@@ -3,6 +3,9 @@ pragma solidity ^0.8.19;
 
 import "./StreamArtistEconomicsHashes.sol";
 import "./StreamArtistConsentState.sol";
+import {
+    IStreamArtistEconomicsEvidence
+} from "../../interfaces/stream/artist/IStreamArtistEconomicsEvidence.sol";
 import "./StreamArtistCurrentAuthorityFacts.sol";
 import "./StreamArtistContentHashes.sol";
 import "../../interfaces/stream/artist/IStreamArtistContentOwner.sol";
@@ -14,7 +17,7 @@ import {
 
 /// @notice Sole owner of the onboarding policy/economics/content-ratification records.
 /// @dev Does not advertise sanction or recovery operations. Reads return records, not readiness assertions.
-contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
+contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner, IStreamArtistEconomicsEvidence {
     mapping(bytes32 => bytes32) private _policies;
     mapping(bytes32 => bytes32) private _economics;
     mapping(uint256 => T.RatificationRecord) private _ratifications;
@@ -27,6 +30,8 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
     mapping(bytes32 => bytes32) private _latestContentFreeze;
     mapping(bytes32 => Sale.Record) private _saleRecords;
     mapping(bytes32 => bytes32) private _latestSaleConsents;
+    mapping(bytes32 => Association) private _economicsAssociations;
+    mapping(bytes32 => bytes32) private _associatedEconomicsRecords;
 
     event ArtistSaleConsentRecorded(
         uint16 schemaVersion,
@@ -184,6 +189,33 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
         return _economics[keccak256(abi.encode(p))];
     }
 
+    function economicsRecordForBinding(
+        T.EconomicsConsent calldata p,
+        bytes32 artistId,
+        uint64 generation,
+        bytes32 bindingHash
+    ) external view override returns (bytes32 record) {
+        record = _associatedEconomicsRecords[
+            StreamArtistEconomicsAssociation.key(p, artistId, generation, bindingHash)
+        ];
+        if (record == bytes32(0)) return record;
+        Association memory a = _economicsAssociations[record];
+        if (
+            a.artistId != artistId || a.bindingGeneration != generation
+                || a.bindingHash != bindingHash || a.payloadHash != keccak256(abi.encode(p))
+                || a.originalRecord == bytes32(0) || _economics[a.payloadHash] != a.originalRecord
+        ) revert T.InvalidRecord();
+    }
+
+    function economicsRecordAssociation(bytes32 recordHash)
+        external
+        view
+        override
+        returns (Association memory)
+    {
+        return _economicsAssociations[recordHash];
+    }
+
     function firstReleaseRatification(uint256 collectionId)
         external
         view
@@ -306,10 +338,12 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
         uint8 principalClass
     ) private returns (bytes32 record) {
         StreamArtistConsentState.Mutation memory m =
-            StreamArtistConsentState.economicsForAuthority(
+            StreamArtistConsentState.economicsAssociatedForAuthority(
                 _economics,
                 recordDelegation,
                 _replay,
+                _economicsAssociations,
+                _associatedEconomicsRecords,
                 _consentContext(),
                 b,
                 p,

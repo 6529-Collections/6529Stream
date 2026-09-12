@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistEconomicsAssociation.sol";
+import {
+    IStreamArtistEconomicsEvidence as EconomicsEvidence
+} from "../../interfaces/stream/artist/IStreamArtistEconomicsEvidence.sol";
 
 import "./StreamArtistEconomicsHashes.sol";
 import "./StreamArtistSaleHashes.sol";
@@ -212,6 +216,81 @@ library StreamArtistConsentState {
         );
     }
 
+    event ArtistEconomicsConsentAssociated(
+        uint16 schemaVersion,
+        bytes32 indexed recordHash,
+        bytes32 indexed artistId,
+        bytes32 indexed bindingHash,
+        uint64 bindingGeneration,
+        bytes32 payloadHash,
+        bytes32 originalRecord
+    );
+
+    function economicsAssociatedForAuthority(
+        mapping(bytes32 => bytes32) storage records,
+        mapping(bytes32 => bytes32) storage delegations,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        mapping(bytes32 => EconomicsEvidence.Association) storage associations,
+        mapping(bytes32 => bytes32) storage associatedRecords,
+        Context memory o,
+        T.Binding memory b,
+        T.EconomicsConsent memory p,
+        T.Payout memory designation,
+        address signer,
+        uint8 principalClass,
+        uint256 nonce,
+        bytes32 grant
+    ) public returns (Mutation memory m) {
+        if (b.artistId == bytes32(0) || b.generation == 0 || b.bindingHash == bytes32(0)) {
+            revert T.InvalidRecord();
+        }
+        bytes32 payloadHash = keccak256(abi.encode(p));
+        bytes32 original = records[payloadHash];
+        bool firstAssociation = original == bytes32(0);
+        if (!firstAssociation) {
+            EconomicsEvidence.Association memory prior = associations[original];
+            if (
+                prior.originalRecord != original || prior.payloadHash != payloadHash
+                    || prior.artistId == bytes32(0) || prior.bindingGeneration == 0
+                    || prior.bindingHash == bytes32(0)
+            ) revert T.InvalidRecord();
+            firstAssociation = prior.artistId == b.artistId
+                && prior.bindingGeneration == b.generation && prior.bindingHash == b.bindingHash;
+            if (!firstAssociation && b.generation <= prior.bindingGeneration) {
+                revert T.InvalidRecord();
+            }
+        }
+        m = _economics(
+            records,
+            delegations,
+            replay,
+            o,
+            b,
+            p,
+            designation,
+            signer,
+            principalClass,
+            nonce,
+            grant,
+            firstAssociation
+                ? payloadHash
+                : StreamArtistEconomicsAssociation.continuation(original, p, b),
+            firstAssociation
+        );
+        if (original == bytes32(0)) original = m.record;
+        EconomicsEvidence.Association memory association = EconomicsEvidence.Association(
+            b.artistId, b.generation, b.bindingHash, payloadHash, original
+        );
+        bytes32 key =
+            StreamArtistEconomicsAssociation.key(p, b.artistId, b.generation, b.bindingHash);
+        associations[m.record] = association;
+        associatedRecords[key] = m.record;
+        m.state = keccak256(abi.encode(m.state, key, association));
+        emit ArtistEconomicsConsentAssociated(
+            1, m.record, b.artistId, b.bindingHash, b.generation, payloadHash, original
+        );
+    }
+
     function economicsForAuthority(
         mapping(bytes32 => bytes32) storage records,
         mapping(bytes32 => bytes32) storage delegations,
@@ -225,10 +304,44 @@ library StreamArtistConsentState {
         uint256 nonce,
         bytes32 grant
     ) public returns (Mutation memory m) {
+        return _economics(
+            records,
+            delegations,
+            replay,
+            o,
+            b,
+            p,
+            designation,
+            signer,
+            principalClass,
+            nonce,
+            grant,
+            keccak256(abi.encode(p)),
+            true
+        );
+    }
+
+    function _economics(
+        mapping(bytes32 => bytes32) storage records,
+        mapping(bytes32 => bytes32) storage delegations,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        Context memory o,
+        T.Binding memory b,
+        T.EconomicsConsent memory p,
+        T.Payout memory designation,
+        address signer,
+        uint8 principalClass,
+        uint256 nonce,
+        bytes32 grant,
+        bytes32 replayScope,
+        bool firstRecord
+    ) private returns (Mutation memory m) {
         if (
             designation.account == address(0) || designation.recordHash == bytes32(0)
-                || p.resolver == address(0) || p.assignmentHash == bytes32(0)
-                || p.revenueClass == bytes32(0) || p.scope != 1 || p.scopeId != p.collectionId
+                || p.resolver == address(0) || p.collectionId == 0 || p.revenueClass == bytes32(0)
+                || p.scope > 2
+                || (p.scope == 0 && (p.scopeId != 0 || p.assignmentHash == bytes32(0)))
+                || (p.scope == 1 && p.scopeId != p.collectionId) || (p.scope == 2 && p.scopeId == 0)
         ) {
             revert T.InvalidRecord();
         }
@@ -244,9 +357,10 @@ library StreamArtistConsentState {
             o.observedAt
         );
         bytes32 scope = keccak256(abi.encode(p));
-        bytes32 key =
-            _consume(replay, o, keccak256("consent_finality.replay.consent_key"), scope, m.record);
-        records[scope] = m.record;
+        bytes32 key = _consume(
+            replay, o, keccak256("consent_finality.replay.consent_key"), replayScope, m.record
+        );
+        if (firstRecord) records[scope] = m.record;
         if (grant != bytes32(0)) delegations[m.record] = grant;
         m.action = grant == bytes32(0)
             ? keccak256(abi.encode(b, p, designation, signer, nonce))

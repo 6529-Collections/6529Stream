@@ -14,10 +14,12 @@ import "../../interfaces/stream/artist/IStreamArtistPayoutOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistPayoutTransitionOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistRotationOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistConsentOwner.sol";
+import "../../interfaces/stream/artist/IStreamArtistEconomicsEvidence.sol";
 import "../../interfaces/stream/artist/IStreamArtistContentFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistContentMutationFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistRoyaltyFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistPrimaryScopeFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryTemplateFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistRoyaltyPreview.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttribution.sol";
@@ -197,7 +199,9 @@ contract StreamArtistOnboardingReads {
                 _suite.primaryResolver
             ).resolvePrimaryAssignment(collectionId, 0, _suite.primaryRevenueClass);
         if (
-            !p.exists || p.scope != 1 || p.scopeId != collectionId
+            !p.exists
+                || !((p.scope == 1 && p.scopeId == collectionId)
+                    || (p.scope == 0 && p.scopeId == 0 && p.assignmentType == 1))
                 || !((p.assignmentType == 1 && p.profileId != bytes32(0))
                     || (p.assignmentType == 2
                         && p.profileId == bytes32(0)
@@ -235,21 +239,62 @@ contract StreamArtistOnboardingReads {
         T.FixedEconomicsCandidate calldata candidate,
         address payout
     ) external view returns (T.AssignmentFact memory fact) {
+        (fact,) = _requireProspectiveEconomics(p, candidate, payout);
+    }
+
+    function requireProspectiveEconomicsWithEvidence(
+        T.EconomicsConsent calldata p,
+        T.FixedEconomicsCandidate calldata candidate,
+        address payout
+    ) external view returns (T.AssignmentFact memory fact, bytes32 previousHash) {
+        return _requireProspectiveEconomics(p, candidate, payout);
+    }
+
+    function _requireProspectiveEconomics(
+        T.EconomicsConsent memory p,
+        T.FixedEconomicsCandidate memory candidate,
+        address payout
+    ) private view returns (T.AssignmentFact memory fact, bytes32 previousHash) {
+        if (p.resolver == _suite.primaryResolver && p.assignmentHash == bytes32(0)) {
+            if (
+                p.revenueClass != _suite.primaryRevenueClass || candidate.profileHash != bytes32(0)
+                    || candidate.policyHash != bytes32(0) || candidate.royaltyBps != 0
+                    || candidate.frozen
+            ) revert T.UnsupportedProfile();
+            (fact, previousHash) = IStreamArtistPrimaryScopeFacts(p.resolver)
+                .previewArtistPrimaryClear(p.collectionId, p.scope, p.scopeId);
+            if (
+                fact.resolver != p.resolver || fact.revenueClass != p.revenueClass
+                    || fact.scope != p.scope || fact.scopeId != p.scopeId
+                    || fact.assignmentHash != bytes32(0) || previousHash == bytes32(0)
+            ) {
+                revert T.InvalidRecord();
+            }
+            _requireCollaboratorDesignations(p.collectionId, payout);
+            return (fact, previousHash);
+        }
         if (
             candidate.profileHash == bytes32(0) || candidate.policyHash != bytes32(0)
-                || p.scope != 1 || p.scopeId != p.collectionId
+                || (p.scope != 1 && p.scope != 2) || (p.scope == 1 && p.scopeId != p.collectionId)
         ) revert T.UnsupportedProfile();
         if (p.resolver == _suite.primaryResolver) {
             if (candidate.royaltyBps != 0 || p.revenueClass != _suite.primaryRevenueClass) {
                 revert T.UnsupportedProfile();
             }
-            fact = IStreamArtistPrimaryFacts(p.resolver)
-                .previewArtistPrimaryAssignment(
-                    p.collectionId, candidate.profileHash, candidate.policyHash, candidate.frozen
+            fact = IStreamArtistPrimaryScopeFacts(p.resolver)
+                .previewArtistPrimaryAssignmentForScope(
+                    p.collectionId,
+                    p.scope,
+                    p.scopeId,
+                    candidate.profileHash,
+                    candidate.policyHash,
+                    candidate.frozen
                 );
         } else if (p.resolver == _suite.royaltyResolver) {
             _requireSelected(keccak256("ROYALTY_RESOLVER"), p.resolver);
-            if (p.revenueClass != keccak256("ROYALTY_ERC2981")) revert T.UnsupportedProfile();
+            if (p.revenueClass != keccak256("ROYALTY_ERC2981") || p.scope != 1) {
+                revert T.UnsupportedProfile();
+            }
             fact = IStreamArtistRoyaltyPreview(p.resolver)
                 .previewArtistRoyaltyAssignment(
                     p.collectionId, candidate.profileHash, candidate.royaltyBps, candidate.frozen
@@ -273,6 +318,25 @@ contract StreamArtistOnboardingReads {
             candidate.profileHash,
             payout
         );
+    }
+
+    function _requireCollaboratorDesignations(uint256 collectionId, address payout) private view {
+        if (payout == address(0)) revert T.MissingMintPrerequisite(keccak256("payout"));
+        T.Binding memory b = acceptedBinding(collectionId);
+        uint32 count =
+            IStreamArtistCollaboratorBindingOwner(_suite.owners[0])
+        .bindingTerms(collectionId, b.generation)
+        .count;
+        for (uint256 i; i < count; ++i) {
+            C.Row memory row = collaboratorAt(collectionId, b.generation, i);
+            if (!row.accepted) revert T.InvalidAttribution(collectionId);
+            if (row.shareLabelId == bytes32(0)) continue;
+            (address account, bytes32 designation) =
+                collaboratorPayoutAccount(row.collaboratorArtistId, row.account);
+            if (account == address(0) || designation == bytes32(0)) {
+                revert T.MissingMintPrerequisite(keccak256("collaborator_payout"));
+            }
+        }
     }
 
     function requireRoyaltyFreezeProposal(T.RoyaltyFreeze calldata p) external view {
@@ -327,8 +391,8 @@ contract StreamArtistOnboardingReads {
         }
         (T.AssignmentFact memory primary, T.AssignmentFact memory royalty) =
             currentAssignments(collectionId);
-        _requireEconomics(consents, collectionId, primary);
-        _requireEconomics(consents, collectionId, royalty);
+        _requireEconomics(b, collectionId, primary);
+        _requireEconomics(b, collectionId, royalty);
         (address metadata, bytes32 content) = currentContent(collectionId);
         T.RatificationRecord memory r = consents.firstReleaseRatification(collectionId);
         bool validContent = r.recordHash != bytes32(0) && r.metadataContract == metadata;
@@ -372,8 +436,8 @@ contract StreamArtistOnboardingReads {
     }
 
     function requireEconomicsConsent(T.EconomicsConsent calldata p) external view {
-        acceptedBinding(p.collectionId);
-        if (IStreamArtistConsentOwner(_suite.owners[6]).economicsRecord(p) == bytes32(0)) {
+        T.Binding memory b = acceptedBinding(p.collectionId);
+        if (_economicsForBinding(p, b) == bytes32(0)) {
             revert T.MissingMintPrerequisite(keccak256("economics"));
         }
     }
@@ -389,11 +453,83 @@ contract StreamArtistOnboardingReads {
             requireStaticArtistPayout(collectionId, resolver, payout);
             return "";
         }
-        IStreamRevenueResolver.ResolvedPrimaryAssignment memory current = IStreamRevenueResolver(
-                resolver
-            ).resolvePrimaryAssignment(collectionId, 0, _suite.primaryRevenueClass);
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory current =
+            _rawSelectedCollectionPrimary(collectionId);
+        return _requireCurrentPrimary(collectionId, current, payout);
+    }
+
+    /// @notice Exact-key facts for recording, without invoking the resolver's consent-consuming resolution.
+    function requireCurrentEconomics(T.EconomicsConsent calldata p, address payout)
+        external
+        view
+        returns (bytes memory)
+    {
+        if (p.resolver == _suite.primaryResolver) {
+            if (p.revenueClass != _suite.primaryRevenueClass || p.assignmentHash == bytes32(0)) {
+                revert T.InvalidRecord();
+            }
+            IStreamRevenueResolver.ResolvedPrimaryAssignment memory current = IStreamArtistPrimaryScopeFacts(
+                    p.resolver
+                ).primaryEconomicsFacts(p.collectionId, p.scope, p.scopeId);
+            if (
+                !current.exists || current.scope != p.scope || current.scopeId != p.scopeId
+                    || current.assignmentHash != p.assignmentHash
+            ) revert T.InvalidRecord();
+            return _requireCurrentPrimary(p.collectionId, current, payout);
+        }
+        T.AssignmentFact memory expected = currentRoyaltyAssignment(p.collectionId);
+        if (
+            p.resolver != expected.resolver || p.revenueClass != expected.revenueClass
+                || p.scope != expected.scope || p.scopeId != expected.scopeId
+                || p.assignmentHash != expected.assignmentHash
+        ) revert T.InvalidRecord();
+        requireStaticArtistPayout(p.collectionId, p.resolver, payout);
+        return "";
+    }
+
+    function _rawSelectedCollectionPrimary(uint256 collectionId)
+        private
+        view
+        returns (IStreamRevenueResolver.ResolvedPrimaryAssignment memory current)
+    {
+        IStreamArtistPrimaryScopeFacts provider =
+            IStreamArtistPrimaryScopeFacts(_suite.primaryResolver);
+        current = provider.primaryEconomicsFacts(collectionId, 1, collectionId);
+        if (!current.exists) current = provider.primaryEconomicsFacts(collectionId, 0, 0);
+    }
+
+    function _requireCurrentPrimary(
+        uint256 collectionId,
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory current,
+        address payout
+    ) private view returns (bytes memory) {
+        address resolver = _suite.primaryResolver;
         if (current.assignmentType != 2) {
-            requireStaticArtistPayout(collectionId, resolver, payout);
+            if (
+                !current.exists || current.assignmentType != 1 || current.profileId == bytes32(0)
+                    || current.policyHash != bytes32(0)
+            ) revert T.UnsupportedProfile();
+            T.AssignmentFact memory fact = IStreamArtistPrimaryScopeFacts(resolver)
+                .previewArtistPrimaryAssignmentForScope(
+                    collectionId,
+                    current.scope,
+                    current.scopeId,
+                    current.profileId,
+                    current.policyHash,
+                    current.frozen
+                );
+            if (
+                fact.resolver != resolver || fact.revenueClass != _suite.primaryRevenueClass
+                    || fact.scope != current.scope || fact.scopeId != current.scopeId
+                    || fact.assignmentHash != current.assignmentHash
+            ) revert T.InvalidRecord();
+            _requireProfilePayout(
+                collectionId,
+                resolver,
+                IStreamRevenueResolver(resolver).splitFactory(),
+                current.profileId,
+                payout
+            );
             return "";
         }
         if (
@@ -440,7 +576,7 @@ contract StreamArtistOnboardingReads {
     }
 
     /// @notice Verifies that actual static profile artist entries pay the operative designation.
-    /// @dev The initial profile supports fixed collection assignments only. Dynamic templates
+    /// @dev Uses raw collection/default selection to avoid consent recursion. Dynamic templates
     ///      require their separate accepted materialization path and are rejected here.
     function requireStaticArtistPayout(uint256 collectionId, address resolver, address payout)
         public
@@ -449,10 +585,9 @@ contract StreamArtistOnboardingReads {
         bytes32 profileId;
         address factory;
         if (resolver == _suite.primaryResolver) {
-            IStreamRevenueResolver.ResolvedPrimaryAssignment memory p = IStreamRevenueResolver(
-                    resolver
-                ).resolvePrimaryAssignment(collectionId, 0, _suite.primaryRevenueClass);
-            if (!p.exists || p.assignmentType != 1 || p.scope != 1 || p.scopeId != collectionId) {
+            IStreamRevenueResolver.ResolvedPrimaryAssignment memory p =
+                _rawSelectedCollectionPrimary(collectionId);
+            if (!p.exists || p.assignmentType != 1) {
                 revert T.UnsupportedProfile();
             }
             profileId = p.profileId;
@@ -524,17 +659,25 @@ contract StreamArtistOnboardingReads {
         }
     }
 
-    function _requireEconomics(
-        IStreamArtistConsentOwner consents,
-        uint256 collectionId,
-        T.AssignmentFact memory a
-    ) private view {
+    function _requireEconomics(T.Binding memory b, uint256 collectionId, T.AssignmentFact memory a)
+        private
+        view
+    {
         T.EconomicsConsent memory p = T.EconomicsConsent(
             collectionId, a.resolver, a.revenueClass, a.scope, a.scopeId, a.assignmentHash
         );
-        if (consents.economicsRecord(p) == bytes32(0)) {
+        if (_economicsForBinding(p, b) == bytes32(0)) {
             revert T.MissingMintPrerequisite(a.revenueClass);
         }
+    }
+
+    function _economicsForBinding(T.EconomicsConsent memory p, T.Binding memory b)
+        private
+        view
+        returns (bytes32)
+    {
+        return IStreamArtistEconomicsEvidence(_suite.owners[6])
+            .economicsRecordForBinding(p, b.artistId, b.generation, b.bindingHash);
     }
 
     function _requireSelected(bytes32 kind, address expected) private view returns (bool frozen) {

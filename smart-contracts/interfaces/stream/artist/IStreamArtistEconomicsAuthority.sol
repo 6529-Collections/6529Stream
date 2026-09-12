@@ -5,8 +5,9 @@ import { StreamArtistOnboardingTypes as T } from "./StreamArtistOnboardingTypes.
 
 /// @notice Supported artist economics extensions without advertising the unfinished full authority API.
 interface IStreamArtistEconomicsAuthority {
-    /// @notice Records operation 15 consent to a real, canonical prospective fixed-profile assignment.
-    /// @dev Requires actual artist authorization and current typed payout facts; does not mutate a resolver.
+    /// @notice Records operation 15 consent to a canonical prospective fixed profile or exact primary key clear.
+    /// @dev Primary collection/token clear uses assignmentHash zero and an entirely zero candidate.
+    ///      Requires actual artist authorization and current typed payout facts; does not mutate a resolver.
     function recordProspectiveEconomicsConsent(
         T.EconomicsConsent calldata payload,
         T.FixedEconomicsCandidate calldata candidate,
@@ -33,8 +34,9 @@ interface IStreamArtistEconomicsAuthority {
         view
         returns (bool);
 
-    /// @notice Requires consent to the calling resolver's exact resulting assignment before it writes.
-    /// @dev Governance authority remains independently required. Static consent survives later payout revisions.
+    /// @notice Requires current-binding consent to the calling resolver's exact assignment or clear result.
+    /// @dev Governance remains independently required. Static consent survives payout and authority changes
+    ///      within the same binding; a corrected binding requires its own fresh association evidence.
     function requireEconomicsConsent(
         uint256 collectionId,
         bytes32 revenueClass,

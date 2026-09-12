@@ -2,12 +2,14 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/revenue/IStreamRevenueResolver.sol";
+import "./StreamPrimaryAssignmentHash.sol";
 import "../../interfaces/stream/revenue/IStreamAssetPolicyRegistry.sol";
 import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
 import "../../interfaces/stream/core/IStreamCore.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttribution.sol";
 import "../../interfaces/stream/artist/IStreamArtistEconomicsAuthority.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistPrimaryScopeFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryTemplateFacts.sol";
 import "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 import "../../interfaces/stream/artist/IStreamArtistBeneficiaryFacts.sol";
@@ -38,12 +40,14 @@ abstract contract StreamPrimaryResolverState {
 }
 
 /// @notice Core-bound primary assignments with immutable artist-facade admission.
-/// @dev Bound artist collections support fixed PRIMARY_SALE profiles with prospective artist
-///      consent and independent governance admission. Initial supported templates may be read
+/// @dev Bound collections and mapped tokens support fixed PRIMARY_SALE profiles with prospective artist
+///      consent and independent governance admission. Inherited/default selected rights need their own
+///      applicable consent in token contexts. Initial supported templates may be read
 ///      after nomination, but their bound writes and sale-adapter admission stay closed.
 contract StreamRevenueResolver is
     IStreamRevenueResolver,
     IStreamArtistPrimaryFacts,
+    IStreamArtistPrimaryScopeFacts,
     IStreamArtistPrimaryTemplateFacts,
     ERC165,
     Ownable,
@@ -102,17 +106,6 @@ contract StreamRevenueResolver is
 
     /// @notice Reverts when the configured split factory cannot support resolver invariants.
     error InvalidSplitFactory(address splitFactory);
-
-    struct PrimaryAssignmentHashInput {
-        bytes32 revenueClass;
-        uint8 scope;
-        uint256 scopeId;
-        uint8 assignmentType;
-        bytes32 profileId;
-        bytes32 templateId;
-        bytes32 policyHash;
-        bool frozen;
-    }
 
     /// @dev The explicit facade pin permits deployment before genesis installs Core pointers.
     ///      Assignment configuration still requires this facade to be selected by Core.
@@ -185,6 +178,7 @@ contract StreamRevenueResolver is
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
         return id == type(IStreamArtistPrimaryTemplateFacts).interfaceId
+            || id == type(IStreamArtistPrimaryScopeFacts).interfaceId
             || id == type(IStreamArtistPrimaryFacts).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId || super.supportsInterface(id);
     }
@@ -261,24 +255,60 @@ contract StreamRevenueResolver is
         bytes32 policyHash,
         bool frozen
     ) external view override returns (StreamArtistOnboardingTypes.AssignmentFact memory fact) {
-        _requireSelectedArtistRegistry();
-        _requireScope(SCOPE_COLLECTION, collectionId);
-        _resolveCollectionIdentity(collectionId, 0);
+        return _previewArtistPrimaryProfile(
+            collectionId, SCOPE_COLLECTION, collectionId, profileHash, policyHash, frozen
+        );
+    }
+
+    /// @inheritdoc IStreamArtistPrimaryScopeFacts
+    function primaryEconomicsFacts(uint256 collectionId, uint8 scope, uint256 scopeId)
+        external
+        view
+        override
+        returns (ResolvedPrimaryAssignment memory)
+    {
+        _requireArtistScopeIdentity(collectionId, scope, scopeId);
+        return _resolvedAt(keccak256("PRIMARY_SALE"), scope, scopeId);
+    }
+
+    /// @inheritdoc IStreamArtistPrimaryScopeFacts
+    function previewArtistPrimaryAssignmentForScope(
+        uint256 collectionId,
+        uint8 scope,
+        uint256 scopeId,
+        bytes32 profileHash,
+        bytes32 policyHash,
+        bool frozen
+    ) external view override returns (StreamArtistOnboardingTypes.AssignmentFact memory fact) {
+        return _previewArtistPrimaryProfile(
+            collectionId, scope, scopeId, profileHash, policyHash, frozen
+        );
+    }
+
+    function _previewArtistPrimaryProfile(
+        uint256 collectionId,
+        uint8 scope,
+        uint256 scopeId,
+        bytes32 profileHash,
+        bytes32 policyHash,
+        bool frozen
+    ) private view returns (StreamArtistOnboardingTypes.AssignmentFact memory) {
+        _requireArtistScopeIdentity(collectionId, scope, scopeId);
         if (policyHash != bytes32(0)) revert InvalidPrimaryPolicyHash();
         if (
             profileHash == bytes32(0) || !splitFactoryContract.profileExists(profileHash)
                 || !splitFactoryContract.splitWalletExists(profileHash)
         ) revert UnverifiedSplitProfile(profileHash);
         bytes32 revenueClass = keccak256("PRIMARY_SALE");
-        fact = StreamArtistOnboardingTypes.AssignmentFact(
+        return StreamArtistOnboardingTypes.AssignmentFact(
             address(this),
             revenueClass,
-            SCOPE_COLLECTION,
-            collectionId,
+            scope,
+            scopeId,
             _primaryAssignmentHash(
                 revenueClass,
-                SCOPE_COLLECTION,
-                collectionId,
+                scope,
+                scopeId,
                 ASSIGNMENT_TYPE_PROFILE,
                 profileHash,
                 bytes32(0),
@@ -286,6 +316,42 @@ contract StreamRevenueResolver is
                 frozen
             )
         );
+    }
+
+    /// @inheritdoc IStreamArtistPrimaryScopeFacts
+    function previewArtistPrimaryClear(uint256 collectionId, uint8 scope, uint256 scopeId)
+        external
+        view
+        override
+        returns (StreamArtistOnboardingTypes.AssignmentFact memory fact, bytes32 previousHash)
+    {
+        _requireArtistScopeIdentity(collectionId, scope, scopeId);
+        if (scope == SCOPE_DEFAULT) revert InvalidAssignmentScope(scope, scopeId);
+        bytes32 revenueClass = keccak256("PRIMARY_SALE");
+        ResolvedPrimaryAssignment memory current = _resolvedAt(revenueClass, scope, scopeId);
+        if (!current.exists) revert PrimaryAssignmentMissing(revenueClass, scope, scopeId);
+        if (current.frozen) revert PrimaryAssignmentFrozen(revenueClass, scope, scopeId);
+        if (current.assignmentType != ASSIGNMENT_TYPE_PROFILE) {
+            revert UnsupportedArtistPrimaryAssignment(collectionId);
+        }
+        fact = StreamArtistOnboardingTypes.AssignmentFact(
+            address(this), revenueClass, scope, scopeId, bytes32(0)
+        );
+        return (fact, current.assignmentHash);
+    }
+
+    /// @dev Supplemental collection context is always joined to actual Core identity.
+    function _requireArtistScopeIdentity(uint256 collectionId, uint8 scope, uint256 scopeId)
+        private
+        view
+    {
+        _requireSelectedArtistRegistry();
+        _requireScope(scope, scopeId);
+        if (collectionId == 0) revert InvalidPrimaryCollection(collectionId);
+        if (scope == SCOPE_COLLECTION && scopeId != collectionId) {
+            revert InvalidAssignmentScope(scope, scopeId);
+        }
+        _resolveCollectionIdentity(collectionId, scope == SCOPE_TOKEN ? scopeId : 0);
     }
 
     /// @notice The split factory used to verify and materialize profiles.
@@ -394,7 +460,7 @@ contract StreamRevenueResolver is
     {
         _requireRevenueClass(revenueClass);
         _requireScope(scope, scopeId);
-        _requireMutableArtistScope(scope, scopeId);
+        _requireSelectedArtistRegistry();
         bytes32 key = _assignmentKey(revenueClass, scope, scopeId);
         PrimaryAssignment storage assignment = _primaryAssignments[key];
         if (!assignment.exists) {
@@ -404,6 +470,7 @@ contract StreamRevenueResolver is
             revert PrimaryAssignmentFrozen(revenueClass, scope, scopeId);
         }
         bytes32 previousHash = _assignmentHash(revenueClass, scope, scopeId, assignment);
+        _requireArtistEconomics(revenueClass, scope, scopeId, assignment.assignmentType, bytes32(0));
         delete _primaryAssignments[key];
         emit PrimaryAssignmentCleared(revenueClass, scope, scopeId, previousHash, msg.sender);
     }
@@ -417,11 +484,7 @@ contract StreamRevenueResolver is
     {
         _requireRevenueClass(revenueClass);
         _requireScope(scope, scopeId);
-        if (scope == SCOPE_COLLECTION && revenueClass == keccak256("PRIMARY_SALE")) {
-            _requireSelectedArtistRegistry();
-        } else {
-            _requireMutableArtistScope(scope, scopeId);
-        }
+        _requireSelectedArtistRegistry();
         bytes32 key = _assignmentKey(revenueClass, scope, scopeId);
         PrimaryAssignment storage assignment = _primaryAssignments[key];
         if (!assignment.exists) {
@@ -472,19 +535,29 @@ contract StreamRevenueResolver is
                 && IStreamArtistAttribution(artistRegistry).attribution(collectionId).nominationHash
                     != bytes32(0)
         ) {
-            if (
-                !resolved.exists || resolved.scope != SCOPE_COLLECTION
-                    || resolved.scopeId != collectionId
-            ) {
+            if (!resolved.exists) {
                 revert UnsupportedArtistPrimaryAssignment(collectionId);
             }
             if (
                 resolved.assignmentType == ASSIGNMENT_TYPE_TEMPLATE
                     && revenueClass == keccak256("PRIMARY_SALE")
+                    && resolved.scope == SCOPE_COLLECTION && resolved.scopeId == collectionId
             ) {
                 _requireArtistTemplate(resolved.templateId);
             } else if (resolved.assignmentType != ASSIGNMENT_TYPE_PROFILE) {
                 revert UnsupportedArtistPrimaryAssignment(collectionId);
+            }
+            if (tokenId != 0 || resolved.scope != SCOPE_COLLECTION) {
+                if (revenueClass != keccak256("PRIMARY_SALE")) {
+                    revert UnsupportedArtistPrimaryAssignment(collectionId);
+                }
+                _requireConsent(
+                    collectionId,
+                    revenueClass,
+                    resolved.scope,
+                    resolved.scopeId,
+                    resolved.assignmentHash
+                );
             }
         }
     }
@@ -811,7 +884,7 @@ contract StreamRevenueResolver is
         bytes32 policyHash,
         bool frozen
     ) private view returns (bytes32) {
-        PrimaryAssignmentHashInput memory input;
+        StreamPrimaryAssignmentHash.Input memory input;
         input.revenueClass = revenueClass;
         input.scope = scope;
         input.scopeId = scopeId;
@@ -823,161 +896,25 @@ contract StreamRevenueResolver is
         return _primaryAssignmentHash(input);
     }
 
-    function _primaryAssignmentHash(PrimaryAssignmentHashInput memory input)
+    function _primaryAssignmentHash(StreamPrimaryAssignmentHash.Input memory input)
         private
         view
         returns (bytes32)
     {
-        return keccak256(
-            abi.encode(
-                _PRIMARY_ASSIGNMENT_DOMAIN,
-                uint256(block.chainid),
-                _assignmentResolverContextHash(),
-                _assignmentScopeContextHash(
-                    input.revenueClass, input.scope, input.scopeId, input.assignmentType
-                ),
-                _assignmentPointerContextHash(
-                    input.assignmentType, input.profileId, input.templateId
-                ),
-                input.policyHash,
-                input.frozen
-            )
+        bytes32 entries;
+        bytes32 metadata;
+        if (input.assignmentType == ASSIGNMENT_TYPE_TEMPLATE && input.templateId != bytes32(0)) {
+            entries = _templates[input.templateId].entriesHash;
+            metadata = _templates[input.templateId].metadataURIHash;
+        }
+        return StreamPrimaryAssignmentHash.hash(
+            splitFactoryContract,
+            address(_assetPolicyRegistry),
+            _splitWalletRuntimeCodeHash,
+            input,
+            entries,
+            metadata
         );
-    }
-
-    function _assignmentResolverContextHash() private view returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                _PRIMARY_ASSIGNMENT_RESOLVER_CONTEXT_DOMAIN,
-                address(this),
-                address(splitFactoryContract),
-                address(_assetPolicyRegistry),
-                _splitWalletRuntimeCodeHash
-            )
-        );
-    }
-
-    function _assignmentScopeContextHash(
-        bytes32 revenueClass,
-        uint8 scope,
-        uint256 scopeId,
-        uint8 assignmentType
-    ) private pure returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                _PRIMARY_ASSIGNMENT_SCOPE_CONTEXT_DOMAIN,
-                revenueClass,
-                scope,
-                scopeId,
-                assignmentType
-            )
-        );
-    }
-
-    function _assignmentPointerContextHash(
-        uint8 assignmentType,
-        bytes32 profileId,
-        bytes32 templateId
-    ) private view returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                _PRIMARY_ASSIGNMENT_POINTER_CONTEXT_DOMAIN,
-                profileId,
-                _assignmentProfileContextHash(assignmentType, profileId),
-                templateId,
-                _assignmentTemplateContextHash(assignmentType, templateId)
-            )
-        );
-    }
-
-    function _assignmentProfileContextHash(uint8 assignmentType, bytes32 profileId)
-        private
-        view
-        returns (bytes32)
-    {
-        if (assignmentType != ASSIGNMENT_TYPE_PROFILE || profileId == bytes32(0)) {
-            return bytes32(0);
-        }
-        return keccak256(
-            abi.encode(
-                _PRIMARY_ASSIGNMENT_PROFILE_CONTEXT_DOMAIN,
-                _assignmentWallet(assignmentType, profileId),
-                _assignmentProfileEntriesHash(assignmentType, profileId),
-                _assignmentProfileMetadataURIHash(assignmentType, profileId)
-            )
-        );
-    }
-
-    function _assignmentTemplateContextHash(uint8 assignmentType, bytes32 templateId)
-        private
-        view
-        returns (bytes32)
-    {
-        if (assignmentType != ASSIGNMENT_TYPE_TEMPLATE || templateId == bytes32(0)) {
-            return bytes32(0);
-        }
-        return keccak256(
-            abi.encode(
-                _PRIMARY_ASSIGNMENT_TEMPLATE_CONTEXT_DOMAIN,
-                _assignmentTemplateEntriesHash(assignmentType, templateId),
-                _assignmentTemplateMetadataURIHash(assignmentType, templateId)
-            )
-        );
-    }
-
-    function _assignmentWallet(uint8 assignmentType, bytes32 profileId)
-        private
-        view
-        returns (address)
-    {
-        if (assignmentType != ASSIGNMENT_TYPE_PROFILE || profileId == bytes32(0)) {
-            return address(0);
-        }
-        return splitFactoryContract.walletFor(profileId);
-    }
-
-    function _assignmentProfileEntriesHash(uint8 assignmentType, bytes32 profileId)
-        private
-        view
-        returns (bytes32)
-    {
-        if (assignmentType != ASSIGNMENT_TYPE_PROFILE || profileId == bytes32(0)) {
-            return bytes32(0);
-        }
-        return splitFactoryContract.profileEntriesHash(profileId);
-    }
-
-    function _assignmentProfileMetadataURIHash(uint8 assignmentType, bytes32 profileId)
-        private
-        view
-        returns (bytes32)
-    {
-        if (assignmentType != ASSIGNMENT_TYPE_PROFILE || profileId == bytes32(0)) {
-            return bytes32(0);
-        }
-        return splitFactoryContract.profileMetadataURIHash(profileId);
-    }
-
-    function _assignmentTemplateEntriesHash(uint8 assignmentType, bytes32 templateId)
-        private
-        view
-        returns (bytes32)
-    {
-        if (assignmentType != ASSIGNMENT_TYPE_TEMPLATE || templateId == bytes32(0)) {
-            return bytes32(0);
-        }
-        return _templates[templateId].entriesHash;
-    }
-
-    function _assignmentTemplateMetadataURIHash(uint8 assignmentType, bytes32 templateId)
-        private
-        view
-        returns (bytes32)
-    {
-        if (assignmentType != ASSIGNMENT_TYPE_TEMPLATE || templateId == bytes32(0)) {
-            return bytes32(0);
-        }
-        return _templates[templateId].metadataURIHash;
     }
 
     function _canonicalizeTemplate(PrimaryTemplateEntry[] calldata entries)
@@ -1152,8 +1089,8 @@ contract StreamRevenueResolver is
         _requireSelectedArtistRegistry();
     }
 
-    /// @dev The consent read happens before any assignment write. A bound collection's
-    ///      unsupported token/template/other-class mutations remain unavailable.
+    /// @dev The consent read happens before any assignment write. Bound template and other-class
+    ///      mutations remain unavailable. Default configuration remains global; use is collection-admitted.
     function _requireArtistEconomics(
         bytes32 revenueClass,
         uint8 scope,
@@ -1170,11 +1107,20 @@ contract StreamRevenueResolver is
                 == bytes32(0)
         ) return;
         if (
-            scope != SCOPE_COLLECTION || assignmentType != ASSIGNMENT_TYPE_PROFILE
-                || revenueClass != keccak256("PRIMARY_SALE")
+            assignmentType != ASSIGNMENT_TYPE_PROFILE || revenueClass != keccak256("PRIMARY_SALE")
                 || !IERC165(artistRegistry)
                     .supportsInterface(type(IStreamArtistEconomicsAuthority).interfaceId)
         ) revert PrimaryArtistConsentRequired(collectionId);
+        _requireConsent(collectionId, revenueClass, scope, scopeId, assignmentHash);
+    }
+
+    function _requireConsent(
+        uint256 collectionId,
+        bytes32 revenueClass,
+        uint8 scope,
+        uint256 scopeId,
+        bytes32 assignmentHash
+    ) private view {
         IStreamArtistEconomicsAuthority(artistRegistry)
             .requireEconomicsConsent(collectionId, revenueClass, scope, scopeId, assignmentHash);
     }

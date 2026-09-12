@@ -39,6 +39,20 @@ interface ArtistTestVm {
 contract ArtistUnitCore {
     mapping(bytes32 => address) public targets;
     mapping(bytes32 => bool) public frozen;
+    mapping(uint256 => uint256) private tokenCollections;
+
+    function setTokenCollection(uint256 tokenId, uint256 collectionId) external {
+        tokenCollections[tokenId] = collectionId;
+    }
+
+    function tokenCollectionIdentity(uint256 tokenId)
+        external
+        view
+        returns (bool, uint256, uint256, bool)
+    {
+        uint256 collectionId = tokenCollections[tokenId];
+        return (collectionId != 0, collectionId, 1, false);
+    }
 
     function set(bytes32 kind, address target, bool frozen_) external {
         targets[kind] = target;
@@ -3500,11 +3514,7 @@ contract StreamArtistOnboardingTest is
             "partial row evidence survives refusal"
         );
         address governor = primary.owner();
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamRevenueResolver.PrimaryArtistConsentRequired.selector, uint256(1)
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidAttribution.selector, uint256(1)));
         vm.prank(governor);
         primary.clearPrimaryAssignment(PRIMARY, 1, 1);
     }
@@ -4042,11 +4052,7 @@ contract StreamArtistOnboardingTest is
         vm.expectRevert(abi.encodeWithSelector(T.InvalidAttribution.selector, uint256(1)));
         vm.prank(governor);
         royalty.configureCollectionRoyalty(1, profile, 600);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamRevenueResolver.PrimaryArtistConsentRequired.selector, uint256(1)
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidAttribution.selector, uint256(1)));
         vm.prank(governor);
         primary.clearPrimaryAssignment(PRIMARY, 1, 1);
         _repropose(1);
@@ -9472,6 +9478,796 @@ contract StreamArtistOnboardingTest is
                     == 0
                 && ingress.guardianSetRecord(newGuardian).provisional.transitionRecordHash == 0,
             "fresh revision continuation payout detachment and guardian write are stable"
+        );
+    }
+
+    function _scopePayload(uint8 scope, uint256 id, bytes32 profile, bool frozen_)
+        private
+        view
+        returns (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate)
+    {
+        T.AssignmentFact memory fact =
+            primary.previewArtistPrimaryAssignmentForScope(1, scope, id, profile, 0, frozen_);
+        p = T.EconomicsConsent(1, address(primary), PRIMARY, scope, id, fact.assignmentHash);
+        candidate = T.FixedEconomicsCandidate(profile, 0, 0, frozen_);
+    }
+
+    function _scopeRecord(T.EconomicsConsent memory p) private returns (bytes32 record) {
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.economicsConsentDigest(p, a));
+        _artistCall(abi.encodeCall(IStreamArtistOnboarding.recordEconomicsConsent, (p, a)));
+        T.Binding memory b = coordinator.reads().acceptedBinding(p.collectionId);
+        return IStreamArtistEconomicsEvidence(suite.owners[6])
+            .economicsRecordForBinding(p, b.artistId, b.generation, b.bindingHash);
+    }
+
+    function _clearPrimary(uint8 scope, uint256 id) private {
+        T.EconomicsConsent memory p = T.EconomicsConsent(1, address(primary), PRIMARY, scope, id, 0);
+        _prospectiveConsent(p, T.FixedEconomicsCandidate(0, 0, 0, false));
+        vm.prank(primary.owner());
+        primary.clearPrimaryAssignment(PRIMARY, scope, id);
+    }
+
+    function testPrimaryTokenConsentActualSafeInstallFreezeAndImmutableAssociation() public {
+        directArtistCalls = true;
+        _accept();
+        _payout();
+        core.setTokenCollection(41, 1);
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory collection =
+            primary.resolvePrimaryAssignment(1, 0, PRIMARY);
+        (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate) =
+            _scopePayload(2, 41, collection.profileId, false);
+        address governance = primary.owner();
+        vm.expectRevert(
+            abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("economics"))
+        );
+        vm.prank(governance);
+        primary.setPrimaryProfileAssignment(PRIMARY, 2, 41, collection.profileId, 0);
+        _prospectiveConsent(p, candidate);
+        vm.prank(primary.owner());
+        bytes32 installed =
+            primary.setPrimaryProfileAssignment(PRIMARY, 2, 41, collection.profileId, 0);
+        require(
+            installed == p.assignmentHash
+                && primary.resolvePrimaryAssignment(0, 41, PRIMARY).assignmentHash == installed,
+            "actual mapped token and Safe consent"
+        );
+        T.Binding memory b = coordinator.reads().acceptedBinding(1);
+        IStreamArtistEconomicsEvidence owner = IStreamArtistEconomicsEvidence(suite.owners[6]);
+        bytes32 record = owner.economicsRecordForBinding(p, b.artistId, b.generation, b.bindingHash);
+        IStreamArtistEconomicsEvidence.Association memory association =
+            owner.economicsRecordAssociation(record);
+        require(
+            record != 0 && association.originalRecord == record
+                && association.payloadHash == keccak256(abi.encode(p)),
+            "first immutable association"
+        );
+        this.executeTargetSafe(
+            suite.owners[6],
+            abi.encodeCall(
+                IStreamArtistEconomicsEvidence.economicsRecordForBinding,
+                (p, b.artistId, b.generation, b.bindingHash)
+            )
+        );
+        this.executeTargetSafe(
+            suite.owners[6],
+            abi.encodeCall(IStreamArtistEconomicsEvidence.economicsRecordAssociation, (record))
+        );
+        (p, candidate) = _scopePayload(2, 41, collection.profileId, true);
+        _prospectiveConsent(p, candidate);
+        vm.prank(primary.owner());
+        require(
+            primary.freezePrimaryAssignment(PRIMARY, 2, 41) == p.assignmentHash,
+            "exact token freeze hash"
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamRevenueResolver.PrimaryAssignmentFrozen.selector,
+                PRIMARY,
+                uint8(2),
+                uint256(41)
+            )
+        );
+        primary.previewArtistPrimaryClear(1, 2, 41);
+        require(
+            primary.resolvePrimaryAssignment(1, 41, PRIMARY).frozen, "frozen token remains selected"
+        );
+    }
+
+    function testPrimaryTokenClearZeroDoesNotConsentInheritedCollectionAndCanBeReused() public {
+        _accept();
+        _payout();
+        core.setTokenCollection(41, 1);
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory collection =
+            primary.resolvePrimaryAssignment(1, 0, PRIMARY);
+        (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate) =
+            _scopePayload(2, 41, collection.profileId, false);
+        _prospectiveConsent(p, candidate);
+        vm.prank(primary.owner());
+        primary.setPrimaryProfileAssignment(PRIMARY, 2, 41, collection.profileId, 0);
+        _clearPrimary(2, 41);
+        require(!primary.primaryEconomicsFacts(1, 2, 41).exists, "clear removes exact key only");
+        vm.expectRevert(
+            abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("economics"))
+        );
+        primary.resolvePrimaryAssignment(1, 41, PRIMARY);
+        _scopeRecord(
+            T.EconomicsConsent(1, address(primary), PRIMARY, 1, 1, collection.assignmentHash)
+        );
+        require(
+            primary.resolvePrimaryAssignment(1, 41, PRIMARY).assignmentHash
+                == collection.assignmentHash,
+            "separate selected ancestor consent"
+        );
+        vm.prank(primary.owner());
+        primary.setPrimaryProfileAssignment(PRIMARY, 2, 41, collection.profileId, 0);
+        vm.prank(primary.owner());
+        primary.clearPrimaryAssignment(PRIMARY, 2, 41);
+        require(
+            primary.resolvePrimaryAssignment(1, 41, PRIMARY).scope == 1,
+            "same association clear authorization reusable"
+        );
+    }
+
+    function testPrimaryDefaultConsentRestoresMintAndDoesNotSignOrAuthorizeAnotherCollection()
+        public
+    {
+        _all();
+        StreamArtistOnboardingReads reads = coordinator.reads();
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory collection =
+            primary.resolvePrimaryAssignment(1, 0, PRIMARY);
+        vm.prank(primary.owner());
+        primary.setPrimaryProfileAssignment(PRIMARY, 0, 0, collection.profileId, 0);
+        _clearPrimary(1, 1);
+        vm.expectRevert(
+            abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("economics"))
+        );
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory current =
+            primary.primaryEconomicsFacts(1, 0, 0);
+        T.EconomicsConsent memory p =
+            T.EconomicsConsent(1, address(primary), PRIMARY, 0, 0, current.assignmentHash);
+        T.Authorization memory a = _authorization(false);
+        bytes32 digest = ingress.economicsConsentDigest(p, a);
+        a.signature = _signature(digest);
+        ingress.recordEconomicsConsent(p, a);
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        ingress.proposeArtistBinding(
+            2, _proposal(artistId), bytes("unit identity document"), "Artist Safe"
+        );
+        T.Authorization memory acceptance = _authorization(false);
+        acceptance.signature = _signature(ingress.acceptanceDigest(2, acceptance));
+        ingress.acceptArtistBinding(2, acceptance);
+        p.collectionId = 2;
+        require(
+            ingress.economicsConsentDigest(p, a) == digest,
+            "default collection admission is not signed"
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("economics"))
+        );
+        reads.requireEconomicsConsent(p);
+        avm.expectPartialRevert(T.Replay.selector);
+        ingress.recordEconomicsConsent(p, a);
+        _scopeRecord(p);
+        reads.requireEconomicsConsent(p);
+    }
+
+    function _economicsReplayKey(bytes32 scope) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2"),
+                block.chainid,
+                address(ingress),
+                address(coordinator),
+                address(archive),
+                suite.owners[6],
+                keccak256("domain:consent_finality"),
+                keccak256("consent_finality.replay.consent_key"),
+                scope
+            )
+        );
+    }
+
+    /// @dev Corrective binding ingress is not implemented here. Only its authoritative Binding/Attribution
+    ///      read boundary is replaced; both artists, Safe proofs, Identity/Consent/Archive remain actual.
+    function _correctEconomicsBinding(address payout) private returns (T.Binding memory b) {
+        keys = new uint256[](2);
+        keys[0] = 0xC0FF01;
+        keys[1] = 0xC0FF02;
+        artist = createOfficialSafe(safeComponents, safeOwnerAddresses(keys), 2, 24401);
+        nextNonce = 0;
+        (artistId,) = ingress.proposeArtistBinding(
+            2, _proposal(0), bytes("unit identity document"), "Corrected Artist Safe"
+        );
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.acceptanceDigest(2, a));
+        ingress.acceptArtistBinding(2, a);
+        T.PayoutDesignation memory designation = T.PayoutDesignation(artistId, payout, 0);
+        a = _authorization(true);
+        a.signature = _signature(ingress.payoutDesignationDigest(designation, a));
+        ingress.recordPayoutDesignation(designation, a);
+        b = IStreamArtistBindingOwner(suite.owners[0]).binding(2);
+        b.generation = 2;
+        b.bindingHash = keccak256("corrected binding generation 2");
+        _mockEconomicsBinding(b);
+    }
+
+    function _mockEconomicsBinding(T.Binding memory b) private {
+        avm.mockCall(
+            suite.owners[0], abi.encodeCall(IStreamArtistBindingOwner.binding, (1)), abi.encode(b)
+        );
+        avm.mockCall(
+            suite.owners[4],
+            abi.encodeCall(IStreamArtistAttributionOwner.attributionState, (1)),
+            abi.encode(uint8(2), b.generation)
+        );
+    }
+
+    function testEconomicsAssociationCorrectedArtistSecondThirdGenerationAndExactReplay() public {
+        _accept();
+        _payout();
+        StreamArtistOnboardingReads reads = coordinator.reads();
+        T.EconomicsConsent memory p = _currentEconomics(address(primary));
+        T.Binding memory firstBinding = coordinator.reads().acceptedBinding(1);
+        bytes32 first = _scopeRecord(p);
+        bytes32 firstKey = _economicsReplayKey(keccak256(abi.encode(p)));
+        T.ReplayCell memory originalCell = IStreamArtistOwner(suite.owners[6]).replayCell(firstKey);
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.economicsConsentDigest(p, a));
+        vm.expectRevert(abi.encodeWithSelector(T.Replay.selector, firstKey));
+        ingress.recordEconomicsConsent(p, a);
+        T.Binding memory b = _correctEconomicsBinding(address(artist));
+        vm.expectRevert(
+            abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("economics"))
+        );
+        reads.requireEconomicsConsent(p);
+        bytes32 second = _scopeRecord(p);
+        require(second != first, "new artist fresh canonical record");
+        reads.requireEconomicsConsent(p);
+        bytes32 secondScope = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ECONOMICS_BINDING_CONTINUATION_V1"),
+                first,
+                p,
+                b.artistId,
+                b.generation,
+                b.bindingHash
+            )
+        );
+        bytes32 secondKey = _economicsReplayKey(secondScope);
+        a = _authorization(false);
+        a.signature = _signature(ingress.economicsConsentDigest(p, a));
+        vm.expectRevert(abi.encodeWithSelector(T.Replay.selector, secondKey));
+        ingress.recordEconomicsConsent(p, a);
+        IStreamArtistEconomicsEvidence owner = IStreamArtistEconomicsEvidence(suite.owners[6]);
+        require(
+            owner.economicsRecordForBinding(
+                p, firstBinding.artistId, firstBinding.generation, firstBinding.bindingHash
+            ) == first,
+            "historical first lookup"
+        );
+        require(
+            owner.economicsRecordForBinding(p, b.artistId, b.generation, firstBinding.bindingHash)
+                == 0,
+            "wrong binding hash absent"
+        );
+        require(
+            owner.economicsRecordForBinding(p, firstBinding.artistId, b.generation, b.bindingHash)
+                    == 0
+                && owner.economicsRecordForBinding(p, b.artistId, b.generation + 1, b.bindingHash)
+                == 0,
+            "wrong artist and generation cannot select current consent"
+        );
+        b.generation = 3;
+        b.bindingHash = keccak256("corrected binding generation 3");
+        _mockEconomicsBinding(b);
+        vm.expectRevert(
+            abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("economics"))
+        );
+        reads.requireEconomicsConsent(p);
+        bytes32 third = _scopeRecord(p);
+        require(
+            third != second && owner.economicsRecordAssociation(third).originalRecord == first,
+            "third generation anchors first record"
+        );
+        require(
+            IStreamArtistConsentOwner(suite.owners[6]).economicsRecord(p) == first,
+            "raw first immutable"
+        );
+        require(
+            keccak256(abi.encode(IStreamArtistOwner(suite.owners[6]).replayCell(firstKey)))
+                == keccak256(abi.encode(originalCell)),
+            "original consumed cell immutable"
+        );
+        require(
+            IStreamArtistOwner(suite.owners[6]).replayCell(secondKey).commitment == second,
+            "second continuation retained"
+        );
+        reads.requireEconomicsConsent(p);
+    }
+
+    function _associationEvent(
+        Vm.Log[] memory logs,
+        bytes32 record,
+        T.EconomicsConsent memory p,
+        T.Binding memory b,
+        bytes32 original
+    ) private view {
+        bytes32 topic = keccak256(
+            "ArtistEconomicsConsentAssociated(uint16,bytes32,bytes32,bytes32,uint64,bytes32,bytes32)"
+        );
+        uint256 count;
+        for (uint256 i; i < logs.length; ++i) {
+            if (logs[i].emitter != suite.owners[6] || logs[i].topics[0] != topic) continue;
+            require(
+                logs[i].topics.length == 4 && logs[i].topics[1] == record
+                    && logs[i].topics[2] == b.artistId && logs[i].topics[3] == b.bindingHash
+                    && keccak256(logs[i].data)
+                        == keccak256(
+                            abi.encode(uint16(1), b.generation, keccak256(abi.encode(p)), original)
+                        ),
+                "exact association owner event"
+            );
+            ++count;
+        }
+        require(count == 1, "one association event");
+    }
+
+    function testEconomicsAssociationLateArchiveActualSafeRollbackAndExactEvidenceRetry() public {
+        _accept();
+        _payout();
+        T.EconomicsConsent memory p = _currentEconomics(address(primary));
+        T.Binding memory firstBinding = coordinator.reads().acceptedBinding(1);
+        vm.recordLogs();
+        bytes32 first = _scopeRecord(p);
+        _associationEvent(vm.getRecordedLogs(), first, p, firstBinding, first);
+        T.Binding memory b = _correctEconomicsBinding(address(artist));
+        T.Authorization memory a = _authorization(false);
+        a.signature = "";
+        bytes memory data = abi.encodeCall(IStreamArtistOnboarding.recordEconomicsConsent, (p, a));
+        bytes32 roots = _roots();
+        uint256 safeNonce = artist.nonce();
+        IStreamArtistEconomicsEvidence owner = IStreamArtistEconomicsEvidence(suite.owners[6]);
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodePacked(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(address(ingress), data);
+        require(
+            _roots() == roots && artist.nonce() == safeNonce
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce)
+                && owner.economicsRecordForBinding(p, b.artistId, b.generation, b.bindingHash) == 0
+                && IStreamArtistConsentOwner(suite.owners[6]).economicsRecord(p) == first,
+            "late rollback includes Safe, both owners, association and immutable raw record"
+        );
+        avm.clearMockedCalls();
+        _mockEconomicsBinding(b);
+        vm.recordLogs();
+        this.executeTargetSafe(address(ingress), data);
+        bytes32 record = owner.economicsRecordForBinding(p, b.artistId, b.generation, b.bindingHash);
+        _associationEvent(vm.getRecordedLogs(), record, p, b, first);
+        require(record != 0 && artist.nonce() == safeNonce + 1, "same direct Safe action retry");
+        bytes32 evidenceId = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ONBOARDING_OPERATION_EVIDENCE_V1"),
+                block.chainid,
+                address(ingress),
+                address(coordinator),
+                uint16(15),
+                address(artist),
+                record
+            )
+        );
+        (
+            uint16 schema,
+            bytes32 configuration,
+            uint16 op,
+            address actor,
+            bytes32 archived,
+            T.Snapshot[7] memory before_,
+            T.Snapshot[7] memory after_,
+            bytes memory payload
+        ) = abi.decode(
+            archive.artistEvidenceBytesV2(evidenceId, 1),
+            (uint16, bytes32, uint16, address, bytes32, T.Snapshot[7], T.Snapshot[7], bytes)
+        );
+        (
+            T.Binding memory captured,
+            T.EconomicsConsent memory terms,
+            T.Payout memory payout,
+            T.Authorization memory authorization,
+            T.SignerApproval memory proof,
+            bytes memory candidate,
+            IStreamArtistEconomicsEvidence.Association memory association
+        ) = abi.decode(
+            payload,
+            (
+                T.Binding,
+                T.EconomicsConsent,
+                T.Payout,
+                T.Authorization,
+                T.SignerApproval,
+                bytes,
+                IStreamArtistEconomicsEvidence.Association
+            )
+        );
+        require(
+            schema == 1 && configuration == coordinator.configurationHash() && op == 15
+                && actor == address(artist) && archived == record
+                && before_[6].revision + 1 == after_[6].revision
+                && before_[2].revision + 1 == after_[2].revision
+                && keccak256(abi.encode(captured)) == keccak256(abi.encode(b))
+                && keccak256(abi.encode(terms)) == keccak256(abi.encode(p))
+                && payout.recordHash != 0 && authorization.nonce == a.nonce && proof.direct
+                && proof.signer == address(artist) && candidate.length == 0
+                && association.originalRecord == first && association.bindingHash == b.bindingHash
+                && association.payloadHash == keccak256(abi.encode(p)),
+            "exact archived association and one owner commit"
+        );
+    }
+
+    function _literalPrimaryHash(
+        uint8 scope,
+        uint256 id,
+        uint8 kind,
+        bytes32 profile,
+        bytes32 templateId,
+        bytes32 templateEntries,
+        bytes32 templateMetadata,
+        bool frozen_
+    ) private view returns (bytes32) {
+        bytes32 profileContext = kind == 1
+            ? keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_PRIMARY_ASSIGNMENT_PROFILE_CONTEXT_V1"),
+                    factory.walletFor(profile),
+                    factory.profileEntriesHash(profile),
+                    factory.profileMetadataURIHash(profile)
+                )
+            )
+            : bytes32(0);
+        bytes32 templateContext = kind == 2
+            ? keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_PRIMARY_ASSIGNMENT_TEMPLATE_CONTEXT_V1"),
+                    templateEntries,
+                    templateMetadata
+                )
+            )
+            : bytes32(0);
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_PRIMARY_ASSIGNMENT_V1"),
+                block.chainid,
+                keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_PRIMARY_ASSIGNMENT_RESOLVER_CONTEXT_V1"),
+                        address(primary),
+                        address(factory),
+                        address(factory.assetPolicyRegistry()),
+                        factory.splitWalletRuntimeCodeHash()
+                    )
+                ),
+                keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_PRIMARY_ASSIGNMENT_SCOPE_CONTEXT_V1"),
+                        PRIMARY,
+                        scope,
+                        id,
+                        kind
+                    )
+                ),
+                keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_PRIMARY_ASSIGNMENT_POINTER_CONTEXT_V1"),
+                        profile,
+                        profileContext,
+                        templateId,
+                        templateContext
+                    )
+                ),
+                bytes32(0),
+                frozen_
+            )
+        );
+    }
+
+    function testPrimaryAssignmentHashLinkedReadExactLiteralPreimagesAndFailureControl() public {
+        core.setTokenCollection(41, 1);
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory current =
+            primary.resolvePrimaryAssignment(1, 0, PRIMARY);
+        require(
+            current.assignmentHash
+                == _literalPrimaryHash(1, 1, 1, current.profileId, 0, 0, 0, false),
+            "old collection preimage"
+        );
+        for (uint8 scope; scope < 3; ++scope) {
+            uint256 id = scope == 0 ? 0 : scope == 1 ? 1 : 41;
+            T.AssignmentFact memory preview = primary.previewArtistPrimaryAssignmentForScope(
+                1, scope, id, current.profileId, 0, true
+            );
+            require(
+                preview.assignmentHash
+                    == _literalPrimaryHash(scope, id, 1, current.profileId, 0, 0, 0, true),
+                "every scoped fixed hash and provider context"
+            );
+        }
+        avm.mockCallRevert(
+            address(factory),
+            abi.encodeCall(IStreamSplitFactory.profileEntriesHash, (current.profileId)),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidRecord.selector));
+        primary.previewArtistPrimaryAssignmentForScope(1, 2, 41, current.profileId, 0, false);
+        avm.clearMockedCalls();
+        require(
+            primary.previewArtistPrimaryAssignmentForScope(1, 2, 41, current.profileId, 0, false)
+            .assignmentHash == _literalPrimaryHash(2, 41, 1, current.profileId, 0, 0, 0, false),
+            "same immutable factory read healthy retry"
+        );
+        _freshTemplateFixture(1);
+        current = primary.resolvePrimaryAssignment(1, 0, PRIMARY);
+        (bytes32 entries, bytes32 metadataHash,) =
+            primary.primaryTemplateEconomicsFacts(current.templateId);
+        require(
+            current.assignmentHash
+                == _literalPrimaryHash(
+                    1, 1, 2, 0, current.templateId, entries, metadataHash, false
+                ),
+            "old template preimage and zero profile branch"
+        );
+    }
+
+    function testPrimaryClearRequiresExactZeroCandidateAndExistingMutableKey() public {
+        _accept();
+        _payout();
+        core.setTokenCollection(41, 1);
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory installed =
+            primary.resolvePrimaryAssignment(1, 0, PRIMARY);
+        T.EconomicsConsent memory p = T.EconomicsConsent(1, address(primary), PRIMARY, 1, 1, 0);
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.economicsConsentDigest(p, a));
+        T.FixedEconomicsCandidate memory candidate =
+            T.FixedEconomicsCandidate(installed.profileId, 0, 0, false);
+        bytes32 roots = _roots();
+        vm.expectRevert(abi.encodeWithSelector(T.UnsupportedProfile.selector));
+        ingress.recordProspectiveEconomicsConsent(p, candidate, a);
+        candidate.profileHash = 0;
+        candidate.frozen = true;
+        vm.expectRevert(abi.encodeWithSelector(T.UnsupportedProfile.selector));
+        ingress.recordProspectiveEconomicsConsent(p, candidate, a);
+        candidate.frozen = false;
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidRecord.selector));
+        ingress.recordEconomicsConsent(p, a);
+        require(
+            _roots() == roots
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce),
+            "zero only prospective and malformed controls do not consume"
+        );
+        ingress.recordProspectiveEconomicsConsent(p, candidate, a);
+        vm.prank(primary.owner());
+        primary.clearPrimaryAssignment(PRIMARY, 1, 1);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamRevenueResolver.PrimaryAssignmentMissing.selector,
+                PRIMARY,
+                uint8(1),
+                uint256(1)
+            )
+        );
+        primary.previewArtistPrimaryClear(1, 1, 1);
+    }
+
+    function testEconomicsAssociationTokenConsumptionSurvivesPayoutRotationAndZeroCapEstate()
+        public
+    {
+        _all();
+        core.setTokenCollection(41, 1);
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory collection =
+            primary.resolvePrimaryAssignment(1, 0, PRIMARY);
+        (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate) =
+            _scopePayload(2, 41, collection.profileId, false);
+        _prospectiveConsent(p, candidate);
+        vm.prank(primary.owner());
+        primary.setPrimaryProfileAssignment(PRIMARY, 2, 41, collection.profileId, 0);
+        T.Binding memory b = coordinator.reads().acceptedBinding(1);
+        IStreamArtistEconomicsEvidence owner = IStreamArtistEconomicsEvidence(suite.owners[6]);
+        bytes32 record = owner.economicsRecordForBinding(p, b.artistId, b.generation, b.bindingHash);
+        bytes32 evidence = keccak256(abi.encode(owner.economicsRecordAssociation(record)));
+        _newRotationSafe(24481);
+        bytes32 rotation = _stageRotation(0);
+        _executeTimedRotation(rotation);
+        _adoptRotatedSafe();
+        coordinator.reads().requireEconomicsConsent(p);
+        require(
+            primary.resolvePrimaryAssignment(1, 41, PRIMARY).assignmentHash == p.assignmentHash,
+            "rotation preserves selected token consent"
+        );
+        R.TransitionState memory transition = ingress.artistTransitionState(rotation);
+        vm.warp(transition.postWindowEndsAt);
+        (, bytes32 previous) = ingress.artistPayoutAccount(artistId);
+        T.PayoutDesignation memory update = T.PayoutDesignation(artistId, address(0xCAFE), previous);
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.payoutDesignationDigest(update, a));
+        ingress.recordPayoutDesignation(update, a);
+        coordinator.reads().requireEconomicsConsent(p);
+        require(
+            primary.resolvePrimaryAssignment(1, 41, PRIMARY).profileId == collection.profileId,
+            "fixed old payout profile rights remain immutable"
+        );
+        _estateActivateAndAdopt(0);
+        Estate.AuthorityCapabilities memory rights = ingress.currentAuthorityCapabilities(artistId);
+        require(
+            rights.authorityClass == 3 && rights.status == 3 && rights.effectiveCapabilities == 0,
+            "real zero-cap successor"
+        );
+        coordinator.reads().requireEconomicsConsent(p);
+        require(
+            primary.resolvePrimaryAssignment(1, 41, PRIMARY).assignmentHash == p.assignmentHash,
+            "consumption of existing token consent needs no new capability"
+        );
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        require(
+            owner.economicsRecordForBinding(p, b.artistId, b.generation, b.bindingHash) == record
+                && keccak256(abi.encode(owner.economicsRecordAssociation(record))) == evidence
+                && keccak256(abi.encode(coordinator.reads().acceptedBinding(1)))
+                    == keccak256(abi.encode(b)),
+            "binding and immutable evidence survive all three authority/payout changes"
+        );
+    }
+
+    /// @dev Explicit missing-evidence storage fault, not a live migration/upgrade path.
+    ///      Mapping slot16 is pinned by the separate recursive layout proof; old raw slot5/replay stay intact.
+    function testEconomicsAssociationMissingLegacyEvidenceFailsClosedThenExactRestoreRetry()
+        public
+    {
+        _accept();
+        _payout();
+        T.EconomicsConsent memory p = _currentEconomics(address(primary));
+        bytes32 first = _scopeRecord(p);
+        bytes32 key = _economicsReplayKey(keccak256(abi.encode(p)));
+        bytes32 oldCell = keccak256(abi.encode(IStreamArtistOwner(suite.owners[6]).replayCell(key)));
+        bytes32 slot = keccak256(abi.encode(first, uint256(16)));
+        bytes32[5] memory words;
+        for (uint256 i; i < 5; ++i) {
+            words[i] = vm.load(suite.owners[6], bytes32(uint256(slot) + i));
+            vm.store(suite.owners[6], bytes32(uint256(slot) + i), 0);
+        }
+        require(
+            words[0] == artistId && words[3] == keccak256(abi.encode(p)) && words[4] == first,
+            "exact tested association storage roots"
+        );
+        T.Binding memory b = _correctEconomicsBinding(address(artist));
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.economicsConsentDigest(p, a));
+        bytes32 roots = _roots();
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidRecord.selector));
+        ingress.recordEconomicsConsent(p, a);
+        require(
+            _roots() == roots
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce)
+                && IStreamArtistConsentOwner(suite.owners[6]).economicsRecord(p) == first,
+            "unknown old evidence cannot be guessed and does not consume new authorization"
+        );
+        for (uint256 i; i < 5; ++i) {
+            vm.store(suite.owners[6], bytes32(uint256(slot) + i), words[i]);
+        }
+        bytes32 fresh = ingress.recordEconomicsConsent(p, a);
+        require(
+            fresh != 0
+                && IStreamArtistEconomicsEvidence(suite.owners[6])
+                    .economicsRecordForBinding(p, b.artistId, b.generation, b.bindingHash) == fresh
+                && keccak256(abi.encode(IStreamArtistOwner(suite.owners[6]).replayCell(key)))
+                    == oldCell,
+            "same proof healthy retry with original replay bytes preserved"
+        );
+    }
+
+    function _economicsSafeRead(address target, bytes memory data, bytes memory expected) private {
+        (bool ok, bytes memory raw) = target.staticcall(data);
+        require(ok && keccak256(raw) == keccak256(expected), "exact public preparation returndata");
+        bytes32 roots = _roots();
+        uint256 nonce = artist.nonce();
+        this.executeTargetSafe(target, data);
+        (ok, raw) = target.staticcall(data);
+        require(
+            ok && keccak256(raw) == keccak256(expected) && _roots() == roots
+                && artist.nonce() == nonce + 1,
+            "same complete result and no record effect around actual Safe CALL"
+        );
+    }
+
+    function testEconomicsPreparationReadsActualSafeParityAndInvalidInputRejection() public {
+        _accept();
+        _payout();
+        StreamArtistOnboardingReads reads = coordinator.reads();
+        T.EconomicsConsent memory p = _currentEconomics(address(primary));
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory installed =
+            primary.primaryEconomicsFacts(1, 1, 1);
+        T.FixedEconomicsCandidate memory candidate =
+            T.FixedEconomicsCandidate(installed.profileId, 0, 0, false);
+        T.AssignmentFact memory fact =
+            T.AssignmentFact(p.resolver, p.revenueClass, p.scope, p.scopeId, p.assignmentHash);
+        bytes memory currentCall = abi.encodeCall(
+            StreamArtistOnboardingReads.requireCurrentEconomics, (p, address(artist))
+        );
+        bytes memory prospectiveCall = abi.encodeCall(
+            StreamArtistOnboardingReads.requireProspectiveEconomicsWithEvidence,
+            (p, candidate, address(artist))
+        );
+        _economicsSafeRead(address(reads), currentCall, abi.encode(bytes("")));
+        _economicsSafeRead(address(reads), prospectiveCall, abi.encode(fact, bytes32(0)));
+        require(
+            IStreamArtistConsentOwner(suite.owners[6]).economicsRecord(p) == 0,
+            "read preparation is not consent authority"
+        );
+        bytes32 goodHash = p.assignmentHash;
+        p.assignmentHash = keccak256("wrong current assignment");
+        bytes memory bad = abi.encodeCall(
+            StreamArtistOnboardingReads.requireCurrentEconomics, (p, address(artist))
+        );
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidRecord.selector));
+        reads.requireCurrentEconomics(p, address(artist));
+        uint256 safeNonce = artist.nonce();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(address(reads), bad);
+        require(artist.nonce() == safeNonce, "invalid current read rolls Safe envelope back");
+        p.assignmentHash = goodHash;
+        candidate.profileHash = 0;
+        bad = abi.encodeCall(
+            StreamArtistOnboardingReads.requireProspectiveEconomicsWithEvidence,
+            (p, candidate, address(artist))
+        );
+        vm.expectRevert(abi.encodeWithSelector(T.UnsupportedProfile.selector));
+        reads.requireProspectiveEconomicsWithEvidence(p, candidate, address(artist));
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(address(reads), bad);
+        require(artist.nonce() == safeNonce, "invalid prospective read rolls Safe envelope back");
+        _economicsSafeRead(address(reads), currentCall, abi.encode(bytes("")));
+        _economicsSafeRead(address(reads), prospectiveCall, abi.encode(fact, bytes32(0)));
+    }
+
+    function testPrimaryClearMissingPaidCollaboratorDesignationSameAuthorizationRetry() public {
+        _collaboratorIdentity(false);
+        C.BindingAcceptance memory row = _collaborativeProposal(true);
+        _accept();
+        _collaboratorAcceptance(row, false);
+        _payout();
+        bytes32 installed = primary.primaryEconomicsFacts(1, 1, 1).assignmentHash;
+        T.EconomicsConsent memory p = T.EconomicsConsent(1, address(primary), PRIMARY, 1, 1, 0);
+        T.FixedEconomicsCandidate memory candidate = T.FixedEconomicsCandidate(0, 0, 0, false);
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.economicsConsentDigest(p, a));
+        bytes memory call_ = abi.encodeCall(
+            IStreamArtistEconomicsAuthority.recordProspectiveEconomicsConsent, (p, candidate, a)
+        );
+        bytes32 roots = _roots();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                T.MissingMintPrerequisite.selector, keccak256("collaborator_payout")
+            )
+        );
+        ingress.recordProspectiveEconomicsConsent(p, candidate, a);
+        require(
+            _roots() == roots
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce)
+                && primary.primaryEconomicsFacts(1, 1, 1).assignmentHash == installed,
+            "missing collaborator leaves authorization and exact key untouched"
+        );
+        _collaboratorPayout(address(delegateSafe));
+        this.executeTargetSafe(address(ingress), call_);
+        require(
+            IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce)
+                && IStreamArtistConsentOwner(suite.owners[6]).economicsRecord(p) != 0,
+            "same artist authorization succeeds after actual collaborator designation"
+        );
+        vm.prank(primary.owner());
+        primary.clearPrimaryAssignment(PRIMARY, 1, 1);
+        require(
+            !primary.primaryEconomicsFacts(1, 1, 1).exists, "actual independently authorized clear"
         );
     }
 

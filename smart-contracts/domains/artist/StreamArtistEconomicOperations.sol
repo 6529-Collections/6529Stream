@@ -3,6 +3,9 @@ pragma solidity ^0.8.19;
 import "./StreamArtistAuthorizationState.sol";
 import "./StreamArtistCurrentAuthorityFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistCurrentConsentOwner.sol";
+import {
+    IStreamArtistEconomicsEvidence
+} from "../../interfaces/stream/artist/IStreamArtistEconomicsEvidence.sol";
 
 import "./StreamArtistOnboardingReads.sol";
 import "./StreamArtistEconomicsHashes.sol";
@@ -71,17 +74,8 @@ library StreamArtistEconomicOperations {
         StreamArtistOnboardingReads reads = StreamArtistOnboardingReads(x.reads);
         T.Binding memory b = reads.acceptedBinding(p.collectionId);
         _collection(x, p.collectionId);
-        (T.AssignmentFact memory primary, T.AssignmentFact memory royalty) =
-            reads.currentAssignments(p.collectionId);
-        T.AssignmentFact memory expected = p.resolver == primary.resolver ? primary : royalty;
-        if (
-            p.resolver != expected.resolver || p.revenueClass != expected.revenueClass
-                || p.scope != expected.scope || p.scopeId != expected.scopeId
-                || p.assignmentHash != expected.assignmentHash
-        ) revert T.InvalidRecord();
         T.Payout memory payout = _payout(x, b.artistId);
-        bytes memory currentEvidence =
-            reads.requireCurrentArtistEconomics(p.collectionId, p.resolver, payout.account);
+        bytes memory currentEvidence = reads.requireCurrentEconomics(p, payout.account);
         return _economics(x, actor, b, p, payout, delegation, a, before_, currentEvidence);
     }
 
@@ -98,12 +92,19 @@ library StreamArtistEconomicOperations {
         T.Binding memory b = reads.acceptedBinding(p.collectionId);
         _collection(x, p.collectionId);
         T.Payout memory payout = _payout(x, b.artistId);
-        T.AssignmentFact memory actual =
-            reads.requireProspectiveEconomics(p, candidate, payout.account);
-        return
-            _economics(
-                x, actor, b, p, payout, delegation, a, before_, abi.encode(candidate, actual)
-            );
+        (T.AssignmentFact memory actual, bytes32 previousHash) =
+            reads.requireProspectiveEconomicsWithEvidence(p, candidate, payout.account);
+        return _economics(
+            x,
+            actor,
+            b,
+            p,
+            payout,
+            delegation,
+            a,
+            before_,
+            abi.encode(candidate, actual, previousHash)
+        );
     }
 
     function _economics(
@@ -171,9 +172,9 @@ library StreamArtistEconomicOperations {
                 );
         }
         if (actual != record) revert T.InvalidRecord();
-        bytes memory payload = candidateEvidence.length == 0
-            ? abi.encode(b, p, payout, a, proof)
-            : abi.encode(b, p, payout, a, proof, candidateEvidence);
+        IStreamArtistEconomicsEvidence.Association memory association =
+            IStreamArtistEconomicsEvidence(x.suite.owners[6]).economicsRecordAssociation(record);
+        bytes memory payload = abi.encode(b, p, payout, a, proof, candidateEvidence, association);
         if (delegation != bytes32(0)) payload = abi.encode(payload, delegation, prior);
         _archive(x, 15, actor, record, before_, payload);
     }
