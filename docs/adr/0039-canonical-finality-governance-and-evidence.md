@@ -462,6 +462,62 @@ has an independent current-principal admission branch; only that successful
 branch invalidates a pending finding. This finding-only exception does not
 change the separate estate living-principal cancellation rule.
 
+## Recovery approval admission and saved association
+
+Operation 22 preserves the seven signed fields and twelve-word permanent
+approval preimage. Fresh admission validates the actual selected recovery
+companion's retained intent, the exact original executed Finality record and
+its unique stored `ARTIST_SANCTION` component and archival/execution witnesses.
+The original saved sanction in the pinned Consent owner determines the artist
+association. Its supplemental generation and binding hash are authenticated
+by that immutable owner code; they are not falsely described as fields in the
+permanent sanction hash.
+
+The first implementation admits the current living principal or activated
+successor with `CAP_SANCTION`, an empty collaborator set and canonical empty
+capability-policy set. It supports the actual stored record path for each of
+COLLECTION, TOKEN, RELEASE, SEASON and VIEW, with the requested scope exactly
+equal to the authenticated original record's scope. New scoped recovery that
+inherits collection finality under ADR 0020 is not admitted by this increment;
+that requires the later companion lineage and admission path. The saved
+verification tuple does not imply inherited-scope admission. Delegation,
+steward authority and collaborator-threshold approval are separate remaining
+branches. A direct
+approval requires the actual caller to be the current principal, an empty
+signature, the current shared nonce and an unexpired explicit deadline. A
+relayed approval validates the permanent digest and deadline through the
+existing signer verifier. Identity consumes its normal nonce/digest lane and
+authenticated activity, then Consent records one immutable approval under the
+new association replay scope. One Archive append binds the actual caller,
+both owner transitions and exact preparation observations; late failure rolls
+all of them back.
+
+New admission requires the current accepted-or-sanctioned Binding association
+to equal the original executed sanction association. The permanent
+`verifyRecoveryApproval` read instead selects that original association and
+exact original-record/manifest terms. It does not re-read current Binding,
+Attribution status, authority address, capability, deadline, discovery,
+coverage or Core pointer selection. Ordinary rotation, estate succession and
+Identity contest cannot silently turn historical approval into an unused
+authorization. Every entry retains the Coordinator's complete suite runtime
+checks, including the Consent owner whose supplemental fields authenticate
+the original association. The verifying read proves saved consent, not
+current recovery-route readiness or that a recovery action can execute.
+
+Corrective-association adoption and adjudicated identity supersession are not
+implemented by this first profile. A mismatching current generation/hash is
+rejected for fresh admission as unsupported; it is never treated as proof that
+a saved approval was adjudicatively superseded. A later supported adoption
+must consume the actual authoritative owner proof before selecting another
+association. Raw records and exact-association lookups remain immutable and
+available independently of that future selection policy.
+
+The two existing facade delegation digest bodies move to its existing fixed
+finality reader for size, preserving their exact preimages, constructor
+topology, deployment chain ID and facade verifying-contract environment.
+Operation 22 is added to the Coordinator configuration commitment; no new
+constructor argument or mutable target binding is introduced.
+
 ## Acceptance and remaining work
 
 Required tests include an actual threshold-Safe/Executor class-2 path, direct

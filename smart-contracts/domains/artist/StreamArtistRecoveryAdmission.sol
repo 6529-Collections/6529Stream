@@ -2,6 +2,9 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/artist/IStreamArtistUnavailability.sol";
+import {
+    StreamArtistRecoveryApprovalTypes as Approval
+} from "../../interfaces/stream/artist/StreamArtistRecoveryApprovalTypes.sol";
 import "../../interfaces/stream/artist/IStreamArtistBindingOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityContest.sol";
@@ -260,6 +263,53 @@ library StreamArtistRecoveryAdmission {
                 || _address(suite.roleRegistry, abi.encodeWithSignature("owner()"), cap) != executor
         ) {
             revert Recovery.InvalidUnavailabilityFinding();
+        }
+    }
+
+    /// @notice Approval is bound to staged intent, independently of a later governance action.
+    function approvalIntent(
+        T.SuiteConfiguration memory suite,
+        address originalFinality,
+        Approval.Request memory request,
+        uint256 cap
+    ) public view returns (IStreamArtistRecoveryIntent.Facts memory facts) {
+        address target = request.recoveryRegistry;
+        _selected(suite.core, keccak256("ARTWORK_FINALITY_RECOVERY"), target, cap);
+        if (
+            target == address(0) || request.terms.finalityRegistry != originalFinality
+                || request.scope.collectionId != request.terms.collectionId
+                || request.terms.finalityRecordHash == 0 || request.terms.recoveryManifestHash == 0
+                || _address(target, abi.encodeCall(IStreamArtistRecoveryIntent.core, ()), cap)
+                    != suite.core
+                || _address(
+                        target,
+                        abi.encodeCall(IStreamArtistRecoveryIntent.originalFinalityRegistry, ()),
+                        cap
+                    ) != originalFinality
+        ) {
+            revert Recovery.InvalidRecoveryApproval();
+        }
+        facts = abi.decode(
+            _fixed(
+                target,
+                abi.encodeCall(
+                    IStreamArtistRecoveryIntent.requireArtistRecoveryIntent,
+                    (
+                        request.scope,
+                        request.terms.finalityRecordHash,
+                        request.terms.recoveryManifestHash
+                    )
+                ),
+                128,
+                cap
+            ),
+            (IStreamArtistRecoveryIntent.Facts)
+        );
+        if (
+            facts.scopeHash == 0 || facts.oldValueHash == 0 || facts.newValueHash == 0
+                || facts.requestHash == 0
+        ) {
+            revert Recovery.InvalidRecoveryApproval();
         }
     }
 

@@ -26,6 +26,27 @@ contract StreamArtistConsentWriterExtension is StreamArtistConsentStorage {
         _;
     }
 
+    function recordRecoveryApproval(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Recovery.ApprovalRecord calldata r,
+        R.AuthorityFact calldata authority,
+        Approval.Admission calldata admission
+    ) external onlyHost returns (bytes32) {
+        _check(c, 22);
+        StreamArtistRecoveryApprovalState.Mutation memory m =
+            StreamArtistRecoveryApprovalState.recordEncoded(
+                _recoveryApprovals,
+                _replay,
+                StreamArtistRecoveryApprovalState.OwnerContext(
+                    _environment(), operationCoordinator, archiveV2, domainId, _revision, _now()
+                ),
+                msg.data
+            );
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return m.record;
+    }
+
     function consumeSanctionFinalization(
         T.ActionContext calldata c,
         T.Binding calldata b,

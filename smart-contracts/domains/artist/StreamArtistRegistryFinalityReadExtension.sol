@@ -79,6 +79,34 @@ contract StreamArtistRegistryFinalityReadExtension {
         return IStreamArtistSanctionCoordinator(operationCoordinator).prepareArtistSanction(p);
     }
 
+    function recoveryApprovalDigest(Recovery.ApprovalTerms calldata p, T.Authorization calldata a)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        return StreamArtistRecoveryHashes.approvalDigest(_environment(), p, a.nonce, a.time);
+    }
+
+    function recoveryApprovalRecord(bytes32 hash)
+        external
+        view
+        onlyHost
+        returns (Recovery.ApprovalRecord memory, Approval.Admission memory)
+    {
+        return IStreamArtistRecoveryApprovalOwner(_contentSuite().owners[6])
+            .recoveryApprovalRecord(hash);
+    }
+
+    function verifyRecoveryApproval(
+        uint256 collectionId,
+        bytes32 originalHash,
+        bytes32 manifestHash
+    ) external view onlyHost returns (bool, bytes32, address, uint8) {
+        return IStreamArtistRecoveryApprovalCoordinator(operationCoordinator)
+            .verifyRecoveryApproval(collectionId, originalHash, manifestHash);
+    }
+
     function sanctionRecord(bytes32 hash) external view onlyHost returns (S.Record memory) {
         return IStreamArtistSanctionOwner(_contentSuite().owners[6]).sanctionRecord(hash);
     }
@@ -206,6 +234,24 @@ contract StreamArtistRegistryFinalityReadExtension {
         returns (bytes32)
     {
         return StreamArtistSaleHashes.digest(_environment(), p, a);
+    }
+
+    function delegationGrantDigest(D.Grant calldata p, T.Authorization calldata a)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        return StreamArtistDelegationState.grantDigest(_environment(), p, a.nonce);
+    }
+
+    function delegationRevocationDigest(D.Revocation calldata p, T.Authorization calldata a)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        return StreamArtistDelegationState.revokeDigest(_environment(), p, a.nonce, a.time);
     }
 
     function contentConsentDigest(Content.Consent calldata p, T.Authorization calldata a)

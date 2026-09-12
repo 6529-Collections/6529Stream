@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistIdentityRecoveryApprovalState.sol";
 import "../../interfaces/stream/artist/IStreamArtistUnavailability.sol";
 
 import "./StreamArtistContentHashes.sol";
@@ -184,6 +185,22 @@ contract StreamArtistIdentityEstateExtension is
         _check(c, 12);
         StreamArtistIdentityState.Mutation memory m;
         (m, record) = StreamArtistIdentityConsentState.sanction(
+            _identity, _replay, _ownerContext(), c, b, p, a, proof
+        );
+        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
+        _commit(c, m.action, m.state, m.replay, m.record);
+    }
+
+    function consumeRecoveryApproval(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Recovery.ApprovalTerms calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external onlyHost returns (bytes32 record) {
+        _check(c, 22);
+        StreamArtistIdentityState.Mutation memory m;
+        (m, record) = StreamArtistIdentityRecoveryApprovalState.consume(
             _identity, _replay, _ownerContext(), c, b, p, a, proof
         );
         _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);

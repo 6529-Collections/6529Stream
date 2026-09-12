@@ -13,12 +13,17 @@ import "../../interfaces/stream/artist/IStreamArtistContentOwner.sol";
 import "./StreamArtistOwner.sol";
 import "./StreamArtistSanctionState.sol";
 import "./StreamArtistConsentReadEncoding.sol";
+import "./StreamArtistRecoveryApprovalState.sol";
 import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 
 /// @notice Exact common storage owned by Consent and addressed by its fixed writer.
-abstract contract StreamArtistConsentStorage is StreamArtistOwner, IStreamArtistSanctionEvents {
+abstract contract StreamArtistConsentStorage is
+    StreamArtistOwner,
+    IStreamArtistSanctionEvents,
+    IStreamArtistRecoveryApprovalEvents
+{
     mapping(bytes32 => bytes32) internal _policies;
     mapping(bytes32 => bytes32) internal _economics;
     mapping(uint256 => T.RatificationRecord) internal _ratifications;
@@ -34,6 +39,7 @@ abstract contract StreamArtistConsentStorage is StreamArtistOwner, IStreamArtist
     mapping(bytes32 => IStreamArtistEconomicsEvidence.Association) internal _economicsAssociations;
     mapping(bytes32 => bytes32) internal _associatedEconomicsRecords;
     StreamArtistSanctionState.State internal _sanctions;
+    StreamArtistRecoveryApprovalState.State internal _recoveryApprovals;
 
     event ArtistSaleConsentRecorded(
         uint16 schemaVersion,

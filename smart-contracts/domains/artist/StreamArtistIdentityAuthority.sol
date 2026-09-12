@@ -127,6 +127,16 @@ contract StreamArtistIdentityAuthority is
         _forwardEstateWriter();
     }
 
+    function consumeRecoveryApproval(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Recovery.ApprovalTerms calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external returns (bytes32) {
+        _forwardEstateWriter();
+    }
+
     function requestEstate(
         T.ActionContext calldata c,
         Estate.Request calldata p,

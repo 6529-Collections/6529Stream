@@ -2,6 +2,8 @@
 pragma solidity ^0.8.19;
 import "./StreamArtistIdentityDismissalOperations.sol";
 import "./StreamArtistUnavailabilityOperations.sol";
+import "./StreamArtistRecoveryApprovalOperations.sol";
+import "../../interfaces/stream/artist/IStreamArtistRecoveryApproval.sol";
 import "./StreamArtistOnboardingReadDeployment.sol";
 import "./StreamArtistFinalityAdmission.sol";
 import "./StreamArtistSanctionOperations.sol";
@@ -161,6 +163,7 @@ contract StreamArtistOnboardingCoordinator is
                 uint16(18),
                 uint16(20),
                 uint16(21),
+                uint16(22),
                 uint16(23),
                 uint16(24),
                 uint16(25),
@@ -209,6 +212,41 @@ contract StreamArtistOnboardingCoordinator is
     ) external operation returns (bytes32) {
         return StreamArtistSanctionOperations.record(
             _economicContext(), _sanctionPins(), actor, p, a
+        );
+    }
+
+    function coordinateRecordRecoveryApproval(
+        address actor,
+        Approval.Request calldata p,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        _unavailabilityPins();
+        return StreamArtistRecoveryApprovalOperations.record(
+            _economicContext(), _recoveryApprovalPins(), actor, p, a
+        );
+    }
+
+    function verifyRecoveryApproval(
+        uint256 collectionId,
+        bytes32 originalHash,
+        bytes32 manifestHash
+    ) external view returns (bool, bytes32, address, uint8) {
+        _unavailabilityPins();
+        return StreamArtistRecoveryApprovalReads.verify(
+            _suite, _recoveryApprovalPins(), collectionId, originalHash, manifestHash
+        );
+    }
+
+    function _recoveryApprovalPins()
+        private
+        view
+        returns (StreamArtistRecoveryOriginalReads.Pins memory)
+    {
+        (uint256 cap,, uint8 failure, uint64 revision) = IStreamGasParameterHost(_suite.registry)
+            .gasParameterInfo(keccak256("6529STREAM_GGP_ARTIST_FINALITY_READ_GAS"));
+        if (cap == 0 || failure != 2 || revision == 0) revert T.InvalidBinding();
+        return StreamArtistRecoveryOriginalReads.Pins(
+            finalityRegistry, finalityRegistryCodeHash, _runtimeHashes[9], _runtimeHashes[7], cap
         );
     }
 

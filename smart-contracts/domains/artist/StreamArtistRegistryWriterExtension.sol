@@ -59,6 +59,15 @@ contract StreamArtistRegistryWriterExtension {
             .coordinateRecordArtistSanction(msg.sender, p, a);
     }
 
+    function recordRecoveryApproval(Approval.Request calldata p, T.Authorization calldata a)
+        external
+        onlyHost
+        returns (bytes32)
+    {
+        return IStreamArtistRecoveryApprovalCoordinator(operationCoordinator)
+            .coordinateRecordRecoveryApproval(msg.sender, p, a);
+    }
+
     function confirmSanctionFinalized(uint256 collectionId) external onlyHost {
         IStreamArtistSanctionConfirmationCoordinator(operationCoordinator)
             .coordinateConfirmSanctionFinalized(msg.sender, collectionId);

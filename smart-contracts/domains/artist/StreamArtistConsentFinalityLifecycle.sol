@@ -24,7 +24,8 @@ import {
 contract StreamArtistConsentFinalityLifecycle is
     StreamArtistConsentStorage,
     IStreamArtistEconomicsEvidence,
-    IStreamArtistSanctionOwner
+    IStreamArtistSanctionOwner,
+    IStreamArtistRecoveryApprovalOwner
 {
     // Retain the published host error ABI after callback implementation extraction.
     error BoundExceeded(uint256 actual, uint256 maximum);
@@ -34,6 +35,37 @@ contract StreamArtistConsentFinalityLifecycle is
     error StaleOwnerSnapshot(bytes32 domainId);
     error Unauthorized(address caller);
     address public immutable consentWriterExtension;
+
+    function recordRecoveryApproval(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Recovery.ApprovalRecord calldata r,
+        R.AuthorityFact calldata authority,
+        Approval.Admission calldata admission
+    ) external returns (bytes32) {
+        _forwardConsentWriter();
+    }
+
+    function recoveryApprovalRecord(bytes32 recordHash)
+        external
+        view
+        returns (Recovery.ApprovalRecord memory, Approval.Admission memory)
+    {
+        _returnSanction(
+            StreamArtistRecoveryApprovalState.recordEncodedRead(_recoveryApprovals, recordHash)
+        );
+    }
+
+    function recoveryApprovalForAssociation(
+        bytes32 artistId,
+        uint64 generation,
+        bytes32 bindingHash,
+        Recovery.ApprovalTerms calldata p
+    ) external view returns (bytes32) {
+        return _recoveryApprovals.associationRecords[
+            StreamArtistRecoveryApprovalState.associationKey(artistId, generation, bindingHash, p)
+        ];
+    }
 
     function consumeSanctionFinalization(
         T.ActionContext calldata c,

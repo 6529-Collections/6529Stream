@@ -62,6 +62,7 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistSanction,
     IStreamArtistSanctionConfirmation,
     IStreamArtistUnavailability,
+    IStreamArtistRecoveryApproval,
     IStreamArtworkFinalityComponent,
     IStreamArtworkScopedFinalityComponent,
     StreamModuleBase,
@@ -112,6 +113,37 @@ contract StreamArtistOnboardingRegistry is
         returns (bytes32)
     {
         _forwardRegistryWriter();
+    }
+
+    function recordRecoveryApproval(Approval.Request calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function recoveryApprovalDigest(Recovery.ApprovalTerms calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardFinalityRead();
+    }
+
+    function recoveryApprovalRecord(bytes32 hash)
+        external
+        view
+        returns (Recovery.ApprovalRecord memory, Approval.Admission memory)
+    {
+        _forwardFinalityRead();
+    }
+
+    function verifyRecoveryApproval(
+        uint256 collectionId,
+        bytes32 originalHash,
+        bytes32 manifestHash
+    ) external view returns (bool, bytes32, address, uint8) {
+        _forwardFinalityRead();
     }
 
     function confirmSanctionFinalized(uint256 collectionId) external {
@@ -243,7 +275,8 @@ contract StreamArtistOnboardingRegistry is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return id == type(IStreamArtistUnavailability).interfaceId
+        return id == type(IStreamArtistRecoveryApproval).interfaceId
+            || id == type(IStreamArtistUnavailability).interfaceId
             || id == type(IStreamArtistMintConsent).interfaceId
             || id == type(IStreamArtistAttribution).interfaceId
             || id == type(IStreamArtistOnboarding).interfaceId
@@ -944,7 +977,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bytes32)
     {
-        return StreamArtistDelegationState.grantDigest(_environment(), p, a.nonce);
+        _forwardFinalityRead();
     }
 
     function delegationRevocationDigest(D.Revocation calldata p, T.Authorization calldata a)
@@ -952,7 +985,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bytes32)
     {
-        return StreamArtistDelegationState.revokeDigest(_environment(), p, a.nonce, a.time);
+        _forwardFinalityRead();
     }
 
     function delegationRecord(bytes32 grant) public view returns (D.Record memory) {
