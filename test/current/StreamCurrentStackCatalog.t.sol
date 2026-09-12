@@ -9,7 +9,7 @@ contract StreamCurrentStackCatalogTest is StreamCurrentStackFixture {
         _deployCurrentStack(vm.addr(ARTIST_KEY), vm.addr(PLATFORM_KEY));
     }
 
-    function testReplacementTargetRequiresCatalogAndPublishesRealManifestRevisionTwo() public {
+    function testReplacementTargetRequiresCatalogAndPublishesNextRealManifestRevision() public {
         StreamEntropyCoordinator replacement = _replacement();
         (GovernanceCall[] memory calls, bytes[] memory data) = _configuration(replacement);
         executor.publishGovernanceCallData(data);
@@ -17,7 +17,10 @@ contract StreamCurrentStackCatalogTest is StreamCurrentStackFixture {
         vm.expectRevert();
         governanceRoot.execute(address(executor), 0, unknownTargetRequest);
 
-        (, bytes32 initialCatalog, uint256 initialCount,) = executor.governanceActionPolicyState();
+        (, bytes32 initialCatalog, uint256 initialCount, uint64 initialRevision) =
+            executor.governanceActionPolicyState();
+        uint64 initialManifestRevision = StreamGenesisManifestPlan.readAggregate(manifest).revision;
+        uint256 initialPublicationCount = manifest.streamSystemManifestPointerCount();
         address initialPayload = manifest.streamSystemManifestPointer();
         (calls, data) = _extension(replacement);
         executor.publishGovernanceCallData(data);
@@ -30,11 +33,12 @@ contract StreamCurrentStackCatalogTest is StreamCurrentStackFixture {
         (, bytes32 nextCatalog, uint256 nextCount, uint64 catalogRevision) =
             executor.governanceActionPolicyState();
         require(nextCatalog != initialCatalog && nextCount == initialCount + 1, "catalog append");
-        require(catalogRevision == 1, "catalog revision");
+        require(catalogRevision == initialRevision + 1, "catalog revision");
         StreamSystemManifest.AggregateState memory state =
             StreamGenesisManifestPlan.readAggregate(manifest);
         require(
-            state.revision == 2 && manifest.streamSystemManifestPointerCount() == 2,
+            state.revision == initialManifestRevision + 1
+                && manifest.streamSystemManifestPointerCount() == initialPublicationCount + 1,
             "real publication"
         );
         require(manifest.streamSystemManifestPointer() != initialPayload, "new payload");
@@ -55,7 +59,9 @@ contract StreamCurrentStackCatalogTest is StreamCurrentStackFixture {
 
     function testInvalidRealManifestTailRollsBackCatalogExtension() public {
         StreamEntropyCoordinator replacement = _replacement();
-        (, bytes32 initialCatalog, uint256 initialCount,) = executor.governanceActionPolicyState();
+        (, bytes32 initialCatalog, uint256 initialCount, uint64 initialRevision) =
+            executor.governanceActionPolicyState();
+        uint256 initialPublicationCount = manifest.streamSystemManifestPointerCount();
         (GovernanceCall[] memory calls, bytes[] memory data) = _extension(replacement);
         calls[1].oldValueHash = keccak256("stale manifest revision");
         executor.publishGovernanceCallData(data);
@@ -65,21 +71,27 @@ contract StreamCurrentStackCatalogTest is StreamCurrentStackFixture {
         executor.executeGovernanceBatch(id, calls, data);
         (, bytes32 catalog, uint256 count, uint64 revision) = executor.governanceActionPolicyState();
         require(
-            catalog == initialCatalog && count == initialCount && revision == 0, "catalog rollback"
+            catalog == initialCatalog && count == initialCount && revision == initialRevision,
+            "catalog rollback"
         );
-        require(manifest.streamSystemManifestPointerCount() == 1, "publication rollback");
+        require(
+            manifest.streamSystemManifestPointerCount() == initialPublicationCount,
+            "publication rollback"
+        );
     }
 
     function _replacement() private returns (StreamEntropyCoordinator) {
-        return new StreamEntropyCoordinator(StreamEntropyCoordinator.DeploymentConfig(
-            address(core),
-            address(executor),
-            address(roles),
-            StreamCurrentStackPlan.entropyTimeParameters(),
-            DEPLOYMENT_HASH,
-            "urn:6529stream:fixture:replacement-entropy",
-            keccak256("replacement entropy module")
-        ));
+        return new StreamEntropyCoordinator(
+            StreamEntropyCoordinator.DeploymentConfig(
+                address(core),
+                address(executor),
+                address(roles),
+                StreamCurrentStackPlan.entropyTimeParameters(),
+                DEPLOYMENT_HASH,
+                "urn:6529stream:fixture:replacement-entropy",
+                keccak256("replacement entropy module")
+            )
+        );
     }
 
     function _configuration(StreamEntropyCoordinator target)

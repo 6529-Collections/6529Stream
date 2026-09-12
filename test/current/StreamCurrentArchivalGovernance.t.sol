@@ -493,6 +493,7 @@ contract StreamCurrentArchivalGovernanceTest is StreamCurrentSafeGovernanceFixtu
     }
 
     function _admitGovernanceSelectors() private {
+        uint256 initialPublicationCount = manifest.streamSystemManifestPointerCount();
         GovernanceActionPolicyEntry[] memory additions = new GovernanceActionPolicyEntry[](4);
         additions[0] = _policy(address(coverageHost), coverageHost.admitFamily.selector);
         additions[1] = _policy(address(coverageHost), coverageHost.setFamilyStatus.selector);
@@ -552,7 +553,7 @@ contract StreamCurrentArchivalGovernanceTest is StreamCurrentSafeGovernanceFixtu
             "four exact archival selectors admitted"
         );
         require(
-            manifest.streamSystemManifestPointerCount() == 2,
+            manifest.streamSystemManifestPointerCount() == initialPublicationCount + 1,
             "actual manifest accompanies catalog extension"
         );
     }

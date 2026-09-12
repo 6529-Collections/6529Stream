@@ -15,6 +15,9 @@ import "../../smart-contracts/domains/artist/StreamArtistConsentFinalityLifecycl
 import "../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
 import "../../smart-contracts/domains/revenue/StreamRoyaltyResolver.sol";
 import "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
+import "../../smart-contracts/domains/preservation/StreamArchivalCoverage.sol";
+import "../../smart-contracts/domains/preservation/StreamArweaveCheckpointVerifier.sol";
+import "../../smart-contracts/interfaces/stream/preservation/StreamArchivalTypes.sol";
 
 interface ArtistSuiteVm {
     function getNonce(address account) external view returns (uint64);
@@ -30,6 +33,10 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase {
     StreamRevenueResolver internal primaryResolver;
     StreamMetadataRouter internal router;
     StreamRoyaltyResolver internal royalties;
+    StreamArchivalCoverage internal artistArchivalCoverage;
+    StreamArweaveCheckpointVerifier internal artistArchivalCheckpoint;
+    uint256 internal constant ARCHIVAL_OBSERVER_ONE = 0xE5701;
+    uint256 internal constant ARCHIVAL_OBSERVER_TWO = 0xE5702;
     T.SuiteConfiguration internal artistSuite;
     bytes32 internal fixtureArtistId;
     uint256 private _artistAuthorizationNonce;
@@ -48,6 +55,7 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase {
         s.roleRegistry = roles_;
         s.validator = address(new StreamArtistRegistryValidatorBase());
         s.primaryRevenueClass = PRIMARY_REVENUE_CLASS;
+        _deployArtistArchival(core_, executor_, roles_);
         ArtistSuiteVm prediction = ArtistSuiteVm(address(vm));
         uint256 nonce = prediction.getNonce(address(this));
         // Facade, archive, seven owners, metadata, primary, royalty, then coordinator.
@@ -57,6 +65,7 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase {
             manager_,
             nextCoordinator,
             executor_,
+            address(artistArchivalCoverage),
             deploymentHash,
             "urn:6529stream:fixture:artist",
             keccak256("fixture artist module")
@@ -121,6 +130,39 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase {
         artistCoordinator = new StreamArtistOnboardingCoordinator(s);
         require(address(artistCoordinator) == nextCoordinator, "artist deployment order");
         artistSuite = s;
+    }
+
+    /// @dev Canonical governance must already bind its RoleRegistry. Observer signatures in
+    ///      tests authenticate fixture evidence; they do not establish an external network quorum.
+    function _deployArtistArchival(address core_, address executor_, address roles_) private {
+        StreamArchivalTypes.Observer[] memory observers = new StreamArchivalTypes.Observer[](2);
+        observers[0] = StreamArchivalTypes.Observer(
+            vm.addr(ARCHIVAL_OBSERVER_ONE), keccak256("current archival observer organization one")
+        );
+        observers[1] = StreamArchivalTypes.Observer(
+            vm.addr(ARCHIVAL_OBSERVER_TWO), keccak256("current archival observer organization two")
+        );
+        if (observers[0].account > observers[1].account) {
+            (observers[0], observers[1]) = (observers[1], observers[0]);
+        }
+        IStreamGasParameterHost.GasParameterConfig memory signatureGas =
+            IStreamGasParameterHost.GasParameterConfig(
+                "ARCHIVAL_ERC1271_VERIFY_GAS", 400_000, 90_000, 2
+            );
+        artistArchivalCheckpoint =
+            new StreamArweaveCheckpointVerifier(executor_, observers, 2, signatureGas);
+        artistArchivalCoverage = new StreamArchivalCoverage(
+            core_,
+            executor_,
+            roles_,
+            address(artistArchivalCheckpoint),
+            signatureGas,
+            IStreamGasParameterHost.GasParameterConfig(
+                "ARCHIVAL_DEPENDENCY_READ_GAS", 150_000, 50_000, 2
+            )
+        );
+        require(address(artistArchivalCheckpoint).code.length <= 24_576, "checkpoint deployable");
+        require(address(artistArchivalCoverage).code.length <= 24_576, "coverage deployable");
     }
 
     /// @dev Called after real role grant, Core pointer selection, content and economics configuration.
