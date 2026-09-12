@@ -26,8 +26,10 @@ the release policy in `docs/release-policy.md`.
 - Implemented identity-contest dismissal and terminal cohort closure under
   operation 58, preserving history and sole Identity ownership. The 202-case
   domain suite and twelve actual-current dismissal/refund/dispute cases pass
-  independent review. Rotated-cohort composition and effective source/configuration
-  binding remain pending.
+  independent review. Five further current succession/cohort/standing cases now
+  pass with eight Dutch/refund regressions on the supplemental recorder after
+  a test-only nonce correction. Effective source/configuration binding remains
+  pending.
 - Added native refund-window purchases with separate buyer custody, per-sale
   pull refunds, permissionless finalization, official settlement, retained
   artist-authority checks and reveal-fee handling. The 63-case domain suite and

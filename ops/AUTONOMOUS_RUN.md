@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `f49e7bc1` (financial-only clearing settlement), `f91c1e7a` (historical/current artist checks), `ee21cff9` (archival provider); actual dismissal12 and corrected Dutch4 independently accepted. New lifecycle5 plus Dutch4/refund4 are running together. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | `f49e7bc1` (financial-only clearing settlement), `f91c1e7a` (historical/current artist checks), `ee21cff9` (archival provider); corrected lifecycle13 independently accepted with test-only nonce fix `d98650ba`. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -61,10 +61,12 @@ interface move `09afe2b8`. The final 202-case domain run passes independent
 review. Four actual Executor/Safe dismissal cases plus eight refund/dispute
 regressions now pass independent review. Five new current lifecycle tests cover
 succession records, rotated-cohort timing and retirement-specific standing.
-Their source passes independent review; the five cases are running alongside
-four Dutch and four refund regressions on the integrated supplemental recorder.
-The effective source/configuration
-gate remains separate work.
+All five now pass alongside four Dutch and four refund regressions on the
+integrated supplemental recorder, with independent source and artifact review.
+The initial twelve-pass/one-fail run is retained: the succession test supplied
+nonce zero despite reading nonce eleven. The one-line correction submits the
+observed nonce; all production artifacts are unchanged. The effective
+source/configuration gate remains separate work.
 
 Supplemental clearing settlement is integrated as `f49e7bc1`, with 21 new tests,
 103 prior regressions, five 256-input fuzz properties and both production
