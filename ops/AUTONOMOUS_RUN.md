@@ -88,7 +88,7 @@ deployment inventory composition remain to be demonstrated.
 
 [ADR 0029](../docs/adr/0029-identity-contest-dismissal-and-cohort-closure.md)
 defines the missing dismissal transition and history-preserving cohort closure.
-Both veto and filing causes are explicitly captured. Its
+The design requires typed cause capture on both veto and filing paths. Its
 [effective extension design](../docs/architecture/artist-operation-extension-v1.md)
 preserves all historical packet/schema bytes and adds the exact typed row 58.
 The design check and eleven adversarial tests pass; source/configuration and

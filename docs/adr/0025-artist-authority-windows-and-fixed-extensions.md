@@ -105,8 +105,9 @@ context: Registry remains the creator, its writer remains child nonce 1 and its
 reader remains child nonce 2. The reader retains the exact host and Coordinator
 arguments. No constructor input, mutable route or runtime authority is added.
 
-The accepted succession snapshot proves eight actual CREATEs, all linked code
-and immutable pins, and all 87 production runtimes. Identity measures 23,918
+The accepted succession snapshot proves eight actual CREATEs, compiler-declared
+link bindings and immutable pins, and all 87 production runtimes. The new helper
+and its two linked runtimes are separately bound. Identity measures 23,918
 runtime bytes and 48,598 bytes of initcode including arguments; Registry measures
 23,627 and 36,847 respectively. These are scoped measurements for `8227e0b6`.
 Deployment inventory and later current-contract composition must include the
