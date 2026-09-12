@@ -558,7 +558,7 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
     }
 
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {
-        rows = new GovernanceActionPolicyEntry[](localDevelopment ? 69 : 70);
+        rows = new GovernanceActionPolicyEntry[](localDevelopment ? 71 : 72);
         rows[0] = _operatingPolicy(address(manager), manager.configurePhase.selector);
         rows[1] = _operatingPolicy(address(manager), manager.setPhaseExecutor.selector);
         rows[2] = _operatingPolicy(address(manager), manager.setPhasePaused.selector);
@@ -658,6 +658,8 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
             address(primaryRevenue), primaryRevenue.setPrimaryTemplateAssignment.selector
         );
         rows[i++] = _operatingPolicy(address(entropy), entropy.raiseTimeParameter.selector);
+        rows[i++] = _operatingPolicy(1, address(artistRegistry), IStreamArtistIdentityContest.contestArtistIdentity.selector);
+        rows[i++] = _operatingPolicy(2, address(artistRegistry), IStreamArtistIdentityContest.contestArtistIdentity.selector);
         // Metadata/entropy configuration is also collected from genesis.
         assert(i == rows.length);
     }
