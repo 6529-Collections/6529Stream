@@ -20,6 +20,56 @@ percentage-based progress reporting with concrete capabilities and evidence.
 
 ## Latest integration: 12 September
 
+Stable router presentation is integrated as `f445ac79` from the independently
+reviewed `89dc713d` handoff. Its retained 40-case rendering cohort, two actual
+current-contract Safe cases and exact-context cold-rendering check pass. The
+latter uses 11,900,916 gas against the existing 12,000,000 cap; it is evidence
+for that captured source, before the subsequent Base64 repair.
+
+The artist owner/acceptance stack repair is integrated as `1e3087a2`, retaining
+exact commitment preimages, event arguments and the prior ABI/storage. The
+complete compilation result remains open. Latest remote CI at `90c8fdcf` is
+red; its source predates this repair. Independent execution probes also reject
+the deployment script's self-view calls under default Foundry protection.
+Moving a self-call outside broadcast did not solve that issue. A compatible
+planning boundary remains required; earlier compile-only results do not prove
+that the deployment script runs. An independently reviewed separate-helper
+simulation passes default Foundry protection with exactly two intended writes
+and no helper broadcast nonce; actual Stream planner integration is next.
+
+The [onchain content checkpoint](../docs/integrations/onchain-content-checkpoints.md)
+passes 17 reviewed computation cases and 256 fuzz inputs in both compiler modes.
+Seven additional composition cases pass with actual Core, router, inventory and
+checkpoint contracts, including Safe custody/burns, complete odd-sized roots,
+maximum script/token data and atomic retry. Governance, module registry,
+Manager, artist and external entropy remain explicit boundaries in that fixture.
+Authoritative root publication, typed scope inputs, archive and full finality
+remain implementation work.
+
+Actual composition found that the router could not admit inline images; a fixed
+image-only helper now supports canonical Base64 PNG/JPEG/GIF/WebP admission
+under the existing 2,048-byte limit. Fuzzing also found a shared Base64 padding
+bug, repaired in `164f867b` with exact caller-memory preservation. Nineteen
+image/vendor tests and two 256-input fuzz properties pass in both modes. The
+complete retained renderer cohort passes 61 cases in IR. Pure configuration
+preparation moved into the existing fixed renderer after an intermediate
+25,025-byte Router exceeded the runtime limit. The corrected actual Router is
+24,035 bytes in default mode and 23,711 in IR, with all 64 common contracts'
+ABIs and runtimes matching the final source. Historical failing captures remain
+preserved. Complete system compilation and final deployment evidence remain open.
+The two maximum-size rendering cases also pass after cooling the router's
+actual linked renderer: 11,887,094 gas for Router and 12,698,145 for Core,
+returning the complete 63,193-byte URI. These are fixture account-cooling
+measurements, not universal all-state-cold or deployment acceptance.
+
+The museum abstract/nonvisual increment is integrated as `db3c8153` from the
+reviewed `dab6d08e` handoff. All 132 tests, five generators and dependency checks
+pass again in the integration environment. The original 104 tests and 115-file
+v1 package remain unchanged. Explicit abstract works, linguistic content and
+nonvisual source assertions retain their proper entities and complete field
+accounting. Public fixtures remain distinct from authenticated chain records;
+PREMIS/LIDO/IIIF correspondence, packaging and institutional evidence continue.
+
 The dedicated [independent-attestor host](../docs/integrations/independent-attestations.md)
 is integrated as `4673f248` from `4c277b0e`. Its 22 reviewed cases and 256 fuzz
 inputs cover retained bytes, signatures, history, replay, actual Safe calls and

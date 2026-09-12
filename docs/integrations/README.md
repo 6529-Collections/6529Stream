@@ -26,6 +26,8 @@ deployment evidence.
 | Create, bid on and settle an auction | [English auctions](auction-flows.md) |
 | Index purchases and state changes | [Events and indexing](events-and-indexing.md) |
 | Display pending and final artwork | [Metadata and rendering](metadata-rendering.md) |
+| Lock artwork presentation while retaining live artist authority | [Stable router presentation](stable-router-presentation.md) |
+| Index completed mints and compute exact onchain content roots | [Token inventory](collection-token-inventory.md) and [content checkpoints](onchain-content-checkpoints.md) |
 | Publish full-byte collection records and recover attributed history | [Developing metadata record host](metadata-records.md) |
 | Withdraw proceeds or bid refunds | [Payments and withdrawals](withdrawals-and-credits.md) |
 | Run the complete flow locally | [Current deployment demo](../../script/current/README.md) |

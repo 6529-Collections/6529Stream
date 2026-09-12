@@ -21,6 +21,7 @@ import "../modules/StreamModuleBase.sol";
 import "./StreamMetadataRenderer.sol";
 import "./StreamMetadataArtistPresentation.sol";
 import "./StreamMetadataTokenRenderer.sol";
+import "./StreamMetadataImageURI.sol";
 
 /// @notice Serves current-Core identities and their original coordinator's canonical entropy.
 contract StreamMetadataRouter is
@@ -198,7 +199,7 @@ contract StreamMetadataRouter is
         ) revert ArtistContentLocked(collectionId, LOCK_DISPLAY_METADATA);
         StreamMetadataRenderer.requireValidUtf8Bytes("name", name, 256);
         StreamMetadataRenderer.requireValidUtf8Bytes("description", description, 2048);
-        StreamMetadataRenderer.requireValidUtf8ContentUri("image", image, 2048, true);
+        StreamMetadataImageURI.requireImageURI(image);
         StreamMetadataRenderer.requireValidUtf8ContentUri(
             "animationBaseURI", animationBaseURI, 2048, true
         );
@@ -235,7 +236,7 @@ contract StreamMetadataRouter is
             );
         }
         _collections[collectionId].animationScript = script;
-        _prepared[collectionId].animationScript = _prepareScript(script);
+        _prepared[collectionId].animationScript = StreamMetadataTokenRenderer.prepareScript(script);
         emit CollectionScriptConfigured(collectionId, keccak256(bytes(script)));
         _recordContentApplication(collectionId, CONTENT_SCRIPT, consent, ratification);
     }
@@ -779,47 +780,17 @@ contract StreamMetadataRouter is
         string memory image,
         string memory animationBaseURI
     ) private {
-        // Escape once during configuration. Bounded Core reads must not repeat expensive
-        // byte-by-byte escaping; the aggregate cap also preserves Core's 64 KiB return limit.
-        name = StreamMetadataRenderer.escapeJsonString(name);
-        description = StreamMetadataRenderer.escapeJsonString(description);
-        image = StreamMetadataRenderer.escapeJsonString(image);
-        uint256 identityBytes = bytes(name).length + bytes(description).length + bytes(image).length;
-        if (identityBytes > 5120) revert MetadataJSONLimitExceeded(identityBytes, 5120);
+        ServingSource memory escaped =
+            StreamMetadataTokenRenderer.prepareMetadata(name, description, image, animationBaseURI);
         PreparedMetadata storage prepared = _prepared[collectionId];
-        prepared.name = name;
-        prepared.description = description;
-        prepared.image = image;
-        prepared.animationBaseURI = StreamMetadataRenderer.escapeJsonString(animationBaseURI);
+        prepared.name = escaped.name;
+        prepared.description = escaped.description;
+        prepared.image = escaped.imageURI;
+        prepared.animationBaseURI = escaped.animationBaseURI;
     }
 
-    /// @dev Escape the slash of every case-insensitive </script prefix. This preserves the
-    /// JavaScript source while preventing an embedded string/comment from ending the HTML tag.
-    /// Each disjoint eight-byte match adds one byte; resizing the allocation avoids a copy loop.
-    function _prepareScript(string memory raw) internal pure returns (string memory result) {
-        bytes memory source = bytes(raw);
-        result = new string(source.length + source.length / 8);
-        assembly ("memory-safe") {
-            let cursor := add(source, 0x20)
-            let end := add(cursor, mload(source))
-            let output := add(result, 0x20)
-            let start := output
-            for { } lt(cursor, end) { cursor := add(cursor, 1) } {
-                let character := byte(0, mload(cursor))
-                if and(
-                    iszero(gt(add(cursor, 8), end)),
-                    eq(or(shr(192, mload(cursor)), 0x0000202020202020), 0x3c2f736372697074)
-                ) {
-                    mstore8(output, 0x3c)
-                    mstore8(add(output, 1), 0x5c)
-                    output := add(output, 2)
-                    cursor := add(cursor, 1)
-                    character := 0x2f
-                }
-                mstore8(output, character)
-                output := add(output, 1)
-            }
-            mstore(result, sub(output, start))
-        }
+    /// @dev Retain the existing derived-contract preparation hook.
+    function _prepareScript(string memory raw) internal pure returns (string memory) {
+        return StreamMetadataTokenRenderer.prepareScript(raw);
     }
 }

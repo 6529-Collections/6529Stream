@@ -771,10 +771,21 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase, OfficialSafeFixt
     }
 
     function _coolMetadata() private {
+        IStreamMetadataServingFacts.ServingFacts memory facts = router.collectionServingFacts(1);
+        require(facts.renderer != address(0), "renderer must be configured");
+        require(facts.renderer.codehash == facts.rendererCodeHash, "renderer code hash must match");
         EntropyGasMeasurementVm(address(vm)).cool(address(router));
         EntropyGasMeasurementVm(address(vm)).cool(address(entropy));
         EntropyGasMeasurementVm(address(vm)).cool(address(artistRegistry));
         EntropyGasMeasurementVm(address(vm)).cool(address(core));
+        EntropyGasMeasurementVm(address(vm)).cool(address(StreamMetadataTokenRenderer));
+        EntropyGasMeasurementVm(address(vm)).cool(address(StreamMetadataArtistPresentation));
+        EntropyGasMeasurementVm(address(vm)).cool(address(StreamMetadataRenderer));
+        EntropyGasMeasurementVm(address(vm)).cool(address(StreamMetadataImageURI));
+        EntropyGasMeasurementVm(address(vm)).cool(address(StreamCoreExternalReads));
+        // Dynamic test linking can give the test a different library address from the router.
+        // Read and validate the actual router binding before cooling any measured accounts.
+        EntropyGasMeasurementVm(address(vm)).cool(facts.renderer);
     }
 
     function testMaximumTokenDataScriptAndEscapedIdentityFitCoreResponse() public {

@@ -7,6 +7,21 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added faithful museum abstract-work and nonvisual projections with shared
+  identities and exact source accounting. All 132 tests and five generators
+  pass locally; the original v1 package remains unchanged.
+- Added permissionless onchain content checkpoints with exact served JSON/HTML,
+  complete Core membership, retained leaf history and threshold Safe calls.
+  Authoritative publication, archival coverage and full finality remain separate.
+- Integrated stable artist presentation, display locks and historical metadata
+  reads. Added image-field-only canonical Base64 raster admission, preserving
+  existing URI bounds, external schemes and artist authorization.
+- Fixed vendored Base64 encoding of inputs followed by dirty memory. Padding is
+  canonical, and input/adjacent memory is restored; literal and independent
+  randomized regressions cover the repair.
+- Preserved artist owner commitments and acceptance event arguments while
+  reducing default-compiler stack pressure. Complete-build acceptance remains
+  separate from the focused compiler repair.
 - Added an independent-attestor record host with permanent author history and
   Safe direct/relayed paths. Its reviewed 22-case suite uses actual schemas,
   byte storage and governance, with explicit Core membership boundaries.
@@ -26,7 +41,9 @@ the release policy in `docs/release-policy.md`.
   Actual artist publication and typed finality composition remain in development.
 - Isolated deployment-script catalog construction behind an additive view call
   after broadcast stops, resolving the minimal Yul compiler reproducer. The
-  full patched deployment target has not yet completed compilation.
+  full patched deployment target has not yet completed compilation. A later
+  execution probe also rejects script self-calls under default Foundry protection;
+  deployment planning still needs a compatible implementation boundary.
 - Added attributed museum resource projections and reproducible offline public
   packages. The combined suite now contains 104 tests; complete cross-format
   mappings, authenticated onchain sources and institutional acceptance remain open.
@@ -1321,7 +1338,7 @@ the release policy in `docs/release-policy.md`.
   component manifests verified against live
   `finalityState`/`finalityStateForScope` reads; the mandatory
   component-type floor enforced onchain per collection metadata mode
-  ([LTA-FINALITY] requirement 1 — COLLECTION_METADATA, METADATA_ROUTER,
+  ([LTA-FINALITY] requirement 1 â€” COLLECTION_METADATA, METADATA_ROUTER,
   RENDERER, RENDER_CONTEXT, MEDIA_MANIFEST, ENTROPY_COORDINATOR for every
   mode, plus SCRIPT_SOURCE, DEPENDENCY_SOURCE, REFERENCE_RENDER for
   ONCHAIN/hybrid script works) independent of the optional discovery module,
@@ -2485,7 +2502,7 @@ the release policy in `docs/release-policy.md`.
   (sale adapter conformance, English/Dutch auctions with anti-snipe and
   increments, burn-to-mint, Merkle allowlists, refund windows, delegated
   minting); replaced every immutable gas cap with Governed Gas Parameters
-  (immutable floors, staged raise/lower, health probes — minting can never
+  (immutable floors, staged raise/lower, health probes â€” minting can never
   brick and marketplace reads can never permanently zero under gas
   repricing); extended finality with per-token content roots for all
   metadata modes, reference-render capture, renderer-determinism gates, and

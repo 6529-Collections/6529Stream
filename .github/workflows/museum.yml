@@ -61,3 +61,5 @@ jobs:
         run: python -m tools.museum.review --check
       - name: Check resource projection generation
         run: python -m tools.museum.projection --check
+      - name: Check abstract and nonvisual projection generation
+        run: python -m tools.museum.projection_v2 --check

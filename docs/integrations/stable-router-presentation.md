@@ -70,6 +70,15 @@ remote media. Empty-field hashes are Keccak-256 of empty bytes, not a claim
 that an absent asset has a nonzero content-root leaf. Consumers apply their
 declared leaf schema to distinguish source URI hashes from media-byte hashes.
 
+The image field additionally admits canonical Base64 inline PNG, JPEG, GIF
+and WebP images through the fixed `StreamMetadataImageURI` library. The
+2,048-byte URI bound and existing external-URI policy remain unchanged. MIME
+names are exact and lowercase; additional parameters, whitespace, noncanonical
+padding, SVG and HTML are rejected. The declared raster signature must match.
+These are admission checks, not full image decoding or renderability evidence.
+Animation base URIs and contract metadata URIs retain their existing policy.
+Artist consent and media/display locks still govern every image update.
+
 `historicalTokenMetadataJSON` accepts a permanent MINTED or BURNED Core token
 identity and requires finalized entropy from its original coordinator. It
 uses the same serializer as the live public JSON, including every field and
@@ -88,7 +97,8 @@ value-preserving transform. Changing or rounding a value is not canonicalization
 
 Deployment links the new `StreamMetadataArtistPresentation` and
 `StreamMetadataTokenRenderer` libraries in addition to the existing
-`StreamMetadataRenderer` escaping helper. The finality provider must pin the
+`StreamMetadataRenderer` escaping helper and the image-field-specific
+`StreamMetadataImageURI` admission helper. The finality provider must pin the
 actual router runtime and complete helper/source closure. The new artist
 reader copies only exact fixed-size results and uses available gas for the
 trusted immutable Core and its actual selected facade; this is not a new

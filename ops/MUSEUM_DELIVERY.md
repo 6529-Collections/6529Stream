@@ -26,7 +26,7 @@ No third-party authority match or museum review becomes a mint/finality gate.
 | --- | --- | --- | --- | --- |
 | MUSEUM-01 Profile and fixtures | Three exact schemas, five record allocations, pinned offline dependency closure, machine-readable crosswalk, explicit bounds and eight fixture scenarios; validate positive and negative vectors | Adopted specification | Revenue builder; integrator owns shared record interface | Reviewed first foundation integrated as `c7752f11`: 32 tests and both generators pass; complete mapping/conformance pending |
 | MUSEUM-02 Record integration | Registered documents and payload writes/reads through existing artist, curator, institution, independent and archive authority lanes; Safe direct/relayed paths, replay and renderer isolation tested | MUSEUM-01 interfaces; actual metadata hosts | Integrator and both builders | Byte host `72c4b099`, actual artist composition `85f44fbd` and independent host `4673f248` pass focused review; full current-stack and museum-schema composition pending |
-| MUSEUM-03 Offline exporter | Deterministic package, identity/provenance indexes, exact values, policy-bound conflict presentation, TGN snapshots and field coverage; regenerate with no network | MUSEUM-01 fixture/schema boundary; real-chain acceptance also needs MUSEUM-02 | Revenue builder | Reviewed selection, projection and reproducible public package integrated; 104 combined tests pass; recorded-chain and complete format mappings pending |
+| MUSEUM-03 Offline exporter | Deterministic package, identity/provenance indexes, exact values, policy-bound conflict presentation, TGN snapshots and field coverage; regenerate with no network | MUSEUM-01 fixture/schema boundary; real-chain acceptance also needs MUSEUM-02 | Revenue builder | Reviewed selection, projection and reproducible public package integrated; 132 combined tests pass; recorded-chain and complete format mappings pending |
 | MUSEUM-04 Cross-format and capture | LIDO/PREMIS/IIIF correspondence tests; draft-preview and confirmed-record adapters preserving artist text, stable IDs and attribution | MUSEUM-01; compose with MUSEUM-03 | Export/capture builder | Pending |
 | MUSEUM-05 Institutional evidence | Both existing named repository-family ingests and both external practitioner roles examine semantic packages and coverage; at least one review covers CRM/Linked Art and authority reconciliation | Reproducible MUSEUM-03/04 outputs | Integrator coordinates external evidence | Pending; no institution or reviewer engagement claimed |
 
@@ -62,6 +62,17 @@ that implementation, not full RDF/OWL reasoning or Linked Art model acceptance.
 
 ## Acceptance evidence
 
+The abstract/nonvisual increment is integrated as `db3c8153` with independent
+review. All 132 tests and five generators pass again in the integration
+checkout. The original 104 tests and v1 package bytes remain unchanged.
+[Abstract works and nonvisual projection](../docs/museum-abstract-nonvisual-projection.md)
+now distinguish E89 works, linguistic content, their carriers and nonlinguistic
+source assertions with exact field accounting. These are public fixtures;
+authenticated-chain exports and institutional acceptance remain open. The
+next bounded implementation is PREMIS file/fixity correspondence, followed by
+remaining format and capture work. The preceding 104-test platform evidence
+below remains tied to its original source.
+
 The latest integrated suite contains 104 tests, all passing again in the root
 environment with 15 pinned packages. Reviewed semantic-review selection
 (`f5a23d72`) binds authenticated reviewer evidence to exact original assertion
@@ -78,8 +89,9 @@ These increments add [review literals](../docs/museum-review-literal.md),
 The earlier 65-test source at `49b3e072` passed CI on Windows and Linux. The new
 104-test source and all four generators also pass both platforms at `dac4d4ed`
 ([run 34697427952](https://github.com/6529-Collections/6529Stream/actions/runs/34697427952)).
-Complete mappings, including a faithful abstract-work representation, BagIt/
-OCFL packaging, real-chain authority and institutional ingests remain in scope.
+Further complete mappings, BagIt/OCFL packaging, real-chain authority and
+institutional ingests remain in scope; the later abstract-work increment is
+recorded above.
 
 The [metadata host](../docs/integrations/metadata-records.md) now has focused
 record-byte, history, authority and Safe tests. Four actual artist-publication

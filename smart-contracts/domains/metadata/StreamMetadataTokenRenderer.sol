@@ -5,6 +5,7 @@ import "../../interfaces/stream/metadata/IStreamMetadataServingFacts.sol";
 import "../../interfaces/stream/metadata/StreamMetadataRenderTypes.sol";
 import "../../vendor/openzeppelin/Strings.sol";
 import "../../vendor/openzeppelin/Base64.sol";
+import "./StreamMetadataRenderer.sol";
 
 /// @notice Exact deterministic Stream JSON/HTML serialization, not RFC8785/JCS canonicalization.
 /// @dev Prepared fields are escaped by the router's existing fixed helper. This pure linked helper
@@ -136,5 +137,53 @@ library StreamMetadataTokenRenderer {
         }
         if (bytes(metadata.animationBaseURI).length == 0) return "";
         return string(abi.encodePacked(metadata.animationBaseURI, token.tokenId.toString()));
+    }
+    error MetadataJSONLimitExceeded(uint256 bytes_, uint256 maximum);
+
+    /// @notice Exact existing configuration escaping and aggregate bound, before storage writes.
+    function prepareMetadata(
+        string memory name,
+        string memory description,
+        string memory image,
+        string memory animationBaseURI
+    ) public pure returns (IStreamMetadataServingFacts.ServingSource memory) {
+        name = StreamMetadataRenderer.escapeJsonString(name);
+        description = StreamMetadataRenderer.escapeJsonString(description);
+        image = StreamMetadataRenderer.escapeJsonString(image);
+        uint256 identityBytes = bytes(name).length + bytes(description).length + bytes(image).length;
+        if (identityBytes > 5120) revert MetadataJSONLimitExceeded(identityBytes, 5120);
+        return IStreamMetadataServingFacts.ServingSource(
+            name, description, image, StreamMetadataRenderer.escapeJsonString(animationBaseURI), ""
+        );
+    }
+
+    /// @dev Escape the slash of every case-insensitive </script prefix. This preserves the
+    /// JavaScript source while preventing an embedded string/comment from ending the HTML tag.
+    /// Each disjoint eight-byte match adds one byte; resizing the allocation avoids a copy loop.
+    function prepareScript(string memory raw) public pure returns (string memory result) {
+        bytes memory source = bytes(raw);
+        result = new string(source.length + source.length / 8);
+        assembly ("memory-safe") {
+            let cursor := add(source, 0x20)
+            let end := add(cursor, mload(source))
+            let output := add(result, 0x20)
+            let start := output
+            for { } lt(cursor, end) { cursor := add(cursor, 1) } {
+                let character := byte(0, mload(cursor))
+                if and(
+                    iszero(gt(add(cursor, 8), end)),
+                    eq(or(shr(192, mload(cursor)), 0x0000202020202020), 0x3c2f736372697074)
+                ) {
+                    mstore8(output, 0x3c)
+                    mstore8(add(output, 1), 0x5c)
+                    output := add(output, 2)
+                    cursor := add(cursor, 1)
+                    character := 0x2f
+                }
+                mstore8(output, character)
+                output := add(output, 1)
+            }
+            mstore(result, sub(output, start))
+        }
     }
 }

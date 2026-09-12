@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Museum package104 `66aebd4a`, complete archival coverage `880bac6d`, deployment compiler repair `04338eda` and current metadata records `72c4b099` are integrated. Actual artist publication and full finality composition remain active. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | Stable router `f445ac79`, artist compiler repair `1e3087a2`, museum abstract/nonvisual132 `db3c8153` and Base64 repair `164f867b` are integrated. Content-checkpoint computation/composition is independently accepted. Actual typed finality and deployment planner integration remain active. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -28,14 +28,19 @@ metadata-host publication passes four reviewed cases and is integrated as
 `85f44fbd`; Core and Executor remain explicit unit boundaries. The dedicated
 independent-attestor host is integrated as `4673f248`, with 22 reviewed cases,
 256 fuzz inputs and both production profiles fitting. Artist finality/sanction
-and the router's stable presentation/serving facts are the two builder tasks.
-The integrator owns complete token membership and the typed evidence producer.
+is the artist builder's current task. Stable router presentation is integrated
+as `f445ac79`; the second builder resumes the remaining museum mappings.
+The integrator's 17-case checkpoint suite and seven actual Core/router cases
+pass, including Safe custody, burns and atomic retry. Inline-image admission
+and the Base64 padding repair (`164f867b`) have 19 focused tests with fuzzing.
+The corrected Router fits both compiler modes; the retained renderer cohort
+passes 61 IR cases. The typed evidence producer and full finality remain open.
 
-The latest museum increments provide review selection, attributed resource
-projection and reproducible offline packages (`f5a23d72`, `ff1a899d`,
-`66aebd4a`). All 104 combined tests pass again locally with pinned dependencies.
-The 104-test source and all four generators also pass Windows and Linux CI
-at `dac4d4ed`.
+The latest museum increment adds faithful abstract/nonvisual projections as
+`db3c8153`, retaining the original package and source identity. All 132 tests
+and five generators pass again locally. Its predecessor's 104 tests pass
+Windows and Linux CI; the new version has a matching fifth generator CI check.
+The builder continues the first PREMIS cross-format increment.
 Full authenticated-chain exports and institutional acceptance remain open.
 Complete archival artifact coverage is integrated as `880bac6d`, with 26
 reviewed domain tests and fuzzing. The corrected metadata host/adapter cohort
@@ -43,11 +48,15 @@ passes 23 tests in both compiler modes; separate actual-Executor tests cover
 root authority, ordinary-proposer rejection and multi-call execution. Actual
 artist publication, typed finality and discovery still need composition.
 
-The deployment-script catalog fix passes the minimal and configuration variants,
-but broader CI at `dac4d4ed` still fails with a Yul stack error. The default smoke
-build also identifies a stack-depth error in `StreamArtistAcceptanceLifecycle`.
-The team is isolating those remaining compile surfaces; no complete-build pass
-is claimed. Release checksums and the Slither snapshot also await the later
+The artist owner/acceptance compiler repair is integrated as `1e3087a2`, with
+exact preimage/event checks and matching owner interfaces/storage. Latest remote
+CI at `90c8fdcf` predates that repair and still fails compilation. Deployment
+planning remains unresolved: the catalog self-view call helps minimal compiler
+probes but fails current Foundry execution protection, even outside broadcasting.
+An independent separate-helper simulation passes default protection without an
+extra broadcast nonce; integration into Stream's actual planner is next.
+No complete-build or working deployment-script repair is claimed. Release
+checksums and the Slither snapshot also await the later
 stabilized-source regeneration. See [V1_DELIVERY.md](V1_DELIVERY.md).
 
 One integrator owns technical decisions and delivery. Two builders and a separate
@@ -59,7 +68,7 @@ contract call, including owner actions, payments, NFT custody and reads.
 | --- | --- | --- |
 | Integrator | `codex/v1-integration` | Actual metadata/finality producers and discovery, staged product/operator activation, whole-current compiler diagnostic, client and release |
 | Artist | `codex/v1-artist-authority` | Archival artifact coverage integrated; full artist publication regression, actual finality/sanction/recovery and typed preparation |
-| Revenue | `codex/v1-revenue` | Museum package104 integrated; dedicated permanent independent-attestor host, then remaining museum format and chain-adapter work |
+| Revenue | `codex/v1-revenue` | Museum package104 integrated; museum abstract/nonvisual132 integrated; remaining format and chain-adapter work |
 | Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |
 
 Signing-domain discovery is integrated as `134e0f58`. The native fixed,
