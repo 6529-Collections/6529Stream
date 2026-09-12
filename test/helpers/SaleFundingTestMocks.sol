@@ -24,11 +24,16 @@ contract SaleFundingArtistMock is IStreamArtistAttribution, IERC165 {
     bytes32 public nomination;
     bool public saleConsentRequired;
     uint256 public saleConsentFault;
+    uint256 public saleCapabilityFault;
     mapping(bytes32 => bool) public saleConsents;
 
     function configureSaleConsent(bool required, uint256 fault) external {
         saleConsentRequired = required;
         saleConsentFault = fault;
+    }
+
+    function configureSaleCapability(uint256 fault) external {
+        saleCapabilityFault = fault;
     }
 
     function recordTestSaleConsent(address adapter, uint256 collection, bytes32 id, bytes32 hash, bool allowed) external {
@@ -53,7 +58,18 @@ contract SaleFundingArtistMock is IStreamArtistAttribution, IERC165 {
         nomination = keccak256("binding");
     }
 
-    function supportsInterface(bytes4 id) external pure returns (bool) {
+    function supportsInterface(bytes4 id) external view returns (bool) {
+        if (id == 0x606af4b9) {
+            uint256 fault = saleCapabilityFault;
+            if (fault == 1) return false;
+            if (fault == 2) { assembly ("memory-safe") { return(0, 0) } }
+            if (fault == 3) { assembly ("memory-safe") { mstore(0, 1) return(0, 31) } }
+            if (fault == 4) { assembly ("memory-safe") { mstore(0, 2) return(0, 32) } }
+            if (fault == 5) { assembly ("memory-safe") { mstore(0, 1) mstore(32, 0) return(0, 64) } }
+            if (fault == 6) revert("sale capability unavailable");
+            if (fault == 7) { assembly ("memory-safe") { let p := mload(0x40) mstore(p, 1) return(p, 65536) } }
+            return true;
+        }
         return id == type(IStreamArtistAttribution).interfaceId || id == type(IERC165).interfaceId;
     }
 

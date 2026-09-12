@@ -7,6 +7,9 @@ import "../../interfaces/stream/core/IStreamCorePointers.sol";
 /// @dev Linked invocation keeps the original consumer as the facade's caller. NONE versus
 ///      REQUIRED is decided by the actual facade; failed/unknown reads never mean NONE.
 library StreamSaleConsent {
+    // Canonical IStreamArtistSaleAuthority, including the op16 writer and current consent reads.
+    bytes4 private constant _SALE_AUTHORITY = 0x606af4b9;
+
     error SaleConsentFacadeChanged(address facade);
     error SaleConsentNotSatisfied(address facade, uint256 collectionId, bytes32 saleId);
 
@@ -35,6 +38,18 @@ library StreamSaleConsent {
                 || bytes32(pointer[1]) != admittedCodeHash
         ) {
             revert SaleConsentFacadeChanged(facade);
+        }
+        // A void unknown selector can succeed through an empty fallback. Require the actual
+        // sale capability first; attribution capability alone does not establish this API.
+        data = abi.encodeWithSelector(bytes4(0x01ffc9a7), _SALE_AUTHORITY);
+        uint256 supported;
+        assembly ("memory-safe") {
+            ok := staticcall(gas(), facade, add(data, 32), mload(data), 0, 32)
+            size := returndatasize()
+            supported := mload(0)
+        }
+        if (!ok || size != 32 || supported != 1) {
+            revert SaleConsentNotSatisfied(facade, collectionId, saleId);
         }
         data = abi.encodeWithSelector(
             bytes4(keccak256("requireSaleConsent(uint256,bytes32,bytes32)")),

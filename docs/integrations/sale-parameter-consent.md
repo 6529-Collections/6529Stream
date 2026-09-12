@@ -12,7 +12,10 @@ The consumer supplies its stored collection ID, sale ID and complete config
 hash to `requireSaleConsent(uint256,bytes32,bytes32)`. The linked
 `StreamSaleConsent` helper preserves the consumer as the caller seen by the
 facade. It checks the pinned facade runtime and the actual Core-selected pointer,
-then requires a successful response containing exactly zero bytes. Missing,
+then requires canonical ERC165 `IStreamArtistSaleAuthority` capability admission
+(exactly one 32-byte word equal to one) before accepting the consent call's
+successful response containing exactly zero bytes. An attribution-only facade
+with an empty-success fallback cannot stand in for this sale API. Missing,
 failed or malformed responses fail closed. NONE is decided by the actual facade
 on a real binding; it is never inferred from missing capability or failed reads.
 
