@@ -1,0 +1,189 @@
+ type="xs:anyURI"/>
+	</xs:complexType>
+    
+	<!--  
+****************signatureComplexType
+-->
+	<xs:complexType name="signatureComplexType">
+		<xs:sequence>
+			<xs:element ref="signatureEncoding"/>
+			<xs:element ref="signer" minOccurs="0"/>
+			<xs:element ref="signatureMethod"/>
+			<xs:element ref="signatureValue"/>
+			<xs:element ref="signatureValidationRules"/>
+			<xs:element ref="signatureProperties" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="keyInformation" minOccurs="0" maxOccurs="unbounded"/>
+			
+		</xs:sequence>
+	</xs:complexType>
+    
+	<!--  
+****************signatureInformationComplexType
+                                   See comment for "creatingApplicationComplexType"
+-->
+	<xs:complexType name="signatureInformationComplexType">
+		<xs:choice>
+			<xs:sequence>
+				<xs:element ref="signature"/>
+				<xs:element ref="signatureInformationExtension" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+<!-- -->
+		    <xs:element ref="signatureInformationExtension"  maxOccurs="unbounded"/>
+		<!-- -->
+		</xs:choice>
+	</xs:complexType>
+    
+	<!-- 
+****************significantPropertiesComplexType
+                                   See comment for "creatingApplicationComplexType"
+ -->
+	<xs:complexType name="significantPropertiesComplexType">
+		<xs:choice>
+			<xs:sequence>
+				<xs:element ref="significantPropertiesType"/>
+				<xs:element ref="significantPropertiesValue" minOccurs="0"/>
+				<xs:element ref="significantPropertiesExtension" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+<!-- -->
+		    <xs:sequence>
+				<xs:element ref="significantPropertiesValue"/>
+				<xs:element ref="significantPropertiesExtension" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<!---->
+		    <xs:element ref="significantPropertiesExtension" maxOccurs="unbounded"/>
+			<!-- -->
+		</xs:choice>
+	</xs:complexType>
+
+	<!--  
+****************startAndEndDateComplexType     
+-->
+	<xs:complexType name="startAndEndDateComplexType">
+		<xs:sequence>
+			<xs:element ref="startDate"/>
+			<xs:element ref="endDate" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+    
+	<!--
+******* statuteDocumentationIdentifierComplexType     
+-->
+	<xs:complexType name="statuteDocumentationIdentifierComplexType">
+		<xs:sequence>
+			<xs:element ref="statuteDocumentationIdentifierType"/>
+			<xs:element ref="statuteDocumentationIdentifierValue"/>
+			<xs:element ref="statuteDocumentationRole" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+    
+	<!--
+******* statuteInformationComplexType
+-->
+	<xs:complexType name="statuteInformationComplexType">
+		<xs:sequence>
+			<xs:element ref="statuteJurisdiction"/>
+			<xs:element ref="statuteCitation"/>
+			<xs:element ref="statuteInformationDeterminationDate" minOccurs="0"/>
+			<xs:element ref="statuteNote" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="statuteDocumentationIdentifier" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="statuteApplicableDates" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+    
+	<!--  
+****************storageComplexType
+                                   See comment for "creatingApplicationComplexType"
+-->
+	<xs:complexType name="storageComplexType">
+		<xs:choice>
+			<xs:sequence>
+				<xs:element ref="contentLocation"/>
+				<xs:element ref="storageMedium" minOccurs="0"/>
+			</xs:sequence>
+			<xs:element ref="storageMedium"/>
+		</xs:choice>
+	</xs:complexType>
+    
+    
+	<!-- 
+********************************************************************************************
+*                                                                                          *
+*                                   Element declarations                                   *
+*                                                                                          *
+********************************************************************************************
+
+****** xs:string type element declarations
+
+-->
+	<xs:element name="agentIdentifierValue" type="xs:string"/>
+	<xs:element name="agentNote" type="xs:string"/>
+    <xs:element name="agentVersion" type="xs:string"/>
+	<xs:element name="contentLocationValue" type="xs:string"/>
+	<xs:element name="copyrightDocumentationIdentifierValue" type="xs:string"/>
+	<xs:element name="copyrightNote" type="xs:string"/>
+	<xs:element name="creatingApplicationVersion" type="xs:string"/>
+    <xs:element name="environmentDesignationExtension" type="xs:string"/>
+    <xs:element name="environmentDesignationNote" type="xs:string"/>
+    <xs:element name="environmentFunctionLevel" type="xs:string"/>
+	<xs:element name="environmentNote" type="xs:string"/>
+    <xs:element name="environmentOrigin" type="xs:string"/>
+    <xs:element name="environmentRegistryKey" type="xs:string"/>
+    <xs:element name="environmentRegistryName" type="xs:string"/>
+    <xs:element name="environmentVersion" type="xs:string"/>
+	<xs:element name="eventDetail" type="xs:string"/>
+	<xs:element name="eventIdentifierValue" type="xs:string"/>
+	<xs:element name="eventOutcomeDetailNote" type="xs:string"/>
+	<xs:element name="formatNote" type="xs:string"/>
+	<xs:element name="formatVersion" type="xs:string"/>
+	<xs:element name="hwOtherInformation" type="xs:string"/>
+	<xs:element name="inhibitorKey" type="xs:string"/>
+	<xs:element name="licenseDocumentationIdentifierValue" type="xs:string"/>
+	<xs:element name="licenseIdentifierValue" type="xs:string"/>
+	<xs:element name="licenseNote" type="xs:string"/>
+	<xs:element name="licenseTerms" type="xs:string"/>
+	<xs:element name="linkingAgentIdentifierValue" type="xs:string"/>
+    <xs:element name="linkingEnvironmentIdentifierType" type="xs:string"/>
+    <xs:element name="linkingEnvironmentIdentifierValue" type="xs:string"/>
+	<xs:element name="linkingEventIdentifierValue" type="xs:string"/>
+	<xs:element name="linkingObjectIdentifierValue" type="xs:string"/>
+	<xs:element name="linkingRightsStatementIdentifierValue" type="xs:string"/>
+	<xs:element name="messageDigest" type="xs:string"/>
+	<xs:element name="objectIdentifierValue" type="xs:string"/>
+	<xs:element name="otherRightsDocumentationIdentifierValue" type="xs:string"/>
+	<xs:element name="otherRightsNote" type="xs:string"/>
+	<xs:element name="preservationLevelRationale" type="xs:string"/>
+	<xs:element name="relatedEventIdentifierValue" type="xs:string"/>
+	<xs:element name="relatedObjectIdentifierValue" type="xs:string"/>
+	<xs:element name="rightsGrantedNote" type="xs:string"/>
+	<xs:element name="rightsStatementIdentifierValue" type="xs:string"/>
+	<xs:element name="signatureProperties" type="xs:string"/>
+	<xs:element name="signatureValue" type="xs:string"/>
+	<xs:element name="significantPropertiesValue" type="xs:string"/>
+	<xs:element name="statuteDocumentationIdentifierValue" type="xs:string"/>
+	<xs:element name="statuteNote" type="xs:string"/>
+	<xs:element name="swVersion" type="xs:string"/>
+	<xs:element name="swOtherInformation" type="xs:string"/>
+
+<!-- 
+
+****** stringPlusAuthority type element declarations
+
+-->
+	<xs:element name="act" type="stringPlusAuthority"/>
+	<xs:element name="agentIdentifierType" type="stringPlusAuthority"/>
+	<xs:element name="agentName" type="stringPlusAuthority"/>
+	<xs:element name="agentType" type="stringPlusAuthority"/>
+	<xs:element name="contentLocationType" type="stringPlusAuthority"/>
+	<xs:element name="copyrightDocumentationIdentifierType" type="stringPlusAuthority"/>
+	<xs:element name="copyrightDocumentationRole" type="stringPlusAuthority"/>
+	<xs:element name="copyrightStatus" type="stringPlusAuthority"/>
+	<xs:element name="creatingApplicationName" type="stringPlusAuthority"/>
+	<xs:element name="environmentCharacteristic" type="stringPlusAuthority"/>
+    <xs:element name="environmentFunctionType" type="stringPlusAuthority"/>
+    <xs:element name="environmentName" type="stringPlusAuthority"/>
+    <xs:element name="environmentRegistryRole" type="stringPlusAuthority"/>
+	<xs:element name="environmentPurpose" type="stringPlusAuthority"/>
+	<xs:element name="eventIdentifierType" type="stringPlusAuthority"/>
+	<xs:element name="eventOutcome" type="stringPlusAuthority"/>
+	<xs:element name="eventType" type="stringPlusAuthority"/>
+	<xs:element name="formatName" type="stringPlusAuthorit
