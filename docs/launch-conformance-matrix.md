@@ -24,6 +24,35 @@ The current contracts predate the protocol specification and do not yet
 conform. A specs-only PR may merge before implementation, but a deployment,
 audit handoff, or release branch must treat any failed gate as blocking.
 
+## Museum semantic profile [LCM-MUSEUM-SEMANTIC]
+
+1. The full-v1 gate set includes the following adopted gates (ADR 0036 decision
+   M1). Their exact required verification is owned by [MSM-CONFORMANCE] in
+   [museum semantic mapping](museum-semantic-mapping.md); this table registers
+   traceability without creating another definition of the profile.
+2. All rows remain required for full-v1 conformance. Initial contract testing
+   and identified engineering deployments may proceed while these rows are
+   incomplete (ADR 0036 decision M2). This does not waive any other contract
+   gate or authorize a museum-conformance claim.
+3. Evidence and assignments live in the [museum delivery plan](../ops/MUSEUM_DELIVERY.md).
+   MSM-12 extends the existing [CMC-OBJECT-DOSSIER] institutional gate; synthetic
+   fixtures and internal review cannot stand in for the named external evidence.
+
+| Gate | Owning requirements | Delivery owner | Evidence status |
+| --- | --- | --- | --- |
+| `MSM-01-SCOPE` | [MSM-SCOPE] 1–5 | Integrator | Required; implementation/evidence pending |
+| `MSM-02-PROFILE-LOCK` | [MSM-PROFILE] 1–8 | Profile builder | Required; implementation/evidence pending |
+| `MSM-03-IDENTITY` | [MSM-IDENTITY] 1–8 | Profile/export builder | Required; implementation/evidence pending |
+| `MSM-04-CROSSWALK` | [MSM-MAPPING] 1–10 | Profile/export builder | Required; implementation/evidence pending |
+| `MSM-05-AUTHORSHIP` | [MSM-ASSERTIONS] 1–10 | Metadata builder | Required; implementation/evidence pending |
+| `MSM-06-AUTHORITIES` | [MSM-AUTHORITIES] 1–9 | Profile/export builder | Required; implementation/evidence pending |
+| `MSM-07-PLACES` | [MSM-PLACES] 1–7 | Profile/export builder | Required; implementation/evidence pending |
+| `MSM-08-RELATIONS` | [MSM-RELATIONS] 1–7 | Profile/export builder | Required; implementation/evidence pending |
+| `MSM-09-EXPORT` | [MSM-EXPORT] 1–12 | Export builder | Required; implementation/evidence pending |
+| `MSM-10-INTEROP` | [MSM-INTEROP] 1–5 | Export builder | Required; implementation/evidence pending |
+| `MSM-11-AUTHORING` | [MSM-AUTHORING] 1–5 | Capture adapter builder | Required; implementation/evidence pending |
+| `MSM-12-INSTITUTIONAL` | [MSM-CONFORMANCE] 1–4 | Integrator / external practitioners | Required; implementation/evidence pending |
+
 ## Review-Entry Conditions
 
 Requirements [LCM-REVIEW-ENTRY]:

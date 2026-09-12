@@ -81,3 +81,8 @@ defines archival evidence and immutable dependencies for estate authority.
 [ADR 0033: Engineering rehearsals and collector gas](0033-engineering-rehearsals-and-collector-gas.md)
 permits identified test-asset engineering deployments while failed collector
 gas gates remain visible and continue to constrain candidate acceptance.
+
+[ADR 0036: Adopt the museum semantic profile](0036-museum-semantic-profile.md)
+records owner adoption of the complete museum profile, review and identity
+boundaries, bounded deterministic exports, and parallel delivery with separate
+testnet-engineering and full museum acceptance checks.

@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Adopted the complete museum semantic specification under ADR 0036, including
+  CIDOC CRM/Linked Art, Getty TGN, attributed records and offline dossier exports.
+  Tightened review authority, identity, bounded documents and exact field
+  preservation; twelve conformance gates and five parallel delivery packages
+  track implementation and evidence still to be delivered.
 - Added the native clearing-sale consumer with immediate floor mints, permanent
   buyer rebates, separate supplemental settlement and bounded refund escape.
   The subsequent compressed-aggregate and sparse-record optimization passes

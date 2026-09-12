@@ -42,8 +42,12 @@ recovery, other sales and the full Safe call matrix retain their ledger scope.
 Collector gas remains above its specified ceiling. ADR 0033 permits identified
 test-asset engineering deployments while preserving the failed candidate gate;
 it does not authorize a conforming-candidate claim from domain tests or a small
-rehearsal. The separate museum semantic proposal was reviewed as a recommendation
-and has not been incorporated into the normative scope.
+rehearsal. The owner adopted the full museum semantic profile with reviewed
+refinements
+on 12 September (ADR 0036). Its [delivery plan](MUSEUM_DELIVERY.md) runs profile,
+record and exporter work alongside contract engineering; all twelve museum
+gates remain required for full-v1 acceptance. Adoption is not implementation
+or institutional-conformance evidence.
 
 ## Team and ownership
 

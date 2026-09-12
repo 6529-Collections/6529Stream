@@ -14,6 +14,12 @@ defines strategy, gates, and readiness criteria; the execution backlog defines
 the concrete next work items, dependencies, acceptance criteria, and evidence
 requirements needed to move toward a 10/10 open-source protocol repo.
 
+The owner adopted the complete [museum semantic profile](../docs/museum-semantic-mapping.md)
+on 12 September 2026 (ADR 0036). Its [delivery packages](MUSEUM_DELIVERY.md)
+run alongside current contract implementation, with museum conformance tracked
+separately from initial testnet engineering. All twelve museum gates remain
+part of full-v1 acceptance; adoption does not mark those gates complete.
+
 ## 0. Current Status
 
 ### Maturity Statement
