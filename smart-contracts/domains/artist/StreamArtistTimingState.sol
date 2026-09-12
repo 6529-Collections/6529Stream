@@ -2,14 +2,9 @@
 pragma solidity ^0.8.19;
 
 import "./StreamArtistRotationState.sol";
+import "../../interfaces/stream/artist/IStreamArtistManagerBinding.sol";
 import "../mint/StreamMintArtistConsent.sol";
 import "../../interfaces/stream/parameters/IStreamGovernedParameterAuthority.sol";
-
-interface IStreamArtistManagerBinding {
-    function core() external view returns (address);
-    function moduleRegistry() external view returns (address);
-    function governanceAuthority() external view returns (address);
-}
 
 /// @notice AA-owned operational windows, deliberately outside the GGP/GTP models.
 library StreamArtistTimingState {
