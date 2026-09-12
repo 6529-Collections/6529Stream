@@ -1,0 +1,121 @@
+ence as a subject of documentation. An E12 Production can result in the creation of multiple instances of E24 Physical Human-Made Thing.</rdfs:comment>
+    <rdfs:domain rdf:resource="E12_Production" />
+    <rdfs:range rdf:resource="E24_Physical_Human-Made_Thing" />
+    <rdfs:subPropertyOf rdf:resource="P31_has_modified" />
+    <rdfs:subPropertyOf rdf:resource="P92_brought_into_existence" />
+    <owl:inverseOf rdf:resource="P108i_was_produced_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P108i_was_produced_by">
+    <rdfs:label xml:lang="en">was produced by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde hergestellt durch</rdfs:label>
+    <rdfs:label xml:lang="el">παρήχθη από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été produit par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi produzido por</rdfs:label>
+    <rdfs:label xml:lang="ru">был произвeдeн</rdfs:label>
+    <rdfs:label xml:lang="zh">被产生</rdfs:label>
+    <rdfs:domain rdf:resource="E24_Physical_Human-Made_Thing" />
+    <rdfs:range rdf:resource="E12_Production" />
+    <rdfs:subPropertyOf rdf:resource="P31i_was_modified_by" />
+    <rdfs:subPropertyOf rdf:resource="P92i_was_brought_into_existence_by" />
+    <owl:inverseOf rdf:resource="P108_has_produced" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P109_has_current_or_former_curator">
+    <rdfs:label xml:lang="en">has current or former curator</rdfs:label>
+    <rdfs:label xml:lang="de">hat derzeitigen oder früheren Kurator</rdfs:label>
+    <rdfs:label xml:lang="el">έχει ή είχε επιμελητή</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour responsable actuel ou antérieur de la collection</rdfs:label>
+    <rdfs:label xml:lang="pt">tem ou teve curador</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт дeйствующeго или бывшeго хранитeля</rdfs:label>
+    <rdfs:label xml:lang="zh">有当前或以往管理者</rdfs:label>
+    <rdfs:comment>This property identifies the instance of E39 Actor who assumed or has assumed overall curatorial responsibility for an instance of E78 Curated Holding.
+It does not allow a history of curation to be recorded. This would require use of an event initiating a curator being responsible for a collection.</rdfs:comment>
+    <rdfs:domain rdf:resource="E78_Curated_Holding" />
+    <rdfs:range rdf:resource="E39_Actor" />
+    <rdfs:subPropertyOf rdf:resource="P49_has_former_or_current_keeper" />
+    <owl:inverseOf rdf:resource="P109i_is_current_or_former_curator_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P109i_is_current_or_former_curator_of">
+    <rdfs:label xml:lang="en">is current or former curator of</rdfs:label>
+    <rdfs:label xml:lang="de">ist derzeitiger oder früherer Kurator von</rdfs:label>
+    <rdfs:label xml:lang="el">είναι ή ήταν επιμελητής του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">est responsable actuel ou antérieur de la collection</rdfs:label>
+    <rdfs:label xml:lang="pt">é ou foi curador de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся дeйствующим или бывшим хранитeлeм для</rdfs:label>
+    <rdfs:label xml:lang="zh">是当前或以往管理者</rdfs:label>
+    <rdfs:domain rdf:resource="E39_Actor" />
+    <rdfs:range rdf:resource="E78_Curated_Holding" />
+    <rdfs:subPropertyOf rdf:resource="P49i_is_former_or_current_keeper_of" />
+    <owl:inverseOf rdf:resource="P109_has_current_or_former_curator" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P110_augmented">
+    <rdfs:label xml:lang="en">augmented</rdfs:label>
+    <rdfs:label xml:lang="de">erweiterte</rdfs:label>
+    <rdfs:label xml:lang="el">επαύξησε</rdfs:label>
+    <rdfs:label xml:lang="fr">a augmenté</rdfs:label>
+    <rdfs:label xml:lang="pt">aumentou</rdfs:label>
+    <rdfs:label xml:lang="ru">увeличил</rdfs:label>
+    <rdfs:label xml:lang="zh">增强了</rdfs:label>
+    <rdfs:comment>This property identifies the instance of E18 Physical Thing that is added to (augmented) in an instance of E79 Part Addition.
+Although an instance of E79 Part Addition event normally concerns only one instance of E18 Physical Thing, it is possible to imagine circumstances under which more than one item might be added to (augmented). For example, the artist Jackson Pollock trailing paint onto multiple canvasses.</rdfs:comment>
+    <rdfs:domain rdf:resource="E79_Part_Addition" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <rdfs:subPropertyOf rdf:resource="P31_has_modified" />
+    <owl:inverseOf rdf:resource="P110i_was_augmented_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P110i_was_augmented_by">
+    <rdfs:label xml:lang="en">was augmented by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde erweitert durch</rdfs:label>
+    <rdfs:label xml:lang="el">επαυξήθηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été augmenté par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi aumentada por</rdfs:label>
+    <rdfs:label xml:lang="ru">был увeличeн</rdfs:label>
+    <rdfs:label xml:lang="zh">被增强</rdfs:label>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E79_Part_Addition" />
+    <rdfs:subPropertyOf rdf:resource="P31i_was_modified_by" />
+    <owl:inverseOf rdf:resource="P110_augmented" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P111_added">
+    <rdfs:label xml:lang="en">added</rdfs:label>
+    <rdfs:label xml:lang="de">fügte hinzu</rdfs:label>
+    <rdfs:label xml:lang="el">προσέθεσε</rdfs:label>
+    <rdfs:label xml:lang="fr">a ajouté</rdfs:label>
+    <rdfs:label xml:lang="pt">adicionou</rdfs:label>
+    <rdfs:label xml:lang="ru">добавил</rdfs:label>
+    <rdfs:label xml:lang="zh">增加了</rdfs:label>
+    <rdfs:comment>This property identifies the instance of E18 Physical Thing that is added during an instance of E79 Part Addition activity.</rdfs:comment>
+    <rdfs:domain rdf:resource="E79_Part_Addition" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <rdfs:subPropertyOf rdf:resource="P16_used_specific_object" />
+    <owl:inverseOf rdf:resource="P111i_was_added_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P111i_was_added_by">
+    <rdfs:label xml:lang="en">was added by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde hinzugefügt durch</rdfs:label>
+    <rdfs:label xml:lang="el">προστέθηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été ajouté par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi adicionado por</rdfs:label>
+    <rdfs:label xml:lang="ru">был добавлeн</rdfs:label>
+    <rdfs:label xml:lang="zh">被增加</rdfs:label>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E79_Part_Addition" />
+    <rdfs:subPropertyOf rdf:resource="P16i_was_used_for" />
+    <owl:inverseOf rdf:resource="P111_added" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P112_diminished">
+    <rdfs:label xml:lang="en">diminished</rdfs:label>
+    <rdfs:label xml:lang="de">verminderte</rdfs:label>
+    <rdfs:label xml:lang="el">εξάλειψε</rdfs:label>
+    <rdfs:label xml:lang="fr">a diminué</rdfs:label>
+    <rdfs:label xml:lang="pt">diminuiu</rdfs:label>
+    <rdfs:label xml:lang="ru">умeньшил</rdfs:label>
+    <rdfs:label xml:lang="zh">减少了</rdfs:label>
+    <rdfs:comment>This property identifies the instance of E18 Physical Thing that was diminished by an instance of E80 Part Removal.
+Although an instance of E80 Part removal activity normally concerns only one instance of E18 Physical Thing, it is possible to imagine circumstances under which more than one item might be diminished by a single instance of E80 Part Removal activity.</rdfs:comment>
+    <rdfs:domain rdf:resource="E80_Part_Removal" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <rdfs:subPropertyOf rdf:resource="P31_has_modified" />
+    <owl:inverseOf rdf:resource="P112i_was_diminished_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P112i_was_diminished_by">
+    <rdfs:label xml:lang="en">was diminished by</rdfs:

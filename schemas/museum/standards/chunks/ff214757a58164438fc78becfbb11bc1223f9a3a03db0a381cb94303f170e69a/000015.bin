@@ -1,0 +1,46 @@
+:about="E92_Spacetime_Volume">
+    <rdfs:label xml:lang="en">Spacetime Volume</rdfs:label>
+    <rdfs:label xml:lang="fr">Volume spatio-temporel</rdfs:label>
+    <rdfs:label xml:lang="ru">Область Пространства-Врeмeни</rdfs:label>
+    <rdfs:comment>This class comprises 4-dimensional point sets (volumes) in physical spacetime (in contrast to mathematical models of it) regardless of their true geometric forms. They may derive their identity from being the extent of a material phenomenon or from being the interpretation of an expression defining an extent in spacetime. Intersections of instances of E92 Spacetime Volume, E53 Place, and E52 Time-Span are also regarded as instances of E92 Spacetime Volume. An instance of E92 Spacetime Volume is either contiguous or composed of a finite number of contiguous subsets. Its boundaries may be fuzzy due to the properties of the phenomena it derives from or due to the limited precision up to which defining expression can be identified with a real extent in spacetime. The duration of existence of an instance of E92 Spacetime Volume is its projection on time.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E1_CRM_Entity" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E93_Presence">
+    <rdfs:label xml:lang="en">Presence</rdfs:label>
+    <rdfs:label xml:lang="fr">Présence</rdfs:label>
+    <rdfs:label xml:lang="ru">Присутствиe</rdfs:label>
+    <rdfs:comment>This class comprises instances of E92 Spacetime Volume, whose temporal extent has been chosen in order to determine the spatial extent of a phenomenon over the chosen time-span. Respective phenomena may, for instance, be historical events or periods, but can also be the diachronic extent and existence of physical things. In other words, instances of this class fix a slice of another instance of E92 Spacetime Volume in time.
+The temporal extent of an instance of E93 Presence typically is predetermined by the researcher so as to focus the investigation particularly on finding the spatial extent of the phenomenon by testing for its characteristic features. There are at least two basic directions such investigations might take. The investigation may wish to determine where something was during some time or it may wish to reconstruct the total passage of a phenomenon’s spacetime volume through an examination of discrete presences. Observation and measurement of features indicating the presence or absence of a phenomenon in some space allows for the progressive approximation of spatial extents through argumentation typically based on inclusion, exclusion and various overlaps.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E92_Spacetime_Volume" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E96_Purchase">
+    <rdfs:label xml:lang="en">Purchase</rdfs:label>
+    <rdfs:label xml:lang="fr">Achat</rdfs:label>
+    <rdfs:label xml:lang="ru">Покупка</rdfs:label>
+    <rdfs:comment>This class comprises transfers of legal ownership from one or more instances of E39 Actor to one or more different instances of E39 Actor, where the transferring party is completely compensated by the payment of a monetary amount. In more detail, a purchase agreement establishes a fixed monetary obligation at its initialization on the receiving party, to the giving party. An instance of E96 Purchase begins with the contract or equivalent agreement and ends with the fulfilment of all contractual obligations. In the case that the activity is abandoned before both parties have fulfilled these obligations, the activity is not regarded as an instance of E96 Purchase.
+This class is a very specific case of the much more complex social business practices of exchange of goods and the creation and satisfaction of related social obligations. Purchase activities which define individual sales prices per object can be modelled by instantiating E96 Purchase for each object individually and as part of an overall instance of E96 Purchase transaction.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E8_Acquisition" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E97_Monetary_Amount">
+    <rdfs:label xml:lang="en">Monetary Amount</rdfs:label>
+    <rdfs:label xml:lang="fr">Valeur monétaire</rdfs:label>
+    <rdfs:label xml:lang="ru">Дeнeжный Эквивалeнт</rdfs:label>
+    <rdfs:comment>This class comprises quantities of monetary possessions or obligations in terms of their nominal value with respect to a particular currency. These quantities may be abstract accounting units, the nominal value of a heap of coins or bank notes at the time of validity of the respective currency, the nominal value of a bill of exchange or other documents expressing monetary claims or obligations. It specifically excludes amounts expressed in terms of weights of valuable items, like gold and diamonds, and quantities of other non-currency items, like goats or stocks and bonds.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E54_Dimension" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E98_Currency">
+    <rdfs:label xml:lang="en">Currency</rdfs:label>
+    <rdfs:label xml:lang="fr">Unité monétaire</rdfs:label>
+    <rdfs:label xml:lang="ru">Валюта</rdfs:label>
+    <rdfs:comment>This class comprises the units in which a monetary system, supported by an administrative authority or other community, quantifies and arithmetically compares all monetary amounts declared in the unit. The unit of a monetary system must describe a nominal value which is kept constant by its administrative authority and an associated banking system if it exists, and not by market value. For instance, one may pay with grams of gold, but the respective monetary amount would have been agreed as the gold price in US dollars on the day of the payment. Under this definition, British Pounds, U.S. Dollars, and European Euros are examples of currency, but “grams of gold” is not. One monetary system has one and only one currency. Instances of this class must not be confused with coin denominations, such as “Dime” or “Sestertius”. Non-monetary exchange of value in terms of quantities of a particular type of goods, such as cows, do not constitute a currency.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E58_Measurement_Unit" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E99_Product_Type">
+    <rdfs:label xml:lang="en">Product Type</rdfs:label>
+    <rdfs:label xml:lang="fr">Modèle de produit</rdfs:label>
+    <rdfs:label xml:lang="ru">Тип Продукта</rdfs:label>
+    <rdfs:comment>This class comprises types that stand as the models for instances of E22 Human-Made Object that are produced as the result of production activities using plans exact enough to result in one or more series of uniform, functionally and aesthetically identical and interchangeable items. The product type is the intended ideal form of the manufacture process. It is typical of instances of E22 Human-Made Object that conform to an instance of E99 Product Type that its component parts are interchangeable with component parts of other instances of E22 Human-Made Object made after the model of the same instance of E99 Product Type. Frequently, the uniform production according to a given instance of E99 Product Type is achieved by creating individual tools, such as moulds or print plates that are themselves carriers of the design of the product type. Modern tools may use the flexibility of electronically controlled devices to achieve such uniformity. The product type itself, i.e. the potentially unlimited series of aesthetically equivalent items, may be the target of artistic design, rather than the individual object. In extreme cases, only one instance of a product type may have been produced, such as in a “print on demand” process which was only triggered once. However, this should not be confused with industrial prototypes, such as car prototypes, which are produced prior to the production line being set up, or test the production line itself.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E55_Type" />
+  </rdfs:Class>
+  <rdf:Property rdf:about="P1_is_identified_by">
+    <rdfs:la

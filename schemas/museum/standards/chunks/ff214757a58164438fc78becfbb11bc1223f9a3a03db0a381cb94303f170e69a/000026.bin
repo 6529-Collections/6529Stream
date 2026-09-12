@@ -1,0 +1,101 @@
+вляeтся условиeм для</rdfs:label>
+    <rdfs:label xml:lang="zh">是状况</rdfs:label>
+    <rdfs:domain rdf:resource="E3_Condition_State" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <owl:inverseOf rdf:resource="P44_has_condition" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P45_consists_of">
+    <rdfs:label xml:lang="en">consists of</rdfs:label>
+    <rdfs:label xml:lang="de">besteht aus</rdfs:label>
+    <rdfs:label xml:lang="el">αποτελείται από</rdfs:label>
+    <rdfs:label xml:lang="fr">comprend</rdfs:label>
+    <rdfs:label xml:lang="pt">consiste de</rdfs:label>
+    <rdfs:label xml:lang="ru">состоит из</rdfs:label>
+    <rdfs:label xml:lang="zh">包含</rdfs:label>
+    <rdfs:comment>This property identifies the instances of E57 Materials of which an instance of E18 Physical Thing is composed.
+All physical things consist of physical materials. P45 consists of (is incorporated in) allows the different materials to be recorded. P45 consists of (is incorporated in) refers here to observed material as opposed to the consumed raw material.
+A material, such as a theoretical alloy, may not have any physical instances.</rdfs:comment>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E57_Material" />
+    <owl:inverseOf rdf:resource="P45i_is_incorporated_in" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P45i_is_incorporated_in">
+    <rdfs:label xml:lang="en">is incorporated in</rdfs:label>
+    <rdfs:label xml:lang="de">ist enthalten in</rdfs:label>
+    <rdfs:label xml:lang="el">είναι ενσωματωμένος/η/ο σε</rdfs:label>
+    <rdfs:label xml:lang="fr">est inclus dans</rdfs:label>
+    <rdfs:label xml:lang="pt">está presente em</rdfs:label>
+    <rdfs:label xml:lang="ru">входит в состав</rdfs:label>
+    <rdfs:label xml:lang="zh">结合在</rdfs:label>
+    <rdfs:domain rdf:resource="E57_Material" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <owl:inverseOf rdf:resource="P45_consists_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P46_is_composed_of">
+    <rdfs:label xml:lang="en">is composed of</rdfs:label>
+    <rdfs:label xml:lang="de">ist zusammengesetzt aus</rdfs:label>
+    <rdfs:label xml:lang="el">αποτελείται από</rdfs:label>
+    <rdfs:label xml:lang="fr">est composé de</rdfs:label>
+    <rdfs:label xml:lang="pt">é composto de</rdfs:label>
+    <rdfs:label xml:lang="ru">составлeн из</rdfs:label>
+    <rdfs:label xml:lang="zh">组成成分是</rdfs:label>
+    <rdfs:comment>This property associates an instance of E18 Physical Thing with another instance of Physical Thing that forms part of it. The spatial extent of the composing part is included in the spatial extent of the whole.
+Component elements, since they are themselves instances of E18 Physical Thing, may be further analysed into sub-components, thereby creating a hierarchy of part decomposition. An instance of E18 Physical Thing may be shared between multiple wholes, for example two buildings may share a common wall. This property does not specify when and for how long a component element resided in the respective whole. If a component is not part of a whole from the beginning of existence or until the end of existence of the whole, the classes E79 Part Addition and E90 Part Removal can be used to document when a component became part of a particular whole and/or when it stopped being a part of it. For the time-span of being part of the respective whole, the component is completely contained in the place the whole occupies.
+This property is intended to describe specific components that are individually documented, rather than general aspects. Overall descriptions of the structure of an instance of E18 Physical Thing are captured by the P3 has note property.
+The instances of E57 Material of which an instance of E18 Physical Thing is composed should be documented using P45 consists of (is incorporated in).
+This property is transitive and asymmetric.</rdfs:comment>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <owl:inverseOf rdf:resource="P46i_forms_part_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P46i_forms_part_of">
+    <rdfs:label xml:lang="en">forms part of</rdfs:label>
+    <rdfs:label xml:lang="de">bildet Teil von</rdfs:label>
+    <rdfs:label xml:lang="el">αποτελεί μέρος του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">fait partie de</rdfs:label>
+    <rdfs:label xml:lang="pt">faz parte de</rdfs:label>
+    <rdfs:label xml:lang="ru">образуeт часть</rdfs:label>
+    <rdfs:label xml:lang="zh">构成部分</rdfs:label>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <owl:inverseOf rdf:resource="P46_is_composed_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P48_has_preferred_identifier">
+    <rdfs:label xml:lang="en">has preferred identifier</rdfs:label>
+    <rdfs:label xml:lang="de">hat bevorzugtes Kennzeichen</rdfs:label>
+    <rdfs:label xml:lang="el">έχει προτιμώμενο αναγνωριστικό</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour identifiant préférentiel</rdfs:label>
+    <rdfs:label xml:lang="pt">tem identificador preferido</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт прeдпочтитeльный идeнтификатор</rdfs:label>
+    <rdfs:label xml:lang="zh">有优选标识符</rdfs:label>
+    <rdfs:comment>This property records the preferred instance of E42 Identifier that was used to identify an instance of E1 CRM Entity at the time this property was recorded.
+More than one preferred identifier may have been assigned to an item over time.
+Use of this property requires an external mechanism for assigning temporal validity to the respective CIDOC CRM instance.
+The fact that an identifier is a preferred one for an organisation can be better expressed in a context independent form by assigning a suitable instance of E55 Type to the respective instance of E15 Identifier Assignment using the P2 has type property.</rdfs:comment>
+    <rdfs:domain rdf:resource="E1_CRM_Entity" />
+    <rdfs:range rdf:resource="E42_Identifier" />
+    <rdfs:subPropertyOf rdf:resource="P1_is_identified_by" />
+    <owl:inverseOf rdf:resource="P48i_is_preferred_identifier_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P48i_is_preferred_identifier_of">
+    <rdfs:label xml:lang="en">is preferred identifier of</rdfs:label>
+    <rdfs:label xml:lang="de">ist bevorzugtes Kennzeichen für</rdfs:label>
+    <rdfs:label xml:lang="el">είναι προτιμώμενο αναγνωριστικό</rdfs:label>
+    <rdfs:label xml:lang="fr">est l’identifiant préférentiel de</rdfs:label>
+    <rdfs:label xml:lang="pt">é o identificador preferido de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся прeдпочтитeльным идeнтификатором</rdfs:label>
+    <rdfs:label xml:lang="zh">是优选标识符</rdfs:label>
+    <rdfs:domain rdf:resource="E42_Identifier" />
+    <rdfs:range rdf:resource="E1_CRM_Entity" />
+    <rdfs:subPropertyOf rdf:resource="P1i_identifies" />
+    <owl:inverseOf rdf:resource="P48_has_preferred_identifier" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P49_has_former_or_current_keeper">
+    <rdfs:label xml:lang="en">has former or current keeper</rdfs:label>
+    <rdfs:label xml:lang="de">hat früheren oder derzeitigen Betreuer</rdfs:label>
+    <rdfs:label xml:lang="el">είναι ή ήταν στην κατοχή του</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour actant détenteur actuel ou antérieur</rdfs:label>
+    <rdfs:label xml:lang="pt">é ou foi guardada por</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт бывшeго или тeкущeго хранитeля</rdfs:label>
+    <rdfs:label xml:lang="zh">有以往或当前保管者</rdfs:label>
+    <rdfs:comment>This property identifies the instance of E39 Actor who has or has had custody of an instance of E18 Physical Thing at some time. This 

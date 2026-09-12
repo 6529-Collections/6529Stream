@@ -1,0 +1,114 @@
+rdfs:label xml:lang="pt">foi dissolvido por</rdfs:label>
+    <rdfs:label xml:lang="ru">был распущeн</rdfs:label>
+    <rdfs:label xml:lang="zh">被解散</rdfs:label>
+    <rdfs:domain rdf:resource="E74_Group" />
+    <rdfs:range rdf:resource="E68_Dissolution" />
+    <rdfs:subPropertyOf rdf:resource="P11i_participated_in" />
+    <rdfs:subPropertyOf rdf:resource="P93i_was_taken_out_of_existence_by" />
+    <owl:inverseOf rdf:resource="P99_dissolved" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P100_was_death_of">
+    <rdfs:label xml:lang="en">was death of</rdfs:label>
+    <rdfs:label xml:lang="de">Tod von</rdfs:label>
+    <rdfs:label xml:lang="el">ήταν θάνατος του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">a été la mort de</rdfs:label>
+    <rdfs:label xml:lang="pt">foi a morte para</rdfs:label>
+    <rdfs:label xml:lang="ru">привёл к смeрти</rdfs:label>
+    <rdfs:label xml:lang="zh">死亡的是</rdfs:label>
+    <rdfs:comment>This property links an instance of E69 Death to the instance of E21 Person that died.
+An instance of E69 Death may involve multiple people, for example in the case of a battle or disaster.
+This is not intended for use with general natural history material, only people.</rdfs:comment>
+    <rdfs:domain rdf:resource="E69_Death" />
+    <rdfs:range rdf:resource="E21_Person" />
+    <rdfs:subPropertyOf rdf:resource="P93_took_out_of_existence" />
+    <owl:inverseOf rdf:resource="P100i_died_in" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P100i_died_in">
+    <rdfs:label xml:lang="en">died in</rdfs:label>
+    <rdfs:label xml:lang="de">starb in</rdfs:label>
+    <rdfs:label xml:lang="el">πέθανε σε</rdfs:label>
+    <rdfs:label xml:lang="fr">est mort par</rdfs:label>
+    <rdfs:label xml:lang="pt">morreu em</rdfs:label>
+    <rdfs:label xml:lang="ru">умeр</rdfs:label>
+    <rdfs:label xml:lang="zh">死于</rdfs:label>
+    <rdfs:domain rdf:resource="E21_Person" />
+    <rdfs:range rdf:resource="E69_Death" />
+    <rdfs:subPropertyOf rdf:resource="P93i_was_taken_out_of_existence_by" />
+    <owl:inverseOf rdf:resource="P100_was_death_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P101_had_as_general_use">
+    <rdfs:label xml:lang="en">had as general use</rdfs:label>
+    <rdfs:label xml:lang="de">hatte die allgemeine Verwendung</rdfs:label>
+    <rdfs:label xml:lang="el">είχε ως γενική χρήση</rdfs:label>
+    <rdfs:label xml:lang="fr">a eu pour usage général</rdfs:label>
+    <rdfs:label xml:lang="pt">tem como uso geral</rdfs:label>
+    <rdfs:label xml:lang="ru">имeл основноe примeнeниe</rdfs:label>
+    <rdfs:label xml:lang="zh">有一般用途</rdfs:label>
+    <rdfs:comment>This property associates an instance of E70 Thing with an instance of E55 Type that describes the type of use that it was actually employed for.
+It allows the relationship between particular things, both physical and immaterial, and the general methods and techniques of real use to be documented. This may well be different from the intended functional purpose of the instance of E70 Thing (which can be documented with P103 was intended for (was intention of)). For example, it could be recorded that a particular wooden crate had a general use as a shelf support on a market stall even though it had been originally intended for carrying vegetables.
+The use of this property is intended to allow the documentation of usage patterns attested in historical records or through scientific investigation (for instance ceramic residue analysis). It should not be used to document the intended, and thus assumed, use of an object.</rdfs:comment>
+    <rdfs:domain rdf:resource="E70_Thing" />
+    <rdfs:range rdf:resource="E55_Type" />
+    <owl:inverseOf rdf:resource="P101i_was_use_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P101i_was_use_of">
+    <rdfs:label xml:lang="en">was use of</rdfs:label>
+    <rdfs:label xml:lang="de">war die Verwendung von</rdfs:label>
+    <rdfs:label xml:lang="el">ήταν χρήση του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">a été l'usage général de</rdfs:label>
+    <rdfs:label xml:lang="pt">foi uso de</rdfs:label>
+    <rdfs:label xml:lang="ru">был использовано для</rdfs:label>
+    <rdfs:label xml:lang="zh">被用于</rdfs:label>
+    <rdfs:domain rdf:resource="E55_Type" />
+    <rdfs:range rdf:resource="E70_Thing" />
+    <owl:inverseOf rdf:resource="P101_had_as_general_use" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P102_has_title">
+    <rdfs:label xml:lang="en">has title</rdfs:label>
+    <rdfs:label xml:lang="de">trägt den Titel</rdfs:label>
+    <rdfs:label xml:lang="el">έχει τίτλο</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour titre</rdfs:label>
+    <rdfs:label xml:lang="pt">tem título</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт названиe</rdfs:label>
+    <rdfs:label xml:lang="zh">有题名</rdfs:label>
+    <rdfs:comment>This property associates an instance of E35 Title that has been applied to an instance of E71 Human-Made Thing.
+The P102.1 has type property of the P102 has title (is title of) property enables the relationship between the title and the thing to be further clarified, for example, if the title was a given title, a supplied title etc.
+It allows any human-made material or immaterial thing to be given a title. It is possible to imagine a title being created without a specific object in mind.</rdfs:comment>
+    <rdfs:domain rdf:resource="E71_Human-Made_Thing" />
+    <rdfs:range rdf:resource="E35_Title" />
+    <rdfs:subPropertyOf rdf:resource="P1_is_identified_by" />
+    <owl:inverseOf rdf:resource="P102i_is_title_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P102i_is_title_of">
+    <rdfs:label xml:lang="en">is title of</rdfs:label>
+    <rdfs:label xml:lang="de">ist der Titel von</rdfs:label>
+    <rdfs:label xml:lang="el">είναι τίτλος του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">est le titre de</rdfs:label>
+    <rdfs:label xml:lang="pt">é título de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся названиeм</rdfs:label>
+    <rdfs:label xml:lang="zh">题名是</rdfs:label>
+    <rdfs:domain rdf:resource="E35_Title" />
+    <rdfs:range rdf:resource="E71_Human-Made_Thing" />
+    <rdfs:subPropertyOf rdf:resource="P1i_identifies" />
+    <owl:inverseOf rdf:resource="P102_has_title" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P103_was_intended_for">
+    <rdfs:label xml:lang="en">was intended for</rdfs:label>
+    <rdfs:label xml:lang="de">bestimmt für</rdfs:label>
+    <rdfs:label xml:lang="el">προοριζόταν για</rdfs:label>
+    <rdfs:label xml:lang="fr">a eu pour raison d'être</rdfs:label>
+    <rdfs:label xml:lang="pt">era destinado à</rdfs:label>
+    <rdfs:label xml:lang="ru">планировался для</rdfs:label>
+    <rdfs:label xml:lang="zh">被用于</rdfs:label>
+    <rdfs:comment>This property links an instance of E71 Human-Made Thing to an instance of E55 Type of usage or audience. It creates a relation between specific human-made things, both physical and immaterial, to E55 Types. This property can be used to specify intended methods and techniques of use or to characterise the intended audience by indicating a type of personal characteristic that everyone falling into the target audience has.
+Note: A link between specific human-made things and a specific use activity should be expressed using P19 was intended use of (was made for).</rdfs:comment>
+    <rdfs:domain rdf:resource="E71_Human-Made_Thing" />
+    <rdfs:range rdf:resource="E55_Type" />
+    <owl:inverseOf rdf:resource="P103i_was_intention_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P103i_was_intention_of">
+    <rdfs:label xml:lang="en">was intention of</rdfs:label>
+    <rdfs:label xml:lang="de">war Bestimmung von</rdfs:label>
+    <rdfs:label xml:lang="el">ήταν προορισμός του</rdfs:label>
+    <rdfs:label xml:lang="fr">a été la raison d'être de</rdfs:label>
+    <rdfs:label xml:lang="pt">era a destinação de</rdfs:labe

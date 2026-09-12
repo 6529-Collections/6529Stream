@@ -1,0 +1,117 @@
+bel>
+    <rdfs:label xml:lang="pt">foi verificada durante</rdfs:label>
+    <rdfs:label xml:lang="ru">наблюдался в</rdfs:label>
+    <rdfs:label xml:lang="zh">被观测</rdfs:label>
+    <rdfs:domain rdf:resource="E54_Dimension" />
+    <rdfs:range rdf:resource="E16_Measurement" />
+    <rdfs:subPropertyOf rdf:resource="P141i_was_assigned_by" />
+    <owl:inverseOf rdf:resource="P40_observed_dimension" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P41_classified">
+    <rdfs:label xml:lang="en">classified</rdfs:label>
+    <rdfs:label xml:lang="de">klassifizierte</rdfs:label>
+    <rdfs:label xml:lang="el">χαρακτήρισε</rdfs:label>
+    <rdfs:label xml:lang="fr">a classifié</rdfs:label>
+    <rdfs:label xml:lang="pt">classificou</rdfs:label>
+    <rdfs:label xml:lang="ru">классифицируeт</rdfs:label>
+    <rdfs:label xml:lang="zh">分类</rdfs:label>
+    <rdfs:comment>This property records the item to which a type was assigned in an E17 Type Assignment activity.
+Any instance of a CIDOC CRM entity may be assigned a type through type assignment. Type assignment events allow a more detailed path from E1 CRM Entity through P41i was classified by, E17 Type Assignment, P42 assigned, to E55 Type for assigning types to objects compared to the shortcut offered by P2 has type (is type of).</rdfs:comment>
+    <rdfs:domain rdf:resource="E17_Type_Assignment" />
+    <rdfs:range rdf:resource="E1_CRM_Entity" />
+    <rdfs:subPropertyOf rdf:resource="P140_assigned_attribute_to" />
+    <owl:inverseOf rdf:resource="P41i_was_classified_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P41i_was_classified_by">
+    <rdfs:label xml:lang="en">was classified by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde klassifiziert durch</rdfs:label>
+    <rdfs:label xml:lang="el">χαρακτηρίσθηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été classifié par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi classificada por</rdfs:label>
+    <rdfs:label xml:lang="ru">был классифицирован</rdfs:label>
+    <rdfs:label xml:lang="zh">被分类</rdfs:label>
+    <rdfs:domain rdf:resource="E1_CRM_Entity" />
+    <rdfs:range rdf:resource="E17_Type_Assignment" />
+    <rdfs:subPropertyOf rdf:resource="P140i_was_attributed_by" />
+    <owl:inverseOf rdf:resource="P41_classified" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P42_assigned">
+    <rdfs:label xml:lang="en">assigned</rdfs:label>
+    <rdfs:label xml:lang="de">wies zu</rdfs:label>
+    <rdfs:label xml:lang="el">απέδωσε ως ιδιότητα</rdfs:label>
+    <rdfs:label xml:lang="fr">a assigné</rdfs:label>
+    <rdfs:label xml:lang="pt">atribuiu</rdfs:label>
+    <rdfs:label xml:lang="ru">назначил</rdfs:label>
+    <rdfs:label xml:lang="zh">分配类型</rdfs:label>
+    <rdfs:comment>This property records the type that was assigned to an entity by an E17 Type Assignment activity.
+Type assignment events allow a more detailed path from E1 CRM Entity through P41i was classified by, E17 Type Assignment, P42 assigned, to E55 Type for assigning types to objects compared to the shortcut offered by P2 has type (is type of).
+For example, a fragment of an antique vessel could be assigned the type “attic red figured belly handled amphora” by expert A. The same fragment could be assigned the type “shoulder handled amphora” by expert B.
+A Type may be intellectually constructed independent from assigning an instance of it.</rdfs:comment>
+    <rdfs:domain rdf:resource="E17_Type_Assignment" />
+    <rdfs:range rdf:resource="E55_Type" />
+    <rdfs:subPropertyOf rdf:resource="P141_assigned" />
+    <owl:inverseOf rdf:resource="P42i_was_assigned_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P42i_was_assigned_by">
+    <rdfs:label xml:lang="en">was assigned by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde zugewiesen durch</rdfs:label>
+    <rdfs:label xml:lang="el">αποδόθηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été assigné par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi atribuído por</rdfs:label>
+    <rdfs:label xml:lang="ru">назначeн посрeдством</rdfs:label>
+    <rdfs:label xml:lang="zh">被分配类型</rdfs:label>
+    <rdfs:domain rdf:resource="E55_Type" />
+    <rdfs:range rdf:resource="E17_Type_Assignment" />
+    <rdfs:subPropertyOf rdf:resource="P141i_was_assigned_by" />
+    <owl:inverseOf rdf:resource="P42_assigned" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P43_has_dimension">
+    <rdfs:label xml:lang="en">has dimension</rdfs:label>
+    <rdfs:label xml:lang="de">hat Dimension</rdfs:label>
+    <rdfs:label xml:lang="el">έχει μέγεθος</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour dimension</rdfs:label>
+    <rdfs:label xml:lang="pt">tem dimensão</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт размeр</rdfs:label>
+    <rdfs:label xml:lang="zh">有度量规格</rdfs:label>
+    <rdfs:comment>This property records an instance of E54 Dimension of some instance of E70 Thing.
+In the case that the recorded property is a result of a measurement of an instance of E18 Physical Thing, this property is a shortcut of the more fully developed path from E18 Physical Thing through P39i was measured by, E16 Measurement, P40 observed dimension to E54 Dimension.
+It offers no information about how and when an E54 Dimension was established, nor by whom. Knowledge about an instance of E54 Dimension need not be the result of a measurement; it may be the result of evaluating data or other information, which should be documented as an instance of E13 Attribute Assignment.
+An instance of E54 Dimension is specific to an instance of E70 Thing.</rdfs:comment>
+    <rdfs:domain rdf:resource="E70_Thing" />
+    <rdfs:range rdf:resource="E54_Dimension" />
+    <owl:inverseOf rdf:resource="P43i_is_dimension_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P43i_is_dimension_of">
+    <rdfs:label xml:lang="en">is dimension of</rdfs:label>
+    <rdfs:label xml:lang="de">ist Dimension von</rdfs:label>
+    <rdfs:label xml:lang="el">είναι μέγεθος του</rdfs:label>
+    <rdfs:label xml:lang="fr">est la dimension de</rdfs:label>
+    <rdfs:label xml:lang="pt">é dimensão de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся размeром для</rdfs:label>
+    <rdfs:label xml:lang="zh">是度量规格</rdfs:label>
+    <rdfs:domain rdf:resource="E54_Dimension" />
+    <rdfs:range rdf:resource="E70_Thing" />
+    <owl:inverseOf rdf:resource="P43_has_dimension" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P44_has_condition">
+    <rdfs:label xml:lang="en">has condition</rdfs:label>
+    <rdfs:label xml:lang="de">hat Zustand</rdfs:label>
+    <rdfs:label xml:lang="el">έχει κατάσταση</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour état matériel</rdfs:label>
+    <rdfs:label xml:lang="pt">tem estado material</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт условиe</rdfs:label>
+    <rdfs:label xml:lang="zh">有状况</rdfs:label>
+    <rdfs:comment>This property records an E3 Condition State for some E18 Physical Thing.
+This property is a shortcut of the more fully developed path from E18 Physical Thing through P34i was assessed by, E14 Condition Assessment, P35 has identified to E3 Condition State. It offers no information about how and when the E3 Condition State was established, nor by whom.
+An instance of E3 Condition State is specific to an instance of E18 Physical Thing.</rdfs:comment>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E3_Condition_State" />
+    <owl:inverseOf rdf:resource="P44i_is_condition_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P44i_is_condition_of">
+    <rdfs:label xml:lang="en">is condition of</rdfs:label>
+    <rdfs:label xml:lang="de">ist Zustand von</rdfs:label>
+    <rdfs:label xml:lang="el">είναι κατάσταση του</rdfs:label>
+    <rdfs:label xml:lang="fr">est l'état matériel de</rdfs:label>
+    <rdfs:label xml:lang="pt">estado material de</rdfs:label>
+    <rdfs:label xml:lang="ru">я

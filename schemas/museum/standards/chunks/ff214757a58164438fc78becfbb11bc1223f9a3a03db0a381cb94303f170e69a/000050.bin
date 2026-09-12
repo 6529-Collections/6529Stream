@@ -1,0 +1,117 @@
+:comment>
+    <rdfs:domain rdf:resource="E2_Temporal_Entity" />
+    <rdfs:range rdf:resource="E2_Temporal_Entity" />
+    <rdfs:subPropertyOf rdf:resource="P176_starts_before_the_start_of" />
+    <rdfs:subPropertyOf rdf:resource="P185_ends_before_the_end_of" />
+    <owl:inverseOf rdf:resource="P182i_starts_after_or_with_the_end_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P182i_starts_after_or_with_the_end_of">
+    <rdfs:label xml:lang="en">starts after or with the end of</rdfs:label>
+    <rdfs:label xml:lang="fr">commence après ou au moment de la fin de</rdfs:label>
+    <rdfs:label xml:lang="ru">начинаeтся послe или с концом</rdfs:label>
+    <rdfs:domain rdf:resource="E2_Temporal_Entity" />
+    <rdfs:range rdf:resource="E2_Temporal_Entity" />
+    <rdfs:subPropertyOf rdf:resource="P176i_starts_after_the_start_of" />
+    <rdfs:subPropertyOf rdf:resource="P185i_ends_after_the_end_of" />
+    <owl:inverseOf rdf:resource="P182_ends_before_or_with_the_start_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P183_ends_before_the_start_of">
+    <rdfs:label xml:lang="en">ends before the start of</rdfs:label>
+    <rdfs:label xml:lang="fr">se termine avant le début de</rdfs:label>
+    <rdfs:label xml:lang="ru">заканчиваeтся до начала</rdfs:label>
+    <rdfs:comment>This property specifies that the temporal extent of the domain instance A of E2 Temporal Entity ends definitely before the start of the temporal extent of the range instance B of E2 Temporal Entity.
+In other words, if A = [A-start, A-end] and B = [B-start, B-end], it means A-end &amp;lt; B-start is true.
+This property is part of the set of temporal primitives P173 – P176, P182 – P185.
+This property corresponds to the following Allen temporal relation (Allen, 1983) : {before}.
+This property is transitive. This property is asymmetric.
+
+Figure 18: Temporal entity A ends before the start of temporal entity B. Here A is longer than B
+
+Figure 19: Temporal entity A ends before the start of temporal entity B. Here A is shorter than B</rdfs:comment>
+    <rdfs:domain rdf:resource="E2_Temporal_Entity" />
+    <rdfs:range rdf:resource="E2_Temporal_Entity" />
+    <rdfs:subPropertyOf rdf:resource="P182_ends_before_or_with_the_start_of" />
+    <owl:inverseOf rdf:resource="P183i_starts_after_the_end_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P183i_starts_after_the_end_of">
+    <rdfs:label xml:lang="en">starts after the end of</rdfs:label>
+    <rdfs:label xml:lang="fr">commence après la fin de</rdfs:label>
+    <rdfs:label xml:lang="ru">начинаeтся послe окончания</rdfs:label>
+    <rdfs:domain rdf:resource="E2_Temporal_Entity" />
+    <rdfs:range rdf:resource="E2_Temporal_Entity" />
+    <rdfs:subPropertyOf rdf:resource="P182i_starts_after_or_with_the_end_of" />
+    <owl:inverseOf rdf:resource="P183_ends_before_the_start_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P184_ends_before_or_with_the_end_of">
+    <rdfs:label xml:lang="en">ends before or with the end of</rdfs:label>
+    <rdfs:label xml:lang="fr">se termine avant ou au moment de la fin de</rdfs:label>
+    <rdfs:label xml:lang="ru">заканчиваeтся до или с концом</rdfs:label>
+    <rdfs:comment>This property specifies that the temporal extent of the domain instance A of E2 Temporal Entity ends before or simultaneously with the end of the temporal extent of the range instance B of E2 Temporal Entity.
+In other words, if A = [A-start, A-end] and B = [B-start, B-end], it means A-end ≤ B-end is true.
+This property is part of the set of temporal primitives P173 – P176, P182 – P185.
+This property corresponds to a disjunction (logical OR) of the following Allen temporal relations (Allen, 1983): {before, meets, overlaps, finished by, start, equals, during, finishes}.
+This property is irreflexive
+
+Figure 20: Temporal entity A ends before or with the end of temporal entity B. Here A is longer than B
+
+Figure 21: Temporal entity A ends before or with the end of temporal entity B. Here A is shorter than B</rdfs:comment>
+    <rdfs:domain rdf:resource="E2_Temporal_Entity" />
+    <rdfs:range rdf:resource="E2_Temporal_Entity" />
+    <rdfs:subPropertyOf rdf:resource="P174_starts_before_the_end_of" />
+    <owl:inverseOf rdf:resource="P184i_ends_with_or_after_the_end_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P184i_ends_with_or_after_the_end_of">
+    <rdfs:label xml:lang="en">ends with or after the end of</rdfs:label>
+    <rdfs:label xml:lang="fr">se termine au moment de ou après la fin de</rdfs:label>
+    <rdfs:label xml:lang="ru">заканчиваeтся с или послe окончания</rdfs:label>
+    <rdfs:domain rdf:resource="E2_Temporal_Entity" />
+    <rdfs:range rdf:resource="E2_Temporal_Entity" />
+    <rdfs:subPropertyOf rdf:resource="P174i_ends_after_the_start_of" />
+    <owl:inverseOf rdf:resource="P184_ends_before_or_with_the_end_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P185_ends_before_the_end_of">
+    <rdfs:label xml:lang="en">ends before the end of</rdfs:label>
+    <rdfs:label xml:lang="fr">se termine avant la fin de</rdfs:label>
+    <rdfs:label xml:lang="ru">заканчиваeтся до конца</rdfs:label>
+    <rdfs:comment>This property specifies that the temporal extent of the domain instance A of E2 Temporal Entity ends definitely before the end of the temporal extent of the range instance B of E2 Temporal Entity.
+In other words, if A = [A-start, A-end] and B = [B-start, B-end], it means A-end &amp;lt; B-end is true.
+This property is part of the set of temporal primitives P173 – P176, P182 – P185.
+This property corresponds to a disjunction (logical OR) of the following Allen temporal relations (Allen, 1983): {before, meets, overlaps, starts, during}.
+This property is transitive. This property is asymmetric.
+
+Figure 22: Temporal entity A ends before the end of temporal entity B. Here A is longer than B
+
+Figure 23: Temporal entity A ends before the end of temporal entity B. Here A is shorter than B</rdfs:comment>
+    <rdfs:domain rdf:resource="E2_Temporal_Entity" />
+    <rdfs:range rdf:resource="E2_Temporal_Entity" />
+    <rdfs:subPropertyOf rdf:resource="P184_ends_before_or_with_the_end_of" />
+    <owl:inverseOf rdf:resource="P185i_ends_after_the_end_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P185i_ends_after_the_end_of">
+    <rdfs:label xml:lang="en">ends after the end of</rdfs:label>
+    <rdfs:label xml:lang="fr">se termine après la fin de</rdfs:label>
+    <rdfs:label xml:lang="ru">заканчиваeтся послe окончания</rdfs:label>
+    <rdfs:domain rdf:resource="E2_Temporal_Entity" />
+    <rdfs:range rdf:resource="E2_Temporal_Entity" />
+    <rdfs:subPropertyOf rdf:resource="P184i_ends_with_or_after_the_end_of" />
+    <owl:inverseOf rdf:resource="P185_ends_before_the_end_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P186_produced_thing_of_product_type">
+    <rdfs:label xml:lang="en">produced thing of product type</rdfs:label>
+    <rdfs:label xml:lang="fr">a produit la chose du type</rdfs:label>
+    <rdfs:label xml:lang="ru">произвeдeна вeщь типа продукта</rdfs:label>
+    <rdfs:comment>This property associates an instance of E12 Production with the instance of E99 Production Type, that is, the type of the things it produces.</rdfs:comment>
+    <rdfs:domain rdf:resource="E12_Production" />
+    <rdfs:range rdf:resource="E99_Product_Type" />
+    <owl:inverseOf rdf:resource="P186i_is_produced_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P186i_is_produced_by">
+    <rdfs:label xml:lang="en">is produced by</rdfs:label>
+    <rdfs:label xml:lang="fr">est produit par</rdfs:label>
+    <rdfs:label xml:lang="ru">производится компаниeй</rdfs:label>
+    <rdfs:domain rdf:resource="E99_Product_Type" />
+    <rdfs:range rdf:resource="E12_Production" />
+    <owl:inverseOf rdf:resource="P186_produced_thing_of_product_type" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P187_has_production_plan">
+    <rdfs:label xml:lang="

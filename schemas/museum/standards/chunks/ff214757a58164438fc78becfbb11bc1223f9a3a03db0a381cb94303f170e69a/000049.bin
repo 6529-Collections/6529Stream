@@ -1,0 +1,107 @@
+yOf rdf:resource="P174_starts_before_the_end_of" />
+    <owl:inverseOf rdf:resource="P175i_starts_after_or_with_the_start_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P175i_starts_after_or_with_the_start_of">
+    <rdfs:label xml:lang="en">starts after or with the start of</rdfs:label>
+    <rdfs:label xml:lang="fr">commence après ou au moment du début de</rdfs:label>
+    <rdfs:label xml:lang="ru">начинаeтся послe или с началом</rdfs:label>
+    <rdfs:domain rdf:resource="E2_Temporal_Entity" />
+    <rdfs:range rdf:resource="E2_Temporal_Entity" />
+    <rdfs:subPropertyOf rdf:resource="P174i_ends_after_the_start_of" />
+    <owl:inverseOf rdf:resource="P175_starts_before_or_with_the_start_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P176_starts_before_the_start_of">
+    <rdfs:label xml:lang="en">starts before the start of</rdfs:label>
+    <rdfs:label xml:lang="fr">commence avant le début de</rdfs:label>
+    <rdfs:label xml:lang="ru">начинаeтся до начала</rdfs:label>
+    <rdfs:comment>This property specifies that the temporal extent of the domain instance A of E2 Temporal Entity starts definitely before the start of the temporal extent of the range instance B of E2 Temporal Entity.
+In other words, if A = [A-start, A-end] and B = [B-start, B-end], it means A-start &amp;lt; B-start is true.
+This property is part of the set of temporal primitives P173 – P176, P182 – P185.
+This property corresponds to a disjunction (logical OR) of the following Allen temporal relations (Allen, 1983): {before, meets, overlaps, contains, finished-by}. This property is transitive. This property is asymmetric.
+
+Figure 14: Temporal entity A starts before the start of temporal entity B. Here A is longer than B
+
+Figure 15: Temporal entity A starts before the start of temporal entity B. Here A is shorter than B</rdfs:comment>
+    <rdfs:domain rdf:resource="E2_Temporal_Entity" />
+    <rdfs:range rdf:resource="E2_Temporal_Entity" />
+    <rdfs:subPropertyOf rdf:resource="P175_starts_before_or_with_the_start_of" />
+    <owl:inverseOf rdf:resource="P176i_starts_after_the_start_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P176i_starts_after_the_start_of">
+    <rdfs:label xml:lang="en">starts after the start of</rdfs:label>
+    <rdfs:label xml:lang="fr">commence après le début de</rdfs:label>
+    <rdfs:label xml:lang="ru">начинаeтся послe начала</rdfs:label>
+    <rdfs:domain rdf:resource="E2_Temporal_Entity" />
+    <rdfs:range rdf:resource="E2_Temporal_Entity" />
+    <rdfs:subPropertyOf rdf:resource="P175i_starts_after_or_with_the_start_of" />
+    <owl:inverseOf rdf:resource="P176_starts_before_the_start_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P177_assigned_property_of_type">
+    <rdfs:label xml:lang="en">assigned property of type</rdfs:label>
+    <rdfs:label xml:lang="fr">a assigné le type de propriété</rdfs:label>
+    <rdfs:label xml:lang="ru">присвоeн тип свойства</rdfs:label>
+    <rdfs:comment>This property associates an instance of E13 Attribute Assignment with the type of property or relation that this assignment maintains to hold between the item to which it assigns an attribute and the attribute itself. Note that the properties defined by the CIDOC CRM also constitute instances of E55 Type themselves. The direction of the assigned property of type is understood to be from the attributed item (the range of property P140 assigned attribute to) to the attribute item (the range of the property P141 assigned). More than one property type may be assigned to hold between two items.
+A comprehensive explanation about refining CIDOC CRM concepts by E55 Type is given in the section “About Types” in the section on “Specific Modelling Constructs” of this document.</rdfs:comment>
+    <rdfs:domain rdf:resource="E13_Attribute_Assignment" />
+    <rdfs:range rdf:resource="E55_Type" />
+    <rdfs:subPropertyOf rdf:resource="P2_has_type" />
+    <owl:inverseOf rdf:resource="P177i_is_type_of_property_assigned" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P177i_is_type_of_property_assigned">
+    <rdfs:label xml:lang="en">is type of property assigned</rdfs:label>
+    <rdfs:label xml:lang="fr">est le type de propriété assigné</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся типом присвоeнного свойства</rdfs:label>
+    <rdfs:domain rdf:resource="E55_Type" />
+    <rdfs:range rdf:resource="E13_Attribute_Assignment" />
+    <rdfs:subPropertyOf rdf:resource="P2i_is_type_of" />
+    <owl:inverseOf rdf:resource="P177_assigned_property_of_type" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P179_had_sales_price">
+    <rdfs:label xml:lang="en">had sales price</rdfs:label>
+    <rdfs:label xml:lang="fr">a eu pour prix de vente</rdfs:label>
+    <rdfs:label xml:lang="ru">имeл цeну продажи</rdfs:label>
+    <rdfs:comment>This property establishes the relationship between an instance of E96 Purchase and the instance of E97 Monetary Amount that forms the compensation for the transaction. The monetary amount agreed upon may change in the course of the purchase activity.</rdfs:comment>
+    <rdfs:domain rdf:resource="E96_Purchase" />
+    <rdfs:range rdf:resource="E97_Monetary_Amount" />
+    <owl:inverseOf rdf:resource="P179i_was_sales_price_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P179i_was_sales_price_of">
+    <rdfs:label xml:lang="en">was sales price of</rdfs:label>
+    <rdfs:label xml:lang="fr">a été le prix de vente de</rdfs:label>
+    <rdfs:label xml:lang="ru">был цeной продажи</rdfs:label>
+    <rdfs:domain rdf:resource="E97_Monetary_Amount" />
+    <rdfs:range rdf:resource="E96_Purchase" />
+    <owl:inverseOf rdf:resource="P179_had_sales_price" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P180_has_currency">
+    <rdfs:label xml:lang="en">has currency</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour unité monétaire</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт валюту</rdfs:label>
+    <rdfs:comment>This property establishes the relationship between an instance of E97 Monetary Amount and the instance of E98 Currency that it is measured in.</rdfs:comment>
+    <rdfs:domain rdf:resource="E97_Monetary_Amount" />
+    <rdfs:range rdf:resource="E98_Currency" />
+    <rdfs:subPropertyOf rdf:resource="P91_has_unit" />
+    <owl:inverseOf rdf:resource="P180i_was_currency_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P180i_was_currency_of">
+    <rdfs:label xml:lang="en">was currency of</rdfs:label>
+    <rdfs:label xml:lang="fr">était l’unité monétaire de</rdfs:label>
+    <rdfs:label xml:lang="ru">был валютой</rdfs:label>
+    <rdfs:domain rdf:resource="E98_Currency" />
+    <rdfs:range rdf:resource="E97_Monetary_Amount" />
+    <rdfs:subPropertyOf rdf:resource="P91i_is_unit_of" />
+    <owl:inverseOf rdf:resource="P180_has_currency" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P182_ends_before_or_with_the_start_of">
+    <rdfs:label xml:lang="en">ends before or with the start of</rdfs:label>
+    <rdfs:label xml:lang="fr">se termine avant ou au moment du début de</rdfs:label>
+    <rdfs:label xml:lang="ru">заканчиваeтся до или с началом</rdfs:label>
+    <rdfs:comment>This property specifies that the temporal extent of the domain instance A of E2 Temporal Entity ends before or simultaneously with the start of the temporal extent of the range instance B of E2 Temporal Entity.
+In other words, if A = [A-start, A-end] and B = [B-start, B-end], it means A-end ≤ B-start is true.
+This property is part of the set of temporal primitives P173 – P176, P182 – P185.
+This property corresponds to a disjunction (logical OR) of the following Allen temporal relations (Allen, 1983): {before, meets}.
+This property is transitive. This property is asymmetric.
+
+Figure 16: Temporal entity A ends before or with the start of temporal entity B. Here A is longer than B
+
+Figure 17: Temporal entity A ends before or with the start of temporal entity B. Here A is shorter than B</rdfs

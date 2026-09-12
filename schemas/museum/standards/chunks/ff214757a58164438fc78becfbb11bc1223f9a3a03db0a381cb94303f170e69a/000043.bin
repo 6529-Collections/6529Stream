@@ -1,0 +1,102 @@
+ance of E36 Visual Item and the instance of E1 CRM Entity that it visually represents.
+Any entity may be represented visually. This property is part of the fully developed path from E24 Physical Human-Made Thing through P65 shows visual item (is shown by), E36 Visual Item, P138 represents (has representation) to E1 CRM Entity, which is shortcut by P62 depicts (is depicted by). P138.1 mode of representation allows the nature of the representation to be refined.
+This property is also used for the relationship between an original and a digitisation of the original by the use of techniques such as digital photography, flatbed or infrared scanning. Digitisation is here seen as a process with a mechanical, causal component rendering the spatial distribution of structural and optical properties of the original and does not necessarily include any visual similarity identifiable by human observation.</rdfs:comment>
+    <rdfs:domain rdf:resource="E36_Visual_Item" />
+    <rdfs:range rdf:resource="E1_CRM_Entity" />
+    <rdfs:subPropertyOf rdf:resource="P67_refers_to" />
+    <owl:inverseOf rdf:resource="P138i_has_representation" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P138i_has_representation">
+    <rdfs:label xml:lang="en">has representation</rdfs:label>
+    <rdfs:label xml:lang="de">wird dargestellt durch</rdfs:label>
+    <rdfs:label xml:lang="el">παριστάνεται από</rdfs:label>
+    <rdfs:label xml:lang="fr">est représenté par</rdfs:label>
+    <rdfs:label xml:lang="pt">tem representação</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт прeдставлeниe</rdfs:label>
+    <rdfs:label xml:lang="zh">有描绘</rdfs:label>
+    <rdfs:domain rdf:resource="E1_CRM_Entity" />
+    <rdfs:range rdf:resource="E36_Visual_Item" />
+    <rdfs:subPropertyOf rdf:resource="P67i_is_referred_to_by" />
+    <owl:inverseOf rdf:resource="P138_represents" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P139_has_alternative_form">
+    <rdfs:label xml:lang="en">has alternative form</rdfs:label>
+    <rdfs:label xml:lang="de">hat alternative Form</rdfs:label>
+    <rdfs:label xml:lang="el">έχει εναλλακτική μορφή</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour forme alternative</rdfs:label>
+    <rdfs:label xml:lang="pt">tem forma alternativa</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт альтeрнативную форму</rdfs:label>
+    <rdfs:label xml:lang="zh">有交替形式</rdfs:label>
+    <rdfs:comment>This property associates an instance of E41 Appellation with another instance of E41 Appellation that constitutes a derivative or variant of the former and that may also be used for identifying items identified by the former, in suitable contexts, independent from the particular item to be identified. This property should not be confused with additional variants of names used characteristically for a single, particular item, such as individual nicknames. It is a directed relationship, where the range expresses the derivative or variant and the domain the source of derivation or original form of variation, if such a direction can be established. Otherwise, the relationship is symmetric.
+Multiple names assigned to an object, which do not apply to all things identified with the specific instance of E41 Appellation, should be modelled as repeated values of P1 is identified by (identifies) of this object.
+P139.1 has type allows the type of derivation to be refined, for instance “transliteration from Latin 1 to ASCII”.</rdfs:comment>
+    <rdfs:domain rdf:resource="E41_Appellation" />
+    <rdfs:range rdf:resource="E41_Appellation" />
+    <owl:inverseOf rdf:resource="P139i_is_alternative_form_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P139i_is_alternative_form_of">
+    <rdfs:label xml:lang="en">is alternative form of</rdfs:label>
+    <rdfs:label xml:lang="fr">est la forme alternative de</rdfs:label>
+    <rdfs:domain rdf:resource="E41_Appellation" />
+    <rdfs:range rdf:resource="E41_Appellation" />
+    <owl:inverseOf rdf:resource="P139_has_alternative_form" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P140_assigned_attribute_to">
+    <rdfs:label xml:lang="en">assigned attribute to</rdfs:label>
+    <rdfs:label xml:lang="de">wies Merkmal zu</rdfs:label>
+    <rdfs:label xml:lang="el">απέδωσε ιδιότητα σε</rdfs:label>
+    <rdfs:label xml:lang="fr">a assigné l’attribut à</rdfs:label>
+    <rdfs:label xml:lang="pt">atribuiu atributo para</rdfs:label>
+    <rdfs:label xml:lang="ru">получeн атрибут посрeдством</rdfs:label>
+    <rdfs:label xml:lang="zh">分配属性于</rdfs:label>
+    <rdfs:comment>This property associates an instance of E13 Attribute Assignment with the instance of E1 CRM Entity about which it made an attribution. The instance of E1 CRM Entity plays the role of the domain of the attribution.
+The kind of attribution made should be documented using P177 assigned property of type (is type of property assigned).</rdfs:comment>
+    <rdfs:domain rdf:resource="E13_Attribute_Assignment" />
+    <rdfs:range rdf:resource="E1_CRM_Entity" />
+    <owl:inverseOf rdf:resource="P140i_was_attributed_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P140i_was_attributed_by">
+    <rdfs:label xml:lang="en">was attributed by</rdfs:label>
+    <rdfs:label xml:lang="de">bekam Merkmal zugewiesen durch</rdfs:label>
+    <rdfs:label xml:lang="el">χαρακτηρίστηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a reçu l’attribut par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi atribuído por</rdfs:label>
+    <rdfs:label xml:lang="ru">присвоeн атрибут</rdfs:label>
+    <rdfs:label xml:lang="zh">接受属性</rdfs:label>
+    <rdfs:domain rdf:resource="E1_CRM_Entity" />
+    <rdfs:range rdf:resource="E13_Attribute_Assignment" />
+    <owl:inverseOf rdf:resource="P140_assigned_attribute_to" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P141_assigned">
+    <rdfs:label xml:lang="en">assigned</rdfs:label>
+    <rdfs:label xml:lang="de">wies zu</rdfs:label>
+    <rdfs:label xml:lang="el">απέδωσε</rdfs:label>
+    <rdfs:label xml:lang="fr">a attribué</rdfs:label>
+    <rdfs:label xml:lang="pt">atribuiu</rdfs:label>
+    <rdfs:label xml:lang="ru">назначил</rdfs:label>
+    <rdfs:label xml:lang="zh">分配</rdfs:label>
+    <rdfs:comment>This property associates an instance of E13 Attribute Assignment with the instance of E1 CRM Entity used in the attribution. The instance of E1 CRM Entity here plays the role of the range of the attribution.
+The kind of attribution made should be documented using P177 assigned property of type (is type of property assigned).</rdfs:comment>
+    <rdfs:domain rdf:resource="E13_Attribute_Assignment" />
+    <rdfs:range rdf:resource="E1_CRM_Entity" />
+    <owl:inverseOf rdf:resource="P141i_was_assigned_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P141i_was_assigned_by">
+    <rdfs:label xml:lang="en">was assigned by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde zugewiesen durch</rdfs:label>
+    <rdfs:label xml:lang="el">αποδόθηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été attribué par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi atribuído por</rdfs:label>
+    <rdfs:label xml:lang="ru">назначeн посрeдством</rdfs:label>
+    <rdfs:label xml:lang="zh">被分配</rdfs:label>
+    <rdfs:domain rdf:resource="E1_CRM_Entity" />
+    <rdfs:range rdf:resource="E13_Attribute_Assignment" />
+    <owl:inverseOf rdf:resource="P141_assigned" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P142_used_constituent">
+    <rdfs:label xml:lang="en">used constituent</rdfs:label>
+    <rdfs:label xml:lang="de">benutzte Bestandteil</rdfs:label>
+    <rdfs:label xml:lang="fr">a mobilisé comme élément</rdfs:label>
+    <rdfs:label xml:lang="ru">использовал составляющую</rdfs:label>
+    <rdfs:label xml:lang="zh">使用构成成分</rdfs:label>
+    <rdfs:comment>This property associates an instance of E15 Identifier Assignment with the instance of E90 Symbolic Object used as constit

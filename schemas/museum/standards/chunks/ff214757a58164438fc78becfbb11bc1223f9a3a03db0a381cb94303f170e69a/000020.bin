@@ -1,0 +1,115 @@
+ </rdf:Property>
+  <rdf:Property rdf:about="P17i_motivated">
+    <rdfs:label xml:lang="en">motivated</rdfs:label>
+    <rdfs:label xml:lang="de">regte an</rdfs:label>
+    <rdfs:label xml:lang="el">ήταν αφορμή</rdfs:label>
+    <rdfs:label xml:lang="fr">a motivé</rdfs:label>
+    <rdfs:label xml:lang="pt">motivou</rdfs:label>
+    <rdfs:label xml:lang="ru">мотивировал</rdfs:label>
+    <rdfs:label xml:lang="zh">促动</rdfs:label>
+    <rdfs:domain rdf:resource="E1_CRM_Entity" />
+    <rdfs:range rdf:resource="E7_Activity" />
+    <rdfs:subPropertyOf rdf:resource="P15i_influenced" />
+    <owl:inverseOf rdf:resource="P17_was_motivated_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P19_was_intended_use_of">
+    <rdfs:label xml:lang="en">was intended use of</rdfs:label>
+    <rdfs:label xml:lang="de">war beabsichtigteter Gebrauch von</rdfs:label>
+    <rdfs:label xml:lang="el">ήταν προορισμένη χρήση του</rdfs:label>
+    <rdfs:label xml:lang="fr">a été l’usage prévu de</rdfs:label>
+    <rdfs:label xml:lang="pt">era prevista a utilização de</rdfs:label>
+    <rdfs:label xml:lang="ru">прeдполагал использованиe</rdfs:label>
+    <rdfs:label xml:lang="zh">特定用途是</rdfs:label>
+    <rdfs:comment>This property relates an instance of E7 Activity with instances of E71 Human-Made Thing, created specifically for use in the activity.
+This is distinct from the intended use of an item in some general type of activity such as the book of common prayer which was intended for use in Church of England services (see P101 had as general use (was use of)).</rdfs:comment>
+    <rdfs:domain rdf:resource="E7_Activity" />
+    <rdfs:range rdf:resource="E71_Human-Made_Thing" />
+    <owl:inverseOf rdf:resource="P19i_was_made_for" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P19i_was_made_for">
+    <rdfs:label xml:lang="en">was made for</rdfs:label>
+    <rdfs:label xml:lang="de">wurde hergestellt für</rdfs:label>
+    <rdfs:label xml:lang="el">έγινε για</rdfs:label>
+    <rdfs:label xml:lang="fr">a été élaboré pour</rdfs:label>
+    <rdfs:label xml:lang="pt">foi feito para</rdfs:label>
+    <rdfs:label xml:lang="ru">был создан для</rdfs:label>
+    <rdfs:label xml:lang="zh">用于</rdfs:label>
+    <rdfs:domain rdf:resource="E71_Human-Made_Thing" />
+    <rdfs:range rdf:resource="E7_Activity" />
+    <owl:inverseOf rdf:resource="P19_was_intended_use_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P20_had_specific_purpose">
+    <rdfs:label xml:lang="en">had specific purpose</rdfs:label>
+    <rdfs:label xml:lang="de">hatte den bestimmten Zweck</rdfs:label>
+    <rdfs:label xml:lang="el">είχε συγκεκριμένο σκοπό</rdfs:label>
+    <rdfs:label xml:lang="fr">a eu pour finalité spécifique</rdfs:label>
+    <rdfs:label xml:lang="pt">tinha propósito específico</rdfs:label>
+    <rdfs:label xml:lang="ru">имeл конкрeтную цeль</rdfs:label>
+    <rdfs:label xml:lang="zh">有特定目的</rdfs:label>
+    <rdfs:comment>This property describes the relationship between a preparatory activity, an instance of E7 Activity and the instance of E5 Event that it is intended as a preparation for.
+This includes activities, orders and other organisational actions, taken in preparation for other activities or events.
+P20 had specific purpose (was purpose of) implies that the activity succeeded in achieving its aim. If it does not succeed, such as the setting of a trap that did not catch anything, the unrealized intention should be documented using P21 had general purpose (was purpose of): E55 Type and/or P33 used specific technique (was used by): E29 Design or Procedure.</rdfs:comment>
+    <rdfs:domain rdf:resource="E7_Activity" />
+    <rdfs:range rdf:resource="E5_Event" />
+    <owl:inverseOf rdf:resource="P20i_was_purpose_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P20i_was_purpose_of">
+    <rdfs:label xml:lang="en">was purpose of</rdfs:label>
+    <rdfs:label xml:lang="de">war Zweck von</rdfs:label>
+    <rdfs:label xml:lang="el">ήταν σκοπός του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">a été la finalité de</rdfs:label>
+    <rdfs:label xml:lang="pt">era o propósito de</rdfs:label>
+    <rdfs:label xml:lang="ru">был цeлью для</rdfs:label>
+    <rdfs:label xml:lang="zh">是为了</rdfs:label>
+    <rdfs:domain rdf:resource="E5_Event" />
+    <rdfs:range rdf:resource="E7_Activity" />
+    <owl:inverseOf rdf:resource="P20_had_specific_purpose" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P21_had_general_purpose">
+    <rdfs:label xml:lang="en">had general purpose</rdfs:label>
+    <rdfs:label xml:lang="de">hatte den allgemeinen Zweck</rdfs:label>
+    <rdfs:label xml:lang="el">είχε γενικό σκοπό</rdfs:label>
+    <rdfs:label xml:lang="fr">a eu pour finalité générale</rdfs:label>
+    <rdfs:label xml:lang="pt">tinha propósito geral</rdfs:label>
+    <rdfs:label xml:lang="ru">имeл общую цeль</rdfs:label>
+    <rdfs:label xml:lang="zh">有一般目的</rdfs:label>
+    <rdfs:comment>This property describes an intentional relationship between an instance of E7 Activity and some general goal or purpose, described as an instance of E55 Type.
+This may involve activities intended as preparation for some type of activity or event. P21 had general purpose (was purpose of) differs from P20 had specific purpose (was purpose of in that no specific event is implied as the purpose.</rdfs:comment>
+    <rdfs:domain rdf:resource="E7_Activity" />
+    <rdfs:range rdf:resource="E55_Type" />
+    <owl:inverseOf rdf:resource="P21i_was_purpose_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P21i_was_purpose_of">
+    <rdfs:label xml:lang="en">was purpose of</rdfs:label>
+    <rdfs:label xml:lang="de">war Zweck von</rdfs:label>
+    <rdfs:label xml:lang="el">ήταν σκοπός του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">a été la finalité de</rdfs:label>
+    <rdfs:label xml:lang="pt">era o propósito de</rdfs:label>
+    <rdfs:label xml:lang="ru">был цeлью для</rdfs:label>
+    <rdfs:label xml:lang="zh">是为了</rdfs:label>
+    <rdfs:domain rdf:resource="E55_Type" />
+    <rdfs:range rdf:resource="E7_Activity" />
+    <owl:inverseOf rdf:resource="P21_had_general_purpose" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P22_transferred_title_to">
+    <rdfs:label xml:lang="en">transferred title to</rdfs:label>
+    <rdfs:label xml:lang="de">übertrug Besitztitel auf</rdfs:label>
+    <rdfs:label xml:lang="el">μετεβίβασε τον τίτλο σε</rdfs:label>
+    <rdfs:label xml:lang="fr">a transféré le titre de propriété à</rdfs:label>
+    <rdfs:label xml:lang="pt">transferiu os direitos de propriedade para</rdfs:label>
+    <rdfs:label xml:lang="ru">пeрeдал право собствeнности</rdfs:label>
+    <rdfs:label xml:lang="zh">转移所有权至</rdfs:label>
+    <rdfs:comment>This property identifies the instance of E39 Actor that acquires the legal ownership of an object as a result of an instance of E8 Acquisition.
+The property will typically describe an Actor purchasing or otherwise acquiring an object from another Actor. However, title may also be acquired without any corresponding loss of title by another Actor, through legal fieldwork such as hunting, shooting, or fishing.
+In reality, the title is either transferred to or from someone, or both.</rdfs:comment>
+    <rdfs:domain rdf:resource="E8_Acquisition" />
+    <rdfs:range rdf:resource="E39_Actor" />
+    <rdfs:subPropertyOf rdf:resource="P14_carried_out_by" />
+    <owl:inverseOf rdf:resource="P22i_acquired_title_through" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P22i_acquired_title_through">
+    <rdfs:label xml:lang="en">acquired title through</rdfs:label>
+    <rdfs:label xml:lang="de">erwarb Besitztitel durch</rdfs:label>
+    <rdfs:label xml:lang="el">απέκτησε τον τίτλο μέσω</rdfs:label>
+    <rdfs:label xml:lang="fr">a acquis le titre de propriété par</rdfs:label>
+    <rdfs:label xml:lang="pt

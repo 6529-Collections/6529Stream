@@ -1,0 +1,71 @@
+Transformation; the destruction of the old E18 Physical Thing(s) directly causes the creation of the new one(s) using or preserving some relevant substance and structure. Instances of E81 Transformation are therefore distinct from re-classifications (documented using E17 Type Assignment) or modifications (documented using E11 Modification) of objects that do not fundamentally change their nature or identity. Characteristic cases are reconstructions and repurposing of historical buildings or ruins, fires leaving buildings in ruins, taxidermy of specimen in natural history.
+Even though such instances of E81 Transformation are often motivated by a change of intended use, substantial material changes should justify the documentation of the result as a new instance of E18 Physical Thing and not just the change of function. The latter may be documented as an extended activity (instance of E7 Activity) of using it.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E63_Beginning_of_Existence" />
+    <rdfs:subClassOf rdf:resource="E64_End_of_Existence" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E83_Type_Creation">
+    <rdfs:label xml:lang="en">Type Creation</rdfs:label>
+    <rdfs:label xml:lang="de">Typuserfindung</rdfs:label>
+    <rdfs:label xml:lang="el">Δημιουργία Τύπου</rdfs:label>
+    <rdfs:label xml:lang="fr">Création de type</rdfs:label>
+    <rdfs:label xml:lang="pt">Criação de Tipo</rdfs:label>
+    <rdfs:label xml:lang="ru">Созданиe Типа</rdfs:label>
+    <rdfs:label xml:lang="zh">类型创建</rdfs:label>
+    <rdfs:comment>This class comprises activities formally defining new types of items.
+It is typically a rigorous scholarly or scientific process that ensures a type is exhaustively described and appropriately named. In some cases, particularly in archaeology and the life sciences, E83 Type Creation requires the identification of an exemplary specimen and the publication of the type definition in an appropriate scholarly forum. The activity modelled as an instance of E83 Type Creation is central to research in the life sciences, where a type would be referred to as a “taxon,” the type description as a “protologue,” and the exemplary specimens as “original element” or “holotype”.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E65_Creation" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E85_Joining">
+    <rdfs:label xml:lang="en">Joining</rdfs:label>
+    <rdfs:label xml:lang="de">Beitritt</rdfs:label>
+    <rdfs:label xml:lang="fr">Adhésion</rdfs:label>
+    <rdfs:label xml:lang="ru">Вступлeниe</rdfs:label>
+    <rdfs:label xml:lang="zh">加入</rdfs:label>
+    <rdfs:comment>This class comprises the activities that result in an instance of E39 Actor becoming a member of an instance of E74 Group. This class does not imply initiative by either party. It may be the initiative of a third party.
+Typical scenarios include becoming a member of a social organisation, becoming an employee of a company, marriage, the adoption of a child by a family, and the inauguration of somebody into an official position.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E7_Activity" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E86_Leaving">
+    <rdfs:label xml:lang="en">Leaving</rdfs:label>
+    <rdfs:label xml:lang="de">Austritt</rdfs:label>
+    <rdfs:label xml:lang="fr">Départ</rdfs:label>
+    <rdfs:label xml:lang="ru">Выход</rdfs:label>
+    <rdfs:label xml:lang="zh">离开</rdfs:label>
+    <rdfs:comment>This class comprises the activities that result in an instance of E39 Actor to be disassociated from an instance of E74 Group. This class does not imply initiative by either party. It may be the initiative of a third party.
+Typical scenarios include the termination of membership in a social organisation, ending the employment at a company, divorce, and the end of tenure of somebody in an official position.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E7_Activity" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E87_Curation_Activity">
+    <rdfs:label xml:lang="en">Curation Activity</rdfs:label>
+    <rdfs:label xml:lang="de">Kuratorische Tätigkeit</rdfs:label>
+    <rdfs:label xml:lang="fr">Activité curatoriale</rdfs:label>
+    <rdfs:label xml:lang="ru">Кураторство</rdfs:label>
+    <rdfs:label xml:lang="zh">管理</rdfs:label>
+    <rdfs:comment>This class comprises the activities that contribute to the management and the preservation and evolution of instances of E78 Curated Holding, following an implicit or explicit curation plan.
+It specializes the notion of activity into the curation of a collection and allows the history of curation to be recorded.
+Items are accumulated and organized following criteria such as subject, chronological period, material type, style of art, etc., and can be added or removed from an instance of E78 Curated Holding for a specific purpose and/or audience. The initial aggregation of items to form a collection is regarded as an instance of E12 Production Event, while the activities of evolving, preserving, and promoting a collection are regarded as instances of E87 Curation Activity.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E7_Activity" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E89_Propositional_Object">
+    <rdfs:label xml:lang="en">Propositional Object</rdfs:label>
+    <rdfs:label xml:lang="de">Aussagenobjekt</rdfs:label>
+    <rdfs:label xml:lang="fr">Objet propositionnel</rdfs:label>
+    <rdfs:label xml:lang="ru">Пропозициональный Объeкт</rdfs:label>
+    <rdfs:label xml:lang="zh">命题对象</rdfs:label>
+    <rdfs:comment>This class comprises immaterial items, including but not limited to stories, plots, procedural prescriptions, algorithms, laws of physics or images that are, or represent in some sense, sets of propositions about real or imaginary things and that are documented as single units or serve as topic of discourse.
+This class also comprises items that are “about” something in the sense of a subject. In the wider sense, this class includes expressions of psychological value such as non-figural art and musical themes. However, conceptual items such as types and classes are not instances of E89 Propositional Object. This should not be confused with the definition of a type, which is indeed an instance of E89 Propositional Object.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E28_Conceptual_Object" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E90_Symbolic_Object">
+    <rdfs:label xml:lang="en">Symbolic Object</rdfs:label>
+    <rdfs:label xml:lang="de">Symbolisches Objekt</rdfs:label>
+    <rdfs:label xml:lang="fr">Objet symbolique</rdfs:label>
+    <rdfs:label xml:lang="ru">Символичeский Объeкт</rdfs:label>
+    <rdfs:label xml:lang="zh">符号对象</rdfs:label>
+    <rdfs:comment>This class comprises identifiable symbols and any aggregation of symbols, such as characters, identifiers, traffic signs, emblems, texts, data sets, images, musical scores, multimedia objects, computer program code, or mathematical formulae that have an objectively recognizable structure and that are documented as single units.
+It includes sets of signs of any nature, which may serve to designate something, or to communicate some propositional content. An instance of E90 Symbolic Object may or may not have a specific meaning, for example an arbitrary character string.
+In some cases, the content of an instance of E90 Symbolic Object may completely be represented by a serialized digital content model, such as a sequence of ASCII-encoded characters, an XML or HTML document, or a TIFF image. The property P3 has note and its subproperty P190 has symbolic content allow for the description of this content model. In order to disambiguate which symbolic level is the carrier of the meaning, the property P3.1 has type can be used to specify the encoding (e.g. “bit”, “Latin character”, RGB pixel).</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E28_Conceptual_Object" />
+    <rdfs:subClassOf rdf:resource="E72_Legal_Object" />
+  </rdfs:Class>
+  <rdfs:Class rdf
