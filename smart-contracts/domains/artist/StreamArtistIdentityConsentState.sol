@@ -346,6 +346,21 @@ library StreamArtistIdentityConsentState {
             a.nonce,
             a.time
         );
+        if (p.subjectKind == 7) {
+            m = StreamArtistIdentityState.authorizeIntentAttestation(
+                identity,
+                replay,
+                o,
+                c,
+                b.artistId,
+                a,
+                proof,
+                StreamArtistHashes.attestationDigest(o.environment, p, a),
+                record,
+                identity.identities[b.artistId].authorityAddress
+            );
+            return (m, record);
+        }
         m = StreamArtistIdentityState.authorize(
             identity,
             replay,

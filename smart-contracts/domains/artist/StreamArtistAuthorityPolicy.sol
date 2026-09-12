@@ -48,6 +48,23 @@ library StreamArtistAuthorityPolicy {
         ) {
             revert T.InvalidIdentity(artistId);
         }
+        _requireCapability(principal, artistId, required);
+    }
+
+    /// @dev AA-INTENT gives subject7 CAP_INTENT_RECORDS alone; ordinary attestations retain CAP_ATTEST.
+    function requireIntentAttestation(T.Identity memory principal, bytes32 artistId) internal view {
+        if (
+            principal.authorityAddress == address(0)
+                || !ordinary(principal.authorityClass, principal.status, false)
+        ) revert T.InvalidIdentity(artistId);
+        if (principal.authorityClass == 1) return;
+        _requireCapability(principal, artistId, 64);
+    }
+
+    function _requireCapability(T.Identity memory principal, bytes32 artistId, uint32 required)
+        private
+        view
+    {
         Estate.AuthorityCapabilities memory actual = capabilities(artistId);
         if (
             actual.authorityAddress != principal.authorityAddress

@@ -4,6 +4,8 @@ import "../../interfaces/stream/artist/IStreamArtistIdentityRevision.sol";
 
 import "./StreamArtistOwner.sol";
 import "./StreamArtistCurrentAuthorityFacts.sol";
+import "./StreamArtistRecordPublicationState.sol";
+import "../../interfaces/stream/artist/IStreamArtistRecordPublicationOwner.sol";
 import {
     StreamArtistBindingLifecycleTypes as L
 } from "../../interfaces/stream/artist/StreamArtistBindingLifecycleTypes.sol";
@@ -21,6 +23,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
     mapping(bytes32 => T.AttestationRecord) private _attestations;
     mapping(bytes32 => T.AttestationRecord) private _records;
     mapping(bytes32 => bytes) private _statements;
+    mapping(bytes32 => IStreamArtistRecordPublicationOwner.Record) private _publications;
     /// @notice Additional context reconstructing a refusal's exact normative record from events.
     event ArtistBindingTerminationContext(
         uint16 schemaVersion,
@@ -97,6 +100,14 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
 
     function statementBytes(bytes32 hash) external view returns (bytes memory) {
         return _statements[hash];
+    }
+
+    function publicationAttestation(bytes32 recordHash)
+        external
+        view
+        returns (IStreamArtistRecordPublicationOwner.Record memory)
+    {
+        return _publications[recordHash];
     }
 
     function claim(
@@ -358,6 +369,40 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             statement,
             authority.authorityClass
         );
+    }
+
+    function recordPublicationAttestation(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.Attestation calldata p,
+        R.AuthorityFact calldata authority,
+        uint256 nonce,
+        uint64 signedAt,
+        bytes calldata statement,
+        bytes32 metadataHostCodeHash
+    ) external returns (bytes32) {
+        _check(c, 24);
+        StreamArtistCurrentAuthorityFacts.requireAccepted(
+            b, authority.authorityAddress, authority, false
+        );
+        if ((p.subjectKind != 7 && p.subjectKind != 8) || metadataHostCodeHash == 0) {
+            revert T.InvalidRecord();
+        }
+        Attribution storage attr = _attributions[p.collectionId];
+        if ((attr.state != 2 && attr.state != 3) || attr.generation != b.generation) {
+            revert T.InvalidAttribution(p.collectionId);
+        }
+        (bytes32 record, bytes32 action, bytes32 stateDelta) = StreamArtistRecordPublicationState.record(
+            _records,
+            _attestations,
+            _statements,
+            _publications,
+            StreamArtistRecordPublicationState.Input(
+                _environment(), b, p, authority, nonce, signedAt, statement, metadataHostCodeHash
+            )
+        );
+        _commit(c, action, stateDelta, bytes32(0), record);
+        return record;
     }
 
     function _recordAttestation(

@@ -266,6 +266,39 @@ library StreamArtistIdentityState {
     ) public returns (Mutation memory) {
         T.Identity storage item = state.identities[artistId];
         StreamArtistAuthorityPolicy.requireOperation(item, artistId, c.operationId);
+        return _authorize(state, replay, o, c, artistId, a, proof, digest, record, expectedSigner);
+    }
+
+    function authorizeIntentAttestation(
+        State storage state,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        OwnerContext memory o,
+        T.ActionContext memory c,
+        bytes32 artistId,
+        T.Authorization memory a,
+        T.SignerApproval memory proof,
+        bytes32 digest,
+        bytes32 record,
+        address expectedSigner
+    ) public returns (Mutation memory) {
+        if (c.operationId != 24) revert T.InvalidRecord();
+        StreamArtistAuthorityPolicy.requireIntentAttestation(state.identities[artistId], artistId);
+        return _authorize(state, replay, o, c, artistId, a, proof, digest, record, expectedSigner);
+    }
+
+    function _authorize(
+        State storage state,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        OwnerContext memory o,
+        T.ActionContext memory c,
+        bytes32 artistId,
+        T.Authorization memory a,
+        T.SignerApproval memory proof,
+        bytes32 digest,
+        bytes32 record,
+        address expectedSigner
+    ) private returns (Mutation memory) {
+        T.Identity storage item = state.identities[artistId];
         if (
             proof.signer != expectedSigner || expectedSigner == address(0) || proof.digest != digest
                 || (proof.direct && (c.actor != proof.signer || a.signature.length != 0))

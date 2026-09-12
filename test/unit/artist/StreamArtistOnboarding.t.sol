@@ -5,6 +5,7 @@ import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 import "../../helpers/OfficialSafeFixture.sol";
 import "./ArtistEstateArchivalFixture.sol";
 import "./ArtistSaleRegistryFixture.sol";
+import "./ArtistPublicationHostFixture.sol";
 import "./ArtistIdentityReadEncodingFixture.sol";
 import "../../../smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol";
 import "../../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
@@ -500,6 +501,419 @@ contract StreamArtistOnboardingTest is
     uint8 private saleScopeFixture;
     StreamModuleRegistry private saleModules;
     StreamNativeFixedPriceSaleAdapter private nativeSale;
+
+    function _publicationHost() private returns (ArtistPublicationHostFixture host) {
+        actualSaleRegistryFixture = true;
+        setUp();
+        _accept();
+        host = new ArtistPublicationHostFixture(address(core));
+        _saleRegister(
+            saleModules,
+            factory.governanceAuthority(),
+            address(host),
+            keccak256("COLLECTION_METADATA"),
+            type(IStreamArtistRecordPublicationHost).interfaceId
+        );
+        core.set(keccak256("COLLECTION_METADATA"), address(host), false);
+    }
+
+    function _publicationTerms(ArtistPublicationHostFixture host, bool intent)
+        private
+        view
+        returns (P.Publication memory pub, T.Attestation memory p, bytes memory statement)
+    {
+        pub = P.Publication(
+            address(host),
+            address(artist),
+            1,
+            keccak256("exact unit collection subject"),
+            intent ? keccak256("ARTIST_INTENT") : keccak256("ARTIST_STATEMENT"),
+            intent ? keccak256("STREAM_ARTIST_INTENT_V1") : keccak256("STREAM_ARTIST_INTERVIEW_V1"),
+            keccak256("JCS_RFC8785"),
+            1,
+            keccak256("actual unit publication bytes"),
+            keccak256("urn:publication-unit"),
+            uint64(block.timestamp),
+            bytes32(0)
+        );
+        pub.candidateRecordHash = host.candidateHash(pub);
+        statement = abi.encode(uint16(1), pub);
+        p = T.Attestation(
+            1,
+            intent ? 7 : 8,
+            pub.subjectId,
+            intent ? pub.candidateRecordHash : bytes32(0),
+            keccak256("6529STREAM_ARTIST_RECORD_PUBLICATION_V1"),
+            keccak256(statement),
+            "urn:publication-unit"
+        );
+    }
+
+    function _publicationExpected(T.Attestation memory p, T.Authorization memory a, uint8 class_)
+        private
+        view
+        returns (bytes32)
+    {
+        bytes32[16] memory words;
+        words[0] = keccak256("6529STREAM_ARTIST_ATTESTATION_RECORD_V1");
+        words[1] = bytes32(block.chainid);
+        words[2] = bytes32(uint256(uint160(address(ingress))));
+        words[3] = bytes32(uint256(uint160(address(core))));
+        words[4] = bytes32(uint256(1));
+        words[5] = bytes32(uint256(p.subjectKind));
+        words[6] = p.subjectId;
+        words[7] = p.subjectStateHash;
+        words[8] = p.schemaId;
+        words[9] = p.statementHash;
+        words[10] = keccak256(bytes(p.statementURI));
+        words[11] = artistId;
+        words[12] = bytes32(uint256(uint160(address(artist))));
+        words[13] = bytes32(uint256(class_));
+        words[14] = bytes32(a.nonce);
+        words[15] = bytes32(uint256(a.time));
+        return keccak256(abi.encode(words));
+    }
+
+    function testPublicationActualSafeExactRecordEventArchiveAndCurrentRead() public {
+        ArtistPublicationHostFixture host = _publicationHost();
+        (P.Publication memory pub, T.Attestation memory p, bytes memory statement) =
+            _publicationTerms(host, true);
+        T.Authorization memory a = _authorization(true);
+        bytes32 expected = _publicationExpected(p, a, 1);
+        vm.recordLogs();
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistOnboarding.recordArtistAttestation, (p, a, statement)),
+                0
+            ),
+            "actual op24 Safe CALL"
+        );
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        uint256 count;
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].emitter != suite.owners[4] || logs[i].topics.length == 0
+                    || logs[i].topics[0]
+                        != keccak256(
+                            "ArtistAttestationRecorded(uint16,uint256,uint8,address,bytes32,bytes32,bytes32,bytes32,bytes32,uint8,uint256,uint64,bytes32)"
+                        )
+            ) continue;
+            ++count;
+            require(
+                logs[i].topics.length == 4 && logs[i].topics[1] == bytes32(uint256(1))
+                    && logs[i].topics[2] == bytes32(uint256(7))
+                    && logs[i].topics[3] == bytes32(uint256(uint160(address(artist))))
+                    && keccak256(logs[i].data)
+                        == keccak256(
+                            abi.encode(
+                                uint16(1),
+                                p.subjectId,
+                                p.subjectStateHash,
+                                p.schemaId,
+                                p.statementHash,
+                                pub.uriHash,
+                                uint8(1),
+                                a.nonce,
+                                a.time,
+                                expected
+                            )
+                        ),
+                "exact op24 event"
+            );
+        }
+        require(count == 1, "one original normative event");
+        P.Evidence memory evidence = ingress.requireRecordPublication(expected, pub);
+        T.Binding memory b = IStreamArtistBindingOwner(suite.owners[0]).binding(1);
+        require(
+            evidence.attestationRecordHash == expected && evidence.artistId == artistId
+                && evidence.bindingHash == b.bindingHash
+                && evidence.bindingGeneration == b.generation && evidence.signer == address(artist)
+                && evidence.authorityClass == 1 && evidence.requiredCapability == 64
+                && evidence.signedAt == a.time
+                && evidence.publicationHash == keccak256(abi.encode(pub)),
+            "all nine exact current evidence fields"
+        );
+        IStreamArtistRecordPublicationOwner.Record memory saved =
+            IStreamArtistRecordPublicationOwner(suite.owners[4]).publicationAttestation(expected);
+        require(
+            saved.metadataHostCodeHash == address(host).codehash
+                && keccak256(abi.encode(saved.publication)) == evidence.publicationHash,
+            "immutable owner evidence"
+        );
+        (
+            T.Binding memory archived,
+            T.Attestation memory ap,
+            T.Authorization memory submitted,
+            bytes memory actualStatement,
+            T.SignerApproval memory proof,
+            T.Authorization memory effective,
+            R.AuthorityFact memory authority,
+            P.Publication memory captured,
+            bytes32 codeHash
+        ) = abi.decode(
+            _operationPayload(24, address(artist), expected),
+            (
+                T.Binding,
+                T.Attestation,
+                T.Authorization,
+                bytes,
+                T.SignerApproval,
+                T.Authorization,
+                R.AuthorityFact,
+                P.Publication,
+                bytes32
+            )
+        );
+        require(
+            archived.bindingHash == b.bindingHash && ap.statementHash == p.statementHash
+                && submitted.nonce == a.nonce && effective.time == a.time && proof.direct
+                && authority.authorityAddress == address(artist)
+                && keccak256(actualStatement) == p.statementHash
+                && keccak256(abi.encode(captured)) == evidence.publicationHash
+                && codeHash == saved.metadataHostCodeHash,
+            "archive binds exact original and current owner facts"
+        );
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(
+                    IStreamArtistRecordPublication.requireRecordPublication, (expected, pub)
+                ),
+                0
+            ),
+            "Safe validating read CALL"
+        );
+        require(
+            ingress.supportsInterface(type(IStreamArtistRecordPublication).interfaceId),
+            "typed interface advertised"
+        );
+
+        bytes memory readData = abi.encodeCall(
+            IStreamArtistRecordPublication.requireRecordPublication, (expected, pub)
+        );
+        (bool readOk, bytes memory returned) = address(ingress).staticcall(readData);
+        require(
+            readOk && returned.length == 288
+                && keccak256(returned) == keccak256(abi.encode(evidence)),
+            "all nine static return words preserved through fixed reader"
+        );
+        require(
+            executeSafe(
+                artist,
+                keys,
+                suite.owners[4],
+                0,
+                abi.encodeCall(
+                    IStreamArtistRecordPublicationOwner.publicationAttestation, (expected)
+                ),
+                0
+            ),
+            "actual Safe historical owner read"
+        );
+        address reader = ingress.registryReadExtension();
+        uint256 safeNonce = artist.nonce();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executePublicationSafe(reader, readData);
+        require(artist.nonce() == safeNonce, "fixed child onlyHost rejects direct Safe");
+        T.ActionContext memory context = T.ActionContext(
+            24, address(artist), IStreamArtistOwner(suite.owners[4]).ownerStateSnapshotV2()
+        );
+        bytes memory callback = abi.encodeCall(
+            IStreamArtistRecordPublicationOwner.recordPublicationAttestation,
+            (context, b, p, authority, a.nonce, a.time, statement, codeHash)
+        );
+        bytes32 roots = _roots();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executePublicationSafe(suite.owners[4], callback);
+        require(
+            _roots() == roots && artist.nonce() == safeNonce,
+            "protocol callback rejects actual Safe atomically"
+        );
+    }
+
+    function executePublicationSafe(address target, bytes calldata data) external {
+        require(executeSafe(artist, keys, target, 0, data, 0), "actual publication Safe wrapper");
+    }
+
+    function testPublicationMalformedHostAndLateArchiveRollbackSameProofRetry() public {
+        ArtistPublicationHostFixture host = _publicationHost();
+        (P.Publication memory pub, T.Attestation memory p, bytes memory statement) =
+            _publicationTerms(host, false);
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.attestationDigest(p, a));
+        bytes32 expected = _publicationExpected(p, a, 1);
+        bytes32 roots = _roots();
+        uint256 hint = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId).nonceHint;
+        for (uint256 mode = 1; mode <= 4; ++mode) {
+            host.setMode(mode);
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    StreamArtistRecordPublicationReads.PublicationReadFailed.selector,
+                    address(host),
+                    IStreamArtistRecordPublicationHost.requireArtistRecordCandidate.selector
+                )
+            );
+            ingress.recordArtistAttestation(p, a, statement);
+            require(_roots() == roots, "malformed/OOG provider no writes");
+        }
+        host.setMode(0);
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodeWithSelector(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidRecord.selector));
+        ingress.recordArtistAttestation(p, a, statement);
+        require(
+            _roots() == roots
+                && IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId).nonceHint == hint
+                && IStreamArtistRecordPublicationOwner(suite.owners[4])
+                    .publicationAttestation(expected).evidence.attestationRecordHash == 0,
+            "late Archive rolls nonce and appended publication evidence back"
+        );
+        avm.clearMockedCalls();
+        require(
+            ingress.recordArtistAttestation(p, a, statement) == expected,
+            "same signed authorization healthy retry"
+        );
+        require(
+            ingress.requireRecordPublication(expected, pub).requiredCapability == 1,
+            "current interview evidence"
+        );
+        roots = _roots();
+        avm.expectPartialRevert(T.Replay.selector);
+        ingress.recordArtistAttestation(p, a, statement);
+        require(_roots() == roots, "exact original authorization replay rejected");
+    }
+
+    function testPublicationUnusedOldAuthorityCannotPublishAfterRotation() public {
+        ArtistPublicationHostFixture host = _publicationHost();
+        (P.Publication memory pub, T.Attestation memory p, bytes memory statement) =
+            _publicationTerms(host, true);
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.attestationDigest(p, a));
+        bytes32 record = ingress.recordArtistAttestation(p, a, statement);
+        IStreamArtistRecordPublicationOwner owner =
+            IStreamArtistRecordPublicationOwner(suite.owners[4]);
+        bytes32 historical = keccak256(abi.encode(owner.publicationAttestation(record)));
+        _newRotationSafe(15801);
+        bytes32 rotation = _stageRotation(0);
+        _executeTimedRotation(rotation);
+        _adoptRotatedSafe();
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidRecord.selector));
+        ingress.requireRecordPublication(record, pub);
+        require(
+            keccak256(abi.encode(owner.publicationAttestation(record))) == historical,
+            "historical authorship stays immutable"
+        );
+        (pub, p, statement) = _publicationTerms(host, true);
+        a = _authorization(true);
+        a.signature = _signature(ingress.attestationDigest(p, a));
+        bytes32 fresh = ingress.recordArtistAttestation(p, a, statement);
+        require(
+            fresh != record
+                && ingress.requireRecordPublication(fresh, pub).signer == address(artist),
+            "fresh current principal permits new publication"
+        );
+    }
+
+    function testPublicationEstateIntent64AloneAndNoOrdinaryAttestationCapability() public {
+        ArtistPublicationHostFixture host = _publicationHost();
+        _estateActivateAndAdopt(64);
+        (P.Publication memory pub, T.Attestation memory p, bytes memory statement) =
+            _publicationTerms(host, true);
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.attestationDigest(p, a));
+        bytes32 expected = _publicationExpected(p, a, 3);
+        require(
+            ingress.recordArtistAttestation(p, a, statement) == expected,
+            "subject7 uses intent64 alone"
+        );
+        P.Evidence memory evidence = ingress.requireRecordPublication(expected, pub);
+        require(
+            evidence.authorityClass == 3 && evidence.requiredCapability == 64
+                && evidence.signer == address(artist),
+            "truthful successor capability"
+        );
+        (pub, p, statement) = _publicationTerms(host, false);
+        a = _authorization(true);
+        a.signature = _signature(ingress.attestationDigest(p, a));
+        bytes32 roots = _roots();
+        vm.expectRevert(
+            abi.encodeWithSelector(Estate.EstateCapabilityUnavailable.selector, artistId, uint32(1))
+        );
+        ingress.recordArtistAttestation(p, a, statement);
+        require(
+            _roots() == roots
+                && ingress.currentAuthorityCapabilities(artistId).effectiveCapabilities == 64,
+            "intent grant cannot authorize ordinary statement"
+        );
+    }
+
+    function testPublicationSemanticAssertionExactFamilyCurrentSafeAndHostPin() public {
+        ArtistPublicationHostFixture host = _publicationHost();
+        (P.Publication memory pub, T.Attestation memory p,) = _publicationTerms(host, false);
+        pub.recordType = keccak256("ARTIST_SEMANTIC_ASSERTION");
+        pub.schemaId = keccak256("STREAM_SEMANTIC_ASSERTION_V1");
+        pub.candidateRecordHash = host.candidateHash(pub);
+        bytes memory statement = abi.encode(uint16(1), pub);
+        p.statementHash = keccak256(statement);
+        T.Authorization memory a = _authorization(true);
+        bytes32 expected = _publicationExpected(p, a, 1);
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistOnboarding.recordArtistAttestation, (p, a, statement)),
+                0
+            ),
+            "actual semantic assertion Safe proof"
+        );
+        P.Evidence memory e = ingress.requireRecordPublication(expected, pub);
+        require(
+            e.requiredCapability == 1 && e.publicationHash == keccak256(abi.encode(pub))
+                && e.signer == address(artist),
+            "semantic assertion exact ordinary authorization"
+        );
+        bytes32 historic = keccak256(
+            abi.encode(
+                IStreamArtistRecordPublicationOwner(suite.owners[4])
+                    .publicationAttestation(expected)
+            )
+        );
+        host.setCore(address(0xBAD));
+        vm.expectRevert(abi.encodeWithSelector(T.ComponentChanged.selector, address(host)));
+        ingress.requireRecordPublication(expected, pub);
+        host.setCore(address(core));
+        require(
+            keccak256(abi.encode(ingress.requireRecordPublication(expected, pub)))
+                == keccak256(abi.encode(e)),
+            "same-context restored Core positive control"
+        );
+        P.Publication memory altered = abi.decode(abi.encode(pub), (P.Publication));
+        altered.recordType = keccak256("ARTIST_STATEMENT");
+        altered.candidateRecordHash = host.candidateHash(altered);
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidRecord.selector));
+        ingress.requireRecordPublication(expected, altered);
+        require(
+            keccak256(
+                abi.encode(
+                    IStreamArtistRecordPublicationOwner(suite.owners[4])
+                        .publicationAttestation(expected)
+                )
+            ) == historic,
+            "new publication cannot relabel immutable semantic authorship"
+        );
+    }
 
     /// @dev Actual registered native record/facts and actual artist owners. Core and Executor remain unit boundaries.
     function _saleFixture(uint8 scope_) private returns (Sale.Consent memory p) {

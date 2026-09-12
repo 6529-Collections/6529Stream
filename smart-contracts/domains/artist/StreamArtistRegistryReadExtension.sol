@@ -42,6 +42,17 @@ contract StreamArtistRegistryReadExtension {
         _;
     }
 
+    function requireRecordPublication(bytes32 recordHash, P.Publication calldata publication)
+        external
+        view
+        onlyHost
+        returns (P.Evidence memory)
+    {
+        return StreamArtistRecordPublicationReads.requirePublication(
+            _contentSuite(), recordHash, publication
+        );
+    }
+
     function estateActivationDigest(Estate.Request calldata p, T.Authorization calldata a)
         external
         view

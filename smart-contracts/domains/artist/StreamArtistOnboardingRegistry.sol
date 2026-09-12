@@ -8,6 +8,7 @@ import "./StreamArtistRegistryReadExtension.sol";
 import "./StreamArtistRegistryExtensionDeployment.sol";
 import "./StreamArtistEstateCoverage.sol";
 import "../../interfaces/stream/artist/IStreamArtistCommercialAuthority.sol";
+import "../../interfaces/stream/artist/IStreamArtistRecordPublication.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionState.sol";
 import {
     IStreamArtistContentAuthority
@@ -53,6 +54,7 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistEstateActivation,
     IStreamArtistEstateBinding,
     IStreamArtistCommercialAuthority,
+    IStreamArtistRecordPublication,
     StreamModuleBase,
     StreamGasParameterHost
 {
@@ -101,6 +103,9 @@ contract StreamArtistOnboardingRegistry is
         _registerGasParameter(GasParameterConfig("ARTIST_ERC1271_VERIFY_GAS", 150_000, 90_000, 2));
         _registerGasParameter(GasParameterConfig("ARTIST_SALE_FACTS_READ_GAS", 150_000, 50_000, 2));
         _registerGasParameter(
+            GasParameterConfig("ARTIST_RECORD_PUBLICATION_READ_GAS", 400_000, 150_000, 2)
+        );
+        _registerGasParameter(
             GasParameterConfig("ARTIST_ARCHIVAL_COVERAGE_READ_GAS", 400_000, 250_000, 2)
         );
     }
@@ -140,6 +145,7 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistEstateActivation).interfaceId
             || id == type(IStreamArtistEstateBinding).interfaceId
             || id == type(IStreamArtistCommercialAuthority).interfaceId
+            || id == type(IStreamArtistRecordPublication).interfaceId
             || id == type(IStreamArtistSuccessionRecords).interfaceId
             || id == type(IStreamArtistSuccessionReads).interfaceId
             || id == type(IStreamArtistWindows).interfaceId || super.supportsInterface(id);
@@ -415,6 +421,14 @@ contract StreamArtistOnboardingRegistry is
     function saleConsentRecord(bytes32 recordHash) external view returns (Sale.Record memory) {
         return
             IStreamArtistSaleConsentOwner(_contentSuite().owners[6]).saleConsentRecord(recordHash);
+    }
+
+    function requireRecordPublication(bytes32 recordHash, P.Publication calldata publication)
+        external
+        view
+        returns (P.Evidence memory)
+    {
+        _forwardRegistryRead();
     }
 
     function collectionArtistState(uint256 collectionId)

@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "./StreamArtistEconomicOperations.sol";
 import "./StreamArtistIdentityRevisionState.sol";
+import "./StreamArtistRecordPublicationReads.sol";
 import "../../interfaces/stream/artist/IStreamArtistCurrentBindingOwner.sol";
 
 /// @notice Typed identity recipes in the guarded Coordinator's delegatecall context.
@@ -72,6 +73,9 @@ library StreamArtistIdentityOperations {
         T.Authorization memory submitted,
         bytes memory statement
     ) public returns (bytes32 record) {
+        if (p.subjectKind == 7 || p.subjectKind == 8) {
+            return _publicationAttestation(x, actor, p, submitted, statement);
+        }
         T.Snapshot[7] memory before_ = _snapshots(x, 24);
         T.Binding memory b = StreamArtistOnboardingReads(x.reads).acceptedBinding(p.collectionId);
         if (!IStreamCoreCollectionView(x.suite.core).collectionExists(p.collectionId)) {
@@ -113,6 +117,55 @@ library StreamArtistIdentityOperations {
         if (p.subjectKind == 10) payload = abi.encode(payload, operative);
         payload = abi.encode(payload, authority);
         _archive(x, 24, actor, record, before_, payload);
+    }
+
+    function _publicationAttestation(
+        D.CoordinatorContext memory x,
+        address actor,
+        T.Attestation memory p,
+        T.Authorization memory submitted,
+        bytes memory statement
+    ) private returns (bytes32 record) {
+        T.Snapshot[7] memory before_ = _snapshots(x, 24);
+        T.Binding memory b = StreamArtistRecordPublicationReads.binding(x.suite, p.collectionId);
+        (P.Publication memory publication,) =
+            StreamArtistRecordPublicationRules.decode(p, statement);
+        R.AuthorityFact memory authority =
+            StreamArtistCurrentAuthorityFacts.read(x.suite.owners[2], b.artistId, false);
+        if (publication.recorder != authority.authorityAddress) revert T.InvalidRecord();
+        bytes32 hostCodeHash = StreamArtistRecordPublicationReads.candidate(x.suite, publication);
+        T.Authorization memory effective = _directTime(actor, authority.authorityAddress, submitted);
+        T.SignerApproval memory proof = _verify(
+            x,
+            actor,
+            authority.authorityAddress,
+            StreamArtistHashes.attestationDigest(_environment(x), p, effective),
+            effective.signature
+        );
+        record = IStreamArtistIdentityOwner(x.suite.owners[2])
+            .consumeAttestation(T.ActionContext(24, actor, before_[2]), b, p, effective, proof);
+        bytes32 actual = IStreamArtistRecordPublicationOwner(x.suite.owners[4])
+            .recordPublicationAttestation(
+                T.ActionContext(24, actor, before_[4]),
+                b,
+                p,
+                authority,
+                effective.nonce,
+                effective.time,
+                statement,
+                hostCodeHash
+            );
+        if (actual != record) revert T.InvalidRecord();
+        _archive(
+            x,
+            24,
+            actor,
+            record,
+            before_,
+            abi.encode(
+                b, p, submitted, statement, proof, effective, authority, publication, hostCodeHash
+            )
+        );
     }
 
     function _directTime(address actor, address signer, T.Authorization memory submitted)
