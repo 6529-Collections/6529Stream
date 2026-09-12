@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added native refund-window purchases with separate buyer custody, per-sale
+  pull refunds, permissionless finalization, official settlement, retained
+  artist-authority checks and reveal-fee handling. The 63-case domain suite and
+  two fuzz properties pass independent review; actual current-stack composition
+  is still running.
 - Added signing-domain discovery for native and universal sales, including an
   explicit getter for the native adapter's separate price-program domain.
   Existing signed messages, interface IDs and storage remain unchanged. Four

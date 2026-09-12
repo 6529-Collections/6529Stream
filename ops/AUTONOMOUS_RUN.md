@@ -31,8 +31,27 @@ contract call, including owner actions, payments, NFT custody and reads.
 | --- | --- | --- |
 | Integrator | `codex/v1-integration` | Reveal policy/escrow, canonical role activation, current-stack composition, remaining entropy/recovery, operator/client migration and release |
 | Artist | `codex/v1-artist-authority` | Succession directives/designations integrated `8227e0b6`; typed dismissal, cohort closure and dependent record/read continuation active, then remaining lifecycle |
-| Revenue | `codex/v1-revenue` | Capability admission integrated; refund-window custody, actual saved-artist association checks, canonical reveal funding and early unlock |
+| Revenue | `codex/v1-revenue` | Refund-window source integrated as `ea107e58`, with 63 independently accepted domain cases; Dutch pricing, settlement and Safe flows proceed separately |
 | Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |
+
+Signing-domain discovery is integrated as `134e0f58`. The native fixed,
+native price-program and universal fixed families retain their distinct signed
+preimages and existing interface IDs. Four focused tests and 256 fuzz inputs
+pass independent review, including actual threshold Safe reads and native
+purchases. Both production compiler profiles fit; that domain suite uses
+explicit Core, Manager and artist fixtures. The
+[integration guide](../docs/integrations/sale-signing-domains.md) explains which
+getter clients must use. Full ABI/client and selector acceptance remain open.
+
+Refund-window source is integrated as `ea107e58`: all 38 files match the
+independently accepted handoff, with 63 tests, two 256-input fuzz properties,
+128 compiler sources, 160 artifacts and both production profiles verified.
+The current refund composition is being executed against that exact source and
+the integration checkout. It covers real Core, Manager,
+artist, settlement, entropy, governance and threshold Safe contracts; only the
+external randomness service is doubled. Dismissal operation 58 has reached its
+first 202-case domain run after resolving production size limits. These active
+runs do not yet establish integrated acceptance.
 
 The twelve-case snapshot at `72c208f2` passes independent review for actual
 Core/Manager/artist/Executor/Safe composition: five native sale cases, three
