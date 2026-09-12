@@ -9,9 +9,15 @@ the release policy in `docs/release-policy.md`.
 
 - Added the native clearing-sale consumer with immediate floor mints, permanent
   buyer rebates, separate supplemental settlement and bounded refund escape.
-  Fifty-nine domain cases and fuzzing pass independent review. Current-contract
-  composition is running; collector gas exceeds the required ceiling and
-  optimization remains mandatory before deployment.
+  The subsequent compressed-aggregate and sparse-record optimization passes
+  70 domain cases and six fuzz properties with independent review. Updated
+  current-contract composition is running; collector gas exceeds the required
+  ceiling and remains a candidate gate under ADR 0033.
+- Added estate activation and successor authority with immutable archival
+  coverage dependencies. All 234 artist-domain cases pass independent review;
+  current-contract estate execution and operator migration remain pending.
+- Distinguished test-asset engineering rehearsals from conforming candidates
+  in ADR 0033, preserving all numerical collector-gas ceilings and failed gates.
 - Added a network-derived Arweave inclusion fixture with exact source provenance,
   positive and rejection tests, and changed-payload fuzzing in both compiler
   profiles. This tests native inclusion without claiming consensus or independent
@@ -26,8 +32,8 @@ the release policy in `docs/release-policy.md`.
 - Added native supplemental clearing settlement tied to the original paid mint,
   with independent replay protection, current revenue rights and no second NFT.
   Twenty-one new cases, 103 prior regressions, fuzzing and both product compiler
-  profiles pass independent review. The complete clearing-sale consumer remains
-  under construction.
+  profiles pass independent review. The separate clearing-sale consumer and
+  its optimization are described above.
 
 - Added standard native Dutch sales with immutable schedules, signed maximum
   prices, official settlement and per-sale excess credits. Thirty-three domain

@@ -69,4 +69,15 @@ provider fee capability, canonical operational roles and resumable activation.
 [ADR 0029: Identity-contest dismissal and cohort closure](0029-identity-contest-dismissal-and-cohort-closure.md)
 defines the missing operation 58, explicit adjudicated closure of contested
 provisional records, replay-preserving continuation and a versioned extension
-of the immutable historical operation inventory. Implementation remains pending.
+of the immutable historical operation inventory.
+
+[ADR 0030: Clearing partial settlement and refund entitlements](0030-clearing-partial-settlement-and-refund-entitlements.md)
+defines immediate floor mints, retained buyer credits and bounded independent
+financial processing with terminal refund escape.
+
+[ADR 0031: Quorum-anchored estate archival profile](0031-quorum-anchored-estate-archival-profile.md)
+defines archival evidence and immutable dependencies for estate authority.
+
+[ADR 0033: Engineering rehearsals and collector gas](0033-engineering-rehearsals-and-collector-gas.md)
+permits identified test-asset engineering deployments while failed collector
+gas gates remain visible and continue to constrain candidate acceptance.

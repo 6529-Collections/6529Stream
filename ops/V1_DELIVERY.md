@@ -18,6 +18,33 @@ The prior 45-60% assessment was a qualitative feature estimate, not a measured
 requirements pass rate or estimate of remaining time. This ledger replaces
 percentage-based progress reporting with concrete capabilities and evidence.
 
+## Latest integration: 12 September
+
+The reviewed estate increment is integrated as `34932659` from `9af9a107`:
+234 domain cases pass, all 115 nonempty production runtimes fit, and constructor
+and historical interface/storage checks are retained. The optimized clearing
+increment is integrated as `73ae34c3` from `1407caf3`: 70 domain cases and six
+fuzz properties pass. These results are scoped to their captured inputs.
+
+The shared current fixture now initializes the canonical governance foundation
+before constructing the archival provider and artist facade. Ordinary governed
+catalog admission and product activation follow. Nine current clearing,
+catalog and archival-governance cases are compiling against the combined code.
+Three new actual-current estate/Safe cases have source review and a clean ABI
+preflight; their runtime remains pending. Persistent operator deployment still
+needs the same staged migration before the new system can be rehearsed.
+
+The artist builder is implementing primary token economics and a reviewed
+consent association fix for corrected artist bindings. The revenue builder is
+implementing native private offers and consignment. Complete metadata, finality,
+recovery, other sales and the full Safe call matrix retain their ledger scope.
+
+Collector gas remains above its specified ceiling. ADR 0033 permits identified
+test-asset engineering deployments while preserving the failed candidate gate;
+it does not authorize a conforming-candidate claim from domain tests or a small
+rehearsal. The separate museum semantic proposal was reviewed as a recommendation
+and has not been incorporated into the normative scope.
+
 ## Team and ownership
 
 Four agents work concurrently: one integrator, two builders and one independent
