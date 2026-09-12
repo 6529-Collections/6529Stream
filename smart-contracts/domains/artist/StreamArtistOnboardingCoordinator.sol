@@ -3,6 +3,8 @@ pragma solidity ^0.8.19;
 import "./StreamArtistIdentityOperations.sol";
 import "./StreamArtistOnboardingOperations.sol";
 import "./StreamArtistRotationOperations.sol";
+import "./StreamArtistSaleOperations.sol";
+import "../../interfaces/stream/artist/IStreamArtistSaleAuthority.sol";
 
 import "./StreamArtistEconomicsHashes.sol";
 import "./StreamArtistEconomicOperations.sol";
@@ -36,7 +38,8 @@ contract StreamArtistOnboardingCoordinator is
     IStreamArtistEconomicsCoordinator,
     IStreamArtistDelegationCoordinator,
     IStreamArtistBindingLifecycleCoordinator,
-    IStreamArtistCollaboratorCoordinator
+    IStreamArtistCollaboratorCoordinator,
+    IStreamArtistSaleCoordinator
 {
     /// @notice A required artist fact is absent; retained for errors propagated by linked recipes.
     error MissingMintPrerequisite(bytes32 prerequisite);
@@ -127,6 +130,7 @@ contract StreamArtistOnboardingCoordinator is
                 uint16(7),
                 uint16(14),
                 uint16(15),
+                uint16(16),
                 uint16(17),
                 uint16(18),
                 uint16(20),
@@ -162,6 +166,14 @@ contract StreamArtistOnboardingCoordinator is
 
     function suiteConfiguration() external view returns (T.SuiteConfiguration memory) {
         return _suite;
+    }
+
+    function coordinateRecordSaleConsent(
+        address actor,
+        Sale.Consent calldata p,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistSaleOperations.record(_economicContext(), actor, p, a);
     }
 
     function coordinateSetArtistGuardians(

@@ -41,6 +41,15 @@ contract StreamArtistRegistryWriterExtension {
         _;
     }
 
+    function recordSaleConsent(Sale.Consent calldata p, T.Authorization calldata a)
+        external
+        onlyHost
+        returns (bytes32)
+    {
+        return IStreamArtistSaleCoordinator(operationCoordinator)
+            .coordinateRecordSaleConsent(msg.sender, p, a);
+    }
+
     function recordIdentityRevision(
         StreamArtistIdentityRevisionTypes.Revision calldata p,
         T.Authorization calldata a,

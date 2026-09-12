@@ -282,6 +282,21 @@ contract StreamArtistIdentityWriterExtension is StreamArtistOwner, StreamArtistI
         );
     }
 
+    function consumeSaleConsent(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Sale.Consent calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external onlyHost returns (bytes32 record) {
+        _check(c, 16);
+        StreamArtistIdentityState.Mutation memory m;
+        (m, record) = StreamArtistIdentityConsentState.saleConsent(
+            _identity, _replay, _ownerContext(), c, b, p, a, proof
+        );
+        _commit(c, m.action, m.state, m.replay, m.record);
+    }
+
     function consumePolicy(
         T.ActionContext calldata c,
         T.Binding calldata b,

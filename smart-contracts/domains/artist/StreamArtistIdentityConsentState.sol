@@ -4,9 +4,42 @@ pragma solidity ^0.8.19;
 import "./StreamArtistIdentityState.sol";
 import "./StreamArtistContentHashes.sol";
 import "./StreamArtistEconomicsHashes.sol";
+import "./StreamArtistSaleHashes.sol";
 
 /// @notice Typed authorization mechanics; Identity keeps every operation guard and semantic commit.
 library StreamArtistIdentityConsentState {
+    function saleConsent(
+        StreamArtistIdentityState.State storage identity,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        T.Binding memory b,
+        Sale.Consent memory p,
+        T.Authorization memory a,
+        T.SignerApproval memory proof
+    ) public returns (StreamArtistIdentityState.Mutation memory m, bytes32 record) {
+        _deadline(a.time);
+        if (
+            p.collectionId == 0 || p.saleAdapter == address(0) || p.saleId == bytes32(0)
+                || p.saleConfigHash == bytes32(0)
+        ) revert T.InvalidRecord();
+        record = StreamArtistSaleHashes.record(
+            o.environment, p, b.artistId, proof.signer, 1, a.nonce, _now()
+        );
+        m = StreamArtistIdentityState.authorize(
+            identity,
+            replay,
+            o,
+            c,
+            b.artistId,
+            a,
+            proof,
+            StreamArtistSaleHashes.digest(o.environment, p, a),
+            record,
+            identity.identities[b.artistId].authorityAddress
+        );
+    }
+
     function acceptance(
         StreamArtistIdentityState.State storage identity,
         mapping(bytes32 => T.ReplayCell) storage replay,

@@ -3,6 +3,10 @@ pragma solidity ^0.8.19;
 
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 import "../../helpers/OfficialSafeFixture.sol";
+import "./ArtistSaleRegistryFixture.sol";
+import "../../../smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol";
+import "../../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
+import "../../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
 import "../../../smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol";
 import "../../../smart-contracts/domains/artist/StreamArtistArchiveV2.sol";
 import "../../../smart-contracts/domains/artist/StreamArtistBindingLifecycle.sol";
@@ -56,12 +60,14 @@ contract ArtistUnitCore {
             targets[kind],
             targets[kind].codehash,
             frozen[kind],
-            bytes32(0),
-            bytes4(0),
-            address(0),
+            kind,
+            kind == keccak256("MODULE_REGISTRY")
+                ? type(IStreamModuleRegistry).interfaceId
+                : bytes4(0),
+            targets[keccak256("MODULE_REGISTRY")],
             1,
-            bytes32(0),
-            bytes32(0),
+            keccak256("unit pointer manifest"),
+            keccak256("unit pointer deployment"),
             1
         );
     }
@@ -87,6 +93,28 @@ contract ArtistUnitGovernance {
     bytes32 private oldState;
     bytes32 private newState;
     uint8 private selectedClass = 1;
+
+    /// @dev An exact target context only. This does not simulate a real Executor's authorization or delay.
+    function executeModuleContext(
+        address target,
+        bytes calldata data,
+        uint8 actionClass,
+        bytes32 scope_,
+        bytes32 oldState_,
+        bytes32 newState_
+    ) external {
+        active = true;
+        selectedClass = actionClass;
+        scope = scope_;
+        oldState = oldState_;
+        newState = newState_;
+        (bool ok, bytes memory reason) = target.call(data);
+        if (!ok) assembly ("memory-safe") { revert(add(reason, 32), mload(reason)) }
+        active = false;
+        scope = 0;
+        oldState = 0;
+        newState = 0;
+    }
 
     function isStreamGovernedParameterAuthority() external pure returns (bool) {
         return true;
@@ -381,7 +409,11 @@ contract ArtistRotationContestHarness is StreamArtistIdentityAuthority {
     }
 }
 
-contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFixture {
+contract StreamArtistOnboardingTest is
+    CharacterizationTestBase,
+    OfficialSafeFixture,
+    ArtistSaleRegistryFixture
+{
     event CollaboratorBoundMeasurement(uint256 rows, uint256 entries, uint256 gasUsed);
     ArtistTestVm private constant avm =
         ArtistTestVm(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -409,6 +441,520 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
     uint8 private templateFixtureKind;
     bytes32 private templateFixtureId;
     bool private rotationContestFixture;
+    bool private actualSaleRegistryFixture;
+    uint8 private saleScopeFixture;
+    StreamModuleRegistry private saleModules;
+    StreamNativeFixedPriceSaleAdapter private nativeSale;
+
+    /// @dev Actual registered native record/facts and actual artist owners. Core and Executor remain unit boundaries.
+    function _saleFixture(uint8 scope_) private returns (Sale.Consent memory p) {
+        actualSaleRegistryFixture = true;
+        saleScopeFixture = scope_;
+        setUp();
+        _accept();
+        _policy();
+        _payout();
+        _economics();
+        _ratify();
+        _attestations();
+        (bool configured, bytes memory reason) = address(manager).call(_configureData());
+        if (!configured) assembly ("memory-safe") { revert(add(reason, 32), mload(reason)) }
+        StreamRevenueEscrow escrow = new StreamRevenueEscrow(
+            factory,
+            factory.governanceAuthority(),
+            IStreamGasParameterHost.GasParameterConfig("FLUSH_GAS_FLOOR", 12_000_000, 12_000_000, 3)
+        );
+        StreamPrimarySaleSettlement recorder =
+            new StreamPrimarySaleSettlement(primary, address(saleModules), escrow);
+        nativeSale =
+            new StreamNativeFixedPriceSaleAdapter(manager, recorder, address(artist), ingress);
+        _saleRegister(
+            saleModules,
+            factory.governanceAuthority(),
+            address(nativeSale),
+            keccak256("NATIVE_PRIMARY_SALE_ADAPTER"),
+            type(IStreamNativeSaleBinding).interfaceId
+        );
+        bytes32 id = nativeSale.registerSale(
+            IStreamNativeFixedPriceSaleAdapter.SaleConfig(
+                1,
+                PHASE,
+                1000,
+                0,
+                type(uint64).max,
+                POLICY,
+                primary.resolvePrimaryAssignment(1, 0, PRIMARY).assignmentHash
+            )
+        );
+        p = Sale.Consent(1, address(nativeSale), id, nativeSale.saleRecord(id).configHash);
+    }
+
+    function _saleAuthorization(Sale.Consent memory p) private returns (T.Authorization memory a) {
+        a = _authorization(false);
+        a.signature = _signature(ingress.saleConsentDigest(p, a));
+    }
+
+    function _requireSale(Sale.Consent memory p) private {
+        vm.prank(p.saleAdapter);
+        ingress.requireSaleConsent(p.collectionId, p.saleId, p.saleConfigHash);
+    }
+
+    function testSaleConsentActualNativeSafeExactDigestRecordEventAndReplay() public {
+        Sale.Consent memory p = _saleFixture(1);
+        require(ingress.saleConsentScope(1) == 1, "immutable REQUIRED election");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Sale.SaleConsentUnavailable.selector, 1, p.saleId, p.saleConfigHash
+            )
+        );
+        _requireSale(p);
+        T.Authorization memory a = _saleAuthorization(p);
+        bytes32 digest = StreamArtistHashes.typed(
+            StreamArtistHashes.Environment(
+                block.chainid, address(ingress), address(core), address(manager)
+            ),
+            keccak256(
+                abi.encode(
+                    bytes32(0x5a0d2fee9c2248ad2b0735d54beb28b1decdd1adeb65c63c4016da70ec399045),
+                    address(core),
+                    p.saleAdapter,
+                    uint256(1),
+                    p.saleId,
+                    p.saleConfigHash,
+                    a.nonce,
+                    a.time
+                )
+            )
+        );
+        require(digest == ingress.saleConsentDigest(p, a), "exact permanent digest");
+        vm.warp(1017);
+        vm.recordLogs();
+        bytes32 record = ingress.recordSaleConsent(p, a);
+        bytes32 expected = keccak256(
+            abi.encode(
+                bytes32(0xf30702786801bdda286e4555272eb70024e76bd156af98fab2513886e5bdcfd1),
+                block.chainid,
+                address(ingress),
+                p.saleAdapter,
+                address(core),
+                uint256(1),
+                p.saleId,
+                p.saleConfigHash,
+                artistId,
+                address(artist),
+                uint8(1),
+                a.nonce,
+                uint64(1017)
+            )
+        );
+        require(record == expected, "observed record time distinct from deadline");
+        Sale.Record memory saved = ingress.saleConsentRecord(record);
+        T.Binding memory b = IStreamArtistBindingOwner(suite.owners[0]).binding(1);
+        require(
+            saved.bindingGeneration == b.generation && saved.bindingHash == b.bindingHash
+                && saved.artistId == artistId && saved.recordHash == expected,
+            "canonical record plus actual applicability"
+        );
+        uint256 found;
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].emitter == suite.owners[6]
+                    && logs[i].topics[0]
+                        == keccak256(
+                            "ArtistSaleConsentRecorded(uint16,uint256,bytes32,address,bytes32,uint8,uint256,uint64,bytes32)"
+                        )
+            ) {
+                require(
+                    logs[i].topics[1] == bytes32(uint256(1))
+                        && logs[i].topics[2] == p.saleConfigHash
+                        && logs[i].topics[3] == bytes32(uint256(uint160(address(artist))))
+                        && keccak256(logs[i].data)
+                            == keccak256(
+                                abi.encode(
+                                    uint16(1), p.saleId, uint8(1), a.nonce, uint64(1017), record
+                                )
+                            ),
+                    "exact owner event"
+                );
+                ++found;
+            }
+        }
+        require(found == 1, "one canonical event");
+        (bool exists, bytes32 observed) = ingress.isSaleConsented(1, p.saleId, p.saleConfigHash);
+        require(exists && observed == record, "stored evidence");
+        _requireSale(p);
+        bytes32 roots = _roots();
+        avm.expectPartialRevert(T.Replay.selector);
+        ingress.recordSaleConsent(p, a);
+        require(_roots() == roots, "principal replay atomic");
+        T.Authorization memory fresh = _saleAuthorization(p);
+        bytes32 replayKey = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2"),
+                block.chainid,
+                address(ingress),
+                address(coordinator),
+                address(archive),
+                suite.owners[6],
+                keccak256("domain:consent_finality"),
+                keccak256("consent_finality.replay.sale_consent_key"),
+                keccak256(abi.encode(p, b.generation, b.bindingHash))
+            )
+        );
+        vm.expectRevert(abi.encodeWithSelector(T.Replay.selector, replayKey));
+        ingress.recordSaleConsent(p, fresh);
+        require(
+            _roots() == roots,
+            "same-generation consent key and new principal authorization rollback"
+        );
+    }
+
+    function testSaleConsentDelayedDirectSafeAndCallerBoundRead() public {
+        Sale.Consent memory p = _saleFixture(1);
+        T.Authorization memory a = _authorization(false);
+        bytes memory data = abi.encodeCall(IStreamArtistSaleAuthority.recordSaleConsent, (p, a));
+        vm.warp(block.timestamp + 30);
+        require(
+            executeSafe(artist, keys, address(ingress), 0, data, 0), "actual Safe direct writer"
+        );
+        (bool exists, bytes32 hash) = ingress.isSaleConsented(1, p.saleId, p.saleConfigHash);
+        require(
+            exists && ingress.saleConsentRecord(hash).signer == address(artist),
+            "Safe remains signer"
+        );
+        (,,, T.SignerApproval memory proof,,) = abi.decode(
+            _operationPayload(16, address(artist), hash),
+            (T.Binding, Sale.Consent, T.Authorization, T.SignerApproval, R.AuthorityFact, bytes)
+        );
+        require(
+            proof.direct && proof.signer == address(artist), "archived actual direct Safe proof"
+        );
+        _requireSale(p);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Sale.SaleConsentUnavailable.selector, 1, p.saleId, p.saleConfigHash
+            )
+        );
+        ingress.requireSaleConsent(1, p.saleId, p.saleConfigHash);
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(
+                    IStreamArtistSaleAuthority.isSaleConsented, (1, p.saleId, p.saleConfigHash)
+                ),
+                0
+            ),
+            "Safe historical read"
+        );
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistAttributionState.collectionArtistState, (1)),
+                0
+            ),
+            "Safe typed state read"
+        );
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistSaleAuthority.saleConsentScope, (1)),
+                0
+            ),
+            "Safe scope read"
+        );
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistSaleAuthority.saleConsentDigest, (p, a)),
+                0
+            ),
+            "Safe digest read"
+        );
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistSaleAuthority.saleConsentRecord, (hash)),
+                0
+            ),
+            "Safe permanent record read"
+        );
+    }
+
+    function testSaleConsentApprovedEmptySafeAndOwnerEOACannotSubstitute() public {
+        Sale.Consent memory p = _saleFixture(1);
+        T.Authorization memory a = _authorization(false);
+        bytes32 roots = _roots();
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.recordSaleConsent(p, a);
+        vm.prank(vm.addr(keys[0]));
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.recordSaleConsent(p, a);
+        require(_roots() == roots, "no Safe owner role inheritance");
+        bytes32 digest = ingress.saleConsentDigest(p, a);
+        require(
+            executeSafe(
+                artist,
+                keys,
+                safeComponents.signMessage,
+                0,
+                abi.encodeWithSignature("signMessage(bytes)", abi.encode(digest)),
+                1
+            ),
+            "actual Safe approved message"
+        );
+        bytes32 hash = ingress.recordSaleConsent(p, a);
+        require(
+            ingress.saleConsentRecord(hash).signer == address(artist), "approved-empty relayed Safe"
+        );
+        _requireSale(p);
+    }
+
+    function testSaleConsentLateArchiveFailureAndExactRetry() public {
+        Sale.Consent memory p = _saleFixture(1);
+        T.Authorization memory a = _saleAuthorization(p);
+        bytes32 roots = _roots();
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodeWithSelector(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.recordSaleConsent(p, a);
+        require(_roots() == roots, "Identity and Consent roll back on Archive failure");
+        avm.clearMockedCalls();
+        ingress.recordSaleConsent(p, a);
+        _requireSale(p);
+    }
+
+    function testSaleConsentNativeScopeNoneAndUnknownBindingAreDistinct() public {
+        Sale.Consent memory p = _saleFixture(0);
+        require(ingress.saleConsentScope(1) == 0, "actual NONE election");
+        ingress.requireSaleConsent(1, p.saleId, p.saleConfigHash);
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidAttribution.selector, 2));
+        ingress.requireSaleConsent(2, 0, 0);
+        ingress.recordSaleConsent(p, _saleAuthorization(p));
+        (bool exists,) = ingress.isSaleConsented(1, p.saleId, p.saleConfigHash);
+        require(exists, "NONE may record evidence");
+    }
+
+    function testSaleConsentMissingChangedForeignFactsAndDeprecatedModuleRollback() public {
+        Sale.Consent memory p = _saleFixture(1);
+        Sale.Consent memory wrong =
+            Sale.Consent(1, p.saleAdapter, keccak256("missing"), p.saleConfigHash);
+        T.Authorization memory a = _saleAuthorization(wrong);
+        bytes32 roots = _roots();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Sale.SaleFactsReadFailed.selector,
+                p.saleAdapter,
+                IStreamArtistSaleFacts.saleConsentFacts.selector
+            )
+        );
+        ingress.recordSaleConsent(wrong, a);
+        wrong = Sale.Consent(1, p.saleAdapter, p.saleId, keccak256("foreign config"));
+        a = _saleAuthorization(wrong);
+        vm.expectRevert(abi.encodeWithSelector(Sale.InvalidSaleAdapter.selector, p.saleAdapter));
+        ingress.recordSaleConsent(wrong, a);
+        _saleStatus(
+            saleModules,
+            factory.governanceAuthority(),
+            p.saleAdapter,
+            ModuleRegistryStatus.DEPRECATED
+        );
+        a = _saleAuthorization(p);
+        vm.expectRevert(abi.encodeWithSelector(Sale.InvalidSaleAdapter.selector, p.saleAdapter));
+        ingress.recordSaleConsent(p, a);
+        require(_roots() == roots, "failed facts never consume artist state");
+    }
+
+    function testSaleConsentBoundedMalformedAndExhaustedProviderReads() public {
+        _saleFixture(1);
+        ArtistSaleFactsAdversary bad =
+            new ArtistSaleFactsAdversary(address(core), keccak256("boundary config"));
+        _saleRegister(
+            saleModules,
+            factory.governanceAuthority(),
+            address(bad),
+            bad.streamModuleType(),
+            bad.streamModuleInterfaceId()
+        );
+        Sale.Consent memory p =
+            Sale.Consent(1, address(bad), keccak256("boundary sale"), keccak256("boundary config"));
+        T.Authorization memory a = _saleAuthorization(p);
+        bytes32 roots = _roots();
+        for (uint256 mode = 1; mode <= 4; ++mode) {
+            bad.setMode(mode);
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    Sale.SaleFactsReadFailed.selector,
+                    address(bad),
+                    IStreamArtistSaleFacts.saleConsentFacts.selector
+                )
+            );
+            ingress.recordSaleConsent(p, a);
+            require(_roots() == roots, "provider failure bounded and atomic");
+        }
+        bad.setMode(0);
+        bad.setCore(address(0xBAD));
+        vm.expectRevert(abi.encodeWithSelector(Sale.InvalidSaleAdapter.selector, address(bad)));
+        ingress.recordSaleConsent(p, a);
+        require(_roots() == roots, "foreign Core rejected");
+        bad.setCore(address(core));
+        bytes32 record = ingress.recordSaleConsent(p, a);
+        require(
+            ingress.saleConsentRecord(record).terms.saleAdapter == address(bad),
+            "same admitted context and authorization positive control"
+        );
+        _requireSale(p);
+    }
+
+    function testSaleConsentRotationPreservesStoredRecordAndRejectsUnusedOldProof() public {
+        Sale.Consent memory p = _saleFixture(1);
+        ingress.recordSaleConsent(p, _saleAuthorization(p));
+        T.Authorization memory unused = _saleAuthorization(p);
+        unused.time = type(uint64).max;
+        unused.signature = _signature(ingress.saleConsentDigest(p, unused));
+        _newRotationSafe(9929);
+        bytes32 rotation = _stageRotation(0);
+        _executeTimedRotation(rotation);
+        bytes32 roots = _roots();
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.recordSaleConsent(p, unused);
+        require(_roots() == roots, "old current-principal proof rejected before duplicate consent");
+        _requireSale(p);
+        (uint8 state, uint64 generation, bytes32 id, uint8 authorityStatus, bytes32 bindingHash) =
+            ingress.collectionArtistState(1);
+        require(
+            state == 2 && generation == 1 && id == artistId && authorityStatus == 1
+                && bindingHash != 0,
+            "rotation retains accepted generation"
+        );
+    }
+
+    function testSaleStateReadDistinguishesNoneClaimedWithdrawnAndReproposal() public {
+        (uint8 state, uint64 generation, bytes32 id, uint8 status, bytes32 hash) =
+            ingress.collectionArtistState(2);
+        require(
+            state == 0 && generation == 0 && id == 0 && status == 0 && hash == 0,
+            "absent actual owners"
+        );
+        (state, generation, id, status, hash) = ingress.collectionArtistState(1);
+        require(
+            state == 1 && generation == 1 && id == artistId && status == 1 && hash != 0,
+            "CLAIMED is not disputed"
+        );
+        bytes32 prior = hash;
+        ingress.withdrawArtistBinding(_termination(1));
+        (state, generation, id, status, hash) = ingress.collectionArtistState(1);
+        require(
+            state == 5 && generation == 1 && id == artistId && status == 1 && hash == prior,
+            "only claimed generation terminated"
+        );
+        _repropose(1);
+        (state, generation, id, status, hash) = ingress.collectionArtistState(1);
+        require(
+            state == 1 && generation == 2 && id == artistId && status == 1 && hash != prior,
+            "later generation has its own facts"
+        );
+        // Expected-generation endpoint is required for a new direct acceptance; signed helper binds the exact current hash.
+        _accept();
+        (state, generation, id, status, hash) = ingress.collectionArtistState(1);
+        require(state == 2 && generation == 2, "actual complete acceptance");
+    }
+
+    function testSaleStateAuthorityContestIsNotAttributionDisputeAndHistoricalEvidenceRemains()
+        public
+    {
+        rotationContestFixture = true;
+        Sale.Consent memory p = _saleFixture(1);
+        bytes32 record = ingress.recordSaleConsent(p, _saleAuthorization(p));
+        _newRotationSafe(9988);
+        bytes32 transition = _stageRotation(0);
+        _executeTimedRotation(transition);
+        ArtistRotationContestHarness(suite.owners[2]).simulateExecutedTransitionContest(transition);
+        (uint8 state, uint64 generation, bytes32 id, uint8 status, bytes32 hash) =
+            ingress.collectionArtistState(1);
+        require(
+            state == 2 && generation == 1 && id == artistId && status == 4 && hash != 0,
+            "qualified Identity4 never becomes Attribution4"
+        );
+        (bool exists, bytes32 saved) = ingress.isSaleConsented(1, p.saleId, p.saleConfigHash);
+        require(exists && saved == record, "stored evidence is not current applicability");
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidAttribution.selector, 1));
+        _requireSale(p);
+    }
+
+    function testSaleConsentParentGasAndProtocolOnlyCallbacks() public {
+        Sale.Consent memory p = _saleFixture(1);
+        (bool ok, bytes memory reason) = address(ingress).staticcall{ gas: 120_000 }(
+            abi.encodeCall(IStreamArtistSaleAuthority.saleConsentScope, (1))
+        );
+        require(
+            !ok && reason.length == 68 && bytes4(reason) == Sale.SaleFactsParentGas.selector,
+            "explicit parent gas rejection"
+        );
+        T.Authorization memory a = _saleAuthorization(p);
+        T.Binding memory b = IStreamArtistBindingOwner(suite.owners[0]).binding(1);
+        T.ActionContext memory context = T.ActionContext(
+            16, address(artist), IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2()
+        );
+        T.SignerApproval memory proof =
+            T.SignerApproval(address(artist), ingress.saleConsentDigest(p, a), false);
+        vm.expectRevert(abi.encodeWithSelector(T.Unauthorized.selector, address(artist)));
+        vm.prank(address(artist));
+        IStreamArtistSaleIdentityOwner(suite.owners[2]).consumeSaleConsent(context, b, p, a, proof);
+        T.ActionContext memory consentContext = T.ActionContext(
+            16, address(artist), IStreamArtistOwner(suite.owners[6]).ownerStateSnapshotV2()
+        );
+        R.AuthorityFact memory emptyAuthority;
+        vm.expectRevert(abi.encodeWithSelector(T.Unauthorized.selector, address(artist)));
+        vm.prank(address(artist));
+        IStreamArtistSaleConsentOwner(suite.owners[6])
+            .recordSaleConsent(consentContext, b, p, address(artist), a.nonce, emptyAuthority);
+        bytes memory rejectedCall = abi.encodeCall(
+            IStreamArtistSaleConsentOwner.recordSaleConsent,
+            (consentContext, b, p, address(artist), a.nonce, emptyAuthority)
+        );
+        uint256 safeNonceBefore = artist.nonce();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(suite.owners[6], rejectedCall);
+        require(artist.nonce() == safeNonceBefore, "rejected actual Safe callback is atomic");
+        address extension = StreamArtistIdentityAuthority(suite.owners[2]).identityWriterExtension();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamArtistIdentityWriterExtension.ExtensionWrongHost.selector, extension
+            )
+        );
+        IStreamArtistSaleIdentityOwner(extension).consumeSaleConsent(context, b, p, a, proof);
+        vm.expectRevert(abi.encodeWithSelector(T.Unauthorized.selector, address(artist)));
+        vm.prank(address(artist));
+        coordinator.coordinateRecordSaleConsent(address(artist), p, a);
+        address writer = ingress.registryWriterExtension();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamArtistRegistryWriterExtension.ExtensionWrongHost.selector, writer
+            )
+        );
+        IStreamArtistSaleAuthority(writer).recordSaleConsent(p, a);
+        ingress.recordSaleConsent(p, a);
+        _requireSale(p);
+    }
 
     function _freshTemplateFixture(uint8 kind) private {
         // A separate deployment with a prebinding template; no existing assignment or history is reset.
@@ -1752,6 +2298,7 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
                 uint16(7),
                 uint16(14),
                 uint16(15),
+                uint16(16),
                 uint16(17),
                 uint16(18),
                 uint16(20),
@@ -5513,8 +6060,18 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         artist = createOfficialSafe(safeComponents, safeOwnerAddresses(keys), 2, 17);
         core = new ArtistUnitCore();
         address governance = address(new ArtistUnitGovernance());
-        ArtistUnitModuleRegistry modules = new ArtistUnitModuleRegistry(governance);
-        core.set(keccak256("MODULE_REGISTRY"), address(modules), false);
+        address modules;
+        if (actualSaleRegistryFixture) {
+            saleModules = new StreamModuleRegistry(
+                IStreamGovernanceExecutor(governance),
+                keccak256("artist sale registry"),
+                "urn:artist-sale-registry"
+            );
+            modules = address(saleModules);
+        } else {
+            modules = address(new ArtistUnitModuleRegistry(governance));
+        }
+        core.set(keccak256("MODULE_REGISTRY"), modules, false);
         ledger = new StreamMintLedger();
         manager =
             new StreamMintManager(IStreamCore(address(core)), ledger, IERC165(address(modules)));
@@ -5678,6 +6235,7 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         }
         p.identityRecordURI = string(uri);
         p.consentMode = 1;
+        p.saleConsentScope = saleScopeFixture;
         p.collaborators = new T.CollaboratorRecord[](0);
         p.capabilityPolicyOverrides = new T.CapabilityPolicyOverride[](0);
     }

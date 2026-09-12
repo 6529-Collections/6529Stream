@@ -90,7 +90,7 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
         ) revert T.InvalidAttribution(collectionId);
         uint64 generation = previous.generation + 1;
         if (
-            p.consentMode != 1 || p.saleConsentScope != 0 || p.registryImmutabilityElection > 1
+            p.consentMode != 1 || p.saleConsentScope > 1 || p.registryImmutabilityElection > 1
                 || p.collabPolicyMode != 0 || p.collabThreshold != 0
                 || p.capabilityPolicyOverrides.length != 0
         ) revert T.UnsupportedProfile();

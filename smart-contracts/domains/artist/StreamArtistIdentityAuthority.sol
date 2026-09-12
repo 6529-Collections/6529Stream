@@ -596,6 +596,16 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentit
         _forwardIdentityWriter();
     }
 
+    function consumeSaleConsent(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Sale.Consent calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external returns (bytes32 record) {
+        _forwardIdentityWriter();
+    }
+
     function consumePolicy(
         T.ActionContext calldata c,
         T.Binding calldata b,

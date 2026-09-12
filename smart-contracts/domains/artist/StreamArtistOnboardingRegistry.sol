@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "./StreamArtistEconomicsHashes.sol";
 import "./StreamArtistRegistryWriterExtension.sol";
 import "./StreamArtistRegistryReadExtension.sol";
+import "../../interfaces/stream/artist/IStreamArtistAttributionState.sol";
 import {
     IStreamArtistContentAuthority
 } from "../../interfaces/stream/artist/IStreamArtistContentAuthority.sol";
@@ -40,6 +41,8 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistIdentityRevision,
     IStreamArtistRotation,
     IStreamArtistWindows,
+    IStreamArtistSaleAuthority,
+    IStreamArtistAttributionState,
     StreamModuleBase,
     StreamGasParameterHost
 {
@@ -79,6 +82,7 @@ contract StreamArtistOnboardingRegistry is
         registryReadExtension =
             address(new StreamArtistRegistryReadExtension(address(this), coordinator_));
         _registerGasParameter(GasParameterConfig("ARTIST_ERC1271_VERIFY_GAS", 150_000, 90_000, 2));
+        _registerGasParameter(GasParameterConfig("ARTIST_SALE_FACTS_READ_GAS", 150_000, 50_000, 2));
     }
 
     function streamModuleType() public pure override returns (bytes32) {
@@ -109,7 +113,67 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistIdentityRevisionReads).interfaceId
             || id == type(IStreamArtistRotation).interfaceId
             || id == type(IStreamArtistRotationReads).interfaceId
+            || id == type(IStreamArtistSaleAuthority).interfaceId
+            || id == type(IStreamArtistAttributionState).interfaceId
             || id == type(IStreamArtistWindows).interfaceId || super.supportsInterface(id);
+    }
+
+    function recordSaleConsent(Sale.Consent calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function saleConsentDigest(Sale.Consent calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        return StreamArtistSaleHashes.digest(_environment(), p, a);
+    }
+
+    function saleConsentScope(uint256 collectionId) external view returns (uint8) {
+        return StreamArtistSaleOperations.scope(_contentSuite(), collectionId);
+    }
+
+    /// @notice Stored evidence only, independent of its current applicability.
+    function isSaleConsented(uint256 collectionId, bytes32 saleId, bytes32 saleConfigHash)
+        external
+        view
+        returns (bool, bytes32)
+    {
+        return StreamArtistSaleOperations.isConsented(
+            _contentSuite(), collectionId, saleId, saleConfigHash
+        );
+    }
+
+    function requireSaleConsent(uint256 collectionId, bytes32 saleId, bytes32 saleConfigHash)
+        external
+        view
+    {
+        StreamArtistSaleOperations.requireConsent(
+            _contentSuite(), msg.sender, collectionId, saleId, saleConfigHash
+        );
+    }
+
+    function saleConsentRecord(bytes32 recordHash) external view returns (Sale.Record memory) {
+        return
+            IStreamArtistSaleConsentOwner(_contentSuite().owners[6]).saleConsentRecord(recordHash);
+    }
+
+    function collectionArtistState(uint256 collectionId)
+        external
+        view
+        returns (
+            uint8 attributionState,
+            uint64 bindingGeneration,
+            bytes32 artistId,
+            uint8 authorityStatus,
+            bytes32 bindingHash
+        )
+    {
+        return StreamArtistSaleOperations.attributionState(_contentSuite(), collectionId);
     }
 
     function recordIdentityRevision(
