@@ -82,6 +82,31 @@ library StreamArtistCollaboratorHashes {
         );
     }
 
+    function acceptanceRecordForAuthority(
+        StreamArtistHashes.Environment memory e,
+        C.BindingAcceptance memory p,
+        uint8 authorityClass,
+        uint256 nonce,
+        uint64 observed
+    ) public pure returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ACCEPTANCE_RECORD_V1"),
+                e.chainId,
+                e.registry,
+                e.core,
+                p.collectionId,
+                p.generation,
+                p.bindingHash,
+                uint8(2),
+                p.account,
+                authorityClass,
+                nonce,
+                observed
+            )
+        );
+    }
+
     function proposalHash(
         StreamArtistHashes.Environment memory e,
         C.IdentityProposal memory p,

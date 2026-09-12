@@ -6,6 +6,8 @@ import "./StreamArtistEconomicsHashes.sol";
 import "./StreamArtistRegistryWriterExtension.sol";
 import "./StreamArtistRegistryReadExtension.sol";
 import "./StreamArtistRegistryExtensionDeployment.sol";
+import "./StreamArtistEstateCoverage.sol";
+import "../../interfaces/stream/artist/IStreamArtistCommercialAuthority.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionState.sol";
 import {
     IStreamArtistContentAuthority
@@ -48,6 +50,9 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistIdentityContest,
     IStreamArtistSuccessionRecords,
     IStreamArtistIdentityDismissal,
+    IStreamArtistEstateActivation,
+    IStreamArtistEstateBinding,
+    IStreamArtistCommercialAuthority,
     StreamModuleBase,
     StreamGasParameterHost
 {
@@ -56,12 +61,16 @@ contract StreamArtistOnboardingRegistry is
     address public immutable operationCoordinator;
     address public immutable registryWriterExtension;
     address public immutable registryReadExtension;
+    address public immutable override archivalCoverage;
+    bytes32 public immutable override archivalCoverageCodeHash;
+    bytes32 public immutable override archivalCoverageConfigurationHash;
 
     constructor(
         address core_,
         address manager_,
         address coordinator_,
         address governance_,
+        address archivalCoverage_,
         bytes32 deploymentHash,
         string memory manifestURI,
         bytes32 manifestHash
@@ -82,11 +91,18 @@ contract StreamArtistOnboardingRegistry is
         core = core_;
         mintManager = manager_;
         operationCoordinator = coordinator_;
+        archivalCoverageConfigurationHash =
+            StreamArtistEstateCoverage.admit(core_, manager_, governance_, archivalCoverage_);
+        archivalCoverage = archivalCoverage_;
+        archivalCoverageCodeHash = archivalCoverage_.codehash;
         registryWriterExtension =
             address(new StreamArtistRegistryWriterExtension(address(this), coordinator_));
         registryReadExtension = StreamArtistRegistryExtensionDeployment.deployReader(coordinator_);
         _registerGasParameter(GasParameterConfig("ARTIST_ERC1271_VERIFY_GAS", 150_000, 90_000, 2));
         _registerGasParameter(GasParameterConfig("ARTIST_SALE_FACTS_READ_GAS", 150_000, 50_000, 2));
+        _registerGasParameter(
+            GasParameterConfig("ARTIST_ARCHIVAL_COVERAGE_READ_GAS", 400_000, 250_000, 2)
+        );
     }
 
     function streamModuleType() public pure override returns (bytes32) {
@@ -121,6 +137,9 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistAttributionState).interfaceId
             || id == type(IStreamArtistIdentityContest).interfaceId
             || id == type(IStreamArtistIdentityDismissal).interfaceId
+            || id == type(IStreamArtistEstateActivation).interfaceId
+            || id == type(IStreamArtistEstateBinding).interfaceId
+            || id == type(IStreamArtistCommercialAuthority).interfaceId
             || id == type(IStreamArtistSuccessionRecords).interfaceId
             || id == type(IStreamArtistSuccessionReads).interfaceId
             || id == type(IStreamArtistWindows).interfaceId || super.supportsInterface(id);
@@ -131,6 +150,77 @@ contract StreamArtistOnboardingRegistry is
         returns (bytes32)
     {
         _forwardRegistryWriter();
+    }
+
+    function requestEstateActivation(Estate.Request calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function cancelEstateActivation(bytes32 artistId, bytes32 expected) external {
+        _forwardRegistryWriter();
+    }
+
+    function executeEstateActivation(Estate.Execution calldata p) external {
+        _forwardRegistryWriter();
+    }
+
+    function estateActivationDigest(Estate.Request calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function estateActivationState(bytes32 artistId)
+        external
+        view
+        returns (address, uint64, bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function estateActivationRecord(bytes32 record)
+        external
+        view
+        returns (Estate.RequestRecord memory, uint8, Estate.ExecutionFacts memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function estateActivationNonceHint(bytes32 artistId, address successor)
+        external
+        view
+        returns (uint256)
+    {
+        _forwardRegistryRead();
+    }
+
+    function currentAuthorityCapabilities(bytes32 artistId)
+        external
+        view
+        returns (Estate.AuthorityCapabilities memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function estateAccelerationContext(Estate.Execution calldata p)
+        external
+        view
+        returns (Estate.AccelerationContext memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function collectionArtistAuthority(uint256 collectionId)
+        external
+        view
+        returns (bytes32, uint64, bytes32, address, uint8, uint8, uint32)
+    {
+        _forwardRegistryRead();
     }
 
     function recordSuccessorDesignation(Succ.Designation calldata p, T.Authorization calldata a)
@@ -980,11 +1070,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bool, bytes32, bytes32)
     {
-        T.SuiteConfiguration memory s =
-            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
-        T.RatificationRecord memory r =
-            IStreamArtistConsentOwner(s.owners[6]).firstReleaseRatification(collectionId);
-        return (r.recordHash != bytes32(0), r.contentStateHash, r.recordHash);
+        _forwardRegistryRead();
     }
 
     function collectionArtistBeneficiary(uint256 collectionId)
@@ -1019,14 +1105,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bytes32)
     {
-        T.SuiteConfiguration memory s =
-            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
-        return StreamArtistHashes.acceptanceDigest(
-            _environment(),
-            collectionId,
-            IStreamArtistBindingOwner(s.owners[0]).binding(collectionId),
-            a
-        );
+        _forwardRegistryRead();
     }
 
     function policyConsentDigest(T.PolicyConsent calldata p, T.Authorization calldata a)

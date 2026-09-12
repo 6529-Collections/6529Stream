@@ -23,6 +23,8 @@ import {
 
 import "./StreamArtistIdentityData.sol";
 import "./StreamArtistIdentityDismissalState.sol";
+import "./StreamArtistEstateReads.sol";
+import "../../interfaces/stream/artist/IStreamArtistEstateOwner.sol";
 import "./StreamArtistTimingState.sol";
 
 /// @notice Constructor-fixed typed Identity writers, executed only in their bound owner.
@@ -31,8 +33,10 @@ import "./StreamArtistTimingState.sol";
 contract StreamArtistIdentityWriterExtension is
     StreamArtistOwner,
     StreamArtistIdentityData,
-    IStreamArtistIdentityDismissalEvents
+    IStreamArtistIdentityDismissalEvents,
+    IStreamArtistEstateEvents
 {
+    error InvalidTimestamp(uint64 timestamp);
     error ExtensionWrongHost(address actual);
     address private immutable _host;
 
@@ -100,6 +104,8 @@ contract StreamArtistIdentityWriterExtension is
         StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityState.grantDelegation(
             _identity, _replay, _delegations, _ownerContext(), c, p, a, proof
         );
+        _estate.grantEpoch[m.record] = _estate.delegationEpoch[p.artistId];
+        _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, m);
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
@@ -124,6 +130,7 @@ contract StreamArtistIdentityWriterExtension is
                 proof,
                 _currentIdentityClosure(p.artistId)
             );
+        _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, m);
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
@@ -150,6 +157,7 @@ contract StreamArtistIdentityWriterExtension is
                 document,
                 _currentIdentityClosure(p.artistId)
             );
+        _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, m);
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
@@ -187,6 +195,7 @@ contract StreamArtistIdentityWriterExtension is
                 _currentIdentityClosure(p.artistId),
                 _resolutions.continuations[_resolutions.continuationHead[p.artistId]]
             );
+        _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, m);
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
@@ -201,6 +210,7 @@ contract StreamArtistIdentityWriterExtension is
         StreamArtistIdentityState.Mutation memory m = StreamArtistAuthorizationState.revoke(
             _identity, _replay, _ownerContext(), c, p, a, proof
         );
+        _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, m);
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
@@ -247,7 +257,9 @@ contract StreamArtistIdentityWriterExtension is
         _check(c, 7);
         _deadline(a.time);
         if (proof.signer != p.account) revert T.InvalidSignature();
-        record = StreamArtistCollaboratorHashes.acceptanceRecord(_environment(), p, a.nonce, _now());
+        record = StreamArtistCollaboratorHashes.acceptanceRecordForAuthority(
+            _environment(), p, _identity.identities[artistId].authorityClass, a.nonce, _now()
+        );
         _authorize(
             c,
             artistId,
@@ -323,6 +335,9 @@ contract StreamArtistIdentityWriterExtension is
         bytes32 digest,
         bytes32 record
     ) private {
+        if (_estate.grantEpoch[grant] != _estate.delegationEpoch[b.artistId]) {
+            revert D.DelegationUnavailable(grant);
+        }
         StreamArtistSuccessionState.requireAllowed(_succession, _rotations, b.artistId, capability);
         StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityState.authorizeDelegate(
             _identity,
@@ -354,6 +369,7 @@ contract StreamArtistIdentityWriterExtension is
         (m, record) = StreamArtistIdentityConsentState.acceptance(
             _identity, _replay, _ownerContext(), c, collectionId, b, a, proof
         );
+        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, m);
         _commit(c, m.action, m.state, m.replay, m.record);
     }
 
@@ -365,22 +381,12 @@ contract StreamArtistIdentityWriterExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32 record) {
         _check(c, 3);
-        _deadline(a.time);
-        if (
-            b.accepted || b.generation != p.generation || b.bindingHash != p.bindingHash
-                || proof.signer != _identity.identities[b.artistId].authorityAddress
-        ) revert T.InvalidRecord();
-        record = StreamArtistBindingOperations.refusalRecord(
-            _environment(), p, b.artistId, proof.signer, a.nonce, _now()
+        StreamArtistIdentityState.Mutation memory m;
+        (m, record) = StreamArtistIdentityConsentState.refusal(
+            _identity, _replay, _ownerContext(), c, b, p, a, proof
         );
-        _authorize(
-            c,
-            b.artistId,
-            a,
-            proof,
-            StreamArtistBindingOperations.refusalDigest(_environment(), p, a),
-            record
-        );
+        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, m);
+        _commit(c, m.action, m.state, m.replay, m.record);
     }
 
     function consumeSaleConsent(
@@ -395,6 +401,7 @@ contract StreamArtistIdentityWriterExtension is
         (m, record) = StreamArtistIdentityConsentState.saleConsent(
             _identity, _replay, _ownerContext(), c, b, p, a, proof
         );
+        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, m);
         _commit(c, m.action, m.state, m.replay, m.record);
     }
 
@@ -410,6 +417,7 @@ contract StreamArtistIdentityWriterExtension is
         (m, record) = StreamArtistIdentityConsentState.policy(
             _identity, _replay, _ownerContext(), c, b, p, a, proof
         );
+        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, m);
         _commit(c, m.action, m.state, m.replay, m.record);
     }
 
@@ -426,6 +434,7 @@ contract StreamArtistIdentityWriterExtension is
         (m, record) = StreamArtistIdentityConsentState.economics(
             _identity, _replay, _ownerContext(), c, b, p, designation, a, proof
         );
+        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, m);
         _commit(c, m.action, m.state, m.replay, m.record);
     }
 
@@ -436,10 +445,12 @@ contract StreamArtistIdentityWriterExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32 record) {
         _check(c, 18);
-        _signedAt(a.time);
-        bytes32 digest;
-        (record, digest) = StreamArtistIdentityState.payoutProof(_environment(), p, proof.signer, a);
-        _authorize(c, p.artistId, a, proof, digest, record);
+        StreamArtistIdentityState.Mutation memory m;
+        (m, record) = StreamArtistIdentityConsentState.payout(
+            _identity, _replay, _ownerContext(), c, p, a, proof
+        );
+        _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, m);
+        _commit(c, m.action, m.state, m.replay, m.record);
     }
 
     function consumeAttestation(
@@ -450,11 +461,12 @@ contract StreamArtistIdentityWriterExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32 record) {
         _check(c, 24);
-        _signedAt(a.time);
-        bytes32 digest;
-        (record, digest) =
-            StreamArtistIdentityState.attestationProof(_environment(), b, p, proof.signer, a);
-        _authorize(c, b.artistId, a, proof, digest, record);
+        StreamArtistIdentityState.Mutation memory m;
+        (m, record) = StreamArtistIdentityConsentState.attestation(
+            _identity, _replay, _ownerContext(), c, b, p, a, proof
+        );
+        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, m);
+        _commit(c, m.action, m.state, m.replay, m.record);
     }
 
     function consumeRatification(
@@ -465,12 +477,12 @@ contract StreamArtistIdentityWriterExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32 record) {
         _check(c, 52);
-        _deadline(a.time);
-        bytes32 digest;
-        (record, digest) = StreamArtistIdentityState.ratificationProof(
-            _environment(), b, p, proof.signer, a, _now()
+        StreamArtistIdentityState.Mutation memory m;
+        (m, record) = StreamArtistIdentityConsentState.ratification(
+            _identity, _replay, _ownerContext(), c, b, p, a, proof
         );
-        _authorize(c, b.artistId, a, proof, digest, record);
+        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, m);
+        _commit(c, m.action, m.state, m.replay, m.record);
     }
 
     function consumeRoyaltyFreeze(
@@ -485,6 +497,7 @@ contract StreamArtistIdentityWriterExtension is
         (m, record) = StreamArtistIdentityConsentState.royaltyFreeze(
             _identity, _replay, _ownerContext(), c, b, p, a, proof
         );
+        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, m);
         _commit(c, m.action, m.state, m.replay, m.record);
     }
 
@@ -500,6 +513,7 @@ contract StreamArtistIdentityWriterExtension is
         (m, record) = StreamArtistIdentityConsentState.contentConsent(
             _identity, _replay, _ownerContext(), c, b, p, a, proof
         );
+        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, m);
         _commit(c, m.action, m.state, m.replay, m.record);
     }
 
@@ -515,6 +529,7 @@ contract StreamArtistIdentityWriterExtension is
         (m, record) = StreamArtistIdentityConsentState.contentFreeze(
             _identity, _replay, _ownerContext(), c, b, p, a, proof
         );
+        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, m);
         _commit(c, m.action, m.state, m.replay, m.record);
     }
 
@@ -539,6 +554,7 @@ contract StreamArtistIdentityWriterExtension is
                 record,
                 _identity.identities[artistId].authorityAddress
             );
+        _noteLiving(_ownerContext(), _replay, artistId, proof.signer, m);
         _commit(c, m.action, m.state, m.replay, m.record);
     }
 

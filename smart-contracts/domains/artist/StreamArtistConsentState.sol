@@ -45,12 +45,26 @@ library StreamArtistConsentState {
         address signer,
         uint256 nonce
     ) public returns (Mutation memory m) {
+        return saleConsentForAuthority(records, latest, replay, o, b, p, signer, 1, nonce);
+    }
+
+    function saleConsentForAuthority(
+        mapping(bytes32 => Sale.Record) storage records,
+        mapping(bytes32 => bytes32) storage latest,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        Context memory o,
+        T.Binding memory b,
+        Sale.Consent memory p,
+        address signer,
+        uint8 principalClass,
+        uint256 nonce
+    ) public returns (Mutation memory m) {
         if (
             p.collectionId == 0 || p.saleAdapter == address(0) || p.saleId == bytes32(0)
                 || p.saleConfigHash == bytes32(0)
         ) revert T.InvalidRecord();
         m.record = StreamArtistSaleHashes.record(
-            o.environment, p, b.artistId, signer, 1, nonce, o.observedAt
+            o.environment, p, b.artistId, signer, principalClass, nonce, o.observedAt
         );
         bytes32 scope = keccak256(abi.encode(p, b.generation, b.bindingHash));
         bytes32 key = _consume(
@@ -58,7 +72,15 @@ library StreamArtistConsentState {
         );
         if (records[m.record].recordHash != bytes32(0)) revert T.InvalidRecord();
         Sale.Record memory item = Sale.Record(
-            m.record, p, b.artistId, signer, 1, nonce, o.observedAt, b.generation, b.bindingHash
+            m.record,
+            p,
+            b.artistId,
+            signer,
+            principalClass,
+            nonce,
+            o.observedAt,
+            b.generation,
+            b.bindingHash
         );
         bytes32 lookup = StreamArtistSaleHashes.lookup(p.collectionId, p.saleId, p.saleConfigHash);
         records[m.record] = item;
@@ -67,7 +89,15 @@ library StreamArtistConsentState {
         m.state = keccak256(abi.encode(scope, lookup, item));
         m.replay = keccak256(abi.encode(key, m.record));
         emit ArtistSaleConsentRecorded(
-            1, p.collectionId, p.saleConfigHash, signer, p.saleId, 1, nonce, o.observedAt, m.record
+            1,
+            p.collectionId,
+            p.saleConfigHash,
+            signer,
+            p.saleId,
+            principalClass,
+            nonce,
+            o.observedAt,
+            m.record
         );
     }
 
@@ -125,11 +155,24 @@ library StreamArtistConsentState {
         address signer,
         uint256 nonce
     ) public returns (Mutation memory m) {
+        return policyForAuthority(records, replay, o, b, p, signer, 1, nonce);
+    }
+
+    function policyForAuthority(
+        mapping(bytes32 => bytes32) storage records,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        Context memory o,
+        T.Binding memory b,
+        T.PolicyConsent memory p,
+        address signer,
+        uint8 principalClass,
+        uint256 nonce
+    ) public returns (Mutation memory m) {
         if (p.phaseId == bytes32(0) || p.policyHash == bytes32(0)) {
             revert T.InvalidRecord();
         }
-        m.record = StreamArtistHashes.policyRecord(
-            o.environment, p, b.artistId, signer, nonce, o.observedAt
+        m.record = StreamArtistHashes.policyRecordForAuthority(
+            o.environment, p, b.artistId, signer, principalClass, nonce, o.observedAt
         );
         bytes32 scope = keccak256(abi.encode(p.collectionId, p.phaseId, p.policyHash));
         bytes32 key = _consume(
@@ -140,7 +183,15 @@ library StreamArtistConsentState {
         m.state = keccak256(abi.encode(scope, m.record));
         m.replay = keccak256(abi.encode(key, m.record));
         emit ArtistPolicyConsentRecorded(
-            1, p.collectionId, p.policyHash, signer, p.phaseId, 1, nonce, o.observedAt, m.record
+            1,
+            p.collectionId,
+            p.policyHash,
+            signer,
+            p.phaseId,
+            principalClass,
+            nonce,
+            o.observedAt,
+            m.record
         );
     }
 
@@ -156,6 +207,24 @@ library StreamArtistConsentState {
         uint256 nonce,
         bytes32 grant
     ) public returns (Mutation memory m) {
+        return economicsForAuthority(
+            records, delegations, replay, o, b, p, designation, signer, 1, nonce, grant
+        );
+    }
+
+    function economicsForAuthority(
+        mapping(bytes32 => bytes32) storage records,
+        mapping(bytes32 => bytes32) storage delegations,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        Context memory o,
+        T.Binding memory b,
+        T.EconomicsConsent memory p,
+        T.Payout memory designation,
+        address signer,
+        uint8 principalClass,
+        uint256 nonce,
+        bytes32 grant
+    ) public returns (Mutation memory m) {
         if (
             designation.account == address(0) || designation.recordHash == bytes32(0)
                 || p.resolver == address(0) || p.assignmentHash == bytes32(0)
@@ -163,7 +232,7 @@ library StreamArtistConsentState {
         ) {
             revert T.InvalidRecord();
         }
-        uint8 authorityClass = grant == bytes32(0) ? 1 : 2;
+        uint8 authorityClass = grant == bytes32(0) ? principalClass : 2;
         m.record = StreamArtistEconomicsHashes.economicsRecordForAuthority(
             o.environment,
             p,
@@ -217,6 +286,22 @@ library StreamArtistConsentState {
         address signer,
         uint256 nonce
     ) public returns (Mutation memory m) {
+        return ratificationForAuthority(current, records, replay, o, b, p, signer, 1, nonce);
+    }
+
+    function ratificationForAuthority(
+        mapping(uint256 => T.RatificationRecord) storage current,
+        mapping(
+            bytes32 => T.RatificationRecord
+        ) storage records,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        Context memory o,
+        T.Binding memory b,
+        T.Ratification memory p,
+        address signer,
+        uint8 principalClass,
+        uint256 nonce
+    ) public returns (Mutation memory m) {
         if (p.metadataContract == address(0) || p.contentStateHash == bytes32(0)) {
             revert T.InvalidRecord();
         }
@@ -227,8 +312,8 @@ library StreamArtistConsentState {
         ) {
             revert T.InvalidRecord();
         }
-        m.record = StreamArtistHashes.ratificationRecord(
-            o.environment, p, b.artistId, signer, nonce, o.observedAt
+        m.record = StreamArtistHashes.ratificationRecordForAuthority(
+            o.environment, p, b.artistId, signer, principalClass, nonce, o.observedAt
         );
         bytes32 key = _consume(
             replay,
@@ -245,7 +330,14 @@ library StreamArtistConsentState {
         m.state = keccak256(abi.encode(p.collectionId, item));
         m.replay = keccak256(abi.encode(key, m.record));
         emit ArtistContentRatificationRecorded(
-            1, p.collectionId, p.contentStateHash, signer, 1, nonce, o.observedAt, m.record
+            1,
+            p.collectionId,
+            p.contentStateHash,
+            signer,
+            principalClass,
+            nonce,
+            o.observedAt,
+            m.record
         );
     }
 

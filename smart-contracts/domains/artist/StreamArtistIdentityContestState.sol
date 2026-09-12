@@ -11,6 +11,16 @@ library StreamArtistIdentityContestState {
         mapping(bytes32 => bytes32) latest;
     }
 
+    struct FileFacts {
+        bytes32 scope;
+        bytes32 oldHash;
+        bytes32 newHash;
+        bytes32 pending;
+        bytes32 executed;
+        bytes32 guardians;
+        bytes32 captured;
+    }
+
     event ArtistIdentityContested(
         uint16 schemaVersion,
         bytes32 indexed artistId,
@@ -30,8 +40,9 @@ library StreamArtistIdentityContestState {
         Contest.Request memory p
     ) public view returns (bytes32 scope, bytes32 oldHash, bytes32 newHash) {
         _validate(identity, rotations, p);
-        bytes32 pending = rotations.pending[p.artistId];
+        bytes32 pending = StreamArtistRotationState.pendingTransition(rotations, p.artistId);
         bytes32 executed = rotations.latestExecution[p.artistId];
+        (, bytes32 captured,) = StreamArtistRotationState.transitionStanding(rotations, pending);
         scope = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_IDENTITY_CONTEST_SCOPE_V1"),
@@ -52,10 +63,10 @@ library StreamArtistIdentityContestState {
                 rotations.latestTransition[p.artistId],
                 pending,
                 executed,
-                rotations.rotations[pending].transition,
-                rotations.rotations[executed].transition,
+                StreamArtistRotationState.transitionState(rotations, pending),
+                StreamArtistRotationState.transitionState(rotations, executed),
                 StreamArtistRotationState.operativeGuardian(rotations, p.artistId),
-                rotations.rotations[pending].guardianSetRecordHash,
+                captured,
                 s.latest[p.artistId]
             )
         );
@@ -196,20 +207,15 @@ library StreamArtistIdentityContestState {
         Dismissal.ContestResolutionFacts memory resolution,
         Dismissal.StandingJudgment memory judgment
     ) private returns (StreamArtistIdentityState.Mutation memory m) {
-        (bytes32 scope, bytes32 oldHash, bytes32 newHash) = contextWithResolution(
-            s, identity, rotations, o, p, successor, successorRecord, resolution
-        );
-        bytes32 pending = rotations.pending[p.artistId];
-        bytes32 executed = rotations.latestExecution[p.artistId];
-        bytes32 guardians = StreamArtistRotationState.operativeGuardian(rotations, p.artistId);
-        bytes32 captured = rotations.rotations[pending].guardianSetRecordHash;
+        FileFacts memory f =
+            _fileFacts(s, identity, rotations, o, p, successor, successorRecord, resolution);
         if (governance.actionId != bytes32(0)) {
             if (
                 c.actor != governanceAuthority || governance.proposer == address(0)
                     || (governance.actionClass != 1 && governance.actionClass != 2)
                     || governance.roleRevision == 0 || governance.roleMutationHash == bytes32(0)
-                    || governance.scopeHash != scope || governance.oldValueHash != oldHash
-                    || governance.newValueHash != newHash
+                    || governance.scopeHash != f.scope || governance.oldValueHash != f.oldHash
+                    || governance.newValueHash != f.newHash
             ) revert Contest.InvalidContestGovernance();
         } else {
             Contest.GovernanceWitness memory empty;
@@ -223,8 +229,8 @@ library StreamArtistIdentityContestState {
                     && judgment.retirementHash == rotations.retirement[p.artistId][c.actor]
             ) revoked = true;
             if (
-                c.actor != successor && !_member(rotations, guardians, c.actor)
-                    && !_member(rotations, captured, c.actor)
+                c.actor != successor && !_member(rotations, f.guardians, c.actor)
+                    && !_member(rotations, f.captured, c.actor)
                     && (rotations.retirement[p.artistId][c.actor] == bytes32(0) || revoked)
             ) {
                 revert T.Unauthorized(c.actor);
@@ -267,35 +273,29 @@ library StreamArtistIdentityContestState {
             c.actor,
             observed,
             identity.identities[p.artistId].status,
-            guardians,
-            captured,
-            pending,
-            executed,
+            f.guardians,
+            f.captured,
+            f.pending,
+            f.executed,
             keccak256(abi.encode(governance))
         );
         s.records[record] = item;
         s.latest[p.artistId] = record;
         // The named historical subject cannot let a current provisional cohort escape the filing.
         _markWithResolution(rotations, p.subjectRecordHash, observed, resolution.subjectClosure);
-        _markWithResolution(rotations, executed, observed, resolution.executedClosure);
-        if (pending != bytes32(0)) {
-            _mark(rotations, pending, observed);
-            rotations.rotations[pending].transition.phase = 3;
+        _markWithResolution(rotations, f.executed, observed, resolution.executedClosure);
+        // Estate transition writes remain in the Identity's estate-state recipe after this
+        // helper returns. Never create a zero RotationRecord for an estate reference.
+        if (f.pending != bytes32(0) && rotations.rotations[f.pending].recordHash != bytes32(0)) {
+            _mark(rotations, f.pending, observed);
+            rotations.rotations[f.pending].transition.phase = 3;
             delete rotations.pending[p.artistId];
         }
         identity.identities[p.artistId].status = 4;
         m = StreamArtistIdentityState.Mutation(
             record,
             keccak256(abi.encode(p, governance)),
-            keccak256(
-                abi.encode(
-                    item,
-                    identity.identities[p.artistId],
-                    rotations.rotations[p.subjectRecordHash].transition,
-                    rotations.rotations[pending].transition,
-                    rotations.rotations[executed].transition
-                )
-            ),
+            _postState(identity, rotations, item),
             keccak256(abi.encode(subjectKey, recordKey, record))
         );
         emit ArtistIdentityContested(
@@ -316,6 +316,45 @@ library StreamArtistIdentityContestState {
         ) {
             m.state = keccak256(abi.encode(m.state, resolution, judgment));
         }
+    }
+
+    function _fileFacts(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        StreamArtistIdentityState.OwnerContext memory o,
+        Contest.Request memory p,
+        address successor,
+        bytes32 successorRecord,
+        Dismissal.ContestResolutionFacts memory resolution
+    ) private view returns (FileFacts memory f) {
+        (f.scope, f.oldHash, f.newHash) = contextWithResolution(
+            s, identity, rotations, o, p, successor, successorRecord, resolution
+        );
+        f.pending = StreamArtistRotationState.pendingTransition(rotations, p.artistId);
+        f.executed = rotations.latestExecution[p.artistId];
+        f.guardians = StreamArtistRotationState.operativeGuardian(rotations, p.artistId);
+        (, f.captured,) = StreamArtistRotationState.transitionStanding(rotations, f.pending);
+    }
+
+    function _postState(
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        Contest.Record memory item
+    ) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                item,
+                identity.identities[item.terms.artistId],
+                StreamArtistRotationState.transitionState(rotations, item.terms.subjectRecordHash),
+                StreamArtistRotationState.transitionState(
+                    rotations, item.pendingTransitionRecordHash
+                ),
+                StreamArtistRotationState.transitionState(
+                    rotations, item.executedTransitionRecordHash
+                )
+            )
+        );
     }
 
     function contextWithResolution(
@@ -367,7 +406,7 @@ library StreamArtistIdentityContestState {
             }
             return;
         }
-        R.TransitionState storage t = rotations.rotations[record].transition;
+        R.TransitionState memory t = StreamArtistRotationState.transitionState(rotations, record);
         uint64 ends = t.phase == 2 ? t.postWindowEndsAt : t.contestEndsAt;
         bool abandoned = t.phase == 3
             || (t.phase == 2 && t.contestedAt != 0 && t.contestedAt < t.postWindowEndsAt);
@@ -396,14 +435,16 @@ library StreamArtistIdentityContestState {
     ) private view {
         T.Identity storage principal = identity.identities[p.artistId];
         if (
-            p.artistId == bytes32(0) || principal.status != 1 || principal.authorityClass != 1
+            p.artistId == bytes32(0)
+                || !((principal.status == 1 && principal.authorityClass == 1)
+                    || (principal.status == 3 && principal.authorityClass == 3))
                 || principal.authorityAddress == address(0) || p.evidenceHash == bytes32(0)
                 || p.reasonHash == bytes32(0)
         ) {
             revert Contest.InvalidIdentityContest(p.artistId);
         }
         if (p.subjectRecordHash != bytes32(0)) {
-            R.TransitionState storage t = rotations.rotations[p.subjectRecordHash].transition;
+            R.TransitionState memory t = _contestSubject(p.subjectRecordHash);
             if (
                 t.artistId != p.artistId || t.recordHash != p.subjectRecordHash
                     || (t.phase != 1 && t.phase != 2)
@@ -413,12 +454,35 @@ library StreamArtistIdentityContestState {
         }
     }
 
+    function _contestSubject(bytes32 record) private view returns (R.TransitionState memory t) {
+        bytes memory data =
+            abi.encodeCall(IStreamArtistRotationReads.artistTransitionState, (record));
+        bytes memory raw = new bytes(256);
+        bool ok;
+        uint256 size;
+        assembly ("memory-safe") {
+            ok := staticcall(gas(), address(), add(data, 32), mload(data), add(raw, 32), 256)
+            size := returndatasize()
+        }
+        if (!ok || size != 256) revert Contest.InvalidContestSubject(record);
+        // Preserve the prior public error even for a malformed fixed owner result.
+        for (uint256 i = 2; i < 8; ++i) {
+            uint256 value;
+            assembly ("memory-safe") { value := mload(add(add(raw, 32), mul(i, 32))) }
+            if (value >> (i == 7 ? 8 : 64) != 0) revert Contest.InvalidContestSubject(record);
+        }
+        t = abi.decode(raw, (R.TransitionState));
+    }
+
     function _mark(
         StreamArtistRotationState.State storage rotations,
         bytes32 record,
         uint64 observed
     ) private {
-        if (record != bytes32(0) && rotations.rotations[record].transition.contestedAt == 0) {
+        if (
+            record != bytes32(0) && rotations.rotations[record].recordHash != bytes32(0)
+                && rotations.rotations[record].transition.contestedAt == 0
+        ) {
             rotations.rotations[record].transition.contestedAt = observed;
         }
     }

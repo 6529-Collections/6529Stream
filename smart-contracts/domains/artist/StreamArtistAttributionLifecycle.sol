@@ -226,7 +226,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes32 record
     ) external {
         _check(c, 2);
-        _complete(c, collectionId, b, record, b.artistAddress);
+        _complete(c, collectionId, b, record, b.artistAddress, 1);
     }
 
     function completeCollaboratorBinding(
@@ -238,7 +238,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
     ) external {
         _check(c, 7);
         if (signer == address(0)) revert T.InvalidSignature();
-        _complete(c, collectionId, b, record, signer);
+        _complete(c, collectionId, b, record, signer, 1);
     }
 
     function acceptWithAuthority(
@@ -252,7 +252,22 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         StreamArtistCurrentAuthorityFacts.requirePrincipal(
             b.artistId, authority.authorityAddress, authority, false
         );
-        _complete(c, collectionId, b, record, authority.authorityAddress);
+        _complete(c, collectionId, b, record, authority.authorityAddress, authority.authorityClass);
+    }
+
+    function completeCollaboratorBindingWithAuthority(
+        T.ActionContext calldata c,
+        uint256 collectionId,
+        T.Binding calldata b,
+        bytes32 record,
+        address signer,
+        R.AuthorityFact calldata authority
+    ) external {
+        _check(c, 7);
+        StreamArtistCurrentAuthorityFacts.requirePrincipal(
+            authority.artistId, signer, authority, false
+        );
+        _complete(c, collectionId, b, record, signer, authority.authorityClass);
     }
 
     function _complete(
@@ -260,7 +275,8 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         uint256 collectionId,
         T.Binding calldata b,
         bytes32 record,
-        address signer
+        address signer,
+        uint8 authorityClass
     ) private {
         Attribution storage a = _attributions[collectionId];
         if (a.state != 1 || a.generation != b.generation || record == bytes32(0)) {
@@ -275,7 +291,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             bytes32(0)
         );
         emit ArtistAttributionStateChanged(
-            1, collectionId, 2, b.generation, 1, signer, 1, record, bytes32(0), ""
+            1, collectionId, 2, b.generation, 1, signer, authorityClass, record, bytes32(0), ""
         );
     }
 
@@ -292,7 +308,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         // The old callback has no operative Identity fact. Only deployment uses it.
         if (p.subjectKind != 9) revert T.UnsupportedProfile();
         if (signer != b.artistAddress) revert T.InvalidAttribution(p.collectionId);
-        return _recordAttestation(c, b, p, bytes32(0), signer, nonce, signedAt, statement);
+        return _recordAttestation(c, b, p, bytes32(0), signer, nonce, signedAt, statement, 1);
     }
 
     function recordIdentityAttestation(
@@ -309,7 +325,9 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         if (p.subjectKind != 10 || operativeIdentityHash == bytes32(0)) revert T.InvalidRecord();
         if (signer != b.artistAddress) revert T.InvalidAttribution(p.collectionId);
         return
-            _recordAttestation(c, b, p, operativeIdentityHash, signer, nonce, signedAt, statement);
+            _recordAttestation(
+                c, b, p, operativeIdentityHash, signer, nonce, signedAt, statement, 1
+            );
     }
 
     function recordAttestationWithAuthority(
@@ -329,8 +347,17 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             (p.subjectKind == 10 && operativeIdentityHash == bytes32(0))
                 || (p.subjectKind == 9 && operativeIdentityHash != bytes32(0))
         ) revert T.InvalidRecord();
-        return
-            _recordAttestation(c, b, p, operativeIdentityHash, signer, nonce, signedAt, statement);
+        return _recordAttestation(
+            c,
+            b,
+            p,
+            operativeIdentityHash,
+            signer,
+            nonce,
+            signedAt,
+            statement,
+            authority.authorityClass
+        );
     }
 
     function _recordAttestation(
@@ -341,7 +368,8 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         address signer,
         uint256 nonce,
         uint64 signedAt,
-        bytes calldata statement
+        bytes calldata statement,
+        uint8 authorityClass
     ) private returns (bytes32 record) {
         Attribution storage attr = _attributions[p.collectionId];
         if (attr.state != 2 || attr.generation != b.generation) {
@@ -371,8 +399,8 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         } else {
             revert T.UnsupportedProfile();
         }
-        record = StreamArtistHashes.attestationRecord(
-            _environment(), p, b.artistId, signer, nonce, signedAt
+        record = StreamArtistHashes.attestationRecordForAuthority(
+            _environment(), p, b.artistId, signer, authorityClass, nonce, signedAt
         );
         if (_records[record].recordHash != bytes32(0)) revert T.InvalidRecord();
         T.AttestationRecord memory item = T.AttestationRecord(
@@ -404,7 +432,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             p.schemaId,
             p.statementHash,
             keccak256(bytes(p.statementURI)),
-            1,
+            authorityClass,
             nonce,
             signedAt,
             record

@@ -42,6 +42,25 @@ contract StreamArtistRegistryWriterExtension {
         _;
     }
 
+    function requestEstateActivation(Estate.Request calldata p, T.Authorization calldata a)
+        external
+        onlyHost
+        returns (bytes32)
+    {
+        return IStreamArtistEstateCoordinator(operationCoordinator)
+            .coordinateRequestEstateActivation(msg.sender, p, a);
+    }
+
+    function cancelEstateActivation(bytes32 artistId, bytes32 expected) external onlyHost {
+        IStreamArtistEstateCoordinator(operationCoordinator)
+            .coordinateCancelEstateActivation(msg.sender, artistId, expected);
+    }
+
+    function executeEstateActivation(Estate.Execution calldata p) external onlyHost {
+        IStreamArtistEstateCoordinator(operationCoordinator)
+            .coordinateExecuteEstateActivation(msg.sender, p);
+    }
+
     function recordSaleConsent(Sale.Consent calldata p, T.Authorization calldata a)
         external
         onlyHost

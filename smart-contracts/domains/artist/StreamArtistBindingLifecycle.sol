@@ -246,7 +246,7 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
         _check(c, 3);
         T.Binding memory b = _pending(p);
         if (signer != b.artistAddress) revert T.InvalidSignature();
-        return _refuse(c, p, b, signer, nonce);
+        return _refuse(c, p, b, signer, nonce, 1);
     }
 
     function refuseWithAuthority(
@@ -259,7 +259,7 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
         _check(c, 3);
         T.Binding memory b = _pending(p);
         StreamArtistCurrentAuthorityFacts.requirePrincipal(b.artistId, signer, authority, false);
-        return _refuse(c, p, b, signer, nonce);
+        return _refuse(c, p, b, signer, nonce, authority.authorityClass);
     }
 
     function _refuse(
@@ -267,10 +267,11 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
         L.Termination calldata p,
         T.Binding memory b,
         address signer,
-        uint256 nonce
+        uint256 nonce,
+        uint8 authorityClass
     ) private returns (bytes32 record) {
-        record = StreamArtistBindingOperations.refusalRecord(
-            _environment(), p, b.artistId, signer, nonce, _now()
+        record = StreamArtistBindingOperations.refusalRecordForAuthority(
+            _environment(), p, b.artistId, signer, authorityClass, nonce, _now()
         );
         bytes32 key = _consume(
             keccak256("binding_lifecycle.replay.refusal_uniqueness"),

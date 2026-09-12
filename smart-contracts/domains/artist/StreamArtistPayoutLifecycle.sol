@@ -2,6 +2,8 @@
 pragma solidity ^0.8.19;
 
 import "./StreamArtistOwner.sol";
+import "./StreamArtistCurrentAuthorityFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistCurrentPayoutOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistPayoutTransitionOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistPayoutResolutionOwner.sol";
 import {
@@ -94,7 +96,7 @@ contract StreamArtistPayoutLifecycle is StreamArtistOwner {
     ) external returns (bytes32 record) {
         Dismissal.PayoutResolutionFacts memory none;
         return _recordDesignation(
-            c, p, signer, nonce, signedAt, currentTransition, candidateTransition, none, false
+            c, p, signer, nonce, signedAt, currentTransition, candidateTransition, none, false, 1
         );
     }
 
@@ -109,7 +111,43 @@ contract StreamArtistPayoutLifecycle is StreamArtistOwner {
         Dismissal.PayoutResolutionFacts calldata resolution
     ) external returns (bytes32 record) {
         return _recordDesignation(
-            c, p, signer, nonce, signedAt, currentTransition, candidateTransition, resolution, true
+            c,
+            p,
+            signer,
+            nonce,
+            signedAt,
+            currentTransition,
+            candidateTransition,
+            resolution,
+            true,
+            1
+        );
+    }
+
+    function recordDesignationWithAuthority(
+        T.ActionContext calldata c,
+        T.PayoutDesignation calldata p,
+        address signer,
+        uint256 nonce,
+        uint64 signedAt,
+        R.TransitionState calldata currentTransition,
+        R.TransitionState calldata candidateTransition,
+        Dismissal.PayoutResolutionFacts calldata resolution,
+        R.AuthorityFact calldata authority
+    ) external returns (bytes32) {
+        _check(c, 18);
+        StreamArtistCurrentAuthorityFacts.requirePrincipal(p.artistId, signer, authority, false);
+        return _recordDesignation(
+            c,
+            p,
+            signer,
+            nonce,
+            signedAt,
+            currentTransition,
+            candidateTransition,
+            resolution,
+            true,
+            authority.authorityClass
         );
     }
 
@@ -122,7 +160,8 @@ contract StreamArtistPayoutLifecycle is StreamArtistOwner {
         R.TransitionState calldata currentTransition,
         R.TransitionState calldata candidateTransition,
         Dismissal.PayoutResolutionFacts memory resolution,
-        bool modern
+        bool modern,
+        uint8 authorityClass
     ) private returns (bytes32 record) {
         _check(c, 18);
         if (modern && resolution.artistId != p.artistId) revert T.InvalidRecord();
@@ -175,7 +214,9 @@ contract StreamArtistPayoutLifecycle is StreamArtistOwner {
                 );
             }
         }
-        record = StreamArtistHashes.payoutRecord(_environment(), p, signer, nonce, signedAt);
+        record = StreamArtistHashes.payoutRecordForAuthority(
+            _environment(), p, signer, authorityClass, nonce, signedAt
+        );
         if (_records[record].artistId != bytes32(0)) revert T.InvalidRecord();
         if (abandonedChild != bytes32(0)) _abandonedUnder[abandonedChild] = dismissal;
         _records[record] = p;
@@ -233,7 +274,15 @@ contract StreamArtistPayoutLifecycle is StreamArtistOwner {
             record
         );
         emit ArtistPayoutDesignationRecorded(
-            1, p.artistId, p.payoutAccount, signer, current.recordHash, 1, nonce, signedAt, record
+            1,
+            p.artistId,
+            p.payoutAccount,
+            signer,
+            current.recordHash,
+            authorityClass,
+            nonce,
+            signedAt,
+            record
         );
 
         if (abandonedChild != bytes32(0)) {

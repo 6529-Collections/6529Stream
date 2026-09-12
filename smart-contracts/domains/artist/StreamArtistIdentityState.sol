@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamArtistDelegationState.sol";
+import "./StreamArtistAuthorityPolicy.sol";
 
 /// @notice Linked mechanics over Identity's original storage prefix and replay map.
 /// @dev Typed owner guards and one semantic commit remain in Identity. This library owns no separate state.
@@ -264,14 +265,7 @@ library StreamArtistIdentityState {
         address expectedSigner
     ) public returns (Mutation memory) {
         T.Identity storage item = state.identities[artistId];
-        bool defensive = c.operationId == 20 || c.operationId == 21 || c.operationId == 27
-            || c.operationId == 54;
-        if (
-            (item.status != 1 && !(defensive && item.status == 4)) || item.authorityClass != 1
-                || item.authorityAddress == address(0)
-        ) {
-            revert T.InvalidIdentity(artistId);
-        }
+        StreamArtistAuthorityPolicy.requireOperation(item, artistId, c.operationId);
         if (
             proof.signer != expectedSigner || expectedSigner == address(0) || proof.digest != digest
                 || (proof.direct && (c.actor != proof.signer || a.signature.length != 0))

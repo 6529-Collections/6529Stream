@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 import "../../helpers/OfficialSafeFixture.sol";
+import "./ArtistEstateArchivalFixture.sol";
 import "./ArtistSaleRegistryFixture.sol";
 import "./ArtistIdentityReadEncodingFixture.sol";
 import "../../../smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol";
@@ -450,9 +451,10 @@ contract ArtistRotationContestHarness is StreamArtistIdentityAuthority {
 
 contract StreamArtistOnboardingTest is
     CharacterizationTestBase,
-    OfficialSafeFixture,
+    ArtistEstateArchivalFixture,
     ArtistSaleRegistryFixture
 {
+    event EstateCoverageMeasurement(string context, uint256 cap, uint256 measuredSpan);
     event CollaboratorBoundMeasurement(uint256 rows, uint256 entries, uint256 gasUsed);
     ArtistTestVm private constant avm =
         ArtistTestVm(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -2354,6 +2356,9 @@ contract StreamArtistOnboardingTest is
                 uint16(33),
                 uint16(36),
                 uint16(37),
+                uint16(38),
+                uint16(39),
+                uint16(40),
                 uint16(51),
                 uint16(52),
                 uint16(54),
@@ -7673,6 +7678,1803 @@ contract StreamArtistOnboardingTest is
         );
     }
 
+    /// @dev First connected estate flow: actual artist/Safe/archival products; Core and governance are unit boundaries.
+    function testEstateActivationActualCoverageAndSafePrincipalsZeroCapabilities() public {
+        _accept();
+        _policy();
+        _payout();
+        _economics();
+        _ratify();
+        _attestations();
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        _delegateSetup();
+        Succ.Designation memory designation = _successorTerms(address(delegateSafe), 2);
+        designation.grantedCapabilities = 0;
+        T.Authorization memory designationAuth = T.Authorization(nextNonce++, 0, "");
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(
+                    IStreamArtistSuccessionRecords.recordSuccessorDesignation,
+                    (designation, designationAuth)
+                ),
+                0
+            ),
+            "living Safe designation"
+        );
+        bytes32 designationHash =
+            StreamArtistIdentityAuthority(suite.owners[2]).operativeSuccessorRecord(artistId);
+        (bytes32 evidence, bytes32 coverage) = _estateArchiveEvidence(artistId);
+        Estate.Request memory request =
+            Estate.Request(artistId, address(delegateSafe), evidence, designationHash, coverage);
+        T.Authorization memory auth = T.Authorization(0, uint64(block.timestamp + 1 days), "");
+        bytes32 independentlyTyped = _successionTyped(
+            keccak256(
+                abi.encode(
+                    keccak256(
+                        "StreamArtistEstateActivation(bytes32 artistId,address successor,bytes32 evidenceHash,uint256 nonce,uint64 deadline)"
+                    ),
+                    artistId,
+                    address(delegateSafe),
+                    evidence,
+                    uint256(0),
+                    auth.time
+                )
+            )
+        );
+        require(
+            ingress.estateActivationDigest(request, auth) == independentlyTyped,
+            "exact permanent five-field signed digest"
+        );
+        uint64 observed = uint64(block.timestamp);
+        require(
+            executeSafe(
+                delegateSafe,
+                delegateKeys,
+                address(ingress),
+                0,
+                abi.encodeCall(
+                    IStreamArtistEstateActivation.requestEstateActivation, (request, auth)
+                ),
+                0
+            ),
+            "successor Safe request"
+        );
+        (address pending, uint64 ends, bytes32 record) = ingress.estateActivationState(artistId);
+        require(pending == address(delegateSafe) && ends == observed + 180 days, "captured notice");
+        bytes32 expected = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ESTATE_ACTIVATION_RECORD_V1"),
+                block.chainid,
+                address(ingress),
+                artistId,
+                address(delegateSafe),
+                evidence,
+                uint256(0),
+                observed,
+                ends
+            )
+        );
+        require(record == expected, "exact permanent request record");
+        require(
+            ingress.estateActivationNonceHint(artistId, address(delegateSafe)) == 1,
+            "persistent successor replay lane"
+        );
+        vm.warp(ends);
+        Estate.Execution memory execution = Estate.Execution(artistId, record, coverage);
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistEstateActivation.executeEstateActivation, (execution)),
+                0
+            ),
+            "permissionless Safe execution at notice equality"
+        );
+        Estate.AuthorityCapabilities memory rights = ingress.currentAuthorityCapabilities(artistId);
+        require(
+            rights.authorityAddress == address(delegateSafe) && rights.authorityClass == 3
+                && rights.status == 3 && rights.effectiveCapabilities == 0
+                && rights.activationRecordHash == record,
+            "truthful zero-cap successor authority"
+        );
+        require(
+            ingress.acceptedArtist(1) == address(delegateSafe),
+            "immutable binding resolves current successor"
+        );
+        require(
+            StreamArtistIdentityAuthority(suite.owners[2]).activeIdentity(address(artist)) == 0
+                && StreamArtistIdentityAuthority(suite.owners[2])
+                        .activeIdentity(address(delegateSafe)) == artistId,
+            "one operative identity address"
+        );
+        (Estate.RequestRecord memory saved, uint8 phase, Estate.ExecutionFacts memory result) =
+            ingress.estateActivationRecord(record);
+        require(
+            saved.recordHash == record && phase == 2 && result.activationRecordHash == record
+                && result.coverageRecordHash == coverage && result.effectiveCapabilities == 0
+                && result.executedAt == ends && result.governanceActionId == 0
+                && result.delegationEpoch == 1,
+            "actual executed archival evidence"
+        );
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        T.PolicyConsent memory later = T.PolicyConsent(1, keccak256("fresh estate policy"), POLICY);
+        T.Identity memory current =
+            StreamArtistIdentityAuthority(suite.owners[2]).identity(artistId);
+        T.Authorization memory denied =
+            T.Authorization(current.nonceHint, uint64(block.timestamp + 1 days), "");
+        vm.prank(address(delegateSafe));
+        vm.expectRevert(
+            abi.encodeWithSelector(Estate.EstateCapabilityUnavailable.selector, artistId, uint32(2))
+        );
+        ingress.recordPolicyConsent(later, denied);
+        require(
+            ingress.currentAuthorityCapabilities(artistId).effectiveCapabilities == 0,
+            "failed new policy cannot manufacture rights"
+        );
+    }
+
+    function _estatePendingFixture(uint32 capabilities)
+        private
+        returns (Estate.Execution memory execution)
+    {
+        if (address(delegateSafe) == address(0)) _delegateSetup();
+        Succ.Designation memory d = _successorTerms(address(delegateSafe), 2);
+        d.grantedCapabilities = capabilities;
+        bytes32 designation = _successionRecord(d);
+        (bytes32 evidence, bytes32 coverage) = _estateArchiveEvidence(artistId);
+        Estate.Request memory request =
+            Estate.Request(artistId, address(delegateSafe), evidence, designation, coverage);
+        T.Authorization memory a = T.Authorization(0, uint64(block.timestamp + 1 days), "");
+        require(
+            executeSafe(
+                delegateSafe,
+                delegateKeys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistEstateActivation.requestEstateActivation, (request, a)),
+                0
+            ),
+            "actual successor Safe request"
+        );
+        (,, bytes32 record) = ingress.estateActivationState(artistId);
+        return Estate.Execution(artistId, record, coverage);
+    }
+
+    function _assertEstateCancellationEvent(
+        Vm.Log[] memory logs,
+        bytes32 record,
+        uint256 expectedCount
+    ) private view {
+        bytes32 topic = keccak256(
+            "ArtistEstateActivationCancelled(uint16,bytes32,address,uint8,bytes32)"
+        );
+        uint256 count;
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].emitter != suite.owners[2] || logs[i].topics.length == 0
+                    || logs[i].topics[0] != topic
+            ) continue;
+            require(
+                logs[i].topics.length == 3 && logs[i].topics[1] == artistId
+                    && logs[i].topics[2] == bytes32(uint256(uint160(address(artist)))),
+                "exact living cancellation emitter/topics"
+            );
+            require(
+                keccak256(logs[i].data) == keccak256(abi.encode(uint16(1), uint8(1), record)),
+                "exact living cancellation data"
+            );
+            ++count;
+        }
+        require(count == expectedCount, "exact cancellation event count");
+    }
+
+    function _estateLivingRevisionAt(uint256 boundary) private {
+        Estate.Execution memory p = _estatePendingFixture(4095);
+        (Estate.RequestRecord memory before_,,) =
+            ingress.estateActivationRecord(p.expectedActivationRecordHash);
+        if (boundary == 1) vm.warp(before_.noticeEndsAt);
+        if (boundary == 2) vm.warp(uint256(before_.noticeEndsAt) + 1);
+        bytes memory document = bytes("living principal cancels active estate");
+        StreamArtistIdentityRevisionTypes.Revision memory revision =
+            StreamArtistIdentityRevisionTypes.Revision(
+                artistId,
+                ingress.operativeIdentityRecord(artistId),
+                keccak256(document),
+                "urn:living-after-estate-request"
+            );
+        T.Authorization memory a = T.Authorization(nextNonce++, uint64(block.timestamp), "");
+        vm.recordLogs();
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(
+                    IStreamArtistIdentityRevision.recordIdentityRevision,
+                    (revision, a, document, "Living artist")
+                ),
+                0
+            ),
+            "actual living Safe revision"
+        );
+        _assertEstateCancellationEvent(vm.getRecordedLogs(), p.expectedActivationRecordHash, 1);
+        (,, bytes32 pending) = ingress.estateActivationState(artistId);
+        (, uint8 phase,) = ingress.estateActivationRecord(p.expectedActivationRecordHash);
+        require(
+            pending == 0 && phase == 3
+                && ingress.operativeIdentityRecord(artistId) == keccak256(document),
+            "cancelling revision is operative and request terminal"
+        );
+        bytes32 key = _identityRevisionReplayKey(
+            keccak256("identity_authority.replay.activation_cancellation_key"),
+            p.expectedActivationRecordHash
+        );
+        T.ReplayCell memory cell = IStreamArtistOwner(suite.owners[2]).replayCell(key);
+        require(
+            cell.status == 2 && cell.commitment == p.expectedActivationRecordHash,
+            "actual cancellation replay"
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Estate.InvalidEstateActivation.selector, p.expectedActivationRecordHash
+            )
+        );
+        ingress.executeEstateActivation(p);
+    }
+
+    function testEstateLivingRevisionCancelsInSameBlockAndStaysOperative() public {
+        _estateLivingRevisionAt(0);
+    }
+
+    function testEstateLivingRevisionCancelsAtNoticeEquality() public {
+        _estateLivingRevisionAt(1);
+    }
+
+    function testEstateLivingRevisionCancelsAfterNoticeBeforeExecution() public {
+        _estateLivingRevisionAt(2);
+    }
+
+    function testEstateDirectSafeCancellationAfterNoticePinsReplayAndEvent() public {
+        Estate.Execution memory p = _estatePendingFixture(0);
+        (, uint64 end,) = ingress.estateActivationState(artistId);
+        vm.warp(uint256(end) + 1);
+        vm.recordLogs();
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(
+                    IStreamArtistEstateActivation.cancelEstateActivation,
+                    (artistId, p.expectedActivationRecordHash)
+                ),
+                0
+            ),
+            "direct current Safe cancel"
+        );
+        _assertEstateCancellationEvent(vm.getRecordedLogs(), p.expectedActivationRecordHash, 1);
+        (, uint8 phase,) = ingress.estateActivationRecord(p.expectedActivationRecordHash);
+        require(
+            phase == 3 && ingress.currentAuthorityCapabilities(artistId).authorityClass == 1,
+            "cancel preserves living authority"
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Estate.InvalidEstateActivation.selector, p.expectedActivationRecordHash
+            )
+        );
+        ingress.executeEstateActivation(p);
+    }
+
+    function _estatePendingContest(bool named) private {
+        _selfGuardian();
+        Estate.Execution memory p = _estatePendingFixture(4095);
+        bytes32 subject = named ? p.expectedActivationRecordHash : bytes32(0);
+        uint64 observed = uint64(block.timestamp);
+        T.Identity memory before_ = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        bytes32 unchanged = _roots();
+        bytes32 unknown = keccak256("unknown estate subject");
+        vm.expectRevert(abi.encodeWithSelector(Contest.InvalidContestSubject.selector, unknown));
+        ingress.contestArtistIdentity(
+            artistId, unknown, keccak256("compromise evidence"), keccak256("compromise reason")
+        );
+        require(
+            _roots() == unchanged,
+            "unknown subject cannot change state before same-context valid control"
+        );
+        vm.recordLogs();
+        require(
+            executeSafe(artist, keys, address(ingress), 0, _contestData(subject), 0),
+            "guardian Safe contests actual pending estate"
+        );
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        _assertEstateCancellationEvent(logs, p.expectedActivationRecordHash, 0);
+        bytes32 contest = ingress.latestIdentityContest(artistId);
+        Contest.Record memory actual = ingress.identityContestRecord(contest);
+        require(
+            actual.terms.subjectRecordHash == subject
+                && actual.pendingTransitionRecordHash == p.expectedActivationRecordHash,
+            "contest binds actual named or general pending cohort"
+        );
+        R.TransitionState memory transition =
+            ingress.artistTransitionState(p.expectedActivationRecordHash);
+        (, uint8 phase,) = ingress.estateActivationRecord(p.expectedActivationRecordHash);
+        (,, bytes32 pending) = ingress.estateActivationState(artistId);
+        require(
+            phase == 3 && transition.phase == 3 && transition.contestedAt == observed
+                && pending == 0,
+            "named/general pending cancellation is terminal"
+        );
+        T.Identity memory after_ = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        require(
+            after_.status == 4 && after_.nonceHint == before_.nonceHint
+                && after_.lastAuthorityActionAt == before_.lastAuthorityActionAt,
+            "guardian filing is not a living authority action"
+        );
+        bytes32 key = _identityRevisionReplayKey(
+            keccak256("identity_authority.replay.activation_cancellation_key"),
+            p.expectedActivationRecordHash
+        );
+        require(
+            IStreamArtistOwner(suite.owners[2]).replayCell(key).status == 2,
+            "actual cancellation cell consumed"
+        );
+        _assertDismissalCauseEvent(logs, ingress.currentIdentityContestCause(artistId));
+    }
+
+    function testEstateNamedPendingRequestGuardianContestTerminatesWithoutSyntheticCancel() public {
+        _estatePendingContest(true);
+    }
+
+    function testEstateGeneralGuardianContestTerminatesPendingWithoutSyntheticCancel() public {
+        _estatePendingContest(false);
+    }
+
+    function testEstateLivingCancellationAndRevisionRollbackOnLateArchiveThenExactSafeRetry()
+        public
+    {
+        Estate.Execution memory p = _estatePendingFixture(4095);
+        bytes memory document = bytes("atomic living revision and pending cancellation");
+        bytes32 previous = ingress.operativeIdentityRecord(artistId);
+        StreamArtistIdentityRevisionTypes.Revision memory revision =
+            StreamArtistIdentityRevisionTypes.Revision(
+                artistId, previous, keccak256(document), "urn:estate-cancellation-rollback"
+            );
+        T.Authorization memory a = T.Authorization(nextNonce, uint64(block.timestamp), "");
+        bytes memory call_ = abi.encodeCall(
+            IStreamArtistIdentityRevision.recordIdentityRevision,
+            (revision, a, document, "Living retry")
+        );
+        bytes32 roots = _roots();
+        uint256 safeNonce = artist.nonce();
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodeWithSelector(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeArtistSafe(call_);
+        (,, bytes32 pending) = ingress.estateActivationState(artistId);
+        require(
+            _roots() == roots && artist.nonce() == safeNonce
+                && pending == p.expectedActivationRecordHash
+                && ingress.operativeIdentityRecord(artistId) == previous,
+            "late archive reverts revision, same-block living marker, cancellation and Safe nonce"
+        );
+        avm.clearMockedCalls();
+        this.executeArtistSafe(call_);
+        (,, pending) = ingress.estateActivationState(artistId);
+        require(
+            pending == 0 && ingress.operativeIdentityRecord(artistId) == keccak256(document),
+            "same calldata and nonce succeeds after archive restoration"
+        );
+    }
+
+    function testEstateExecutionLateArchiveRollsAuthorityEpochAndWindowBackThenExactRetry() public {
+        Estate.Execution memory p = _estatePendingFixture(1024);
+        (, uint64 end,) = ingress.estateActivationState(artistId);
+        vm.warp(end);
+        bytes32 roots = _roots();
+        uint256 safeNonce = artist.nonce();
+        bytes memory call_ =
+            abi.encodeCall(IStreamArtistEstateActivation.executeEstateActivation, (p));
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodeWithSelector(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeArtistSafe(call_);
+        (, uint8 phase, Estate.ExecutionFacts memory execution) =
+            ingress.estateActivationRecord(p.expectedActivationRecordHash);
+        require(
+            _roots() == roots && artist.nonce() == safeNonce && phase == 1
+                && execution.activationRecordHash == 0
+                && ingress.currentAuthorityCapabilities(artistId).authorityClass == 1,
+            "late archive reverts authority/epoch/execution window"
+        );
+        avm.clearMockedCalls();
+        this.executeArtistSafe(call_);
+        Estate.AuthorityCapabilities memory rights = ingress.currentAuthorityCapabilities(artistId);
+        require(
+            rights.authorityClass == 3 && rights.effectiveCapabilities == 1024,
+            "exact retry activates selected sale capability"
+        );
+    }
+
+    /// @dev Root-derived mainnet native paths, signed by local fixture observers; not independent quorum or consensus evidence.
+    function testEstateNetworkDerivedArweavePathsAndActualCoverageReachExecution() public {
+        estateNetworkVector = true;
+        vm.warp(1800000000);
+        Estate.Execution memory p = _estatePendingFixture(1024);
+        (Estate.RequestRecord memory request,,) =
+            ingress.estateActivationRecord(p.expectedActivationRecordHash);
+        require(
+            request.terms.evidenceHash == keccak256(bytes("test")),
+            "exact neutral network payload commitment"
+        );
+        vm.warp(request.noticeEndsAt);
+        ingress.executeEstateActivation(p);
+        Estate.AuthorityCapabilities memory rights = ingress.currentAuthorityCapabilities(artistId);
+        require(
+            rights.authorityClass == 3 && rights.status == 3
+                && rights.effectiveCapabilities == 1024,
+            "verified network-derived bytes reach actual estate execution"
+        );
+    }
+
+    function testEstateActualSafeReadSurfaceAndCommercialAuthorityAtActivation() public {
+        _all();
+        Estate.Execution memory p = _estatePendingFixture(1024);
+        (Estate.RequestRecord memory item,,) =
+            ingress.estateActivationRecord(p.expectedActivationRecordHash);
+        bytes[] memory reads = new bytes[](6);
+        reads[0] = abi.encodeCall(
+            IStreamArtistEstateActivation.estateActivationDigest, (item.terms, item.authorization)
+        );
+        reads[1] = abi.encodeCall(IStreamArtistEstateActivation.estateActivationState, (artistId));
+        reads[2] = abi.encodeCall(
+            IStreamArtistEstateActivation.estateActivationRecord, (p.expectedActivationRecordHash)
+        );
+        reads[3] = abi.encodeCall(
+            IStreamArtistEstateActivation.estateActivationNonceHint,
+            (artistId, address(delegateSafe))
+        );
+        reads[4] =
+            abi.encodeCall(IStreamArtistEstateActivation.currentAuthorityCapabilities, (artistId));
+        reads[5] = abi.encodeCall(IStreamArtistEstateActivation.estateAccelerationContext, (p));
+        for (uint256 i; i < reads.length; ++i) {
+            require(
+                executeSafe(artist, keys, address(ingress), 0, reads[i], 0),
+                "actual Safe estate read"
+            );
+        }
+        vm.warp(item.noticeEndsAt);
+        ingress.executeEstateActivation(p);
+        (
+            bytes32 id,
+            uint64 generation,
+            bytes32 binding,
+            address account,
+            uint8 class_,
+            uint8 status,
+            uint32 caps
+        ) = ingress.collectionArtistAuthority(1);
+        T.Binding memory actual = IStreamArtistBindingOwner(suite.owners[0]).binding(1);
+        require(
+            id == artistId && generation == actual.generation && binding == actual.bindingHash
+                && account == address(delegateSafe) && class_ == 3 && status == 3 && caps == 1024,
+            "exact seven-word current commercial authority"
+        );
+        require(
+            executeSafe(
+                delegateSafe,
+                delegateKeys,
+                address(ingress),
+                0,
+                abi.encodeCall(
+                    IStreamArtistCommercialAuthority.collectionArtistAuthority, (uint256(1))
+                ),
+                0
+            ),
+            "successor Safe reads exact commercial facts"
+        );
+        require(
+            ingress.supportsInterface(type(IStreamArtistEstateActivation).interfaceId)
+                && ingress.supportsInterface(type(IStreamArtistCommercialAuthority).interfaceId),
+            "implemented typed estate capabilities advertised"
+        );
+    }
+
+    function _estateActivateAndAdopt(uint32 caps) private returns (Estate.Execution memory p) {
+        p = _estatePendingFixture(caps);
+        (Estate.RequestRecord memory item,,) =
+            ingress.estateActivationRecord(p.expectedActivationRecordHash);
+        vm.warp(item.noticeEndsAt);
+        ingress.executeEstateActivation(p);
+        artist = delegateSafe;
+        keys = delegateKeys;
+        nextNonce = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId).nonceHint;
+    }
+
+    function testEstateSuccessorAcceptsFixedIdentityWithClassThreeAndCannotCreatePolicy() public {
+        T.Binding memory prior = IStreamArtistBindingOwner(suite.owners[0]).binding(1);
+        T.Authorization memory oldProof =
+            T.Authorization(100, uint64(block.timestamp + 365 days), "");
+        oldProof.signature = _signature(ingress.acceptanceDigest(1, oldProof));
+        _estateActivateAndAdopt(0);
+        bytes32 roots = _roots();
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.acceptArtistBinding(1, oldProof);
+        require(_roots() == roots, "retired principal proof fails before effects");
+        uint256 nonce = nextNonce;
+        uint64 observed = uint64(block.timestamp);
+        vm.recordLogs();
+        directArtistCalls = true;
+        _accept();
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        T.Binding memory current = IStreamArtistBindingOwner(suite.owners[0]).binding(1);
+        require(
+            current.bindingHash == prior.bindingHash && current.artistAddress == prior.artistAddress
+                && current.artistId == prior.artistId && current.generation == prior.generation
+                && current.accepted,
+            "successor acceptance preserves frozen proposal facts"
+        );
+        bytes32 record =
+            IStreamArtistAcceptanceOwner(suite.owners[3]).acceptanceRecord(prior.bindingHash);
+        uint256 count;
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].emitter != suite.owners[3]
+                    || logs[i].topics[0]
+                        != keccak256(
+                            "ArtistBindingAccepted(uint16,uint256,bytes32,address,uint64,bytes32,uint8,uint256,uint64,bytes32)"
+                        )
+            ) continue;
+            ++count;
+            require(
+                logs[i].topics.length == 4 && logs[i].topics[1] == bytes32(uint256(1))
+                    && logs[i].topics[2] == artistId
+                    && logs[i].topics[3] == bytes32(uint256(uint160(address(artist))))
+                    && keccak256(logs[i].data)
+                        == keccak256(
+                            abi.encode(
+                                uint16(1),
+                                prior.generation,
+                                prior.bindingHash,
+                                uint8(3),
+                                nonce,
+                                observed,
+                                record
+                            )
+                        ),
+                "truthful class-three acceptance event"
+            );
+        }
+        require(
+            count == 1 && ingress.acceptedArtist(1) == address(artist), "one acceptance transition"
+        );
+        T.PolicyConsent memory terms = T.PolicyConsent(1, PHASE, POLICY);
+        T.Authorization memory a = T.Authorization(nextNonce, uint64(block.timestamp + 1 days), "");
+        roots = _roots();
+        vm.prank(address(artist));
+        vm.expectRevert(
+            abi.encodeWithSelector(Estate.EstateCapabilityUnavailable.selector, artistId, uint32(2))
+        );
+        ingress.recordPolicyConsent(terms, a);
+        require(_roots() == roots, "acceptance creates no new-work capability");
+    }
+
+    function testEstateSuccessorRefusesFixedProposalWithExactClassThreeRecord() public {
+        L.Termination memory terms = _termination(1);
+        T.Binding memory binding = IStreamArtistBindingOwner(suite.owners[0]).binding(1);
+        _estateActivateAndAdopt(0);
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.bindingRefusalDigest(terms, a));
+        bytes32 expected = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_BINDING_REFUSAL_RECORD_V1"),
+                block.chainid,
+                address(ingress),
+                suite.core,
+                uint256(1),
+                terms.generation,
+                terms.bindingHash,
+                artistId,
+                address(artist),
+                uint8(3),
+                terms.reasonHash,
+                a.nonce,
+                uint64(block.timestamp)
+            )
+        );
+        require(ingress.refuseArtistBinding(terms, a) == expected, "canonical class-three refusal");
+        T.Binding memory after_ = IStreamArtistBindingOwner(suite.owners[0]).binding(1);
+        require(
+            after_.bindingHash == binding.bindingHash
+                && after_.artistAddress == binding.artistAddress && !after_.accepted,
+            "refusal retains immutable proposal"
+        );
+        require(
+            ingress.currentAuthorityCapabilities(artistId).effectiveCapabilities == 0,
+            "refusal grants no unrelated authority"
+        );
+    }
+
+    function testEstateZeroCapSuccessorRotatesAndRevokesPriorStandingWithoutInventedCaps() public {
+        address retired = address(artist);
+        Estate.Execution memory p = _estateActivateAndAdopt(0);
+        (Estate.RequestRecord memory saved,,) =
+            ingress.estateActivationRecord(p.expectedActivationRecordHash);
+        R.TransitionState memory estateWindow =
+            ingress.artistTransitionState(p.expectedActivationRecordHash);
+        vm.warp(uint256(estateWindow.postWindowEndsAt) + saved.standingTailSeconds);
+        R.StandingRevocation memory terms = R.StandingRevocation(
+            artistId, retired, keccak256("estate standing removal"), p.expectedActivationRecordHash
+        );
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.standingRevocationDigest(terms, a));
+        ingress.revokePriorAddressStanding(terms, a);
+        (bool revoked,) = ingress.priorAddressStandingRevoked(artistId, retired);
+        require(revoked, "class-three exact retirement standing revoked");
+        _newRotationSafe(17001);
+        bytes32 rotation = _stageRotation(p.expectedActivationRecordHash);
+        _executeTimedRotation(rotation);
+        Estate.AuthorityCapabilities memory rights = ingress.currentAuthorityCapabilities(artistId);
+        require(
+            rights.authorityAddress == address(rotationSafe) && rights.authorityClass == 3
+                && rights.status == 3 && rights.effectiveCapabilities == 0
+                && rights.activationRecordHash == p.expectedActivationRecordHash,
+            "two-sided successor rotation retains class caps and activation provenance"
+        );
+    }
+
+    function testEstateExecutionInvalidatesGrantEpochButExactRetiredGrantorCanRevoke() public {
+        _accept();
+        _payout();
+        _delegateSetup();
+        bytes32 grant = _grant(_delegation(1, 4, 1000, uint64(400 days), 5));
+        Estate.Execution memory p = _estatePendingFixture(4095);
+        (Estate.RequestRecord memory item,,) =
+            ingress.estateActivationRecord(p.expectedActivationRecordHash);
+        vm.warp(item.noticeEndsAt);
+        ingress.executeEstateActivation(p);
+        (bool active, uint64 recorded, uint64 current) =
+            IStreamArtistEstateOwner(suite.owners[2]).delegationEpochState(grant);
+        require(!active && recorded == 0 && current == 1, "old grant epoch ceases operation");
+        bytes32 roots = _roots();
+        vm.expectRevert(abi.encodeWithSelector(D.DelegationUnavailable.selector, grant));
+        this.relayDelegateEconomics(address(primary), grant, 0);
+        require(_roots() == roots, "epoch denial precedes all consent mutations");
+        T.Identity memory before_ = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        directArtistCalls = true;
+        _revoke(grant);
+        T.Identity memory after_ = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        require(
+            after_.nonceHint == before_.nonceHint + 1
+                && after_.lastAuthorityActionAt == before_.lastAuthorityActionAt
+                && after_.authorityAddress == before_.authorityAddress
+                && after_.authorityClass == before_.authorityClass
+                && after_.status == before_.status
+                && IStreamArtistIdentityOwner(suite.owners[2])
+                    .nonceUsed(artistId, before_.nonceHint)
+                && ingress.delegationRecord(grant).revoked,
+            "retired Safe grantor consumes shared nonce without current authority or liveness change"
+        );
+        D.Grant memory fresh = _delegation(1, 4, 0, 0, 5);
+        T.Authorization memory a = T.Authorization(after_.nonceHint, 0, "");
+        vm.prank(address(delegateSafe));
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidIdentity.selector, artistId));
+        ingress.grantArtistDelegation(fresh, a);
+    }
+
+    function executeEstateAccelerator(Estate.Execution calldata p, uint8 class_, uint8 fault)
+        external
+    {
+        require(msg.sender == address(this), "test-only");
+        ArtistUnitGovernance authority = ArtistUnitGovernance(manager.governanceAuthority());
+        Estate.AccelerationContext memory x = ingress.estateAccelerationContext(p);
+        authority.configureContestReads(
+            address(estateFixityRoles),
+            address(0xB0AD),
+            fault == 1 ? keccak256("wrong evidence") : x.evidenceHash,
+            "urn:unit:estate"
+        );
+        authority.executeModuleContext(
+            address(ingress),
+            abi.encodeCall(IStreamArtistEstateActivation.executeEstateActivation, (p)),
+            class_,
+            fault == 2 ? keccak256("wrong scope") : x.scopeHash,
+            fault == 3 ? keccak256("wrong old state") : x.oldValueHash,
+            fault == 4 ? keccak256("wrong new intent") : x.newValueHash
+        );
+    }
+
+    function testEstateEarlyAcceleratorRequiresClassOneExactEvidenceAndPerCallContext() public {
+        Estate.Execution memory p = _estatePendingFixture(1024);
+        (Estate.RequestRecord memory request,,) =
+            ingress.estateActivationRecord(p.expectedActivationRecordHash);
+        bytes32 roots = _roots();
+        vm.expectRevert(
+            abi.encodeWithSelector(Estate.EstateNoticeNotElapsed.selector, request.noticeEndsAt)
+        );
+        ingress.executeEstateActivation(p);
+        for (uint8 i; i < 6; ++i) {
+            avm.expectRevert(Contest.InvalidContestGovernance.selector);
+            this.executeEstateAccelerator(p, i == 0 ? 0 : i == 1 ? 2 : 1, i < 2 ? 0 : i - 1);
+            require(_roots() == roots, "failed acceleration preserves identical request and roots");
+        }
+        vm.recordLogs();
+        this.executeEstateAccelerator(p, 1, 0);
+        (Estate.RequestRecord memory saved, uint8 phase, Estate.ExecutionFacts memory result) =
+            ingress.estateActivationRecord(p.expectedActivationRecordHash);
+        require(
+            phase == 2 && result.executedAt == request.requestedAt
+                && result.governanceActionId == keccak256("unit authority gas raise")
+                && result.governanceWitnessHash != 0 && saved.noticeEndsAt == request.noticeEndsAt,
+            "exact class-one witness permits early execution without rewriting notice"
+        );
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        uint256 count;
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].emitter != suite.owners[2]
+                    || logs[i].topics[0]
+                        != keccak256(
+                            "ArtistSuccessionActivated(uint16,bytes32,address,uint8,uint32,bytes32,bytes32)"
+                        )
+            ) continue;
+            ++count;
+            require(
+                logs[i].topics.length == 3 && logs[i].topics[1] == artistId
+                    && logs[i].topics[2] == bytes32(uint256(uint160(address(delegateSafe))))
+                    && keccak256(logs[i].data)
+                        == keccak256(
+                            abi.encode(
+                                uint16(1),
+                                uint8(3),
+                                uint32(1024),
+                                request.terms.evidenceHash,
+                                result.governanceActionId
+                            )
+                        ),
+                "exact activation event"
+            );
+        }
+        require(count == 1, "one actual Identity activation event");
+    }
+
+    function testEstateNoticeAndPostWindowCaptureSurviveLaterTimingChanges() public {
+        Estate.Execution memory p = _estatePendingFixture(0);
+        (Estate.RequestRecord memory saved,,) =
+            ingress.estateActivationRecord(p.expectedActivationRecordHash);
+        ArtistUnitGovernance authority = ArtistUnitGovernance(manager.governanceAuthority());
+        bytes32 parameter = keccak256("ARTIST_ESTATE_ACTIVATION_NOTICE_SECONDS");
+        T.Identity memory before_ = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        authority.configureWindow(ingress, parameter, 200 days, 1, 1, false);
+        authority.configureWindow(
+            ingress, keccak256("ARTIST_ROTATION_CONTEST_SECONDS"), 14 days, 1, 1, false
+        );
+        (Estate.RequestRecord memory same,,) =
+            ingress.estateActivationRecord(p.expectedActivationRecordHash);
+        require(
+            keccak256(abi.encode(saved)) == keccak256(abi.encode(same)),
+            "recorded windows immutable under config change"
+        );
+        T.Identity memory after_ = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        require(
+            before_.lastAuthorityActionAt == after_.lastAuthorityActionAt
+                && before_.nonceHint == after_.nonceHint,
+            "timing changes are not living actions"
+        );
+        vm.warp(saved.noticeEndsAt);
+        ingress.executeEstateActivation(p);
+        R.TransitionState memory transition =
+            ingress.artistTransitionState(p.expectedActivationRecordHash);
+        require(
+            transition.postWindowEndsAt == saved.noticeEndsAt + saved.postContestSeconds,
+            "execution uses captured post-window rather than new configuration"
+        );
+    }
+
+    function testEstateLivingRotationCancelsPendingEstateAndPreservesWindowTruth() public {
+        Estate.Execution memory p = _estatePendingFixture(4095);
+        (, uint64 notice,) = ingress.estateActivationState(artistId);
+        (bytes32 active, uint64 end, bool contested) = ingress.activeAuthorityWindow(artistId);
+        require(
+            active == p.expectedActivationRecordHash && end == notice && !contested,
+            "generic read resolves actual pending estate"
+        );
+        _newRotationSafe(17002);
+        vm.recordLogs();
+        bytes32 replacement = _stageRotation(p.expectedActivationRecordHash);
+        _assertEstateCancellationEvent(vm.getRecordedLogs(), p.expectedActivationRecordHash, 1);
+        (, uint8 phase,) = ingress.estateActivationRecord(p.expectedActivationRecordHash);
+        (active, end, contested) = ingress.activeAuthorityWindow(artistId);
+        require(
+            phase == 3 && active == replacement && !contested
+                && end == ingress.rotationRecord(replacement).transition.contestEndsAt,
+            "living transition supersedes pending estate atomically"
+        );
+    }
+
+    function _estatePreparedRequest(uint32 caps) private returns (Estate.Request memory p) {
+        _delegateSetup();
+        Succ.Designation memory d = _successorTerms(address(delegateSafe), 2);
+        d.grantedCapabilities = caps;
+        bytes32 designation = _successionRecord(d);
+        (bytes32 evidence, bytes32 coverage) = _estateArchiveEvidence(artistId);
+        return Estate.Request(artistId, address(delegateSafe), evidence, designation, coverage);
+    }
+
+    function testEstateRequestLateArchiveRollsReplayAndPendingBackThenExactSafeRetry() public {
+        Estate.Request memory p = _estatePreparedRequest(0);
+        T.Authorization memory a = T.Authorization(0, uint64(block.timestamp + 1 days), "");
+        bytes memory data =
+            abi.encodeCall(IStreamArtistEstateActivation.requestEstateActivation, (p, a));
+        bytes32 roots = _roots();
+        uint256 safeNonce = delegateSafe.nonce();
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodePacked(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeDelegate(address(ingress), data);
+        (,, bytes32 pending) = ingress.estateActivationState(artistId);
+        require(
+            _roots() == roots && pending == 0 && delegateSafe.nonce() == safeNonce
+                && ingress.estateActivationNonceHint(artistId, address(delegateSafe)) == 0,
+            "late request Archive failure rolls all owner and Safe effects back"
+        );
+        avm.clearMockedCalls();
+        vm.recordLogs();
+        require(
+            executeSafe(delegateSafe, delegateKeys, address(ingress), 0, data, 0),
+            "same exact request retry"
+        );
+        (, uint64 ends, bytes32 record) = ingress.estateActivationState(artistId);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        uint256 count;
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].emitter != suite.owners[2]
+                    || logs[i].topics[0]
+                        != keccak256(
+                            "ArtistEstateActivationRequested(uint16,bytes32,address,uint64,uint64,uint256,bytes32,bytes32)"
+                        )
+            ) continue;
+            ++count;
+            require(
+                logs[i].topics.length == 3 && logs[i].topics[1] == artistId
+                    && logs[i].topics[2] == bytes32(uint256(uint160(address(delegateSafe))))
+                    && keccak256(logs[i].data)
+                        == keccak256(
+                            abi.encode(
+                                uint16(1),
+                                uint64(block.timestamp),
+                                ends,
+                                a.nonce,
+                                p.evidenceHash,
+                                record
+                            )
+                        ),
+                "exact request emitter event and record"
+            );
+        }
+        require(
+            count == 1 && ingress.estateActivationNonceHint(artistId, address(delegateSafe)) == 1,
+            "one successful request consumes persistent successor nonce"
+        );
+    }
+
+    function testEstateSuccessorProofDomainAndCancelledRequestNonceCannotReplay() public {
+        Estate.Request memory p = _estatePreparedRequest(0);
+        T.Authorization memory a = T.Authorization(0, uint64(block.timestamp + 1 days), "");
+        bytes32 body = keccak256(
+            abi.encode(
+                keccak256(
+                    "StreamArtistEstateActivation(bytes32 artistId,address successor,bytes32 evidenceHash,uint256 nonce,uint64 deadline)"
+                ),
+                artistId,
+                p.successor,
+                p.evidenceHash,
+                a.nonce,
+                a.time
+            )
+        );
+        bytes32 roots = _roots();
+        for (uint256 i; i < 2; ++i) {
+            bytes32 domain = keccak256(
+                abi.encode(
+                    keccak256(
+                        "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+                    ),
+                    keccak256("6529StreamArtistRegistry"),
+                    keccak256("1"),
+                    i == 0 ? block.chainid + 1 : block.chainid,
+                    i == 1 ? address(0xBAD) : address(ingress)
+                )
+            );
+            bytes32 wrong = keccak256(abi.encodePacked(hex"1901", domain, body));
+            a.signature = safeThresholdSignature(
+                delegateKeys, safeMessageDigest(delegateSafe, abi.encode(wrong))
+            );
+            avm.expectRevert(T.InvalidSignature.selector);
+            ingress.requestEstateActivation(p, a);
+            require(_roots() == roots, "actual wrong chain or facade domain rejects same body");
+        }
+        a.signature = _delegateSignature(ingress.estateActivationDigest(p, a));
+        bytes32 record = ingress.requestEstateActivation(p, a);
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(
+                    IStreamArtistEstateActivation.cancelEstateActivation, (artistId, record)
+                ),
+                0
+            ),
+            "actual living Safe cancellation"
+        );
+        bytes32 key = _identityRevisionReplayKey(
+            keccak256("identity_authority.replay.nonce_allocator"),
+            keccak256(abi.encode("estate_activation", artistId, p.successor, uint256(0)))
+        );
+        roots = _roots();
+        T.ReplayCell memory consumed = IStreamArtistOwner(suite.owners[2]).replayCell(key);
+        require(
+            consumed.status == 2 && consumed.commitment == ingress.estateActivationDigest(p, a),
+            "cancel retains exact consumed successor nonce cell"
+        );
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.requestEstateActivation(p, a);
+        require(_roots() == roots, "same-block duplicate record rejects before authorization");
+        vm.warp(block.timestamp + 1);
+        vm.expectRevert(abi.encodeWithSelector(T.Replay.selector, key));
+        ingress.requestEstateActivation(p, a);
+        require(_roots() == roots, "cancel preserves permanent prior successor nonce");
+        a.nonce = 1;
+        a.signature = _delegateSignature(ingress.estateActivationDigest(p, a));
+        bytes32 later = ingress.requestEstateActivation(p, a);
+        require(
+            later != record && ingress.estateActivationNonceHint(artistId, p.successor) == 2,
+            "fresh nonce can request same retained coverage after living cancellation"
+        );
+    }
+
+    function testEstateApprovedEmptySuccessorProofIsRelayAndExpiredProofRejectsBeforeRetry()
+        public
+    {
+        Estate.Request memory p = _estatePreparedRequest(0);
+        T.Authorization memory a = T.Authorization(0, uint64(block.timestamp - 1), "");
+        a.signature = _delegateSignature(ingress.estateActivationDigest(p, a));
+        bytes32 roots = _roots();
+        vm.expectRevert(abi.encodeWithSelector(T.ExpiredAuthorization.selector, a.time));
+        ingress.requestEstateActivation(p, a);
+        require(_roots() == roots, "expired exact successor signature cannot request");
+        a.time = uint64(block.timestamp + 1 days);
+        a.signature = "";
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.requestEstateActivation(p, a);
+        bytes32 digest = ingress.estateActivationDigest(p, a);
+        require(
+            executeSafe(
+                delegateSafe,
+                delegateKeys,
+                safeComponents.signMessage,
+                0,
+                abi.encodeWithSignature("signMessage(bytes)", abi.encode(digest)),
+                1
+            ),
+            "actual successor Safe approved digest"
+        );
+        bytes32 record = ingress.requestEstateActivation(p, a);
+        (Estate.RequestRecord memory saved,,) = ingress.estateActivationRecord(record);
+        require(
+            saved.authorization.signature.length == 0 && saved.authorization.time == a.time
+                && saved.authorization.nonce == 0,
+            "approved-empty relay retains exact submitted authorization"
+        );
+    }
+
+    function testEstatePairedDirectiveIntersectionAndLatestGlobalForbidDoNotAddRights() public {
+        _delegateSetup();
+        // The paired grant permits only policy+sale. A newer unpaired grant cannot add payout.
+        Succ.PublicDocument memory doc =
+            Succ.PublicDocument(keccak256("paired legal"), keccak256("paired payout"));
+        Succ.Directive memory directive = Succ.Directive(
+            artistId, 1026, 0, keccak256(ingress.previewEstateDirectivePayload(1026, 0, doc))
+        );
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.estateDirectiveDigest(directive, a));
+        bytes32 paired = ingress.recordEstateDirective(directive, a, doc);
+        Succ.Designation memory d = _successorTerms(address(delegateSafe), 2);
+        d.directiveHash = paired;
+        bytes32 designation = _successionRecord(d);
+        _directiveRecord(2);
+        (bytes32 evidence, bytes32 coverage) = _estateArchiveEvidence(artistId);
+        Estate.Request memory p =
+            Estate.Request(artistId, address(delegateSafe), evidence, designation, coverage);
+        a = T.Authorization(0, uint64(block.timestamp + 1 days), "");
+        a.signature = _delegateSignature(ingress.estateActivationDigest(p, a));
+        bytes32 record = ingress.requestEstateActivation(p, a);
+        (Estate.RequestRecord memory saved,,) = ingress.estateActivationRecord(record);
+        require(
+            saved.pairedDirectiveRecordHash == paired
+                && saved.forbiddenDirectiveRecordHash != paired,
+            "exact distinct paired grant and current global-forbid witnesses"
+        );
+        vm.warp(saved.noticeEndsAt);
+        ingress.executeEstateActivation(Estate.Execution(artistId, record, coverage));
+        require(
+            ingress.currentAuthorityCapabilities(artistId).effectiveCapabilities == 1024,
+            "designation intersects paired grant then latest global forbids; unrelated grant adds nothing"
+        );
+    }
+
+    function testEstateClosedOldRotationDoesNotHideNewPendingEstateWindow() public {
+        _newRotationSafe(17003);
+        bytes32 old = _stageRotation(bytes32(0));
+        _executeTimedRotation(old);
+        _adoptRotatedSafe();
+        vm.warp(ingress.rotationRecord(old).transition.postWindowEndsAt);
+        _dismissalGuardianCause();
+        _dismissalExecute(_dismissalRequest(), 1, 0);
+        require(
+            ingress.identityTransitionClosure(artistId, old).dismissalRecordHash != 0,
+            "actual old execution is closed"
+        );
+        ArtistUnitGovernance(manager.governanceAuthority())
+            .configureContestReads(
+                address(estateFixityRoles),
+                address(this),
+                keccak256("archival fixture"),
+                "urn:unit:archival"
+            );
+        Estate.Execution memory p = _estatePendingFixture(0);
+        (Estate.RequestRecord memory saved,,) =
+            ingress.estateActivationRecord(p.expectedActivationRecordHash);
+        (bytes32 active, uint64 end, bool contested) = ingress.activeAuthorityWindow(artistId);
+        require(
+            active == p.expectedActivationRecordHash && end == saved.noticeEndsAt && !contested,
+            "closed old cohort cannot hide actual pending estate"
+        );
+    }
+
+    // Draft for the next test-only boundary; not part of the immutable225 run.
+    function testEstateGuardianSetCapabilityCannotRemoveCapturedLivingGuardians() public {
+        _selfGuardian();
+        address retained = address(artist);
+        _estateActivateAndAdopt(256);
+        R.GuardianSet memory terms = R.GuardianSet(artistId, new address[](0), 0, 0);
+        T.Authorization memory a = T.Authorization(nextNonce, uint64(block.timestamp), "");
+        a.signature = _signature(ingress.guardianSetDigest(terms, a));
+        bytes32 roots = _roots();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Estate.EstateCapabilityUnavailable.selector, artistId, uint32(2048)
+            )
+        );
+        ingress.setArtistGuardians(terms, a);
+        require(_roots() == roots, "guardian cap alone does not remove lifetime guardian");
+        terms.guardians = new address[](1);
+        terms.guardians[0] = retained;
+        terms.approvalThreshold = 1;
+        a.signature = _signature(ingress.guardianSetDigest(terms, a));
+        bytes32 record = ingress.setArtistGuardians(terms, a);
+        require(
+            ingress.guardianSetRecord(record).authorityClass == 3,
+            "same nonce records truthful retained guardian set"
+        );
+    }
+
+    function testEstateExplicitGuardianRemovalCapabilityCanRemoveCapturedSet() public {
+        _selfGuardian();
+        _estateActivateAndAdopt(2304);
+        R.GuardianSet memory terms = R.GuardianSet(artistId, new address[](0), 0, 0);
+        T.Authorization memory a = T.Authorization(nextNonce, uint64(block.timestamp), "");
+        a.signature = _signature(ingress.guardianSetDigest(terms, a));
+        bytes32 record = ingress.setArtistGuardians(terms, a);
+        R.GuardianRecord memory saved = ingress.guardianSetRecord(record);
+        require(
+            saved.authorityClass == 3 && saved.terms.guardians.length == 0
+                && saved.provisional.transitionRecordHash != 0,
+            "explicit removal right still obeys post-estate provisional window"
+        );
+        vm.warp(saved.provisional.windowEndsAt);
+        (address[] memory members,,, bytes32 selected) = ingress.guardianSet(artistId);
+        require(
+            members.length == 0 && selected == record,
+            "uncontested removal matures at captured equality"
+        );
+    }
+
+    function testEstatePendingOldCollaboratorAccountNeverRedirectsToSuccessor() public {
+        ingress.withdrawArtistBinding(_termination(1));
+        T.BindingProposal memory terms = _proposal(artistId);
+        address listed = address(artist);
+        terms.collaborators = new T.CollaboratorRecord[](1);
+        terms.collaborators[0] = T.CollaboratorRecord(listed, keccak256("composer"), bytes32(0));
+        ingress.proposeArtistBinding(1, terms, bytes("unit identity document"), "Artist Safe");
+        T.Binding memory b = IStreamArtistBindingOwner(suite.owners[0]).binding(1);
+        _estateActivateAndAdopt(0);
+        _accept();
+        C.BindingAcceptance memory row = C.BindingAcceptance(
+            1, b.generation, b.bindingHash, listed, keccak256("composer"), bytes32(0)
+        );
+        T.Authorization memory a = T.Authorization(nextNonce, uint64(block.timestamp + 1 days), "");
+        a.signature = _signature(ingress.collaboratorAcceptanceDigest(row, a));
+        bytes32 roots = _roots();
+        // Exact listed account has no active identity after succession.
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidIdentity.selector, bytes32(0)));
+        ingress.acceptCollaborator(row, a);
+        row.account = address(artist);
+        a.signature = _signature(ingress.collaboratorAcceptanceDigest(row, a));
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.acceptCollaborator(row, a);
+        require(
+            _roots() == roots && !IStreamArtistBindingOwner(suite.owners[0]).binding(1).accepted,
+            "pending tuple is exact and cannot inherit authority by substitution"
+        );
+    }
+
+    function testEstateActualSafeOwnerAndBothChildCallbacksRemainProtocolOnly() public {
+        Estate.Execution memory p = _estatePendingFixture(0);
+        StreamArtistIdentityAuthority owner = StreamArtistIdentityAuthority(suite.owners[2]);
+        address child1 = owner.identityWriterExtension();
+        address child2 = owner.identityEstateExtension();
+        T.ActionContext memory c =
+            T.ActionContext(39, address(artist), owner.ownerStateSnapshotV2());
+        bytes memory data = abi.encodeCall(
+            IStreamArtistEstateOwner.cancelEstate, (c, artistId, p.expectedActivationRecordHash)
+        );
+        bytes32 roots = _roots();
+        vm.prank(address(artist));
+        vm.expectRevert(abi.encodeWithSelector(T.Unauthorized.selector, address(artist)));
+        IStreamArtistEstateOwner(address(owner))
+            .cancelEstate(c, artistId, p.expectedActivationRecordHash);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(address(owner), data);
+        vm.prank(address(artist));
+        vm.expectRevert(abi.encodeWithSignature("ExtensionWrongHost(address)", child2));
+        IStreamArtistEstateOwner(child2).cancelEstate(c, artistId, p.expectedActivationRecordHash);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(child2, data);
+        // Existing child1 read guard and new child2 read guard must not return empty owner facts.
+        bytes memory read = abi.encodeCall(IStreamArtistOwner.ownerStateSnapshotV2, ());
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(child1, read);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(child2, read);
+        require(
+            _roots() == roots, "actual Safe CALL cannot impersonate Coordinator or Identity host"
+        );
+    }
+
+    function _estateSafeRead(address target, bytes memory data) private {
+        (bool ok, bytes memory actual) = target.staticcall(data);
+        require(ok && actual.length != 0, "healthy canonical read before actual Safe call");
+        uint256 nonce = artist.nonce();
+        require(
+            executeSafe(artist, keys, target, 0, data, 0) && artist.nonce() == nonce + 1,
+            "actual Safe executes exact read selector"
+        );
+        (ok, data) = target.staticcall(data);
+        require(
+            ok && keccak256(data) == keccak256(actual), "Safe read leaves exact result unchanged"
+        );
+    }
+
+    function testEstateArchivalActualSafeInheritedAndCurrentReadSelectors() public {
+        (bytes32 evidence, bytes32 hash) = _estateArchiveEvidence(artistId);
+        A.CoverageFacts memory f = estateCoverageProvider.coverage(hash);
+        address[2] memory targets =
+            [address(estateCheckpointVerifier), address(estateCoverageProvider)];
+        bytes[] memory common = new bytes[](11);
+        common[0] = abi.encodeWithSignature("FAILURE_CLASS_FAIL_CLOSED_PRECHECK()");
+        common[1] = abi.encodeWithSignature("FAILURE_CLASS_FORWARDING_CAP()");
+        common[2] = abi.encodeWithSignature("FAILURE_CLASS_MIN_GAS_GATE()");
+        common[3] = abi.encodeWithSignature("FAILURE_CLASS_NONE()");
+        common[4] = abi.encodeWithSignature("GAS_PARAMETER_SCHEMA_VERSION()");
+        common[5] = abi.encodeCall(IStreamGasParameterHost.gasParameterIds, ());
+        common[6] = abi.encodeCall(IStreamGasParameterHost.governanceAuthority, ());
+        common[7] = abi.encodeWithSignature("profileHash()");
+        common[8] = abi.encodeWithSignature("supportsInterface(bytes4)", bytes4(0x01ffc9a7));
+        bytes32 signatureGas = keccak256("6529STREAM_GGP_ARCHIVAL_ERC1271_VERIFY_GAS");
+        common[9] = abi.encodeCall(IStreamGasParameterHost.gasParameter, (signatureGas));
+        common[10] = abi.encodeCall(IStreamGasParameterHost.gasParameterInfo, (signatureGas));
+        for (uint256 j; j < 2; ++j) {
+            for (uint256 i; i < common.length; ++i) {
+                _estateSafeRead(targets[j], common[i]);
+            }
+        }
+        _estateSafeRead(
+            targets[0], abi.encodeCall(IStreamArchivalCheckpointVerifier.configurationHash, ())
+        );
+        _estateSafeRead(targets[0], abi.encodeCall(IStreamArchivalCheckpointVerifier.networkId, ()));
+        _estateSafeRead(targets[0], abi.encodeCall(IStreamArchivalCheckpointVerifier.quorum, ()));
+        _estateSafeRead(targets[1], abi.encodeCall(IStreamArchivalCoverage.core, ()));
+        _estateSafeRead(targets[1], abi.encodeCall(IStreamArchivalCoverage.roleRegistry, ()));
+        _estateSafeRead(targets[1], abi.encodeCall(IStreamArchivalCoverage.checkpointVerifier, ()));
+        _estateSafeRead(targets[1], abi.encodeWithSignature("POSSESSION_PROFILE()"));
+        _estateSafeRead(
+            targets[1],
+            abi.encodeCall(IStreamArchivalCoverage.familyRevision, (f.firstFamilyRecordHash))
+        );
+        _estateSafeRead(
+            targets[1],
+            abi.encodeCall(
+                IStreamArchivalCoverage.familyStatusContext, (f.firstFamilyRecordHash, uint8(2))
+            )
+        );
+        _estateSafeRead(
+            targets[1],
+            abi.encodeCall(IStreamArchivalCoverage.latestFixity, (f.secondReceiptRecordHash))
+        );
+        _estateSafeRead(targets[1], abi.encodeCall(IStreamArchivalCoverage.nonceUsed, (bytes32(0))));
+        (A.Family memory family_,) = estateCoverageProvider.family(f.secondFamilyRecordHash);
+        family_.familyId = keccak256("estate-safe-registration-context");
+        _estateSafeRead(
+            targets[1],
+            abi.encodeCall(
+                IStreamArchivalCoverage.familyRegistrationContext,
+                ("estate-safe-registration-context", family_)
+            )
+        );
+        (A.ReceiptTerms memory receipt,,) =
+            estateCoverageProvider.receipt(f.secondReceiptRecordHash);
+        _estateSafeRead(
+            targets[1],
+            abi.encodeCall(
+                IStreamArchivalCoverage.possessionHash,
+                (A.Possession(
+                        receipt.envelopeHash,
+                        receipt.familyRecordHash,
+                        receipt.storageIdentifierHash,
+                        receipt.writer,
+                        receipt.observedAt
+                    ))
+            )
+        );
+        _estateSafeRead(
+            targets[1], abi.encodeCall(IStreamArchivalCoverage.receiptDigest, (receipt))
+        );
+        (A.FixityTerms memory fixity_,) = estateCoverageProvider.fixity(f.secondFixityRecordHash);
+        _estateSafeRead(targets[1], abi.encodeCall(IStreamArchivalCoverage.fixityDigest, (fixity_)));
+        _estateSafeRead(
+            targets[1],
+            abi.encodeCall(IStreamArchivalCoverage.requireCoverage, (hash, artistId, evidence))
+        );
+        for (uint256 i; i < 2; ++i) {
+            bytes memory data = abi.encodeCall(
+                IStreamGasParameterHost.raiseGasParameter, (signatureGas, uint256(500000))
+            );
+            vm.prank(address(artist));
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    IStreamGasParameterHost.GasParameterNotAuthority.selector, address(artist)
+                )
+            );
+            IStreamGasParameterHost(targets[i]).raiseGasParameter(signatureGas, 500000);
+            vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+            this.executeTargetSafe(targets[i], data);
+        }
+        bytes memory statusCall = abi.encodeCall(
+            IStreamArchivalCoverage.setFamilyStatus, (f.firstFamilyRecordHash, uint8(2))
+        );
+        vm.prank(address(artist));
+        vm.expectRevert(abi.encodeWithSelector(A.ArchivalUnauthorized.selector, address(artist)));
+        estateCoverageProvider.setFamilyStatus(f.firstFamilyRecordHash, 2);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(targets[1], statusCall);
+        require(
+            estateCoverageProvider.requireCoverage(hash, artistId, evidence).coverageRecordHash
+                == hash,
+            "all read and direct-governance-negative rows preserve actual coverage"
+        );
+    }
+
+    function testEstatePermissionlessSafeEnvelopeFixityAndCoverageHaveExactGoldenCommitments()
+        public
+    {
+        (bytes32 evidence, bytes32 old) = _estateArchiveEvidence(artistId);
+        A.CoverageFacts memory f = estateCoverageProvider.coverage(old);
+        (A.Envelope memory envelope,) = estateCoverageProvider.envelope(f.envelopeHash);
+        bytes memory payload = bytes("another exact public envelope");
+        A.Envelope memory other = envelope;
+        other.evidenceHash = keccak256(payload);
+        other.payloadDigest = sha256(payload);
+        other.byteSize = uint64(payload.length);
+        bytes32 envelopeHash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARCHIVAL_ENVELOPE_V1"),
+                block.chainid,
+                address(estateCoverageProvider),
+                other
+            )
+        );
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(estateCoverageProvider),
+                0,
+                abi.encodeCall(IStreamArchivalCoverage.recordEnvelope, (other, payload)),
+                0
+            ),
+            "permissionless actual Safe envelope write"
+        );
+        (A.Envelope memory actual, bytes memory bytes_) =
+            estateCoverageProvider.envelope(envelopeHash);
+        require(
+            keccak256(abi.encode(actual)) == keccak256(abi.encode(other))
+                && keccak256(bytes_) == keccak256(payload),
+            "exact envelope domain and stored bytes"
+        );
+        (A.ReceiptTerms memory receipt,,) =
+            estateCoverageProvider.receipt(f.secondReceiptRecordHash);
+        bytes32 domain = keccak256(
+            abi.encode(
+                keccak256(
+                    "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+                ),
+                keccak256("6529Stream Archival Coverage"),
+                keccak256("1"),
+                block.chainid,
+                address(estateCoverageProvider)
+            )
+        );
+        bytes32 receiptBody = keccak256(
+            abi.encode(
+                keccak256(
+                    "StreamArchivalReceipt(bytes32 envelopeHash,bytes32 familyRecordHash,bytes32 storageIdentifierHash,bytes32 evidenceClass,bytes32 proofProfileHash,bytes32 proofRecordHash,address writer,uint64 observedAt,uint256 nonce,uint64 deadline)"
+                ),
+                receipt.envelopeHash,
+                receipt.familyRecordHash,
+                receipt.storageIdentifierHash,
+                receipt.evidenceClass,
+                receipt.proofProfileHash,
+                receipt.proofRecordHash,
+                receipt.writer,
+                receipt.observedAt,
+                receipt.nonce,
+                receipt.deadline
+            )
+        );
+        require(
+            estateCoverageProvider.receiptDigest(receipt)
+                == keccak256(abi.encodePacked(hex"1901", domain, receiptBody)),
+            "independent receipt field sequence and provider domain"
+        );
+        (A.FixityTerms memory fixity_,) = estateCoverageProvider.fixity(f.secondFixityRecordHash);
+        fixity_.previousFixityHash = f.secondFixityRecordHash;
+        fixity_.nonce = 2;
+        fixity_.reportHash = keccak256("new healthy fixity report");
+        bytes32 body = keccak256(
+            abi.encode(
+                keccak256(
+                    "StreamArchivalFixity(bytes32 receiptRecordHash,bytes32 envelopeHash,bytes32 familyRecordHash,bytes32 expectedDigest,bytes32 observedDigest,uint64 observedSize,uint64 checkedAt,uint8 outcome,bytes32 reportHash,bytes32 previousFixityHash,bytes32 repairReportHash,address verifier,uint256 nonce,uint64 deadline)"
+                ),
+                fixity_.receiptRecordHash,
+                fixity_.envelopeHash,
+                fixity_.familyRecordHash,
+                fixity_.expectedDigest,
+                fixity_.observedDigest,
+                fixity_.observedSize,
+                fixity_.checkedAt,
+                fixity_.outcome,
+                fixity_.reportHash,
+                fixity_.previousFixityHash,
+                fixity_.repairReportHash,
+                fixity_.verifier,
+                fixity_.nonce,
+                fixity_.deadline
+            )
+        );
+        bytes32 digest = keccak256(abi.encodePacked(hex"1901", domain, body));
+        require(
+            estateCoverageProvider.fixityDigest(fixity_) == digest,
+            "independent fixity type and domain"
+        );
+        (uint8 v, bytes32 r, bytes32 ss) = safeVm.sign(0xE5705, digest);
+        bytes memory signature = abi.encodePacked(r, ss, v);
+        vm.recordLogs();
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(estateCoverageProvider),
+                0,
+                abi.encodeCall(IStreamArchivalCoverage.recordFixity, (fixity_, signature)),
+                0
+            ),
+            "Safe relays actual independent operator fixity"
+        );
+        bytes32 fixityHash = estateCoverageProvider.latestFixity(f.secondReceiptRecordHash);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        uint256 count;
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].emitter != address(estateCoverageProvider)
+                    || logs[i].topics[0]
+                        != keccak256(
+                            "ArchivalFixityRecorded(uint16,bytes32,bytes32,(bytes32,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint8,bytes32,bytes32,bytes32,address,uint256,uint64))"
+                        )
+            ) continue;
+            ++count;
+            require(
+                logs[i].topics.length == 3 && logs[i].topics[1] == fixityHash
+                    && logs[i].topics[2] == f.secondReceiptRecordHash
+                    && keccak256(logs[i].data) == keccak256(abi.encode(uint16(1), fixity_)),
+                "exact independent fixity event"
+            );
+        }
+        require(count == 1, "one full-schema fixity event");
+        f.coverageRecordHash = 0;
+        f.secondFixityRecordHash = fixityHash;
+        bytes32 next = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARCHIVAL_COVERAGE_RECORD_V1"),
+                block.chainid,
+                address(estateCoverageProvider),
+                f
+            )
+        );
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(estateCoverageProvider),
+                0,
+                abi.encodeCall(
+                    IStreamArchivalCoverage.recordCoverage,
+                    (f.firstReceiptRecordHash, f.secondReceiptRecordHash)
+                ),
+                0
+            ),
+            "permissionless actual Safe selects current independent fixity coverage"
+        );
+        f.coverageRecordHash = next;
+        require(
+            keccak256(abi.encode(estateCoverageProvider.requireCoverage(next, artistId, evidence)))
+                == keccak256(abi.encode(f)),
+            "exact canonical full coverage facts"
+        );
+        avm.expectRevert(A.InvalidArchivalCoverage.selector);
+        estateCoverageProvider.requireCoverage(old, artistId, evidence);
+    }
+
+    function _estateCoolCoverageState() private {
+        // Foundry cool(address) marks that account and all its slots cold:
+        // https://github.com/foundry-rs/foundry/blob/master/crates/cheatcodes/spec/src/vm.rs
+        safeVm.cool(address(core));
+        safeVm.cool(address(ingress));
+        safeVm.cool(address(estateCoverageProvider));
+        safeVm.cool(address(estateCheckpointVerifier));
+        safeVm.cool(suite.owners[2]);
+    }
+
+    function testEstateActualColdCoverageAndParentGasSameContextRetry() public {
+        Estate.Execution memory p = _estatePendingFixture(1024);
+        (Estate.RequestRecord memory item,,) =
+            ingress.estateActivationRecord(p.expectedActivationRecordHash);
+        bytes memory call_ = abi.encodeCall(
+            IStreamArchivalCoverage.requireCoverage,
+            (p.currentCoverageHash, artistId, item.terms.evidenceHash)
+        );
+        _estateCoolCoverageState();
+        uint256 before_ = gasleft();
+        (bool ok, bytes memory result) =
+            address(estateCoverageProvider).staticcall{ gas: 400000 }(call_);
+        uint256 span = before_ - gasleft();
+        require(ok && result.length == 384, "actual cold provider fits current outer cap");
+        require(
+            abi.decode(result, (A.CoverageFacts)).coverageRecordHash == p.currentCoverageHash,
+            "actual provider result"
+        );
+        emit EstateCoverageMeasurement("provider-state-cold", 400000, span);
+        call_ = abi.encodeCall(IStreamArtistEstateActivation.estateAccelerationContext, (p));
+        _estateCoolCoverageState();
+        (ok, result) = address(ingress).staticcall{ gas: 350000 }(call_);
+        require(
+            !ok
+                && keccak256(result)
+                    == keccak256(
+                        abi.encodeWithSelector(T.ComponentChanged.selector, address(core))
+                    ),
+            "insufficient parent gas fails exact first bounded dependency"
+        );
+        _estateCoolCoverageState();
+        before_ = gasleft();
+        (ok, result) = address(ingress).staticcall{ gas: 1500000 }(call_);
+        span = before_ - gasleft();
+        require(ok && result.length == 160, "same exact context healthy parent gas retry");
+        emit EstateCoverageMeasurement("facade-state-cold-linked-code-warm", 1500000, span);
+        ArtistUnitGovernance authority = ArtistUnitGovernance(manager.governanceAuthority());
+        bytes32 inner = keccak256("6529STREAM_GGP_ARCHIVAL_DEPENDENCY_READ_GAS");
+        bytes32 outer = keccak256("6529STREAM_GGP_ARTIST_ARCHIVAL_COVERAGE_READ_GAS");
+        authority.raise(estateCoverageProvider, inner, 300000);
+        _estateCoolCoverageState();
+        (ok, result) = address(ingress).staticcall{ gas: 1500000 }(call_);
+        // Preserve the measured observation without asserting that an unmeasured cap must fail.
+        emit EstateCoverageMeasurement(
+            ok ? "inner-raised-outer-original-pass" : "inner-raised-outer-original-fail", 400000, 0
+        );
+        authority.raise(ingress, outer, 800000);
+        _estateCoolCoverageState();
+        (ok, result) = address(ingress).staticcall{ gas: 2000000 }(call_);
+        require(
+            ok && result.length == 160,
+            "actual nested and outer monotonic raises preserve identical evidence"
+        );
+        require(
+            ingress.estateActivationNonceHint(artistId, address(delegateSafe)) == 1,
+            "passive capped reads and governance raises consume no estate authorization"
+        );
+    }
+
+    function _estateExactOwnerBytes(bytes memory data, bytes memory expected) private {
+        (bool ok, bytes memory actual) = suite.owners[2].staticcall(data);
+        require(
+            ok && keccak256(actual) == keccak256(expected), "exact full encoded owner returndata"
+        );
+        _estateSafeRead(suite.owners[2], data);
+    }
+
+    function testEstateSixEncodedOwnerReadsMatchExplicitTuplesIncludingMaximumSignature() public {
+        Estate.RequestRecord memory empty;
+        Estate.ExecutionFacts memory noExecution;
+        bytes32 absent = keccak256("absent estate record");
+        _estateExactOwnerBytes(
+            abi.encodeCall(IStreamArtistEstateOwner.estateActivationRecord, (absent)),
+            abi.encode(empty, uint8(0), noExecution)
+        );
+        Succ.DesignationRecord memory emptyDesignation;
+        Succ.DirectiveRecord memory emptyDirective;
+        _estateExactOwnerBytes(
+            abi.encodeCall(IStreamArtistSuccessionReads.successorDesignationRecord, (absent)),
+            abi.encode(emptyDesignation)
+        );
+        _estateExactOwnerBytes(
+            abi.encodeCall(IStreamArtistSuccessionReads.estateDirectiveRecord, (absent)),
+            abi.encode(emptyDirective)
+        );
+        bytes32 directive = _directiveRecord(0);
+        Estate.Request memory p = _estatePreparedRequest(0);
+        A.CoverageFacts memory coverage = estateCoverageProvider.coverage(p.selectedCoverageHash);
+        Estate.RequestFacts memory expected = Estate.RequestFacts(
+            p.expectedDesignationRecordHash,
+            0,
+            directive,
+            0,
+            coverage.envelopeHash,
+            180 days,
+            1,
+            7 days,
+            90 days,
+            1
+        );
+        _estateExactOwnerBytes(
+            abi.encodeCall(IStreamArtistEstateOwner.estateRequestFacts, (p, coverage.envelopeHash)),
+            abi.encode(expected)
+        );
+        Estate.AuthorityCapabilities memory living =
+            Estate.AuthorityCapabilities(address(artist), 1, 1, 4095, 0);
+        _estateExactOwnerBytes(
+            abi.encodeCall(IStreamArtistEstateOwner.currentAuthorityCapabilities, (artistId)),
+            abi.encode(living)
+        );
+        Succ.Designation memory terms = _successorTerms(address(delegateSafe), 2);
+        terms.grantedCapabilities = 0;
+        Succ.DesignationRecord memory designation = Succ.DesignationRecord(
+            p.expectedDesignationRecordHash,
+            terms,
+            address(artist),
+            1,
+            1,
+            uint64(block.timestamp),
+            R.ProvisionalAssociation(0, 0)
+        );
+        _estateExactOwnerBytes(
+            abi.encodeCall(
+                IStreamArtistSuccessionReads.successorDesignationRecord,
+                (p.expectedDesignationRecordHash)
+            ),
+            abi.encode(designation)
+        );
+        (Succ.Directive memory directiveTerms,) = _directiveTerms(0);
+        Succ.DirectiveRecord memory savedDirective = Succ.DirectiveRecord(
+            directive,
+            directiveTerms,
+            address(artist),
+            1,
+            0,
+            uint64(block.timestamp),
+            R.ProvisionalAssociation(0, 0)
+        );
+        _estateExactOwnerBytes(
+            abi.encodeCall(IStreamArtistSuccessionReads.estateDirectiveRecord, (directive)),
+            abi.encode(savedDirective)
+        );
+        T.Authorization memory a = T.Authorization(0, uint64(block.timestamp + 1 days), "");
+        bytes memory shortSignature = _delegateSignature(ingress.estateActivationDigest(p, a));
+        a.signature = new bytes(4096);
+        for (uint256 i; i < shortSignature.length; ++i) {
+            a.signature[i] = shortSignature[i];
+        }
+        bytes32 record = ingress.requestEstateActivation(p, a);
+        Estate.RequestRecord memory item = Estate.RequestRecord(
+            record,
+            p,
+            a,
+            address(artist),
+            p.expectedDesignationRecordHash,
+            0,
+            directive,
+            0,
+            coverage.envelopeHash,
+            uint64(block.timestamp),
+            uint64(block.timestamp + 180 days),
+            180 days,
+            1,
+            7 days,
+            90 days,
+            1,
+            0
+        );
+        _estateExactOwnerBytes(
+            abi.encodeCall(IStreamArtistEstateOwner.estateActivationRecord, (record)),
+            abi.encode(item, uint8(1), noExecution)
+        );
+        Estate.Execution memory execution =
+            Estate.Execution(artistId, record, p.selectedCoverageHash);
+        Estate.AccelerationContext memory x;
+        x.scopeHash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ESTATE_ACCELERATION_SCOPE_V1"),
+                block.chainid,
+                address(ingress),
+                suite.owners[2],
+                artistId,
+                record
+            )
+        );
+        x.oldValueHash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ESTATE_ACCELERATION_STATE_V1"),
+                x.scopeHash,
+                item,
+                IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId),
+                uint256(0),
+                p.expectedDesignationRecordHash,
+                directive,
+                p.selectedCoverageHash,
+                coverage.envelopeHash,
+                uint32(0)
+            )
+        );
+        x.newValueHash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ESTATE_ACCELERATION_INTENT_V1"),
+                x.scopeHash,
+                x.oldValueHash,
+                execution,
+                uint32(0)
+            )
+        );
+        x.evidenceHash = p.evidenceHash;
+        _estateExactOwnerBytes(
+            abi.encodeCall(
+                IStreamArtistEstateOwner.estateExecutionFacts, (execution, coverage.envelopeHash)
+            ),
+            abi.encode(uint32(0), x)
+        );
+        (bool ok, bytes memory raw) = suite.owners[2].staticcall(
+            abi.encodeCall(IStreamArtistEstateOwner.currentAuthorityCapabilities, (absent))
+        );
+        require(
+            !ok
+                && keccak256(raw)
+                    == keccak256(abi.encodeWithSelector(T.InvalidIdentity.selector, absent)),
+            "encoded getter preserves exact unknown-identity error"
+        );
+    }
+
+    function testEstateEarlyContestAndDismissalAbandonThreeCandidatesAndRestoreSuccessorProgress()
+        public
+    {
+        _accept();
+        _payout();
+        _selfGuardian();
+        OfficialSafe retired = artist;
+        uint256[] memory retiredKeys = keys;
+        bytes32 priorDocument = ingress.operativeIdentityRecord(artistId);
+        (address priorPayout, bytes32 priorPayoutRecord) = ingress.artistPayoutAccount(artistId);
+        (,,, bytes32 priorGuardian) = ingress.guardianSet(artistId);
+        Estate.Execution memory p = _estateActivateAndAdopt(4095);
+        R.TransitionState memory transition =
+            ingress.artistTransitionState(p.expectedActivationRecordHash);
+        bytes32 document = _reviseDocument(bytes("provisional successor document"));
+        bytes32 payout = _dismissalPayout(address(0xACCA));
+        address[] memory none = new address[](0);
+        bytes32 guardian = _guardianRecord(none, 0, 0, nextNonce);
+        require(
+            ingress.identityRevisionProvisionalAssociation(document).transitionRecordHash
+                    == p.expectedActivationRecordHash
+                && ingress.payoutDesignationProvisionalAssociation(payout).transitionRecordHash
+                    == p.expectedActivationRecordHash
+                && ingress.guardianSetRecord(guardian).provisional.transitionRecordHash
+                    == p.expectedActivationRecordHash,
+            "all three candidates bind actual estate cohort"
+        );
+        require(
+            ingress.operativeIdentityRecord(artistId) == priorDocument,
+            "candidate document is not yet operative"
+        );
+        vm.warp(transition.postWindowEndsAt - 1);
+        require(
+            executeSafe(
+                retired,
+                retiredKeys,
+                address(ingress),
+                0,
+                _contestData(p.expectedActivationRecordHash),
+                0
+            ),
+            "actual retired guardian contests executed estate"
+        );
+        Dismissal.Cause memory cause = ingress.currentIdentityContestCause(artistId);
+        require(
+            cause.facts.authorityClass == 3 && cause.facts.priorStatus == 3
+                && cause.facts.executedTransitionHash == p.expectedActivationRecordHash,
+            "contest captures truthful successor incumbent and estate cohort"
+        );
+        _dismissalExecute(_dismissalRequest(), 1, 0);
+        require(
+            ingress.currentAuthorityCapabilities(artistId).authorityClass == 3
+                && ingress.currentAuthorityCapabilities(artistId).status == 3,
+            "governed dismissal restores actual successor status"
+        );
+        R.TransitionState memory closed =
+            ingress.artistTransitionState(p.expectedActivationRecordHash);
+        vm.warp(transition.postWindowEndsAt + 1);
+        (address selected, bytes32 selectedRecord) = ingress.artistPayoutAccount(artistId);
+        (,,, bytes32 selectedGuardian) = ingress.guardianSet(artistId);
+        require(
+            ingress.operativeIdentityRecord(artistId) == priorDocument && selected == priorPayout
+                && selectedRecord == priorPayoutRecord && selectedGuardian == priorGuardian,
+            "dismissal never matures invalid estate candidates after original deadline"
+        );
+        require(
+            keccak256(abi.encode(closed))
+                == keccak256(
+                    abi.encode(ingress.artistTransitionState(p.expectedActivationRecordHash))
+                ),
+            "actual closed estate facts remain immutable"
+        );
+        bytes32 replacement = _reviseDocument(bytes("fresh successor continuation"));
+        bytes32 newPayout = _dismissalPayout(address(0xACCB));
+        bytes32 newGuardian = _guardianRecord(none, 0, 0, nextNonce);
+        require(
+            ingress.identityRevisionProvisionalAssociation(replacement).transitionRecordHash == 0
+                && ingress.payoutDesignationProvisionalAssociation(newPayout).transitionRecordHash
+                    == 0
+                && ingress.guardianSetRecord(newGuardian).provisional.transitionRecordHash == 0,
+            "fresh revision continuation payout detachment and guardian write are stable"
+        );
+    }
+
     function setUp() public {
         nextNonce = 0;
         directArtistCalls = false;
@@ -7719,6 +9521,7 @@ contract StreamArtistOnboardingTest is
         (bytes32 profile, address wallet) =
             factory.createProfile(entries, keccak256("artist unit split"));
         suite.primaryRevenueClass = PRIMARY;
+        _deployEstateArchival(address(core), governance);
         uint256 nonce = avm.getNonce(address(this));
         address predictedRegistry = avm.computeCreateAddress(address(this), nonce);
         address predictedArchive = avm.computeCreateAddress(address(this), nonce + 1);
@@ -7728,6 +9531,7 @@ contract StreamArtistOnboardingTest is
             suite.mintManager,
             predictedCoordinator,
             governance,
+            address(estateCoverageProvider),
             keccak256("unit deployment"),
             "urn:artist-unit",
             keccak256("unit manifest")

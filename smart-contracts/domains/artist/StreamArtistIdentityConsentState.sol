@@ -5,9 +5,48 @@ import "./StreamArtistIdentityState.sol";
 import "./StreamArtistContentHashes.sol";
 import "./StreamArtistEconomicsHashes.sol";
 import "./StreamArtistSaleHashes.sol";
+import "./StreamArtistBindingOperations.sol";
 
 /// @notice Typed authorization mechanics; Identity keeps every operation guard and semantic commit.
 library StreamArtistIdentityConsentState {
+    function refusal(
+        StreamArtistIdentityState.State storage identity,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        T.Binding memory b,
+        L.Termination memory p,
+        T.Authorization memory a,
+        T.SignerApproval memory proof
+    ) public returns (StreamArtistIdentityState.Mutation memory m, bytes32 record) {
+        _deadline(a.time);
+        if (
+            b.accepted || b.generation != p.generation || b.bindingHash != p.bindingHash
+                || proof.signer != identity.identities[b.artistId].authorityAddress
+        ) revert T.InvalidRecord();
+        record = StreamArtistBindingOperations.refusalRecordForAuthority(
+            o.environment,
+            p,
+            b.artistId,
+            proof.signer,
+            identity.identities[b.artistId].authorityClass,
+            a.nonce,
+            _now()
+        );
+        m = StreamArtistIdentityState.authorize(
+            identity,
+            replay,
+            o,
+            c,
+            b.artistId,
+            a,
+            proof,
+            StreamArtistBindingOperations.refusalDigest(o.environment, p, a),
+            record,
+            identity.identities[b.artistId].authorityAddress
+        );
+    }
+
     function saleConsent(
         StreamArtistIdentityState.State storage identity,
         mapping(bytes32 => T.ReplayCell) storage replay,
@@ -24,7 +63,13 @@ library StreamArtistIdentityConsentState {
                 || p.saleConfigHash == bytes32(0)
         ) revert T.InvalidRecord();
         record = StreamArtistSaleHashes.record(
-            o.environment, p, b.artistId, proof.signer, 1, a.nonce, _now()
+            o.environment,
+            p,
+            b.artistId,
+            proof.signer,
+            identity.identities[b.artistId].authorityClass,
+            a.nonce,
+            _now()
         );
         m = StreamArtistIdentityState.authorize(
             identity,
@@ -51,8 +96,14 @@ library StreamArtistIdentityConsentState {
         T.SignerApproval memory proof
     ) public returns (StreamArtistIdentityState.Mutation memory m, bytes32 record) {
         _deadline(a.time);
-        record = StreamArtistHashes.acceptanceRecord(
-            o.environment, collectionId, b, proof.signer, a.nonce, _now()
+        record = StreamArtistHashes.acceptanceRecordForAuthority(
+            o.environment,
+            collectionId,
+            b,
+            proof.signer,
+            identity.identities[b.artistId].authorityClass,
+            a.nonce,
+            _now()
         );
         m = StreamArtistIdentityState.authorize(
             identity,
@@ -79,8 +130,14 @@ library StreamArtistIdentityConsentState {
         T.SignerApproval memory proof
     ) public returns (StreamArtistIdentityState.Mutation memory m, bytes32 record) {
         _deadline(a.time);
-        record = StreamArtistHashes.policyRecord(
-            o.environment, p, b.artistId, proof.signer, a.nonce, _now()
+        record = StreamArtistHashes.policyRecordForAuthority(
+            o.environment,
+            p,
+            b.artistId,
+            proof.signer,
+            identity.identities[b.artistId].authorityClass,
+            a.nonce,
+            _now()
         );
         m = StreamArtistIdentityState.authorize(
             identity,
@@ -109,7 +166,13 @@ library StreamArtistIdentityConsentState {
         _deadline(a.time);
         StreamArtistContentHashes.validateConsent(p);
         record = StreamArtistContentHashes.consentRecord(
-            o.environment, p, b.artistId, proof.signer, 1, a.nonce, _now()
+            o.environment,
+            p,
+            b.artistId,
+            proof.signer,
+            identity.identities[b.artistId].authorityClass,
+            a.nonce,
+            _now()
         );
         m = StreamArtistIdentityState.authorize(
             identity,
@@ -138,8 +201,15 @@ library StreamArtistIdentityConsentState {
     ) public returns (StreamArtistIdentityState.Mutation memory m, bytes32 record) {
         _deadline(a.time);
         if (designation == bytes32(0)) revert T.InvalidRecord();
-        record = StreamArtistEconomicsHashes.economicsRecord(
-            o.environment, p, designation, b.artistId, proof.signer, a.nonce, _now()
+        record = StreamArtistEconomicsHashes.economicsRecordForAuthority(
+            o.environment,
+            p,
+            designation,
+            b.artistId,
+            proof.signer,
+            identity.identities[b.artistId].authorityClass,
+            a.nonce,
+            _now()
         );
         m = StreamArtistIdentityState.authorize(
             identity,
@@ -166,8 +236,14 @@ library StreamArtistIdentityConsentState {
         T.SignerApproval memory proof
     ) public returns (StreamArtistIdentityState.Mutation memory m, bytes32 record) {
         _deadline(a.time);
-        record = StreamArtistEconomicsHashes.royaltyFreezeRecord(
-            o.environment, p, b.artistId, proof.signer, a.nonce, _now()
+        record = StreamArtistEconomicsHashes.royaltyFreezeRecordForAuthority(
+            o.environment,
+            p,
+            b.artistId,
+            proof.signer,
+            identity.identities[b.artistId].authorityClass,
+            a.nonce,
+            _now()
         );
         m = StreamArtistIdentityState.authorize(
             identity,
@@ -196,7 +272,13 @@ library StreamArtistIdentityConsentState {
         _deadline(a.time);
         StreamArtistContentHashes.validateFreeze(p);
         record = StreamArtistContentHashes.freezeRecord(
-            o.environment, p, b.artistId, proof.signer, 1, a.nonce, _now()
+            o.environment,
+            p,
+            b.artistId,
+            proof.signer,
+            identity.identities[b.artistId].authorityClass,
+            a.nonce,
+            _now()
         );
         m = StreamArtistIdentityState.authorize(
             identity,
@@ -207,6 +289,106 @@ library StreamArtistIdentityConsentState {
             a,
             proof,
             StreamArtistContentHashes.freezeDigest(o.environment, p, a),
+            record,
+            identity.identities[b.artistId].authorityAddress
+        );
+    }
+
+    function payout(
+        StreamArtistIdentityState.State storage identity,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        T.PayoutDesignation memory p,
+        T.Authorization memory a,
+        T.SignerApproval memory proof
+    ) public returns (StreamArtistIdentityState.Mutation memory m, bytes32 record) {
+        if (a.time == 0 || a.time > block.timestamp) revert T.InvalidTimestamp(a.time);
+        record = StreamArtistHashes.payoutRecordForAuthority(
+            o.environment,
+            p,
+            proof.signer,
+            identity.identities[p.artistId].authorityClass,
+            a.nonce,
+            a.time
+        );
+        m = StreamArtistIdentityState.authorize(
+            identity,
+            replay,
+            o,
+            c,
+            p.artistId,
+            a,
+            proof,
+            StreamArtistHashes.payoutDigest(o.environment, p, a),
+            record,
+            identity.identities[p.artistId].authorityAddress
+        );
+    }
+
+    function attestation(
+        StreamArtistIdentityState.State storage identity,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        T.Binding memory b,
+        T.Attestation memory p,
+        T.Authorization memory a,
+        T.SignerApproval memory proof
+    ) public returns (StreamArtistIdentityState.Mutation memory m, bytes32 record) {
+        if (a.time == 0 || a.time > block.timestamp) revert T.InvalidTimestamp(a.time);
+        record = StreamArtistHashes.attestationRecordForAuthority(
+            o.environment,
+            p,
+            b.artistId,
+            proof.signer,
+            identity.identities[b.artistId].authorityClass,
+            a.nonce,
+            a.time
+        );
+        m = StreamArtistIdentityState.authorize(
+            identity,
+            replay,
+            o,
+            c,
+            b.artistId,
+            a,
+            proof,
+            StreamArtistHashes.attestationDigest(o.environment, p, a),
+            record,
+            identity.identities[b.artistId].authorityAddress
+        );
+    }
+
+    function ratification(
+        StreamArtistIdentityState.State storage identity,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        T.Binding memory b,
+        T.Ratification memory p,
+        T.Authorization memory a,
+        T.SignerApproval memory proof
+    ) public returns (StreamArtistIdentityState.Mutation memory m, bytes32 record) {
+        _deadline(a.time);
+        record = StreamArtistHashes.ratificationRecordForAuthority(
+            o.environment,
+            p,
+            b.artistId,
+            proof.signer,
+            identity.identities[b.artistId].authorityClass,
+            a.nonce,
+            _now()
+        );
+        m = StreamArtistIdentityState.authorize(
+            identity,
+            replay,
+            o,
+            c,
+            b.artistId,
+            a,
+            proof,
+            StreamArtistHashes.ratificationDigest(o.environment, p, a),
             record,
             identity.identities[b.artistId].authorityAddress
         );

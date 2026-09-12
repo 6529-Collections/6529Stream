@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 import "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 import "../../interfaces/stream/artist/IStreamArtistPayoutResolutionOwner.sol";
+import "../../interfaces/stream/artist/IStreamArtistCurrentPayoutOwner.sol";
 import "./StreamArtistIdentityOperations.sol";
 import "./StreamArtistRotationOperations.sol";
 
@@ -145,8 +146,8 @@ library StreamArtistOnboardingOperations {
             resolver.identityTransitionClosure(p.artistId, candidateTransition.recordHash);
         record = IStreamArtistIdentityOwner(x.suite.owners[2])
             .consumePayout(_context(18, actor, before_[2]), p, effective, proof);
-        bytes32 actual = IStreamArtistPayoutResolutionOwner(x.suite.owners[5])
-            .recordDesignationWithResolution(
+        bytes32 actual = IStreamArtistCurrentPayoutOwner(x.suite.owners[5])
+            .recordDesignationWithAuthority(
                 _context(18, actor, before_[5]),
                 p,
                 proof.signer,
@@ -154,7 +155,10 @@ library StreamArtistOnboardingOperations {
                 effective.time,
                 currentTransition,
                 candidateTransition,
-                resolution
+                resolution,
+                R.AuthorityFact(
+                    p.artistId, artist.authorityAddress, artist.authorityClass, artist.status
+                )
             );
         if (actual != record) revert T.InvalidRecord();
         _archive(

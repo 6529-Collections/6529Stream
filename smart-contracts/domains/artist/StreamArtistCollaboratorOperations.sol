@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistCurrentCollaboratorOwner.sol";
+import "./StreamArtistAuthorityPolicy.sol";
 import "./StreamArtistBindingOperations.sol";
 import "./StreamArtistCollaboratorHashes.sol";
 import "../../interfaces/stream/artist/IStreamArtistCollaboratorRecordsOwner.sol";
@@ -134,7 +136,10 @@ library StreamArtistCollaboratorOperations {
         IStreamArtistIdentityOwner identity = IStreamArtistIdentityOwner(x.suite.owners[2]);
         bytes32 artistId = identity.activeIdentity(p.account);
         (address signer, uint8 auth, uint8 status,) = identity.authorityState(artistId);
-        if (artistId == bytes32(0) || signer != p.account || auth != 1 || status != 1) {
+        if (
+            artistId == bytes32(0) || signer != p.account
+                || !StreamArtistAuthorityPolicy.ordinary(auth, status, false)
+        ) {
             revert T.InvalidIdentity(artistId);
         }
         T.SignerApproval memory proof = _verify(
@@ -148,9 +153,13 @@ library StreamArtistCollaboratorOperations {
             .consumeCollaboratorAcceptance(
                 T.ActionContext(7, actor, before_[2]), p, artistId, a, proof
             );
-        bytes32 actual = IStreamArtistCollaboratorAcceptanceOwner(x.suite.owners[3])
-            .recordCollaboratorAcceptance(
-                T.ActionContext(7, actor, before_[3]), p, artistId, a.nonce
+        bytes32 actual = IStreamArtistCurrentCollaboratorAcceptanceOwner(x.suite.owners[3])
+            .recordCollaboratorAcceptanceWithAuthority(
+                T.ActionContext(7, actor, before_[3]),
+                p,
+                artistId,
+                a.nonce,
+                R.AuthorityFact(artistId, signer, auth, status)
             );
         if (record != actual) revert T.InvalidRecord();
         uint32 count = collaborators.recordRowAcceptance(
@@ -162,9 +171,14 @@ library StreamArtistCollaboratorOperations {
             bindingOwner.completeCollaboratorBinding(
                 T.ActionContext(7, actor, before_[0]), p.collectionId, p.bindingHash, record
             );
-            IStreamArtistCollaboratorAttributionOwner(x.suite.owners[4])
-                .completeCollaboratorBinding(
-                    T.ActionContext(7, actor, before_[4]), p.collectionId, b, record, p.account
+            IStreamArtistCurrentCollaboratorAttributionOwner(x.suite.owners[4])
+                .completeCollaboratorBindingWithAuthority(
+                    T.ActionContext(7, actor, before_[4]),
+                    p.collectionId,
+                    b,
+                    record,
+                    p.account,
+                    R.AuthorityFact(artistId, signer, auth, status)
                 );
         }
         _archive(
@@ -184,7 +198,9 @@ library StreamArtistCollaboratorOperations {
         bytes32 digest,
         bytes memory signature
     ) private view returns (T.SignerApproval memory) {
-        if (actor == address(0) || signer == address(0)) revert T.InvalidSignature();
+        if (actor == address(0) || signer == address(0)) {
+            revert T.InvalidSignature();
+        }
         bool direct = actor == signer && signature.length == 0;
         if (!direct) {
             (uint256 cap,, uint8 failure, uint64 revision) = IStreamGasParameterHost(

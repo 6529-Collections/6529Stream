@@ -42,6 +42,91 @@ contract StreamArtistRegistryReadExtension {
         _;
     }
 
+    function estateActivationDigest(Estate.Request calldata p, T.Authorization calldata a)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        return IStreamArtistEstateOwner(_contentSuite().owners[2]).estateActivationDigest(p, a);
+    }
+
+    function estateActivationState(bytes32 artistId)
+        external
+        view
+        onlyHost
+        returns (address, uint64, bytes32)
+    {
+        return IStreamArtistEstateOwner(_contentSuite().owners[2]).estateActivationState(artistId);
+    }
+
+    function estateActivationRecord(bytes32 record)
+        external
+        view
+        onlyHost
+        returns (Estate.RequestRecord memory, uint8, Estate.ExecutionFacts memory)
+    {
+        return IStreamArtistEstateOwner(_contentSuite().owners[2]).estateActivationRecord(record);
+    }
+
+    function estateActivationNonceHint(bytes32 artistId, address successor)
+        external
+        view
+        onlyHost
+        returns (uint256)
+    {
+        return IStreamArtistEstateOwner(_contentSuite().owners[2])
+            .estateActivationNonceHint(artistId, successor);
+    }
+
+    function currentAuthorityCapabilities(bytes32 artistId)
+        external
+        view
+        onlyHost
+        returns (Estate.AuthorityCapabilities memory)
+    {
+        return IStreamArtistEstateOwner(_contentSuite().owners[2])
+            .currentAuthorityCapabilities(artistId);
+    }
+
+    function estateAccelerationContext(Estate.Execution calldata p)
+        external
+        view
+        onlyHost
+        returns (Estate.AccelerationContext memory)
+    {
+        return StreamArtistEstateOperations.acceleration(
+            D.CoordinatorContext(_contentSuite(), address(0), bytes32(0)), p
+        );
+    }
+
+    function collectionArtistAuthority(uint256 collectionId)
+        external
+        view
+        onlyHost
+        returns (bytes32, uint64, bytes32, address, uint8, uint8, uint32)
+    {
+        T.SuiteConfiguration memory s = _contentSuite();
+        (uint8 state, uint64 generation, bytes32 artistId,, bytes32 hash) =
+            StreamArtistSaleOperations.attributionState(s, collectionId);
+        T.Binding memory b = IStreamArtistBindingOwner(s.owners[0]).binding(collectionId);
+        if (
+            state != 2 || !b.accepted || artistId == bytes32(0) || hash == bytes32(0)
+                || generation != b.generation || hash != b.bindingHash || artistId != b.artistId
+        ) revert T.InvalidAttribution(collectionId);
+        Estate.AuthorityCapabilities memory f =
+            IStreamArtistEstateOwner(s.owners[2]).currentAuthorityCapabilities(artistId);
+        return (
+            artistId,
+            generation,
+            hash,
+            f.authorityAddress,
+            f.authorityClass,
+            f.status,
+            f.effectiveCapabilities
+        );
+    }
+
     function _contentSuite() private view returns (T.SuiteConfiguration memory) {
         return StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
     }
@@ -327,19 +412,23 @@ contract StreamArtistRegistryReadExtension {
         returns (bool, address, uint256, uint32, uint64, uint64, uint64)
     {
         D.Record memory item = delegationRecord(grant);
+        T.SuiteConfiguration memory suite =
+            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
+        (bool currentEpoch,,) =
+            IStreamArtistEstateOwner(suite.owners[2]).delegationEpochState(grant);
         uint64 remaining = item.grantor == address(0)
             ? 0
             : item.grant.maxUses == 0
                 ? type(uint64).max
                 : uint64(uint256(item.grant.maxUses) - item.uses);
         return (
-            StreamArtistDelegationState.active(item),
+            currentEpoch && StreamArtistDelegationState.active(item),
             item.grant.delegate,
             item.grant.collectionId,
             item.grant.capabilities,
             item.grant.notBefore,
             item.grant.expiresAt,
-            remaining
+            currentEpoch ? remaining : 0
         );
     }
 
@@ -357,5 +446,34 @@ contract StreamArtistRegistryReadExtension {
 
     function _reads() private view returns (StreamArtistOnboardingReads) {
         return StreamArtistOnboardingCoordinator(operationCoordinator).reads();
+    }
+
+    function firstReleaseRatification(uint256 collectionId)
+        external
+        view
+        onlyHost
+        returns (bool, bytes32, bytes32)
+    {
+        T.SuiteConfiguration memory s =
+            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
+        T.RatificationRecord memory r =
+            IStreamArtistConsentOwner(s.owners[6]).firstReleaseRatification(collectionId);
+        return (r.recordHash != bytes32(0), r.contentStateHash, r.recordHash);
+    }
+
+    function acceptanceDigest(uint256 collectionId, T.Authorization calldata a)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        T.SuiteConfiguration memory s =
+            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
+        return StreamArtistHashes.acceptanceDigest(
+            StreamArtistHashes.Environment(block.chainid, _host, s.core, s.mintManager),
+            collectionId,
+            IStreamArtistBindingOwner(s.owners[0]).binding(collectionId),
+            a
+        );
     }
 }

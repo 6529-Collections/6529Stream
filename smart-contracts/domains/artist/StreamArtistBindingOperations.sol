@@ -159,6 +159,34 @@ library StreamArtistBindingOperations {
         );
     }
 
+    function refusalRecordForAuthority(
+        StreamArtistHashes.Environment memory e,
+        L.Termination memory p,
+        bytes32 artistId,
+        address signer,
+        uint8 authorityClass,
+        uint256 nonce,
+        uint64 time
+    ) public pure returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                bytes32(0x61e2c527c98d65328522fa0ac36862f52a59a2035e3e2ca4a0bfd5da13ee95ed),
+                e.chainId,
+                e.registry,
+                e.core,
+                p.collectionId,
+                p.generation,
+                p.bindingHash,
+                artistId,
+                signer,
+                authorityClass,
+                p.reasonHash,
+                nonce,
+                time
+            )
+        );
+    }
+
     function refuse(
         D.CoordinatorContext memory x,
         address actor,

@@ -70,9 +70,9 @@ contract StreamArtistCollaboratorLifecycle is StreamArtistOwner {
         if (bytes(p.identityRecordURI).length > 2048) {
             revert T.BoundExceeded(bytes(p.identityRecordURI).length, 2048);
         }
-        if (bytes(p.reasonURI).length > 2048) revert T.BoundExceeded(
-            bytes(p.reasonURI).length, 2048
-        );
+        if (bytes(p.reasonURI).length > 2048) {
+            revert T.BoundExceeded(bytes(p.reasonURI).length, 2048);
+        }
         bytes32 scope = keccak256(abi.encode(p.account, p.identityRecordHash));
         hash = StreamArtistCollaboratorHashes.proposalHash(_environment(), p, c.actor);
         bytes32 replay = _consume(
@@ -152,9 +152,8 @@ contract StreamArtistCollaboratorLifecycle is StreamArtistOwner {
         view
         returns (C.Join memory)
     {
-        return _joins[
-            StreamArtistCollaboratorHashes.rowKey(bindingHash, account, role, shareLabelId)
-        ];
+        return
+            _joins[StreamArtistCollaboratorHashes.rowKey(bindingHash, account, role, shareLabelId)];
     }
 
     function acceptedCount(bytes32 bindingHash) external view returns (uint32) {

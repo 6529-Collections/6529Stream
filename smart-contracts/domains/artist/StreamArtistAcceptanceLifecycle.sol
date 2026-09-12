@@ -65,7 +65,7 @@ contract StreamArtistAcceptanceLifecycle is StreamArtistOwner {
     ) external returns (bytes32 record) {
         _check(c, 2);
         if (signer != b.artistAddress) revert T.InvalidRecord();
-        return _recordAcceptance(c, collectionId, b, signer, nonce);
+        return _recordAcceptance(c, collectionId, b, signer, nonce, 1);
     }
 
     function recordAcceptanceWithAuthority(
@@ -78,7 +78,7 @@ contract StreamArtistAcceptanceLifecycle is StreamArtistOwner {
     ) external returns (bytes32) {
         _check(c, 2);
         StreamArtistCurrentAuthorityFacts.requirePrincipal(b.artistId, signer, authority, false);
-        return _recordAcceptance(c, collectionId, b, signer, nonce);
+        return _recordAcceptance(c, collectionId, b, signer, nonce, authority.authorityClass);
     }
 
     function _recordAcceptance(
@@ -86,13 +86,14 @@ contract StreamArtistAcceptanceLifecycle is StreamArtistOwner {
         uint256 collectionId,
         T.Binding calldata b,
         address signer,
-        uint256 nonce
+        uint256 nonce,
+        uint8 authorityClass
     ) private returns (bytes32 record) {
         if (b.accepted || b.bindingHash == bytes32(0)) {
             revert T.InvalidRecord();
         }
-        record = StreamArtistHashes.acceptanceRecord(
-            _environment(), collectionId, b, signer, nonce, _now()
+        record = StreamArtistHashes.acceptanceRecordForAuthority(
+            _environment(), collectionId, b, signer, authorityClass, nonce, _now()
         );
         bytes32 key = _consume(
             keccak256("acceptance_lifecycle.replay.record_uniqueness"),
@@ -115,7 +116,7 @@ contract StreamArtistAcceptanceLifecycle is StreamArtistOwner {
             signer,
             b.generation,
             b.bindingHash,
-            1,
+            authorityClass,
             nonce,
             _now(),
             record
@@ -139,12 +140,36 @@ contract StreamArtistAcceptanceLifecycle is StreamArtistOwner {
         bytes32 artistId,
         uint256 nonce
     ) external returns (bytes32 record) {
+        return _recordCollaboratorAcceptance(c, p, artistId, nonce, 1);
+    }
+
+    function recordCollaboratorAcceptanceWithAuthority(
+        T.ActionContext calldata c,
+        C.BindingAcceptance calldata p,
+        bytes32 artistId,
+        uint256 nonce,
+        R.AuthorityFact calldata authority
+    ) external returns (bytes32) {
+        _check(c, 7);
+        StreamArtistCurrentAuthorityFacts.requirePrincipal(artistId, p.account, authority, false);
+        return _recordCollaboratorAcceptance(c, p, artistId, nonce, authority.authorityClass);
+    }
+
+    function _recordCollaboratorAcceptance(
+        T.ActionContext calldata c,
+        C.BindingAcceptance calldata p,
+        bytes32 artistId,
+        uint256 nonce,
+        uint8 authorityClass
+    ) private returns (bytes32 record) {
         _check(c, 7);
         if (
             p.collectionId == 0 || p.generation == 0 || p.bindingHash == bytes32(0)
                 || p.account == address(0) || artistId == bytes32(0)
         ) revert T.InvalidRecord();
-        record = StreamArtistCollaboratorHashes.acceptanceRecord(_environment(), p, nonce, _now());
+        record = StreamArtistCollaboratorHashes.acceptanceRecordForAuthority(
+            _environment(), p, authorityClass, nonce, _now()
+        );
         bytes32 row =
             StreamArtistCollaboratorHashes.rowKey(p.bindingHash, p.account, p.role, p.shareLabelId);
         bytes32 key = _consume(
@@ -172,7 +197,7 @@ contract StreamArtistAcceptanceLifecycle is StreamArtistOwner {
             p.generation,
             p.role,
             p.shareLabelId,
-            1,
+            authorityClass,
             nonce,
             _now(),
             record,

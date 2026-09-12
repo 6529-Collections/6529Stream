@@ -112,7 +112,8 @@ library StreamArtistContentOperations {
             IStreamArtistContentRecordsOwner(suite.owners[6]).contentConsentAt(p, b.generation);
         if (
             record.recordHash == bytes32(0) || record.artistId != b.artistId
-                || record.bindingGeneration != b.generation || record.authorityClass != 1
+                || record.bindingGeneration != b.generation
+                || (record.authorityClass != 1 && record.authorityClass != 3)
                 || keccak256(abi.encode(record.terms)) != keccak256(abi.encode(p))
         ) {
             revert T.MissingMintPrerequisite(keccak256("content-consent"));
@@ -134,7 +135,7 @@ library StreamArtistContentOperations {
             .contentFreezeAt(collectionId, b.generation, suite.metadata, lockClass);
         bool valid = record.recordHash != bytes32(0) && record.artistId == b.artistId
             && record.bindingGeneration == b.generation && record.metadataContract == suite.metadata
-            && record.authorityClass == 1
+            && (record.authorityClass == 1 || record.authorityClass == 3)
             && record.expectedStateHash == host.artistContentFreezeState(collectionId);
         return (valid, valid ? record.recordHash : bytes32(0));
     }
@@ -158,7 +159,8 @@ library StreamArtistContentOperations {
             IStreamArtistIdentityOwner(suite.owners[2]).authorityState(b.artistId);
         if (
             !b.accepted || (state != 2 && !(defensive && state == 4)) || generation != b.generation
-                || b.consentMode != 1 || (status != 1 && !(defensive && status == 4)) || class_ != 1
+                || b.consentMode != 1
+                || !StreamArtistAuthorityPolicy.ordinary(class_, status, defensive)
                 || authority == address(0)
         ) revert T.InvalidAttribution(collectionId);
         C.BindingTerms memory terms = IStreamArtistCollaboratorBindingOwner(suite.owners[0])

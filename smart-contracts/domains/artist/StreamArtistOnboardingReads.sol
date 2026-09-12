@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistHashes.sol";
+import "./StreamArtistAuthorityPolicy.sol";
 
 import "../../interfaces/stream/artist/IStreamArtistBindingOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistCollaboratorBindingOwner.sol";
@@ -59,8 +60,8 @@ contract StreamArtistOnboardingReads {
             IStreamArtistIdentityOwner(_suite.owners[2]).authorityState(b.artistId);
         if (
             !b.accepted || (state != 2 && !(defensive && state == 4)) || generation != b.generation
-                || (identityStatus != 1 && !(defensive && identityStatus == 4))
-                || authorityClass != 1 || authority == address(0)
+                || !StreamArtistAuthorityPolicy.ordinary(authorityClass, identityStatus, defensive)
+                || authority == address(0)
         ) {
             revert T.InvalidAttribution(collectionId);
         }

@@ -1,8 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistTransitionReads.sol";
+import "./StreamArtistGuardianState.sol";
 
 import "./StreamArtistIdentityState.sol";
 import "./StreamArtistRotationHashes.sol";
+import "../../interfaces/stream/artist/IStreamArtistRotationOwner.sol";
+import "../../interfaces/stream/artist/IStreamArtistEstateOwner.sol";
 import {
     StreamArtistIdentityDismissalTypes as Dismissal
 } from "../../interfaces/stream/artist/StreamArtistIdentityDismissalTypes.sol";
@@ -10,6 +14,8 @@ import {
 /// @notice Linked state mechanics for Identity's guardian and rotation domain.
 /// @dev Identity retains typed caller/snapshot guards and the single semantic commit.
 library StreamArtistRotationState {
+    error InvalidGuardianSet();
+    error EstateCapabilityUnavailable(bytes32 artistId, uint32 requiredCapabilities);
     using StreamArtistNonceAvailability for StreamArtistNonceAvailability.Index;
 
     struct State {
@@ -102,11 +108,11 @@ library StreamArtistRotationState {
         private
         view
     {
-        R.TransitionState storage t = s.rotations[s.latestExecution[artistId]].transition;
+        R.TransitionState memory t = transitionState(s, s.latestExecution[artistId]);
         bool abandoned = t.phase == 3
             || (t.phase == 2 && t.contestedAt != 0 && t.contestedAt < t.postWindowEndsAt);
         if (
-            closure.artistId != artistId
+            closure.artistId != artistId || t.artistId != artistId
                 || closure.transitionRecordHash != s.latestExecution[artistId]
                 || closure.transitionRecordHash == bytes32(0) || t.phase != 2 || t.executedAt == 0
                 || closure.windowEndsAt != t.postWindowEndsAt
@@ -132,7 +138,7 @@ library StreamArtistRotationState {
             return activeWindow(s, artistId);
         }
         _validClosure(s, artistId, closure);
-        if (s.pending[artistId] != bytes32(0)) return activeWindow(s, artistId);
+        if (pendingTransition(s, artistId) != bytes32(0)) return activeWindow(s, artistId);
         return (bytes32(0), 0, false);
     }
 
@@ -142,7 +148,10 @@ library StreamArtistRotationState {
         returns (R.ProvisionalAssociation memory result)
     {
         bytes32 record = s.latestExecution[artistId];
-        R.TransitionState storage transition = s.rotations[record].transition;
+        R.TransitionState memory transition = transitionState(s, record);
+        if (record != bytes32(0) && transition.artistId != artistId) {
+            revert T.InvalidIdentity(artistId);
+        }
         if (record != bytes32(0) && block.timestamp < transition.postWindowEndsAt) {
             result = R.ProvisionalAssociation(record, transition.postWindowEndsAt);
         }
@@ -154,7 +163,7 @@ library StreamArtistRotationState {
         returns (bool)
     {
         if (a.transitionRecordHash == bytes32(0)) return a.windowEndsAt == 0;
-        R.TransitionState storage t = s.rotations[a.transitionRecordHash].transition;
+        R.TransitionState memory t = transitionState(s, a.transitionRecordHash);
         return t.artistId == artistId && t.phase == 2 && t.executedAt != 0
             && t.postWindowEndsAt == a.windowEndsAt
             && (t.contestedAt == 0 || t.contestedAt >= a.windowEndsAt)
@@ -178,21 +187,35 @@ library StreamArtistRotationState {
         view
         returns (bytes32 record, uint64 endsAt, bool contested)
     {
-        record = s.pending[artistId];
-        if (record != bytes32(0)) {
-            R.TransitionState storage pending_ = s.rotations[record].transition;
-            return (record, pending_.contestEndsAt, pending_.contestedAt != 0);
-        }
-        record = s.latestExecution[artistId];
-        if (record == bytes32(0)) return (bytes32(0), 0, false);
-        R.TransitionState storage executed = s.rotations[record].transition;
-        if (
-            (executed.contestedAt != 0 && executed.contestedAt < executed.postWindowEndsAt)
-                || block.timestamp < executed.postWindowEndsAt
-        ) {
-            return (record, executed.postWindowEndsAt, executed.contestedAt != 0);
-        }
-        return (bytes32(0), 0, false);
+        return StreamArtistTransitionReads.activeWindow(s, artistId);
+    }
+
+    /// @notice Resolve the actual pending rotation or estate from Identity-owned references.
+    function pendingTransition(State storage s, bytes32 artistId)
+        public
+        view
+        returns (bytes32 record)
+    {
+        return StreamArtistTransitionReads.pendingTransition(s, artistId);
+    }
+
+    /// @dev Rotation data stays local; the fixed estate getter reads only actual local estate maps.
+    function transitionStanding(State storage s, bytes32 record)
+        public
+        view
+        returns (address priorAddress, bytes32 guardianRecord, uint64 standingTail)
+    {
+        return StreamArtistTransitionReads.transitionStanding(s, record);
+    }
+
+    /// @dev Existing rotation facts stay local. Other actual transition kinds resolve by a
+    /// fixed same-Identity static read; the owner getter never calls this selection helper.
+    function transitionState(State storage s, bytes32 record)
+        public
+        view
+        returns (R.TransitionState memory t)
+    {
+        return StreamArtistTransitionReads.transitionState(s, record);
     }
 
     function standingRevoked(State storage s, bytes32 artistId, address priorAddress)
@@ -246,89 +269,8 @@ library StreamArtistRotationState {
         T.SignerApproval memory proof,
         Dismissal.Closure memory closure
     ) private returns (StreamArtistIdentityState.Mutation memory m) {
-        if (
-            p.guardians.length > 8 || p.minContestSeconds > 30 days
-                || (p.guardians.length == 0
-                        ? p.approvalThreshold != 0
-                        : p.approvalThreshold == 0 || p.approvalThreshold > p.guardians.length)
-        ) {
-            revert R.InvalidGuardianSet();
-        }
-        address previous;
-        for (uint256 i; i < p.guardians.length; ++i) {
-            if (p.guardians[i] <= previous) revert R.InvalidGuardianSet();
-            previous = p.guardians[i];
-        }
-        if (a.time == 0 || a.time > block.timestamp || (proof.direct && a.time != block.timestamp))
-        {
-            revert T.InvalidRecord();
-        }
-        bytes32 prior = operativeGuardian(s, p.artistId);
-        bytes32 record = StreamArtistRotationHashes.guardianRecord(o.environment, p, a);
-        if (s.guardians[record].recordHash != bytes32(0)) revert T.InvalidRecord();
-        m = StreamArtistIdentityState.authorize(
-            identity,
-            replay,
-            o,
-            c,
-            p.artistId,
-            a,
-            proof,
-            StreamArtistRotationHashes.guardianDigest(o.environment, p, a),
-            record,
-            identity.identities[p.artistId].authorityAddress
-        );
-        R.ProvisionalAssociation memory pending_ = associationWithResolution(s, p.artistId, closure);
-        R.GuardianRecord memory item =
-            R.GuardianRecord(record, p, proof.signer, 1, a.nonce, a.time, prior, pending_);
-        s.guardians[record] = item;
-        // Checkpoint only an actually eligible head; time-only reads also select it before this write.
-        s.stableGuardian[p.artistId] = prior;
-        bytes32 candidate = s.provisionalGuardian[p.artistId];
-        if (pending_.transitionRecordHash == bytes32(0)) {
-            if (prior == bytes32(0) || a.nonce > s.guardians[prior].nonce) {
-                s.stableGuardian[p.artistId] = record;
-            }
-            s.provisionalGuardian[p.artistId] = bytes32(0);
-        } else if (
-            (prior == bytes32(0) || a.nonce > s.guardians[prior].nonce)
-                && (candidate == bytes32(0)
-                    || s.guardians[candidate].provisional.transitionRecordHash
-                        != pending_.transitionRecordHash
-                    || a.nonce > s.guardians[candidate].nonce)
-        ) {
-            s.provisionalGuardian[p.artistId] = record;
-        }
-        bytes32 key = _consume(
-            replay,
-            o,
-            keccak256("identity_authority.replay.guardian_set_chain"),
-            keccak256(abi.encode(p.artistId, a.nonce)),
-            record
-        );
-        m.record = record;
-        m.action = keccak256(abi.encode(p, a, proof));
-        m.state = keccak256(
-            abi.encode(
-                m.state, item, s.stableGuardian[p.artistId], s.provisionalGuardian[p.artistId]
-            )
-        );
-        m.replay = keccak256(abi.encode(m.replay, key, record));
-        emit ArtistGuardianSetUpdated(
-            1,
-            p.artistId,
-            p.guardians,
-            p.approvalThreshold,
-            p.minContestSeconds,
-            1,
-            a.nonce,
-            a.time,
-            record
-        );
-
-        if (closure.dismissalRecordHash != bytes32(0)) {
-            m.state = keccak256(abi.encode(m.state, closure));
-        }
+        return
+            StreamArtistGuardianState.setGuardians(s, identity, replay, o, c, p, a, proof, closure);
     }
 
     function stage(
@@ -580,8 +522,11 @@ library StreamArtistRotationState {
     ) public returns (StreamArtistIdentityState.Mutation memory m) {
         R.RotationRecord storage r = _pending(s, artistId, expected);
         if (
-            identity.identities[artistId].status != 1
-                || !_member(s, r.guardianSetRecordHash, c.actor)
+            !StreamArtistAuthorityPolicy.ordinary(
+                    identity.identities[artistId].authorityClass,
+                    identity.identities[artistId].status,
+                    false
+                ) || !_member(s, r.guardianSetRecordHash, c.actor)
         ) {
             revert T.Unauthorized(c.actor);
         }
@@ -704,7 +649,7 @@ library StreamArtistRotationState {
         R.RotationRecord storage r = _pending(s, artistId, expected);
         T.Identity storage principal = identity.identities[artistId];
         if (
-            principal.status != 1 || principal.authorityClass != 1
+            !StreamArtistAuthorityPolicy.ordinary(principal.authorityClass, principal.status, false)
                 || principal.authorityAddress != r.terms.oldAddress
                 || identity.activeIdentity[r.terms.oldAddress] != artistId
         ) revert T.InvalidIdentity(artistId);
@@ -749,7 +694,13 @@ library StreamArtistRotationState {
             keccak256(abi.encode(executionKey, retirementKey, expected))
         );
         emit ArtistAddressRotated(
-            1, artistId, r.terms.oldAddress, r.terms.newAddress, 1, r.terms.reasonHash, expected
+            1,
+            artistId,
+            r.terms.oldAddress,
+            r.terms.newAddress,
+            principal.authorityClass,
+            r.terms.reasonHash,
+            expected
         );
     }
 
@@ -765,21 +716,23 @@ library StreamArtistRotationState {
     ) public returns (StreamArtistIdentityState.Mutation memory m) {
         if (block.timestamp > a.time) revert T.ExpiredAuthorization(a.time);
         bytes32 retirement = s.retirement[p.artistId][p.revokedAddress];
-        R.RotationRecord storage transition = s.rotations[retirement];
+        R.TransitionState memory transition = transitionState(s, retirement);
+        (address priorAddress,, uint64 tail) = transitionStanding(s, retirement);
         (bool revoked,) = standingRevoked(s, p.artistId, p.revokedAddress);
         if (
             retirement == bytes32(0) || retirement != p.retiredTransitionRecordHash || revoked
                 || p.revokedAddress == identity.identities[p.artistId].authorityAddress
-                || transition.transition.phase != 2 || transition.transition.contestedAt != 0
-                || s.pending[p.artistId] != bytes32(0)
-                || block.timestamp
-                    < uint256(transition.transition.postWindowEndsAt) + transition.standingTail
+                || transition.artistId != p.artistId || priorAddress != p.revokedAddress
+                || transition.phase != 2 || transition.contestedAt != 0
+                || pendingTransition(s, p.artistId) != bytes32(0)
+                || block.timestamp < uint256(transition.postWindowEndsAt) + tail
         ) {
             revert R.InvalidPriorStanding(p.revokedAddress);
         }
         uint64 observed = _now();
-        bytes32 record = StreamArtistRotationHashes.standingRecord(
-            o.environment, p, proof.signer, a.nonce, observed
+        uint8 authorityClass = identity.identities[p.artistId].authorityClass;
+        bytes32 record = StreamArtistRotationHashes.standingRecordForAuthority(
+            o.environment, p, proof.signer, authorityClass, a.nonce, observed
         );
         m = StreamArtistIdentityState.authorize(
             identity,
@@ -801,7 +754,7 @@ library StreamArtistRotationState {
             record
         );
         R.StandingRecord memory item =
-            R.StandingRecord(record, p, proof.signer, 1, a.nonce, observed);
+            R.StandingRecord(record, p, proof.signer, authorityClass, a.nonce, observed);
         s.standingRecords[record] = item;
         s.standingRevocation[p.artistId][p.revokedAddress] = record;
         m.record = record;
@@ -814,7 +767,7 @@ library StreamArtistRotationState {
             p.revokedAddress,
             proof.signer,
             retirement,
-            1,
+            authorityClass,
             p.reasonHash,
             a.nonce,
             observed,

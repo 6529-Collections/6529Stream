@@ -18,7 +18,9 @@ library StreamArtistIdentityOperations {
         T.Snapshot[7] memory before_ = _snapshots(x, 25);
         (address signer, uint8 class_, uint8 status,) =
             IStreamArtistIdentityOwner(x.suite.owners[2]).authorityState(p.artistId);
-        if (class_ != 1 || status != 1) revert T.InvalidIdentity(p.artistId);
+        if (!StreamArtistAuthorityPolicy.ordinary(class_, status, false)) {
+            revert T.InvalidIdentity(p.artistId);
+        }
         T.Authorization memory effective = _directTime(actor, signer, submitted);
         T.SignerApproval memory proof = _verify(
             x,
@@ -52,8 +54,8 @@ library StreamArtistIdentityOperations {
         (bytes32 hash, string memory uri, string memory name) =
             IStreamArtistIdentityRevisionOwner(owner).operativeIdentityMetadata(p.artistId);
         if (
-            status != 1 || class_ != 1 || authority != p.artistAddress
-                || hash != p.identityRecordHash
+            !StreamArtistAuthorityPolicy.ordinary(class_, status, false)
+                || authority != p.artistAddress || hash != p.identityRecordHash
                 || identity.activeIdentity(p.artistAddress) != p.artistId
                 || keccak256(document) != hash
                 || keccak256(bytes(displayName)) != keccak256(bytes(name))

@@ -178,7 +178,7 @@ library StreamArtistIdentityRevisionState {
                 p.previousRecordHash,
                 p.revisedRecordHash,
                 proof.signer,
-                uint8(1),
+                identity.identities[p.artistId].authorityClass,
                 a.nonce,
                 a.time
             )
@@ -278,7 +278,7 @@ library StreamArtistIdentityRevisionState {
             p.previousRecordHash,
             p.revisedRecordHash,
             p.identityRecordURI,
-            1,
+            identity.identities[p.artistId].authorityClass,
             a.nonce,
             a.time,
             record

@@ -77,8 +77,7 @@ library StreamArtistCollaboratorIdentityState {
         // A direct registration uses the persistent account hint; this fresh identity
         // still consumes that exact nonce and then derives its own independent hint.
         if (proof.direct) identity.identities[id].nonceHint = hint;
-        StreamArtistIdentityState.Mutation memory authorization =
-            StreamArtistIdentityState.authorize(
+        StreamArtistIdentityState.Mutation memory authorization = StreamArtistIdentityState.authorize(
             identity, replay, o, c, id, a, proof, digest, id, p.account
         );
         bytes32 uniqueKey = _key(o, keccak256("identity_authority.replay.identity_uniqueness"), id);

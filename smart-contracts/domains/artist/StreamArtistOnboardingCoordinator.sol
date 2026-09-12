@@ -7,6 +7,7 @@ import "./StreamArtistRotationOperations.sol";
 import "./StreamArtistSaleOperations.sol";
 import "./StreamArtistIdentityContestOperations.sol";
 import "./StreamArtistSuccessionOperations.sol";
+import "./StreamArtistEstateOperations.sol";
 import "../../interfaces/stream/artist/IStreamArtistSaleAuthority.sol";
 
 import "./StreamArtistEconomicsHashes.sol";
@@ -150,6 +151,9 @@ contract StreamArtistOnboardingCoordinator is
                 uint16(33),
                 uint16(36),
                 uint16(37),
+                uint16(38),
+                uint16(39),
+                uint16(40),
                 uint16(51),
                 uint16(52),
                 uint16(54),
@@ -189,6 +193,28 @@ contract StreamArtistOnboardingCoordinator is
         returns (bytes32)
     {
         return StreamArtistIdentityDismissalOperations.dismiss(_economicContext(), actor, p);
+    }
+
+    function coordinateRequestEstateActivation(
+        address actor,
+        Estate.Request calldata p,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistEstateOperations.request(_economicContext(), actor, p, a);
+    }
+
+    function coordinateCancelEstateActivation(address actor, bytes32 artistId, bytes32 expected)
+        external
+        operation
+    {
+        StreamArtistEstateOperations.cancel(_economicContext(), actor, artistId, expected);
+    }
+
+    function coordinateExecuteEstateActivation(address actor, Estate.Execution calldata p)
+        external
+        operation
+    {
+        StreamArtistEstateOperations.execute(_economicContext(), actor, p);
     }
 
     function coordinateContestArtistIdentity(address actor, Contest.Request calldata p)

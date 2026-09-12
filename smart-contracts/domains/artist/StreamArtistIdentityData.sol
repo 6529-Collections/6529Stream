@@ -19,6 +19,7 @@ import "./StreamArtistIdentityContestState.sol";
 import "./StreamArtistSuccessionState.sol";
 import "./StreamArtistIdentityResolutionState.sol";
 import "./StreamArtistTimingState.sol";
+import "./StreamArtistEstateState.sol";
 import "../../interfaces/stream/artist/IStreamArtistRotationOwner.sol";
 import {
     StreamArtistOnboardingTypes as T
@@ -35,6 +36,22 @@ abstract contract StreamArtistIdentityData {
     StreamArtistIdentityContestState.State internal _identityContests;
     StreamArtistSuccessionState.State internal _succession;
     StreamArtistIdentityResolutionState.State internal _resolutions;
+    // Estate state is appended after every prior Identity root; existing nested structs stay fixed.
+    StreamArtistEstateState.State internal _estate;
+
+    function _noteLiving(
+        StreamArtistIdentityState.OwnerContext memory o,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        bytes32 artistId,
+        address signer,
+        StreamArtistIdentityState.Mutation memory m
+    ) internal {
+        (bytes32 stateDelta, bytes32 replayDelta) = StreamArtistEstateState.livingAction(
+            _estate, _identity, replay, o, artistId, signer
+        );
+        if (stateDelta != bytes32(0)) m.state = keccak256(abi.encode(m.state, stateDelta));
+        if (replayDelta != bytes32(0)) m.replay = keccak256(abi.encode(m.replay, replayDelta));
+    }
 
     function _identityContestResolution(bytes32 artistId, bytes32 subject)
         internal

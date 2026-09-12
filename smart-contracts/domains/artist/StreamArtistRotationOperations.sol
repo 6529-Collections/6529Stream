@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAuthorityPolicy.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 
 import "./StreamArtistRotationHashes.sol";
@@ -199,7 +200,9 @@ library StreamArtistRotationOperations {
         uint8 status;
         (signer, class_, status,) =
             IStreamArtistIdentityOwner(x.suite.owners[2]).authorityState(artistId);
-        if (signer == address(0) || class_ != 1 || status != 1) revert T.InvalidIdentity(artistId);
+        if (signer == address(0) || !StreamArtistAuthorityPolicy.ordinary(class_, status, false)) {
+            revert T.InvalidIdentity(artistId);
+        }
     }
 
     function _verify(

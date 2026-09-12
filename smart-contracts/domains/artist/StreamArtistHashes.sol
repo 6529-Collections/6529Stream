@@ -129,6 +129,33 @@ library StreamArtistHashes {
         );
     }
 
+    function acceptanceRecordForAuthority(
+        Environment memory e,
+        uint256 collectionId,
+        StreamArtistOnboardingTypes.Binding memory b,
+        address signer,
+        uint8 authorityClass,
+        uint256 nonce,
+        uint64 signedAt
+    ) internal pure returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ACCEPTANCE_RECORD_V1"),
+                e.chainId,
+                e.registry,
+                e.core,
+                collectionId,
+                b.generation,
+                b.bindingHash,
+                uint8(1),
+                signer,
+                authorityClass,
+                nonce,
+                signedAt
+            )
+        );
+    }
+
     function policyDigest(
         Environment memory e,
         StreamArtistOnboardingTypes.PolicyConsent memory p,
@@ -173,6 +200,33 @@ library StreamArtistHashes {
                 artistId,
                 signer,
                 uint8(1),
+                nonce,
+                signedAt
+            )
+        );
+    }
+
+    function policyRecordForAuthority(
+        Environment memory e,
+        StreamArtistOnboardingTypes.PolicyConsent memory p,
+        bytes32 artistId,
+        address signer,
+        uint8 authorityClass,
+        uint256 nonce,
+        uint64 signedAt
+    ) internal pure returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_POLICY_CONSENT_RECORD_V1"),
+                e.chainId,
+                e.registry,
+                e.manager,
+                p.collectionId,
+                p.phaseId,
+                p.policyHash,
+                artistId,
+                signer,
+                authorityClass,
                 nonce,
                 signedAt
             )
@@ -328,6 +382,30 @@ library StreamArtistHashes {
         );
     }
 
+    function payoutRecordForAuthority(
+        Environment memory e,
+        StreamArtistOnboardingTypes.PayoutDesignation memory p,
+        address signer,
+        uint8 authorityClass,
+        uint256 nonce,
+        uint64 signedAt
+    ) internal pure returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_PAYOUT_DESIGNATION_RECORD_V1"),
+                e.chainId,
+                e.registry,
+                p.artistId,
+                p.payoutAccount,
+                p.previousDesignationRecordHash,
+                signer,
+                authorityClass,
+                nonce,
+                signedAt
+            )
+        );
+    }
+
     function attestationDigest(
         Environment memory e,
         StreamArtistOnboardingTypes.Attestation memory p,
@@ -385,6 +463,37 @@ library StreamArtistHashes {
         );
     }
 
+    function attestationRecordForAuthority(
+        Environment memory e,
+        StreamArtistOnboardingTypes.Attestation memory p,
+        bytes32 artistId,
+        address signer,
+        uint8 authorityClass,
+        uint256 nonce,
+        uint64 signedAt
+    ) internal pure returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ATTESTATION_RECORD_V1"),
+                e.chainId,
+                e.registry,
+                e.core,
+                p.collectionId,
+                p.subjectKind,
+                p.subjectId,
+                p.subjectStateHash,
+                p.schemaId,
+                p.statementHash,
+                keccak256(bytes(p.statementURI)),
+                artistId,
+                signer,
+                authorityClass,
+                nonce,
+                signedAt
+            )
+        );
+    }
+
     function ratificationDigest(
         Environment memory e,
         StreamArtistOnboardingTypes.Ratification memory p,
@@ -428,6 +537,33 @@ library StreamArtistHashes {
                 artistId,
                 signer,
                 uint8(1),
+                nonce,
+                signedAt
+            )
+        );
+    }
+
+    function ratificationRecordForAuthority(
+        Environment memory e,
+        StreamArtistOnboardingTypes.Ratification memory p,
+        bytes32 artistId,
+        address signer,
+        uint8 authorityClass,
+        uint256 nonce,
+        uint64 signedAt
+    ) internal pure returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_CONTENT_RATIFICATION_RECORD_V1"),
+                e.chainId,
+                e.registry,
+                p.metadataContract,
+                e.core,
+                p.collectionId,
+                p.contentStateHash,
+                artistId,
+                signer,
+                authorityClass,
                 nonce,
                 signedAt
             )

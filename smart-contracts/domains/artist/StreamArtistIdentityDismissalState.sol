@@ -73,7 +73,7 @@ library StreamArtistIdentityDismissalState {
             principal.authorityAddress,
             principal.authorityClass,
             principal.status,
-            rotations.pending[artistId],
+            StreamArtistRotationState.pendingTransition(rotations, artistId),
             rotations.latestExecution[artistId],
             s.currentCause[artistId],
             s.latestResolution[artistId],
@@ -87,9 +87,10 @@ library StreamArtistIdentityDismissalState {
         Dismissal.CauseFacts memory f
     ) public returns (bytes32 hash) {
         if (
-            f.referenceHash == bytes32(0) || f.priorStatus != 1 || f.authorityClass != 1
-                || f.incumbent == address(0) || (f.kind != 1 && f.kind != 2)
-                || f.actor == address(0) || block.timestamp == 0
+            f.referenceHash == bytes32(0)
+                || !((f.priorStatus == 1 && f.authorityClass == 1)
+                    || (f.priorStatus == 3 && f.authorityClass == 3)) || f.incumbent == address(0)
+                || (f.kind != 1 && f.kind != 2) || f.actor == address(0) || block.timestamp == 0
                 || block.timestamp > type(uint64).max || f.enteredAt != block.timestamp
                 || f.previousCauseHash != s.currentCause[f.artistId]
                 || f.previousResolutionHash != s.latestResolution[f.artistId]
@@ -138,8 +139,11 @@ library StreamArtistIdentityDismissalState {
         Dismissal.Cause memory cause
     ) public view returns (Dismissal.CohortSnapshot memory v) {
         bytes32 id = cause.facts.artistId;
-        v.pendingTransition = rotations.rotations[cause.facts.pendingTransitionHash].transition;
-        v.executedTransition = rotations.rotations[cause.facts.executedTransitionHash].transition;
+        v.pendingTransition =
+            StreamArtistRotationState.transitionState(rotations, cause.facts.pendingTransitionHash);
+        v.executedTransition = StreamArtistRotationState.transitionState(
+            rotations, cause.facts.executedTransitionHash
+        );
         v.stableRevisionRecord = revisions.latestRecord[id];
         v.pendingRevisionRecord = revisions.pendingRecord[id];
         v.operativeRevisionRecord = v.pendingRevisionRecord != bytes32(0)
@@ -184,7 +188,8 @@ library StreamArtistIdentityDismissalState {
                 || cause.facts.referenceHash == bytes32(0) || cause.facts.actor == address(0)
                 || principal.status != 4 || principal.authorityAddress != cause.facts.incumbent
                 || principal.authorityClass != cause.facts.authorityClass
-                || cause.facts.priorStatus != 1 || cause.facts.authorityClass != 1
+                || !((cause.facts.priorStatus == 1 && cause.facts.authorityClass == 1)
+                    || (cause.facts.priorStatus == 3 && cause.facts.authorityClass == 3))
                 || p.expectedResolutionHash != s.latestResolution[p.artistId]
                 || cause.facts.previousResolutionHash != p.expectedResolutionHash
                 || p.evidenceHash == bytes32(0) || p.reasonHash == bytes32(0)

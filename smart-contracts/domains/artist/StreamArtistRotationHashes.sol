@@ -161,4 +161,29 @@ library StreamArtistRotationHashes {
             )
         );
     }
+
+    function standingRecordForAuthority(
+        StreamArtistHashes.Environment memory e,
+        R.StandingRevocation memory p,
+        address signer,
+        uint8 authorityClass,
+        uint256 nonce,
+        uint64 signedAt
+    ) public pure returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                bytes32(0xc62769083037c111cec5a5f8d100e5c4064db79bec694312e35e53acc7256d0e),
+                e.chainId,
+                e.registry,
+                p.artistId,
+                p.revokedAddress,
+                p.retiredTransitionRecordHash,
+                signer,
+                authorityClass,
+                p.reasonHash,
+                nonce,
+                signedAt
+            )
+        );
+    }
 }

@@ -109,7 +109,8 @@ library StreamArtistSaleOperations {
         Sale.Record memory item =
             owner.saleConsentRecord(owner.saleConsentAt(collectionId, saleId, config));
         if (
-            item.recordHash == bytes32(0) || item.artistId != b.artistId || item.authorityClass != 1
+            item.recordHash == bytes32(0) || item.artistId != b.artistId
+                || (item.authorityClass != 1 && item.authorityClass != 3)
                 || item.bindingGeneration != b.generation || item.bindingHash != b.bindingHash
                 || keccak256(abi.encode(item.terms)) != keccak256(abi.encode(p))
         ) {
@@ -161,7 +162,8 @@ library StreamArtistSaleOperations {
         (address authority, uint8 class_, uint8 status,) =
             IStreamArtistIdentityOwner(suite.owners[2]).authorityState(b.artistId);
         if (
-            !b.accepted || state != 2 || generation != b.generation || status != 1 || class_ != 1
+            !b.accepted || state != 2 || generation != b.generation
+                || !StreamArtistAuthorityPolicy.ordinary(class_, status, false)
                 || authority == address(0) || b.consentMode != 1
         ) revert T.InvalidAttribution(collectionId);
         C.BindingTerms memory terms = IStreamArtistCollaboratorBindingOwner(suite.owners[0])

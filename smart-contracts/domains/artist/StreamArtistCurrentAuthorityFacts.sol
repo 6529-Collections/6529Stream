@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/artist/IStreamArtistIdentityOwner.sol";
+import "./StreamArtistAuthorityPolicy.sol";
 import {
     StreamArtistRotationTypes as R
 } from "../../interfaces/stream/artist/StreamArtistRotationTypes.sol";
@@ -17,8 +18,8 @@ library StreamArtistCurrentAuthorityFacts {
         (a.authorityAddress, a.authorityClass, a.status,) =
             IStreamArtistIdentityOwner(identityOwner).authorityState(artistId);
         if (
-            a.authorityAddress == address(0) || a.authorityClass != 1
-                || (a.status != 1 && !(defensive && a.status == 4))
+            a.authorityAddress == address(0)
+                || !StreamArtistAuthorityPolicy.ordinary(a.authorityClass, a.status, defensive)
         ) revert T.InvalidIdentity(artistId);
     }
 
@@ -40,8 +41,8 @@ library StreamArtistCurrentAuthorityFacts {
     ) internal pure {
         if (
             artistId == bytes32(0) || a.artistId != artistId || signer == address(0)
-                || a.authorityAddress != signer || a.authorityClass != 1
-                || (a.status != 1 && !(defensive && a.status == 4))
+                || a.authorityAddress != signer
+                || !StreamArtistAuthorityPolicy.ordinary(a.authorityClass, a.status, defensive)
         ) revert T.InvalidRecord();
     }
 }

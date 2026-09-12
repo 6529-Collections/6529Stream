@@ -50,8 +50,16 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
     ) external returns (bytes32 record) {
         _check(c, 16);
         StreamArtistCurrentAuthorityFacts.requireAccepted(b, signer, authority, false);
-        StreamArtistConsentState.Mutation memory m = StreamArtistConsentState.saleConsent(
-            _saleRecords, _latestSaleConsents, _replay, _consentContext(), b, p, signer, nonce
+        StreamArtistConsentState.Mutation memory m = StreamArtistConsentState.saleConsentForAuthority(
+            _saleRecords,
+            _latestSaleConsents,
+            _replay,
+            _consentContext(),
+            b,
+            p,
+            signer,
+            authority.authorityClass,
+            nonce
         );
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
@@ -225,8 +233,8 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
     ) private returns (bytes32 record) {
         _check(c, 14);
         StreamArtistCurrentAuthorityFacts.requireAccepted(b, signer, authority, false);
-        StreamArtistConsentState.Mutation memory m = StreamArtistConsentState.policy(
-            _policies, _replay, _consentContext(), b, p, signer, nonce
+        StreamArtistConsentState.Mutation memory m = StreamArtistConsentState.policyForAuthority(
+            _policies, _replay, _consentContext(), b, p, signer, authority.authorityClass, nonce
         );
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
@@ -268,7 +276,9 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
     ) private returns (bytes32 record) {
         _check(c, 15);
         StreamArtistCurrentAuthorityFacts.requireAccepted(b, signer, authority, false);
-        return _recordEconomics(c, b, p, designation, signer, nonce, bytes32(0));
+        return _recordEconomics(
+            c, b, p, designation, signer, nonce, bytes32(0), authority.authorityClass
+        );
     }
 
     function recordDelegatedEconomics(
@@ -282,7 +292,7 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
     ) external returns (bytes32) {
         _check(c, 15);
         _requireDelegated(b, signer, grant);
-        return _recordEconomics(c, b, p, designation, signer, nonce, grant);
+        return _recordEconomics(c, b, p, designation, signer, nonce, grant, 2);
     }
 
     function _recordEconomics(
@@ -292,20 +302,23 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
         T.Payout calldata designation,
         address signer,
         uint256 nonce,
-        bytes32 grant
+        bytes32 grant,
+        uint8 principalClass
     ) private returns (bytes32 record) {
-        StreamArtistConsentState.Mutation memory m = StreamArtistConsentState.economics(
-            _economics,
-            recordDelegation,
-            _replay,
-            _consentContext(),
-            b,
-            p,
-            designation,
-            signer,
-            nonce,
-            grant
-        );
+        StreamArtistConsentState.Mutation memory m =
+            StreamArtistConsentState.economicsForAuthority(
+                _economics,
+                recordDelegation,
+                _replay,
+                _consentContext(),
+                b,
+                p,
+                designation,
+                signer,
+                principalClass,
+                nonce,
+                grant
+            );
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
@@ -343,9 +356,18 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
     ) private returns (bytes32 record) {
         _check(c, 52);
         StreamArtistCurrentAuthorityFacts.requireAccepted(b, signer, authority, false);
-        StreamArtistConsentState.Mutation memory m = StreamArtistConsentState.ratification(
-            _ratifications, _ratificationRecords, _replay, _consentContext(), b, p, signer, nonce
-        );
+        StreamArtistConsentState.Mutation memory m =
+            StreamArtistConsentState.ratificationForAuthority(
+                _ratifications,
+                _ratificationRecords,
+                _replay,
+                _consentContext(),
+                b,
+                p,
+                signer,
+                authority.authorityClass,
+                nonce
+            );
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
@@ -391,7 +413,7 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
     ) private returns (bytes32 record) {
         _check(c, 20);
         StreamArtistCurrentAuthorityFacts.requireAccepted(b, signer, authority, true);
-        return _authorizeRoyaltyFreeze(c, b, p, signer, nonce, bytes32(0));
+        return _authorizeRoyaltyFreeze(c, b, p, signer, nonce, bytes32(0), authority.authorityClass);
     }
 
     function authorizeDelegatedRoyaltyFreeze(
@@ -404,7 +426,7 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
     ) external returns (bytes32) {
         _check(c, 20);
         _requireDelegated(b, signer, grant);
-        return _authorizeRoyaltyFreeze(c, b, p, signer, nonce, grant);
+        return _authorizeRoyaltyFreeze(c, b, p, signer, nonce, grant, 2);
     }
 
     function _authorizeRoyaltyFreeze(
@@ -413,7 +435,8 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
         T.RoyaltyFreeze calldata p,
         address signer,
         uint256 nonce,
-        bytes32 grant
+        bytes32 grant,
+        uint8 principalClass
     ) private returns (bytes32 record) {
         if (
             p.resolver == address(0) || p.collectionId == 0
@@ -422,7 +445,7 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
         ) {
             revert T.InvalidRecord();
         }
-        uint8 authorityClass = grant == bytes32(0) ? 1 : 2;
+        uint8 authorityClass = grant == bytes32(0) ? principalClass : 2;
         record = StreamArtistEconomicsHashes.royaltyFreezeRecordForAuthority(
             _environment(), p, b.artistId, signer, authorityClass, nonce, _now()
         );
@@ -530,7 +553,7 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
         StreamArtistCurrentAuthorityFacts.requireAccepted(b, signer, authority, false);
         StreamArtistContentHashes.validateConsent(p);
         record = StreamArtistContentHashes.consentRecord(
-            _environment(), p, b.artistId, signer, 1, nonce, _now()
+            _environment(), p, b.artistId, signer, authority.authorityClass, nonce, _now()
         );
         bytes32 scope = keccak256(abi.encode(p, b.generation));
         bytes32 key = _consume(
@@ -539,7 +562,9 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
             record
         );
         IStreamArtistContentRecordsOwner.ConsentRecord memory item =
-            IStreamArtistContentRecordsOwner.ConsentRecord(record, b.artistId, b.generation, p, 1);
+            IStreamArtistContentRecordsOwner.ConsentRecord(
+                record, b.artistId, b.generation, p, authority.authorityClass
+            );
         _contentConsents[record] = item;
         _latestContentConsent[scope] = record;
         _commit(
@@ -550,7 +575,15 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
             record
         );
         emit ArtistContentConsentRecorded(
-            1, p.collectionId, p.familyId, signer, p.newStateHash, 1, nonce, _now(), record
+            1,
+            p.collectionId,
+            p.familyId,
+            signer,
+            p.newStateHash,
+            authority.authorityClass,
+            nonce,
+            _now(),
+            record
         );
         emit ArtistContentRecordContext(1, record, p.metadataContract, b.artistId);
     }
@@ -590,7 +623,7 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
         StreamArtistCurrentAuthorityFacts.requireAccepted(b, signer, authority, true);
         StreamArtistContentHashes.validateFreeze(p);
         record = StreamArtistContentHashes.freezeRecord(
-            _environment(), p, b.artistId, signer, 1, nonce, _now()
+            _environment(), p, b.artistId, signer, authority.authorityClass, nonce, _now()
         );
         bytes32 key = _consume(
             keccak256("consent_finality.replay.freeze_key"),
@@ -604,7 +637,7 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
             p.metadataContract,
             p.lockClasses,
             p.expectedStateHash,
-            1
+            authority.authorityClass
         );
         _contentFreezes[record] = item;
         for (uint256 i; i < p.lockClasses.length; ++i) {
@@ -622,7 +655,15 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
             record
         );
         emit ArtistContentFreezeAuthorized(
-            1, p.collectionId, signer, p.lockClasses, p.expectedStateHash, 1, nonce, _now(), record
+            1,
+            p.collectionId,
+            signer,
+            p.lockClasses,
+            p.expectedStateHash,
+            authority.authorityClass,
+            nonce,
+            _now(),
+            record
         );
         emit ArtistContentRecordContext(1, record, p.metadataContract, b.artistId);
     }
