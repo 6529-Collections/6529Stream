@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added signing-domain discovery for native and universal sales, including an
+  explicit getter for the native adapter's separate price-program domain.
+  Existing signed messages, interface IDs and storage remain unchanged. Four
+  focused Safe/domain tests and 256 fuzz runs pass independent review.
 - Added succession directives and successor designations with disjoint authority
   masks, defensive successor standing and typed record/read interfaces. The
   185-case domain suite, prior interfaces/storage and eight actual constructor

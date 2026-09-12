@@ -38,6 +38,10 @@ quantity purchases or configure per-wallet fairness counters.
 
 ## Signing and checkout
 
+Read `priceProgramEip712Domain()` for this authorization family. The native
+adapter's standard `eip712Domain()` getter describes fixed sales; see the
+[domain discovery guide](sale-signing-domains.md) for client selection rules.
+
 The new EIP712 domain is `(6529StreamNativePricePrograms, 1, chainId,
 consumerAddress)`. Sign the exact `PriceProgramAuthorization` tuple in the
 interface; its type name is `NativePriceProgramAuthorization`. The old

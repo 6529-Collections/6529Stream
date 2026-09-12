@@ -12,6 +12,8 @@ import "../revenue/StreamNativeSettlementAdmission.sol";
 import "../revenue/StreamNativeSettlementSupport.sol";
 import "../../interfaces/stream/revenue/IStreamNativePrimarySaleSettlement.sol";
 import "../../interfaces/stream/mint/IStreamNativeFixedPriceSaleAdapter.sol";
+import "../../interfaces/stream/mint/IStreamNativePriceProgramDomain.sol";
+import "../../interfaces/standards/IERC5267.sol";
 import "../../interfaces/stream/artist/IStreamArtistSaleFacts.sol";
 import "../../interfaces/stream/mint/IStreamMintReads.sol";
 import "../../interfaces/stream/revenue/IStreamPrimarySaleSettlement.sol";
@@ -24,6 +26,8 @@ import "../../vendor/openzeppelin/ERC165.sol";
 contract StreamNativeFixedPriceSaleAdapter is
     IStreamNativeFixedPriceSaleAdapter,
     IStreamNativePricePrograms,
+    IStreamNativePriceProgramDomain,
+    IERC5267,
     IStreamArtistSaleFacts,
     StreamSettlementContext,
     Ownable,
@@ -85,8 +89,53 @@ contract StreamNativeFixedPriceSaleAdapter is
     function supportsInterface(bytes4 id) public view override returns (bool) {
         return id == type(IStreamNativeFixedPriceSaleAdapter).interfaceId
             || id == type(IStreamNativePricePrograms).interfaceId
+            || id == type(IStreamNativePriceProgramDomain).interfaceId
+            || id == type(IERC5267).interfaceId
             || id == type(IStreamArtistSaleFacts).interfaceId
             || id == type(IStreamNativeSaleBinding).interfaceId || super.supportsInterface(id);
+    }
+
+    /// @notice Domain for NativeSaleAuthorization and authorizationDigest().
+    /// @dev PriceProgramAuthorization uses priceProgramEip712Domain() instead.
+    function eip712Domain()
+        external
+        view
+        override
+        returns (
+            bytes1 fields,
+            string memory name,
+            string memory version,
+            uint256 chainId,
+            address verifyingContract,
+            bytes32 salt,
+            uint256[] memory extensions
+        )
+    {
+        return (
+            hex"0f", "6529StreamNativeFixedPriceSaleAdapter", "1", block.chainid,
+            address(this), bytes32(0), new uint256[](0)
+        );
+    }
+
+    /// @inheritdoc IStreamNativePriceProgramDomain
+    function priceProgramEip712Domain()
+        external
+        view
+        override
+        returns (
+            bytes1 fields,
+            string memory name,
+            string memory version,
+            uint256 chainId,
+            address verifyingContract,
+            bytes32 salt,
+            uint256[] memory extensions
+        )
+    {
+        return (
+            hex"0f", "6529StreamNativePricePrograms", "1", block.chainid,
+            address(this), bytes32(0), new uint256[](0)
+        );
     }
 
     /// @notice Canonical declaration checked against the actual registered module record.

@@ -41,6 +41,10 @@ permit helper have no native entry or modification in this increment.
 
 ## Signing and execution
 
+Read `eip712Domain()` before constructing a fixed-sale signature. The
+[domain discovery guide](sale-signing-domains.md) lists its exact fields and
+distinguishes the native adapter's separate price-program domain.
+
 The owner registers a config containing collection, phase, price, sale window,
 mint policy and the exact current primary assignment hash. Both platform and
 accepted artist sign the `NativeSaleAuthorization` typed struct from

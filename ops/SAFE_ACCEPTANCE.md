@@ -62,6 +62,15 @@ evidence. The legacy ForkSmoke name does not establish an actual chain fork.
 
 ## Source and test obligations
 
+The additive sale-domain getters have focused
+[actual Safe read and purchase tests](../test/unit/revenue/StreamSaleSigningDomains.t.sol).
+They cover all three published domains, exact digest reconstruction, fixed and
+price-program native purchases, and chain/address fuzzing. Core, Manager and
+artist providers in that suite are explicit domain fixtures. These results
+establish the named discovery paths; complete current-contract composition and
+the final selector inventory remain required. Client selection is documented in
+the [sale-domain guide](../docs/integrations/sale-signing-domains.md).
+
 - Verify contract-wallet signatures through the actual configured ERC-1271
   handler, with opaque variable-length bytes. SafeMessage wrapping, threshold
   ordering, nested dynamic offsets and real onchain message approvals need tests.
