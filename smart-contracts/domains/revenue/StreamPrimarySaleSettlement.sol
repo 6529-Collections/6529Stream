@@ -2,6 +2,10 @@
 pragma solidity ^0.8.19;
 
 import "./StreamSettlementContext.sol";
+import "./StreamNativeSupplementalExecution.sol";
+import "./StreamNativePrimaryExecution.sol";
+import "./StreamPrimaryTokenRouting.sol";
+import "./StreamPrimarySettlementValidation.sol";
 import "./StreamPrimarySettlementHash.sol";
 import "./StreamNativeSettlementHash.sol";
 import "./StreamNativeSettlementAdmission.sol";
@@ -16,13 +20,14 @@ import "../../interfaces/stream/revenue/IStreamPrimarySaleSettlement.sol";
 import "../../vendor/openzeppelin/ReentrancyGuard.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 
-/// @notice Shared official recorder for typed native and ERC20 single-step profiles.
+/// @notice Official recorder for typed mint payments and native clearing supplemental revenue.
 /// @dev Registered sale adapters call directly. The ERC20 path is funded only by its bound contract20;
 ///      native adapters supply exact value. No owner, payer allowance or arbitrary transfer route.
 contract StreamPrimarySaleSettlement is
     IStreamPrimarySaleSettlement,
     IStreamNativePrimarySaleSettlement,
     IStreamDeferredNativePrimarySaleSettlement,
+    IStreamNativeSupplementalSettlement,
     StreamSettlementContext,
     ReentrancyGuard,
     ERC165
@@ -40,6 +45,10 @@ contract StreamPrimarySaleSettlement is
     mapping(bytes32 => uint256) private _officialSettled;
     mapping(address => uint256) public override totalOfficialSettled;
     mapping(bytes32 => bool) public deferredPurchaseConsumed;
+    mapping(bytes32 => bool) public supplementalPurchaseConsumed;
+    mapping(bytes32 => bool) public supplementalFloorConsumed;
+    mapping(bytes32 => StreamNativeSupplementalTypes.NativeSupplementalResult) private
+        _supplementalResults;
 
     constructor(IStreamRevenueResolver resolver, address registry, IStreamRevenueEscrow escrow)
         StreamSettlementContext(resolver, registry)
@@ -74,6 +83,7 @@ contract StreamPrimarySaleSettlement is
         return id == type(IStreamPrimarySaleSettlement).interfaceId
             || id == type(IStreamNativePrimarySaleSettlement).interfaceId
             || id == type(IStreamDeferredNativePrimarySaleSettlement).interfaceId
+            || id == type(IStreamNativeSupplementalSettlement).interfaceId
             || super.supportsInterface(id);
     }
 
@@ -183,17 +193,14 @@ contract StreamPrimarySaleSettlement is
             StreamNativeSettlementHash.accountingContext(n);
         StreamSaleTemplate.Selection memory selected = _resolve(c);
         settlementConsumed[key] = true;
-        uint256 original = address(this).balance - msg.value;
-        StreamSaleTemplate.materialize(revenueResolver, c.sale.collectionId, selected);
-        _requireWallet(selected);
-        bool escrowed = StreamNativeSettlementSupport.fundNative(
-            revenueEscrow,
-            escrowCodeHash,
-            selected,
+        bool escrowed = StreamNativePrimaryExecution.fund(
+            StreamNativePrimaryExecution.Context(
+                _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
+            ),
+            c.sale.collectionId,
             c.sale.amount,
-            StreamNativeSettlementSupport.gasParameter(splitFactory, factoryCodeHash, _DEPOSIT_GAS)
+            selected
         );
-        if (address(this).balance != original) revert SettlementAmountMismatch(address(0));
         _requireNativeContext();
         StreamNativeSettlementAdmission.requireAdmission(moduleRegistry, n);
         _requireCurrent(c, selected);
@@ -256,17 +263,14 @@ contract StreamPrimarySaleSettlement is
         StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c =
             StreamNativeSettlementHash.accountingContext(d.execution);
         StreamSaleTemplate.Selection memory selected = _resolve(c);
-        uint256 original = address(this).balance - msg.value;
-        StreamSaleTemplate.materialize(revenueResolver, c.sale.collectionId, selected);
-        _requireWallet(selected);
-        bool escrowed = StreamNativeSettlementSupport.fundNative(
-            revenueEscrow,
-            escrowCodeHash,
-            selected,
+        bool escrowed = StreamNativePrimaryExecution.fund(
+            StreamNativePrimaryExecution.Context(
+                _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
+            ),
+            c.sale.collectionId,
             c.sale.amount,
-            StreamNativeSettlementSupport.gasParameter(splitFactory, factoryCodeHash, _DEPOSIT_GAS)
+            selected
         );
-        if (address(this).balance != original) revert SettlementAmountMismatch(address(0));
         _requireNativeContext();
         StreamDeferredNativeSettlementAdmission.requireAdmission(moduleRegistry, d.execution);
         _requireCurrent(c, selected);
@@ -294,45 +298,87 @@ contract StreamPrimarySaleSettlement is
         );
     }
 
+    function supplementalPurchaseKey(address adapter, bytes32 id) public view returns (bytes32) {
+        return StreamNativeSupplementalHash.purchaseKey(address(this), adapter, id);
+    }
+
+    function supplementalFloorKey(bytes32 originalKey) public view returns (bytes32) {
+        return StreamNativeSupplementalHash.floorKey(address(this), originalKey);
+    }
+
+    function nativeSupplementalResult(bytes32 key)
+        external
+        view
+        override
+        returns (StreamNativeSupplementalTypes.NativeSupplementalResult memory)
+    {
+        return _supplementalResults[key];
+    }
+
+    function settleNativeSupplementalRevenueFromAdapter(
+        StreamNativeSupplementalTypes.NativeSupplementalCandidate calldata candidate
+    )
+        external
+        payable
+        override
+        nonReentrant
+        returns (StreamNativeSupplementalTypes.NativeSupplementalResult memory result)
+    {
+        StreamNativeSupplementalTypes.NativeSupplementalCandidate memory c = candidate;
+        if (msg.sender != c.originalFloor.saleAdapter) {
+            revert InvalidNativeSupplementalSettlement();
+        }
+        bytes32 purchaseKey = supplementalPurchaseKey(c.originalFloor.saleAdapter, c.purchaseId);
+        if (supplementalPurchaseConsumed[purchaseKey]) {
+            revert SupplementalPurchaseAlreadyConsumed(purchaseKey);
+        }
+        bytes32 floorKey = supplementalFloorKey(c.purchase.floorSettlementKey);
+        if (supplementalFloorConsumed[floorKey]) revert SupplementalFloorAlreadyConsumed(floorKey);
+        bytes32 key = settlementKey(
+            c.originalFloor.saleAdapter, StreamNativeSupplementalHash.executionId(address(this), c)
+        );
+        if (settlementConsumed[key]) revert SettlementAlreadyConsumed(key);
+        _requireNativeContext();
+        if (!settlementConsumed[c.purchase.floorSettlementKey]) {
+            revert InvalidNativeSupplementalSettlement();
+        }
+        StreamDeferredNativeSettlementValidation.Bindings memory bindings =
+            StreamDeferredNativeSettlementValidation.Bindings(
+                core, moduleRegistry, address(revenueResolver), address(revenueEscrow)
+            );
+        uint256 amount = StreamNativeSupplementalValidation.validate(
+            bindings, c, _results[c.purchase.floorSettlementKey]
+        );
+        supplementalPurchaseConsumed[purchaseKey] = true;
+        supplementalFloorConsumed[floorKey] = true;
+        settlementConsumed[key] = true;
+        result = StreamNativeSupplementalExecution.fund(
+            StreamNativeSupplementalExecution.Context(
+                _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
+            ),
+            c,
+            key,
+            amount
+        );
+        _requireNativeContext();
+        StreamNativeSupplementalValidation.requireCurrent(bindings, c);
+        StreamPrimarySettlementTypes.PrimarySettlementResult memory common =
+            StreamNativeSupplementalExecution.commonResult(c, result);
+        _results[key] = common;
+        _supplementalResults[key] = result;
+        _officialSettled[_totalKey(_CLASS, result.profileId, result.wallet, address(0))] += amount;
+        totalOfficialSettled[address(0)] += amount;
+        StreamNativeSupplementalExecution.emitResult(c, result, common);
+    }
+
     function _validateNative(StreamNativeSettlementTypes.NativeSettlementCandidate memory c)
         private
         view
     {
-        if (
-            msg.sender != c.saleAdapter || c.saleAdapter == address(0) || c.executor == address(0)
-                || c.sale.settlementId == 0 || c.sale.revenueClass != _CLASS
-                || c.sale.policyMode != 0 || c.sale.collectionId == 0 || c.sale.tokenId != 0
-                || c.sale.saleNonce == 0 || c.sale.payer == address(0)
-                || c.sale.payer == address(this) || c.sale.payer == c.saleAdapter
-                || c.sale.payer == c.rights.wallet || c.sale.payer == address(revenueEscrow)
-                || c.sale.payer != c.executor || c.sale.beneficiary == address(0)
-                || c.sale.amount == 0 || msg.value != c.sale.amount
-                || c.sale.expectedPrimaryPolicyHash == 0 || c.orchestrationOrder != 1
-                || c.executionBinding.authorityMode != 1 || c.executionBinding.executionNonce == 0
-                || c.executionBinding.saleAuthorizationDigest == 0
-                || c.operationIdentityCommitment == 0 || c.operationId == 0
-                || c.currentPolicyHash == 0 || c.boundPolicyHash == 0 || c.saleExecutionHash == 0
-                || c.executionBinding.executionId != StreamNativeSettlementHash.executionId(c)
-        ) revert InvalidPrimarySale();
+        StreamPrimarySettlementValidation.nativeFields(_validationBindings(), c);
         _requireNativeContext();
         StreamNativeSettlementAdmission.requireAdmission(moduleRegistry, c);
-        if (
-            _read(c.saleAdapter, abi.encodeWithSignature("primarySaleSettlement()"), gasleft())
-                    != uint256(uint160(address(this)))
-                || _read(c.saleAdapter, abi.encodeWithSignature("core()"), gasleft())
-                    != uint256(uint160(core))
-                || _read(c.saleAdapter, abi.encodeWithSignature("moduleRegistry()"), gasleft())
-                    != uint256(uint160(moduleRegistry))
-                || _read(c.saleAdapter, abi.encodeWithSignature("revenueResolver()"), gasleft())
-                    != uint256(uint160(address(revenueResolver)))
-                || _read(c.saleAdapter, abi.encodeWithSignature("mintManager()"), gasleft())
-                    != uint256(uint160(c.mintManager))
-                || !StreamSettlementAdmission.isContract(c.mintManager)
-                || _read(c.mintManager, abi.encodeWithSignature("core()"), gasleft())
-                    != uint256(uint160(core))
-                || _read(c.mintManager, abi.encodeWithSignature("moduleRegistry()"), gasleft())
-                    != uint256(uint160(moduleRegistry))
-        ) revert InvalidPrimarySale();
+        StreamPrimarySettlementValidation.nativeBindings(_validationBindings(), c);
     }
 
     /// @dev Native payments do not consult ERC20 status or permit-policy availability.
@@ -352,45 +398,21 @@ contract StreamPrimarySaleSettlement is
         address paymentAdapter,
         StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c
     ) private view {
-        if (
-            msg.sender != c.saleAdapter || c.saleAdapter == address(0) || c.executor == address(0)
-                || c.sale.settlementId == 0 || c.sale.revenueClass != _CLASS
-                || c.sale.policyMode != 0 || c.sale.collectionId == 0 || c.sale.tokenId != 0
-                || c.sale.saleNonce == 0 || c.sale.payer == address(0)
-                || c.sale.payer == address(this) || c.sale.payer == paymentAdapter
-                || c.sale.payer == c.rights.wallet || c.sale.payer == address(revenueEscrow)
-                || c.sale.beneficiary == address(0) || c.sale.amount == 0
-                || c.sale.expectedPrimaryPolicyHash == 0 || c.orchestrationOrder != 1
-                || c.executionBinding.authorityMode != 1 || c.executionBinding.executionNonce == 0
-                || c.executionBinding.saleAuthorizationDigest == 0
-                || c.operationIdentityCommitment == 0 || c.operationId == 0
-                || c.currentPolicyHash == 0 || c.boundPolicyHash == 0 || c.saleExecutionHash == 0
-                || c.executionBinding.executionId != StreamPrimarySettlementHash.executionId(c)
-        ) {
-            revert InvalidPrimarySale();
-        }
+        StreamPrimarySettlementValidation.erc20Fields(_validationBindings(), paymentAdapter, c);
         _requireContext();
         _requireActive(c.asset);
         StreamSettlementAdmission.requireAdmission(moduleRegistry, paymentAdapter, c);
-        if (
-            _read(paymentAdapter, abi.encodeWithSignature("primarySaleSettlement()"), gasleft())
-                    != uint256(uint160(address(this)))
-                || _read(paymentAdapter, abi.encodeWithSignature("core()"), gasleft())
-                    != uint256(uint160(core))
-                || _read(paymentAdapter, abi.encodeWithSignature("moduleRegistry()"), gasleft())
-                    != uint256(uint160(moduleRegistry))
-                || _read(paymentAdapter, abi.encodeWithSignature("revenueResolver()"), gasleft())
-                    != uint256(uint160(address(revenueResolver)))
-                || _read(
-                        c.saleAdapter, abi.encodeWithSignature("primarySaleSettlement()"), gasleft()
-                    ) != uint256(uint160(address(this)))
-                || _read(c.saleAdapter, abi.encodeWithSignature("core()"), gasleft())
-                    != uint256(uint160(core))
-                || _read(c.saleAdapter, abi.encodeWithSignature("mintManager()"), gasleft())
-                    != uint256(uint160(c.mintManager))
-        ) {
-            revert PrimarySettlementPaymentBindingInvalid(paymentAdapter);
-        }
+        StreamPrimarySettlementValidation.erc20Bindings(_validationBindings(), paymentAdapter, c);
+    }
+
+    function _validationBindings()
+        private
+        view
+        returns (StreamPrimarySettlementValidation.Bindings memory)
+    {
+        return StreamPrimarySettlementValidation.Bindings(
+            core, moduleRegistry, address(revenueResolver), address(revenueEscrow)
+        );
     }
 
     function _rightsContext() private view returns (StreamPrimarySettlementRights.Context memory) {
@@ -428,43 +450,13 @@ contract StreamPrimarySaleSettlement is
         StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c,
         StreamSaleTemplate.Selection memory rights,
         uint256 cap
-    ) private returns (bool escrowed) {
-        _requireWallet(rights);
-        if (
-            rights.wallet.code.length != 0
-                && _transfer(c.asset, rights.wallet, c.sale.amount, cap, true)
-        ) return false;
-        if (address(revenueEscrow).codehash != escrowCodeHash) {
-            revert InvalidSettlementContext(address(revenueEscrow));
-        }
-        uint256 beforeEscrow = _balance(c.asset, address(revenueEscrow), cap);
-        uint256 beforeWallet = _balance(c.asset, rights.wallet, cap);
-        uint256 owed = revenueEscrow.escrowOwed(_CLASS, rights.profileId, rights.wallet, c.asset);
-        if (_allowance(c.asset, address(this), address(revenueEscrow), cap) != 0) {
-            revert PrimarySettlementEscrowMismatch();
-        }
-        _tokenCall(
-            c.asset,
-            abi.encodeCall(IERC20.approve, (address(revenueEscrow), c.sale.amount)),
-            cap,
-            false
+    ) private returns (bool) {
+        return StreamPrimaryTokenRouting.route(
+            StreamPrimaryTokenRouting.Context(_rightsContext(), revenueEscrow, escrowCodeHash),
+            c,
+            rights,
+            cap
         );
-        if (_allowance(c.asset, address(this), address(revenueEscrow), cap) != c.sale.amount) {
-            revert PrimarySettlementEscrowMismatch();
-        }
-        revenueEscrow.creditERC20(
-            _CLASS, rights.profileId, rights.wallet, c.asset, c.sale.amount, rights.templateId != 0
-        );
-        if (
-            _allowance(c.asset, address(this), address(revenueEscrow), cap) != 0
-                || _balance(c.asset, address(revenueEscrow), cap) != beforeEscrow + c.sale.amount
-                || _balance(c.asset, rights.wallet, cap) != beforeWallet
-                || revenueEscrow.escrowOwed(_CLASS, rights.profileId, rights.wallet, c.asset)
-                    != owed + c.sale.amount
-        ) {
-            revert PrimarySettlementEscrowMismatch();
-        }
-        return true;
     }
 
     function _totalKey(bytes32 revenueClass, bytes32 profileId, address wallet, address asset)
