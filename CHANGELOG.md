@@ -7,11 +7,20 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added standard native Dutch sales with immutable schedules, signed maximum
+  prices, official settlement and per-sale excess credits. Thirty-three domain
+  cases and two fuzz properties pass independent review. Four current-contract
+  Safe workflows have source review and are running separately.
+- Implemented identity-contest dismissal and terminal cohort closure under
+  operation 58, preserving history and sole Identity ownership. The 202-case
+  domain suite passes independent review; actual Executor/Safe acceptance and
+  effective source/configuration binding remain pending.
 - Added native refund-window purchases with separate buyer custody, per-sale
   pull refunds, permissionless finalization, official settlement, retained
   artist-authority checks and reveal-fee handling. The 63-case domain suite and
-  two fuzz properties pass independent review; actual current-stack composition
-  is still running.
+  two fuzz properties pass independent review. Four actual-current refund cases
+  and four retained identity-dispute cases also pass independent review against
+  their captured pre-dismissal source.
 - Added signing-domain discovery for native and universal sales, including an
   explicit getter for the native adapter's separate price-program domain.
   Existing signed messages, interface IDs and storage remain unchanged. Four
@@ -27,7 +36,7 @@ the release policy in `docs/release-policy.md`.
 - Recorded the explicit identity-contest dismissal design in ADR 0029: a new
   operation 58 closes adjudicated provisional cohorts while preserving historical
   records and consumed replay state. The additive inventory and hostile checker
-  fixtures are recorded separately; implementation remains pending.
+  fixtures are recorded separately from the implementation and its acceptance.
 - Added governed reveal timing with a permissionless Safe keeper request after
   the effective SLO, live request-timeout raises and strict deadline boundaries.
   Fifty-four domain tests, thirty actual-Core metadata regressions and both

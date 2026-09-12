@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `66d70e04` (reveal fees and activation), `f8564761` / `99b53aab` / `dac3ef4a` / `592635fc` (coupled artist sale consent and capability admission), `677b9ae9` (identity-compromise filing), `b56c37f2` (governed reveal timing), `ec476e5c` (actual REQUIRED purchase tests); captured acceptance scopes are described below; RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | `b3152198` (standard Dutch), `3489d360` / `09afe2b8` (dismissal and timing interface), `fa52a5b3` (deployment compiler repair), `c2332e48` (shared interfaces), `6b87a0ca` / `8a0f1e41` (current dismissal/Dutch tests, runtime pending); RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -30,8 +30,8 @@ contract call, including owner actions, payments, NFT custody and reads.
 | Lane | Branch | Current deliverable |
 | --- | --- | --- |
 | Integrator | `codex/v1-integration` | Reveal policy/escrow, canonical role activation, current-stack composition, remaining entropy/recovery, operator/client migration and release |
-| Artist | `codex/v1-artist-authority` | Succession directives/designations integrated `8227e0b6`; typed dismissal, cohort closure and dependent record/read continuation active, then remaining lifecycle |
-| Revenue | `codex/v1-revenue` | Refund-window source integrated as `ea107e58`, with 63 independently accepted domain cases; Dutch pricing, settlement and Safe flows proceed separately |
+| Artist | `codex/v1-artist-authority` | Dismissal and cohort closure integrated `3489d360` / `09afe2b8`; estate activation, archival prerequisites and dependent successor authority now being built |
+| Revenue | `codex/v1-revenue` | Refund and standard Dutch source integrated `ea107e58` / `b3152198`; financial settlement for clearing sales and the separate rebate lifecycle now being built |
 | Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |
 
 Signing-domain discovery is integrated as `134e0f58`. The native fixed,
@@ -46,12 +46,27 @@ getter clients must use. Full ABI/client and selector acceptance remain open.
 Refund-window source is integrated as `ea107e58`: all 38 files match the
 independently accepted handoff, with 63 tests, two 256-input fuzz properties,
 128 compiler sources, 160 artifacts and both production profiles verified.
-The current refund composition is being executed against that exact source and
-the integration checkout. It covers real Core, Manager,
-artist, settlement, entropy, governance and threshold Safe contracts; only the
-external randomness service is doubled. Dismissal operation 58 has reached its
-first 202-case domain run after resolving production size limits. These active
-runs do not yet establish integrated acceptance.
+The current refund composition passes all eight cases with independent review:
+four refund workflows and four retained identity-dispute regressions. It covers
+real Core, Manager, artist, settlement, entropy, governance and threshold Safe
+contracts; only the external randomness service is doubled. This captured run
+predates dismissal. Standard native Dutch source is integrated as `b3152198`,
+with 33 domain cases and two 256-input fuzz properties independently accepted.
+Its separate four-case current-contract run is compiling.
+
+Dismissal operation 58 is integrated as `3489d360` with the separate timing
+interface move `09afe2b8`. The final 202-case domain run passes independent
+review. Four actual Executor/Safe dismissal cases are running alongside the
+eight refund/dispute cases. Rotated-cohort current composition, succession and
+the effective source/configuration gate remain separate work.
+
+The deployment script's large positional return expression caused the isolated
+CI compiler failure. Named return fields fix that exact reproduction without
+changing its ABI or compiler settings (`fa52a5b3`); a fresh compile against the
+latest integrated deployment inputs is running. Shared sale/permit interfaces
+are separated in `c2332e48`. The active source inventory now contains 365 files,
+and the layout check plus 46 checker/refresh tests pass. Full CI, generated
+candidate artifacts and the new testnet rehearsal remain pending.
 
 The twelve-case snapshot at `72c208f2` passes independent review for actual
 Core/Manager/artist/Executor/Safe composition: five native sale cases, three
@@ -85,8 +100,9 @@ production compiler profiles fit. Its separate seven-case actual Executor/Safe
 composition passes independent review, including the final unique-holder planner.
 That run predates the later operation-33 artist source. This constructor and
 storage-layout increment is for new
-deployments. Automatic AT_MINT attempts and complete entropy recovery still
-remain. Every feature row in the ledger stays in scope.
+deployments. The later refund composition now proves admitted AT_MINT requests
+and provider-failure retry. Complete entropy recovery remains. Every feature
+row in the ledger stays in scope.
 
 Identity-compromise operation 33 is integrated as `677b9ae9`: 159 focused tests,
 existing interface/storage compatibility and seven actual deployment traces
@@ -110,8 +126,9 @@ defines the missing dismissal transition and history-preserving cohort closure.
 The design requires typed cause capture on both veto and filing paths. Its
 [effective extension design](../docs/architecture/artist-operation-extension-v1.md)
 preserves all historical packet/schema bytes and adds the exact typed row 58.
-The design check and eleven adversarial tests pass; source/configuration and
-actual Executor/Safe acceptance remain pending. Artist implementation continues.
+The design check and eleven adversarial tests pass. Source and domain runtime
+are now integrated; effective source/configuration and actual Executor/Safe
+acceptance remain pending. Estate implementation continues in parallel.
 
 Fixed-sale and auction funding, scoped delegation, refusal/withdrawal and
 expected-binding acceptance are integrated. Collaborator operations 5/6/7

@@ -2,7 +2,8 @@
 
 Status: Accepted design for the undeployed full-v1 implementation. The
 [effective extension design](../architecture/artist-operation-extension-v1.md)
-is recorded and checked; source and runtime acceptance remain pending.
+is recorded and checked. Source and the 202-case domain runtime are integrated;
+actual current-stack and effective source/configuration acceptance remain pending.
 
 Date: 12 September 2026. Delivery issue: [#743](https://github.com/6529-Collections/6529Stream/issues/743).
 
@@ -162,6 +163,29 @@ Freeze the exact new ABI, hashes, events and typed continuation contracts with
 the implementation and extension manifest. Regenerate current deployment
 links, constructor bindings, ABI exports and release artifacts once that source
 stabilizes. Existing RC1 and historical packets remain unchanged.
+
+## Bounded implementation helpers
+
+The integrated implementation keeps Identity as the sole owner of dismissal
+storage, replay, records and events. Resolution state follows the existing
+succession roots. Fixed compiler-linked helpers compose cause records and
+encode eleven typed Identity reads. Each read has an explicit function and
+fixed storage arguments; callers cannot supply a target or selector. Direct
+library calls do not return authoritative Identity state.
+
+The Identity constructor uses a fixed deployment helper to create its writer
+child. Delegatecall retains Identity as the CREATE sender and preserves child
+nonce 1, the actual Identity host and the existing facade, Coordinator, Archive,
+Core and Manager pins. The Registry's separate reader deployment helper retains
+its earlier CREATE sequence. Neither helper introduces mutable routing or a
+caller-selected deployment host.
+
+The accepted 213-source, 202-test domain snapshot includes nine actual CREATE
+traces and 95 production runtimes within the EVM size limits. Identity's runtime
+is 24,490 bytes and its argument-inclusive initcode is 26,263 bytes; the fixed
+deployment helper's runtime is 24,304 bytes. These measurements apply to that
+snapshot. The supported artist profile remains via-IR; non-IR compilation is
+unsupported. Current deployment and Executor/Safe acceptance remain separate.
 
 ## Required verification
 

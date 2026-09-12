@@ -24,9 +24,13 @@ The next full-v1 implementation is tracked in the
 successor records are source-integrated with 185 independently reviewed domain
 tests. A separate eleven-case current-contract run proves four identity-dispute
 governance/Safe workflows and seven retained entropy workflows; it predates the
-succession source. Dismissal has an accepted
-[extension design](architecture/artist-operation-extension-v1.md), while its
-source, wider lifecycle and new candidate acceptance remain in progress.
+succession source. Dismissal source now implements the accepted
+[extension design](architecture/artist-operation-extension-v1.md), with 202
+independently reviewed domain tests; its actual Executor/Safe run is pending.
+Eight current-contract refund/dispute cases pass on their pre-dismissal snapshot.
+Standard native Dutch source has 33 reviewed domain cases, with current-contract
+composition running separately. Estate, clearing settlement, wider lifecycle and
+the new candidate remain in progress.
 
 The historical Gate A regression/evidence baseline records:
 
