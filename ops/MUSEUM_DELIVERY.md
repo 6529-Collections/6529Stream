@@ -62,6 +62,13 @@ that implementation, not full RDF/OWL reasoning or Linked Art model acceptance.
 
 ## Acceptance evidence
 
+The [schema inventory engine](../docs/museum-schema-inventory.md) is integrated
+as `ef3b1631`. Thirteen new cases extend the reviewed museum suite to 65 tests,
+covering the actual candidate schema shapes, applicable branches, exact large
+integers/decimals and complete field accounting within explicit work budgets.
+This supplies the source-field inventory for subsequent projections; it does
+not make the current synthetic exporter an authenticated recorded-state export.
+
 The [Linked Art validator](../docs/museum-linked-art-validation.md) is integrated
 as `ef107a22`. Its 52-test combined suite passes independent review and a fresh
 root environment with 15 pinned packages. All 667 retained schema references

@@ -7,6 +7,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a bounded, schema-derived source inventory for museum projections,
+  retaining applicable branch evidence and exact field values. Thirteen new
+  cases extend the independently reviewed museum suite to 65 tests.
 - Added pinned offline Linked Art schema validation and JSON-LD expansion,
   with complete local schema-reference checks, explicit interpretation repairs
   and strict format validation. Fifty-two tests pass independent review;

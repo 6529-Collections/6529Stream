@@ -20,6 +20,12 @@ percentage-based progress reporting with concrete capabilities and evidence.
 
 ## Latest integration: 12 September
 
+The schema-derived museum inventory is integrated as `ef3b1631`, with thirteen
+new cases passing again locally and a reviewed 65-test combined suite. It
+accounts for applicable schema branches and exact source values before format
+projection. The independent museum CI has passed on both Linux and Windows
+for the preceding 52-test snapshot at `63d8c1f9`.
+
 Offline Linked Art validation is integrated as `ef107a22`. The complete current
 museum tool suite passes 52 independently reviewed tests, again in a fresh root
 environment with all 15 pinned dependencies. Thirteen retained schemas have
