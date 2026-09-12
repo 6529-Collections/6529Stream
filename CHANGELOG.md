@@ -7,14 +7,27 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added the public archival-coverage prerequisite with quorum-authenticated
+  Arweave checkpoints, native inclusion, independent storing-family receipts
+  and current fixity records. Twenty-nine tests, two fuzz properties and separate
+  default compiler products pass independent review. Real-network rehearsal and
+  estate composition remain pending under ADR 0031.
+
+- Added native supplemental clearing settlement tied to the original paid mint,
+  with independent replay protection, current revenue rights and no second NFT.
+  Twenty-one new cases, 103 prior regressions, fuzzing and both product compiler
+  profiles pass independent review. The complete clearing-sale consumer remains
+  under construction.
+
 - Added standard native Dutch sales with immutable schedules, signed maximum
   prices, official settlement and per-sale excess credits. Thirty-three domain
   cases and two fuzz properties pass independent review. Four current-contract
-  Safe workflows have source review and are running separately.
+  Safe workflows pass independent review after a test-only role correction.
 - Implemented identity-contest dismissal and terminal cohort closure under
   operation 58, preserving history and sole Identity ownership. The 202-case
-  domain suite passes independent review; actual Executor/Safe acceptance and
-  effective source/configuration binding remain pending.
+  domain suite and twelve actual-current dismissal/refund/dispute cases pass
+  independent review. Rotated-cohort composition and effective source/configuration
+  binding remain pending.
 - Added native refund-window purchases with separate buyer custody, per-sale
   pull refunds, permissionless finalization, official settlement, retained
   artist-authority checks and reveal-fee handling. The 63-case domain suite and

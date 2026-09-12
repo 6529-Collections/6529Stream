@@ -26,10 +26,16 @@ tests. A separate eleven-case current-contract run proves four identity-dispute
 governance/Safe workflows and seven retained entropy workflows; it predates the
 succession source. Dismissal source now implements the accepted
 [extension design](architecture/artist-operation-extension-v1.md), with 202
-independently reviewed domain tests; its actual Executor/Safe run is pending.
-Eight current-contract refund/dispute cases pass on their pre-dismissal snapshot.
+independently reviewed domain tests. Twelve actual-current cases also pass
+independent review: four Executor/Safe dismissal workflows and eight retained
+refund/dispute workflows. Rotated-cohort composition remains separate.
 Standard native Dutch source has 33 reviewed domain cases, with current-contract
-composition running separately. Estate, clearing settlement, wider lifecycle and
+composition has four independently accepted cases after a test-role correction.
+The financial-only clearing settlement primitive is
+integrated with 21 new cases and 103 prior regressions independently reviewed;
+the clearing consumer is still being built. The archival-provider prerequisite
+has 29 reviewed tests and two fuzz properties, with real-network rehearsal and
+estate composition still to complete. Estate, wider lifecycle and
 the new candidate remain in progress.
 
 The historical Gate A regression/evidence baseline records:

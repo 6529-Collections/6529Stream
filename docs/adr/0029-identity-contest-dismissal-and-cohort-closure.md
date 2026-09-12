@@ -3,7 +3,9 @@
 Status: Accepted design for the undeployed full-v1 implementation. The
 [effective extension design](../architecture/artist-operation-extension-v1.md)
 is recorded and checked. Source and the 202-case domain runtime are integrated;
-actual current-stack and effective source/configuration acceptance remain pending.
+four actual Executor/Safe dismissal cases and eight refund/dispute regressions
+also pass independent review. Rotated-cohort current composition and effective
+source/configuration acceptance remain pending.
 
 Date: 12 September 2026. Delivery issue: [#743](https://github.com/6529-Collections/6529Stream/issues/743).
 

@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `b3152198` (standard Dutch), `3489d360` / `09afe2b8` (dismissal and timing interface), `fa52a5b3` (deployment compiler repair), `c2332e48` (shared interfaces), `6b87a0ca` / `8a0f1e41` (current dismissal/Dutch tests, runtime pending); RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | `f49e7bc1` (financial-only clearing settlement), `f91c1e7a` (historical/current artist checks), `ee21cff9` (archival provider); actual dismissal12 and corrected Dutch4 independently accepted. New lifecycle5 plus Dutch4/refund4 are running together. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -31,7 +31,7 @@ contract call, including owner actions, payments, NFT custody and reads.
 | --- | --- | --- |
 | Integrator | `codex/v1-integration` | Reveal policy/escrow, canonical role activation, current-stack composition, remaining entropy/recovery, operator/client migration and release |
 | Artist | `codex/v1-artist-authority` | Dismissal and cohort closure integrated `3489d360` / `09afe2b8`; estate activation, archival prerequisites and dependent successor authority now being built |
-| Revenue | `codex/v1-revenue` | Refund and standard Dutch source integrated `ea107e58` / `b3152198`; financial settlement for clearing sales and the separate rebate lifecycle now being built |
+| Revenue | `codex/v1-revenue` | Refund, standard Dutch and supplemental settlement `f49e7bc1` integrated; actual clearing consumer and rebate lifecycle being built |
 | Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |
 
 Signing-domain discovery is integrated as `134e0f58`. The native fixed,
@@ -52,20 +52,48 @@ real Core, Manager, artist, settlement, entropy, governance and threshold Safe
 contracts; only the external randomness service is doubled. This captured run
 predates dismissal. Standard native Dutch source is integrated as `b3152198`,
 with 33 domain cases and two 256-input fuzz properties independently accepted.
-Its separate four-case current-contract run is compiling.
+Its separate four-case current-contract run passes independent review after
+correcting a test-only role name. The initial three-pass/one-fail
+snapshot is retained, and the production snapshot is unchanged by the correction.
 
 Dismissal operation 58 is integrated as `3489d360` with the separate timing
 interface move `09afe2b8`. The final 202-case domain run passes independent
-review. Four actual Executor/Safe dismissal cases are running alongside the
-eight refund/dispute cases. Rotated-cohort current composition, succession and
-the effective source/configuration gate remain separate work.
+review. Four actual Executor/Safe dismissal cases plus eight refund/dispute
+regressions now pass independent review. Five new current lifecycle tests cover
+succession records, rotated-cohort timing and retirement-specific standing.
+Their source passes independent review; the five cases are running alongside
+four Dutch and four refund regressions on the integrated supplemental recorder.
+The effective source/configuration
+gate remains separate work.
+
+Supplemental clearing settlement is integrated as `f49e7bc1`, with 21 new tests,
+103 prior regressions, five 256-input fuzz properties and both production
+compiler profiles independently accepted. This is a financial primitive tied
+to an original paid mint; the complete clearing consumer remains under construction.
+The new fixed linked libraries are documented in its
+[integration guide](../docs/integrations/native-clearing-supplemental-settlement.md).
+
+The archival provider prerequisite is integrated as `ee21cff9`: 14 checkpoint
+tests and 15 coverage tests, two fuzz properties and separate default compiler
+products pass independent review. Its explicit observer-quorum profile, native
+inclusion checks and independent storage/fixity records are described in
+[ADR 0031](../docs/adr/0031-quorum-anchored-estate-archival-profile.md).
+Estate/current-stack composition, actual-network rehearsal and the full call
+gas budget remain open. The artist builder owns estate activation next.
 
 The deployment script's large positional return expression caused the isolated
 CI compiler failure. Named return fields fix that exact reproduction without
-changing its ABI or compiler settings (`fa52a5b3`); a fresh compile against the
-latest integrated deployment inputs is running. Shared sale/permit interfaces
-are separated in `c2332e48`. The active source inventory now contains 365 files,
-and the layout check plus 46 checker/refresh tests pass. Full CI, generated
+changing its ABI or compiler settings (`fa52a5b3`). The separate compile against
+260 integrated deployment inputs also passes independent review; this is script
+code generation, not a deployment or full CI pass. Shared sale/permit interfaces
+are separated in `c2332e48`. The active source inventory now contains 383 files
+and the layout check passes; the refresher's 46 tests passed at its earlier
+365-file checkpoint. Scoped formatting still identifies three artist collaborator
+files and the entropy coordinator for their owners to format at the next source
+checkpoint. Historical artist-57
+checks now execute against their exact RC1 baseline while enforcing unchanged
+frozen files in the active checkout. Current design and contract checks continue
+against current sources. Full CI, generated
 candidate artifacts and the new testnet rehearsal remain pending.
 
 The twelve-case snapshot at `72c208f2` passes independent review for actual

@@ -4,6 +4,13 @@ This is detailed maintainer reference. Start everyday work with the
 [developer commands](../../tooling.md); run aggregate release validation only when
 preparing the corresponding evidence. Commands below run from the repository root.
 
+The three historical artist-57 gates run through
+`python -m tools.protocol.run_frozen_artist_checks` with `matrix`, `reconstruction`
+or `continuity`. They validate frozen active inputs and execute against the exact
+RC1 Git baseline; see [the isolation rules](../../tooling.md#pick-the-relevant-tests).
+The effective artist extension and all current contract, layout, ABI and release
+checks continue to use the active checkout.
+
 ## Local Checks
 
 For the supported current stack, run `make current-stack-check`, or on Windows:
