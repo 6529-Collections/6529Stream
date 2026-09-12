@@ -311,7 +311,7 @@ contract StreamCurrentDutchSaleTest is StreamCurrentSafeGovernanceFixture {
         _safeRead(abi.encodeCall(dutchSale.eip712Domain, ()));
         _safeRead(abi.encodeCall(dutchSale.authorizationDigest, (data.authorization)));
         _safeRead(abi.encodeCall(dutchSale.refundableBalance, (dutchId, address(payerSafe))));
-        _setRole(keccak256("ROLE_PAUSE_OPERATOR"), address(operatorSafe), true);
+        _setRole(keccak256("ROLE_PAUSE_GUARDIAN"), address(operatorSafe), true);
         _exec(
             operatorSafe,
             address(dutchSale),
