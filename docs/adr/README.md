@@ -42,6 +42,11 @@ Each ADR should include problem, current behavior, intended behavior,
 alternatives, security impact, release impact, test plan, rollout plan,
 non-goals, and accepted risks.
 
+[ADR 0032: Governance foundation before product activation](0032-governance-foundation-before-product-activation.md)
+defines the staged deployment needed by the archival provider's canonical role
+pin. Its historical foundation seal and complete activated release inventory
+have separate acceptance requirements.
+
 [ADR 0024: Append-only governance catalog evolution](0024-append-only-governance-catalog.md)
 is accepted for the current pre-genesis implementation. It permits delayed,
 root-proposed exact-target extensions without changing existing catalog entries.
