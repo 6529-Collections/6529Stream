@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | `TBD` |
 | Next issue | `TBD` |
-| Source checkpoint | `66d70e04` (reveal fees and activation), `f8564761` / `99b53aab` / `dac3ef4a` / `592635fc` (coupled artist sale consent and capability admission), `677b9ae9` (identity-compromise filing); the next timing increment is described below; RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | `66d70e04` (reveal fees and activation), `f8564761` / `99b53aab` / `dac3ef4a` / `592635fc` (coupled artist sale consent and capability admission), `677b9ae9` (identity-compromise filing), `b56c37f2` (governed reveal timing), `ec476e5c` (actual REQUIRED purchase tests); captured acceptance scopes are described below; RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -48,8 +48,8 @@ The next current snapshot passed all fourteen prior cases, including the final
 unique-holder activation planner. Its three new REQUIRED purchase tests failed
 in their direct artist-approval nonce setup; the corrected two-file fixture
 change has independent source review and its separate three-case runtime now
-passes. Final artifact review is pending; the original fourteen-pass/three-fail
-result is retained. This captured composition predates governed entropy timing
+passes independent artifact review. All 114 production artifacts match the
+original snapshot; the original fourteen-pass/three-fail result is retained. This captured composition predates governed entropy timing
 and the later operation-33 artist source.
 
 The reveal-fee increment has independently reviewed 44-case domain and
@@ -73,8 +73,10 @@ Identity-compromise operation 33 is integrated as `677b9ae9`: 159 focused tests,
 existing interface/storage compatibility and seven actual deployment traces
 passed independent review. Its actual governance catalog/current composition
 remains a distinct next integration task. Estate operations 36/37 are underway;
-the missing dismissal transition will receive an explicit specification
-amendment, preserving the historical 57-operation evidence.
+[ADR 0029](../docs/adr/0029-identity-contest-dismissal-and-cohort-closure.md)
+defines the missing dismissal transition and history-preserving cohort closure.
+Its implementation and effective inventory remain pending; the historical
+57-operation evidence is preserved.
 
 Fixed-sale and auction funding, scoped delegation, refusal/withdrawal and
 expected-binding acceptance are integrated. Collaborator operations 5/6/7

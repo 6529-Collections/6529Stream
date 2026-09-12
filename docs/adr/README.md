@@ -60,3 +60,8 @@ upstream acceptance remain separate requirements.
 [ADR 0028: Reveal-fee custody and role activation](0028-reveal-fee-custody-and-role-activation.md)
 defines separate collection escrow and requester credits, the optional exact
 provider fee capability, canonical operational roles and resumable activation.
+
+[ADR 0029: Identity-contest dismissal and cohort closure](0029-identity-contest-dismissal-and-cohort-closure.md)
+defines the missing operation 58, explicit adjudicated closure of contested
+provisional records, replay-preserving continuation and a versioned extension
+of the immutable historical operation inventory. Implementation remains pending.

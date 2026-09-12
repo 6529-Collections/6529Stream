@@ -7,6 +7,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Recorded the explicit identity-contest dismissal design in ADR 0029: a new
+  operation 58 closes adjudicated provisional cohorts while preserving historical
+  records and consumed replay state. Implementation remains pending.
 - Added governed reveal timing with a permissionless Safe keeper request after
   the effective SLO, live request-timeout raises and strict deadline boundaries.
   Fifty-four domain tests, thirty actual-Core metadata regressions and both
@@ -16,8 +19,8 @@ the release policy in `docs/release-policy.md`.
 - Added exact artist sale-parameter consent across native and universal sales,
   with explicit capability admission and REQUIRED rejection in legacy consumers.
   Focused consent and Safe tests pass. Three actual-current REQUIRED purchase
-  scenarios also pass after correcting their direct artist-approval nonce setup;
-  the original partial run is retained separately.
+  scenarios pass independent review after correcting their direct artist-approval
+  nonce setup; the original partial run is retained separately.
 - Added artist identity-compromise filings by eligible guardians, prior
   authorities and a staged arbiter, with immutable contest records and
   provisional-cohort consequences. The 159-case domain suite passes independent
