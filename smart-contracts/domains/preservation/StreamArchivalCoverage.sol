@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/preservation/IStreamArchivalCoverage.sol";
+import "../../interfaces/stream/preservation/IStreamArchivalChunkCoverage.sol";
 import "../../interfaces/stream/preservation/IStreamArchivalBindings.sol";
 import "../../interfaces/stream/preservation/IStreamArchivalCheckpointVerifier.sol";
 import "../../interfaces/stream/core/IStreamCorePointers.sol";
@@ -11,7 +12,11 @@ import "./StreamArchivalSignatures.sol";
 
 /// @notice Actual public bytes, independent family receipts and current independent fixity evidence.
 /// @dev Its endowed profile trusts a pinned observer quorum for network anchoring, not governance roots.
-contract StreamArchivalCoverage is StreamGasParameterHost, IStreamArchivalCoverage {
+contract StreamArchivalCoverage is
+    StreamGasParameterHost,
+    IStreamArchivalCoverage,
+    IStreamArchivalChunkCoverage
+{
     bytes32 public constant override profileHash =
         keccak256("6529STREAM_PUBLIC_DUAL_FAMILY_ARCHIVAL_V1");
     bytes32 public constant POSSESSION_PROFILE =
@@ -50,6 +55,14 @@ contract StreamArchivalCoverage is StreamGasParameterHost, IStreamArchivalCovera
     mapping(bytes32 => bytes32) private _latestFixities;
     mapping(bytes32 => A.CoverageFacts) private _coverage;
     mapping(bytes32 => bool) private _nonces;
+
+    struct ChunkPointer {
+        address pointer;
+        bytes32 codeHash;
+    }
+    mapping(bytes32 => ChunkPointer) private _chunkPointers;
+    uint64 public override coverageValidationEpoch = 1;
+    bytes32 private constant _CHUNK_SCHEMA = keccak256("6529STREAM_FINALITY_ARTIFACT_CHUNK_V1");
 
     constructor(
         address core_,
@@ -141,7 +154,8 @@ contract StreamArchivalCoverage is StreamGasParameterHost, IStreamArchivalCovera
 
     function supportsInterface(bytes4 id) external pure override returns (bool) {
         return id == 0x01ffc9a7 || id == type(IStreamArchivalCoverage).interfaceId
-            || id == type(IStreamGasParameterHost).interfaceId;
+            || id == type(IStreamGasParameterHost).interfaceId
+            || id == type(IStreamArchivalChunkCoverage).interfaceId;
     }
 
     function recordEnvelope(A.Envelope calldata e, bytes calldata payload)
@@ -174,7 +188,49 @@ contract StreamArchivalCoverage is StreamGasParameterHost, IStreamArchivalCovera
         override
         returns (A.Envelope memory, bytes memory)
     {
+        if (_envelopes[hash].schemaId == _CHUNK_SCHEMA) {
+            return (_envelopes[hash], _chunkPayload(hash));
+        }
         return (_envelopes[hash], _payloads[hash]);
+    }
+
+    function recordChunkEnvelope(A.Envelope calldata e, address pointer)
+        external
+        override
+        returns (bytes32 hash)
+    {
+        if (
+            e.artistId == bytes32(0) || e.schemaId != _CHUNK_SCHEMA
+                || e.canonicalizationId != keccak256("BINARY_EXACT_V1") || e.digestAlgorithm != 2
+                || e.visibility != 1 || e.custodyPolicyHash != bytes32(0) || e.byteSize == 0
+                || e.byteSize > 8192 || pointer.code.length != uint256(e.byteSize) + 1
+        ) {
+            revert A.InvalidArchivalEnvelope();
+        }
+        bytes memory payload = _pointerPayload(pointer, e.byteSize);
+        if (e.evidenceHash != keccak256(payload) || e.payloadDigest != sha256(payload)) {
+            revert A.InvalidArchivalEnvelope();
+        }
+        hash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARCHIVAL_CHUNK_ENVELOPE_V1"),
+                block.chainid,
+                address(this),
+                e,
+                pointer,
+                pointer.codehash
+            )
+        );
+        if (_envelopes[hash].artistId != bytes32(0)) revert A.ArchivalRecordExists(hash);
+        _envelopes[hash] = e;
+        _chunkPointers[hash] = ChunkPointer(pointer, pointer.codehash);
+        emit ArchivalEnvelopeRecorded(1, hash, e);
+        emit ArchivalChunkEnvelopeRecorded(1, hash, pointer, pointer.codehash);
+    }
+
+    function chunkEnvelopePointer(bytes32 hash) external view override returns (address, bytes32) {
+        ChunkPointer storage p = _chunkPointers[hash];
+        return (p.pointer, p.codeHash);
     }
 
     function familyRegistrationContext(string calldata name, A.Family calldata f)
@@ -233,6 +289,7 @@ contract StreamArchivalCoverage is StreamGasParameterHost, IStreamArchivalCovera
         uint8 prior = _familyStatus[hash];
         _familyStatus[hash] = next;
         uint64 revision = ++_familyRevisions[hash];
+        _advanceValidationEpoch();
         emit ArchivalFamilyStatusChanged(1, hash, action, prior, next, revision);
     }
 
@@ -261,6 +318,7 @@ contract StreamArchivalCoverage is StreamGasParameterHost, IStreamArchivalCovera
     ) external override returns (bytes32 hash) {
         A.Envelope storage e = _envelopes[t.envelopeHash];
         A.Family storage f = _families[t.familyRecordHash];
+        if (e.schemaId == _CHUNK_SCHEMA) _chunkPayload(t.envelopeHash);
         if (
             e.artistId == bytes32(0) || _familyStatus[t.familyRecordHash] != 1
                 || t.writer != f.storingAgent || t.observedAt == 0 || t.observedAt > block.timestamp
@@ -389,6 +447,7 @@ contract StreamArchivalCoverage is StreamGasParameterHost, IStreamArchivalCovera
         _fixities[hash] = t;
         _fixitySignatures[hash] = signature;
         _latestFixities[t.receiptRecordHash] = hash;
+        if (prior != bytes32(0)) _advanceValidationEpoch();
         emit ArchivalFixityRecorded(1, hash, t.receiptRecordHash, t);
     }
 
@@ -432,16 +491,7 @@ contract StreamArchivalCoverage is StreamGasParameterHost, IStreamArchivalCovera
         override
         returns (A.CoverageFacts memory saved)
     {
-        if (core.codehash != _coreCodeHash) revert A.ArchivalComponentChanged(core);
-        address facade = _selected(core, keccak256("ARTIST_REGISTRY"));
-        if (
-            _address(facade, abi.encodeCall(IStreamArtistArchivalBinding.core, ())) != core
-                || _address(
-                        facade, abi.encodeCall(IStreamArtistArchivalBinding.archivalCoverage, ())
-                    ) != address(this)
-        ) {
-            revert A.ArchivalComponentChanged(facade);
-        }
+        _requireArtistBinding();
         saved = _coverage[hash];
         if (
             saved.coverageRecordHash == bytes32(0) || saved.artistId != artistId
@@ -453,6 +503,104 @@ contract StreamArchivalCoverage is StreamGasParameterHost, IStreamArchivalCovera
         if (keccak256(abi.encode(actual)) != keccak256(abi.encode(saved))) {
             revert A.InvalidArchivalCoverage();
         }
+    }
+
+    function requireCoverageEnvironment() external view override returns (bytes32) {
+        address facade = _requireArtistBinding();
+        if (
+            checkpointVerifier.codehash != _verifierCodeHash
+                || abi.decode(
+                        _read(
+                            checkpointVerifier,
+                            abi.encodeCall(IStreamArchivalCheckpointVerifier.profileHash, ()),
+                            32
+                        ),
+                        (bytes32)
+                    ) != _endowedProfile
+                || abi.decode(
+                        _read(
+                            checkpointVerifier,
+                            abi.encodeCall(IStreamArchivalCheckpointVerifier.configurationHash, ()),
+                            32
+                        ),
+                        (bytes32)
+                    ) != _endowedConfiguration
+                || abi.decode(
+                        _read(
+                            checkpointVerifier,
+                            abi.encodeCall(IStreamArchivalCheckpointVerifier.networkId, ()),
+                            32
+                        ),
+                        (bytes32)
+                    ) != _endowedNetwork
+        ) {
+            revert A.ArchivalComponentChanged(checkpointVerifier);
+        }
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARCHIVAL_COVERAGE_ENVIRONMENT_V1"),
+                block.chainid,
+                address(this),
+                address(this).codehash,
+                core,
+                _coreCodeHash,
+                facade,
+                facade.codehash,
+                checkpointVerifier,
+                _verifierCodeHash,
+                _endowedProfile,
+                _endowedConfiguration,
+                _endowedNetwork
+            )
+        );
+    }
+
+    function _requireArtistBinding() private view returns (address facade) {
+        if (core.codehash != _coreCodeHash) revert A.ArchivalComponentChanged(core);
+        facade = _selected(core, keccak256("ARTIST_REGISTRY"));
+        if (
+            _address(facade, abi.encodeCall(IStreamArtistArchivalBinding.core, ())) != core
+                || _address(
+                        facade, abi.encodeCall(IStreamArtistArchivalBinding.archivalCoverage, ())
+                    ) != address(this)
+        ) {
+            revert A.ArchivalComponentChanged(facade);
+        }
+    }
+
+    function _advanceValidationEpoch() private {
+        if (coverageValidationEpoch == type(uint64).max) revert ArchivalValidationEpochOverflow();
+        ++coverageValidationEpoch;
+        emit ArchivalValidationEpochAdvanced(1, coverageValidationEpoch);
+    }
+
+    function _chunkPayload(bytes32 hash) private view returns (bytes memory payload) {
+        ChunkPointer storage p = _chunkPointers[hash];
+        A.Envelope storage e = _envelopes[hash];
+        if (
+            p.pointer == address(0) || p.pointer.codehash != p.codeHash
+                || p.pointer.code.length != uint256(e.byteSize) + 1
+        ) revert A.ArchivalComponentChanged(p.pointer);
+        payload = _pointerPayload(p.pointer, e.byteSize);
+        if (keccak256(payload) != e.evidenceHash || sha256(payload) != e.payloadDigest) {
+            revert A.InvalidArchivalEnvelope();
+        }
+    }
+
+    function _pointerPayload(address pointer, uint64 length)
+        private
+        view
+        returns (bytes memory payload)
+    {
+        bytes1 prefix;
+        assembly ("memory-safe") {
+            let scratch := mload(0x40)
+            extcodecopy(pointer, scratch, 0, 1)
+            prefix := mload(scratch)
+        }
+        if (prefix != 0) revert A.InvalidArchivalEnvelope();
+        payload = new bytes(length);
+        assembly ("memory-safe") { extcodecopy(pointer, add(payload, 32), 1, length) }
     }
 
     function nonceUsed(bytes32 key) external view override returns (bool) {
@@ -483,6 +631,7 @@ contract StreamArchivalCoverage is StreamGasParameterHost, IStreamArchivalCovera
                 || _fixities[fixB].outcome != 1
         ) revert A.InvalidArchivalCoverage();
         A.Envelope storage e = _envelopes[a.envelopeHash];
+        if (e.schemaId == _CHUNK_SCHEMA) _chunkPayload(a.envelopeHash);
         _checkpoint(a.proofRecordHash, e, bytes32(_identifiers[first]));
         f = A.CoverageFacts(
             0,
