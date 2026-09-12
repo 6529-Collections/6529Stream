@@ -112,7 +112,17 @@ contract DeployCurrentStack is StreamCurrentStackDeployment {
         deployed.productsActivated = false;
         deployed.foundationPlan = encodedFoundationPlan;
         deployed.productRegistrations = _productRegistrations();
-        deployed.catalogAdditions = _productPolicyAdditions();
+        deployed.catalogAdditions = this.deploymentCatalogAdditions();
+    }
+
+    /// @notice Unscheduled catalog additions for the deployed product configuration.
+    /// @dev A separate external view avoids inlining catalog construction into the large deployment return.
+    function deploymentCatalogAdditions()
+        external
+        view
+        returns (GovernanceActionPolicyEntry[] memory)
+    {
+        return _productPolicyAdditions();
     }
 
     function _loadVRFConfig() private {
