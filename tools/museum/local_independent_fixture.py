@@ -99,13 +99,13 @@ class LocalFixture:
             "runtimeBytes": str(len(runtime))}
         return address
 
-    def register(self, registry, executor, store, name, kind, payload):
+    def register(self, registry, executor, store, name, kind, payload, canonicalization=RAW_BYTES):
         chunks = []
         for offset in range(0, len(payload), 8192):
             part = payload[offset:offset + 8192]
             self.invoke(store, "publishChunk(bytes)", ("bytes",), (part,))
             chunks.append(keccak256(part))
-        spec = (name, kind, keccak256(payload), RAW_BYTES, ZERO, "", len(payload))
+        spec = (name, kind, keccak256(payload), canonicalization, ZERO, "", len(payload))
         arguments = (DOCUMENT_SPEC, Array("bytes32"))
         transition = self.read(registry, "registrationTransition((string,uint8,bytes32,bytes32,bytes32,string,uint32),bytes32[])",
                                arguments, (spec, chunks), ("bytes32",) * 3)
@@ -197,6 +197,7 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--anvil", default="anvil")
     parser.add_argument("--publications", action="store_true", help="Also retain exact receipt/header publication evidence")
+    parser.add_argument("--semantics", action="store_true", help="Publish and project canonical account-authored semantic records")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
     with socket.socket() as sock:
@@ -220,6 +221,9 @@ def main():
                 raise RuntimeError("isolated Anvil did not start")
             try:
                 anchor, evidence = fixture.build()
+                if args.semantics:
+                    from .local_account_fixture import publish_semantics
+                    anchor, evidence = publish_semantics(fixture, anchor, evidence)
             except Exception:
                 (args.output / "failed-rehearsal-transactions.json").write_bytes(dumps({
                     "environment": "local_evm_fixture", "transactions": fixture.receipts,
@@ -234,7 +238,7 @@ def main():
             (args.output / "source-capture.json").write_bytes(snapshot)
             replay = IndependentSourceAdapter(anchor, ReplayTransport(transcript, keccak256(transcript)), provenance="trusted_rpc")
             require(replay.snapshot() == snapshot, "offline replay byte parity")
-            if args.publications:
+            if args.publications or args.semantics:
                 from .independent_publication import EVENT_DATA, EVENT_TOPIC, PROFILE as PUBLICATION_PROFILE, IndependentPublicationAdapter
                 captured = json.loads(snapshot)
                 selected = {r["recordHash"] for r in captured["records"]}
@@ -260,6 +264,9 @@ def main():
                 publication_replay = IndependentPublicationAdapter(replay, hints_raw,
                     ReplayTransport(publication_transcript, keccak256(publication_transcript)), provenance="trusted_rpc")
                 require(publication_replay.snapshot() == publication_bytes, "publication replay byte parity")
+                if args.semantics:
+                    from .local_account_fixture import capture_semantics
+                    capture_semantics(publication, publication_replay, endpoint, args.output)
             print(dumps({"status": "PASS", "environment": "local_evm_fixture", "captureHash": keccak256(snapshot),
                          "transcriptHash": keccak256(transcript), "deploymentEvidenceHash": keccak256(evidence)}).decode())
         finally:

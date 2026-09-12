@@ -179,3 +179,12 @@ the original LIDO1.1 XSD and its complete pinned import closure. Check it with
 `python -m tools.museum.lido_model --check`; no new dependencies are needed.
 Exact source attribution, export-language assertions and final XML path evidence
 remain separate from creator truth, chain authority and institutional acceptance.
+
+The separate [recorded account projection](../../docs/museum-recorded-account.md)
+checks actual registered schema/profile bytes and historical independent-account
+authorship before entering the same finite v2 model. Run
+`python -m tools.museum.account_profile --check` and
+`python -m unittest tools.museum.test_recorded_account -v` for its pinned offline
+example. Same-account SELF reviews are explicit and never establish independent
+human review. The local-EVM example is distinct from public-chain acceptance;
+existing synthetic packages and format commands keep their prior input boundary.

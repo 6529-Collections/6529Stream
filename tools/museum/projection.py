@@ -159,14 +159,23 @@ def _entity(state, row, profile_hash):
 
 def project_fixture(state, selection_bytes: bytes, plan_bytes: bytes, *, selection_hash: str,
                     plan_hash: str, profile_hash: str, profile: ProjectionProfile) -> Projection:
-    rules, classes, relations = profile.rule_prefix, profile.classes, profile.relations
     selection = select_canonical_fixture(state, selection_bytes, policy_hash=selection_hash, profile_hash=profile_hash)
+    return _project_selected(state, selection_bytes, plan_bytes, selection_hash=selection_hash,
+        plan_hash=plan_hash, profile_hash=profile_hash, profile=profile, selection=selection, entity_reader=_entity)
+
+
+def _project_selected(state, selection_bytes, plan_bytes, *, selection_hash, plan_hash, profile_hash,
+                      profile, selection, entity_reader, plan_mode="synthetic_resource_projection",
+                      sidecar_mode="synthetic_projection_sidecar", report_mode="synthetic_candidate_resource_projection",
+                      external_kinds=KINDS) -> Projection:
+    """Shared model mechanics; admission remains in the concrete entrypoints."""
+    rules, classes, relations = profile.rule_prefix, profile.classes, profile.relations
     if keccak256(plan_bytes) != plan_hash:
         raise MuseumError("projection plan hash mismatch")
     plan = loads(plan_bytes, maximum=524288, canonical=True)
     if (not isinstance(plan, dict) or set(plan) != {"mode", "version", "sourceStateHash", "profileHash",
             "selectionPolicyHash", "crosswalkHash", "entityAuthoritySet", "externalEntities"}
-            or plan["mode"] != "synthetic_resource_projection" or plan["version"] != profile.version
+            or plan["mode"] != plan_mode or plan["version"] != profile.version
             or plan["sourceStateHash"] != state.commitment or plan["profileHash"] != profile_hash
             or plan["selectionPolicyHash"] != selection_hash or plan["crosswalkHash"] != profile.crosswalk_hash):
         raise MuseumError("projection plan scope mismatch")
@@ -176,7 +185,7 @@ def project_fixture(state, selection_bytes: bytes, plan_bytes: bytes, *, selecti
             raise MuseumError("invalid projection plan entries")
     external = {}
     for item in plan["externalEntities"]:
-        if (not isinstance(item, dict) or set(item) != {"id", "kind"} or item["kind"] not in KINDS
+        if (not isinstance(item, dict) or set(item) != {"id", "kind"} or item["kind"] not in external_kinds
                 or not isinstance(item["id"], str) or not format_checker().conforms(item["id"], "uri")
                 or item["id"] in external):
             raise MuseumError("invalid external entity declaration")
@@ -186,7 +195,7 @@ def project_fixture(state, selection_bytes: bytes, plan_bytes: bytes, *, selecti
         raise MuseumError("projection source byte limit")
     declarations, selected_rows, entities, records = [], {}, {}, {}
     for row in plan["entityAuthoritySet"]:
-        value, record = _entity(state, row, profile_hash)
+        value, record = entity_reader(state, row, profile_hash)
         declaration = EntityDeclaration(value["id"], value["kind"], row["recordHash"], row["pointer"], value["declaringAgent"])
         declarations.append(declaration)
         selected_rows[(row["recordHash"], row["pointer"])] = value["declaringAgent"]
@@ -310,7 +319,7 @@ def project_fixture(state, selection_bytes: bytes, plan_bytes: bytes, *, selecti
         verify_coverage(inv.fields, rows)
         coverage.append({"recordHash": key, "schemaHash": inv.schema_hash, "payloadHash": inv.payload_hash,
                          "evaluationHash": inv.evaluation_hash, "fields": rows})
-    sidecar = dumps({"mode": "synthetic_projection_sidecar", "selectedClaims": retained_claims,
+    sidecar = dumps({"mode": sidecar_mode, "selectedClaims": retained_claims,
         "withheldClaims": [{"selector": loads(c.selector), "assertion": loads(c.assertion),
                             "reviewEvidence": [loads(e) for e in c.review_evidence]} for c in selection.withheld],
         "extensionEntities": extensions, "externalEntities": sorted(plan["externalEntities"], key=lambda v: v["id"]),
@@ -319,7 +328,7 @@ def project_fixture(state, selection_bytes: bytes, plan_bytes: bytes, *, selecti
                            "schemaHex": "0x" + r.schema.hex(), "authorityEvidenceHex": "0x" + r.authority_evidence.hex(),
                            "inventoryScope": r.selector.record_hash in scope} for r in public]})
     coverage_raw, provenance_raw = dumps(coverage), dumps(sorted(provenance, key=dumps))
-    report = dumps({"mode": "synthetic_candidate_resource_projection", "version": profile.version, "sourceStateHash": state.commitment,
+    report = dumps({"mode": report_mode, "version": profile.version, "sourceStateHash": state.commitment,
         "profileHash": profile_hash, "selectionPolicyHash": selection_hash, "planHash": plan_hash,
         "projectionDependencies": loads(profile.identity), "sidecarHash": keccak256(sidecar),
         "profileDerivedPaths": [{"entity": r.identifier, "targetPointer": "/@context", "value": CONTEXT,
