@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `f49e7bc1` (financial-only clearing settlement), `f91c1e7a` (historical/current artist checks), `ee21cff9` (archival provider); corrected lifecycle13 independently accepted with test-only nonce fix `d98650ba`. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | Clearing consumer `d807421e` with current Safe composition `d9d7d46b`; archival Safe governance `c980f8d6`; governance foundation planner/tests `97599d12`; corrected lifecycle13 `d98650ba`. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -31,7 +31,7 @@ contract call, including owner actions, payments, NFT custody and reads.
 | --- | --- | --- |
 | Integrator | `codex/v1-integration` | Reveal policy/escrow, canonical role activation, current-stack composition, remaining entropy/recovery, operator/client migration and release |
 | Artist | `codex/v1-artist-authority` | Dismissal and cohort closure integrated `3489d360` / `09afe2b8`; estate activation, archival prerequisites and dependent successor authority now being built |
-| Revenue | `codex/v1-revenue` | Clearing consumer `d807421e` integrated with 59 reviewed functional cases; current composition runs while aggregate/storage gas optimization continues |
+| Revenue | `codex/v1-revenue` | Clearing consumer `d807421e` with 59 reviewed domain cases and two actual-current Safe cases; aggregate/storage optimization handoff precedes private offers and consignment |
 | Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |
 
 Signing-domain discovery is integrated as `134e0f58`. The native fixed,
@@ -73,10 +73,16 @@ Supplemental clearing settlement is integrated as `f49e7bc1`, with 21 new tests,
 compiler profiles independently accepted. This is a financial primitive tied
 to an original paid mint. The complete clearing consumer is now integrated as
 `d807421e`: 59 domain cases, five fuzz properties and both compiler profiles
-pass independent review. Two current-contract Safe cases are running. Its first
-measured purchase costs 6,843,542 gas, above the 500,000 collector ceiling even
-before full cold composition; compression and shared-path slimming are active
-implementation work, and no deployment gas acceptance is claimed.
+pass independent review. Two actual-current Safe cases also pass independent
+review (`d9d7d46b`): required artist consent, paid mints, excess and immediate
+rebate claims, official supplemental settlement, and partial escape preserving
+NFT custody. They use a fixed profile, zero reveal fee and the explicit external
+randomness double. The original domain purchase measured 6,843,542 gas. A
+separate actual-current trace measures 8,755,856 gas in the first consumer call;
+its real Manager and recorder calls each exceed the 500,000 collector ceiling
+alone. These are qualified in-test measurements, not a cold-call admission.
+Compression and storage optimization continue, with shared-path gas work kept
+explicit so it does not serialize every remaining sale feature.
 The new fixed linked libraries are documented in its
 [integration guide](../docs/integrations/native-clearing-supplemental-settlement.md).
 
@@ -89,9 +95,22 @@ The network-derived native inclusion fixture in `352e3e26` passes four cases
 and fuzzing in both profiles with independent review. It verifies a historical
 four-byte public payload and real native paths retrieved through one gateway;
 quorum and consensus authentication remain distinct. Five new current-contract
-2-of-3 Safe governance cases pass runtime and await final independent artifact
-review. Estate/current-stack composition, complete network rehearsal and the
-full call gas budget remain open. The artist builder owns estate activation.
+2-of-3 Safe governance cases pass independent review (`c980f8d6`). Estate domain
+activation and cancellation have nine independently reviewed cases on the
+builder's branch; its complete 225-case regression run is in progress.
+Estate/current-stack composition, complete network rehearsal and the full call
+gas budget remain open.
+
+The actual constructor dependency exposed a deployment-order gap: the provider
+requires initialized canonical roles before the artist suite can deploy.
+[ADR 0032](../docs/adr/0032-governance-foundation-before-product-activation.md)
+resolves this through the existing governance foundation and later product
+activation paths. The shared planner and two actual-current foundation tests
+pass independent review (`97599d12`). The original five-leaf foundation seal is
+historical evidence, distinct from the complete release inventory. A further
+three-case cohort exercises delayed Safe catalog extension and mint-product
+activation; migration of the shared artist fixture and broadcast script remains
+integration work.
 
 The deployment script's large positional return expression caused the isolated
 CI compiler failure. Named return fields fix that exact reproduction without
