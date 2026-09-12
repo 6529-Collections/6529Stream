@@ -1,0 +1,218 @@
+ps://linked.art/model/base/#names)",
+            "type": "object",
+            "properties": {
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "Name"
+                        }
+                    ]
+                },
+                "identified_by": {
+                    "$ref": "#/$defs/identified_byProp"
+                },
+                "referred_to_by": {
+                    "$ref": "#/$defs/referred_to_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/$defs/classified_asProp"
+                },
+                "content": {
+                    "$ref": "#/$defs/contentProp"
+                },
+                "language": {
+                    "$ref": "#/$defs/languageProp"
+                },
+                "part": {
+                    "description": "A list of one or more `Name` structures, which are parts of this `Name`",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/Name"
+                    }
+                }
+            },
+            "required": [
+                "type",
+                "content"
+            ],
+            "additionalProperties": false,
+            "examples": [
+                {
+                    "type": "Name",
+                    "content": "Georgia O'Keeffe"
+                },
+                {
+                    "type": "Name",
+                    "content": "Blue",
+                    "classified_as": [
+                        {
+                            "id": "http://vocab.getty.edu/aat/300404670",
+                            "type": "Type",
+                            "_label": "Primary Name"
+                        }
+                    ],
+                    "language": [
+                        {
+                            "id": "http://vocab.getty.edu/aat/300388277",
+                            "type": "Language",
+                            "_label": "English"
+                        }
+                    ]
+                }
+            ]
+        },
+        "Identifier": {
+            "title": "crm:E42_Identifier",
+            "description": "An identifier for an entity\nSee: [API](https://linked.art/api/1.0/shared/identifier/) | [Model](https://linked.art/model/base/#identifiers)",
+            "type": "object",
+            "properties": {
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "Identifier"
+                        }
+                    ]
+                },
+                "identified_by": {
+                    "$ref": "#/$defs/identified_byProp"
+                },
+                "referred_to_by": {
+                    "$ref": "#/$defs/referred_to_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/$defs/classified_asProp"
+                },
+                "content": {
+                    "$ref": "#/$defs/contentProp"
+                },
+                "part": {
+                    "description": "A list of one or more `Identifier` structures, which are parts of this `Identifier`",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/Identifier"
+                    }
+                },
+                "assigned_by": {
+                    "description": "The activity through which this `Identifier` was assigned to the entity",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/AttributeAssignment"
+                    }
+                }
+            },
+            "required": [
+                "type",
+                "content"
+            ],
+            "additionalProperties": false
+        },
+        "Statement": {
+            "title": "crm:E33_Linguistic_Object",
+            "description": "An embedded, relatively short piece of textual content\nSee: [API](https://linked.art/api/1.0/shared/statement/) | [Model](https://linked.art/model/base/#statements-about-a-resource)",
+            "type": "object",
+            "properties": {
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "LinguisticObject"
+                        }
+                    ]
+                },
+                "identified_by": {
+                    "$ref": "#/$defs/identified_byProp"
+                },
+                "referred_to_by": {
+                    "$ref": "#/$defs/referred_to_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/$defs/classified_asProp"
+                },
+                "content": {
+                    "$ref": "#/$defs/contentProp"
+                },
+                "language": {
+                    "$ref": "#/$defs/languageProp"
+                },
+                "format": {
+                    "$ref": "#/$defs/formatProp"
+                }
+            },
+            "required": [
+                "type",
+                "content"
+            ],
+            "additionalProperties": false
+        },
+        "TimeSpan": {
+            "title": "crm:E52_Time-Span",
+            "description": "A data structure for recording a span of time\nSee: [API](https://linked.art/api/1.0/shared/timespan/) | [Model](https://linked.art/model/base/#time-span-details)",
+            "type": "object",
+            "properties": {
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "TimeSpan"
+                        }
+                    ]
+                },
+                "identified_by": {
+                    "$ref": "#/$defs/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/$defs/classified_asProp"
+                },
+                "begin_of_the_begin": {
+                    "title": "crm:P82a_begin_of_the_begin",
+                    "description": "The earliest possible date-time at which the timespan could have started",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "end_of_the_begin": {
+                    "title": "crm:P81a_end_of_the_begin",
+                    "description": "The latest possible date-time at which the timespan could have started",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "begin_of_the_end": {
+                    "title": "crm:P81b_begin_of_the_end",
+                    "description": "The earliest possible date-time at which the timespan could have ended",
+                    "type": "string",
+                    "format": "date-time"
+                },
+        

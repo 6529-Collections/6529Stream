@@ -18,6 +18,7 @@ from rfc3339_validator import validate_rfc3339
 
 from .canonical import MuseumError, dumps, keccak256, loads
 from .dependencies import OfflineDocuments
+from .schema_interpretation import conjoin_duplicate_schema
 
 
 @dataclass(frozen=True)
@@ -93,6 +94,13 @@ def _repair(schema, rule):
                 or node != rule["expectedValue"] or not isinstance(rule["replacementValue"], str)):
             raise MuseumError("schema reference repair preimage mismatch")
         _pointer(schema, pointer.rsplit("/", 1)[0])["$ref"] = rule["replacementValue"]
+    elif rule.get("operation") == "append_exact_schema_reference":
+        item = rule.get("appendItem")
+        if (pointer != "/anyOf" or not isinstance(node, list) or node != rule.get("expectedItems")
+                or not isinstance(item, dict) or set(item) != {"$ref"}
+                or not isinstance(item["$ref"], str) or item in node):
+            raise MuseumError("schema root append preimage mismatch")
+        node.append(dict(item))
     else:
         raise MuseumError("unsupported schema interpretation repair")
 
@@ -144,21 +152,45 @@ class PinnedLinkedArt:
         if keccak256(policy_bytes) != expected_policy_hash:
             raise MuseumError("validation policy hash mismatch")
         policy = loads(policy_bytes, canonical=True)
-        if (policy.get("mode") != "candidate_pinned_linked_art_validation" or policy.get("version") != "1"
+        if (policy.get("mode") != "candidate_pinned_linked_art_validation" or policy.get("version") not in ("1", "2")
                 or policy.get("processor") != "PyLD3.3.0" or version("PyLD") != "3.3.0"
                 or policy.get("formatProfile") != "exact-uri-rfc3339-no-leap-seconds-v1"):
             raise MuseumError("unsupported validation processor profile")
         if keccak256(documents.load(policy["contextUri"])) != policy["contextHash"]:
             raise MuseumError("validation context hash mismatch")
+        if policy["version"] == "2":
+            supporting = policy.get("supportingDocuments")
+            if (not isinstance(supporting, list) or not supporting or len(supporting) > 64
+                    or any(not isinstance(row, dict) or set(row) != {"sourceUri", "contentHash"}
+                           or not isinstance(row["sourceUri"], str) for row in supporting)
+                    or len({row["sourceUri"] for row in supporting}) != len(supporting)):
+                raise MuseumError("invalid supporting interpretation documents")
+            for row in supporting:
+                if keccak256(documents.load(row["sourceUri"])) != row["contentHash"]:
+                    raise MuseumError("supporting interpretation document mismatch")
         resources, derived_hashes, derived_bytes, applied = {}, {}, {}, set()
         repairs = policy["schemaRepairs"]
+        duplicate_rules = policy.get("duplicateSchemaInterpretations", [])
+        if (not isinstance(duplicate_rules, list) or len(duplicate_rules) > 1
+                or any(not isinstance(rule, dict) for rule in duplicate_rules)
+                or (duplicate_rules and policy["version"] != "2")):
+            raise MuseumError("unsupported duplicate schema interpretation profile")
+        duplicate_applied = set()
+        if policy["version"] == "1" and any(r.get("operation") == "append_exact_schema_reference" for r in repairs):
+            raise MuseumError("root schema append requires a v2 interpretation")
         if len({(r["schemaUri"], r["pointer"]) for r in repairs}) != len(repairs):
             raise MuseumError("duplicate schema interpretation repair")
         for row in policy["schemaDocuments"]:
             uri = row["sourceUri"]
             if uri in resources or keccak256(documents.load(uri)) != row["contentHash"]:
                 raise MuseumError("validation schema identity mismatch")
-            schema = documents.jsonld_loader(uri)["document"]
+            matches = [(i, rule) for i, rule in enumerate(duplicate_rules) if rule.get("schemaUri") == uri]
+            if matches:
+                i, rule = matches[0]
+                schema = conjoin_duplicate_schema(documents.load(uri), rule)
+                duplicate_applied.add(i)
+            else:
+                schema = documents.jsonld_loader(uri)["document"]
             if schema.get("$id") != uri or schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
                 raise MuseumError("validation schema dialect or URI mismatch")
             for index, rule in enumerate(repairs):
@@ -174,6 +206,8 @@ class PinnedLinkedArt:
             resources[uri] = Resource.from_contents(schema)
         if applied != set(range(len(repairs))):
             raise MuseumError("unapplied schema interpretation repair")
+        if duplicate_applied != set(range(len(duplicate_rules))):
+            raise MuseumError("unapplied duplicate schema interpretation")
         if policy["rootSchemaUri"] not in resources:
             raise MuseumError("root validation schema unavailable")
         self.schema_references = _reference_closure({uri: resource.contents for uri, resource in resources.items()})

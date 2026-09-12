@@ -11,7 +11,7 @@ On Windows PowerShell, no activation or execution-policy change is needed:
 ```powershell
 python -m venv .venv-tools/museum
 .\.venv-tools\museum\Scripts\python.exe -m pip install -r tools/museum/requirements-jsonld.txt
-.\.venv-tools\museum\Scripts\python.exe -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art tools.museum.test_schema_inventory tools.museum.test_review tools.museum.test_semantic_selection tools.museum.test_projection tools.museum.test_package -v
+.\.venv-tools\museum\Scripts\python.exe -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art tools.museum.test_schema_inventory tools.museum.test_review tools.museum.test_semantic_selection tools.museum.test_projection tools.museum.test_package tools.museum.test_linked_art_v2 tools.museum.test_projection_v2 -v
 ```
 
 On Linux or macOS:
@@ -19,7 +19,7 @@ On Linux or macOS:
 ```sh
 python3 -m venv .venv-tools/museum
 .venv-tools/museum/bin/python -m pip install -r tools/museum/requirements-jsonld.txt
-.venv-tools/museum/bin/python -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art tools.museum.test_schema_inventory tools.museum.test_review tools.museum.test_semantic_selection tools.museum.test_projection tools.museum.test_package -v
+.venv-tools/museum/bin/python -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art tools.museum.test_schema_inventory tools.museum.test_review tools.museum.test_semantic_selection tools.museum.test_projection tools.museum.test_package tools.museum.test_linked_art_v2 tools.museum.test_projection_v2 -v
 ```
 
 Use that environment's Python for the following commands. Dependency installation
@@ -138,5 +138,12 @@ admission and complete Museum/dossier conformance remain separate work.
 
 ```text
 python -m tools.museum.projection --check
-python -m unittest tools.museum.test_projection tools.museum.test_package -v
+python -m unittest tools.museum.test_projection tools.museum.test_package tools.museum.test_linked_art_v2 tools.museum.test_projection_v2 -v
 ```
+
+The separate [abstract/nonvisual v2 projection](../../docs/museum-abstract-nonvisual-projection.md)
+adds explicit E89 and linguistic-content resources while retaining sound/software
+E73 content and original technical relationships in the sidecar. It selects a
+new crosswalk and fourteen-schema interpretation closure; the thirteen-schema
+v1 policy and package CLI remain unchanged. No additional Python dependency is
+needed. Check its definition with `python -m tools.museum.projection_v2 --check`.

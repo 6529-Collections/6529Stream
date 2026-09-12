@@ -1,0 +1,250 @@
+"additionalProperties": false
+        },
+        "NameOrIdentifier": {
+            "description": "A Name or an Identifier",
+            "anyOf": [
+                {
+                    "$ref": "#/$defs/Name"
+                },
+                {
+                    "$ref": "#/$defs/Identifier"
+                }
+            ]
+        },
+        "LingObjOrVisualItemRef": {
+            "description": "A Linguistic Object Reference or Visual Item Reference",
+            "anyOf": [
+                {
+                    "$ref": "#/$defs/VisualItemRef"
+                },
+                {
+                    "$ref": "#/$defs/LinguisticObjectRef"
+                }
+            ]
+        },
+        "LingObjOrDigitalObjOrStatement": {
+            "description": "A Linguistic Object Reference, Digitial Object Reference or Statement",
+            "anyOf": [
+                {
+                    "$ref": "#/$defs/Statement"
+                },
+                {
+                    "$ref": "#/$defs/DigitalObjectRef"
+                },
+                {
+                    "$ref": "#/$defs/LinguisticObjectRef"
+                }
+            ]
+        },
+        "PersonRefOrGroupRef": {
+            "description": "A Reference to a Person or Group",
+            "anyOf": [
+                {
+                    "$ref": "#/$defs/PersonRef"
+                },
+                {
+                    "$ref": "#/$defs/GroupRef"
+                }
+            ]
+        },
+        "PeriodRefOrEventRefOrActivityRef": {
+            "anyOf": [
+                {
+                    "$ref": "#/$defs/PeriodRef"
+                },
+                {
+                    "$ref": "#/$defs/EventRef"
+                },
+                {
+                    "$ref": "#/$defs/ActivityRef"
+                }
+            ]
+        },
+        "EventRefOrActivityRef": {
+            "anyOf": [
+                {
+                    "$ref": "#/$defs/EventRef"
+                },
+                {
+                    "$ref": "#/$defs/ActivityRef"
+                }
+            ]
+        },
+        "HumanMadeObjectRefOrSetRef": {
+            "anyOf": [
+                {
+                    "$ref": "#/$defs/HumanMadeObjectRef"
+                },
+                {
+                    "$ref": "#/$defs/SetRef"
+                }
+            ]
+        },
+        "ContextStringOrArray": {
+            "title": "JSON-LD Context",
+            "description": "Either an array of contexts, or a string containing the Linked Art context URI",
+            "anyOf": [
+                {
+                    "title": "Linked Art",
+                    "type": "string",
+                    "const": "https://linked.art/ns/v1/linked-art.json"
+                },
+                {
+                    "title": "Linked Art with Extensions",
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "format": "uri"
+                    }
+                }
+            ]
+        },
+        "AnyRef": {
+            "title": "*",
+            "description": "Reference to another primary entity\nSee: [API](https://linked.art/api/1.0/shared/reference/) | [Model]()",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "Title": "Specific",
+                            "type": "string",
+                            "enum": [
+                                "HumanMadeObject",
+                                "Person",
+                                "Group",
+                                "VisualItem",
+                                "LinguisticObject",
+                                "Set",
+                                "Place",
+                                "DigitalObject",
+                                "Type",
+                                "Event",
+                                "Activity",
+                                "Period",
+                                "Language",
+                                "Material",
+                                "Currency",
+                                "MeasurementUnit",
+                                "PropositionalObject"
+                            ]
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "equivalent": {"$ref": "#/$defs/equivalentProp"}
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "PlaceRef": {
+            "title": "crm:E53_Place",
+            "description": "Reference to a `Place` entity\nSee: [Schema](place.html)",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "Place"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "equivalent": {"$ref": "#/$defs/equivalentProp"}
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "PersonRef": {
+            "title": "E21_Person",
+            "description": "Reference to a `Person`\nSee: [Schema](person.html)",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "Person"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "equivalent": {"$ref": "#/$defs/equivalentProp"}
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "GroupRef": {
+            "title": "crm:E74_Group",
+            "description": "Reference to a `Group`\nSee: [Schema](group.html)",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "Group"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "equivalent": {"$ref": "#/$defs/equivalentProp"}
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "HumanMadeObjectRef": {
+            "title": "crm:E22_Human-Made_Object",
+            "description": "Reference to a `HumanMadeObject`\nSee: [Schema](object.html)",
+            "type": "object

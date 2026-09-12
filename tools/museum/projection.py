@@ -86,21 +86,35 @@ CROSSWALK_HASH = keccak256(CROSSWALK_BYTES)
 
 
 class ProjectionProfile:
+    version = "1"
+    rule_prefix = RULE
+    crosswalk_bytes = CROSSWALK_BYTES
+    crosswalk_hash = CROSSWALK_HASH
+    validation_directory = "linked-art"
+    classes = CLASSES
+    relations = RELATIONS
+
     def __init__(self, root: Path, crosswalk_bytes: bytes, *, crosswalk_hash: str,
                  validation_hash: str, vocabulary_hash: str):
-        if crosswalk_bytes != CROSSWALK_BYTES or keccak256(crosswalk_bytes) != crosswalk_hash:
+        if crosswalk_bytes != self.crosswalk_bytes or keccak256(crosswalk_bytes) != crosswalk_hash:
             raise MuseumError("unsupported or mismatched projection crosswalk")
-        validation = (root / "linked-art/validation-policy.json").read_bytes()
+        validation = (root / self.validation_directory / "validation-policy.json").read_bytes()
         vocab = (root / "standards/vocabulary-policy.json").read_bytes()
         if keccak256(vocab) != vocabulary_hash:
             raise MuseumError("projection vocabulary policy hash mismatch")
-        vi = loads((root / "linked-art/validation-index.json").read_bytes(), maximum=65536)
+        vi = loads((root / self.validation_directory / "validation-index.json").read_bytes(), maximum=65536)
         oi = loads((root / "standards/vocabulary-index.json").read_bytes(), maximum=65536)
         self.linked_art = PinnedLinkedArt(OfflineDocuments(root, vi), validation, validation_hash)
         self.vocabulary = Vocabulary(OfflineDocuments(root / "standards", oi), loads(vocab, canonical=True))
         self.identity = dumps({"crosswalkHash": crosswalk_hash, "validationPolicyHash": validation_hash,
                                "vocabularyPolicyHash": vocabulary_hash,
                                "derivedSchemaHashes": dict(self.linked_art.derived_schema_hashes)})
+
+    def content_specializations(self, selection, entities, policy):
+        return {}
+
+    def literal_content(self, assertion, resource_class):
+        return None
 
 
 @dataclass(frozen=True)
@@ -145,15 +159,16 @@ def _entity(state, row, profile_hash):
 
 def project_fixture(state, selection_bytes: bytes, plan_bytes: bytes, *, selection_hash: str,
                     plan_hash: str, profile_hash: str, profile: ProjectionProfile) -> Projection:
+    rules, classes, relations = profile.rule_prefix, profile.classes, profile.relations
     selection = select_canonical_fixture(state, selection_bytes, policy_hash=selection_hash, profile_hash=profile_hash)
     if keccak256(plan_bytes) != plan_hash:
         raise MuseumError("projection plan hash mismatch")
     plan = loads(plan_bytes, maximum=524288, canonical=True)
     if (not isinstance(plan, dict) or set(plan) != {"mode", "version", "sourceStateHash", "profileHash",
             "selectionPolicyHash", "crosswalkHash", "entityAuthoritySet", "externalEntities"}
-            or plan["mode"] != "synthetic_resource_projection" or plan["version"] != "1"
+            or plan["mode"] != "synthetic_resource_projection" or plan["version"] != profile.version
             or plan["sourceStateHash"] != state.commitment or plan["profileHash"] != profile_hash
-            or plan["selectionPolicyHash"] != selection_hash or plan["crosswalkHash"] != CROSSWALK_HASH):
+            or plan["selectionPolicyHash"] != selection_hash or plan["crosswalkHash"] != profile.crosswalk_hash):
         raise MuseumError("projection plan scope mismatch")
     for key in ("entityAuthoritySet", "externalEntities"):
         if (not isinstance(plan[key], list) or len(plan[key]) > 512
@@ -188,6 +203,9 @@ def project_fixture(state, selection_bytes: bytes, plan_bytes: bytes, *, selecti
         references.extend(loads(e)["reviewer"] for e in claim.review_evidence)
     selected_entities, _ = entity_index(tuple(declarations), selected_rows, tuple(references), frozenset(external))
     policy = loads(selection_bytes)
+    specializations = profile.content_specializations(selection, entities, policy)
+    resolved_classes = {identifier: classes.get(value["kind"]) for identifier, (value, _) in entities.items()}
+    resolved_classes.update({identifier: value["resourceClass"] for identifier, value in specializations.items()})
     scope = {row["recordHash"] for row in policy["sourceAuthoritySet"] + policy["reviewerAuthoritySet"]}
     scope.update(records)
     records = {r.selector.record_hash: r for r in public if r.selector.record_hash in scope}
@@ -204,17 +222,27 @@ def project_fixture(state, selection_bytes: bytes, plan_bytes: bytes, *, selecti
     for declaration in selected_entities:
         value, row = entities[declaration.identifier]
         kind = value["kind"]
-        if kind not in CLASSES:
+        resource_class = resolved_classes[value["id"]]
+        if resource_class is None:
             extensions.append({"id": value["id"], "kind": kind, "crmClass": EXTENSION_CLASSES.get(kind),
                                "declaration": value, "source": row,
-                               "rule": RULE + "kind:" + kind})
+                               "rule": rules + "kind:" + kind})
+            if value["id"] in specializations:
+                extensions[-1]["contentKind"] = specializations[value["id"]]["contentKind"]
+                extensions[-1]["contentKindEvidence"] = specializations[value["id"]]["evidence"]
             continue
         label = value["names"][0]["value"] if value["names"] else value["id"]
-        resource = {"@context": CONTEXT, "id": value["id"], "type": CLASSES[kind][0], "_label": label}
+        resource = {"@context": CONTEXT, "id": value["id"], "type": resource_class[0], "_label": label}
         resources[value["id"]] = resource
         for target, field in (("/id", "/id"), ("/type", "/kind"),
                               ("/_label", "/names/0/value" if value["names"] else "/id")):
-            evidence(value["id"], target, row, row["pointer"] + field, RULE + "kind:" + kind, "selected declaration")
+            evidence(value["id"], target, row, row["pointer"] + field, rules + "kind:" + kind, "selected declaration")
+        if value["id"] in specializations:
+            for item in specializations[value["id"]]["evidence"]:
+                evidence(value["id"], "/type", item["selector"], item["selector"]["pointer"] + "/object/literal/lexicalValue",
+                         rules + "content-kind", item["basis"])
+                evidence(value["id"], "/type", item["selector"], item["selector"]["pointer"] + "/relation",
+                         rules + "content-kind", item["basis"])
         if value["names"]:
             resource["identified_by"] = []
         for i, name in enumerate(value["names"]):
@@ -222,48 +250,62 @@ def project_fixture(state, selection_bytes: bytes, plan_bytes: bytes, *, selecti
                                                "content": name["value"]})
             for target, field in (("/type", "/kind"), ("/content", "/value")):
                 evidence(value["id"], "/identified_by/" + str(i) + target, row,
-                         row["pointer"] + "/names/" + str(i) + field, RULE + "name", "selected declaration")
+                         row["pointer"] + "/names/" + str(i) + field, rules + "name", "selected declaration")
 
     def kind_of(identifier):
         return entities[identifier][0]["kind"] if identifier in entities else external[identifier]
+
+    def class_of(identifier):
+        return resolved_classes[identifier] if identifier in entities else classes.get(external[identifier])
 
     for claim in selection.selected:
         assertion, row = loads(claim.assertion), loads(claim.selector)
         subject, predicate = assertion["subject"], assertion["relation"]
         target = assertion["object"].get("entity")
         reason = "no supported exact Linked Art rule; retain typed assertion"
-        if predicate in RELATIONS and target is not None and subject in resources and kind_of(target) in CLASSES:
-            subject_class, target_class = CLASSES[kind_of(subject)][1], CLASSES[kind_of(target)][1]
+        if any(item["selector"] == row for item in specializations.get(subject, {}).get("evidence", [])):
+            reason = "explicit content-kind evidence retained with its resource specialization or typed extension"
+        content = profile.literal_content(assertion, class_of(subject))
+        if content is not None and subject in resources:
+            resources[subject]["content"] = content
+            evidence(subject, "/content", row, row["pointer"] + "/object/literal/lexicalValue", rules + "content", claim.basis)
+            evidence(subject, "/content", row, row["pointer"] + "/relation", rules + "content", claim.basis)
+            reason = "mapped exact linguistic content; original qualifiers and evidence retained"
+        elif predicate in relations and target is not None and subject in resources and class_of(target) is not None:
+            subject_class, target_class = class_of(subject)[1], class_of(target)[1]
             profile.vocabulary.require_relation(subject_class, predicate, target_class)
-            prop = RELATIONS[predicate]
+            prop = relations[predicate]
             values = resources[subject].setdefault(prop, [])
             i = len(values)
-            values.append({"id": target, "type": CLASSES[kind_of(target)][0]})
+            values.append({"id": target, "type": class_of(target)[0]})
             for suffix, field in (("/id", "/object/entity"), ("/type", "/object/entity")):
                 evidence(subject, "/" + prop + "/" + str(i) + suffix, row, row["pointer"] + field,
-                         RULE + "relation:" + prop, claim.basis)
+                         rules + "relation:" + prop, claim.basis)
             if target in entities:
                 _, target_row = entities[target]
                 evidence(subject, "/" + prop + "/" + str(i) + "/type", target_row,
-                         target_row["pointer"] + "/kind", RULE + "kind:" + kind_of(target), "selected target declaration")
+                         target_row["pointer"] + "/kind", rules + "kind:" + kind_of(target), "selected target declaration")
+                for item in specializations.get(target, {}).get("evidence", []):
+                    evidence(subject, "/" + prop + "/" + str(i) + "/type", item["selector"],
+                             item["selector"]["pointer"] + "/object/literal/lexicalValue", rules + "content-kind", item["basis"])
             else:
                 reference_types.append({"entity": subject, "targetPointer": "/" + prop + "/" + str(i) + "/type",
                                         "externalEntity": target, "kind": kind_of(target), "planHash": plan_hash})
-            evidence(subject, "/" + prop, row, row["pointer"] + "/relation", RULE + "relation:" + prop, claim.basis)
+            evidence(subject, "/" + prop, row, row["pointer"] + "/relation", rules + "relation:" + prop, claim.basis)
             reason = "mapped exact entity relation; original authority and review evidence retained"
         retained_claims.append({"selector": row, "assertion": assertion, "basis": claim.basis,
                                "reviewEvidence": [loads(e) for e in claim.review_evidence], "projectionReason": reason})
     output = []
     for identifier, resource in sorted(resources.items()):
         expanded = profile.linked_art.validate_and_expand(dumps(resource))
-        if loads(expanded.expanded_bytes, maximum=16 * 1024 * 1024)[0].get("@type") != [CLASSES[kind_of(identifier)][1]]:
+        if loads(expanded.expanded_bytes, maximum=16 * 1024 * 1024)[0].get("@type") != [class_of(identifier)[1]]:
             raise MuseumError("expanded entity class differs from the crosswalk")
         output.append(ProjectedResource(identifier, expanded.source_bytes, expanded.expanded_bytes))
     coverage = []
     for key, inv in sorted(inventories.items()):
         rows = [{"pointer": f.pointer, "presence": f.presence, "exactHex": "0x" + f.exact.hex(),
                  "disposition": "mapped" if (key, f.pointer) in mapped else "retained_stream_only",
-                 "rule": RULE + "coverage", "reason": "source bytes retained; emitted source field" if (key, f.pointer) in mapped
+                 "rule": rules + "coverage", "reason": "source bytes retained; emitted source field" if (key, f.pointer) in mapped
                  else "source bytes retained; no stronger projection claim"} for f in inv.fields]
         verify_coverage(inv.fields, rows)
         coverage.append({"recordHash": key, "schemaHash": inv.schema_hash, "payloadHash": inv.payload_hash,
@@ -277,7 +319,7 @@ def project_fixture(state, selection_bytes: bytes, plan_bytes: bytes, *, selecti
                            "schemaHex": "0x" + r.schema.hex(), "authorityEvidenceHex": "0x" + r.authority_evidence.hex(),
                            "inventoryScope": r.selector.record_hash in scope} for r in public]})
     coverage_raw, provenance_raw = dumps(coverage), dumps(sorted(provenance, key=dumps))
-    report = dumps({"mode": "synthetic_candidate_resource_projection", "version": "1", "sourceStateHash": state.commitment,
+    report = dumps({"mode": "synthetic_candidate_resource_projection", "version": profile.version, "sourceStateHash": state.commitment,
         "profileHash": profile_hash, "selectionPolicyHash": selection_hash, "planHash": plan_hash,
         "projectionDependencies": loads(profile.identity), "sidecarHash": keccak256(sidecar),
         "profileDerivedPaths": [{"entity": r.identifier, "targetPointer": "/@context", "value": CONTEXT,

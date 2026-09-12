@@ -61,8 +61,10 @@ adopted media/event crosswalk remains required.
 The pinned context defines PropositionalObject, but the retained thirteen-schema
 upstream root contains no abstract-work shape. The first projection attempt
 failed that validator. The extension makes no upstream shape-validation claim.
-A separately versioned abstract-work validation supplement and resource rule are
-required; substituting a carrier or Set would change the source meaning.
+A separately versioned [v2 supplement and resource rule](museum-abstract-nonvisual-projection.md)
+now provides that representation and explicit linguistic-content specialization.
+Selecting it requires new crosswalk and validation-policy hashes; v1 output is
+unchanged. Substituting a carrier or Set would change the source meaning.
 
 For compatible selected resources, four exact entity predicates are currently
 copied: `digitally_shows`, CRM P65 `shows`, P138 `represents`, and P129 `about`.
