@@ -15,6 +15,7 @@ import "./StreamArtistAuthorizationState.sol";
 import "./StreamArtistIdentityRevisionState.sol";
 import "./StreamArtistIdentityConsentState.sol";
 import "./StreamArtistRotationState.sol";
+import "./StreamArtistIdentityContestState.sol";
 import "./StreamArtistTimingState.sol";
 import "../../interfaces/stream/artist/IStreamArtistRotationOwner.sol";
 import {
@@ -29,4 +30,5 @@ abstract contract StreamArtistIdentityData {
     StreamArtistCollaboratorIdentityState.State internal _collaboratorAccounts;
     StreamArtistIdentityRevisionState.State internal _identityRevisions;
     StreamArtistRotationState.State internal _rotations;
+    StreamArtistIdentityContestState.State internal _identityContests;
 }

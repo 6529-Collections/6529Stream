@@ -39,6 +39,56 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentit
     address public immutable artistWindowAuthority;
     address public immutable identityWriterExtension;
 
+    event ArtistIdentityContested(
+        uint16 schemaVersion,
+        bytes32 indexed artistId,
+        address indexed contester,
+        bytes32 subjectRecordHash,
+        bytes32 evidenceHash,
+        bytes32 reasonHash,
+        uint64 contestedAt,
+        bytes32 contestRecordHash
+    );
+
+    function contestIdentity(
+        T.ActionContext calldata c,
+        Contest.Request calldata p,
+        Contest.GovernanceWitness calldata governance
+    ) external returns (bytes32) {
+        _check(c, 33);
+        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityContestState.file(
+            _identityContests,
+            _identity,
+            _rotations,
+            _replay,
+            _ownerContext(),
+            c,
+            p,
+            governance,
+            artistWindowAuthority
+        );
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return m.record;
+    }
+
+    function identityContestRecord(bytes32 record) external view returns (Contest.Record memory) {
+        return _identityContests.records[record];
+    }
+
+    function latestIdentityContest(bytes32 artistId) external view returns (bytes32) {
+        return _identityContests.latest[artistId];
+    }
+
+    function identityContestContext(Contest.Request calldata p)
+        external
+        view
+        returns (bytes32, bytes32, bytes32)
+    {
+        return StreamArtistIdentityContestState.context(
+            _identityContests, _identity, _rotations, _ownerContext(), p
+        );
+    }
+
     event ArtistIdentityRevisionRecorded(
         uint16 schemaVersion,
         bytes32 indexed artistId,

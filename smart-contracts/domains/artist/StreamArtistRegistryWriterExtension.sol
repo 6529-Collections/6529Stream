@@ -50,6 +50,18 @@ contract StreamArtistRegistryWriterExtension {
             .coordinateRecordSaleConsent(msg.sender, p, a);
     }
 
+    function contestArtistIdentity(
+        bytes32 artistId,
+        bytes32 subjectRecordHash,
+        bytes32 evidenceHash,
+        bytes32 reasonHash
+    ) external onlyHost returns (bytes32) {
+        return IStreamArtistIdentityContestCoordinator(operationCoordinator)
+            .coordinateContestArtistIdentity(
+                msg.sender, Contest.Request(artistId, subjectRecordHash, evidenceHash, reasonHash)
+            );
+    }
+
     function recordIdentityRevision(
         StreamArtistIdentityRevisionTypes.Revision calldata p,
         T.Authorization calldata a,

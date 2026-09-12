@@ -43,6 +43,7 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistWindows,
     IStreamArtistSaleAuthority,
     IStreamArtistAttributionState,
+    IStreamArtistIdentityContest,
     StreamModuleBase,
     StreamGasParameterHost
 {
@@ -115,6 +116,7 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistRotationReads).interfaceId
             || id == type(IStreamArtistSaleAuthority).interfaceId
             || id == type(IStreamArtistAttributionState).interfaceId
+            || id == type(IStreamArtistIdentityContest).interfaceId
             || id == type(IStreamArtistWindows).interfaceId || super.supportsInterface(id);
     }
 
@@ -123,6 +125,32 @@ contract StreamArtistOnboardingRegistry is
         returns (bytes32)
     {
         _forwardRegistryWriter();
+    }
+
+    function contestArtistIdentity(
+        bytes32 artistId,
+        bytes32 subjectRecordHash,
+        bytes32 evidenceHash,
+        bytes32 reasonHash
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function identityContestRecord(bytes32 record) external view returns (Contest.Record memory) {
+        _forwardRegistryRead();
+    }
+
+    function latestIdentityContest(bytes32 artistId) external view returns (bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function identityContestGovernanceContext(
+        bytes32 artistId,
+        bytes32 subjectRecordHash,
+        bytes32 evidenceHash,
+        bytes32 reasonHash
+    ) external view returns (bytes32, bytes32, bytes32) {
+        _forwardRegistryRead();
     }
 
     function saleConsentDigest(Sale.Consent calldata p, T.Authorization calldata a)

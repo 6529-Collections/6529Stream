@@ -49,6 +49,33 @@ contract StreamArtistRegistryReadExtension {
         return IStreamArtistRotationOwner(_contentSuite().owners[2]);
     }
 
+    function identityContestRecord(bytes32 record)
+        external
+        view
+        onlyHost
+        returns (Contest.Record memory)
+    {
+        return IStreamArtistIdentityContestOwner(_contentSuite().owners[2])
+            .identityContestRecord(record);
+    }
+
+    function latestIdentityContest(bytes32 artistId) external view onlyHost returns (bytes32) {
+        return IStreamArtistIdentityContestOwner(_contentSuite().owners[2])
+            .latestIdentityContest(artistId);
+    }
+
+    function identityContestGovernanceContext(
+        bytes32 artistId,
+        bytes32 subjectRecordHash,
+        bytes32 evidenceHash,
+        bytes32 reasonHash
+    ) external view onlyHost returns (bytes32, bytes32, bytes32) {
+        return IStreamArtistIdentityContestOwner(_contentSuite().owners[2])
+            .identityContestContext(
+                Contest.Request(artistId, subjectRecordHash, evidenceHash, reasonHash)
+            );
+    }
+
     function guardianSetRecord(bytes32 record)
         external
         view

@@ -4,6 +4,7 @@ import "./StreamArtistIdentityOperations.sol";
 import "./StreamArtistOnboardingOperations.sol";
 import "./StreamArtistRotationOperations.sol";
 import "./StreamArtistSaleOperations.sol";
+import "./StreamArtistIdentityContestOperations.sol";
 import "../../interfaces/stream/artist/IStreamArtistSaleAuthority.sol";
 
 import "./StreamArtistEconomicsHashes.sol";
@@ -144,6 +145,7 @@ contract StreamArtistOnboardingCoordinator is
                 uint16(30),
                 uint16(31),
                 uint16(32),
+                uint16(33),
                 uint16(51),
                 uint16(52),
                 uint16(54)
@@ -174,6 +176,14 @@ contract StreamArtistOnboardingCoordinator is
         T.Authorization calldata a
     ) external operation returns (bytes32) {
         return StreamArtistSaleOperations.record(_economicContext(), actor, p, a);
+    }
+
+    function coordinateContestArtistIdentity(address actor, Contest.Request calldata p)
+        external
+        operation
+        returns (bytes32)
+    {
+        return StreamArtistIdentityContestOperations.file(_economicContext(), actor, p);
     }
 
     function coordinateSetArtistGuardians(

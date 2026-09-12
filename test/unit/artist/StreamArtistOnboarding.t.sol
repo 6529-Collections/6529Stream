@@ -93,6 +93,35 @@ contract ArtistUnitGovernance {
     bytes32 private oldState;
     bytes32 private newState;
     uint8 private selectedClass = 1;
+    address public roleRegistry;
+    address private contestProposer;
+    bytes32 private contestReason;
+    string private contestURI;
+
+    /// @dev Exact governance read boundary, not actual staging, proposer admission or timelock evidence.
+    function configureContestReads(
+        address roles,
+        address proposer,
+        bytes32 reason,
+        string calldata uri
+    ) external {
+        roleRegistry = roles;
+        contestProposer = proposer;
+        contestReason = reason;
+        contestURI = uri;
+    }
+
+    function governanceAction(bytes32) external view returns (GovernanceAction memory action) {
+        action.status = GovernanceActionStatus.EXECUTED;
+        action.actionClass = selectedClass;
+        action.proposer = contestProposer;
+        action.reasonHash = contestReason;
+        action.reasonURI = contestURI;
+        // Deliberately differs from the current call: batches index their first call here.
+        action.target = address(0x1234);
+        action.selector = bytes4(0x12345678);
+        action.scopeHash = keccak256("first batch call");
+    }
 
     /// @dev An exact target context only. This does not simulate a real Executor's authorization or delay.
     function executeModuleContext(
@@ -188,14 +217,23 @@ contract ArtistUnitRoles {
     mapping(address => bool) private extraAdmins;
     uint64 private revision = 1;
     bytes32 private changes;
+    mapping(address => bool) private arbiters;
 
     constructor(address admin_) {
         admin = admin_;
     }
 
     function hasRole(bytes32 role, address account) external view returns (bool) {
-        return role == keccak256("ROLE_ARTIST_REGISTRY_ADMIN")
+        return (role == keccak256("ROLE_ATTRIBUTION_ARBITER") && arbiters[account])
+            || role == keccak256("ROLE_ARTIST_REGISTRY_ADMIN")
             && (account == admin || extraAdmins[account]);
+    }
+
+    function setArbiter(address account, bool enabled) external {
+        require(msg.sender == admin, "unit admin");
+        arbiters[account] = enabled;
+        changes = keccak256(abi.encode(changes, account, enabled, "arbiter"));
+        ++revision;
     }
 
     function setAdmin(address account, bool enabled) external {
@@ -2312,6 +2350,7 @@ contract StreamArtistOnboardingTest is
                 uint16(30),
                 uint16(31),
                 uint16(32),
+                uint16(33),
                 uint16(51),
                 uint16(52),
                 uint16(54)
@@ -5814,7 +5853,7 @@ contract StreamArtistOnboardingTest is
     }
 
     function _rotationContestMaturityCase(uint256 boundary) private {
-        rotationContestFixture = true;
+        rotationContestFixture = false;
         setUp();
         _all();
         bytes32 priorIdentity = ingress.operativeIdentityRecord(artistId);
@@ -5823,6 +5862,8 @@ contract StreamArtistOnboardingTest is
         _newRotationSafe(9200 + boundary);
         bytes32 transition = _stageRotation(bytes32(0));
         _executeTimedRotation(transition);
+        OfficialSafe priorSafe = artist;
+        uint256[] memory priorKeys = keys;
         _adoptRotatedSafe();
         uint64 end = ingress.rotationRecord(transition).transition.postWindowEndsAt;
         bytes memory document = bytes("provisional contested document");
@@ -5842,7 +5883,25 @@ contract StreamArtistOnboardingTest is
         members[0] = address(artist);
         bytes32 guardianRecord = _guardianRecord(members, 1, 0, nextNonce);
         vm.warp(uint256(end) + boundary - 1);
-        ArtistRotationContestHarness(suite.owners[2]).simulateExecutedTransitionContest(transition);
+        require(
+            executeSafe(
+                priorSafe,
+                priorKeys,
+                address(ingress),
+                0,
+                abi.encodeCall(
+                    IStreamArtistIdentityContest.contestArtistIdentity,
+                    (
+                        artistId,
+                        transition,
+                        keccak256("actual compromise evidence"),
+                        keccak256("actual compromise reason")
+                    )
+                ),
+                0
+            ),
+            "actual prior Safe files compromise"
+        );
         vm.warp(uint256(end) + 2);
         bool mature = boundary != 0;
         require(
@@ -5871,15 +5930,15 @@ contract StreamArtistOnboardingTest is
         );
     }
 
-    function testRotationQualifiedCompromiseBeforeExpiryPreventsAllCandidateMaturity() public {
+    function testIdentityContestBeforeExpiryPreventsAllCandidateMaturity() public {
         _rotationContestMaturityCase(0);
     }
 
-    function testRotationQualifiedCompromiseAtExpiryDoesNotRewindMatureFacts() public {
+    function testIdentityContestAtExpiryDoesNotRewindMatureFacts() public {
         _rotationContestMaturityCase(1);
     }
 
-    function testRotationQualifiedCompromiseAfterExpiryDoesNotRewindMatureFacts() public {
+    function testIdentityContestAfterExpiryDoesNotRewindMatureFacts() public {
         _rotationContestMaturityCase(2);
     }
 
@@ -6047,6 +6106,588 @@ contract StreamArtistOnboardingTest is
         vm.expectRevert(abi.encodeWithSelector(T.ExpiredAuthorization.selector, newA.time));
         ingress.rotateArtistAddress(p, oldA, newA);
         require(_roots() == roots, "live old side cannot waive expired new-side acceptance");
+    }
+
+    function _contestData(bytes32 subject) private view returns (bytes memory) {
+        return abi.encodeCall(
+            IStreamArtistIdentityContest.contestArtistIdentity,
+            (artistId, subject, keccak256("compromise evidence"), keccak256("compromise reason"))
+        );
+    }
+
+    function _selfGuardian() private returns (bytes32 record) {
+        address[] memory guardians = new address[](1);
+        guardians[0] = address(artist);
+        return _guardianRecord(guardians, 1, 0, nextNonce);
+    }
+
+    function testIdentityContestGuardianSafeExactRecordReplayEventAndSingleOwnerCommit() public {
+        bytes32 guardian = _selfGuardian();
+        T.Identity memory prior = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        T.Snapshot[7] memory before_;
+        for (uint256 i; i < 7; ++i) {
+            before_[i] = IStreamArtistOwner(suite.owners[i]).ownerStateSnapshotV2();
+        }
+        vm.warp(1077);
+        vm.recordLogs();
+        require(
+            executeSafe(artist, keys, address(ingress), 0, _contestData(0), 0),
+            "actual guardian Safe"
+        );
+        bytes32 record = ingress.latestIdentityContest(artistId);
+        bytes32 expected = keccak256(
+            abi.encode(
+                bytes32(0x26a4221cd1625ab88b1ac279e1708a73efa176e486242b26832cdc94fe25e6bb),
+                block.chainid,
+                address(ingress),
+                artistId,
+                address(artist),
+                bytes32(0),
+                keccak256("compromise evidence"),
+                keccak256("compromise reason"),
+                uint64(1077)
+            )
+        );
+        require(record == expected, "independent permanent preimage");
+        Contest.Record memory saved = ingress.identityContestRecord(record);
+        require(
+            saved.recordHash == record && saved.guardianSetRecordHash == guardian
+                && saved.priorStatus == 1 && saved.contestedAt == 1077,
+            "actual record facts"
+        );
+        T.Identity memory after_ = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        require(
+            after_.status == 4 && after_.nonceHint == prior.nonceHint
+                && after_.lastAuthorityActionAt == prior.lastAuthorityActionAt,
+            "no principal nonce or liveness"
+        );
+        after_.status = prior.status;
+        require(
+            keccak256(abi.encode(after_)) == keccak256(abi.encode(prior)), "only status changes"
+        );
+        for (uint256 i; i < 7; ++i) {
+            T.Snapshot memory actual = IStreamArtistOwner(suite.owners[i]).ownerStateSnapshotV2();
+            if (i == 2) {
+                require(
+                    actual.revision == before_[i].revision + 1
+                        && actual.recordChainTip != before_[i].recordChainTip,
+                    "one Identity record commit"
+                );
+            } else {
+                require(
+                    keccak256(abi.encode(actual)) == keccak256(abi.encode(before_[i])),
+                    "other owner unchanged"
+                );
+            }
+        }
+        bytes32 subjectKey = _identityRevisionReplayKey(
+            keccak256("identity_authority.replay.contest_record_hash_and_subject_key"),
+            keccak256(
+                abi.encode(
+                    keccak256("subject"),
+                    artistId,
+                    bytes32(0),
+                    keccak256("compromise evidence"),
+                    keccak256("compromise reason")
+                )
+            )
+        );
+        T.ReplayCell memory cell = IStreamArtistOwner(suite.owners[2]).replayCell(subjectKey);
+        require(cell.status == 2 && cell.commitment == record, "exact subject replay cell");
+        (
+            Contest.Request memory terms,
+            Contest.GovernanceWitness memory witness,
+            Contest.Record memory archived
+        ) = abi.decode(
+            _operationPayload(33, address(artist), record),
+            (Contest.Request, Contest.GovernanceWitness, Contest.Record)
+        );
+        require(
+            terms.artistId == artistId && witness.actionId == 0
+                && keccak256(abi.encode(archived)) == keccak256(abi.encode(saved)),
+            "actual archive payload"
+        );
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        uint256 count;
+        bytes32 topic = keccak256(
+            "ArtistIdentityContested(uint16,bytes32,address,bytes32,bytes32,bytes32,uint64,bytes32)"
+        );
+        for (uint256 i; i < logs.length; ++i) {
+            if (logs[i].topics[0] == topic) {
+                require(
+                    logs[i].emitter == suite.owners[2] && logs[i].topics[1] == artistId
+                        && logs[i].topics[2] == bytes32(uint256(uint160(address(artist)))),
+                    "exact owner emitter"
+                );
+                require(
+                    keccak256(logs[i].data)
+                        == keccak256(
+                            abi.encode(
+                                uint16(1),
+                                bytes32(0),
+                                keccak256("compromise evidence"),
+                                keccak256("compromise reason"),
+                                uint64(1077),
+                                record
+                            )
+                        ),
+                    "exact event fields"
+                );
+                ++count;
+            }
+        }
+        require(count == 1, "one normative event");
+        bytes32 roots = _roots();
+        vm.expectRevert(abi.encodeWithSelector(Contest.InvalidIdentityContest.selector, artistId));
+        vm.prank(address(artist));
+        ingress.contestArtistIdentity(
+            artistId, 0, keccak256("compromise evidence"), keccak256("compromise reason")
+        );
+        require(_roots() == roots, "already contested has no successful no-op");
+    }
+
+    function testIdentityContestSafeOwnerStrangerAndCurrentPrincipalNeedActualStanding() public {
+        bytes memory data = _contestData(0);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeArtistSafe(data);
+        _selfGuardian();
+        address ownerEOA = vm.addr(keys[0]);
+        vm.expectRevert(abi.encodeWithSelector(T.Unauthorized.selector, ownerEOA));
+        vm.prank(ownerEOA);
+        ingress.contestArtistIdentity(
+            artistId, 0, keccak256("compromise evidence"), keccak256("compromise reason")
+        );
+        vm.expectRevert(abi.encodeWithSelector(T.Unauthorized.selector, address(this)));
+        ingress.contestArtistIdentity(
+            artistId, 0, keccak256("compromise evidence"), keccak256("compromise reason")
+        );
+        require(
+            executeSafe(artist, keys, address(ingress), 0, data, 0),
+            "same call actual guardian succeeds"
+        );
+    }
+
+    function _pendingContestGuardianCase(bool useCaptured) private {
+        bytes32 setA = _selfGuardian();
+        _newRotationSafe(11001);
+        bytes32 rotation = _stageRotation(0);
+        address[] memory members = new address[](1);
+        members[0] = address(rotationSafe);
+        bytes32 setB = _guardianRecord(members, 1, 0, nextNonce);
+        require(
+            executeSafe(
+                useCaptured ? artist : rotationSafe,
+                useCaptured ? keys : rotationKeys,
+                address(ingress),
+                0,
+                _contestData(rotation),
+                0
+            ),
+            "operative or captured actual Safe"
+        );
+        Contest.Record memory item =
+            ingress.identityContestRecord(ingress.latestIdentityContest(artistId));
+        require(
+            item.guardianSetRecordHash == setB && item.capturedGuardianSetRecordHash == setA
+                && ingress.rotationRecord(rotation).transition.phase == 3,
+            "both membership facts and terminal pending"
+        );
+        (,,,, bytes32 pending) = ingress.pendingRotation(artistId);
+        require(pending == 0, "pending cancelled");
+    }
+
+    function testIdentityContestNewOperativeGuardianWhileRotationPending() public {
+        _pendingContestGuardianCase(false);
+    }
+
+    function testIdentityContestCapturedGuardianStillHasDefensiveStanding() public {
+        _pendingContestGuardianCase(true);
+    }
+
+    function testIdentityContestRetiredSafeStandingSurvivesTailUntilExplicitRevocation() public {
+        _newRotationSafe(11002);
+        bytes32 rotation = _stageRotation(0);
+        _executeTimedRotation(rotation);
+        R.RotationRecord memory r = ingress.rotationRecord(rotation);
+        vm.warp(uint256(r.transition.postWindowEndsAt) + r.standingTail + 1);
+        require(
+            executeSafe(artist, keys, address(ingress), 0, _contestData(rotation), 0),
+            "old Safe standing persists"
+        );
+        require(
+            ingress.rotationRecord(rotation).transition.contestedAt == block.timestamp,
+            "actual late contest time"
+        );
+    }
+
+    function testIdentityContestRevokedPriorIndependentGuardianRemains() public {
+        _selfGuardian();
+        OfficialSafe old = artist;
+        uint256[] memory oldKeys = keys;
+        _newRotationSafe(11003);
+        bytes32 rotation = _stageRotation(0);
+        _executeTimedRotation(rotation);
+        _adoptRotatedSafe();
+        R.RotationRecord memory r = ingress.rotationRecord(rotation);
+        vm.warp(uint256(r.transition.postWindowEndsAt) + r.standingTail);
+        R.StandingRevocation memory p =
+            R.StandingRevocation(artistId, address(old), keccak256("retire"), rotation);
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.standingRevocationDigest(p, a));
+        ingress.revokePriorAddressStanding(p, a);
+        require(
+            executeSafe(old, oldKeys, address(ingress), 0, _contestData(0), 0),
+            "independent operative guardian remains"
+        );
+    }
+
+    function testIdentityContestRevokedPriorSafeCannotFileWithoutOtherStanding() public {
+        OfficialSafe old = artist;
+        uint256[] memory oldKeys = keys;
+        _newRotationSafe(11004);
+        bytes32 rotation = _stageRotation(0);
+        _executeTimedRotation(rotation);
+        _adoptRotatedSafe();
+        R.RotationRecord memory r = ingress.rotationRecord(rotation);
+        vm.warp(uint256(r.transition.postWindowEndsAt) + r.standingTail);
+        R.StandingRevocation memory p =
+            R.StandingRevocation(artistId, address(old), keccak256("retire"), rotation);
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.standingRevocationDigest(p, a));
+        ingress.revokePriorAddressStanding(p, a);
+        bytes32 roots = _roots();
+        vm.expectRevert(abi.encodeWithSelector(T.Unauthorized.selector, address(old)));
+        vm.prank(address(old));
+        ingress.contestArtistIdentity(
+            artistId, rotation, keccak256("compromise evidence"), keccak256("compromise reason")
+        );
+        artist = old;
+        keys = oldKeys;
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeArtistSafe(_contestData(rotation));
+        require(_roots() == roots, "revoked prior Safe rejection is atomic");
+    }
+
+    function testIdentityContestOlderSubjectCannotLeaveCurrentWindowUncontested() public {
+        OfficialSafe old = artist;
+        uint256[] memory oldKeys = keys;
+        _newRotationSafe(11005);
+        bytes32 first = _stageRotation(0);
+        _executeTimedRotation(first);
+        vm.warp(ingress.rotationRecord(first).transition.postWindowEndsAt);
+        _adoptRotatedSafe();
+        _newRotationSafe(11006);
+        bytes32 second = _stageRotation(first);
+        _executeTimedRotation(second);
+        uint64 end = ingress.rotationRecord(second).transition.postWindowEndsAt;
+        require(
+            executeSafe(old, oldKeys, address(ingress), 0, _contestData(first), 0),
+            "oldest Safe names historical subject"
+        );
+        require(
+            ingress.rotationRecord(first).transition.contestedAt == block.timestamp
+                && ingress.rotationRecord(second).transition.contestedAt == block.timestamp
+                && block.timestamp < end,
+            "current cohort receives actual contest too"
+        );
+        vm.warp(end);
+        R.ProvisionalAssociation memory association = R.ProvisionalAssociation(second, end);
+        require(
+            !IStreamArtistRotationOwner(suite.owners[2])
+                .provisionalRecordEligible(artistId, association),
+            "current cohort remains ineligible"
+        );
+    }
+
+    function testIdentityContestEmptyAndForeignSubjectsRollbackThenSameSafeCanFile() public {
+        _selfGuardian();
+        bytes32 roots = _roots();
+        vm.expectRevert(
+            abi.encodeWithSelector(Contest.InvalidContestSubject.selector, bytes32(uint256(3)))
+        );
+        vm.prank(address(artist));
+        ingress.contestArtistIdentity(artistId, bytes32(uint256(3)), keccak256("e"), keccak256("r"));
+        vm.expectRevert(abi.encodeWithSelector(Contest.InvalidIdentityContest.selector, artistId));
+        vm.prank(address(artist));
+        ingress.contestArtistIdentity(artistId, 0, 0, keccak256("r"));
+        vm.expectRevert(abi.encodeWithSelector(Contest.InvalidIdentityContest.selector, artistId));
+        vm.prank(address(artist));
+        ingress.contestArtistIdentity(artistId, 0, keccak256("e"), 0);
+        require(_roots() == roots, "bad requests leave roots");
+        _newRotationSafe(11007);
+        bytes32 rotation = _stageRotation(0);
+        T.BindingProposal memory proposal = _proposal(0);
+        proposal.artistAddress = address(rotationSafe);
+        (bytes32 otherId,) = ingress.proposeArtistBinding(
+            2, proposal, bytes("unit identity document"), "Other identity"
+        );
+        vm.expectRevert(abi.encodeWithSelector(Contest.InvalidContestSubject.selector, rotation));
+        vm.prank(address(artist));
+        ingress.contestArtistIdentity(otherId, rotation, keccak256("e"), keccak256("r"));
+        require(
+            executeSafe(artist, keys, address(ingress), 0, _contestData(0), 0), "positive control"
+        );
+    }
+
+    function testIdentityContestLateArchiveFailureRollsBackRecordReplayAndSafeNonce() public {
+        _selfGuardian();
+        bytes32 roots = _roots();
+        uint256 safeNonce = artist.nonce();
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodeWithSelector(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeArtistSafe(_contestData(0));
+        require(
+            _roots() == roots && artist.nonce() == safeNonce
+                && ingress.latestIdentityContest(artistId) == 0,
+            "late entire transaction rollback"
+        );
+        avm.clearMockedCalls();
+        require(
+            executeSafe(artist, keys, address(ingress), 0, _contestData(0), 0),
+            "same calldata succeeds after restored archive"
+        );
+    }
+
+    function testIdentityContestDefensiveFourFamiliesStayAvailableWithoutTimeout() public {
+        _all();
+        _delegateSetup();
+        bytes32 grant = _grant(_delegation(1, 4, 1000, uint64(1000 + 500 days), 0));
+        _selfGuardian();
+        require(
+            executeSafe(artist, keys, address(ingress), 0, _contestData(0), 0), "real compromise"
+        );
+        vm.warp(block.timestamp + 365 days);
+        require(_closed(_mintCall()), "no automatic clearance");
+        _authorizeFreeze();
+        _contentFreeze();
+        _revoke(grant);
+        StreamArtistAuthorizationTypes.Revocation memory p =
+            StreamArtistAuthorizationTypes.Revocation(
+                artistId, keccak256("unused compromised authorization"), 0
+            );
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.authorizationRevocationDigest(p, a));
+        ingress.revokeArtistAuthorization(p, a);
+        require(
+            IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId).status == 4,
+            "defenses never clear status"
+        );
+    }
+
+    function _governedContest(uint8 actionClass, uint8 fault) private {
+        ArtistUnitGovernance authority = ArtistUnitGovernance(manager.governanceAuthority());
+        bytes32 reason = keccak256("compromise reason");
+        ArtistUnitRoles(suite.roleRegistry).setArbiter(address(artist), true);
+        authority.configureContestReads(
+            suite.roleRegistry, address(artist), reason, "urn:unit:contest"
+        );
+        (bytes32 scope, bytes32 oldHash, bytes32 newHash) = ingress.identityContestGovernanceContext(
+            artistId, 0, keccak256("compromise evidence"), reason
+        );
+        if (fault == 1) scope = keccak256("wrong scope");
+        if (fault == 2) oldHash = keccak256("wrong old state");
+        if (fault == 3) newHash = keccak256("wrong intent");
+        if (fault == 4) {
+            authority.configureContestReads(
+                suite.roleRegistry, address(artist), keccak256("wrong reason"), "urn:unit"
+            );
+        }
+        if (fault == 5) {
+            authority.configureContestReads(address(core), address(artist), reason, "urn:unit");
+        }
+        if (fault == 6) ArtistUnitRoles(suite.roleRegistry).setArbiter(address(artist), false);
+        authority.executeModuleContext(
+            address(ingress), _contestData(0), actionClass, scope, oldHash, newHash
+        );
+    }
+
+    function testIdentityContestGovernanceExactContextAndRoleNegativesHavePositiveControl() public {
+        bytes32 roots = _roots();
+        for (uint8 fault = 1; fault <= 6; ++fault) {
+            uint256 checkpoint = vm.snapshotState();
+            if (fault == 6) {
+                vm.expectRevert(abi.encodeWithSelector(T.Unauthorized.selector, address(artist)));
+            } else {
+                vm.expectRevert(abi.encodeWithSelector(Contest.InvalidContestGovernance.selector));
+            }
+            this.executeGovernedContest(1, fault);
+            require(_roots() == roots, "governance fault rollback");
+            _governedContest(1, 0);
+            require(
+                ingress.latestIdentityContest(artistId) != 0,
+                "same context restored positive control"
+            );
+            require(vm.revertToState(checkpoint), "restore test-only checkpoint");
+        }
+        vm.expectRevert(abi.encodeWithSelector(Contest.InvalidContestGovernance.selector));
+        this.executeGovernedContest(0, 0);
+        vm.expectRevert(abi.encodeWithSelector(Contest.InvalidContestGovernance.selector));
+        this.executeGovernedContest(3, 0);
+        _governedContest(1, 0);
+        bytes32 record = ingress.latestIdentityContest(artistId);
+        (,, Contest.Record memory item) = abi.decode(
+            _operationPayload(33, manager.governanceAuthority(), record),
+            (Contest.Request, Contest.GovernanceWitness, Contest.Record)
+        );
+        require(
+            item.contester == manager.governanceAuthority() && item.governanceWitnessHash != 0,
+            "governed actor and witness"
+        );
+    }
+
+    function executeGovernedContest(uint8 actionClass, uint8 fault) external {
+        require(msg.sender == address(this), "test-only");
+        _governedContest(actionClass, fault);
+    }
+
+    function testIdentityContestMalformedGovernanceHeaderIsBoundedAndRecoverable() public {
+        ArtistUnitGovernance authority = ArtistUnitGovernance(manager.governanceAuthority());
+        ArtistUnitRoles(suite.roleRegistry).setArbiter(address(artist), true);
+        authority.configureContestReads(
+            suite.roleRegistry, address(artist), keccak256("compromise reason"), "urn:test"
+        );
+        bytes memory valid = abi.encode(authority.governanceAction(bytes32(0)));
+        bytes32 roots = _roots();
+        for (uint256 mode; mode < 10; ++mode) {
+            uint256 checkpoint = vm.snapshotState();
+            bytes memory bad = bytes.concat(valid);
+            if (mode == 0) bad = new bytes(639);
+            if (mode == 1) assembly ("memory-safe") { mstore(add(bad, 32), 64) }
+            if (mode == 2) assembly ("memory-safe") { mstore(add(bad, 576), 608) }
+            if (mode == 3) assembly ("memory-safe") { mstore(add(bad, 640), not(0)) }
+            if (mode == 4) assembly ("memory-safe") { mstore(add(bad, 416), not(0)) }
+            if (mode == 5) assembly ("memory-safe") { mstore(add(bad, 64), 1) }
+            if (mode == 6) assembly ("memory-safe") { mstore(add(bad, 96), 257) }
+            if (mode == 7) assembly ("memory-safe") { mstore(add(bad, 192), 1) }
+            if (mode == 8) bad = bytes.concat(bad, bytes32(0));
+            if (mode == 9) assembly ("memory-safe") { mstore(add(bad, 352), not(0)) }
+            avm.mockCall(
+                address(authority),
+                abi.encodeWithSelector(IStreamGovernanceReads.governanceAction.selector),
+                bad
+            );
+            vm.expectRevert(abi.encodeWithSelector(Contest.InvalidContestGovernance.selector));
+            this.executeGovernedContest(1, 0);
+            require(_roots() == roots, "malformed header leaves owner state");
+            avm.clearMockedCalls();
+            _governedContest(1, 0);
+            require(ingress.latestIdentityContest(artistId) != 0, "same request after restore");
+            require(vm.revertToState(checkpoint), "restore malformed test checkpoint");
+        }
+    }
+
+    function testIdentityContestProtocolCallbacksAndFixedExtensionRejectActualSafe() public {
+        _selfGuardian();
+        Contest.Request memory p = Contest.Request(artistId, 0, keccak256("e"), keccak256("r"));
+        Contest.GovernanceWitness memory empty;
+        T.ActionContext memory c = T.ActionContext(
+            33, address(artist), IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2()
+        );
+        bytes memory ownerData =
+            abi.encodeCall(IStreamArtistIdentityContestOwner.contestIdentity, (c, p, empty));
+        vm.expectRevert(abi.encodeWithSelector(T.Unauthorized.selector, address(artist)));
+        vm.prank(address(artist));
+        IStreamArtistIdentityContestOwner(suite.owners[2]).contestIdentity(c, p, empty);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(suite.owners[2], ownerData);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(
+            address(coordinator),
+            abi.encodeCall(
+                IStreamArtistIdentityContestCoordinator.coordinateContestArtistIdentity,
+                (address(artist), p)
+            )
+        );
+        address writer = ingress.registryWriterExtension();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(writer, _contestData(0));
+        address reader = ingress.registryReadExtension();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(
+            reader, abi.encodeCall(IStreamArtistIdentityContest.latestIdentityContest, (artistId))
+        );
+        require(
+            executeSafe(artist, keys, address(ingress), 0, _contestData(0), 0),
+            "normal guarded path"
+        );
+    }
+
+    function testIdentityContestSafeCallsGovernedBoundaryAndReadCapability() public {
+        ArtistUnitGovernance authority = ArtistUnitGovernance(manager.governanceAuthority());
+        ArtistUnitRoles(suite.roleRegistry).setArbiter(address(artist), true);
+        authority.configureContestReads(
+            suite.roleRegistry,
+            address(artist),
+            keccak256("compromise reason"),
+            string(new bytes(4097))
+        );
+        (bytes32 scope, bytes32 oldHash, bytes32 newHash) = ingress.identityContestGovernanceContext(
+            artistId, 0, keccak256("compromise evidence"), keccak256("compromise reason")
+        );
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(
+                    IStreamArtistIdentityContest.identityContestGovernanceContext,
+                    (
+                        artistId,
+                        bytes32(0),
+                        keccak256("compromise evidence"),
+                        keccak256("compromise reason")
+                    )
+                ),
+                0
+            ),
+            "real Safe context read"
+        );
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(authority),
+                0,
+                abi.encodeCall(
+                    ArtistUnitGovernance.executeModuleContext,
+                    (address(ingress), _contestData(0), uint8(2), scope, oldHash, newHash)
+                ),
+                0
+            ),
+            "actual Safe into qualified governance boundary"
+        );
+        bytes32 record = ingress.latestIdentityContest(artistId);
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistIdentityContest.identityContestRecord, (record)),
+                0
+            ),
+            "real Safe record read"
+        );
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistIdentityContest.latestIdentityContest, (artistId)),
+                0
+            ),
+            "real Safe latest read"
+        );
+        require(
+            ingress.supportsInterface(type(IStreamArtistIdentityContest).interfaceId),
+            "narrow capability advertised"
+        );
     }
 
     function setUp() public {
