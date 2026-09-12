@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Reworked collaborator binding serialization to avoid the default compiler's
+  stack limit while preserving the exact sixteen-word preimage, ABI and
+  selectors. Independent literal vectors and 256 fuzz inputs pass against the
+  prior IR implementation and both new compiler profiles. Complete repository
+  compilation remains a separate check.
 - Added the immutable interpretation-document registry and bounded chunk store,
   with canonical payload reconstruction, versioned identities, governed
   retirement and retained history. Eighteen current governance/document cases

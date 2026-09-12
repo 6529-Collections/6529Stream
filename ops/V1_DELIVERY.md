@@ -84,9 +84,12 @@ or institutional-conformance evidence.
 The latest remote CI on `266fc055` remains red. It identified a default-mode
 artist hash-helper stack limit and a separate full current-profile Yul compiler
 failure; Slither provenance and release bundles also need their planned refresh.
-Passing focused runtime cohorts does not replace resolving this complete-build
-failure. The artist builder owns the hash helper; the integrator owns the full
-compile, CI and final matching artifact pass.
+The hash-helper repair is integrated as `e43dbed5`, with exact preimage vectors
+and fuzzing against the old IR and both new compiler modes. The integrator is
+running the whole current compilation with dynamic test linking in an isolated
+snapshot to investigate the other failure; repository compiler settings have
+not changed. Passing focused runtime cohorts does not replace resolving this
+complete-build failure and the final matching artifact pass.
 
 ## Team and ownership
 

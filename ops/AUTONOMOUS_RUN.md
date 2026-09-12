@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Primary token economics `e7250886` and full-payload revocation `37f57cf6`, with seven actual-current Safe mint regressions passing. Staged operator foundation `266fc055` and catalog11 `1ef25f34` independently reviewed. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | Museum foundation `c7752f11`, royalty262 `763944c2`, schema19 `0f4ad530`, and exact-preimage compiler repair `e43dbed5` are integrated. Primary/revocation current7 and the staged operator foundation are independently reviewed. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,9 +29,9 @@ contract call, including owner actions, payments, NFT custody and reads.
 
 | Lane | Branch | Current deliverable |
 | --- | --- | --- |
-| Integrator | `codex/v1-integration` | Schema document registry, actual metadata/finality producers, staged product/operator activation, combined compiler/CI repairs, client and release |
-| Artist | `codex/v1-artist-authority` | Royalty262 integrated as `763944c2`; exact-preimage compiler repair and actual finality/sanction/recovery integration next |
-| Revenue | `codex/v1-revenue` | Revocation integrated; museum schemas, bounded offline fixtures, prospective publication planner and exporter in progress |
+| Integrator | `codex/v1-integration` | Actual metadata/finality producers and discovery, staged product/operator activation, whole-current compiler diagnostic, client and release |
+| Artist | `codex/v1-artist-authority` | Royalty and exact-preimage compiler repair integrated; actual finality/sanction/recovery and archival artifact coverage next |
+| Revenue | `codex/v1-revenue` | Museum foundation32 integrated; complete vocabulary, JSON-LD/Linked Art validation and remaining export mappings in progress |
 | Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |
 
 Signing-domain discovery is integrated as `134e0f58`. The native fixed,
