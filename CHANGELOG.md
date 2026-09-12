@@ -7,6 +7,24 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added the current full-byte metadata host, a distinct caller interface,
+  attributed history, canonical events and root-authorized family grants.
+  Twenty-three host/adapter cases pass in both compiler modes with fuzzing;
+  three independent actual-Executor cases verify the configuration boundary.
+  Actual artist publication and typed finality composition remain in development.
+- Isolated deployment-script catalog construction behind an additive view call
+  after broadcast stops, resolving the minimal Yul compiler reproducer. The
+  full patched deployment target has not yet completed compilation.
+- Added attributed museum resource projections and reproducible offline public
+  packages. The combined suite now contains 104 tests; complete cross-format
+  mappings, authenticated onchain sources and institutional acceptance remain open.
+- Added complete archival artifact chunk coverage with stable completion
+  commitments and separate fresh-fixity validation. Twenty-six focused cases
+  and fuzzing pass independent review; actual full finality composition remains open.
+- Added canonical semantic review bodies and deterministic authority-policy
+  selection, binding reviews to exact original records without circular hashes.
+  Fifteen new tests extend the reviewed museum suite to 80; actual recorded-state
+  authentication and complete projections remain in development.
 - Added a bounded, schema-derived source inventory for museum projections,
   retaining applicable branch evidence and exact field values. Thirteen new
   cases extend the independently reviewed museum suite to 65 tests.

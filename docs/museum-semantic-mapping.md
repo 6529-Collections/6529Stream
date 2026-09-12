@@ -216,6 +216,19 @@ The adopted baseline is CIDOC CRM 7.1.3 and Linked Art Model 1.0.0, expressed us
    approved account. Selection affects this dossier view only: it cannot grant
    a reviewer a protocol veto, alter an original record, block independent-lane
    entry, or change default `tokenURI`/renderer inputs and their firewall.
+   A semantic review uses relation `urn:6529stream:semantic-review:v1` and
+   datatype `urn:6529stream:datatype:semantic-review:v1`. Its canonical literal
+   binds the complete original record selector and field pointer, assertion
+   revision, profile, mapping rule and disposition. The enclosing authenticated
+   assertion supplies the reviewer and time, identifies the original assertion
+   as its subject and uses `direct_statement` origin. Its own selector is
+   resolved after publication and is excluded from its body. A later review
+   backlink must match this exact published review and original target;
+   self-review is derived from authenticated identities. The original record
+   must precede the review in authenticated publication order. Eligibility
+   remains subject to the selected authority policy. The exact subordinate
+   body and acyclic commitment rules are defined in
+   [museum semantic review literal](museum-review-literal.md).
 10. Every emitted semantic claim must have a provenance-index entry linking its entity/property path and value to the exact source assertion or record selector and mapping rule. Shared claims may cite several sources. Labels copied from an authority snapshot must identify that snapshot; they must not appear as artist-authored wording. Linked Art's assignment patterns can express selected attribution, while Stream retains the full source/version history. [Linked Art assertions](https://linked.art/model/assertion/)
 
 ## 6. Authority alignment and Getty TGN [MSM-AUTHORITIES]

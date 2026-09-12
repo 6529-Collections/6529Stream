@@ -57,3 +57,7 @@ jobs:
         run: python -m tools.museum.schemas --check
       - name: Check fixture generation
         run: python -m tools.museum.fixtures --check
+      - name: Check semantic review schema generation
+        run: python -m tools.museum.review --check
+      - name: Check resource projection generation
+        run: python -m tools.museum.projection --check

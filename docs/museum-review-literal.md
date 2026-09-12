@@ -7,7 +7,7 @@ payload. Registration authority for this interpretation does not confer review
 authority. The first executable resolver uses synthetic fixture evidence; actual
 record-family authentication and publication ordering remain adapter obligations.
 
-The proposed normative join for MSM-ASSERTIONS is:
+The adopted normative join in [MSM-ASSERTIONS](museum-semantic-mapping.md) is:
 
 > A semantic review statement must use relation
 > `urn:6529stream:semantic-review:v1` and a typed literal with datatype

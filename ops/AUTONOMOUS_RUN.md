@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Museum foundation `c7752f11`, royalty262 `763944c2`, schema19 `0f4ad530`, and exact-preimage compiler repair `e43dbed5` are integrated. Primary/revocation current7 and the staged operator foundation are independently reviewed. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | Museum package104 `66aebd4a`, complete archival coverage `880bac6d`, deployment compiler repair `04338eda` and current metadata records `72c4b099` are integrated. Actual artist publication and full finality composition remain active. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -22,14 +22,20 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active work
 
-The latest increments add independently reviewed content-root/subject
-primitives and immutable finality host adapters: seven tests with fuzzing and
-eight adapter tests pass in each compiler mode, including actual Safe reads.
-The current metadata host, evidence records and discovery still need wiring.
-Museum Linked Art validation is integrated as `ef107a22`, with 52 reviewed
-tests passing in a fresh isolated environment. Its new Windows/Linux workflow
-runs independently of Solidity. The whole-current dynamic-linking diagnostic
-failed after 1,801 seconds; source isolation now owns that compiler issue.
+The latest museum increments provide review selection, attributed resource
+projection and reproducible offline packages (`f5a23d72`, `ff1a899d`,
+`66aebd4a`). All 104 combined tests pass again locally with pinned dependencies.
+Full authenticated-chain exports and institutional acceptance remain open.
+Complete archival artifact coverage is integrated as `880bac6d`, with 26
+reviewed domain tests and fuzzing. The corrected metadata host/adapter cohort
+passes 23 tests in both compiler modes; separate actual-Executor tests cover
+root authority, ordinary-proposer rejection and multi-call execution. Actual
+artist publication, typed finality and discovery still need composition.
+
+The full current build's Yul issue was isolated to deployment-script catalog
+return construction. Its proposed fix passes the minimal and configuration
+variants; the full patched target timed out, so complete-build acceptance
+remains open. See [V1_DELIVERY.md](V1_DELIVERY.md) for exact evidence boundaries.
 
 One integrator owns technical decisions and delivery. Two builders and a separate
 reviewer advance independent domains; all rows in [V1_DELIVERY.md](V1_DELIVERY.md)
@@ -39,8 +45,8 @@ contract call, including owner actions, payments, NFT custody and reads.
 | Lane | Branch | Current deliverable |
 | --- | --- | --- |
 | Integrator | `codex/v1-integration` | Actual metadata/finality producers and discovery, staged product/operator activation, whole-current compiler diagnostic, client and release |
-| Artist | `codex/v1-artist-authority` | Royalty and exact-preimage compiler repair integrated; actual finality/sanction/recovery and archival artifact coverage next |
-| Revenue | `codex/v1-revenue` | Museum foundation32 integrated; complete vocabulary, JSON-LD/Linked Art validation and remaining export mappings in progress |
+| Artist | `codex/v1-artist-authority` | Archival artifact coverage integrated; full artist publication regression, actual finality/sanction/recovery and typed preparation |
+| Revenue | `codex/v1-revenue` | Museum package104 integrated; dedicated permanent independent-attestor host, then remaining museum format and chain-adapter work |
 | Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |
 
 Signing-domain discovery is integrated as `134e0f58`. The native fixed,

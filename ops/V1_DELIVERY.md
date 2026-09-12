@@ -20,14 +20,44 @@ percentage-based progress reporting with concrete capabilities and evidence.
 
 ## Latest integration: 12 September
 
+Museum review/selection is integrated as `f5a23d72`, resource projection as
+`ff1a899d`, and offline package reproduction as `66aebd4a`. All 104 combined
+museum tests pass again in the root's pinned environment. Each increment has
+independent review and an exact source-to-integration bridge. These tools use
+explicit public fixtures; authenticated chain adapters, complete cross-format
+mapping and institutional acceptance remain open. The prior 65-test source
+at `49b3e072` passed museum CI on both Windows and Linux; the new 104-test
+source needs its own platform CI result.
+
+The developing [current metadata record host](../docs/integrations/metadata-records.md),
+integrated as `72c4b099`,
+retains complete payload bytes, original authors, interpretation identities,
+record chains and per-author history. Its corrected 23-case host/adapter cohort
+passes both compiler modes with 256 fuzz inputs. Root-only delayed catalog and
+family-grant configuration includes the live root revision; independent actual
+Executor tests reject a registered proposer's self-grant and accept a genuine
+second batch element. The host cohort uses actual schemas/store and Safe 1.4.1,
+with explicit Core/Executor/artist boundaries. Full artist publication,
+typed finality production and all-selector Safe composition remain next.
+The earlier 19-case cohort is superseded: its tests passed, but independent
+review found the missing target-side stored-proposer check.
+
+Complete archival artifact coverage is integrated as `880bac6d` from the
+reviewed thirteen-file handoff `062a6208`; three interfaces were already exact
+in the integration tree. Twenty-six tests and 256 fuzz inputs pass review,
+including actual chunk retention and Safe calls. Immutable completion
+commitments remain stable across successful revalidation; current fixity
+freshness is separate. The tested dependencies include explicit finality/Core
+boundaries, so this does not close the actual full-finality flow.
+
 The schema-derived museum inventory is integrated as `ef3b1631`, with thirteen
 new cases passing again locally and a reviewed 65-test combined suite. It
 accounts for applicable schema branches and exact source values before format
 projection. The independent museum CI has passed on both Linux and Windows
 for the preceding 52-test snapshot at `63d8c1f9`.
 
-Offline Linked Art validation is integrated as `ef107a22`. The complete current
-museum tool suite passes 52 independently reviewed tests, again in a fresh root
+Offline Linked Art validation is integrated as `ef107a22`. Its original
+52-test museum cohort passed independent review, again in a fresh root
 environment with all 15 pinned dependencies. Thirteen retained schemas have
 complete local reference validation and three explicit interpretation repairs;
 original standard bytes are unchanged. A separate Windows/Linux museum CI
@@ -108,9 +138,14 @@ failure; Slither provenance and release bundles also need their planned refresh.
 The hash-helper repair is integrated as `e43dbed5`, with exact preimage vectors
 and fuzzing against the old IR and both new compiler modes. The isolated whole-current dynamic-linking diagnostic
 failed with the same Yul stack-layout error after 1,801 seconds on the exact
-`e43dbed5` Solidity snapshot. Repository compiler settings remain unchanged;
-the independent reviewer is isolating the smallest failing compiler input. Passing focused runtime cohorts does not replace resolving this
-complete-build failure and the final matching artifact pass.
+`e43dbed5` Solidity snapshot. The reviewer isolated the failing deployment-script
+combination of a large returned struct and an internal catalog builder. The
+source-reviewed repair (`04338eda`) computes that catalog through an additive external view
+after broadcasting stops; the minimal reproducer and configuration-return
+variant compile. The full patched deployment target timed out and is not yet
+a passing complete-build result. Repository compiler settings remain unchanged.
+Focused runtime cohorts do not replace complete compilation and the final
+matching artifact pass.
 
 ## Team and ownership
 

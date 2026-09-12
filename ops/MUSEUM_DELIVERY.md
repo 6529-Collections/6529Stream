@@ -25,8 +25,8 @@ No third-party authority match or museum review becomes a mint/finality gate.
 | Work package | Concrete output and completion check | Dependency | Owner | Status |
 | --- | --- | --- | --- | --- |
 | MUSEUM-01 Profile and fixtures | Three exact schemas, five record allocations, pinned offline dependency closure, machine-readable crosswalk, explicit bounds and eight fixture scenarios; validate positive and negative vectors | Adopted specification | Revenue builder; integrator owns shared record interface | Reviewed first foundation integrated as `c7752f11`: 32 tests and both generators pass; complete mapping/conformance pending |
-| MUSEUM-02 Record integration | Registered documents and payload writes/reads through existing artist, curator, institution, independent and archive authority lanes; Safe direct/relayed paths, replay and renderer isolation tested | MUSEUM-01 interfaces; actual metadata hosts | Metadata builder with integrator | Pending |
-| MUSEUM-03 Offline exporter | Deterministic package, identity/provenance indexes, exact values, policy-bound conflict presentation, TGN snapshots and field coverage; regenerate with no network | MUSEUM-01 fixture/schema boundary; real-chain acceptance also needs MUSEUM-02 | Revenue builder | Reviewed synthetic fixture export/verification integrated; recorded-chain and complete format mappings pending |
+| MUSEUM-02 Record integration | Registered documents and payload writes/reads through existing artist, curator, institution, independent and archive authority lanes; Safe direct/relayed paths, replay and renderer isolation tested | MUSEUM-01 interfaces; actual metadata hosts | Integrator and both builders | Current byte host `72c4b099` passes focused review; actual artist composition and independent lane in development |
+| MUSEUM-03 Offline exporter | Deterministic package, identity/provenance indexes, exact values, policy-bound conflict presentation, TGN snapshots and field coverage; regenerate with no network | MUSEUM-01 fixture/schema boundary; real-chain acceptance also needs MUSEUM-02 | Revenue builder | Reviewed selection, projection and reproducible public package integrated; 104 combined tests pass; recorded-chain and complete format mappings pending |
 | MUSEUM-04 Cross-format and capture | LIDO/PREMIS/IIIF correspondence tests; draft-preview and confirmed-record adapters preserving artist text, stable IDs and attribution | MUSEUM-01; compose with MUSEUM-03 | Export/capture builder | Pending |
 | MUSEUM-05 Institutional evidence | Both existing named repository-family ingests and both external practitioner roles examine semantic packages and coverage; at least one review covers CRM/Linked Art and authority reconciliation | Reproducible MUSEUM-03/04 outputs | Integrator coordinates external evidence | Pending; no institution or reviewer engagement claimed |
 
@@ -61,6 +61,30 @@ closed vocabulary. This proves the named hierarchy/domain/range rules used by
 that implementation, not full RDF/OWL reasoning or Linked Art model acceptance.
 
 ## Acceptance evidence
+
+The latest integrated suite contains 104 tests, all passing again in the root
+environment with 15 pinned packages. Reviewed semantic-review selection
+(`f5a23d72`) binds authenticated reviewer evidence to exact original assertion
+selectors and avoids circular commitments. Resource projection (`ff1a899d`)
+retains source inventory, exact values, attribution and diagnostic sidecars.
+Offline package construction and verification (`66aebd4a`) reproduce the
+projection from archived inputs and reject missing, altered or extra files.
+The current package is an explicitly public fixture product; it rejects claims
+of authenticated recorded-state input or restricted-record support.
+
+These increments add [review literals](../docs/museum-review-literal.md),
+[resource projection](../docs/museum-resource-projection.md) and
+[offline package reproduction](../docs/museum-offline-resource-package.md).
+The earlier 65-test source at `49b3e072` passed CI on Windows and Linux. The new
+104-test source and four generators need their own platform CI evidence.
+Complete mappings, including a faithful abstract-work representation, BagIt/
+OCFL packaging, real-chain authority and institutional ingests remain in scope.
+
+The [metadata host](../docs/integrations/metadata-records.md) now has focused
+record-byte, history, authority and Safe tests. Actual artist-authority
+publication and the dedicated independent-attestor host are being built in
+parallel. The exporter will consume verified records through its typed adapter;
+it must never relabel a synthetic fixture as an onchain source.
 
 The [schema inventory engine](../docs/museum-schema-inventory.md) is integrated
 as `ef3b1631`. Thirteen new cases extend the reviewed museum suite to 65 tests,
