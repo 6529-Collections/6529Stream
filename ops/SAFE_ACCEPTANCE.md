@@ -39,13 +39,14 @@ uncovered supported ABI functions, rather than a sample of wallet workflows.
 ## Content-root publication increment
 
 The focused [root-publication tests](../test/unit/metadata/StreamContentRootPublication.t.sol)
-use a real two-owner, two-signature Safe 1.4.1 for every newly introduced caller
-function: preview, publication, current head, retained record and scoped root.
+use a real two-owner, two-signature Safe 1.4.1 for all five publication-interface
+functions: preview, publication, current head, retained record and scoped root.
 They also call the extended `artistContentFamilyState`. A separate
 [composition test](../test/unit/metadata/StreamContentRootComposition.t.sol)
 executes actual preserved-root publication through that Safe. Both classes of
 publisher grant are exercised. This is scoped evidence; the complete ABI,
-version, nested-wallet and rejection matrix above remains required.
+version, nested-wallet and rejection matrix above remains required, including
+new constant and deployment-binding getters.
 
 ## Shared foundation
 

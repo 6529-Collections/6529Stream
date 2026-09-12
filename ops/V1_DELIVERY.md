@@ -20,7 +20,8 @@ percentage-based progress reporting with concrete capabilities and evidence.
 
 ## Latest integration: 12 September
 
-The Router now implements [artist-approved content-root publication](../docs/integrations/content-root-publication.md).
+The Router now implements [artist-approved content-root publication](../docs/integrations/content-root-publication.md)
+in `bf5fa1b6`, with independent source, behavior, ABI/storage and compiler review.
 Seventeen focused cases and 256 fuzz inputs pass in both compiler modes. Four
 cases compose actual Router rendering, schema/store, inventory, checkpoint,
 leaf verification and archival artifact aggregation, including threshold Safe

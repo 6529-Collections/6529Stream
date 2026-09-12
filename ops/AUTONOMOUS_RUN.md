@@ -22,7 +22,8 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active work
 
-The integrator has completed the focused content-root publication increment:
+The integrator has committed and pushed the independently reviewed content-root
+publication increment as `bf5fa1b6`:
 17 cases and 256 fuzz inputs pass both compiler modes, alongside 61 retained
 renderer cases and two maximum-content gas checks. Actual Router/schema/store,
 inventory, checkpoint, leaf verifier, archival aggregator and threshold Safe
