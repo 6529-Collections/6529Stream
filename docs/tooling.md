@@ -36,6 +36,21 @@ historical 57-operation packets and derives the additive 58-row inventory.
 Its implementation gate remains closed until matching source and execution
 evidence exist; it is not a substitute for the current test suite.
 
+The three frozen artist-57 design gates use the accepted RC1 Git tree
+`569bf87f1fa808787d324f6e1582924b5ccf1d40`. Run them with
+`python -m tools.protocol.run_frozen_artist_checks matrix`, `reconstruction`,
+or `continuity`. The runner first verifies that the frozen packets, schemas,
+checkers and tests in this checkout still match that baseline. It then runs
+the historical tests and checker in a temporary Git archive and removes it.
+This preserves historical evidence while allowing the current specification
+to evolve. A missing baseline Git object is an error; use a full clone or fetch
+the published `testnet/current-rc-1` tag before running these gates.
+
+Make, both aggregate shell wrappers and CI label these checks as historical.
+Current contracts, the effective 58-operation design, source layout, ABI,
+admission, provenance and release checks continue to use the active checkout.
+A historical pass provides no current implementation or release acceptance.
+
 ```text
 python scripts/dev.py test --match-contract StreamCurrentStackTest
 python scripts/dev.py test --suite unit --match-test testExample

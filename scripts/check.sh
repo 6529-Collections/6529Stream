@@ -68,12 +68,14 @@ fi
 "$python_bin" -m tools.protocol.check_governance_action_policy
 "$python_bin" -m tools.protocol.test_record_family_authorization
 "$python_bin" -m tools.protocol.check_record_family_authorization
-"$python_bin" -m tools.protocol.test_artist_semantic_owner_matrix
-"$python_bin" -m tools.protocol.check_artist_semantic_owner_matrix
-"$python_bin" -m tools.protocol.test_artist_record_event_reconstruction_correction
-"$python_bin" -m tools.protocol.check_artist_record_event_reconstruction_correction
-"$python_bin" -m tools.protocol.test_artist_owner_record_continuity
-"$python_bin" -m tools.protocol.check_artist_owner_record_continuity
+# Historical artist-57 packets retain their exact accepted execution context.
+"$python_bin" -m tools.protocol.test_frozen_artist_checks
+"$python_bin" -m tools.protocol.run_frozen_artist_checks matrix
+"$python_bin" -m tools.protocol.run_frozen_artist_checks reconstruction
+"$python_bin" -m tools.protocol.run_frozen_artist_checks continuity
+# The effective design is checked against this checkout; implementation is separate.
+"$python_bin" -m tools.protocol.test_artist_operation_extension
+"$python_bin" -m tools.protocol.check_artist_operation_extension
 "$python_bin" -m tools.protocol.test_system_manifest_payload_vector
 "$python_bin" -m tools.protocol.check_system_manifest_payload_vector
 "$python_bin" -m tools.protocol.test_system_manifest_payload_vector_reference

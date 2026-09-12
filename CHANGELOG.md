@@ -182,6 +182,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Run frozen artist-57 packet checks in their exact accepted RC1 Git context,
+  while enforcing unchanged frozen inputs in the active checkout. Current
+  extension-design and contract checks continue against current sources.
+
 - Preserve historical mint and revenue companions in explicitly named, provenance-
   checked RC1 fixtures so legacy regressions remain separate from evolving v1
   contract behavior and current deployment artifacts.

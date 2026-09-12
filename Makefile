@@ -43,6 +43,8 @@ release-manifest-check: fork-ceremony-evidence-check fork-randomizer-operations-
 .PHONY: governed-parameter-inventory-check
 .PHONY: governance-action-policy-check
 .PHONY: record-family-authorization-check artist-semantic-owner-matrix-check artist-record-event-reconstruction-correction-check artist-owner-record-continuity-check
+.PHONY: artist-operation-extension-check frozen-artist-runner-check
+check: artist-operation-extension-check frozen-artist-runner-check
 check: governed-parameter-identifiers-check
 check: governed-parameter-inventory-check
 check: governance-action-policy-check
@@ -53,6 +55,8 @@ current-stack-check: export FOUNDRY_PROFILE := current
 current-stack-check:
 	forge build
 	forge test -vvv
+	$(PYTHON) -m tools.protocol.test_artist_operation_extension
+	$(PYTHON) -m tools.protocol.check_artist_operation_extension
 	$(PYTHON) -m tools.build.test_release_artifacts
 	$(PYTHON) -m tools.deployment.test_current_stack_artifacts
 	$(PYTHON) -m tools.deployment.test_prepare_current_stack_compilation
@@ -501,16 +505,22 @@ architecture-threat-model-check:
 	$(PYTHON) -m tools.docs.check_architecture_threat_model
 
 artist-semantic-owner-matrix-check:
-	$(PYTHON) -m tools.protocol.test_artist_semantic_owner_matrix
-	$(PYTHON) -m tools.protocol.check_artist_semantic_owner_matrix
+	$(PYTHON) -m tools.protocol.run_frozen_artist_checks matrix
 
 artist-record-event-reconstruction-correction-check:
-	$(PYTHON) -m tools.protocol.test_artist_record_event_reconstruction_correction
-	$(PYTHON) -m tools.protocol.check_artist_record_event_reconstruction_correction
+	$(PYTHON) -m tools.protocol.run_frozen_artist_checks reconstruction
 
 artist-owner-record-continuity-check:
-	$(PYTHON) -m tools.protocol.test_artist_owner_record_continuity
-	$(PYTHON) -m tools.protocol.check_artist_owner_record_continuity
+	$(PYTHON) -m tools.protocol.run_frozen_artist_checks continuity
+
+# The three artist-57 targets above validate the immutable historical baseline.
+# Effective design and executable contract tests use the active checkout.
+artist-operation-extension-check:
+	$(PYTHON) -m tools.protocol.test_artist_operation_extension
+	$(PYTHON) -m tools.protocol.check_artist_operation_extension
+
+frozen-artist-runner-check:
+	$(PYTHON) -m tools.protocol.test_frozen_artist_checks
 
 audit-package-check:
 	$(PYTHON) -m tools.docs.test_audit_package

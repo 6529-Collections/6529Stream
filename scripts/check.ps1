@@ -75,6 +75,8 @@ if ($CurrentStack) {
         $env:FOUNDRY_PROFILE = "current"
         forge build
         forge test -vvv
+        & $pythonPath @pythonArgs "-m" "tools.protocol.test_artist_operation_extension"
+        & $pythonPath @pythonArgs "-m" "tools.protocol.check_artist_operation_extension"
         & $pythonPath @pythonArgs "-m" "tools.build.test_release_artifacts"
         & $pythonPath @pythonArgs "-m" "tools.deployment.test_current_stack_artifacts"
         & $pythonPath @pythonArgs "-m" "tools.deployment.test_prepare_current_stack_compilation"
@@ -135,12 +137,14 @@ if ($candidateStrictExit -ne 1) {
 & $pythonPath @pythonArgs "-m" "tools.protocol.check_governance_action_policy"
 & $pythonPath @pythonArgs "-m" "tools.protocol.test_record_family_authorization"
 & $pythonPath @pythonArgs "-m" "tools.protocol.check_record_family_authorization"
-& $pythonPath @pythonArgs "-m" "tools.protocol.test_artist_semantic_owner_matrix"
-& $pythonPath @pythonArgs "-m" "tools.protocol.check_artist_semantic_owner_matrix"
-& $pythonPath @pythonArgs "-m" "tools.protocol.test_artist_record_event_reconstruction_correction"
-& $pythonPath @pythonArgs "-m" "tools.protocol.check_artist_record_event_reconstruction_correction"
-& $pythonPath @pythonArgs "-m" "tools.protocol.test_artist_owner_record_continuity"
-& $pythonPath @pythonArgs "-m" "tools.protocol.check_artist_owner_record_continuity"
+# Historical artist-57 packets retain their exact accepted execution context.
+& $pythonPath @pythonArgs "-m" "tools.protocol.test_frozen_artist_checks"
+& $pythonPath @pythonArgs "-m" "tools.protocol.run_frozen_artist_checks" "matrix"
+& $pythonPath @pythonArgs "-m" "tools.protocol.run_frozen_artist_checks" "reconstruction"
+& $pythonPath @pythonArgs "-m" "tools.protocol.run_frozen_artist_checks" "continuity"
+# The effective design is checked against this checkout; implementation is separate.
+& $pythonPath @pythonArgs "-m" "tools.protocol.test_artist_operation_extension"
+& $pythonPath @pythonArgs "-m" "tools.protocol.check_artist_operation_extension"
 & $pythonPath @pythonArgs "-m" "tools.protocol.test_system_manifest_payload_vector"
 & $pythonPath @pythonArgs "-m" "tools.protocol.check_system_manifest_payload_vector"
 & $pythonPath @pythonArgs "-m" "tools.protocol.test_system_manifest_payload_vector_reference"

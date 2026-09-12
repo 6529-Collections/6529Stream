@@ -796,21 +796,35 @@ jobs:
           python -m pip check
           python -m playwright install --with-deps chromium
 
-      - name: Artist record/event reconstruction correction gate
+      - name: Current artist extension design and historical runner isolation
         shell: bash
         run: |
           set -o pipefail
           mkdir -p ci-logs
-          python3 -m tools.protocol.test_artist_record_event_reconstruction_correction 2>&1 | tee ci-logs/artist-record-event-reconstruction-correction-tests.log
-          python3 -m tools.protocol.check_artist_record_event_reconstruction_correction 2>&1 | tee ci-logs/artist-record-event-reconstruction-correction-check.log
+          python3 -m tools.protocol.test_frozen_artist_checks 2>&1 | tee ci-logs/frozen-artist-runner-tests.log
+          python3 -m tools.protocol.test_artist_operation_extension 2>&1 | tee ci-logs/artist-extension-tests.log
+          python3 -m tools.protocol.check_artist_operation_extension 2>&1 | tee ci-logs/artist-extension-check.log
 
-      - name: Artist owner-record continuity gate
+      - name: Historical artist-57 semantic owner matrix
         shell: bash
         run: |
           set -o pipefail
           mkdir -p ci-logs
-          python3 -m tools.protocol.test_artist_owner_record_continuity 2>&1 | tee ci-logs/artist-owner-record-continuity-tests.log
-          python3 -m tools.protocol.check_artist_owner_record_continuity 2>&1 | tee ci-logs/artist-owner-record-continuity-check.log
+          python3 -m tools.protocol.run_frozen_artist_checks matrix 2>&1 | tee ci-logs/historical-artist-matrix.log
+
+      - name: Historical artist-57 record/event reconstruction
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 -m tools.protocol.run_frozen_artist_checks reconstruction 2>&1 | tee ci-logs/historical-artist-reconstruction.log
+
+      - name: Historical artist-57 owner-record continuity
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 -m tools.protocol.run_frozen_artist_checks continuity 2>&1 | tee ci-logs/historical-artist-continuity.log
 
       - name: PowerShell syntax and wrapper runtime
         shell: pwsh
