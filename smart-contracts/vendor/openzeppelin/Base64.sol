@@ -43,6 +43,13 @@ library Base64 {
             // Prepare result pointer, jump over length
             let resultPtr := add(result, 32)
 
+            // Local correctness repair: the last three-byte load may extend past
+            // the logical input. Zero that tail while encoding, then restore it
+            // so adjacent objects and caller-owned padding remain unchanged.
+            let afterPtr := add(add(data, 32), mload(data))
+            let afterCache := mload(afterPtr)
+            mstore(afterPtr, 0)
+
             // Run over the input, 3 bytes at a time
             for {
                 let dataPtr := data
@@ -85,6 +92,8 @@ library Base64 {
             case 2 {
                 mstore8(sub(resultPtr, 1), 0x3d)
             }
+
+            mstore(afterPtr, afterCache)
         }
 
         return result;
