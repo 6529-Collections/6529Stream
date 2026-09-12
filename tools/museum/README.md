@@ -35,16 +35,19 @@ python -m tools.museum.linked_art schemas/museum/linked-art/examples/digital.jso
 ```
 
 `schemas` and `fixtures` regenerate their deterministic files when `--check` is
-omitted. No command downloads documents, sends a transaction, registers a schema,
-or verifies an onchain source. The package command emits an explicit synthetic
+omitted. The commands above do not download documents, send a transaction,
+register a schema or verify an onchain source. The package command emits an explicit synthetic
 fixture manifest, original source/schema bytes and complete source-path coverage.
 It does not emit a fabricated `STREAM_SEMANTIC_EXPORT_V1` recorded-state payload.
 
 The executable source interface separates immutable payload/schema bytes and
-record selectors from fixture authority evidence. The only concrete adapter is
-`FixtureSourceAdapter`. The future authenticated state adapter must establish
-host, subject, schema, authority and lane completeness at one exact block. Root
-owns that contract integration. A mode field or reviewer name is not evidence.
+record selectors from fixture authority evidence. `FixtureSourceAdapter` retains
+that synthetic boundary. The additive [independent source capture](../../docs/museum-independent-source.md)
+reads actual INDEPENDENT history at one externally anchored block, retaining
+exact payload, signature, schema and pointer bytes with explicit trusted-RPC
+provenance. Its local-EVM rehearsal is separate from the fixture projections and
+packages above. Other authority lanes and semantic recorded-state composition
+remain open. A mode field or reviewer name is not evidence.
 
 The synthetic selection harness uses a separate review test wire
 (`assertionSelector`, `assertionHash`, `disposition`) to exercise authenticated
