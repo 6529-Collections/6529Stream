@@ -100,6 +100,12 @@ library StreamArtistRecordPublicationState {
             abi.encode(x.binding_, p, signer, x.nonce, x.signedAt, keccak256(x.statement))
         );
         // The host's subsequent commit neither calls externally nor emits a log; a failure rolls this back.
+        _emit(p, x, signer, recordHash);
+    }
+
+    function _emit(T.Attestation memory p, Input memory x, address signer, bytes32 recordHash)
+        private
+    {
         emit ArtistAttestationRecorded(
             1,
             p.collectionId,

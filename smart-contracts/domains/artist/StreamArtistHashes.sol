@@ -5,6 +5,25 @@ import "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 
 /// @notice Exact AA-DOMAINS preimages shared by typed artist owners and their coordinator.
 library StreamArtistHashes {
+    struct AttestationRecordPreimage {
+        bytes32 domain;
+        uint256 chainId;
+        address registry;
+        address core;
+        uint256 collectionId;
+        uint8 subjectKind;
+        bytes32 subjectId;
+        bytes32 subjectStateHash;
+        bytes32 schemaId;
+        bytes32 statementHash;
+        bytes32 statementURIHash;
+        bytes32 artistId;
+        address signer;
+        uint8 authorityClass;
+        uint256 nonce;
+        uint64 signedAt;
+    }
+
     struct Environment {
         uint256 chainId;
         address registry;
@@ -472,26 +491,24 @@ library StreamArtistHashes {
         uint256 nonce,
         uint64 signedAt
     ) internal pure returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                keccak256("6529STREAM_ARTIST_ATTESTATION_RECORD_V1"),
-                e.chainId,
-                e.registry,
-                e.core,
-                p.collectionId,
-                p.subjectKind,
-                p.subjectId,
-                p.subjectStateHash,
-                p.schemaId,
-                p.statementHash,
-                keccak256(bytes(p.statementURI)),
-                artistId,
-                signer,
-                authorityClass,
-                nonce,
-                signedAt
-            )
-        );
+        AttestationRecordPreimage memory words;
+        words.domain = keccak256("6529STREAM_ARTIST_ATTESTATION_RECORD_V1");
+        words.chainId = e.chainId;
+        words.registry = e.registry;
+        words.core = e.core;
+        words.collectionId = p.collectionId;
+        words.subjectKind = p.subjectKind;
+        words.subjectId = p.subjectId;
+        words.subjectStateHash = p.subjectStateHash;
+        words.schemaId = p.schemaId;
+        words.statementHash = p.statementHash;
+        words.statementURIHash = keccak256(bytes(p.statementURI));
+        words.artistId = artistId;
+        words.signer = signer;
+        words.authorityClass = authorityClass;
+        words.nonce = nonce;
+        words.signedAt = signedAt;
+        return keccak256(abi.encode(words));
     }
 
     function ratificationDigest(

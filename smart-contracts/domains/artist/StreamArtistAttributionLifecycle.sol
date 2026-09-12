@@ -17,6 +17,14 @@ import {
 
 /// @notice Sole owner of collection attribution state and state-bound artist attestations.
 contract StreamArtistAttributionLifecycle is StreamArtistOwner {
+    struct AttestationContext {
+        bytes32 operativeIdentityHash;
+        address signer;
+        uint256 nonce;
+        uint64 signedAt;
+        uint8 authorityClass;
+    }
+
     struct Attribution {
         uint8 state;
         uint64 generation;
@@ -360,7 +368,12 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         // The old callback has no operative Identity fact. Only deployment uses it.
         if (p.subjectKind != 9) revert T.UnsupportedProfile();
         if (signer != b.artistAddress) revert T.InvalidAttribution(p.collectionId);
-        return _recordAttestation(c, b, p, bytes32(0), signer, nonce, signedAt, statement, 1);
+        AttestationContext memory x;
+        x.signer = signer;
+        x.nonce = nonce;
+        x.signedAt = signedAt;
+        x.authorityClass = 1;
+        return _recordAttestation(c, b, p, statement, x);
     }
 
     function recordIdentityAttestation(
@@ -376,10 +389,13 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         _check(c, 24);
         if (p.subjectKind != 10 || operativeIdentityHash == bytes32(0)) revert T.InvalidRecord();
         if (signer != b.artistAddress) revert T.InvalidAttribution(p.collectionId);
-        return
-            _recordAttestation(
-                c, b, p, operativeIdentityHash, signer, nonce, signedAt, statement, 1
-            );
+        AttestationContext memory x;
+        x.operativeIdentityHash = operativeIdentityHash;
+        x.signer = signer;
+        x.nonce = nonce;
+        x.signedAt = signedAt;
+        x.authorityClass = 1;
+        return _recordAttestation(c, b, p, statement, x);
     }
 
     function recordAttestationWithAuthority(
@@ -399,17 +415,13 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             (p.subjectKind == 10 && operativeIdentityHash == bytes32(0))
                 || (p.subjectKind == 9 && operativeIdentityHash != bytes32(0))
         ) revert T.InvalidRecord();
-        return _recordAttestation(
-            c,
-            b,
-            p,
-            operativeIdentityHash,
-            signer,
-            nonce,
-            signedAt,
-            statement,
-            authority.authorityClass
-        );
+        AttestationContext memory x;
+        x.operativeIdentityHash = operativeIdentityHash;
+        x.signer = signer;
+        x.nonce = nonce;
+        x.signedAt = signedAt;
+        x.authorityClass = authority.authorityClass;
+        return _recordAttestation(c, b, p, statement, x);
     }
 
     function recordPublicationAttestation(
@@ -436,14 +448,17 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         ) {
             revert T.InvalidAttribution(p.collectionId);
         }
+        StreamArtistRecordPublicationState.Input memory input_;
+        input_.environment = _environment();
+        input_.binding_ = b;
+        input_.terms = p;
+        input_.authority = authority;
+        input_.nonce = nonce;
+        input_.signedAt = signedAt;
+        input_.statement = statement;
+        input_.metadataHostCodeHash = metadataHostCodeHash;
         (bytes32 record, bytes32 action, bytes32 stateDelta) = StreamArtistRecordPublicationState.record(
-            _records,
-            _attestations,
-            _statements,
-            _publications,
-            StreamArtistRecordPublicationState.Input(
-                _environment(), b, p, authority, nonce, signedAt, statement, metadataHostCodeHash
-            )
+            _records, _attestations, _statements, _publications, input_
         );
         _commit(c, action, stateDelta, bytes32(0), record);
         return record;
@@ -453,12 +468,8 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         T.ActionContext calldata c,
         T.Binding calldata b,
         T.Attestation calldata p,
-        bytes32 operativeIdentityHash,
-        address signer,
-        uint256 nonce,
-        uint64 signedAt,
         bytes calldata statement,
-        uint8 authorityClass
+        AttestationContext memory x
     ) private returns (bytes32 record) {
         Attribution storage attr = _attributions[p.collectionId];
         if (
@@ -484,7 +495,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             ) revert T.InvalidRecord();
         } else if (p.subjectKind == 10) {
             if (
-                p.subjectId != b.artistId || p.subjectStateHash != operativeIdentityHash
+                p.subjectId != b.artistId || p.subjectStateHash != x.operativeIdentityHash
                     || (p.schemaId != keccak256("6529STREAM_ARTIST_PERSONHOOD_WAIVER_V1")
                         && p.schemaId != keccak256("6529STREAM_ARTIST_PERSONHOOD_EVIDENCE_V1"))
             ) revert T.InvalidRecord();
@@ -492,11 +503,17 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             revert T.UnsupportedProfile();
         }
         record = StreamArtistHashes.attestationRecordForAuthority(
-            _environment(), p, b.artistId, signer, authorityClass, nonce, signedAt
+            _environment(), p, b.artistId, x.signer, x.authorityClass, x.nonce, x.signedAt
         );
         if (_records[record].recordHash != bytes32(0)) revert T.InvalidRecord();
         T.AttestationRecord memory item = T.AttestationRecord(
-            record, p.subjectStateHash, p.schemaId, p.statementHash, b.generation, signedAt, signer
+            record,
+            p.subjectStateHash,
+            p.schemaId,
+            p.statementHash,
+            b.generation,
+            x.signedAt,
+            x.signer
         );
         _records[record] = item;
         _attestations[keccak256(abi.encode(p.collectionId, p.subjectKind, p.subjectId))] = item;
@@ -506,10 +523,16 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             p.subjectKind == 10
                 ? keccak256(
                     abi.encode(
-                        b, p, signer, nonce, signedAt, keccak256(statement), operativeIdentityHash
+                        b,
+                        p,
+                        x.signer,
+                        x.nonce,
+                        x.signedAt,
+                        keccak256(statement),
+                        x.operativeIdentityHash
                     )
                 )
-                : keccak256(abi.encode(b, p, signer, nonce, signedAt, keccak256(statement))),
+                : keccak256(abi.encode(b, p, x.signer, x.nonce, x.signedAt, keccak256(statement))),
             keccak256(abi.encode(p.collectionId, p.subjectKind, p.subjectId, item)),
             bytes32(0),
             record
@@ -518,15 +541,15 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             1,
             p.collectionId,
             p.subjectKind,
-            signer,
+            x.signer,
             p.subjectId,
             p.subjectStateHash,
             p.schemaId,
             p.statementHash,
             keccak256(bytes(p.statementURI)),
-            authorityClass,
-            nonce,
-            signedAt,
+            x.authorityClass,
+            x.nonce,
+            x.signedAt,
             record
         );
     }
