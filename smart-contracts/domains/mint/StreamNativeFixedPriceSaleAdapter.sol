@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamSaleArtist.sol";
+import "./StreamNativePriceProgram.sol";
 import "./StreamSaleTemplate.sol";
 import "../revenue/StreamSettlementContext.sol";
 import "../revenue/StreamPrimarySettlementHash.sol";
@@ -20,6 +21,7 @@ import "../../vendor/openzeppelin/ERC165.sol";
 /// @dev PROFILE and current artist-only templates; exact value and no persistent payment custody.
 contract StreamNativeFixedPriceSaleAdapter is
     IStreamNativeFixedPriceSaleAdapter,
+    IStreamNativePricePrograms,
     StreamSettlementContext,
     Ownable,
     ReentrancyGuard,
@@ -47,6 +49,7 @@ contract StreamNativeFixedPriceSaleAdapter is
     mapping(address => mapping(bytes32 => bool)) public authorizationUsed;
     mapping(bytes32 => mapping(uint256 => bytes32)) public executionIdByNonce;
     mapping(bytes32 => uint8) public executionStatus;
+    mapping(bytes32 => PriceProgramRecord) private _pricePrograms;
 
     constructor(
         IStreamMintManager manager,
@@ -78,7 +81,184 @@ contract StreamNativeFixedPriceSaleAdapter is
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
         return id == type(IStreamNativeFixedPriceSaleAdapter).interfaceId
+            || id == type(IStreamNativePricePrograms).interfaceId
             || id == type(IStreamNativeSaleBinding).interfaceId || super.supportsInterface(id);
+    }
+
+    function registerPriceProgram(PriceProgramConfig calldata config)
+        external
+        override
+        onlyOwner
+        nonReentrant
+        returns (bytes32 id)
+    {
+        _requireSaleContext();
+        StreamNativePriceProgram.validateConfig(_priceProgramContext(), config);
+        StreamNativeSettlementTypes.SaleLifecycleBinding memory lifecycle =
+            StreamNativeSettlementAdmission.capture(moduleRegistry, address(this));
+        uint256 nonce = nextSaleNonce++;
+        id = priceProgramIdFor(config.collectionId, config.phaseId, config.kind, nonce);
+        bytes32 hash = keccak256(
+            abi.encode(keccak256("6529STREAM_NATIVE_PRICE_PROGRAM_CONFIG_V1"), id, config)
+        );
+        _pricePrograms[id] = PriceProgramRecord(config, nonce, hash, lifecycle, 0, false);
+        emit NativePriceProgramConfigured(
+            id,
+            1,
+            nonce,
+            hash,
+            config,
+            lifecycle.saleCreatedAt,
+            lifecycle.saleAdapterRegistryRevision
+        );
+    }
+
+    function priceProgramIdFor(uint256 collectionId, bytes32 phaseId, uint8 kind, uint256 nonce)
+        public
+        view
+        override
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_SALE_V1"),
+                block.chainid,
+                address(this),
+                kind,
+                collectionId,
+                phaseId,
+                nonce
+            )
+        );
+    }
+
+    function priceProgramRecord(bytes32 id)
+        external
+        view
+        override
+        returns (PriceProgramRecord memory)
+    {
+        return _pricePrograms[id];
+    }
+
+    function closePriceProgram(bytes32 id) external override onlyOwner nonReentrant {
+        PriceProgramRecord storage record = _pricePrograms[id];
+        if (record.saleNonce == 0 || record.closed) revert NativePriceProgramUnavailable(id);
+        record.closed = true;
+        emit NativePriceProgramClosed(id, 1, record.mintedQuantity);
+    }
+
+    function priceProgramAuthorizationDigest(PriceProgramAuthorization calldata authorization)
+        external
+        view
+        override
+        returns (bytes32)
+    {
+        return StreamNativePriceProgram.authorizationDigest(authorization);
+    }
+
+    function previewPriceProgram(PriceProgramExecution calldata e)
+        external
+        view
+        override
+        returns (PriceProgramResult memory r)
+    {
+        (StreamNativeSettlementTypes.NativeSettlementCandidate memory c,) = _preparePriceProgram(e);
+        return _priceProgramResult(c);
+    }
+
+    function executePriceProgram(PriceProgramExecution calldata e)
+        external
+        payable
+        override
+        nonReentrant
+        returns (PriceProgramResult memory r)
+    {
+        (
+            StreamNativeSettlementTypes.NativeSettlementCandidate memory c,
+            IStreamMintManager.MintBatch memory batch
+        ) = _preparePriceProgram(e);
+        if (msg.sender != c.sale.payer || msg.sender != c.executor || msg.value != c.sale.amount) {
+            revert InvalidNativePriceProgram();
+        }
+        uint256 original = address(this).balance - msg.value;
+        PriceProgramRecord storage record = _pricePrograms[e.authorization.saleId];
+        authorizationUsed[e.authorization.artist][e.authorization.nonce] = true;
+        executionIdByNonce[e.authorization.saleId][e.authorization.executionNonce] =
+        c.executionBinding.executionId;
+        executionStatus[c.executionBinding.executionId] = 1;
+        ++record.mintedQuantity;
+        r = _priceProgramResult(c);
+        if (c.sale.amount != 0) {
+            StreamPrimarySettlementTypes.PrimarySettlementResult memory settled = _settle(c);
+            r.settlementKey = settled.settlementKey;
+            r.escrowed = settled.escrowed;
+            _requireRetained(c, e.authorization.artist);
+        }
+        (uint256[] memory tokens, bytes32 root, bytes32[] memory ids) =
+            mintManager.executeSingleStepMint(batch, "");
+        if (
+            tokens.length != 1 || tokens[0] == 0 || root != c.operationIdentityCommitment
+                || ids.length != 1 || ids[0] != c.operationId
+        ) revert NativeMintResultInvalid();
+        if (c.sale.amount != 0) {
+            _requireRetained(c, e.authorization.artist);
+        } else {
+            _requireSaleContext();
+            StreamNativeSettlementAdmission.requireAdmission(moduleRegistry, c);
+            StreamSaleArtist.requireArtist(
+                artistRegistry, artistRegistryCodeHash, c.sale.collectionId, e.authorization.artist
+            );
+        }
+        if (address(this).balance != original) revert NativeSettlementFailed();
+        r.tokenId = tokens[0];
+        executionStatus[c.executionBinding.executionId] = 2;
+        StreamNativePriceProgram.emitCompletion(e.authorization.saleId, c, r, record.mintedQuantity);
+    }
+
+    function _preparePriceProgram(PriceProgramExecution calldata e)
+        private
+        view
+        returns (
+            StreamNativeSettlementTypes.NativeSettlementCandidate memory c,
+            IStreamMintManager.MintBatch memory batch
+        )
+    {
+        _requireSaleContext();
+        if (authorizationUsed[e.authorization.artist][e.authorization.nonce]) {
+            revert NativeAuthorizationUsed(e.authorization.artist, e.authorization.nonce);
+        }
+        if (executionIdByNonce[e.authorization.saleId][e.authorization.executionNonce] != 0) {
+            revert NativeExecutionUsed(e.authorization.saleId, e.authorization.executionNonce);
+        }
+        (c, batch) = StreamNativePriceProgram.prepare(
+            _priceProgramContext(), _pricePrograms[e.authorization.saleId], e, paused
+        );
+        StreamNativeSettlementAdmission.requireAdmission(moduleRegistry, c);
+    }
+
+    function _priceProgramResult(StreamNativeSettlementTypes.NativeSettlementCandidate memory c)
+        private
+        pure
+        returns (PriceProgramResult memory r)
+    {
+        r.revenueOutcome = c.sale.amount == 0 ? 1 : 2;
+        r.executionId = c.executionBinding.executionId;
+        r.operationRoot = c.operationIdentityCommitment;
+        r.operationId = c.operationId;
+        r.chargedAmount = c.sale.amount;
+    }
+
+    function _priceProgramContext() private view returns (StreamNativePriceProgram.Context memory) {
+        return StreamNativePriceProgram.Context(
+            mintManager,
+            revenueResolver,
+            splitFactory,
+            factoryCodeHash,
+            artistRegistry,
+            artistRegistryCodeHash,
+            platformSigner
+        );
     }
 
     function registerSale(SaleConfig calldata config)
@@ -137,7 +317,7 @@ contract StreamNativeFixedPriceSaleAdapter is
         override
         returns (StreamNativeSettlementTypes.SaleLifecycleBinding memory)
     {
-        return _sales[id].lifecycle;
+        return _sales[id].saleNonce != 0 ? _sales[id].lifecycle : _pricePrograms[id].lifecycle;
     }
 
     function cancelSale(bytes32 id) external override onlyOwner nonReentrant {
@@ -292,104 +472,14 @@ contract StreamNativeFixedPriceSaleAdapter is
         )
     {
         _requireSaleContext();
-        SaleAuthorization memory a = e.authorization;
-        SaleRecord storage record = _sales[a.saleId];
-        if (
-            paused || record.saleNonce == 0 || record.cancelled
-                || block.timestamp < record.config.startsAt
-                || block.timestamp > record.config.endsAt
-        ) revert NativeSaleUnavailable(a.saleId);
-        if (
-            a.saleConfigHash != record.configHash || a.payer == address(0)
-                || a.executor == address(0) || a.recipient == address(0) || a.artist == address(0)
-                || a.mintCommitment == 0 || a.executionNonce == 0
-                || a.expectedPrimaryPolicyHash == 0 || a.tokenDataHash != keccak256(e.tokenData)
-                || block.timestamp > a.deadline
-        ) revert InvalidNativeSale();
-        if (authorizationUsed[a.artist][a.nonce]) {
-            revert NativeAuthorizationUsed(a.artist, a.nonce);
-        }
-        if (executionIdByNonce[a.saleId][a.executionNonce] != 0) {
-            revert NativeExecutionUsed(a.saleId, a.executionNonce);
-        }
-        bytes32 digest = _authorizationDigest(a);
-        StreamSaleArtist.requireArtist(
-            artistRegistry, artistRegistryCodeHash, record.config.collectionId, a.artist
+        return StreamNativePriceProgram.prepareFixed(
+            _priceProgramContext(),
+            _sales[e.authorization.saleId],
+            e,
+            paused,
+            authorizationUsed[e.authorization.artist][e.authorization.nonce],
+            executionIdByNonce[e.authorization.saleId][e.authorization.executionNonce]
         );
-        if (!_validNativeSignature(platformSigner, digest, e.platformSignature)) {
-            revert NativeSaleSignatureInvalid(platformSigner);
-        }
-        if (!_validNativeSignature(a.artist, digest, e.artistSignature)) {
-            revert NativeSaleSignatureInvalid(a.artist);
-        }
-        StreamSaleTemplate.Selection memory rights = _rights(record.config.collectionId);
-        if (
-            StreamSaleTemplate.policyHash(revenueResolver, record.config.collectionId, rights)
-                    != a.expectedPrimaryPolicyHash
-                || rights.assignmentHash != record.config.primaryAssignmentHash
-        ) revert InvalidNativeSale();
-        c.saleAdapter = address(this);
-        c.executor = a.executor;
-        c.sale = StreamPrimarySettlementTypes.PrimarySale(
-            a.saleId,
-            _CLASS,
-            0,
-            record.config.collectionId,
-            0,
-            record.saleNonce,
-            a.payer,
-            address(0),
-            a.recipient,
-            record.config.price,
-            a.expectedPrimaryPolicyHash
-        );
-        c.lifecycleBinding = record.lifecycle;
-        c.executionBinding =
-            StreamPrimarySettlementTypes.SaleExecutionBinding(0, a.executionNonce, 1, digest);
-        c.orchestrationOrder = 1;
-        c.mintManager = address(mintManager);
-        c.currentPolicyHash = IStreamMintReads(address(mintManager))
-            .phasePolicyHash(record.config.collectionId, record.config.phaseId);
-        c.boundPolicyHash = record.config.mintPolicyHash;
-        c.rights = StreamPrimarySettlementTypes.PrimaryRights(
-            rights.profileId,
-            rights.wallet,
-            rights.templateId,
-            rights.assignmentHash,
-            rights.entriesHash
-        );
-        c.saleExecutionHash = keccak256(abi.encode(e));
-        batch = _batch(a, record.config, e.tokenData, digest);
-        bytes32[] memory ids;
-        (c.operationIdentityCommitment, ids) =
-            IStreamMintReads(address(mintManager)).previewSingleStepMintOperation(batch, "");
-        if (c.operationIdentityCommitment == 0 || ids.length != 1 || ids[0] == 0) {
-            revert NativeMintResultInvalid();
-        }
-        c.operationId = ids[0];
-        c.executionBinding.executionId = StreamNativeSettlementHash.executionId(c);
-    }
-
-    function _batch(
-        SaleAuthorization memory a,
-        SaleConfig memory config,
-        bytes memory tokenData,
-        bytes32 digest
-    ) private pure returns (IStreamMintManager.MintBatch memory b) {
-        b.collectionId = config.collectionId;
-        b.phaseId = config.phaseId;
-        b.payer = a.payer;
-        b.initialRecipients = new address[](1);
-        b.initialRecipients[0] = a.recipient;
-        b.beneficiaries = new address[](1);
-        b.beneficiaries[0] = a.recipient;
-        b.tokenData = new bytes[](1);
-        b.tokenData[0] = tokenData;
-        b.mintCommitments = new bytes32[](1);
-        b.mintCommitments[0] = a.mintCommitment;
-        b.expectedPolicyHash = config.mintPolicyHash;
-        b.authorizationId = keccak256(abi.encode(_NONCE, digest));
-        b.contextHash = digest;
     }
 
     function _rights(uint256 collectionId)
@@ -398,21 +488,6 @@ contract StreamNativeFixedPriceSaleAdapter is
         returns (StreamSaleTemplate.Selection memory)
     {
         return StreamNativeSettlementSupport.rights(revenueResolver, collectionId);
-    }
-
-    function _validNativeSignature(address signer, bytes32 digest, bytes memory signature)
-        private
-        view
-        returns (bool)
-    {
-        return StreamNativeSettlementSupport.validSignature(
-            signer,
-            digest,
-            signature,
-            StreamNativeSettlementSupport.gasParameter(
-                splitFactory, factoryCodeHash, _SIGNATURE_GAS
-            )
-        );
     }
 
     function _requireSaleContext() private view {
@@ -435,43 +510,8 @@ contract StreamNativeFixedPriceSaleAdapter is
 
     function _settle(StreamNativeSettlementTypes.NativeSettlementCandidate memory c)
         private
-        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory)
     {
-        bytes memory data = abi.encodeCall(
-            IStreamNativePrimarySaleSettlement.settleNativePrimarySaleFromAdapter, (c)
-        );
-        bytes memory response = new bytes(384);
-        address target = primarySaleSettlement;
-        bool ok;
-        uint256 size;
-        uint256 amount = c.sale.amount;
-        assembly ("memory-safe") {
-            ok := call(gas(), target, amount, add(data, 32), mload(data), add(response, 32), 384)
-            size := returndatasize()
-        }
-        if (!ok || size != 384) revert NativeSettlementFailed();
-        result = abi.decode(response, (StreamPrimarySettlementTypes.PrimarySettlementResult));
-        if (
-            result.candidateCommitment
-                    != StreamNativeSettlementHash.candidateCommitment(primarySaleSettlement, c)
-                || result.settlementKey
-                    != StreamPrimarySettlementHash.settlementKey(
-                        primarySaleSettlement, address(this), c.executionBinding.executionId
-                    ) || result.profileId != c.rights.profileId || result.wallet != c.rights.wallet
-                || result.asset != address(0) || result.amount != c.sale.amount
-                || result.executor != c.executor
-                || result.executionId != c.executionBinding.executionId
-                || result.operationIdentityCommitment != c.operationIdentityCommitment
-                || result.currentPolicyHash != c.currentPolicyHash
-                || result.boundPolicyHash != c.boundPolicyHash
-        ) revert NativeSettlementFailed();
-        data = abi.encodeCall(IStreamPrimarySaleSettlement.settlementResult, (result.settlementKey));
-        assembly ("memory-safe") {
-            ok := staticcall(gas(), target, add(data, 32), mload(data), add(response, 32), 384)
-            size := returndatasize()
-        }
-        if (!ok || size != 384 || keccak256(response) != keccak256(abi.encode(result))) {
-            revert NativeSettlementFailed();
-        }
+        return StreamNativePriceProgram.settle(primarySaleSettlement, c);
     }
 }

@@ -30,10 +30,13 @@ creation time and registration revision strictly precede deprecation.
 `INCIDENT_REVOKED` rejects execution. These checks use the canonical registry,
 including its exact-code ERC165 policy, without an additional owner or allowlist.
 
-Deploy and link `StreamNativeSettlementAdmission` and
-`StreamNativeSettlementSupport` using the compiler's link references. They have
-no storage or ownership. The funding helper executes in the recorder context;
-direct calls to its state-changing library entry reject. Contract 20 and its
+Deploy and link `StreamNativeSettlementAdmission`,
+`StreamNativeSettlementSupport`, and `StreamNativePriceProgram` using the compiler's
+link references. The price-program helper also carries the unchanged fixed
+preparation and exact recorder-call logic to keep the consumer within code size. They have
+no storage or ownership. Native funding executes in the recorder context;
+price-program preparation and the exact recorder call execute in the consumer
+context. Direct calls to state-changing library entries reject. Contract 20 and its
 permit helper have no native entry or modification in this increment.
 
 ## Signing and execution
@@ -113,7 +116,7 @@ governance-delay or fully cold gas evidence.
 
 The separate `test/current/StreamCurrentNativeSettlement.t.sol` suite uses actual
 Core, Manager, artist owners, governance, resolver and two-owner Safe wallets.
-Its three cases pass together with the three current ERC-20 regressions:
+`1b41cff4` records its three cases passing with the three current ERC-20 regressions:
 native PROFILE purchase/reveal/claims/replay, governed COLLECTION_ARTIST template
 creation and deferred-wallet escrow/deploy/flush/claims, and a late recipient
 rejection that rolls back all money and mint state before an identical retry.
@@ -121,7 +124,9 @@ Only the external entropy service is mocked in this composition. Independent
 review binds the exact six-case snapshot and compiler outputs; it does not
 establish the complete feature set or a new release candidate.
 
-Prepared minting, deferred custody settlement, refund windows, native auctions,
-Dutch/private/public sale modes and collaborator templates remain separate
+Explicit free, PWYW and open-edition execution is described in
+[native price programs](native-price-programs.md). Prepared minting, deferred
+custody settlement, refund windows, native auctions, Dutch/private/public sale
+modes and collaborator templates remain separate
 implementation slices. A Safe receiving the immediately minted NFT proves
 recipient custody, not a deferred custody settlement order.
