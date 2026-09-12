@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added exact typed metadata-publication authorization through the current artist
+  registry, preserving prior artist methods, signing domains and storage prefixes.
+  The unpruned 271-test artist cohort passes independent review; actual
+  artist-to-metadata-host publication is the next composition check.
 - Added the current full-byte metadata host, a distinct caller interface,
   attributed history, canonical events and root-authorized family grants.
   Twenty-three host/adapter cases pass in both compiler modes with fuzzing;

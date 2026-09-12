@@ -20,6 +20,14 @@ percentage-based progress reporting with concrete capabilities and evidence.
 
 ## Latest integration: 12 September
 
+Exact artist record-publication authorization is integrated as `a7114aeb`
+from `36237a1a`. The complete 271-test artist cohort passes in one unpruned
+run, including all 262 prior cases and nine publication/related regressions.
+Independent review checks the prior ABI/storage prefixes and all 121 nonempty
+production runtimes. Its candidate metadata host is an explicit fixture; the
+builder is now composing the actual artist registry with `StreamCollectionMetadataV1`,
+including Safe signer/relayer paths, rotation and atomic append failure.
+
 Museum review/selection is integrated as `f5a23d72`, resource projection as
 `ff1a899d`, and offline package reproduction as `66aebd4a`. All 104 combined
 museum tests pass again in the root's pinned environment. Each increment has

@@ -22,6 +22,10 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active work
 
+Exact artist publication authorization is integrated as `a7114aeb`, with the
+complete 271-test artist cohort independently reviewed. Actual registry-to-
+metadata-host publication is now the artist builder's immediate composition task.
+
 The latest museum increments provide review selection, attributed resource
 projection and reproducible offline packages (`f5a23d72`, `ff1a899d`,
 `66aebd4a`). All 104 combined tests pass again locally with pinned dependencies.

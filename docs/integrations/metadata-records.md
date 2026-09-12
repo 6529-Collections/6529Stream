@@ -54,6 +54,8 @@ to obtain authorization for the complete typed candidate, then submit
 artist association and capability. The relay caller is recorded separately
 from the artist recorder, and each authorization is consumed once. Its backlink
 is stored outside the record's own hash to avoid a circular commitment.
+The [artist publication profile](../architecture/artist-record-publication-profile.md)
+defines the complete operation-24 envelope and capability checks.
 
 Collection subjects use the canonical Core/collection domain. Before using a
 token subject, call `registerTokenSubject(tokenId)`; it checks Core membership
