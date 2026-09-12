@@ -98,6 +98,38 @@ contract ArtistCanonicalPublicationFixture {
         _admit(keccak256("ARTIST_SEMANTIC_ASSERTION"));
     }
 
+    /// @notice Unit-only governed registration; this opaque definition proves authority, not JSON.
+    function configureWorkDescription(address curator) external {
+        require(msg.sender == root, "fixture owner");
+        _register(
+            "STREAM_WORK_DESCRIPTION_V1", IStreamSchemaRegistry.DocumentKind.SCHEMA, bytes("{}")
+        );
+        bytes32 kind = keccak256("WORK_DESCRIPTION");
+        (bytes32 s, bytes32 o, bytes32 n) =
+            metadata.recordTypeTransition(kind, StreamRecordFamilies.CURATOR, 0x010a);
+        _execute(
+            address(metadata),
+            abi.encodeCall(
+                metadata.admitRecordType, (kind, StreamRecordFamilies.CURATOR, uint16(0x010a))
+            ),
+            s,
+            o,
+            n
+        );
+        (s, o, n) =
+            metadata.familyWriterTransition(1, StreamRecordFamilies.CURATOR, 3, curator, true);
+        _execute(
+            address(metadata),
+            abi.encodeCall(
+                metadata.setFamilyWriter,
+                (uint256(1), StreamRecordFamilies.CURATOR, uint8(3), curator, true)
+            ),
+            s,
+            o,
+            n
+        );
+    }
+
     function prepare(
         address recorder,
         bytes32 kind,

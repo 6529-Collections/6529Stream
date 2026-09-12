@@ -70,6 +70,10 @@ library StreamArtistRecordPublicationRules {
                 && schemaId == keccak256("STREAM_SEMANTIC_ASSERTION_V1")
         ) return (8, 1);
         if (
+            recordType == keccak256("WORK_DESCRIPTION")
+                && schemaId == keccak256("STREAM_WORK_DESCRIPTION_V1")
+        ) return (8, 1);
+        if (
             recordType == keccak256("ARTIST_STATEMENT") && schemaId != 0
                 && schemaId != keccak256("STREAM_ARTIST_INTENT_V1")
                 && schemaId != keccak256("STREAM_ARTIST_INTENT_WAIVER_V1")

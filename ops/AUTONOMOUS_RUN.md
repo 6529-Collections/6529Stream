@@ -14,13 +14,51 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Current content `60ec0ba3`, LIDO `03693f36`, sanction confirmation `9ab6a717` and separate Attribution compiler repair `c7447881` integrated. Full typed provider/Finality/deployment acceptance remains active. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | Rights JSON `e82c6cfb`, artist finding `48774674`, recovery prerequisite `415d3f8c` and recorded-account museum input `14c206b9` integrated. WORK authority and extracted fixture have independent focused acceptance. Full typed provider/Finality/deployment acceptance remains active. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
 | Last updated | `2026-09-12 UTC` |
 
 ## Active work
+
+The rights JSON implementation is integrated as `e82c6cfb`: ten Solidity cases
+and 256 fuzz inputs pass both compiler modes, with five independent Python
+schema/canonicalization cases. Complete supported typed fields reconstruct the
+exact stored bytes, including the 8192-byte boundary. The closed semantic
+schema and separate profile are prospective registration inputs; actual
+registered definitions, saved record authority and current selection are the
+integrator's next join. See the [rights guide](../docs/integrations/rights-json-profile.md).
+
+The shared [WORK_DESCRIPTION authority](../docs/integrations/work-description-authority.md)
+now allows the original artist operation-24 path and separate curator/admin
+paths under the same CURATOR record family. The exact schema, receipt classes,
+record hash and storage layout are preserved. Twenty-eight focused cases pass
+both compiler modes. Three dedicated current artist/estate/Safe cases pass on
+the integrated unavailability source, with independent source/artifact review.
+The shared artist fixture extraction preserves all 301 test bodies: 298 remain
+in the original test class and three new work-description cases are separate.
+This preserves test behavior while allowing new cases to compile independently.
+Complete WORK JSON is assigned to the museum builder; current selection and
+the actual provider remain root-owned. Core/Executor boundaries in these
+focused artist tests are explicit; this is not a full current-system run.
+
+The actual artist-unavailability finding is integrated as `48774674`, after
+recovery interface/hash prerequisite `415d3f8c`. Independent review binds the
+319-case pass result and the qualified final declaration/source bridge. The
+finding retains original governance action identity, delayed notice and current
+artist activity rules. Operation 22 and the recovery companion remain active;
+the prerequisite interface and pure hashes do not establish execution.
+
+Museum input now includes actual recorded, account-authored semantic records:
+`fe9b5b90` adds independent anchored history, `16d68963` binds exact publication
+event order, and `14c206b9` adds registered interpretation and account authority.
+The last increment has 100 independently reviewed cases; root readback matches
+all 45 integrated files and passes 19 focused cases plus its profile generator.
+The local captures retain original records and explicit trusted-RPC and typed
+Core/Executor boundaries. Account authorship does not identify a human or prove
+institutional independence. See [recorded account input](../docs/museum-recorded-account.md).
+Complete museum conformance and public deployment acceptance remain open.
 
 Operation 13 sanction confirmation is integrated as `9ab6a717`. The independent
 review accepts all 303 test names across the retained 302-pass run and one
@@ -45,9 +83,10 @@ discovery and Finality execution remain next; see the
 LIDO is integrated as `03693f36`, with all 202 tests, eight generators and
 37 exact reproduced composite outputs. Original standards and all previous
 package/projection outputs remain unchanged. The 183-test IIIF revision passes
-Windows/Linux CI at `8ad1e43d` (34713924514); new LIDO CI is pending. Shared CI
-now checks LIDO and allows 40 minutes for the measured 24-minute test cohort.
-The museum builder proceeds to an explicit authenticated-chain read boundary.
+Windows/Linux CI at `8ad1e43d` (34713924514); LIDO202 now passes both platforms
+at `739ef458` (34715965661). Shared CI checks all eight generators and allows
+40 minutes for the measured 24-minute test cohort. The museum builder has
+delivered the bounded chain/account input above and now owns full WORK JSON.
 
 The integrator has committed and pushed the independently reviewed content-root
 publication increment as `bf5fa1b6`:

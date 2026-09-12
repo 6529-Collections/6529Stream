@@ -7,10 +7,21 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a narrow shared artist/curator WORK_DESCRIPTION authorization path,
+  preserving the original record hash, receipt provenance and family grants.
+- Added complete supported rights JSON serialization, exact recorded-byte
+  comparison, closed schema/profile inputs and independent canonical fixtures.
+  Onchain registration, authenticated current selection and typed write
+  admission remain separate integration work.
+- Added anchored independent-record history and exact publication event order
+  for museum input. Offline replay and actual local captures retain explicit
+  trusted-RPC and fixture boundaries. Registered account-authored semantic
+  records now produce exact museum projections; institutional identity and
+  independence remain separately evidenced.
 - Added pinned LIDO correspondence for the same four-media source used by
   Linked Art, PREMIS and IIIF, with original schema closure, exact provenance
   and preserved previous outputs. All 202 tests and eight generators pass;
-  actual chain-record input and complete institutional conformance remain open.
+  full recorded-input correspondence and institutional conformance remain open.
 - Added current-content evidence reads that join the exact artist-approved root
   record, fixed deployment route, complete token checkpoint and preserved leaf
   bytes. Full typed record interpretation and finality composition remain open.

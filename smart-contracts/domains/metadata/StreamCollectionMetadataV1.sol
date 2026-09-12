@@ -166,9 +166,16 @@ contract StreamCollectionMetadataV1 is
         override
         returns (bytes32 scope, bytes32 oldHash, bytes32 newHash)
     {
+        uint16 allowed = family.allowed();
+        // WORK_DESCRIPTION shares curatorial storage, with a separate artist op-24 path.
+        if (recordType == keccak256("WORK_DESCRIPTION") && family == StreamRecordFamilies.CURATOR) {
+            allowed |= StreamRecordFamilies.bit(1);
+        }
         if (
-            recordType == 0 || _policies[recordType].admitted || mask == 0 || family.allowed() == 0
-                || (mask & ~family.allowed()) != 0
+            recordType == 0 || _policies[recordType].admitted || mask == 0 || allowed == 0
+                || (mask & ~allowed) != 0
+                || (recordType == keccak256("WORK_DESCRIPTION")
+                    && family != StreamRecordFamilies.CURATOR)
         ) revert InvalidMetadataRecord();
         // These families have dedicated permanent hosts or typed intersection rules.
         if (
@@ -336,10 +343,14 @@ contract StreamCollectionMetadataV1 is
     function _candidate(P.Publication memory p) private view returns (bytes32 hash, uint8 kind) {
         _requireArtistSelected();
         _requireSubject(p.collectionId, p.subjectId);
+        RecordPolicy memory policy = _policies[p.recordType];
         if (
             p.metadataHost != address(this) || p.recorder == address(0) || p.payloadAlgorithm != 1
-                || p.effectiveAt == 0 || !_policies[p.recordType].admitted
-                || _policies[p.recordType].family != StreamRecordFamilies.ARTIST
+                || p.effectiveAt == 0 || !policy.admitted
+                || (policy.authorizationMask & StreamRecordFamilies.bit(1)) == 0
+                || (policy.family != StreamRecordFamilies.ARTIST
+                    && !(policy.family == StreamRecordFamilies.CURATOR
+                        && p.recordType == keccak256("WORK_DESCRIPTION")))
         ) revert InvalidMetadataRecord();
         _schema(p.schemaId, p.canonicalizationId);
         bytes memory payload = _chunk(p.payloadHash);
@@ -446,6 +457,8 @@ contract StreamCollectionMetadataV1 is
                 || payload.length == 0 || payload.length > MAX_RECORD_PAYLOAD_BYTES
                 || bytes32(record.contentHash.digest) != keccak256(payload)
                 || record.effectiveAt == 0 || block.timestamp > type(uint64).max
+                || (record.recordType == keccak256("WORK_DESCRIPTION")
+                    && record.schemaId != keccak256("STREAM_WORK_DESCRIPTION_V1"))
         ) revert InvalidMetadataRecord();
         StreamMetadataRenderer.requireValidUtf8ContentUri("recordURI", record.uri, 2048, true);
         RecordReceipt memory receipt;
@@ -567,6 +580,8 @@ contract StreamCollectionMetadataV1 is
                         || schemaId == keccak256("STREAM_ARTIST_STATEMENT_V1")))
                 || (recordType == keccak256("ARTIST_SEMANTIC_ASSERTION")
                     && schemaId == keccak256("STREAM_SEMANTIC_ASSERTION_V1"))
+                || (recordType == keccak256("WORK_DESCRIPTION")
+                    && schemaId == keccak256("STREAM_WORK_DESCRIPTION_V1"))
         ) return 8;
         revert InvalidMetadataRecord();
     }

@@ -14,11 +14,51 @@ through actual current contracts, with independent review, tests, developer
 interfaces and a newly identified candidate. External audit and production
 ceremony acceptance remain separately visible requirements.
 
-The prior 45-60% assessment was a qualitative feature estimate, not a measured
-requirements pass rate or estimate of remaining time. This ledger replaces
-percentage-based progress reporting with concrete capabilities and evidence.
+The latest owner-facing estimate is approximately 65% of full v1, with a
+60-70% uncertainty range. This is engineering judgment, not a measured
+requirements pass rate or estimate of remaining time. The remaining work
+includes difficult integration. This ledger tracks concrete capabilities
+and evidence instead of deriving completion from test or interface counts.
 
 ## Latest integration: 12 September
+
+The rights JSON implementation is integrated as `e82c6cfb`: ten Solidity cases
+and 256 fuzz inputs pass both compiler modes, with five independent Python
+schema/canonicalization cases. Complete supported typed fields reconstruct the
+exact stored bytes, including the 8192-byte boundary. The closed semantic
+schema and separate profile are prospective registration inputs; actual
+registered definitions, saved record authority and current selection are the
+integrator's next join. See the [rights guide](../docs/integrations/rights-json-profile.md).
+
+The shared [WORK_DESCRIPTION authority](../docs/integrations/work-description-authority.md)
+now allows the original artist operation-24 path and separate curator/admin
+paths under the same CURATOR record family. The exact schema, receipt classes,
+record hash and storage layout are preserved. Twenty-eight focused cases pass
+both compiler modes. Three dedicated current artist/estate/Safe cases pass on
+the integrated unavailability source, with independent source/artifact review.
+The shared artist fixture extraction preserves all 301 test bodies: 298 remain
+in the original test class and three new work-description cases are separate.
+This preserves test behavior while allowing new cases to compile independently.
+Complete WORK JSON is assigned to the museum builder; current selection and
+the actual provider remain root-owned. Core/Executor boundaries in these
+focused artist tests are explicit; this is not a full current-system run.
+
+The actual artist-unavailability finding is integrated as `48774674`, after
+recovery interface/hash prerequisite `415d3f8c`. Independent review binds the
+319-case pass result and the qualified final declaration/source bridge. The
+finding retains original governance action identity, delayed notice and current
+artist activity rules. Operation 22 and the recovery companion remain active;
+the prerequisite interface and pure hashes do not establish execution.
+
+Museum input now includes actual recorded, account-authored semantic records:
+`fe9b5b90` adds independent anchored history, `16d68963` binds exact publication
+event order, and `14c206b9` adds registered interpretation and account authority.
+The last increment has 100 independently reviewed cases; root readback matches
+all 45 integrated files and passes 19 focused cases plus its profile generator.
+The local captures retain original records and explicit trusted-RPC and typed
+Core/Executor boundaries. Account authorship does not identify a human or prove
+institutional independence. See [recorded account input](../docs/museum-recorded-account.md).
+Complete museum conformance and public deployment acceptance remain open.
 
 The current-content consumer is integrated as `60ec0ba3`, with independent
 source and compiler review. Its 15 new cases plus all 17 retained publication
@@ -32,11 +72,9 @@ open. Next, fixed typed serializers will reconstruct exact stored JSON payloads
 from untrusted field witnesses, preserving complete semantic schema meanings
 and separately versioned interpretation profiles.
 
-WORK_DESCRIPTION also needs an explicit shared artist/curatorial admission seam:
-the current generic host's single-family policy and artist subject mapping
-cannot yet serve both mandated authority branches for that same record type.
-The serializer will confer no authority. RIGHTS keeps its existing class-7/8
-grant path, so its typed interpretation can proceed independently.
+WORK_DESCRIPTION now has the shared artist/curatorial admission seam described
+above. Its serializer confers no authority. RIGHTS keeps the existing class-7/8
+grant path, with typed interpretation built independently of that authority.
 
 The Router now implements [artist-approved content-root publication](../docs/integrations/content-root-publication.md)
 in `bf5fa1b6`, with independent source, behavior, ABI/storage and compiler review.
@@ -69,8 +107,10 @@ Museum LIDO correspondence is integrated as `03693f36`. All 202 tests pass
 on the exact reviewed source, with eight generators and original pinned XSD
 closure. Root readback reproduces all 37 four-media composite outputs exactly;
 the prior 115/16/17/28 package/projection/PREMIS/IIIF outputs remain unchanged.
-This is a synthetic source correspondence; actual authenticated-chain records,
-complete WORK_DESCRIPTION interpretation and institutional ingest remain open.
+This LIDO correspondence uses its retained synthetic source. The separately
+reviewed recorded-account input above establishes a bounded authenticated
+source path; complete WORK_DESCRIPTION-to-LIDO interpretation and institutional
+ingest remain open.
 CI now includes the eighth generator and a 40-minute allowance for the measured
 24-minute cohort (`503c60ff`).
 
@@ -80,8 +120,9 @@ all seven generators and all 28 four-media example outputs. The reviewed test
 union has 183 distinct cases (182 original plus 34 after one corrected identity
 predicate); this is not a single latest-source 183-case run. Windows/Linux CI
 passes the 183-test IIIF revision at `8ad1e43d`, run 34713924514. The LIDO
-revision's CI has not yet run. Remaining museum formats, packaging, chain
-authentication and institutional acceptance continue in parallel.
+revision passes Windows/Linux CI at `739ef458`, run 34715965661, with all 202
+tests and eight generators. Remaining profile integration, packaging and
+institutional acceptance continue in parallel.
 
 Signed artist sanctions and canonical finality admission are integrated as
 `50bd3935`, followed by the separate historical-test migration `cb332bc7`.

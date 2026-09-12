@@ -39,6 +39,11 @@ granted by the host administrator. OWNER, INDEPENDENT and SNAPSHOT families
 cannot be admitted to this generic host. Their authority and permanence rules
 require their dedicated implementations.
 
+`WORK_DESCRIPTION` has an explicit shared artist/curatorial policy, documented
+in [work-description authority](work-description-authority.md). It retains the
+CURATOR family and requires the exact `STREAM_WORK_DESCRIPTION_V1` identity on
+both write paths. This does not yet validate the payload's descriptive meaning.
+
 For a direct record, call `recordCollectionRecordWithPayload`. The recorder
 is `msg.sender`, including when it is a Safe. Supply a nonempty payload of at
 most 8,192 bytes, algorithm 1, its exact keccak256 digest, active schema and

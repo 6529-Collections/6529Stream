@@ -34,6 +34,12 @@ documented isolated environment; the general tools lock does not include the
 JSON-LD dependencies. These tests cover the implemented offline tools and do
 not establish complete museum conformance.
 
+The [typed record tools](../tools/metadata/README.md) share that isolated Python
+environment for independent JSON Schema and canonical-byte tests. Run
+`python -m unittest tools.metadata.test_rights_profile -v` and
+`python -m tools.metadata.rights_profile --check` for the rights profile.
+Both commands are included in museum CI; they do not register anything onchain.
+
 Draft pull requests retain their running CI job when new commits arrive. GitHub
 keeps the newest pending run for that pull request, so repeated integration
 pushes do not keep discarding an unfinished compiler run. Ready pull requests

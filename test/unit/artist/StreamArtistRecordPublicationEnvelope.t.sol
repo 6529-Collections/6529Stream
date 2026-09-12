@@ -128,4 +128,23 @@ contract StreamArtistRecordPublicationEnvelopeTest {
         vm.expectRevert(abi.encodeWithSelector(T.UnsupportedProfile.selector));
         StreamArtistRecordPublicationRules.decode(p, statement);
     }
+
+    function testWorkDescriptionUsesExactSchemaSubjectEightAndAttestCapability() public {
+        StreamArtistRecordPublicationTypes.Publication memory publication = _publication();
+        publication.recordType = keccak256("WORK_DESCRIPTION");
+        publication.schemaId = keccak256("STREAM_WORK_DESCRIPTION_V1");
+        (T.Attestation memory p, bytes memory statement) = _attestation(publication, 8);
+        (, uint32 capability) = StreamArtistRecordPublicationRules.decode(p, statement);
+        require(
+            capability == 1 && p.subjectStateHash == 0 && statement.length == 416,
+            "existing op24 envelope and CAP_ATTEST"
+        );
+        (p, statement) = _attestation(publication, 7);
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidRecord.selector));
+        StreamArtistRecordPublicationRules.decode(p, statement);
+        publication.schemaId = keccak256("STREAM_ARTIST_INTERVIEW_V1");
+        (p, statement) = _attestation(publication, 8);
+        vm.expectRevert(abi.encodeWithSelector(T.UnsupportedProfile.selector));
+        StreamArtistRecordPublicationRules.decode(p, statement);
+    }
 }

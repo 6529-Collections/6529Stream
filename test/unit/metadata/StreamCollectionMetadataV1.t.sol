@@ -224,18 +224,18 @@ contract MetadataModuleRegistryBoundary {
     }
 }
 
-contract StreamCollectionMetadataV1Test is CharacterizationTestBase, OfficialSafeFixture {
-    StreamCollectionMetadataV1 private metadata;
-    MetadataCoreBoundary private core;
-    MetadataExecutorBoundary private executor;
-    MetadataArtistBoundary private artist;
-    StreamSchemaRegistry private schemas;
-    StreamSchemaDocumentStore private store;
-    bytes32 private schemaId;
-    bytes32 private subject;
-    bytes32 private constant CURATOR = keccak256("CURATOR_TEST_RECORD");
-    bytes32 private constant RIGHTS = keccak256("RIGHTS_TEST_RECORD");
-    bytes32 private constant ARTIST = keccak256("ARTIST_STATEMENT");
+abstract contract CollectionMetadataV1Fixture is CharacterizationTestBase, OfficialSafeFixture {
+    StreamCollectionMetadataV1 internal metadata;
+    MetadataCoreBoundary internal core;
+    MetadataExecutorBoundary internal executor;
+    MetadataArtistBoundary internal artist;
+    StreamSchemaRegistry internal schemas;
+    StreamSchemaDocumentStore internal store;
+    bytes32 internal schemaId;
+    bytes32 internal subject;
+    bytes32 internal constant CURATOR = keccak256("CURATOR_TEST_RECORD");
+    bytes32 internal constant RIGHTS = keccak256("RIGHTS_TEST_RECORD");
+    bytes32 internal constant ARTIST = keccak256("ARTIST_STATEMENT");
     event CollectionRecordRecorded(
         uint256 indexed collectionId,
         bytes32 indexed recordType,
@@ -298,6 +298,131 @@ contract StreamCollectionMetadataV1Test is CharacterizationTestBase, OfficialSaf
         _admit(ARTIST, StreamRecordFamilies.ARTIST, 2);
     }
 
+    function _record(bytes32 kind, bytes memory payload)
+        internal
+        view
+        returns (IStreamPreservationRecords.CollectionRecord memory r)
+    {
+        r.recordType = kind;
+        r.subjectId = subject;
+        r.schemaId = schemaId;
+        r.contentHash = IStreamPreservationRecords.HashRef(
+            1, abi.encode(keccak256(payload)), schemas.RAW_BYTES()
+        );
+        r.uri = "ipfs://record";
+        r.effectiveAt = 1;
+    }
+
+    function _publication(address recorder, IStreamPreservationRecords.CollectionRecord memory r)
+        internal
+        view
+        returns (P.Publication memory p)
+    {
+        p = P.Publication(
+            address(metadata),
+            recorder,
+            1,
+            r.subjectId,
+            r.recordType,
+            r.schemaId,
+            r.contentHash.canonicalizationId,
+            1,
+            bytes32(r.contentHash.digest),
+            keccak256(bytes(r.uri)),
+            r.effectiveAt,
+            _oldRecordHash(recorder, r)
+        );
+    }
+
+    function _oldRecordHash(address recorder, IStreamPreservationRecords.CollectionRecord memory r)
+        internal
+        view
+        returns (bytes32)
+    {
+        bytes32[14] memory words;
+        words[0] = keccak256("6529stream.preservation-record.v2");
+        words[1] = bytes32(block.chainid);
+        words[2] = bytes32(uint256(uint160(address(metadata))));
+        words[3] = bytes32(uint256(uint160(address(core))));
+        words[4] = bytes32(uint256(uint160(recorder)));
+        words[5] = bytes32(uint256(1));
+        words[6] = r.recordType;
+        words[7] = r.subjectId;
+        words[8] = keccak256(
+            abi.encode(
+                r.contentHash.algorithm,
+                keccak256(r.contentHash.digest),
+                r.contentHash.canonicalizationId
+            )
+        );
+        words[9] = keccak256(bytes(r.uri));
+        words[10] = r.schemaId;
+        words[11] = r.signatureScheme;
+        words[12] = keccak256(
+            abi.encode(
+                r.signatureHash.algorithm,
+                keccak256(r.signatureHash.digest),
+                r.signatureHash.canonicalizationId
+            )
+        );
+        words[13] = bytes32(uint256(r.effectiveAt));
+        return keccak256(abi.encode(words));
+    }
+
+    function _register(
+        string memory name,
+        IStreamSchemaRegistry.DocumentKind kind,
+        bytes memory payload
+    ) internal returns (bytes32) {
+        (bytes32 hash,) = store.publishChunk(payload);
+        bytes32[] memory chunks = new bytes32[](1);
+        chunks[0] = hash;
+        IStreamSchemaRegistry.DocumentSpec memory spec = IStreamSchemaRegistry.DocumentSpec(
+            name, kind, hash, schemas.RAW_BYTES(), 0, "", uint32(payload.length)
+        );
+        (bytes32 s, bytes32 o, bytes32 n) = schemas.registrationTransition(spec, chunks);
+        return abi.decode(
+            executor.execute(
+                address(schemas), abi.encodeCall(schemas.registerDocument, (spec, chunks)), s, o, n
+            ),
+            (bytes32)
+        );
+    }
+
+    function _admit(bytes32 kind, bytes32 family, uint16 mask) internal {
+        (bytes32 s, bytes32 o, bytes32 n) = metadata.recordTypeTransition(kind, family, mask);
+        executor.execute(
+            address(metadata),
+            abi.encodeCall(metadata.admitRecordType, (kind, family, mask)),
+            s,
+            o,
+            n
+        );
+    }
+
+    function _grant(
+        uint256 collectionId,
+        bytes32 family,
+        uint8 authClass,
+        address account,
+        bool enabled
+    ) internal {
+        (bytes32 s, bytes32 o, bytes32 n) = metadata.familyWriterTransition(
+            collectionId, family, authClass, account, enabled
+        );
+        executor.execute(
+            address(metadata),
+            abi.encodeCall(
+                metadata.setFamilyWriter, (collectionId, family, authClass, account, enabled)
+            ),
+            s,
+            o,
+            n
+        );
+    }
+}
+
+contract StreamCollectionMetadataV1Test is CollectionMetadataV1Fixture {
     function testDirectBytesExactEventHistoryAndDistinctAuthors() public {
         bytes memory payload = bytes("{\"meaning\":\"original\"}");
         IStreamPreservationRecords.CollectionRecord memory r = _record(CURATOR, payload);
@@ -803,128 +928,5 @@ contract StreamCollectionMetadataV1Test is CharacterizationTestBase, OfficialSaf
         );
         require(status != StreamCoreValidationStatus.VALID, "legacy catalog identity rejected");
         require(!metadata.supportsInterface(0xffffffff), "invalid ERC165 marker rejected");
-    }
-
-    function _record(bytes32 kind, bytes memory payload)
-        private
-        view
-        returns (IStreamPreservationRecords.CollectionRecord memory r)
-    {
-        r.recordType = kind;
-        r.subjectId = subject;
-        r.schemaId = schemaId;
-        r.contentHash = IStreamPreservationRecords.HashRef(
-            1, abi.encode(keccak256(payload)), schemas.RAW_BYTES()
-        );
-        r.uri = "ipfs://record";
-        r.effectiveAt = 1;
-    }
-
-    function _publication(address recorder, IStreamPreservationRecords.CollectionRecord memory r)
-        private
-        view
-        returns (P.Publication memory p)
-    {
-        p = P.Publication(
-            address(metadata),
-            recorder,
-            1,
-            r.subjectId,
-            r.recordType,
-            r.schemaId,
-            r.contentHash.canonicalizationId,
-            1,
-            bytes32(r.contentHash.digest),
-            keccak256(bytes(r.uri)),
-            r.effectiveAt,
-            _oldRecordHash(recorder, r)
-        );
-    }
-
-    function _oldRecordHash(address recorder, IStreamPreservationRecords.CollectionRecord memory r)
-        private
-        view
-        returns (bytes32)
-    {
-        bytes32[14] memory words;
-        words[0] = keccak256("6529stream.preservation-record.v2");
-        words[1] = bytes32(block.chainid);
-        words[2] = bytes32(uint256(uint160(address(metadata))));
-        words[3] = bytes32(uint256(uint160(address(core))));
-        words[4] = bytes32(uint256(uint160(recorder)));
-        words[5] = bytes32(uint256(1));
-        words[6] = r.recordType;
-        words[7] = r.subjectId;
-        words[8] = keccak256(
-            abi.encode(
-                r.contentHash.algorithm,
-                keccak256(r.contentHash.digest),
-                r.contentHash.canonicalizationId
-            )
-        );
-        words[9] = keccak256(bytes(r.uri));
-        words[10] = r.schemaId;
-        words[11] = r.signatureScheme;
-        words[12] = keccak256(
-            abi.encode(
-                r.signatureHash.algorithm,
-                keccak256(r.signatureHash.digest),
-                r.signatureHash.canonicalizationId
-            )
-        );
-        words[13] = bytes32(uint256(r.effectiveAt));
-        return keccak256(abi.encode(words));
-    }
-
-    function _register(
-        string memory name,
-        IStreamSchemaRegistry.DocumentKind kind,
-        bytes memory payload
-    ) private returns (bytes32) {
-        (bytes32 hash,) = store.publishChunk(payload);
-        bytes32[] memory chunks = new bytes32[](1);
-        chunks[0] = hash;
-        IStreamSchemaRegistry.DocumentSpec memory spec = IStreamSchemaRegistry.DocumentSpec(
-            name, kind, hash, schemas.RAW_BYTES(), 0, "", uint32(payload.length)
-        );
-        (bytes32 s, bytes32 o, bytes32 n) = schemas.registrationTransition(spec, chunks);
-        return abi.decode(
-            executor.execute(
-                address(schemas), abi.encodeCall(schemas.registerDocument, (spec, chunks)), s, o, n
-            ),
-            (bytes32)
-        );
-    }
-
-    function _admit(bytes32 kind, bytes32 family, uint16 mask) private {
-        (bytes32 s, bytes32 o, bytes32 n) = metadata.recordTypeTransition(kind, family, mask);
-        executor.execute(
-            address(metadata),
-            abi.encodeCall(metadata.admitRecordType, (kind, family, mask)),
-            s,
-            o,
-            n
-        );
-    }
-
-    function _grant(
-        uint256 collectionId,
-        bytes32 family,
-        uint8 authClass,
-        address account,
-        bool enabled
-    ) private {
-        (bytes32 s, bytes32 o, bytes32 n) = metadata.familyWriterTransition(
-            collectionId, family, authClass, account, enabled
-        );
-        executor.execute(
-            address(metadata),
-            abi.encodeCall(
-                metadata.setFamilyWriter, (collectionId, family, authClass, account, enabled)
-            ),
-            s,
-            o,
-            n
-        );
     }
 }
