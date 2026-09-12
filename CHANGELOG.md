@@ -7,10 +7,18 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added an independent-attestor record host with permanent author history and
+  Safe direct/relayed paths. Its reviewed 22-case suite uses actual schemas,
+  byte storage and governance, with explicit Core membership boundaries.
+- Added a permissionless collection inventory backed by actual Core serials,
+  including burns and excluding incomplete mints. Fourteen focused cases pass
+  both compiler modes with 256 fuzz inputs and threshold Safe calls.
+- Added four actual artist-registry-to-metadata-host publication checks for
+  Safe signatures, estate intent authority, rotation and atomic append rollback.
+  Full current Core/Executor composition remains separate.
 - Added exact typed metadata-publication authorization through the current artist
   registry, preserving prior artist methods, signing domains and storage prefixes.
-  The unpruned 271-test artist cohort passes independent review; actual
-  artist-to-metadata-host publication is the next composition check.
+  The unpruned 271-test artist cohort passes independent review.
 - Added the current full-byte metadata host, a distinct caller interface,
   attributed history, canonical events and root-authorized family grants.
   Twenty-three host/adapter cases pass in both compiler modes with fuzzing;

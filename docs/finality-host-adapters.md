@@ -59,3 +59,9 @@ actual record bytes and interpretation identities. Its primary interface is
 finality evidence. Preserved leaf manifests, complete typed render inventory
 and their current-contract finality composition remain in development. The
 [delivery ledger](../ops/V1_DELIVERY.md) tracks that remaining integration.
+
+The [typed-provider design](adr/0041-typed-finality-evidence-provider.md) keeps
+those interpretations in a fixed satellite beside the generic record host.
+The [collection token inventory](integrations/collection-token-inventory.md)
+enumerates actual completed mints, including burns, as an input to complete
+content-root production. Neither surface makes generic records finality-ready.
