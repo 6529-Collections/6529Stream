@@ -20,6 +20,21 @@ percentage-based progress reporting with concrete capabilities and evidence.
 
 ## Latest integration: 12 September
 
+Offline Linked Art validation is integrated as `ef107a22`. The complete current
+museum tool suite passes 52 independently reviewed tests, again in a fresh root
+environment with all 15 pinned dependencies. Thirteen retained schemas have
+complete local reference validation and three explicit interpretation repairs;
+original standard bytes are unchanged. A separate Windows/Linux museum CI
+workflow keeps these fast checks independent of Solidity compilation.
+
+The [content-root primitives and host adapters](../docs/finality-host-adapters.md)
+pass independent review: seven content/subject tests with 256 fuzz inputs and
+eight adapter tests pass in both compiler modes. The adapter cases include a
+real threshold Safe calling all eleven public reads. Core and host evidence
+are explicit boundary doubles here; actual metadata publication, complete
+scope evidence, discovery wiring and the first full finality flow remain the
+integrator's next implementation work.
+
 The reviewed estate increment is integrated as `34932659` from `9af9a107`:
 234 domain cases pass, all 115 nonempty production runtimes fit, and constructor
 and historical interface/storage checks are retained. The optimized clearing
@@ -85,10 +100,10 @@ The latest remote CI on `266fc055` remains red. It identified a default-mode
 artist hash-helper stack limit and a separate full current-profile Yul compiler
 failure; Slither provenance and release bundles also need their planned refresh.
 The hash-helper repair is integrated as `e43dbed5`, with exact preimage vectors
-and fuzzing against the old IR and both new compiler modes. The integrator is
-running the whole current compilation with dynamic test linking in an isolated
-snapshot to investigate the other failure; repository compiler settings have
-not changed. Passing focused runtime cohorts does not replace resolving this
+and fuzzing against the old IR and both new compiler modes. The isolated whole-current dynamic-linking diagnostic
+failed with the same Yul stack-layout error after 1,801 seconds on the exact
+`e43dbed5` Solidity snapshot. Repository compiler settings remain unchanged;
+the independent reviewer is isolating the smallest failing compiler input. Passing focused runtime cohorts does not replace resolving this
 complete-build failure and the final matching artifact pass.
 
 ## Team and ownership
@@ -190,9 +205,9 @@ commits, tests and retained results in the evidence column when advancing it.
 | MINT-01 | Signed tickets, burn-to-mint and delegate gates, counter/nullifier continuity and required content-selection behavior | Integrator / revenue builder; shared artist/payment interfaces | Building: full-payload ticket/offer revocation at the Manager/Ledger boundary is assigned; other listed behaviors retain their acceptance scope |
 | ENT-01 | Reviewed non-VRF provider and safe-mode fallback instances are installed; actual provider failure/recovery follows the specified lifecycle | Integrator / freed builder; provider docs and exact interfaces | Building: ARRNG adapter and four actual-current Safe/Executor cases accepted in `72c208f2`; safe-mode, full recovery and deployed upstream acceptance remain |
 | ENT-02 | Scope/reveal policies, fee escrow, keeper/SLO fallback and recovery preserve committed entropy without discretionary rerolls | Integrator / freed builder; ENT-01 | Building: policy/escrow/typed quote source integrated `66d70e04`, with 44 focused cases, 30 metadata regressions and six planner cases; separate 14-case actual current/Safe composition independently accepted with its captured pre-unique-holder planner; governed timing/SLO source has 54 accepted domain cases and 30 metadata regressions, with a separately accepted seven-case actual governance/Safe run captured before operation 33; AT_MINT attempts and recovery remain |
-| META-01 | Schema, owner records, attestations, views and preservation modules cover required genesis metadata and authority | Integrator / freed builder; FOUND-01 and typed ART-03 interface, build owners in parallel with ART-03 | Queued |
+| META-01 | Schema, owner records, attestations, views and preservation modules cover required genesis metadata and authority | Integrator / freed builder; FOUND-01 and typed ART-03 interface, build owners in parallel with ART-03 | Building: immutable document registry and reviewed content/subject primitives are integrated; actual record hosts, schema admission and remaining families continue |
 | META-02 | Rendering-input manifests, offchain first-sale binding, archive receipt/fixity semantics and required museum schemas round-trip | Integrator / freed builder; META-01 | Queued |
-| FIN-01 | Collection/token/release/season/view finality binds actual Core, metadata, discovery, entropy and artist sanction | Artist + integrator; ART-03, META-01/02, ENT-02 | Queued |
+| FIN-01 | Collection/token/release/season/view finality binds actual Core, metadata, discovery, entropy and artist sanction | Artist + integrator; ART-03, META-01/02, ENT-02 | Building: fixed-host adapters reviewed; canonical governance registry and actual metadata/sanction evidence are in progress, with no full finality-flow acceptance yet |
 | FIN-02 | Governance-owned recovery, owner notice/objection, recovered-route lineage and bounded refresh/cutover work end to end | Artist + integrator; FIN-01, owner records, ADR 0020 reconciliation | Queued |
 | ARCH-01 | Complete state/event reconstruction and export preservation can rebuild required records, lineage and artwork without relying on the app | Integrator / freed builder; current publisher, META/ART/FIN | Queued |
 | GOV-01 | Complete governed parameter hosts, call-budget behavior and distinct fallback instances fit the real candidate | Integrator; integrated modules | Queued |

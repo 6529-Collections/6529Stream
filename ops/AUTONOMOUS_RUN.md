@@ -22,6 +22,15 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active work
 
+The latest increments add independently reviewed content-root/subject
+primitives and immutable finality host adapters: seven tests with fuzzing and
+eight adapter tests pass in each compiler mode, including actual Safe reads.
+The current metadata host, evidence records and discovery still need wiring.
+Museum Linked Art validation is integrated as `ef107a22`, with 52 reviewed
+tests passing in a fresh isolated environment. Its new Windows/Linux workflow
+runs independently of Solidity. The whole-current dynamic-linking diagnostic
+failed after 1,801 seconds; source isolation now owns that compiler issue.
+
 One integrator owns technical decisions and delivery. Two builders and a separate
 reviewer advance independent domains; all rows in [V1_DELIVERY.md](V1_DELIVERY.md)
 remain in scope. [Safe acceptance](SAFE_ACCEPTANCE.md) covers every supported

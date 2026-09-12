@@ -62,6 +62,16 @@ that implementation, not full RDF/OWL reasoning or Linked Art model acceptance.
 
 ## Acceptance evidence
 
+The [Linked Art validator](../docs/museum-linked-art-validation.md) is integrated
+as `ef107a22`. Its 52-test combined suite passes independent review and a fresh
+root environment with 15 pinned packages. All 667 retained schema references
+resolve locally after three narrowly declared interpretation repairs; the
+original standards remain unchanged. URI/date-time validation consumes the
+whole value, and the chosen time profile explicitly excludes leap seconds.
+The independent Windows/Linux workflow runs these tools without Solidity
+compilation. Full source mappings, recorded-state export and institutional
+acceptance remain open.
+
 All twelve gates in [MSM-CONFORMANCE](../docs/museum-semantic-mapping.md) and
 the [conformance matrix](../docs/launch-conformance-matrix.md) remain open until
 their exact evidence is retained. Every package records source revision and

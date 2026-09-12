@@ -27,6 +27,13 @@ once, then `npm --prefix packages/stream-client test`. Its independent CI job
 checks retained ABI freshness, TypeScript types, signing payloads and snapshots
 without recompiling Solidity. Solidity development does not require Node.js.
 
+The [museum tooling](../tools/museum/README.md) has its own pinned Python
+dependencies and independent Windows/Linux CI workflow. Its tests and
+deterministic schema/fixture checks run without compiling Solidity. Use the
+documented isolated environment; the general tools lock does not include the
+JSON-LD dependencies. These tests cover the implemented offline tools and do
+not establish complete museum conformance.
+
 Draft pull requests retain their running CI job when new commits arrive. GitHub
 keeps the newest pending run for that pull request, so repeated integration
 pushes do not keep discarding an unfinished compiler run. Ready pull requests

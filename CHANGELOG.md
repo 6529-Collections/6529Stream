@@ -7,6 +7,14 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added pinned offline Linked Art schema validation and JSON-LD expansion,
+  with complete local schema-reference checks, explicit interpretation repairs
+  and strict format validation. Fifty-two tests pass independent review;
+  museum tooling now has an independent Windows/Linux CI workflow.
+- Added canonical token content-tree and metadata-subject primitives, with
+  independent hash vectors and fuzzing. Added immutable host finality adapters
+  separating historical verification from current discovery; actual metadata
+  publication and full finality integration remain in development.
 - Retained the pinned CRM and Linked Art vocabulary bytes and explicit
   interpretation policy, with seven independently reviewed hierarchy and
   domain/range tests. Complete JSON-LD and Linked Art validation remain separate.

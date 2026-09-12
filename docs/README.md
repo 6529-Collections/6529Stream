@@ -15,6 +15,8 @@ their own scope and must not be read as a list of installed features.
 | Sign, buy, bid, index, withdraw, or render | [Integration guide](integrations/README.md) |
 | Use typed calls and export selected state | [TypeScript client](integrations/typescript-client.md) |
 | Publish and reconstruct interpretation documents | [Schema registry](schema-registry.md) |
+| Bind content roots and inspect finality component hosts | [Finality adapters and content commitments](finality-host-adapters.md) |
+| Validate retained Linked Art documents offline | [Museum tooling](../tools/museum/README.md), [validation boundary](museum-linked-art-validation.md) |
 | Run a second artist through sales and auctions | [Product scenarios](integrations/product-demo.md) |
 | Complete a collection and retain its artwork | [Collector package](integrations/collector-package.md) |
 | Choose a command or compiler profile | [Tooling](tooling.md) |
