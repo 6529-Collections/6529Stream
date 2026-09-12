@@ -20,6 +20,7 @@ import "../../smart-contracts/domains/entropy/StreamEntropyCoordinator.sol";
 import "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
 import "../../script/current/StreamCurrentStackPlan.sol";
 import "../../script/current/StreamArtistActivationPlan.sol";
+import "../../script/current/StreamRevealActivationPlan.sol";
 import "../../script/current/StreamGenesisManifestPlan.sol";
 import "../mocks/MockStreamEntropyProvider.sol";
 
@@ -107,6 +108,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
         entropy = new StreamEntropyCoordinator(
             address(core),
             address(executor),
+            address(roles),
             DEPLOYMENT_HASH,
             "urn:6529stream:fixture:entropy",
             keccak256("fixture entropy module")
@@ -123,6 +125,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
         _assertDeployableProductionContracts();
         _initializeProductGenesis();
         _activateArtistAuthority();
+        _activateRevealAuthority();
         _prepareArtistOnboarding();
         _onboardFixtureArtist(artist);
         _configureMintPhase(PHASE, address(sale));
@@ -224,9 +227,57 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
         manager.setPhaseExecutor(1, phase, phaseExecutor, true);
     }
 
+    function _revealPrincipals()
+        internal
+        view
+        virtual
+        returns (StreamRevealActivationPlan.Principals memory)
+    {
+        return StreamRevealActivationPlan.Principals(
+            address(this), address(governanceRoot), address(governanceRoot)
+        );
+    }
+
+    function _configureInitialRevealPolicy() internal virtual {
+        entropy.configureCollectionRevealPolicy(
+            1, 0, keccak256("ROLE_ENTROPY_REVEAL_OWNER"), 100, 0
+        );
+    }
+
+    /// @dev Existing fixture deployments exercise the three-call post-artist activation route.
+    ///      New operator deployments combine these grants into the original activation batch.
+    function _activateRevealAuthority() internal virtual {
+        StreamRevealActivationPlan.Principals memory principals = _revealPrincipals();
+        StreamArtistActivationPlan.Plan memory plan =
+            StreamRevealActivationPlan.build(roles, principals);
+        executor.publishGovernanceCallData(plan.callDatas);
+        uint64 notBefore = uint64(block.timestamp + 49 hours);
+        bytes32 actionId = _scheduleFixtureActivation(plan, notBefore);
+        vm.warp(notBefore);
+        StreamRevealActivationPlan.execute(
+            executor,
+            roles,
+            IStreamGasParameterHost(address(0)),
+            address(0),
+            principals,
+            actionId,
+            plan
+        );
+        StreamRevealActivationPlan.execute(
+            executor,
+            roles,
+            IStreamGasParameterHost(address(0)),
+            address(0),
+            principals,
+            actionId,
+            plan
+        );
+        _configureInitialRevealPolicy();
+    }
+
     /// @dev One real post-genesis batch activates the artist role and required read budget.
     ///      The deployment planner returns these same calls for persistent operator resumption.
-    function _activateArtistAuthority() private {
+    function _activateArtistAuthority() internal virtual {
         StreamArtistActivationPlan.Plan memory plan =
             StreamArtistActivationPlan.build(roles, manager, address(this));
         uint64 notBefore = uint64(block.timestamp + 49 hours);
@@ -302,7 +353,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
     function _scheduleFixtureActivation(
         StreamArtistActivationPlan.Plan memory plan,
         uint64 notBefore
-    ) private returns (bytes32) {
+    ) internal returns (bytes32) {
         bytes memory result = governanceRoot.execute(
             address(executor),
             0,

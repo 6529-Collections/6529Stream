@@ -74,6 +74,7 @@ contract StreamCurrentStackCatalogTest is StreamCurrentStackFixture {
         return new StreamEntropyCoordinator(
             address(core),
             address(executor),
+            address(roles),
             DEPLOYMENT_HASH,
             "urn:6529stream:fixture:replacement-entropy",
             keccak256("replacement entropy module")

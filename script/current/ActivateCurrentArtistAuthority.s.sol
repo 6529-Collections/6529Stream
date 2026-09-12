@@ -11,8 +11,9 @@ interface CurrentArtistActivationVm {
     function stopBroadcast() external;
 }
 
-/// @notice Resume the one delayed artist-authority batch returned by DeployCurrentStack.
+/// @notice Resume a retained two-call artist-only activation from an earlier modular deployment.
 /// @dev Supply the retained action ID and ABI-encoded plan; do not rebuild the plan.
+///      New five-call deployment plans use ActivateCurrentRevealAuthority instead.
 ///      This enables artist setup. Artist records, phase consent and Manager handoff
 ///      are separate subsequent transactions, and are not claimed complete here.
 contract ActivateCurrentArtistAuthority {

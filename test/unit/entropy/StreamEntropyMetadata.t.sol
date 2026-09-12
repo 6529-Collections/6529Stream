@@ -8,6 +8,7 @@ import {
 } from "../core/StreamCorePermanentTarget.t.sol";
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 import "../../mocks/MockStreamEntropyProvider.sol";
+import "../../mocks/MockEntropyRoleRegistry.sol";
 import "../../mocks/MockVRFCoordinatorV2Plus.sol";
 import "../../../smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol";
 import "../../../smart-contracts/domains/entropy/StreamEntropyCoordinator.sol";
@@ -65,6 +66,7 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase, OfficialSafeFixt
     StreamMetadataRouter private router;
     StreamMetadataArtistBoundary private artistRegistry;
     MockStreamEntropyProvider private provider;
+    MockEntropyRoleRegistry public roleRegistry;
 
     function supportsInterface(bytes4 id) external pure returns (bool) {
         return id == type(IStreamMintManager).interfaceId || id == 0x01ffc9a7;
@@ -74,6 +76,8 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase, OfficialSafeFixt
     function setUp() public {
         executor = new PermanentTargetGovernanceExecutor();
         registry = new PermanentTargetModuleRegistry();
+        registry.setGovernanceExecutor(address(this));
+        roleRegistry = new MockEntropyRoleRegistry(address(this));
         StreamCore.GasParameterGenesisConfig[] memory gasConfigs =
             new StreamCore.GasParameterGenesisConfig[](4);
         gasConfigs[0] = StreamCore.GasParameterGenesisConfig(
@@ -105,7 +109,12 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase, OfficialSafeFixt
             address(registry), REGISTRY, type(IStreamModuleRegistry).interfaceId, MANIFEST, MANIFEST
         );
         entropy = new StreamEntropyCoordinator(
-            address(core), address(this), MANIFEST, "ipfs://local-test", MANIFEST
+            address(core),
+            address(this),
+            address(roleRegistry),
+            MANIFEST,
+            "ipfs://local-test",
+            MANIFEST
         );
         artistRegistry = new StreamMetadataArtistBoundary(address(core), address(this), RECIPIENT);
         router = new NativeMetadataEncodingHarness(
@@ -153,6 +162,7 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase, OfficialSafeFixt
             type(IStreamArtistMintConsent).interfaceId
         );
         entropy.configureCollection(1, address(provider), keccak256("collection-salt"), true, 10);
+        entropy.configureCollectionRevealPolicy(1, 0, keccak256("ROLE_ENTROPY_REVEAL_OWNER"), 10, 0);
         router.setCollectionMetadata(
             1, 'Artist "Collection"', "Description", "ipfs://image", "https://example.test/art/"
         );
@@ -623,7 +633,7 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase, OfficialSafeFixt
         uint256 id = _mint();
         (, uint256 requestId) = entropy.requestEntropy(id);
         StreamEntropyCoordinator next = new StreamEntropyCoordinator(
-            address(core), address(this), MANIFEST, "ipfs://next", MANIFEST
+            address(core), address(this), address(roleRegistry), MANIFEST, "ipfs://next", MANIFEST
         );
         _install(ENTROPY, address(next), type(IStreamEntropyCoordinator).interfaceId);
         provider.fulfill(requestId, bytes32(uint256(12)));

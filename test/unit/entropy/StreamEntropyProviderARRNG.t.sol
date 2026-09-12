@@ -178,6 +178,59 @@ contract StreamEntropyProviderARRNGTest is CharacterizationTestBase, OfficialSaf
         );
     }
 
+    function testFuzzTypedFeeEqualsEveryContextAndSafeCanCallGetter(bytes calldata context) public {
+        require(
+            adapter.supportsInterface(type(IStreamEntropyProviderFeeQuote).interfaceId)
+                && !adapter.supportsInterface(0xffffffff)
+                && adapter.contextIndependentRequestFee() == FEE
+                && adapter.quoteRequest(context) == FEE
+                && adapter.quoteRequest(abi.encode(KEY, uint256(1), address(target))) == FEE,
+            "optional capability matches actual per-request quote"
+        );
+        require(
+            executeSafe(
+                treasury,
+                keys,
+                address(adapter),
+                0,
+                abi.encodeCall(adapter.contextIndependentRequestFee, ()),
+                0
+            ),
+            "threshold Safe executes typed getter"
+        );
+    }
+
+    function testTypedAndRequestQuoteFailIdenticallyOnOwnerAndMinimumDrift() public {
+        upstream.setOwner(address(0xBAD));
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamEntropyProviderARRNG.ARRNGUpstreamDrift.selector)
+        );
+        adapter.contextIndependentRequestFee();
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamEntropyProviderARRNG.ARRNGUpstreamDrift.selector)
+        );
+        adapter.quoteRequest(abi.encode(KEY));
+        upstream.setOwner(address(0xA11CE));
+        upstream.setMinimum(101);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamEntropyProviderARRNG.ARRNGPaymentBelowMinimum.selector, FEE, uint256(101)
+            )
+        );
+        adapter.contextIndependentRequestFee();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamEntropyProviderARRNG.ARRNGPaymentBelowMinimum.selector, FEE, uint256(101)
+            )
+        );
+        adapter.quoteRequest(abi.encode(KEY, uint256(42)));
+        upstream.setMinimum(100);
+        require(
+            adapter.contextIndependentRequestFee() == FEE && adapter.quoteRequest("") == FEE,
+            "both recover from minimum drift"
+        );
+    }
+
     function testLifecycleEventsReconstructExactRequestRawBudgetAndOutcome() public {
         vm.recordLogs();
         uint256 id = _request(KEY);

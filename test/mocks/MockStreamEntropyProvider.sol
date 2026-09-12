@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../../smart-contracts/interfaces/stream/entropy/IStreamEntropyProvider.sol";
 import "../../smart-contracts/interfaces/stream/entropy/IStreamEntropyCoordinator.sol";
+import "../../smart-contracts/interfaces/stream/entropy/IStreamEntropyProviderFeeQuote.sol";
 import "../../smart-contracts/vendor/openzeppelin/ERC165.sol";
 
 /// @notice LOCAL TEST ONLY: anyone can supply deterministic test randomness or simulate outages.
@@ -18,14 +19,22 @@ contract MockStreamEntropyProvider is ERC165, IStreamEntropyProvider {
     uint256 public fee;
     uint256 public nextRequestId = 1;
     bool public reenterOnRequest;
+    bool public quoteUnavailable;
     mapping(uint256 => Result) public results;
 
     constructor(address coordinator_) {
         coordinator = IStreamEntropyCoordinator(coordinator_);
     }
 
-    function supportsInterface(bytes4 id) public view override(ERC165, IERC165) returns (bool) {
-        return id == type(IStreamEntropyProvider).interfaceId || super.supportsInterface(id);
+    function supportsInterface(bytes4 id)
+        public
+        view
+        virtual
+        override(ERC165, IERC165)
+        returns (bool)
+    {
+        return id == type(IStreamEntropyProvider).interfaceId
+            || id == type(IStreamEntropyProviderFeeQuote).interfaceId || super.supportsInterface(id);
     }
 
     function isStreamEntropyProvider() external pure returns (bool) {
@@ -56,7 +65,16 @@ contract MockStreamEntropyProvider is ERC165, IStreamEntropyProvider {
         reenterOnRequest = value;
     }
 
+    function setQuoteUnavailable(bool value) external {
+        quoteUnavailable = value;
+    }
+
     function quoteRequest(bytes calldata) external view returns (uint256) {
+        return contextIndependentRequestFee();
+    }
+
+    function contextIndependentRequestFee() public view virtual returns (uint256) {
+        require(!quoteUnavailable, "quote unavailable");
         return fee;
     }
 

@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "../../smart-contracts/core/StreamCore.sol";
 import "./StreamArtistSuiteDeployment.sol";
 import "./StreamArtistActivationPlan.sol";
+import "./StreamRevealActivationPlan.sol";
 import "../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
 import "../../smart-contracts/domains/governance/StreamGovernanceExecutor.sol";
 import "../../smart-contracts/domains/governance/StreamGovernanceActor.sol";
@@ -116,6 +117,7 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
         entropy = new StreamEntropyCoordinator(
             address(core),
             address(executor),
+            address(roles),
             DEPLOYMENT_HASH,
             "urn:6529stream:development:entropy",
             keccak256("development entropy module")
@@ -172,8 +174,14 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
     }
 
     function _scheduleArtistActivation() private {
-        StreamArtistActivationPlan.Plan memory plan =
-            StreamArtistActivationPlan.build(roles, manager, deployer);
+        StreamArtistActivationPlan.Plan memory plan = StreamRevealActivationPlan.buildWithArtist(
+            roles,
+            manager,
+            deployer,
+            StreamRevealActivationPlan.Principals(
+                address(governanceRoot), address(governanceRoot), address(governanceRoot)
+            )
+        );
         artistActivationNotBefore = _artistActivationTimestamp();
         require(
             artistActivationNotBefore >= block.timestamp + 48 hours,

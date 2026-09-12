@@ -50,7 +50,7 @@ contract DeployCurrentStack is StreamCurrentStackDeployment {
         address[7] artistOwners;
         bytes32 activationActionId;
         uint64 activationNotBefore;
-        bytes activationPlan;
+        bytes activationPlan; // Combined artist/reveal five-call plan; use ActivateCurrentRevealAuthority.
     }
 
     function run() external returns (DeploymentAddresses memory deployed) {

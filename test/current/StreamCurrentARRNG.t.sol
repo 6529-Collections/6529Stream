@@ -54,6 +54,8 @@ contract StreamCurrentARRNGTest is StreamCurrentStackFixture, OfficialSafeFixtur
     uint256[] private keys;
     CurrentARRNGService private upstream;
     StreamEntropyProviderARRNG private arrng;
+    bytes private combinedActivationPlan;
+    bytes32 private combinedActivationId;
     bytes32 private constant SALT = keccak256("current ARRNG collection salt");
     bytes32 private constant MINT = keccak256("current ARRNG artwork commitment");
 
@@ -72,6 +74,155 @@ contract StreamCurrentARRNGTest is StreamCurrentStackFixture, OfficialSafeFixtur
 
     function _artistProof(bytes32 digest) internal override returns (bytes memory) {
         return safeThresholdSignature(keys, safeMessageDigest(artistSafe, abi.encode(digest)));
+    }
+
+    function _revealPrincipals()
+        internal
+        view
+        override
+        returns (StreamRevealActivationPlan.Principals memory)
+    {
+        return StreamRevealActivationPlan.Principals(
+            address(buyerSafe), address(buyerSafe), address(buyerSafe)
+        );
+    }
+
+    /// @dev Exercise the exact five-call initial deployment plan with actual Safe role holders.
+    function _activateArtistAuthority() internal override {
+        StreamArtistActivationPlan.Plan memory plan = StreamRevealActivationPlan.buildWithArtist(
+            roles, manager, address(this), _revealPrincipals()
+        );
+        uint64 notBefore = uint64(block.timestamp + 49 hours);
+        executor.publishGovernanceCallData(plan.callDatas);
+        uint256 nonce = executor.governanceNonce();
+        combinedActivationId = _scheduleFixtureActivation(plan, notBefore);
+        combinedActivationPlan = abi.encode(plan);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceActionNotExecutable.selector,
+                combinedActivationId,
+                notBefore
+            )
+        );
+        this.executeSavedCombinedActivation(_revealPrincipals());
+        vm.warp(notBefore);
+        this.executeSavedCombinedActivation(_revealPrincipals());
+        this.executeSavedCombinedActivation(_revealPrincipals());
+        require(
+            executor.governanceNonce() == nonce + 1,
+            "one combined action, retry does not reschedule"
+        );
+    }
+
+    function executeSavedCombinedActivation(StreamRevealActivationPlan.Principals memory principals)
+        external
+    {
+        require(msg.sender == address(this), "fixture only");
+        StreamRevealActivationPlan.execute(
+            executor,
+            roles,
+            manager,
+            address(this),
+            principals,
+            combinedActivationId,
+            abi.decode(combinedActivationPlan, (StreamArtistActivationPlan.Plan))
+        );
+    }
+
+    function _activateRevealAuthority() internal override {
+        require(
+            executeSafe(
+                buyerSafe,
+                keys,
+                address(entropy),
+                0,
+                abi.encodeCall(
+                    entropy.configureCollectionRevealPolicy,
+                    (1, 0, keccak256("ROLE_ENTROPY_REVEAL_OWNER"), uint64(100), uint256(100))
+                ),
+                0
+            ),
+            "Safe declares reveal policy before registrations"
+        );
+    }
+
+    function testCompletedCombinedActivationStillRejectsChangedPrincipal() public {
+        StreamRevealActivationPlan.Principals memory principals = _revealPrincipals();
+        principals.treasury = address(artistSafe);
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamRevealActivationPlan.InvalidRevealActivationPlan.selector)
+        );
+        this.executeSavedCombinedActivation(principals);
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamEntropyCoordinator.Unauthorized.selector, address(this))
+        );
+        entropy.updateRevealFeePerToken(1, 101);
+        vm.prank(vm.addr(keys[0]));
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamEntropyCoordinator.Unauthorized.selector, vm.addr(keys[0]))
+        );
+        entropy.updateRevealFeePerToken(1, 101);
+    }
+
+    function testSafeRevealEscrowSpendsAtActualRequestAndReleasesOnlyAfterReveal() public {
+        uint256 token = _buy();
+        require(
+            executeSafe(
+                buyerSafe,
+                keys,
+                address(entropy),
+                200,
+                abi.encodeCall(entropy.fundRevealFeeEscrow, (1)),
+                0
+            ),
+            "Safe funds actual coordinator"
+        );
+        uint256 beforeOracle = address(artistSafe).balance;
+        _requestAsSafe(token, 25);
+        require(
+            address(artistSafe).balance == beforeOracle + 100 && entropy.revealFeeEscrow(1) == 100
+                && entropy.entropyFeeCredit(address(buyerSafe)) == 25
+                && entropy.nonterminalTokenCount(1) == 1,
+            "escrow pays provider and caller keeps full excess"
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.withdrawRevealEscrowAsSafe(100);
+        _deliverAsSafe(1, 42, 0);
+        _assertSeed(token, 1, 42);
+        uint256 beforeTreasury = address(buyerSafe).balance;
+        this.withdrawRevealEscrowAsSafe(100);
+        require(
+            executeSafe(
+                buyerSafe,
+                keys,
+                address(entropy),
+                0,
+                abi.encodeCall(entropy.claimEntropyFeeCredit, (payable(address(buyerSafe)))),
+                0
+            ),
+            "Safe claims excess"
+        );
+        require(
+            address(buyerSafe).balance == beforeTreasury + 125
+                && entropy.nonterminalTokenCount(1) == 0 && entropy.totalRevealFeeEscrows() == 0
+                && entropy.totalFeeCredits() == 0,
+            "terminal escrow and caller credit settle independently"
+        );
+    }
+
+    function withdrawRevealEscrowAsSafe(uint256 amount) external {
+        require(msg.sender == address(this), "fixture only");
+        require(
+            executeSafe(
+                buyerSafe,
+                keys,
+                address(entropy),
+                0,
+                abi.encodeCall(entropy.withdrawRevealFeeEscrow, (1, amount)),
+                0
+            ),
+            "Safe escrow withdrawal"
+        );
     }
 
     function _deployAdditionalProducts() internal override {

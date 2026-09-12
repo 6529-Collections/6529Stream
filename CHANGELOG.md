@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added declared collection reveal-fee policies, separate escrow and requester
+  credits, canonical operational roles and typed provider quotes. Forty-four
+  focused cases and thirty actual-Core metadata regressions pass independent
+  review. Resumable role activation has six registry regression tests; automatic
+  request timing, SLO fallback and complete recovery remain in progress.
 - Added the ARRNG provider adapter with pinned source authority, exact fees,
   stored-output retry, a governed coordinator-call gas cap and contract treasury
   withdrawals. Seventeen focused tests plus fuzzing pass with independent review;

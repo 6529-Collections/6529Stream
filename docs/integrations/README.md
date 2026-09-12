@@ -7,7 +7,8 @@ deployment evidence.
 
 | Task | Guide |
 | --- | --- |
-| Resume the developing modular artist authority batch | [Current artist activation](current-artist-activation.md) |
+| Resume the developing artist and reveal authority batch | [Current activation](current-artist-activation.md) |
+| Fund reveal requests and settle collection escrow | [Reveal-fee funding](reveal-fee-funding.md) |
 | Integrate the new native/ERC-20 funding boundary | [Sale funding](sale-funding.md) |
 | Integrate auction V2 and retained proceeds rights | [Auction funding](auction-funding.md) |
 | Build typed calls, signing payloads and portable snapshots | [TypeScript client](typescript-client.md) |

@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../../smart-contracts/interfaces/stream/entropy/IStreamEntropyProvider.sol";
 import "../../smart-contracts/interfaces/stream/entropy/IStreamEntropyCoordinator.sol";
+import "../../smart-contracts/interfaces/stream/entropy/IStreamEntropyProviderFeeQuote.sol";
 import "../../smart-contracts/vendor/openzeppelin/ERC165.sol";
 
 /// @notice ANVIL DEVELOPMENT ONLY. Controller-supplied values are not secure randomness.
@@ -29,7 +30,8 @@ contract DevelopmentEntropyProvider is ERC165, IStreamEntropyProvider {
     }
 
     function supportsInterface(bytes4 id) public view override(ERC165, IERC165) returns (bool) {
-        return id == type(IStreamEntropyProvider).interfaceId || super.supportsInterface(id);
+        return id == type(IStreamEntropyProvider).interfaceId
+            || id == type(IStreamEntropyProviderFeeQuote).interfaceId || super.supportsInterface(id);
     }
 
     function isStreamEntropyProvider() external pure returns (bool) {
@@ -49,6 +51,10 @@ contract DevelopmentEntropyProvider is ERC165, IStreamEntropyProvider {
     }
 
     function quoteRequest(bytes calldata) external pure returns (uint256) {
+        return contextIndependentRequestFee();
+    }
+
+    function contextIndependentRequestFee() public pure returns (uint256) {
         return 0;
     }
 

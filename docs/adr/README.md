@@ -56,3 +56,7 @@ Implementation and integration evidence remain separate acceptance gates.
 defines the adapter's enforceable coordinator-call cap, persisted-output retry,
 source pins and governed treasury custody. Incoming oracle gas and deployed
 upstream acceptance remain separate requirements.
+
+[ADR 0028: Reveal-fee custody and role activation](0028-reveal-fee-custody-and-role-activation.md)
+defines separate collection escrow and requester credits, the optional exact
+provider fee capability, canonical operational roles and resumable activation.

@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/entropy/IStreamEntropyProviderARRNG.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyCoordinator.sol";
+import "../../interfaces/stream/entropy/IStreamEntropyProviderFeeQuote.sol";
 import "../../integrations/arrng/IStreamARRNGController.sol";
 import "../../vendor/openzeppelin/ReentrancyGuard.sol";
 import "../parameters/StreamGasParameterHost.sol";
@@ -133,6 +134,7 @@ contract StreamEntropyProviderARRNG is
         returns (bool)
     {
         return id == type(IStreamEntropyProvider).interfaceId
+            || id == type(IStreamEntropyProviderFeeQuote).interfaceId
             || id == type(IStreamEntropyProviderARRNG).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId || super.supportsInterface(id);
     }
@@ -164,6 +166,11 @@ contract StreamEntropyProviderARRNG is
     }
 
     function quoteRequest(bytes calldata) external view override returns (uint256) {
+        return contextIndependentRequestFee();
+    }
+
+    /// @notice Live ARRNG payment shared by actual request quotes and reveal policy funding.
+    function contextIndependentRequestFee() public view returns (uint256) {
         _requireUpstream();
         _requireFundedQuote();
         return requestPaymentWei;

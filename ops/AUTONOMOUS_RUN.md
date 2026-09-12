@@ -1,6 +1,6 @@
 # Stream delivery state
 
-Updated 11 September 2026. The owner authorizes autonomous completion of the
+Updated 12 September 2026. The owner authorizes autonomous completion of the
 remaining full v1 features, independent adversarial review and matching testnet
 delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
@@ -14,11 +14,11 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | `TBD` |
 | Next issue | `TBD` |
-| Source checkpoint | `f9162df3` (native domain handoff), `49b3261b` (tested operator setup), `4e9a41b1` (tested current payment composition); RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | `72c208f2` (twelve-case current price/ARRNG/Safe composition), `ca0bbaf5` (typed native sale facts); reveal-fee implementation and activation have separate focused evidence below; RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-09-11 UTC` |
+| Last updated | `2026-09-12 UTC` |
 
 ## Active work
 
@@ -29,10 +29,28 @@ contract call, including owner actions, payments, NFT custody and reads.
 
 | Lane | Branch | Current deliverable |
 | --- | --- | --- |
-| Integrator | `codex/v1-integration` | Current-stack composition, remaining unit fixtures, operator onboarding, client/signing migration, CI and release |
-| Artist | `codex/v1-artist-authority` | Guardian configuration and two-sided principal rotation (operations 28–32) |
-| Revenue | `codex/v1-revenue` | Signed free claims, open editions and pay-what-you-want programs; refund-window lifecycle next |
+| Integrator | `codex/v1-integration` | Reveal policy/escrow, canonical role activation, current-stack composition, remaining entropy/recovery, operator/client migration and release |
+| Artist | `codex/v1-artist-authority` | Sale consent and attribution state; older sale/auction consumers must reject unsupported required consent before the election is enabled; remaining artist lifecycle follows |
+| Revenue | `codex/v1-revenue` | Native/universal sale consent before and after callbacks; deferred refund custody and canonical reveal funding |
 | Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |
+
+The twelve-case snapshot at `72c208f2` passes independent review for actual
+Core/Manager/artist/Executor/Safe composition: five native sale cases, three
+universal ERC-20 cases and four ARRNG cases. Its captured production inputs are
+`ed8f0e40`; later fee and consent source changes need their own evidence.
+Rotation (`c71003dc`) and price programs (`9eae0d67`) are integrated with their
+133-case and 72-case focused reviews. The artist builder's later 144-case
+consent/attribution result is held for complete purchase-path enforcement and
+its final actual-Safe negative follow-up.
+
+The reveal-fee increment has independently reviewed 44-case domain and
+30-case actual-Core metadata results, plus six planner regressions using the
+actual RoleRegistry and an explicit execution-context fixture. Both production
+compiler profiles fit. A fourteen-case current composition is in progress.
+The final planner adds unique treasury/reveal-owner checks after that run's
+capture; its separate six-case proof must not be confused with actual Executor
+composition. Automatic AT_MINT attempts, governed SLO fallback and complete
+entropy recovery still remain. Every feature row in the ledger stays in scope.
 
 Fixed-sale and auction funding, scoped delegation, refusal/withdrawal and
 expected-binding acceptance are integrated. Collaborator operations 5/6/7
