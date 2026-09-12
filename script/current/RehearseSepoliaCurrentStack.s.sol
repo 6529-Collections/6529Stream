@@ -67,4 +67,19 @@ contract RehearseSepoliaCurrentStack is StreamCurrentStackDeployment {
         );
         return (address(core), address(provider), subId);
     }
+
+    function _buildGovernanceFoundationPlan(
+        StreamGovernanceGenesisPlan.Configuration memory configuration,
+        address payloadRoot,
+        StreamSystemManifestUpdate memory update
+    )
+        internal
+        override
+        returns (SystemManifestBootstrapBinding memory binding, GenesisBatch[] memory batches)
+    {
+        vm.stopBroadcast();
+        (binding, batches) =
+            super._buildGovernanceFoundationPlan(configuration, payloadRoot, update);
+        vm.startBroadcast(deployer);
+    }
 }

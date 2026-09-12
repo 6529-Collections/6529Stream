@@ -63,3 +63,5 @@ jobs:
         run: python -m tools.museum.projection --check
       - name: Check abstract and nonvisual projection generation
         run: python -m tools.museum.projection_v2 --check
+      - name: Check PREMIS file correspondence generation
+        run: python -m tools.museum.premis --check

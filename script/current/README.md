@@ -47,6 +47,33 @@ The development compiler profile is Solidity 0.8.19, optimizer 200 runs and
 global via-IR. Development module hashes identify engineering configurations;
 release binding and full-v1 acceptance remain separate work.
 
+## Local planning boundary
+
+`StreamDeploymentPlan` is a stateless helper created when the script is
+constructed, before broadcasting starts. Both deployment entry points stop
+broadcasting around its foundation read and resume with the same deployer.
+The manifest payload is still created in the original broadcast sequence;
+commit, preparation and initialization remain three intended governance calls.
+Catalog construction also uses this helper after broadcasting stops. The helper
+does not become a protocol module, authority, catalog entry or deployment output.
+
+Six planner tests, including the retained actual foundation/Safe regressions
+and a 256-input fuzz property, cover exact plan bytes and catalog semantics.
+The [protected foundation rehearsal](../../test/fixtures/deployment-planner/ProtectedFoundation.s.sol)
+separately exercises the real Core, Executor, roles, registry and manifest under
+default Foundry script protection. It checks no helper nonce and three resumed
+governance writes. Run it locally without an RPC or broadcast submission:
+
+```sh
+python scripts/dev.py test --match-contract '^StreamDeploymentPlanTest$'
+forge script test/fixtures/deployment-planner/ProtectedFoundation.s.sol:ProtectedFoundation --sig 'run()' --via-ir
+```
+
+The helper compiles and the bounded foundation rehearsal passes. Full product
+entry-point compilation exceeded the local ten-minute diagnostic limit; complete
+script execution and expanded product inventory remain open. These focused
+results do not establish a complete deployment or candidate acceptance.
+
 ## Retained RC1 operator recipes
 
 All PowerShell recipes and measurements below describe the frozen RC1 workflow.

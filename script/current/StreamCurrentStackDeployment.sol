@@ -6,6 +6,7 @@ import "./StreamArtistSuiteDeployment.sol";
 import "../../smart-contracts/interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 import "./StreamArtistActivationPlan.sol";
 import "./StreamGovernanceGenesisPlan.sol";
+import "./StreamDeploymentPlan.sol";
 import "./StreamRevealActivationPlan.sol";
 import "../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
 import "../../smart-contracts/domains/governance/StreamGovernanceExecutor.sol";
@@ -42,6 +43,8 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
     bytes32 internal constant DEPLOYMENT_HASH =
         keccak256("current-stack staged engineering deployment v2; unaudited; not release evidence");
     bytes32 internal constant REGISTRY_HASH = keccak256("current-stack development registry v1");
+    // Script construction precedes broadcasting; this helper never consumes a deployer nonce.
+    StreamDeploymentPlan internal immutable deploymentPlanner = new StreamDeploymentPlan();
     address internal deployer;
     address internal protocol;
     bool internal localDevelopment;
@@ -247,7 +250,7 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
             keccak256("development client")
         );
         (SystemManifestBootstrapBinding memory binding, GenesisBatch[] memory batches) =
-            StreamGovernanceGenesisPlan.build(c, payload, update);
+            _buildGovernanceFoundationPlan(c, payload, update);
         encodedFoundationPlan = abi.encode(binding, batches);
         for (uint256 i; i < binding.actionPolicies.length; ++i) {
             foundationPolicies.push(binding.actionPolicies[i]);
@@ -255,6 +258,19 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
         executor.commitGenesisPlan(executor.hashGenesisPlan(binding, batches));
         executor.prepareGenesis(binding, batches);
         executor.initializeGenesis(binding, batches);
+    }
+
+    /// @dev Entry points own broadcast bracketing; the shared planning hook performs only reads.
+    function _buildGovernanceFoundationPlan(
+        StreamGovernanceGenesisPlan.Configuration memory configuration,
+        address payloadRoot,
+        StreamSystemManifestUpdate memory update
+    )
+        internal
+        virtual
+        returns (SystemManifestBootstrapBinding memory, GenesisBatch[] memory)
+    {
+        return deploymentPlanner.buildFoundation(configuration, payloadRoot, update);
     }
 
     /// @notice Exact deployed product records; foundation registrations are excluded.
@@ -270,21 +286,9 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
     function _productPolicyAdditions() internal view returns (GovernanceActionPolicyEntry[] memory rows) {
         GenesisBatch[] memory prototypes = new GenesisBatch[](1);
         prototypes[0] = _initialConfigurationBatch();
-        GovernanceActionPolicyEntry[] memory allRows = _actionPolicies(prototypes);
-        uint256 count;
-        for (uint256 i; i < allRows.length; ++i) {
-            bool exists;
-            for (uint256 j; j < foundationPolicies.length; ++j) {
-                if (_policyKey(allRows[i]) != _policyKey(foundationPolicies[j])) continue;
-                require(keccak256(abi.encode(allRows[i])) == keccak256(abi.encode(foundationPolicies[j])),
-                    "foundation policy cannot be rewritten");
-                exists = true;
-                break;
-            }
-            if (!exists) allRows[count++] = allRows[i];
-        }
-        rows = new GovernanceActionPolicyEntry[](count);
-        for (uint256 i; i < count; ++i) rows[i] = allRows[i];
+        return deploymentPlanner.catalogAdditions(
+            prototypes, _operatingPolicies(), foundationPolicies, DEPLOYMENT_HASH
+        );
     }
 
     /// @dev Rebuild against observed selected products before scheduling. These prototypes
@@ -418,71 +422,6 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
         return StreamCurrentStackPlan.call(
             target, data, keccak256(abi.encode(target, data)), bytes32(0), keccak256(data)
         );
-    }
-
-    function _actionPolicies(GenesisBatch[] memory batches)
-        private
-        view
-        returns (GovernanceActionPolicyEntry[] memory policies)
-    {
-        GovernanceActionPolicyEntry[] memory operating = _operatingPolicies();
-        uint256 capacity = operating.length;
-        for (uint256 i; i < batches.length; ++i) {
-            capacity += batches[i].calls.length;
-        }
-        GovernanceActionPolicyEntry[] memory candidates =
-            new GovernanceActionPolicyEntry[](capacity);
-        uint256 count = operating.length;
-        for (uint256 i; i < count; ++i) {
-            candidates[i] = operating[i];
-        }
-        for (uint256 i; i < batches.length; ++i) {
-            for (uint256 j; j < batches[i].calls.length; ++j) {
-                GovernanceCall memory operation = batches[i].calls[j];
-                bytes32 key = keccak256(
-                    abi.encode(batches[i].actionClass, operation.target, operation.selector)
-                );
-                bool duplicate;
-                for (uint256 k; k < count; ++k) {
-                    if (
-                        keccak256(
-                                abi.encode(
-                                    candidates[k].actionClass,
-                                    candidates[k].target,
-                                    candidates[k].selector
-                                )
-                            ) == key
-                    ) duplicate = true;
-                }
-                if (!duplicate) {
-                    candidates[count++] = GovernanceActionPolicyEntry(
-                        batches[i].actionClass,
-                        operation.target,
-                        operation.selector,
-                        operation.target.codehash,
-                        keccak256(abi.encode(DEPLOYMENT_HASH, operation.target)),
-                        1,
-                        0,
-                        0,
-                        bytes32(0)
-                    );
-                }
-            }
-        }
-        policies = new GovernanceActionPolicyEntry[](count);
-        for (uint256 i; i < count; ++i) {
-            policies[i] = candidates[i];
-        }
-        for (uint256 i = 1; i < count; ++i) {
-            for (
-                uint256 j = i; j > 0 && _policyKey(policies[j - 1]) > _policyKey(policies[j]); --j) {
-                (policies[j - 1], policies[j]) = (policies[j], policies[j - 1]);
-            }
-        }
-    }
-
-    function _policyKey(GovernanceActionPolicyEntry memory policy) private pure returns (bytes32) {
-        return keccak256(abi.encode(policy.actionClass, policy.target, policy.selector));
     }
 
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {

@@ -112,11 +112,11 @@ contract DeployCurrentStack is StreamCurrentStackDeployment {
         deployed.productsActivated = false;
         deployed.foundationPlan = encodedFoundationPlan;
         deployed.productRegistrations = _productRegistrations();
-        deployed.catalogAdditions = this.deploymentCatalogAdditions();
+        deployed.catalogAdditions = _productPolicyAdditions();
     }
 
     /// @notice Unscheduled catalog additions for the deployed product configuration.
-    /// @dev A separate external view avoids inlining catalog construction into the large deployment return.
+    /// @dev The stateless planner builds these rows outside broadcasting without a script self-call.
     function deploymentCatalogAdditions()
         external
         view
@@ -143,5 +143,20 @@ contract DeployCurrentStack is StreamCurrentStackDeployment {
         vrfConfig.callbackGasLimit = uint32(callbackGas);
         vrfConfig.maximumCallbackGasLimit = uint32(maximumCallbackGas);
         vrfConfig.nativePayment = vm.envOr("STREAM_VRF_NATIVE_PAYMENT", true);
+    }
+
+    function _buildGovernanceFoundationPlan(
+        StreamGovernanceGenesisPlan.Configuration memory configuration,
+        address payloadRoot,
+        StreamSystemManifestUpdate memory update
+    )
+        internal
+        override
+        returns (SystemManifestBootstrapBinding memory binding, GenesisBatch[] memory batches)
+    {
+        vm.stopBroadcast();
+        (binding, batches) =
+            super._buildGovernanceFoundationPlan(configuration, payloadRoot, update);
+        vm.startBroadcast(deployer);
     }
 }

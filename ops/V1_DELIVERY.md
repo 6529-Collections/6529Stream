@@ -32,10 +32,13 @@ complete compilation result remains open. Latest remote CI at `90c8fdcf` is
 red; its source predates this repair. Independent execution probes also reject
 the deployment script's self-view calls under default Foundry protection.
 Moving a self-call outside broadcast did not solve that issue. A compatible
-planning boundary remains required; earlier compile-only results do not prove
-that the deployment script runs. An independently reviewed separate-helper
-simulation passes default Foundry protection with exactly two intended writes
-and no helper broadcast nonce; actual Stream planner integration is next.
+planning boundary was therefore extracted into a stateless local helper. Six
+plan/catalog tests and 256 fuzz inputs pass, preserving exact inline plan bytes
+and actual governance execution. A separate real Core/Executor/roles/registry/
+manifest rehearsal passes default script protection with no helper nonce and
+exactly three resumed governance writes. The complete product entry-point
+compile reached its 600-second bound without a result. Full build and complete
+deployment-script execution remain unaccepted.
 
 The [onchain content checkpoint](../docs/integrations/onchain-content-checkpoints.md)
 passes 17 reviewed computation cases and 256 fuzz inputs in both compiler modes.
@@ -69,6 +72,13 @@ v1 package remain unchanged. Explicit abstract works, linguistic content and
 nonvisual source assertions retain their proper entities and complete field
 accounting. Public fixtures remain distinct from authenticated chain records;
 PREMIS/LIDO/IIIF correspondence, packaging and institutional evidence continue.
+
+The first PREMIS file-object correspondence is integrated as `9f6afe60`, with
+149 independently reviewed tests and six generation checks. It preserves the
+previous 132 tests and both public output versions, joins exact source fields
+to the pinned PREMIS 3 schema, and distinguishes asserted fixity from a fresh
+check of actual file bytes. Full PREMIS and the other formats remain in scope.
+The preceding 132-test version passes Windows/Linux CI at `d8f0eef2`.
 
 The dedicated [independent-attestor host](../docs/integrations/independent-attestations.md)
 is integrated as `4673f248` from `4c277b0e`. Its 22 reviewed cases and 256 fuzz

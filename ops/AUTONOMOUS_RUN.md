@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Stable router `f445ac79`, artist compiler repair `1e3087a2`, museum abstract/nonvisual132 `db3c8153` and Base64 repair `164f867b` are integrated. Content-checkpoint computation/composition is independently accepted. Actual typed finality and deployment planner integration remain active. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | Complete inline content computation/composition `d8f0eef2`, museum PREMIS149 `9f6afe60`, artist compiler repair `1e3087a2` and Base64 repair `164f867b` are integrated. Actual typed finality and full deployment-script acceptance remain active. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -36,11 +36,11 @@ and the Base64 padding repair (`164f867b`) have 19 focused tests with fuzzing.
 The corrected Router fits both compiler modes; the retained renderer cohort
 passes 61 IR cases. The typed evidence producer and full finality remain open.
 
-The latest museum increment adds faithful abstract/nonvisual projections as
-`db3c8153`, retaining the original package and source identity. All 132 tests
-and five generators pass again locally. Its predecessor's 104 tests pass
-Windows and Linux CI; the new version has a matching fifth generator CI check.
-The builder continues the first PREMIS cross-format increment.
+The first PREMIS file-object correspondence is integrated as `9f6afe60`, with
+149 tests and six generators passing again locally. Exact source assertions
+remain distinct from actual file-byte verification. The preceding faithful
+abstract/nonvisual projections (`db3c8153`) pass Windows/Linux CI at `d8f0eef2`.
+The builder continues IIIF correspondence; both prior package versions remain exact.
 Full authenticated-chain exports and institutional acceptance remain open.
 Complete archival artifact coverage is integrated as `880bac6d`, with 26
 reviewed domain tests and fuzzing. The corrected metadata host/adapter cohort
@@ -53,8 +53,11 @@ exact preimage/event checks and matching owner interfaces/storage. Latest remote
 CI at `90c8fdcf` predates that repair and still fails compilation. Deployment
 planning remains unresolved: the catalog self-view call helps minimal compiler
 probes but fails current Foundry execution protection, even outside broadcasting.
-An independent separate-helper simulation passes default protection without an
-extra broadcast nonce; integration into Stream's actual planner is next.
+The separate helper now passes six plan/catalog tests with 256 fuzz inputs and
+a real Core/Executor/registry/manifest script rehearsal under default protection.
+Its creation/read consume no deployer nonce; the three resumed governance writes
+complete. Actual full product-script compilation reached its 600-second bound
+without a result, so full compiler and deployment acceptance remain open.
 No complete-build or working deployment-script repair is claimed. Release
 checksums and the Slither snapshot also await the later
 stabilized-source regeneration. See [V1_DELIVERY.md](V1_DELIVERY.md).
@@ -68,7 +71,7 @@ contract call, including owner actions, payments, NFT custody and reads.
 | --- | --- | --- |
 | Integrator | `codex/v1-integration` | Actual metadata/finality producers and discovery, staged product/operator activation, whole-current compiler diagnostic, client and release |
 | Artist | `codex/v1-artist-authority` | Archival artifact coverage integrated; full artist publication regression, actual finality/sanction/recovery and typed preparation |
-| Revenue | `codex/v1-revenue` | Museum package104 integrated; museum abstract/nonvisual132 integrated; remaining format and chain-adapter work |
+| Revenue | `codex/v1-revenue` | Museum PREMIS149 integrated; IIIF, remaining formats and chain-adapter work |
 | Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |
 
 Signing-domain discovery is integrated as `134e0f58`. The native fixed,

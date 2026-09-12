@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a pinned PREMIS 3 file-object export linked to the same source assertions
+  as Linked Art, with exact datatype, size, format and fixity-field checks.
+  The reviewed museum cohort contains 149 tests; this first file profile does
+  not establish actual file fixity, authenticated-chain input or full PREMIS.
 - Added faithful museum abstract-work and nonvisual projections with shared
   identities and exact source accounting. All 132 tests and five generators
   pass locally; the original v1 package remains unchanged.
@@ -39,11 +43,11 @@ the release policy in `docs/release-policy.md`.
   Twenty-three host/adapter cases pass in both compiler modes with fuzzing;
   three independent actual-Executor cases verify the configuration boundary.
   Actual artist publication and typed finality composition remain in development.
-- Isolated deployment-script catalog construction behind an additive view call
-  after broadcast stops, resolving the minimal Yul compiler reproducer. The
-  full patched deployment target has not yet completed compilation. A later
-  execution probe also rejects script self-calls under default Foundry protection;
-  deployment planning still needs a compatible implementation boundary.
+- Extracted foundation/catalog planning into a stateless local helper, with
+  explicit stop/read/resume handling in both deployment entry points. Exact
+  plan/catalog tests and a real protected foundation rehearsal pass without
+  adding a deployer transaction. Full product-script compilation and execution
+  remain open after the bounded compilation diagnostic timed out.
 - Added attributed museum resource projections and reproducible offline public
   packages. The combined suite now contains 104 tests; complete cross-format
   mappings, authenticated onchain sources and institutional acceptance remain open.
