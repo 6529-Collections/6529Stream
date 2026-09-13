@@ -11,6 +11,8 @@ deployment evidence.
 | Derive independent serving families from actual Router sources | [Router evidence provider](finality-router-evidence.md) |
 | Discover all coordinators retained at mint for a scope | [Original coordinator inventory](original-coordinator-inventory.md) |
 | Encode complete artist intent, waiver and interview records | [Conservation record JSON](conservation-record-json.md) |
+| Select original intent/waiver records and preserve interview attribution | [Conservation selection](../architecture/conservation-record-selection-profile.md) |
+| Integrate the initial adjudicated identity-recovery profile | [Initial identity recovery](initial-identity-recovery.md) |
 | Read a fixed coordinator's original locked collection policy | [Entropy policy evidence](entropy-finality-evidence.md) |
 | Consume exact current WORK and RIGHTS selections | [Description evidence](finality-description-evidence.md) |
 | Authenticate published RELEASE, SEASON and VIEW membership | [Scope membership](../scope-membership.md) |

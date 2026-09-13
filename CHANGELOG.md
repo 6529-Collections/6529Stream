@@ -5,6 +5,13 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Added the initial living-artist adjudicated recovery path, original authority
+  acceptance, atomic owner/archive continuity and contest/dismissal behavior.
+  Registered-guardian and broader historical/estate profiles remain in development.
+- Added authenticated intent/waiver selection with distinct original artist and
+  estate lineages, exact interview linkage, immutable preparation and artist head locks.
+  Finality consumption and complete archival coverage remain separate work.
+
 - Extended inherited artist recovery approval to actual published RELEASE, SEASON
   and VIEW membership, with fresh execution validation and preserved approval history.
 

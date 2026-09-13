@@ -22,14 +22,42 @@ and evidence instead of deriving completion from test or interface counts.
 
 ## Latest integration: 13 September
 
+Initial living-artist identity recovery is integrated as c7b75384, following the
+actual-domain receipt occurrence a3eca855 and sealed terminal governance witness
+0cb06b55. Recovery keeps the artist identity, authenticates new authority and
+invalidates prior delegation; owner revisions, ordered Archive receipts and the
+provisional contest window roll back together on failure. Five distinct actual
+Artist/Safe recovery cases pass in IR as a retained three-case plus corrected
+two-case union. Seven state cases pass separately; the governance witness has
+six focused cases in both modes and five actual Core/Executor/Safe cases in IR.
+These cohorts do not yet prove one combined governance/Artist deployment.
+The implemented profile is initial living authority without prior transitions,
+guardians or supersession entries. Guarded recovery, historical/posthumous
+profiles and complete adjudication remain required; see the
+[recovery guide](../docs/integrations/initial-identity-recovery.md).
+
+Actual conservation selection is integrated as ecbf3fd8. It authenticates the
+original Metadata/Artist publication, keeps original artist and estate lineages
+separate, binds the exact interview named by the selected intent or waiver, and
+supports a one-way original-artist head lock. Immutable interview preparation
+allows bounded parent adoption without promoting a per-author latest record.
+Sixty-six tests pass in both modes, including four 256-input properties, with
+three separate actual Artist/op24/Safe cases in IR. The measured maximum shape
+uses 14.158/14.644 million gas for preparation and 4.664/4.614 million for parent
+adoption under separate 16-million callee limits. These figures bind the unit
+compiler context; the actual-composition IR language-library artifact differs,
+so its maximum-capacity claim remains open. Exact original artifact/hash
+correspondence, full provider/finality joins and archival delivery remain
+explicit in the [selection profile](../docs/architecture/conservation-record-selection-profile.md).
+
 Inherited RELEASE, SEASON and VIEW recovery approval is integrated as 0e58111d.
 The actual Artist/companion flow consumes current published membership and
 preserves approved history; three family cases pass in IR alongside the retained
 TOKEN case. This is an explicit union of captured runs. The companion's 16-million
 Artist callback budget needs more than 16,353,968 gas at its inner calling frame;
 it does not prove a 12- or 16-million whole-transaction envelope. Typed governance,
-original provider and full deployment boundaries remain in the ADR. Explicit
-adjudicated identity authority is the next artist implementation.
+original provider and full deployment boundaries remain in the ADR. The initial
+adjudicated identity profile is described above; broader authority remains open.
 
 Original-coordinator inventory `66579293` now traverses every actual scope member's retained
 Core coordinator, preserving old sources across pointer replacement. Seventeen
@@ -46,8 +74,8 @@ Conservation records are integrated as 25d3392c: complete artist-intent, waiver
 and interview JSON, eight definitions, seven canonical examples and pinned
 language tooling. Thirty-five Solidity cases pass each compiler mode with two
 256-input properties; twenty-four Python cases pass separately. Original record
-authority, current conservation selection and archival coverage are the next
-consumer work. The dedicated
+authority and current selection are now implemented above; finality consumption
+and archival coverage remain separate work. The dedicated
 [conservation guide](../docs/integrations/conservation-record-json.md) preserves
 those boundaries. Recovery membership authentication a3b430d8 and permanent
 identity-recovery hashing 3a2c0544 are also integrated; neither prerequisite
@@ -139,13 +167,13 @@ not complete that join.
 | Owner | Next deliverable |
 | --- | --- |
 | Integrator | Complete typed metadata/finality provider, original-coordinator discovery and current deployment assembly; shared tests, CI and release |
-| Artist builder | Adjudicated identity recovery, adopted receipt occurrences and complete authority integration |
-| Museum/payment builder | Actual conservation original-record interpretation, current artist/estate selection and interview linkage |
+| Artist builder | Registered-guardian action association/veto, then historical and posthumous adjudicated recovery |
+| Museum/payment builder | Actual conservation finality consumer, preserving original voice, waiver evidence and archive boundaries |
 | Independent reviewer | Challenge exact implementations, real-contract composition and integration evidence |
 
-The full build remains red. At pushed head `7630e3c3`, museum CI passed on
-Windows and Linux; client/wrapper checks passed, while current integration,
-Foundry smoke, static baseline and release artifact checks failed. The retained compiler diagnostic has two missing actual
+The full build remains red. At previously checked head `46b67093`, client/wrapper checks passed, while
+current integration, Foundry smoke, static baseline and release artifact checks
+failed; museum tooling subsequently passed on both Windows and Linux. The retained compiler diagnostic has two missing actual
 Finality arguments in Coordinator assembly; the immutable deployment order in
 ADR 0041 must be implemented with the complete provider. Static-analysis
 baseline and release artifacts also need reconciliation after implementation

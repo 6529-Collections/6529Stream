@@ -73,6 +73,24 @@ capture return bytes inside Safe, exercise nested wallets or complete the
 protocol-wide final acceptance matrix. Actual Core/Executor/Safe replacement
 composition is captured separately from the focused Core-response fixture.
 
+## Identity recovery and conservation increments
+
+The [initial recovery tests](../test/unit/artist/StreamArtistIdentityRecoveryActual.t.sol)
+use actual Artist owners, Archive and Safe authorization for the new principal,
+including failed final Archive writes and exact retry, provisional contest and
+dismissal. Five cases pass in IR across the retained three plus corrected two
+cohorts. [Actual governance tests](../test/unit/artist/StreamArtistRecoveryActualGovernance.t.sol)
+separately cover sealed delayed terminal authority, per-call witnesses, global
+veto and current arbiter roles through Core/Executor/Safe. The combined real
+Artist/governance deployment and registered artist guardian veto remain open.
+
+The [conservation composition tests](../test/unit/artist/StreamConservationActualArtist.t.sol)
+pass three IR cases with actual Artist publication, Metadata, Schema, Store and
+threshold Safes: rotation and original-voice locking, estate/lifetime separation,
+and rejected signature rollback followed by prepared-interview parent adoption.
+Their Core and governance remain typed test boundaries. Neither increment
+completes all ABI selectors, Safe versions or nested-wallet acceptance.
+
 ## Shared foundation
 
 The [description evidence tests](../test/unit/finality/StreamFinalityDescriptionReads.t.sol)
