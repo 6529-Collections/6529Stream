@@ -143,6 +143,13 @@ operative checks is moved into a constructor that precedes its dependencies.
 
 ## Delivery boundaries
 
+The [description consumer](../integrations/finality-description-evidence.md)
+now joins the actual WORK and RIGHTS selectors through their exact current
+head, validating readback and original receipt. It keeps late selector bindings
+fixed and does not infer scope membership from a canonical subject. The existing
+collection-root consumer remains separate; collection roots are not silently
+reused for TOKEN, RELEASE, SEASON or VIEW subjects.
+
 This design neither changes permanent artist signing preimages nor grants
 generic record writers permission to bypass typed evidence checks. The root,
 snapshot, reference render, intent or waiver, interview, rights, work description,
