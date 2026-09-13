@@ -36,11 +36,20 @@ The integrator owns the combined inventory; each builder supplies its domain's
 rows and executable evidence. Final acceptance requires no unclassified or
 uncovered supported ABI functions, rather than a sample of wallet workflows.
 
+## Independent input-manifest increment
+
+The [input-manifest tests](../test/unit/finality/StreamFinalityInputManifestReads.t.sol)
+execute five named calls through actual threshold Safe 1.4.1: Store byte retention,
+fixture original-Registry staging, encoding, exact validated read and the permanent
+scope-input hash read. Fifteen cases pass both compiler modes with actual Schema
+and Store and explicit Core/Metadata/Registry/governance/provider-fact boundaries.
+This is not complete actual Registry or all-selector acceptance.
+
 ## Fixed discovery and native-source composition increment
 
 The [discovery cohort](../test/unit/finality/StreamFinalityCurrentDiscovery.t.sol)
 executes three named reads through a real threshold Safe: independent discovery
-facts, full component count and full discovery hash. Twenty-one discovery and
+facts, scoped component-at-index and full discovery hash. Twenty-one discovery and
 retained adapter tests pass both modes with explicit producer/Core fixtures.
 This does not cover every new configuration, binding or scoped selector.
 

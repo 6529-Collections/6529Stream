@@ -7,6 +7,7 @@ deployment evidence.
 
 | Task | Guide |
 | --- | --- |
+| Retain and validate exact independent finality manifest bytes | [Finality input manifests](finality-input-manifests.md) |
 | Discover the fixed required finality components | [Fixed finality discovery](fixed-finality-discovery.md) |
 | Preserve and verify large external runtime objects | [External object archive](../guides/external-object-archive.md) |
 | Publish and retrieve retained native collection snapshots | [Native onchain snapshots](native-onchain-snapshots.md) |

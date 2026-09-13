@@ -22,6 +22,24 @@ and evidence instead of deriving completion from test or interface counts.
 
 ## Latest integration: 13 September
 
+The next artist increment `adb8ade9` admits a nonempty, sorted list of guardian
+records made obsolete by the adjudicated original rotation. It preserves every
+pre-vesting record and any guardian membership retained elsewhere. Four actual
+Artist/Safe IR cases pass, including veto standing, exact contest/cutoff checks,
+atomic two-receipt execution, late rollback and identical retry. All captured
+production runtimes fit. The accepted slice covers already-unselected lower-nonce
+guardian records after one original ordinary rotation; current-head rewind,
+other record families, appeals/estate and maximum-list gas remain required.
+
+[Independent input-manifest admission](../docs/integrations/finality-input-manifests.md)
+now checks the full registered ABI interpretation and identical exact bytes in
+both the schema Store and original Registry staging. It binds all ten inputs
+and nine independent component families without a sanction/self-hash cycle.
+Fifteen cases pass both compiler modes, including 256 fuzz inputs and real Safe
+calls. Actual Schema/Store are used; Core/Metadata/Registry/governance and current
+fact derivation remain typed test boundaries. This is a retained-document join,
+not the complete provider or separate manifest/sanction archival evidence.
+
 Reviewed integration now includes external whole-object archival evidence
 `d990ca24`, current liveness of the original archive receipt pair `3fd0a221`,
 and owner-authenticated guardian vesting history `5bf15ed2`, in addition to
@@ -62,7 +80,7 @@ Mint-manager admission, artist/original-Finality and randomness service remain
 explicit test boundaries. The earlier combined 65-case source/snapshot/serving
 capture remains separate and is not a new test total.
 
-At pushed head `70314f2f`, museum tooling passed on Windows and Linux, and client
+At pushed head `d3c20649`, museum tooling passed on Windows and Linux, and client
 and Windows-wrapper jobs passed. Current-stack integration, Foundry smoke,
 static baseline and release-artifact jobs failed. Complete finality aggregation,
 original reference-render publication, remaining scope/profile coverage and the

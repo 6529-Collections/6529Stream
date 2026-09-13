@@ -32,6 +32,20 @@ class MarkdownLinkTests(unittest.TestCase):
         """The agent operating guide is part of the default checked docs."""
         self.assertIn(Path("AGENTS.md"), checker.DEFAULT_INCLUDED_ROOTS)
 
+    def test_default_scan_catches_broken_contract_interface_link(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            for included in checker.DEFAULT_INCLUDED_ROOTS:
+                if included.suffix == ".md":
+                    write(root / included, "# Documentation\n")
+                else:
+                    (root / included).mkdir(parents=True, exist_ok=True)
+            write(root / "smart-contracts/interfaces/README.md", "[Interface](IExample.sol)\n")
+            with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
+                self.assertEqual(checker.main(["--repo-root", str(root)]), 1)
+                write(root / "smart-contracts/interfaces/IExample.sol", "pragma solidity ^0.8.19;\n")
+                self.assertEqual(checker.main(["--repo-root", str(root)]), 0)
+
     def test_accepts_committed_markdown(self) -> None:
         """The committed Markdown corpus satisfies the checker."""
         with redirect_stdout(StringIO()), redirect_stderr(StringIO()):

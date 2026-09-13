@@ -5,6 +5,13 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Added exact independent finality ABI manifests with complete portable tuple
+  definitions, fixed source bindings and matching Store/original-Registry bytes.
+- Added bounded nonempty guardian-record supersession after an adjudicated
+  original rotation while preserving pre-transition and retained-set veto rights.
+- Included contract/interface guides in the default Markdown link check and
+  corrected the named Safe discovery selector evidence.
+
 - Added fixed current finality discovery with mandatory component families,
   unsigned artist preparation, shared producer bindings and bounded indexed reads.
 - Added native external-object proofs, complete archival coverage and current
