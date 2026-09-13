@@ -518,6 +518,37 @@ topology, deployment chain ID and facade verifying-contract environment.
 Operation 22 is added to the Coordinator configuration commitment; no new
 constructor argument or mutable target binding is introduced.
 
+## Recovery batch classification and companion cutover
+
+The canonical Executor and its fixed scheduling library validate recovery
+composition after the existing action catalog has authenticated every target,
+selector, runtime and value. Both passes use the complete published call list
+and its exact retained calldata. A recovery selector may appear at most once
+across all targets and scopes, only under class 2 with value zero and a
+canonically encoded complete request. Its target must identify the exact
+recovery module/interface and reciprocally bind the same Core and Executor.
+These classifier facts do not establish current module eligibility, artist or
+owner evidence, original-finality lineage or replacement-route readiness;
+the operative companion must validate those independently.
+
+An update of the actual Core's `ARTWORK_FINALITY_RECOVERY` pointer has exact
+68-byte calldata, canonical address encoding and value zero. When the current
+pointer is nonzero, the immediately preceding call must be that current old
+target's exact four-byte zero-incomplete assertion, also with value zero. An
+initial zero-pointer installation needs no predecessor assertion. Only one
+such pointer update is permitted in a batch. Execution repeats this check
+against the then-current pointer, so an earlier scheduling observation cannot
+authorize a stale predecessor. The stored pointer status is installation
+history, not a substitute for the live ModuleRegistry eligibility read.
+
+Focused classifier tests cover complete calldata and batch shape. Separate
+composition uses actual Core, Executor, ModuleRegistry, SystemManifest and a
+threshold Safe, with an explicitly limited companion target fixture: initial
+installation, late assertion rollback and exact retry, a changed predecessor
+between scheduling and execution, published-byte/runtime rejection and the
+second call's distinct execution context. This does not complete the companion,
+owner notice, inherited-scope admission or recovery serving implementation.
+
 ## Acceptance and remaining work
 
 Required tests include an actual threshold-Safe/Executor class-2 path, direct

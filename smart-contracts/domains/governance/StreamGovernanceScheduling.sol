@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamGovernanceManifest.sol";
+import { StreamGovernanceRecoveryPolicy } from "./StreamGovernanceRecoveryPolicy.sol";
 
 /// @notice Linked scheduling validation and record encoding for the immutable Executor.
 /// @dev Storage references point to the Executor's existing fields. This library does
@@ -132,6 +133,9 @@ library StreamGovernanceScheduling {
             ctx.actionClass,
             calls,
             callDatas
+        );
+        StreamGovernanceRecoveryPolicy.validate(
+            manifest.core, manifest.coreCodeHash, ctx.actionClass, calls, callDatas
         );
         if (ctx.actionClass == StreamGovernanceActionClasses.TERMINAL_FREEZE) {
             StreamGovernanceManifest.requireBoundRoleRegistry(manifest);

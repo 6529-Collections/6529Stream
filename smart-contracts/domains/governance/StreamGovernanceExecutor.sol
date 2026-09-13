@@ -10,6 +10,7 @@ import "../../vendor/openzeppelin/ReentrancyGuard.sol";
 import "./StreamRoles.sol";
 import "./StreamGovernanceBootstrap.sol";
 import "./StreamGovernanceActionPolicy.sol";
+import { StreamGovernanceRecoveryPolicy } from "./StreamGovernanceRecoveryPolicy.sol";
 import "./StreamGovernanceManifest.sol";
 import "./StreamGovernancePolicy.sol";
 import "./StreamGovernanceScheduling.sol";
@@ -1381,6 +1382,9 @@ contract StreamGovernanceExecutor is
             action.actionClass,
             calls,
             scheduledCallDatas
+        );
+        StreamGovernanceRecoveryPolicy.validate(
+            _manifest.core, _manifest.coreCodeHash, action.actionClass, calls, scheduledCallDatas
         );
         if (!_manifest.isSealed && action.proposer != genesisBootstrapAuthority) {
             revert GenesisBootstrapActorRequired(action.proposer);
