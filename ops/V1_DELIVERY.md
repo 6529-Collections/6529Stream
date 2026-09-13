@@ -22,6 +22,15 @@ and evidence instead of deriving completion from test or interface counts.
 
 ## Latest integration: 13 September
 
+Inherited RELEASE, SEASON and VIEW recovery approval is integrated as 0e58111d.
+The actual Artist/companion flow consumes current published membership and
+preserves approved history; three family cases pass in IR alongside the retained
+TOKEN case. This is an explicit union of captured runs. The companion's 16-million
+Artist callback budget needs more than 16,353,968 gas at its inner calling frame;
+it does not prove a 12- or 16-million whole-transaction envelope. Typed governance,
+original provider and full deployment boundaries remain in the ADR. Explicit
+adjudicated identity authority is the next artist implementation.
+
 Original-coordinator inventory `66579293` now traverses every actual scope member's retained
 Core coordinator, preserving old sources across pointer replacement. Seventeen
 focused cases pass both modes as a retained 15-case cohort plus two added controls,
@@ -130,7 +139,7 @@ not complete that join.
 | Owner | Next deliverable |
 | --- | --- |
 | Integrator | Complete typed metadata/finality provider, original-coordinator discovery and current deployment assembly; shared tests, CI and release |
-| Artist builder | Actual inherited approval and recovery across TOKEN, RELEASE, SEASON and VIEW, followed by adjudicated identity recovery |
+| Artist builder | Adjudicated identity recovery, adopted receipt occurrences and complete authority integration |
 | Museum/payment builder | Actual conservation original-record interpretation, current artist/estate selection and interview linkage |
 | Independent reviewer | Challenge exact implementations, real-contract composition and integration evidence |
 

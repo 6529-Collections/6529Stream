@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Extended inherited artist recovery approval to actual published RELEASE, SEASON
+  and VIEW membership, with fresh execution validation and preserved approval history.
+
 - Added complete conservation JSON profiles, schemas, format catalogs and dated
   language validation for artist intent, waivers and interviews. Original record
   authority, current selection and archive coverage remain separate consumers.
