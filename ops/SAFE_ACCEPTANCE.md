@@ -51,6 +51,11 @@ IR captures; successor-authored guardian recovery has five cases in one IR run.
 Both include actual Safe calls and owner/Archive failure/retry assertions. Broad
 estate histories and the complete selector matrix remain required.
 
+WORK/RIGHTS sealing additionally has six selector outcomes across retained five-plus-one
+IR captures and five separate actual canonical-governance cases, including Safe
+selection/reads and class-2 governance. The combined native provider ceremony is
+still outstanding; these complementary cohorts do not establish one full deployment.
+
 ## Current route increment
 
 The fixed discovery cohort exercises both `requireCurrentRoutes` projections and

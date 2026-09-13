@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Added permanent WORK/RIGHTS selected-head seals through canonical terminal
+  governance, with guarded selector writes and historical seal receipts.
+
 - Added estate-authority recovery and authenticated successor guardian histories,
   retaining original capabilities, veto standing and atomic Archive retries.
 - Added the developing native collection finality provider, exact source and

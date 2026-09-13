@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Reviewed guardian directive correction `144f33e6`, first estate recovery `5700804a`, successor guardians `c9281b67`; native provider focused27 both modes accepted, actual producer/seal assembly active. Immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | Reviewed guardian directive correction `144f33e6`, first estate recovery `5700804a`, successor guardians `c9281b67`; native provider focused27 both modes accepted, seals `56e6ff3c` integrated; actual complete assembly active. Immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -31,15 +31,17 @@ veto standing and atomic owner/Archive retry are preserved. Broader closed or
 accelerated estate histories, supersession and maximum capacity remain open.
 
 The [native finality provider](../docs/integrations/native-finality-provider.md)
-passes 27 focused cases in both compiler modes, including 256 fuzz inputs and
+`823ea826` passes 27 focused cases in both compiler modes, including 256 fuzz inputs and
 actual two-owner Safe access checks. Its source derivation uses explicit typed
 producer boundaries; matching compiler artifacts received independent review.
 It derives ten original inputs, joins the full inventory and snapshot dependency graphs, validates all
 canonical component state fields, and provides a Registry-only prepared path after
 strict current-state validation. Its metadata component uses local selected records
-and seals without provider/discovery recursion. Actual WORK/RIGHTS seals are being
-implemented in parallel because the previous selectors could still advance their
-heads. Neither a Core freeze nor a nonzero evidence hash substitutes for these locks.
+and seals without provider/discovery recursion. Actual WORK/RIGHTS seals are integrated as `56e6ff3c`: terminal governance fixes
+the original selected head and all subsequent selector mutations are blocked. Six
+selector outcomes across retained five-plus-one captures and five separate actual
+canonical-governance cases received independent review. Generic dossier publication
+remains separate. Neither a Core freeze nor an evidence hash substitutes for a seal.
 
 The latest remote checks at `c385c1a2` passed Museum tooling on both platforms,
 TypeScript and the Windows wrapper. The same existing constructor, frozen packet,

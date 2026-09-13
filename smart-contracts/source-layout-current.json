@@ -492,6 +492,7 @@
     "smart-contracts/domains/metadata/StreamOwnerRecordReads.sol",
     "smart-contracts/domains/metadata/StreamOwnerRecordSignatures.sol",
     "smart-contracts/domains/metadata/StreamOwnerRecords.sol",
+    "smart-contracts/domains/metadata/StreamRecordSelectionLocks.sol",
     "smart-contracts/domains/metadata/StreamRightsRecordSelection.sol",
     "smart-contracts/domains/metadata/StreamSchemaDocumentStore.sol",
     "smart-contracts/domains/metadata/StreamSchemaRegistry.sol",

@@ -13,8 +13,9 @@ prepared-input dispatch are implemented. The independently reviewed 27-case
 cohort passes both compiler modes, with one 256-input fuzz property and an actual
 two-owner Safe. Source derivation tests use explicit typed producer boundaries. They are not the complete eight-producer assembly, finalization
 ceremony, deployed graph, or transaction-capacity acceptance. Producer runtime and integration acceptance are tracked separately. Full inventory
-and bundle runtime validation remain pending; WORK/RIGHTS seals have focused
-builder evidence and still require integration with this provider.
+and bundle runtime validation remain pending. WORK/RIGHTS seals are integrated
+with independently reviewed focused builder evidence; the complete assembled
+provider/Registry ceremony is the next integration step.
 See [full-v1 delivery](../../ops/V1_DELIVERY.md) for current integration evidence.
 
 ## Fixed graph
