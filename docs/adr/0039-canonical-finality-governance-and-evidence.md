@@ -512,6 +512,41 @@ must consume the actual authoritative owner proof before selecting another
 association. Raw records and exact-association lookups remain immutable and
 available independently of that future selection policy.
 
+### Inherited TOKEN approval extension
+
+The subsequent TOKEN increment extends fresh operation 22 admission from an
+authenticated original COLLECTION record to a canonical TOKEN scope in that
+same collection. The requested token ID must be nonzero and its scope ID zero.
+The fixed Core must report a mapped identity, the exact collection, a nonzero
+serial and either MINTED or BURNED lifecycle, with the burned flag agreeing
+with that lifecycle. Prepared or unallocated identities are not sufficient.
+The selected companion must independently authenticate the exact retained
+request, manifest and original collection lineage. These observations are
+repeated under the existing operation lock before either owner commits.
+
+The immutable admission and Archive retain the requested TOKEN scope and the
+companion's exact intent facts. The seven signed fields, twelve-word approval
+hash and owner replay scope remain unchanged. Saved verification recognizes
+only an exact original scope or the admission-proven COLLECTION-to-TOKEN
+relation. It does not re-read current token state, companion staging or today's
+pointers to keep recorded consent valid. A new companion execution separately
+requires a currently valid route and membership. Authority is evaluated for
+the requested scope; inheriting a collection's finality does not confer
+collection-wide steward authority over a TOKEN request.
+
+Operation 23 may bind a finding to that same authenticated TOKEN intent using
+its existing action-specific notice and activity-cancellation rules. Its
+notice clock remains an execution gate separate from the saved finding's
+association and activity eligibility. Original executed records and the
+recorded approval or finding remain permanent after a completed recovery.
+
+This extension does not admit inherited RELEASE, SEASON or VIEW approvals,
+delegated or collaborator-threshold approvals, or corrective association
+adoption. Operation 35 and an explicit authorized approval-supersession proof
+are not implemented by this increment. Neither a changed Binding generation
+nor identity recovery by itself is such proof; the normative identity recovery
+record list must not be silently enlarged to invalidate recovery approvals.
+
 The two existing facade delegation digest bodies move to its existing fixed
 finality reader for size, preserving their exact preimages, constructor
 topology, deployment chain ID and facade verifying-contract environment.

@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "./StreamArtistRecoveryOriginalReads.sol";
 import "./StreamArtistRecoveryAdmission.sol";
 import "./StreamArtistRecoveryApprovalState.sol";
+import "./StreamArtistRecoveryApprovalScopes.sol";
 import "../../interfaces/stream/artist/IStreamArtistCollaboratorBindingOwner.sol";
 
 /// @notice Fresh approval admission and historical verification have distinct authority predicates.
@@ -25,10 +26,12 @@ library StreamArtistRecoveryApprovalReads {
         if (request.terms.finalityRegistry != pins.finalityRegistry) revert Recovery.InvalidRecoveryApproval();
         StreamArtistRecoveryOriginalReads.Observation memory original =
             StreamArtistRecoveryOriginalReads.observe(suite, pins, request.terms.finalityRecordHash);
-        if (
-            request.terms.collectionId != original.scope.collectionId
-                || keccak256(abi.encode(request.scope)) != keccak256(abi.encode(original.scope))
-        ) revert Recovery.InvalidRecoveryApproval();
+        if (request.terms.collectionId != original.scope.collectionId) {
+            revert Recovery.InvalidRecoveryApproval();
+        }
+        StreamArtistRecoveryApprovalScopes.requireFresh(
+            suite.core, original.scope, request.scope, pins.readGas
+        );
         p.binding_ =
             StreamArtistRecoveryAdmission.binding(suite, request.terms.collectionId, pins.readGas);
         if (
@@ -89,7 +92,7 @@ library StreamArtistRecoveryApprovalReads {
                 || r.bindingGeneration != o.sanction.bindingGeneration
                 || r.bindingHash != o.sanction.bindingHash
                 || keccak256(abi.encode(r.terms)) != keccak256(abi.encode(terms))
-                || keccak256(abi.encode(a.scope)) != keccak256(abi.encode(o.scope))
+                || !StreamArtistRecoveryApprovalScopes.supported(o.scope, a.scope)
                 || a.originalFinalityCodeHash != pins.finalityCodeHash
                 || StreamArtistRecoveryHashes.approvalRecord(
                         StreamArtistHashes.Environment(
