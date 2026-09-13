@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistGuardianSupersession as GuardianSupersession
+} from "./StreamArtistGuardianSupersession.sol";
+import {
+    StreamArtistGuardianSelectionTypes as Selection
+} from "../../interfaces/stream/artist/StreamArtistGuardianSelectionTypes.sol";
 import { StreamArtistIdentityContestState } from "./StreamArtistIdentityContestState.sol";
 import { StreamArtistGuardianHistory as GuardianHistory } from "./StreamArtistGuardianHistory.sol";
 import {
@@ -22,6 +28,28 @@ import {
 
 /// @notice Fixed Identity wrappers authenticate the storage supplying these encoded reads.
 library StreamArtistRecoveryOwnerReads {
+    function guardianSet(
+        RecoveryState.State storage s,
+        RotationState.State storage rotations,
+        bytes32 artistId
+    ) public view returns (bytes memory) {
+        GuardianSupersession.requireHeads(s.guardianSupersession, rotations, artistId);
+        bytes32 record = RotationState.operativeGuardian(rotations, artistId);
+        R.GuardianSet storage terms = rotations.guardians[record].terms;
+        return abi.encode(terms.guardians, terms.approvalThreshold, terms.minContestSeconds, record);
+    }
+
+    function selection(RecoveryState.State storage s, bytes32 actionId)
+        public
+        view
+        returns (bytes memory)
+    {
+        return abi.encode(
+            s.guardianSupersession.elections[actionId],
+            s.guardianSupersession.restoredGuardians[actionId]
+        );
+    }
+
     function contest(StreamArtistIdentityContestState.State storage s, bytes32 hash)
         public
         view
@@ -99,7 +127,27 @@ library StreamArtistRecoveryOwnerReads {
                 || estate.requests[hash].recordHash != bytes32(0)
         ) revert R.InvalidRotation(hash);
         bytes32 guardian = s.recoveryGuardians[hash];
-        if (guardian != bytes32(0)) {
+        if (s.guardianSupersession.elections[item.fields.governanceActionId].commitment != 0) {
+            A.Association storage a = s.actions[item.fields.governanceActionId];
+            Selection.Result storage election =
+                s.guardianSupersession.elections[item.fields.governanceActionId];
+            R.GuardianRecord storage restored =
+                s.guardianSupersession.restoredGuardians[item.fields.governanceActionId];
+            if (
+                a.associationHash == 0 || a.artistId != item.fields.artistId
+                    || s.actionExecutions[item.fields.governanceActionId] != hash
+                    || s.guardianSupersession.plans[item.fields.governanceActionId].associationHash
+                        != a.associationHash
+                    || s.guardianSupersession.plans[item.fields.governanceActionId]
+                            .contextCommitment != item.contextHash
+                    || election.selectedRecordHash != guardian || restored.recordHash != guardian
+                    || (guardian != 0
+                        && (keccak256(abi.encode(restored)) != election.selectedDataHash
+                            || keccak256(abi.encode(rotations.guardians[guardian]))
+                                != election.selectedDataHash
+                            || restored.nonce != election.selectedNonce))
+            ) revert R.InvalidRotation(hash);
+        } else if (guardian != bytes32(0)) {
             A.Association storage a = s.actions[item.fields.governanceActionId];
             if (
                 a.associationHash == bytes32(0) || a.artistId != item.fields.artistId

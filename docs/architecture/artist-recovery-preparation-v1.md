@@ -318,3 +318,84 @@ estate/posthumous recovery, other superseded record families, selected-head and
 chain rewinds, and expanded historical contest standing remain required
 consumers. This increment neither fabricates their authority nor weakens their
 conditions.
+
+
+## Current guardian head recovery
+
+`6529STREAM_ARTIST_GUARDIAN_HEAD_SELECTION_PROFILE_V1` extends the nonempty
+profile above to current heads and higher-nonce records. The earlier
+lower-nonce path remains supported. The same living, sole-original-rotation,
+no-prior-recovery cutoff and exact contest evidence gates still apply.
+Pre-transition and other record-family exclusions still reject.
+
+The fixed third Identity child constructs one immutable
+`StreamArtistGuardianSelectionPreparation` through a linked deployment library.
+Read Identity's existing `identityRecoveryExtension()`, then that child's
+`guardianSelectionPreparationBinding()` to find its address and runtime pin.
+No caller selects the producer. Identity's original three child addresses and
+constructor argument order remain unchanged; all linked creation helpers must
+still satisfy deployment size limits.
+
+Before asking for the recovery context, call `begin(artistId, transition,
+excluded)` on this helper and advance `continueSelection(key, maximumRecords)`
+until complete. Each transaction processes only its requested range. There is
+no new total-history cardinality limit. The caller cannot skip, reorder or
+shorten the committed history: the helper checks every indexed original entry,
+strict owner-revision order, full guardian-record data hash and complete history
+chain, and seals only at the exact admitted count, final root and revision.
+Every excluded hash must occur in the scanned prefix. Empty and previously
+unselected sets are scanned too. The elected result is the highest eligible
+nonce outside the requested exclusions and permanent supersession statuses;
+following an old head's predecessor pointer cannot establish that result.
+
+Election starts only after the sole original rotation's post-window has
+elapsed. Every provisional association must be empty or refer to that exact
+original transition and deadline. Its phase, window and first contest timestamp
+are fixed in the evaluation basis and rechecked at every chunk and consumption.
+An early-contested cohort stays discarded; a late contest does not rewind
+already-mature eligibility. Changed owner runtime, history or transition makes
+the old preparation unusable. The no-prior-recovery restriction is also part of
+this basis; a future profile allowing mutable prior supersession statuses must
+add an appropriate invalidator. These checks prevent a scan from dropping an
+immature higher nonce in one transaction and sealing after it matures.
+
+Helper progress neither changes an Identity owner revision nor creates a pending
+governance action. The existing owner-local registration still authenticates the
+whole scheduled batch, complete terminal delay, exact current cause, request and
+acceptance. It commits the sealed election and complete restored guardian record
+in its state and Archive evidence. The original association retains the
+pre-recovery operative guardian fact; `guardianRecoverySelection(actionId)` on
+the fixed Identity owner exposes the separately retained result and restored
+record. A complete zero eligible result is explicit. An eligible empty guardian
+set has its original nonzero record hash and retains its own window floor.
+
+Execution repeats the current context and applies the result atomically with the
+original recovery record, two receipts and one owner revision. It checkpoints
+the restored stable head, clears the fully classified former provisional
+candidate, and records the exclusions permanently. The post-vesting window is
+`max(global rotation window, restored guardian minimum)`. Saved recovery standing
+uses the immutable restored record and action/selection commitments without
+consulting the helper's later availability or today's selected head. Original
+rotation, guardian and executed-history records remain unchanged.
+
+Actual guardian admissions validate the local stable and provisional heads
+against permanent statuses before and after their mutations; recovery validates
+its atomic repaired result. The unchanged dismissal checkpoints only the actual
+operative result from those same local heads and clears the candidate, so it
+preserves this invariant without a new status read. It cannot install a
+caller-selected or prior-history head. The outward guardian read validates the
+same invariant. Existing selection logic can therefore continue reading these
+authenticated heads without a new callback in every internal selection. Every
+future writer that installs or rewinds a guardian head must preserve this
+invariant and consult supersession status. No corrupted or legacy state repair
+is inferred. A later authorized record below the excluded head's nonce can become
+operative after its own captured window; the excluded head is never restored by
+that comparison.
+
+Preparation paging establishes completeness, not a universal gas envelope.
+Maximum exclusion-count materialization, cold-read budgets, constructor/initcode
+and complete deployment remain separately measured gates. General historical
+or estate election needs all relevant eligibility invalidators, not just the
+single elapsed transition used here. Appeal authority, hostile pre-transition
+evidence, absolute directive restrictions, other superseded record families and
+full chain rewinds remain required consumers.

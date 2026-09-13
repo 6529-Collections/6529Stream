@@ -31,6 +31,10 @@ import {
 } from "./StreamArtistGuardianVestingHistory.sol";
 import { StreamArtistRotationState as Rotations } from "./StreamArtistRotationState.sol";
 import { StreamArtistHashes } from "./StreamArtistHashes.sol";
+import { StreamArtistGuardianSelectionReads } from "./StreamArtistGuardianSelectionReads.sol";
+import {
+    StreamArtistGuardianSelectionTypes as Selection
+} from "../../interfaces/stream/artist/StreamArtistGuardianSelectionTypes.sol";
 
 /// @notice First-rotation, post-vesting, unselected guardian adjudication.
 /// @dev Fixed Identity owner authenticates governance, current cause and original rotation.
@@ -41,6 +45,8 @@ library StreamArtistGuardianSupersession {
         mapping(bytes32 => S.Plan) plans;
         mapping(bytes32 => S.Status) statuses;
         mapping(bytes32 => mapping(address => uint64)) excludedMemberships;
+        mapping(bytes32 => Selection.Result) elections;
+        mapping(bytes32 => R.GuardianRecord) restoredGuardians;
     }
 
     /// @dev Called only after the same owner's successful original operation28 and History.append.
@@ -129,15 +135,13 @@ library StreamArtistGuardianSupersession {
                     || record.terms.artistId != request.artistId || record.authorityClass != 1
                     || record.signer != cutoff.newAddress
                     || entry.recordDataHash != keccak256(abi.encode(record))
-                    || hash == rotations.stableGuardian[request.artistId]
-                    || hash == rotations.provisionalGuardian[request.artistId]
-                    || record.nonce >= operative.nonce || s.statuses[hash].recoveryRecordHash != 0
+                    || s.statuses[hash].recoveryRecordHash != 0
             ) {
                 revert S.InvalidGuardianSupersession(hash);
             }
             previous = hash;
         }
-        return keccak256(
+        bytes32 commitment = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_POSTVESTING_GUARDIAN_SUPERSESSION_V1"),
                 cutoff,
@@ -145,6 +149,199 @@ library StreamArtistGuardianSupersession {
                 head,
                 selected,
                 request.supersededRecordHashes
+            )
+        );
+        Selection.Result memory chosen =
+            election(s, history, rotations, environment, request, actualCount);
+        if (chosen.commitment == 0) return commitment;
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_GUARDIAN_HEAD_SUPERSESSION_CONTEXT_V1"),
+                commitment,
+                chosen
+            )
+        );
+    }
+
+    function election(
+        State storage s,
+        History.State storage history,
+        Rotations.State storage rotations,
+        StreamArtistHashes.Environment memory environment,
+        Recovery.Request memory request,
+        uint64 actualCount
+    ) public view returns (Selection.Result memory result) {
+        if (!_requiresElection(rotations, request.artistId, request.supersededRecordHashes)) return result;
+        GH.Head memory head = History.requireComplete(history, request.artistId, actualCount);
+        _complete(s, request.artistId, head);
+        R.TransitionState memory transition =
+            Rotations.transitionState(rotations, rotations.latestExecution[request.artistId]);
+        result = StreamArtistGuardianSelectionReads.requireSelection(
+            environment, request.artistId, head, transition, request.supersededRecordHashes
+        );
+        if (result.selectedRecordHash != 0) {
+            R.GuardianRecord storage record = rotations.guardians[result.selectedRecordHash];
+            GH.Entry storage entry = history.entries[result.selectedRecordHash];
+            if (
+                record.recordHash != result.selectedRecordHash
+                    || record.terms.artistId != request.artistId
+                    || record.nonce != result.selectedNonce
+                    || keccak256(abi.encode(record)) != result.selectedDataHash
+                    || entry.recordDataHash != result.selectedDataHash || entry.index == 0
+                    || entry.index > head.count
+                    || history.records[request.artistId][entry.index] != record.recordHash
+                    || s.statuses[record.recordHash].recoveryRecordHash != 0
+                    || !R.eligible(
+                        request.artistId, record.provisional, transition, block.timestamp
+                    )
+            ) revert Selection.InvalidGuardianSelection(result.sourceKey);
+            for (uint256 i; i < request.supersededRecordHashes.length; ++i) {
+                if (request.supersededRecordHashes[i] == record.recordHash) {
+                    revert Selection.InvalidGuardianSelection(result.sourceKey);
+                }
+            }
+        }
+    }
+
+    function recoveryWindow(
+        State storage s,
+        History.State storage history,
+        Rotations.State storage rotations,
+        StreamArtistHashes.Environment memory environment,
+        Recovery.Request memory request,
+        uint64 actualCount,
+        uint64 globalWindow
+    ) public view returns (uint64) {
+        Selection.Result memory result =
+            election(s, history, rotations, environment, request, actualCount);
+        bytes32 selected = result.commitment == 0
+            ? Rotations.operativeGuardian(rotations, request.artistId)
+            : result.selectedRecordHash;
+        uint64 minimum = rotations.guardians[selected].terms.minContestSeconds;
+        return minimum > globalWindow ? minimum : globalWindow;
+    }
+
+    function contextAndWindow(
+        State storage s,
+        History.State storage history,
+        Vesting.State storage vesting,
+        Rotations.State storage rotations,
+        StreamArtistHashes.Environment memory environment,
+        D.Cause memory cause,
+        Recovery.Request memory request,
+        uint64 actualCount,
+        uint64 globalWindow
+    ) public view returns (bytes32 commitment, uint64 window) {
+        // Adjudicability precedes the new prepared-selection dependency.
+        commitment =
+            context(s, history, vesting, rotations, environment, cause, request, actualCount);
+        window =
+            recoveryWindow(s, history, rotations, environment, request, actualCount, globalWindow);
+    }
+
+    function _requiresElection(
+        Rotations.State storage rotations,
+        bytes32 artistId,
+        bytes32[] memory list
+    ) private view returns (bool) {
+        bytes32 operative = Rotations.operativeGuardian(rotations, artistId);
+        for (uint256 i; i < list.length; ++i) {
+            if (
+                list[i] == rotations.stableGuardian[artistId]
+                    || list[i] == rotations.provisionalGuardian[artistId]
+                    || rotations.guardians[list[i]].nonce >= rotations.guardians[operative].nonce
+            ) return true;
+        }
+        return false;
+    }
+
+    function freezeWithSelection(
+        State storage s,
+        History.State storage history,
+        Rotations.State storage rotations,
+        StreamArtistHashes.Environment memory environment,
+        Recovery.Request memory request,
+        uint64 actualCount,
+        bytes32 actionId,
+        bytes32 associationHash,
+        bytes32 commitment
+    ) public returns (bytes32 delta) {
+        Selection.Result memory result =
+            election(s, history, rotations, environment, request, actualCount);
+        delta = freeze(
+            s,
+            history,
+            rotations,
+            request.artistId,
+            actionId,
+            associationHash,
+            commitment,
+            request.supersededRecordHashes
+        );
+        if (result.commitment == 0) return delta;
+        s.elections[actionId] = result;
+        if (result.selectedRecordHash != 0) {
+            s.restoredGuardians[actionId] = rotations.guardians[result.selectedRecordHash];
+        }
+        return keccak256(abi.encode(delta, result, s.restoredGuardians[actionId]));
+    }
+
+    function requireHeads(State storage s, Rotations.State storage rotations, bytes32 artistId)
+        public
+        view
+    {
+        bytes32 stable = rotations.stableGuardian[artistId];
+        bytes32 provisional = rotations.provisionalGuardian[artistId];
+        if (
+            (stable != 0 && s.statuses[stable].recoveryRecordHash != 0)
+                || (provisional != 0 && s.statuses[provisional].recoveryRecordHash != 0)
+        ) {
+            revert S.InvalidGuardianSupersession(artistId);
+        }
+    }
+
+    function applyWithSelection(
+        State storage s,
+        Rotations.State storage rotations,
+        mapping(bytes32 => bytes32) storage recoveryGuardians,
+        bytes32 artistId,
+        bytes32 actionId,
+        bytes32 associationHash,
+        bytes32 recoveryRecord,
+        bytes32 commitment,
+        bytes32[] memory excluded
+    ) public returns (bytes32 delta) {
+        delta = applyRecovery(
+            s, artistId, actionId, associationHash, recoveryRecord, commitment, excluded
+        );
+        Selection.Result storage result = s.elections[actionId];
+        if (result.commitment == 0) return delta;
+        R.GuardianRecord storage selected = s.restoredGuardians[actionId];
+        if (
+            selected.recordHash != result.selectedRecordHash
+                || (selected.recordHash != 0
+                    && (keccak256(abi.encode(selected)) != result.selectedDataHash
+                        || selected.nonce != result.selectedNonce
+                        || s.statuses[selected.recordHash].recoveryRecordHash != 0))
+        ) {
+            revert Selection.InvalidGuardianSelection(result.sourceKey);
+        }
+        bytes32 oldStable = rotations.stableGuardian[artistId];
+        bytes32 oldCandidate = rotations.provisionalGuardian[artistId];
+        rotations.stableGuardian[artistId] = result.selectedRecordHash;
+        delete rotations.provisionalGuardian[artistId];
+        recoveryGuardians[recoveryRecord] = result.selectedRecordHash;
+        requireHeads(s, rotations, artistId);
+        return keccak256(
+            abi.encode(
+                delta,
+                result,
+                selected,
+                oldStable,
+                oldCandidate,
+                rotations.stableGuardian[artistId],
+                rotations.provisionalGuardian[artistId],
+                recoveryRecord
             )
         );
     }

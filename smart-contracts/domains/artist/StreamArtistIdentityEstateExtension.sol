@@ -221,6 +221,9 @@ contract StreamArtistIdentityEstateExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32) {
         _check(c, 28);
+        GuardianSupersession.requireHeads(
+            _identityRecovery.guardianSupersession, _rotations, p.artistId
+        );
         StreamArtistIdentityState.Mutation memory m =
             StreamArtistRotationState.setGuardiansWithResolution(
                 _rotations,
@@ -233,6 +236,9 @@ contract StreamArtistIdentityEstateExtension is
                 proof,
                 _currentIdentityClosure(p.artistId)
             );
+        GuardianSupersession.requireHeads(
+            _identityRecovery.guardianSupersession, _rotations, p.artistId
+        );
         _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, c.operationId, m);
         uint64 admitted = ++_identityRecovery.guardianRecordsSeen[p.artistId];
         bytes32 historyCommitment = StreamArtistGuardianHistory.append(

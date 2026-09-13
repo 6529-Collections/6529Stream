@@ -1,6 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    IStreamArtistGuardianSelectionPreparation,
+    IStreamArtistGuardianSelectionBinding,
+    IStreamArtistGuardianSelectionOwner
+} from "../../../smart-contracts/interfaces/stream/artist/IStreamArtistGuardianSelectionPreparation.sol";
+import {
+    StreamArtistGuardianSelectionTypes as Selection
+} from "../../../smart-contracts/interfaces/stream/artist/StreamArtistGuardianSelectionTypes.sol";
+import {
     StreamArtistGuardianSupersessionTypes as GS
 } from "../../../smart-contracts/interfaces/stream/artist/StreamArtistGuardianSupersessionTypes.sol";
 import {
@@ -103,11 +111,11 @@ import {
 } from "../../../smart-contracts/interfaces/stream/artist/StreamArtistEstateTypes.sol";
 
 contract StreamArtistGuardianSupersessionActualTest is ArtistOnboardingFixture {
-    uint256 private restoreBlock;
-    GovernanceAction private scheduled;
-    bytes32 private currentId;
+    uint256 internal restoreBlock;
+    GovernanceAction internal scheduled;
+    bytes32 internal currentId;
 
-    function _sizes() private view {
+    function _sizes() internal view {
         require(
             address(StreamArtistEstateExtensionDeployment).code.length <= 24576,
             "actual fixed Estate deployment library runtime size"
@@ -126,7 +134,7 @@ contract StreamArtistGuardianSupersessionActualTest is ArtistOnboardingFixture {
         );
     }
 
-    function _governedInitialContest() private {
+    function _governedInitialContest() internal {
         ArtistUnitGovernance authority = ArtistUnitGovernance(manager.governanceAuthority());
         ArtistUnitRoles(suite.roleRegistry).setArbiter(address(artist), true);
         authority.configureContestReads(
@@ -148,7 +156,7 @@ contract StreamArtistGuardianSupersessionActualTest is ArtistOnboardingFixture {
         );
     }
 
-    function _terms() private view returns (IdentityRecovery.Request memory) {
+    function _terms() internal view returns (IdentityRecovery.Request memory) {
         return IdentityRecovery.Request(
             artistId,
             address(rotationSafe),
@@ -162,7 +170,7 @@ contract StreamArtistGuardianSupersessionActualTest is ArtistOnboardingFixture {
     }
 
     function _acceptance(IdentityRecovery.Request memory p)
-        private
+        internal
         returns (T.Authorization memory a)
     {
         a = T.Authorization(0, uint64(block.timestamp + 30 days), "");
@@ -176,7 +184,7 @@ contract StreamArtistGuardianSupersessionActualTest is ArtistOnboardingFixture {
         );
     }
 
-    function _guarded() private returns (bytes32 guardian) {
+    function _guarded() internal returns (bytes32 guardian) {
         _sizes();
         _delegateSetup();
         _newRotationSafe(36001);
@@ -189,7 +197,7 @@ contract StreamArtistGuardianSupersessionActualTest is ArtistOnboardingFixture {
     }
 
     function _calls(IdentityRecovery.Request memory p, T.Authorization memory a)
-        private
+        internal
         view
         returns (GovernanceCall[] memory calls)
     {
@@ -216,7 +224,7 @@ contract StreamArtistGuardianSupersessionActualTest is ArtistOnboardingFixture {
     }
 
     function _schedule(bytes32 id, IdentityRecovery.Request memory p, T.Authorization memory a)
-        private
+        internal
         returns (GovernanceCall[] memory calls)
     {
         currentId = id;
@@ -259,7 +267,7 @@ contract StreamArtistGuardianSupersessionActualTest is ArtistOnboardingFixture {
         _publish();
     }
 
-    function _publish() private {
+    function _publish() internal {
         address authority = manager.governanceAuthority();
         avm.mockCall(
             authority,
@@ -306,7 +314,7 @@ contract StreamArtistGuardianSupersessionActualTest is ArtistOnboardingFixture {
         return ingress.latestIdentityRecovery(artistId);
     }
 
-    function _inactive() private {
+    function _inactive() internal {
         avm.mockCall(
             manager.governanceAuthority(),
             abi.encodeWithSignature("currentAction()"),
@@ -332,25 +340,25 @@ contract StreamArtistGuardianSupersessionActualTest is ArtistOnboardingFixture {
     }
 
     function _read()
-        private
+        internal
         view
         returns (A.Association memory a, A.Veto memory v, bytes32 executed, uint64 count)
     {
         return ingress.identityRecoveryActionState(artistId, currentId);
     }
 
-    function _snapshot(bytes32 record) private view returns (V.Snapshot memory) {
+    function _snapshot(bytes32 record) internal view returns (V.Snapshot memory) {
         return IStreamArtistGuardianVestingHistory(suite.owners[2])
             .guardianVestingSnapshot(artistId, record);
     }
 
-    function _missing(bytes32 record) private {
+    function _missing(bytes32 record) internal {
         address owner = suite.owners[2];
         vm.expectRevert(abi.encodeWithSelector(V.InvalidGuardianVesting.selector, record));
         IStreamArtistGuardianVestingHistory(owner).guardianVestingSnapshot(artistId, record);
     }
 
-    function _ownerSnapshot() private view returns (T.Snapshot memory) {
+    function _ownerSnapshot() internal view returns (T.Snapshot memory) {
         return IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2();
     }
 
@@ -359,7 +367,7 @@ contract StreamArtistGuardianSupersessionActualTest is ArtistOnboardingFixture {
         uint16 operation,
         T.Snapshot memory before_,
         Vm.Log[] memory logs
-    ) private view {
+    ) internal view {
         require(
             s.artistId == artistId && s.transitionRecordHash != 0 && s.operationId == operation
                 && s.ownerRevision == before_.revision + 1 && s.executedAt == block.timestamp
@@ -421,7 +429,7 @@ contract StreamArtistGuardianSupersessionActualTest is ArtistOnboardingFixture {
         require(count == 1, "one actual vesting event");
     }
 
-    function _overflow() private {
+    function _overflow() internal {
         restoreBlock = block.number;
         vm.roll(uint256(type(uint64).max) + 1);
         vm.expectRevert(
@@ -471,14 +479,14 @@ contract StreamArtistGuardianSupersessionActualTest is ArtistOnboardingFixture {
         _sizes();
     }
 
-    bytes32 private soleRotation;
-    bytes32 private lifetimeGuardian;
-    bytes32 private attackerGuardian;
-    bytes32 private retainedAttackerGuardian;
-    bytes32 private guardianBeforeHash;
-    bytes32 private rotationBeforeHash;
+    bytes32 internal soleRotation;
+    bytes32 internal lifetimeGuardian;
+    bytes32 internal attackerGuardian;
+    bytes32 internal retainedAttackerGuardian;
+    bytes32 internal guardianBeforeHash;
+    bytes32 internal rotationBeforeHash;
 
-    function _nonempty(bool retainAttacker, bool selectPost) private {
+    function _nonempty(bool retainAttacker, bool selectPost) internal {
         _delegateSetup();
         address[] memory members = new address[](1);
         members[0] = address(delegateSafe);
@@ -521,7 +529,7 @@ contract StreamArtistGuardianSupersessionActualTest is ArtistOnboardingFixture {
         _sizes();
     }
 
-    function _nonemptyTerms() private view returns (IdentityRecovery.Request memory p) {
+    function _nonemptyTerms() internal view returns (IdentityRecovery.Request memory p) {
         p = _terms();
         p.evidenceHash = keccak256("compromise evidence");
         p.reasonHash = keccak256("compromise reason");
@@ -529,7 +537,7 @@ contract StreamArtistGuardianSupersessionActualTest is ArtistOnboardingFixture {
         p.supersededRecordHashes[0] = attackerGuardian;
     }
 
-    function _status(bytes32 record) private view returns (GS.Status memory) {
+    function _status(bytes32 record) internal view returns (GS.Status memory) {
         return IStreamArtistGuardianSupersession(suite.owners[2]).guardianRecordSupersession(record);
     }
 
@@ -678,6 +686,23 @@ contract StreamArtistGuardianSupersessionActualTest is ArtistOnboardingFixture {
         _sizes();
     }
 
+    function _selectionPreparation()
+        internal
+        view
+        returns (IStreamArtistGuardianSelectionPreparation preparation)
+    {
+        address child = StreamArtistIdentityAuthority(suite.owners[2]).identityRecoveryExtension();
+        (address target, bytes32 codeHash) =
+            IStreamArtistGuardianSelectionBinding(child).guardianSelectionPreparationBinding();
+        require(target.code.length != 0 && target.codehash == codeHash, "fixed preparation code");
+        preparation = IStreamArtistGuardianSelectionPreparation(target);
+        require(
+            preparation.owner() == suite.owners[2]
+                && preparation.artistRegistry() == address(ingress),
+            "fixed preparation owner"
+        );
+    }
+
     function testActualPreVestingHeadAndEvidenceExclusionsRejected() public {
         _nonempty(false, true);
         IdentityRecovery.Request memory p = _nonemptyTerms();
@@ -689,9 +714,13 @@ contract StreamArtistGuardianSupersessionActualTest is ArtistOnboardingFixture {
         );
         ingress.identityRecoveryContext(p, a);
         p.supersededRecordHashes[0] = retainedAttackerGuardian;
+        IStreamArtistGuardianSelectionPreparation preparation = _selectionPreparation();
+        bytes32 key = preparation.begin(artistId, soleRotation, p.supersededRecordHashes);
+        (GH.Head memory head,,,) = IStreamArtistGuardianHistory(suite.owners[2])
+            .guardianHistoryState(artistId, 0, address(0), 0);
         vm.expectRevert(
             abi.encodeWithSelector(
-                GS.InvalidGuardianSupersession.selector, retainedAttackerGuardian
+                Selection.IncompleteGuardianSelection.selector, key, uint64(0), head.count
             )
         );
         ingress.identityRecoveryContext(p, a);

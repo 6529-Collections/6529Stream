@@ -1205,6 +1205,38 @@ and complete historical standing remain required; this increment supplies no
 proxy approval for them. Canonical 57 operations, adopted 58, auxiliary 65534 and
 37 genesis roles remain unchanged.
 
+## Complete election for guardian head supersession
+
+`6529STREAM_ARTIST_GUARDIAN_HEAD_SELECTION_PROFILE_V1` extends the first
+nonempty consumer to current-head exclusions using a complete bounded-chunk
+history election. The immutable third-child preparation source scans every
+original indexed admission and seals the exact count/root/revision, including
+empty and unselected records. It elects the highest eligible nonce outside both
+new and permanent exclusions; a prior-head link alone cannot prove completeness.
+
+The evaluation basis is restricted to the same sole original ordinary rotation,
+with its window already elapsed and each provisional association bound to that
+exact transition/deadline. Every chunk and consumption rechecks original phase,
+window, contest timestamp, current complete history and owner runtime. The
+existing no-prior-recovery gate prevents cached status drift; broader historical
+and estate profiles need their own complete invalidator set.
+
+External progress has no owner authority. The existing scheduled-action
+association separately commits the result and full restored record under one
+owner revision, with complete Archive evidence. Execution preserves the original
+recovery semantic hashes/two receipts, permanently excludes the listed records,
+checkpoints the restored head and derives the fresh window from its minimum.
+Saved standing retains that restored record independently of later helper
+liveness. Fixed-owner guardian writers, dismissal checkpoints and outward reads
+preserve the non-superseded-head invariant; future rewinds must do likewise.
+
+The [preparation guide](../architecture/artist-recovery-preparation-v1.md#current-guardian-head-recovery)
+defines discovery, paging, zero-versus-empty selection, immutable evidence and
+capacity limits. Public operations 34/35, the canonical 57 plus adopted 58,
+auxiliary 65534 and 37 genesis roles are unchanged. This extension does not
+supply appeal/hostile-guardian authority, estate recovery, other record-family
+adjudication or a maximum-capacity/full-deployment claim.
+
 ## Acceptance and remaining work
 
 Required tests include an actual threshold-Safe/Executor class-2 path, direct

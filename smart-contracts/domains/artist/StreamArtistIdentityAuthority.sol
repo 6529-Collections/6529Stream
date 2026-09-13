@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistGuardianSelectionTypes as GuardianSelectionTypes
+} from "../../interfaces/stream/artist/StreamArtistGuardianSelectionTypes.sol";
+import {
     StreamArtistGuardianSupersessionTypes as GuardianSupersessionTypes
 } from "../../interfaces/stream/artist/StreamArtistGuardianSupersessionTypes.sol";
 import { StreamArtistGuardianVestingHistory } from "./StreamArtistGuardianVestingHistory.sol";
@@ -370,6 +373,14 @@ contract StreamArtistIdentityAuthority is
         _returnResolution(
             StreamArtistRecoveryOwnerReads.guardianSupersession(_identityRecovery, recordHash)
         );
+    }
+
+    function guardianRecoverySelection(bytes32 actionId)
+        external
+        view
+        returns (GuardianSelectionTypes.Result memory, R.GuardianRecord memory)
+    {
+        _returnResolution(StreamArtistRecoveryOwnerReads.selection(_identityRecovery, actionId));
     }
 
     function guardianVestingSnapshot(bytes32 artistId, bytes32 recordHash)
@@ -785,9 +796,9 @@ contract StreamArtistIdentityAuthority is
         view
         returns (address[] memory, uint32, uint64, bytes32)
     {
-        bytes32 record = StreamArtistRotationState.operativeGuardian(_rotations, artistId);
-        R.GuardianSet storage terms = _rotations.guardians[record].terms;
-        return (terms.guardians, terms.approvalThreshold, terms.minContestSeconds, record);
+        _returnResolution(
+            StreamArtistRecoveryOwnerReads.guardianSet(_identityRecovery, _rotations, artistId)
+        );
     }
 
     function pendingRotation(bytes32 artistId)

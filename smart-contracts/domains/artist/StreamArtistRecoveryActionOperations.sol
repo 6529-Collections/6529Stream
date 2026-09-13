@@ -1,6 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    IStreamArtistGuardianSelectionOwner
+} from "../../interfaces/stream/artist/IStreamArtistGuardianSelectionPreparation.sol";
+import {
+    StreamArtistGuardianSelectionTypes as Selection
+} from "../../interfaces/stream/artist/StreamArtistGuardianSelectionTypes.sol";
+import {
+    StreamArtistRotationTypes as Rotation
+} from "../../interfaces/stream/artist/StreamArtistRotationTypes.sol";
+import {
     IStreamArtistGuardianHistory
 } from "../../interfaces/stream/artist/IStreamArtistGuardianHistory.sol";
 import {
@@ -87,8 +96,28 @@ library StreamArtistRecoveryActionOperations {
             A.PREPARE_OPERATION,
             association,
             before_,
-            abi.encode(p, acceptance, context, saved, count, history)
+            _preparationPayload(identity, p, acceptance, context, saved, count, history)
         );
+    }
+
+    function _preparationPayload(
+        address identity,
+        R.Request memory p,
+        T.Authorization memory acceptance,
+        R.Context memory context,
+        A.Association memory saved,
+        uint64 count,
+        GH.Snapshot memory history
+    ) private view returns (bytes memory) {
+        if (p.supersededRecordHashes.length != 0) {
+            (Selection.Result memory result, Rotation.GuardianRecord memory restored) = IStreamArtistGuardianSelectionOwner(
+                    identity
+                ).guardianRecoverySelection(saved.action.actionId);
+            if (result.commitment != 0) {
+                return abi.encode(p, acceptance, context, saved, count, history, result, restored);
+            }
+        }
+        return abi.encode(p, acceptance, context, saved, count, history);
     }
 
     function veto(D.CoordinatorContext memory x, address actor, bytes32 artistId, bytes32 reason)

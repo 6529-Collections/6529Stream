@@ -148,7 +148,20 @@ library StreamArtistIdentityRecoveryState {
         c.incumbent = principal.authorityAddress;
         c.postContestSeconds = StreamArtistRotationState.rotationSeconds(rotations);
         R.GuardianRecord memory guardian = _guardian(s, rotations, o, p.artistId, c.incumbent);
-        if (guardian.terms.minContestSeconds > c.postContestSeconds) {
+        bytes32 supersessionContext;
+        if (p.supersededRecordHashes.length != 0) {
+            (supersessionContext, c.postContestSeconds) = GuardianSupersession.contextAndWindow(
+                s.guardianSupersession,
+                s.guardianHistory,
+                s.vestingHistory,
+                rotations,
+                o.environment,
+                cause,
+                p,
+                s.guardianRecordsSeen[p.artistId],
+                c.postContestSeconds
+            );
+        } else if (guardian.terms.minContestSeconds > c.postContestSeconds) {
             c.postContestSeconds = guardian.terms.minContestSeconds;
         }
         c.standingTailSeconds = StreamArtistRotationState.standingSeconds(rotations);
@@ -211,21 +224,7 @@ library StreamArtistIdentityRecoveryState {
             );
         }
         if (p.supersededRecordHashes.length != 0) {
-            c.oldValueHash = keccak256(
-                abi.encode(
-                    c.oldValueHash,
-                    GuardianSupersession.context(
-                        s.guardianSupersession,
-                        s.guardianHistory,
-                        s.vestingHistory,
-                        rotations,
-                        o.environment,
-                        cause,
-                        p,
-                        s.guardianRecordsSeen[p.artistId]
-                    )
-                )
-            );
+            c.oldValueHash = keccak256(abi.encode(c.oldValueHash, supersessionContext));
         }
         c.newValueHash = keccak256(
             abi.encode(
@@ -379,8 +378,10 @@ library StreamArtistIdentityRecoveryState {
             m.state = keccak256(
                 abi.encode(
                     m.state,
-                    GuardianSupersession.applyRecovery(
+                    GuardianSupersession.applyWithSelection(
                         s.guardianSupersession,
+                        rotations,
+                        s.recoveryGuardians,
                         i.request.artistId,
                         i.governance.actionId,
                         s.actions[i.governance.actionId].associationHash,
@@ -466,15 +467,16 @@ library StreamArtistIdentityRecoveryState {
             m.state = keccak256(
                 abi.encode(
                     m.state,
-                    GuardianSupersession.freeze(
+                    GuardianSupersession.freezeWithSelection(
                         s.guardianSupersession,
                         s.guardianHistory,
                         rotations,
-                        a.artistId,
+                        i.owner.environment,
+                        i.request,
+                        s.guardianRecordsSeen[a.artistId],
                         w.actionId,
                         associationHash,
-                        a.contextHash,
-                        i.request.supersededRecordHashes
+                        a.contextHash
                     )
                 )
             );
