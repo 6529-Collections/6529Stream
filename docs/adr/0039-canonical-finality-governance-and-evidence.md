@@ -549,6 +549,31 @@ between scheduling and execution, published-byte/runtime rejection and the
 second call's distinct execution context. This does not complete the companion,
 owner notice, inherited-scope admission or recovery serving implementation.
 
+## Complete recovery request availability
+
+The permanent staged recovery intent remains exactly 704 bytes. It commits
+both URI hashes but cannot reconstruct the URI strings needed by the existing
+three-key artist preparation read. An additive permissionless
+`registerFinalityRecoveryIntent(Request)` therefore retains the complete
+canonical `abi.encode(Request)` under the same manifest content key, only after
+checking the already-staged exact intent, owning chain/companion environment,
+manifest URI hash and all other committed fields. Exact duplicate registration
+is idempotent; it cannot replace the original request or storage pointer.
+
+This interface is separate from the original sixteen-selector recovery
+interface. Registration creates no authority, pending action, head, generation,
+approval/finding evidence or route readiness. Current preparation and execution
+must independently revalidate stored bytes, fixed bindings and current lineage.
+Every stored-object read checks its initial runtime and complete content hash.
+
+The first availability profile uses one complete SSTORE2 object. The canonical
+request may occupy at most 24,544 ABI-aligned bytes, including both complete URI
+strings; the next padded word fails. Its STOP-prefixed runtime is at most
+24,545 bytes. URI validation here proves UTF-8 and exact byte/hash binding, not
+a separate absolute-URI grammar. Larger request profiles and actual companion
+scope/route/authority admission are separate work. The bounded storage tests
+do not imply those operative gates have been implemented.
+
 ## Acceptance and remaining work
 
 Required tests include an actual threshold-Safe/Executor class-2 path, direct
