@@ -22,104 +22,83 @@ and evidence instead of deriving completion from test or interface counts.
 
 ## Latest integration: 13 September
 
-Typed owner steward designations are integrated as `1cb3530f`, using the
-original direct/relayed owner signature, receipt and history. Fifty focused and
-retained cases pass in both compiler modes, including actual threshold Safe
-calls, two retained fuzz properties, exact registered schema/profile/JCS bytes,
-atomic supersession and an 8,192-byte typed payload. Per-author designations
-survive transfers and reactivate if that owner reacquires the token. No ownership
-epoch is inferred. The original owner interface and storage prefix are preserved;
-the new typed interface and index are additive. Core custody and Executor remain
-explicit boundaries in this cohort. See the [owner integration guide](../docs/integrations/owner-records.md).
+Authoritative scope membership is integrated as `0f3805ab`. Actual Metadata,
+Schema, Store and Inventory contracts publish complete RELEASE, SEASON and VIEW
+membership, including all 64 supported native chunks. Publication and capacity
+cases pass both compiler modes; separate actual Core cases pass in IR. Router
+membership readers are integrated as `a9aa1aeb`, bound to the original provider
+and its immutable membership host. Their four composed cases pass both modes.
+See [scope membership](../docs/scope-membership.md).
 
-Complete steward/recovery-response JSON definitions are integrated as `df3fb50b`.
-Fifteen Solidity cases pass in both profiles, and fifteen Python cases plus exact
-generation checks pass. This preserves all six hash algorithms and every array
-entry fitting the 8,192-byte payload. Response authority, counting and notice
-execution are separate from the pure serializer and remain in progress.
+Action-bound TOKEN owner recovery notices and response evidence are integrated
+as `f79ddb0d`. Bounded preparation follows in `04390f62`: the publisher records
+the original complete designation and delivery commitment, publishes delivery
+evidence in bounded calls, and opens the notice after a fresh ownership/head
+check. Opening preserves the complete response queue and starts the 72-hour
+period. All 119 focused and retained cases pass both modes. Wider notice scopes
+and complete finality execution remain open. See
+[owner notices](../docs/integrations/owner-recovery-notices.md).
 
-Recovery-aware Router serving is integrated as `88d198bd`. The actual original
-Registry, companion, Router and serving adapters demonstrate original finalized
-rendering and replacement-renderer consumption after the old renderer loses code,
-with explicit authority/provider boundaries. Separate actual Core/governance
-tests demonstrate cold unfinalized serving and maximum 16-KiB token-data reads.
-The corrected 2-million-gas raw-source limit accommodates the measured cold data;
-the earlier 1-million token and 150,000-gas fact limits did not. Router runtime
-fits both profiles. Full cold frozen Core/provider composition under the current
-12-million-gas serving profile remains required. A further reviewed source finding
-is resolved in `f397d17d`: original and recovered rendering survive owner-evidence
-or Executor runtime loss, while new recovery preparation still requires those
-pins. Seven actual topology cases pass in IR; all 155 production ABI/storage
-comparisons in that capture remain unchanged.
+The contact-capacity correction `dad44218` preserves endpoint order, exact JSON
+and the existing payload limit while replacing quadratic duplicate checks and
+repeated prefix copying. All 131 focused and retained cases pass both modes,
+including three 256-input properties. The named cold 214-endpoint original writer
+uses 13.075 / 13.626 million gas under its unchanged 16-million test budget.
+This is the measured payload and named cold accounts, excluding transaction
+intrinsic gas; it does not imply every possible payload has the same cost.
 
-The Router's saved original-Finality anchor preserves historical classification
-after pointer changes. New candidate admission must require a locked presentation
-and the saved anchor's exact registry/code match to that candidate's Registry.
-This is a mandatory actual-provider integration join; it is not supplied by a
-caller-selected current pointer or inferred from the serving tests.
+Shared JSON escaping is optimized in `e9b6a7bc`. An independent literal copy of
+the previous implementation proves exact output preservation for controls,
+arbitrary bytes and maximum escaped strings. All 135 focused/retained cases pass
+both modes, including seven 256-input properties. The named ASCII measurements
+show approximately 64% / 66% less escaping gas; these are function measurements,
+not a claim about the complete transaction.
 
-The complete scheduled-action verifier is integrated as `b58eee55`. It authenticates
-the entire published call array, exact recovery request and original execution
-window. Twenty-seven focused cases pass both modes, two actual Executor cases
-pass in IR, and two actual companion capacity cases pass both modes. These are
-31 distinct cases across separate captures. Maximum 24,544-byte requests require
-the measured 8-million-gas admission budget; later notice eligibility avoids
-repeating that entire preparation inside the owner callback.
+Native entropy policy and a fixed evidence provider are integrated as `4819c079`.
+The actual Coordinator reports its original locked provider/reveal policy,
+independently of whether output randomness has completed. Forty-eight focused
+and retained cases pass both modes, including all new provider selectors and
+the native policy read through actual threshold Safe. The provider describes
+one original coordinator; complete discovery must still join every token's
+retained `coordinatorAtMint`. See
+[entropy evidence](../docs/integrations/entropy-finality-evidence.md).
 
-Canonical scope membership encoding is integrated as `043f0ba7`: six pure cases,
-including two 256-input fuzz properties, pass both modes. Actual authenticated
-membership publication, complete inventories and current Core composition are
-being completed by the artist builder; the encoding alone does not prove them.
+The latest actual Core/Coordinator/Router cohort passes all 32 cases in IR,
+including two new original-policy cases across minting and coordinator
+replacement. Local typed rendering avoids an unnecessary encode/decode cycle;
+externally supplied frozen rendering keeps strict canonical-byte validation.
+The retained maximum 16-KiB data and escaped-script case now uses 11,939,859 gas
+for the named cold Router call, below its unchanged 12-million limit. Core's
+outer `tokenURI` call uses 12,749,169 gas. Router runtime fits at 24,158 bytes in
+the default production-only closure and 24,443 in the current IR cohort.
+Artist attribution, original-unfinalized Finality and oracle service remain
+explicit fixtures in this cohort. Full cold frozen Core/provider composition
+still needs its own acceptance test.
 
-Actual six-family Router evidence is integrated as `f6a79668`. Eighteen
-cases pass both modes, including 256 scope inputs, actual specialized serving
-adapters and all provider selectors through threshold Safe. The provider binds
-original source runtimes and derives independent display, media, script,
-renderer, context and dependency commitments. It authenticates the saved original
-Finality anchor and actual live module eligibility for new candidate checks.
-Maximum source reads use 1,328,267/1,337,443 gas with four named hosts cooled;
-linked accounts are not all cold, and adapter calls are not under a governed
-Registry budget. Core, metadata, membership, artist and Finality remain typed
-boundaries here. Full ten-reference evidence, entropy and actual scope-host
-composition remain open. See [Router evidence](../docs/integrations/finality-router-evidence.md).
-
-Earlier current WORK selection `03f74207`, bounded RIGHTS selection `4bf64532`,
-WORK-to-LIDO mapping `579c92dd`, owner/shared readers `001bfaa5`, canonical recovery
-`b8768972` and nonempty Core refresh `71cff6ff` remain integrated. Their focused
-evidence and explicit boundary qualifications are retained. Compact governance
-action facts `021e9389` support authenticated notices without copying long reason
-URIs; they do not themselves implement the notice mechanism.
-
-Implementation ownership now separates the remaining dependencies:
+Earlier typed stewardship, WORK and RIGHTS selection, six-family Router
+evidence, archived content, museum account records, IIIF and LIDO remain
+integrated. Their guides and earlier entries retain the exact tested boundaries.
+Full typed finality requires all ten metadata references and actual authority,
+inventory and preserved-record consumers; passing individual producers does
+not complete that join.
 
 | Owner | Next deliverable |
 | --- | --- |
-| Integrator | Actual typed metadata/finality provider, current discovery and remaining typed record consumers; shared integration, CI and release |
-| Artist builder | Authoritative RELEASE/SEASON/VIEW membership and actual Core composition |
-| Museum/payment builder | Actual owner response indexing and action-bound 72-hour notices in the dedicated owner-notices worktree |
-| Independent reviewer | Challenge each implementation and its real-target tests before integration |
+| Integrator | Complete typed metadata/finality provider, original-coordinator discovery and current deployment assembly; shared tests, CI and release |
+| Artist builder | Actual inherited approval and recovery across TOKEN, RELEASE, SEASON and VIEW, followed by adjudicated identity recovery |
+| Museum/payment builder | Typed artist intent, waiver and interview profiles; conservation tooling and remaining owner/museum work |
+| Independent reviewer | Challenge exact implementations, real-contract composition and integration evidence |
 
-Notice admission will use a separately measured proof-read budget. Later notice
-eligibility verifies the retained complete action commitment and exact execution
-context; the companion owns current recovery-lineage validation before and after
-its owner-evidence read. Repeating that entire preparation inside the small owner
-callback is not a viable gas design. The actual composed callback remains a test
-requirement, and wider notice scopes remain part of full v1. Original responses
-for an exact action/manifest are retained even before opening. The host must
-process that complete ordered queue before supplying execution evidence, without
-making permanent owner documentation depend on action liveness. Late objections
-remain visible; objections themselves do not automatically veto recovery.
-
-At `76fd111b`, museum CI, the TypeScript client and Windows wrapper passed. Main
-CI still failed full current compilation, Slither and release checksums. The checksum attribute
-parser and import-name failures are fixed in `e3af3184`; the retained current-build
-diagnostic now has two missing actual Finality arguments in Coordinator assembly.
-The concrete deployment order and immutable predicted WORK/RIGHTS bindings are
-specified in ADR 0041. Whole-system construction and stale release artifacts
-remain open; focused passing increments
-do not substitute for them. No new full-v1 freeze or deployment is claimed.
-All 57 artist operations, 37 genesis roles and adopted museum requirements remain
-in scope. RC1 remains immutable.
+The full build remains red. At pushed head `ca906119`, museum CI passed and the
+main workflow failed. The retained compiler diagnostic has two missing actual
+Finality arguments in Coordinator assembly; the immutable deployment order in
+ADR 0041 must be implemented with the complete provider. Static-analysis
+baseline and release artifacts also need reconciliation after implementation
+stabilizes. Complete Safe selector/version/nesting acceptance, remaining
+commerce/royalty/entropy behavior, museum conformance and a newly frozen tested
+candidate remain required. No new full-v1 freeze or deployment is claimed.
+All 57 artist operations, the accepted extension, 37 genesis roles and adopted
+museum requirements remain in scope. Initial RC1 remains immutable.
 
 ### Earlier integrated increments
 

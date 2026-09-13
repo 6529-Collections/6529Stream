@@ -87,11 +87,13 @@ are attributed owner statements, not independent verification of an institution.
 
 ## Recovery responses and notices
 
-The complete recovery-response JSON schema and serializer are available, but
-generic `RECOVERY_RESPONSE` ingress does not yet count an acknowledgment or
-objection. Action-bound 72-hour notices, authenticated response indexing and the
-owner-evidence interface remain implementation work. No recovery-read interface
-is advertised by this increment.
+Typed recovery responses now use the original owner authorization and retained
+receipt history. Exact action/manifest responses enter the complete owner queue,
+including records published before a notice opens. The TOKEN notice implementation
+snapshots the original owner and steward contacts and starts its own 72-hour window.
+Bounded preparation lets publishers retain every delivery claim before one atomic
+opening. See [owner recovery notices](owner-recovery-notices.md) for queue processing,
+permissionless finalization, actual companion evidence and remaining wider scopes.
 
 For the exact semantics and event commitments, see the
 [owner-record specification](../collection-metadata-contract.md#owner-records-and-the-object-dossier).

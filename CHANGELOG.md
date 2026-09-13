@@ -5,6 +5,15 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Added authenticated scope membership and original-provider Router reads, typed
+  owner recovery responses and action-bound notice windows, and bounded immutable
+  preparation for complete delivery claims. Wider recovery scopes remain in progress.
+- Reduced shared JSON escaping gas while preserving the prior returned bytes,
+  including arbitrary byte strings. Differential fuzzing and retained owner,
+  rights and work-record flows pass in both compiler modes.
+- Added the current coordinator's immutable collection-policy read and fixed
+  entropy serving evidence. Complete entropy modes, mixed-coordinator discovery
+  and whole-system finality remain separate implementation work.
 - Added a fixed evidence provider for six actual Router serving families, with
   independent source commitments and explicit current-candidate checks against
   live module eligibility and the saved original-Finality anchor. Complete typed
@@ -19,14 +28,14 @@ the release policy in `docs/release-policy.md`.
 - Added complete steward/recovery-response JSON profiles and atomic typed
   owner steward designations using the original direct/relayed owner record
   authorization, exact registered definitions and durable per-author history.
-  Recovery-response counting and action-bound notice execution remain open.
+  Typed recovery-response counting and TOKEN notice execution are now implemented.
 - Added authenticated current WORK selection with curator grants or explicit
   adoption of an artist's predecessor-bound publication, complete typed meaning,
   original provenance and retained history. Full provider/deployment composition
   remains open.
 - Added current-owner dossier records with retained payloads, direct and relayed
   Safe/EOA calls, unordered replay protection and custody history. Typed recovery
-  notices and responses remain separate implementation work.
+  notices and responses extend this same authorization and history.
 - Added bounded schema facts and original collection-record receipts, preserving
   existing interfaces and storage. Maximum supported registration and record
   shapes now fit the existing dependency cap for these readers and record ingress.

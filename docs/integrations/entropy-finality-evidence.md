@@ -90,6 +90,15 @@ the five-named-source provider call costs 37,478 / 34,886. The latter uses the
 explicit membership fixture, and neither measurement represents all linked
 accounts, complete current contracts or transaction intrinsic gas.
 
+A separate 32-case IR cohort joins actual Core, Coordinator and Router. It
+proves that the first actual mint locks the configured policy before a seed
+exists, fulfillment leaves that policy unchanged, and replacing the Coordinator
+preserves each token's original coordinator and policy. Artist/Finality and
+external oracle boundaries remain explicit. This cohort also retains the
+maximum-data serving test: the named cold Router call uses 11,939,859 gas,
+while the outer Core call uses 12,749,169. Frozen-finality serving is a separate
+composition requirement.
+
 Full discovery, original-coordinator inventory, the complete typed metadata
 provider and a newly frozen candidate remain separate acceptance work. See the
 [delivery ledger](../../ops/V1_DELIVERY.md) and

@@ -9,6 +9,8 @@ deployment evidence.
 | --- | --- |
 | Validate a published root against current preserved content | [Finality content evidence](finality-content-evidence.md) |
 | Derive independent serving families from actual Router sources | [Router evidence provider](finality-router-evidence.md) |
+| Read a fixed coordinator's original locked collection policy | [Entropy policy evidence](entropy-finality-evidence.md) |
+| Authenticate published RELEASE, SEASON and VIEW membership | [Scope membership](../scope-membership.md) |
 | Resume the developing artist and reveal authority batch | [Current activation](current-artist-activation.md) |
 | Fund reveal requests and settle collection escrow | [Reveal-fee funding](reveal-fee-funding.md) |
 | Record artist approval of exact sale terms | [Sale-parameter consent](sale-parameter-consent.md) |
@@ -36,6 +38,7 @@ deployment evidence.
 | Append institutional records as the current NFT owner | [Owner records](owner-records.md) |
 | Encode complete steward designations and recovery responses | [Owner notice JSON](owner-notice-json.md) |
 | Authenticate the exact scheduled recovery action before notice | [Recovery action evidence](owner-recovery-action-reads.md) |
+| Prepare complete delivery claims and open the owner response window | [Owner recovery notices](owner-recovery-notices.md) |
 | Read complete evidence without copying long registration URIs | [Bounded record reads](bounded-record-reads.md) |
 | Publish an artist or curatorial description under one record type | [Work-description authority](work-description-authority.md) |
 | Select an authenticated current WORK description | [Work-record selection](work-record-selection.md) |

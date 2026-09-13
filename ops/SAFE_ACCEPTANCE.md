@@ -48,6 +48,16 @@ publisher grant are exercised. This is scoped evidence; the complete ABI,
 version, nested-wallet and rejection matrix above remains required, including
 new constant and deployment-binding getters.
 
+## Entropy finality evidence increment
+
+The [entropy provider tests](../test/unit/finality/StreamFinalityEntropyEvidenceProvider.t.sol)
+execute 18 actual threshold-Safe 1.4.1 transactions covering all 17 public
+provider selectors and the Coordinator's native `entropyPolicyFrozen` read.
+The 48-case focused/retained cohort passes both compiler modes. Core, Metadata,
+membership, governance and the external oracle service are explicit boundaries;
+this proves the named reads, not the complete deployment or final selector,
+version and nested-wallet acceptance matrix.
+
 ## Shared foundation
 
 Use the [pinned official Safe fixtures](../test/fixtures/safe/README.md) and
