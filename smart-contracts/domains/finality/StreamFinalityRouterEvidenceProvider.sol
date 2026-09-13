@@ -73,7 +73,7 @@ contract StreamFinalityRouterEvidenceProvider is
         // No Coordinator/facade-Finality read, selected pointer or collection lock in construction.
     }
 
-    function supportsInterface(bytes4 id) external pure virtual override returns (bool) {
+    function supportsInterface(bytes4 id) public pure virtual override returns (bool) {
         return id == type(IERC165).interfaceId
             || id == type(IStreamFinalityServingEvidenceProvider).interfaceId
             || id == type(IStreamFinalityComponentFacts).interfaceId
@@ -88,7 +88,7 @@ contract StreamFinalityRouterEvidenceProvider is
     }
 
     function finalityComponentFacts(bytes32 family, StreamFinalityScope calldata scope)
-        external
+        public
         view
         virtual
         override
@@ -166,7 +166,7 @@ contract StreamFinalityRouterEvidenceProvider is
         _address(registry, abi.encodeWithSignature("sanctionReads()"), p.registry);
     }
 
-    function _scope(StreamFinalityScope memory scope) private view {
+    function _scope(StreamFinalityScope memory scope) internal view {
         if (
             scope.collectionId == 0
                 || (scope.scopeType == StreamFinalityScopeType.COLLECTION
@@ -202,7 +202,7 @@ contract StreamFinalityRouterEvidenceProvider is
         );
     }
 
-    function _pins() private view {
+    function _pins() internal view {
         if (block.chainid != deploymentChainId) revert RouterProviderConfiguration();
         _pin(core, coreCodeHash);
         _pin(metadataHost, metadataHostCodeHash);

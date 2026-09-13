@@ -16,6 +16,7 @@ import "../../interfaces/stream/finality/IStreamCoreFinalityEvidenceBinding.sol"
 import "../../interfaces/stream/core/IStreamCorePointers.sol";
 import "./StreamFinalityHashes.sol";
 import "./StreamFinalityRouteReads.sol";
+import "./StreamFinalityPreparedScopeReads.sol";
 import "../../interfaces/stream/finality/IStreamFinalityMetadataReads.sol";
 import "../../interfaces/stream/finality/IStreamFinalitySanctionReads.sol";
 import "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
@@ -23,8 +24,6 @@ import "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
 /// @notice Stateless candidate evidence validation using the registry's exact immutable dependencies.
 /// @dev Compiler linkage preserves registry identity. The host checks its actual record/manifest state.
 library StreamFinalityPreparation {
-    uint256 private constant FINALITY_STRICT_PARENT_GAS_RESERVE = 100_000;
-
     struct Dependencies {
         IStreamCoreFinalitySource coreReads;
         IStreamCoreFinalityAdapter coreFinalityAdapter;
@@ -135,7 +134,7 @@ library StreamFinalityPreparation {
         _verifyComponentsLiveStrict(deps, components, _componentCallData(deps, scope));
         prepared.nonSanctionComponentsHash = _componentsHash(deps, components);
         _verifyNonSanctionDiscovery(deps, scope, components, prepared.nonSanctionComponentsHash);
-        prepared.scopeInputsHash = _scopeInputsHash(deps, scope, manifest, metadataMode);
+        prepared.scopeInputsHash = _scopeInputsHash(deps, scope, manifest, metadataMode, components);
         prepared.sanctionSubjectHash = _sanctionSubjectHash(
             deps, scope, prepared.coreFactsHash, prepared.nonSanctionComponentsHash, manifest
         );
@@ -215,7 +214,7 @@ library StreamFinalityPreparation {
         _verifySanctionComponent(deps, scope, components, ctx.coreFactsHash, manifest);
         _verifyComponentsLiveStrict(deps, components, _componentCallData(deps, scope));
         _verifyDiscovery(deps, scope, components, ctx.componentsHash);
-        execution.inputsHash = _scopeInputsHash(deps, scope, manifest, metadataMode);
+        execution.inputsHash = _scopeInputsHash(deps, scope, manifest, metadataMode, components);
         ctx.finalityRecordHash =
             _finalityRecordHash(deps, scope, ctx.coreFactsHash, ctx.componentsHash, manifest);
         if (ctx.finalityRecordHash != expectedFinalityRecordHash) {
@@ -258,16 +257,11 @@ library StreamFinalityPreparation {
         Dependencies memory deps,
         StreamFinalityScope memory scope,
         StreamFinalityManifestRef calldata manifest,
-        uint8 metadataMode
+        uint8 metadataMode,
+        StreamFinalityComponentExpectation[] calldata components
     ) private view returns (bytes32) {
-        bytes memory raw = _requiredRead(
-            deps,
-            address(deps.metadataReads),
-            abi.encodeCall(
-                IStreamFinalityScopeEvidence.requireFinalityScopeInputs,
-                (scope, manifest.contentHash)
-            ),
-            384
+        bytes memory raw = StreamFinalityPreparedScopeReads.read(
+            address(deps.metadataReads), scope, manifest.contentHash, components, deps.readGas
         );
         (StreamFinalityScopeInputs memory inputs, bytes32 schema, bytes32 canonicalization) =
             abi.decode(raw, (StreamFinalityScopeInputs, bytes32, bytes32));
@@ -446,28 +440,7 @@ library StreamFinalityPreparation {
         bytes memory callData,
         uint256 expectedLength
     ) private view returns (bool readable, uint256 actualLength, bytes memory result) {
-        result = new bytes(expectedLength);
-        uint256 availableGas = gasleft();
-        uint256 forwardedGas = deps.readGas;
-        if (
-            forwardedGas > type(uint256).max / 64
-                || availableGas
-                    <= forwardedGas + (forwardedGas + 62) / 63 + FINALITY_STRICT_PARENT_GAS_RESERVE
-        ) {
-            return (false, 0, result);
-        }
-        assembly ("memory-safe") {
-            readable := staticcall(
-                forwardedGas,
-                target,
-                add(callData, 0x20),
-                mload(callData),
-                add(result, 0x20),
-                expectedLength
-            )
-            actualLength := returndatasize()
-            if iszero(eq(actualLength, expectedLength)) { readable := 0 }
-        }
+        return StreamFinalityBoundedReads.tryRead(target, callData, expectedLength, deps.readGas);
     }
 
     function _adapterResultWord(Dependencies memory deps, bytes memory result, uint256 index)

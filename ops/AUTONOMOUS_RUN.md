@@ -14,13 +14,41 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Guardian head restoration `1457a33b`, reference publication `47678da2`, guardian appeals `8b7b5822`; current-route optimization, complete provider/archive joins and assembly active. Immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | Reviewed guardian directive correction `144f33e6`, first estate recovery `5700804a`, successor guardians `c9281b67`; native provider focused27 both modes accepted, actual producer/seal assembly active. Immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
 | Last updated | `2026-09-13 UTC` |
 
 ## Active work
+
+The current reviewed artist integration adds first estate recovery `5700804a`
+and successor-authored guardian history `c9281b67`, following the directive gate
+correction `144f33e6`. The initial profile has five distinct actual outcomes across
+retained four-plus-one IR captures; the successor extension passes five cases in
+one IR run. Original activation, capability masks, identity class, full retained
+veto standing and atomic owner/Archive retry are preserved. Broader closed or
+accelerated estate histories, supersession and maximum capacity remain open.
+
+The [native finality provider](../docs/integrations/native-finality-provider.md)
+passes 27 focused cases in both compiler modes, including 256 fuzz inputs and
+actual two-owner Safe access checks. Its source derivation uses explicit typed
+producer boundaries; matching compiler artifacts received independent review.
+It derives ten original inputs, joins the full inventory and snapshot dependency graphs, validates all
+canonical component state fields, and provides a Registry-only prepared path after
+strict current-state validation. Its metadata component uses local selected records
+and seals without provider/discovery recursion. Actual WORK/RIGHTS seals are being
+implemented in parallel because the previous selectors could still advance their
+heads. Neither a Core freeze nor a nonzero evidence hash substitutes for these locks.
+
+The latest remote checks at `c385c1a2` passed Museum tooling on both platforms,
+TypeScript and the Windows wrapper. The same existing constructor, frozen packet,
+static provenance and release-artifact issues failed; independent comparison found
+no new failure class. Those results do not accept this newer local integration.
+Full provider/producer assembly, manifest parity, complete Safe ceremony and gas
+capacity remain pending; there is no new full-v1 candidate or deployment.
+
+### Previous 13 September checkpoint
 
 Guardian head restoration `1457a33b` and restricted root-authorized guardian
 appeals `8b7b5822` are integrated. Restoration re-elects the highest admissible

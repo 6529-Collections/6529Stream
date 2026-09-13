@@ -36,6 +36,21 @@ The integrator owns the combined inventory; each builder supplies its domain's
 rows and executable evidence. Final acceptance requires no unclassified or
 uncovered supported ABI functions, rather than a sample of wallet workflows.
 
+## Native provider and estate increments
+
+The native provider's independently reviewed 27-case cohort passes both compiler
+modes. A real two-owner Safe 1.4.1 calls `collectionMetadataMode` successfully and
+is rejected from `requirePreparedFinalityScopeInputs`, which accepts only the
+original Registry after its complete live-state checks. The failed direct Safe
+attempt preserves its nonce. This proves those two named paths; complete provider
+getter/manifest access, full Registry preparation and all-version/nesting coverage
+remain outstanding. Input-source tests use explicit typed producer boundaries.
+
+First estate recovery has five distinct actual outcomes in retained four-plus-one
+IR captures; successor-authored guardian recovery has five cases in one IR run.
+Both include actual Safe calls and owner/Archive failure/retry assertions. Broad
+estate histories and the complete selector matrix remain required.
+
 ## Current route increment
 
 The fixed discovery cohort exercises both `requireCurrentRoutes` projections and

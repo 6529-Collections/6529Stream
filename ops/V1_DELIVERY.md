@@ -22,6 +22,34 @@ and evidence instead of deriving completion from test or interface counts.
 
 ## Latest integration: 13 September
 
+The current reviewed artist integration adds first estate recovery `5700804a`
+and successor-authored guardian history `c9281b67`, following the directive gate
+correction `144f33e6`. The initial profile has five distinct actual outcomes across
+retained four-plus-one IR captures; the successor extension passes five cases in
+one IR run. Original activation, capability masks, identity class, full retained
+veto standing and atomic owner/Archive retry are preserved. Broader closed or
+accelerated estate histories, supersession and maximum capacity remain open.
+
+The [native finality provider](../docs/integrations/native-finality-provider.md)
+passes 27 focused cases in both compiler modes, including 256 fuzz inputs and
+actual two-owner Safe access checks. Its source derivation uses explicit typed
+producer boundaries; matching compiler artifacts received independent review.
+It derives ten original inputs, joins the full inventory and snapshot dependency graphs, validates all
+canonical component state fields, and provides a Registry-only prepared path after
+strict current-state validation. Its metadata component uses local selected records
+and seals without provider/discovery recursion. Actual WORK/RIGHTS seals are being
+implemented in parallel because the previous selectors could still advance their
+heads. Neither a Core freeze nor a nonzero evidence hash substitutes for these locks.
+
+The latest remote checks at `c385c1a2` passed Museum tooling on both platforms,
+TypeScript and the Windows wrapper. The same existing constructor, frozen packet,
+static provenance and release-artifact issues failed; independent comparison found
+no new failure class. Those results do not accept this newer local integration.
+Full provider/producer assembly, manifest parity, complete Safe ceremony and gas
+capacity remain pending; there is no new full-v1 candidate or deployment.
+
+### Previous 13 September checkpoint
+
 Guardian head restoration `1457a33b` and restricted root-authorized guardian
 appeals `8b7b5822` are integrated. Restoration re-elects the highest admissible
 retained guardian record from complete indexed history and preserves the restored

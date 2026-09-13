@@ -5,6 +5,13 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Added estate-authority recovery and authenticated successor guardian histories,
+  retaining original capabilities, veto standing and atomic Archive retries.
+- Added the developing native collection finality provider, exact source and
+  archive joins, local selected-record facts and Registry-only prepared inputs.
+- Kept finality read caps as upper bounds with exact return validation and
+  tested actual Safe public reads and protocol-only access restrictions.
+
 - Added current-head guardian restoration and restricted root-authorized appeals,
   preserving original transition evidence, directives and retained veto rights.
 - Added native original reference-render publication, complete retained runtime
