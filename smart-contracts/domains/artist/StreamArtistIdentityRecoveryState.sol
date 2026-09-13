@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveryHistoricalPredecessor as HistoricalPredecessor
+} from "./StreamArtistRecoveryHistoricalPredecessor.sol";
+import {
     StreamArtistRecoveryPredecessor as Predecessor
 } from "./StreamArtistRecoveryPredecessor.sol";
 import { StreamArtistGuardianHistory as GuardianHistory } from "./StreamArtistGuardianHistory.sol";
@@ -39,7 +42,7 @@ import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 
-/// @notice Living recovery for initial authority or a first rotation whose uncontested window completed.
+/// @notice Living recovery from initial authority or authenticated ordinary-rotation history.
 /// @dev Owner calls this only after pinned governance/signature observations and commits both receipts once.
 library StreamArtistIdentityRecoveryState {
     struct State {
@@ -110,6 +113,7 @@ library StreamArtistIdentityRecoveryState {
                 || s.latest[p.artistId] != bytes32(0)
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         bytes32 predecessor;
+        bool historicalPredecessor;
         if (rotations.latestExecution[p.artistId] == bytes32(0)) {
             if (
                 rotations.latestTransition[p.artistId] != bytes32(0)
@@ -119,9 +123,18 @@ library StreamArtistIdentityRecoveryState {
                 revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
             }
         } else {
-            predecessor = Predecessor.firstRotation(
-                rotations, o.environment, cause.facts, principal.authorityAddress
-            );
+            R.RotationRecord storage previous =
+                rotations.rotations[rotations.latestExecution[p.artistId]];
+            historicalPredecessor = previous.terms.expectedPreviousTransitionRecordHash != 0
+                || (previous.transition.contestedAt != 0
+                    && previous.transition.contestedAt < previous.transition.postWindowEndsAt);
+            predecessor = historicalPredecessor
+                ? HistoricalPredecessor.rotation(
+                    rotations, resolutions, o.environment, cause.facts, principal.authorityAddress
+                )
+                : Predecessor.firstRotation(
+                    rotations, o.environment, cause.facts, principal.authorityAddress
+                );
         }
         if (identity.activeIdentity[p.newAddress] != bytes32(0)) {
             revert T.AddressAlreadyRegistered(p.newAddress);
@@ -184,7 +197,9 @@ library StreamArtistIdentityRecoveryState {
         if (predecessor != bytes32(0)) {
             c.oldValueHash = keccak256(
                 abi.encode(
-                    keccak256("6529STREAM_ARTIST_RECOVERY_FIRST_ROTATION_CONTEXT_V1"),
+                    historicalPredecessor
+                        ? keccak256("6529STREAM_ARTIST_RECOVERY_HISTORICAL_ROTATION_CONTEXT_V1")
+                        : keccak256("6529STREAM_ARTIST_RECOVERY_FIRST_ROTATION_CONTEXT_V1"),
                     c.oldValueHash,
                     predecessor
                 )

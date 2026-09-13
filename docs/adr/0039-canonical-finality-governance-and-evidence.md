@@ -1071,6 +1071,64 @@ boundaries; a typed scheduled-action fixture is not a combined real Executor
 and Artist deployment. Complete default-profile and deployment-capacity evidence
 remain separate from the focused IR implementation evidence.
 
+## Later ordinary rotations and resolved original windows
+
+The historical-rotation profile extends living, empty-supersession recovery to
+later admitted ordinary rotations and to an original executed rotation whose
+within-window contest was resolved by an actual earlier dismissal. It retains
+the no-prior-identity-recovery gate. The current latest transition must still be
+the actual latest ordinary execution; an unresolved later stage or vetoed head
+is not treated as the vested incumbent.
+
+The owner authenticates the current original RotationRecord, permanent hash,
+executed transition, incumbent and old-address retirement. A nonzero previous
+transition reference must identify an actual stored ordinary rotation of the
+same artist. An executed predecessor must have vested the current rotation's
+old address; a vetoed predecessor must retain that old address without having
+executed. These are immediate owner-local joins over an admitted chain, not an
+unbounded replay of every historical transition. The current original execution
+may precede its contest deadline when its retained guardian approval threshold
+was satisfied, exactly as ordinary rotation execution permits.
+
+An early-contested executed window requires the exact permanent abandoned
+Closure, its original Dismissal.Record and that record's original saved Cause.
+The owner recomputes both hashes and joins artist, incumbent, original executed
+transition, ACTIVE/class1 pre-contest authority, first contest time and stored
+window. The original cause must precede that window's end; the original
+dismissal must precede or coincide with the new cause. The closure continues to
+name its first dismissal when later independent dismissals advance the current
+resolution pointer. Current cause/latest-resolution equality remains a separate
+existing admission check. A nonzero closure or today's timestamp alone supplies
+no resolution evidence.
+
+Resolution releases the operative window according to the existing dismissal
+rules. It never clears the original contestedAt or makes the abandoned cohort
+eligible. Every admitted guardian in the complete indexed prefix retains staged
+recovery veto, including an abandoned provisional set. The selected operative
+set alone controls the new post-vesting minimum and singular saved standing.
+Neither an ordinary class1 nor class2 dismissal supplies appeal authority,
+changes a guardian's lifetime veto, or adjudicates a recovery approval.
+
+The added configuration tag is
+`keccak256("6529STREAM_ARTIST_RECOVERY_HISTORICAL_ROTATION_PROFILE_V1")`.
+Only the new historical branch wraps the scheduled old-value hash under
+`6529STREAM_ARTIST_RECOVERY_HISTORICAL_ROTATION_CONTEXT_V1`; initial and previously
+supported first-rotation context preimages retain their existing domains and
+contents. Public operation34/35 and Association tuples, permanent semantic and
+signature hashes, owner storage, original acceptance replay, one owner revision
+and two ordered recovery receipts remain unchanged. Archive failure rolls the
+entire transition back.
+
+This increment does not finish appeal, estate or prior-op35 histories, nonempty
+supersession and operative-selection rewinds, a later phase3 latest head, exact
+approval-target adjudication, or all-history post-recovery contest standing.
+Those remain required. In particular, disqualifying a pre-transition guardian
+requires the separately authenticated appeal authority, hostile-guardian
+evidence and directive constraints in AA-GUARD7; ordinary dismissal is no proxy.
+The focused actual Artist/Safe/Archive tests retain typed Core/governance
+boundaries and do not establish the combined deployed system, a default-profile
+build or an aggregate transaction gas limit.
+
 ## Acceptance and remaining work
 
 Required tests include an actual threshold-Safe/Executor class-2 path, direct

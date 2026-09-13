@@ -135,3 +135,45 @@ This is an empty-supersession first-rotation profile. It does not implement late
 rotation/appeal/estate histories, earlier adjudicated exclusions, nonempty
 supersession or all-history post-recovery contest standing. Counted/indexed fresh
 deployments remain required; an unindexed legacy history cannot be asserted.
+
+## Historical ordinary-rotation extension
+
+The additional `6529STREAM_ARTIST_RECOVERY_HISTORICAL_ROTATION_PROFILE_V1`
+configuration tag admits later ordinary rotations and actual prior-dismissal
+resolution of an executed in-window contest. The initial branch and the
+previously supported first completed-rotation branch retain their old context
+preimages. No public tuple or storage root changes.
+
+The new predecessor hashes `abi.encode(
+keccak256("6529STREAM_ARTIST_RECOVERY_HISTORICAL_ROTATION_FACTS_V1"),
+fullCurrentOriginalRotationRecord, currentOldAddressRetirement,
+previousRecordHash, resolutionHash)`. Here `previousRecordHash` is zero for no
+previous transition, otherwise `keccak256(abi.encode(fullPreviousRotationRecord))`.
+The previous record must be an actual same-artist ordinary record that either
+vested the current old address or was vetoed without changing that address.
+The helper trusts the fixed owner's original admission invariants; it does not
+walk every predecessor or equate a vetoed new address with an incumbent.
+
+For an originally uncontested completed window, `resolutionHash` is zero. For
+an early-contested window it is `keccak256(abi.encode(originalClosure,
+originalDismissalRecord, originalCause))`, after validating the full original
+record/cause hashes, exact transition/artist/incumbent and chronology. The first
+closure's dismissal need not be today's latest dismissal. The current cause
+still binds today's actual latest resolution through the unchanged owner
+admission. The original contestedAt and abandoned guardian records remain
+permanent; they never mature through this read.
+
+Only the new historical branch then wraps its preceding old-value hash and
+this predecessor under `6529STREAM_ARTIST_RECOVERY_HISTORICAL_ROTATION_CONTEXT_V1`.
+All inputs exist before scheduling. The future preparation revision, action ID
+and association remain outside that context, avoiding a scheduling cycle.
+The saved history prefix supplies all registered guardian veto membership;
+operative selection supplies only the new window and singular standing tuple.
+Guardian-threshold execution before an ordinary rotation's contest deadline is
+valid original history and retains its actual stored approvals/timing.
+
+This remains living class1, empty supersession, no earlier identity recovery
+and no later unresolved phase3 latest head. Dismissal is an ordinary typed
+resolution, not appeal authority or supersession. Estate, prior recovery,
+nonempty supersession/selection rewinds, appeal-tier disqualification and
+complete post-recovery historical contest standing remain implementation work.
