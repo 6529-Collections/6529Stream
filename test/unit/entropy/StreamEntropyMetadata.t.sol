@@ -956,6 +956,46 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase, OfficialSafeFixt
         require(entropy.pendingRequestCount() == 0, "retry cannot reactivate randomness");
     }
 
+    function testActualCoreMintLocksPolicyBeforeSeedThenFinalRenderingPreservesIt() public {
+        (bool frozen, bytes32 policy,,,) = entropy.entropyPolicyFrozen(1);
+        require(!frozen && policy != 0, "configured policy still mutable before mint");
+        uint256 id = _mint();
+        (bool locked, bytes32 lockedPolicy,,,) = entropy.entropyPolicyFrozen(1);
+        require(locked && lockedPolicy == policy, "actual Core callback locks same policy");
+        require(core.coordinatorAtMint(id) == address(entropy));
+        require(entropy.tokenEntropyStatus(id) == StreamEntropyStatus.REGISTERED);
+        (, uint256 requestId) = entropy.requestEntropy(id);
+        require(provider.fulfill(requestId, bytes32(uint256(65))) == 0);
+        (, bytes32 finalPolicy,,,) = entropy.entropyPolicyFrozen(1);
+        require(finalPolicy == policy, "fulfilled output does not change policy");
+        _assertState(id, "final");
+        require(bytes(core.tokenURI(id)).length != 0, "actual current Core serving");
+    }
+
+    function testActualCoreRetainsDifferentOriginalPoliciesAcrossCoordinatorReplacement() public {
+        uint256 first = _mint();
+        (, bytes32 originalPolicy,,,) = entropy.entropyPolicyFrozen(1);
+        StreamEntropyCoordinator next = new StreamEntropyCoordinator(StreamEntropyCoordinator.DeploymentConfig(
+            address(core), address(this), address(roleRegistry), EntropyTimeTestConfigs.parameters(),
+            MANIFEST, "ipfs://next-policy", MANIFEST
+        ));
+        MockStreamEntropyProvider nextProvider = new MockStreamEntropyProvider(address(next));
+        next.configureCollection(1, address(nextProvider), keccak256("distinct policy salt"), true, 10);
+        next.configureCollectionRevealPolicy(1, 0, keccak256("ROLE_ENTROPY_REVEAL_OWNER"), 10, 0);
+        _install(ENTROPY, address(next), type(IStreamEntropyCoordinator).interfaceId);
+        uint256 second = _mint();
+        require(core.coordinatorAtMint(first) == address(entropy));
+        require(core.coordinatorAtMint(second) == address(next));
+        (bool frozen, bytes32 nextPolicy,,,) = next.entropyPolicyFrozen(1);
+        (, bytes32 oldPolicy,,,) = entropy.entropyPolicyFrozen(1);
+        require(frozen && nextPolicy != 0 && nextPolicy != originalPolicy && oldPolicy == originalPolicy);
+        (, uint256 requestId) = entropy.requestEntropy(first);
+        require(provider.fulfill(requestId, bytes32(uint256(66))) == 0);
+        _assertState(first, "final");
+        require(entropy.tokenEntropyStatus(second) == StreamEntropyStatus.NONE);
+        require(next.tokenEntropyStatus(second) == StreamEntropyStatus.REGISTERED);
+    }
+
     function _mint() private returns (uint256 id) {
         (id,) = core.mintFromManager(
             1,

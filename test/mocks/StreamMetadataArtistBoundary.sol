@@ -4,9 +4,25 @@ pragma solidity ^0.8.19;
 import "../../smart-contracts/interfaces/stream/artist/IStreamArtistAttribution.sol";
 import "../../smart-contracts/interfaces/stream/artist/IStreamArtistContentRatification.sol";
 import "../../smart-contracts/interfaces/stream/artist/IStreamArtistMintConsent.sol";
+import "../../smart-contracts/interfaces/stream/artist/IStreamArtistAttributionState.sol";
+import "../../smart-contracts/interfaces/stream/artist/IStreamArtistFinalityBinding.sol";
+import "../../smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
 import {
     StreamArtistContentTypes
 } from "../../smart-contracts/interfaces/stream/artist/StreamArtistContentTypes.sol";
+
+/// @dev Explicit absence-only original Finality for metadata-domain tests, never executed finality.
+contract MetadataUnfinalizedOriginalBoundary {
+    address public immutable coreReads;
+
+    constructor(address core_) { coreReads = core_; }
+
+    function finalityComponentCount(uint256) external pure returns (uint256) { return 0; }
+
+    function finalityComponentCountForScope(StreamFinalityScope calldata)
+        external pure returns (uint256)
+    { return 0; }
+}
 
 /// @dev Metadata-domain boundary: supplies explicit attribution, ratification and content authorization.
 ///      Every mint-consent operation rejects; this fixture cannot prove artist eligibility.
@@ -14,10 +30,14 @@ contract StreamMetadataArtistBoundary is
     IStreamArtistAttribution,
     IStreamArtistContentRatification,
     IStreamArtistMintConsent,
+    IStreamArtistAttributionState,
+    IStreamArtistFinalityBinding,
     IERC165
 {
     address public immutable override(IStreamArtistAttribution, IStreamArtistMintConsent) core;
     address public immutable mintManager;
+    address public immutable override finalityRegistry;
+    bytes32 public immutable override finalityRegistryCodeHash;
     address private immutable fixtureOwner;
     IStreamCollectionArtistRegistry.Attribution private record;
     bytes32 private ratifiedContent;
@@ -31,6 +51,8 @@ contract StreamMetadataArtistBoundary is
         core = core_;
         mintManager = manager_;
         fixtureOwner = msg.sender;
+        finalityRegistry = address(new MetadataUnfinalizedOriginalBoundary(core_));
+        finalityRegistryCodeHash = finalityRegistry.codehash;
         record = IStreamCollectionArtistRegistry.Attribution({
             nominatedArtist: artist_,
             artist: artist_,
@@ -45,11 +67,20 @@ contract StreamMetadataArtistBoundary is
     function supportsInterface(bytes4 id) external pure returns (bool) {
         return id == type(IStreamArtistAttribution).interfaceId
             || id == type(IStreamArtistContentRatification).interfaceId
-            || id == type(IStreamArtistMintConsent).interfaceId || id == type(IERC165).interfaceId;
+            || id == type(IStreamArtistMintConsent).interfaceId
+            || id == type(IStreamArtistAttributionState).interfaceId
+            || id == type(IStreamArtistFinalityBinding).interfaceId || id == type(IERC165).interfaceId;
     }
 
     function acceptedArtist(uint256 collectionId) external view returns (address) {
         return collectionId == 1 ? record.artist : address(0);
+    }
+
+    function collectionArtistState(uint256 collectionId)
+        external view returns (uint8, uint64, bytes32, uint8, bytes32)
+    {
+        if (collectionId != 1) return (0, 0, 0, 0, 0);
+        return (2, record.nominationRevision, keccak256("metadata fixture artist"), 1, record.nominationHash);
     }
 
     function attribution(uint256 collectionId)

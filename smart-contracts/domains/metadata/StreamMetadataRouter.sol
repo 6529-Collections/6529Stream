@@ -755,10 +755,11 @@ contract StreamMetadataRouter is
             _collections[facts.collectionId].configured
         );
         bytes memory artist = _artistJSON(facts.collectionId);
-        return
-            StreamMetadataTokenRenderer.renderForFinality(
-                asURI, abi.encode(token, metadata, artist)
-            );
+        // Local typed values already have their exact ABI shape. The independently selected
+        // finality path still uses renderForFinality to validate its serialized input.
+        return asURI
+            ? StreamMetadataTokenRenderer.renderURI(token, metadata, artist)
+            : StreamMetadataTokenRenderer.render(token, metadata, artist);
     }
 
     function _tokenFacts(uint256 tokenId, bool allowBurned)
