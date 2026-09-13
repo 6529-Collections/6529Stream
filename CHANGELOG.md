@@ -7,13 +7,17 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added complete steward/recovery-response JSON profiles and atomic typed
+  owner steward designations using the original direct/relayed owner record
+  authorization, exact registered definitions and durable per-author history.
+  Recovery-response counting and action-bound notice execution remain open.
 - Added authenticated current WORK selection with curator grants or explicit
   adoption of an artist's predecessor-bound publication, complete typed meaning,
   original provenance and retained history. Full provider/deployment composition
   remains open.
 - Added current-owner dossier records with retained payloads, direct and relayed
   Safe/EOA calls, unordered replay protection and custody history. Typed recovery
-  notices, responses and steward interpretation remain separate implementation work.
+  notices and responses remain separate implementation work.
 - Added bounded schema facts and original collection-record receipts, preserving
   existing interfaces and storage. Maximum supported registration and record
   shapes now fit the existing dependency cap for these readers and record ingress.

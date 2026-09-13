@@ -33,6 +33,7 @@ deployment evidence.
 | Adopt a verified root with artist consent and governed publisher authority | [Content-root publication](content-root-publication.md) |
 | Publish full-byte collection records and recover attributed history | [Developing metadata record host](metadata-records.md) |
 | Append institutional records as the current NFT owner | [Owner records](owner-records.md) |
+| Encode complete steward designations and recovery responses | [Owner notice JSON](owner-notice-json.md) |
 | Read complete evidence without copying long registration URIs | [Bounded record reads](bounded-record-reads.md) |
 | Publish an artist or curatorial description under one record type | [Work-description authority](work-description-authority.md) |
 | Select an authenticated current WORK description | [Work-record selection](work-record-selection.md) |
