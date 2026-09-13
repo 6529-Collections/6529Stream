@@ -197,7 +197,8 @@ contract StreamArtistOnboardingCoordinator is
                 uint16(54),
                 uint16(58),
                 uint16(65534),
-                keccak256("6529STREAM_ARTIST_RECOVERY_PREPARATION_PROFILE_V1")
+                keccak256("6529STREAM_ARTIST_RECOVERY_PREPARATION_PROFILE_V1"),
+                keccak256("6529STREAM_ARTIST_RECOVERY_GUARDIAN_HISTORY_PROFILE_V1")
             )
         );
         reads = StreamArtistOnboardingReadDeployment.deployReader(suite);

@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistGuardianHistoryTypes as GH
+} from "../../interfaces/stream/artist/StreamArtistGuardianHistoryTypes.sol";
+import {
     IStreamArtistRecoveryActionOwner
 } from "../../interfaces/stream/artist/IStreamArtistRecoveryAction.sol";
 import {
@@ -354,6 +357,18 @@ contract StreamArtistIdentityAuthority is
         uint64 contestedAt,
         bytes32 contestRecordHash
     );
+
+    function guardianHistoryState(bytes32 artistId, uint64 index, address actor, bytes32 actionId)
+        external
+        view
+        returns (GH.Head memory, GH.Entry memory, GH.Snapshot memory, uint64)
+    {
+        _returnResolution(
+            StreamArtistRecoveryOwnerReads.history(
+                _identityRecovery, artistId, index, actor, actionId
+            )
+        );
+    }
 
     function recoveryExecutorBinding() external view returns (address, bytes32) {
         return IStreamArtistRecoveryActionOwner(identityRecoveryExtension).recoveryExecutorBinding();

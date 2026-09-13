@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistGuardianHistory as GuardianHistory } from "./StreamArtistGuardianHistory.sol";
+import {
+    StreamArtistGuardianHistoryTypes as GH
+} from "../../interfaces/stream/artist/StreamArtistGuardianHistoryTypes.sol";
 
 import {
     StreamArtistRecoveryActionTypes as A
@@ -46,6 +50,7 @@ library StreamArtistIdentityRecoveryState {
         mapping(bytes32 => A.Veto) vetoes;
         mapping(bytes32 => bytes32) actionExecutions;
         mapping(bytes32 => bytes32) recoveryGuardians;
+        GuardianHistory.State guardianHistory;
     }
 
     struct Input {
@@ -148,6 +153,18 @@ library StreamArtistIdentityRecoveryState {
                     c.oldValueHash,
                     guardian,
                     s.guardianRecordsSeen[p.artistId]
+                )
+            );
+        }
+        if (guardian.recordHash != bytes32(0)) {
+            GH.Head memory history = GuardianHistory.requireComplete(
+                s.guardianHistory, p.artistId, s.guardianRecordsSeen[p.artistId]
+            );
+            c.oldValueHash = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_RECOVERY_GUARDIAN_HISTORY_CONTEXT_V1"),
+                    c.oldValueHash,
+                    history
                 )
             );
         }
@@ -362,7 +379,14 @@ library StreamArtistIdentityRecoveryState {
         s.actions[w.actionId] = a;
         s.pendingAction[a.artistId] = w.actionId;
         m.action = keccak256(abi.encode(A.PREPARE_OPERATION, a, previous));
-        m.state = keccak256(abi.encode(a, s.pendingAction[a.artistId]));
+        GH.Snapshot memory history = GuardianHistory.freeze(
+            s.guardianHistory,
+            w.actionId,
+            associationHash,
+            a.artistId,
+            s.guardianRecordsSeen[a.artistId]
+        );
+        m.state = keccak256(abi.encode(a, s.pendingAction[a.artistId], history));
         m.replay = _consume(
             replay,
             i.owner,
@@ -391,14 +415,21 @@ library StreamArtistIdentityRecoveryState {
                 || s.actionExecutions[expectedAction] != bytes32(0) || block.timestamp == 0
                 || block.timestamp > type(uint64).max
         ) revert A.InvalidRecoveryAction(expectedAction);
-        bool member;
-        for (uint256 n; n < a.guardian.terms.guardians.length; ++n) {
-            if (a.guardian.terms.guardians[n] == c.actor) member = true;
+        if (!GuardianHistory.member(
+                s.guardianHistory, expectedAction, a.associationHash, artistId, c.actor
+            )) {
+            revert A.InvalidRecoveryGuardian(c.actor);
         }
-        if (!member || c.actor == address(0)) revert A.InvalidRecoveryGuardian(c.actor);
         s.vetoes[expectedAction] = A.Veto(c.actor, reason, uint64(block.timestamp));
         m.action = keccak256(abi.encode(artistId, expectedAction, c.actor, reason));
-        m.state = keccak256(abi.encode(a.associationHash, s.vetoes[expectedAction]));
+        m.state = keccak256(
+            abi.encode(
+                a.associationHash,
+                s.vetoes[expectedAction],
+                s.guardianHistory.snapshots[expectedAction],
+                s.guardianHistory.firstMembership[artistId][c.actor]
+            )
+        );
         m.replay = _consume(
             replay,
             o,
@@ -421,9 +452,10 @@ library StreamArtistIdentityRecoveryState {
             if (count != 0) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
             return g;
         }
+        GuardianHistory.requireComplete(s.guardianHistory, artistId, count);
         g = r.guardians[head];
         if (
-            count != 1 || g.recordHash != head || g.terms.artistId != artistId
+            count == 0 || g.recordHash != head || g.terms.artistId != artistId
                 || g.authorityClass != 1 || g.signer != incumbent
                 || g.provisional.transitionRecordHash != bytes32(0)
                 || g.provisional.windowEndsAt != 0 || g.terms.guardians.length > 8
@@ -456,6 +488,17 @@ library StreamArtistIdentityRecoveryState {
                     != keccak256(abi.encode(rotations.guardians[guardian]))
                 || s.actionExecutions[i.governance.actionId] != bytes32(0)
         ) revert A.InvalidRecoveryAction(i.governance.actionId);
+        GH.Head memory history = GuardianHistory.requireComplete(
+            s.guardianHistory, a.artistId, s.guardianRecordsSeen[a.artistId]
+        );
+        GH.Snapshot storage snapshot = s.guardianHistory.snapshots[i.governance.actionId];
+        if (
+            snapshot.artistId != a.artistId || snapshot.associationHash != a.associationHash
+                || snapshot.count != history.count
+                || snapshot.historyCommitment != history.commitment
+        ) {
+            revert A.InvalidRecoveryAction(i.governance.actionId);
+        }
         if (s.vetoes[i.governance.actionId].vetoer != address(0)) {
             revert A.RecoveryActionVetoed(i.governance.actionId);
         }

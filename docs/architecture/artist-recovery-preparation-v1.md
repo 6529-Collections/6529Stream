@@ -65,3 +65,39 @@ separate association commits the owner revision and frozen guardian identity.
 Count1 can include an empty first set; such a set supplies no eligible local
 guardian. Fresh counted deployments are required: this profile does not infer
 historical admission counts for an older deployment.
+
+## Indexed-history extension
+
+The additional configuration tag
+`keccak256("6529STREAM_ARTIST_RECOVERY_GUARDIAN_HISTORY_PROFILE_V1")` admits
+multiple original guardian-set records in the same initial-living/no-transition
+profile. `StreamArtistGuardianHistoryTypes` defines the exact Head, Entry and
+Snapshot widths/order. The original Association tuple is unchanged.
+
+Each operation28 history commitment hashes ten ABI words in this order:
+`keccak256("6529STREAM_ARTIST_GUARDIAN_ADMISSION_HISTORY_V1")`, chain ID,
+registry, actual Identity owner, artist ID, one-based admission index, successful
+operation28 owner revision, unchanged permanent guardian record hash,
+`keccak256(abi.encode(fullGuardianRecord))`, and previous history commitment.
+The owner retains both index-to-record and record-to-entry mappings. The first
+membership index is per artist and address and is written only once.
+
+The guarded context wraps its preceding guarded old-value hash and complete
+Head under `keccak256("6529STREAM_ARTIST_RECOVERY_GUARDIAN_HISTORY_CONTEXT_V1")`.
+Only prior immutable admission revisions enter that head. Registration cannot
+change the history/context by creating its own owner revision.
+
+The action-local Snapshot contains artist ID, complete count, history commitment
+and association hash. Preparation's next-state hash and Archive payload include
+this snapshot; veto's next-state hash includes the same snapshot and the actor's
+first membership index. The historical count/root remain immutable per action.
+A new member cannot join an older prefix. Runtime source admission supplies the
+policy under which every record in this initial prefix has veto standing; the
+standalone history library is not an authority or adjudication verifier.
+
+`guardianHistoryState(artistId,index,actor,actionId)` returns Head, the indexed
+Entry, the action Snapshot and actor's first index. Index0/action0 request absent
+entry/snapshot, and a known snapshot from another artist rejects. Positive
+admission count without complete indexed history rejects. The read bundle does
+not replace the existing singular transition-standing tuple or grant union
+standing to post-recovery contests.

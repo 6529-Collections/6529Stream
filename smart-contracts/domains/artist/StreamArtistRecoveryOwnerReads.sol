@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistGuardianHistory as GuardianHistory } from "./StreamArtistGuardianHistory.sol";
+import {
+    StreamArtistGuardianHistoryTypes as GH
+} from "../../interfaces/stream/artist/StreamArtistGuardianHistoryTypes.sol";
 import {
     StreamArtistIdentityRecoveryState as RecoveryState
 } from "./StreamArtistIdentityRecoveryState.sol";
@@ -17,6 +21,28 @@ import {
 
 /// @notice Fixed Identity wrappers authenticate the storage supplying these encoded reads.
 library StreamArtistRecoveryOwnerReads {
+    function history(
+        RecoveryState.State storage s,
+        bytes32 artistId,
+        uint64 index,
+        address actor,
+        bytes32 actionId
+    ) public view returns (bytes memory) {
+        GH.Head memory head = GuardianHistory.requireComplete(
+            s.guardianHistory, artistId, s.guardianRecordsSeen[artistId]
+        );
+        GH.Snapshot storage snapshot = s.guardianHistory.snapshots[actionId];
+        if (snapshot.associationHash != bytes32(0) && snapshot.artistId != artistId) {
+            revert GH.InvalidGuardianHistorySnapshot(actionId);
+        }
+        return abi.encode(
+            head,
+            s.guardianHistory.entries[s.guardianHistory.records[artistId][index]],
+            snapshot,
+            s.guardianHistory.firstMembership[artistId][actor]
+        );
+    }
+
     function record(RecoveryState.State storage s, bytes32 hash)
         public
         view

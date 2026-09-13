@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamArtistGuardianHistory
+} from "../../../smart-contracts/interfaces/stream/artist/IStreamArtistGuardianHistory.sol";
+import {
+    StreamArtistGuardianHistoryTypes as GH
+} from "../../../smart-contracts/interfaces/stream/artist/StreamArtistGuardianHistoryTypes.sol";
 
 import {
     ArtistOnboardingFixture,
@@ -532,11 +538,162 @@ contract StreamArtistGuardianRecoveryActualTest is ArtistOnboardingFixture {
         _governedInitialContest();
         IdentityRecovery.Request memory p = _terms();
         T.Authorization memory a = _acceptance(p);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IdentityRecovery.UnsupportedIdentityRecoveryProfile.selector, artistId
+        IdentityRecovery.Context memory context = ingress.identityRecoveryContext(p, a);
+        require(context.oldValueHash != 0, "complete two-record initial history now supported");
+        (GH.Head memory history, GH.Entry memory entry,, uint64 firstIndex) = IStreamArtistGuardianHistory(
+                suite.owners[2]
+            ).guardianHistoryState(artistId, 2, address(artist), 0);
+        require(
+            history.count == 2 && history.commitment == entry.commitment
+                && entry.recordHash == second && entry.index == 2 && firstIndex == 1,
+            "actual original and unselected records form complete indexed history"
+        );
+    }
+
+    function _historySnapshot(
+        bytes32 action,
+        bytes32 association,
+        uint64 count,
+        address member,
+        uint64 first
+    ) private view returns (GH.Snapshot memory snapshot) {
+        (GH.Head memory head,, GH.Snapshot memory captured, uint64 index) = IStreamArtistGuardianHistory(
+                suite.owners[2]
+            ).guardianHistoryState(artistId, 0, member, action);
+        require(
+            head.count == count && captured.count == count
+                && head.commitment == captured.historyCommitment
+                && captured.associationHash == association && captured.artistId == artistId
+                && index == first,
+            "actual complete immutable action prefix"
+        );
+        return captured;
+    }
+
+    function _replaceGuardianWithEmpty(uint256 firstNonce, bool lowerNonceMember)
+        private
+        returns (bytes32 original, bytes32 selected)
+    {
+        _sizes();
+        _delegateSetup();
+        _newRotationSafe(36009);
+        address[] memory members = new address[](1);
+        members[0] = lowerNonceMember ? address(artist) : address(delegateSafe);
+        original = _guardianRecord(members, 1, 10 days, firstNonce);
+        if (lowerNonceMember) {
+            members[0] = address(delegateSafe);
+            original = _guardianRecord(members, 1, 20 days, 1);
+        }
+        selected = _guardianRecord(new address[](0), 0, 0, firstNonce + 1);
+        (,,, bytes32 current) = ingress.guardianSet(artistId);
+        require(current == selected && original != selected, "new selected empty set");
+        _governedInitialContest();
+    }
+
+    function testActualOldSelectedGuardianRetainsVetoAfterEmptyReplacement() public {
+        (bytes32 original, bytes32 selected) = _replaceGuardianWithEmpty(9, false);
+        IdentityRecovery.Request memory p = _terms();
+        T.Authorization memory a = _acceptance(p);
+        GovernanceCall[] memory calls = _schedule(keccak256("old selected historical veto"), p, a);
+        bytes32 roots = _roots();
+        restoreBlock = block.number;
+        vm.roll(uint256(type(uint64).max) + 1);
+        vm.expectRevert();
+        ingress.registerIdentityRecoveryAction(currentId, calls, p, a);
+        require(_roots() == roots, "historical preparation Archive rollback");
+        (,, GH.Snapshot memory empty,) = IStreamArtistGuardianHistory(suite.owners[2])
+            .guardianHistoryState(artistId, 0, address(delegateSafe), currentId);
+        require(empty.associationHash == 0, "failed preparation has no history snapshot");
+        vm.roll(restoreBlock);
+        bytes32 association = ingress.registerIdentityRecoveryAction(currentId, calls, p, a);
+        GH.Snapshot memory before_ =
+            _historySnapshot(currentId, association, 2, address(delegateSafe), 1);
+        (A.Association memory saved,,,) = _read();
+        require(
+            saved.guardian.recordHash == selected && saved.guardian.terms.guardians.length == 0,
+            "standing cannot come from selected empty record"
+        );
+        (, GH.Entry memory first,,) = IStreamArtistGuardianHistory(suite.owners[2])
+            .guardianHistoryState(artistId, 1, address(delegateSafe), currentId);
+        require(
+            first.recordHash == original && first.index == 1, "actual historical member provenance"
+        );
+        vm.warp(uint256(scheduled.expiresAfter) + 1);
+        this.vetoByGuardian(keccak256("old guardian full staged veto"));
+        (, A.Veto memory veto,,) = _read();
+        require(
+            veto.vetoer == address(delegateSafe),
+            "old selected member vetoes while still SCHEDULED after expiry"
+        );
+        require(
+            keccak256(abi.encode(before_))
+                == keccak256(
+                    abi.encode(
+                        _historySnapshot(currentId, association, 2, address(delegateSafe), 1)
+                    )
+                ),
+            "veto does not replace saved history"
+        );
+    }
+
+    function testActualUnselectedGuardianVetoThenFreshRecoveryKeepsSelectedWindow() public {
+        (bytes32 unselected, bytes32 selected) = _replaceGuardianWithEmpty(9, true);
+        IdentityRecovery.Request memory p = _terms();
+        T.Authorization memory a = _acceptance(p);
+        GovernanceCall[] memory calls = _schedule(keccak256("unselected guardian veto"), p, a);
+        bytes32 association = ingress.registerIdentityRecoveryAction(currentId, calls, p, a);
+        _historySnapshot(currentId, association, 3, address(delegateSafe), 2);
+        (, GH.Entry memory entry,,) = IStreamArtistGuardianHistory(suite.owners[2])
+            .guardianHistoryState(artistId, 2, address(delegateSafe), currentId);
+        require(
+            entry.recordHash == unselected && ingress.guardianSetRecord(unselected).nonce == 1,
+            "lower nonce never selected but admitted"
+        );
+        vm.warp(scheduled.notBefore);
+        this.vetoByGuardian(keccak256("unselected record veto"));
+        bytes32 oldId = currentId;
+        GovernanceAction memory old = scheduled;
+        scheduled.status = GovernanceActionStatus.EXECUTED;
+        _publish();
+        bytes32 roots = _roots();
+        vm.expectRevert(abi.encodeWithSelector(A.RecoveryActionVetoed.selector, currentId));
+        this.executeRegistered(p, a);
+        _inactive();
+        require(
+            roots == _roots() && ingress.latestIdentityRecovery(artistId) == 0,
+            "historical veto blocks real recovery"
+        );
+        avm.mockCall(
+            manager.governanceAuthority(),
+            abi.encodeCall(IStreamGovernanceActionFacts.governanceActionFacts, (oldId)),
+            abi.encode(
+                IStreamGovernanceActionFacts.ActionFacts(
+                    GovernanceActionStatus.CANCELLED,
+                    2,
+                    old.callHash,
+                    old.notBefore,
+                    old.expiresAfter
+                )
             )
         );
-        ingress.identityRecoveryContext(p, a);
+        calls = _schedule(keccak256("fresh action after historical veto"), p, a);
+        bytes32 nextAssociation = ingress.registerIdentityRecoveryAction(currentId, calls, p, a);
+        _historySnapshot(currentId, nextAssociation, 3, address(delegateSafe), 2);
+        vm.warp(scheduled.notBefore);
+        scheduled.status = GovernanceActionStatus.EXECUTED;
+        _publish();
+        bytes32 record = this.executeRegistered(p, a);
+        IdentityRecovery.Record memory recovered = ingress.identityRecoveryRecord(record);
+        require(
+            record != 0 && recovered.postContestSeconds == 7 days,
+            "operative empty set uses global window, not every historical latency"
+        );
+        (, bytes32 saved,) =
+            IStreamArtistIdentityRecoveryOwner(suite.owners[2]).recoveryTransitionStanding(record);
+        require(saved == selected, "common standing preserves singular selected snapshot");
+        (, A.Veto memory permanent,,) = ingress.identityRecoveryActionState(artistId, oldId);
+        require(permanent.vetoer == address(delegateSafe), "earlier veto remains permanent");
+        _historySnapshot(oldId, association, 3, address(delegateSafe), 2);
+        _sizes();
     }
 }

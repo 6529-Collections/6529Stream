@@ -977,6 +977,53 @@ supersession and exact approval-target adjudication remain required. Typed actio
 observations in Artist tests and separate real Executor reader tests do not by
 themselves prove one combined authority deployment or maximum batch gas capacity.
 
+## Complete initial guardian history for recovery veto
+
+The next incremental profile widens the preceding count1 rule to every admitted
+guardian-set record of an initial living authority with no prior transition and
+an empty supersession list. The one-set evidence remains its own predecessor.
+This widening implements the AA-GUARD7 veto union for that bounded initial
+profile: a lower-nonce record that never became selected and a formerly selected
+record replaced by an empty set both retain their guardians' recovery-veto
+standing. It does not infer eligibility from a caller-supplied partial list.
+
+Every successful operation28 now stores a one-based Identity-owned admission
+index and a chained history commitment. The entry binds the actual successful
+owner revision, original permanent record hash and full retained GuardianRecord
+hash. Record indices follow admission, not signedAt or author nonce. Indexed
+records include empty sets, and each member's first index is permanently kept
+per artist. These writes enter the same operation28 next-state commitment,
+original semantic append and final Archive rollback. They do not create a new
+semantic record or alter the permanent guardian hash. The indexed count must
+match the existing actual admission counter; a positive count with missing
+history fails closed. Earlier deployments cannot import an asserted prefix.
+
+The already-admitted complete history head enters the guarded context before
+scheduling. Its historical admission revision is immutable; the future
+preparation revision, action ID, association hash and preparation time never
+enter that context. Preparation freezes the same count/root in a separate
+owner-local action snapshot linked to the unchanged Association.contextHash and
+association hash. Owner mutation and Archive payload both bind that snapshot.
+Execution rechecks the exact committed prefix against the complete current head.
+The new configuration additionally binds
+`keccak256("6529STREAM_ARTIST_RECOVERY_GUARDIAN_HISTORY_PROFILE_V1")`.
+
+Operation34 admits a direct actor only when its per-artist first membership index
+is nonzero and no greater than the frozen count. A default-zero index grants no
+standing. No history-wide scan or new arbitrary record-count cap is introduced.
+The owner exposes indexed entries and the complete head through the additive
+`guardianHistoryState` read bundle; the old Association and operation34/35 ABI
+stay unchanged. The existing staged timing, local permanent veto, terminal
+replacement, independent governance checks and original acceptance rules remain.
+
+AA-GUARD10 still uses the operative set's minimum for the recovery post-vesting
+window. The history union does not take the maximum of every old set's latency.
+The existing common transition-standing tuple still captures that one operative
+set; this increment does not claim the union supplies post-recovery identity
+contest standing. Complete prior-transition/appeal eligibility, posthumous
+recovery, nonempty supersession and exact approval-target adjudication remain
+required, as does one combined actual Artist/governance deployment.
+
 ## Acceptance and remaining work
 
 Required tests include an actual threshold-Safe/Executor class-2 path, direct

@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamArtistGuardianHistory
+} from "../../interfaces/stream/artist/IStreamArtistGuardianHistory.sol";
+import {
+    StreamArtistGuardianHistoryTypes as GH
+} from "../../interfaces/stream/artist/StreamArtistGuardianHistoryTypes.sol";
 
 import { StreamArtistRecoveryActionReads as Reads } from "./StreamArtistRecoveryActionReads.sol";
 import {
@@ -67,13 +73,21 @@ library StreamArtistRecoveryActionOperations {
                 || veto.vetoer != address(0) || executed != bytes32(0)
                 || saved.action.actionId != actionId
         ) revert T.InvalidRecord();
+        (GH.Head memory head,, GH.Snapshot memory history,) = IStreamArtistGuardianHistory(
+                address(owner)
+            ).guardianHistoryState(p.artistId, 0, address(0), actionId);
+        if (
+            history.associationHash != association || history.artistId != p.artistId
+                || history.count != count || head.count != count
+                || history.historyCommitment != head.commitment
+        ) revert T.InvalidRecord();
         _archive(
             x,
             actor,
             A.PREPARE_OPERATION,
             association,
             before_,
-            abi.encode(p, acceptance, context, saved, count)
+            abi.encode(p, acceptance, context, saved, count, history)
         );
     }
 
