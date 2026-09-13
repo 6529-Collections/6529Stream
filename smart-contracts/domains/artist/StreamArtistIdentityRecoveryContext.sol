@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveryEstateGuardians as EstateGuardians
+} from "./StreamArtistRecoveryEstateGuardians.sol";
+import {
     StreamArtistGuardianAppealTypes as Appeal
 } from "../../interfaces/stream/artist/StreamArtistGuardianAppealTypes.sol";
 import { StreamArtistGuardianAppealReads } from "./StreamArtistGuardianAppealReads.sol";
@@ -257,7 +260,16 @@ library StreamArtistIdentityRecoveryContext {
         c.causeHash = cause.causeHash;
         c.incumbent = principal.authorityAddress;
         c.postContestSeconds = StreamArtistRotationState.rotationSeconds(rotations);
-        R.GuardianRecord memory guardian = _guardian(s, rotations, o, p.artistId, c.incumbent);
+        bytes32 activation = estate.authorityActivation[p.artistId];
+        R.GuardianRecord memory guardian = EstateGuardians.guardian(
+            s.guardianHistory,
+            rotations,
+            o.environment,
+            p.artistId,
+            s.guardianRecordsSeen[p.artistId],
+            s.vestingHistory.snapshots[activation],
+            estate.transitions[activation].postWindowEndsAt
+        );
         if (guardian.terms.minContestSeconds > c.postContestSeconds) {
             c.postContestSeconds = guardian.terms.minContestSeconds;
         }

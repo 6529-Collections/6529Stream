@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistRecoveryEstateGuardians as EstateGuardians
+} from "./StreamArtistRecoveryEstateGuardians.sol";
+import {
     StreamArtistIdentityRecoveryState as RecoveryState
 } from "./StreamArtistIdentityRecoveryState.sol";
 import { StreamArtistSuccessionState } from "./StreamArtistSuccessionState.sol";
@@ -231,8 +234,21 @@ library StreamArtistIdentityRecoveryMutation {
         RecoveryState.PrepareInput memory i,
         Recovery.Context memory c
     ) public returns (StreamArtistIdentityState.Mutation memory m, bytes32 associationHash) {
-        R.GuardianRecord memory guardian =
-            _guardian(s, rotations, i.owner, i.request.artistId, c.incumbent);
+        R.GuardianRecord memory guardian;
+        if (i.request.vestedAuthorityClass == 3) {
+            bytes32 activation = estate.authorityActivation[i.request.artistId];
+            guardian = EstateGuardians.guardian(
+                s.guardianHistory,
+                rotations,
+                i.owner.environment,
+                i.request.artistId,
+                s.guardianRecordsSeen[i.request.artistId],
+                s.vestingHistory.snapshots[activation],
+                estate.transitions[activation].postWindowEndsAt
+            );
+        } else {
+            guardian = _guardian(s, rotations, i.owner, i.request.artistId, c.incumbent);
+        }
         A.Witness memory w = i.witness;
         _requireAppealWitness(
             s, rotations, i.owner, i.request, w.proposer, w.roleMutationHash, w.roleRevision

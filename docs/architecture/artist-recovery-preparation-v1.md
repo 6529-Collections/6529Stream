@@ -536,3 +536,58 @@ General estate histories, accelerated/closed windows, successor-authored guardia
 history, nonempty estate supersession and appeals, later recoveries, dormancy and
 steward branches remain open. No maximum history/list, aggregate gas or complete
 system deployment claim follows from these focused cases.
+
+## Estate successor guardian admissions
+
+The successor-guardian profile extends the preceding first-estate profile to
+guardian records actually admitted by the original estate successor. The original
+nonaccelerated operation-40 activation, exact current class-3 compromise cause,
+empty closure, unchanged designation/directives/capability mask, no earlier
+vesting or recovery, and empty supersession list remain required. This extension
+does not authorize a new guardian publication or reconstruct missing history.
+
+The saved vesting guardian head is an authenticated prefix of the current complete
+append-only history. A nonempty prefix must match its exact terminal index, full
+guardian record/data hash, successful owner revision and history commitment; its
+admission revision precedes the operation-40 revision. An empty saved prefix must
+have zero count, commitment and last-admission revision, while the original
+vesting itself remains a nonzero authenticated record. Missing or incomplete
+legacy history fails closed. This is a fresh-deployment profile with no backfill.
+
+The operative selection retains the normal maximum eligible nonce rule. A living
+class-1 record must belong to the saved pre-vesting prefix and have the canonical
+empty provisional association. A class-3 record must be beyond that prefix in
+both admission index and successful owner revision, and its signer must be the
+original operation-40 successor. Its immutable association must be empty or name
+that exact estate activation and original post-window end. The normal eligibility
+rule still applies: an original-window record can mature at exact expiry, while a
+strictly earlier contest cannot become eligible merely through elapsed time.
+Author-supplied timestamps and nonce order do not establish the vesting cutoff.
+
+Original operation-28 admission supplies the historical capability and signature
+authorization. Additive maintenance requires CAP_GUARDIAN_SET (256); removing a
+captured original guardian additionally requires CAP_GUARDIAN_DISPLACE (2048).
+Recovery adds no present-day capability gate to keep an already admitted record
+valid. The unchanged zero-mask admission rule remains enforced.
+
+Context and owner preparation use the same estate guardian reader. They commit
+the complete current history and exact selected record before registration;
+execution rejects changes to that basis. Every admitted member in the frozen
+unsuperseded prefix, including an unselected lower-nonce successor record, retains
+the action-local veto. Original operation-40 data, its smaller guardian snapshot,
+and the designation's original successor remain unchanged. New operation-35
+vesting captures the extended history and chains to the original estate
+commitment. Saved recovery standing names the selected class-3 record without a
+fresh current-head lookup; the singular post-recovery contest-standing interface
+is not broadened into a complete historical-member union.
+
+Focused cases cover SET-only successor records admitted inside and at the end of
+the original window, exact-expiry maturation, complete-history preparation, a
+lower-nonce successor-only Safe veto, zero-mask additive rejection, and an
+identical-action late-Archive failure/retry. Retained first-estate and initial
+living-recovery cases cover the prior branches. The original typed Core, action
+facts and archival-to-Artist Executor role-phase fixture limitations remain;
+these cases do not establish a combined actual governance deployment. General
+estate histories, accelerated or resolved windows, later recoveries, nonempty
+estate supersession/appeals, other record families, and maximum-history or
+whole-transaction capacity remain separate requirements.

@@ -1311,6 +1311,42 @@ remain required work. The [preparation guide](../architecture/artist-recovery-pr
 details the exact consumer and fixture boundaries. Existing permanent hashes,
 57 operations plus adopted 58, auxiliary 65534 and all 37 genesis roles are unchanged.
 
+## Estate successor guardian history extension
+
+The first-estate recovery profile additionally admits actual guardian records
+authored by the original operation-40 estate successor. Authenticate the saved
+vesting head as a prefix of the complete current owner-maintained history: exact
+terminal entry/index/full record/revision/commitment for a nonempty prefix, or a
+canonical all-zero empty prefix inside a nonzero original vesting snapshot. No
+legacy backfill or timestamp/nonce inference is permitted.
+
+A selected class-1 record remains inside the pre-vesting prefix. A selected
+class-3 record must have a strictly later successful owner revision and admission
+index and the exact original successor signer. Its original association must be
+empty or identify the same operation-40 transition and saved window; ordinary
+eligibility controls maturity, including exact expiry and permanent rejection
+after an in-window contest. Current original activation/cause/closure/plan and
+capability-mask checks remain intact. The prior operation-28 admission, including
+SET 256 and any required DISPLACE 2048 permission, authenticates historical
+publication; this recovery read does not grant or replay it.
+
+Both context and owner preparation bind the same selected record and complete
+current prefix, and execution rejects a changed basis. Empty supersession retains
+every prefix member's staged-recovery veto, including lower-nonce successor sets.
+Original estate records and original vesting remain permanent; operation-35
+vesting appends the extended prefix under the unchanged one-revision/two-receipt
+Archive boundary. The recovered principal stays class 3 with its original saved
+capabilities. Existing standing interfaces retain their separate scope.
+
+This is still the first nonaccelerated, unclosed estate activation, no earlier
+recovery, unchanged original authority plan and empty-supersession profile. It
+does not complete arbitrary estate histories, earlier resolved windows, later
+recoveries, estate supersession/appeal or maximum capacity. The
+[preparation guide](../architecture/artist-recovery-preparation-v1.md#estate-successor-guardian-admissions)
+details the original association, fixture and dependency limits. Permanent
+semantic hashes, the canonical 57 operations plus adopted 58, auxiliary 65534 and
+37 genesis roles are unchanged.
+
 ## Acceptance and remaining work
 
 Required tests include an actual threshold-Safe/Executor class-2 path, direct

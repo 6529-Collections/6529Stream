@@ -12,7 +12,9 @@ import {
 import {
     StreamArtistIdentityResolutionState as Resolution
 } from "./StreamArtistIdentityResolutionState.sol";
-import { StreamArtistGuardianHistory as History } from "./StreamArtistGuardianHistory.sol";
+import {
+    StreamArtistRecoveryEstateGuardians as EstateGuardians
+} from "./StreamArtistRecoveryEstateGuardians.sol";
 import { StreamArtistHashes } from "./StreamArtistHashes.sol";
 import { StreamArtistRotationState } from "./StreamArtistRotationState.sol";
 import { StreamArtistSuccessionState } from "./StreamArtistSuccessionState.sol";
@@ -122,20 +124,24 @@ library StreamArtistRecoveryEstatePredecessor {
         if (keccak256(abi.encode(resolutions.closures[head])) != keccak256(abi.encode(empty))) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         }
-        f.guardians = History.requireComplete(
-            recovery.guardianHistory, p.artistId, recovery.guardianRecordsSeen[p.artistId]
-        );
         if (
             recovery.vestingHistory.latest[p.artistId] != head || f.vesting.artistId != p.artistId
                 || f.vesting.transitionRecordHash != head || f.vesting.operationId != 40
                 || f.vesting.authorityClass != 3 || f.vesting.oldAddress != f.request.incumbent
                 || f.vesting.newAddress != cause.facts.incumbent
                 || f.vesting.executedAt != f.execution.executedAt || f.vesting.ownerRevision == 0
-                || f.vesting.ownerRevision <= f.guardians.ownerRevision
+                || f.vesting.ownerRevision <= f.vesting.guardians.ownerRevision
                 || f.vesting.previousTransitionRecordHash != 0 || f.vesting.previousCommitment != 0
                 || f.vesting.commitment == 0 || f.vesting.commitment != _vestingHash(e, f.vesting)
-                || keccak256(abi.encode(f.guardians)) != keccak256(abi.encode(f.vesting.guardians))
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
+        f.guardians = EstateGuardians.prefix(
+            recovery.guardianHistory,
+            rotations,
+            e,
+            p.artistId,
+            recovery.guardianRecordsSeen[p.artistId],
+            f.vesting
+        );
         if (
             cause.causeHash
                 != keccak256(
