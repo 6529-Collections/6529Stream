@@ -12,7 +12,9 @@ introduced here.
 ```sh
 python -m tools.metadata.rights_profile
 python -m tools.metadata.rights_profile --check
-python -m unittest tools.metadata.test_rights_profile -v
+python -m tools.metadata.work_profile --check
+python -m tools.metadata.rights_definitions --check
+python -m unittest tools.metadata.test_rights_profile tools.metadata.test_work_profile -v
 ```
 
 Generation uses only the standard library. The tests independently compare all
@@ -22,3 +24,14 @@ exact payload identity that a generic JSON Schema engine does not establish.
 
 The [rights profile guide](../../docs/integrations/rights-json-profile.md)
 describes the wire format and the remaining authenticated-consumer work.
+
+The [work-description profile](../../docs/work-description-json-profile.md)
+covers the complete typed work description and its separately committed format
+catalog. Artist or curator authorization comes from the metadata host's
+[record authority](../../docs/integrations/work-description-authority.md).
+
+`rights_definitions` generates the Solidity constants for the exact retained
+rights schema, interpretation profile and shared JCS definition. Regenerate it
+after an intentional definition change. The [current rights selection design](../../docs/adr/0042-current-rights-record-selection.md)
+explains how the consumer checks actual registered bytes and retains selected
+history separately from current eligibility.

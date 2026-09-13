@@ -7,6 +7,13 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added explicit current rights-record selection backed by original metadata
+  receipts, exact registered definitions, existing RIGHTS-family grants and
+  immutable history. Complete provider, scope and Finality composition remain open.
+- Added the complete typed work-description JSON profile, format catalog,
+  independent canonical fixtures and pinned registered-artist identity reads.
+- Added immutable artist recovery approvals and a bounded recovery owner-evidence
+  reader. The full recovery companion and owner-notice execution remain in development.
 - Added a narrow shared artist/curator WORK_DESCRIPTION authorization path,
   preserving the original record hash, receipt provenance and family grants.
 - Added complete supported rights JSON serialization, exact recorded-byte

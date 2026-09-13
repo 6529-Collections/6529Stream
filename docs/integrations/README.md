@@ -33,7 +33,9 @@ deployment evidence.
 | Adopt a verified root with artist consent and governed publisher authority | [Content-root publication](content-root-publication.md) |
 | Publish full-byte collection records and recover attributed history | [Developing metadata record host](metadata-records.md) |
 | Publish an artist or curatorial description under one record type | [Work-description authority](work-description-authority.md) |
+| Encode the complete typed description and its format catalog | [Work-description JSON profile](../work-description-json-profile.md) |
 | Reconstruct and validate the complete supported rights JSON bytes | [Rights interpretation profile](rights-json-profile.md) |
+| Select a current rights statement and preserve its original evidence | [Rights selection design](../adr/0042-current-rights-record-selection.md) |
 | Withdraw proceeds or bid refunds | [Payments and withdrawals](withdrawals-and-credits.md) |
 | Run the complete flow locally | [Current deployment demo](../../script/current/README.md) |
 

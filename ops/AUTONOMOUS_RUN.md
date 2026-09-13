@@ -1,6 +1,6 @@
 # Stream delivery state
 
-Updated 12 September 2026. The owner authorizes autonomous completion of the
+Updated 13 September 2026. The owner authorizes autonomous completion of the
 remaining full v1 features, independent adversarial review and matching testnet
 delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
@@ -14,41 +14,43 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Rights JSON `e82c6cfb`, artist finding `48774674`, recovery prerequisite `415d3f8c` and recorded-account museum input `14c206b9` integrated. WORK authority and extracted fixture have independent focused acceptance. Full typed provider/Finality/deployment acceptance remains active. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | WORK JSON `4f31b392`, artist identity reads `601ed179`, recovery approval `ae473558` and owner-evidence reads `6aafa56f` integrated. Current rights selection passes its 17-case focused cohort in both compiler modes. Full typed provider/Finality/deployment acceptance remains active. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-09-12 UTC` |
+| Last updated | `2026-09-13 UTC` |
 
 ## Active work
 
-The rights JSON implementation is integrated as `e82c6cfb`: ten Solidity cases
-and 256 fuzz inputs pass both compiler modes, with five independent Python
-schema/canonicalization cases. Complete supported typed fields reconstruct the
-exact stored bytes, including the 8192-byte boundary. The closed semantic
-schema and separate profile are prospective registration inputs; actual
-registered definitions, saved record authority and current selection are the
-integrator's next join. See the [rights guide](../docs/integrations/rights-json-profile.md).
+Current rights selection now joins actual MetadataV1 records, full registered
+schema/profile/JCS bytes and the existing RIGHTS-family grants. Seventeen focused
+cases and 256 supersession fuzz inputs pass both compiler modes, including exact
+event/selection commitments, original publisher versus selector provenance,
+retained history, low-gas rollback/retry and threshold Safe calls. Registered
+artist references retain an immutable identity hash without imposing today's
+active status. Core/Executor and the artist graph are typed fixtures here;
+actual artist-owner, provider, broader scopes and Finality composition remain
+required. The [selection design](../docs/adr/0042-current-rights-record-selection.md)
+also distinguishes Core's stored installation status from live module eligibility.
 
-The shared [WORK_DESCRIPTION authority](../docs/integrations/work-description-authority.md)
-now allows the original artist operation-24 path and separate curator/admin
-paths under the same CURATOR record family. The exact schema, receipt classes,
-record hash and storage layout are preserved. Twenty-eight focused cases pass
-both compiler modes. Three dedicated current artist/estate/Safe cases pass on
-the integrated unavailability source, with independent source/artifact review.
-The shared artist fixture extraction preserves all 301 test bodies: 298 remain
-in the original test class and three new work-description cases are separate.
-This preserves test behavior while allowing new cases to compile independently.
-Complete WORK JSON is assigned to the museum builder; current selection and
-the actual provider remain root-owned. Core/Executor boundaries in these
-focused artist tests are explicit; this is not a full current-system run.
+Complete WORK JSON is integrated as `4f31b392`: twenty Solidity cases with two
+256-input fuzz properties pass both compiler modes, and twenty independent Python
+cases pass. The format catalog and every supported typed field are committed
+exactly. This builds on the shared [artist/curator authority](../docs/integrations/work-description-authority.md)
+in `82909797`, with 28 focused cases and three current artist/estate/Safe cases.
+The known-artist reader is integrated as `601ed179`, with ten independently
+reviewed cases in both modes. Current WORK selection/provider consumption remains
+root-owned; the museum builder now maps actual WORK descriptions to LIDO.
 
-The actual artist-unavailability finding is integrated as `48774674`, after
-recovery interface/hash prerequisite `415d3f8c`. Independent review binds the
-319-case pass result and the qualified final declaration/source bridge. The
-finding retains original governance action identity, delayed notice and current
-artist activity rules. Operation 22 and the recovery companion remain active;
-the prerequisite interface and pure hashes do not establish execution.
+Artist recovery approval operation 22 is integrated as `ae473558`, following
+the unavailability finding in `48774674`. Independent review accepts the exact
+26-name pass union: 24 retained cases and two corrected test-only cases, with
+unchanged production artifacts, original ABI/storage compatibility and all
+production runtimes within the limit. The shared configuration oracle includes
+operation 22. Approval covers its exact original scope; inherited and adjudicated
+scope paths and actual companion execution remain open. The separately integrated
+owner-evidence reader (`6aafa56f`, six focused cases in both modes) is a prerequisite;
+it does not implement the owner's action-bound 72-hour notice and objections.
 
 Museum input now includes actual recorded, account-authored semantic records:
 `fe9b5b90` adds independent anchored history, `16d68963` binds exact publication
@@ -69,7 +71,7 @@ through the existing owners/Archive and preserves historical authority rules.
 The separate Attribution stack/preimage repair is integrated as `c7447881`,
 with six focused tests and 256 inputs in old IR, new default and new IR modes.
 The existing `IdentityConsentState.policyDigest` default-stack issue remains.
-The artist builder proceeds to recovery operations 22/23 and actual execution
+The artist builder proceeds to the recovery companion and actual execution
 composition as the integrator completes typed records/provider/discovery.
 
 The current-content consumer is integrated as `60ec0ba3`: 32 focused/retained
@@ -86,7 +88,7 @@ package/projection outputs remain unchanged. The 183-test IIIF revision passes
 Windows/Linux CI at `8ad1e43d` (34713924514); LIDO202 now passes both platforms
 at `739ef458` (34715965661). Shared CI checks all eight generators and allows
 40 minutes for the measured 24-minute test cohort. The museum builder has
-delivered the bounded chain/account input above and now owns full WORK JSON.
+delivered the bounded chain/account input and full WORK JSON, and now owns WORK-to-LIDO mapping.
 
 The integrator has committed and pushed the independently reviewed content-root
 publication increment as `bf5fa1b6`:
