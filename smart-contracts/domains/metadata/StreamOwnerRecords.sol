@@ -13,6 +13,9 @@ import "./StreamOwnerRecordHash.sol";
 import "./StreamOwnerRecordReads.sol";
 import "./StreamOwnerRecordSignatures.sol";
 import "../records/StreamOwnerNoticeAdmission.sol";
+import "../records/StreamOwnerRecoveryNoticeState.sol";
+import "../records/StreamOwnerRecordBook.sol";
+import "../records/StreamOwnerRecordAuthorizations.sol";
 
 /// @notice Owner-authored permanent dossiers, independent of artwork locks and platform grants.
 /// @dev Generic records commit statements. Typed recovery notice/response interpretation is separate.
@@ -22,8 +25,13 @@ contract StreamOwnerRecords is
     ReentrancyGuard,
     IStreamOwnerRecords,
     IStreamOwnerStewardRecords,
+    IStreamOwnerRecoveryNotices,
+    IStreamFinalityRecoveryOwnerEvidence,
     IERC5267
 {
+    // Retain the original public error ABI after immutable payload reads move to Book.
+    error SSTORE2InvalidPointer(address pointer);
+
     struct Configuration {
         address core;
         address schemas;
@@ -33,14 +41,6 @@ contract StreamOwnerRecords is
         bytes32 manifestHash;
         GasParameterConfig signatureGas;
         GasParameterConfig dependencyReadGas;
-    }
-
-    struct Stored {
-        OwnerRecord record;
-        Receipt receipt;
-        address payloadPointer;
-        address signaturePointer;
-        bytes32 payloadHash;
     }
 
     address public immutable override core;
@@ -56,6 +56,8 @@ contract StreamOwnerRecords is
         0x3ca324ef8262b1ff4cb8753a082cd8780e50f754c1a323a433e0e7665a5ec9f9;
     bytes32 public constant DEPENDENCY_READ_GAS =
         keccak256("6529STREAM_GGP_METADATA_DEPENDENCY_READ_GAS");
+    bytes32 public constant RECOVERY_INTENT_READ_GAS =
+        keccak256("6529STREAM_GGP_OWNER_RECOVERY_INTENT_READ_GAS");
     bytes32 public constant STREAM_OWNER_RECORD_TYPEHASH = StreamOwnerRecordHash.RECORD_TYPEHASH;
     bytes32 public constant STREAM_OWNER_RECORD_REVOCATION_TYPEHASH =
         StreamOwnerRecordHash.REVOCATION_TYPEHASH;
@@ -63,13 +65,14 @@ contract StreamOwnerRecords is
         0x1e576f27850d12bc1ec9255ca277dbecfbc84fb3a9a34c474640dfca89811d7e;
 
     mapping(address => mapping(uint256 => bool)) private _used;
-    mapping(bytes32 => Stored) private _records;
+    mapping(bytes32 => StreamOwnerRecordBook.Stored) private _records;
     mapping(uint256 => mapping(bytes32 => bytes32[])) private _history;
     mapping(uint256 => mapping(bytes32 => bytes32)) private _chains;
     mapping(bytes32 => bytes32) private _latest;
     mapping(bytes32 => bool) private _additionalTypes;
     // Durable per-author designation; historical entries survive transfers and burns.
     mapping(uint256 => mapping(address => bytes32)) private _stewards;
+    StreamOwnerRecoveryNoticeState.State private _notices;
 
     constructor(Configuration memory c)
         StreamModuleBase(
@@ -103,6 +106,14 @@ contract StreamOwnerRecords is
         schemaRegistryCodeHash = c.schemas.codehash;
         chunkStoreCodeHash = chunkStore.codehash;
         executorCodeHash = c.executor.codehash;
+        _registerGasParameter(
+            GasParameterConfig(
+                "OWNER_RECOVERY_INTENT_READ_GAS",
+                8000000,
+                8000000,
+                FAILURE_CLASS_FAIL_CLOSED_PRECHECK
+            )
+        );
         StreamMetadataRenderer.requireValidUtf8ContentUri(
             "moduleManifestURI", c.manifestURI, 2048, false
         );
@@ -128,6 +139,8 @@ contract StreamOwnerRecords is
     {
         return id == type(IStreamOwnerRecords).interfaceId
             || id == type(IStreamOwnerStewardRecords).interfaceId
+            || id == type(IStreamOwnerRecoveryNotices).interfaceId
+            || id == type(IStreamFinalityRecoveryOwnerEvidence).interfaceId
             || id == type(IERC5267).interfaceId || id == type(IStreamGasParameterHost).interfaceId
             || super.supportsInterface(id);
     }
@@ -163,7 +176,7 @@ contract StreamOwnerRecords is
         uint256 nonce,
         uint64 deadline
     ) public view override returns (bytes32) {
-        return StreamOwnerRecordHash.record(tokenId, r, owner, nonce, deadline);
+        return StreamOwnerRecordAuthorizations.digest(tokenId, r, owner, nonce, deadline);
     }
 
     function ownerRecordRevocationDigest(address owner, uint256 nonce, uint64 deadline)
@@ -172,7 +185,7 @@ contract StreamOwnerRecords is
         override
         returns (bytes32)
     {
-        return StreamOwnerRecordHash.revocation(owner, nonce, deadline);
+        return StreamOwnerRecordAuthorizations.revocation(owner, nonce, deadline);
     }
 
     function recordOwnerRecord(uint256 tokenId, OwnerRecord calldata r)
@@ -213,26 +226,18 @@ contract StreamOwnerRecords is
         uint64 deadline,
         bytes calldata signature
     ) private returns (bytes32) {
-        _fresh(owner, nonce);
-        _deadline(deadline);
-        Receipt memory receipt;
-        receipt.owner = owner;
-        receipt.relayed = true;
-        receipt.nonce = nonce;
-        receipt.deadline = deadline;
-        receipt.authorizationDigest = ownerRecordDigest(tokenId, r, owner, nonce, deadline);
-        receipt.signatureScheme = StreamOwnerRecordSignatures.verify(
-            owner,
-            receipt.authorizationDigest,
-            signature,
-            _gasParameterValue(GGP_METADATA_ERC1271_VERIFY_GAS)
+        (Receipt memory receipt, bytes memory bundle) = StreamOwnerRecordAuthorizations.prepare(
+            _used,
+            StreamOwnerRecordAuthorizations.SignedInput(
+                tokenId,
+                r,
+                owner,
+                nonce,
+                deadline,
+                signature,
+                _gasParameterValue(GGP_METADATA_ERC1271_VERIFY_GAS)
+            )
         );
-        bytes memory bundle = abi.encode(
-            StreamOwnerRecordHash.domain(),
-            StreamOwnerRecordHash.words(tokenId, r, owner, nonce, deadline),
-            signature
-        );
-        _used[owner][nonce] = true;
         return _append(tokenId, r, receipt, bundle);
     }
 
@@ -311,137 +316,190 @@ contract StreamOwnerRecords is
         return (owner, _stewards[tokenId][owner]);
     }
 
+    function _noticeConfiguration()
+        private
+        view
+        returns (StreamOwnerRecoveryNoticeState.Configuration memory)
+    {
+        return StreamOwnerRecoveryNoticeState.Configuration(
+            StreamOwnerRecoveryActionReads.Config(
+                core,
+                coreCodeHash,
+                governanceAuthority,
+                executorCodeHash,
+                address(this),
+                _gasParameterValue(DEPENDENCY_READ_GAS),
+                _gasParameterValue(RECOVERY_INTENT_READ_GAS)
+            ),
+            chunkStore,
+            chunkStoreCodeHash
+        );
+    }
+
+    function openRecoveryNotice(
+        bytes32 actionId,
+        GovernanceCall[] calldata calls,
+        StreamFinalityRecoveryRequest calldata request,
+        StreamOwnerNoticeTypes.Designation calldata steward,
+        StreamOwnerRecoveryNoticeTypes.Publication calldata publication
+    ) external override nonReentrant {
+        uint256 tokenId = request.scope.tokenId;
+        address owner = StreamOwnerRecordReads.owner(
+            core, coreCodeHash, tokenId, _gasParameterValue(DEPENDENCY_READ_GAS)
+        );
+        bytes32 hash = _stewards[tokenId][owner];
+        StreamOwnerRecoveryNoticeState.open(
+            _notices,
+            _noticeConfiguration(),
+            StreamOwnerRecoveryNoticeState.OpeningWitness(
+                actionId,
+                calls,
+                request,
+                StreamOwnerRecoveryNoticeState.OriginalOwner(
+                    owner,
+                    hash,
+                    _records[hash].payloadHash,
+                    uint64(_history[tokenId][keccak256("RECOVERY_RESPONSE")].length)
+                ),
+                steward,
+                publication
+            )
+        );
+    }
+
+    function recordRecoveryResponse(
+        uint256 tokenId,
+        OwnerRecord calldata r,
+        StreamOwnerNoticeTypes.Response calldata response
+    ) external override nonReentrant {
+        _requireResponse(r, response);
+        bytes32 hash = _directAppend(tokenId, r);
+        StreamOwnerRecoveryNoticeState.append(_notices, hash, _records[hash].receipt, response);
+    }
+
+    function recordRecoveryResponseFor(
+        uint256 tokenId,
+        OwnerRecord calldata r,
+        address owner,
+        uint256 nonce,
+        uint64 deadline,
+        bytes calldata signature,
+        StreamOwnerNoticeTypes.Response calldata response
+    ) external override nonReentrant {
+        _requireResponse(r, response);
+        bytes32 hash = _signedAppend(tokenId, r, owner, nonce, deadline, signature);
+        StreamOwnerRecoveryNoticeState.append(_notices, hash, _records[hash].receipt, response);
+    }
+
+    function _requireResponse(
+        OwnerRecord calldata r,
+        StreamOwnerNoticeTypes.Response calldata response
+    ) private view {
+        StreamOwnerNoticeAdmission.requireResponse(
+            StreamOwnerNoticeAdmission.Configuration(
+                schemaRegistry,
+                schemaRegistryCodeHash,
+                chunkStore,
+                chunkStoreCodeHash,
+                _gasParameterValue(DEPENDENCY_READ_GAS)
+            ),
+            r,
+            response
+        );
+    }
+
+    function processRecoveryResponse(bytes32 actionId)
+        external
+        override
+        nonReentrant
+        returns (bool)
+    {
+        return StreamOwnerRecoveryNoticeState.process(_notices, _noticeConfiguration(), actionId);
+    }
+
+    function verifyRecoveryOwnerEvidence(
+        StreamFinalityScope calldata scope,
+        bytes32 actionId,
+        bytes32 manifest
+    ) external view override returns (bool, bytes32, uint64, uint64, uint32, uint32) {
+        return StreamOwnerRecoveryNoticeState.evidence(
+            _notices, _noticeConfiguration(), scope, actionId, manifest
+        );
+    }
+
+    function recoveryNotice(bytes32 actionId)
+        external
+        view
+        override
+        returns (StreamOwnerRecoveryNoticeTypes.Snapshot memory)
+    {
+        return StreamOwnerRecoveryNoticeState.snapshot(_notices, actionId);
+    }
+
+    function recoveryNoticeClaim(bytes32 actionId, uint256 index)
+        external
+        view
+        override
+        returns (address, bytes memory)
+    {
+        return StreamOwnerRecoveryNoticeState.claim(_notices, actionId, index);
+    }
+
+    function recoveryResponse(bytes32 hash)
+        external
+        view
+        override
+        returns (StreamOwnerRecoveryNoticeTypes.Response memory)
+    {
+        return StreamOwnerRecoveryNoticeState.readResponse(_notices, hash);
+    }
+
+    function recoveryResponseAt(bytes32 actionId, uint256 index)
+        external
+        view
+        override
+        returns (bytes32)
+    {
+        return StreamOwnerRecoveryNoticeState.responseAt(_notices, actionId, index);
+    }
+
+    function latestCountedRecoveryResponse(bytes32 actionId, address author)
+        external
+        view
+        override
+        returns (bytes32)
+    {
+        return StreamOwnerRecoveryNoticeState.latest(_notices, actionId, author);
+    }
+
     function _append(
         uint256 tokenId,
         OwnerRecord calldata r,
         Receipt memory receipt,
         bytes memory bundle
-    ) private returns (bytes32 hash) {
-        uint256 cap = _gasParameterValue(DEPENDENCY_READ_GAS);
-        if (receipt.owner != StreamOwnerRecordReads.owner(core, coreCodeHash, tokenId, cap)) {
-            revert OwnerRecordAuthorityRequired(receipt.owner);
-        }
-        _validate(tokenId, r);
-        StreamOwnerRecordReads.requireCode(schemaRegistry, schemaRegistryCodeHash);
-        receipt.schemaDefinitionHash = StreamOwnerRecordReads.definition(
-            schemaRegistry, r.schemaId, IStreamSchemaRegistry.DocumentKind.SCHEMA, cap
+    ) private returns (bytes32) {
+        return StreamOwnerRecordBook.append(
+            _records,
+            _history,
+            _chains,
+            _latest,
+            StreamOwnerRecordBook.Configuration(
+                core,
+                coreCodeHash,
+                schemaRegistry,
+                schemaRegistryCodeHash,
+                chunkStore,
+                chunkStoreCodeHash,
+                _gasParameterValue(DEPENDENCY_READ_GAS)
+            ),
+            StreamOwnerRecordBook.Input(
+                tokenId, r, receipt, bundle, isOwnerRecordType(r.recordType)
+            )
         );
-        receipt.canonicalizationDefinitionHash = StreamOwnerRecordReads.definition(
-            schemaRegistry,
-            r.contentHash.canonicalizationId,
-            IStreamSchemaRegistry.DocumentKind.CANONICALIZATION,
-            cap
-        );
-        receipt.tokenId = tokenId;
-        receipt.recordedAt = uint64(block.timestamp);
-        receipt.signatureBundleHash = keccak256(bundle);
-        IStreamPreservationRecords.CollectionRecord memory genericRecord =
-            IStreamPreservationRecords.CollectionRecord(
-                r.recordType,
-                r.subjectId,
-                r.contentHash,
-                r.uri,
-                r.schemaId,
-                receipt.signatureScheme,
-                IStreamPreservationRecords.HashRef(
-                    1, abi.encode(receipt.signatureBundleHash), keccak256("RAW_BYTES")
-                ),
-                r.effectiveAt
-            );
-        hash = StreamCollectionRecordHashes.recordHash(core, receipt.owner, tokenId, genericRecord);
-        if (_records[hash].receipt.owner != address(0)) revert OwnerRecordExists(hash);
-        uint256 count = _history[tokenId][r.recordType].length;
-        if (count == type(uint64).max) revert InvalidOwnerRecord();
-        receipt.recordIndex = uint64(count);
-        receipt.recordChainHash = StreamCollectionRecordHashes.nextChain(
-            tokenId, r.recordType, _chains[tokenId][r.recordType], hash, uint64(count)
-        );
-        Stored storage stored = _records[hash];
-        stored.signaturePointer = _publish(bundle);
-        if (r.payload.length != 0) stored.payloadPointer = _publish(r.payload);
-        stored.payloadHash = keccak256(r.payload);
-        stored.record.recordType = r.recordType;
-        stored.record.subjectId = r.subjectId;
-        stored.record.schemaId = r.schemaId;
-        stored.record.contentHash = r.contentHash;
-        stored.record.uri = r.uri;
-        stored.record.effectiveAt = r.effectiveAt;
-        stored.receipt = receipt;
-        _history[tokenId][r.recordType].push(hash);
-        _chains[tokenId][r.recordType] = receipt.recordChainHash;
-        _latest[keccak256(abi.encode(tokenId, r.recordType, receipt.owner))] = hash;
-        emit OwnerRecordRecorded(
-            tokenId,
-            r.recordType,
-            receipt.owner,
-            r,
-            hash,
-            receipt.recordChainHash,
-            receipt.relayed,
-            1
-        );
-    }
-
-    function _validate(uint256 tokenId, OwnerRecord calldata r) private view {
-        if (
-            !isOwnerRecordType(r.recordType) || r.subjectId != deriveOwnerSubject(tokenId)
-                || r.schemaId == 0 || r.contentHash.canonicalizationId == 0
-                || r.payload.length > MAX_RECORD_PAYLOAD_BYTES || r.effectiveAt == 0
-                || block.timestamp > type(uint64).max
-        ) revert InvalidOwnerRecord();
-        uint16 algorithm = r.contentHash.algorithm;
-        uint256 size = r.contentHash.digest.length;
-        if (algorithm == 1 || algorithm == 2 || algorithm == 3 || algorithm == 6) {
-            if (size != 32) revert InvalidOwnerRecord();
-        } else if (algorithm == 4 || algorithm == 5) {
-            if (size == 0 || size > 128) revert InvalidOwnerRecord();
-        } else {
-            revert InvalidOwnerRecord();
-        }
-        // Algorithms without an onchain implementation remain explicit opaque commitments.
-        if (r.payload.length != 0) {
-            if (algorithm == 1 && bytes32(r.contentHash.digest) != keccak256(r.payload)) {
-                revert InvalidOwnerRecord();
-            }
-            if (algorithm == 2 && bytes32(r.contentHash.digest) != sha256(r.payload)) {
-                revert InvalidOwnerRecord();
-            }
-        }
-        StreamMetadataRenderer.requireValidUtf8ContentUri("recordURI", r.uri, 2048, true);
-    }
-
-    function _publish(bytes memory payload) private returns (address pointer) {
-        StreamOwnerRecordReads.requireCode(chunkStore, chunkStoreCodeHash);
-        bytes32 hash;
-        (hash, pointer) = StreamSchemaDocumentStore(chunkStore).publishChunk(payload);
-        if (hash != keccak256(payload) || pointer.code.length != payload.length + 1) {
-            revert InvalidOwnerRecord();
-        }
-    }
-
-    function _payload(address pointer, bytes32 hash) private view returns (bytes memory payload) {
-        if (pointer == address(0)) {
-            if (hash != keccak256(bytes(""))) revert InvalidOwnerRecord();
-            return bytes("");
-        }
-        if (pointer.code.length == 0 || pointer.code.length > 8193) {
-            revert OwnerRecordDependencyChanged(pointer);
-        }
-        payload = SSTORE2.read(pointer);
-        if (keccak256(payload) != hash) revert OwnerRecordDependencyChanged(pointer);
-    }
-
-    function _fresh(address owner, uint256 nonce) private view {
-        if (owner == address(0)) revert InvalidOwnerRecordSignature(owner);
-        if (_used[owner][nonce]) revert OwnerRecordNonceUsed(owner, nonce);
-    }
-
-    function _deadline(uint64 deadline) private view {
-        if (deadline < block.timestamp) revert OwnerRecordDeadlineExpired(deadline);
     }
 
     function revokeOwnerRecordNonce(uint256 nonce) external override nonReentrant {
-        _revoke(msg.sender, nonce, false);
+        StreamOwnerRecordAuthorizations.revoke(_used, msg.sender, nonce, false);
     }
 
     function revokeOwnerRecordNonceFor(
@@ -450,21 +508,14 @@ contract StreamOwnerRecords is
         uint64 deadline,
         bytes calldata signature
     ) external override nonReentrant {
-        _fresh(owner, nonce);
-        _deadline(deadline);
-        StreamOwnerRecordSignatures.verify(
+        StreamOwnerRecordAuthorizations.revokeFor(
+            _used,
             owner,
-            ownerRecordRevocationDigest(owner, nonce, deadline),
+            nonce,
+            deadline,
             signature,
             _gasParameterValue(GGP_METADATA_ERC1271_VERIFY_GAS)
         );
-        _revoke(owner, nonce, true);
-    }
-
-    function _revoke(address owner, uint256 nonce, bool relayed) private {
-        _fresh(owner, nonce);
-        _used[owner][nonce] = true;
-        emit OwnerRecordNonceRevoked(owner, nonce, relayed, 1);
     }
 
     function isOwnerRecordNonceUsed(address owner, uint256 nonce)
@@ -482,10 +533,7 @@ contract StreamOwnerRecords is
         override
         returns (OwnerRecord memory record, Receipt memory receipt)
     {
-        Stored storage s = _known(hash);
-        record = s.record;
-        record.payload = _payload(s.payloadPointer, s.payloadHash);
-        return (record, s.receipt);
+        return StreamOwnerRecordBook.record(_records, hash);
     }
 
     function ownerRecordSignatureBundle(bytes32 hash)
@@ -494,8 +542,7 @@ contract StreamOwnerRecords is
         override
         returns (address, bytes memory)
     {
-        Stored storage s = _known(hash);
-        return (s.signaturePointer, _payload(s.signaturePointer, s.receipt.signatureBundleHash));
+        return StreamOwnerRecordBook.signature(_records, hash);
     }
 
     function recordHashAt(uint256 tokenId, bytes32 recordType, uint256 index)
@@ -523,11 +570,6 @@ contract StreamOwnerRecords is
         returns (bytes32)
     {
         return _latest[keccak256(abi.encode(tokenId, recordType, owner))];
-    }
-
-    function _known(bytes32 hash) private view returns (Stored storage stored) {
-        stored = _records[hash];
-        if (stored.receipt.owner == address(0)) revert OwnerRecordUnknown(hash);
     }
 
     function ownerRecordTypeTransition(bytes32 t)

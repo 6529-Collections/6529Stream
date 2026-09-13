@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "./StreamOwnerNoticeDefinitions.sol";
 import "./StreamWorkRecordDefinitions.sol";
 import "./StreamStewardDesignationJson.sol";
+import "./StreamRecoveryResponseJson.sol";
 import "../metadata/StreamOwnerRecordReads.sol";
 import "../metadata/StreamSchemaDocumentStore.sol";
 import "../../interfaces/stream/metadata/IStreamOwnerStewardRecords.sol";
@@ -63,9 +64,51 @@ library StreamOwnerNoticeAdmission {
         if (
             r.schemaId == StreamOwnerNoticeDefinitions.STEWARD_SCHEMA_ID
                 && r.recordType == keccak256("STEWARD_DESIGNATION")
+                || r.schemaId == StreamOwnerNoticeDefinitions.RESPONSE_SCHEMA_ID
+                && r.recordType == keccak256("RECOVERY_RESPONSE")
         ) {
             revert IStreamOwnerStewardRecords.TypedOwnerRecordRequired();
         }
+    }
+
+    function requireResponse(
+        Configuration memory c,
+        IStreamOwnerRecords.OwnerRecord memory r,
+        StreamOwnerNoticeTypes.Response memory response
+    ) public view {
+        if (
+            r.recordType != keccak256("RECOVERY_RESPONSE")
+                || r.schemaId != StreamOwnerNoticeDefinitions.RESPONSE_SCHEMA_ID
+                || r.contentHash.canonicalizationId != StreamWorkRecordDefinitions.CANON_ID
+                || response.subjectId != r.subjectId
+                || response.profileHash != StreamOwnerNoticeDefinitions.RESPONSE_PROFILE_HASH
+        ) {
+            revert IStreamOwnerStewardRecords.InvalidOwnerNoticeRecord();
+        }
+        StreamRecoveryResponseJson.requireExact(response, r.payload);
+        StreamOwnerRecordReads.requireCode(c.schemas, c.schemasCodeHash);
+        StreamOwnerRecordReads.requireCode(c.store, c.storeCodeHash);
+        _definition(
+            c,
+            StreamOwnerNoticeDefinitions.RESPONSE_SCHEMA_ID,
+            IStreamSchemaRegistry.DocumentKind.SCHEMA,
+            StreamOwnerNoticeDefinitions.RESPONSE_SCHEMA_HASH,
+            StreamOwnerNoticeDefinitions.RESPONSE_SCHEMA_BYTES
+        );
+        _definition(
+            c,
+            StreamOwnerNoticeDefinitions.RESPONSE_PROFILE_ID,
+            IStreamSchemaRegistry.DocumentKind.CATALOG,
+            StreamOwnerNoticeDefinitions.RESPONSE_PROFILE_HASH,
+            StreamOwnerNoticeDefinitions.RESPONSE_PROFILE_BYTES
+        );
+        _definition(
+            c,
+            StreamWorkRecordDefinitions.CANON_ID,
+            IStreamSchemaRegistry.DocumentKind.CANONICALIZATION,
+            StreamWorkRecordDefinitions.CANON_HASH,
+            StreamWorkRecordDefinitions.CANON_BYTES
+        );
     }
 
     function _definition(

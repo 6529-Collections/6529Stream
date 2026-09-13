@@ -291,7 +291,7 @@ contract StreamOwnerStewardRecordsTest is CollectionMetadataV1Fixture {
         require(
             dossier.supportsInterface(type(IStreamOwnerStewardRecords).interfaceId)
                 && dossier.supportsInterface(type(IStreamOwnerRecords).interfaceId)
-                && !dossier.supportsInterface(0x20279cd8) && !dossier.supportsInterface(0xffffffff),
+                && dossier.supportsInterface(0x20279cd8) && !dossier.supportsInterface(0xffffffff),
             "additive truthful capabilities"
         );
     }
