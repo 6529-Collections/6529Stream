@@ -340,4 +340,117 @@ contract StreamOwnerRecoveryNoticeCompanionTest is RecoveryCompanionBoundaryFixt
             "actual companion owns independent current lineage validation"
         );
     }
+
+    function testPreparedNoticeActualCompanionAdmissionClockAndExecution() public {
+        StreamOwnerNoticeTypes.Designation memory d;
+        StreamOwnerNoticeTypes.Reference memory runbook = StreamOwnerNoticeTypes.Reference(
+            2, keccak256("RAW_BYTES"), abi.encode(keccak256("runbook")), "ipfs://runbook"
+        );
+        StreamOwnerNoticeTypes.Reference memory notice = StreamOwnerNoticeTypes.Reference(
+            5, keccak256("RAW_BYTES"), hex"010203", "ipfs://notice"
+        );
+        bytes32 id = owner.prepareRecoveryNotice(
+            StreamOwnerPreparedNoticeTypes.Input(23, ACTION, 1, d, runbook, notice)
+        );
+        _respond("published during preparation");
+        owner.prepareRecoveryNoticeDelivery(
+            id,
+            StreamOwnerRecoveryNoticeTypes.Delivery(
+                StreamOwnerNoticeTypes.Contact(
+                    StreamOwnerNoticeTypes.ContactKind.EIP155, "", block.chainid, address(this)
+                ),
+                notice
+            )
+        );
+        cvm.cool(address(owner));
+        cvm.cool(address(core));
+        cvm.cool(address(executor));
+        cvm.cool(address(recovery));
+        cvm.cool(address(StreamOwnerRecoveryNoticeState));
+        cvm.cool(address(StreamOwnerRecoveryNoticePreparation));
+        cvm.cool(address(StreamOwnerRecoveryActionReads));
+        owner.openPreparedRecoveryNotice(id, calls, request);
+        require(
+            owner.recoveryNotice(ACTION).responseTail == 1
+                && owner.recoveryNotice(ACTION).firstResponseIndex == 1,
+            "actual final queue capture"
+        );
+        owner.processRecoveryResponse(ACTION);
+        vm.warp(END);
+        _coldOwnerCallback(1);
+        _context();
+        _coldOwnerCallback(3);
+        cvm.prank(address(executor));
+        recovery.executeFinalityRecovery(request);
+        StreamFinalityRecoveryRecord memory saved = recovery.finalityRecoveryRecord(ACTION);
+        require(
+            saved.executed
+                && saved.evidence.ownerEvidenceHash == owner.recoveryNotice(ACTION).evidenceHash
+                && saved.evidence.ownerObjectionCount == 1,
+            "actual companion accepts same immutable evidence contract"
+        );
+    }
+
+    event PreparedActualMaximumGas(uint256 used, uint256 requestBytes);
+
+    function testPreparedMaximumOriginalRequestAdmitsThroughActualCompanionWithinDedicatedCap()
+        public
+    {
+        StreamFinalityRecoveryRequest memory r = request;
+        uint256 fixedBytes = abi.encode(r).length - ((bytes(r.reasonURI).length + 31) / 32) * 32;
+        bytes memory reason = new bytes(24544 - fixedBytes);
+        for (uint256 i; i < reason.length; ++i) {
+            reason[i] = 0x61;
+        }
+        r.reasonURI = string(reason);
+        require(abi.encode(r).length == 24544, "complete maximum word-aligned original request");
+        r.recoveryManifest.contentHash =
+            recovery.stageFinalityRecoveryManifest(recovery.finalityRecoveryIntentBytes(r));
+        recovery.registerFinalityRecoveryIntent(r);
+        request = r;
+        calls[0].callDataHash =
+            keccak256(abi.encodeCall(IStreamArtworkFinalityRecovery.executeFinalityRecovery, (r)));
+        calls[0].newValueHash = recovery.finalityRecoveryNewValueHash(r);
+        _action(1);
+        StreamOwnerNoticeTypes.Designation memory d;
+        StreamOwnerNoticeTypes.Reference memory reference_ = StreamOwnerNoticeTypes.Reference(
+            2, keccak256("RAW_BYTES"), abi.encode(keccak256("publication")), "ipfs://publication"
+        );
+        bytes32 id = owner.prepareRecoveryNotice(
+            StreamOwnerPreparedNoticeTypes.Input(23, ACTION, 3, d, reference_, reference_)
+        );
+        owner.prepareRecoveryNoticeDelivery(
+            id,
+            StreamOwnerRecoveryNoticeTypes.Delivery(
+                StreamOwnerNoticeTypes.Contact(
+                    StreamOwnerNoticeTypes.ContactKind.EIP155, "", block.chainid, address(this)
+                ),
+                reference_
+            )
+        );
+        cvm.cool(address(owner));
+        cvm.cool(address(core));
+        cvm.cool(address(executor));
+        cvm.cool(address(recovery));
+        cvm.cool(address(modules));
+        cvm.cool(fixture.artistTarget());
+        cvm.cool(address(fixture.history()));
+        cvm.cool(r.replacementRoute.component);
+        cvm.cool(address(StreamOwnerRecoveryNoticeState));
+        cvm.cool(address(StreamOwnerRecoveryNoticePreparation));
+        cvm.cool(address(StreamOwnerRecoveryActionReads));
+        uint256 beforeGas = gasleft();
+        owner.openPreparedRecoveryNotice(id, calls, r);
+        uint256 used = beforeGas - gasleft();
+        emit PreparedActualMaximumGas(used, abi.encode(r).length);
+        require(
+            used < 12000000
+                && owner.recoveryNotice(ACTION).binding.requestHash == keccak256(abi.encode(r)),
+            "all exact original request bytes under dedicated admission cap"
+        );
+        vm.warp(END);
+        (bool valid,,,,,) =
+            owner.verifyRecoveryOwnerEvidence(r.scope, ACTION, r.recoveryManifest.contentHash);
+        require(valid, "maximum request does not make the lightweight owner callback recurse");
+    }
 }

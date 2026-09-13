@@ -6,9 +6,10 @@ import "../metadata/StreamOwnerRecordReads.sol";
 import "../metadata/StreamSchemaDocumentStore.sol";
 import "../metadata/StreamMetadataRenderer.sol";
 import "./StreamCollectionRecordHashes.sol";
+import "./StreamOwnerRecordAuthorizations.sol";
 
 /// @notice Original OwnerRecords append and immutable reads, using explicit existing map roots.
-/// @dev Caller retains signature verification, nonce writes and the shared reentrancy guard.
+/// @dev The host retains the shared guard; linked authorization prepares the original nonce and signature.
 library StreamOwnerRecordBook {
     struct Stored {
         IStreamOwnerRecords.OwnerRecord record;
@@ -35,6 +36,17 @@ library StreamOwnerRecordBook {
         bytes bundle;
         bool knownType;
     }
+
+    struct DirectInput {
+        uint256 tokenId;
+        IStreamOwnerRecords.OwnerRecord record;
+        bool knownType;
+    }
+
+    struct SignedInput {
+        StreamOwnerRecordAuthorizations.SignedInput authorization;
+        bool knownType;
+    }
     event OwnerRecordRecorded(
         uint256 indexed tokenId,
         bytes32 indexed recordType,
@@ -47,6 +59,65 @@ library StreamOwnerRecordBook {
     );
     bytes32 private constant TOKEN =
         0x1e576f27850d12bc1ec9255ca277dbecfbc84fb3a9a34c474640dfca89811d7e;
+
+    function isKnownType(mapping(bytes32 => bool) storage additionalTypes, bytes32 t)
+        public
+        view
+        returns (bool)
+    {
+        return t == keccak256("ACCESSION") || t == keccak256("CONDITION_REPORT")
+            || t == keccak256("EXHIBITION") || t == keccak256("LOAN")
+            || t == keccak256("DEACCESSION") || t == keccak256("CITATION")
+            || t == keccak256("VALUATION") || t == keccak256("STEWARD_DESIGNATION")
+            || t == keccak256("RECOVERY_RESPONSE") || t == keccak256("REDEMPTION_CLAIM")
+            || additionalTypes[t];
+    }
+
+    /// @dev Same direct receipt/bundle as the original host; delegatecall retains its sender.
+    function directAppend(
+        mapping(bytes32 => Stored) storage records,
+        mapping(uint256 => mapping(bytes32 => bytes32[])) storage history,
+        mapping(uint256 => mapping(bytes32 => bytes32)) storage chains,
+        mapping(bytes32 => bytes32) storage latest,
+        Configuration memory c,
+        DirectInput memory i
+    ) public returns (bytes32) {
+        IStreamOwnerRecords.Receipt memory receipt;
+        receipt.owner = msg.sender;
+        receipt.signatureScheme = keccak256("DIRECT");
+        bytes memory bundle =
+            abi.encode(receipt.signatureScheme, msg.sender, keccak256(i.record.payload));
+        return append(
+            records,
+            history,
+            chains,
+            latest,
+            c,
+            Input(i.tokenId, i.record, receipt, bundle, i.knownType)
+        );
+    }
+
+    /// @dev Original nonce preparation precedes append; any later append failure rolls it back.
+    function signedAppend(
+        mapping(address => mapping(uint256 => bool)) storage used,
+        mapping(bytes32 => Stored) storage records,
+        mapping(uint256 => mapping(bytes32 => bytes32[])) storage history,
+        mapping(uint256 => mapping(bytes32 => bytes32)) storage chains,
+        mapping(bytes32 => bytes32) storage latest,
+        Configuration memory c,
+        SignedInput memory i
+    ) public returns (bytes32) {
+        (IStreamOwnerRecords.Receipt memory receipt, bytes memory bundle) =
+            StreamOwnerRecordAuthorizations.prepare(used, i.authorization);
+        return append(
+            records,
+            history,
+            chains,
+            latest,
+            c,
+            Input(i.authorization.tokenId, i.authorization.record, receipt, bundle, i.knownType)
+        );
+    }
 
     function append(
         mapping(bytes32 => Stored) storage records,
@@ -203,6 +274,26 @@ library StreamOwnerRecordBook {
         r = s.record;
         r.payload = _payload(s.payloadPointer, s.payloadHash);
         return (r, s.receipt);
+    }
+
+    /// @dev Exact public return encoding; the fixed host forwards these bytes without recopying tuples.
+    function encodedRecord(mapping(bytes32 => Stored) storage records, bytes32 hash)
+        public
+        view
+        returns (bytes memory)
+    {
+        (IStreamOwnerRecords.OwnerRecord memory r, IStreamOwnerRecords.Receipt memory receipt) =
+            record(records, hash);
+        return abi.encode(r, receipt);
+    }
+
+    function encodedSignature(mapping(bytes32 => Stored) storage records, bytes32 hash)
+        public
+        view
+        returns (bytes memory)
+    {
+        (address pointer, bytes memory raw) = signature(records, hash);
+        return abi.encode(pointer, raw);
     }
 
     function signature(mapping(bytes32 => Stored) storage records, bytes32 hash)

@@ -26,6 +26,7 @@ contract StreamOwnerRecords is
     IStreamOwnerRecords,
     IStreamOwnerStewardRecords,
     IStreamOwnerRecoveryNotices,
+    IStreamOwnerPreparedRecoveryNotices,
     IStreamFinalityRecoveryOwnerEvidence,
     IERC5267
 {
@@ -73,6 +74,7 @@ contract StreamOwnerRecords is
     // Durable per-author designation; historical entries survive transfers and burns.
     mapping(uint256 => mapping(address => bytes32)) private _stewards;
     StreamOwnerRecoveryNoticeState.State private _notices;
+    StreamOwnerRecoveryNoticePreparation.State private _preparedNotices;
 
     constructor(Configuration memory c)
         StreamModuleBase(
@@ -140,6 +142,7 @@ contract StreamOwnerRecords is
         return id == type(IStreamOwnerRecords).interfaceId
             || id == type(IStreamOwnerStewardRecords).interfaceId
             || id == type(IStreamOwnerRecoveryNotices).interfaceId
+            || id == type(IStreamOwnerPreparedRecoveryNotices).interfaceId
             || id == type(IStreamFinalityRecoveryOwnerEvidence).interfaceId
             || id == type(IERC5267).interfaceId || id == type(IStreamGasParameterHost).interfaceId
             || super.supportsInterface(id);
@@ -161,12 +164,7 @@ contract StreamOwnerRecords is
     }
 
     function isOwnerRecordType(bytes32 t) public view override returns (bool) {
-        return t == keccak256("ACCESSION") || t == keccak256("CONDITION_REPORT")
-            || t == keccak256("EXHIBITION") || t == keccak256("LOAN")
-            || t == keccak256("DEACCESSION") || t == keccak256("CITATION")
-            || t == keccak256("VALUATION") || t == keccak256("STEWARD_DESIGNATION")
-            || t == keccak256("RECOVERY_RESPONSE") || t == keccak256("REDEMPTION_CLAIM")
-            || _additionalTypes[t];
+        return StreamOwnerRecordBook.isKnownType(_additionalTypes, t);
     }
 
     function ownerRecordDigest(
@@ -198,12 +196,14 @@ contract StreamOwnerRecords is
     }
 
     function _directAppend(uint256 tokenId, OwnerRecord calldata r) private returns (bytes32) {
-        Receipt memory receipt;
-        receipt.owner = msg.sender;
-        receipt.signatureScheme = keccak256("DIRECT");
-        // This original bundle binds even opaque external algorithms to the retained payload bytes.
-        bytes memory bundle = abi.encode(receipt.signatureScheme, msg.sender, keccak256(r.payload));
-        return _append(tokenId, r, receipt, bundle);
+        return StreamOwnerRecordBook.directAppend(
+            _records,
+            _history,
+            _chains,
+            _latest,
+            _bookConfiguration(),
+            StreamOwnerRecordBook.DirectInput(tokenId, r, isOwnerRecordType(r.recordType))
+        );
     }
 
     function recordOwnerRecordFor(
@@ -226,19 +226,20 @@ contract StreamOwnerRecords is
         uint64 deadline,
         bytes calldata signature
     ) private returns (bytes32) {
-        (Receipt memory receipt, bytes memory bundle) = StreamOwnerRecordAuthorizations.prepare(
-            _used,
-            StreamOwnerRecordAuthorizations.SignedInput(
-                tokenId,
-                r,
-                owner,
-                nonce,
-                deadline,
-                signature,
-                _gasParameterValue(GGP_METADATA_ERC1271_VERIFY_GAS)
-            )
+        StreamOwnerRecordBook.SignedInput memory input;
+        input.authorization = StreamOwnerRecordAuthorizations.SignedInput(
+            tokenId,
+            r,
+            owner,
+            nonce,
+            deadline,
+            signature,
+            _gasParameterValue(GGP_METADATA_ERC1271_VERIFY_GAS)
         );
-        return _append(tokenId, r, receipt, bundle);
+        input.knownType = isOwnerRecordType(r.recordType);
+        return StreamOwnerRecordBook.signedAppend(
+            _used, _records, _history, _chains, _latest, _bookConfiguration(), input
+        );
     }
 
     function recordStewardDesignation(
@@ -367,6 +368,90 @@ contract StreamOwnerRecords is
         );
     }
 
+    function _preparationConfiguration()
+        private
+        view
+        returns (StreamOwnerRecoveryNoticePreparation.Configuration memory)
+    {
+        return StreamOwnerRecoveryNoticePreparation.Configuration(
+            core,
+            coreCodeHash,
+            chunkStore,
+            chunkStoreCodeHash,
+            _gasParameterValue(DEPENDENCY_READ_GAS)
+        );
+    }
+
+    function prepareRecoveryNotice(StreamOwnerPreparedNoticeTypes.Input calldata input)
+        external
+        override
+        nonReentrant
+        returns (bytes32)
+    {
+        return StreamOwnerRecoveryNoticePreparation.begin(
+            _preparedNotices, _stewards, _records, _preparationConfiguration(), input
+        );
+    }
+
+    function prepareRecoveryNoticeDelivery(
+        bytes32 id,
+        StreamOwnerRecoveryNoticeTypes.Delivery calldata delivery
+    ) external override nonReentrant {
+        StreamOwnerRecoveryNoticePreparation.append(
+                _preparedNotices, _preparationConfiguration(), id, delivery
+            );
+    }
+
+    function openPreparedRecoveryNotice(
+        bytes32 id,
+        GovernanceCall[] calldata calls,
+        StreamFinalityRecoveryRequest calldata request
+    ) external override nonReentrant {
+        StreamOwnerRecoveryNoticeState.openPrepared(
+            _notices,
+            _preparedNotices,
+            _stewards,
+            _noticeConfiguration(),
+            StreamOwnerRecoveryNoticeState.PreparedOpeningWitness(
+                id,
+                calls,
+                request,
+                uint64(_history[request.scope.tokenId][keccak256("RECOVERY_RESPONSE")].length)
+            )
+        );
+    }
+
+    function recoveryNoticePreparation(bytes32 id)
+        external
+        view
+        override
+        returns (StreamOwnerPreparedNoticeTypes.Snapshot memory)
+    {
+        bytes memory encoded =
+            StreamOwnerRecoveryNoticePreparation.encodedSnapshot(_preparedNotices, id);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
+    }
+
+    function recoveryNoticePreparedClaim(bytes32 id, uint256 index)
+        external
+        view
+        override
+        returns (address pointer, bytes memory originalBytes)
+    {
+        bytes memory encoded =
+            StreamOwnerRecoveryNoticePreparation.encodedClaim(_preparedNotices, id, index);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
+    }
+
+    function recoveryNoticePreparationFor(bytes32 actionId)
+        external
+        view
+        override
+        returns (bytes32)
+    {
+        return _preparedNotices.notices[actionId];
+    }
+
     function recordRecoveryResponse(
         uint256 tokenId,
         OwnerRecord calldata r,
@@ -433,7 +518,8 @@ contract StreamOwnerRecords is
         override
         returns (StreamOwnerRecoveryNoticeTypes.Snapshot memory)
     {
-        return StreamOwnerRecoveryNoticeState.snapshot(_notices, actionId);
+        bytes memory encoded = StreamOwnerRecoveryNoticeState.encodedSnapshot(_notices, actionId);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function recoveryNoticeClaim(bytes32 actionId, uint256 index)
@@ -442,7 +528,10 @@ contract StreamOwnerRecords is
         override
         returns (address, bytes memory)
     {
-        return StreamOwnerRecoveryNoticeState.claim(_notices, actionId, index);
+        bytes memory encoded = StreamOwnerRecoveryNoticeState.encodedClaim(
+            _notices, _preparedNotices, actionId, index
+        );
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function recoveryResponse(bytes32 hash)
@@ -451,7 +540,8 @@ contract StreamOwnerRecords is
         override
         returns (StreamOwnerRecoveryNoticeTypes.Response memory)
     {
-        return StreamOwnerRecoveryNoticeState.readResponse(_notices, hash);
+        bytes memory encoded = StreamOwnerRecoveryNoticeState.encodedResponse(_notices, hash);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function recoveryResponseAt(bytes32 actionId, uint256 index)
@@ -472,29 +562,19 @@ contract StreamOwnerRecords is
         return StreamOwnerRecoveryNoticeState.latest(_notices, actionId, author);
     }
 
-    function _append(
-        uint256 tokenId,
-        OwnerRecord calldata r,
-        Receipt memory receipt,
-        bytes memory bundle
-    ) private returns (bytes32) {
-        return StreamOwnerRecordBook.append(
-            _records,
-            _history,
-            _chains,
-            _latest,
-            StreamOwnerRecordBook.Configuration(
-                core,
-                coreCodeHash,
-                schemaRegistry,
-                schemaRegistryCodeHash,
-                chunkStore,
-                chunkStoreCodeHash,
-                _gasParameterValue(DEPENDENCY_READ_GAS)
-            ),
-            StreamOwnerRecordBook.Input(
-                tokenId, r, receipt, bundle, isOwnerRecordType(r.recordType)
-            )
+    function _bookConfiguration()
+        private
+        view
+        returns (StreamOwnerRecordBook.Configuration memory)
+    {
+        return StreamOwnerRecordBook.Configuration(
+            core,
+            coreCodeHash,
+            schemaRegistry,
+            schemaRegistryCodeHash,
+            chunkStore,
+            chunkStoreCodeHash,
+            _gasParameterValue(DEPENDENCY_READ_GAS)
         );
     }
 
@@ -533,7 +613,8 @@ contract StreamOwnerRecords is
         override
         returns (OwnerRecord memory record, Receipt memory receipt)
     {
-        return StreamOwnerRecordBook.record(_records, hash);
+        bytes memory encoded = StreamOwnerRecordBook.encodedRecord(_records, hash);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function ownerRecordSignatureBundle(bytes32 hash)
@@ -542,7 +623,8 @@ contract StreamOwnerRecords is
         override
         returns (address, bytes memory)
     {
-        return StreamOwnerRecordBook.signature(_records, hash);
+        bytes memory encoded = StreamOwnerRecordBook.encodedSignature(_records, hash);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function recordHashAt(uint256 tokenId, bytes32 recordType, uint256 index)

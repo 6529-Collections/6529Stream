@@ -6,6 +6,11 @@ import "../../../smart-contracts/domains/metadata/StreamSchemaRegistry.sol";
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 import "../../helpers/OfficialSafeFixture.sol";
 
+interface OwnerNoticeSnapshotVm {
+    function snapshotState() external returns (uint256);
+    function revertToState(uint256 id) external returns (bool);
+}
+
 /// @dev Explicit custody/selected-target boundary; production Core composition is separate.
 contract OwnerNoticeCoreBoundary {
     address public recovery;
@@ -1141,6 +1146,987 @@ contract StreamOwnerRecoveryNoticesTest is CharacterizationTestBase, OfficialSaf
             "exact processed event"
         );
         require(owner.recoveryResponseAt(ID, 0) == hash, "same original queue hash");
+    }
+
+    function testValidationOnlyPublicationPreservesAllSixReferenceFamiliesAndOpaqueBytes() public {
+        OwnerNoticeSnapshotVm snap = OwnerNoticeSnapshotVm(address(vm));
+        uint256 checkpoint = snap.snapshotState();
+        for (uint16 algorithm = 1; algorithm <= 6; ++algorithm) {
+            StreamOwnerNoticeTypes.Designation memory d;
+            StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(d);
+            p.runbook = _ref(algorithm, "ipfs://runbook");
+            p.publicNotice = _ref(algorithm, "ar://public-notice");
+            p.deliveries[0].evidence = _ref(algorithm, "https://museum.example/claim");
+            owner.openRecoveryNotice(ID, calls, request, d, p);
+            (, bytes memory raw) = owner.recoveryNoticeClaim(ID, 0);
+            require(
+                keccak256(raw) == keccak256(abi.encode(p.runbook, p.publicNotice)),
+                "exact original references"
+            );
+            require(snap.revertToState(checkpoint), "independent algorithm frame");
+        }
+    }
+
+    function testValidationOnlyPublicationRejectsEveryBadReferenceShapeThenExactRetry() public {
+        for (uint256 fault; fault < 9; ++fault) {
+            StreamOwnerNoticeTypes.Designation memory d;
+            StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(d);
+            if (fault == 0) {
+                p.runbook.algorithm = 0;
+            } else if (fault == 1) {
+                p.runbook.algorithm = 7;
+            } else if (fault == 2) {
+                p.runbook.canonicalizationId = 0;
+            } else if (fault == 3) {
+                p.runbook.digest = new bytes(31);
+            } else if (fault == 4) {
+                p.runbook.algorithm = 4;
+                p.runbook.digest = new bytes(0);
+            } else if (fault == 5) {
+                p.runbook.algorithm = 5;
+                p.runbook.digest = new bytes(129);
+            } else if (fault == 6) {
+                p.runbook.uri = "";
+            } else if (fault == 7) {
+                p.runbook.uri = _url(2049);
+            } else {
+                bytes memory invalidUtf8 = hex"68747470733a2f2fff";
+                p.runbook.uri = string(invalidUtf8);
+            }
+            (bool ok,) = address(owner)
+                .call(abi.encodeCall(owner.openRecoveryNotice, (ID, calls, request, d, p)));
+            require(!ok, "invalid reference never opens");
+        }
+        _open();
+        require(
+            owner.recoveryNotice(ID).openingOwner == address(this),
+            "original healthy opening still available"
+        );
+    }
+
+    event PreparedGas(bytes32 label, uint256 gasUsed, uint256 deliveryCount);
+
+    function _begin(
+        StreamOwnerNoticeTypes.Designation memory d,
+        StreamOwnerRecoveryNoticeTypes.Publication memory p,
+        uint256 nonce
+    ) private returns (bytes32) {
+        return owner.prepareRecoveryNotice(
+            StreamOwnerPreparedNoticeTypes.Input(7, ID, nonce, d, p.runbook, p.publicNotice)
+        );
+    }
+
+    function _deliver(bytes32 id, StreamOwnerRecoveryNoticeTypes.Publication memory p) private {
+        for (uint256 i; i < p.deliveries.length; ++i) {
+            owner.prepareRecoveryNoticeDelivery(id, p.deliveries[i]);
+        }
+    }
+
+    function testPreparedPublisherFinalizerAndLegacyHashBytesAreExact() public {
+        StreamOwnerNoticeTypes.Designation memory d = _designation();
+        _steward(d);
+        StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(d);
+        uint256 checkpoint = OwnerNoticeSnapshotVm(address(vm)).snapshotState();
+        owner.openRecoveryNotice(ID, calls, request, d, p);
+        bytes memory expected = abi.encode(owner.recoveryNotice(ID));
+        require(
+            OwnerNoticeSnapshotVm(address(vm)).revertToState(checkpoint),
+            "separate original opening"
+        );
+        bytes32 id = _begin(d, p, 1);
+        _deliver(id, p);
+        vm.recordLogs();
+        vm.prank(address(0xbeef));
+        owner.openPreparedRecoveryNotice(id, calls, request);
+        require(
+            keccak256(abi.encode(owner.recoveryNotice(ID))) == keccak256(expected),
+            "original publication, attribution and evidence hash exact"
+        );
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        Vm.Log memory last = logs[logs.length - 1];
+        require(
+            last.topics[0]
+                    == keccak256(
+                        "OwnerRecoveryNoticePreparedOpening(bytes32,bytes32,address,address,uint16)"
+                    ) && last.topics[1] == id && last.topics[2] == ID
+                && last.topics[3] == bytes32(uint256(uint160(address(this))))
+                && keccak256(last.data) == keccak256(abi.encode(address(0xbeef), uint16(1))),
+            "publisher and finalizer distinct"
+        );
+        require(
+            owner.recoveryNoticePreparationFor(ID) == id
+                && owner.recoveryNoticePreparation(id).consumed,
+            "permanent original preparation link"
+        );
+        for (uint256 i; i <= p.deliveries.length; ++i) {
+            (address a, bytes memory x) = owner.recoveryNoticeClaim(ID, i);
+            (address b, bytes memory y) = owner.recoveryNoticePreparedClaim(id, i);
+            bytes memory original =
+                i == 0 ? abi.encode(p.runbook, p.publicNotice) : abi.encode(p.deliveries[i - 1]);
+            require(
+                a == b && keccak256(x) == keccak256(original)
+                    && keccak256(y) == keccak256(original),
+                "same complete canonical claim bytes"
+            );
+        }
+    }
+
+    function testPreparedNoClockUntilAtomicOpeningAndResponsesDuringPreparationCount() public {
+        _append(1, "before preparation");
+        StreamOwnerNoticeTypes.Designation memory d;
+        StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(d);
+        bytes32 id = _begin(d, p, 2);
+        require(!_valid(), "preparation creates no notice");
+        _append(0, "during preparation");
+        vm.warp(9000);
+        _deliver(id, p);
+        owner.openPreparedRecoveryNotice(id, calls, request);
+        StreamOwnerRecoveryNoticeTypes.Snapshot memory n = owner.recoveryNotice(ID);
+        require(
+            n.openedAt == 9000 && n.noticeEndsAt == 9000 + 72 hours && n.firstResponseIndex == 2
+                && n.responseTail == 2 && n.processed == 0,
+            "final opening clock and exact original-index barrier"
+        );
+        vm.warp(n.noticeEndsAt);
+        require(!_valid(), "unprocessed full tail prevents stale count");
+        owner.processRecoveryResponse(ID);
+        require(!_valid(), "every candidate must be processed");
+        owner.processRecoveryResponse(ID);
+        require(
+            _valid() && owner.recoveryNotice(ID).acknowledgements == 1
+                && owner.recoveryNotice(ID).objections == 0,
+            "latest exact action owner answer"
+        );
+    }
+
+    function testPreparedHeadAndOwnerCASWithDurableReactivation() public {
+        StreamOwnerNoticeTypes.Designation memory d = _designation();
+        bytes32 head = _steward(d);
+        StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(d);
+        bytes32 id = _begin(d, p, 3);
+        _deliver(id, p);
+        core.setOwner(7, address(0xbeef));
+        (bool ok,) = address(owner)
+            .call(abi.encodeCall(owner.openPreparedRecoveryNotice, (id, calls, request)));
+        require(
+            !ok && !owner.recoveryNoticePreparation(id).consumed,
+            "changed owner cannot use frozen recipients"
+        );
+        core.setOwner(7, address(this));
+        uint256 checkpoint = OwnerNoticeSnapshotVm(address(vm)).snapshotState();
+        d.predecessor = head;
+        d.name = "new designation";
+        _steward(d);
+        (ok,) = address(owner)
+            .call(abi.encodeCall(owner.openPreparedRecoveryNotice, (id, calls, request)));
+        require(!ok && !owner.recoveryNoticePreparation(id).consumed, "exact durable head CAS");
+        require(
+            OwnerNoticeSnapshotVm(address(vm)).revertToState(checkpoint),
+            "restore original head frame"
+        );
+        owner.openPreparedRecoveryNotice(id, calls, request);
+        require(
+            owner.recoveryNotice(ID).stewardRecordHash == head,
+            "A B A original head intentionally reactivated"
+        );
+    }
+
+    function testPreparedIncompleteWrongBatchAndClosedActionRollbackThenRetry() public {
+        StreamOwnerNoticeTypes.Designation memory d;
+        StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(d);
+        bytes32 id = _begin(d, p, 4);
+        (bool ok,) = address(owner)
+            .call(abi.encodeCall(owner.openPreparedRecoveryNotice, (id, calls, request)));
+        require(!ok, "incomplete cannot open");
+        _deliver(id, p);
+        _status(3);
+        (ok,) = address(owner)
+            .call(abi.encodeCall(owner.openPreparedRecoveryNotice, (id, calls, request)));
+        require(
+            !ok && !owner.recoveryNoticePreparation(id).consumed,
+            "cancelled action rolls consumption back"
+        );
+        _status(1);
+        GovernanceCall[] memory wrong = calls;
+        wrong[0].newValueHash = keccak256("wrong full call");
+        (ok,) = address(owner)
+            .call(abi.encodeCall(owner.openPreparedRecoveryNotice, (id, wrong, request)));
+        require(
+            !ok && owner.recoveryNoticePreparationFor(ID) == 0, "wrong calls cannot consume proof"
+        );
+        StreamFinalityRecoveryRequest memory wrongRequest = request;
+        wrongRequest.reasonURI = "ipfs://mutated";
+        (ok,) = address(owner)
+            .call(abi.encodeCall(owner.openPreparedRecoveryNotice, (id, calls, wrongRequest)));
+        require(
+            !ok && !owner.recoveryNoticePreparation(id).consumed, "original full request retained"
+        );
+        owner.openPreparedRecoveryNotice(id, calls, request);
+        require(owner.recoveryNoticePreparation(id).consumed, "identical healthy proof retry");
+    }
+
+    function testPreparedExpiryCheckedAtFinalOpeningIncludingEquality() public {
+        StreamOwnerNoticeTypes.Designation memory d;
+        StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(d);
+        bytes32 id = _begin(d, p, 5);
+        _deliver(id, p);
+        vm.warp(EXPIRY - 72 hours + 1);
+        (bool ok,) = address(owner)
+            .call(abi.encodeCall(owner.openPreparedRecoveryNotice, (id, calls, request)));
+        require(
+            !ok && !owner.recoveryNoticePreparation(id).consumed,
+            "elapsed preparation cannot steal notice window"
+        );
+        vm.warp(EXPIRY - 72 hours);
+        owner.openPreparedRecoveryNotice(id, calls, request);
+        vm.warp(EXPIRY);
+        require(_valid(), "exact expiry equality and own elapsed window");
+    }
+
+    function testPreparedPublisherOnlyAndEveryEndpointTupleFieldBound() public {
+        StreamOwnerNoticeTypes.Designation memory d = _designation();
+        _steward(d);
+        StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(d);
+        uint256 checkpoint = OwnerNoticeSnapshotVm(address(vm)).snapshotState();
+        for (uint256 fault; fault < 6; ++fault) {
+            bytes32 id = _begin(d, p, 6);
+            vm.prank(address(0xbeef));
+            (bool ok,) = address(owner)
+                .call(abi.encodeCall(owner.prepareRecoveryNoticeDelivery, (id, p.deliveries[0])));
+            require(
+                !ok && owner.recoveryNoticePreparation(id).preparedCount == 0,
+                "foreign caller cannot replace claim refs"
+            );
+            StreamOwnerRecoveryNoticeTypes.Delivery memory bad =
+                abi.decode(abi.encode(p.deliveries[0]), (StreamOwnerRecoveryNoticeTypes.Delivery));
+            if (fault == 0) bad.endpoint.account = address(0xbeef);
+            else if (fault == 1) ++bad.endpoint.chainId;
+            else if (fault == 2) bad.endpoint.uri = "https://a";
+            else if (fault == 3) bad.endpoint.kind = StreamOwnerNoticeTypes.ContactKind.HTTPS;
+            else bad = p.deliveries[1];
+            owner.prepareRecoveryNoticeDelivery(id, bad);
+            owner.prepareRecoveryNoticeDelivery(id, fault == 5 ? p.deliveries[0] : p.deliveries[1]);
+            (ok,) = address(owner)
+                .call(abi.encodeCall(owner.prepareRecoveryNoticeDelivery, (id, p.deliveries[2])));
+            require(
+                !ok && !owner.recoveryNoticePreparation(id).complete,
+                "wrong field, duplicate, or order cannot complete"
+            );
+            require(
+                OwnerNoticeSnapshotVm(address(vm)).revertToState(checkpoint),
+                "independent ordered-root fault"
+            );
+        }
+    }
+
+    function testPreparedLastClaimRetryAndCompletionIrrevocablyFreezesPlan() public {
+        StreamOwnerNoticeTypes.Designation memory d;
+        StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(d);
+        bytes32 id = _begin(d, p, 7);
+        StreamOwnerRecoveryNoticeTypes.Delivery memory bad =
+            abi.decode(abi.encode(p.deliveries[0]), (StreamOwnerRecoveryNoticeTypes.Delivery));
+        bad.endpoint.account = address(0xbeef);
+        (bool ok,) =
+            address(owner).call(abi.encodeCall(owner.prepareRecoveryNoticeDelivery, (id, bad)));
+        require(
+            !ok && owner.recoveryNoticePreparation(id).preparedCount == 0,
+            "failed final row fully rolled back"
+        );
+        _deliver(id, p);
+        bytes32 original = keccak256(abi.encode(owner.recoveryNoticePreparation(id)));
+        (ok,) = address(owner)
+            .call(abi.encodeCall(owner.prepareRecoveryNoticeDelivery, (id, p.deliveries[0])));
+        require(
+            !ok && keccak256(abi.encode(owner.recoveryNoticePreparation(id))) == original,
+            "completed count, root and refs frozen"
+        );
+        (ok,) = address(owner)
+            .call(
+                abi.encodeCall(
+                    owner.prepareRecoveryNotice,
+                    (StreamOwnerPreparedNoticeTypes.Input(7, ID, 7, d, p.runbook, p.publicNotice))
+                )
+            );
+        require(!ok, "same domain plan cannot be overwritten");
+    }
+
+    function testPreparedOriginalWitnessAndUnknownTokenAreRequired() public {
+        StreamOwnerNoticeTypes.Designation memory d = _designation();
+        _steward(d);
+        StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(d);
+        d.name = "forged original";
+        (bool ok,) = address(owner)
+            .call(
+                abi.encodeCall(
+                    owner.prepareRecoveryNotice,
+                    (StreamOwnerPreparedNoticeTypes.Input(7, ID, 8, d, p.runbook, p.publicNotice))
+                )
+            );
+        require(!ok, "full saved canonical designation witness");
+        d = _designation();
+        core.setOwner(0, address(this));
+        (ok,) = address(owner)
+            .call(
+                abi.encodeCall(
+                    owner.prepareRecoveryNotice,
+                    (StreamOwnerPreparedNoticeTypes.Input(0, ID, 8, d, p.runbook, p.publicNotice))
+                )
+            );
+        require(!ok, "token zero not invented through fixture");
+        core.setOwner(7, address(0));
+        (ok,) = address(owner)
+            .call(
+                abi.encodeCall(
+                    owner.prepareRecoveryNotice,
+                    (StreamOwnerPreparedNoticeTypes.Input(7, ID, 8, d, p.runbook, p.publicNotice))
+                )
+            );
+        require(!ok, "unknown burned token cannot prepare");
+    }
+
+    function testPreparedAllSixReferencesAndImmutableCodeIntegrity() public {
+        StreamOwnerNoticeTypes.Designation memory d;
+        StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(d);
+        for (uint16 algorithm = 1; algorithm <= 6; ++algorithm) {
+            p.runbook = _ref(algorithm, "ipfs://runbook");
+            p.publicNotice = _ref(algorithm, "ar://notice");
+            p.deliveries[0].evidence = _ref(algorithm, "https://claim.example/");
+            bytes32 id = _begin(d, p, algorithm + 100);
+            _deliver(id, p);
+            (address pointer, bytes memory raw) = owner.recoveryNoticePreparedClaim(id, 1);
+            require(
+                keccak256(raw) == keccak256(abi.encode(p.deliveries[0])),
+                "all six exact opaque references"
+            );
+            bytes memory code = pointer.code;
+            bytes memory changed = abi.encodePacked(bytes1(0x01), raw);
+            vm.etch(pointer, changed);
+            (bool ok,) = address(owner)
+                .staticcall(abi.encodeCall(owner.recoveryNoticePreparedClaim, (id, 1)));
+            require(!ok, "STOP carrier prefix required");
+            changed[0] = 0;
+            changed[changed.length - 1] = bytes1(uint8(changed[changed.length - 1]) ^ 1);
+            vm.etch(pointer, changed);
+            (ok,) = address(owner)
+                .staticcall(abi.encodeCall(owner.recoveryNoticePreparedClaim, (id, 1)));
+            require(!ok, "full original bytes hash required");
+            vm.etch(pointer, code);
+            (, raw) = owner.recoveryNoticePreparedClaim(id, 1);
+            require(
+                keccak256(raw) == keccak256(abi.encode(p.deliveries[0])), "exact original restore"
+            );
+        }
+    }
+
+    function testPreparedStoreFailureLeavesNoPartialDeliveryThenExactRetry() public {
+        StreamOwnerNoticeTypes.Designation memory d;
+        StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(d);
+        bytes32 id = _begin(d, p, 9);
+        bytes memory code = address(store).code;
+        vm.etch(address(store), hex"00");
+        (bool ok,) = address(owner)
+            .call(abi.encodeCall(owner.prepareRecoveryNoticeDelivery, (id, p.deliveries[0])));
+        require(
+            !ok && owner.recoveryNoticePreparation(id).preparedCount == 0,
+            "failed write keeps root/count unchanged"
+        );
+        vm.etch(address(store), code);
+        _deliver(id, p);
+        require(owner.recoveryNoticePreparation(id).complete, "identical healthy delivery retry");
+    }
+
+    function testPreparedEncodingReadOraclesAndOriginalErrors() public {
+        bytes32 hash = _append(1, "retained exact tuple");
+        (
+            IStreamOwnerRecords.OwnerRecord memory record,
+            IStreamOwnerRecords.Receipt memory receipt
+        ) = owner.ownerRecord(hash);
+        (bool ok, bytes memory raw) =
+            address(owner).staticcall(abi.encodeCall(owner.ownerRecord, (hash)));
+        require(
+            ok && keccak256(raw) == keccak256(abi.encode(record, receipt))
+                && receipt.owner == address(this) && receipt.recordIndex == 0
+                && record.contentHash.algorithm == 1,
+            "canonical full owner return"
+        );
+        (address pointer, bytes memory bundle) = owner.ownerRecordSignatureBundle(hash);
+        (ok, raw) =
+            address(owner).staticcall(abi.encodeCall(owner.ownerRecordSignatureBundle, (hash)));
+        require(
+            ok && keccak256(raw) == keccak256(abi.encode(pointer, bundle))
+                && keccak256(bundle)
+                    == keccak256(
+                        abi.encode(keccak256("DIRECT"), address(this), keccak256(record.payload))
+                    ),
+            "original direct bundle"
+        );
+        (ok, raw) =
+            address(owner).staticcall(abi.encodeCall(owner.ownerRecord, (bytes32(uint256(99)))));
+        require(
+            !ok
+                && keccak256(raw)
+                    == keccak256(
+                        abi.encodeWithSelector(
+                            IStreamOwnerRecords.OwnerRecordUnknown.selector, bytes32(uint256(99))
+                        )
+                    ),
+            "original unknown error exact"
+        );
+        _open();
+        (ok, raw) = address(owner).staticcall(abi.encodeCall(owner.recoveryNotice, (ID)));
+        require(
+            ok && keccak256(raw) == keccak256(abi.encode(owner.recoveryNotice(ID))),
+            "full canonical notice return"
+        );
+        (ok, raw) = address(owner).staticcall(abi.encodeCall(owner.recoveryResponse, (hash)));
+        require(
+            ok && keccak256(raw) == keccak256(abi.encode(owner.recoveryResponse(hash))),
+            "full canonical response return"
+        );
+    }
+
+    function testPreparedManyShortEndpointsHaveBoundedIndividualPublicationAndConstantFinalOpen()
+        public
+    {
+        StreamOwnerNoticeTypes.Designation memory d = _designation();
+        d.name = "x";
+        d.identity.uri = "ipfs://i";
+        d.contactEndpoints = new StreamOwnerNoticeTypes.Contact[](190);
+        for (uint256 i; i < d.contactEndpoints.length; ++i) {
+            d.contactEndpoints[i] = StreamOwnerNoticeTypes.Contact(
+                StreamOwnerNoticeTypes.ContactKind.HTTPS,
+                string(
+                    abi.encodePacked(
+                        "https://", bytes1(uint8(97 + i / 26)), bytes1(uint8(97 + i % 26))
+                    )
+                ),
+                0,
+                address(0)
+            );
+        }
+        bytes memory serialized = StreamStewardDesignationJson.serialize(d);
+        require(
+            serialized.length <= 8192 && d.contactEndpoints.length > 100,
+            "many valid original endpoints"
+        );
+        _steward(d);
+        StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(d);
+        uint256 beforeGas = gasleft();
+        bytes32 id = _begin(d, p, 10);
+        emit PreparedGas("many-begin", beforeGas - gasleft(), p.deliveries.length);
+        uint256 largest;
+        for (uint256 i; i < p.deliveries.length; ++i) {
+            beforeGas = gasleft();
+            owner.prepareRecoveryNoticeDelivery(id, p.deliveries[i]);
+            uint256 used = beforeGas - gasleft();
+            if (used > largest) largest = used;
+        }
+        emit PreparedGas("many-delivery", largest, p.deliveries.length);
+        beforeGas = gasleft();
+        owner.openPreparedRecoveryNotice(id, calls, request);
+        uint256 opened = beforeGas - gasleft();
+        emit PreparedGas("many-open", opened, p.deliveries.length);
+        require(
+            largest < 1500000 && opened < 2000000,
+            "individual delivery and final opening bounded independently of endpoint count"
+        );
+        require(owner.recoveryNotice(ID).deliveryCount == 191, "every endpoint retained");
+    }
+
+    function _coolPrepared() private {
+        safeVm.cool(address(owner));
+        safeVm.cool(address(core));
+        safeVm.cool(address(executor));
+        safeVm.cool(address(recovery));
+        safeVm.cool(address(store));
+        safeVm.cool(address(StreamOwnerRecoveryNoticeState));
+        safeVm.cool(address(StreamOwnerRecoveryNoticePreparation));
+        safeVm.cool(address(StreamOwnerRecoveryActionReads));
+        safeVm.cool(address(StreamOwnerRecordReads));
+        safeVm.cool(address(StreamOwnerNoticeFields));
+        safeVm.cool(address(StreamStewardDesignationJson));
+        safeVm.cool(address(StreamRecordJson));
+        safeVm.cool(address(StreamMetadataRenderer));
+    }
+
+    function testPreparedMaximumPayloadAndURIClaimsUseBoundedColdTransactions() public {
+        StreamOwnerNoticeTypes.Designation memory d = _designation();
+        d.name = _text(512, 0x61);
+        d.identity.uri = _url(2048);
+        d.contactEndpoints = new StreamOwnerNoticeTypes.Contact[](4);
+        for (uint256 i; i < 4; ++i) {
+            d.contactEndpoints[i] = StreamOwnerNoticeTypes.Contact(
+                StreamOwnerNoticeTypes.ContactKind.HTTPS,
+                string.concat(_url(1023), string(abi.encodePacked(bytes1(uint8(98 + i))))),
+                0,
+                address(0)
+            );
+        }
+        uint256 length = StreamStewardDesignationJson.serialize(d).length;
+        d.contactEndpoints[3].uri = _url(1024 + 8192 - length);
+        require(
+            StreamStewardDesignationJson.serialize(d).length == 8192,
+            "exact entire designation limit"
+        );
+        _steward(d);
+        StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(d);
+        p.runbook = _ref(4, _url(2048));
+        p.runbook.digest = new bytes(128);
+        p.publicNotice = _ref(5, _url(2048));
+        p.publicNotice.digest = new bytes(128);
+        for (uint256 i; i < p.deliveries.length; ++i) {
+            p.deliveries[i].evidence = _ref(4, _url(2048));
+            p.deliveries[i].evidence.digest = new bytes(128);
+        }
+        _coolPrepared();
+        uint256 beforeGas = gasleft();
+        bytes32 id = _begin(d, p, 120);
+        uint256 used = beforeGas - gasleft();
+        emit PreparedGas("max-begin", used, p.deliveries.length);
+        require(used < 30000000, "bounded whole designation authentication and base claim");
+        uint256 largest;
+        for (uint256 i; i < p.deliveries.length; ++i) {
+            _coolPrepared();
+            beforeGas = gasleft();
+            owner.prepareRecoveryNoticeDelivery(id, p.deliveries[i]);
+            used = beforeGas - gasleft();
+            if (used > largest) largest = used;
+            (, bytes memory retained) = owner.recoveryNoticePreparedClaim(id, i + 1);
+            require(
+                keccak256(retained) == keccak256(abi.encode(p.deliveries[i])),
+                "all maximum reference bytes intact"
+            );
+        }
+        emit PreparedGas("max-delivery", largest, p.deliveries.length);
+        require(largest < 5000000, "one full maximum delivery transaction");
+        _coolPrepared();
+        beforeGas = gasleft();
+        owner.openPreparedRecoveryNotice(id, calls, request);
+        used = beforeGas - gasleft();
+        emit PreparedGas("max-open", used, p.deliveries.length);
+        require(
+            used < 2000000 && owner.recoveryNotice(ID).deliveryCount == 5,
+            "fixed final opening with complete endpoints"
+        );
+    }
+
+    function testPreparedDomainBindsLiteralChainHostPublisherNonceTokenAndAction() public {
+        StreamOwnerNoticeTypes.Designation memory d;
+        StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(d);
+        bytes32 id = _begin(d, p, 125);
+        bytes32 expected = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_OWNER_NOTICE_PREPARATION_V1"),
+                block.chainid,
+                address(owner),
+                address(this),
+                uint256(125),
+                uint256(7),
+                ID,
+                address(this),
+                bytes32(0),
+                keccak256(abi.encode(p.runbook, p.publicNotice))
+            )
+        );
+        require(id == expected, "independently encoded full preparation domain");
+        require(_begin(d, p, 126) != id, "nonce separation");
+        vm.prank(address(0xbeef));
+        bytes32 other = _begin(d, p, 125);
+        require(
+            other != id && owner.recoveryNoticePreparation(other).publisher == address(0xbeef),
+            "publisher separation without owner impersonation"
+        );
+        vm.chainId(block.chainid + 1);
+        other = _begin(d, p, 125);
+        require(other != id, "chain separation");
+    }
+
+    function testPreparedMalformedReferencesHaveNoPartialPlanOrDelivery() public {
+        StreamOwnerNoticeTypes.Designation memory d;
+        StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(d);
+        bytes32 id = _begin(d, p, 130);
+        for (uint256 fault; fault < 9; ++fault) {
+            StreamOwnerNoticeTypes.Reference memory bad = _ref(1, "ipfs://reference");
+            if (fault == 0) {
+                bad.algorithm = 0;
+            } else if (fault == 1) {
+                bad.algorithm = 7;
+            } else if (fault == 2) {
+                bad.canonicalizationId = 0;
+            } else if (fault == 3) {
+                bad.digest = new bytes(31);
+            } else if (fault == 4) {
+                bad.algorithm = 4;
+                bad.digest = new bytes(0);
+            } else if (fault == 5) {
+                bad.algorithm = 5;
+                bad.digest = new bytes(129);
+            } else if (fault == 6) {
+                bad.uri = "";
+            } else if (fault == 7) {
+                bad.uri = _url(2049);
+            } else {
+                bytes memory invalid = hex"697066733a2f2fff";
+                bad.uri = string(invalid);
+            }
+            (bool ok,) = address(owner)
+                .call(
+                    abi.encodeCall(
+                        owner.prepareRecoveryNotice,
+                        (StreamOwnerPreparedNoticeTypes.Input(7, ID, 131, d, bad, p.publicNotice))
+                    )
+                );
+            require(!ok, "bad base reference rejects");
+            StreamOwnerRecoveryNoticeTypes.Delivery memory delivery =
+                StreamOwnerRecoveryNoticeTypes.Delivery(p.deliveries[0].endpoint, bad);
+            (ok,) = address(owner)
+                .call(abi.encodeCall(owner.prepareRecoveryNoticeDelivery, (id, delivery)));
+            require(
+                !ok && owner.recoveryNoticePreparation(id).preparedCount == 0,
+                "bad delivery does not advance commitment"
+            );
+        }
+        _deliver(id, p);
+        owner.openPreparedRecoveryNotice(id, calls, request);
+    }
+
+    function testPreparedActualThresholdSafeWritesReadsAndEOAOwnerCannotReplacePublisher() public {
+        SafeComponents memory components = deploySafeComponents("1.4.1");
+        uint256[] memory keys = new uint256[](3);
+        keys[0] = 6201;
+        keys[1] = 6202;
+        keys[2] = 6203;
+        OfficialSafe account = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 120);
+        core.setOwner(7, address(account));
+        StreamOwnerNoticeTypes.Designation memory d;
+        StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(d);
+        StreamOwnerPreparedNoticeTypes.Input memory input =
+            StreamOwnerPreparedNoticeTypes.Input(7, ID, 140, d, p.runbook, p.publicNotice);
+        vm.recordLogs();
+        require(
+            executeSafe(
+                account,
+                keys,
+                address(owner),
+                0,
+                abi.encodeCall(owner.prepareRecoveryNotice, (input)),
+                0
+            ),
+            "actual threshold preparation"
+        );
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        bytes32 id;
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].emitter == address(owner)
+                    && logs[i].topics[0]
+                        == keccak256(
+                            "OwnerRecoveryNoticePreparing(bytes32,bytes32,address,uint256,address,bytes32,uint64,uint16)"
+                        )
+            ) id = logs[i].topics[1];
+        }
+        require(
+            id != 0 && owner.recoveryNoticePreparation(id).publisher == address(account),
+            "actual Safe attributed publisher"
+        );
+        vm.prank(vm.addr(keys[0]));
+        (bool ok,) = address(owner)
+            .call(abi.encodeCall(owner.prepareRecoveryNoticeDelivery, (id, p.deliveries[0])));
+        require(!ok, "individual signer is not Safe publisher");
+        require(
+            executeSafe(
+                account,
+                keys,
+                address(owner),
+                0,
+                abi.encodeCall(owner.prepareRecoveryNoticeDelivery, (id, p.deliveries[0])),
+                0
+            ),
+            "actual Safe delivery"
+        );
+        require(
+            executeSafe(
+                account,
+                keys,
+                address(owner),
+                0,
+                abi.encodeCall(owner.openPreparedRecoveryNotice, (id, calls, request)),
+                0
+            ),
+            "actual Safe finalization"
+        );
+        require(
+            executeSafe(
+                account,
+                keys,
+                address(owner),
+                0,
+                abi.encodeCall(owner.recoveryNoticePreparation, (id)),
+                0
+            ),
+            "actual Safe preparation read"
+        );
+        require(
+            executeSafe(
+                account,
+                keys,
+                address(owner),
+                0,
+                abi.encodeCall(owner.recoveryNoticePreparedClaim, (id, 1)),
+                0
+            ),
+            "actual Safe original claim read"
+        );
+        require(
+            executeSafe(
+                account,
+                keys,
+                address(owner),
+                0,
+                abi.encodeCall(owner.recoveryNoticePreparationFor, (ID)),
+                0
+            ),
+            "actual Safe action-plan read"
+        );
+        require(
+            owner.recoveryNotice(ID).openingOwner == address(account)
+                && owner.supportsInterface(type(IStreamOwnerPreparedRecoveryNotices).interfaceId),
+            "actual owner and additive capability"
+        );
+    }
+
+    function testPreparedExact8192ShortEndpointFamilyRejectsNextEntryAndPublishesEveryClaim()
+        public
+    {
+        StreamOwnerNoticeTypes.Designation memory d = _designation();
+        d.name = "x";
+        d.identity.uri = "ipfs://i";
+        d.contactEndpoints = new StreamOwnerNoticeTypes.Contact[](214);
+        for (uint256 i; i < 214; ++i) {
+            d.contactEndpoints[i] = StreamOwnerNoticeTypes.Contact(
+                StreamOwnerNoticeTypes.ContactKind.HTTPS,
+                string(
+                    abi.encodePacked(
+                        "https://", bytes1(uint8(97 + i / 26)), bytes1(uint8(97 + i % 26))
+                    )
+                ),
+                0,
+                address(0)
+            );
+        }
+        require(
+            StreamStewardDesignationJson.serialize(d).length == 8186,
+            "independent canonical family byte arithmetic"
+        );
+        StreamOwnerNoticeTypes.Designation memory extra =
+            abi.decode(abi.encode(d), (StreamOwnerNoticeTypes.Designation));
+        extra.contactEndpoints = new StreamOwnerNoticeTypes.Contact[](215);
+        for (uint256 i; i < 214; ++i) {
+            extra.contactEndpoints[i] = d.contactEndpoints[i];
+        }
+        extra.contactEndpoints[214] = StreamOwnerNoticeTypes.Contact(
+            StreamOwnerNoticeTypes.ContactKind.HTTPS, "https://ig", 0, address(0)
+        );
+        (bool ok,) = address(StreamStewardDesignationJson)
+            .staticcall(
+                abi.encodeWithSelector(StreamStewardDesignationJson.serialize.selector, extra)
+            );
+        require(!ok, "next same-family entry exceeds complete8192");
+        d.contactEndpoints[213].uri = string.concat(d.contactEndpoints[213].uri, "xxxxxx");
+        require(
+            StreamStewardDesignationJson.serialize(d).length == 8192,
+            "exact complete limit with214 distinct endpoints"
+        );
+        _steward(d);
+        StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(d);
+        _coolPrepared();
+        uint256 beforeGas = gasleft();
+        bytes32 id = _begin(d, p, 150);
+        uint256 used = beforeGas - gasleft();
+        emit PreparedGas("214-begin", used, 215);
+        require(used < 30000000, "entire admitted witness remains one bounded preparation");
+        uint256 largest;
+        for (uint256 i; i < p.deliveries.length; ++i) {
+            _coolPrepared();
+            beforeGas = gasleft();
+            owner.prepareRecoveryNoticeDelivery(id, p.deliveries[i]);
+            used = beforeGas - gasleft();
+            if (used > largest) largest = used;
+        }
+        emit PreparedGas("214-delivery", largest, 215);
+        require(largest < 1500000, "independent per-claim publication");
+        _coolPrepared();
+        beforeGas = gasleft();
+        owner.openPreparedRecoveryNotice(id, calls, request);
+        used = beforeGas - gasleft();
+        emit PreparedGas("214-open", used, 215);
+        require(used < 2000000, "fixed final opening never loops214 endpoints");
+        require(owner.recoveryNotice(ID).deliveryCount == 215, "no dropped endpoint");
+        for (uint256 i; i < p.deliveries.length; ++i) {
+            (, bytes memory raw) = owner.recoveryNoticeClaim(ID, i + 1);
+            require(
+                keccak256(raw) == keccak256(abi.encode(p.deliveries[i])),
+                "every final ordered claim exactly retrievable"
+            );
+        }
+    }
+
+    function testPreparedAbsoluteABIClaimBoundsArePublishedWithEveryMaximumField() public {
+        StreamOwnerNoticeTypes.Designation memory d = _designation();
+        d.name = _text(512, 0x61);
+        d.identity.uri = _url(2048);
+        d.contactEndpoints = new StreamOwnerNoticeTypes.Contact[](1);
+        d.contactEndpoints[0] = StreamOwnerNoticeTypes.Contact(
+            StreamOwnerNoticeTypes.ContactKind.HTTPS, _url(2048), 0, address(0)
+        );
+        _steward(d);
+        StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(d);
+        p.runbook = _ref(4, _url(2048));
+        p.runbook.digest = new bytes(128);
+        p.publicNotice = _ref(5, _url(2048));
+        p.publicNotice.digest = new bytes(128);
+        for (uint256 i; i < 2; ++i) {
+            p.deliveries[i].evidence = _ref(4, _url(2048));
+            p.deliveries[i].evidence.digest = new bytes(128);
+        }
+        require(
+            abi.encode(p.runbook, p.publicNotice).length == 4800,
+            "two maximum dynamic references include every ABI head/tail word"
+        );
+        require(
+            abi.encode(p.deliveries[1]).length == 4672,
+            "maximum endpoint plus reference includes complete outer tuple"
+        );
+        _coolPrepared();
+        uint256 beforeGas = gasleft();
+        bytes32 id = _begin(d, p, 160);
+        emit PreparedGas("absolute-begin", beforeGas - gasleft(), 2);
+        uint256 largest;
+        for (uint256 i; i < 2; ++i) {
+            _coolPrepared();
+            beforeGas = gasleft();
+            owner.prepareRecoveryNoticeDelivery(id, p.deliveries[i]);
+            uint256 used = beforeGas - gasleft();
+            if (used > largest) largest = used;
+        }
+        emit PreparedGas("absolute-delivery", largest, 2);
+        require(largest < 5000000, "complete maximum claim is individually publishable");
+        _coolPrepared();
+        beforeGas = gasleft();
+        owner.openPreparedRecoveryNotice(id, calls, request);
+        emit PreparedGas("absolute-open", beforeGas - gasleft(), 2);
+        (, bytes memory base) = owner.recoveryNoticeClaim(ID, 0);
+        (, bytes memory delivery) = owner.recoveryNoticeClaim(ID, 2);
+        require(
+            base.length == 4800 && delivery.length == 4672
+                && keccak256(base) == keccak256(abi.encode(p.runbook, p.publicNotice))
+                && keccak256(delivery) == keccak256(abi.encode(p.deliveries[1])),
+            "both complete original maximum chunks survive final opening"
+        );
+    }
+
+    function testAuthenticatedPreparationRejectsDuplicateReorderedAndInactiveWitnessFields()
+        public
+    {
+        StreamOwnerNoticeTypes.Designation memory original = _designation();
+        _steward(original);
+        StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(original);
+        for (uint256 fault; fault < 6; ++fault) {
+            StreamOwnerNoticeTypes.Designation memory d =
+                abi.decode(abi.encode(original), (StreamOwnerNoticeTypes.Designation));
+            if (fault == 0) {
+                d.contactEndpoints[1] = d.contactEndpoints[0];
+            } else if (fault == 1) {
+                d.contactEndpoints[0] = original.contactEndpoints[1];
+                d.contactEndpoints[1] = original.contactEndpoints[0];
+            } else if (fault == 2) {
+                d.contactEndpoints[0].chainId = 1;
+            } else if (fault == 3) {
+                d.contactEndpoints[0].account = address(1);
+            } else if (fault == 4) {
+                d.predecessor = keccak256("not the original predecessor");
+            } else {
+                d.kind = StreamOwnerNoticeTypes.StewardKind.REGISTRAR_CONTACT;
+            }
+            (bool ok,) = address(owner)
+                .call(
+                    abi.encodeCall(
+                        owner.prepareRecoveryNotice,
+                        (StreamOwnerPreparedNoticeTypes.Input(
+                                7, ID, 170, d, p.runbook, p.publicNotice
+                            ))
+                    )
+                );
+            require(!ok, "complete canonical hash and closed inactive unions remain required");
+        }
+        bytes32 id = _begin(original, p, 170);
+        _deliver(id, p);
+        owner.openPreparedRecoveryNotice(id, calls, request);
+    }
+
+    function testAuthenticatedPreparationPreservesAllContactKindsAndExactEscapedMeaning() public {
+        StreamOwnerNoticeTypes.Designation memory d = _designation();
+        bytes32 prior = _steward(d);
+        d.predecessor = prior;
+        d.kind = StreamOwnerNoticeTypes.StewardKind.REGISTRAR_CONTACT;
+        d.name = unicode"Exact \" \\ /\r\n\u0001 🎨 é";
+        d.identity = _ref(5, "ar://opaque-identity");
+        d.identity.digest = hex"00ff7f";
+        d.contactEndpoints = new StreamOwnerNoticeTypes.Contact[](3);
+        d.contactEndpoints[0] = StreamOwnerNoticeTypes.Contact(
+            StreamOwnerNoticeTypes.ContactKind.EIP155, "", type(uint256).max, address(0xabcd)
+        );
+        d.contactEndpoints[1] = StreamOwnerNoticeTypes.Contact(
+            StreamOwnerNoticeTypes.ContactKind.MAILTO, "mailto:a+b@c.example", 0, address(0)
+        );
+        d.contactEndpoints[2] = StreamOwnerNoticeTypes.Contact(
+            StreamOwnerNoticeTypes.ContactKind.HTTPS, unicode"https://example/🎨", 0, address(0)
+        );
+        bytes32 hash = _steward(d);
+        StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(d);
+        bytes32 id = _begin(d, p, 171);
+        _deliver(id, p);
+        owner.openPreparedRecoveryNotice(id, calls, request);
+        require(
+            owner.recoveryNotice(ID).stewardRecordHash == hash
+                && owner.recoveryNoticePreparation(id).stewardPayloadHash
+                    == keccak256(StreamStewardDesignationJson.serialize(d)),
+            "same complete existing serializer bytes, not a new normalization"
+        );
+    }
+
+    function testAuthenticatedPreparationExact8192WithMaximumEscapedNameIsBounded() public {
+        StreamOwnerNoticeTypes.Designation memory d = _designation();
+        d.name = _text(512, 0x01);
+        d.identity.uri = _url(2048);
+        d.contactEndpoints[0] = StreamOwnerNoticeTypes.Contact(
+            StreamOwnerNoticeTypes.ContactKind.HTTPS, _url(2048), 0, address(0)
+        );
+        d.contactEndpoints[1] = StreamOwnerNoticeTypes.Contact(
+            StreamOwnerNoticeTypes.ContactKind.HTTPS, "https://a", 0, address(0)
+        );
+        uint256 n = StreamStewardDesignationJson.serialize(d).length;
+        require(n < 8192 && 9 + 8192 - n <= 2048, "maximum escaped-name complete payload fixture");
+        d.contactEndpoints[1].uri = string.concat("https://a", _text(8192 - n, 0x61));
+        require(
+            StreamStewardDesignationJson.serialize(d).length == 8192,
+            "every original escaped byte included"
+        );
+        _steward(d);
+        StreamOwnerRecoveryNoticeTypes.Publication memory p = _publication(d);
+        _coolPrepared();
+        uint256 beforeGas = gasleft();
+        bytes32 id = _begin(d, p, 172);
+        uint256 used = beforeGas - gasleft();
+        emit PreparedGas("escaped-begin", used, 3);
+        require(used < 16000000, "maximum escaped original fits bounded preparation");
+        _deliver(id, p);
+        owner.openPreparedRecoveryNotice(id, calls, request);
+        require(
+            owner.recoveryNotice(ID).stewardPayloadHash
+                == keccak256(StreamStewardDesignationJson.serialize(d)),
+            "complete original escaped meaning"
+        );
     }
 
     function testProductionSizeAndAdditiveInterfacesAndSeparateGovernedIntentBudget() public view {

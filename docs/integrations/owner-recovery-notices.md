@@ -54,6 +54,71 @@ immutable manifest bytes or claim a new manifest field was present originally.
 eight-entry limit. Historical reads check each retained chunk hash and do not
 depend on today's owner, steward, schema status, Executor or recovery readiness.
 
+## Incremental immutable publication
+
+Use `IStreamOwnerPreparedRecoveryNotices` for endpoint sets whose complete publication
+would be too expensive in one call. It adds three guarded writes while retaining
+`openRecoveryNotice` and the existing notice/evidence interfaces:
+
+1. `prepareRecoveryNotice` authenticates the complete original designation once,
+   snapshots its current owner and durable per-author head, publishes the runbook
+   and public-notice references, and commits the required ordered endpoint tuples.
+2. The original publisher calls `prepareRecoveryNoticeDelivery` once per endpoint,
+   in order. Each call preserves the full `Delivery` ABI bytes in an immutable
+   chunk. The final row must complete the exact expected endpoint commitment.
+3. Anyone may call `openPreparedRecoveryNotice` with the complete governance batch
+   and original request. It rechecks the current owner and exact designation head,
+   authenticates the full action, and atomically creates the final notice snapshot.
+
+The private reconstruction keeps every original field and canonical JSON byte,
+including exact Unicode/escape values and inactive-union checks. It compares the
+complete result to the payload hash at the actual per-author steward head. That
+head can only have been admitted by the original registered-profile serializer,
+which already rejected duplicate endpoints. Reconstruction therefore omits a
+second quadratic uniqueness scan; duplicate or reordered witnesses fail the whole
+payload hash comparison. The existing serializer and original admission are
+unchanged. Repeated string concatenation remains, so this is not a claim that all
+preparation work is asymptotically linear.
+
+Preparation creates no notice, elapsed clock or recovery eligibility. The 72-hour
+clock, expiry check, original response-lane barrier and complete candidate tail are
+captured at final opening, including responses published during preparation. A
+failed final opening rolls back consumption of the plan. A changed owner or
+current designation prevents opening; the original A-to-B-to-A owner reactivation
+continues to use its durable original head, without a custody-epoch condition.
+
+The plan ID binds a versioned domain, chain, host, publisher, caller nonce, token,
+action, opening owner, original designation head and base-publication hash. The
+nonce separates preparations; it is not an owner signature or a globally consumed
+authorization nonce. A completed plan permanently freezes its count, ordered root
+and claim handles. It cannot accept another delivery. Earlier wrong rows cannot
+be edited; that publisher can prepare a new plan. Incomplete plans remain attributed
+publication history and can never become valid notices through missing endpoint
+coverage.
+
+Final opening has no endpoint loop or full designation serialization. It uses the
+saved original publisher in the same publication/evidence hash as the original
+opening path. `OwnerRecoveryNoticePreparedOpening` separately identifies the
+finalizer; finalization never lets a relayer replace references or become their
+author. Each endpoint commitment includes every canonical tuple field and its
+index. Original reference algorithm, canonicalization ID, digest and URI bytes
+remain intact, including opaque multihash/CID commitments.
+
+`recoveryNoticePreparation` reads the stored plan summary;
+`recoveryNoticePreparedClaim(id, 0)` reads the original base publication and higher
+indices read original deliveries. `recoveryNoticePreparationFor(actionId)` links an
+opened notice to its plan. The existing `recoveryNoticeClaim` also returns these
+same original pointers and bytes for a prepared opening. Prepared carrier reads
+verify the STOP prefix, bounded code length and full original bytes hash. Historical
+reads do not revalidate current owner, interpretation status or action readiness.
+
+For maximum 2048-byte URIs and 128-byte opaque digests, the base claim's complete
+ABI encoding is at most 4800 bytes and a delivery's is at most 4672 bytes, below
+the existing 8192-byte immutable chunk limit. Endpoint count remains controlled by
+the complete original designation's 8192-byte canonical payload; no new item cap
+or field omission is introduced. The final snapshot stores the aggregate publication
+commitment and a link to the immutable plan instead of copying all delivery handles.
+
 ## Responses and complete processing
 
 `recordRecoveryResponse` and `recordRecoveryResponseFor` validate the exact complete
@@ -117,7 +182,11 @@ OwnerRecords keeps its existing mapping roots at slots 4 through 10. Append/read
 and signature preparation are linked helpers receiving explicit map references;
 no aggregate storage overlay or caller-selected storage root is exposed by the host.
 The shared guard surrounds original publication, typed queue linkage, notice opening
-and processing. The new notice state begins after the existing steward mapping.
+and processing. The notice state begins after the existing steward mapping; prepared-plan maps append
+after the original notice roots. Original record and notice getters keep their typed
+ABI and return the linked helper's exact canonical encoding without an extra full
+tuple decode/re-encode. Signature preparation still precedes append inside the same
+guarded transaction and retains its original nonce, domain and rollback behavior.
 
 Focused tests use real OwnerRecords, SchemaRegistry, DocumentStore and threshold
 Safe. A separate composition also uses the actual registered recovery companion,
@@ -129,19 +198,41 @@ even while the deliberately lighter notice liveness remains true.
 The named callback probe cools OwnerRecords, NoticeState, ActionReads, Core, Executor
 and the actual recovery companion before each read. Its exact 192-byte result fits
 500,000 gas in SCHEDULED and active EXECUTED contexts: measured enclosing call costs
-are 105,181 / 122,489 in default and 104,585 / 121,975 with IR. This covers that
+are 105,205 / 122,513 in default and 104,573 / 121,963 with IR. This covers that
 explicit graph, not the full current Core/Executor/artist deployment or every future
 provider. The companion execution test separately exercises its preparation before
 and after reading the actual owner evidence.
 
-Maximum payload preservation is not a transaction gas acceptance. In the retained
-default fixture, an 8192-byte steward record call costs 15,980,612 gas, opening with
-2048-byte runbook/public-notice and five delivery-reference URIs costs 45,171,830,
-and an 8192-byte response call costs 17,044,680. Those are individual traced contract
-calls, exclude transaction intrinsic gas, and are not cold current-stack bounds.
-Publication currently builds JSON while validating references although it retains
-ABI bytes; eliminating that discarded serialization is a possible narrow follow-up.
-No chain transaction ceiling or release gas gate is waived by these harness passes.
+The original five-delivery opening remains a supported convenience path with cost
+proportional to its full publication. A retained default predecessor measured
+45,171,830 gas for its maximum-URI example. Validation without discarded JSON or
+revalidating already authenticated steward endpoints reduced the same example to
+21,863,647. Neither figure is an all-valid-shape transaction-capacity claim.
+
+The final named-target cold capacity measurements are individual enclosing calls,
+excluding transaction intrinsic gas. Each figure below gives default / IR gas:
+
+| Exercised shape | Begin preparation | Largest single delivery | Final opening |
+| --- | ---: | ---: | ---: |
+| Exact 8192-byte designation, 214 short endpoints plus owner | 12,513,866 / 12,770,204 | 307,587 / 307,793 | 694,799 / 689,613 |
+| Exact 8192-byte designation, maximum reference URIs, five deliveries | 13,750,007 / 13,976,250 | 1,815,594 / 1,902,103 | 695,614 / 690,432 |
+| Absolute 4800-byte base and 4672-byte delivery encodings | 9,355,141 / 9,545,008 | 1,826,054 / 1,912,533 | 694,835 / 689,649 |
+
+The exact 8192-byte escaped-name case begins at 9,154,430 / 9,103,883 gas. The
+214-endpoint case also rejects a next entry in that same canonical family; it is
+not a universal maximum over all lexical combinations. The final opening performs
+no endpoint traversal. An actual companion's complete 24,544-byte registered request
+is separately admitted at final opening for 6,782,262 / 7,641,804 gas, with the
+existing dedicated intent cap. Those direct dependencies are named explicitly in
+the test. This is not a whole current-stack cold transaction bound.
+
+The original staged-input and full-witness requirements remain intact. All prior
+94 behavioral names pass in the matching 119-case cohort in both profiles, along
+with exact original-publication/evidence parity, maximum ABI chunks, malformed
+witnesses, queue/clock timing, actual threshold Safe calls and actual companion
+execution. No network transaction limit or release gas gate is waived. The
+separate shared JSON escape optimization is not included in this increment's
+source or measurements.
 
 Actual full current Core/artist/Executor/companion composition, wider
 collection/release/season/view affected-token inventory and runbook routing,

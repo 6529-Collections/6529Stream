@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "../../interfaces/stream/metadata/IStreamOwnerRecoveryNotices.sol";
 import "../../interfaces/stream/core/IStreamCoreIdentity.sol";
 import "./StreamStewardDesignationJson.sol";
+import "./StreamOwnerRecoveryNoticePreparation.sol";
 import "../metadata/StreamOwnerRecordReads.sol";
 import "../metadata/StreamSchemaDocumentStore.sol";
 
@@ -101,8 +102,8 @@ library StreamOwnerRecoveryNoticeState {
         if (w.publication.deliveries.length != 1 + w.steward.contactEndpoints.length) {
             revert IStreamOwnerRecoveryNotices.InvalidOwnerRecoveryNotice();
         }
-        StreamOwnerNoticeFields.referenceJSON(w.publication.runbook);
-        StreamOwnerNoticeFields.referenceJSON(w.publication.publicNotice);
+        _reference(w.publication.runbook);
+        _reference(w.publication.publicNotice);
         bytes memory raw = abi.encode(w.publication.runbook, w.publication.publicNotice);
         n.publicationPointer = _publish(c, raw);
         n.publicationBytesHash = keccak256(raw);
@@ -117,28 +118,124 @@ library StreamOwnerRecoveryNoticeState {
             if (keccak256(abi.encode(d.endpoint)) != keccak256(abi.encode(expected))) {
                 revert IStreamOwnerRecoveryNotices.InvalidOwnerRecoveryNotice();
             }
-            StreamOwnerNoticeFields.contact(d.endpoint);
-            StreamOwnerNoticeFields.referenceJSON(d.evidence);
+            // The exact steward endpoint was already validated by the full saved witness.
+            if (i == 0) StreamOwnerNoticeFields.contact(d.endpoint);
+            _reference(d.evidence);
             raw = abi.encode(d);
             bytes32 hash = keccak256(raw);
             n.deliveryPointers.push(_publish(c, raw));
             n.deliveryHashes.push(hash);
             publicationHash = keccak256(abi.encode(publicationHash, i, hash));
         }
-        StreamOwnerRecoveryNoticeTypes.Snapshot storage v = n.snapshot;
-        v.binding = b;
-        v.scope = w.request.scope;
-        v.publisher = msg.sender;
-        v.openingOwner = w.owner.owner;
-        v.stewardRecordHash = w.owner.stewardRecordHash;
-        v.stewardPayloadHash = w.owner.stewardPayloadHash;
-        v.publicationHash = publicationHash;
+        _save(
+            s,
+            c,
+            SavedOpening(
+                w.actionId,
+                b,
+                w.request.scope,
+                w.owner,
+                msg.sender,
+                publicationHash,
+                uint64(w.publication.deliveries.length)
+            )
+        );
+    }
+
+    struct SavedOpening {
+        bytes32 actionId;
+        StreamOwnerRecoveryActionReads.Binding binding;
+        StreamFinalityScope scope;
+        OriginalOwner owner;
+        address publisher;
+        bytes32 publicationHash;
+        uint64 deliveryCount;
+    }
+
+    struct PreparedOpeningWitness {
+        bytes32 preparationId;
+        GovernanceCall[] calls;
+        StreamFinalityRecoveryRequest request;
+        uint64 firstResponseIndex;
+    }
+
+    event OwnerRecoveryNoticePreparedOpening(
+        bytes32 indexed preparationId,
+        bytes32 indexed actionId,
+        address indexed publisher,
+        address finalizer,
+        uint16 schemaVersion
+    );
+
+    function openPrepared(
+        State storage s,
+        StreamOwnerRecoveryNoticePreparation.State storage prepared,
+        mapping(
+            uint256
+                => mapping(
+                address => bytes32
+            )
+        ) storage stewards,
+        Configuration memory c,
+        PreparedOpeningWitness memory w
+    ) public {
+        StreamOwnerPreparedNoticeTypes.Snapshot memory p =
+            StreamOwnerRecoveryNoticePreparation.consume(
+                prepared,
+                stewards,
+                StreamOwnerRecoveryNoticePreparation.Configuration(
+                    c.action.core, c.action.coreCodeHash, c.store, c.storeCodeHash, c.action.readGas
+                ),
+                w.preparationId
+            );
+        if (
+            w.request.scope.scopeType != StreamFinalityScopeType.TOKEN
+                || w.request.scope.tokenId != p.tokenId
+                || s.notices[p.actionId].snapshot.openingOwner != address(0)
+        ) {
+            revert IStreamOwnerRecoveryNotices.InvalidOwnerRecoveryNotice();
+        }
+        StreamOwnerRecoveryActionReads.Binding memory binding =
+            StreamOwnerRecoveryActionReads.admit(c.action, p.actionId, w.calls, w.request);
+        _token(c.action, w.request.scope);
+        if (block.timestamp == 0 || block.timestamp + 72 hours > binding.expiresAfter) {
+            revert IStreamOwnerRecoveryNotices.InvalidOwnerRecoveryNotice();
+        }
+        _save(
+            s,
+            c,
+            SavedOpening(
+                p.actionId,
+                binding,
+                w.request.scope,
+                OriginalOwner(
+                    p.openingOwner, p.stewardRecordHash, p.stewardPayloadHash, w.firstResponseIndex
+                ),
+                p.publisher,
+                p.publicationHash,
+                p.deliveryCount
+            )
+        );
+        emit OwnerRecoveryNoticePreparedOpening(
+            w.preparationId, p.actionId, p.publisher, msg.sender, 1
+        );
+    }
+
+    function _save(State storage s, Configuration memory c, SavedOpening memory o) private {
+        StreamOwnerRecoveryNoticeTypes.Snapshot storage v = s.notices[o.actionId].snapshot;
+        v.binding = o.binding;
+        v.scope = o.scope;
+        v.publisher = o.publisher;
+        v.openingOwner = o.owner.owner;
+        v.stewardRecordHash = o.owner.stewardRecordHash;
+        v.stewardPayloadHash = o.owner.stewardPayloadHash;
+        v.publicationHash = o.publicationHash;
         v.openedAt = uint64(block.timestamp);
         v.noticeEndsAt = uint64(block.timestamp + 72 hours);
-        v.firstResponseIndex = w.owner.firstResponseIndex;
-        v.deliveryCount = uint64(w.publication.deliveries.length);
+        v.firstResponseIndex = o.owner.firstResponseIndex;
+        v.deliveryCount = uint64(o.deliveryCount);
         v.responseTail =
-            uint64(s.candidates[_key(w.request.scope.tokenId, w.actionId, b.manifestHash)].length);
+            uint64(s.candidates[_key(o.scope.tokenId, o.actionId, o.binding.manifestHash)].length);
         v.revision = 1;
         v.evidenceHash = keccak256(
             abi.encode(
@@ -146,12 +243,12 @@ library StreamOwnerRecoveryNoticeState {
                 block.chainid,
                 address(this),
                 c.action.core,
-                w.actionId,
-                b,
-                w.request.scope,
-                msg.sender,
-                w.owner,
-                publicationHash,
+                o.actionId,
+                o.binding,
+                o.scope,
+                o.publisher,
+                o.owner,
+                o.publicationHash,
                 v.openedAt,
                 v.noticeEndsAt,
                 v.responseTail
@@ -159,16 +256,16 @@ library StreamOwnerRecoveryNoticeState {
         );
         if (
             StreamOwnerRecordReads.owner(
-                    c.action.core, c.action.coreCodeHash, w.request.scope.tokenId, c.action.readGas
-                ) != w.owner.owner
+                    c.action.core, c.action.coreCodeHash, o.scope.tokenId, c.action.readGas
+                ) != o.owner.owner
         ) revert IStreamOwnerRecoveryNotices.InvalidOwnerRecoveryNotice();
         emit OwnerRecoveryNoticeOpened(
-            w.actionId,
-            w.request.scope.tokenId,
-            w.owner.owner,
-            msg.sender,
-            w.owner.stewardRecordHash,
-            publicationHash,
+            o.actionId,
+            o.scope.tokenId,
+            o.owner.owner,
+            o.publisher,
+            o.owner.stewardRecordHash,
+            o.publicationHash,
             v.openedAt,
             v.noticeEndsAt,
             v.evidenceHash,
@@ -317,6 +414,11 @@ library StreamOwnerRecoveryNoticeState {
         return _known(s, actionId).snapshot;
     }
 
+    /// @dev Exact typed host return encoding, preserving the same unknown-record guard.
+    function encodedSnapshot(State storage s, bytes32 actionId) public view returns (bytes memory) {
+        return abi.encode(snapshot(s, actionId));
+    }
+
     function claim(State storage s, bytes32 actionId, uint256 index)
         public
         view
@@ -332,6 +434,31 @@ library StreamOwnerRecoveryNoticeState {
             hash = n.deliveryHashes[index - 1];
         }
         return (pointer, _payload(pointer, hash));
+    }
+
+    function claimWithPreparation(
+        State storage s,
+        StreamOwnerRecoveryNoticePreparation.State storage prepared,
+        bytes32 actionId,
+        uint256 index
+    ) public view returns (address pointer, bytes memory originalBytes) {
+        bytes32 id = prepared.notices[actionId];
+        if (id != 0) return StreamOwnerRecoveryNoticePreparation.claim(prepared, id, index);
+        return claim(s, actionId, index);
+    }
+
+    function encodedClaim(
+        State storage s,
+        StreamOwnerRecoveryNoticePreparation.State storage prepared,
+        bytes32 actionId,
+        uint256 index
+    ) public view returns (bytes memory) {
+        (address pointer, bytes memory raw) = claimWithPreparation(s, prepared, actionId, index);
+        return abi.encode(pointer, raw);
+    }
+
+    function encodedResponse(State storage s, bytes32 hash) public view returns (bytes memory) {
+        return abi.encode(readResponse(s, hash));
     }
 
     function readResponse(State storage s, bytes32 hash)
@@ -414,6 +541,22 @@ library StreamOwnerRecoveryNoticeState {
         ) {
             revert IStreamOwnerRecoveryNotices.InvalidOwnerRecoveryNotice();
         }
+    }
+
+    /// @dev Same accepted reference shape as referenceJSON, without constructing discarded JSON.
+    function _reference(StreamOwnerNoticeTypes.Reference memory r) private pure {
+        if (r.canonicalizationId == 0 || r.algorithm == 0 || r.algorithm > 6) {
+            revert StreamOwnerNoticeFields.InvalidNoticeWitness();
+        }
+        if (r.algorithm == 4 || r.algorithm == 5) {
+            if (r.digest.length == 0 || r.digest.length > 128) {
+                revert StreamOwnerNoticeFields.InvalidNoticeWitness();
+            }
+        } else if (r.digest.length != 32) {
+            revert StreamOwnerNoticeFields.InvalidNoticeWitness();
+        }
+        // This already checks nonempty, maximum bytes and UTF8; quote adds no admission rule.
+        StreamMetadataRenderer.requireValidUtf8ContentUri("NOTICE_REFERENCE", r.uri, 2048, false);
     }
 
     function _publish(Configuration memory c, bytes memory raw) private returns (address pointer) {
