@@ -1,0 +1,1 @@
+{"encoding":"BINARY_EXACT","formatId":"IANA:image/png","meaning":"Full PNG capture object. Byte identity and independently attested full retrieval are distinct from semantic PNG decoding, performed by the capture/offline validator.","name":"STREAM_REFERENCE_PNG_OBJECT_V1","version":1}
