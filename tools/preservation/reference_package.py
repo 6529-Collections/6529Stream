@@ -34,7 +34,7 @@ def sha(raw: bytes) -> str:
 
 def safe_name(name: str) -> str:
     path = PurePosixPath(name)
-    if (not name or path.is_absolute() or str(path) != name or "\\" in name or ":" in name
+    if (not name or path.is_absolute() or str(path) != name or any(c in name for c in '\\:<>"|?*')
             or any(p in (".", "..", "") or p.endswith((" ", ".")) for p in name.split("/"))
             or any(ord(c) < 32 or ord(c) > 126 for c in name)):
         raise ValueError("noncanonical package path")

@@ -81,6 +81,25 @@ library StreamExternalArtifactTypes {
         uint64 deadline;
     }
 
+    /// @notice Unsaved present liveness for two exact original receipts; never a recorded coverage.
+    /// @dev Later passing fixity may change these two fixity hashes without changing the originals.
+    struct CurrentPair {
+        bytes32 objectHash;
+        bytes32 artistId;
+        bytes32 contentHash;
+        bytes32 sha256Digest;
+        bytes32 arweaveDataRoot;
+        uint64 byteSize;
+        bytes32 firstFamilyRecordHash;
+        bytes32 secondFamilyRecordHash;
+        bytes32 firstReceiptHash;
+        bytes32 secondReceiptHash;
+        bytes32 firstFixityHash;
+        bytes32 secondFixityHash;
+        bytes32 checkpointHash;
+        bytes32 profileHash;
+    }
+
     struct Coverage {
         bytes32 coverageHash;
         bytes32 objectHash;

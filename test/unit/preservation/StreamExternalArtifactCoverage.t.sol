@@ -646,9 +646,8 @@ contract StreamExternalArtifactCoverageTest is OfficialSafeFixture {
 
     function testFullObjectCurrentReadHasConstantBulkSizeCost() public {
         (,, bytes32 hash) = _covered();
-        bytes memory data = abi.encodeCall(
-            host.requireCoverage, (hash, object.artistId, objectHash)
-        );
+        bytes memory data =
+            abi.encodeCall(host.requireCoverage, (hash, object.artistId, objectHash));
         vm.cool(address(host));
         vm.cool(address(core));
         vm.cool(address(governance));
@@ -737,12 +736,10 @@ contract StreamExternalArtifactCoverageTest is OfficialSafeFixture {
             )
         );
         bytes32 legacy = keccak256(abi.encodePacked(hex"1901", legacyDomain, body));
-        p[0].signature = _sign(
-            p[0].account == safeVm.addr(OBSERVER_A) ? OBSERVER_A : OBSERVER_B, legacy
-        );
-        p[1].signature = _sign(
-            p[1].account == safeVm.addr(OBSERVER_A) ? OBSERVER_A : OBSERVER_B, legacy
-        );
+        p[0].signature =
+            _sign(p[0].account == safeVm.addr(OBSERVER_A) ? OBSERVER_A : OBSERVER_B, legacy);
+        p[1].signature =
+            _sign(p[1].account == safeVm.addr(OBSERVER_A) ? OBSERVER_A : OBSERVER_B, legacy);
         _fails(
             address(verifier),
             abi.encodeCall(
@@ -903,5 +900,146 @@ contract StreamExternalArtifactCoverageTest is OfficialSafeFixture {
             oldHash,
             newHash
         );
+    }
+
+    function testCurrentPairRefreshPreservesExactOriginalCoverage() public {
+        (bytes32 a, bytes32 b, bytes32 original) = _covered();
+        E.Coverage memory saved = host.coverage(original);
+        bytes32 savedHash = keccak256(abi.encode(saved));
+        E.CurrentPair memory initial = host.currentReceiptPair(a, b, object.artistId, objectHash);
+        require(initial.firstFixityHash == saved.firstFixityHash);
+        bytes32 refresh = _recordFixity(a, 1, false);
+        E.CurrentPair memory current = host.currentReceiptPair(a, b, object.artistId, objectHash);
+        require(
+            current.firstFixityHash == refresh && current.firstFixityHash != initial.firstFixityHash
+        );
+        require(current.secondFixityHash == initial.secondFixityHash);
+        require(current.firstReceiptHash == a && current.secondReceiptHash == b);
+        require(current.firstFamilyRecordHash == saved.firstFamilyRecordHash);
+        require(current.secondFamilyRecordHash == saved.secondFamilyRecordHash);
+        require(current.objectHash == saved.objectHash && current.artistId == saved.artistId);
+        require(
+            current.contentHash == saved.contentHash && current.sha256Digest == saved.sha256Digest
+        );
+        require(
+            current.arweaveDataRoot == saved.arweaveDataRoot && current.byteSize == saved.byteSize
+        );
+        require(
+            current.checkpointHash == saved.checkpointHash
+                && current.profileHash == saved.profileHash
+        );
+        require(keccak256(abi.encode(host.coverage(original))) == savedHash);
+        _fails(
+            address(host),
+            abi.encodeCall(host.requireCoverage, (original, object.artistId, objectHash))
+        );
+    }
+
+    function testCurrentPairFailureRepairNeedsSameOriginalReceipts() public {
+        (bytes32 a, bytes32 b, bytes32 original) = _covered();
+        bytes32 failing = _recordFixity(a, 2, false);
+        _fails(
+            address(host),
+            abi.encodeCall(host.currentReceiptPair, (a, b, object.artistId, objectHash))
+        );
+        E.Fixity memory invalid = _fixity(a, 1);
+        bytes memory signature = safeThresholdSignature(
+            fixityKeys, safeMessageDigest(fixitySafe, abi.encodePacked(host.fixityDigest(invalid)))
+        );
+        _fails(address(host), abi.encodeCall(host.recordFixity, (invalid, signature)));
+        require(host.latestFixity(a) == failing);
+        bytes32 repair = _recordFixity(a, 1, true);
+        E.CurrentPair memory current = host.currentReceiptPair(a, b, object.artistId, objectHash);
+        require(
+            current.firstReceiptHash == a && current.secondReceiptHash == b
+                && current.firstFixityHash == repair
+        );
+        require(host.coverage(original).firstFixityHash != repair);
+        _fails(
+            address(host),
+            abi.encodeCall(host.requireCoverage, (original, object.artistId, objectHash))
+        );
+    }
+
+    function testCurrentPairDoesNotSelectReplacementReceipt() public {
+        (bytes32 a, bytes32 b,) = _covered();
+        bytes32 replacement = _recordReceipt(true, 1);
+        _recordFixity(replacement, 1, false);
+        _recordFixity(a, 2, false);
+        _fails(
+            address(host),
+            abi.encodeCall(host.currentReceiptPair, (a, b, object.artistId, objectHash))
+        );
+        E.CurrentPair memory other =
+            host.currentReceiptPair(replacement, b, object.artistId, objectHash);
+        require(other.firstReceiptHash == replacement && other.firstReceiptHash != a);
+        // A caller retaining the original pair must compare identities and cannot substitute other.
+        _fails(
+            address(host),
+            abi.encodeCall(host.currentReceiptPair, (b, replacement, object.artistId, objectHash))
+        );
+        _fails(
+            address(host),
+            abi.encodeCall(host.currentReceiptPair, (b, b, object.artistId, objectHash))
+        );
+    }
+
+    function testCurrentPairFamilyAndGraphInvalidationRestore() public {
+        (bytes32 a, bytes32 b,) = _covered();
+        bytes memory callData =
+            abi.encodeCall(host.currentReceiptPair, (a, b, object.artistId, objectHash));
+        _status(firstFamily, 2);
+        _fails(address(host), callData);
+        _status(firstFamily, 1);
+        host.currentReceiptPair(a, b, object.artistId, objectHash);
+        bytes memory code = address(verifier).code;
+        vm.etch(address(verifier), hex"00");
+        _fails(address(host), callData);
+        vm.etch(address(verifier), code);
+        host.currentReceiptPair(a, b, object.artistId, objectHash);
+        core.set(
+            keccak256("MODULE_REGISTRY"), address(new ExternalArchiveModuleBoundary(address(1)))
+        );
+        _fails(address(host), callData);
+    }
+
+    function testCurrentPairIsAdditiveUnsavedExactFourteenWords() public {
+        (bytes32 a, bytes32 b,) = _covered();
+        require(host.supportsInterface(type(IStreamExternalArtifactCoverage).interfaceId));
+        require(host.supportsInterface(type(IStreamExternalArtifactCurrentPair).interfaceId));
+        bytes memory data =
+            abi.encodeCall(host.currentReceiptPair, (a, b, object.artistId, objectHash));
+        vm.cool(address(host));
+        vm.cool(address(core));
+        vm.cool(address(governance));
+        vm.cool(address(roles));
+        vm.cool(address(verifier));
+        uint256 beforeGas = gasleft();
+        (bool ok, bytes memory out) = address(host).staticcall{ gas: 2000000 }(data);
+        emit log_named_uint("currentPair14words5namedcold", beforeGas - gasleft());
+        require(ok && out.length == 448);
+        E.CurrentPair memory current = abi.decode(out, (E.CurrentPair));
+        require(keccak256(out) == keccak256(abi.encode(current)));
+        _role(address(fixitySafe), false);
+        host.currentReceiptPair(a, b, object.artistId, objectHash);
+        // Original authority survives revocation; a fresh fixity still needs today's role.
+        E.Fixity memory f = _fixity(a, 1);
+        _fails(address(host), abi.encodeCall(host.recordFixity, (f, bytes(""))));
+    }
+
+    function testFuzzCurrentPairCannotBorrowWrongArtistOrObject(bytes32 replacement) public {
+        (bytes32 a, bytes32 b,) = _covered();
+        if (replacement != objectHash) {
+            _fails(
+                address(host),
+                abi.encodeCall(host.currentReceiptPair, (a, b, object.artistId, replacement))
+            );
+        }
+        if (replacement != object.artistId) {
+            _fails(
+                address(host),
+                abi.encodeCall(host.currentReceiptPair, (a, b, replacement, objectHash))
+            );
+        }
     }
 }

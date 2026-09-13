@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/preservation/IStreamExternalArtifactCoverage.sol";
+import "../../interfaces/stream/preservation/IStreamExternalArtifactCurrentPair.sol";
 import "../../interfaces/stream/preservation/IStreamExternalArtifactCheckpointVerifier.sol";
 import "../../interfaces/stream/preservation/IStreamArchivalBindings.sol";
 import "../../interfaces/stream/core/IStreamCorePointers.sol";
@@ -13,7 +14,11 @@ import "./StreamArchivalSignatures.sol";
 /// @dev Native data-root inclusion and independently attested full-file correspondence are distinct.
 ///      No descriptor or small byte sample is substituted for the external object's identity.
 ///      Taxonomy rows belong to this new proof profile; old bounded receipt rows are not reinterpreted.
-contract StreamExternalArtifactCoverage is StreamGasParameterHost, IStreamExternalArtifactCoverage {
+contract StreamExternalArtifactCoverage is
+    StreamGasParameterHost,
+    IStreamExternalArtifactCoverage,
+    IStreamExternalArtifactCurrentPair
+{
     bytes32 public constant override profileHash =
         keccak256("STREAM_EXTERNAL_ARTIFACT_COVERAGE_V1");
     bytes32 public constant FIXITY_PROFILE = keccak256("STREAM_EXTERNAL_OBJECT_FIXITY_V1");
@@ -111,7 +116,8 @@ contract StreamExternalArtifactCoverage is StreamGasParameterHost, IStreamExtern
 
     function supportsInterface(bytes4 id) external pure override returns (bool) {
         return id == 0x01ffc9a7 || id == type(IStreamExternalArtifactCoverage).interfaceId
-            || id == type(IStreamGasParameterHost).interfaceId;
+            || id == type(IStreamGasParameterHost).interfaceId
+            || id == type(IStreamExternalArtifactCurrentPair).interfaceId;
     }
 
     /// @notice Register an unverified object commitment. This does not create preservation coverage.
@@ -412,6 +418,36 @@ contract StreamExternalArtifactCoverage is StreamGasParameterHost, IStreamExtern
         if (keccak256(abi.encode(actual)) != keccak256(abi.encode(saved))) {
             revert A.InvalidArchivalCoverage();
         }
+    }
+
+    /// @notice Current passing observations for the same two retained original receipt identities.
+    /// @dev Reuses every original context/independence/checkpoint predicate. It neither records
+    ///      coverage nor changes original fixity commitments or their historical meaning.
+    function currentReceiptPair(bytes32 first, bytes32 second, bytes32 artistId, bytes32 objectHash)
+        external
+        view
+        override
+        returns (E.CurrentPair memory current)
+    {
+        _context();
+        E.Coverage memory e = _coverageFacts(first, second);
+        if (e.artistId != artistId || e.objectHash != objectHash) {
+            revert A.InvalidArchivalCoverage();
+        }
+        current.objectHash = e.objectHash;
+        current.artistId = e.artistId;
+        current.contentHash = e.contentHash;
+        current.sha256Digest = e.sha256Digest;
+        current.arweaveDataRoot = e.arweaveDataRoot;
+        current.byteSize = e.byteSize;
+        current.firstFamilyRecordHash = e.firstFamilyRecordHash;
+        current.secondFamilyRecordHash = e.secondFamilyRecordHash;
+        current.firstReceiptHash = e.firstReceiptHash;
+        current.secondReceiptHash = e.secondReceiptHash;
+        current.firstFixityHash = e.firstFixityHash;
+        current.secondFixityHash = e.secondFixityHash;
+        current.checkpointHash = e.checkpointHash;
+        current.profileHash = e.profileHash;
     }
 
     function _coverageFacts(bytes32 first, bytes32 second)

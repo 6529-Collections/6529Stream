@@ -97,10 +97,17 @@ class ReferencePackageTests(unittest.TestCase):
 
     def test_exact_path_vocabulary_rejects_native_aliases(self):
         for name in ["../escape", "/root", "a//b", "a/./b", "a/../b", "C:/a", "a\\b",
-                     "CON.txt", "a/NUL", "COM1", "a/last.", "a/last ", "a\nb", "café"]:
+                     "CON.txt", "a/NUL", "COM1", "a/last.", "a/last ", "a\nb", "café",
+                     "a<b", "a>b", 'a"b', "a|b", "a?b", "a*b"]:
             with self.subTest(name=name), self.assertRaises(ValueError):
                 safe_name(name)
         self.assertEqual(safe_name("engine/152.0.7977.83/chrome.dll"), "engine/152.0.7977.83/chrome.dll")
+
+    def test_rehashed_illegal_inventory_name_rejected_before_restore_writes(self):
+        anchor = self.rewrite(lambda m: m["files"][0].update(path="bad?native-name.exe"))
+        with self.assertRaisesRegex(ValueError, "noncanonical package path"):
+            restore(self.package, self.root / "restored", anchor)
+        self.assertFalse((self.root / "restored").exists())
 
     def test_nested_output_cannot_capture_itself(self):
         with self.assertRaises(ValueError):

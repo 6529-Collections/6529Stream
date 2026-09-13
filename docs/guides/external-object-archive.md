@@ -70,6 +70,26 @@ metadata. Family admission/status changes require the actual class-1 current
 governance action with its exact scope and old/new state hashes. Gas parameters
 are separately governed for fixed-size reads and signature verification.
 
+
+The additive `IStreamExternalArtifactCurrentPair.currentReceiptPair` returns
+fourteen unsaved current facts for two explicitly supplied **original receipt
+hashes**, expected artist and expected whole object. It reuses the exact same
+context, independent-family, native-checkpoint and latest-passing-fixity checks.
+It does not record coverage, choose another receipt or change `requireCoverage`:
+even a later PASS still makes an old recorded coverage fail that original exact
+head check. Current availability can recover after an authorized failure/repair
+chain for the same receipts without rewriting a locked reference publication.
+
+A reference consumer must retain the original coverage and both original
+receipt/fixity identities in its immutable record. At every current read it must
+compare this new pair's complete object, artist, profile, family, receipt and
+checkpoint identities to those saved originals; only the latest fixity hashes
+may differ. Those later observations are current evidence, never retroactively
+part of the original publication hash. Family suspension and changed pinned
+graph still fail immediately. Original signer role revocation does not erase
+admission; a new fixity requires the current role. This read adds no elapsed-age
+freshness rule or annual/quarterly cadence scheduler.
+
 ## Runnable fixture and limits
 
 The public test fixture identifies a real locally packaged 253,440,410-byte
