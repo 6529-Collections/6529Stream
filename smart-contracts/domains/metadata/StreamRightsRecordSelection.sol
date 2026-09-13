@@ -2,12 +2,16 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/metadata/IStreamRightsRecordSelection.sol";
+import "../../interfaces/stream/metadata/IStreamRightsRecordWitnessSelection.sol";
 import "../records/StreamRightsRecordReads.sol";
 import "../records/StreamRecordArtistIdentityReads.sol";
 
 /// @notice Explicit current rights statements selected by the existing RIGHTS authority.
 /// @dev Fixed auxiliary for the typed provider; no new Core role, grant store or mutable binder.
-contract StreamRightsRecordSelection is IStreamRightsRecordSelection {
+contract StreamRightsRecordSelection is
+    IStreamRightsRecordSelection,
+    IStreamRightsRecordWitnessSelection
+{
     address public immutable override core;
     address public immutable override metadata;
     address public immutable override schemaRegistry;
@@ -20,8 +24,22 @@ contract StreamRightsRecordSelection is IStreamRightsRecordSelection {
     StreamRecordArtistIdentityReads.Pins private _artistPins;
     mapping(bytes32 => Selection[]) private _history;
 
+    struct SelectionRequest {
+        uint256 collectionId;
+        bytes32 subjectId;
+        bytes32 recordHash;
+        bytes32 expectedHead;
+        uint64 expectedRevision;
+    }
+
     constructor(address core_, address metadata_, address schemas_) {
-        if (core_.code.length == 0 || metadata_.code.length == 0 || schemas_.code.length == 0) {
+        if (
+            core_.code.length == 0 || metadata_.code.length == 0 || schemas_.code.length == 0
+                || !IERC165(metadata_)
+                    .supportsInterface(type(IStreamCollectionRecordReceipts).interfaceId)
+                || !IERC165(schemas_)
+                    .supportsInterface(type(IStreamSchemaDocumentFacts).interfaceId)
+        ) {
             revert InvalidRightsConfiguration();
         }
         core = core_;
@@ -41,7 +59,8 @@ contract StreamRightsRecordSelection is IStreamRightsRecordSelection {
     }
 
     function supportsInterface(bytes4 id) external pure override returns (bool) {
-        return id == type(IStreamRightsRecordSelection).interfaceId || id == 0x01ffc9a7;
+        return id == type(IStreamRightsRecordSelection).interfaceId
+            || id == type(IStreamRightsRecordWitnessSelection).interfaceId || id == 0x01ffc9a7;
     }
 
     function selectCurrent(
@@ -52,19 +71,59 @@ contract StreamRightsRecordSelection is IStreamRightsRecordSelection {
         uint64 expectedRevision,
         StreamRightsRecordTypes.Statement calldata witness
     ) external override returns (Selection memory selected) {
-        Selection memory previous = currentRights(collectionId, subjectId);
+        IStreamPreservationRecords.CollectionRecord memory unused;
+        return _select(
+            SelectionRequest(collectionId, subjectId, recordHash, expectedHead, expectedRevision),
+            witness,
+            unused,
+            false
+        );
+    }
+
+    function selectCurrentWithRecord(
+        uint256 collectionId,
+        bytes32 subjectId,
+        bytes32 recordHash,
+        bytes32 expectedHead,
+        uint64 expectedRevision,
+        Witness calldata witness
+    ) external override returns (Selection memory) {
+        return _select(
+            SelectionRequest(collectionId, subjectId, recordHash, expectedHead, expectedRevision),
+            witness.statement,
+            witness.original,
+            true
+        );
+    }
+
+    function _select(
+        SelectionRequest memory request,
+        StreamRightsRecordTypes.Statement calldata witness,
+        IStreamPreservationRecords.CollectionRecord memory original,
+        bool supplied
+    ) private returns (Selection memory selected) {
+        Selection memory previous = currentRights(request.collectionId, request.subjectId);
         if (
-            previous.recordHash != expectedHead || previous.revision != expectedRevision
-                || witness.predecessor != expectedHead || expectedRevision == type(uint64).max
+            previous.recordHash != request.expectedHead
+                || previous.revision != request.expectedRevision
+                || witness.predecessor != request.expectedHead
+                || request.expectedRevision == type(uint64).max
                 || block.timestamp > type(uint64).max
         ) revert RightsSelectionConflict();
         StreamRightsRecordReads.Dependencies memory d = _context();
         (selected.authorizationClass, selected.grantScope, selected.grantRevision) =
-            StreamRightsRecordReads.authority(d, collectionId, msg.sender);
+            StreamRightsRecordReads.authority(d, request.collectionId, msg.sender);
         StreamRightsRecordReads.definitions(d);
         IStreamCollectionMetadataV1.RecordReceipt memory receipt;
-        (selected.payloadHash, receipt) =
-            StreamRightsRecordReads.recorded(d, collectionId, subjectId, recordHash, witness);
+        if (supplied) {
+            (selected.payloadHash, receipt) = StreamRightsRecordReads.recordedWithWitness(
+                d, request.collectionId, request.subjectId, request.recordHash, witness, original
+            );
+        } else {
+            (selected.payloadHash, receipt) = StreamRightsRecordReads.recorded(
+                d, request.collectionId, request.subjectId, request.recordHash, witness
+            );
+        }
         selected.recordIndex = receipt.recordIndex;
         selected.recorder = receipt.recorder;
         selected.recorderAuthorizationClass = receipt.authorizationClass;
@@ -73,17 +132,19 @@ contract StreamRightsRecordSelection is IStreamRightsRecordSelection {
                 metadata, core, deploymentChainId, _artistPins, witness.licensor.artistId, d.readGas
             );
         }
-        if (expectedHead != 0 && selected.recordIndex <= previous.recordIndex) {
+        if (request.expectedHead != 0 && selected.recordIndex <= previous.recordIndex) {
             revert RightsSelectionConflict();
         }
-        selected.recordHash = recordHash;
-        selected.predecessor = expectedHead;
+        selected.recordHash = request.recordHash;
+        selected.predecessor = request.expectedHead;
         selected.selector = msg.sender;
-        selected.revision = expectedRevision + 1;
+        selected.revision = request.expectedRevision + 1;
         selected.selectedAt = uint64(block.timestamp);
-        selected.selectionHash = _selectionHash(collectionId, subjectId, selected);
-        _history[_key(collectionId, subjectId)].push(selected);
-        emit RightsRecordSelected(collectionId, subjectId, recordHash, selected);
+        selected.selectionHash = _selectionHash(request.collectionId, request.subjectId, selected);
+        _history[_key(request.collectionId, request.subjectId)].push(selected);
+        emit RightsRecordSelected(
+            request.collectionId, request.subjectId, request.recordHash, selected
+        );
     }
 
     function _selectionHash(uint256 collectionId, bytes32 subjectId, Selection memory selected)

@@ -8,6 +8,8 @@ import "./StreamRecordFamilies.sol";
 import "../../interfaces/stream/metadata/IStreamRightsRecordSelection.sol";
 import "../../interfaces/stream/metadata/IStreamCollectionMetadataV1.sol";
 import "../../interfaces/stream/metadata/IStreamSchemaRegistry.sol";
+import "../../interfaces/stream/metadata/IStreamSchemaDocumentFacts.sol";
+import "../../interfaces/stream/metadata/IStreamCollectionRecordReceipts.sol";
 import "../../interfaces/stream/parameters/IStreamGasParameterHost.sol";
 import "../metadata/StreamSchemaDocumentStore.sol";
 
@@ -156,6 +158,44 @@ library StreamRightsRecordReads {
             ),
             (IStreamPreservationRecords.CollectionRecord, IStreamCollectionMetadataV1.RecordReceipt)
         );
+        payloadHash = _recorded(d, collectionId, subjectId, recordHash, witness, record, receipt);
+    }
+
+    function recordedWithWitness(
+        Dependencies memory d,
+        uint256 collectionId,
+        bytes32 subjectId,
+        bytes32 recordHash,
+        StreamRightsRecordTypes.Statement memory witness,
+        IStreamPreservationRecords.CollectionRecord memory record
+    )
+        public
+        view
+        returns (bytes32 payloadHash, IStreamCollectionMetadataV1.RecordReceipt memory receipt)
+    {
+        bytes memory
+            output = _read(
+            d,
+            d.targets[1],
+            abi.encodeCall(IStreamCollectionRecordReceipts.collectionRecordReceipt, (recordHash)),
+            288
+        );
+        if (output.length != 288) {
+            revert IStreamRightsRecordSelection.RightsDependencyReadFailed(d.targets[1]);
+        }
+        receipt = abi.decode(output, (IStreamCollectionMetadataV1.RecordReceipt));
+        payloadHash = _recorded(d, collectionId, subjectId, recordHash, witness, record, receipt);
+    }
+
+    function _recorded(
+        Dependencies memory d,
+        uint256 collectionId,
+        bytes32 subjectId,
+        bytes32 recordHash,
+        StreamRightsRecordTypes.Statement memory witness,
+        IStreamPreservationRecords.CollectionRecord memory record,
+        IStreamCollectionMetadataV1.RecordReceipt memory receipt
+    ) private view returns (bytes32 payloadHash) {
         if (
             collectionId == 0 || subjectId == 0 || recordHash == 0
                 || receipt.collectionId != collectionId || receipt.recorder == address(0)
@@ -263,40 +303,51 @@ library StreamRightsRecordReads {
         bytes32 hash,
         uint256 byteLength
     ) private view {
-        IStreamSchemaRegistry.DocumentView memory row =
-            abi.decode(
-                _read(d, d.targets[2], abi.encodeCall(IStreamSchemaRegistry.document, (id)), 8192),
-                (IStreamSchemaRegistry.DocumentView)
-            );
+        bytes memory output = _read(
+            d, d.targets[2], abi.encodeCall(IStreamSchemaDocumentFacts.documentFacts, (id)), 288
+        );
+        if (output.length != 288) {
+            revert IStreamRightsRecordSelection.RightsDependencyReadFailed(d.targets[2]);
+        }
+        IStreamSchemaDocumentFacts.DocumentFacts memory row =
+            abi.decode(output, (IStreamSchemaDocumentFacts.DocumentFacts));
         if (
             !row.exists || row.status != IStreamSchemaRegistry.DocumentStatus.ACTIVE
-                || keccak256(bytes(row.specification.name)) != id || row.specification.kind != kind
-                || row.specification.canonicalizationId != RAW_BYTES
-                || row.specification.supersedesId != 0 || row.specification.totalBytes != byteLength
-                || row.specification.contentHash != hash
-                || row.declarationHash != keccak256(abi.encode(row.specification, row.chunkHashes))
+                || row.kind != kind || row.canonicalizationId != RAW_BYTES || row.supersedesId != 0
+                || row.totalBytes != byteLength || row.contentHash != hash
+                || row.declarationHash == 0
         ) {
             revert IStreamRightsRecordSelection.RightsDefinitionUnavailable(id);
         }
         // Reconstruct the complete registered document through individually bounded reads.
         // The semantic schema exceeds one chunk; do not silently truncate it or raise a cap.
         bytes memory payload;
-        if (row.chunkHashes.length == 0 || row.chunkHashes.length > 64) {
+        if (row.chunkCount == 0 || row.chunkCount > 64) {
             revert IStreamRightsRecordSelection.RightsDefinitionUnavailable(id);
         }
-        for (uint256 i; i < row.chunkHashes.length; ++i) {
+        for (uint256 i; i < row.chunkCount; ++i) {
+            bytes memory chunkOutput = _read(
+                d,
+                d.targets[2],
+                abi.encodeCall(IStreamSchemaDocumentFacts.documentChunkHashAt, (id, i)),
+                32
+            );
+            if (chunkOutput.length != 32) {
+                revert IStreamRightsRecordSelection.RightsDependencyReadFailed(d.targets[2]);
+            }
+            bytes32 chunkHash = abi.decode(chunkOutput, (bytes32));
             bytes memory chunk = abi.decode(
                 _read(
                     d,
                     d.targets[3],
-                    abi.encodeCall(StreamSchemaDocumentStore.readChunk, (row.chunkHashes[i])),
+                    abi.encodeCall(StreamSchemaDocumentStore.readChunk, (chunkHash)),
                     8256
                 ),
                 (bytes)
             );
             if (
-                chunk.length == 0 || chunk.length > 8192 || keccak256(chunk) != row.chunkHashes[i]
-                    || (i + 1 < row.chunkHashes.length && chunk.length != 8192)
+                chunk.length == 0 || chunk.length > 8192 || keccak256(chunk) != chunkHash
+                    || (i + 1 < row.chunkCount && chunk.length != 8192)
                     || payload.length + chunk.length > byteLength
             ) {
                 revert IStreamRightsRecordSelection.RightsDefinitionUnavailable(id);

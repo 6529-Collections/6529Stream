@@ -15,6 +15,8 @@ interface RightsSelectionFileVm {
     function readFileBinary(string calldata path) external view returns (bytes memory);
     function recordLogs() external;
     function getRecordedLogs() external returns (Log[] memory);
+    function mockCall(address target, bytes calldata input, bytes calldata output) external;
+    function clearMockedCalls() external;
 }
 
 /// @notice Actual metadata, multi-chunk definitions, rights selection and threshold Safe.
@@ -25,6 +27,7 @@ contract StreamRightsRecordSelectionTest is CollectionMetadataV1Fixture {
     RecordArtistReadFixture private rightsArtistCoordinator;
     RecordArtistReadFixture private rightsArtistIdentity;
     bytes32 private constant RIGHTS_TYPE = keccak256("RIGHTS_STATEMENT");
+    string private registrationURI;
 
     function _prepare() private {
         _register(
@@ -57,7 +60,7 @@ contract StreamRightsRecordSelectionTest is CollectionMetadataV1Fixture {
             keccak256(payload),
             schemas.RAW_BYTES(),
             0,
-            "",
+            registrationURI,
             uint32(payload.length)
         );
         (bytes32 scope, bytes32 oldHash, bytes32 newHash) =
@@ -606,5 +609,162 @@ contract StreamRightsRecordSelectionTest is CollectionMetadataV1Fixture {
         (IStreamPreservationRecords.CollectionRecord memory record,) =
             metadata.collectionRecord(first);
         require(record.subjectId == subject, "original record remains readable");
+    }
+
+    function _longUri() private pure returns (string memory) {
+        bytes memory tail = new bytes(2041);
+        for (uint256 i; i < tail.length; ++i) {
+            tail[i] = 0x75;
+        }
+        return string(abi.encodePacked("ipfs://", tail));
+    }
+
+    function _outerWitness(StreamRightsRecordTypes.Statement memory statement, string memory uri)
+        private
+        returns (bytes32 hash, IStreamRightsRecordWitnessSelection.Witness memory witness)
+    {
+        bytes memory payload = StreamRightsRecordJson.serialize(statement);
+        witness.statement = statement;
+        witness.original = _record(RIGHTS_TYPE, payload);
+        witness.original.uri = uri;
+        witness.original.subjectId = statement.subjectId;
+        witness.original.schemaId = StreamRightsRecordDefinitions.SCHEMA_ID;
+        witness.original.contentHash.canonicalizationId = StreamRightsRecordDefinitions.CANON_ID;
+        hash = metadata.recordCollectionRecordWithPayload(1, witness.original, payload);
+    }
+
+    function testBoundedWitnessSupportsColdMaximumRecordAndSchemaUri() public {
+        registrationURI = _longUri();
+        _prepare();
+        (bytes32 hash, IStreamRightsRecordWitnessSelection.Witness memory witness) =
+            _outerWitness(_statement(), _longUri());
+        safeVm.cool(address(metadata));
+        safeVm.cool(address(schemas));
+        IStreamRightsRecordSelection.Selection memory selected =
+            selection.selectCurrentWithRecord(1, subject, hash, 0, 0, witness);
+        require(
+            selected.recordHash == hash && selected.recorder == address(this),
+            "cold maximum selected original"
+        );
+        safeVm.cool(address(schemas));
+        require(
+            selection.requireCurrent(1, subject, hash, 1).selectionHash == selected.selectionHash,
+            "cold maximum definitions consumable"
+        );
+        require(
+            selection.supportsInterface(type(IStreamRightsRecordSelection).interfaceId)
+                && selection.supportsInterface(
+                    type(IStreamRightsRecordWitnessSelection).interfaceId
+                ),
+            "old and additive caller IDs"
+        );
+    }
+
+    function testEveryOuterWitnessFieldIsAuthenticatedBeforeSelection() public {
+        _prepare();
+        (bytes32 hash, IStreamRightsRecordWitnessSelection.Witness memory witness) =
+            _outerWitness(_statement(), "ipfs://exact");
+        bytes memory original = abi.encode(witness);
+        for (uint256 field; field < 12; ++field) {
+            witness = abi.decode(original, (IStreamRightsRecordWitnessSelection.Witness));
+            if (field == 0) witness.original.uri = "ipfs://tampered";
+            if (field == 1) witness.original.effectiveAt += 1;
+            if (field == 2) witness.original.recordType = bytes32(uint256(1));
+            if (field == 3) witness.original.subjectId = bytes32(uint256(1));
+            if (field == 4) witness.original.schemaId = bytes32(uint256(1));
+            if (field == 5) witness.original.contentHash.digest = abi.encode(bytes32(uint256(1)));
+            if (field == 6) witness.original.contentHash.algorithm = 2;
+            if (field == 7) witness.original.contentHash.canonicalizationId = bytes32(uint256(1));
+            if (field == 8) witness.original.signatureScheme = bytes32(uint256(1));
+            if (field == 9) witness.original.signatureHash.digest = hex"01";
+            if (field == 10) {
+                witness.original.signatureHash.canonicalizationId = bytes32(uint256(1));
+            }
+            if (field == 11) witness.original.signatureHash.algorithm = 1;
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    IStreamRightsRecordSelection.InvalidRightsRecord.selector, hash
+                )
+            );
+            selection.selectCurrentWithRecord(1, subject, hash, 0, 0, witness);
+            require(
+                selection.currentRights(1, subject).recordHash == 0, "bad witness never advances"
+            );
+        }
+        witness = abi.decode(original, (IStreamRightsRecordWitnessSelection.Witness));
+        require(
+            selection.selectCurrentWithRecord(1, subject, hash, 0, 0, witness).recordHash == hash,
+            "original exact proof retry"
+        );
+    }
+
+    function testMalformedCompactReceiptCannotSelectAndCanonicalRetryWorks() public {
+        _prepare();
+        (bytes32 hash, IStreamRightsRecordWitnessSelection.Witness memory witness) =
+            _outerWitness(_statement(), "ipfs://exact");
+        bytes memory input =
+            abi.encodeCall(IStreamCollectionRecordReceipts.collectionRecordReceipt, (hash));
+        for (uint256 i; i < 2; ++i) {
+            RightsSelectionFileVm(address(vm))
+                .mockCall(address(metadata), input, new bytes(i == 0 ? 256 : 320));
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    IStreamRightsRecordSelection.RightsDependencyReadFailed.selector,
+                    address(metadata)
+                )
+            );
+            selection.selectCurrentWithRecord(1, subject, hash, 0, 0, witness);
+        }
+        RightsSelectionFileVm(address(vm)).clearMockedCalls();
+        require(selection.currentRights(1, subject).recordHash == 0, "malformed receipt atomic");
+        selection.selectCurrentWithRecord(1, subject, hash, 0, 0, witness);
+    }
+
+    function testSafeCallsAdditiveBoundedSelectionAtMaximumRecordUri() public {
+        _prepare();
+        uint256[] memory keys = new uint256[](2);
+        keys[0] = 101;
+        keys[1] = 202;
+        OfficialSafe account =
+            createOfficialSafe(deploySafeComponents("1.4.1"), safeOwnerAddresses(keys), 2, 1);
+        _grant(1, StreamRecordFamilies.RIGHTS, 7, address(account), true);
+        (bytes32 hash, IStreamRightsRecordWitnessSelection.Witness memory witness) =
+            _outerWitness(_statement(), _longUri());
+        bytes memory input = abi.encodeCall(
+            selection.selectCurrentWithRecord, (1, subject, hash, bytes32(0), uint64(0), witness)
+        );
+        safeVm.cool(address(metadata));
+        require(
+            executeSafe(account, keys, address(selection), 0, input, 0),
+            "actual Safe bounded select"
+        );
+        require(
+            selection.currentRights(1, subject).selector == address(account),
+            "Safe authority preserved"
+        );
+    }
+
+    function testConstructorRequiresBothCompactCapabilitiesAndHealthyRetry() public {
+        _prepare();
+        for (uint256 i; i < 2; ++i) {
+            address target = i == 0 ? address(metadata) : address(schemas);
+            bytes4 id = i == 0
+                ? type(IStreamCollectionRecordReceipts).interfaceId
+                : type(IStreamSchemaDocumentFacts).interfaceId;
+            RightsSelectionFileVm(address(vm))
+                .mockCall(
+                    target, abi.encodeCall(IERC165.supportsInterface, (id)), abi.encode(false)
+                );
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    IStreamRightsRecordSelection.InvalidRightsConfiguration.selector
+                )
+            );
+            new StreamRightsRecordSelection(address(core), address(metadata), address(schemas));
+            RightsSelectionFileVm(address(vm)).clearMockedCalls();
+        }
+        StreamRightsRecordSelection healthy =
+            new StreamRightsRecordSelection(address(core), address(metadata), address(schemas));
+        require(healthy.metadata() == address(metadata), "exact healthy constructor retry");
     }
 }

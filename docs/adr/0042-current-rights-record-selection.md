@@ -40,10 +40,31 @@ subject through that host's existing admission rules.
 The complete semantic schema, separate `STREAM_RIGHTS_JSON_PROFILE_V1` profile
 and shared `RFC8785_JCS` definition must be registered, active and byte-exact.
 All three definitions declare `RAW_BYTES` for their own retained bytes. Their
-identities, kinds, immutable declaration, ordered chunks, lengths and hashes
+identities, kinds, stored declaration hash, ordered chunks, lengths and hashes
 are checked. The semantic schema exceeds one 8192-byte chunk. The original
 record receipt must name the same schema and canonicalization definition
 hashes, and its typed witness must reproduce every stored payload byte.
+
+### Bounded original-record witness
+
+The additive `IStreamRightsRecordWitnessSelection.selectCurrentWithRecord`
+entrypoint accepts both the complete original record tuple and its typed
+statement. A fixed-size actual receipt, the exact original fourteen-word hash
+and the actual indexed lane authenticate the entire supplied tuple, including
+its URI and zero-valued signature fields. It uses the same authority, selection
+history, event and commitment as `selectCurrent`.
+
+Definitions now use `IStreamSchemaDocumentFacts` and ordered per-document chunk
+reads. The pinned registry establishes the name-derived document key and retains
+the declaration hash. This consumer reconstructs the complete content bytes;
+it does not reconstruct the omitted registration name/URI declaration preimage.
+Both compact reader interfaces are required at construction. The original
+primary interface ID, selector and storage remain unchanged.
+
+Use the additive entrypoint for onchain selection across every supported URI
+length. The old `selectCurrent` full-record read retains its existing gas limit.
+`requireCurrent` uses bounded definitions even for a head originally selected
+through that old entrypoint. See [bounded reads](../integrations/bounded-record-reads.md).
 
 An artist licensor reference proves a known immutable identity registration
 through the actual metadata artist facade, its Coordinator and Identity owner.
