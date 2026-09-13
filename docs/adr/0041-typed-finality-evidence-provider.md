@@ -143,6 +143,15 @@ operative checks is moved into a constructor that precedes its dependencies.
 
 ## Delivery boundaries
 
+The [original-coordinator inventory](../integrations/original-coordinator-inventory.md)
+now derives an ordered complete source set from actual token membership and
+Core's retained coordinator address for each completed or burned token.
+Permissionless bounded indexing binds every association and first-occurrence
+runtime identity. These code pins are observed at indexing; original module
+identity and actual entropy-policy validation still belong to complete discovery.
+Current membership completeness and per-entry live code validation are explicit
+separate reads.
+
 The [description consumer](../integrations/finality-description-evidence.md)
 now joins the actual WORK and RIGHTS selectors through their exact current
 head, validating readback and original receipt. It keeps late selector bindings
