@@ -1895,6 +1895,47 @@ contract StreamOwnerRecoveryNoticesTest is CharacterizationTestBase, OfficialSaf
         );
     }
 
+    function testColdOriginal214EndpointDesignationWriterFits16MGas() public {
+        StreamOwnerNoticeTypes.Designation memory d = _designation();
+        d.name = "x";
+        d.identity.uri = "ipfs://i";
+        d.contactEndpoints = new StreamOwnerNoticeTypes.Contact[](214);
+        for (uint256 i; i < 214; ++i) {
+            d.contactEndpoints[i] = StreamOwnerNoticeTypes.Contact(
+                StreamOwnerNoticeTypes.ContactKind.HTTPS,
+                string(
+                    abi.encodePacked(
+                        "https://", bytes1(uint8(97 + i / 26)), bytes1(uint8(97 + i % 26))
+                    )
+                ),
+                0,
+                address(0)
+            );
+        }
+        d.contactEndpoints[213].uri = string.concat(d.contactEndpoints[213].uri, "xxxxxx");
+        bytes memory payload = StreamStewardDesignationJson.serialize(d);
+        require(payload.length == 8192, "exact complete payload boundary");
+        IStreamOwnerRecords.OwnerRecord memory r = _record(
+            keccak256("STEWARD_DESIGNATION"),
+            StreamOwnerNoticeDefinitions.STEWARD_SCHEMA_ID,
+            payload
+        );
+        _coolPrepared();
+        safeVm.cool(address(schemas));
+        safeVm.cool(address(StreamOwnerNoticeAdmission));
+        safeVm.cool(address(StreamOwnerRecordBook));
+        uint256 beforeGas = gasleft();
+        owner.recordStewardDesignation(7, r, d);
+        uint256 used = beforeGas - gasleft();
+        emit PreparedGas("214-original-writer", used, 214);
+        require(used < 16000000, "named-target cold original writer exceeds practical16M probe");
+        bytes32 head = owner.stewardDesignationFor(7, address(this));
+        (IStreamOwnerRecords.OwnerRecord memory saved,) = owner.ownerRecord(head);
+        require(
+            head != 0 && keccak256(saved.payload) == keccak256(payload), "exact admitted payload"
+        );
+    }
+
     function testPreparedExact8192ShortEndpointFamilyRejectsNextEntryAndPublishesEveryClaim()
         public
     {

@@ -209,16 +209,31 @@ proportional to its full publication. A retained default predecessor measured
 revalidating already authenticated steward endpoints reduced the same example to
 21,863,647. Neither figure is an all-valid-shape transaction-capacity claim.
 
+The designation writer now checks uniqueness by sorting a separate array of exact
+canonical contact hashes. It retains the original contact/JSON order, validates
+every row once, and joins the collected rows once. The uniqueness work is bounded
+by O(n log n), with no recursion or item-count cap. All original tuple/inactive-field
+and complete-payload limits remain; inputs with multiple distinct errors still
+reject, without promising which competing error is reported first.
+
+The exact 8192-byte, 214-short-endpoint original designation write costs
+13,074,681 / 13,626,093 gas in the named-target cold enclosing-call probe, below
+its 16-million test bound. A separate retained maximum-payload/2048-byte-record-URI
+case costs 13,323,571 / 13,798,640 in the direct callee trace. These measurements
+include the separately reviewed shared JSON escaping implementation; the Fields
+change alone did not close the writer capacity gap. They cover the specified
+shapes and cold targets, not every possible lexical shape or a network limit.
+
 The final named-target cold capacity measurements are individual enclosing calls,
 excluding transaction intrinsic gas. Each figure below gives default / IR gas:
 
 | Exercised shape | Begin preparation | Largest single delivery | Final opening |
 | --- | ---: | ---: | ---: |
-| Exact 8192-byte designation, 214 short endpoints plus owner | 12,513,866 / 12,770,204 | 307,587 / 307,793 | 694,799 / 689,613 |
-| Exact 8192-byte designation, maximum reference URIs, five deliveries | 13,750,007 / 13,976,250 | 1,815,594 / 1,902,103 | 695,614 / 690,432 |
-| Absolute 4800-byte base and 4672-byte delivery encodings | 9,355,141 / 9,545,008 | 1,826,054 / 1,912,533 | 694,835 / 689,649 |
+| Exact 8192-byte designation, 214 short endpoints plus owner | 11,126,373 / 11,366,693 | 307,587 / 307,793 | 694,799 / 689,613 |
+| Exact 8192-byte designation, maximum reference URIs, five deliveries | 9,002,832 / 9,311,757 | 1,815,594 / 1,902,103 | 695,614 / 690,432 |
+| Absolute 4800-byte base and 4672-byte delivery encodings | 6,482,597 / 6,722,621 | 1,826,054 / 1,912,533 | 694,835 / 689,649 |
 
-The exact 8192-byte escaped-name case begins at 9,154,430 / 9,103,883 gas. The
+The exact 8192-byte escaped-name case begins at 4,760,274 / 4,855,301 gas. The
 214-endpoint case also rejects a next entry in that same canonical family; it is
 not a universal maximum over all lexical combinations. The final opening performs
 no endpoint traversal. An actual companion's complete 24,544-byte registered request
@@ -227,12 +242,13 @@ existing dedicated intent cap. Those direct dependencies are named explicitly in
 the test. This is not a whole current-stack cold transaction bound.
 
 The original staged-input and full-witness requirements remain intact. All prior
-94 behavioral names pass in the matching 119-case cohort in both profiles, along
+119 behavioral names pass in the matching 131-case cohort in both profiles, along
 with exact original-publication/evidence parity, maximum ABI chunks, malformed
 witnesses, queue/clock timing, actual threshold Safe calls and actual companion
-execution. No network transaction limit or release gas gate is waived. The
-separate shared JSON escape optimization is not included in this increment's
-source or measurements.
+execution. No network transaction limit or release gas gate is waived. The measurements borrow the exact shared JSON escape implementation from
+`e9b6a7bcb6a3e08ffe8ef8c117644c0eae5426ff`; that dependency remains owned and
+committed separately from the contact writer change. The host ABI, storage,
+signature preparation, nonce ordering and notice/response state are unchanged.
 
 Actual full current Core/artist/Executor/companion composition, wider
 collection/release/season/view affected-token inventory and runbook routing,

@@ -41,18 +41,76 @@ library StreamOwnerNoticeFields {
         returns (string memory)
     {
         if (values.length == 0) revert InvalidNoticeWitness();
-        string memory out = "[";
+        bytes[] memory rows = new bytes[](values.length);
         bytes32[] memory hashes = new bytes32[](values.length);
+        uint256 length = 1;
         for (uint256 i; i < values.length; ++i) {
-            string memory row = contact(values[i]);
-            hashes[i] = keccak256(bytes(row));
-            for (uint256 j; j < i; ++j) {
-                if (hashes[i] == hashes[j]) revert InvalidNoticeWitness();
-            }
-            out = string.concat(out, i == 0 ? "" : ",", row);
-            if (bytes(out).length > 8192) revert InvalidNoticeWitness();
+            rows[i] = bytes(contact(values[i]));
+            hashes[i] = keccak256(rows[i]);
+            length += rows[i].length + (i == 0 ? 0 : 1);
+            if (length > 8192) revert InvalidNoticeWitness();
         }
-        return string.concat(out, "]");
+        _requireUnique(hashes);
+        // Preserve the original prefix bound, then append its closing bracket exactly.
+        bytes memory out = new bytes(length + 1);
+        out[0] = "[";
+        uint256 offset = 1;
+        for (uint256 i; i < rows.length; ++i) {
+            if (i != 0) out[offset++] = ",";
+            _copyRow(rows[i], out, offset);
+            offset += rows[i].length;
+        }
+        out[offset] = "]";
+        return string(out);
+    }
+
+    /// @dev Only complete words and remaining actual bytes are copied; no padded tail write.
+    function _copyRow(bytes memory row, bytes memory out, uint256 offset) private pure {
+        assembly ("memory-safe") {
+            let size := mload(row)
+            let source := add(row, 32)
+            let target := add(add(out, 32), offset)
+            let cursor := 0
+            for { } iszero(gt(add(cursor, 32), size)) { cursor := add(cursor, 32) } {
+                mstore(add(target, cursor), mload(add(source, cursor)))
+            }
+            if lt(cursor, size) {
+                let tail := mload(add(source, cursor))
+                let index := 0
+                for { } lt(cursor, size) {
+                    cursor := add(cursor, 1)
+                    index := add(index, 1)
+                } { mstore8(add(target, cursor), byte(index, tail)) }
+            }
+        }
+    }
+
+    /// @dev Sort only hashes; emitted contacts retain their original order. Heap construction
+    /// and extraction bound uniqueness work to O(n log n), without recursion or an item cap.
+    function _requireUnique(bytes32[] memory hashes) private pure {
+        uint256 n = hashes.length;
+        for (uint256 i = n / 2; i != 0;) {
+            --i;
+            _siftDown(hashes, i, n);
+        }
+        for (uint256 end = n; end > 1;) {
+            --end;
+            (hashes[0], hashes[end]) = (hashes[end], hashes[0]);
+            _siftDown(hashes, 0, end);
+        }
+        for (uint256 i = 1; i < n; ++i) {
+            if (hashes[i - 1] == hashes[i]) revert InvalidNoticeWitness();
+        }
+    }
+
+    function _siftDown(bytes32[] memory hashes, uint256 root, uint256 n) private pure {
+        while (root < n / 2) {
+            uint256 child = root * 2 + 1;
+            if (child + 1 < n && hashes[child] < hashes[child + 1]) ++child;
+            if (hashes[root] >= hashes[child]) return;
+            (hashes[root], hashes[child]) = (hashes[child], hashes[root]);
+            root = child;
+        }
     }
 
     function contact(StreamOwnerNoticeTypes.Contact memory c) public pure returns (string memory) {
