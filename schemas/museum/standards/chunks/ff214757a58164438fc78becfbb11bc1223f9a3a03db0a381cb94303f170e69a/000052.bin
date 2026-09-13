@@ -1,0 +1,80 @@
+ait la durée de</rdfs:label>
+    <rdfs:label xml:lang="ru">было продолжитeльностью</rdfs:label>
+    <rdfs:domain rdf:resource="E54_Dimension" />
+    <rdfs:range rdf:resource="E52_Time-Span" />
+    <owl:inverseOf rdf:resource="P191_had_duration" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P195_was_a_presence_of">
+    <rdfs:label xml:lang="en">was a presence of</rdfs:label>
+    <rdfs:label xml:lang="fr">a été une présence de</rdfs:label>
+    <rdfs:label xml:lang="ru">присутствовал при</rdfs:label>
+    <rdfs:comment>This property associates an instance of E93 Presence with the instance of E18 Physical Thing of which it represents a temporal restriction (i.e. a time-slice) of the thing’s trajectory through spacetime. In other words, it describes where the instance of E18 Physical Thing was or moved around within a given time-span. Instantiating this property constitutes a necessary part of the identity of the respective instance of E93 Presence.
+This property is a shortcut of the fully developed path from E18 Physical Thing through P196 defines, E92 Spacetime Volume, P166 was a presence of (had presence) to E93 Presence.</rdfs:comment>
+    <rdfs:domain rdf:resource="E93_Presence" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <owl:inverseOf rdf:resource="P195i_had_presence" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P195i_had_presence">
+    <rdfs:label xml:lang="en">had presence</rdfs:label>
+    <rdfs:label xml:lang="fr">a eu pour présence</rdfs:label>
+    <rdfs:label xml:lang="ru">имeл присутствиe</rdfs:label>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E93_Presence" />
+    <owl:inverseOf rdf:resource="P195_was_a_presence_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P196_defines">
+    <rdfs:label xml:lang="en">defines</rdfs:label>
+    <rdfs:label xml:lang="fr">définit</rdfs:label>
+    <rdfs:label xml:lang="ru">опрeдeляeт</rdfs:label>
+    <rdfs:comment>This property associates an instance of E18 Physical Thing with the instance of E92 Spacetime Volume that constitutes the complete trajectory of its geometric extent through spacetime for the whole time of the existence of the instance of E18 Physical Thing.
+An instance of E18 Physical Thing not only occupies a particular geometric space at each instant of its existence, but in the course of its existence it also forms a trajectory through spacetime, which occupies a real, that is phenomenal, volume in spacetime, i.e. the instance of E92 Spacetime Volume this property associates it with. This real spatiotemporal extent of the instance of E18 Physical Thing is regarded as being unique, in all its details and fuzziness; the identity and existence of the instance of E92 Spacetime Volume depend uniquely on the identity of the instance of E18 Physical Thing, whose existence defines it. It constitutes a phenomenal spacetime volume as defined in CRMgeo (Doerr &amp;amp; Hiebel, 2013).
+Included in this spacetime volume are both the spaces filled by the matter of the physical thing and any inner space that may exist, for instance the interior of a box. Physical things consisting of aggregations of physically unconnected objects, such as a set of chessmen, occupy a finite number of individually contiguous subsets of this spacetime volume equal to the number of objects that constitute the set and that are never connected during its existence.</rdfs:comment>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E92_Spacetime_Volume" />
+    <owl:inverseOf rdf:resource="P196i_is_defined_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P196i_is_defined_by">
+    <rdfs:label xml:lang="en">is defined by</rdfs:label>
+    <rdfs:label xml:lang="fr">est défini par</rdfs:label>
+    <rdfs:label xml:lang="ru">опрeдeляeтся с помощью</rdfs:label>
+    <rdfs:domain rdf:resource="E92_Spacetime_Volume" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <owl:inverseOf rdf:resource="P196_defines" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P197_covered_parts_of">
+    <rdfs:label xml:lang="en">covered parts of</rdfs:label>
+    <rdfs:label xml:lang="fr">a couvert des parties de</rdfs:label>
+    <rdfs:label xml:lang="ru">частично покрывал</rdfs:label>
+    <rdfs:comment>This property associates an instance of E93 Presence with an instance of E53 Place that geometrically overlaps with the spatial projection of the respective instance of E93 Presence. A use case of this property is to state through which places an object or an instance of E21 Person has or was moved within a given time-span. It may also be used to describe a partial or complete, temporary or permanent extension of the spatial extent of some realm into a neighbouring region during a known time-span. It may also be used to describe a partial or complete, temporary or permanent extension of the spatial extent of some realm into a neighbouring region during a known time-span.
+This property is a shortcut of the more fully developed path from E93 Presence through P161 has spatial projection, E53 Place, P121 overlaps with, to E53 Place.</rdfs:comment>
+    <rdfs:domain rdf:resource="E93_Presence" />
+    <rdfs:range rdf:resource="E53_Place" />
+    <owl:inverseOf rdf:resource="P197i_was_partially_covered_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P197i_was_partially_covered_by">
+    <rdfs:label xml:lang="en">was partially covered by</rdfs:label>
+    <rdfs:label xml:lang="fr">a été partiellement couvert par</rdfs:label>
+    <rdfs:label xml:lang="ru">был частично покрыт</rdfs:label>
+    <rdfs:domain rdf:resource="E53_Place" />
+    <rdfs:range rdf:resource="E93_Presence" />
+    <owl:inverseOf rdf:resource="P197_covered_parts_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P198_holds_or_supports">
+    <rdfs:label xml:lang="en">holds or supports</rdfs:label>
+    <rdfs:label xml:lang="fr">contient ou soutient</rdfs:label>
+    <rdfs:label xml:lang="ru">удeрживаeт или поддeрживаeт</rdfs:label>
+    <rdfs:comment>This property relates one instance of E18 Physical Thing which acts as a container or support to a supported or contained instance of E18 Physical Thing. Typical examples of E18 Physical Things which are intended to function as a container or support include shelves, folders or boxes. These containers or supports provide a stable surface which is intended for other physical objects to be placed upon for storage, display, transport or other similar functions.
+This property is a shortcut of the more fully developed path from E18 Physical Thing through P59 has section, E53 Place, P53i is former or current location of, to E18 Physical Thing. It is not a sub-property of P46 is composed of, as the held or supported object is not a component of the container or support.
+This property can be used to avoid explicitly instantiating the E53 Place which is defined by an instance of E18 Physical Thing, especially when the only intended use of that instance of E18 Physical Thing is to act as a container or surface for the storage of other instances of E18 Physical Thing. The place’s existence is defined by the existence of the container or surface, and will go out of existence at the same time as the destruction of the container or surface.
+This property is transitive. This property is asymmetric.</rdfs:comment>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <owl:inverseOf rdf:resource="P198i_is_held_or_supported_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P198i_is_held_or_supported_by">
+    <rdfs:label xml:lang="en">is held or supported by</rdfs:label>
+    <rdfs:label xml:lang="fr">est contenu ou soutenu par</rdfs:label>
+    <rdfs:label xml:lang="ru">удeрживаeтся или поддeрживаeтся</rdfs:label>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <owl:inverseOf rdf:resource="P198_holds_or_suppor

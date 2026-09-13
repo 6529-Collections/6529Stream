@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    ***************************************************************************
+   *                                                                            *
+   *                              PREMIS                                        * 
+   *                 Preservation Metadata XML Schema                           *
+   *                                                                            *       
+   *                             VERSION 3.0                                    *
+   *                (supercedes version 2.3 of August 4, 2014)                  *   
+   *                                                                            *
+   *                            January 18, 2016                                *
+   *                                                                            *
+   *                                                                            *
+   *  editor: Ray Denenberg, Library of Congress; rden@loc.gov                  *
+   *                                                                            *   
+    ****************************************************************************
+
+
+******************************************************************************************************
+
+Changes in version 3.0:
+
+1.  Added xsi:type="intellectualEntity" 
+2. linkingIntellectualEntityIdentifier removed
+3.  <environment> removed 
+4. storage added to representation
+5. eventDetail renamed eventDetailInformation and is structured
+6. agentVersion added 
+7. linkingEnvironmentIdentifier added
+8.  preservationLevelType new within preservationLevel
+9.  relatedObjectIdentification renamed relatedObjectIdentifier 
+10. relatedObjectIdentification and relatedEventIdentification renamed
+         relatedObjectIdentifier and relatedEventIdentifier
+11. relatedEnvironmentPurpose and relatedEnvironmentCharacteristic added to relationship. 
+     These were previously environmentPurpose and environmentCharacteristic 
+      under environment, which is removed.
+12. compositionLevel:Was nonNegativeInteger.  Now value "unknown" may be supplied. 
+13. namespace changed from info:lc/xmlns/premis-v2   to  http://www.loc.gov/premis/v3
+14. edtf definition changed so that it is equivalent to xs:string 
+    (regular expressions removed).
+15. Reference to XLink namespace and schema, and XLink attributeGroup removed. 
+    Local attribute simpleLink defined to replace replace xlink:simpleLInk
+16. mdSec removed.  The mdSec definition and all references to it.    
+********************************************************************************************   
+-->
+<xs:schema 
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+	xmlns="http://www.loc.gov/premis/v3" 
+	targetNamespace="http://www.loc.gov/premis/v3" 
+	elementFormDefault="qualified" 
+	attributeFormDefault="unqualified">
+	<!--   		
+An instance is 
+(1) One or more of <object>, <event>, <agent>, <rights> all wrapped within a <premis> container; or
+(2) any one of  <object>, <event>, <agent>, <rights>  by itself. 
+
+Thus the root element is one of the following:  <premis>, <object>, <event>, <agent>, <rights> 
+
+********************************************************************************************
+*                                                                                          *
+*                            Root element declarations                                     *
+*                                                                                          *
+********************************************************************************************
+
+-->
+	<xs:element name="premis" type="premisComplexType"/>
+	<xs:element name="object" type="objectComplexType"/>
+	<xs:element name="event" type="eventComplexType"/>
+	<xs:element name="agent" type="agentComplexType"/>
+	<xs:element name="rights" type="rightsComplexType"/>
+	<!-- 	
+
+
+*************************************************************************************************
+*                                                                                               *
+*                          definitions of complex types for the root elements                   *
+*                                                                                               *
+*************************************************************************************************
+
+************************************ premisComplexType 
+-->
+	<xs:complexType name="premisComplexType">
+		<xs:sequence>
+			<xs:element ref="object" maxOccurs="unbounded"/>
+			<xs:element ref="event" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="agent" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="rights" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="version" type="version3" use="required"/>
+	</xs:complexType>
+	<!-- 	
+
+*************************************************************************************************
+*                                                                                               *
+*   objectComplexType  (and the four major <object>  category definitions)                     *
+*                                                                                               *
+*************************************************************************************************
+
+-->
+	<xs:complexType name="objectComplexType" abstract="true"/>
+	<!--
+***************  
+The four "types":  'file', 'representation', 'bitstream', and intellectualEntity'.  
+intellectualEntity is new in 3.0.
+
+These are the values for the xsi:type attribute in an instance. 
+For an object of type file: <object xsi:type="file"> will mean that the complexType 
+"file" will be validated. For an object of type representation: 
+<object xsi:type="representation">  will mean that the complexType "representation" will be validated. Etc.
+
+
+******* file
+-->
+	<xs:complexType name="file">
+		<xs:complexContent>
+			<xs:extension base="objectComplexType">
+				<xs:sequence>
+					<xs:element ref="objectIdentifier" maxOccurs="unbounded"/>
+					<!-- Data dictionary lists objectCategory here, values:  'file', 'representation', or 
+					    'bitstream'. It is omitted and instead the mechanism described in the preceding
+					    comment is used to signify the category of the object. Using this mechanism allows
+					    for the specific definition, corresponding to the category, to be validated. 
+                          -->
+					<xs:element ref="preservationLevel" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element ref="significantProperties" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element ref="objectCharacteristics" maxOccurs="unbounded"/>
+					<xs:element ref="originalName" minOccurs="0"/>
+					<xs:element ref="storage" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element ref="signatureInformation" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element ref="relationship" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element ref="linkingEventIdentifier" minOccurs="0" maxOccurs="unbounded"/>
+					<!-- linkingIntellectualEntityIdentifier removed in 3.0 -->
+					<xs:element ref="linkingRightsStatementIdentifier" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+				<xs:attribute name="xmlID" type="xs:ID"/>
+				<xs:attribute name="version" type="version3"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--
+*********** representation
+  	-->
+	<xs:complexType name="representation">
+		<xs:complexContent>
+			<xs:extension base="objectComplexType">
+				<xs:sequence>
+					<xs:element ref="objectIdentifier" maxOccurs="unbounded"/>
+					<xs:element ref="preservationLevel" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element ref="significantProperties" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element ref="originalName" minOccurs="0"/>
+				    <!-- 
+				        storage added in 3.0-->
+				    <xs:element ref="storage" minOccurs="0" maxOccurs="unbounded"/>				    
+					<!-- 
+					    <environment> removed in 3.0 
+					-->
+					<xs:element ref="relationship" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element ref="linkingEventIdentifier" minOccurs="0" maxO

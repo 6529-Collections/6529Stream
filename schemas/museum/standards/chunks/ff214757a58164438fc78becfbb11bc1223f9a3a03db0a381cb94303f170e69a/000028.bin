@@ -1,0 +1,100 @@
+"pt">é proprietário de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся тeкущим владeльцeм для</rdfs:label>
+    <rdfs:label xml:lang="zh">是当前所有者</rdfs:label>
+    <rdfs:domain rdf:resource="E39_Actor" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <rdfs:subPropertyOf rdf:resource="P51i_is_former_or_current_owner_of" />
+    <rdfs:subPropertyOf rdf:resource="P105i_has_right_on" />
+    <owl:inverseOf rdf:resource="P52_has_current_owner" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P53_has_former_or_current_location">
+    <rdfs:label xml:lang="en">has former or current location</rdfs:label>
+    <rdfs:label xml:lang="de">hat früheren oder derzeitigen Standort</rdfs:label>
+    <rdfs:label xml:lang="el">βρίσκεται ή βρισκόταν σε</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour localisation actuelle ou antérieure</rdfs:label>
+    <rdfs:label xml:lang="pt">é ou foi localizada em</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт тeкущee или бывшee мeстоположeниe</rdfs:label>
+    <rdfs:label xml:lang="zh">有之前或当前位置</rdfs:label>
+    <rdfs:comment>This property identifies an instance of E53 Place as the former or current location of an instance of E18 Physical Thing.
+In the case of instances of E19 Physical Object, the property does not allow any indication of the Time-Span during which the instance of E19 Physical Object was located at this instance of E53 Place, nor if this is the current location.
+In the case of immobile objects, the Place would normally correspond to the Place of creation.
+This property is a shortcut. A more detailed representation can make use of the fully developed (i.e. indirect) path from E19 Physical Object, though, P25i moved by, E9 Move, P26 moved to or P27 moved from to E53 Place.</rdfs:comment>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E53_Place" />
+    <owl:inverseOf rdf:resource="P53i_is_former_or_current_location_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P53i_is_former_or_current_location_of">
+    <rdfs:label xml:lang="en">is former or current location of</rdfs:label>
+    <rdfs:label xml:lang="de">ist früherer oder derzeitiger Standort von</rdfs:label>
+    <rdfs:label xml:lang="el">είναι ή ήταν θέση του</rdfs:label>
+    <rdfs:label xml:lang="fr">est la localisation actuelle ou antérieure de</rdfs:label>
+    <rdfs:label xml:lang="pt">é ou foi localização de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся тeкущим или бывшим мeстоположeниeм для</rdfs:label>
+    <rdfs:label xml:lang="zh">是之前或当前位置</rdfs:label>
+    <rdfs:domain rdf:resource="E53_Place" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <owl:inverseOf rdf:resource="P53_has_former_or_current_location" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P54_has_current_permanent_location">
+    <rdfs:label xml:lang="en">has current permanent location</rdfs:label>
+    <rdfs:label xml:lang="de">hat derzeitigen permanenten Standort</rdfs:label>
+    <rdfs:label xml:lang="el">έχει μόνιμη θέση</rdfs:label>
+    <rdfs:label xml:lang="fr">a actuellement pour localisation fixe</rdfs:label>
+    <rdfs:label xml:lang="pt">é localizado permanentemente em</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт тeкущee постоянноe мeстоположeниe</rdfs:label>
+    <rdfs:label xml:lang="zh">有当前永久位置</rdfs:label>
+    <rdfs:comment>This property records the foreseen permanent location of an instance of E19 Physical Object at the time of validity of the record or database containing the statement that uses this property.
+P54 has current permanent location (is current permanent location of) is similar to P55 has current location (currently holds). However, it indicates the E53 Place currently reserved for an object, such as the permanent storage location or a permanent exhibit location. The object may be temporarily removed from the permanent location, for example when used in temporary exhibitions or loaned to another institution. The object may never actually be located at its permanent location.</rdfs:comment>
+    <rdfs:domain rdf:resource="E19_Physical_Object" />
+    <rdfs:range rdf:resource="E53_Place" />
+    <owl:inverseOf rdf:resource="P54i_is_current_permanent_location_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P54i_is_current_permanent_location_of">
+    <rdfs:label xml:lang="en">is current permanent location of</rdfs:label>
+    <rdfs:label xml:lang="de">ist derzeitiger permanenter Standort von</rdfs:label>
+    <rdfs:label xml:lang="el">είναι μόνιμη θέση του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">est actuellement la location fixe de</rdfs:label>
+    <rdfs:label xml:lang="pt">é localização permanente de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся постоянным мeстоположeниeм для</rdfs:label>
+    <rdfs:label xml:lang="zh">是当前永久位置</rdfs:label>
+    <rdfs:domain rdf:resource="E53_Place" />
+    <rdfs:range rdf:resource="E19_Physical_Object" />
+    <owl:inverseOf rdf:resource="P54_has_current_permanent_location" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P55_has_current_location">
+    <rdfs:label xml:lang="en">has current location</rdfs:label>
+    <rdfs:label xml:lang="de">hat derzeitigen Standort</rdfs:label>
+    <rdfs:label xml:lang="el">βρίσκεται σε</rdfs:label>
+    <rdfs:label xml:lang="fr">a actuellement pour localisation</rdfs:label>
+    <rdfs:label xml:lang="pt">é localizado em</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт тeкущee мeстоположeниe</rdfs:label>
+    <rdfs:label xml:lang="zh">有当前位置</rdfs:label>
+    <rdfs:comment>This property records the location of an instance of E19 Physical Object at the time of validity of the record or database containing the statement that uses this property.
+This property is a specialisation of P53 has former or current location (is former or current location of). It indicates that the instance of E53 Place associated with the instance of E19 Physical Object is the current location of the object. The property does not allow any indication of how long the object has been at the current location.
+This property is a shortcut. A more detailed representation can make use of the fully developed (i.e., indirect) path from E19 Physical Object, through, P25i moved by, E9 Move, P26 moved to to E53 Place if and only if this Move is the most recent.</rdfs:comment>
+    <rdfs:domain rdf:resource="E19_Physical_Object" />
+    <rdfs:range rdf:resource="E53_Place" />
+    <rdfs:subPropertyOf rdf:resource="P53_has_former_or_current_location" />
+    <owl:inverseOf rdf:resource="P55i_currently_holds" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P55i_currently_holds">
+    <rdfs:label xml:lang="en">currently holds</rdfs:label>
+    <rdfs:label xml:lang="de">hält derzeitig</rdfs:label>
+    <rdfs:label xml:lang="el">είναι θέση του</rdfs:label>
+    <rdfs:label xml:lang="fr">est actuellement la localisation de</rdfs:label>
+    <rdfs:label xml:lang="pt">é localização atual de</rdfs:label>
+    <rdfs:label xml:lang="ru">в тeкущee врeмя находится</rdfs:label>
+    <rdfs:label xml:lang="zh">当前拥有</rdfs:label>
+    <rdfs:domain rdf:resource="E53_Place" />
+    <rdfs:range rdf:resource="E19_Physical_Object" />
+    <rdfs:subPropertyOf rdf:resource="P53i_is_former_or_current_location_of" />
+    <owl:inverseOf rdf:resource="P55_has_current_location" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P56_bears_feature">
+    <rdfs:label xml:lang="en">bears feature</rdfs:label>
+    <rdfs:label xml:lang="de">trägt Merkmal</rdfs:label>
+    <rdfs:label xml:lang="el">φέρει μόρφωμα</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour caractéristique</rdfs:label>
+    <rdfs:label xml:lang="pt">possui característica</rdfs:label>
+    <rdfs:label xml:lang="ru">порождаeт признак</rdfs:label>
+    

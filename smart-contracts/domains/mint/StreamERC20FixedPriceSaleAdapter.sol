@@ -1,29 +1,36 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "./StreamSaleArtist.sol";
+import "./StreamLegacySaleConsent.sol";
+import "./StreamSaleFunding.sol";
+import "./StreamSaleTemplate.sol";
+
 import "../../interfaces/stream/mint/IStreamERC20FixedPriceSaleAdapter.sol";
 import "../../interfaces/stream/mint/IStreamMintReads.sol";
 import "../../interfaces/stream/revenue/IStreamRevenueResolver.sol";
 import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
-import "../../interfaces/stream/artist/IStreamCollectionArtistRegistry.sol";
+import "../../interfaces/stream/artist/IStreamArtistAttribution.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 import "../../interfaces/standards/IERC20.sol";
 import "../revenue/StreamPaymentIntentVerifier.sol";
 
 /// @notice One creator/platform-authorized ERC-20 purchase funds a verified split and mints atomically.
 /// @dev The adapter itself pulls allowances. Relayers require payer-signed intent; direct payers
-///      remain bounded by signed, immutable sale terms. This current fixed-profile lane is not
+///      remain bounded by signed, immutable sale terms. This bounded profile/template lane is not
 ///      the universal official settlement/escrow implementation tracked by issue #694.
 contract StreamERC20FixedPriceSaleAdapter is
     IStreamERC20FixedPriceSaleAdapter,
     StreamPaymentIntentVerifier,
-    ERC165
+    ERC165,
+    StreamSaleFunding
 {
     bytes32 public constant SALE_AUTHORIZATION_TYPEHASH = keccak256(
         "ERC20SaleAuthorization(bytes32 saleId,bytes32 saleConfigHash,address payer,address recipient,address artist,bytes32 tokenDataHash,bytes32 mintCommitment,bytes32 nonce,uint64 deadline,uint64 signerEpoch)"
     );
     bytes32 public constant STREAM_SALE_V1 = keccak256("6529STREAM_SALE_V1");
     bytes32 public constant PRIMARY_POLICY_DOMAIN = keccak256("6529STREAM_PRIMARY_POLICY_V1");
+    bytes32 public constant REVENUE_CLASS = keccak256("PRIMARY_SALE");
     bytes32 private constant CONFIG_DOMAIN =
         keccak256("6529STREAM_CURRENT_ERC20_FIXED_PRICE_CONFIG_V1");
     bytes32 private constant NONCE_DOMAIN = keccak256("6529STREAM_ERC20_SALE_NONCE_V1");
@@ -32,7 +39,8 @@ contract StreamERC20FixedPriceSaleAdapter is
     IStreamRevenueResolver public immutable override revenueResolver;
     IStreamSplitFactory public immutable override splitFactory;
     IStreamAssetPolicyRegistry public immutable override assetPolicyRegistry;
-    IStreamCollectionArtistRegistry public immutable override artistRegistry;
+    IStreamArtistAttribution public immutable override artistRegistry;
+    bytes32 public immutable artistRegistryCodeHash;
     address public override platformSigner;
     uint64 public override signerEpoch = 1;
     uint256 public override nextSaleNonce = 1;
@@ -46,15 +54,16 @@ contract StreamERC20FixedPriceSaleAdapter is
         IStreamMintManager manager_,
         IStreamRevenueResolver resolver_,
         address platformSigner_,
-        IStreamCollectionArtistRegistry artists_
-    ) {
+        IStreamArtistAttribution artists_,
+        IStreamRevenueEscrow escrow_
+    ) StreamSaleFunding(IStreamSplitFactory(resolver_.splitFactory()), escrow_) {
         if (
             address(manager_).code.length == 0 || address(resolver_).code.length == 0
                 || platformSigner_ == address(0) || !resolver_.isStreamRevenueResolver()
-                || address(artists_).code.length == 0
-                || !artists_.supportsInterface(type(IStreamCollectionArtistRegistry).interfaceId)
-                || artists_.supportsInterface(0xffffffff)
+                || !StreamSaleArtist.supportsAttribution(artists_)
                 || address(IStreamMintReads(address(manager_)).core()) != artists_.core()
+                || resolver_.core() != artists_.core()
+                || resolver_.artistRegistry() != address(artists_)
         ) {
             revert InvalidSaleConfiguration();
         }
@@ -70,6 +79,7 @@ contract StreamERC20FixedPriceSaleAdapter is
         splitFactory = factory_;
         assetPolicyRegistry = assets_;
         artistRegistry = artists_;
+        artistRegistryCodeHash = address(artists_).codehash;
         platformSigner = platformSigner_;
     }
 
@@ -126,7 +136,7 @@ contract StreamERC20FixedPriceSaleAdapter is
     {
         if (
             config.collectionId == 0 || config.phaseId == bytes32(0)
-                || config.revenueClass == bytes32(0) || config.price == 0
+                || config.revenueClass != REVENUE_CLASS || config.price == 0
                 || config.endsAt <= config.startsAt || config.endsAt < block.timestamp
                 || config.mintPolicyHash == bytes32(0)
                 || config.expectedPrimaryPolicyHash == bytes32(0)
@@ -171,30 +181,39 @@ contract StreamERC20FixedPriceSaleAdapter is
         override
         returns (bytes32 policyHash, bytes32 profileId, address wallet)
     {
+        StreamSaleTemplate.Selection memory selected = _primarySelection(collectionId, revenueClass);
+        return (
+            StreamSaleTemplate.policyHash(revenueResolver, collectionId, selected),
+            selected.profileId,
+            selected.wallet
+        );
+    }
+
+    function _primarySelection(uint256 collectionId, bytes32 revenueClass)
+        private
+        view
+        returns (StreamSaleTemplate.Selection memory selected)
+    {
+        if (revenueClass != REVENUE_CLASS) revert UnsupportedPrimaryAssignment();
         IStreamRevenueResolver.ResolvedPrimaryAssignment memory assignment =
             revenueResolver.resolvePrimaryAssignment(collectionId, 0, revenueClass);
+        if (assignment.assignmentType == 2) {
+            return StreamSaleTemplate.preview(revenueResolver, collectionId, assignment);
+        }
         if (
-            !assignment.exists || assignment.assignmentType != 1 || assignment.scope > 1
-                || assignment.templateId != bytes32(0) || assignment.profileId == bytes32(0)
-                || assignment.assignmentHash == bytes32(0)
-        ) revert UnsupportedPrimaryAssignment();
-        profileId = assignment.profileId;
-        if (!splitFactory.splitWalletExists(profileId)) revert UnsupportedPrimaryAssignment();
-        wallet = splitFactory.walletFor(profileId);
-        policyHash = keccak256(
-            abi.encode(
-                PRIMARY_POLICY_DOMAIN,
-                block.chainid,
-                address(revenueResolver),
-                revenueClass,
-                collectionId,
-                uint256(0),
-                bytes32(0),
-                profileId,
-                wallet,
-                assignment.assignmentHash
-            )
-        );
+            !assignment.exists || assignment.assignmentType != 1 || assignment.scope != 1
+                || assignment.scopeId != collectionId || assignment.templateId != bytes32(0)
+                || assignment.profileId == bytes32(0) || assignment.assignmentHash == bytes32(0)
+        ) {
+            revert UnsupportedPrimaryAssignment();
+        }
+        selected.profileId = assignment.profileId;
+        if (!splitFactory.splitWalletExists(selected.profileId)) {
+            revert UnsupportedPrimaryAssignment();
+        }
+        selected.wallet = splitFactory.walletFor(selected.profileId);
+        selected.assignmentHash = assignment.assignmentHash;
+        _requireFundingWallet(selected.profileId, selected.wallet);
     }
 
     function authorizationId(address artist, bytes32 nonce) public view override returns (bytes32) {
@@ -218,6 +237,8 @@ contract StreamERC20FixedPriceSaleAdapter is
         address wallet;
         bytes32 operationRoot;
         bytes32 operationId;
+        bool escrowed;
+        StreamSaleTemplate.Selection selected;
     }
 
     function buy(
@@ -262,10 +283,19 @@ contract StreamERC20FixedPriceSaleAdapter is
             intent,
             payerSignature
         );
+        StreamSaleTemplate.materialize(
+            revenueResolver, execution.config.collectionId, execution.selected
+        );
         authorizationUsed[authorization.artist][authorization.nonce] = true;
         proceeds[execution.profileId][execution.config.asset] += execution.config.price;
         totalProceeds[execution.config.asset] += execution.config.price;
-        _pay(authorization.payer, execution);
+        execution.escrowed = _pay(authorization.payer, execution);
+        StreamLegacySaleConsent.requireNone(
+            artistRegistry,
+            artistRegistryCodeHash,
+            execution.config.collectionId,
+            authorization.artist
+        );
         uint256[] memory tokenIds;
         bytes32[] memory operationIds;
         (tokenIds, operationRoot, operationIds) = mintManager.executeSingleStepMint(batch, "");
@@ -274,7 +304,23 @@ contract StreamERC20FixedPriceSaleAdapter is
                 || operationIds.length != 1 || operationIds[0] != execution.operationId
         ) revert SaleMintResultInvalid();
         tokenId = tokenIds[0];
+        StreamLegacySaleConsent.requireNone(
+            artistRegistry,
+            artistRegistryCodeHash,
+            execution.config.collectionId,
+            authorization.artist
+        );
         _emitSale(authorization, execution, tokenId);
+        emit SaleRevenueFunded(
+            1,
+            execution.authorizationId,
+            operationRoot,
+            execution.profileId,
+            execution.wallet,
+            execution.config.asset,
+            execution.config.price,
+            execution.escrowed
+        );
     }
 
     function _validate(
@@ -301,7 +347,9 @@ contract StreamERC20FixedPriceSaleAdapter is
             revert SaleAuthorizationUsed(authorization.artist, authorization.nonce);
         }
         e.config = record.config;
-        artistRegistry.requireArtist(e.config.collectionId, authorization.artist);
+        StreamLegacySaleConsent.requireNone(
+            artistRegistry, artistRegistryCodeHash, e.config.collectionId, authorization.artist
+        );
         e.digest = authorizationDigest(authorization);
         if (!_validSignature(platformSigner, e.digest, platformSignature)) {
             revert InvalidSaleSignature(platformSigner);
@@ -310,9 +358,11 @@ contract StreamERC20FixedPriceSaleAdapter is
             revert InvalidSaleSignature(authorization.artist);
         }
         _requireActiveAsset(e.config.asset);
-        bytes32 policy;
-        (policy, e.profileId, e.wallet) =
-            primaryPolicy(e.config.collectionId, e.config.revenueClass);
+        e.selected = _primarySelection(e.config.collectionId, e.config.revenueClass);
+        e.profileId = e.selected.profileId;
+        e.wallet = e.selected.wallet;
+        bytes32 policy =
+            StreamSaleTemplate.policyHash(revenueResolver, e.config.collectionId, e.selected);
         if (policy != e.config.expectedPrimaryPolicyHash) {
             revert PrimaryPolicyMismatch(e.config.expectedPrimaryPolicyHash, policy);
         }
@@ -358,68 +408,28 @@ contract StreamERC20FixedPriceSaleAdapter is
         );
     }
 
-    function _pay(address payer, Execution memory e) private {
-        uint256 startingBalance = _balance(e.config.asset, address(this));
-        _transfer(e.config.asset, payer, address(this), e.config.price, true);
-        _transfer(e.config.asset, address(this), e.wallet, e.config.price, false);
-        if (_balance(e.config.asset, address(this)) != startingBalance) {
-            revert ERC20AmountMismatch(e.config.asset);
-        }
+    function _pay(address payer, Execution memory e) private returns (bool escrowed) {
+        escrowed = _fundERC20(
+            payer,
+            e.config.revenueClass,
+            e.profileId,
+            e.wallet,
+            e.config.asset,
+            e.config.price,
+            e.selected.templateId != bytes32(0)
+        );
         _requireActiveAsset(e.config.asset);
-        (bytes32 policy,,) = primaryPolicy(e.config.collectionId, e.config.revenueClass);
-        if (policy != e.config.expectedPrimaryPolicyHash) {
-            revert PrimaryPolicyMismatch(e.config.expectedPrimaryPolicyHash, policy);
+        if (e.selected.templateId != bytes32(0)) {
+            StreamSaleTemplate.requireCurrent(revenueResolver, e.config.collectionId, e.selected);
+        } else {
+            (bytes32 policy,,) = primaryPolicy(e.config.collectionId, e.config.revenueClass);
+            if (policy != e.config.expectedPrimaryPolicyHash) {
+                revert PrimaryPolicyMismatch(e.config.expectedPrimaryPolicyHash, policy);
+            }
         }
     }
 
     function _requireActiveAsset(address asset) private view {
-        if (asset.code.length == 0) revert AssetNotActive(asset);
-        address registry = address(assetPolicyRegistry);
-        bytes memory data = abi.encodeCall(IStreamAssetPolicyRegistry.assetStatus, (asset));
-        bool ok;
-        uint256 status;
-        if (gasleft() < 50_000) revert AssetNotActive(asset);
-        assembly ("memory-safe") {
-            let ptr := mload(0x40)
-            ok := staticcall(30000, registry, add(data, 32), mload(data), ptr, 32)
-            ok := and(ok, eq(returndatasize(), 32))
-            status := mload(ptr)
-        }
-        if (!ok || status != 1) revert AssetNotActive(asset);
-    }
-
-    function _balance(address asset, address account) private view returns (uint256 value) {
-        bytes memory data = abi.encodeCall(IERC20.balanceOf, (account));
-        bool ok;
-        assembly ("memory-safe") {
-            let ptr := mload(0x40)
-            ok := staticcall(gas(), asset, add(data, 32), mload(data), ptr, 32)
-            ok := and(ok, eq(returndatasize(), 32))
-            value := mload(ptr)
-        }
-        if (!ok) revert ERC20BalanceReadFailed(asset, account);
-    }
-
-    function _transfer(address asset, address from, address to, uint256 amount, bool pull) private {
-        uint256 fromBefore = _balance(asset, from);
-        uint256 toBefore = _balance(asset, to);
-        bytes memory data = pull
-            ? abi.encodeCall(IERC20.transferFrom, (from, to, amount))
-            : abi.encodeCall(IERC20.transfer, (to, amount));
-        bool ok;
-        uint256 result;
-        assembly ("memory-safe") {
-            let ptr := mload(0x40)
-            ok := call(gas(), asset, 0, add(data, 32), mload(data), ptr, 32)
-            ok := and(ok, eq(returndatasize(), 32))
-            result := mload(ptr)
-        }
-        if (!ok || result != 1) revert ERC20TransferFailed(asset);
-        uint256 fromAfter = _balance(asset, from);
-        uint256 toAfter = _balance(asset, to);
-        if (
-            fromAfter > fromBefore || fromBefore - fromAfter != amount || toAfter < toBefore
-                || toAfter - toBefore != amount
-        ) revert ERC20AmountMismatch(asset);
+        _requireFundingAsset(asset);
     }
 }

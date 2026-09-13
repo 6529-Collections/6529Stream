@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../regression/legacy/helpers/CharacterizationTestBase.sol";
+import "./StreamArtistSuiteFixture.sol";
+import "../../smart-contracts/interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 import "../../smart-contracts/core/StreamCore.sol";
 import "../../smart-contracts/domains/governance/StreamGovernanceExecutor.sol";
 import "../../smart-contracts/domains/governance/StreamGovernanceActor.sol";
@@ -12,18 +13,21 @@ import "../../smart-contracts/domains/mint/StreamMintManager.sol";
 import "../../smart-contracts/domains/mint/StreamMintLedger.sol";
 import "../../smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol";
 import "../../smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol";
-import "../../smart-contracts/domains/artist/StreamCollectionArtistRegistry.sol";
 import "../../smart-contracts/domains/revenue/StreamSplitFactory.sol";
 import "../../smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol";
+import "../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
 import "../../smart-contracts/domains/revenue/StreamRoyaltyResolver.sol";
 import "../../smart-contracts/domains/entropy/StreamEntropyCoordinator.sol";
-import "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
+import { StreamMetadataRouter } from "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
 import "../../script/current/StreamCurrentStackPlan.sol";
+import "../../script/current/StreamArtistActivationPlan.sol";
+import "../../script/current/StreamRevealActivationPlan.sol";
 import "../../script/current/StreamGenesisManifestPlan.sol";
+import "../../script/current/StreamGovernanceGenesisPlan.sol";
 import "../mocks/MockStreamEntropyProvider.sol";
 
 /// @notice One real current-stack topology. Only the external entropy service is a test double.
-abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
+abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
     uint256 internal constant ARTIST_KEY = 0xA47157;
     uint256 internal constant PLATFORM_KEY = 0x6529;
     address internal constant BUYER = address(0xB0B);
@@ -47,15 +51,14 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
     StreamEnglishAuctionHouse internal auction;
     StreamSplitFactory internal factory;
     StreamAssetPolicyRegistry internal assetPolicy;
-    StreamRoyaltyResolver internal royalties;
-    StreamCollectionArtistRegistry internal artists;
+    StreamRevenueEscrow internal revenueEscrow;
     StreamEntropyCoordinator internal entropy;
-    StreamMetadataRouter internal router;
     MockStreamEntropyProvider internal provider;
     address internal artist;
     address internal wallet;
     bytes32 internal profile;
     address[] internal guardians;
+    GovernanceActionPolicyEntry[] private _foundationPolicies;
 
     function _deployCurrentStack(address artist_, address platform) internal {
         artist = artist_;
@@ -80,62 +83,110 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
             StreamCurrentStackPlan.gasParameters()
         );
         manifest = new StreamSystemManifest(address(core), address(executor));
+        _initializeGovernanceFoundation();
         ledger = new StreamMintLedger();
         manager = new StreamMintManager(core, ledger, IERC165(address(registry)));
         ledger.setLedgerWriter(address(manager), true);
-        assetPolicy = new StreamAssetPolicyRegistry();
-        factory = new StreamSplitFactory(assetPolicy);
-        royalties = new StreamRoyaltyResolver(core, factory, address(executor));
-        artists = new StreamCollectionArtistRegistry(
+        assetPolicy = new StreamAssetPolicyRegistry(address(executor));
+        factory = new StreamSplitFactory(assetPolicy, address(executor), _walletGasConfigs());
+        _deployArtistSuite(
             address(core),
+            address(manager),
+            address(roles),
+            factory,
             address(executor),
-            DEPLOYMENT_HASH,
-            "urn:6529stream:fixture:artist",
-            keccak256("fixture artist module")
+            DEPLOYMENT_HASH
         );
-        sale = new StreamFixedPriceSaleAdapter(manager, factory, platform, artists);
-        auction = new StreamEnglishAuctionHouse(core, manager, factory, platform, artists);
+        IStreamArtistAttribution attribution = IStreamArtistAttribution(address(artists));
+        revenueEscrow = new StreamRevenueEscrow(
+            factory,
+            address(executor),
+            IStreamGasParameterHost.GasParameterConfig("FLUSH_GAS_FLOOR", 12_000_000, 12_000_000, 3)
+        );
+        sale = new StreamFixedPriceSaleAdapter(
+            manager, primaryResolver, platform, attribution, revenueEscrow
+        );
+        auction = new StreamEnglishAuctionHouse(
+            core, manager, primaryResolver, platform, attribution, revenueEscrow
+        );
         entropy = new StreamEntropyCoordinator(
-            address(core),
-            address(executor),
-            DEPLOYMENT_HASH,
-            "urn:6529stream:fixture:entropy",
-            keccak256("fixture entropy module")
-        );
-        router = new StreamMetadataRouter(
-            address(core),
-            address(executor),
-            DEPLOYMENT_HASH,
-            "urn:6529stream:fixture:metadata",
-            keccak256("fixture metadata module"),
-            artists
+            StreamEntropyCoordinator.DeploymentConfig(
+                address(core),
+                address(executor),
+                address(roles),
+                StreamCurrentStackPlan.entropyTimeParameters(),
+                DEPLOYMENT_HASH,
+                "urn:6529stream:fixture:entropy",
+                keccak256("fixture entropy module")
+            )
         );
         provider = new MockStreamEntropyProvider(address(entropy));
-        _configureMintPhase(PHASE, address(sale));
-        _configureMintPhase(AUCTION_PHASE, address(auction));
         IStreamSplitWallet.SplitEntry[] memory entries = new IStreamSplitWallet.SplitEntry[](2);
         entries[0] = IStreamSplitWallet.SplitEntry(artist, 900_000, keccak256("artist"));
         entries[1] = IStreamSplitWallet.SplitEntry(PROTOCOL, 100_000, keccak256("protocol"));
         (profile, wallet) = factory.createProfile(entries, keccak256("fixture split"));
-        _configureAdditionalProducts();
+        _deployAdditionalProducts();
         ledger.transferOwnership(address(executor));
-        manager.transferOwnership(address(executor));
         sale.transferOwnership(address(executor));
         auction.transferOwnership(address(executor));
-        assetPolicy.transferOwnership(address(executor));
-        _initializeProductGenesis();
-        IStreamCollectionArtistRegistry.Attribution memory attribution = artists.attribution(1);
-        uint64 deadline = uint64(block.timestamp + 1 days);
-        bytes32 digest = artists.acceptanceDigest(1, attribution.nominationHash, 0, deadline);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(ARTIST_KEY, digest);
-        artists.acceptArtist(1, attribution.nominationHash, 0, deadline, abi.encodePacked(r, s, v));
+        _assertDeployableProductionContracts();
+        _activateInitialProducts();
+        _activateArtistAuthority();
+        _activateRevealAuthority();
+        _prepareArtistOnboarding();
+        _onboardFixtureArtist(artist);
+        _configureMintPhase(PHASE, address(sale));
+        _configureMintPhase(AUCTION_PHASE, address(auction));
+        _configureAdditionalProducts();
+        _handoffManager();
     }
 
-    /// @dev Runs after product/profile construction, before ownership transfer and genesis sealing.
-    ///      Derived fixtures own transferring any added product authority to executor.
+    /// @dev Operator scenarios can retain their real initial owner until setup completes.
+    function _handoffManager() internal virtual {
+        manager.transferOwnership(address(executor));
+    }
+
+    function _artistProof(bytes32 digest) internal virtual override returns (bytes memory) {
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(ARTIST_KEY, digest);
+        return abi.encodePacked(r, s, v);
+    }
+
+    function _walletGasConfigs()
+        internal
+        pure
+        returns (IStreamGasParameterHost.GasParameterConfig[3] memory rows)
+    {
+        rows[0] = IStreamGasParameterHost.GasParameterConfig(
+            "ERC_1271_GAS_LIMIT", 400_000, 350_000, 2
+        );
+        rows[1] =
+            IStreamGasParameterHost.GasParameterConfig("ASSET_POLICY_GAS_LIMIT", 30_000, 15_000, 2);
+        // Planning value covers the instrumented token's cold transfer storage writes.
+        // It is not acceptance of every asset or the complete cold-wallet deployment envelope.
+        rows[2] = IStreamGasParameterHost.GasParameterConfig(
+            "WALLET_DEPOSIT_GAS_LIMIT", 200_000, 25_000, 2
+        );
+    }
+
+    /// @dev Deploy additional products before their exact governance policies are admitted.
+    function _deployAdditionalProducts() internal virtual { }
+
+    /// @dev Scenarios may configure actual unbound economics through governance before artist acceptance.
+    function _prepareArtistOnboarding() internal virtual { }
+
+    function _additionalEscrowProducers() internal view virtual returns (address[] memory) {
+        return new address[](0);
+    }
+
+    function _nativePrimaryPolicyHash() internal view returns (bytes32 hash) {
+        (hash,,) = sale.primaryPolicy(1);
+    }
+
+    /// @dev Configure additional products after real artist onboarding and genesis selection.
+    ///      Manager remains temporarily deployer-owned until this hook returns.
     function _configureAdditionalProducts() internal virtual { }
 
-    /// @dev Additional exact-target operating selectors are included in the committed genesis catalog.
+    /// @dev Additional exact-target operating selectors join the governed product catalog extension.
     function _additionalOperatingPolicies()
         internal
         view
@@ -165,41 +216,248 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
             keccak256("counter")
         );
         IStreamMintManager.MintGateConfig memory gate;
-        manager.configurePhase(
-            1,
+        IStreamMintManager.MintPhaseConfig memory config = IStreamMintManager.MintPhaseConfig(
+            false, 0, 0, 1, keccak256("phase"), keccak256("metadata")
+        );
+        address[] memory executors = new address[](0);
+        _recordFixturePolicy(
             phase,
-            IStreamMintManager.MintPhaseConfig(
-                false, 0, 0, 1, keccak256("phase"), keccak256("metadata")
-            ),
-            gate,
-            counters,
-            configs
+            manager.previewPhasePolicyHash(1, phase, config, gate, counters, configs, executors)
+        );
+        manager.configurePhase(1, phase, config, gate, counters, configs);
+        executors = new address[](1);
+        executors[0] = phaseExecutor;
+        _recordFixturePolicy(
+            phase,
+            manager.previewPhasePolicyHash(1, phase, config, gate, counters, configs, executors)
         );
         manager.setPhaseExecutor(1, phase, phaseExecutor, true);
     }
 
-    function _initializeProductGenesis() private {
-        StreamModuleRegistration[] memory records = _moduleRecords();
-        bytes32[] memory pointerTypes = new bytes32[](records.length);
-        StreamModuleRegistration[] memory pointerRecords =
-            new StreamModuleRegistration[](records.length);
+    function _revealPrincipals()
+        internal
+        view
+        virtual
+        returns (StreamRevealActivationPlan.Principals memory)
+    {
+        return StreamRevealActivationPlan.Principals(
+            address(this), address(governanceRoot), address(governanceRoot)
+        );
+    }
+
+    function _configureInitialRevealPolicy() internal virtual {
+        entropy.configureCollectionRevealPolicy(
+            1, 0, keccak256("ROLE_ENTROPY_REVEAL_OWNER"), 100, 0
+        );
+    }
+
+    /// @dev Existing fixture deployments exercise the three-call post-artist activation route.
+    ///      New operator deployments combine these grants into the original activation batch.
+    function _activateRevealAuthority() internal virtual {
+        StreamRevealActivationPlan.Principals memory principals = _revealPrincipals();
+        StreamArtistActivationPlan.Plan memory plan =
+            StreamRevealActivationPlan.build(roles, principals);
+        executor.publishGovernanceCallData(plan.callDatas);
+        uint64 notBefore = uint64(block.timestamp + 49 hours);
+        bytes32 actionId = _scheduleFixtureActivation(plan, notBefore);
+        vm.warp(notBefore);
+        StreamRevealActivationPlan.execute(
+            executor,
+            roles,
+            IStreamGasParameterHost(address(0)),
+            address(0),
+            principals,
+            actionId,
+            plan
+        );
+        StreamRevealActivationPlan.execute(
+            executor,
+            roles,
+            IStreamGasParameterHost(address(0)),
+            address(0),
+            principals,
+            actionId,
+            plan
+        );
+        _configureInitialRevealPolicy();
+    }
+
+    /// @dev One real post-genesis batch activates the artist role and required read budget.
+    ///      The deployment planner returns these same calls for persistent operator resumption.
+    function _activateArtistAuthority() internal virtual {
+        StreamArtistActivationPlan.Plan memory plan =
+            StreamArtistActivationPlan.build(roles, manager, address(this));
+        uint64 notBefore = uint64(block.timestamp + 49 hours);
+        // Queued broadcast reaches a later block; the retained time still meets the delay floor.
+        vm.warp(block.timestamp + 10 minutes);
+        uint256 nonceBefore = executor.governanceNonce();
+        bytes32 publicationKey =
+            keccak256(abi.encodePacked(plan.calls[0].callDataHash, plan.calls[1].callDataHash));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.CallDataNotPublished.selector, publicationKey
+            )
+        );
+        this.scheduleArtistActivationForTest(plan, notBefore);
+        require(executor.governanceNonce() == nonceBefore, "unpublished plan consumed nonce");
+        executor.publishGovernanceCallData(plan.callDatas);
+        bytes32 canonicalScope = plan.scopeHash;
+        plan.scopeHash = keccak256("incorrect aggregate");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.BatchScopeHashMismatch.selector,
+                canonicalScope,
+                plan.scopeHash
+            )
+        );
+        this.scheduleArtistActivationForTest(plan, notBefore);
+        require(executor.governanceNonce() == nonceBefore, "wrong aggregate consumed nonce");
+        plan.scopeHash = canonicalScope;
+        bytes32 actionId = _scheduleFixtureActivation(plan, notBefore);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceActionNotExecutable.selector,
+                actionId,
+                notBefore
+            )
+        );
+        this.executeSavedArtistActivation(plan, actionId, address(this));
+        require(
+            !roles.hasRole(keccak256("ROLE_ARTIST_REGISTRY_ADMIN"), address(this)),
+            "role still inactive"
+        );
+        require(
+            manager.gasParameter(manager.GGP_ARTIST_AUTHORITY_GAS_LIMIT()) == 150_000,
+            "read budget unchanged"
+        );
+        vm.warp(notBefore);
+        StreamArtistActivationPlan.execute(executor, roles, manager, address(this), actionId, plan);
+        // A resumed completed action reuses the saved identity without creating another action.
+        StreamArtistActivationPlan.execute(executor, roles, manager, address(this), actionId, plan);
+        require(executor.governanceNonce() == nonceBefore + 1, "activation rescheduled on retry");
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamArtistActivationPlan.InvalidActivationPlan.selector)
+        );
+        this.executeSavedArtistActivation(plan, actionId, address(0xBAD));
+        // A completed action must still authenticate its saved calldata when execution is skipped.
+        plan.callDatas[0] = abi.encodeCall(
+            roles.grantRole, (keccak256("ROLE_ARTIST_REGISTRY_ADMIN"), address(0xBAD))
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamArtistActivationPlan.InvalidActivationPlan.selector)
+        );
+        this.executeSavedArtistActivation(plan, actionId, address(0xBAD));
+        require(
+            roles.hasRole(keccak256("ROLE_ARTIST_REGISTRY_ADMIN"), address(this)),
+            "real artist administrator grant"
+        );
+        require(
+            manager.gasParameter(manager.GGP_ARTIST_AUTHORITY_GAS_LIMIT()) == 300_000,
+            "real artist read budget raise"
+        );
+    }
+
+    function _scheduleFixtureActivation(
+        StreamArtistActivationPlan.Plan memory plan,
+        uint64 notBefore
+    ) internal returns (bytes32) {
+        bytes memory result = governanceRoot.execute(
+            address(executor),
+            0,
+            abi.encodeCall(
+                executor.scheduleGovernanceBatch,
+                (
+                    1,
+                    plan.calls,
+                    plan.scopeHash,
+                    plan.oldValueHash,
+                    plan.newValueHash,
+                    notBefore,
+                    notBefore + 7 days,
+                    keccak256("current artist activation"),
+                    "urn:6529stream:fixture:artist-activation",
+                    DEPLOYMENT_HASH
+                )
+            )
+        );
+        return abi.decode(result, (bytes32));
+    }
+
+    /// @dev Keep the expected revert outside the dynamic return decoding in the scheduling helper.
+    function scheduleArtistActivationForTest(
+        StreamArtistActivationPlan.Plan calldata plan,
+        uint64 notBefore
+    ) external {
+        _scheduleFixtureActivation(plan, notBefore);
+    }
+
+    /// @dev External boundary lets the test observe the same revert as the resumable script.
+    function executeSavedArtistActivation(
+        StreamArtistActivationPlan.Plan calldata plan,
+        bytes32 actionId,
+        address administrator
+    ) external {
+        StreamArtistActivationPlan.execute(executor, roles, manager, administrator, actionId, plan);
+    }
+
+    /// @dev Check the base topology's production instances despite Foundry's test-harness
+    ///      allowance. Derived fixtures check added products with the same helper; linked
+    ///      libraries also require the compiler-artifact size check at release acceptance.
+    function _assertDeployableProductionContracts() private view {
+        address[23] memory instances = [
+            address(core),
+            address(executor),
+            address(governanceRoot),
+            address(roles),
+            address(registry),
+            address(manifest),
+            address(manager),
+            address(ledger),
+            address(sale),
+            address(auction),
+            address(factory),
+            address(assetPolicy),
+            address(revenueEscrow),
+            address(royalties),
+            address(artists),
+            address(entropy),
+            address(router),
+            address(primaryResolver),
+            address(artistCoordinator),
+            artistSuite.archive,
+            artistSuite.validator,
+            address(artistCoordinator.reads()),
+            wallet
+        ];
+        for (uint256 i; i < instances.length; ++i) {
+            _assertDeployableProductionInstance(instances[i]);
+        }
+        for (uint256 i; i < artistSuite.owners.length; ++i) {
+            _assertDeployableProductionInstance(artistSuite.owners[i]);
+        }
+    }
+
+    function _assertDeployableProductionInstance(address instance) internal view {
+        require(
+            instance.code.length != 0 && instance.code.length <= 24_576,
+            "production runtime exceeds EIP-170"
+        );
+    }
+
+    /// @dev New products use ordinary delayed governance after the foundation seal.
+    function _activateInitialProducts() private {
+        StreamModuleRegistration[] memory allRecords = _moduleRecords();
+        StreamModuleRegistration[] memory records =
+            new StreamModuleRegistration[](allRecords.length - 2);
         for (uint256 i; i < records.length; ++i) {
-            pointerRecords[i] = records[i];
-            pointerTypes[i] = _pointerType(records[i].moduleType);
+            records[i] = allRecords[i + 2];
         }
-        for (uint256 i = 1; i < pointerTypes.length; ++i) {
-            for (uint256 j = i; j > 0 && pointerTypes[j - 1] > pointerTypes[j]; --j) {
-                (pointerTypes[j - 1], pointerTypes[j]) = (pointerTypes[j], pointerTypes[j - 1]);
-                (pointerRecords[j - 1], pointerRecords[j]) =
-                (pointerRecords[j], pointerRecords[j - 1]);
-            }
-        }
-        GenesisBatch[] memory batches = new GenesisBatch[](4);
+        GenesisBatch[] memory batches = new GenesisBatch[](3);
         batches[0].actionClass = 1;
         (GovernanceCall[] memory registrations, bytes[] memory registrationData) =
             StreamCurrentStackPlan.registrationCalls(registry, records);
-        batches[0].calls = new GovernanceCall[](records.length + 5);
-        batches[0].callDatas = new bytes[](records.length + 5);
+        batches[0].calls = new GovernanceCall[](records.length + 2);
+        batches[0].callDatas = new bytes[](records.length + 2);
         for (uint256 i; i < records.length; ++i) {
             batches[0].calls[i] = registrations[i];
             batches[0].callDatas[i] = registrationData[i];
@@ -212,6 +470,10 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
         );
         batches[0].callDatas[records.length + 1] = data;
         batches[0].calls[records.length + 1] = _configurationCall(address(entropy), data);
+        batches[2].actionClass = 1;
+        address[] memory extraProducers = _additionalEscrowProducers();
+        batches[2].calls = new GovernanceCall[](6 + extraProducers.length);
+        batches[2].callDatas = new bytes[](6 + extraProducers.length);
         data = abi.encodeCall(
             router.setCollectionMetadata,
             (
@@ -222,33 +484,61 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
                 "https://example.invalid/art/"
             )
         );
-        batches[0].callDatas[records.length + 2] = data;
-        batches[0].calls[records.length + 2] = _configurationCall(address(router), data);
+        batches[2].callDatas[0] = data;
+        batches[2].calls[0] = _configurationCall(address(router), data);
+        data =
+            abi.encodeCall(router.setCollectionScript, (1, "document.body.textContent=tokenHash;"));
+        batches[2].callDatas[1] = data;
+        batches[2].calls[1] = _configurationCall(address(router), data);
         data = abi.encodeCall(royalties.configureCollectionRoyalty, (1, profile, uint16(690)));
-        batches[0].callDatas[records.length + 3] = data;
-        batches[0].calls[records.length + 3] = _configurationCall(address(royalties), data);
+        batches[2].callDatas[2] = data;
+        batches[2].calls[2] = _configurationCall(address(royalties), data);
         data = abi.encodeCall(
-            artists.nominateArtist, (1, artist, keccak256("fixture artist identity"))
+            primaryResolver.setPrimaryProfileAssignment,
+            (PRIMARY_REVENUE_CLASS, uint8(1), 1, profile, bytes32(0))
         );
-        batches[0].callDatas[records.length + 4] = data;
-        batches[0].calls[records.length + 4] = _configurationCall(address(artists), data);
+        batches[2].callDatas[3] = data;
+        batches[2].calls[3] = _configurationCall(address(primaryResolver), data);
+        (batches[2].calls[4], batches[2].callDatas[4]) = _escrowProducerCall(address(sale));
+        (batches[2].calls[5], batches[2].callDatas[5]) = _escrowProducerCall(address(auction));
+        for (uint256 i; i < extraProducers.length; ++i) {
+            (batches[2].calls[6 + i], batches[2].callDatas[6 + i]) =
+                _escrowProducerCall(extraProducers[i]);
+        }
 
-        bytes32[] memory installTypes = new bytes32[](records.length - 1);
-        StreamModuleRegistration[] memory installs =
-            new StreamModuleRegistration[](records.length - 1);
-        for (uint256 i = 1; i < records.length; ++i) {
-            installs[i - 1] = records[i];
-            installTypes[i - 1] = _pointerType(records[i].moduleType);
+        bytes32[] memory installTypes = new bytes32[](records.length);
+        for (uint256 i; i < records.length; ++i) {
+            installTypes[i] = _pointerType(records[i].moduleType);
         }
         batches[1].actionClass = 3;
         (batches[1].calls, batches[1].callDatas) =
-            StreamCurrentStackPlan.pointerCalls(core, registry, installTypes, installs);
-        batches[2].actionClass = 2;
-        batches[2].calls = new GovernanceCall[](1);
-        batches[2].callDatas = new bytes[](1);
-        (batches[2].calls[0], batches[2].callDatas[0]) =
-            StreamCurrentStackPlan.freezeManifestCall(core, registry, records[1]);
-        _sealProductPlan(batches, pointerTypes, pointerRecords, records);
+            StreamCurrentStackPlan.pointerCalls(core, registry, installTypes, records);
+        _admitInitialProductPolicies(batches);
+        _executeInitialBatch(batches[0]);
+        GovernanceCall[] memory pointerCalls = new GovernanceCall[](records.length + 1);
+        bytes[] memory pointerData = new bytes[](records.length + 1);
+        for (uint256 i; i < records.length; ++i) {
+            pointerCalls[i] = batches[1].calls[i];
+            pointerData[i] = batches[1].callDatas[i];
+        }
+        (pointerCalls[records.length], pointerData[records.length]) =
+            _initialPublication(_initialProductModules(), keccak256("initial product selection"));
+        batches[1].calls = pointerCalls;
+        batches[1].callDatas = pointerData;
+        _executeInitialBatch(batches[1]);
+        _executeInitialBatch(batches[2]);
+    }
+
+    function _escrowProducerCall(address producer)
+        private
+        view
+        returns (GovernanceCall memory call_, bytes memory data)
+    {
+        (bytes32 scope, bytes32 oldState, bytes32 nextState) =
+            revenueEscrow.creditProducerTransitionHashes(producer, true);
+        data = abi.encodeCall(revenueEscrow.setCreditProducer, (producer, true));
+        call_ =
+            StreamCurrentStackPlan.call(address(revenueEscrow), data, scope, oldState, nextState);
     }
 
     function _moduleRecords() private view returns (StreamModuleRegistration[] memory records) {
@@ -298,7 +588,7 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
         records[7] = _record(
             address(artists),
             keccak256("ARTIST_REGISTRY"),
-            type(IStreamCollectionArtistRegistry).interfaceId,
+            type(IStreamArtistMintConsent).interfaceId,
             keccak256("fixture artist module")
         );
         records[8] = _record(
@@ -348,75 +638,93 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
         );
     }
 
-    function _sealProductPlan(
-        GenesisBatch[] memory batches,
-        bytes32[] memory pointerTypes,
-        StreamModuleRegistration[] memory pointerRecords,
-        StreamModuleRegistration[] memory records
-    ) private {
-        // Final binding and publication are assembled below from the exact deployed objects.
-        SystemManifestBootstrapBinding memory binding;
-        binding.roleRegistry = address(roles);
-        binding.governanceRoot = address(governanceRoot);
-        binding.governanceRootCodeHash = address(governanceRoot).codehash;
-        binding.initialTerminalFreezeVetoGuardians = guardians;
-        binding.core = address(core);
-        binding.systemManifestSatellite = address(manifest);
-        binding.pointerTypes = pointerTypes;
-        binding.registries = new address[](1);
-        binding.registries[0] = address(registry);
-        (binding.expectedInventoryStateRoot, binding.expectedInventoryLeafCount) =
-            StreamCurrentStackPlan.finalInventory(
-                address(executor), core, registry, pointerTypes, pointerRecords, records
-            );
-        _completeGenesisPlan(binding, batches);
+    function _initializeGovernanceFoundation() private {
+        StreamGovernanceGenesisPlan.Configuration memory c;
+        c.executor = executor;
+        c.roles = roles;
+        c.core = core;
+        c.registry = registry;
+        c.manifest = manifest;
+        c.bootstrapAuthority = address(this);
+        c.governanceRoot = address(governanceRoot);
+        c.guardians = guardians;
+        c.deploymentHash = DEPLOYMENT_HASH;
+        c.manifestModuleHash = keccak256("fixture system manifest");
+        c.moduleURI = "urn:6529stream:fixture:module";
+        (address payload, bytes32 hash) = StreamGenesisManifestPlan.writePayload(
+            bytes("{\"purpose\":\"current-stack governance foundation\",\"version\":1}")
+        );
+        StreamSystemManifestUpdate memory update = StreamSystemManifestUpdate(
+            hash,
+            "urn:6529stream:current-stack:foundation",
+            keccak256("fixture events"),
+            keccak256("fixture compatibility"),
+            keccak256("fixture numeric ids"),
+            keccak256("fixture schema"),
+            keccak256("fixture canonicalization"),
+            keccak256("fixture spec"),
+            keccak256("fixture client")
+        );
+        (SystemManifestBootstrapBinding memory binding, GenesisBatch[] memory batches) =
+            StreamGovernanceGenesisPlan.build(c, payload, update);
+        for (uint256 i; i < binding.actionPolicies.length; ++i) {
+            _foundationPolicies.push(binding.actionPolicies[i]);
+        }
+        executor.commitGenesisPlan(executor.hashGenesisPlan(binding, batches));
+        executor.prepareGenesis(binding, batches);
+        executor.initializeGenesis(binding, batches);
     }
 
-    function _completeGenesisPlan(
-        SystemManifestBootstrapBinding memory binding,
-        GenesisBatch[] memory batches
-    ) internal {
-        (address payload, bytes32 payloadHash) = StreamGenesisManifestPlan.writePayload(
-            bytes("{\"purpose\":\"current-stack integration test\",\"version\":1}")
-        );
-        binding.expectedManifestHash = payloadHash;
-        binding.expectedTriggers = new SystemManifestBootstrapTriggerExpectation[](2);
-        binding.expectedTriggers[0] = SystemManifestBootstrapTriggerExpectation(
-            address(core), core.updateSatellitePointer.selector, address(core).codehash, 8
-        );
-        binding.expectedTriggers[1] = SystemManifestBootstrapTriggerExpectation(
-            address(registry), registry.setModuleStatus.selector, address(registry).codehash, 3
-        );
-        if (uint160(address(core)) > uint160(address(registry))) {
-            (binding.expectedTriggers[0], binding.expectedTriggers[1]) =
-            (binding.expectedTriggers[1], binding.expectedTriggers[0]);
+    function _admitInitialProductPolicies(GenesisBatch[] memory batches) private {
+        GovernanceActionPolicyEntry[] memory candidates = _actionPolicies(batches);
+        uint256 count;
+        for (uint256 i; i < candidates.length; ++i) {
+            bool exists;
+            for (uint256 j; j < _foundationPolicies.length; ++j) {
+                if (_policyKey(candidates[i]) != _policyKey(_foundationPolicies[j])) continue;
+                require(
+                    keccak256(abi.encode(candidates[i]))
+                        == keccak256(abi.encode(_foundationPolicies[j])),
+                    "foundation policy cannot be rewritten"
+                );
+                exists = true;
+                break;
+            }
+            if (!exists) candidates[count++] = candidates[i];
         }
-        binding.actionPolicyCandidateProfileHash = DEPLOYMENT_HASH;
-        batches[3].actionClass = 3;
-        batches[3].calls = new GovernanceCall[](2);
-        batches[3].callDatas = new bytes[](2);
-        batches[3].calls[0].target = address(executor);
-        batches[3].calls[0].selector = executor.sealSystemManifestBootstrap.selector;
-        batches[3].calls[1].target = address(manifest);
-        batches[3].calls[1].selector = manifest.publishStreamSystemManifest.selector;
-        binding.actionPolicies = _actionPolicies(batches);
-        binding.expectedActionPolicyCatalogHash = StreamGovernanceActionPolicy.expectedCatalogHash(
-            address(executor), binding.actionPolicyCandidateProfileHash, binding.actionPolicies
+        GovernanceActionPolicyEntry[] memory additions = new GovernanceActionPolicyEntry[](count);
+        for (uint256 i; i < count; ++i) {
+            additions[i] = candidates[i];
+        }
+        (bytes32 candidate, bytes32 catalog, uint256 existingCount, uint64 revision) =
+            executor.governanceActionPolicyState();
+        require(
+            revision == 0 && existingCount == _foundationPolicies.length,
+            "exact original foundation catalog"
         );
-        (batches[3].calls[0], batches[3].callDatas[0]) =
-            StreamGenesisManifestPlan.sealCall(executor, address(this), binding, payload);
-        StreamSystemManifestUpdate memory update = StreamSystemManifestUpdate({
-            manifestHash: payloadHash,
-            manifestURI: "urn:6529stream:current-stack:fixture",
-            eventCatalogHash: keccak256("fixture events"),
-            compatibilityMatrixHash: keccak256("fixture compatibility"),
-            numericIdCatalogHash: keccak256("fixture numeric ids"),
-            schemaCatalogHash: keccak256("fixture schema"),
-            canonicalizationCatalogHash: keccak256("fixture canonicalization"),
-            specBundleHash: keccak256("fixture spec"),
-            reconstructionClientHash: keccak256("fixture client")
-        });
-        StreamSystemManifest.ModuleAddresses memory modules;
+        (bytes32 next, bytes32 scope, bytes32 oldHash, bytes32 newHash) = StreamGovernanceActionPolicy.extensionTransition(
+            address(executor), candidate, catalog, existingCount, revision, additions
+        );
+        GenesisBatch memory batch;
+        batch.actionClass = 3;
+        batch.calls = new GovernanceCall[](2);
+        batch.callDatas = new bytes[](2);
+        batch.callDatas[0] = abi.encodeCall(
+            executor.extendGovernanceActionPolicy, (revision, catalog, next, additions)
+        );
+        batch.calls[0] = StreamCurrentStackPlan.call(
+            address(executor), batch.callDatas[0], scope, oldHash, newHash
+        );
+        (batch.calls[1], batch.callDatas[1]) =
+            _initialPublication(StreamGenesisManifestPlan.readAggregate(manifest).modules, next);
+        _executeInitialBatch(batch);
+    }
+
+    function _initialProductModules()
+        private
+        view
+        returns (StreamSystemManifest.ModuleAddresses memory modules)
+    {
         modules.artistRegistry = address(artists);
         modules.revenueResolver = address(royalties);
         modules.metadataRouter = address(router);
@@ -426,11 +734,62 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
         modules.streamAdminsOrGovernance = address(executor);
         modules.moduleRegistry = address(registry);
         modules.stateExportPublisher = address(executor);
-        (batches[3].calls[1], batches[3].callDatas[1]) =
-            StreamGenesisManifestPlan.firstPublicationCall(manifest, payload, update, modules);
-        executor.commitGenesisPlan(executor.hashGenesisPlan(binding, batches));
-        executor.prepareGenesis(binding, batches);
-        executor.initializeGenesis(binding, batches);
+    }
+
+    function _initialPublication(
+        StreamSystemManifest.ModuleAddresses memory modules,
+        bytes32 reason
+    ) private returns (GovernanceCall memory call_, bytes memory data) {
+        StreamSystemManifest.AggregateState memory current =
+            StreamGenesisManifestPlan.readAggregate(manifest);
+        (address payload, bytes32 hash) = StreamGenesisManifestPlan.writePayload(
+            abi.encodePacked(
+                "{\"purpose\":\"current product activation\",\"commitment\":\"",
+                Strings.toHexString(uint256(reason), 32),
+                "\"}"
+            )
+        );
+        StreamSystemManifestUpdate memory update = StreamSystemManifestUpdate(
+            hash,
+            "urn:6529stream:current-stack:products",
+            current.discovery.eventCatalogHash,
+            current.discovery.compatibilityMatrixHash,
+            current.discovery.numericIdCatalogHash,
+            current.discovery.schemaCatalogHash,
+            current.discovery.canonicalizationCatalogHash,
+            current.discovery.specBundleHash,
+            current.discovery.reconstructionClientHash
+        );
+        return StreamGenesisManifestPlan.publicationCall(manifest, payload, update, modules);
+    }
+
+    function _executeInitialBatch(GenesisBatch memory batch) private {
+        executor.publishGovernanceCallData(batch.callDatas);
+        (bytes32 scope, bytes32 oldHash, bytes32 newHash) = StreamGovernanceBootstrap.deriveBatchTransitionHashes(
+            batch.calls, StreamGovernanceBootstrap.governanceCallsHash(batch.calls)
+        );
+        uint64 ready = uint64(block.timestamp + executor.minimumDelay(batch.actionClass));
+        bytes memory result = governanceRoot.execute(
+            address(executor),
+            0,
+            abi.encodeCall(
+                executor.scheduleGovernanceBatch,
+                (
+                    batch.actionClass,
+                    batch.calls,
+                    scope,
+                    oldHash,
+                    newHash,
+                    ready,
+                    ready + 7 days,
+                    keccak256("initial product activation"),
+                    "urn:6529stream:fixture:product-activation",
+                    DEPLOYMENT_HASH
+                )
+            )
+        );
+        vm.warp(ready);
+        executor.executeGovernanceBatch(abi.decode(result, (bytes32)), batch.calls, batch.callDatas);
     }
 
     function _actionPolicies(GenesisBatch[] memory batches)
@@ -500,7 +859,7 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
 
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {
         GovernanceActionPolicyEntry[] memory additional = _additionalOperatingPolicies();
-        rows = new GovernanceActionPolicyEntry[](52 + additional.length);
+        rows = new GovernanceActionPolicyEntry[](66 + additional.length);
         rows[0] = _operatingPolicy(address(manager), manager.configurePhase.selector);
         rows[1] = _operatingPolicy(address(manager), manager.setPhaseExecutor.selector);
         rows[2] = _operatingPolicy(address(manager), manager.setPhasePaused.selector);
@@ -567,7 +926,41 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
             _operatingPolicy(1, address(manifest), manifest.publishStreamSystemManifest.selector);
         rows[i++] =
             _operatingPolicy(2, address(manifest), manifest.publishStreamSystemManifest.selector);
-        // Artist nomination and metadata/entropy configuration are also collected from genesis.
+        rows[i++] = _operatingPolicy(address(manager), manager.raiseGasParameter.selector);
+        rows[i++] = _operatingPolicy(address(factory), factory.raiseGasParameter.selector);
+        rows[i++] = _operatingPolicy(address(artists), artists.raiseGasParameter.selector);
+        rows[i++] =
+            _operatingPolicy(address(revenueEscrow), revenueEscrow.setCreditProducer.selector);
+        rows[i++] =
+            _operatingPolicy(address(revenueEscrow), revenueEscrow.raiseGasParameter.selector);
+        rows[i++] =
+            _operatingPolicy(address(primaryResolver), primaryResolver.raiseGasParameter.selector);
+        rows[i++] = _operatingPolicy(
+            address(primaryResolver), primaryResolver.createPrimaryTemplate.selector
+        );
+        rows[i++] =
+            _operatingPolicy(address(assetPolicy), assetPolicy.setAssetPermitPolicy.selector);
+        rows[i++] = _operatingPolicy(
+            address(primaryResolver), primaryResolver.setPrimaryTemplateAssignment.selector
+        );
+        rows[i++] = _operatingPolicy(address(entropy), entropy.raiseTimeParameter.selector);
+        rows[i++] = _operatingPolicy(
+            1, address(artists), IStreamArtistIdentityContest.contestArtistIdentity.selector
+        );
+        rows[i++] = _operatingPolicy(
+            2, address(artists), IStreamArtistIdentityContest.contestArtistIdentity.selector
+        );
+        rows[i++] = _operatingPolicy(
+            1,
+            address(artists),
+            IStreamArtistIdentityDismissal.dismissArtistIdentityContest.selector
+        );
+        rows[i++] = _operatingPolicy(
+            2,
+            address(artists),
+            IStreamArtistIdentityDismissal.dismissArtistIdentityContest.selector
+        );
+        // Metadata, economics and entropy configuration are also collected from genesis.
         for (uint256 j; j < additional.length; ++j) {
             rows[i++] = additional[j];
         }

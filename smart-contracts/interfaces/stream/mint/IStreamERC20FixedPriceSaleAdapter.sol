@@ -5,12 +5,13 @@ import "../revenue/IStreamPaymentIntentVerifier.sol";
 import "./IStreamMintManager.sol";
 import "../revenue/IStreamRevenueResolver.sol";
 import "../revenue/IStreamSplitFactory.sol";
-import "../artist/IStreamCollectionArtistRegistry.sol";
+import "../artist/IStreamArtistAttribution.sol";
 import "../../../vendor/openzeppelin/IERC165.sol";
+import "./IStreamSaleFunding.sol";
 
 /// @notice Current-stack fixed-price ERC-20 purchases with creator, platform and payer consent.
-/// @dev Fixed-profile collection/default primary assignments only; no deferred escrow or permits.
-interface IStreamERC20FixedPriceSaleAdapter is IERC165 {
+/// @dev Explicit collection primary profiles or supported artist templates; bounded deposit/escrow, no permits.
+interface IStreamERC20FixedPriceSaleAdapter is IERC165, IStreamSaleFunding {
     struct SaleConfig {
         uint256 collectionId;
         bytes32 phaseId;
@@ -95,7 +96,7 @@ interface IStreamERC20FixedPriceSaleAdapter is IERC165 {
     /// @notice Shared token admission registry pinned by the split factory.
     function assetPolicyRegistry() external view returns (IStreamAssetPolicyRegistry);
     /// @notice Collection attribution authority bound to the manager's Core.
-    function artistRegistry() external view returns (IStreamCollectionArtistRegistry);
+    function artistRegistry() external view returns (IStreamArtistAttribution);
     /// @notice Current platform signer for commercial sale authorizations.
     function platformSigner() external view returns (address);
     /// @notice Monotonic signer epoch included in every commercial authorization.
@@ -124,7 +125,7 @@ interface IStreamERC20FixedPriceSaleAdapter is IERC165 {
         external
         view
         returns (bytes32);
-    /// @notice Returns the canonical primary-policy commitment for a fixed collection/default profile.
+    /// @notice Returns the canonical PRIMARY_SALE commitment for an explicit collection profile or its current concrete template preview.
     function primaryPolicy(uint256 collectionId, bytes32 revenueClass)
         external
         view

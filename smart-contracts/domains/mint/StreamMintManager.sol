@@ -11,9 +11,33 @@ import "../../vendor/openzeppelin/ERC165.sol";
 import "./StreamMintCoreExecutor.sol";
 import "./StreamMintGateValidator.sol";
 import "./StreamMintOperationIdentity.sol";
+import "./StreamMintArtistConsent.sol";
+import "./StreamMintPhaseState.sol";
+import "./StreamMintRevocation.sol";
+import "./StreamMintManagerAccounting.sol";
+import "../parameters/StreamGasParameterHost.sol";
 
 /// @notice Outside-Core phase policy and prepared mint execution manager.
-contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC165 {
+contract StreamMintManager is
+    IStreamMintManager,
+    IStreamMintAuthorizationRevocation,
+    Ownable,
+    ReentrancyGuard,
+    ERC165,
+    StreamGasParameterHost
+{
+    bytes32 public constant GGP_ARTIST_AUTHORITY_GAS_LIMIT =
+        keccak256("6529STREAM_GGP_ARTIST_AUTHORITY_GAS_LIMIT");
+    bytes32 public constant GGP_MINT_REVOCATION_ERC1271_GAS_LIMIT =
+        keccak256("6529STREAM_GGP_MINT_REVOCATION_ERC1271_GAS_LIMIT");
+    event MintPhaseConsentRecorded(
+        uint16 schemaVersion,
+        uint256 indexed collectionId,
+        bytes32 indexed phaseId,
+        bytes32 indexed policyHash,
+        uint8 consentMode,
+        bytes32 consentEvidenceHash
+    );
     /// @notice Domain separator for active phase policy hashes.
     bytes32 public constant POLICY_DOMAIN = keccak256("6529STREAM_MINT_MANAGER_POLICY_V1");
     /// @notice Domain separator for phase configuration hashes.
@@ -74,11 +98,6 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
     /// @notice Next nonce reserved for prepared mint operation IDs.
     uint256 public override nextOperationNonce;
 
-    struct PhaseState {
-        bool exists;
-        MintPhaseConfig config;
-    }
-
     struct OperationTranscript {
         uint256 quantity;
         uint256 firstOperationNonce;
@@ -90,7 +109,7 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
         StreamMintOperationIdentity.MintAuthorization authorization;
     }
 
-    mapping(uint256 => mapping(bytes32 => PhaseState)) private _phases;
+    mapping(uint256 => mapping(bytes32 => StreamMintPhaseState.PhaseState)) private _phases;
     mapping(uint256 => mapping(bytes32 => MintGateConfig)) private _phaseGateConfigs;
     /// @notice Active manager policy hash for each configured phase.
     mapping(uint256 => mapping(bytes32 => bytes32)) public override phasePolicyHash;
@@ -102,7 +121,11 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
     mapping(uint256 => mapping(bytes32 => address[])) private _phaseExecutors;
     mapping(uint256 => mapping(bytes32 => mapping(address => uint256))) private _phaseExecutorIndex;
 
-    constructor(IStreamCore core_, IStreamMintLedger mintLedger_, IERC165 moduleRegistry_) {
+    constructor(IStreamCore core_, IStreamMintLedger mintLedger_, IERC165 moduleRegistry_)
+        StreamGasParameterHost(StreamMintArtistConsent.governance(
+                address(core_), address(moduleRegistry_)
+            ))
+    {
         if (address(core_).code.length == 0) {
             revert InvalidCoreContract(address(core_));
         }
@@ -132,6 +155,10 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
         core = core_;
         mintLedger = mintLedger_;
         moduleRegistry = moduleRegistry_;
+        _registerGasParameter(GasParameterConfig("ARTIST_AUTHORITY_GAS_LIMIT", 150_000, 150_000, 2));
+        _registerGasParameter(
+            GasParameterConfig("MINT_REVOCATION_ERC1271_GAS_LIMIT", 400_000, 350_000, 2)
+        );
     }
 
     /// @notice Returns true for deployment validation.
@@ -140,10 +167,59 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
     }
 
     /// @notice Advertises the manager interface required by Core satellite validation.
-    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
-        return
-            interfaceId == type(IStreamMintManager).interfaceId
-                || super.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(IERC165, ERC165)
+        returns (bool)
+    {
+        return interfaceId == type(IStreamMintManager).interfaceId
+            || interfaceId == type(IStreamMintAuthorizationRevocation).interfaceId
+            || super.supportsInterface(interfaceId);
+    }
+
+    function mintTicketAuthorizationId(
+        StreamMintTicketTypes.MintTicket calldata ticket,
+        address verifyingGate
+    ) external view override returns (bytes32) {
+        return StreamMintRevocation.ticketId(ticket, verifyingGate);
+    }
+
+    function mintOfferAuthorizationId(StreamPrivateSaleTypes.SaleOffer calldata offer)
+        external
+        view
+        override
+        returns (bytes32)
+    {
+        return StreamMintRevocation.offerId(offer);
+    }
+
+    function voidMintTicket(
+        StreamMintTicketTypes.MintTicket calldata ticket,
+        address verifyingGate,
+        bytes calldata revocationSignature
+    ) external override nonReentrant returns (bytes32) {
+        return StreamMintRevocation.voidTicket(
+            _revocationContext(), ticket, verifyingGate, revocationSignature
+        );
+    }
+
+    function voidMintOffer(
+        StreamPrivateSaleTypes.SaleOffer calldata offer,
+        uint8 buyerKind,
+        bytes calldata revocationSignature
+    ) external override nonReentrant returns (bytes32) {
+        return StreamMintRevocation.voidOffer(
+            _revocationContext(), offer, buyerKind, revocationSignature
+        );
+    }
+
+    function _revocationContext() private view returns (StreamMintRevocation.Context memory) {
+        return StreamMintRevocation.Context(
+            address(core),
+            address(mintLedger),
+            _gasParameterValue(GGP_MINT_REVOCATION_ERC1271_GAS_LIMIT)
+        );
     }
 
     /// @notice Configures and registers a launch-static phase policy.
@@ -159,42 +235,25 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
         if (_phases[collectionId][phaseId].exists) {
             revert MintPhaseAlreadyConfigured(collectionId, phaseId);
         }
-        _requirePhaseConfig(collectionId, phaseId, config);
-        if (counterIds.length == 0 || counterIds.length != counterConfigs.length) {
-            revert MintArrayLengthMismatch();
-        }
-        if (counterIds.length > MAX_PHASE_COUNTERS) {
-            revert MintCounterCountLimitExceeded(counterIds.length, MAX_PHASE_COUNTERS);
-        }
-
-        bytes32[] memory ids = _copyCounterIds(counterIds);
-        IStreamMintLedger.LedgerCounterPolicy[] memory ledgerPolicies =
-            new IStreamMintLedger.LedgerCounterPolicy[](counterIds.length);
-        for (uint256 i = 0; i < counterIds.length; i++) {
-            _requireNoDuplicateCounterId(counterIds, i);
-            _requireStaticCounterConfig(counterIds[i], counterConfigs[i]);
-            ledgerPolicies[i] = _ledgerPolicy(counterConfigs[i]);
-        }
-        MintGateConfig memory validatedGateConfig =
-            StreamMintGateValidator.validateConfiguration(gateConfig, moduleRegistry);
-
-        _replacePhaseCounters(collectionId, phaseId, ids, counterConfigs);
-        _phaseGateConfigs[collectionId][phaseId] = validatedGateConfig;
-        _phases[collectionId][phaseId] = PhaseState({ exists: true, config: config });
-
-        policyHash = _computePolicyHash(collectionId, phaseId);
-        phasePolicyHash[collectionId][phaseId] = policyHash;
-        mintLedger.registerPhasePolicy(
-            address(this), collectionId, phaseId, policyHash, ids, ledgerPolicies, 0
+        return StreamMintPhaseState.configure(
+            _phases[collectionId][phaseId],
+            _phaseGateConfigs[collectionId],
+            _phaseCounterIds[collectionId][phaseId],
+            _counterConfigs[collectionId][phaseId],
+            _phaseExecutors[collectionId][phaseId],
+            phasePolicyHash[collectionId],
+            config,
+            gateConfig,
+            counterIds,
+            counterConfigs,
+            StreamMintPhaseState.ConfigurationContext(
+                _policyContext(collectionId, phaseId),
+                address(core),
+                _gasParameterValue(GGP_ARTIST_AUTHORITY_GAS_LIMIT),
+                MAX_PHASE_BATCH_QUANTITY,
+                MAX_PHASE_COUNTERS
+            )
         );
-
-        _emitPhaseConfigured(collectionId, phaseId, config, policyHash);
-        for (uint256 i = 0; i < counterIds.length; i++) {
-            _emitCounterConfigured(
-                collectionId, phaseId, counterIds[i], counterConfigs[i], policyHash
-            );
-        }
-        _emitGateConfigured(collectionId, phaseId, validatedGateConfig, policyHash);
     }
 
     /// @notice Enables or disables a caller for a configured phase.
@@ -205,23 +264,14 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
         nonReentrant
     {
         _requireConfiguredPhase(collectionId, phaseId);
-        if (executor == address(0)) {
-            revert InvalidMintExecutor(executor);
-        }
-        if (phaseExecutor[collectionId][phaseId][executor] == allowed) {
-            return;
-        }
-        phaseExecutor[collectionId][phaseId][executor] = allowed;
-        if (allowed) {
-            uint256 executorCount = _phaseExecutors[collectionId][phaseId].length;
-            if (executorCount >= MAX_PHASE_EXECUTORS) {
-                revert MintExecutorCountLimitExceeded(executorCount + 1, MAX_PHASE_EXECUTORS);
-            }
-            _phaseExecutorIndex[collectionId][phaseId][executor] = executorCount + 1;
-            _phaseExecutors[collectionId][phaseId].push(executor);
-        } else {
-            _removePhaseExecutor(collectionId, phaseId, executor);
-        }
+        if (!StreamMintPhaseState.setExecutor(
+                phaseExecutor[collectionId][phaseId],
+                _phaseExecutors[collectionId][phaseId],
+                _phaseExecutorIndex[collectionId][phaseId],
+                executor,
+                allowed,
+                MAX_PHASE_EXECUTORS
+            )) return;
 
         bytes32 policyHash = _refreshLedgerPolicy(collectionId, phaseId);
         emit MintPhaseExecutorUpdated(
@@ -236,12 +286,13 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
         onlyOwner
         nonReentrant
     {
-        PhaseState storage phaseState = _requireConfiguredPhase(collectionId, phaseId);
+        StreamMintPhaseState.PhaseState storage phaseState =
+            _requireConfiguredPhase(collectionId, phaseId);
         if (phaseState.config.paused == paused) {
             return;
         }
         phaseState.config.paused = paused;
-        bytes32 policyHash = _refreshLedgerPolicy(collectionId, phaseId);
+        bytes32 policyHash = phasePolicyHash[collectionId][phaseId];
         emit MintPhasePausedEvent(collectionId, phaseId, paused, policyHash, msg.sender);
     }
 
@@ -343,7 +394,7 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
         override
         returns (bool exists, MintPhaseConfig memory config)
     {
-        PhaseState storage phaseState = _phases[collectionId][phaseId];
+        StreamMintPhaseState.PhaseState storage phaseState = _phases[collectionId][phaseId];
         return (phaseState.exists, phaseState.config);
     }
 
@@ -448,7 +499,7 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
     function _requireConfiguredPhase(uint256 collectionId, bytes32 phaseId)
         private
         view
-        returns (PhaseState storage phaseState)
+        returns (StreamMintPhaseState.PhaseState storage phaseState)
     {
         phaseState = _phases[collectionId][phaseId];
         if (!phaseState.exists) {
@@ -459,7 +510,7 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
     function _requireExecutablePhase(MintBatch calldata request)
         private
         view
-        returns (PhaseState storage phaseState)
+        returns (StreamMintPhaseState.PhaseState storage phaseState)
     {
         _requirePhaseIdentity(request.collectionId, request.phaseId);
         phaseState = _requireConfiguredPhase(request.collectionId, request.phaseId);
@@ -509,7 +560,7 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
         bytes calldata gateData,
         bytes32 executionPath
     ) private view returns (OperationTranscript memory transcript) {
-        PhaseState storage phaseState = _requireExecutablePhase(batch);
+        StreamMintPhaseState.PhaseState storage phaseState = _requireExecutablePhase(batch);
         transcript.quantity = _validateMintBatch(batch, phaseState.config);
         transcript.currentPolicyHash = _computePolicyHash(batch.collectionId, batch.phaseId);
         bytes32 registeredPolicyHash = phasePolicyHash[batch.collectionId][batch.phaseId];
@@ -517,6 +568,13 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
             revert MintPolicyHashMismatch(registeredPolicyHash, transcript.currentPolicyHash);
         }
         transcript.boundPolicyHash = _requireBoundPolicyHash(batch, transcript.currentPolicyHash);
+        StreamMintArtistConsent.mint(
+            address(core),
+            batch.collectionId,
+            batch.phaseId,
+            transcript.currentPolicyHash,
+            _gasParameterValue(GGP_ARTIST_AUTHORITY_GAS_LIMIT)
+        );
         transcript.authorization = StreamMintGateValidator.validateAuthorization(
             batch,
             gateData,
@@ -595,24 +653,13 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
         view
         returns (IStreamMintLedger.CounterConsumption[] memory consumptions)
     {
-        bytes32[] storage storedCounterIds = _phaseCounterIds[request.collectionId][request.phaseId];
-        bytes32[] memory counterIds = new bytes32[](storedCounterIds.length);
-        MintCounterConfig[] memory counterConfigs = new MintCounterConfig[](storedCounterIds.length);
-        for (uint256 i = 0; i < storedCounterIds.length; i++) {
-            bytes32 counterId = storedCounterIds[i];
-            counterIds[i] = counterId;
-            counterConfigs[i] = _counterConfigs[request.collectionId][request.phaseId][counterId];
-        }
-        StreamMintOperationIdentity.CounterContext memory context =
-            StreamMintOperationIdentity.CounterContext({
-                chainId: block.chainid,
-                manager: address(this),
-                ledger: address(mintLedger),
-                executor: msg.sender,
-                authorizer: authorizer
-            });
-        return StreamMintOperationIdentity.deriveCounterConsumptions(
-            request, quantity, counterIds, counterConfigs, context
+        return StreamMintManagerAccounting.counterConsumptions(
+            request,
+            quantity,
+            authorizer,
+            address(mintLedger),
+            _phaseCounterIds[request.collectionId][request.phaseId],
+            _counterConfigs[request.collectionId][request.phaseId]
         );
     }
 
@@ -640,19 +687,63 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
         private
         returns (bytes32 policyHash)
     {
-        bytes32[] storage counterIds = _phaseCounterIds[collectionId][phaseId];
-        bytes32[] memory ids = new bytes32[](counterIds.length);
-        IStreamMintLedger.LedgerCounterPolicy[] memory ledgerPolicies =
-            new IStreamMintLedger.LedgerCounterPolicy[](counterIds.length);
-        for (uint256 i = 0; i < counterIds.length; i++) {
-            bytes32 counterId = counterIds[i];
-            ids[i] = counterId;
-            ledgerPolicies[i] = _ledgerPolicy(_counterConfigs[collectionId][phaseId][counterId]);
-        }
+        (bytes32[] memory ids, IStreamMintLedger.LedgerCounterPolicy[] memory ledgerPolicies) = StreamMintManagerAccounting.ledgerPolicies(
+            _phaseCounterIds[collectionId][phaseId], _counterConfigs[collectionId][phaseId]
+        );
         policyHash = _computePolicyHash(collectionId, phaseId);
+        _recordArtistConsent(collectionId, phaseId, policyHash);
         phasePolicyHash[collectionId][phaseId] = policyHash;
         mintLedger.registerPhasePolicy(
             address(this), collectionId, phaseId, policyHash, ids, ledgerPolicies, 0
+        );
+    }
+
+    function _recordArtistConsent(uint256 collectionId, bytes32 phaseId, bytes32 policyHash)
+        private
+    {
+        (uint8 mode, bytes32 evidence) = StreamMintArtistConsent.registration(
+            address(core),
+            collectionId,
+            phaseId,
+            policyHash,
+            _gasParameterValue(GGP_ARTIST_AUTHORITY_GAS_LIMIT)
+        );
+        emit MintPhaseConsentRecorded(
+            SCHEMA_VERSION, collectionId, phaseId, policyHash, mode, evidence
+        );
+    }
+
+    /// @notice Computes the exact prospective policy so the artist can consent before registration.
+    /// @dev Uses this Manager's chain/dependencies. Pause is excluded; executor order is canonicalized.
+    ///      Configuration admission and runtime authorization are independently checked when applied.
+    function previewPhasePolicyHash(
+        uint256 collectionId,
+        bytes32 phaseId,
+        MintPhaseConfig calldata config,
+        MintGateConfig calldata gateConfig,
+        bytes32[] calldata counterIds,
+        MintCounterConfig[] calldata counterConfigs,
+        address[] calldata executors
+    ) external view returns (bytes32) {
+        if (
+            counterIds.length != counterConfigs.length || counterIds.length > MAX_PHASE_COUNTERS
+                || executors.length > MAX_PHASE_EXECUTORS
+        ) revert MintArrayLengthMismatch();
+        return StreamMintOperationIdentity.computePolicyHash(
+            config,
+            gateConfig,
+            counterIds,
+            counterConfigs,
+            executors,
+            StreamMintOperationIdentity.PolicyContext(
+                block.chainid,
+                address(this),
+                address(mintLedger),
+                address(moduleRegistry),
+                SCHEMA_VERSION,
+                collectionId,
+                phaseId
+            )
         );
     }
 
@@ -661,207 +752,35 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
         view
         returns (bytes32)
     {
-        bytes32[] storage storedCounterIds = _phaseCounterIds[collectionId][phaseId];
-        bytes32[] memory counterIds = new bytes32[](storedCounterIds.length);
-        MintCounterConfig[] memory counterConfigs = new MintCounterConfig[](storedCounterIds.length);
-        for (uint256 i = 0; i < storedCounterIds.length; i++) {
-            bytes32 counterId = storedCounterIds[i];
-            counterIds[i] = counterId;
-            counterConfigs[i] = _counterConfigs[collectionId][phaseId][counterId];
-        }
-        StreamMintOperationIdentity.PolicyContext memory context =
-            StreamMintOperationIdentity.PolicyContext({
-                chainId: block.chainid,
-                manager: address(this),
-                ledger: address(mintLedger),
-                moduleRegistry: address(moduleRegistry),
-                schemaVersion: SCHEMA_VERSION,
-                collectionId: collectionId,
-                phaseId: phaseId
-            });
-        return StreamMintOperationIdentity.computePolicyHash(
-            _phases[collectionId][phaseId].config,
+        return StreamMintPhaseState.computeStoredPolicyHash(
+            _phases[collectionId][phaseId],
             _phaseGateConfigs[collectionId][phaseId],
-            counterIds,
-            counterConfigs,
+            _phaseCounterIds[collectionId][phaseId],
+            _counterConfigs[collectionId][phaseId],
             _phaseExecutors[collectionId][phaseId],
-            context
+            _policyContext(collectionId, phaseId)
         );
     }
 
-    function _replacePhaseCounters(
-        uint256 collectionId,
-        bytes32 phaseId,
-        bytes32[] memory counterIds,
-        MintCounterConfig[] calldata counterConfigs
-    ) private {
-        bytes32[] storage existing = _phaseCounterIds[collectionId][phaseId];
-        for (uint256 i = 0; i < existing.length; i++) {
-            delete _counterConfigs[collectionId][phaseId][existing[i]];
-        }
-        delete _phaseCounterIds[collectionId][phaseId];
-        for (uint256 i = 0; i < counterIds.length; i++) {
-            _phaseCounterIds[collectionId][phaseId].push(counterIds[i]);
-            _counterConfigs[collectionId][phaseId][counterIds[i]] = counterConfigs[i];
-        }
-    }
-
-    function _removePhaseExecutor(uint256 collectionId, bytes32 phaseId, address executor) private {
-        uint256 indexPlusOne = _phaseExecutorIndex[collectionId][phaseId][executor];
-        if (indexPlusOne == 0) {
-            return;
-        }
-        uint256 index = indexPlusOne - 1;
-        address[] storage executors = _phaseExecutors[collectionId][phaseId];
-        address last = executors[executors.length - 1];
-        if (index != executors.length - 1) {
-            executors[index] = last;
-            _phaseExecutorIndex[collectionId][phaseId][last] = indexPlusOne;
-        }
-        executors.pop();
-        delete _phaseExecutorIndex[collectionId][phaseId][executor];
-    }
-
-    function _copyCounterIds(bytes32[] calldata counterIds)
+    function _policyContext(uint256 collectionId, bytes32 phaseId)
         private
-        pure
-        returns (bytes32[] memory ids)
+        view
+        returns (StreamMintOperationIdentity.PolicyContext memory)
     {
-        ids = new bytes32[](counterIds.length);
-        for (uint256 i = 0; i < counterIds.length; i++) {
-            ids[i] = counterIds[i];
-        }
-    }
-
-    function _ledgerPolicy(MintCounterConfig memory config)
-        private
-        pure
-        returns (IStreamMintLedger.LedgerCounterPolicy memory)
-    {
-        return IStreamMintLedger.LedgerCounterPolicy({
-            enabled: config.enabled,
-            capMode: config.capMode,
-            deltaMode: config.deltaMode,
-            staticCap: config.staticCap,
-            staticIncrement: config.staticIncrement,
-            counterConfigHash: config.counterConfigHash
-        });
+        return StreamMintOperationIdentity.PolicyContext(
+            block.chainid,
+            address(this),
+            address(mintLedger),
+            address(moduleRegistry),
+            SCHEMA_VERSION,
+            collectionId,
+            phaseId
+        );
     }
 
     function _requirePhaseIdentity(uint256 collectionId, bytes32 phaseId) private pure {
         if (collectionId == 0 || phaseId == bytes32(0)) {
             revert InvalidMintPhase(collectionId, phaseId);
         }
-    }
-
-    function _requirePhaseConfig(
-        uint256 collectionId,
-        bytes32 phaseId,
-        MintPhaseConfig calldata config
-    ) private pure {
-        if (config.endTime != 0 && config.startTime != 0 && config.endTime < config.startTime) {
-            revert InvalidMintPhase(collectionId, phaseId);
-        }
-        if (config.maxBatchQuantity == 0 || config.maxBatchQuantity > MAX_PHASE_BATCH_QUANTITY) {
-            revert InvalidMintBatchLimit(config.maxBatchQuantity, MAX_PHASE_BATCH_QUANTITY);
-        }
-    }
-
-    function _requireNoDuplicateCounterId(bytes32[] calldata counterIds, uint256 index)
-        private
-        pure
-    {
-        bytes32 counterId = counterIds[index];
-        if (counterId == bytes32(0)) {
-            revert InvalidMintCounter(counterId);
-        }
-        for (uint256 i = 0; i < index; i++) {
-            if (counterIds[i] == counterId) {
-                revert DuplicateMintCounter(counterId);
-            }
-        }
-    }
-
-    function _requireStaticCounterConfig(bytes32 counterId, MintCounterConfig calldata config)
-        private
-        pure
-    {
-        if (
-            !config.enabled || config.keyMode == CounterKeyMode.UNKNOWN
-                || config.staticIncrement == 0 || config.counterConfigHash == bytes32(0)
-        ) {
-            revert InvalidMintCounter(counterId);
-        }
-        if (
-            config.deltaMode != IStreamMintLedger.CounterDeltaMode.STATIC
-                || config.capMode == IStreamMintLedger.CounterCapMode.RESOLVER
-        ) {
-            revert UnsupportedMintCounterMode(counterId);
-        }
-        if (config.capMode == IStreamMintLedger.CounterCapMode.STATIC && config.staticCap == 0) {
-            revert InvalidMintCounter(counterId);
-        }
-        if (config.capMode == IStreamMintLedger.CounterCapMode.NONE && config.staticCap != 0) {
-            revert InvalidMintCounter(counterId);
-        }
-    }
-
-    function _emitCounterConfigured(
-        uint256 collectionId,
-        bytes32 phaseId,
-        bytes32 counterId,
-        MintCounterConfig calldata config,
-        bytes32 policyHash
-    ) private {
-        emit MintCounterConfigured(
-            collectionId,
-            phaseId,
-            counterId,
-            config.keyMode,
-            config.capMode,
-            config.deltaMode,
-            config.staticCap,
-            config.staticIncrement,
-            config.counterConfigHash,
-            policyHash
-        );
-    }
-
-    function _emitPhaseConfigured(
-        uint256 collectionId,
-        bytes32 phaseId,
-        MintPhaseConfig calldata config,
-        bytes32 policyHash
-    ) private {
-        emit MintPhaseConfigured(
-            collectionId,
-            phaseId,
-            policyHash,
-            config.startTime,
-            config.endTime,
-            config.maxBatchQuantity,
-            config.configHash,
-            config.metadataHash,
-            msg.sender
-        );
-    }
-
-    function _emitGateConfigured(
-        uint256 collectionId,
-        bytes32 phaseId,
-        MintGateConfig memory gateConfig,
-        bytes32 policyHash
-    ) private {
-        emit MintPhaseGateConfigured(
-            collectionId,
-            phaseId,
-            gateConfig.gate,
-            gateConfig.gateConfigHash,
-            gateConfig.gateCodehash,
-            gateConfig.gateMetadataHash,
-            gateConfig.gateSemanticVersion,
-            gateConfig.gateGasLimit,
-            policyHash
-        );
     }
 }

@@ -1,0 +1,184 @@
+	<xs:element name="sourceMaterialsTech" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="sourceMaterialsTech">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A text element identifying the source of information about materials and
+							techniques, often used when citing a published source of watermarks.</tei:ab>
+						<tei:ab type="label">Source Materials/Techniques</tei:ab>
+						<tei:ab type="dataValues">Free text</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="materialsTechSetComplexType" id="materialsTechSetComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines display and index elements for
+					materials and techniques information.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="displayMaterialsTech" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="displayMaterialsTech">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A display element for materials and techniques, corresponding to the subsequent <tei:ref target="#materialsTech">Materials/Techniques</tei:ref> element.<br/>
+							Repeated for language variants only.</tei:ab>
+						<tei:ab type="label">Display Materials/Techniques</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Free text</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="materialsTech" type="lido:materialsTechComplexType" minOccurs="0" maxOccurs="unbounded" id="materialsTech">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A set of structured information about materials and
+							techniques used for or incorporated in the object/work in
+							focus, for use in indexing and retrieval.<br/>
+							Repeated for multiple parts, or if media and support are recorded seperately.</tei:ab>
+						<tei:ab type="label">Materials/Techniques</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:attribute name="measurementsGroup" type="xs:string" id="measurementsGroup">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">An attribute indicating the group of measurements given in multiple <tei:ref target="#measurementsSet">Measurements Set</tei:ref>elements,
+					each of them qualified by a specific kind of measurement in the <tei:ref target="#measurementType">Measurement Type</tei:ref> element.<br/>
+					Note that this type attribute is primarily intended for use in application profiles.</tei:ab>
+				<tei:ab type="dataValues">Controlled terminology</tei:ab>
+				<tei:ab type="recommendation">To be determined by application profiles.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+	</xs:attribute>
+	<xs:complexType name="measurementsSetComplexType" id="measurementsSetComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines information about the dimensions, or other
+					measurements, of the object/work in focus.<br/>
+					May include spacial, temporal or quantitative extent.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="measurementType" type="lido:conceptMixedComplexType" maxOccurs="unbounded" id="measurementType">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for the kind of dimension, like height or width,
+							or other measurements of the object/work, such as volume or running time. May include values for
+							object requirements in loan contexts, such as the tolerated relative humidity of air.</tei:ab>
+						<tei:ab type="label">Measurement Type</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#measurementType">Measurement Type</tei:ref></tei:ab>
+					</xs:documentation>
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:measurementType">
+								<sch:extends rule="sch_MixedContent"/>
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="measurementUnit" type="lido:conceptMixedComplexType" maxOccurs="unbounded" id="measurementUnit">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A text element describing the value of the dimensions, or other measurements,
+							of the object/work. It is recommended to use the decimal point as decimal separator if neccessary. 
+							Use display element for fractional or other number representations.
+							</tei:ab>
+						<tei:ab type="label">Measurement Unit</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#measurementUnit">Measurement Unit</tei:ref></tei:ab>
+					</xs:documentation>
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:measurementUnit">
+								<sch:extends rule="sch_MixedContent"/>
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="measurementValue" type="lido:textComplexType" id="measurementValue">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A text element describing the value of the dimensions, or other measurements, 
+							of the object/work. It is recommended to use the decimal point as decimal separator if neccessary. 
+							Use display element for fractional or other number representations.</tei:ab>
+						<tei:ab type="label">Measurement Value</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled format</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:attribute name="mostNotableEvent" type="xs:integer" id="mostNotableEvent">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">An attribute qualifying the event in focus as the most notable
+					or significant event as designated by the describing institution.<br/>
+					The priority order is assigned in <tei:ref target="#eventSet">Event Set</tei:ref>
+					by using the attribute <tei:ref target="#sortorder">sortorder</tei:ref>.
+				</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+	</xs:attribute>
+	<xs:element name="objectClassificationWrap" id="objectClassificationWrap">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">A wrapper for classification statements about the
+					object/work in focus, including object/work type and classification.</tei:ab>
+				<tei:ab type="label">Object Classification Wrapper</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="lido:objectWorkTypeWrap">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">A wrapper for object/work types.</tei:ab>
+						</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element ref="lido:classificationWrap" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">A wrapper for assignments of the object/work
+								in focus to a classification scheme or schemes, and the type of scheme
+								used.</tei:ab>
+						</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="objectComplexType" id="objectComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines information about an object or a work related to
+					the object/work in focus.
+				</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="objectWebResource" type="lido:webResourceComplexType" minOccurs="0" maxOccurs="unbounded" id="objectWebResource">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab

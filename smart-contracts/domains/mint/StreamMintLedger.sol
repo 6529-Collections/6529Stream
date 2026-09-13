@@ -2,11 +2,12 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/mint/IStreamMintLedger.sol";
+import "../../interfaces/stream/mint/IStreamMintLedgerRevocation.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 
 /// @notice Durable outside-Core accounting ledger for launch mint counters.
-contract StreamMintLedger is IStreamMintLedger, Ownable, ERC165 {
+contract StreamMintLedger is IStreamMintLedger, IStreamMintLedgerRevocation, Ownable, ERC165 {
     uint16 public constant SCHEMA_VERSION = 1;
     uint64 public constant MAX_POLICY_GRACE_SECONDS = 2_592_000;
     bytes32 public constant VALUE_KEY_DOMAIN = keccak256("6529STREAM_MINT_COUNTER_VALUE_KEY_V1");
@@ -40,10 +41,15 @@ contract StreamMintLedger is IStreamMintLedger, Ownable, ERC165 {
     }
 
     /// @notice Advertises the ledger interface required by Core satellite validation.
-    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
-        return
-            interfaceId == type(IStreamMintLedger).interfaceId
-                || super.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(IERC165, ERC165)
+        returns (bool)
+    {
+        return interfaceId == type(IStreamMintLedger).interfaceId
+            || interfaceId == type(IStreamMintLedgerRevocation).interfaceId
+            || super.supportsInterface(interfaceId);
     }
 
     /// @notice Enables or disables an authorized ledger writer.
@@ -56,6 +62,18 @@ contract StreamMintLedger is IStreamMintLedger, Ownable, ERC165 {
         }
         ledgerWriter[writer] = allowed;
         emit MintLedgerWriterUpdated(writer, allowed);
+    }
+
+    /// @notice Permanently voids one authorization in this authorized manager's existing replay map.
+    function voidAuthorization(address manager, bytes32 authorizationId) external override {
+        _requireLedgerWriter();
+        if (manager != msg.sender) revert InvalidAuthorizationManager(manager, msg.sender);
+        if (authorizationId == bytes32(0)) revert InvalidAuthorizationId(authorizationId);
+        if (_authorizationUsed[msg.sender][authorizationId]) {
+            revert AuthorizationAlreadyConsumed(authorizationId);
+        }
+        _authorizationUsed[msg.sender][authorizationId] = true;
+        emit MintLedgerAuthorizationVoided(SCHEMA_VERSION, authorizationId, msg.sender);
     }
 
     /// @notice Registers the active static launch policy for a manager phase.

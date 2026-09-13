@@ -6,18 +6,30 @@ not select a different contract or grant a caller additional authority.
 
 | Operation | Import | Implementation |
 | --- | --- | --- |
+| Current collection record bytes, family grants and attributed history | [IStreamCollectionMetadataV1](metadata/IStreamCollectionMetadataV1.sol) | [StreamCollectionMetadataV1](../../domains/metadata/StreamCollectionMetadataV1.sol); see [record guide](../../../docs/integrations/metadata-records.md) |
+| Artist-approved publication of a verified collection content root | [IStreamContentRootPublication](metadata/IStreamContentRootPublication.sol) | [StreamMetadataRouter](../../domains/metadata/StreamMetadataRouter.sol); see [publication guide](../../../docs/integrations/content-root-publication.md) |
+| Current published content facts for provider assembly | [StreamFinalityContentTypes](finality/StreamFinalityContentTypes.sol) | [StreamFinalityContentReads](../../domains/finality/StreamFinalityContentReads.sol); [fixed-binding consumer guide](../../../docs/integrations/finality-content-evidence.md) |
 | Token ownership and complete permanent Core API | [core/IStreamCore.sol](core/IStreamCore.sol) | [StreamCore](../../core/StreamCore.sol) |
 | Native fixed-price mint | [mint/IStreamFixedPriceSaleAdapter.sol](mint/IStreamFixedPriceSaleAdapter.sol) | [StreamFixedPriceSaleAdapter](../../domains/mint/StreamFixedPriceSaleAdapter.sol) |
+| Current shared-settlement native sales and price programs | [IStreamNativeFixedPriceSaleAdapter](mint/IStreamNativeFixedPriceSaleAdapter.sol), [IStreamNativePricePrograms](mint/IStreamNativePricePrograms.sol) | [StreamNativeFixedPriceSaleAdapter](../../domains/mint/StreamNativeFixedPriceSaleAdapter.sol) |
+| Current shared-settlement ERC-20 sale authorization | [IStreamUniversalFixedPriceSaleAdapter](mint/IStreamUniversalFixedPriceSaleAdapter.sol) | [StreamUniversalFixedPriceSaleAdapter](../../domains/mint/StreamUniversalFixedPriceSaleAdapter.sol) |
+| Sale signing-domain discovery | [IERC5267](../standards/IERC5267.sol), [IStreamNativePriceProgramDomain](mint/IStreamNativePriceProgramDomain.sol) | The documented sale consumer and signature family; see [domain selection](../../../docs/integrations/sale-signing-domains.md) |
 | ERC-20 fixed-price mint and payer consent | [IStreamERC20FixedPriceSaleAdapter](mint/IStreamERC20FixedPriceSaleAdapter.sol), [IStreamPaymentIntentVerifier](revenue/IStreamPaymentIntentVerifier.sol) | [StreamERC20FixedPriceSaleAdapter](../../domains/mint/StreamERC20FixedPriceSaleAdapter.sol) |
 | Mint execution, phase administration, and reads | [IStreamMintExecution](mint/IStreamMintExecution.sol), [IStreamMintAdmin](mint/IStreamMintAdmin.sol), [IStreamMintReads](mint/IStreamMintReads.sol) | [StreamMintManager](../../domains/mint/StreamMintManager.sol) |
 | Durable counters and replay protection | [mint/IStreamMintLedger.sol](mint/IStreamMintLedger.sol) | [StreamMintLedger](../../domains/mint/StreamMintLedger.sol) |
 | Optional eligibility gate | [mint/IStreamMintGate.sol](mint/IStreamMintGate.sol) | A registered gate module |
 | Auction custody, bidding, and settlement | [auctions/IStreamEnglishAuctionHouse.sol](auctions/IStreamEnglishAuctionHouse.sol) | [StreamEnglishAuctionHouse](../../domains/auctions/StreamEnglishAuctionHouse.sol) |
-| Artist nomination and acceptance | [artist/IStreamCollectionArtistRegistry.sol](artist/IStreamCollectionArtistRegistry.sol) | [StreamCollectionArtistRegistry](../../domains/artist/StreamCollectionArtistRegistry.sol) |
+| Modular artist onboarding and mandatory mint consent | [IStreamArtistOnboarding](artist/IStreamArtistOnboarding.sol), [IStreamArtistMintConsent](artist/IStreamArtistMintConsent.sol) | [StreamArtistOnboardingRegistry](../../domains/artist/StreamArtistOnboardingRegistry.sol) |
+| Artist attribution reads | [IStreamArtistAttribution](artist/IStreamArtistAttribution.sol) | The selected artist facade |
+| Prospective artist economics and defensive royalty authorization | [IStreamArtistEconomicsAuthority](artist/IStreamArtistEconomicsAuthority.sol) | The same modular artist facade |
+| Preview primary/royalty economics or apply an authorized royalty freeze | [IStreamArtistPrimaryFacts](artist/IStreamArtistPrimaryFacts.sol), [IStreamArtistRoyaltyPreview](artist/IStreamArtistRoyaltyPreview.sol), [IStreamRoyaltyFreeze](revenue/IStreamRoyaltyFreeze.sol) | The respective primary or royalty resolver |
+| Earlier collection nomination and acceptance | [artist/IStreamCollectionArtistRegistry.sol](artist/IStreamCollectionArtistRegistry.sol) | [StreamCollectionArtistRegistry](../../domains/artist/StreamCollectionArtistRegistry.sol), the RC1 artist line |
 | Entropy registration and requests | [entropy/IStreamEntropyCoordinator.sol](entropy/IStreamEntropyCoordinator.sol) | [StreamEntropyCoordinator](../../domains/entropy/StreamEntropyCoordinator.sol) |
 | Entropy status and final seed | [entropy/IStreamEntropyView.sol](entropy/IStreamEntropyView.sol) | The token's coordinator at mint |
 | External randomness provider | [entropy/IStreamEntropyProvider.sol](entropy/IStreamEntropyProvider.sol) | [StreamEntropyProviderVRF](../../domains/entropy/StreamEntropyProviderVRF.sol) |
 | Token metadata routing | [metadata/IStreamMetadataRouter.sol](metadata/IStreamMetadataRouter.sol) | [StreamMetadataRouter](../../domains/metadata/StreamMetadataRouter.sol) |
+| Retained schema, canonicalization, catalog and dependency bytes | [metadata/IStreamSchemaRegistry.sol](metadata/IStreamSchemaRegistry.sol) | [StreamSchemaRegistry](../../domains/metadata/StreamSchemaRegistry.sol); see [publication and reconstruction](../../../docs/schema-registry.md) |
+| Fixed-host finality component reads | [IStreamFinalityHostAdapter](finality/IStreamFinalityHostAdapter.sol), [IStreamFinalityComponentFacts](finality/IStreamFinalityComponentFacts.sol) | [StreamFinalityHostAdapter](../../domains/finality/StreamFinalityHostAdapter.sol); [scope and integration status](../../../docs/finality-host-adapters.md) |
 | Immutable split profiles and withdrawals | [IStreamSplitFactory](revenue/IStreamSplitFactory.sol), [IStreamSplitWallet](revenue/IStreamSplitWallet.sol) | [StreamSplitFactory](../../domains/revenue/StreamSplitFactory.sol) and its wallets |
 | Royalty receiver and rate | [revenue/IStreamRoyaltyResolver.sol](revenue/IStreamRoyaltyResolver.sol) | [StreamRoyaltyResolver](../../domains/revenue/StreamRoyaltyResolver.sol), exposed through Core's ERC-2981 API |
 | Governance action lifecycle | [governance/IStreamGovernanceExecution.sol](governance/IStreamGovernanceExecution.sol) | [StreamGovernanceExecutor](../../domains/governance/StreamGovernanceExecutor.sol) |
@@ -71,6 +83,6 @@ module inventory and supported-flow evidence before enabling a feature.
 The previous sale and randomness stack is explicitly under `legacy/mint/`,
 `legacy/auctions/`, and `legacy/entropy/`. Its requests are not interchangeable
 with the current paid-mint or entropy APIs. The old mint-only registry is under
-[mint/compatibility](mint/compatibility/IStreamMintModuleRegistry.sol); new
-systems use the canonical registry in `modules/`. The manager retains that
-older registry vocabulary only for compatibility.
+[mint/compatibility](mint/compatibility/IStreamMintModuleRegistry.sol). The current
+Manager requires the canonical registry in `modules/` and the selected modular
+artist mint-consent capability; the old vocabulary does not supply those checks.

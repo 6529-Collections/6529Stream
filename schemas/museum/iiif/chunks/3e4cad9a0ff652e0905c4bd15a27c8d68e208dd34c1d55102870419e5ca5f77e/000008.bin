@@ -1,0 +1,91 @@
+aintext highlighter-rouge">placeholderCanvas</code> property.<br />
+Clients <em class="rfc">may</em> render <code class="language-plaintext highlighter-rouge">placeholderCanvas</code> on a Collection.</li>
+  <li>A Manifest <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">placeholderCanvas</code> property.<br />
+Clients <em class="rfc">may</em> render <code class="language-plaintext highlighter-rouge">placeholderCanvas</code> on a Manifest.</li>
+  <li>A Canvas <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">placeholderCanvas</code> property.<br />
+Clients <em class="rfc">may</em> render <code class="language-plaintext highlighter-rouge">placeholderCanvas</code> on a Canvas.</li>
+  <li>A Range <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">placeholderCanvas</code> property.<br />
+Clients <em class="rfc">may</em> render <code class="language-plaintext highlighter-rouge">placeholderCanvas</code> on a Range.</li>
+  <li>Other types of resource <em class="rfc">must not</em> have the <code class="language-plaintext highlighter-rouge">placeholderCanvas</code> property.<br />
+Clients <em class="rfc">should</em> ignore <code class="language-plaintext highlighter-rouge">placeholderCanvas</code> on other types of resource.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"placeholderCanvas"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/1/canvas/placeholder"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Canvas"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"height"</span><span class="p">:</span><span class="w"> </span><span class="mi">1400</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"width"</span><span class="p">:</span><span class="w"> </span><span class="mi">1200</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="accompanyingcanvas">
+        
+        
+          accompanyingCanvas <a href="#accompanyingcanvas" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>A single Canvas that provides additional content for use while rendering the resource that has the <code class="language-plaintext highlighter-rouge">accompanyingCanvas</code> property. Examples include an image to show while a duration-only Canvas is playing audio; or background audio to play while a user is navigating an image-only Manifest.</p>
+
+<p>Clients <em class="rfc">may</em> display the content of an accompanying Canvas when presenting the resource. As with <code class="language-plaintext highlighter-rouge">placeholderCanvas</code> above, when more than one accompanying Canvas is available, the client <em class="rfc">should</em> pick the one most specific to the content. Publishers <em class="rfc">should not</em> assume that the accompanying Canvas will be processed by all clients. Clients <em class="rfc">should</em> take care to avoid conflicts between time-based media in the accompanying Canvas and the content of the resource that has the <code class="language-plaintext highlighter-rouge">accompanyingCanvas</code> property.</p>
+
+<p>The value <em class="rfc">must</em> be a <abbr title="JavaScript Object Notation">JSON</abbr> object with the <code class="language-plaintext highlighter-rouge">id</code> and <code class="language-plaintext highlighter-rouge">type</code> properties, and <em class="rfc">may</em> have other properties of Canvases. The value of <code class="language-plaintext highlighter-rouge">type</code> <em class="rfc">must</em> be the string <code class="language-plaintext highlighter-rouge">Canvas</code>. The object <em class="rfc">must not</em> have the <code class="language-plaintext highlighter-rouge">placeholderCanvas</code> property, nor the <code class="language-plaintext highlighter-rouge">accompanyingCanvas</code> property.</p>
+
+<ul>
+  <li>A Collection <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">accompanyingCanvas</code> property.<br />
+Clients <em class="rfc">may</em> render <code class="language-plaintext highlighter-rouge">accompanyingCanvas</code> on a Collection.</li>
+  <li>A Manifest <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">accompanyingCanvas</code> property.<br />
+Clients <em class="rfc">may</em> render <code class="language-plaintext highlighter-rouge">accompanyingCanvas</code> on a Manifest.</li>
+  <li>A Canvas <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">accompanyingCanvas</code> property.<br />
+Clients <em class="rfc">may</em> render <code class="language-plaintext highlighter-rouge">accompanyingCanvas</code> on a Canvas.</li>
+  <li>A Range <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">accompanyingCanvas</code> property.<br />
+Clients <em class="rfc">may</em> render <code class="language-plaintext highlighter-rouge">accompanyingCanvas</code> on a Range.</li>
+  <li>Other types of resource <em class="rfc">must not</em> have the <code class="language-plaintext highlighter-rouge">accompanyingCanvas</code> property.<br />
+Clients <em class="rfc">should</em> ignore <code class="language-plaintext highlighter-rouge">accompanyingCanvas</code> on other types of resource.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"accompanyingCanvas"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/1/canvas/accompany"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Canvas"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"duration"</span><span class="p">:</span><span class="w"> </span><span class="mf">180.0</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h3 id="32-technical-properties">
+        
+        
+          3.2. Technical Properties <a href="#32-technical-properties" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>These properties describe technical features of the resources, and are typically processed by the client to understand how to render the resource.</p>
+      <h5 id="id">
+        
+        
+          id <a href="#id" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>The URI that identifies the resource. If the resource is only available embedded  within another resource (see the <a href="/api/presentation/3.0/#12-terminology">terminology section</a> for an explanation of “embedded”), such as a Range within a Manifest, then the URI <em class="rfc">may</em> be the URI of the embedding resource with a unique fragment on the end. This is not true for Canvases, which <em class="rfc">must</em> have their own URI without a fragment.</p>
+
+<p>The value <em class="rfc">must</em> be a string, and the value <em class="rfc">must</em> be an <abb

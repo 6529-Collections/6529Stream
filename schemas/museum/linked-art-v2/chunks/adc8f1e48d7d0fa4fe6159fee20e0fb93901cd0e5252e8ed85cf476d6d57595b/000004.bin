@@ -1,0 +1,217 @@
+es": {
+                "id": {
+                    "$ref": "#/$defs/idProp"
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "Type"
+                        }
+                    ]
+                },
+                "identified_by": {
+                    "$ref": "#/$defs/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/$defs/classified_asProp"
+                },
+                "equivalent": {"$ref": "#/$defs/equivalentProp"}
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "Activity": {
+            "title": "crm:E7_Activity",
+            "description": "An activity carried out by some person or group",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "Activity"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "identified_by": {
+                    "$ref": "#/$defs/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/$defs/classified_asProp"
+                },
+                "referred_to_by": {
+                    "$ref": "#/$defs/referred_to_byProp"
+                },
+                "took_place_at": {
+                    "$ref": "#/$defs/took_place_atProp"
+                },
+                "timespan": {
+                    "$ref": "#/$defs/timespanProp"
+                },
+                "caused_by": {
+                    "$ref": "#/$defs/caused_byProp"
+                },
+                "carried_out_by": {
+                    "$ref": "#/$defs/carried_out_byProp"
+                },
+                "used_specific_object": {
+                    "$ref": "#/$defs/used_specific_objectProp"
+                },
+                "influenced_by": {
+                    "$ref": "#/$defs/influenced_byProp"
+                },
+                "technique": {
+                    "$ref": "#/$defs/techniqueProp"
+                },
+                "during": {"$ref": "core.json#/$defs/duringProp"},
+                "after": {"$ref": "core.json#/$defs/afterProp"},
+                "before": {"$ref": "core.json#/$defs/beforeProp"},
+                "part_of": {
+                    "$ref": "#/$defs/EventRefOrActivityRef"
+                }
+            },
+            "required": [
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeAssignment": {
+            "title": "crm:E13_Attribute_Assignment",
+            "description": "An activity which involves the assignment of some value to some entity, often with an explicit relationship between value and entity",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "AttributeAssignment"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "identified_by": {
+                    "$ref": "#/$defs/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/$defs/classified_asProp"
+                },
+                "referred_to_by": {
+                    "$ref": "#/$defs/referred_to_byProp"
+                },
+                "took_place_at": {
+                    "$ref": "#/$defs/took_place_atProp"
+                },
+                "timespan": {
+                    "$ref": "#/$defs/timespanProp"
+                },
+                "caused_by": {
+                    "$ref": "#/$defs/caused_byProp"
+                },
+                "carried_out_by": {
+                    "$ref": "#/$defs/carried_out_byProp"
+                },
+                "used_specific_object": {
+                    "$ref": "#/$defs/used_specific_objectProp"
+                },
+                "influenced_by": {
+                    "$ref": "#/$defs/influenced_byProp"
+                },
+                "technique": {
+                    "$ref": "#/$defs/techniqueProp"
+                },
+                "during": {"$ref": "core.json#/$defs/duringProp"},
+                "after": {"$ref": "core.json#/$defs/afterProp"},
+                "before": {"$ref": "core.json#/$defs/beforeProp"},
+                "part_of": {
+                    "$ref": "#/$defs/EventRefOrActivityRef"
+                },
+                "assigned": {
+                    "title": "*",
+                    "description": "Attribute Assignments can assign any entity, structure or value"
+                },
+                "assigned_property": {
+                    "title": "crm:P177_assigned_property_type",
+                    "description": "The relationship from the attributed entity to the assigned entity, given as a string which resolves to a relationship in the context definition",
+                    "type": "string"
+
+                }
+            },
+            "required": [
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipAssignment": {
+            "title": "crm:E13_Attribute_Assignment",
+            "description": "An activity which relates two entities together, optionally with a specific relationship",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "AttributeAssignment"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "identified_by": {
+                    "$ref": "#/$defs/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/$defs/classified_asProp"
+                },
+                "referred_to_by": {
+                    "$ref": "#/$defs/referred_to_byProp"
+                },
+                "timespan": {
+                    "$ref": "#/$defs/timespanProp"
+                },
+                "carried_out_by": {
+                    "$ref": "#/$defs/carried_out_byProp"
+                },
+                "during": {"$ref": "core.json#/$defs/duringProp"},
+                "after": {"$ref": "core.json#/$defs/afterProp"},
+                "before": {"$ref": "core.json#/$defs/beforeProp"},
+                "assigned": {
+                    "title": "*",
+                    "description": "Attribute Assignments can assign any entity or structure",
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/AnyRef"}
+                },
+                "assigned_property": {
+                    "title": "crm:P177_assigned_prop

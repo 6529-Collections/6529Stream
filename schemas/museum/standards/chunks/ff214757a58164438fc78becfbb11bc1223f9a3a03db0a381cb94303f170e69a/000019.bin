@@ -1,0 +1,120 @@
+
+Destruction implies the end of an item’s life as a subject of cultural documentation – the physical matter of which the item was composed may in fact continue to exist. An instance of E6 Destruction may be contiguous with an instance of E12 Production that brings into existence a derived object composed partly of matter from the destroyed object.</rdfs:comment>
+    <rdfs:domain rdf:resource="E6_Destruction" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <rdfs:subPropertyOf rdf:resource="P93_took_out_of_existence" />
+    <owl:inverseOf rdf:resource="P13i_was_destroyed_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P13i_was_destroyed_by">
+    <rdfs:label xml:lang="en">was destroyed by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde zerstört durch</rdfs:label>
+    <rdfs:label xml:lang="el">καταστράφηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été détruit par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi destruído por</rdfs:label>
+    <rdfs:label xml:lang="ru">был уничтожeн</rdfs:label>
+    <rdfs:label xml:lang="zh">被破坏</rdfs:label>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E6_Destruction" />
+    <rdfs:subPropertyOf rdf:resource="P93i_was_taken_out_of_existence_by" />
+    <owl:inverseOf rdf:resource="P13_destroyed" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P14_carried_out_by">
+    <rdfs:label xml:lang="en">carried out by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde ausgeführt von</rdfs:label>
+    <rdfs:label xml:lang="el">πραγματοποιήθηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été effectué par</rdfs:label>
+    <rdfs:label xml:lang="pt">realizada por</rdfs:label>
+    <rdfs:label xml:lang="ru">выполнялся</rdfs:label>
+    <rdfs:label xml:lang="zh">执行者是</rdfs:label>
+    <rdfs:comment>This property describes the active participation of an instance of E39 Actor in an instance of E7 Activity.
+It implies causal or legal responsibility. The P14.1 in the role of property of the property specifies the nature of an Actor’s participation.</rdfs:comment>
+    <rdfs:domain rdf:resource="E7_Activity" />
+    <rdfs:range rdf:resource="E39_Actor" />
+    <rdfs:subPropertyOf rdf:resource="P11_had_participant" />
+    <owl:inverseOf rdf:resource="P14i_performed" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P14i_performed">
+    <rdfs:label xml:lang="en">performed</rdfs:label>
+    <rdfs:label xml:lang="de">führte aus</rdfs:label>
+    <rdfs:label xml:lang="el">πραγματοποίησε</rdfs:label>
+    <rdfs:label xml:lang="fr">a effectué</rdfs:label>
+    <rdfs:label xml:lang="pt">executou</rdfs:label>
+    <rdfs:label xml:lang="ru">выполнял</rdfs:label>
+    <rdfs:label xml:lang="zh">执行</rdfs:label>
+    <rdfs:domain rdf:resource="E39_Actor" />
+    <rdfs:range rdf:resource="E7_Activity" />
+    <rdfs:subPropertyOf rdf:resource="P11i_participated_in" />
+    <owl:inverseOf rdf:resource="P14_carried_out_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P15_was_influenced_by">
+    <rdfs:label xml:lang="en">was influenced by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde beeinflußt durch</rdfs:label>
+    <rdfs:label xml:lang="el">επηρεάστηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été influencé par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi influenciado por</rdfs:label>
+    <rdfs:label xml:lang="ru">находился под влияниeм</rdfs:label>
+    <rdfs:label xml:lang="zh">被影响</rdfs:label>
+    <rdfs:comment>This is a high-level property, which captures the relationship between an instance of E7 Activity and anything, that is, an instance of E1 CRM Entity, that may have had some bearing upon it.
+The property has more specific subproperties.</rdfs:comment>
+    <rdfs:domain rdf:resource="E7_Activity" />
+    <rdfs:range rdf:resource="E1_CRM_Entity" />
+    <owl:inverseOf rdf:resource="P15i_influenced" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P15i_influenced">
+    <rdfs:label xml:lang="en">influenced</rdfs:label>
+    <rdfs:label xml:lang="de">beeinflußte</rdfs:label>
+    <rdfs:label xml:lang="el">επηρέασε</rdfs:label>
+    <rdfs:label xml:lang="fr">a influencé</rdfs:label>
+    <rdfs:label xml:lang="pt">influenciou</rdfs:label>
+    <rdfs:label xml:lang="ru">повлиял</rdfs:label>
+    <rdfs:label xml:lang="zh">影响</rdfs:label>
+    <rdfs:domain rdf:resource="E1_CRM_Entity" />
+    <rdfs:range rdf:resource="E7_Activity" />
+    <owl:inverseOf rdf:resource="P15_was_influenced_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P16_used_specific_object">
+    <rdfs:label xml:lang="en">used specific object</rdfs:label>
+    <rdfs:label xml:lang="de">benutzte das bestimmte Objekt</rdfs:label>
+    <rdfs:label xml:lang="el">χρησιμοποίησε αντικείμενο</rdfs:label>
+    <rdfs:label xml:lang="fr">a mobilisé l’objet spécifique</rdfs:label>
+    <rdfs:label xml:lang="pt">usou objeto específico</rdfs:label>
+    <rdfs:label xml:lang="ru">пользовался</rdfs:label>
+    <rdfs:label xml:lang="zh">使用特定对象</rdfs:label>
+    <rdfs:comment>This property describes the use of material or immaterial things in a way essential to the performance or the outcome of an instance of E7 Activity.
+This property typically applies to tools, instruments, moulds, raw materials and items embedded in a product. It implies that the presence of the object in question was a necessary condition for the action. For example, the activity of writing this text required the use of a computer. An immaterial thing can be used if at least one of its carriers is present. For example, the software tools on a computer.
+Another example is the use of a particular name by a particular group of people over some span to identify a thing, such as a settlement. In this case, the physical carriers of this name are at least the people understanding its use.</rdfs:comment>
+    <rdfs:domain rdf:resource="E7_Activity" />
+    <rdfs:range rdf:resource="E70_Thing" />
+    <rdfs:subPropertyOf rdf:resource="P12_occurred_in_the_presence_of" />
+    <rdfs:subPropertyOf rdf:resource="P15_was_influenced_by" />
+    <owl:inverseOf rdf:resource="P16i_was_used_for" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P16i_was_used_for">
+    <rdfs:label xml:lang="en">was used for</rdfs:label>
+    <rdfs:label xml:lang="de">wurde benutzt für</rdfs:label>
+    <rdfs:label xml:lang="el">χρησιμοποιήθηκε για</rdfs:label>
+    <rdfs:label xml:lang="fr">a été mobilisé pour</rdfs:label>
+    <rdfs:label xml:lang="pt">foi usado por</rdfs:label>
+    <rdfs:label xml:lang="ru">был использован</rdfs:label>
+    <rdfs:label xml:lang="zh">用于</rdfs:label>
+    <rdfs:domain rdf:resource="E70_Thing" />
+    <rdfs:range rdf:resource="E7_Activity" />
+    <rdfs:subPropertyOf rdf:resource="P12i_was_present_at" />
+    <rdfs:subPropertyOf rdf:resource="P15i_influenced" />
+    <owl:inverseOf rdf:resource="P16_used_specific_object" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P17_was_motivated_by">
+    <rdfs:label xml:lang="en">was motivated by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde angeregt durch</rdfs:label>
+    <rdfs:label xml:lang="el">είχε ως αφορμή</rdfs:label>
+    <rdfs:label xml:lang="fr">a été motivé par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi motivado por</rdfs:label>
+    <rdfs:label xml:lang="ru">послужил мотивом для</rdfs:label>
+    <rdfs:label xml:lang="zh">被促动</rdfs:label>
+    <rdfs:comment>This property describes an item or items that are regarded as a reason for carrying out the instance of E7 Activity.
+For example, the discovery of a large hoard of treasure may call for a celebration, an order from headquarters can start a military manoeuvre.</rdfs:comment>
+    <rdfs:domain rdf:resource="E7_Activity" />
+    <rdfs:range rdf:resource="E1_CRM_Entity" />
+    <rdfs:subPropertyOf rdf:resource="P15_was_influenced_by" />
+    <owl:inverseOf rdf:resource="P17i_motivated" />
+ 

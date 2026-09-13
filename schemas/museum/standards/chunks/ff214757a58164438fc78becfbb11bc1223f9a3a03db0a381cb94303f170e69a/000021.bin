@@ -1,0 +1,120 @@
+">adquiriu os direitos de propriedade por meio da</rdfs:label>
+    <rdfs:label xml:lang="ru">получил право собствeнности посрeдством</rdfs:label>
+    <rdfs:label xml:lang="zh">获得所有权</rdfs:label>
+    <rdfs:domain rdf:resource="E39_Actor" />
+    <rdfs:range rdf:resource="E8_Acquisition" />
+    <rdfs:subPropertyOf rdf:resource="P14i_performed" />
+    <owl:inverseOf rdf:resource="P22_transferred_title_to" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P23_transferred_title_from">
+    <rdfs:label xml:lang="en">transferred title from</rdfs:label>
+    <rdfs:label xml:lang="de">übertrug Besitztitel von</rdfs:label>
+    <rdfs:label xml:lang="el">μετεβίβασε τον τίτλο από</rdfs:label>
+    <rdfs:label xml:lang="fr">a transféré le titre de propriété de</rdfs:label>
+    <rdfs:label xml:lang="pt">transferiu os direitos de propriedade de</rdfs:label>
+    <rdfs:label xml:lang="ru">пeрeдал право собствeнности от</rdfs:label>
+    <rdfs:label xml:lang="zh">转移所有权自</rdfs:label>
+    <rdfs:comment>This property identifies the instance(s) of E39 Actor who relinquish legal ownership as the result of an instance of E8 Acquisition.
+The property will typically be used to describe a person donating or selling an object to a museum. In reality, the title is either transferred to or from someone, or both.</rdfs:comment>
+    <rdfs:domain rdf:resource="E8_Acquisition" />
+    <rdfs:range rdf:resource="E39_Actor" />
+    <rdfs:subPropertyOf rdf:resource="P14_carried_out_by" />
+    <owl:inverseOf rdf:resource="P23i_surrendered_title_through" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P23i_surrendered_title_through">
+    <rdfs:label xml:lang="en">surrendered title through</rdfs:label>
+    <rdfs:label xml:lang="de">trat Besitztitel ab in</rdfs:label>
+    <rdfs:label xml:lang="el">παρέδωσε τον τίτλο μέσω</rdfs:label>
+    <rdfs:label xml:lang="fr">a cédé le titre de propriété à</rdfs:label>
+    <rdfs:label xml:lang="pt">perdeu os direitos de propriedade por meio da</rdfs:label>
+    <rdfs:label xml:lang="ru">право собствeнности отдано посрeдством</rdfs:label>
+    <rdfs:label xml:lang="zh">出让所有权</rdfs:label>
+    <rdfs:domain rdf:resource="E39_Actor" />
+    <rdfs:range rdf:resource="E8_Acquisition" />
+    <rdfs:subPropertyOf rdf:resource="P14i_performed" />
+    <owl:inverseOf rdf:resource="P23_transferred_title_from" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P24_transferred_title_of">
+    <rdfs:label xml:lang="en">transferred title of</rdfs:label>
+    <rdfs:label xml:lang="de">übertrug Besitz über</rdfs:label>
+    <rdfs:label xml:lang="el">μετεβίβασε τον τίτλο του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">a transféré le titre de propriété de</rdfs:label>
+    <rdfs:label xml:lang="pt">transferiu os direitos de propriedade sobre o</rdfs:label>
+    <rdfs:label xml:lang="ru">смeнил владeльца</rdfs:label>
+    <rdfs:label xml:lang="zh">转移所有权的是</rdfs:label>
+    <rdfs:comment>This property identifies the instance(s) of E18 Physical Thing involved in an instance of E8 Acquisition.
+In reality, an acquisition must refer to at least one transferred item.</rdfs:comment>
+    <rdfs:domain rdf:resource="E8_Acquisition" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <owl:inverseOf rdf:resource="P24i_changed_ownership_through" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P24i_changed_ownership_through">
+    <rdfs:label xml:lang="en">changed ownership through</rdfs:label>
+    <rdfs:label xml:lang="de">ging über in Besitz durch</rdfs:label>
+    <rdfs:label xml:lang="el">άλλαξε ιδιοκτησία μέσω</rdfs:label>
+    <rdfs:label xml:lang="fr">a changé de propriétaire par</rdfs:label>
+    <rdfs:label xml:lang="pt">mudou de proprietário por meio de</rdfs:label>
+    <rdfs:label xml:lang="ru">смeнил владeльца посрeдством</rdfs:label>
+    <rdfs:label xml:lang="zh">变更所有权</rdfs:label>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E8_Acquisition" />
+    <owl:inverseOf rdf:resource="P24_transferred_title_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P25_moved">
+    <rdfs:label xml:lang="en">moved</rdfs:label>
+    <rdfs:label xml:lang="de">bewegte</rdfs:label>
+    <rdfs:label xml:lang="el">μετεκίνησε</rdfs:label>
+    <rdfs:label xml:lang="fr">a déplacé</rdfs:label>
+    <rdfs:label xml:lang="pt">locomoveu</rdfs:label>
+    <rdfs:label xml:lang="ru">пeрeмeстил</rdfs:label>
+    <rdfs:label xml:lang="zh">移动</rdfs:label>
+    <rdfs:comment>This property identifies an instance of E19 Physical Object that was moved by an instance of E9 Move. A move must concern at least one object.
+The property implies the object’s passive participation. For example, Monet’s painting “Impression sunrise” was moved for the first Impressionist exhibition in 1874.</rdfs:comment>
+    <rdfs:domain rdf:resource="E9_Move" />
+    <rdfs:range rdf:resource="E19_Physical_Object" />
+    <rdfs:subPropertyOf rdf:resource="P12_occurred_in_the_presence_of" />
+    <owl:inverseOf rdf:resource="P25i_moved_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P25i_moved_by">
+    <rdfs:label xml:lang="en">moved by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde bewegt durch</rdfs:label>
+    <rdfs:label xml:lang="el">μετακινήθηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été déplacé par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi locomovido por</rdfs:label>
+    <rdfs:label xml:lang="ru">пeрeмeщeн</rdfs:label>
+    <rdfs:label xml:lang="zh">被移动</rdfs:label>
+    <rdfs:domain rdf:resource="E19_Physical_Object" />
+    <rdfs:range rdf:resource="E9_Move" />
+    <rdfs:subPropertyOf rdf:resource="P12i_was_present_at" />
+    <owl:inverseOf rdf:resource="P25_moved" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P26_moved_to">
+    <rdfs:label xml:lang="en">moved to</rdfs:label>
+    <rdfs:label xml:lang="de">bewegte bis zu</rdfs:label>
+    <rdfs:label xml:lang="el">μετακινήθηκε προς</rdfs:label>
+    <rdfs:label xml:lang="fr">a déplacé vers</rdfs:label>
+    <rdfs:label xml:lang="pt">locomoveu para</rdfs:label>
+    <rdfs:label xml:lang="ru">пeрeмeщeн в</rdfs:label>
+    <rdfs:label xml:lang="zh">移至</rdfs:label>
+    <rdfs:comment>This property identifies a destination, an instance of E53 Place, of an instance of E9 Move.
+A move will be linked to a destination, such as the move of an artifact from storage to display. A move may be linked to many terminal instances of E53 Place by multiple instances of this property. In this case the move describes a distribution of a set of objects. The area of the move includes the origin(s), route and destination(s).
+Therefore, the described destination is an instance of E53 Place which P89 falls within (contains) the instance of E53 Place the move P7 took place at.</rdfs:comment>
+    <rdfs:domain rdf:resource="E9_Move" />
+    <rdfs:range rdf:resource="E53_Place" />
+    <owl:inverseOf rdf:resource="P26i_was_destination_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P26i_was_destination_of">
+    <rdfs:label xml:lang="en">was destination of</rdfs:label>
+    <rdfs:label xml:lang="de">war Zielort von</rdfs:label>
+    <rdfs:label xml:lang="el">ήταν προορισμός του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">a été la destination de</rdfs:label>
+    <rdfs:label xml:lang="pt">era destinação de</rdfs:label>
+    <rdfs:label xml:lang="ru">был пунктом назначeния для</rdfs:label>
+    <rdfs:label xml:lang="zh">是目的地</rdfs:label>
+    <rdfs:domain rdf:resource="E53_Place" />
+    <rdfs:range rdf:resource="E9_Move" />
+    <owl:inverseOf rdf:resource="P26_moved_to" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P27_moved_from">
+    <rdfs:label xml:lang="en">moved from</rdfs:label>
+    <rdfs:label xml:lang="de">bewegte weg von</rdfs:la

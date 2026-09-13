@@ -1,0 +1,77 @@
+ab" id="manifest-comparison-heading" onclick="openTab('manifest-comparison')">
+        <h3><a>Manifest Comparison</a></h3>
+      </li>
+      
+    </ul>
+  </div>
+</nav>
+
+    <div class="container">
+  
+  <div id="version-3" class="content-tab">
+    <h2 id="use-case">Use Case</h2>
+
+<p>The simplest viable manifest for image content. If all you have for an object is one image on the web and a label to go along with it, this pattern turns it into a IIIF Presentation resource. If you would like to enable deep zooming, you will need to use a IIIF Image server. For this, see the <a href="https://iiif.io/api/cookbook/recipe/0005-image-service/" title="Support Deep Viewing with Basic Use of a IIIF Image Service">Support Deep Viewing with Basic Use of a IIIF Image Service</a> recipe.</p>
+
+<h2 id="implementation-notes">Implementation Notes</h2>
+
+<p>This illustrates the mandatory structure and properties of a manifest, with the simplest possible content.</p>
+
+<p>The JSON-LD opens with the <code>@context</code> declaration, which identifies the terms used in the document as belonging to the IIIF specification. The <code>id</code> property identifies this manifest with the URL at which it is available online. The <code>type</code> property must be <code>Manifest</code>. The <code>label</code> property is mandatory, and the language of its value must be given (or the special value <code>none</code>), using a <a href="https://iiif.io/api/presentation/3.0/#language-of-property-values" title="Language of Property Values">language map</a>. Here the language of the label is English and its value is “Single Image Example”. The manifest’s <code>items</code> property is a list of canvases. In this example there is only one canvas, with a <code>height</code> of 1800 and a <code>width</code> of 1200. These units have no dimension: they establish a coordinate space that in this case the single image will fill. The canvas’s <code>id</code> property is used later as the <code>target</code> of the annotation that links to the single image.</p>
+
+<p>The <code>items</code> property of the Canvas is a list of annotation pages, in this case there is only one page. The <code>items</code> property of the annotation page is a list of annotations, in this case there is only one annotation. This annotation is what links the image resource with the canvas. The <code>body</code> of the annotation is an image, the url of which is the <code>id</code> property of the body. The dimensions of the image, in pixels, are given and here match the canvas dimensions exactly. The <code>target</code> property tells us that the image is associated with the entirety of the canvas, and the <code>motivation</code> property of <code>painting</code> tells us that a client should render the image to fill the canvas.</p>
+
+<h2 id="restrictions">Restrictions</h2>
+
+<p>This recipe is not for large images or deep zoom functionality. For this, see the <a href="https://iiif.io/api/cookbook/recipe/0005-image-service/" title="Support Deep Viewing with Basic Use of a IIIF Image Service">Support Deep Viewing with Basic Use of a IIIF Image Service</a> recipe.</p>
+
+<h2 id="example">Example</h2>
+
+<p><a href="manifest.json">JSON-LD</a> | 
+<a href="https://projectmirador.org/embed/?iiif-content=https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json" target="_blank">View in Mirador</a>
+| 
+<a href="https://uv-v4.netlify.app/#?manifest=https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json" target="_blank">View in Universal Viewer</a>
+| 
+<a href="https://ncsu-libraries.github.io/annona/tools/#/display?url=https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json&amp;viewtype=iiif-storyboard&amp;settings=%7B%22fullpage%22%3Atrue%7D" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json" target="_blank">View in Annona</a>
+| 
+<a href="https://samvera-labs.github.io/clover-iiif/docs/viewer/demo?iiif-content=https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json" target="_blank">View in Clover</a>
+| 
+<a href="https://demo.viewer.glycerine.io/viewer?iiif-content=https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json" target="_blank">View in Glycerine Viewer</a>
+| 
+<a href="https://theseusviewer.org/?iiif-content=https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json" target="_blank">View in Theseus</a>
+| 
+<a href="http://codh.rois.ac.jp/software/iiif-curation-viewer/demo/?manifest=https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json" target="_blank">View in IIIF Curation Viewer</a>
+| 
+<a href="https://liiive.now/?iiif-content=https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json" target="_blank">View in liiive</a>
+| 
+<a href="https://tify-iiif-viewer.github.io/tify/?iiif-content=https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json" target="_blank">View in TIFY</a></p>
+
+<p>Code samples: <a href="https://iiif-prezi.github.io/iiif-prezi3/recipes/0001-mvm-image/" target="_blank">Python: iiif-prezi3</a></p>
+
+<pre class="line-numbers data-download-link" data-download-link-label="Download me" data-src="manifest.json"></pre>
+
+<h1 id="related-recipes">Related Recipes</h1>
+
+<ul>
+  <li><a href="https://iiif.io/api/cookbook/recipe/0002-mvm-audio/" title="Simplest Manifest - Audio">Simplest Manifest - Audio</a> and <a href="https://iiif.io/api/cookbook/recipe/0003-mvm-video/" title="Simplest Manifest - Video">Simplest Manifest - Video</a> are equivalent to this example but for other media.</li>
+  <li><a href="https://iiif.io/api/cookbook/recipe/0005-image-service/" title="Support Deep Viewing with Basic Use of a IIIF Image Service">Support Deep Viewing with Basic Use of a IIIF Image Service</a> shows a basic manifest for use with a IIIF Image server.</li>
+  <li><a href="https://iiif.io/api/cookbook/recipe/0004-canvas-size/" title="Image and Canvas with Differing Dimensions">Image different size to canvas</a> shows a canvas with dimensions different from the pixel dimensions of its content.</li>
+  <li><a href="https://iiif.io/api/cookbook/recipe/0006-text-language/" title="Internationalization and Multi-language Values">Multiple values and languages</a> demonstrates language map variations, for multiple values and multiple languages.</li>
+</ul>
+
+<!-- acronyms.md as placeholder for API equivalent -->
+
+
+  </div>
+  
+  <div id="version-4" class="content-tab" style="display:none;">
+    
+<h2 id="use-case">Use Case</h2>
+
+<p>The simplest viable manifest for image content. If all you have for an object is one image on the web and a label to go along with it, this pattern turns it into a IIIF Presentation resource. If you would like to enable deep zooming, you will need to use a IIIF Image server. For this, see the <a href="https://iiif.io/api/cookbook/recipe/0005-image-service/" title="Support Deep Viewing with Basic Use of a IIIF Image Service">Support Deep Viewing with Basic Use of a IIIF Image Service (v3)</a> recipe.</p>
+
+<h2 id="implementation-notes">Implementation Notes</h2>
+
+<p>This illustrates the mandatory structure and properties of a manifest, with the simplest possible image content.</p>
+
+<p>The JSON-LD opens with the <code>@context</code> declaration, which identifies the terms used in the document as belonging to the IIIF specification. The <code>id</code> property identifies this manifest with the URL at which it is available online. The <code>type</code> pr

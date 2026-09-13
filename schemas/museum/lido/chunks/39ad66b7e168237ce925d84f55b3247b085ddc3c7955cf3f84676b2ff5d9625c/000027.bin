@@ -1,0 +1,67 @@
+rburg<br/> <strong>Legal Body Identifier:</strong> <a
+            href="https://ld.zdb-services.de/resource/organisations/DE-Mb112"
+            class="uri">https://ld.zdb-services.de/resource/organisations/DE-Mb112</a>
+            <strong><em>Type:</em></strong> URI |
+            <strong><em>Source:</em></strong> ISIL (ISO 15511)<br/>
+            <strong>Appellation Value:</strong> Deutsches
+            Dokumentationszentrum für Kunstgeschichte - Bildarchiv Foto
+            Marburg <strong><em>Preference:</em></strong> Preferred<br/>
+            <strong>Legal Body Weblink:</strong> <a
+            href="https://www.uni-marburg.de/de/fotomarburg"
+            class="uri">https://www.uni-marburg.de/de/fotomarburg</a></p>
+            </blockquote>
+            <div class="sourceCode" id="cb25"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:recordSource</span>&gt;</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">&lt;!-- URI --&gt;</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:legalBodyID</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00099&quot;</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:source=</span><span class="st">&quot;ISIL (ISO 15511)&quot;</span>&gt;</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>        https://ld.zdb-services.de/resource/organisations/DE-Mb112</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:legalBodyID</span>&gt;</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:legalBodyName</span>&gt;</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">&lt;!-- Preferred label --&gt;</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:appellationValue</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a><span class="ot">            lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00169&quot;</span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="ot">            xml:lang=</span><span class="st">&quot;de&quot;</span>&gt;</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>            Deutsches Dokumentationszentrum für Kunstgeschichte - Bildarchiv Foto Marburg</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:appellationValue</span>&gt;</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:appellationValue</span></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a><span class="ot">            lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00169&quot;</span></span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a><span class="ot">            xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>            Foto Marburg Picture Archive</span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:appellationValue</span>&gt;</span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:sourceAppellation</span></span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a><span class="ot">            xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>            Philipps Universität Marburg. URL: https://www.uni-marburg.de/en/research/research-profile/academics_centres/academic-centers</span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:sourceAppellation</span>&gt;</span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:legalBodyName</span>&gt;</span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:legalBodyWeblink</span>&gt;</span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>        https://www.uni-marburg.de/de/fotomarburg</span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:legalBodyWeblink</span>&gt;</span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:recordSource</span>&gt;</span></code></pre></div>
+            <h3 data-number="5.1.8"
+            id="example-mandatory-elements"><span
+            class="header-section-number">5.1.8</span> Example:
+            Mandatory elements</h3>
+            <p>The following XML code snippet shows the use of the
+            mandatory elements in the record describing the “<a
+            href="https://www.bildindex.de/document/obj00076417">Mona
+            Lisa</a>” provided by Deutsches Dokumentationszentrum für
+            Kunstgeschichte - Bildarchiv Foto Marburg. Note that the
+            value for the Object/Work Type is adapted to follow Cutter’s
+            rule of using the most specific descriptor. </p>
+            <div class="sourceCode" id="cb26"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:lido</span>&gt;</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:lidoRecID</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:source=</span><span class="st">&quot;ld.zdb-services.de/resource/organisations/DE-Mb112&quot;</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00099&quot;</span>&gt;</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>        ld.zdb-services.de/resource/organisations/DE-Mb112/lido/obj/00076417</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:lidoRecID</span>&gt;</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:descriptiveMetadata</span><span class="ot"> xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:objectClassificationWrap</span>&gt;</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:objectWorkTypeWrap</span>&gt;</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">lido:objectWorkType</span>&gt;</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">skos:Concept</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a><span class="ot">                        rdf:about=</span><span class="st">&quot;http://vocab.getty.edu/aat/300033799&quot;</span>&gt;</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>                        &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb26-

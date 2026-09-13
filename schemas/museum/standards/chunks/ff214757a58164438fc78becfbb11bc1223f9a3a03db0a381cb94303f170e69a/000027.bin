@@ -1,0 +1,96 @@
+property leaves open the question if parts of this physical thing have been added or removed during the time-spans it has been under the custody of this actor, but it is required that at least a part which can unambiguously be identified as representing the whole has been under this custody for its whole time. The way, in which a representative part is defined, should ensure that it is unambiguous who keeps a part and who the whole and should be consistent with the identity criteria of the kept instance of E18 Physical Thing.
+The distinction with P50 has current keeper (is current keeper of) is that P49 has former or current keeper (is former or current keeper of) leaves open the question as to whether the specified keepers are current.
+This property is a shortcut for the more detailed path from E18 Physical Thing through P30i custody transferred through, E10 Transfer of Custody, P28 custody surrendered by or P29 custody received by to E39 Actor.</rdfs:comment>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E39_Actor" />
+    <owl:inverseOf rdf:resource="P49i_is_former_or_current_keeper_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P49i_is_former_or_current_keeper_of">
+    <rdfs:label xml:lang="en">is former or current keeper of</rdfs:label>
+    <rdfs:label xml:lang="de">ist früherer oder derzeitiger Betreuer von</rdfs:label>
+    <rdfs:label xml:lang="el">κατέχει ή κατείχε</rdfs:label>
+    <rdfs:label xml:lang="fr">est l’actant détenteur actuel ou antérieur de</rdfs:label>
+    <rdfs:label xml:lang="pt">é ou foi guardador de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся бывшим или тeкущим хранитeлeм для</rdfs:label>
+    <rdfs:label xml:lang="zh">是以往或当前保管者</rdfs:label>
+    <rdfs:domain rdf:resource="E39_Actor" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <owl:inverseOf rdf:resource="P49_has_former_or_current_keeper" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P50_has_current_keeper">
+    <rdfs:label xml:lang="en">has current keeper</rdfs:label>
+    <rdfs:label xml:lang="de">hat derzeitigen Betreuer</rdfs:label>
+    <rdfs:label xml:lang="el">είναι στην κατοχή του</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour actant détenteur actuel</rdfs:label>
+    <rdfs:label xml:lang="pt">é guardada por</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт тeкущeго хранитeля</rdfs:label>
+    <rdfs:label xml:lang="zh">有当前保管者</rdfs:label>
+    <rdfs:comment>This property identifies the instance of E39 Actor that had custody of an instance of E18 Physical Thing at the time of validity of the record or database containing the statement that uses this property.
+This property is a shortcut for the more detailed path from E18 Physical Thing through, P30i custody transferred through, E10 Transfer of Custody, P29 custody received by to E39 Actor, if and only if the custody has not been surrendered by the receiving actor at any later time</rdfs:comment>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E39_Actor" />
+    <rdfs:subPropertyOf rdf:resource="P49_has_former_or_current_keeper" />
+    <owl:inverseOf rdf:resource="P50i_is_current_keeper_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P50i_is_current_keeper_of">
+    <rdfs:label xml:lang="en">is current keeper of</rdfs:label>
+    <rdfs:label xml:lang="de">ist derzeitiger Betreuer von</rdfs:label>
+    <rdfs:label xml:lang="el">κατέχει</rdfs:label>
+    <rdfs:label xml:lang="fr">est l’actant détenteur actuel</rdfs:label>
+    <rdfs:label xml:lang="pt">é guardador de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся тeкущим хранитeлeм для</rdfs:label>
+    <rdfs:label xml:lang="zh">是当前保管者</rdfs:label>
+    <rdfs:domain rdf:resource="E39_Actor" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <rdfs:subPropertyOf rdf:resource="P49i_is_former_or_current_keeper_of" />
+    <owl:inverseOf rdf:resource="P50_has_current_keeper" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P51_has_former_or_current_owner">
+    <rdfs:label xml:lang="en">has former or current owner</rdfs:label>
+    <rdfs:label xml:lang="de">hat früheren oder derzeitigen Besitzer</rdfs:label>
+    <rdfs:label xml:lang="el">έχει ή είχε ιδιοκτήτη</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour propriétaire actuel ou antérieur</rdfs:label>
+    <rdfs:label xml:lang="pt">é ou foi propriedade de</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт бывшeго или тeкущeго владeльца</rdfs:label>
+    <rdfs:label xml:lang="zh">有以往或当前所有者</rdfs:label>
+    <rdfs:comment>This property identifies an instance of E39 Actor that is or had been the legal owner (i.e. title holder) of an instance of E18 Physical Thing at some time.
+The distinction with P52 has current owner (is current owner of) is that P51 has former or current owner (is former or current owner of) does not indicate whether the specified owners are current.
+This property is a shortcut for the more detailed path from E18 Physical Thing through P24i changed ownership through, E8 Acquisition, P23 transferred title from, or P22 transferred title to to E39 Actor.</rdfs:comment>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E39_Actor" />
+    <owl:inverseOf rdf:resource="P51i_is_former_or_current_owner_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P51i_is_former_or_current_owner_of">
+    <rdfs:label xml:lang="en">is former or current owner of</rdfs:label>
+    <rdfs:label xml:lang="de">ist früherer oder derzeitiger Besitzer von</rdfs:label>
+    <rdfs:label xml:lang="el">είναι ή ήταν ιδιοκτήτης του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">est l’actant propriétaire actuel ou antérieur de</rdfs:label>
+    <rdfs:label xml:lang="pt">é ou foi proprietário de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся бывшим или тeкущим владeльцeм для</rdfs:label>
+    <rdfs:label xml:lang="zh">是以往或当前所有者</rdfs:label>
+    <rdfs:domain rdf:resource="E39_Actor" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <owl:inverseOf rdf:resource="P51_has_former_or_current_owner" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P52_has_current_owner">
+    <rdfs:label xml:lang="en">has current owner</rdfs:label>
+    <rdfs:label xml:lang="de">hat derzeitigen Besitzer</rdfs:label>
+    <rdfs:label xml:lang="el">έχει ιδιοκτήτη</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour propriétaire actuel</rdfs:label>
+    <rdfs:label xml:lang="pt">é propriedade de</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт тeкущeго владeльца</rdfs:label>
+    <rdfs:label xml:lang="zh">有当前所有者</rdfs:label>
+    <rdfs:comment>This property identifies the instance of E21 Person or E74 Group that was the owner of an instance of E18 Physical Thing at the time of validity of the record or database containing the statement that uses this property.
+This property is a shortcut for the more detailed path from E18 Physical Thing through, P24i changed ownership through, E8 Acquisition, P22 transferred title to to E39 Actor, if and only if this acquisition event is the most recent.</rdfs:comment>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E39_Actor" />
+    <rdfs:subPropertyOf rdf:resource="P51_has_former_or_current_owner" />
+    <rdfs:subPropertyOf rdf:resource="P105_right_held_by" />
+    <owl:inverseOf rdf:resource="P52i_is_current_owner_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P52i_is_current_owner_of">
+    <rdfs:label xml:lang="en">is current owner of</rdfs:label>
+    <rdfs:label xml:lang="de">ist derzeitiger Besitzer von</rdfs:label>
+    <rdfs:label xml:lang="el">είναι ιδιοκτήτης του</rdfs:label>
+    <rdfs:label xml:lang="fr">est l'actant propriétaire actuel de</rdfs:label>
+    <rdfs:label xml:lang=

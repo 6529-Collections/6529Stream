@@ -1,0 +1,69 @@
+y be the result of modifying pre-existing physical things, preserving larger parts or most of the original matter and structure, which poses the question if they are new or even human-made, the respective interventions of production made on such original material should be obvious and sufficient to regard that the product has a new, distinct identity and intended function and is human-made. Substantial continuity of the previous matter and structure in the new product can be documented by describing the production process also as an instance of E81 Transformation.
+Whereas interventions of conservation and repair are not regarded to produce a new instance of E24 Physical Human-Made Thing, the results of preparation of natural history specimens that substantially change their natural or original state should be regarded as instances of E24 Physical Human-Made Things, including the uncovering of petrified biological features from a solid piece of stone. On the other side, scribbling a museum number on a natural object should not be regarded to make it human-made. This notwithstanding, parts, sections, segments, or features of an instance of E24 Physical Human-Made Thing may continue to be non-human-made and preserved during the production process, for example natural pearls used as a part of an eardrop.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E18_Physical_Thing" />
+    <rdfs:subClassOf rdf:resource="E71_Human-Made_Thing" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E25_Human-Made_Feature">
+    <rdfs:label xml:lang="en">Human-Made Feature</rdfs:label>
+    <rdfs:label xml:lang="fr">Caractéristique élaborée par l'humain</rdfs:label>
+    <rdfs:label xml:lang="ru">Искусствeнный Признак</rdfs:label>
+    <rdfs:comment>This class comprises physical features that are purposely created by human activity, such as scratches, artificial caves, artificial water channels, etc. In particular, it includes the information encoding features on mechanical or digital carriers.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E24_Physical_Human-Made_Thing" />
+    <rdfs:subClassOf rdf:resource="E26_Physical_Feature" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E26_Physical_Feature">
+    <rdfs:label xml:lang="en">Physical Feature</rdfs:label>
+    <rdfs:label xml:lang="de">Materielles Merkmal</rdfs:label>
+    <rdfs:label xml:lang="el">Υλικό Μόρφωμα</rdfs:label>
+    <rdfs:label xml:lang="fr">Caractéristique physique</rdfs:label>
+    <rdfs:label xml:lang="pt">Característica Material</rdfs:label>
+    <rdfs:label xml:lang="ru">Физичeский Признак</rdfs:label>
+    <rdfs:label xml:lang="zh">物理特征</rdfs:label>
+    <rdfs:comment>This class comprises identifiable features that are physically attached in an integral way to particular physical objects.
+Instances of E26 Physical Feature share many of the attributes of instances of E19 Physical Object. They may have a one-dimensional, two-dimensional, or three-dimensional geometric extent, but there are no natural borders that separate them completely in an objective way from the carrier objects. For example, a doorway is a feature but the door itself, being attached by hinges, is not.
+Instances of E26 Physical Feature can be features in a narrower sense, such as scratches, holes, reliefs, surface colours, reflection zones in an opal crystal or a density change in a piece of wood. In the wider sense, they are portions of particular objects with partially imaginary borders, such as the core of the Earth, an area of property on the surface of the Earth, a landscape or the head of a contiguous marble statue. They can be measured and dated, and it is sometimes possible to state who or what is or was responsible for them. They cannot be separated from the carrier object, but a segment of the carrier object may be identified (or sometimes removed) carrying the complete feature.
+This definition coincides with the definition of “fiat objects”, with the exception of aggregates of “bona fide objects” (Smith &amp;amp; Varzi, 2000).</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E18_Physical_Thing" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E27_Site">
+    <rdfs:label xml:lang="en">Site</rdfs:label>
+    <rdfs:label xml:lang="de">Gelände</rdfs:label>
+    <rdfs:label xml:lang="el">Φυσικός Χώρος</rdfs:label>
+    <rdfs:label xml:lang="fr">Site</rdfs:label>
+    <rdfs:label xml:lang="pt">Lugar</rdfs:label>
+    <rdfs:label xml:lang="ru">Мeстоположeниe</rdfs:label>
+    <rdfs:label xml:lang="zh">场地</rdfs:label>
+    <rdfs:comment>This class comprises pieces of land or sea floor.
+In contrast to the purely geometric notion of E53 Place, this class describes constellations of matter on the surface of the Earth or other celestial body, which can be represented by photographs, paintings, and maps.
+Instances of E27 Site are composed of relatively immobile material items and features in a particular configuration at a particular location.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E26_Physical_Feature" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E28_Conceptual_Object">
+    <rdfs:label xml:lang="en">Conceptual Object</rdfs:label>
+    <rdfs:label xml:lang="de">Begrifflicher Gegenstand</rdfs:label>
+    <rdfs:label xml:lang="el">Νοητικό Αντικείμενο</rdfs:label>
+    <rdfs:label xml:lang="fr">Objet conceptuel</rdfs:label>
+    <rdfs:label xml:lang="pt">Objeto Conceitual</rdfs:label>
+    <rdfs:label xml:lang="ru">Концeптуальный Объeкт</rdfs:label>
+    <rdfs:label xml:lang="zh">概念对象</rdfs:label>
+    <rdfs:comment>This class comprises non-material products of our minds and other human produced data that have become objects of a discourse about their identity, circumstances of creation, or historical implication. The production of such information might have been supported by the use of technical devices such as cameras or computers.
+Characteristically, instances of this class are created, invented or thought by someone, and then may be documented or communicated between persons. Instances of E28 Conceptual Object have the ability to exist on more than one particular carrier at the same time, such as paper, electronic signals, marks, audio media, paintings, photos, human memories, etc.
+They cannot be destroyed. They exist as long as they can be found on at least one carrier or in at least one human memory. Their existence ends when the last carrier and the last memory are lost.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E71_Human-Made_Thing" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E29_Design_or_Procedure">
+    <rdfs:label xml:lang="en">Design or Procedure</rdfs:label>
+    <rdfs:label xml:lang="de">Entwurf oder Verfahren</rdfs:label>
+    <rdfs:label xml:lang="el">Σχέδιο</rdfs:label>
+    <rdfs:label xml:lang="fr">Conceptualisation ou procédure</rdfs:label>
+    <rdfs:label xml:lang="pt">Projeto ou Procedimento</rdfs:label>
+    <rdfs:label xml:lang="ru">Проeкт или Процeдура</rdfs:label>
+    <rdfs:label xml:lang="zh">设计或程序</rdfs:label>
+    <rdfs:comment>This class comprises documented plans for the execution of actions in order to achieve a result of a specific quality, form, or contents. In particular, it comprises plans for deliberate human activities that may result in new instances of E71 Human-Made Thing or for shaping or guiding the execution of an instance of E7 Activity.
+Instances of E29 Design or Procedure can be structured in parts and sequences or depend on others.
+This is modelled using P69 has association with (is associated with): E29 Design or Procedure.
+Designs or procedures can be seen as one of the following:
+1. A schema for the activities it describes
+2. A schema of the products that result from their application
+3. An independent intellectual product that may have never been applied, such as Leonardo da Vinci’s famous plans for flying machines
+Because designs or procedures may never be applied or only partially executed, the CIDOC CRM models a loose relationship between the plan and th

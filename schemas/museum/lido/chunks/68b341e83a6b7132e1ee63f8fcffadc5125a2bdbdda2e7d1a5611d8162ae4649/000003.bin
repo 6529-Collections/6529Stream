@@ -1,0 +1,22 @@
+r ratio) that has no physical unit. Uses the MeasureType with the restriction that the unit of measure referenced by uom must be suitable for a scale factor, such as percent, permil, or parts-per-million. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="semiMinorAxis" type="gml:MeasureType">
+		<annotation>
+			<documentation>Length of the semi-minor axis of the ellipsoid. Uses the MeasureType with the restriction that the unit of measure referenced by uom must be suitable for a length, such as metres or feet. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="isSphere">
+		<annotation>
+			<documentation>The ellipsoid is degenerate and is actually a sphere. The sphere is completely defined by the semi-major axis, which is the radius of the sphere. </documentation>
+		</annotation>
+		<simpleType>
+			<restriction base="string">
+				<enumeration value="sphere"/>
+			</restriction>
+		</simpleType>
+	</element>
+	<!-- =================================================== -->
+</schema>

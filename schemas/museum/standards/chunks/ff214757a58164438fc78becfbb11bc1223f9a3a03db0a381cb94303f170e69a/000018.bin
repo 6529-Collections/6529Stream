@@ -1,0 +1,112 @@
+ust fall within the spacetime volume of the former.
+This property is transitive and asymmetric.</rdfs:comment>
+    <rdfs:domain rdf:resource="E4_Period" />
+    <rdfs:range rdf:resource="E4_Period" />
+    <rdfs:subPropertyOf rdf:resource="P10i_contains" />
+    <owl:inverseOf rdf:resource="P9i_forms_part_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P9i_forms_part_of">
+    <rdfs:label xml:lang="en">forms part of</rdfs:label>
+    <rdfs:label xml:lang="de">bildet Teil von</rdfs:label>
+    <rdfs:label xml:lang="el">αποτελεί μέρος του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">fait partie de</rdfs:label>
+    <rdfs:label xml:lang="pt">faz parte de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся частью</rdfs:label>
+    <rdfs:label xml:lang="zh">组成部分</rdfs:label>
+    <rdfs:domain rdf:resource="E4_Period" />
+    <rdfs:range rdf:resource="E4_Period" />
+    <rdfs:subPropertyOf rdf:resource="P10_falls_within" />
+    <owl:inverseOf rdf:resource="P9_consists_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P10_falls_within">
+    <rdfs:label xml:lang="en">falls within</rdfs:label>
+    <rdfs:label xml:lang="de">fällt in</rdfs:label>
+    <rdfs:label xml:lang="el">εμπίπτει</rdfs:label>
+    <rdfs:label xml:lang="fr">s’insère dans</rdfs:label>
+    <rdfs:label xml:lang="pt">está contido em</rdfs:label>
+    <rdfs:label xml:lang="ru">находится в прeдeлах</rdfs:label>
+    <rdfs:label xml:lang="zh">属于</rdfs:label>
+    <rdfs:comment>This property associates an instance of E92 Spacetime Volume with another instance of E92 Spacetime Volume that falls within the latter. In other words, all points in the former are also points in the latter.
+This property is transitive and reflexive.</rdfs:comment>
+    <rdfs:domain rdf:resource="E92_Spacetime_Volume" />
+    <rdfs:range rdf:resource="E92_Spacetime_Volume" />
+    <rdfs:subPropertyOf rdf:resource="P132_spatiotemporally_overlaps_with" />
+    <owl:inverseOf rdf:resource="P10i_contains" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P10i_contains">
+    <rdfs:label xml:lang="en">contains</rdfs:label>
+    <rdfs:label xml:lang="de">enthält</rdfs:label>
+    <rdfs:label xml:lang="el">περιλαμβάνει</rdfs:label>
+    <rdfs:label xml:lang="fr">contient</rdfs:label>
+    <rdfs:label xml:lang="pt">contém</rdfs:label>
+    <rdfs:label xml:lang="ru">содeржит</rdfs:label>
+    <rdfs:label xml:lang="zh">包含</rdfs:label>
+    <rdfs:domain rdf:resource="E92_Spacetime_Volume" />
+    <rdfs:range rdf:resource="E92_Spacetime_Volume" />
+    <rdfs:subPropertyOf rdf:resource="P132_spatiotemporally_overlaps_with" />
+    <owl:inverseOf rdf:resource="P10_falls_within" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P11_had_participant">
+    <rdfs:label xml:lang="en">had participant</rdfs:label>
+    <rdfs:label xml:lang="de">hatte Teilnehmer</rdfs:label>
+    <rdfs:label xml:lang="el">είχε συμμέτοχο</rdfs:label>
+    <rdfs:label xml:lang="fr">a eu pour actant participant</rdfs:label>
+    <rdfs:label xml:lang="pt">tem participante</rdfs:label>
+    <rdfs:label xml:lang="ru">имeл участника</rdfs:label>
+    <rdfs:label xml:lang="zh">有参与者</rdfs:label>
+    <rdfs:comment>This property describes the active or passive participation of instances of E39 Actors in an instance of E5 Event.
+It documents known events in which an instance of E39 Actor has participated during the course of that actor’s life or history. The instances of E53 Place and E52 Time-Span where and when these events happened provide constraints about the presence of the related instances of E39 Actor in the past. Collective actors, i.e. instances of E74 Group, may physically participate in events via their representing instances of E21 Persons only. The participation of multiple actors in an event is most likely an indication of their acquaintance and interaction.
+The property implies that the actor was involved in the event but does not imply any causal relationship. For instance, someone having been portrayed can be said to have participated in the creation of the portrait.</rdfs:comment>
+    <rdfs:domain rdf:resource="E5_Event" />
+    <rdfs:range rdf:resource="E39_Actor" />
+    <rdfs:subPropertyOf rdf:resource="P12_occurred_in_the_presence_of" />
+    <owl:inverseOf rdf:resource="P11i_participated_in" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P11i_participated_in">
+    <rdfs:label xml:lang="en">participated in</rdfs:label>
+    <rdfs:label xml:lang="de">nahm Teil an</rdfs:label>
+    <rdfs:label xml:lang="el">συμμετείχε σε</rdfs:label>
+    <rdfs:label xml:lang="fr">a participé à</rdfs:label>
+    <rdfs:label xml:lang="pt">participa em</rdfs:label>
+    <rdfs:label xml:lang="ru">участвовал в</rdfs:label>
+    <rdfs:label xml:lang="zh">参与</rdfs:label>
+    <rdfs:domain rdf:resource="E39_Actor" />
+    <rdfs:range rdf:resource="E5_Event" />
+    <rdfs:subPropertyOf rdf:resource="P12i_was_present_at" />
+    <owl:inverseOf rdf:resource="P11_had_participant" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P12_occurred_in_the_presence_of">
+    <rdfs:label xml:lang="en">occurred in the presence of</rdfs:label>
+    <rdfs:label xml:lang="de">fand statt im Beisein von</rdfs:label>
+    <rdfs:label xml:lang="el">συνέβη παρουσία του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">a eu lieu en présence de</rdfs:label>
+    <rdfs:label xml:lang="pt">ocorreu na presença de</rdfs:label>
+    <rdfs:label xml:lang="ru">появился в присутствии</rdfs:label>
+    <rdfs:label xml:lang="zh">已出现</rdfs:label>
+    <rdfs:comment>This property describes the active or passive presence of an E77 Persistent Item in an instance of E5 Event without implying any specific role.
+It documents known events in which an instance of E77 Persistent Item was present during the course of its life or history. For example, an object may be the desk, now in a museum, on which a treaty was signed. The instance of E53 Place and the instance of E52 Time-Span where and when these events happened provide constraints about the presence of the related instance E77 Persistent Item in the past. Instances of E90 Symbolic Object, in particular information objects, are physically present in events via at least one of the instances of E18 Physical Thing carrying them. Note, that the human mind can be such a carrier. A precondition for a transfer of information to a person or another new physical carrier is the presence of the respective information object and this person or physical thing in one event.</rdfs:comment>
+    <rdfs:domain rdf:resource="E5_Event" />
+    <rdfs:range rdf:resource="E77_Persistent_Item" />
+    <owl:inverseOf rdf:resource="P12i_was_present_at" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P12i_was_present_at">
+    <rdfs:label xml:lang="en">was present at</rdfs:label>
+    <rdfs:label xml:lang="de">war anwesend bei</rdfs:label>
+    <rdfs:label xml:lang="el">ήταν παρών/παρούσα/παρόν σε</rdfs:label>
+    <rdfs:label xml:lang="fr">a été présent à</rdfs:label>
+    <rdfs:label xml:lang="pt">estava presente no</rdfs:label>
+    <rdfs:label xml:lang="ru">присутствовал при</rdfs:label>
+    <rdfs:label xml:lang="zh">出现在</rdfs:label>
+    <rdfs:domain rdf:resource="E77_Persistent_Item" />
+    <rdfs:range rdf:resource="E5_Event" />
+    <owl:inverseOf rdf:resource="P12_occurred_in_the_presence_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P13_destroyed">
+    <rdfs:label xml:lang="en">destroyed</rdfs:label>
+    <rdfs:label xml:lang="de">zerstörte</rdfs:label>
+    <rdfs:label xml:lang="el">κατέστρεψε</rdfs:label>
+    <rdfs:label xml:lang="fr">a détruit</rdfs:label>
+    <rdfs:label xml:lang="pt">destruiu</rdfs:label>
+    <rdfs:label xml:lang="ru">уничтожил</rdfs:label>
+    <rdfs:label xml:lang="zh">破坏了</rdfs:label>
+    <rdfs:comment>This property links an instance of E6 Destruction to an instance of E18 Physical Thing that has been destroyed by it.

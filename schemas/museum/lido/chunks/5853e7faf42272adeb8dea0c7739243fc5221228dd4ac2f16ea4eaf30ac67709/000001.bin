@@ -1,0 +1,127 @@
+ for metadata defined in external schemas, for which it is not possible to add the concrete components to the GML _MetaData substitution group directly. Deprecated with GML version 3.1.0.</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<complexType name="GenericMetaDataType" mixed="true">
+		<annotation>
+			<documentation>Deprecated with GML version 3.1.0.</documentation>
+		</annotation>
+		<complexContent mixed="true">
+			<extension base="gml:AbstractMetaDataType">
+				<sequence>
+					<any processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ================================================================== -->
+	<!-- ================== Base Property Types ============================== -->
+	<!-- ================================================================== -->
+	<!-- ==== property types for unspecified association - by Value or by Reference ==== -->
+	<!-- ====== single Objects - by Value or by Reference ======== -->
+	<element name="_association" type="gml:AssociationType" abstract="true"/>
+	<!-- =========================================================== -->
+	<element name="_strictAssociation" type="gml:AssociationType" abstract="true">
+		<annotation>
+			<appinfo>
+				<sch:pattern name="refAndContent co-occurence prohibited">
+					<sch:rule context="gml:_strictAssociation">
+						<sch:extends rule="hrefOrContent"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+			<documentation>must carry a reference to an object or contain an object but not both</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<element name="member" type="gml:AssociationType"/>
+	<!-- =========================================================== -->
+	<complexType name="AssociationType">
+		<annotation>
+			<documentation>A pattern or base for derived types used to specify complex types corresponding to an  unspecified UML association - either composition or aggregation.  Restricts the cardinality of Objects contained in the association to a maximum of one.  An instance of this type can contain an element representing an Object, or serve as a pointer to a remote Object.  
+
+Descendents of this type can be restricted in an application schema to 
+* allow only specified classes as valid participants in the aggregation
+* allow only association by reference (i.e. empty the content model) or by value (i.e. remove the xlinks).    
+
+When used for association by reference, the value of the gml:remoteSchema attribute can be used to locate a schema fragment that constrains the target instance.   
+
+In many cases it is desirable to impose the constraint prohibiting the occurence of both reference and value in the same instance, as that would be ambiguous.  This is accomplished by adding a directive in the annotation element of the element declaration.  This directive can be in the form of normative prose, or can use a Schematron pattern to automatically constrain co-occurrence - see the declaration for _strictAssociation below.   
+
+If co-occurence is not prohibited, then both a link and content may be present.  If this occurs in an instance, then the rule for interpretation is that the instance found by traversing the href provides the normative value of the property, and should be used when possible.  The value(s) included as content may be used if the remote instance cannot be resolved.  This may be considered to be a "cached" version of the value(s).</documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:_Object"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="_reference" type="gml:ReferenceType" abstract="true"/>
+	<!-- =========================================================== -->
+	<complexType name="ReferenceType">
+		<annotation>
+			<documentation>A pattern or base for derived types used to specify complex types corresponding to a UML aggregation association.  An instance of this type serves as a pointer to a remote Object.</documentation>
+		</annotation>
+		<sequence/>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =========================================================== -->
+	<!-- ========= multiple objects  - by Value or by Reference ================== -->
+	<element name="members" type="gml:ArrayAssociationType"/>
+	<!-- =========================================================== -->
+	<complexType name="ArrayAssociationType">
+		<annotation>
+			<documentation>A base for derived types used to specify complex types containing an array of objects, by unspecified UML association - either composition or aggregation.  An instance of this type contains elements representing Objects.
+
+Ideally this type would be derived by extension of AssociationType.  
+However, this leads to a non-deterministic content model, since both the base and the extension have minOccurs="0", and is thus prohibited in XML Schema.</documentation>
+		</annotation>
+		<sequence>
+			<element ref="gml:_Object" minOccurs="0" maxOccurs="unbounded"/>
+		</sequence>
+	</complexType>
+	<!-- =========================================================== -->
+	<!-- =========== Abstract "property" supertype ========================= -->
+	<element name="metaDataProperty" type="gml:MetaDataPropertyType">
+		<annotation>
+			<documentation>Contains or refers to a metadata package that contains metadata properties.</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<complexType name="MetaDataPropertyType">
+		<annotation>
+			<documentation>Base type for complex metadata property types.</documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<any processContents="lax"/>
+			<!-- <element ref="gml:_MetaData"/> -->
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+		<attribute name="about" type="anyURI" use="optional"/>
+	</complexType>
+	<!-- =========================================================== -->
+	<!-- ==========================================================
+	global attribute, attribute group and element declarations 
+	============================================================  -->
+	<attribute name="id" type="ID">
+		<annotation>
+			<documentation>Database handle for the object.  It is of XML type ID, so is constrained to be unique in the XML document within which it occurs.  An external identifier for the object in the form of a URI may be constructed using standard XML and XPointer methods.  This is done by concatenating the URI for the document, a fragment separator, and the value of the id attribute.</documentation>
+		</annotation>
+	</attribute>
+	<!-- =========================================================== -->
+	<attribute name="remoteSchema" type="anyURI">
+		<annotation>
+			<documentation>Reference to an XML Schema fragment that specifies the content model of the propertys value. This is in conformance with the XML Schema Section 4.14 Referencing Schemas from Elsewhere.</documentation>
+		</annotation>
+	</attribute>
+	<!-- =========================================================== -->
+	<attributeGroup name="AssociationAttributeGroup">
+		<annotation>
+			<documentation>Attribute group used to enable property elements to refer to their value remotely. It contains the simple link components from xlinks.xsd, with all members optional, and the remoteSchema attribute, which is also optional.  These attributes can be attached to any element, thus allowing it to act as a pointer. The 'remoteSchema' attribute allows an element  that carries link attributes to indicate that the element is declared  in a remote schema rather than by the schema that constrains the current document instance.</documentation>
+		</annotation>
+		<attributeGroup ref="xlink:simpleAttrs"/>
+		<attribute ref="gml:remoteSchema" use="optional"/>
+	</attributeGroup>
+	<!-- =========================================================== -->
+	<element name="name" type="gml:CodeType">
+		<annotati

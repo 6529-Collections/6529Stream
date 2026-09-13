@@ -1,0 +1,26 @@
+element ref="gml:LocationString"/>
+				<element ref="gml:Null"/>
+			</choice>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- ============================================================== -->
+	<element name="priorityLocation" type="gml:PriorityLocationPropertyType" substitutionGroup="gml:location">
+		<annotation>
+			<documentation>Deprecated in GML 3.1.0</documentation>
+		</annotation>
+	</element>
+	<!-- ============================================================== -->
+	<complexType name="PriorityLocationPropertyType">
+		<annotation>
+			<documentation>G-XML component</documentation>
+			<documentation>Deprecated in GML 3.1.0</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:LocationPropertyType">
+				<attribute name="priority" type="string" use="optional"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ============================================================== -->
+</schema>

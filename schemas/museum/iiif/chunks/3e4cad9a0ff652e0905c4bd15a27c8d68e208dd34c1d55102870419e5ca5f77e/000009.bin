@@ -1,0 +1,119 @@
+r title="Hypertext Transfer Protocol">HTTP</abbr>(S) URI for resources defined in this specification. If the resource is retrievable via <abbr title="Hypertext Transfer Protocol">HTTP</abbr>(S), then the URI <em class="rfc">must</em> be the URI at which it is published. External resources, such as profiles, <em class="rfc">may</em> have non-<abbr title="Hypertext Transfer Protocol">HTTP</abbr>(S) URIs defined by other communities.</p>
+
+<p>The existence of an <abbr title="Hypertext Transfer Protocol">HTTP</abbr>(S) URI in the <code class="language-plaintext highlighter-rouge">id</code> property does not mean that the URI will always be dereferencable.  If the resource with the <code class="language-plaintext highlighter-rouge">id</code> property is <a href="/api/presentation/3.0/#12-terminology">embedded</a>, it <em class="rfc">may</em> also be dereferenceable. If the resource is referenced (again, see the <a href="/api/presentation/3.0/#12-terminology">terminology section</a> for an explanation of “referenced”), it <em class="rfc">must</em> be dereferenceable. The <a href="/api/presentation/3.0/#5-resource-structure">definitions of the Resources</a> give further guidance.</p>
+
+<ul>
+  <li>All resource types <em class="rfc">must</em> have the <code class="language-plaintext highlighter-rouge">id</code> property.<br />
+Clients <em class="rfc">may</em> render <code class="language-plaintext highlighter-rouge">id</code> on any resource type, and <em class="rfc">should</em> render <code class="language-plaintext highlighter-rouge">id</code> on Collections, Manifests and Canvases.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/1/manifest"</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="type">
+        
+        
+          type <a href="#type" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>The type or class of the resource. For classes defined for this specification, the value of <code class="language-plaintext highlighter-rouge">type</code> will be described in the sections below describing each individual class.</p>
+
+<p>For content resources, the value of <code class="language-plaintext highlighter-rouge">type</code> is drawn from other specifications. Recommendations for common content types such as image, text or audio are given in the table below.</p>
+
+<p>The <abbr title="JavaScript Object Notation">JSON</abbr> objects that appear in the value of the <code class="language-plaintext highlighter-rouge">service</code> property will have many different classes, and can be used to distinguish the sort of service, with specific properties defined in a <a href="/api/presentation/3.0/#46-linked-data-context-and-extensions" title="Linked Data Context and Extensions">registered context document</a>.</p>
+
+<p>The value <em class="rfc">must</em> be a string.</p>
+
+<ul>
+  <li>All resource types <em class="rfc">must</em> have the <code class="language-plaintext highlighter-rouge">type</code> property.<br />
+Clients <em class="rfc">must</em> process, and <em class="rfc">may</em> render, <code class="language-plaintext highlighter-rouge">type</code> on any resource type.</li>
+</ul>
+
+<table class="api-table" id="table-type">
+  <thead>
+    <tr>
+      <th>Class</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Dataset</code></td>
+      <td>Data not intended to be rendered to humans directly</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Image</code></td>
+      <td>Two dimensional visual resources primarily intended to be seen, such as might be rendered with an &lt;img&gt; <abbr title="HyperText Markup Language">HTML</abbr> tag</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Model</code></td>
+      <td>A three (or more) dimensional model intended to be interacted with by humans</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Sound</code></td>
+      <td>Auditory resources primarily intended to be heard, such as might be rendered with an &lt;audio&gt; <abbr title="HyperText Markup Language">HTML</abbr> tag</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Text</code></td>
+      <td>Resources primarily intended to be read</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Video</code></td>
+      <td>Moving images, with or without accompanying audio, such as might be rendered with a &lt;video&gt; <abbr title="HyperText Markup Language">HTML</abbr> tag</td>
+    </tr>
+  </tbody>
+</table>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Image"</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="format">
+        
+        
+          format <a href="#format" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>The specific media type (often called a MIME type) for a content resource, for example <code class="language-plaintext highlighter-rouge">image/jpeg</code>. This is important for distinguishing different formats of the same overall type of resource, such as distinguishing text in <abbr title="eXtensible Markup Language">XML</abbr> from plain text.</p>
+
+<p>Note that this is different to the <code class="language-plaintext highlighter-rouge">formats</code> property in the <a href="/api/image/3.0/" title="Image API">Image <abbr title="Application Programming Interface">API</abbr></a>, which gives the extension to use within that <abbr title="Application Programming Interface">API</abbr>. It would be inappropriate to use in this case, as <code class="language-plaintext highlighter-rouge">format</code> can be used with any content resource, not just images.</p>
+
+<p>The value <em class="rfc">must</em> be a string, and it <em class="rfc">should</em> be the value of the <code class="language-plaintext highlighter-rouge">Content-Type</code> header returned when the resource is dereferenced.</p>
+
+<ul>
+  <li>A content resource <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">format</code> property.<br />
+Clients <em class="rfc">may</em> render the <code class="language-plaintext highlighter-rouge">format</code> of any content resource.</li>
+  <li>Other types of resource <em class="rfc">must not</em> have the <code class="language-plaintext highlighter-rouge">format</code> property.<br />
+Clients <em class="rfc">should</em> ignore <code class="language-plaintext highlighter-rouge">format</code> on other types of resource.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nl">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"application/xml"</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="language">
+        
+        
+          language <a href="#language" class="anchorClass"></a>
+        
+        
+ 

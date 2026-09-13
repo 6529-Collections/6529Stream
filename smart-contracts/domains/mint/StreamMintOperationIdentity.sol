@@ -214,7 +214,6 @@ library StreamMintOperationIdentity {
         preimage.phaseConfigHash = keccak256(
             abi.encode(
                 PHASE_CONFIG_DOMAIN,
-                phaseConfig.paused,
                 phaseConfig.startTime,
                 phaseConfig.endTime,
                 phaseConfig.maxBatchQuantity,

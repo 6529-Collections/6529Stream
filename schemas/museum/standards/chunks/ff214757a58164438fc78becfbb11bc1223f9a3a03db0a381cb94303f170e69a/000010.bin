@@ -1,0 +1,62 @@
+el 2013). Since our knowledge of history is imperfect and physical phenomena are fuzzy in nature, the extent of phenomenal time-spans can only be described in approximation. An extreme case of approximation, might, for example, define an instance of E52 Time-Span having unknown beginning, end and duration. It may, nevertheless, be associated with other descriptions by which people can infer knowledge about it, such as in relative chronologies.
+Some instances of E52 may be defined precisely as representing a declaration of a temporal extent, as, for instance, done in a business contract. They constitute declarative time-spans as defined in CRMgeo (Doerr &amp;amp; Hiebel 2013) and can be described via the property E61 Time Primitive P170 defines time (time is defined by): E52 Time-Span.
+When used as a common E52 Time-Span for two events, it will nevertheless describe them as being simultaneous, even if nothing else is known.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E1_CRM_Entity" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E53_Place">
+    <rdfs:label xml:lang="en">Place</rdfs:label>
+    <rdfs:label xml:lang="de">Ort</rdfs:label>
+    <rdfs:label xml:lang="el">Τόπος</rdfs:label>
+    <rdfs:label xml:lang="fr">Lieu</rdfs:label>
+    <rdfs:label xml:lang="pt">Local</rdfs:label>
+    <rdfs:label xml:lang="ru">Мeсто</rdfs:label>
+    <rdfs:label xml:lang="zh">地点</rdfs:label>
+    <rdfs:comment>This class comprises extents in the natural space where people live, in particular on the surface of the Earth, in the pure sense of physics: independent from temporal phenomena and matter. They may serve describing the physical location of things or phenomena or other areas of interest. Geometrically, instances of E53 Place constitute single contiguous areas or a finite aggregation of disjoint areas in space which are each individually contiguous. They may have fuzzy boundaries.
+The instances of E53 Place are usually determined by reference to the position of “immobile” objects such as buildings, cities, mountains, rivers, or dedicated geodetic marks, but may also be determined by reference to mobile objects. A Place can be determined by combining a frame of reference and a location with respect to this frame.
+It is sometimes argued that instances of E53 Place are best identified by global coordinates or absolute reference systems. However, relative references are often more relevant in the context of cultural documentation and tend to be more precise. In particular, people are often interested in position in relation to large, mobile objects, such as ships. For example, the Place at which Nelson died is known with reference to a large mobile object, i.e. H.M.S Victory. A resolution of this Place in terms of absolute coordinates would require knowledge of the movements of the vessel and the precise time of death, either of which may be revised, and the result would lack historical and cultural relevance.
+Any instance of E18 Physical Thing can serve as a frame of reference for an instance of E53 Place. This may be documented using the property P157 is at rest relative to (provides reference space for).</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E1_CRM_Entity" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E54_Dimension">
+    <rdfs:label xml:lang="en">Dimension</rdfs:label>
+    <rdfs:label xml:lang="de">Maß</rdfs:label>
+    <rdfs:label xml:lang="el">Μέγεθος</rdfs:label>
+    <rdfs:label xml:lang="fr">Dimension</rdfs:label>
+    <rdfs:label xml:lang="pt">Dimensão</rdfs:label>
+    <rdfs:label xml:lang="ru">Размeр</rdfs:label>
+    <rdfs:label xml:lang="zh">度量规格</rdfs:label>
+    <rdfs:comment>This class comprises quantifiable properties that can be measured by some calibrated means and can be approximated by values, i.e. points or regions in a mathematical or conceptual space, such as natural or real numbers, RGB values, etc.
+An instance of E54 Dimension represents the empirical or theoretically derived quantity, including the precision tolerances resulting from the particular method or calculation. The identity of an instance of E54 Dimension depends on the method of its determination because each method may produce different values even when determining comparable qualities. For instance, the wingspan of a bird alive or dead is a different dimension. Thermoluminescence dating and Rehydroxylation [RHX] dating are different dimensions of temporal distance from now, even if they aim at dating the same object. The method of determination should be expressed using the property P2 has type (is type of). Note that simple terms such as “diameter” or “length” are normally insufficient to unambiguously describe a respective dimension. In contrast, “maximum linear extent” may be sufficient.
+The properties of the class E54 Dimension allow for expressing the numerical approximation of the values of instances of E54 Dimension adequate to the precision of the applied method of determination. If the respective quantity belongs to a non-discrete space according to the laws of physics, such as spatial distances, it is recommended to record them as approximations by intervals or regions of indeterminacy enclosing the assumed true values. For instance, a length of 5 cm may be recorded as 4.5-5.5 cm, according to the precision of the respective observation. Note, that comparability of values described in different units depends critically on the representation as value regions.
+Numerical approximations in archaic instances of E58 Measurement Unit used in historical records should be preserved. Equivalents corresponding to current knowledge should be recorded as additional instances of E54 Dimension, as appropriate.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E1_CRM_Entity" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E55_Type">
+    <rdfs:label xml:lang="en">Type</rdfs:label>
+    <rdfs:label xml:lang="de">Typus</rdfs:label>
+    <rdfs:label xml:lang="el">Τύπος</rdfs:label>
+    <rdfs:label xml:lang="fr">Type</rdfs:label>
+    <rdfs:label xml:lang="pt">Tipo</rdfs:label>
+    <rdfs:label xml:lang="ru">Tип</rdfs:label>
+    <rdfs:label xml:lang="zh">类型</rdfs:label>
+    <rdfs:comment>This class comprises concepts denoted by terms from thesauri and controlled vocabularies used to characterize and classify instances of CIDOC CRM classes. Instances of E55 Type represent concepts, in contrast to instances of E41 Appellation which are used to name instances of CIDOC CRM classes.
+E55 Type provides an interface to domain specific ontologies and thesauri. These can be represented in the CIDOC CRM as subclasses of E55 Type, forming hierarchies of terms, i.e. instances of E55 Type linked via P127 has broader term (has narrower term): E55 Type. Such hierarchies may be extended with additional properties.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E28_Conceptual_Object" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E56_Language">
+    <rdfs:label xml:lang="en">Language</rdfs:label>
+    <rdfs:label xml:lang="de">Sprache</rdfs:label>
+    <rdfs:label xml:lang="el">Γλώσσα</rdfs:label>
+    <rdfs:label xml:lang="fr">Langue</rdfs:label>
+    <rdfs:label xml:lang="pt">Língua</rdfs:label>
+    <rdfs:label xml:lang="ru">Язык</rdfs:label>
+    <rdfs:label xml:lang="zh">语种</rdfs:label>
+    <rdfs:comment>This class is a specialization of E55 Type and comprises the natural languages in the sense of concepts.
+This type is used categorically in the model without reference to instances of it, i.e. the Model does not foresee the description of instances of instances of E56 Language, e.g. “instances of Mandarin Chinese”.
+It is recommended that internationally or nationally agreed codes and terminology should be used to denote instances of E56 Language, such as those defined in ISO 639-3:2007 and later versions.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E55_Type" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E57_Material">
+    <rdfs:label xml:lang="en">Material</rdfs:label>
+    <rdfs:label xml:lang="de">Material</rdfs:label>
+    <rdfs:label xml:lang="el">Υλικ

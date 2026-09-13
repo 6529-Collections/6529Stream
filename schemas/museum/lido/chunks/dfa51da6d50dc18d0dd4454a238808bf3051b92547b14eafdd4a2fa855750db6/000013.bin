@@ -1,0 +1,192 @@
+		<tei:ab type="description">A set of display and index elements for materials
+								and techniques used for or incorporated in the object/work in focus.</tei:ab>
+							<tei:ab type="label">Object Materials/Techniques Set</tei:ab>
+							
+							
+							</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="objectMeasurementsWrap" id="objectMeasurementsWrap">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">A wrapper for information about the dimensions, or other
+					measurements, of the object/work.</tei:ab>
+				<tei:ab type="label">Object Measurements Wrapper</tei:ab>
+				</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="objectMeasurementsSet" minOccurs="0" maxOccurs="unbounded" id="objectMeasurementsSet">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">A set of display and index elements for
+								dimensions, or other measurements, of the object/work in focus.<br/>
+								Repeated to record measurements of different parts of the
+								object/work.</tei:ab>
+							<tei:ab type="label">Object Measurements Set</tei:ab>
+						</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:complexContent>
+							<xs:extension base="lido:objectMeasurementsSetComplexType">
+								<xs:attribute ref="lido:type" id="objectMeasurementsSet_type">
+									<xs:annotation>
+										<xs:documentation>
+											<tei:ab type="description">An attribute indicating whether the measurements given are
+												straight properties of the object in question or requirements for handling the object,
+												such as maximum temperature variation.<br/>
+												Note that this type attribute is primarily intended for use in application profiles.</tei:ab>
+											<tei:ab type="dataValues">Controlled terminology</tei:ab>
+											<tei:ab type="recommendation">LIDO Terminology for
+												<tei:ref target="../../documents/terminology-recommendation.html#objectMeasurementsSet_type">Type of Object Measurements Set</tei:ref>
+											</tei:ab>
+										</xs:documentation>
+									</xs:annotation>
+								</xs:attribute>
+								<xs:attribute ref="lido:measurementsGroup"/>
+								<xs:attribute ref="lido:sortorder"/>
+							</xs:extension>
+						</xs:complexContent>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="objectRelationWrap" id="objectRelationWrap">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">A wrapper for structured information indicating related
+					subject matter and related objects or works.</tei:ab>
+				<tei:ab type="label">Object Relation Wrapper</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="lido:subjectWrap" minOccurs="0"/>
+				<xs:element ref="lido:relatedWorksWrap" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="objectSetComplexType" id="objectSetComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines display and reference elements for
+					an object or work related to the object/work in focus.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="displayObject" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="displayObject">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A display element for a related collection,object or work, corresponding to the
+							subsequent <tei:ref target="#object">Object</tei:ref> element.<br/>
+							Repeated for language variants only.</tei:ab>
+						<tei:ab type="label">Display Object</tei:ab>
+						<tei:ab type="dataValues">Free text</tei:ab>
+						
+												
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="object" type="lido:objectComplexType" minOccurs="0" id="object">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A wrapper for identifying information about an object or work, 
+							including collections, related to the object/work in focus.<br/>
+							May include a weblink.</tei:ab>
+						<tei:ab type="label">Object</tei:ab>
+					</xs:documentation>
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:object">
+								<sch:extends rule="sch_OWL"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="objectWorkTypeWrap" id="objectWorkTypeWrap">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">A wrapper for structured information about the
+					object/work type.</tei:ab>
+				<tei:ab type="label">Object/Work Type Wrapper</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="objectWorkType" maxOccurs="unbounded" id="objectWorkType">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">An index element for the specific kind
+								of the object/work in focus.<br/>
+								Note that indexing Object/Work Type is mandatory.<br/>
+								Repeated if the object/work type is further typified under different aspects,
+								such as <em>by form</em> or <em>by function</em>. If the object/work in focus is a <em>Group-level record</em>,
+								repeat for identifying all or the most important items of the group.</tei:ab>
+							<tei:ab type="label">Object/Work Type</tei:ab>
+							
+							
+							<tei:ab type="dataValues">Controlled terminology</tei:ab>
+							<tei:ab type="recommendation">Linked open vocabulary for
+								<tei:ref target="../../documents/terminology-recommendation.html#objectWorkType">Object/Work Type</tei:ref></tei:ab>
+						</xs:documentation>
+						<xs:appinfo>
+							<sch:pattern>
+								<sch:rule context="lido:objectWorkType">
+									<sch:extends rule="sch_SKOS"/>
+								</sch:rule>
+							</sch:pattern>
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:complexContent>
+							<xs:extension base="lido:conceptComplexType">
+								<xs:attribute ref="lido:type" id="objectWorkType_type">
+									<xs:annotation>
+										<xs:documentation>
+											<tei:ab type="description">An attribute further
+												qualifying the particular aspect of the object/work
+												type. Values for this attribute are commonly referred to as guide terms or node labels.<br/>
+												Examples may include aspects like <em>by form</em>, <em>by function</em>,
+												<em>by material or technique</em>, or <em>by subject</em>.</tei:ab>
+											<tei:ab type="dataValues">Controlled terminology</tei:ab>
+											<tei:ab type="recommendation">LIDO Terminology for
+												<tei:ref target="../../documents/terminology-recommendation.html#objectWorkType_type">Type of Object/Work Type</tei:ref>
+											</tei:ab>
+										</xs:documentation>
+									</xs:annotation>
+								</xs:attribute>
+								<xs:attribute ref="lido:sortorder"/>
+							</xs:extension>
+						</xs:complexContent>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="placeComplexType" id="placeComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines information about a place.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="placeID" type="lido:identifierComplexType" minOccurs="0" maxOccurs="unbounded" id="placeID">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An identifier for the place.<br/>
+							Repeatable for identifiers from different authority files or other sources.
+							The recommended method, however, is to reference equivalent resources using the
+							<tei:ref target="https://www.w3.org/TR/owl-ref/#sameAs-def">owl:sameAs</tei:ref> property,
+							stating that two or more URIs identify the same individual entity.</tei:ab>
+						<tei:ab type="label">Place Identifier</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs

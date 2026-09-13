@@ -1,0 +1,120 @@
+fort in</rdfs:label>
+    <rdfs:label xml:lang="el">συνέχισε</rdfs:label>
+    <rdfs:label xml:lang="fr">a continué</rdfs:label>
+    <rdfs:label xml:lang="pt">continuou</rdfs:label>
+    <rdfs:label xml:lang="ru">продолжил</rdfs:label>
+    <rdfs:label xml:lang="zh">继续</rdfs:label>
+    <rdfs:comment>This property associates two instances of E7 Activity, where the domain is considered as an intentional continuation of the range. A continuation of an activity may happen when the continued activity is still ongoing or after the continued activity has completely ended. The continuing activity may have started already before it decided to continue the other one. Continuation implies a coherence of intentions and outcomes of the involved activities.
+This property is not transitive. This property is asymmetric.</rdfs:comment>
+    <rdfs:domain rdf:resource="E7_Activity" />
+    <rdfs:range rdf:resource="E7_Activity" />
+    <rdfs:subPropertyOf rdf:resource="P15_was_influenced_by" />
+    <rdfs:subPropertyOf rdf:resource="P176i_starts_after_the_start_of" />
+    <owl:inverseOf rdf:resource="P134i_was_continued_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P134i_was_continued_by">
+    <rdfs:label xml:lang="en">was continued by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde fortgesetzt durch</rdfs:label>
+    <rdfs:label xml:lang="el">συνεχίστηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été continué par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi continuada por</rdfs:label>
+    <rdfs:label xml:lang="ru">был продолжeн</rdfs:label>
+    <rdfs:label xml:lang="zh">被继续</rdfs:label>
+    <rdfs:domain rdf:resource="E7_Activity" />
+    <rdfs:range rdf:resource="E7_Activity" />
+    <rdfs:subPropertyOf rdf:resource="P15i_influenced" />
+    <rdfs:subPropertyOf rdf:resource="P176_starts_before_the_start_of" />
+    <owl:inverseOf rdf:resource="P134_continued" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P135_created_type">
+    <rdfs:label xml:lang="en">created type</rdfs:label>
+    <rdfs:label xml:lang="de">erschuf Typus</rdfs:label>
+    <rdfs:label xml:lang="el">δημιούργησε τύπο</rdfs:label>
+    <rdfs:label xml:lang="fr">a créé le type</rdfs:label>
+    <rdfs:label xml:lang="pt">criou tipo</rdfs:label>
+    <rdfs:label xml:lang="ru">создал тип</rdfs:label>
+    <rdfs:label xml:lang="zh">创建类型</rdfs:label>
+    <rdfs:comment>This property identifies the instance of E55 Type, which is created in an instance of E83 Type Creation activity.</rdfs:comment>
+    <rdfs:domain rdf:resource="E83_Type_Creation" />
+    <rdfs:range rdf:resource="E55_Type" />
+    <rdfs:subPropertyOf rdf:resource="P94_has_created" />
+    <owl:inverseOf rdf:resource="P135i_was_created_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P135i_was_created_by">
+    <rdfs:label xml:lang="en">was created by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde geschaffen durch</rdfs:label>
+    <rdfs:label xml:lang="el">δημιουργήθηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été créé par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi criado por</rdfs:label>
+    <rdfs:label xml:lang="ru">был создан</rdfs:label>
+    <rdfs:label xml:lang="zh">被创建</rdfs:label>
+    <rdfs:domain rdf:resource="E55_Type" />
+    <rdfs:range rdf:resource="E83_Type_Creation" />
+    <rdfs:subPropertyOf rdf:resource="P94i_was_created_by" />
+    <owl:inverseOf rdf:resource="P135_created_type" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P136_was_based_on">
+    <rdfs:label xml:lang="en">was based on</rdfs:label>
+    <rdfs:label xml:lang="de">stützte sich auf</rdfs:label>
+    <rdfs:label xml:lang="el">βασίστηκε σε</rdfs:label>
+    <rdfs:label xml:lang="fr">a été fondé sur</rdfs:label>
+    <rdfs:label xml:lang="pt">foi baseado em</rdfs:label>
+    <rdfs:label xml:lang="ru">был основан на</rdfs:label>
+    <rdfs:label xml:lang="zh">基于</rdfs:label>
+    <rdfs:comment>This property identifies one or more instances of E1 CRM Entity that were used as evidence to declare a new instance of E55 Type.
+The examination of these items is often the only objective way to understand the precise characteristics of a new type. Such items should be deposited in a museum or similar institution for that reason. The taxonomic role renders the specific relationship of each item to the type, such as “holotype” or “original element”.</rdfs:comment>
+    <rdfs:domain rdf:resource="E83_Type_Creation" />
+    <rdfs:range rdf:resource="E1_CRM_Entity" />
+    <rdfs:subPropertyOf rdf:resource="P15_was_influenced_by" />
+    <owl:inverseOf rdf:resource="P136i_supported_type_creation" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P136i_supported_type_creation">
+    <rdfs:label xml:lang="en">supported type creation</rdfs:label>
+    <rdfs:label xml:lang="de">belegte</rdfs:label>
+    <rdfs:label xml:lang="el">υποστήριξε τη δημιουργία τύπου</rdfs:label>
+    <rdfs:label xml:lang="fr">a fondé la création du type</rdfs:label>
+    <rdfs:label xml:lang="pt">suportou a criação de tipo</rdfs:label>
+    <rdfs:label xml:lang="ru">стал основой для создания типа</rdfs:label>
+    <rdfs:label xml:lang="zh">支持类型创建</rdfs:label>
+    <rdfs:domain rdf:resource="E1_CRM_Entity" />
+    <rdfs:range rdf:resource="E83_Type_Creation" />
+    <rdfs:subPropertyOf rdf:resource="P15i_influenced" />
+    <owl:inverseOf rdf:resource="P136_was_based_on" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P137_exemplifies">
+    <rdfs:label xml:lang="en">exemplifies</rdfs:label>
+    <rdfs:label xml:lang="de">erläutert</rdfs:label>
+    <rdfs:label xml:lang="el">δειγματίζει</rdfs:label>
+    <rdfs:label xml:lang="fr">exemplifie</rdfs:label>
+    <rdfs:label xml:lang="pt">é exemplificado por</rdfs:label>
+    <rdfs:label xml:lang="ru">иллюстрируeт</rdfs:label>
+    <rdfs:label xml:lang="zh">例示</rdfs:label>
+    <rdfs:comment>This property associates an instance of E1 CRM Entity with an instance of E55 Type for which it has been declared to be a particularly characteristic example.
+The P137.1 in the taxonomic role property of P137 exemplifies (is exemplified by) allows differentiation of taxonomic roles. The taxonomic role renders the specific relationship of this example to the type, such as “prototypical”, “archetypical”, “lectotype”, etc. The taxonomic role “lectotype” is not associated with the instance of E83 Type Creation itself but is selected in a later phase.</rdfs:comment>
+    <rdfs:domain rdf:resource="E1_CRM_Entity" />
+    <rdfs:range rdf:resource="E55_Type" />
+    <rdfs:subPropertyOf rdf:resource="P2_has_type" />
+    <owl:inverseOf rdf:resource="P137i_is_exemplified_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P137i_is_exemplified_by">
+    <rdfs:label xml:lang="en">is exemplified by</rdfs:label>
+    <rdfs:label xml:lang="de">erläutert durch Beispiel</rdfs:label>
+    <rdfs:label xml:lang="el">δειγματίζεται από</rdfs:label>
+    <rdfs:label xml:lang="fr">est exemplifié par</rdfs:label>
+    <rdfs:label xml:lang="pt">exemplifica</rdfs:label>
+    <rdfs:label xml:lang="ru">иллюстрируeтся</rdfs:label>
+    <rdfs:label xml:lang="zh">被例示</rdfs:label>
+    <rdfs:domain rdf:resource="E55_Type" />
+    <rdfs:range rdf:resource="E1_CRM_Entity" />
+    <rdfs:subPropertyOf rdf:resource="P2i_is_type_of" />
+    <owl:inverseOf rdf:resource="P137_exemplifies" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P138_represents">
+    <rdfs:label xml:lang="en">represents</rdfs:label>
+    <rdfs:label xml:lang="de">stellt dar</rdfs:label>
+    <rdfs:label xml:lang="el">παριστάνει</rdfs:label>
+    <rdfs:label xml:lang="fr">représente</rdfs:label>
+    <rdfs:label xml:lang="pt">representa</rdfs:label>
+    <rdfs:label xml:lang="ru">прeдставляeт</rdfs:label>
+    <rdfs:label xml:lang="zh">描绘</rdfs:label>
+    <rdfs:comment>This property establishes the relationship between an inst

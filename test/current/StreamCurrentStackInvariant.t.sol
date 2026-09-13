@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../helpers/StreamCurrentStackFixture.sol";
+import "../helpers/StreamCurrentAssetPolicy.sol";
 import "../helpers/StreamCurrentStackHandler.sol";
 import "../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
 
@@ -23,8 +24,7 @@ contract StreamCurrentStackInvariantTest is StreamCurrentStackFixture {
         string[] artifacts;
     }
     bytes32 private constant ERC20_PHASE = keccak256("stateful ERC20 phase");
-    bytes32 private constant REVENUE = keccak256("stateful primary sale");
-    StreamRevenueResolver private primaryResolver;
+    bytes32 private constant REVENUE = PRIMARY_REVENUE_CLASS;
     StreamERC20FixedPriceSaleAdapter private erc20Sale;
     MockStreamPaymentToken private paymentToken;
     bytes32 private erc20SaleId;
@@ -55,16 +55,32 @@ contract StreamCurrentStackInvariantTest is StreamCurrentStackFixture {
         return 256;
     }
 
-    function _configureAdditionalProducts() internal override {
-        primaryResolver = new StreamRevenueResolver(factory);
-        primaryResolver.setPrimaryProfileAssignment(
-            REVENUE, 1, 1, profile, keccak256("stateful fixed profile")
-        );
+    function _deployAdditionalProducts() internal override {
         paymentToken = new MockStreamPaymentToken();
-        assetPolicy.setAssetStatus(address(paymentToken), 1, keccak256("standard test token"));
         erc20Sale = new StreamERC20FixedPriceSaleAdapter(
-            manager, primaryResolver, vm.addr(PLATFORM_KEY), artists
+            manager,
+            primaryResolver,
+            vm.addr(PLATFORM_KEY),
+            IStreamArtistAttribution(address(artists)),
+            revenueEscrow
         );
+        _assertDeployableProductionInstance(address(erc20Sale));
+    }
+
+    function _additionalEscrowProducers() internal view override returns (address[] memory rows) {
+        rows = new address[](1);
+        rows[0] = address(erc20Sale);
+    }
+
+    function _configureAdditionalProducts() internal override {
+        GovernanceActionRequest memory activation = StreamCurrentAssetPolicy.activationRequest(
+            assetPolicy, address(paymentToken), keccak256("standard test ERC20"), DEPLOYMENT_HASH
+        );
+        bytes memory result = governanceRoot.execute(
+            address(executor), 0, abi.encodeCall(executor.scheduleGovernanceAction, (activation))
+        );
+        vm.warp(activation.notBefore);
+        executor.executeGovernanceAction(abi.decode(result, (bytes32)), activation.callData);
         _configureMintPhase(ERC20_PHASE, address(erc20Sale));
         (bytes32 policy,,) = erc20Sale.primaryPolicy(1, REVENUE);
         erc20SaleId = erc20Sale.registerSale(
@@ -80,7 +96,6 @@ contract StreamCurrentStackInvariantTest is StreamCurrentStackFixture {
                 type(uint64).max
             )
         );
-        primaryResolver.transferOwnership(address(executor));
         erc20Sale.transferOwnership(address(executor));
     }
 

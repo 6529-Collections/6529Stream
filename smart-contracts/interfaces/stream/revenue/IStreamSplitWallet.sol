@@ -3,6 +3,65 @@ pragma solidity ^0.8.19;
 
 /// @notice Interface for immutable split-wallet receipt and release accounting.
 interface IStreamSplitWallet {
+    /// @notice Exact full-amount alternate-recipient release consent under the wallet domain.
+    struct ReleaseAuthorization {
+        address asset;
+        address account;
+        address recipient;
+        uint256 releasableSnapshot;
+        bytes32 nonce;
+        uint64 deadline;
+    }
+
+    error ReleaseAuthorizationExpired(uint64 deadline);
+    error ReleaseAuthorizationNonceUsed(address account, bytes32 nonce);
+    error InvalidReleaseSignature(address account);
+    error InvalidReleaseAccount();
+    error ReleaseSnapshotMismatch(uint256 expected, uint256 actual);
+    error WalletGasParameterReadFailed(bytes32 parameterId);
+    error InsufficientWalletCallGas(uint256 requiredCallGas);
+
+    event ReleaseAuthorizationRevoked(
+        address indexed account, bytes32 indexed nonce, uint16 schemaVersion
+    );
+
+    function releaseWithAuthorization(
+        ReleaseAuthorization calldata authorization,
+        bytes calldata signature
+    ) external returns (uint256 amount);
+    function revokeReleaseAuthorization(bytes32 nonce) external;
+    function revokeReleaseAuthorizationBySignature(
+        address account,
+        bytes32 nonce,
+        uint64 deadline,
+        bytes calldata signature
+    ) external;
+    function isReleaseAuthorizationNonceUsed(address account, bytes32 nonce)
+        external
+        view
+        returns (bool);
+    function releaseAuthorizationDigest(ReleaseAuthorization calldata authorization)
+        external
+        view
+        returns (bytes32);
+    function releaseRevocationDigest(address account, bytes32 nonce, uint64 deadline)
+        external
+        view
+        returns (bytes32);
+    function domainSeparator() external view returns (bytes32);
+    function eip712Domain()
+        external
+        view
+        returns (
+            bytes1 fields,
+            string memory name,
+            string memory version,
+            uint256 chainId,
+            address verifyingContract,
+            bytes32 salt,
+            uint256[] memory extensions
+        );
+
     /// @notice Label-level recipient share entry before account aggregation.
     struct SplitEntry {
         address account;

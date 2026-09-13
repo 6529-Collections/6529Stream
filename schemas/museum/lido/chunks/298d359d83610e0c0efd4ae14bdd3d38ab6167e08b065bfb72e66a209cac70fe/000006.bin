@@ -1,0 +1,141 @@
+ed with GML version 3.1.0. Use "posList" instead.</documentation>
+							</annotation>
+						</element>
+					</choice>
+					<element name="degree" type="nonNegativeInteger">
+						<annotation>
+							<documentation>The attribute "degree" shall be the degree of the polynomial used for interpolation in this spline.</documentation>
+						</annotation>
+					</element>
+					<element name="knot" type="gml:KnotPropertyType" minOccurs="2" maxOccurs="unbounded">
+						<annotation>
+							<documentation>The property "knot" shall be the sequence of distinct knots used to define the spline basis functions.</documentation>
+						</annotation>
+					</element>
+				</sequence>
+				<attribute name="interpolation" type="gml:CurveInterpolationType" default="polynomialSpline">
+					<annotation>
+						<documentation>The attribute "interpolation" specifies the curve interpolation mechanism used for this segment. This mechanism
+uses the control points and control parameters to determine the position of this curve segment. For a BSpline the interpolation can be either "polynomialSpline" or "rationalSpline", default is "polynomialSpline".</documentation>
+					</annotation>
+				</attribute>
+				<attribute name="isPolynomial" type="boolean" use="optional">
+					<annotation>
+						<documentation>The attribute isPolynomial is set to true if this is a polynomial spline.</documentation>
+					</annotation>
+				</attribute>
+				<attribute name="knotType" type="gml:KnotTypesType" use="optional">
+					<annotation>
+						<documentation>The attribute "knotType" gives the type of knot distribution used in defining this spline. This is for information only
+and is set according to the different construction-functions.</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========== global element in "_CurveSegment" substitution group ================ -->
+	<element name="Bezier" type="gml:BezierType" substitutionGroup="gml:BSpline"/>
+	<!-- =========================================================== -->
+	<complexType name="BezierType">
+		<annotation>
+			<documentation>Bezier curves are polynomial splines that use Bezier or Bernstein polynomials for interpolation purposes. It is a special case of the B-Spline curve with two knots.</documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:BSplineType">
+				<sequence>
+					<choice>
+						<annotation>
+							<documentation>GML supports two different ways to specify the control points of a curve segment.
+1. A sequence of "pos" (DirectPositionType) or "pointProperty" (PointPropertyType) elements. "pos" elements are control points that are only part of this curve segment, "pointProperty" elements contain a point that may be referenced from other geometry elements or reference another point defined outside of this curve segment (reuse of existing points).
+2. The "posList" element allows for a compact way to specifiy the coordinates of the control points, if all control points are in the same coordinate reference systems and belong to this curve segment only.</documentation>
+						</annotation>
+						<choice minOccurs="0" maxOccurs="unbounded">
+							<element ref="gml:pos"/>
+							<element ref="gml:pointProperty"/>
+							<element ref="gml:pointRep">
+								<annotation>
+									<documentation>Deprecated with GML version 3.1.0. Use "pointProperty" instead. Included for backwards compatibility with GML 3.0.0.</documentation>
+								</annotation>
+							</element>
+						</choice>
+						<element ref="gml:posList"/>
+						<element ref="gml:coordinates">
+							<annotation>
+								<documentation>Deprecated with GML version 3.1.0. Use "posList" instead.</documentation>
+							</annotation>
+						</element>
+					</choice>
+					<element name="degree" type="nonNegativeInteger">
+						<annotation>
+							<documentation>The attribute "degree" shall be the degree of the polynomial used for interpolation in this spline.</documentation>
+						</annotation>
+					</element>
+					<element name="knot" type="gml:KnotPropertyType" minOccurs="2" maxOccurs="2">
+						<annotation>
+							<documentation>The property "knot" shall be the sequence of distinct knots used to define the spline basis functions.</documentation>
+						</annotation>
+					</element>
+				</sequence>
+				<attribute name="interpolation" type="gml:CurveInterpolationType" fixed="polynomialSpline">
+					<annotation>
+						<documentation>The attribute "interpolation" specifies the curve interpolation mechanism used for this segment. This mechanism
+uses the control points and control parameters to determine the position of this curve segment. For a Bezier the interpolation is fixed as "polynomialSpline".</documentation>
+					</annotation>
+				</attribute>
+				<attribute name="isPolynomial" type="boolean" fixed="true">
+					<annotation>
+						<documentation>The attribute isPolynomial is set to true as this is a polynomial spline.</documentation>
+					</annotation>
+				</attribute>
+				<attribute name="knotType" type="gml:KnotTypesType" use="prohibited">
+					<annotation>
+						<documentation>The property "knotType" is not relevant for Bezier curve segments.</documentation>
+					</annotation>
+				</attribute>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="Surface" type="gml:SurfaceType" substitutionGroup="gml:_Surface"/>
+	<!-- =========================================================== -->
+	<complexType name="SurfaceType">
+		<annotation>
+			<documentation>A Surface is a 2-dimensional primitive and is composed of one or more surface patches. The surface patches are connected to one another.
+				The orientation of the surface is positive ("up"). The orientation of a surface chooses an "up" direction through the choice of the upward normal, which, if the surface is not a cycle, is the side of the surface from which the exterior boundary appears counterclockwise. Reversal of the surface orientation reverses the curve orientation of each boundary component, and interchanges the conceptual "up" and "down" direction of the surface. If the surface is the boundary of a solid, the "up" direction is usually outward. For closed surfaces, which have no boundary, the up direction is that of the surface patches, which must be consistent with one another. Its included surface patches describe the interior structure of the Surface.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractSurfaceType">
+				<sequence>
+					<element ref="gml:patches">
+						<annotation>
+							<documentation>This element encapsulates the patches of the surface.</documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="baseSurface" type="gml:SurfacePropertyType">
+		<annotation>
+			<appinfo>
+				<sch:pattern name="Check either href or content not both">
+					<sch:rule context="gml:baseSurface">
+						<sch:extends rule="hrefOrContent"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+			<documentation>This property element either references a surface via the XLink-attributes or contains the surface element. A surface element is any element which is substitutable for "_Surface".</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<element name="OrientableSurface" type="gml:OrientableSurfaceType" substitutionGroup="gml:_Surface"/>
+	<!-- =========================================================== -->
+	<complexType name="OrientableSurfaceType">
+		<annotation>
+			<documentation>OrientableSurface consists of a surface and an orientation. If the orientation is "+", then the OrientableSurface is identical to the baseSurface. If the orientation is "-", then the OrientableSurface is a reference to a Surface with an up-normal that reverses the direction for this OrientableSurface, the sense of "the top of the surface".</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractSurfaceType">
+				<sequence>
+					<element

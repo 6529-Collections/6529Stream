@@ -1,0 +1,131 @@
+y LOD sources is the option to obtain arbitrary
+            selections or aggregates of the available data by sending
+            queries in the <a
+            href="https://www.w3.org/TR/rdf-sparql-query/">SPARQL Query
+            Language for RDF</a>.</p>
+            <p>The LIDO Terminology meets all of these requirements and
+            can therefore claim to be a fully qualified LOD source. LIDO
+            itself can only partly comply with Linked Data requirements
+            in that LIDO records can be published under persistent URIs.
+            Extracting single statements from a LIDO record requires
+            querying the XML syntax tree using a foundational technology
+            that is different from what is used for Linked Data.</p>
+            <p>In summary, it can be stated that LIDO supports
+            publishing data as Linked Open Data for the following
+            reasons:</p>
+            <ul>
+            <li>LIDO supports the use of LOD-enabled controlled
+            vocabularies and authority files.</li>
+            <li>The LIDO Terminology is available as LOD vocabularies,
+            where each LIDO Term is a resolvable RDF resource,
+            identified by a persistent Uniform Resource Identifier
+            (URI). For instance, the URI for the Event Type “Production”
+            is <a href="http://terminology.lido-schema.org/lido00007"
+            class="uri">http://terminology.lido-schema.org/lido00007</a>.</li>
+            <li>The element and attribute names declared in the LIDO
+            schema could be made into RDF class and property names in a
+            future RDF rendering of LIDO records.</li>
+            </ul>
+            <h2 data-number="3.4" id="enabling-adaptability"><span
+            class="header-section-number">3.4</span> Enabling
+            adaptability</h2>
+            <p>Adaptability means decreasing or increasing the
+            expressivity, and thus the complexity, of the data model.
+            Doing so requires precautions to ensure that all resulting
+            LIDO records are still valid with respect to the current
+            LIDO XML schema.</p>
+            <h3 data-number="3.4.1"
+            id="restriction-and-simplification"><span
+            class="header-section-number">3.4.1</span> Restriction and
+            simplification</h3>
+            <p>The LIDO XML schema itself permits a considerable degree
+            of freedom for choosing the amount of detail that goes into
+            a data record. In some cases it may be useful, or even
+            required, to suppress the usage of elements or attributes
+            explicitly so that processing systems do not have to be
+            prepared to process them.</p>
+            <p>Restrictions may be declared in ancillary files, e.g., in
+            the form of external Schematron rules (see chapter <a
+            href="#schematron"><em>6.2 Schematron</em></a>),
+            transformation scripts, or any other technology suitable for
+            checking or restricting the content of XML records.
+            Evidently, restrictions also must not lead to the
+            disappearance of mandatory LIDO elements. The recommended
+            way to implement restrictions, however, is the creation of
+            an application profile (s. below).</p>
+            <p>A different case for simplification can occur if the
+            content of the LIDO record is to be rendered in a less
+            expressive data model. For example, some applications of the
+            OAI-PMH harvesting protocol require that whatever schema is
+            used for the original data, a simplified representation
+            using Dublin Core must be provided alongside the original
+            record. This requires transforming the LIDO record according
+            to a mapping scheme, in the case of Dublin Core somewhat
+            flippantly referred to as “dumbing down”.</p>
+            <h3 data-number="3.4.2" id="extension"><span
+            class="header-section-number">3.4.2</span> Extension</h3>
+            <p>Different collections of cultural and natural objects may
+            have specific description requirements not readily available
+            in LIDO. While simplification can be achieved without
+            touching the LIDO XML schema, adding expressivity to the
+            schema may sometimes require more complex solutions.</p>
+            <p>A frequent case is that a concept is either missing from
+            a recommended vocabulary, or considered too broad for the
+            intended purpose. Where a more suitable vocabulary is
+            available as Linked Data, this may safely be used within the
+            &lt;skos:Concept&gt; element without compromising the schema
+            validity of the LIDO record.</p>
+            <h3 data-number="3.4.3" id="application-profiles"><span
+            class="header-section-number">3.4.3</span> Application
+            profiles</h3>
+            <p>Application profiles are a way of economizing the use of
+            broadly scoped standards. They allow users to specify rules
+            and recommendations for specific use cases, define rules to
+            improve data editing and quality, or solve possible
+            ambiguities of the relevant standard. A LIDO application
+            profile might include element restrictions or recommend or
+            mandate specific vocabularies, and more.</p>
+            <p>An application profile is always a sub-standard of its
+            parent. It may specify an element’s semantics compared to
+            generic LIDO, but never change its semantics. Further,
+            mandatory elements and attributes must not be declared
+            optional. This ensures that a LIDO record conforming to an
+            application profile is still a valid generic LIDO
+            record.</p>
+            <h4 data-number="3.4.3.1"
+            id="what-constitutes-an-application-profile"><span
+            class="header-section-number">3.4.3.1</span> What
+            Constitutes an Application Profile?</h4>
+            <p>The rules of an application profile can either be
+            expressed in a textual document (such as a print
+            publication, HTML document, etc.) or a set of
+            machine-actionable rules (XML Schema and/or Schematron
+            rules). Ideally, an application profile comprises both,
+            providing textual documentation of the rules and background
+            of an application profile, as well as a machine-actionable
+            file to automatically check records for conformance.</p>
+            <p>The LIDO Application Profile Workflow is the recommended
+            way of creating application profiles. It provides an easy
+            way to document differences between the application profile
+            and generic LIDO, as well as to produce documentation and
+            machine-actionable rules for the profile. You can find the
+            workflow as well as more extensive documentation in the
+            relevant <a
+            href="https://gitlab.gwdg.de/lido/profiles">GitLab
+            Repository</a>.</p>
+            <h4 data-number="3.4.3.2"
+            id="how-to-use-the-application-profile-workflow"><span
+            class="header-section-number">3.4.3.2</span> How to Use the
+            Application Profile Workflow</h4>
+            <p>Use of the application profile worklflow requires basic
+            knowledge of XML and XML Schema Definition. Some familiarity
+            with Schematron, XPath, and <a
+            href="https://tei-c.org/guidelines/customization/lite/">TEI-Lite</a>
+            is useful, though not necessarily required.</p>
+            <figure>
+            <img src="img/lido_profile_workflow.svg"
+            alt="Figure 2: Schematic presentation of the LIDO Application Profile Workflow" />
+            <figcaption aria-hidden="true">Figure 2: Schematic
+            presentation of the LIDO Application Profile
+            Workflow</figcaption>
+    

@@ -1,0 +1,81 @@
+y have been at some other place before. The same holds for the fully developed path from E18 Physical Thing through P196 defines, E92 Spacetime Volume, P161 has spatial projection to E53 Place.</rdfs:comment>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E53_Place" />
+    <rdfs:subPropertyOf rdf:resource="P53_has_former_or_current_location" />
+    <rdfs:subPropertyOf rdf:resource="P157i_provides_reference_space_for" />
+    <owl:inverseOf rdf:resource="P156i_is_occupied_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P156i_is_occupied_by">
+    <rdfs:label xml:lang="en">is occupied by</rdfs:label>
+    <rdfs:label xml:lang="fr">est occupé par</rdfs:label>
+    <rdfs:label xml:lang="ru">занят</rdfs:label>
+    <rdfs:domain rdf:resource="E53_Place" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <rdfs:subPropertyOf rdf:resource="P53i_is_former_or_current_location_of" />
+    <rdfs:subPropertyOf rdf:resource="P157_is_at_rest_relative_to" />
+    <owl:inverseOf rdf:resource="P156_occupies" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P157_is_at_rest_relative_to">
+    <rdfs:label xml:lang="en">is at rest relative to</rdfs:label>
+    <rdfs:label xml:lang="fr">est à l’arrêt par rapport à</rdfs:label>
+    <rdfs:label xml:lang="ru">находится в состоянии покоя относитeльно</rdfs:label>
+    <rdfs:comment>This property associates an instance of E53 Place with the instance of E18 Physical Thing that determines a reference space for this instance of E53 Place by being at rest with respect to this reference space. The relative stability of form of an instance of E18 Physical Thing defines its default reference space. The reference space is not spatially limited to the referred thing. For example, a ship determines a reference space in terms of which other ships in its neighbourhood may be described. Larger constellations of matter, such as continental plates, may comprise many physical features that are at rest with them and define the same reference space.</rdfs:comment>
+    <rdfs:domain rdf:resource="E53_Place" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <owl:inverseOf rdf:resource="P157i_provides_reference_space_for" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P157i_provides_reference_space_for">
+    <rdfs:label xml:lang="en">provides reference space for</rdfs:label>
+    <rdfs:label xml:lang="fr">procure l’espace de référence pour</rdfs:label>
+    <rdfs:label xml:lang="ru">обeспeчиваeт пространствeнную опорную точку для</rdfs:label>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E53_Place" />
+    <owl:inverseOf rdf:resource="P157_is_at_rest_relative_to" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P160_has_temporal_projection">
+    <rdfs:label xml:lang="en">has temporal projection</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour projection temporelle</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт врeмeнную проeкцию</rdfs:label>
+    <rdfs:comment>This property describes the temporal projection of an instance of E92 Spacetime Volume. The property P4 has time-span is the same as P160 has temporal projection if it is used to document an instance of E4 Period or any subclass of it.</rdfs:comment>
+    <rdfs:domain rdf:resource="E92_Spacetime_Volume" />
+    <rdfs:range rdf:resource="E52_Time-Span" />
+    <owl:inverseOf rdf:resource="P160i_is_temporal_projection_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P160i_is_temporal_projection_of">
+    <rdfs:label xml:lang="en">is temporal projection of</rdfs:label>
+    <rdfs:label xml:lang="fr">est la projection temporelle de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся врeмeнной проeкциeй</rdfs:label>
+    <rdfs:domain rdf:resource="E52_Time-Span" />
+    <rdfs:range rdf:resource="E92_Spacetime_Volume" />
+    <owl:inverseOf rdf:resource="P160_has_temporal_projection" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P161_has_spatial_projection">
+    <rdfs:label xml:lang="en">has spatial projection</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour projection spatiale</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт пространствeнную проeкцию</rdfs:label>
+    <rdfs:comment>This property associates an instance of E92 Spacetime Volume with an instance of E53 Place that is the result of the spatial projection of the instance of the E92 Spacetime Volume on a reference space.
+In general, there can be more than one useful reference space (for reference space see P156 occupies and P157 is at rest relative to) to describe the spatial projection of a spacetime volume, for example, in describing a sea battle, the difference between the battle ship and the seafloor as reference spaces. Thus, it can be seen that the projection is not unique.
+The spatial projection is the actual spatial coverage of a spacetime volume, which normally has fuzzy boundaries except for instances of E92 Spacetime Volume which are geometrically defined in the same reference system as the range of this property and are an exception to this and do not have fuzzy boundaries. Modelling explicitly fuzzy spatial projections serves therefore as a common topological reference of different spatial approximations rather than absolute geometric determination, for instance for relating outer or inner spatial boundaries for the respective spacetime volumes.
+The spatial projection is unique with respect to the reference system. For instance, there is exactly one spatial projection of Lord Nelson’s dying relative to the ship HMS Victory, i.e. the location of his body relative to the ship HMS Victory at the time of his death.
+In case the domain of an instance of P161 has spatial projection is an instance of E4 Period, the spatial projection describes all areas that period was ever present at, for instance, the Roman Empire.
+This property is part of the fully developed path from E18 Physical Thing through P196 defines, E92 Spacetime Volume, P161 has spatial projection to E53 Place, which in turn is implied by P156 occupies (is occupied by).</rdfs:comment>
+    <rdfs:domain rdf:resource="E92_Spacetime_Volume" />
+    <rdfs:range rdf:resource="E53_Place" />
+    <owl:inverseOf rdf:resource="P161i_is_spatial_projection_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P161i_is_spatial_projection_of">
+    <rdfs:label xml:lang="en">is spatial projection of</rdfs:label>
+    <rdfs:label xml:lang="fr">est la projection spatiale de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся пространствeнной проeкциeй</rdfs:label>
+    <rdfs:domain rdf:resource="E53_Place" />
+    <rdfs:range rdf:resource="E92_Spacetime_Volume" />
+    <owl:inverseOf rdf:resource="P161_has_spatial_projection" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P164_is_temporally_specified_by">
+    <rdfs:label xml:lang="en">is temporally specified by</rdfs:label>
+    <rdfs:label xml:lang="fr">est temporellement spécifié par</rdfs:label>
+    <rdfs:label xml:lang="ru">ограничиваeтся врeмeнeм</rdfs:label>
+    <rdfs:comment>This property relates an instance of E93 Presence with the instance of E52 Time-Span that defines the time-slice of the spacetime volume that this instance of E93 Presence is related to via the property P166 was a presence of (had presence).
+There are two typical cases for the determination of the related instance of E52 Time-Span. In the first, it is the temporal extent of an instance of E2 Temporal Entity (documented with P4 has time-span (is time-span of)): this then documents the simultaneity of the instance of E93 Presence and the instance of E2 Temporal Entity, even if the absolute time-span is not known, and can be regarded as a phenomenal time-span. In the second, the instance of E52 Time-Span is a date range declared in or derived from historical sources or provided by dating methods: this is a declarative time-span.</rdfs:comment>
+    <rdfs:domain rdf:resource="E93_Presence" />
+    <rdfs:

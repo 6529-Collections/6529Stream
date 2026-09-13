@@ -26,3 +26,21 @@ deployments/current/sepolia-2026-09-10/SHA256SUMS text eol=lf
 
 # Keep generated client projections identical on Windows and Linux.
 packages/stream-client/** text eol=lf
+
+# Preserve the official Safe package license bytes in Windows checkouts.
+test/fixtures/safe/LICENSE-1.3.0 text eol=lf
+test/fixtures/safe/LICENSE-1.4.1 text eol=lf
+test/fixtures/safe/LICENSE-1.5.0 text eol=lf
+# Preserve the official Permit2/Solmate license bytes in Windows checkouts.
+test/fixtures/permit2/LICENSE-Permit2 text eol=lf
+test/fixtures/permit2/LICENSE-Solmate text eol=lf
+
+# Preserve exact upstream IIIF dependency license bytes on Windows.
+schemas/museum/iiif/licenses/cid-LICENSE text eol=lf
+schemas/museum/iiif/licenses/multicodec-LICENSE text eol=lf
+
+# Preserve original whitespace in the pinned W3C license notice.
+schemas/museum/lido/licenses/W3C-SOFTWARE-NOTICE-2002.html whitespace=-blank-at-eol
+
+# Preserve generated WORK-to-LIDO XML bytes on every checkout.
+schemas/museum/work-lido/**/record.xml text eol=lf

@@ -3,24 +3,63 @@ pragma solidity ^0.8.19;
 
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 import "../../mocks/MockStreamEntropyProvider.sol";
+import "../../mocks/MockEntropyRoleRegistry.sol";
+import "../../helpers/EntropyTimeTestMocks.sol";
 import "../../../smart-contracts/domains/entropy/StreamEntropyCoordinator.sol";
 
 /// @notice Minimal Core surface for testing coordinator subject identity without a full stack.
 contract EntropySubjectCoreFixture {
     StreamEntropyCoordinator private _coordinator;
     mapping(uint256 => bool) private _minted;
+    mapping(uint256 => uint256) private _collections;
+    mapping(uint256 => address) private _coordinatorsAtMint;
+    mapping(uint256 => bool) private _burned;
+    mapping(uint256 => bool) private _frozen;
     uint256 public metadataNotifications;
+    address private _moduleRegistry;
+
+    function setModuleRegistry(address registry) external {
+        _moduleRegistry = registry;
+    }
+
+    function getSatellitePointer(bytes32 kind)
+        external
+        view
+        returns (address, bytes32, bool, bytes32, bytes4, address, uint8, bytes32, bytes32, uint64)
+    {
+        require(kind == keccak256("MODULE_REGISTRY"), "only module registry");
+        return (
+            _moduleRegistry,
+            _moduleRegistry.codehash,
+            false,
+            kind,
+            type(IStreamModuleRegistry).interfaceId,
+            _moduleRegistry,
+            1,
+            bytes32(0),
+            bytes32(0),
+            1
+        );
+    }
 
     function supportsInterface(bytes4 id) external pure returns (bool) {
         return id == 0x80ac58cd || id == 0x01ffc9a7;
     }
 
     function collectionExists(uint256 collectionId) external pure returns (bool) {
-        return collectionId == 1;
+        return collectionId == 1 || collectionId == 2;
     }
 
-    function collectionFreezeStatus(uint256) external pure returns (bool) {
-        return false;
+    function collectionFreezeStatus(uint256 collectionId) external view returns (bool) {
+        return _frozen[collectionId];
+    }
+
+    function freezeCollection(uint256 collectionId) external {
+        _frozen[collectionId] = true;
+    }
+
+    function burnToken(uint256 tokenId) external {
+        _burned[tokenId] = true;
     }
 
     function setCoordinator(StreamEntropyCoordinator coordinator) external {
@@ -28,8 +67,22 @@ contract EntropySubjectCoreFixture {
     }
 
     function registerToken(uint256 tokenId, bytes32 mintCommitment) external {
+        _register(1, tokenId, mintCommitment);
+    }
+
+    function registerTokenInCollection(
+        uint256 collectionId,
+        uint256 tokenId,
+        bytes32 mintCommitment
+    ) external {
+        _register(collectionId, tokenId, mintCommitment);
+    }
+
+    function _register(uint256 collectionId, uint256 tokenId, bytes32 mintCommitment) private {
         _minted[tokenId] = true;
-        _coordinator.onTokenMinted(1, tokenId, address(0xbeef), mintCommitment);
+        _collections[tokenId] = collectionId;
+        _coordinatorsAtMint[tokenId] = address(_coordinator);
+        _coordinator.onTokenMinted(collectionId, tokenId, address(0xbeef), mintCommitment);
     }
 
     function tokenCollectionIdentity(uint256 tokenId)
@@ -37,24 +90,28 @@ contract EntropySubjectCoreFixture {
         view
         returns (bool, uint256, uint256, bool)
     {
-        return (_minted[tokenId], _minted[tokenId] ? 1 : 0, tokenId, false);
+        return (_minted[tokenId], _collections[tokenId], tokenId, _burned[tokenId]);
     }
 
     function coordinatorAtMint(uint256 tokenId) external view returns (address) {
-        return _minted[tokenId] ? address(_coordinator) : address(0);
+        return _coordinatorsAtMint[tokenId];
     }
 
     function tokenLifecycle(uint256 tokenId) external view returns (uint8) {
-        return uint8(_minted[tokenId] ? StreamTokenLifecycle.MINTED : StreamTokenLifecycle.UNKNOWN);
+        return uint8(
+            _burned[tokenId]
+                ? StreamTokenLifecycle.BURNED
+                : (_minted[tokenId] ? StreamTokenLifecycle.MINTED : StreamTokenLifecycle.UNKNOWN)
+        );
     }
 
     function emitMetadataUpdate(uint256 tokenId, bytes32 reasonHash) external {
-        require(msg.sender == address(_coordinator) && _minted[tokenId] && reasonHash != 0);
+        require(msg.sender == _coordinatorsAtMint[tokenId] && _minted[tokenId] && reasonHash != 0);
         ++metadataNotifications;
     }
 }
 
-contract StreamEntropySubjectIdentityTest is CharacterizationTestBase {
+contract StreamEntropySubjectIdentityTest is CharacterizationTestBase, EntropyTimeAuthorityFixture {
     bytes32 private constant MANIFEST = keccak256("subject-identity-test");
     bytes32 private constant MINT_COMMITMENT = keccak256("signed mint commitment");
     address private constant REQUESTER = address(0x1234);
@@ -64,15 +121,25 @@ contract StreamEntropySubjectIdentityTest is CharacterizationTestBase {
     StreamEntropyCoordinator private entropy;
     MockStreamEntropyProvider private provider;
     bytes32 private tokenKey;
+    MockEntropyRoleRegistry public roleRegistry;
 
     function setUp() public {
         core = new EntropySubjectCoreFixture();
-        entropy = new StreamEntropyCoordinator(
-            address(core), address(this), MANIFEST, "urn:test:subject-identity", MANIFEST
-        );
+        roleRegistry = new MockEntropyRoleRegistry(address(this));
+        core.setModuleRegistry(address(new MockEntropyModuleRegistry(address(this))));
+        entropy = new StreamEntropyCoordinator(StreamEntropyCoordinator.DeploymentConfig(
+            address(core),
+            address(this),
+            address(roleRegistry),
+            EntropyTimeTestConfigs.parameters(),
+            MANIFEST,
+            "urn:test:subject-identity",
+            MANIFEST
+        ));
         core.setCoordinator(entropy);
         provider = new MockStreamEntropyProvider(address(entropy));
         entropy.configureCollection(1, address(provider), keccak256("collection salt"), true, 10);
+        entropy.configureCollectionRevealPolicy(1, 0, keccak256("ROLE_ENTROPY_REVEAL_OWNER"), 10, 0);
         entropy.setRequester(REQUESTER, true);
         core.registerToken(TOKEN_ID, MINT_COMMITMENT);
         tokenKey = keccak256(abi.encode("TOKEN", TOKEN_ID));

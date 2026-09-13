@@ -1,0 +1,50 @@
+ <code class="language-plaintext highlighter-rouge">body</code> of the Annotation. The URI of the Canvas <em class="rfc">must</em> be repeated in the <code class="language-plaintext highlighter-rouge">target</code> property of the Annotation, or the <code class="language-plaintext highlighter-rouge">source</code> property of a Specific Resource used in the <code class="language-plaintext highlighter-rouge">target</code> property.</p>
+
+<p>Note that the Web Annotation data model defines different patterns for the <code class="language-plaintext highlighter-rouge">value</code> property, when used within an Annotation. The value of a Textual Body or a Fragment Selector, for example, are strings rather than <abbr title="JavaScript Object Notation">JSON</abbr> objects with languages and values. Care must be taken to use the correct string form in these cases.</p>
+
+<p>Additional features of the Web Annotation data model <em class="rfc">may</em> also be used, such as selecting a segment of the Canvas or content resource, or embedding the comment or transcription within the Annotation. The use of these advanced features sometimes results in situations where the <code class="language-plaintext highlighter-rouge">target</code> is not a content resource, but instead a SpecificResource, a Choice, or other non-content object. Implementations should check the <code class="language-plaintext highlighter-rouge">type</code> of the resource and not assume that it is always content to be rendered.</p>
+
+<p>The <abbr title="International Image Interoperability Framework">IIIF</abbr> community has defined <a href="/api/registry/selectors/">additional Selector classes</a> for use with SpecificResources, especially for cases when it is not possible to use the official FragmentSelector. See the additional documentation for details.</p>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"@context"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://iiif.io/api/presentation/3/context.json"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/annotation/p0001-image"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Annotation"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"motivation"</span><span class="p">:</span><span class="w"> </span><span class="s2">"painting"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"body"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/images/page1.jpg"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Image"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"target"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/canvas/p1"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h3 id="57-content-resources">
+        
+        
+          5.7. Content Resources <a href="#57-content-resources" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>Content resources are external web resources that are <a href="/api/presentation/3.0/#12-terminology">referenced</a> from within the Manifest or Collection. This includes images, video, audio, data, web pages or any other format.</p>
+
+<p>As described in the <a href="/api/presentation/3.0/#53-canvas">Canvas</a> section, the content associated with a Canvas (and therefore the content of a Manifest) is provided by the <code class="language-plaintext highlighter-rouge">body</code> property of Annotations with the <code class="language-plaintext highlighter-rouge">painting</code> motivation. Content resources can also be <a href="/api/presentation/3.0/#12-terminology">referenced</a> from <code class="language-plaintext highlighter-rouge">thumbnail</code>, <code class="language-plaintext highlighter-rouge">homepage</code>, <code class="language-plaintext highlighter-rouge">logo</code>, <code class="language-plaintext highlighter-rouge">rendering</code>, and <code class="language-plaintext highlighter-rouge">seeAlso</code> properties.</p>
+
+<p>Content resources <em class="rfc">must</em> have an <code class="language-plaintext highlighter-rouge">id</code> property, with the value being the URI at which the resource can be obtained.</p>
+
+<p>The type of the content resource <em class="rfc">must</em> be included, and <em class="rfc">should</em> be taken from the table listed under the definition of <code class="language-plaintext highlighter-rouge">type</code>. The <code class="language-plaintext highlighter-rouge">format</code> of the resource <em class="rfc">should</em> be included and, if so, <em class="rfc">should</em> be the media type that is returned when the resource is dereferenced. The <code class="language-plaintext highlighter-rouge">profile</code> of the resource, if it has one, <em class="rfc">should</em> also be included. Content resources in appropriate formats <em class="rfc">may</em> also have the <code class="language-plaintext highlighter-rouge">language</code>, <code class="language-plaintext highlighter-rouge">height</code>, <code class="language-plaintext highlighter-rouge">width</code>, and <code class="language-plaintext highlighter-rouge">duration</code> properties. Content resources <em class="rfc">may</em> also have descriptive and linking properties, as defined in <a href="/api/presentation/3.0/#3-resource-properties">section 3</a>.</p>
+
+<p>If the content resource is an Image, and a <abbr title="International Image Interoperability Framework">IIIF</abbr> Image service is available for it, then the <code class="language-plaintext highlighter-rouge">id</code> property of the content resource <em class="rfc">may</em> be a complete URI to any particular representation supported by the Image Service, such as <code class="language-plaintext highlighter-rouge">https://example.org/image1/full/1000,/0/default.jpg</code>, but <em class="rfc">must not</em> be just the URI of the <abbr title="International Image Interoperability Framework">IIIF</abbr> Image service. Its <code class="language-plaintext highlighter-rouge">type</code> value <em class="rfc">must</em> be the string <code class="language-plaintext highlighter-rouge">Image</code>. Its media type <em class="rfc">may</em> be listed in <code class="language-plaintext highlighter-rouge">format</code>, and its height and width <em class="rfc">may</em> be given as integer values for <code class="language-plaintext highlighter-rouge">height</code> and <code class="language-plaintext highlighter-rouge">width</code> respectively. The Image <em class="rfc">should</em> have the service <a href="/api/presentation/3.0/#12-terminology">referenced</a> from it using the <code class="language-plaintext highlighter-rouge">service</code> property.</p>
+
+<p>If there is a need to distinguish between content resources, then the resource <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">label</code> property.</p>
+
+<p>A Canvas <em class="rfc">may</em> be treated as a content resource for the purposes of annotating it on to other Canvases. In this situation, the Canvas <em class="rfc">may</em> be <a href="/api/presentation/3.0/#12-terminology">embedded</a> within the Annotation, or require dereferencing to obtain its description.</p>
+
+<script src="/api/assets/js/copyCode

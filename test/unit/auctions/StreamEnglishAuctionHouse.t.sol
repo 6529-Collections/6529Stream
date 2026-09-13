@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../helpers/StreamSaleTestBase.sol";
+import "../../helpers/StreamCurrentSaleTestBase.sol";
 import "../../../smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol";
 
 contract AuctionTestReceiver is IERC721Receiver {
@@ -59,16 +59,15 @@ contract AuctionContractArtist {
     }
 }
 
-contract StreamEnglishAuctionHouseTest is StreamSaleTestBase {
-    bytes32 private constant PHASE = keccak256("native-english-auction");
+contract StreamEnglishAuctionHouseTest is StreamCurrentSaleTestBase {
     address private constant FIRST_BIDDER = address(0xB1D1);
     address private constant SECOND_BIDDER = address(0xB1D2);
     StreamEnglishAuctionHouse private house;
+    AuctionContractArtist private _onboardingContractArtist;
 
     function setUp() public {
         _setUpSaleFixture();
-        house = new StreamEnglishAuctionHouse(core, manager, factory, platform, artistRegistry);
-        _configureSalePhase(PHASE, address(house));
+        house = auction;
         vm.deal(FIRST_BIDDER, 100 ether);
         vm.deal(SECOND_BIDDER, 100 ether);
     }
@@ -218,7 +217,9 @@ contract StreamEnglishAuctionHouseTest is StreamSaleTestBase {
     }
 
     function testRejectingRefundPreservesCreditAndPauseLeavesExitsAvailable() public {
-        uint256 tokenId = _create(_authorization());
+        IStreamEnglishAuctionHouse.AuctionAuthorization memory terms = _authorization();
+        terms.endTime = uint64(block.timestamp + 4 days);
+        uint256 tokenId = _create(terms);
         _bid(FIRST_BIDDER, tokenId, FIRST_BIDDER, 1 ether);
         _bid(SECOND_BIDDER, tokenId, SECOND_BIDDER, 2 ether);
         RejectAuctionRefund rejecting = new RejectAuctionRefund();
@@ -229,9 +230,9 @@ contract StreamEnglishAuctionHouseTest is StreamSaleTestBase {
             house.refundCredit(FIRST_BIDDER) == 1 ether && house.totalRefundOwed() == 1 ether,
             "failed refund retained"
         );
-        house.setPaused(true);
+        _executeSaleGovernance(address(house), abi.encodeCall(house.setPaused, (true)));
         vm.prank(FIRST_BIDDER);
-        vm.expectRevert();
+        vm.expectRevert(abi.encodeWithSelector(IStreamEnglishAuctionHouse.AuctionsPaused.selector));
         house.bid{ value: 3 ether }(tokenId, FIRST_BIDDER);
         vm.prank(FIRST_BIDDER);
         house.withdrawRefund(payable(FIRST_BIDDER));
@@ -301,10 +302,10 @@ contract StreamEnglishAuctionHouseTest is StreamSaleTestBase {
     }
 
     function testEntropyFailureRollsBackAuctionNonceAndMint() public {
-        entropy.setBehavior(true, false);
+        _failEntropyRegistrationCallback();
         IStreamEnglishAuctionHouse.AuctionAuthorization memory authorization = _authorization();
         (bytes memory platformSig, bytes memory artistSig) = _sign(authorization);
-        vm.expectRevert();
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.EntropyRegistrationFailed.selector));
         house.createAuction(authorization, tokenData, platformSig, artistSig);
         require(core.totalSupply() == 0 && manager.nextOperationNonce() == 0, "mint rolled back");
         require(!house.authorizationUsed(artist, authorization.nonce), "auction nonce rolled back");
@@ -312,13 +313,17 @@ contract StreamEnglishAuctionHouseTest is StreamSaleTestBase {
             !manager.isAuthorizationUsed(house.authorizationId(artist, authorization.nonce)),
             "ledger rolled back"
         );
+        _restoreEntropyRegistrationCallback();
+        uint256 tokenId = _create(authorization);
+        require(core.ownerOf(tokenId) == address(house), "same signed auction retries");
+        require(manager.nextOperationNonce() == 1, "retry consumes exactly one operation");
     }
 
     function testContractArtistUnsoldNFTStaysEscrowedUntilAuthorizedPullClaim() public {
         AuctionContractArtist contractArtist = new AuctionContractArtist();
-        _bindFixtureArtist(address(contractArtist));
-        house = new StreamEnglishAuctionHouse(core, manager, factory, platform, artistRegistry);
-        manager.setPhaseExecutor(1, PHASE, address(house), true);
+        _onboardingContractArtist = contractArtist;
+        _deployCurrentStack(address(contractArtist), platform);
+        house = auction;
         IStreamEnglishAuctionHouse.AuctionAuthorization memory authorization = _authorization();
         authorization.artist = address(contractArtist);
         contractArtist.authorize(house.authorizationDigest(authorization));
@@ -345,9 +350,10 @@ contract StreamEnglishAuctionHouseTest is StreamSaleTestBase {
             house.auction(tokenId).pendingNoBidNftClaimant == address(contractArtist),
             "failed claim preserved"
         );
-        contractArtist.claim(house, tokenId, artist);
+        address claimRecipient = vm.addr(ARTIST_KEY);
+        contractArtist.claim(house, tokenId, claimRecipient);
         require(
-            core.ownerOf(tokenId) == artist
+            core.ownerOf(tokenId) == claimRecipient
                 && house.auction(tokenId).pendingNoBidNftClaimant == address(0),
             "authorized pull completed"
         );
@@ -432,12 +438,13 @@ contract StreamEnglishAuctionHouseTest is StreamSaleTestBase {
     {
         item = IStreamEnglishAuctionHouse.AuctionAuthorization({
             collectionId: 1,
-            phaseId: PHASE,
+            phaseId: AUCTION_PHASE,
             artist: artist,
             profileId: profile,
+            expectedPrimaryPolicyHash: _nativePrimaryPolicyHash(),
             tokenDataHash: keccak256(tokenData),
             mintCommitment: keccak256("auction commitment"),
-            mintPolicyHash: manager.phasePolicyHash(1, PHASE),
+            mintPolicyHash: manager.phasePolicyHash(1, AUCTION_PHASE),
             reservePrice: 1 ether,
             startTime: uint64(block.timestamp),
             endTime: uint64(block.timestamp + 1 hours),
@@ -458,6 +465,14 @@ contract StreamEnglishAuctionHouseTest is StreamSaleTestBase {
         platformSig = abi.encodePacked(r, s, v);
         (v, r, s) = vm.sign(ARTIST_KEY, digest);
         artistSig = abi.encodePacked(r, s, v);
+    }
+
+    function _artistProof(bytes32 digest) internal override returns (bytes memory) {
+        if (address(_onboardingContractArtist) != address(0)) {
+            _onboardingContractArtist.authorize(digest);
+            return bytes("contract artist proof");
+        }
+        return super._artistProof(digest);
     }
 
     function _create(IStreamEnglishAuctionHouse.AuctionAuthorization memory authorization)

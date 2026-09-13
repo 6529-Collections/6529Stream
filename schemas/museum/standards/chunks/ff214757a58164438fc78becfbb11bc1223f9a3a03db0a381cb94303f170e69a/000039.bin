@@ -1,0 +1,120 @@
+label>
+    <rdfs:label xml:lang="de">wurde vermindert durch</rdfs:label>
+    <rdfs:label xml:lang="el">εξαλείφθηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été diminué par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi diminuído por</rdfs:label>
+    <rdfs:label xml:lang="ru">был умeньшeн</rdfs:label>
+    <rdfs:label xml:lang="zh">被减少</rdfs:label>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E80_Part_Removal" />
+    <rdfs:subPropertyOf rdf:resource="P31i_was_modified_by" />
+    <owl:inverseOf rdf:resource="P112_diminished" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P113_removed">
+    <rdfs:label xml:lang="en">removed</rdfs:label>
+    <rdfs:label xml:lang="de">entfernte</rdfs:label>
+    <rdfs:label xml:lang="el">αφαίρεσε</rdfs:label>
+    <rdfs:label xml:lang="fr">a retiré</rdfs:label>
+    <rdfs:label xml:lang="pt">removeu</rdfs:label>
+    <rdfs:label xml:lang="ru">удалил</rdfs:label>
+    <rdfs:label xml:lang="zh">去除了</rdfs:label>
+    <rdfs:comment>This property identifies the instance of E18 Physical Thing that is removed during an instance of E80 Part Removal activity.</rdfs:comment>
+    <rdfs:domain rdf:resource="E80_Part_Removal" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <rdfs:subPropertyOf rdf:resource="P12_occurred_in_the_presence_of" />
+    <owl:inverseOf rdf:resource="P113i_was_removed_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P113i_was_removed_by">
+    <rdfs:label xml:lang="en">was removed by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde entfernt durch</rdfs:label>
+    <rdfs:label xml:lang="el">αφαιρέθηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été retiré par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi removido por</rdfs:label>
+    <rdfs:label xml:lang="ru">был удалeн</rdfs:label>
+    <rdfs:label xml:lang="zh">被去除</rdfs:label>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E80_Part_Removal" />
+    <rdfs:subPropertyOf rdf:resource="P12i_was_present_at" />
+    <owl:inverseOf rdf:resource="P113_removed" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P121_overlaps_with">
+    <rdfs:label xml:lang="en">overlaps with</rdfs:label>
+    <rdfs:label xml:lang="de">überlappt mit</rdfs:label>
+    <rdfs:label xml:lang="el">επικαλύπτεται με</rdfs:label>
+    <rdfs:label xml:lang="fr">se superpose partiellement à</rdfs:label>
+    <rdfs:label xml:lang="pt">sobrepõe com</rdfs:label>
+    <rdfs:label xml:lang="ru">пeрeсeкаeтся с</rdfs:label>
+    <rdfs:label xml:lang="zh">重叠于</rdfs:label>
+    <rdfs:comment>This symmetric property associates an instance of E53 Place with another instance of E53 Place geometrically overlapping it.
+It does not specify anything about the shared area. This property is purely spatial. It does not imply that phenomena that define, by their extent, places related by P121 overlaps with have ever covered a common area at the same time or even coexisted. In contrast, spatiotemporal overlaps described by P132 spatiotemporally overlaps are the total of areas simultaneously covered by the related spacetime volumes.
+This property is symmetric. This property is reflexive.</rdfs:comment>
+    <rdfs:domain rdf:resource="E53_Place" />
+    <rdfs:range rdf:resource="E53_Place" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P122_borders_with">
+    <rdfs:label xml:lang="en">borders with</rdfs:label>
+    <rdfs:label xml:lang="de">grenzt an</rdfs:label>
+    <rdfs:label xml:lang="el">συνορεύει με</rdfs:label>
+    <rdfs:label xml:lang="fr">est limitrophe de</rdfs:label>
+    <rdfs:label xml:lang="pt">fronteira com</rdfs:label>
+    <rdfs:label xml:lang="ru">граничит с</rdfs:label>
+    <rdfs:label xml:lang="zh">接壤于</rdfs:label>
+    <rdfs:comment>This symmetric property associates an instance of E53 Place with another instance of E53 Place which shares a part of its border.
+This property is purely spatial. It does not imply that the phenomena that define, by their extent, places related by P122 borders with have ever shared a respective border at the same time or even coexisted. In particular, this may be the case when the respective common border is formed by a natural feature.
+This property is not transitive. This property is symmetric.</rdfs:comment>
+    <rdfs:domain rdf:resource="E53_Place" />
+    <rdfs:range rdf:resource="E53_Place" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P123_resulted_in">
+    <rdfs:label xml:lang="en">resulted in</rdfs:label>
+    <rdfs:label xml:lang="de">ergab</rdfs:label>
+    <rdfs:label xml:lang="el">είχε ως αποτέλεσμα</rdfs:label>
+    <rdfs:label xml:lang="fr">a eu pour résultat</rdfs:label>
+    <rdfs:label xml:lang="pt">resultou em</rdfs:label>
+    <rdfs:label xml:lang="ru">повлeк появлeниe</rdfs:label>
+    <rdfs:label xml:lang="zh">结果造成</rdfs:label>
+    <rdfs:comment>This property identifies the instance or instances of E18 Physical Thing that are the result of an instance of E81 Transformation. New items replace the transformed item or items, which cease to exist as units of documentation. The physical continuity between the old and the new is expressed by the links to the common instance of E81 Transformation.</rdfs:comment>
+    <rdfs:domain rdf:resource="E81_Transformation" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <rdfs:subPropertyOf rdf:resource="P92_brought_into_existence" />
+    <owl:inverseOf rdf:resource="P123i_resulted_from" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P123i_resulted_from">
+    <rdfs:label xml:lang="en">resulted from</rdfs:label>
+    <rdfs:label xml:lang="de">ergab sich aus</rdfs:label>
+    <rdfs:label xml:lang="el">προέκυψε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a résulté de</rdfs:label>
+    <rdfs:label xml:lang="pt">resultado de</rdfs:label>
+    <rdfs:label xml:lang="ru">был рeзультатом</rdfs:label>
+    <rdfs:label xml:lang="zh">起因于</rdfs:label>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E81_Transformation" />
+    <rdfs:subPropertyOf rdf:resource="P92i_was_brought_into_existence_by" />
+    <owl:inverseOf rdf:resource="P123_resulted_in" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P124_transformed">
+    <rdfs:label xml:lang="en">transformed</rdfs:label>
+    <rdfs:label xml:lang="de">wandelte um</rdfs:label>
+    <rdfs:label xml:lang="el">μετέτρεψε</rdfs:label>
+    <rdfs:label xml:lang="fr">a transformé</rdfs:label>
+    <rdfs:label xml:lang="pt">transformou</rdfs:label>
+    <rdfs:label xml:lang="ru">трансформировал</rdfs:label>
+    <rdfs:label xml:lang="zh">转变了</rdfs:label>
+    <rdfs:comment>This property identifies the instance or instances E18 Physical Thing that have ceased to exist due to an instance of E81 Transformation.
+The item that has ceased to exist and was replaced by the result of the Transformation. The continuity between both items, the new and the old, is expressed by the links to the common instance of E81 Transformation.</rdfs:comment>
+    <rdfs:domain rdf:resource="E81_Transformation" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <rdfs:subPropertyOf rdf:resource="P93_took_out_of_existence" />
+    <owl:inverseOf rdf:resource="P124i_was_transformed_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P124i_was_transformed_by">
+    <rdfs:label xml:lang="en">was transformed by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde umgewandelt durch</rdfs:label>
+    <rdfs:label xml:lang="el">μετατράπηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été transformé par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi transformado por</rdfs:label>
+    <rdfs:label xml:lang="ru">был трансформирован</rdfs:label>
+    <rdfs:label xml:lang="zh">被转变</rdfs:label>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E81_Transformation" />
+    <rdfs:s

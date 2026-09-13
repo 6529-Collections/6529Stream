@@ -1,0 +1,74 @@
+d="cb27-34"><a href="#cb27-34" aria-hidden="true" tabindex="-1"></a><span class="ot">            lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00932&quot;</span>&gt;</span>
+<span id="cb27-35"><a href="#cb27-35" aria-hidden="true" tabindex="-1"></a>        <span class="co">&lt;!-- This URI does not resolve --&gt;</span></span>
+<span id="cb27-36"><a href="#cb27-36" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">skos:Concept</span></span>
+<span id="cb27-37"><a href="#cb27-37" aria-hidden="true" tabindex="-1"></a><span class="ot">                rdf:about=</span><span class="st">&quot;http://dewey.info/class/750&quot;</span>&gt;</span>
+<span id="cb27-38"><a href="#cb27-38" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb27-39"><a href="#cb27-39" aria-hidden="true" tabindex="-1"></a><span class="ot">                    xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb27-40"><a href="#cb27-40" aria-hidden="true" tabindex="-1"></a>                    Painting and paintings</span>
+<span id="cb27-41"><a href="#cb27-41" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb27-42"><a href="#cb27-42" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb27-43"><a href="#cb27-43" aria-hidden="true" tabindex="-1"></a><span class="ot">                    xml:lang=</span><span class="st">&quot;de&quot;</span>&gt;</span>
+<span id="cb27-44"><a href="#cb27-44" aria-hidden="true" tabindex="-1"></a>                    Malerei und Gemälde</span>
+<span id="cb27-45"><a href="#cb27-45" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb27-46"><a href="#cb27-46" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">skos:notation</span>&gt;750&lt;/<span class="kw">skos:notation</span>&gt;</span>
+<span id="cb27-47"><a href="#cb27-47" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb27-48"><a href="#cb27-48" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:classification</span>&gt;</span>
+<span id="cb27-49"><a href="#cb27-49" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:classificationWrap</span>&gt;</span></code></pre></div>
+            <h3 data-number="5.2.3" id="measurements"><span
+            class="header-section-number">5.2.3</span> Measurements</h3>
+            <p><strong>Element name:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#measurementsSet">lido:measurementsSet</a>&gt;</p>
+            <p><strong>Note:</strong> Measurements Set contains
+            information about the dimensions of the object, comprising
+            the measurement type, such as height or width, the
+            corresponding unit, and the measured value. LIDO provides
+            two elements: &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectMeasurementsSet">lido:objectMeasurementsSet</a>&gt;
+            is used to catalog the dimensions of the object at hand,
+            whereas &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventObjectMeasurements">lido:eventObjectMeasurements</a>&gt;
+            refers to the measurements with respect to the event in
+            focus, for instance, the decreased dimensions after the
+            removal of a part.</p>
+            <p><strong>Example:</strong> The following example describes
+            the dimensions of the <a
+            href="https://collections.louvre.fr/en/ark:/53355/cl010062370"><em>Mona
+            Lisa</em></a> in the Louvre. The Measurements Set for
+            “width” is omitted in the XML snippet for brevity. Added is
+            information on the extent, i.e., the part of the object to
+            which the dimensions apply, here the wood panel. Also added
+            is the shape of the panel.</p>
+            <blockquote>
+            <p><strong>Display Object Measurements:</strong> Height x
+            width: 0.79 x 0.53 m<br /> <strong>Type:</strong> height
+            <strong>Unit:</strong> meter <strong>Value:</strong>
+            0.79<br /> <strong>Type:</strong> width
+            <strong>Unit:</strong> meter <strong>Value:</strong>
+            0.53<br /> <strong>Extent Measurements:</strong> wood
+            panel<br /> <strong>Shape Measurements:</strong>
+            rectangular<br /></p>
+            </blockquote>
+            <div class="sourceCode" id="cb28"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:objectMeasurementsSet</span>&gt;</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:displayObjectMeasurements</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="ot">        xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>        Height x width: 0.79 x 0.53 m</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:displayObjectMeasurements</span>&gt;</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:objectMeasurements</span>&gt;</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:measurementsSet</span>&gt;</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:measurementType</span>&gt;</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">skos:Concept</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="ot">                    rdf:about=</span><span class="st">&quot;http://www.wikidata.org/wiki/Q208826&quot;</span>&gt;</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a><span class="ot">                        xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>                        height</span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>                    &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">lido:measurementType</span>&gt;</span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:measurementUnit</span>&gt;</span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">skos:Concept</span></span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a><span class="ot">                    rdf:about=</span><span class="st">&quot;http://www.wikidata.org/wiki/Q11573&quot;</span>&gt;</span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a><span class="ot">                        xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>                        meter</span>
+<span id="cb28-23"><

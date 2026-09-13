@@ -2221,6 +2221,12 @@ the write was accepted: `ARTIST_SIGNER`, `OWNER_SIGNER`, `CURATOR_SIGNER`,
 consumers can permanently distinguish artist-authored, owner-authored,
 independent, and operator-authored provenance (ADR 0010 decision D2).
 
+For the canonical `bytes32 authorizationClass` event field, these eight classes
+use their existing numeric identifiers 1 through 8 in the order listed above,
+zero-extended to 32 bytes. Family masks retain `uint16(1) << class`. This fixes
+the wire representation without reassigning authority or rewriting an earlier
+host's event ABI ([ADR 0040](adr/0040-current-metadata-record-host.md)).
+
 #### Record Payload Carrier [CMC-RECORD-PAYLOAD]
 
 The meaning-bearing record families of [CMC-RECONSTRUCTION] rule 2 need a
@@ -3429,11 +3435,13 @@ at operator death.
    address may write append-only `INDEPENDENT_FIXITY`,
    `INDEPENDENT_PRESERVATION_EVENT`, `INDEPENDENT_EXHIBITION`,
    `INDEPENDENT_CONDITION`, `INDEPENDENT_CONSERVATION_TREATMENT`,
-   `INDEPENDENT_ENVIRONMENT_MIGRATION`, and `INDEPENDENT_EXPORT_MIRROR`
-   records (record types catalogued in the record-type catalog; the
+   `INDEPENDENT_ENVIRONMENT_MIGRATION`, `INDEPENDENT_EXPORT_MIRROR`,
+   and `INDEPENDENT_SEMANTIC_ASSERTION` records (record types catalogued
+   in the record-type catalog; the
    exhibition and condition types added by ADR 0012 decision T8, the
    conservation-treatment and environment-migration types by ADR 0013
-   decision U8, and the export-mirror type by ADR 0014 decision V2)
+   decision U8, the export-mirror type by ADR 0014 decision V2, and the
+   semantic-assertion type by ADR 0036 decision M1)
    against any token, media, or collection subject derived per
    [CMC-SUBJECT-ID]; a deployment-wide artifact binds the
    collection-subject derivation with `collectionId = 0`, the reserved
@@ -3517,6 +3525,11 @@ at operator death.
    findings and migration evidence stay recordable post-operator
    through the preservation-event and environment-migration types
    ([LTA-ARCHIVE] requirement 9; ADR 0014 decision V2).
+   `INDEPENDENT_SEMANTIC_ASSERTION` payloads use
+   `STREAM_SEMANTIC_ASSERTION_V1` under [MSM-ASSERTIONS] in
+   [museum semantic mapping](museum-semantic-mapping.md), preserving
+   this lane's entry, signer, replay and renderer-firewall rules
+   (ADR 0036 decision M1).
    Post-operator descriptive and IIIF re-manifestation statements
    ride `INDEPENDENT_PRESERVATION_EVENT` with `schemaId` naming the
    pinned payload schema they carry (`STREAM_WORK_DESCRIPTION_V1`,
@@ -3664,6 +3677,14 @@ decision T8):
    conformance matrix hosts the gate row; validator round-trips and
    worked examples never substitute for this gate.
 
+The expanded museum profile additionally requires the semantic package and
+the shared-source cross-format checks of [MSM-EXPORT] and [MSM-INTEROP] in
+[museum semantic mapping](museum-semantic-mapping.md). Item 4's same two
+repository ingests and external practitioner reviews must include that package,
+its coverage reports and CRM/Linked Art authority-reconciliation competence
+under [MSM-CONFORMANCE] rule 4 (ADR 0036 decision M1). These are additions to
+the existing evidence, not replacement or duplicate institutional gates.
+
 ### Dossier And Export Packaging [CMC-PACKAGING]
 
 Repository ingest pipelines validate packages before they read
@@ -3729,6 +3750,14 @@ pinned genesis packaging profile [CMC-GENESIS-SCHEMAS] for
    the packaged bytes are recovery convenience verified against the
    leaf hashes, and their absence never marks an export bag
    `fetch_dependent` under rule 3.
+
+For the expanded museum profile, the bag must also embed the semantic
+manifest, resources, assertions, provenance, pinned interpretation documents
+and authority snapshots required by [MSM-EXPORT] in
+[museum semantic mapping](museum-semantic-mapping.md). The acyclic commitment,
+offline verification and package-wide disclosure rules apply to every added
+component. Existing published schema versions retain their meaning; changed
+packaging schemas require explicit new versions (ADR 0036 decision M5).
 
 ### Canonical Citation Profile [CMC-CITATION]
 
@@ -3821,6 +3850,9 @@ and identity alike — therefore ships pinned (ADR 0011 decision R11):
    | `STREAM_METRIC_SSIM_V1` | the registered perceptual-metric entry of [CMC-FINALITY-INPUTS] rule 5(d): algorithm, reference tool, and tool version (ADR 0013 decision U8) |
    | `STREAM_IIIF_P3_MIN_V1` | the archival IIIF profile of [CMC-IIIF] |
    | `STREAM_WORK_DESCRIPTION_V1` | the tombstone fields of [CMC-TOMBSTONE] rule 1 (ADR 0012 decision T8) |
+   | `STREAM_MUSEUM_SEMANTIC_PROFILE_V1` | standards lock, bounded mapping/validation documents and selection policy in [MSM-PROFILE] of [museum semantic mapping](museum-semantic-mapping.md) |
+   | `STREAM_SEMANTIC_ASSERTION_V1` | attributed declarations, mappings and authenticated reviews in [MSM-ASSERTIONS] of [museum semantic mapping](museum-semantic-mapping.md) |
+   | `STREAM_SEMANTIC_EXPORT_V1` | source-bound semantic package manifest in [MSM-EXPORT] of [museum semantic mapping](museum-semantic-mapping.md) |
    | `STREAM_LIDO_PROFILE_V1` | the tombstone-to-LIDO crosswalk of [CMC-TOMBSTONE] rule 4 (ADR 0013 decision U8) |
    | `STREAM_BAGIT_PROFILE_V1` | the packaging profile of [CMC-PACKAGING] (ADR 0012 decision T8) |
    | `STREAM_COLLECTION_IDENTITY_V1` | the collection-identity token-JSON member set of [CMC-COLLECTION-IDENTITY-JSON]: `id`, `name`, `artist`, `serial`, `catalog_number` (ADR 0015 decision W1) |
@@ -3985,6 +4017,13 @@ or collection-scoped subjects [CMC-SUBJECT-ID]:
    system ingests. Dossier export tooling must emit valid LIDO through
    the profile, and the [CMC-PREMIS-PROFILE] rule 2 round-trip gate
    covers the export.
+
+The additional semantic representation and Getty TGN alignment are owned by
+[MSM-MAPPING] and [MSM-AUTHORITIES] in
+[museum semantic mapping](museum-semantic-mapping.md). They supplement this
+work-description/LIDO profile and preserve its existing versioned meaning.
+LIDO, PREMIS and IIIF outputs share source-state and entity correspondence
+under [MSM-INTEROP]; no format replaces another (ADR 0036 decision M1).
 
 ### Museum-Grade Conservation Floor [CMC-MUSEUM-GRADE]
 
@@ -4953,6 +4992,23 @@ SNAPSHOT_*                collection metadata admin or global admin, and only
                           over record families the caller may write
 AGENT_*                   agent metadata admin or global admin
 ```
+
+The record-type catalog must additionally allocate the following entries
+(ADR 0036 decision M1); their payload definitions are owned by
+[museum semantic mapping](museum-semantic-mapping.md). These are required
+allocations, not a statement that deployed catalog entries already exist.
+
+| Record type | Schema | Existing authority family |
+| --- | --- | --- |
+| `ARTIST_SEMANTIC_ASSERTION` | `STREAM_SEMANTIC_ASSERTION_V1` | `ARTIST_*` |
+| `CURATOR_SEMANTIC_ASSERTION` | `STREAM_SEMANTIC_ASSERTION_V1` | `CURATOR_*` |
+| `INSTITUTION_SEMANTIC_ASSERTION` | `STREAM_SEMANTIC_ASSERTION_V1` | `INSTITUTION_*` |
+| `INDEPENDENT_SEMANTIC_ASSERTION` | `STREAM_SEMANTIC_ASSERTION_V1` | `INDEPENDENT_*`, through [CMC-INDEPENDENT-ATTESTOR] |
+| `ARCHIVE_SEMANTIC_EXPORT` | `STREAM_SEMANTIC_EXPORT_V1` | `ARCHIVE_*` |
+
+All existing signature, replay, content-veto, lock/finality and lane-specific
+exceptions continue to apply. Semantic-review and export-selection policies
+cannot grant write authority or alter the renderer read-set firewall.
 
 Authorization rules:
 

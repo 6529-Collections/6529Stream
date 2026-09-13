@@ -27,7 +27,55 @@ once, then `npm --prefix packages/stream-client test`. Its independent CI job
 checks retained ABI freshness, TypeScript types, signing payloads and snapshots
 without recompiling Solidity. Solidity development does not require Node.js.
 
+The [museum tooling](../tools/museum/README.md) has its own pinned Python
+dependencies and independent Windows/Linux CI workflow. Its tests and
+deterministic schema/fixture checks run without compiling Solidity. Use the
+documented isolated environment; the general tools lock does not include the
+JSON-LD dependencies. These tests cover the implemented offline tools and do
+not establish complete museum conformance.
+
+The [typed record tools](../tools/metadata/README.md) share that isolated Python
+environment for independent JSON Schema and canonical-byte tests. Run
+`python -m unittest tools.metadata.test_rights_profile -v` and
+`python -m tools.metadata.rights_profile --check` for the rights profile.
+Both commands are included in museum CI; they do not register anything onchain.
+
+Release checksum validation accepts the exact Git diagnostic override
+`whitespace=-blank-at-eol` used by the preserved W3C license notice. This does not
+change its inherited text/LF policy or remove trailing spaces from the upstream
+bytes. The complete `.gitattributes` file remains part of the checksum inputs;
+other unsupported attributes still fail validation.
+
+Draft pull requests retain their running CI job when new commits arrive. GitHub
+keeps the newest pending run for that pull request, so repeated integration
+pushes do not keep discarding an unfinished compiler run. Ready pull requests
+still cancel superseded runs. Always associate a result with its tested commit;
+a completed earlier run does not validate the pending revision. This uses
+[GitHub's workflow concurrency behavior](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency).
+
 ## Pick the relevant tests
+
+The new [artist operation extension](architecture/artist-operation-extension-v1.md)
+has a separate design check: `python -m tools.protocol.check_artist_operation_extension`
+and `python -m tools.protocol.test_artist_operation_extension`. It preserves the
+historical 57-operation packets and derives the additive 58-row inventory.
+Its implementation gate remains closed until matching source and execution
+evidence exist; it is not a substitute for the current test suite.
+
+The three frozen artist-57 design gates use the accepted RC1 Git tree
+`569bf87f1fa808787d324f6e1582924b5ccf1d40`. Run them with
+`python -m tools.protocol.run_frozen_artist_checks matrix`, `reconstruction`,
+or `continuity`. The runner first verifies that the frozen packets, schemas,
+checkers and tests in this checkout still match that baseline. It then runs
+the historical tests and checker in a temporary Git archive and removes it.
+This preserves historical evidence while allowing the current specification
+to evolve. A missing baseline Git object is an error; use a full clone or fetch
+the published `testnet/current-rc-1` tag before running these gates.
+
+Make, both aggregate shell wrappers and CI label these checks as historical.
+Current contracts, the effective 58-operation design, source layout, ABI,
+admission, provenance and release checks continue to use the active checkout.
+A historical pass provides no current implementation or release acceptance.
 
 ```text
 python scripts/dev.py test --match-contract StreamCurrentStackTest
@@ -123,6 +171,14 @@ production readiness or replace the [release gates](release-readiness.md). Strea
 remains pre-audit and not production-ready.
 
 ## Maintainer references
+
+After adding or removing Solidity files, run
+`python -m tools.build.refresh_solidity_source_inventory`, then
+`python -m tools.build.check_solidity_source_layout`. The refresh changes only
+the active path inventory after validating the layout and imports. It preserves
+the original migration manifest, historical receipts and frozen evidence.
+Use `--check` to detect a stale inventory without writing files. Moves involving
+historical destinations still require an explicit reviewed relocation entry.
 
 | Task | Detailed reference |
 | --- | --- |

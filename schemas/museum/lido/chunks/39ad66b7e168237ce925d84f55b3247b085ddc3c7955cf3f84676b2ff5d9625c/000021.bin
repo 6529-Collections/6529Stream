@@ -1,0 +1,107 @@
+5"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:subjectActor</span>&gt;</span></code></pre></div>
+            <h3 data-number="4.5.2"
+            id="mandatory-sequence-of-elements"><span
+            class="header-section-number">4.5.2</span> Mandatory
+            sequence of elements</h3>
+            <p>The LIDO XML schema prescribes a sequence for elements
+            occurring in elements defined by XML complex types. This
+            sequence must always be observed. Validating parsers will
+            detect any violation of mandatory sequences and will refuse
+            to recognize the XML record as valid with respect to the
+            LIDO schema definition.</p>
+            <p>Note, that only elements explicitly marked as
+            <em>required</em> are mandatory to use in a LIDO record. For
+            the description of an actor, for instance, it is required
+            and sufficient to use the &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#nameActorSet">lido:nameActorSet</a>&gt;
+            element to get a valid LIDO record. If more information on
+            the actor is given, such as a person’s nationality or vital
+            dates, the prescribed sequence of <a
+            href="https://lido-schema.org/schema/latest/lido.html#actorComplexType"><em>actorComplexType</em></a>
+            must be observed to satisfy the LIDO schema definition.</p>
+            <p><img src="img/figure_sequence.jpg"
+            alt="Figure 10: Example sequence in LIDO actorComplexType" />
+            </p>
+            <h1 data-number="5" id="basic-elements-and-attributes"><span
+            class="header-section-number">5</span> Basic elements and
+            attributes</h1>
+            <p>This chapter introduces some of the most important
+            content elements in LIDO, including elements from other
+            namespaces, and gives an account of the attributes used for
+            some of the LIDO elements. A brief explanation of the role
+            of complex types in XML schema definitions and an
+            enumeration of the complex types defined for the LIDO schema
+            is appended.</p>
+            <h2 data-number="5.1" id="mandatory-elements"><span
+            class="header-section-number">5.1</span> Mandatory
+            elements</h2>
+            <h3 data-number="5.1.1" id="overview"><span
+            class="header-section-number">5.1.1</span> Overview</h3>
+            <p>Six content elements are declared mandatory in LIDO as a
+            minimum requirement for a LIDO-compliant record. These
+            elements are a subset of the core categories of
+            <abbr title="Categories for the Description of Works of Art">CDWA</abbr>,
+            and are considered necessary to unambiguously identify an
+            object or work. The motivation for selecting only a small
+            number of mandatory elements was to offer a low threshold
+            for transforming existing data to LIDO. Having only few
+            restrictions also leaves room for adapting the LIDO schema
+            to different requirements. The convenience of easy data
+            transformation, however, has to be balanced against the risk
+            of accepting poor metadata that often leads to
+            unsatisfactory search results. Therefore, some elements in
+            addition to the minimum set are strongly recommended to be
+            used in the object description. Note that the elements <a
+            href="https://lido-schema.org/schema/latest/lido.html#descriptiveMetadata">Descriptive
+            Metadata</a> and <a
+            href="https://lido-schema.org/schema/latest/lido.html#administrativeMetadata">Administrative
+            Metadata</a> must be present in any valid LIDO record.
+            Besides, there are more mandatory elements, depending on the
+            use of other elements, see below.</p>
+            <p>The following six content elements are mandatory, listed
+            in the sequence of appearance in a LIDO record:</p>
+            <ol type="1">
+            <li><strong><a
+            href="https://lido-schema.org/schema/latest/lido.html#lidoRecID">LIDO
+            Metadata Record Identifier</a></strong></li>
+            <li><strong><a
+            href="https://lido-schema.org/schema/latest/lido.html#objectWorkType">Object/Work
+            Type</a></strong></li>
+            <li><strong><a
+            href="https://lido-schema.org/schema/latest/lido.html#titleSet">Title
+            Set</a></strong></li>
+            <li><strong><a
+            href="https://lido-schema.org/schema/latest/lido.html#recordID">Record
+            Identifier</a></strong></li>
+            <li><strong><a
+            href="https://lido-schema.org/schema/latest/lido.html#recordType">Record
+            Type</a></strong></li>
+            <li><strong><a
+            href="https://lido-schema.org/schema/latest/lido.html#recordSource">Record
+            Source</a></strong></li>
+            </ol>
+            <p>The mandatory elements must be contained in a LIDO
+            record. If any of these are missing, a validating XML
+            processor will reject the LIDO record as invalid. Note, that
+            this validation concerns the syntactical conformance to the
+            LIDO schema only; it does not refer to the element contents,
+            whether they contain data, and if this is semantically
+            correct or not.</p>
+            <p>Therefore, the following example is a syntactically
+            valid, yet semantically useless LIDO record.</p>
+            <div class="sourceCode" id="cb20"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:lido</span>&gt;</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:lidoRecID</span><span class="ot"> lido:type=</span><span class="st">&quot;xxx&quot;</span>&gt;&lt;/<span class="kw">lido:lidoRecID</span>&gt;</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:descriptiveMetadata</span><span class="ot"> xml:lang=</span><span class="st">&quot;xxx&quot;</span>&gt;</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:objectClassificationWrap</span>&gt;</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:objectWorkTypeWrap</span>&gt;</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">lido:objectWorkType</span>&gt;&lt;/<span class="kw">lido:objectWorkType</span>&gt;</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:objectWorkTypeWrap</span>&gt;</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:objectClassificationWrap</span>&gt;</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:objectIdentificationWrap</span>&gt;</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:titleWrap</span>&gt;</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">lido:titleSet</span>&gt;</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">lido:appellationValue</span>&gt;</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>                    &lt;/<span class="kw">lido:appellationValue</span>&gt;</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">lido:titleSet</span>&gt;</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabinde

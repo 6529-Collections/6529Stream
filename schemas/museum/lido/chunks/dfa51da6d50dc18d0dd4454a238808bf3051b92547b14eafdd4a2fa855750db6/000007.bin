@@ -1,0 +1,201 @@
+documents/terminology-recommendation.html#eventPlace_type">Type of Event Place</tei:ref></tei:ab>
+   						        	</xs:documentation>
+								</xs:annotation>
+							</xs:attribute>
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="eventMethod" minOccurs="0" maxOccurs="unbounded" id="eventMethod">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for the method by which
+							the event is or was carried out.<br/>
+							Examples may include an acquisition method or a field collection method.</tei:ab>
+						<tei:ab type="label">Event Method</tei:ab>
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						
+						
+						<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#eventMethod">Event Method</tei:ref>
+						</tei:ab>
+						</xs:documentation>
+
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:eventMethod">
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:conceptComplexType">
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="eventMaterialsTech" minOccurs="0" maxOccurs="unbounded" id="eventMaterialsTech">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A set of structured information indicating the materials
+							or techniques involved in the event in focus, such as a material used
+							for the creation or modification of the object/work.<br/>
+							May include also materials and techniques involved in an excavation event.</tei:ab>
+						<tei:ab type="label">Event Materials/Techniques</tei:ab>
+						
+						
+  					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:materialsTechSetComplexType">
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="eventObjectMeasurements" minOccurs="0" maxOccurs="unbounded" id="eventObjectMeasurements">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A set of structured information indicating the dimensions,
+							or other measurements, of the object/work with respect to the event in
+							focus.<br/>
+							Note that the term <em>measurements</em> here refers to the result of measuring,
+							such as the decreased dimensions after the removal of a part.</tei:ab>
+							<tei:ab type="label">Event Measurements</tei:ab>
+						
+						
+				 </xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:objectMeasurementsSetComplexType">
+							<xs:attribute ref="lido:type" id="eventObjectMeasurements_type">
+								<xs:annotation>
+									<xs:documentation>
+										<tei:ab type="description">An attribute indicating whether the measurements given are
+											straight properties of the object in question or requirements for handling the object,
+											such as maximum temperature variation.<br/>
+											Note that this type attribute is primarily intended for use in application profiles.</tei:ab>
+										<tei:ab type="dataValues">Controlled terminology</tei:ab>
+										
+										
+											<tei:ab type="recommendation">LIDO Terminology for
+											<tei:ref target="../../documents/terminology-recommendation.html#objectMeasurementsSet_type">Type of Object Measurements Set</tei:ref></tei:ab>
+									</xs:documentation>
+								</xs:annotation>
+							</xs:attribute>
+							<xs:attribute ref="lido:measurementsGroup"/>
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="thingPresent" minOccurs="0" maxOccurs="unbounded" id="thingPresent">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A set of structured information for a related object or
+							work that is or was present at the event in focus.<br/>
+						    Repeated if there are multiple related objects or works.</tei:ab>
+						<tei:ab type="label">Thing Present</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:objectSetComplexType">
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="relatedEventSet" minOccurs="0" maxOccurs="unbounded" id="relatedEventSet">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A set of structured information about an event related to the event in focus,
+							indicating the type of relationship where applicable.</tei:ab>
+						<tei:ab type="label">Related Event Set</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:relatedEventSetComplexType">
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="eventDescriptionSet" type="lido:descriptiveNoteComplexType" minOccurs="0" maxOccurs="unbounded" id="eventDescriptionSet">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A set of descriptive information about the event, including
+							description identifier, descriptive note and source of the description.<br/>
+							Repeated if there is more than one descriptive note.</tei:ab>
+						<tei:ab type="label">Event Description Set</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="eventSetComplexType" id="eventSetComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines display and index elements for one event
+					the object/work in focus participated in or was present at.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="displayEvent" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="displayEvent">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A display element for an event,
+							corresponding to the subsequent <tei:ref target="#event">Event</tei:ref> element.<br/>
+							Repeated for language variants only.</tei:ab>
+						<tei:ab type="label">Display Event</tei:ab>
+						<tei:ab type="dataValues">Free text</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="event" type="lido:eventComplexType" minOccurs="0" id="event">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A wrapper for information about the event the
+							object/work participated in or was present at, for example, its <em>creation</em>
+							or <em>acquisition</em>.<br/>
+							Includes identifying, descriptive and indexing elements associated with the event in focus, 
+							covering actor and/or date information.</tei:ab>
+						<tei:ab type="label">Event</tei:ab>
+						
+						
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="eventWrap" id="eventWrap">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">A wrapper for event sets.</tei:ab>
+				<tei:ab type="label">Event Wrapper</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="eventSet" minOccurs="0" maxOccurs="unbounded" id="eventSet">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">A set of display and index elements for
+								an event the object/work participated in or was present at.<br/>
+								Repeated if there is more than one event.</tei:ab>
+							<tei:ab type="label">Event Set</t

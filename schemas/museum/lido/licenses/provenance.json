@@ -1,0 +1,22 @@
+[
+  {
+    "path": "OGC-SOFTWARE-NOTICE.txt",
+    "sourceUri": "https://www.ogc.org/about-ogc/policies/software-licenses/ogc-software-license-1-0/",
+    "resolvedUri": "https://www.ogc.org/about/policies/software-licenses/ogc-software-license-1-0/",
+    "retrievedAt": "2026-09-12T19:06:49.400289+00:00",
+    "sha256": "3cd74c8c73778140cd72acfdf3f0a17220ee92f5bd0a692f9cfd6f07f67a5d81",
+    "bytes": 2222,
+    "originalWebpagePath": "OGC-SOFTWARE-LICENSE-1.0.html",
+    "originalWebpageSha256": "47ad624cfae5052444090334f00c9079c8e8e2b7b2a14e81f65ae4f86011cc6f",
+    "originalWebpageBytes": 1075040,
+    "extraction": "Complete eight nonempty notice paragraphs/list entries from the unique parent of This OGC work; UTF-8 text with paragraph separators. Original page retained in research capture; original schema bytes unchanged."
+  },
+  {
+    "path": "W3C-SOFTWARE-NOTICE-2002.html",
+    "sourceUri": "https://www.w3.org/Consortium/Legal/2002/copyright-software-20021231",
+    "resolvedUri": "https://www.w3.org/copyright/software-license-2002/",
+    "retrievedAt": "2026-09-12T19:06:49.494366+00:00",
+    "sha256": "1c39c6882383ed024b0b913e076ed0888b86713580bbb9e282cd4107a0b5fddd",
+    "bytes": 28145
+  }
+]

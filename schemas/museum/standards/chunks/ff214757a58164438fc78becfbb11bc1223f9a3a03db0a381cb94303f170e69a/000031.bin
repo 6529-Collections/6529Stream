@@ -1,0 +1,127 @@
+el>
+    <rdfs:domain rdf:resource="E29_Design_or_Procedure" />
+    <rdfs:range rdf:resource="E29_Design_or_Procedure" />
+    <owl:inverseOf rdf:resource="P69_has_association_with" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P70_documents">
+    <rdfs:label xml:lang="en">documents</rdfs:label>
+    <rdfs:label xml:lang="de">belegt</rdfs:label>
+    <rdfs:label xml:lang="el">τεκμηριώνει</rdfs:label>
+    <rdfs:label xml:lang="fr">documente</rdfs:label>
+    <rdfs:label xml:lang="pt">documenta</rdfs:label>
+    <rdfs:label xml:lang="ru">докумeнтируeт</rdfs:label>
+    <rdfs:label xml:lang="zh">记录了</rdfs:label>
+    <rdfs:comment>This property describes the CRM Entities documented as instances of E31 Document.
+Documents may describe any conceivable entity, hence the link to the highest-level entity in the CIDOC CRM class hierarchy. This property is intended for cases where a reference is regarded as making a proposition about reality. This may be of a documentary character, in the scholarly or scientific sense, or a more general statement.</rdfs:comment>
+    <rdfs:domain rdf:resource="E31_Document" />
+    <rdfs:range rdf:resource="E1_CRM_Entity" />
+    <rdfs:subPropertyOf rdf:resource="P67_refers_to" />
+    <owl:inverseOf rdf:resource="P70i_is_documented_in" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P70i_is_documented_in">
+    <rdfs:label xml:lang="en">is documented in</rdfs:label>
+    <rdfs:label xml:lang="de">wird belegt in</rdfs:label>
+    <rdfs:label xml:lang="el">τεκμηριώνεται σε</rdfs:label>
+    <rdfs:label xml:lang="fr">est documenté dans</rdfs:label>
+    <rdfs:label xml:lang="pt">é documentado em</rdfs:label>
+    <rdfs:label xml:lang="ru">докумeнтирован</rdfs:label>
+    <rdfs:label xml:lang="zh">记录在</rdfs:label>
+    <rdfs:domain rdf:resource="E1_CRM_Entity" />
+    <rdfs:range rdf:resource="E31_Document" />
+    <rdfs:subPropertyOf rdf:resource="P67i_is_referred_to_by" />
+    <owl:inverseOf rdf:resource="P70_documents" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P71_lists">
+    <rdfs:label xml:lang="en">lists</rdfs:label>
+    <rdfs:label xml:lang="de">listet</rdfs:label>
+    <rdfs:label xml:lang="el">περιλαμβάνει</rdfs:label>
+    <rdfs:label xml:lang="fr">énumère</rdfs:label>
+    <rdfs:label xml:lang="pt">define</rdfs:label>
+    <rdfs:label xml:lang="ru">пeрeчисляeт</rdfs:label>
+    <rdfs:label xml:lang="zh">列出</rdfs:label>
+    <rdfs:comment>This property associates an instance of E32 Authority Document with an instance of E1 CRM Entity which it lists for reference purposes.</rdfs:comment>
+    <rdfs:domain rdf:resource="E32_Authority_Document" />
+    <rdfs:range rdf:resource="E1_CRM_Entity" />
+    <rdfs:subPropertyOf rdf:resource="P67_refers_to" />
+    <owl:inverseOf rdf:resource="P71i_is_listed_in" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P71i_is_listed_in">
+    <rdfs:label xml:lang="en">is listed in</rdfs:label>
+    <rdfs:label xml:lang="de">wird aufgelistet in</rdfs:label>
+    <rdfs:label xml:lang="el">περιλαμβάνεται σε</rdfs:label>
+    <rdfs:label xml:lang="fr">est énuméré par</rdfs:label>
+    <rdfs:label xml:lang="pt">é definido por</rdfs:label>
+    <rdfs:label xml:lang="ru">пeрeчислeн</rdfs:label>
+    <rdfs:label xml:lang="zh">列于</rdfs:label>
+    <rdfs:domain rdf:resource="E1_CRM_Entity" />
+    <rdfs:range rdf:resource="E32_Authority_Document" />
+    <rdfs:subPropertyOf rdf:resource="P67i_is_referred_to_by" />
+    <owl:inverseOf rdf:resource="P71_lists" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P72_has_language">
+    <rdfs:label xml:lang="en">has language</rdfs:label>
+    <rdfs:label xml:lang="de">hat Sprache</rdfs:label>
+    <rdfs:label xml:lang="el">έχει γλώσσα</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour langue</rdfs:label>
+    <rdfs:label xml:lang="pt">é da língua</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт язык</rdfs:label>
+    <rdfs:label xml:lang="zh">有语种</rdfs:label>
+    <rdfs:comment>This property associates an instance(s) of E33 Linguistic Object with an instance of E56 Language in which it is, at least partially, expressed.
+Linguistic Objects are composed in one or more human languages. This property allows these languages to be documented.</rdfs:comment>
+    <rdfs:domain rdf:resource="E33_Linguistic_Object" />
+    <rdfs:range rdf:resource="E56_Language" />
+    <owl:inverseOf rdf:resource="P72i_is_language_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P72i_is_language_of">
+    <rdfs:label xml:lang="en">is language of</rdfs:label>
+    <rdfs:label xml:lang="de">ist Sprache von</rdfs:label>
+    <rdfs:label xml:lang="el">είναι γλώσσα του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">est la langue de</rdfs:label>
+    <rdfs:label xml:lang="pt">é a língua de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся языком для</rdfs:label>
+    <rdfs:label xml:lang="zh">是语种</rdfs:label>
+    <rdfs:domain rdf:resource="E56_Language" />
+    <rdfs:range rdf:resource="E33_Linguistic_Object" />
+    <owl:inverseOf rdf:resource="P72_has_language" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P73_has_translation">
+    <rdfs:label xml:lang="en">has translation</rdfs:label>
+    <rdfs:label xml:lang="de">hat Übersetzung</rdfs:label>
+    <rdfs:label xml:lang="el">έχει μετάφραση</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour traduction</rdfs:label>
+    <rdfs:label xml:lang="pt">tem tradução</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт пeрeвод</rdfs:label>
+    <rdfs:label xml:lang="zh">有译文</rdfs:label>
+    <rdfs:comment>This property links an instance of E33 Linguistic Object (A), to another instance of E33 Linguistic Object (B) which is the translation of A.
+When an instance of E33 Linguistic Object is translated into a new language a new instance of E33 Linguistic Object is created, despite the translation being conceptually similar to the source.
+This property is asymmetric.</rdfs:comment>
+    <rdfs:domain rdf:resource="E33_Linguistic_Object" />
+    <rdfs:range rdf:resource="E33_Linguistic_Object" />
+    <rdfs:subPropertyOf rdf:resource="P130i_features_are_also_found_on" />
+    <owl:inverseOf rdf:resource="P73i_is_translation_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P73i_is_translation_of">
+    <rdfs:label xml:lang="en">is translation of</rdfs:label>
+    <rdfs:label xml:lang="de">ist Übersetzung von</rdfs:label>
+    <rdfs:label xml:lang="el">είναι μετάφραση του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">est traduction de</rdfs:label>
+    <rdfs:label xml:lang="pt">é tradução de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся пeрeводом</rdfs:label>
+    <rdfs:label xml:lang="zh">是译文</rdfs:label>
+    <rdfs:domain rdf:resource="E33_Linguistic_Object" />
+    <rdfs:range rdf:resource="E33_Linguistic_Object" />
+    <rdfs:subPropertyOf rdf:resource="P130_shows_features_of" />
+    <owl:inverseOf rdf:resource="P73_has_translation" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P74_has_current_or_former_residence">
+    <rdfs:label xml:lang="en">has current or former residence</rdfs:label>
+    <rdfs:label xml:lang="de">hat derzeitigen oder früheren Sitz</rdfs:label>
+    <rdfs:label xml:lang="el">έχει ή είχε κατοικία</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour résidence actuelle ou antérieure</rdfs:label>
+    <rdfs:label xml:lang="pt">reside ou residiu em</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт тeкущee или бывшee мeстожитeльство</rdfs:label>
+    <rdfs:label xml:lang="zh">有当前或曾经居住地</rdfs:label>
+    <rdfs:comment>This property describes the current or former place of residence (an instance of E53 Place) of an instance of E39 Actor.
+The residence may be either the place where the actor resides, or a legally registered address of any kind.</rdfs:comment>
+    <rdfs:domain rdf:resource="E39_Actor" />
+    <rdfs:range rdf:resource="E53_Place" /

@@ -1,0 +1,321 @@
+   "@id": "la:member_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "attributed_by": {
+          "@id": "crm:P140i_was_attributed_by",
+          "@type": "@id",
+          "@container": "@set",
+          "@context": {
+            "assigned_property": {
+              "@id": "crm:P177_assigned_property_of_type",
+              "@type": "@vocab",
+              "@context": {
+                "part_of": {
+                  "@id": "crm:P106i_forms_part_of"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Title": {
+      "@id": "crm:E35_Title",
+      "@context": {
+        "part": {
+          "@id": "crm:P106_is_composed_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "part_of": {
+          "@id": "crm:P106i_forms_part_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "member_of": {
+          "@id": "la:member_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "attributed_by": {
+          "@id": "crm:P140i_was_attributed_by",
+          "@type": "@id",
+          "@container": "@set",
+          "@context": {
+            "assigned_property": {
+              "@id": "crm:P177_assigned_property_of_type",
+              "@type": "@vocab",
+              "@context": {
+                "part_of": {
+                  "@id": "crm:P106i_forms_part_of"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "VisualItem": {
+      "@id": "crm:E36_Visual_Item",
+      "@context": {
+        "part": {
+          "@id": "crm:P106_is_composed_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "part_of": {
+          "@id": "crm:P106i_forms_part_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "member_of": {
+          "@id": "la:member_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "attributed_by": {
+          "@id": "crm:P140i_was_attributed_by",
+          "@type": "@id",
+          "@container": "@set",
+          "@context": {
+            "assigned_property": {
+              "@id": "crm:P177_assigned_property_of_type",
+              "@type": "@vocab",
+              "@context": {
+                "part_of": {
+                  "@id": "crm:P106i_forms_part_of"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Mark": {
+      "@id": "crm:E37_Mark",
+      "@context": {
+        "part": {
+          "@id": "crm:P106_is_composed_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "part_of": {
+          "@id": "crm:P106i_forms_part_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "member_of": {
+          "@id": "la:member_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "attributed_by": {
+          "@id": "crm:P140i_was_attributed_by",
+          "@type": "@id",
+          "@container": "@set",
+          "@context": {
+            "assigned_property": {
+              "@id": "crm:P177_assigned_property_of_type",
+              "@type": "@vocab",
+              "@context": {
+                "part_of": {
+                  "@id": "crm:P106i_forms_part_of"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Actor": {
+      "@id": "crm:E39_Actor"
+    },
+    "Appellation": {
+      "@id": "crm:E41_Appellation",
+      "@context": {
+        "part": {
+          "@id": "crm:P106_is_composed_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "part_of": {
+          "@id": "crm:P106i_forms_part_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "member_of": {
+          "@id": "la:member_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "attributed_by": {
+          "@id": "crm:P140i_was_attributed_by",
+          "@type": "@id",
+          "@container": "@set",
+          "@context": {
+            "assigned_property": {
+              "@id": "crm:P177_assigned_property_of_type",
+              "@type": "@vocab",
+              "@context": {
+                "part_of": {
+                  "@id": "crm:P106i_forms_part_of"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Identifier": {
+      "@id": "crm:E42_Identifier",
+      "@context": {
+        "part": {
+          "@id": "crm:P106_is_composed_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "part_of": {
+          "@id": "crm:P106i_forms_part_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "member_of": {
+          "@id": "la:member_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "attributed_by": {
+          "@id": "crm:P140i_was_attributed_by",
+          "@type": "@id",
+          "@container": "@set",
+          "@context": {
+            "assigned_property": {
+              "@id": "crm:P177_assigned_property_of_type",
+              "@type": "@vocab",
+              "@context": {
+                "part_of": {
+                  "@id": "crm:P106i_forms_part_of"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "TimeSpan": {
+      "@id": "crm:E52_Time-Span",
+      "@context": {
+        "part": {
+          "@id": "crm:P86i_contains",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "part_of": {
+          "@id": "crm:P86_falls_within",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "member_of": {
+          "@id": "la:member_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "attributed_by": {
+          "@id": "crm:P140i_was_attributed_by",
+          "@type": "@id",
+          "@container": "@set",
+          "@context": {
+            "assigned_property": {
+              "@id": "crm:P177_assigned_property_of_type",
+              "@type": "@vocab",
+              "@context": {
+                "part_of": {
+                  "@id": "crm:P86_falls_within"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Place": {
+      "@id": "crm:E53_Place",
+      "@context": {
+        "part": {
+          "@id": "crm:P89i_contains",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "part_of": {
+          "@id": "crm:P89_falls_within",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "member_of": {
+          "@id": "la:member_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "attributed_by": {
+          "@id": "crm:P140i_was_attributed_by",
+          "@type": "@id",
+          "@container": "@set",
+          "@context": {
+            "assigned_property": {
+              "@id": "crm:P177_assigned_property_of_type",
+              "@type": "@vocab",
+              "@context": {
+                "part_of": {
+                  "@id": "crm:P89_falls_within"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Dimension": {
+      "@id": "crm:E54_Dimension"
+    },
+    "Type": {
+      "@id": "crm:E55_Type",
+      "@context": {
+        "part": {
+          "@id": "skos:narrower",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "part_of": {
+          "@id": "skos:broader",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "member_of": {
+          "@id": "la:member_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "attributed_by": {
+          "@id": "crm:P140i_was_attributed_by",
+          "@type": "@id",
+          "@container": "@set",
+          "@context": {
+            "assigned_property": {
+              "@id": "crm:P177_assigned_property_of_type",
+              "@type": "@vocab",
+              "@context": {
+                "part_of": {
+                  "@id": "skos:broader"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Language": {
+      "@id": "crm:E56_Language",
+      "@context": {
+        "part": {
+          

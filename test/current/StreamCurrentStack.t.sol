@@ -83,7 +83,7 @@ contract StreamCurrentStackTest is StreamCurrentStackFixture {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(PLATFORM_KEY, digest);
         bytes memory platformSignature = abi.encodePacked(r, s, v);
         (v, r, s) = vm.sign(ARTIST_KEY, digest);
-        vm.expectRevert();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "receiver rejected"));
         sale.buy{ value: authorization.price }(
             authorization, TOKEN_DATA, platformSignature, abi.encodePacked(r, s, v)
         );
@@ -101,6 +101,7 @@ contract StreamCurrentStackTest is StreamCurrentStackFixture {
                 phaseId: AUCTION_PHASE,
                 artist: artist,
                 profileId: profile,
+                expectedPrimaryPolicyHash: _nativePrimaryPolicyHash(),
                 tokenDataHash: keccak256(TOKEN_DATA),
                 mintCommitment: keccak256("auction artwork"),
                 mintPolicyHash: manager.phasePolicyHash(1, AUCTION_PHASE),
@@ -255,6 +256,7 @@ contract StreamCurrentStackTest is StreamCurrentStackFixture {
             recipient: BUYER,
             artist: artist,
             profileId: profile,
+            expectedPrimaryPolicyHash: _nativePrimaryPolicyHash(),
             tokenDataHash: keccak256(TOKEN_DATA),
             mintCommitment: keccak256("current-stack artwork commitment"),
             mintPolicyHash: manager.phasePolicyHash(1, PHASE),

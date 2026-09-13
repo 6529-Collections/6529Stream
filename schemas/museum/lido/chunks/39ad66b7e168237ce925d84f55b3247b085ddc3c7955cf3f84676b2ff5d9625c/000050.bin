@@ -1,0 +1,95 @@
+e type of the given place
+            entity including natural environment and landscape. In LIDO
+            v1.1 these values can be expressed in greater detail through
+            &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#placeClassification">lido:placeClassification</a>&gt;.
+            Note that Place Classification in LIDO corresponds to ‘<a
+            href="https://www.getty.edu/research/tools/vocabularies/guidelines/tgn_3_6_place_types.html">Place
+            Type</a>’ in the <a
+            href="https://www.getty.edu/research/tools/vocabularies/tgn/index.html">Getty
+            Thesaurus of Geographic Names</a>. It is recommended to use
+            a URI to refer to the kind of geographical entity.</p>
+            <p><strong>Example:</strong> For an analogous example see
+            ‘lido:politicalEntity’ below in this list.</p>
+            <blockquote>
+            <p>For more information see the note for ‘<a
+            href="http://lido-schema.org/documents/terminology-recommendation.html#geographicalEntity">geographicalEntity</a>’
+            in the LIDO Terminology Recommendation.</p>
+            </blockquote>
+            <h3 data-number="5.4.7" id="label"><span
+            class="header-section-number">5.4.7</span> <span
+            class="citation" data-cites="label">@label</span></h3>
+            <p><strong>Attribute name:</strong> <a
+            href="http://lido-schema.org/schema/latest/lido.html#label">lido:label</a></p>
+            <p><strong>Note:</strong> Attribute for many LIDO elements
+            to indicate how the data element from which the data were
+            migrated is labelled at the user interface. Note that this
+            can be different from how the element is named in the source
+            database (see <a
+            href="https://lido-schema.org/schema/latest/lido.html#encodinganalog"><em>lido:encodinganalog</em></a>
+            for this case).</p>
+            <p><strong>Example:</strong> The following XML code snippet
+            marks the label for the “Historique” note displayed at the
+            user interface of the <a
+            href="https://www.pop.culture.gouv.fr/notice/joconde/000PE025604">PORTRAIT
+            DE MONA LISA (1479-1528)</a>.</p>
+            <div class="sourceCode" id="cb51"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:descriptiveNoteValue</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:label=</span><span class="st">&quot;Historique&quot;</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="ot">    xml:lang=</span><span class="st">&quot;fr&quot;</span>&gt;</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>    Commandé par le florentin Francesco del Giocondo, époux de Mona Lisa entre 1503 et 1506</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:descriptiveNoteValue</span>&gt;</span></code></pre></div>
+            <h3 data-number="5.4.8" id="measurementsgroup"><span
+            class="header-section-number">5.4.8</span> <span
+            class="citation"
+            data-cites="measurementsGroup">@measurementsGroup</span></h3>
+            <p><strong>Attribute name:</strong> <a
+            href="http://lido-schema.org/schema/latest/lido.html#measurementsGroup">lido:measurementsGroup</a></p>
+            <p><strong>Note:</strong> Attribute for &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#eventObjectMeasurements">lido:eventObjectMeasurements</a>&gt;
+            and &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#objectMeasurementsSet">lido:objectMeasurementsSet</a>&gt;
+            to indicate the kind of measurements given in multiple
+            &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#measurementsSet">lido:measurementsSet</a>&gt;
+            elements. This attribute is intended to be used in
+            application profiles.</p>
+            <p><strong>Example:</strong> The following XML code snippet
+            shows how the “<a
+            href="http://terminology.lido-schema.org/lido00923">Measurement
+            object requirement</a>” concerning temperature conditions is
+            recorded.</p>
+            <div class="sourceCode" id="cb52"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Measurement object requirement for @measurementsGroup &quot;temperature&quot; --&gt;</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:eventObjectMeasurements</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00923&quot;</span></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:measurementsGroup=</span><span class="st">&quot;http://vocab.getty.edu/aat/300056066&quot;</span>&gt;</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:displayObjectMeasurements</span>&gt;</span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>        16-25°C ± 1.5°C over 24 hours if the object is installed in a room</span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>        equipped with an operating Heating Ventilation and Air-Conditioning</span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>        (HVAC) system</span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:displayObjectMeasurements</span>&gt;</span></code></pre></div>
+            <h3 data-number="5.4.9" id="mostnotableevent"><span
+            class="header-section-number">5.4.9</span> <span
+            class="citation"
+            data-cites="mostNotableEvent">@mostNotableEvent</span></h3>
+            <p><strong>Attribute name:</strong> <a
+            href="https://lido-schema.org/schema/latest/lido.html#mostNotableEvent">lido:mostNotableEvent</a></p>
+            <p><strong>Note:</strong> Attribute for &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventSet">lido:eventSet</a>&gt;
+            and &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventWrap">lido:eventWrap</a>&gt;
+            to indicate that the event in focus is considered to be the
+            most notable or significant event among others recorded for
+            the object.</p>
+            <p><strong>Example:</strong> The following XML code snippet
+            declares the event “<a
+            href="http://terminology.lido-schema.org/lido00007">Production</a>”
+            as the most notable one.</p>
+            <div class="sourceCode" id="cb53"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:eventSet</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:sortorder=</span><span class="st">&quot;1&quot;</span></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:mostNotableEvent=</span><span class="st">&quot;1&quot;</span>&gt;</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:event</span>&gt;</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:eventType</span>&gt;</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw"

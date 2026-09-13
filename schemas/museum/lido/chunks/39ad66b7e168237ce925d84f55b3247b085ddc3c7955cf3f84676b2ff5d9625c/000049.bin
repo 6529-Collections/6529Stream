@@ -1,0 +1,88 @@
+an></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:codecResource=</span><span class="st">&quot;MPEG Audio Version 1 Layer 3&quot;</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:formatResource=</span><span class="st">&quot;audio/mpeg&quot;</span>&gt;</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>        http://media.slub-dresden.de/fon/snp/a/012100/fon_snp_a_012100_01.mp3</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:linkResource</span>&gt;</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:resourceRepresentation</span>&gt;</span></code></pre></div>
+            <h3 data-number="5.4.4" id="encodinganalog"><span
+            class="header-section-number">5.4.4</span> <span
+            class="citation"
+            data-cites="encodingAnalog">@encodingAnalog</span></h3>
+            <p><strong>Attribute name:</strong> <a
+            href="http://lido-schema.org/schema/latest/lido.html#encodinganalog">lido:encodinganalog</a></p>
+            <p><strong>Note:</strong> Attribute for many LIDO elements
+            to record the field label in the source database from which
+            the element content was migrated. The source format for the
+            whole document is indicated in the attribute <a
+            href="http://lido-schema.org/schema/latest/lido.html#relatedencoding"><em>lido:relatedencoding</em></a>
+            of the <a
+            href="http://lido-schema.org/schema/latest/lido.html#lidoWrap">LIDO
+            Wrapper</a>.</p>
+            <p><strong>Example:</strong> The following XML code snippet
+            contains the popular French title for <em>Mona Lisa</em>,
+            “La Joconde”, stored in the source database as “titre
+            d’usage” under the field label “Type de titre”. The title
+            type is indexed with the AAT descriptor ‘<a
+            href="http://vocab.getty.edu/page/aat/300417200">popular
+            title</a>’.</p>
+            <div class="sourceCode" id="cb49"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:titleSet</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:type=</span><span class="st">&quot;http://vocab.getty.edu/aat/300417200&quot;</span>&gt;</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:appellationValue</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00170&quot;</span></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:encodinganalog=</span><span class="st">&quot;Type de titre&quot;</span></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:label=</span><span class="st">&quot;titre d&#39;usage&quot;</span></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a><span class="ot">        xml:lang=</span><span class="st">&quot;fr&quot;</span>&gt;</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>        La Joconde</span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:appellationValue</span>&gt;</span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:sourceAppellation</span>&gt;</span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>        &quot;Institut national d&#39;histoire de l&#39;art, Portrait de Lisa Gherardini. URL: https://agorha.inha.fr/ark:/54721/8e279ee1-f842-4eb3-994d-797ca8562c09</span>
+<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:sourceAppellation</span>&gt;</span>
+<span id="cb49-13"><a href="#cb49-13" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:titleSet</span>&gt;</span></code></pre></div>
+            <h3 data-number="5.4.5" id="formatresource"><span
+            class="header-section-number">5.4.5</span> <span
+            class="citation"
+            data-cites="formatResource">@formatResource</span></h3>
+            <p><strong>Attribute name:</strong> <a
+            href="http://lido-schema.org/schema/latest/lido.html#formatResource">lido:formatResource</a></p>
+            <p><strong>Note:</strong> Attribute for elements referring
+            to the internet media type of a web resource, i.e., &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#legalBodyWeblink">lido:legalBodyWeblink</a>&gt;,
+            &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#linkResource">lido:linkResource</a>&gt;,
+            &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#objectWebResource">lido:objectWebResource</a>&gt;,
+            and &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#recordInfoLink">lido:recordInfoLink</a>&gt;.
+            It is recommended to use the <a
+            href="https://www.iana.org/assignments/media-types/media-types.xhtml">IANA
+            Media Types</a> as values.</p>
+            <p><strong>Example:</strong> The following XML code snippet
+            marks the format of the Web resource for a study of the
+            <em>Mona Lisa</em> as “text/html” according to the IANA
+            Media Type.</p>
+            <div class="sourceCode" id="cb50"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:object</span>&gt;</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:objectWebResource</span></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:formatResource=</span><span class="st">&quot;text/html&quot;</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="ot">        xml:lang=</span><span class="st">&quot;de&quot;</span>&gt;</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>        http://foto.biblhertz.it/obj08012138</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:objectWebResource</span>&gt;</span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:object</span>&gt;</span></code></pre></div>
+            <h3 data-number="5.4.6" id="geographicalentity"><span
+            class="header-section-number">5.4.6</span> <span
+            class="citation"
+            data-cites="geographicalEntity">@geographicalEntity</span></h3>
+            <p><strong>Attribute name:</strong> <a
+            href="http://lido-schema.org/schema/latest/lido.html#geographicalEntity">lido:geographicalEntity</a></p>
+            <p><strong>Note:</strong> Attribute for &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#partOfPlace">lido:partOfPlace</a>&gt;,
+            &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#place">lido:place</a>&gt;,
+            &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#repositoryLocation">lido:repositoryLocation</a>&gt;,
+            and &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#vitalPlaceActor">lido:vitalPlaceActor</a>&gt;
+            to indicate the kind of place as a physical entity, such as
+            a <em>forest</em> or a <em>river</em>. This attribute was
+            intended in LIDO v1.0 to qualify th

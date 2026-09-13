@@ -1,0 +1,131 @@
+en the basic curve definition is an underdetermined system. For example, line string segments cannot support continuity above C 0 , since there is no spare control parameter to adjust the incoming angle at the end points of the segment. Spline functions on the other hand often have extra degrees of freedom on end segments that allow them to adjust the values of the derivatives to support C 1 or higher continuity.</documentation>
+			</annotation>
+		</attribute>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="segments" type="gml:CurveSegmentArrayPropertyType">
+		<annotation>
+			<documentation>This property element contains a list of curve segments. The order of the elements is significant and shall be preserved when processing the array.</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<complexType name="CurveSegmentArrayPropertyType">
+		<annotation>
+			<documentation>A container for an array of curve segments.</documentation>
+		</annotation>
+		<sequence>
+			<element ref="gml:_CurveSegment" minOccurs="0" maxOccurs="unbounded"/>
+		</sequence>
+	</complexType>
+	<!-- =========== global element in "_CurveSegment" substitution group ================ -->
+	<element name="LineStringSegment" type="gml:LineStringSegmentType" substitutionGroup="gml:_CurveSegment"/>
+	<!-- =========================================================== -->
+	<complexType name="LineStringSegmentType">
+		<annotation>
+			<documentation>A LineStringSegment is a curve segment that is defined by two or more coordinate tuples, with linear interpolation between them.
+				Note: LineStringSegment implements GM_LineString of ISO 19107.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCurveSegmentType">
+				<sequence>
+					<choice>
+						<annotation>
+							<documentation>GML supports two different ways to specify the control points of a curve segment.
+1. A sequence of "pos" (DirectPositionType) or "pointProperty" (PointPropertyType) elements. "pos" elements are control points that are only part of this curve segment, "pointProperty" elements contain a point that may be referenced from other geometry elements or reference another point defined outside of this curve segment (reuse of existing points).
+2. The "posList" element allows for a compact way to specifiy the coordinates of the control points, if all control points are in the same coordinate reference systems and belong to this curve segment only. The number of direct positions in the list must be at least two.</documentation>
+						</annotation>
+						<choice minOccurs="2" maxOccurs="unbounded">
+							<element ref="gml:pos"/>
+							<element ref="gml:pointProperty"/>
+							<element ref="gml:pointRep">
+								<annotation>
+									<documentation>Deprecated with GML version 3.1.0. Use "pointProperty" instead. Included for backwards compatibility with GML 3.0.0.</documentation>
+								</annotation>
+							</element>
+						</choice>
+						<element ref="gml:posList"/>
+						<element ref="gml:coordinates">
+							<annotation>
+								<documentation>Deprecated with GML version 3.1.0. Use "posList" instead.</documentation>
+							</annotation>
+						</element>
+					</choice>
+				</sequence>
+				<attribute name="interpolation" type="gml:CurveInterpolationType" fixed="linear">
+					<annotation>
+						<documentation>The attribute "interpolation" specifies the curve interpolation mechanism used for this segment. This mechanism
+uses the control points and control parameters to determine the position of this curve segment. For a LineStringSegment the interpolation is fixed as "linear".</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========== global element in "_CurveSegment" substitution group ================ -->
+	<element name="ArcString" type="gml:ArcStringType" substitutionGroup="gml:_CurveSegment"/>
+	<!-- =========================================================== -->
+	<complexType name="ArcStringType">
+		<annotation>
+			<documentation>An ArcString is a curve segment that uses three-point circular arc interpolation.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCurveSegmentType">
+				<sequence>
+					<choice>
+						<annotation>
+							<documentation>GML supports two different ways to specify the control points of a curve segment.
+1. A sequence of "pos" (DirectPositionType) or "pointProperty" (PointPropertyType) elements. "pos" elements are control points that are only part of this curve segment, "pointProperty" elements contain a point that may be referenced from other geometry elements or reference another point defined outside of this curve segment (reuse of existing points).
+2. The "posList" element allows for a compact way to specifiy the coordinates of the control points, if all control points are in the same coordinate reference systems and belong to this curve segment only. The number of direct positions in the list must be at least three.</documentation>
+						</annotation>
+						<choice minOccurs="3" maxOccurs="unbounded">
+							<element ref="gml:pos"/>
+							<element ref="gml:pointProperty"/>
+							<element ref="gml:pointRep">
+								<annotation>
+									<documentation>Deprecated with GML version 3.1.0. Use "pointProperty" instead. Included for backwards compatibility with GML 3.0.0.</documentation>
+								</annotation>
+							</element>
+						</choice>
+						<element ref="gml:posList"/>
+						<element ref="gml:coordinates">
+							<annotation>
+								<documentation>Deprecated with GML version 3.1.0. Use "posList" instead.</documentation>
+							</annotation>
+						</element>
+					</choice>
+				</sequence>
+				<attribute name="interpolation" type="gml:CurveInterpolationType" fixed="circularArc3Points">
+					<annotation>
+						<documentation>The attribute "interpolation" specifies the curve interpolation mechanism used for this segment. This mechanism
+uses the control points and control parameters to determine the position of this curve segment. For an ArcString the interpolation is fixed as "circularArc3Points".</documentation>
+					</annotation>
+				</attribute>
+				<attribute name="numArc" type="integer" use="optional">
+					<annotation>
+						<documentation>The number of arcs in the arc string can be explicitly stated in this attribute. The number of control points in the arc string must be 2 * numArc + 1.</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========== global element in "_CurveSegment" substitution group ================ -->
+	<element name="Arc" type="gml:ArcType" substitutionGroup="gml:ArcString"/>
+	<!-- =========================================================== -->
+	<complexType name="ArcType">
+		<annotation>
+			<documentation>An Arc is an arc string with only one arc unit, i.e. three control points.</documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:ArcStringType">
+				<sequence>
+					<choice>
+						<annotation>
+							<documentation>GML supports two different ways to specify the control points of a curve segment.
+1. A sequence of "pos" (DirectPositionType) or "pointProperty" (PointPropertyType) elements. "pos" elements are control points that are only part of this curve segment, "pointProperty" elements contain a point that may be referenced from other geometry elements or reference another point defined outside of this curve segment (reuse of existing points).
+2. The "posList" element allows for a compact way to specifiy the coordinates of the control points, if all control points are in the same coordinate reference systems and belong to this curve segment only. The number of direct positions in the list must be three.</documentation>
+						</annotation>
+						<choice minOccurs="3" maxOccurs="3">
+							<element ref="gml:pos"/>
+							<element ref="gml:pointProperty"/>
+							<element ref="gml:pointRep">
+								<annotation>
+									<documentation>Deprecated with GML version 3.1.0. Use "pointProperty" instead. Included for backwards compatibility with GML 3

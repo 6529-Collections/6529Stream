@@ -1,0 +1,96 @@
+ό</rdfs:label>
+    <rdfs:label xml:lang="fr">Matériau</rdfs:label>
+    <rdfs:label xml:lang="pt">Material</rdfs:label>
+    <rdfs:label xml:lang="ru">Матeриал</rdfs:label>
+    <rdfs:label xml:lang="zh">材质</rdfs:label>
+    <rdfs:comment>This class is a specialization of E55 Type and comprises the concepts of materials.
+Instances of E57 Material may denote properties of matter before its use, during its use, and as incorporated in an object, such as ultramarine powder, tempera paste, reinforced concrete. Discrete pieces of raw-materials kept in museums, such as bricks, sheets of fabric, pieces of metal, should be modelled individually in the same way as other objects. Discrete used or processed pieces, such as the stones from Nefer Titi's temple, should be modelled as parts (cf. P46 is composed of (forms part of): E18 Physical Thing).
+This type is used categorically in the model without reference to instances of it, i.e. the Model does not foresee the description of instances of instances of E57 Material, e.g. “instances of gold”.
+It is recommended that internationally or nationally agreed codes and terminology should be used.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E55_Type" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E58_Measurement_Unit">
+    <rdfs:label xml:lang="en">Measurement Unit</rdfs:label>
+    <rdfs:label xml:lang="de">Maßeinheit</rdfs:label>
+    <rdfs:label xml:lang="el">Μονάδα Μέτρησης</rdfs:label>
+    <rdfs:label xml:lang="fr">Unité de mesure</rdfs:label>
+    <rdfs:label xml:lang="pt">Unidade de Medida</rdfs:label>
+    <rdfs:label xml:lang="ru">Eдиница Измeрeния</rdfs:label>
+    <rdfs:label xml:lang="zh">测量单位</rdfs:label>
+    <rdfs:comment>This class is a specialization of E55 Type and comprises the types of measurement units: feet, inches, centimetres, litres, lumens, etc.
+This type is used categorically in the model without reference to instances of it, i.e. the model does not foresee the description of instances of instances of E58 Measurement Unit, e.g. “instances of cm”.
+Système International (SI) units or internationally recognized non-SI terms should be used whenever possible, such as those defined by ISO80000:2009. Archaic Measurement Units used in historical records should be preserved.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E55_Type" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E63_Beginning_of_Existence">
+    <rdfs:label xml:lang="en">Beginning of Existence</rdfs:label>
+    <rdfs:label xml:lang="de">Daseinsbeginn</rdfs:label>
+    <rdfs:label xml:lang="el">Αρχή Ύπαρξης</rdfs:label>
+    <rdfs:label xml:lang="fr">Début d’existence</rdfs:label>
+    <rdfs:label xml:lang="pt">Início da Existência</rdfs:label>
+    <rdfs:label xml:lang="ru">Начало Сущeствования</rdfs:label>
+    <rdfs:label xml:lang="zh">初始</rdfs:label>
+    <rdfs:comment>This class comprises events that bring into existence any instance of E77 Persistent Item.
+It may be used for temporal reasoning about things (intellectual products, physical items, groups of people, living beings) beginning to exist; it serves as a hook for both a terminus post quem and a terminus ante quem.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E5_Event" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E64_End_of_Existence">
+    <rdfs:label xml:lang="en">End of Existence</rdfs:label>
+    <rdfs:label xml:lang="de">Daseinsende</rdfs:label>
+    <rdfs:label xml:lang="el">Τέλος Ύπαρξης</rdfs:label>
+    <rdfs:label xml:lang="fr">Fin d’existence</rdfs:label>
+    <rdfs:label xml:lang="pt">Fim da Existência</rdfs:label>
+    <rdfs:label xml:lang="ru">Конeц Сущeствования</rdfs:label>
+    <rdfs:label xml:lang="zh">结束</rdfs:label>
+    <rdfs:comment>This class comprises events that end the existence of any instance of E77 Persistent Item.
+It may be used for temporal reasoning about things (physical items, groups of people, living beings) ceasing to exist; it serves as a hook both a terminus post quem and a terminus ante quem. In cases where substance from an instance of E77 Persistent Item continues to exist in a new form, the process would be documented as instances of E81 Transformation.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E5_Event" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E65_Creation">
+    <rdfs:label xml:lang="en">Creation</rdfs:label>
+    <rdfs:label xml:lang="de">Begriffliche Schöpfung</rdfs:label>
+    <rdfs:label xml:lang="el">Δημιουργία</rdfs:label>
+    <rdfs:label xml:lang="fr">Création</rdfs:label>
+    <rdfs:label xml:lang="pt">Criação</rdfs:label>
+    <rdfs:label xml:lang="ru">Созданиe</rdfs:label>
+    <rdfs:label xml:lang="zh">创建</rdfs:label>
+    <rdfs:comment>This class comprises events that result in the creation of conceptual items or immaterial products, such as legends, poems, texts, music, images, movies, laws, types, etc.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E7_Activity" />
+    <rdfs:subClassOf rdf:resource="E63_Beginning_of_Existence" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E66_Formation">
+    <rdfs:label xml:lang="en">Formation</rdfs:label>
+    <rdfs:label xml:lang="de">Gruppenbildung</rdfs:label>
+    <rdfs:label xml:lang="el">Συγκρότηση Ομάδας</rdfs:label>
+    <rdfs:label xml:lang="fr">Formation</rdfs:label>
+    <rdfs:label xml:lang="pt">Formação</rdfs:label>
+    <rdfs:label xml:lang="ru">Формированиe</rdfs:label>
+    <rdfs:label xml:lang="zh">组成</rdfs:label>
+    <rdfs:comment>This class comprises events that result in the formation of a formal or informal E74 Group of people, such as a club, society, association, corporation, or nation.
+E66 Formation does not include the arbitrary aggregation of people who do not act as a collective.
+The formation of an instance of E74 Group does not require that the group is populated with members at the time of formation. In order to express the joining of members at the time of formation, the respective activity should be simultaneously an instance of both E66 Formation and E85 Joining.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E7_Activity" />
+    <rdfs:subClassOf rdf:resource="E63_Beginning_of_Existence" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E67_Birth">
+    <rdfs:label xml:lang="en">Birth</rdfs:label>
+    <rdfs:label xml:lang="de">Geburt</rdfs:label>
+    <rdfs:label xml:lang="el">Γέννηση</rdfs:label>
+    <rdfs:label xml:lang="fr">Naissance</rdfs:label>
+    <rdfs:label xml:lang="pt">Nascimento</rdfs:label>
+    <rdfs:label xml:lang="ru">Рождeниe</rdfs:label>
+    <rdfs:label xml:lang="zh">出生</rdfs:label>
+    <rdfs:comment>This class comprises the births of human beings. E67 Birth is a biological event focussing on the context of people coming into life. (E63 Beginning of Existence comprises the coming into life of any living being.)
+Twins, triplets, etc. are brought into life by the same instance of E67 Birth. The introduction of the E67 Birth event as a documentation element allows the description of a range of family relationships in a simple model. Suitable extensions may describe more details and the complexity of motherhood since the advent of modern medicine. In this model, the biological father is not seen as a necessary participant in the E67 Birth.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E63_Beginning_of_Existence" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E68_Dissolution">
+    <rdfs:label xml:lang="en">Dissolution</rdfs:label>
+    <rdfs:label xml:lang="de">Gruppenauflösung</rdfs:label>
+    <rdfs:label xml:lang="el">Διάλυση Ομάδας</rdfs:label>
+    <rdfs:label xml:lang="fr">Dissolution</rdfs:label>
+    <rdfs:label xml:lang="pt">Dissolução</rdfs:label>
+    <rdfs:label xml:lang="ru">Роспуск</rdfs:label>
+    <rdfs:label xml:lang="zh">解散</rdfs:label>
+    <rdfs:comment>This class comprises the events that result in the formal or informal termination of an instance of E74 Group.
+If the dissolution was deliberate, the Dissolution event

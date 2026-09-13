@@ -1,0 +1,49 @@
+of an instance of E77 Persistent Item. Often, they undergo gradual change, still bearing some similarities with that of previous times, or disappear completely and new emerge. For instance, a person, from the time of being born on, will gradually change all its features and acquire new ones, such as a scar. Even the DNA in different body cells will develop defects and mutations. Nevertheless, relevant characteristics used should be sufficiently similar to recognize the instance for some substantial period of time.
+The more specific criteria that determine the identity of instances of subclasses of E77 Persistent Item may vary considerably and are described or referred to in the respective scope notes. The decision about which exact criteria to use depends on whether the observable behaviour of the respective part of reality such confined conforms to the reasoning the user is interested in. For example, a building can be regarded as no longer existing if it is dismantled and the materials reused in a different configuration. On the other hand, human beings go through radical and profound changes during their life-span, affecting both material composition and form, yet preserve their identity by other criteria, such as being bodily separated from other persons. Similarly, inanimate objects may be subject to exchange of parts and matter. On the opposite, the identity of a (version of a) text of a scientific publication is given by the exact arrangement of its relevant symbols.
+The main classes of objects that fall outside the scope of the E77 Persistent Item class are temporal objects such as periods, events and acts, and descriptive properties.
+An instance of E77 Persistent Item does not require actual knowledge of the identifying features of the instance being currently known. There may be cases, where the actual identifying features of an instance of E77 Persistent Item are not decidable at a particular state of knowledge.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E1_CRM_Entity" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E78_Curated_Holding">
+    <rdfs:label xml:lang="en">Curated Holding</rdfs:label>
+    <rdfs:label xml:lang="fr">Collection</rdfs:label>
+    <rdfs:label xml:lang="ru">Отвeтствeнноe Хранeниe</rdfs:label>
+    <rdfs:comment>This class comprises aggregations of instances of E18 Physical Thing that are assembled and maintained (“curated” and “preserved,” in museological terminology) by one or more instances of E39 Actor over time for a specific purpose and audience, and according to a particular collection development plan. Typical instances of curated holdings are museum collections, archives, library holdings and digital libraries. A digital library is regarded as an instance of E18 Physical Thing because it requires keeping physical carriers of the electronic content.
+Items may be added or removed from an E78 Curated Holding in pursuit of this plan. This class should not be confused with the E39 Actor maintaining the E78 Curated Holding who is often referred to using the name of the E78 Curated Holding (e.g. “The Wallace Collection decided…”).
+Collective objects in the general sense, like a tomb full of gifts, a folder with stamps, or a set of chessmen, should be documented as instances of E19 Physical Object, and not as instances of E78 Curated Holding. This is because they form wholes, either because they are physically bound together or because they are kept together for their functionality.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E24_Physical_Human-Made_Thing" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E79_Part_Addition">
+    <rdfs:label xml:lang="en">Part Addition</rdfs:label>
+    <rdfs:label xml:lang="de">Teilhinzufügung</rdfs:label>
+    <rdfs:label xml:lang="el">Προσθήκη Μερών</rdfs:label>
+    <rdfs:label xml:lang="fr">Ajout d'élément</rdfs:label>
+    <rdfs:label xml:lang="pt">Adição de Parte</rdfs:label>
+    <rdfs:label xml:lang="ru">Добавлeниe Части</rdfs:label>
+    <rdfs:label xml:lang="zh">部分增加</rdfs:label>
+    <rdfs:comment>This class comprises activities that result in an instance of E18 Physical Thing being increased, enlarged, or augmented by the addition of a part.
+Typical scenarios include the attachment of an accessory, the integration of a component, the addition of an element to an aggregate object, or the accessioning of an object into a curated instance of E78 Curated Holding. Both the E18 Physical Thing being augmented and the E18 Physical Thing that is being added are treated as separate identifiable wholes prior to the instance of E79 Part Addition. Following the addition of parts, the resulting assemblages are treated objectively as single identifiable wholes, made up of constituent or component parts bound together either physically (for example the engine becoming a part of the car), or by sharing a common purpose (such as the 32 chess pieces that make up a chess set). This class of activities forms a basis for reasoning about the history and continuity of identity of objects that are integrated into other objects over time, such as precious gemstones being repeatedly incorporated into different items of jewellery, or cultural artefacts being added to different museum instances of E78 Curated Holding over their lifespan.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E11_Modification" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E80_Part_Removal">
+    <rdfs:label xml:lang="en">Part Removal</rdfs:label>
+    <rdfs:label xml:lang="de">Teilentfernung</rdfs:label>
+    <rdfs:label xml:lang="el">Αφαίρεση Μερών</rdfs:label>
+    <rdfs:label xml:lang="fr">Retrait d'élément</rdfs:label>
+    <rdfs:label xml:lang="pt">Remoção de Parte</rdfs:label>
+    <rdfs:label xml:lang="ru">Удалeниe Части</rdfs:label>
+    <rdfs:label xml:lang="zh">部分去除</rdfs:label>
+    <rdfs:comment>This class comprises the activities that result in an instance of E18 Physical Thing being decreased by the removal of a part.
+Typical scenarios include the detachment of an accessory, the removal of a component or part of a composite object, or the deaccessioning of an object from a curated collection, an instance of E78 Curated Holding. If the instance of E80 Part Removal results in the total decomposition of the original object into pieces, such that the whole ceases to exist, the activity should instead be modelled as an instance of E81 Transformation, i.e. a simultaneous destruction and production. In cases where the part removed has no discernible identity prior to its removal but does have an identity subsequent to its removal, the activity should be modelled as both an instance of E80 Part Removal and E12 Production. This class of activities forms a basis for reasoning about the history, and continuity of identity over time, of objects that are removed from other objects, such as precious gemstones being extracted from different items of jewellery, or cultural artifacts being deaccessioned from different museum collections over their lifespan.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E11_Modification" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E81_Transformation">
+    <rdfs:label xml:lang="en">Transformation</rdfs:label>
+    <rdfs:label xml:lang="de">Umwandlung</rdfs:label>
+    <rdfs:label xml:lang="el">Μετατροπή</rdfs:label>
+    <rdfs:label xml:lang="fr">Transformation</rdfs:label>
+    <rdfs:label xml:lang="pt">Transformação</rdfs:label>
+    <rdfs:label xml:lang="ru">Трансформация</rdfs:label>
+    <rdfs:label xml:lang="zh">转变</rdfs:label>
+    <rdfs:comment>This class comprises the events that result in the simultaneous destruction of one or more than one E18 Physical Thing and the creation of one or more than one E18 Physical Thing that preserves recognizable substance and structure from the first one(s) but has fundamentally different nature or identity.
+Although the old and the new instances of E18 Physical Thing are treated as discrete entities having separate, unique identities, they are causally connected through the E81 

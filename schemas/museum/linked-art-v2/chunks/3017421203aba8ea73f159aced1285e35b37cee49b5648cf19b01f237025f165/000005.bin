@@ -1,0 +1,336 @@
+nvolved": {
+      "@id": "crm:P12_occurred_in_the_presence_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "present_at": {
+      "@id": "crm:P12i_was_present_at",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "destroyed": {
+      "@id": "crm:P13_destroyed",
+      "@type": "@id"
+    },
+    "destroyed_by": {
+      "@id": "crm:P13i_was_destroyed_by",
+      "@type": "@id"
+    },
+    "carried_out_by": {
+      "@id": "crm:P14_carried_out_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "carried_out": {
+      "@id": "crm:P14i_performed",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "influenced_by": {
+      "@id": "crm:P15_was_influenced_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "influenced": {
+      "@id": "crm:P15i_influenced",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "used_specific_object": {
+      "@id": "crm:P16_used_specific_object",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "used_for": {
+      "@id": "crm:P16i_was_used_for",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "motivated_by": {
+      "@id": "crm:P17_was_motivated_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "motivated": {
+      "@id": "crm:P17i_motivated",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "intended_use_of": {
+      "@id": "crm:P19_was_intended_use_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "made_for": {
+      "@id": "crm:P19i_was_made_for",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "specific_purpose": {
+      "@id": "crm:P20_had_specific_purpose",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "specific_purpose_of": {
+      "@id": "crm:P20i_was_purpose_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "general_purpose": {
+      "@id": "crm:P21_had_general_purpose",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "purpose_of": {
+      "@id": "crm:P21i_was_purpose_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "transferred_title_to": {
+      "@id": "crm:P22_transferred_title_to",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "acquired_title_through": {
+      "@id": "crm:P22i_acquired_title_through",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "transferred_title_from": {
+      "@id": "crm:P23_transferred_title_from",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "surrendered_title_through": {
+      "@id": "crm:P23i_surrendered_title_through",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "transferred_title_of": {
+      "@id": "crm:P24_transferred_title_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "changed_ownership_through": {
+      "@id": "crm:P24i_changed_ownership_through",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "moved": {
+      "@id": "crm:P25_moved",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "moved_by": {
+      "@id": "crm:P25i_moved_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "moved_to": {
+      "@id": "crm:P26_moved_to",
+      "@type": "@id"
+    },
+    "destination_of": {
+      "@id": "crm:P26i_was_destination_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "moved_from": {
+      "@id": "crm:P27_moved_from",
+      "@type": "@id"
+    },
+    "origin_of": {
+      "@id": "crm:P27i_was_origin_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "transferred_custody_from": {
+      "@id": "crm:P28_custody_surrendered_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "surrendered_custody_through": {
+      "@id": "crm:P28i_surrendered_custody_through",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "transferred_custody_to": {
+      "@id": "crm:P29_custody_received_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "acquired_custody_through": {
+      "@id": "crm:P29i_received_custody_through",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "transferred_custody_of": {
+      "@id": "crm:P30_transferred_custody_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "custody_transferred_through": {
+      "@id": "crm:P30i_custody_transferred_through",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "modified": {
+      "@id": "crm:P31_has_modified",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "modified_by": {
+      "@id": "crm:P31i_was_modified_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "technique": {
+      "@id": "crm:P32_used_general_technique",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "technique_of": {
+      "@id": "crm:P32i_was_technique_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "specific_technique": {
+      "@id": "crm:P33_used_specific_technique",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "used_by": {
+      "@id": "crm:P33i_was_used_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "concerned": {
+      "@id": "crm:P34_concerned",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "assessed_by": {
+      "@id": "crm:P34i_was_assessed_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "identified": {
+      "@id": "crm:P35_has_identified",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "condition_identified_by": {
+      "@id": "crm:P35i_was_identified_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "assigned_identifier": {
+      "@id": "crm:P37_assigned",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "identifier_assigned_by": {
+      "@id": "crm:P37i_was_assigned_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "deassigned": {
+      "@id": "crm:P38_deassigned",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "deassigned_by": {
+      "@id": "crm:P38i_was_deassigned_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "measured": {
+      "@id": "crm:P39_measured",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "measured_by": {
+      "@id": "crm:P39i_was_measured_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "observed_dimension": {
+      "@id": "crm:P40_observed_dimension",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "observed_in": {
+      "@id": "crm:P40i_was_observed_in",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "classified": {
+      "@id": "crm:P41_classified",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "classified_by": {
+      "@id": "crm:P41i_was_classified_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "assigned_type": {
+      "@id": "crm:P42_assigned",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "type_assigned_by": {
+      "@id": "crm:P42i_was_assigned_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "dimension": {
+      "@id": "crm:P43_has_dimension",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "dimension_of": {
+      "@id": "crm:P43i_is_dimension_of",
+      "@type": "@id"
+    },
+    "condition": {
+      "@id": "crm:P44_has_condition",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "condition_of": {
+      "@id": "crm:P44i_is_condition_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "made_of": {
+      "@id": "crm:P45_consists_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "incorporated_in": {
+      "@id": "crm:P45i_is_incorporated_in",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "preferred_identifier": {
+      "@id": "crm:P48_has_preferred_identifier",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "preferred_identifier_of": {
+      "@id": "crm:P48i_is_preferred_identifier_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "former_or_current_keeper": {
+      "@id": "crm:P49_has_former_or_current_keeper",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "former_or_current_keeper_of": {
+      "@id": "crm:P49i_is_former_or_current_keeper_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "current

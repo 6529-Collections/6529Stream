@@ -1,0 +1,79 @@
+escription": "The activity of removing this object from some other object.",
+			"type": "object",
+			"properties": {
+				"type": {"allOf": [{"title": "General", "$ref": "core.json#/$defs/typeProp"},
+					{"title": "Specific", "type": "string", "const": "PartRemoval"}]},
+				"_label": {"$ref": "core.json#/$defs/labelProp"},
+				"identified_by": {"$ref": "core.json#/$defs/identified_byProp"},
+				"classified_as": {"$ref": "core.json#/$defs/classified_asProp"},
+				"referred_to_by": {"$ref": "core.json#/$defs/referred_to_byProp"},
+				"took_place_at": {"$ref": "core.json#/$defs/took_place_atProp"},
+				"timespan": {"$ref": "core.json#/$defs/timespanProp"},
+				"caused_by": {"$ref": "core.json#/$defs/caused_byProp"},
+				"carried_out_by": {"$ref": "core.json#/$defs/carried_out_byProp"},
+				"used_specific_object": {"$ref": "core.json#/$defs/used_specific_objectProp"},
+				"influenced_by": {"$ref": "core.json#/$defs/influenced_byProp"},
+				"technique": {"$ref": "core.json#/$defs/techniqueProp"},
+				"during": {"$ref": "core.json#/$defs/duringProp"},
+				"after": {"$ref": "core.json#/$defs/afterProp"},
+				"before": {"$ref": "core.json#/$defs/beforeProp"},
+				"part_of": {"title": "crm:P9i_forms_part_of", "description": "An identified event or activity which this activity is part of", "$ref": "core.json#/$defs/EventRefOrActivityRef"},
+				"diminished": {"title": "crm:P112_diminished", "description": "A reference to the object which the object was removed from", "$ref": "core.json#/$defs/HumanMadeObjectRef"}
+			}
+		},
+		"EmbeddedAcquisition": {
+			"title": "crm:E8_Acquisition",
+			"description": "An acquisition of the object",
+			"type": "object",
+			"properties": {
+				"type": {"allOf": [{"title": "General", "$ref": "core.json#/$defs/typeProp"},
+					{"title": "Specific", "type": "string", "const": "Acquisition"}]},
+				"_label": {"$ref": "core.json#/$defs/labelProp"},
+				"identified_by": {"$ref": "core.json#/$defs/identified_byProp"},
+				"classified_as": {"$ref": "core.json#/$defs/classified_asProp"},
+				"referred_to_by": {"$ref": "core.json#/$defs/referred_to_byProp"},
+				"transferred_title_from": {"title": "crm:P23_transferred_title_from", "description": "", "type": "array", "items": {"$ref": "core.json#/$defs/PersonRefOrGroupRef"}},
+				"transferred_title_to": {"title": "crm:P22_transferred_title_to", "description": "", "type": "array", "items": {"$ref": "core.json#/$defs/PersonRefOrGroupRef"}},
+
+				"took_place_at": {"$ref": "core.json#/$defs/took_place_atProp"},
+				"timespan": {"$ref": "core.json#/$defs/timespanProp"},
+				"caused_by": {"$ref": "core.json#/$defs/caused_byProp"},
+				"carried_out_by": {"$ref": "core.json#/$defs/carried_out_byProp"},
+				"used_specific_object": {"$ref": "core.json#/$defs/used_specific_objectProp"},
+				"influenced_by": {"$ref": "core.json#/$defs/influenced_byProp"},
+				"technique": {"$ref": "core.json#/$defs/techniqueProp"},
+				"during": {"$ref": "core.json#/$defs/duringProp"},
+				"after": {"$ref": "core.json#/$defs/afterProp"},
+				"before": {"$ref": "core.json#/$defs/beforeProp"},
+				"part_of": {"title": "crm:P9i_forms_part_of", "description": "An identified event or activity which this activity is part of", "$ref": "core.json#/$defs/EventRefOrActivityRef"},
+				"part": {"title":"crm:P46_is_composed_of", "description": "", "type": "array", "items": {"$ref": "#/$defs/Production"}}
+			}
+		},
+		"Encounter": {
+			"title": "sci:S19_Encounter_Event",
+			"description": "The activity during which this object was encountered, found or discovered.",
+			"type": "object",
+			"properties": {
+				"type": {"allOf": [{"title": "General", "$ref": "core.json#/$defs/typeProp"},
+					{"title": "Specific", "type": "string", "const": "Encounter"}]},
+				"_label": {"$ref": "core.json#/$defs/labelProp"},
+				"identified_by": {"$ref": "core.json#/$defs/identified_byProp"},
+				"classified_as": {"$ref": "core.json#/$defs/classified_asProp"},
+				"referred_to_by": {"$ref": "core.json#/$defs/referred_to_byProp"},
+				"took_place_at": {"$ref": "core.json#/$defs/took_place_atProp"},
+				"timespan": {"$ref": "core.json#/$defs/timespanProp"},
+				"caused_by": {"$ref": "core.json#/$defs/caused_byProp"},
+				"carried_out_by": {"$ref": "core.json#/$defs/carried_out_byProp"},
+				"used_specific_object": {"$ref": "core.json#/$defs/used_specific_objectProp"},
+				"influenced_by": {"$ref": "core.json#/$defs/influenced_byProp"},
+				"technique": {"$ref": "core.json#/$defs/techniqueProp"},
+				"during": {"$ref": "core.json#/$defs/duringProp"},
+				"after": {"$ref": "core.json#/$defs/afterProp"},
+				"before": {"$ref": "core.json#/$defs/beforeProp"},
+				"part_of": {"title": "crm:P9i_forms_part_of", "description": "An identified event or activity which this activity is part of", "$ref": "core.json#/$defs/EventRefOrActivityRef"}
+			}
+		}				
+	},
+	"required": ["@context", "id", "type", "_label"],
+	"additionalProperties": false
+}

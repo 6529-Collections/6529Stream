@@ -42,6 +42,75 @@ Each ADR should include problem, current behavior, intended behavior,
 alternatives, security impact, release impact, test plan, rollout plan,
 non-goals, and accepted risks.
 
+[ADR 0032: Governance foundation before product activation](0032-governance-foundation-before-product-activation.md)
+defines the staged deployment needed by the archival provider's canonical role
+pin. Its historical foundation seal and complete activated release inventory
+have separate acceptance requirements.
+
 [ADR 0024: Append-only governance catalog evolution](0024-append-only-governance-catalog.md)
 is accepted for the current pre-genesis implementation. It permits delayed,
 root-proposed exact-target extensions without changing existing catalog entries.
+
+[ADR 0025: Artist authority windows and fixed typed extensions](0025-artist-authority-windows-and-fixed-extensions.md)
+is accepted as the undeployed full-v1 artist design: one active transition
+window, bounded provisional-record selection, and constructor-fixed typed
+extensions that preserve each semantic owner's storage and authority.
+Implementation and integration evidence remain separate acceptance gates.
+
+[ADR 0026: ARRNG callback and custody boundaries](0026-arrng-callback-and-custody-boundaries.md)
+defines the adapter's enforceable coordinator-call cap, persisted-output retry,
+source pins and governed treasury custody. Incoming oracle gas and deployed
+upstream acceptance remain separate requirements.
+
+[ADR 0028: Reveal-fee custody and role activation](0028-reveal-fee-custody-and-role-activation.md)
+defines separate collection escrow and requester credits, the optional exact
+provider fee capability, canonical operational roles and resumable activation.
+
+[ADR 0029: Identity-contest dismissal and cohort closure](0029-identity-contest-dismissal-and-cohort-closure.md)
+defines the missing operation 58, explicit adjudicated closure of contested
+provisional records, replay-preserving continuation and a versioned extension
+of the immutable historical operation inventory.
+
+[ADR 0030: Clearing partial settlement and refund entitlements](0030-clearing-partial-settlement-and-refund-entitlements.md)
+defines immediate floor mints, retained buyer credits and bounded independent
+financial processing with terminal refund escape.
+
+[ADR 0031: Quorum-anchored estate archival profile](0031-quorum-anchored-estate-archival-profile.md)
+defines archival evidence and immutable dependencies for estate authority.
+
+[ADR 0032: Governance foundation before product activation](0032-governance-foundation-before-product-activation.md)
+defines the minimal canonical foundation followed by ordinary delayed catalog
+admission, registration and product selection.
+
+[ADR 0033: Engineering rehearsals and collector gas](0033-engineering-rehearsals-and-collector-gas.md)
+permits identified test-asset engineering deployments while failed collector
+gas gates remain visible and continue to constrain candidate acceptance.
+
+[ADR 0034: Economics consent binding associations](0034-economics-consent-binding-associations.md)
+defines token/default primary scope commitments and exact consent associations
+after a corrected artist binding, preserving earlier permanent decisions.
+
+[ADR 0035: Native secondary private offers](0035-native-secondary-private-offers.md)
+defines exact sale/offer/custody authority, secondary treatment, permanent
+revocation and royalty settlement for the native private-sale increment.
+
+[ADR 0036: Adopt the museum semantic profile](0036-museum-semantic-profile.md)
+records owner adoption of the complete museum profile, review and identity
+boundaries, bounded deterministic exports, and parallel delivery with separate
+testnet-engineering and full museum acceptance checks.
+
+[ADR 0037: Full-payload mint authorization revocation](0037-full-payload-mint-authorization-revocation.md)
+defines permanent ticket and offer revocation from the complete signed payload
+and canonical Manager/Ledger authorization identity.
+
+[ADR 0038: Token royalties and disabled assignment representation](0038-token-royalties-and-disabled-assignment-representation.md)
+defines token precedence, explicit disabled assignment commitments and
+clear-to-inheritance behavior with preserved consent and revision history.
+
+[ADR 0039: Canonical finality governance and evidence](0039-canonical-finality-governance-and-evidence.md)
+defines canonical governance, exact scope evidence and complete archival
+artifact commitments for the developing finality implementation.
+
+[ADR 0040: Current metadata record host](0040-current-metadata-record-host.md)
+defines the new interface boundary, retained byte history and live-root
+authorization for catalog admission and family grants.

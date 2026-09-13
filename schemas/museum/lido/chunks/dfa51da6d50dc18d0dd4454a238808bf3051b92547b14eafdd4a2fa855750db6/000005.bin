@@ -1,0 +1,185 @@
+ <tei:ref target="#earliestDate">Earliest Date</tei:ref>
+							and <tei:ref target="#latestDate">Latest Date</tei:ref> elements.</tei:ab>
+						<tei:ab type="label">Date</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="descriptiveMetadata" type="lido:descriptiveMetadataComplexType" id="descriptiveMetadata">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Aggregates the descriptive metadata of an object/work record.<br/>
+					The attribute xml:lang is mandatory to state the language of the metadata.<br/>
+					Repeated for fully multilingual resources, once for each language.<br/>
+					Please note that the repeatability can vary depending on whether the element is used as root element (not repeatable) 
+					or as a child element (repeatable).</tei:ab>
+				<tei:ab type="label">Descriptive Metadata</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="descriptiveMetadataComplexType" id="descriptiveMetadataComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines the descriptive metadata for an object/work
+					record.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element ref="lido:objectClassificationWrap">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A wrapper for classification statements about the
+							object/work in focus, including object/work type and classification.</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="lido:objectIdentificationWrap"/>
+			<xs:element ref="lido:eventWrap" minOccurs="0"/>
+			<xs:element ref="lido:objectRelationWrap" minOccurs="0"/>
+		</xs:sequence>
+		<xs:attribute ref="xml:lang" use="required"/>
+	</xs:complexType>
+	<xs:complexType name="descriptiveNoteComplexType" id="descriptiveNoteComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines any textual description, including
+					description identifier, descriptive note and sources.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="descriptiveNoteID" type="lido:identifierComplexType" minOccurs="0" maxOccurs="unbounded" id="descriptiveNoteID">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An identifier for an external resource describing
+							the element in focus.<br/>
+							The reference resource may be any kind of resource, preferably web-accessible.</tei:ab>
+						<tei:ab type="note">The referenced resource may be any kind of document,
+							preferably web-accessible.</tei:ab>
+						<tei:ab type="label">Description/Descriptive Note Identifier</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="descriptiveNoteValue" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="descriptiveNoteValue">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A textual description of the element in focus,
+							such as an object/work or an event, usually a brief essay-like text.<br/>
+							Repeated for language variants only.</tei:ab>
+						<tei:ab type="label">Description/Descriptive Note</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Free text</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="sourceDescriptiveNote" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="sourceDescriptiveNote">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A text element identifying the source of the descriptive note, generally a
+							published source.</tei:ab>
+						<tei:ab type="label">Source Description/Descriptive Note</tei:ab>
+						<tei:ab type="dataValues">Free text</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute ref="lido:type" id="descriptiveNote_type">
+			<xs:annotation>
+				<xs:documentation>
+					<tei:ab type="description">An attribute for the particular kind of descriptive note.<br/>
+					 Note that this type attribute is primarily intended for use in application profiles.</tei:ab>
+					<tei:ab type="dataValues">Controlled terminology</tei:ab>
+					<tei:ab type="recommendation">To be determined by application profiles.</tei:ab>
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute ref="lido:sortorder"/>
+	</xs:complexType>
+	<xs:element name="displayStateEditionWrap" id="displayStateEditionWrap">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">A wrapper for the display of state and edition
+					information on the object/work.</tei:ab>
+				<tei:ab type="label">Display State/Edition Wrapper</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="displayState" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="displayState">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">A display element for a description of the
+								state of the object/work, used primarily for prints and other
+								multiples, including state identification and known states, as
+								appropriate.<br/>
+								Repeated for language variants only.</tei:ab>
+							<tei:ab type="label">Display State</tei:ab>
+							<tei:ab type="dataValues">Free text</tei:ab>
+							
+							
+						</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="displayEdition" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="displayEdition">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">A display element for indicating a particular
+								edition to which the object/work belongs, used primarily for prints
+								and other multiples.<br/>
+								Repeated for language variants only.</tei:ab>
+							<tei:ab type="label">Display Edition</tei:ab>
+							
+							
+							<tei:ab type="dataValues">Free text</tei:ab>
+						</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="sourceStateEdition" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="sourceStateEdition">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">A text element identifying the source of the provided information about 
+								the state or edition of the entity in focus.</tei:ab>
+							<tei:ab type="label">Source Display State/Edition</tei:ab>
+							<tei:ab type="dataValues">Free text</tei:ab>
+							
+							
+							
+							
+						</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:attribute name="encodinganalog" type="xs:string" id="encodinganalog">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">An attribute for the internal field label in the
+					source database from which the data were migrated. The source format is
+					indicated in the attribute <tei:ref target="#relatedencoding">relatedencoding</tei:ref> of the
+					<tei:ref target="#lidoWrap">LIDO Wrapper</tei:ref> for the whole document.</tei:ab>
+				<tei:ab type="dataValues">Free text</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+	</xs:attribute>
+	<xs:complexType name="eventComplexType" id="eventComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines information about one event associated with
+					the object/work in focus.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="eventID" type="lido:identifierComplexType" minOccurs="0" maxOccurs="unbounded" id="eventID">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An identifier for the event.<br/>
+							Repeatable for identifiers from different authority files or other sources. 
+							The recommended method, however, is to reference equivalent resources using the 
+							<tei:ref target="https://www.w3.org/TR/owl-ref/#sameAs-def">owl:sameAs</tei:ref>
+							property, stating that two or more URIs identify the same individual entity.</t

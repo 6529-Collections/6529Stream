@@ -1,0 +1,97 @@
+lexType"/>
+	<xs:element name="termOfRestriction" type="startAndEndDateComplexType"/>
+	<!-- 
+****** extension  type  element declarations
+ 	-->
+	<xs:element name="agentExtension" type="extensionComplexType"/>
+	<xs:element name="creatingApplicationExtension" type="extensionComplexType"/>
+	<xs:element name="environmentExtension" type="extensionComplexType"/>
+    <xs:element name="eventDetailExtension" type="extensionComplexType"/>
+    <xs:element name="eventOutcomeDetailExtension" type="extensionComplexType"/>
+	<xs:element name="keyInformation" type="extensionComplexType"/>
+	<xs:element name="objectCharacteristicsExtension" type="extensionComplexType"/>
+	<xs:element name="rightsExtension" type="extensionComplexType"/>
+	<xs:element name="signatureInformationExtension" type="extensionComplexType"/>
+	<xs:element name="significantPropertiesExtension" type="extensionComplexType"/>
+    
+	<!--
+******************************************************************************************************
+************************************ Global Definitions  *******************************************
+******************************************************************************************************
+-->
+	<!--
+************** countryCode definition
+
+Used by copyrightJurisdiction and statuteJurisdiction.  Although typed as stringPlusAuthority, 
+it is recommended that a standard jurisdictional code (such as ISO 3166-1 alpha-2 or alpha-3 country codes) be used, 
+to ensure international uniqueness.  (Note: this does not introduce a substantive change. 
+It is introduced to reinforce this recommendation.)
+-->
+	
+	<xs:complexType name="countryCode">
+		<xs:simpleContent>
+			<xs:extension base="stringPlusAuthority"/>
+		</xs:simpleContent>
+	</xs:complexType>
+	
+	<!--
+************** version definition
+-->
+	<xs:simpleType name="version3">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="3.0"/>
+		</xs:restriction>
+	</xs:simpleType>
+    <!--  
+****************	extension definition	
+-->
+    <xs:complexType name="extensionComplexType">
+        <xs:sequence>
+            <xs:any namespace="##any" processContents="lax" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+	<!-- 	
+	    
+************** edtf date/time Definition
+
+	edtfSimpleType  is the type used throughout the schema for date type elements. 
+	edtf refers to the Extended Date/Time Definition, proposed to be adopted into ISO 8601 Part 2. 
+	It is identical to xs:string. It is defined in order to provide guidance to implementers
+	that for those elements defined as such, the edtf specification should be supported.
+		-->
+	<xs:simpleType name="edtfSimpleType">
+	   <xs:restriction base="xs:string"/>
+	</xs:simpleType>
+    <!--
+        mdSec definition removed in 3.0  
+        -->
+		<!-- 	****************************************************************************************************
+		
+********** authorityAttributeGroup   ********** 
+	
+   and 
+		       
+ ********** stringPlusAuthority   **********
+		       
+		
+		****************************************************************************************************
+	-->
+	<xs:attributeGroup name="authorityAttributeGroup">
+		<xs:attribute name="authority" type="xs:string"/>
+		<xs:attribute name="authorityURI" type="xs:anyURI"/>
+		<xs:attribute name="valueURI" type="xs:anyURI"/>
+	</xs:attributeGroup>
+	<!--
+		************************* stringPlusAuthority  *************************     	
+	-->
+	<xs:complexType name="stringPlusAuthority">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attributeGroup ref="authorityAttributeGroup"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	
+	<!-- -->
+</xs:schema>

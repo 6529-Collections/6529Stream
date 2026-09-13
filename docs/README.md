@@ -14,6 +14,11 @@ their own scope and must not be read as a list of installed features.
 | Find source or a caller capability | [Source map](../smart-contracts/README.md), [interface map](../smart-contracts/interfaces/stream/README.md) |
 | Sign, buy, bid, index, withdraw, or render | [Integration guide](integrations/README.md) |
 | Use typed calls and export selected state | [TypeScript client](integrations/typescript-client.md) |
+| Publish and reconstruct interpretation documents | [Schema registry](schema-registry.md) |
+| Publish attributed records and recover their original bytes | [Current metadata records](integrations/metadata-records.md) |
+| Bind content roots and inspect finality component hosts | [Finality adapters and content commitments](finality-host-adapters.md) |
+| Verify every content leaf against preserved manifest bytes | [Content leaf manifests](integrations/content-leaf-manifests.md) |
+| Validate retained Linked Art documents offline | [Museum tooling](../tools/museum/README.md), [validation boundary](museum-linked-art-validation.md) |
 | Run a second artist through sales and auctions | [Product scenarios](integrations/product-demo.md) |
 | Complete a collection and retain its artwork | [Collector package](integrations/collector-package.md) |
 | Choose a command or compiler profile | [Tooling](tooling.md) |
@@ -25,6 +30,7 @@ their own scope and must not be read as a list of installed features.
 | Need | Reference |
 | --- | --- |
 | Normative target and precedence | [Specification policy](spec-policy.md), [launch architecture](launch-v1-target-architecture.md) |
+| Museum records, authority mappings and archival exports | [Museum semantic specification](museum-semantic-mapping.md), [delivery and evidence](../ops/MUSEUM_DELIVERY.md) |
 | Decisions and unresolved design work | [ADRs](adr/README.md), [open questions](spec-open-questions.md) |
 | Full-v1 conformance and implementation gaps | [Conformance matrix](launch-conformance-matrix.md), [roadmap](../ops/ROADMAP.md), [backlog](../ops/EXECUTION_BACKLOG.md) |
 | Audit scope and reporting | [Audit package](audit-package.md), [threat model](threat-model.md), [SECURITY.md](../SECURITY.md) |

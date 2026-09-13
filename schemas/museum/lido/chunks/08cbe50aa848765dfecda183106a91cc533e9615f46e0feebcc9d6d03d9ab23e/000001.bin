@@ -1,0 +1,155 @@
+itively directed and one negatively directed solid in the coboundary of every face. The positively directed solid corresponds to the solid which lies in the direction of the positively directed normal to the face in any geometric realisation.  A face may optionally be realised by a 2-dimensional (surface) geometric primitive.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractTopoPrimitiveType">
+				<sequence>
+					<element ref="gml:directedEdge" maxOccurs="unbounded"/>
+					<element ref="gml:directedTopoSolid" minOccurs="0" maxOccurs="2"/>
+					<element ref="gml:surfaceProperty" minOccurs="0"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ===== Property for topology association - by Value or by Reference ===== -->
+	<element name="directedFace" type="gml:DirectedFacePropertyType">
+		<annotation>
+			<appinfo>
+				<sch:pattern name="refAndContent co-occurence prohibited">
+					<sch:rule context="gml:directedFace">
+						<sch:extends rule="hrefOrContent"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<complexType name="DirectedFacePropertyType">
+		<sequence minOccurs="0">
+			<element ref="gml:Face"/>
+		</sequence>
+		<attribute name="orientation" type="gml:SignType" default="+"/>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- ========================================================== -->
+	<!-- primitive topology objects (3-dimensional) -->
+	<!-- ========================================================== -->
+	<element name="TopoSolid" type="gml:TopoSolidType" substitutionGroup="gml:_TopoPrimitive"/>
+	<!-- ============================================================= -->
+	<complexType name="TopoSolidType">
+		<annotation>
+			<documentation>The topological boundary of a TopoSolid consists of a set of directed faces. Note that all faces associated with the TopoSolid, including dangling faces, appear in the boundary. The coboundary of a TopoSolid is empty and hence requires no representation.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractTopoPrimitiveType">
+				<sequence>
+					<element ref="gml:directedFace" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ========================================================== -->
+	<!-- ===== Property for topology association - by Value or by Reference ===== -->
+	<element name="directedTopoSolid" type="gml:DirectedTopoSolidPropertyType">
+		<annotation>
+			<appinfo>
+				<sch:pattern name="refAndContent co-occurence prohibited">
+					<sch:rule context="gml:directedTopoSolid">
+						<sch:extends rule="hrefOrContent"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+		</annotation>
+	</element>
+	<!-- ============================================================= -->
+	<complexType name="DirectedTopoSolidPropertyType">
+		<sequence minOccurs="0">
+			<element ref="gml:TopoSolid"/>
+		</sequence>
+		<attribute name="orientation" type="gml:SignType" default="+"/>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- ========================================================== -->
+	<element name="TopoPoint" type="gml:TopoPointType"/>
+	<!-- ========================================================== -->
+	<complexType name="TopoPointType">
+		<annotation>
+			<documentation>The intended use of TopoPoint is to appear within a point feature to express the structural and possibly geometric relationships of this point to other features via shared node definitions. Note the orientation assigned to the directedNode has no meaning in this context. It is preserved for symmetry with the types and elements which follow.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractTopologyType">
+				<sequence>
+					<element ref="gml:directedNode"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ========================================================== -->
+	<!-- ============================================================= -->
+	<!-- ===== Property for topology association - by Value  ===== -->
+	<element name="topoPointProperty" type="gml:TopoPointPropertyType"/>
+	<!-- ============================================================= -->
+	<complexType name="TopoPointPropertyType">
+		<sequence>
+			<element ref="gml:TopoPoint"/>
+		</sequence>
+	</complexType>
+	<!-- ========================================================== -->
+	<!-- ========================================================== -->
+	<element name="TopoCurve" type="gml:TopoCurveType"/>
+	<!-- ============================================================= -->
+	<complexType name="TopoCurveType">
+		<annotation>
+			<documentation>The end Node of each directedEdge of a TopoCurveType
+is the start Node of the next directedEdge of the TopoCurveType in document order.  The TopoCurve type and element represent a homogeneous topological expression, a list of directed edges, which if realised are isomorphic to a geometric curve primitive. The intended use of TopoCurve is to appear within a line feature instance to express the structural and geometric relationships of this line to other features via the shared edge definitions.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractTopologyType">
+				<sequence>
+					<element ref="gml:directedEdge" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ========================================================== -->
+	<!-- ===== Property for topology association - by Value ===== -->
+	<element name="topoCurveProperty" type="gml:TopoCurvePropertyType"/>
+	<!-- ============================================================= -->
+	<complexType name="TopoCurvePropertyType">
+		<sequence>
+			<element ref="gml:TopoCurve"/>
+		</sequence>
+	</complexType>
+	<!-- ========================================================== -->
+	<!-- ========================================================== -->
+	<element name="TopoSurface" type="gml:TopoSurfaceType"/>
+	<!-- ============================================================= -->
+	<complexType name="TopoSurfaceType">
+		<annotation>
+			<documentation>The TopoSurface type and element represent a homogeneous topological expression, a set of directed faces, which if realised are isomorphic to a geometric surface primitive. The intended use of TopoSurface is to appear within a surface feature instance to express the structural and possibly geometric relationships of this surface to other features via the shared face definitions.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractTopologyType">
+				<sequence>
+					<element ref="gml:directedFace" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ========================================================== -->
+	<!-- ===== Property for topology association - by Value ===== -->
+	<element name="topoSurfaceProperty" type="gml:TopoSurfacePropertyType"/>
+	<!-- ============================================================= -->
+	<complexType name="TopoSurfacePropertyType">
+		<sequence>
+			<element ref="gml:TopoSurface"/>
+		</sequence>
+	</complexType>
+	<!-- ========================================================== -->
+	<element name="TopoVolume" type="gml:TopoVolumeType"/>
+	<!-- ============================================================= -->
+	<complexType name="TopoVolumeType">
+		<annotation>
+			<documentation>The TopoVolume type and element represent a homogeneous topological expression, a set of directed TopoSolids, which if realised are isomorphic to a geometric solid primitive. The intended use of TopoVolume is to appear within a 3D solid feature instance to express the structural and geometric relationships of this solid to other features via the shared TopoSolid definitions.  . Note the orientation assigned to the directedSolid has no meaning in three dimensions. It is preserved for symmetry with the preceding types and elements.</documentation>
+		</annotation>
+		<complexContent>
+			<extension b

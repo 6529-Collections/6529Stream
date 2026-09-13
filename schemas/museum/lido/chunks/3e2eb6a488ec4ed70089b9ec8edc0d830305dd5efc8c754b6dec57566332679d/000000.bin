@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.opengis.net/gml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:gml="http://www.opengis.net/gml" xmlns:sch="http://www.ascc.net/xml/schematron" xmlns="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+        attributeFormDefault="unqualified" version="3.1.1.2">
+	<annotation>
+		<appinfo source="urn:opengis:specification:gml:schema-xsd:valueObjects:3.1.1">valueObjects.xsd</appinfo>
+		<documentation>GML conformant schema for Values in which the  
+		    * scalar Value types and lists have their values recorded in simpleContent elements 
+		    * complex Value types are built recursively
+		    
+		    GML is an OGC Standard.
+		    Copyright (c) 2001,2005,2010 Open Geospatial Consortium.
+		    To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .
+		</documentation>
+	</annotation>
+	<!-- ====================================================================== -->
+	<!-- geometry and temporal included so that _Geometry and _TimeObject can be added to Value choice group -->
+	<include schemaLocation="gml.xsd"/>
+	<include schemaLocation="geometryBasic0d1d.xsd"/>
+	<include schemaLocation="temporal.xsd"/>
+	<!-- ====================================================================== -->
+	<group name="Value">
+		<annotation>
+			<documentation>Utility choice group which unifies generic Values defined in this schema document with 
+			Geometry and Temporal objects and the Measures described above, 
+			so that any of these may be used within aggregate Values.</documentation>
+		</annotation>
+		<choice>
+			<!-- <element ref="gml:_Value"/> -->
+			<group ref="gml:ValueObject"/>
+			<element ref="gml:_Object"/>
+			<!--			<element ref="gml:_Geometry"/>
+			<element ref="gml:_TimeObject"/> -->
+			<element ref="gml:Null"/>
+		</choice>
+	</group>
+	<!-- ====================================================================== -->
+	<group name="ValueObject">
+		<choice>
+			<group ref="gml:ScalarValue"/>
+			<group ref="gml:ScalarValueList"/>
+			<group ref="gml:ValueExtent"/>
+			<element ref="gml:CompositeValue"/>
+		</choice>
+	</group>
+	<!-- ======================================================================
+	<element name="_Value" abstract="true" substitutionGroup="gml:_Object">
+		<annotation>
+			<documentation>Abstract element which acts as the head of a substitution group which contains _ScalarValue, _ScalarValueList and CompositeValue and (transitively) the elements in their substitution groups.  This element may be used in an application schema as a variable, so that in an XML instance document any member of its substitution group may occur.</documentation>
+		</annotation>
+	</element> -->
+	<!-- ====================================================================== -->
+	<!-- ================== Scalar Values =========================
+	<element name="_ScalarValue" abstract="true" substitutionGroup="gml:_Value">
+		<annotation>
+			<documentation>Abstract element which acts as the head of a substitution group which contains Boolean, Category, Count and Quantity, and (transitively) the elements in their substitution groups.  This element may be used in an application schema as a variable, so that in an XML instance document any member of its substitution group may occur.</documentation>
+		</annotation>
+	</element> -->
+	<group name="ScalarValue">
+		<choice>
+			<element ref="gml:Boolean"/>
+			<element ref="gml:Category"/>
+			<element ref="gml:Quantity"/>
+			<element ref="gml:Count"/>
+		</choice>
+	</group>
+	<!-- ======================================================================
+	<element name="_ScalarValueList" abstract="true" substitutionGroup="gml:_Value">
+		<annotation>
+			<documentation>Abstract element which acts as the head of a substitution group which contains the compact encodings BooleanList, CategoryList, CountList and QuantityList, and (transitively) the elements in their substitution groups.  This element may be used in an application schema as a variable, so that in an XML instance document any member of its substitution group may occur.</documentation>
+		</annotation>
+	</element> -->
+	<group name="ScalarValueList">
+		<choice>
+			<element ref="gml:BooleanList"/>
+			<element ref="gml:CategoryList"/>
+			<element ref="gml:QuantityList"/>
+			<element ref="gml:CountList"/>
+		</choice>
+	</group>
+	<!-- ====================================================================== -->
+	<!-- ======================= Boolean ========================
+	<element name="Boolean" type="boolean" substitutionGroup="gml:_ScalarValue"> -->
+	<element name="Boolean" type="boolean">
+		<annotation>
+			<documentation>A value from two-valued logic, using the XML Schema boolean type.  An instance may take the values {true, false, 1, 0}.</documentation>
+		</annotation>
+	</element>
+	<!--
+	<element name="BooleanList" type="gml:booleanOrNullList" substitutionGroup="gml:_ScalarValueList"> -->
+	<element name="BooleanList" type="gml:booleanOrNullList">
+		<annotation>
+			<documentation>XML List based on XML Schema boolean type.  An element of this type contains a space-separated list of boolean values {0,1,true,false}</documentation>
+		</annotation>
+	</element>
+	<!-- ====================================================================== -->
+	<!-- ======================= Category ==========================
+	<element name="Category" type="gml:CodeType" substitutionGroup="gml:_ScalarValue"> -->
+	<element name="Category" type="gml:CodeType">
+		<annotation>
+			<documentation>A term representing a classification.  It has an optional XML attribute codeSpace, whose value is a URI which identifies a dictionary, codelist or authority for the term.</documentation>
+		</annotation>
+	</element>
+	<!--
+	<element name="CategoryList" type="gml:CodeOrNullListType" substitutionGroup="gml:_ScalarValueList"> -->
+	<element name="CategoryList" type="gml:CodeOrNullListType">
+		<annotation>
+			<documentation>A space-separated list of terms or nulls.  A single XML attribute codeSpace may be provided, which authorises all the terms in the list.</documentation>
+		</annotation>
+	</element>
+	<!-- ====================================================================== -->
+	<!-- =========================== Quantity ============================
+	<element name="Quantity" type="gml:MeasureType" substitutionGroup="gml:_ScalarValue"> -->
+	<element name="Quantity" type="gml:MeasureType">
+		<annotation>
+			<documentation>A numeric value with a scale.  The content of the element is an amount using the XML Schema type double which permits decimal or scientific notation.  An XML attribute uom (unit of measure) is required, whose value is a URI which identifies the definition of the scale or units by which the numeric value must be multiplied.</documentation>
+		</annotation>
+	</element>
+	<!--
+	<element name="QuantityList" type="gml:MeasureOrNullListType" substitutionGroup="gml:_ScalarValueList"> -->
+	<element name="QuantityList" type="gml:MeasureOrNullListType">
+		<annotation>
+			<documentation>A space separated list of amounts or nulls.  The amounts use the XML Schema type double.  A single XML attribute uom (unit of measure) is required, whose value is a URI which identifies the definition of the scale or units by which all the amounts in the list must be multiplied.</documentation>
+		</annotation>
+	</element>
+	<!-- ====================================================================== -->
+	<!-- ========================== Count ==========================
+	<element name="Count" type="integer" substitutionGroup="gml:_ScalarValue"> -->
+	<element name="Count" type="integer">
+		<annotation>
+			<documentation>An integer representing a frequency of occurrence.</documentation>
+		</annotation>
+	</element>
+	<!--
+	<element name="CountList" type="gml:integerOrNullList" substitutionGroup="gml:_ScalarValueList"> -->
+	<element name="CountList" type="gml:integerOrNullList">
+		<annotation>
+			<documentation>A space-separated list of integers or nulls.</documentation>
+		</annotation>
+	</element>
+	<!-- ====================================================================== -->
+	<!--                    aggregate Value types                      -->
+	<!-- 

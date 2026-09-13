@@ -1,0 +1,164 @@
+========================================== -->
+	<element name="methodName" type="gml:CodeType" substitutionGroup="gml:name">
+		<annotation>
+			<documentation>The name by which this operation method is identified. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<complexType name="OperationMethodType">
+		<annotation>
+			<documentation>Definition of an algorithm used to perform a coordinate operation. Most operation methods use a number of operation parameters, although some coordinate conversions use none. Each coordinate operation using the method assigns values to these parameters. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:OperationMethodBaseType">
+				<sequence>
+					<element ref="gml:methodID" minOccurs="0" maxOccurs="unbounded">
+						<annotation>
+							<documentation>Set of alternative identifications of this operation method. The first methodID, if any, is normally the primary identification code, and any others are aliases. </documentation>
+						</annotation>
+					</element>
+					<element ref="gml:remarks" minOccurs="0">
+						<annotation>
+							<documentation>Comments on or information about this operation method, including source information.</documentation>
+						</annotation>
+					</element>
+					<element ref="gml:methodFormula"/>
+					<element ref="gml:sourceDimensions"/>
+					<element ref="gml:targetDimensions"/>
+					<element ref="gml:usesParameter" minOccurs="0" maxOccurs="unbounded">
+						<annotation>
+							<documentation>Unordered list of associations to the set of operation parameters and parameter groups used by this operation method. </documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="methodID" type="gml:IdentifierType">
+		<annotation>
+			<documentation>An identification of an operation method. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="methodFormula" type="gml:CodeType">
+		<annotation>
+			<documentation>Formula(s) used by this operation method. The value may be a reference to a publication. Note that the operation method may not be analytic, in which case this element references or contains the procedure, not an analytic formula.</documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="sourceDimensions" type="positiveInteger">
+		<annotation>
+			<documentation>Number of dimensions in the source CRS of this operation method. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="targetDimensions" type="positiveInteger">
+		<annotation>
+			<documentation>Number of dimensions in the target CRS of this operation method. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="usesParameter" type="gml:AbstractGeneralOperationParameterRefType">
+		<annotation>
+			<documentation>Association to an operation parameter or parameter group used by this operation method. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="operationMethodRef" type="gml:OperationMethodRefType"/>
+	<!-- =================================================== -->
+	<complexType name="OperationMethodRefType">
+		<annotation>
+			<documentation>Association to a concrete general-purpose operation method, either referencing or containing the definition of that method. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:OperationMethod"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<!-- =================================================== -->
+	<element name="_GeneralOperationParameter" type="gml:AbstractGeneralOperationParameterType" abstract="true" substitutionGroup="gml:Definition"/>
+	<!-- =================================================== -->
+	<complexType name="AbstractGeneralOperationParameterType" abstract="true">
+		<annotation>
+			<documentation>Abstract definition of a parameter or group of parameters used by an operation method. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:DefinitionType">
+				<sequence>
+					<element ref="gml:minimumOccurs" minOccurs="0"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="minimumOccurs" type="nonNegativeInteger">
+		<annotation>
+			<documentation>The minimum number of times that values for this parameter group or parameter are required. If this attribute is omitted, the minimum number is one. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="abstractGeneralOperationParameterRef" type="gml:AbstractGeneralOperationParameterRefType"/>
+	<!-- =================================================== -->
+	<complexType name="AbstractGeneralOperationParameterRefType">
+		<annotation>
+			<documentation>Association to an operation parameter or group, either referencing or containing the definition of that parameter or group. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:_GeneralOperationParameter"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="OperationParameter" type="gml:OperationParameterType" substitutionGroup="gml:_GeneralOperationParameter"/>
+	<!-- =================================================== -->
+	<complexType name="OperationParameterBaseType" abstract="true">
+		<annotation>
+			<documentation>Basic encoding for operation parameter objects, simplifying and restricting the DefinitionType as needed. </documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:AbstractGeneralOperationParameterType">
+				<sequence>
+					<element ref="gml:metaDataProperty" minOccurs="0" maxOccurs="unbounded"/>
+					<element ref="gml:parameterName"/>
+					<element ref="gml:minimumOccurs" minOccurs="0"/>
+				</sequence>
+				<attribute ref="gml:id" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="parameterName" type="gml:CodeType" substitutionGroup="gml:name">
+		<annotation>
+			<documentation>The name by which this operation parameter is identified. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<complexType name="OperationParameterType">
+		<annotation>
+			<documentation>The definition of a parameter used by an operation method. Most parameter values are numeric, but other types of parameter values are possible. This complexType is expected to be used or extended for all operation methods, without defining operation-method-specialized element names.  </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:OperationParameterBaseType">
+				<sequence>
+					<element ref="gml:parameterID" minOccurs="0" maxOccurs="unbounded">
+						<annotation>
+							<documentation>Set of alternative identifications of this operation parameter. The first parameterID, if any, is normally the primary identification code, and any others are aliases. </documentation>
+						</annotation>
+					</element>
+					<element ref="gml:remarks" minOccurs="0">
+						<annotation>
+							<documentation>Comments on or information about this operation parameter, including source information. </documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="parameterID" type="gml:IdentifierType">
+		<annotation>
+			<documentation>An identification of an operation parameter. </documentation>
+		</annotation>
+	<

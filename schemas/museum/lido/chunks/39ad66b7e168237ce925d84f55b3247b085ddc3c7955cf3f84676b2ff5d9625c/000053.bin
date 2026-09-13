@@ -1,0 +1,124 @@
+st date of the
+            creation of the Mona Lisa by Leonardo da Vinci.</p>
+            <div class="sourceCode" id="cb57"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:earliestDate</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:source=</span><span class="st">&quot;Collections des musées de France (Joconde), Portait de Mona Lisa. URL: https://www.pop.culture.gouv.fr/notice/joconde/000PE025604&quot;</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00529&quot;</span>&gt;</span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>    1503</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:earliestDate</span>&gt;</span></code></pre></div>
+            <h1 data-number="6" id="checking-metadata-quality"><span
+            class="header-section-number">6</span> Checking metadata
+            quality</h1>
+            <p>Quality issues can affect processing, integration, and
+            usefulness of a metadata record. Quality checks should
+            therefore be organized according to different levels of
+            compliance:</p>
+            <ul>
+            <li>Syntactic validity with respect to the schema
+            definition</li>
+            <li>Observation of additional formal constraints</li>
+            <li>Observation of content rules and recommendations</li>
+            </ul>
+            <h2 data-number="6.1" id="syntactic-validation"><span
+            class="header-section-number">6.1</span> Syntactic
+            validation</h2>
+            <p>Reliable processing of XML records requires that the
+            record structure follows the model definition. The LIDO
+            record schema is expressed in the <a
+            href="https://www.w3.org/TR/xmlschema11-1/">W3C XML Schema
+            Definition Language (XSD)</a>, one of several formal
+            grammars for specifying XML data structures. An XML record
+            is said to be syntactically valid if (and only if) it meets
+            all constraints laid down in the formal schema
+            definition.</p>
+            <p>Since all further quality checks rely on the syntactic
+            validity of a LIDO record, <strong>XSD validation is the
+            essential first step in quality assurance</strong>. Software
+            tools for checking XML records against XSD are widely
+            available. In the case of the LIDO schema, such validators
+            will also perform checks against the Geographical Markup
+            Language (GML) definition used in LIDO for location
+            coordinates. Note that the GML schema is many times larger
+            than the LIDO schema, so that precautions against overuse of
+            machine resources may have to be taken when high quantities
+            of individual LIDO records need to be validated.</p>
+            <h2 data-number="6.2" id="schematron"><span
+            class="header-section-number">6.2</span> Schematron</h2>
+            <p>The schema definition of LIDO v1.1 contains embedded <a
+            href="https://www.schematron.com/">Schematron</a> rules that
+            constrain certain aspects of the definition which cannot be
+            expressed through the XML Schema Definition Language (XSD).
+            A valid LIDO v1.1 document has therefore to validate against
+            the structural definition contained in the XSD Schema while
+            also complying to the Schematron assertions.</p>
+            <p>Schematron validates these constraints through rules
+            implemented as W3C <a
+            href="https://www.w3.org/TR/xslt-30/">XSL
+            Transformations</a>. In other words, Schematron provides a
+            workflow in which a transformation style sheet, when applied
+            to a LIDO v1.1 document, will result in a report document
+            (as <a
+            href="https://www.schematron.com/document/3427.html">Schematron
+            Validation Report Language, SVRL</a>) about compliance to
+            these rules.</p>
+            <p>Validation of Schema embedded Schematron rules is
+            supported by several tools. Please refer to the respective
+            documentation. For pre-built Schematron validation style
+            sheets and technical documentation refer to <a
+            href="https://gitlab.gwdg.de/lido/development/-/tree/develop/1.1/schematron"
+            class="uri">https://gitlab.gwdg.de/lido/development/-/tree/develop/1.1/schematron</a>.</p>
+            <h2 data-number="6.3" id="further-measures"><span
+            class="header-section-number">6.3</span> Further
+            measures</h2>
+            <p>Wherever feasible, additional checks should be developed
+            for the detection of repeatedly (or even occasionally)
+            occuring quality issues. In many cases, such checks can be
+            implemented as sets of Schematron rules apart from those
+            described above, as self-contained XSLT or XQuery scripts,
+            or as tools written in any programming language with support
+            for XML technology.</p>
+            <p>Useful areas for such quality checks include:</p>
+            <ul>
+            <li>Compliance with the <a
+            href="https://lido-schema.org/documents/terminology-recommendation.html">LIDO
+            Terminology Recommendation</a>. These specify which sections
+            of the LIDO Terminology or from other vocabularies can be
+            applied in particular element or attribute contexts. For
+            example, the <a
+            href="http://lido-schema.org/schema/latest/lido.html#pref"><em>pref</em></a>
+            attribute of a &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#term">lido:term</a>&gt;
+            element can only contain a URI from the LIDO <a
+            href="http://terminology.lido-schema.org/lido00168">Preference
+            Vocabulary</a>, and a statement in &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#objectWorkType">lido:objectWorkType</a>&gt;
+            should only be expressed with concepts from the AAT <a
+            href="http://vocab.getty.edu/hier/aat/300264092">Objects
+            Facet</a>.</li>
+            <li>Appropriate usage of elements and attributes for
+            specific object types. For example, a <a
+            href="http://terminology.lido-schema.org/lido00817">Natural
+            object</a> cannot have a <a
+            href="http://terminology.lido-schema.org/lido00007">Production</a>
+            event.</li>
+            <li>Appropriate usage of textual elements. For example,
+            object titles in the &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#titleSet">lido:titleSet</a>&gt;
+            element should consist of more than one word, not only of
+            numbers, etc.</li>
+            <li>Detection of contradictory statements. For example, the
+            timespan of a <a
+            href="http://terminology.lido-schema.org/lido00010">Collection</a>
+            event cannot precede that of the <a
+            href="http://terminology.lido-schema.org/lido00224">Designing</a>
+            of the item.</li>
+            <li>Improper use of type attributes. A &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#measurementType">lido:measurementType</a>&gt;
+            “height” is incompatible with a &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#measurementUnit">lido:measurementUnit</a>&gt;
+            “kilogram”. </li>
+            </ul>
+            <h1 data-number="7"
+            id="references-and-further-reading"><span
+            class="header-section-number">7</span> References and
+   

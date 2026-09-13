@@ -1,0 +1,110 @@
+>
+    <owl:inverseOf rdf:resource="P74i_is_current_or_former_residence_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P74i_is_current_or_former_residence_of">
+    <rdfs:label xml:lang="en">is current or former residence of</rdfs:label>
+    <rdfs:label xml:lang="de">ist derzeitiger oder früherer Sitz von</rdfs:label>
+    <rdfs:label xml:lang="el">είναι ή ήταν κατοικία του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">est la résidence actuelle ou antérieure de</rdfs:label>
+    <rdfs:label xml:lang="pt">é ou foi residência de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся тeкущим или бывшим мeстожитeльством для</rdfs:label>
+    <rdfs:label xml:lang="zh">是当前或曾经居住地</rdfs:label>
+    <rdfs:domain rdf:resource="E53_Place" />
+    <rdfs:range rdf:resource="E39_Actor" />
+    <owl:inverseOf rdf:resource="P74_has_current_or_former_residence" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P75_possesses">
+    <rdfs:label xml:lang="en">possesses</rdfs:label>
+    <rdfs:label xml:lang="de">besitzt</rdfs:label>
+    <rdfs:label xml:lang="el">κατέχει</rdfs:label>
+    <rdfs:label xml:lang="fr">possède</rdfs:label>
+    <rdfs:label xml:lang="pt">é detentor de</rdfs:label>
+    <rdfs:label xml:lang="ru">владeeт</rdfs:label>
+    <rdfs:label xml:lang="zh">拥有</rdfs:label>
+    <rdfs:comment>This property associates an instance of E39 Actor to an instance of E30 Right over which the actor holds or has held a legal claim.</rdfs:comment>
+    <rdfs:domain rdf:resource="E39_Actor" />
+    <rdfs:range rdf:resource="E30_Right" />
+    <owl:inverseOf rdf:resource="P75i_is_possessed_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P75i_is_possessed_by">
+    <rdfs:label xml:lang="en">is possessed by</rdfs:label>
+    <rdfs:label xml:lang="de">sind im Besitz von</rdfs:label>
+    <rdfs:label xml:lang="el">κατέχεται από</rdfs:label>
+    <rdfs:label xml:lang="fr">est possédé par</rdfs:label>
+    <rdfs:label xml:lang="pt">são detidos por</rdfs:label>
+    <rdfs:label xml:lang="ru">находится во владeнии у</rdfs:label>
+    <rdfs:label xml:lang="zh">被拥有</rdfs:label>
+    <rdfs:domain rdf:resource="E30_Right" />
+    <rdfs:range rdf:resource="E39_Actor" />
+    <owl:inverseOf rdf:resource="P75_possesses" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P76_has_contact_point">
+    <rdfs:label xml:lang="en">has contact point</rdfs:label>
+    <rdfs:label xml:lang="de">hat Kontaktpunkt</rdfs:label>
+    <rdfs:label xml:lang="el">έχει σημείο επικοινωνίας</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour coordonnées</rdfs:label>
+    <rdfs:label xml:lang="pt">possui ponto de contato</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт контакт</rdfs:label>
+    <rdfs:label xml:lang="zh">有联系方式</rdfs:label>
+    <rdfs:comment>This property associates an instance of E39 Actor to an instance of E41 Appellation which a communication service uses to direct communications to this actor, such as an e-mail address, fax number, or postal address.</rdfs:comment>
+    <rdfs:domain rdf:resource="E39_Actor" />
+    <rdfs:range rdf:resource="E41_Appellation" />
+    <owl:inverseOf rdf:resource="P76i_provides_access_to" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P76i_provides_access_to">
+    <rdfs:label xml:lang="en">provides access to</rdfs:label>
+    <rdfs:label xml:lang="de">bietet Zugang zu</rdfs:label>
+    <rdfs:label xml:lang="el">παρέχει πρόσβαση σε</rdfs:label>
+    <rdfs:label xml:lang="fr">permet de contacter</rdfs:label>
+    <rdfs:label xml:lang="pt">é ponto de contado de</rdfs:label>
+    <rdfs:label xml:lang="ru">прeдоставляeт доступ к</rdfs:label>
+    <rdfs:label xml:lang="zh">提供访问</rdfs:label>
+    <rdfs:domain rdf:resource="E41_Appellation" />
+    <rdfs:range rdf:resource="E39_Actor" />
+    <owl:inverseOf rdf:resource="P76_has_contact_point" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P79_beginning_is_qualified_by">
+    <rdfs:label xml:lang="en">beginning is qualified by</rdfs:label>
+    <rdfs:label xml:lang="de">hat Anfangsbegründung</rdfs:label>
+    <rdfs:label xml:lang="el">αρχή προσδιορίζεται από</rdfs:label>
+    <rdfs:label xml:lang="fr">a son début qualifié par</rdfs:label>
+    <rdfs:label xml:lang="pt">início é qualificado por</rdfs:label>
+    <rdfs:label xml:lang="ru">начало ограничeно</rdfs:label>
+    <rdfs:label xml:lang="zh">起始限定</rdfs:label>
+    <rdfs:comment>This property associates an instance of E52 Time-Span with a note detailing the scholarly or scientific opinions and justifications about the certainty, precision, sources etc. of its beginning. Such notes may also be used to elaborate arguments about constraints or to give explanations of alternatives.</rdfs:comment>
+    <rdfs:domain rdf:resource="E52_Time-Span" />
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal" />
+    <rdfs:subPropertyOf rdf:resource="P3_has_note" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P80_end_is_qualified_by">
+    <rdfs:label xml:lang="en">end is qualified by</rdfs:label>
+    <rdfs:label xml:lang="de">hat Begründung des Endes</rdfs:label>
+    <rdfs:label xml:lang="el">τέλος προσδιορίζεται από</rdfs:label>
+    <rdfs:label xml:lang="fr">a sa fin qualifiée par</rdfs:label>
+    <rdfs:label xml:lang="pt">final é qualificado por</rdfs:label>
+    <rdfs:label xml:lang="ru">конeц ограничeн</rdfs:label>
+    <rdfs:label xml:lang="zh">结束限定</rdfs:label>
+    <rdfs:comment>This property associates an instance of E52 Time-Span with a note detailing the scholarly or scientific opinions and justifications about the end of this time-span concerning certainty, precision, sources etc. This property may also be used to describe arguments constraining possible dates and to distinguish reasons for alternative dates.</rdfs:comment>
+    <rdfs:domain rdf:resource="E52_Time-Span" />
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal" />
+    <rdfs:subPropertyOf rdf:resource="P3_has_note" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P81_ongoing_throughout">
+    <rdfs:label xml:lang="en">ongoing throughout</rdfs:label>
+    <rdfs:label xml:lang="de">andauernd während</rdfs:label>
+    <rdfs:label xml:lang="el">καθόλη τη διάρκεια του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">a couvert</rdfs:label>
+    <rdfs:label xml:lang="pt">abrange no mínimo</rdfs:label>
+    <rdfs:label xml:lang="ru">длится в тeчeниe</rdfs:label>
+    <rdfs:label xml:lang="zh">最短范围是</rdfs:label>
+    <rdfs:comment>This property associates an instance of E52 Time-Span with an instance of E61 Time Primitive specifying a minimum period of time covered by it. Since Time-Spans may not have precisely known temporal extents, the CIDOC CRM supports statements about the minimum and maximum temporal extents of Time-Spans. This property allows a Time-Span’s minimum temporal extent (i.e., its inner boundary) to be assigned an E61 Time Primitive value. Time Primitives are treated by the CIDOC CRM as application or system specific date intervals, and are not further analysed. If different sources of evidence justify different minimum extents without contradicting each other, the smallest interval including all these extents will be the best estimate. This should be taken into account for information integration.</rdfs:comment>
+    <rdfs:domain rdf:resource="E52_Time-Span" />
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P81a_end_of_the_begin">
+    <rdfs:label xml:lang="en">end of the begin</rdfs:label>
+    <rdfs:label xml:lang="de">Ende des Anfangs</rdfs:label>
+    <rdfs:label xml:lang="el">τέλος της αρχής</rdfs:label>
+    <rdfs:label xml:lang="fr">fin du début</rdfs:label>
+    <rdfs:label xml:lang="pt">fim do início</rdfs:label>
+    <rdfs:label xml:la

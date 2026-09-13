@@ -1,0 +1,56 @@
+gation display. This allows for the Canvas to include content outside of the default view, such as a color bar or ruler.</p>
+
+<p>Ranges <em class="rfc">must</em> have URIs and they <em class="rfc">should</em> be <abbr title="Hypertext Transfer Protocol">HTTP</abbr>(S) URIs. Top level Ranges are <a href="/api/presentation/3.0/#12-terminology">embedded</a> or externally <a href="/api/presentation/3.0/#12-terminology">referenced</a> within the Manifest in a <code class="language-plaintext highlighter-rouge">structures</code> property. These top level Ranges then embed or reference other Ranges, Canvases or parts of Canvases in the <code class="language-plaintext highlighter-rouge">items</code> property. Each entry in the <code class="language-plaintext highlighter-rouge">items</code> property <em class="rfc">must</em> be a <abbr title="JavaScript Object Notation">JSON</abbr> object, and it <em class="rfc">must</em> have the <code class="language-plaintext highlighter-rouge">id</code> and <code class="language-plaintext highlighter-rouge">type</code> properties. If a top level Range needs to be dereferenced by the client, then it <em class="rfc">must not</em> have the <code class="language-plaintext highlighter-rouge">items</code> property, such that clients are able to recognize that it should be retrieved in order to be processed.</p>
+
+<p>All of the Canvases or parts that should be considered as being part of a Range <em class="rfc">must</em> be included within the Range’s <code class="language-plaintext highlighter-rouge">items</code> property, or a descendant Range’s <code class="language-plaintext highlighter-rouge">items</code>.</p>
+
+<p>The Canvases and parts of Canvases need not be contiguous or in the same order as in the Manifest’s <code class="language-plaintext highlighter-rouge">items</code> property or any other Range. Examples include newspaper articles that are continued in different sections, a chapter that starts half way through a page, or time segments of a single canvas that represent different sections of a piece of music.</p>
+
+<p>Ranges <em class="rfc">may</em> link to an Annotation Collection that has the content of the Range using the <code class="language-plaintext highlighter-rouge">supplementary</code> property. The <a href="/api/presentation/3.0/#12-terminology">referenced</a> Annotation Collection will contain Annotations that target areas of Canvases within the Range and link content resources to those Canvases.</p>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"@context"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://iiif.io/api/presentation/3/context.json"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/manifest"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Manifest"</span><span class="p">,</span><span class="w">
+  </span><span class="c1">// Metadata here ...</span><span class="w">
+
+  </span><span class="nl">"items"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="c1">// Canvases here ...</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+
+  </span><span class="nl">"structures"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/range/r0"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Range"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Table of Contents"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"items"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/canvas/cover"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Canvas"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/range/r1"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Range"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Introduction"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"supplementary"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/annocoll/introTexts"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AnnotationCollection"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"items"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+            </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/canvas/p1"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Canvas"</span><span class="w">
+            </span><span class="p">},</span><span class="w">
+            </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/canvas/p2"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Canvas"</span><span class="w">
+            </span><span class="p">},</span><span class="w">
+            </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SpecificResource"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/canvas/p3"</span><span class=

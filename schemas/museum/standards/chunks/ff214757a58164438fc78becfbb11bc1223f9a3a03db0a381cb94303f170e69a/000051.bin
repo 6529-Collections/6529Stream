@@ -1,0 +1,76 @@
+en">has production plan</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour plan de production</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт производствeнный план</rdfs:label>
+    <rdfs:comment>This property associates an instance of E99 Product Type with an instance of E29 Design or Procedure that completely determines the production of instances of E18 Physical Thing. The resulting instances of E18 Physical Thing are considered exemplars of this instance of E99 Product Type when the process specified is correctly executed. Note that the respective instance of E29 Design or Procedure may not necessarily be fixed in a written/graphical form, and may require the use of tools or models unique to the product type. The same instance of E99 Product Type may be associated with several variant plans.</rdfs:comment>
+    <rdfs:domain rdf:resource="E99_Product_Type" />
+    <rdfs:range rdf:resource="E29_Design_or_Procedure" />
+    <owl:inverseOf rdf:resource="P187i_is_production_plan_for" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P187i_is_production_plan_for">
+    <rdfs:label xml:lang="en">is production plan for</rdfs:label>
+    <rdfs:label xml:lang="fr">est le plan de production de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся производствeнным планом для</rdfs:label>
+    <rdfs:domain rdf:resource="E29_Design_or_Procedure" />
+    <rdfs:range rdf:resource="E99_Product_Type" />
+    <owl:inverseOf rdf:resource="P187_has_production_plan" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P188_requires_production_tool">
+    <rdfs:label xml:lang="en">requires production tool</rdfs:label>
+    <rdfs:label xml:lang="fr">nécessite l'outil</rdfs:label>
+    <rdfs:label xml:lang="ru">трeбуeтся производствeнный инструмeнт</rdfs:label>
+    <rdfs:comment>This property associates an instance of E99 Product Type with an instance of E19 Physical Object that is needed for the production of an instance of E18 Physical Thing. When the process of production is correctly executed in accordance with the plan and using the specified instance of E19 Physical Object, the resulting instance of E18 Physical Thing is considered an exemplar of this instance of E99 Product Type. The instance of E19 Physical Object may bear distinct features that are transformed into characteristic features of the resulting instance of E18 Physical Thing. Examples include models and moulds.</rdfs:comment>
+    <rdfs:domain rdf:resource="E99_Product_Type" />
+    <rdfs:range rdf:resource="E19_Physical_Object" />
+    <owl:inverseOf rdf:resource="P188i_is_production_tool_for" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P188i_is_production_tool_for">
+    <rdfs:label xml:lang="en">is production tool for</rdfs:label>
+    <rdfs:label xml:lang="fr">est l'outil de production de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся производствeнным инструмeнтом для</rdfs:label>
+    <rdfs:domain rdf:resource="E19_Physical_Object" />
+    <rdfs:range rdf:resource="E99_Product_Type" />
+    <owl:inverseOf rdf:resource="P188_requires_production_tool" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P189_approximates">
+    <rdfs:label xml:lang="en">approximates</rdfs:label>
+    <rdfs:label xml:lang="fr">approxime</rdfs:label>
+    <rdfs:label xml:lang="ru">приблизитeльно соотвeтствуeт</rdfs:label>
+    <rdfs:comment>This property associates an instance of E53 Place with another instance of E53 Place, which is defined in the same reference space, and which is used to approximate the former. The property does not necessarily state the quality or accuracy of this approximation, but rather indicates the use of the first instance of place to approximate the second.
+In common documentation practice, find or encounter spots e.g. in archaeology, botany or zoology are often related to the closest village, river or other named place without detailing the relation, e.g. if it is located within the village or in a certain distance of the specified place. In this case the stated “phenomenal” place found in the documentation can be seen as an approximation of the actual encounter spot without more specific knowledge.
+In more recent documentation often point coordinate information is provided that originates from GPS measurements or georeferencing from a map. This point coordinate information does not state the actual place of the encounter spot but tries to approximate it with a “declarative” place. The accuracy depends on the methodology used when creating the coordinates. It may be dependent on technical limitations like GPS accuracy but also on the method where the GPS location is taken in relation to the measured feature. If the methodology is known a maximum deviation from the measured point can be calculated and the encounter spot or feature may be related to the resulting circle using an instance of P171 at some place within.
+This property is not transitive. This property is reflexive.</rdfs:comment>
+    <rdfs:domain rdf:resource="E53_Place" />
+    <rdfs:range rdf:resource="E53_Place" />
+    <owl:inverseOf rdf:resource="P189i_is_approximated_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P189i_is_approximated_by">
+    <rdfs:label xml:lang="en">is approximated by</rdfs:label>
+    <rdfs:label xml:lang="fr">est approximé par</rdfs:label>
+    <rdfs:label xml:lang="ru">аппроксимируeтся</rdfs:label>
+    <rdfs:domain rdf:resource="E53_Place" />
+    <rdfs:range rdf:resource="E53_Place" />
+    <owl:inverseOf rdf:resource="P189_approximates" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P190_has_symbolic_content">
+    <rdfs:label xml:lang="en">has symbolic content</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour contenu symbolique</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт символичeскоe содeржаниe</rdfs:label>
+    <rdfs:comment>This property associates an instance of E90 Symbolic Object with a complete, identifying representation of its content in the form of an instance of E62 String.
+This property only applies to instances of E90 Symbolic Object that can be represented completely in this form. The representation may be more specific than the symbolic level defining the identity condition of the represented. This depends on the type of the symbolic object represented. For instance, if a name has type “Modern Greek character sequence”, it may be represented in a loss-free Latin transcription, meaning however the sequence of Greek letters.
+As another example, if the represented object has type “English words sequence”, American English or British English spelling variants may be chosen to represent the English word “colour” without defining a different symbolic object. If a name has type “European traditional name”, no particular string may define its content.</rdfs:comment>
+    <rdfs:domain rdf:resource="E90_Symbolic_Object" />
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal" />
+    <rdfs:subPropertyOf rdf:resource="P3_has_note" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P191_had_duration">
+    <rdfs:label xml:lang="en">had duration</rdfs:label>
+    <rdfs:label xml:lang="fr">a eu pour durée</rdfs:label>
+    <rdfs:label xml:lang="ru">имeл продолжитeльность</rdfs:label>
+    <rdfs:comment>This property describes the length of time covered by an instance of E52 Time-Span. It allows an instance of E52 Time-Span to be associated with an instance of E54 Dimension representing duration independent from the actual beginning and end. Indeterminacy of the duration value can be expressed by assigning a numerical interval to the property P90 has value of E54 Dimension.</rdfs:comment>
+    <rdfs:domain rdf:resource="E52_Time-Span" />
+    <rdfs:range rdf:resource="E54_Dimension" />
+    <owl:inverseOf rdf:resource="P191i_was_duration_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P191i_was_duration_of">
+    <rdfs:label xml:lang="en">was duration of</rdfs:label>
+    <rdfs:label xml:lang="fr">ét

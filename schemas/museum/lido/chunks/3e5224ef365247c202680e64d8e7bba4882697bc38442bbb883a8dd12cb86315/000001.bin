@@ -1,0 +1,42 @@
+pleType name="fillTimingAttrsType">
+		<restriction base="string">
+			<enumeration value="remove"/>
+			<enumeration value="freeze"/>
+			<enumeration value="hold"/>
+			<enumeration value="auto"/>
+			<enumeration value="default"/>
+			<enumeration value="transition"/>
+		</restriction>
+	</simpleType>
+	<attributeGroup name="fillDefaultAttrs">
+		<attribute name="fillDefault" type="smil20:fillDefaultType" default="inherit"/>
+	</attributeGroup>
+	<simpleType name="fillDefaultType">
+		<restriction base="string">
+			<enumeration value="remove"/>
+			<enumeration value="freeze"/>
+			<enumeration value="hold"/>
+			<enumeration value="auto"/>
+			<enumeration value="inherit"/>
+			<enumeration value="transition"/>
+		</restriction>
+	</simpleType>
+	<attributeGroup name="beginEndTimingAttrs">
+		<attribute name="begin" type="string"/>
+		<attribute name="end" type="string"/>
+	</attributeGroup>
+	<attributeGroup name="durTimingAttrs">
+		<attribute name="dur" type="string"/>
+	</attributeGroup>
+	<attributeGroup name="repeatTimingAttrs">
+		<attribute name="repeatDur" type="string"/>
+		<attribute name="repeatCount" type="smil20:nonNegativeDecimalType"/>
+	</attributeGroup>
+	<attributeGroup name="deprecatedRepeatTiming">
+		<attribute name="repeat" type="nonNegativeInteger"/>
+	</attributeGroup>
+	<attributeGroup name="minMaxTimingAttrs">
+		<attribute name="min" type="string"/>
+		<attribute name="max" type="string"/>
+	</attributeGroup>
+</schema>

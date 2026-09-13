@@ -9,18 +9,18 @@ import "../../../../smart-contracts/domains/auctions/legacy/AuctionContract.sol"
 import "../../../../smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol";
 import "../../../../smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol";
 import "../../../../smart-contracts/domains/access/StreamAdmins.sol";
-import "../../../../smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol";
+import {LegacyRC1StreamAssetPolicyRegistry as StreamAssetPolicyRegistry} from "../../../fixtures/legacy-rc1/contracts/LegacyRC1StreamAssetPolicyRegistry.sol";
 import "../../../../smart-contracts/domains/metadata/StreamCollectionMetadata.sol";
 import "../../../../smart-contracts/domains/metadata/StreamContractMetadata.sol";
 import {LegacyStreamCore} from "../helpers/LegacyStreamCore.sol";
 import "../../../../smart-contracts/domains/mint/legacy/StreamDrops.sol";
 import "../../../../smart-contracts/domains/mint/legacy/StreamMinter.sol";
-import "../../../../smart-contracts/domains/mint/StreamMintManager.sol";
+import {LegacyRC1StreamMintManager as StreamMintManager} from "../../../fixtures/legacy-rc1/contracts/LegacyRC1StreamMintManager.sol";
 import "../../../../smart-contracts/domains/mint/StreamMintModuleRegistry.sol";
-import "../../../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
+import {LegacyRC1StreamPrimarySaleSettlement as StreamPrimarySaleSettlement} from "../../../fixtures/legacy-rc1/contracts/LegacyRC1StreamPrimarySaleSettlement.sol";
 import "../../../../smart-contracts/domains/preservation/StreamPreservationRecords.sol";
 import "../../../../smart-contracts/domains/records/StreamRecordFamilyRegistry.sol";
-import "../../../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
+import {LegacyRC1StreamRevenueResolver as StreamRevenueResolver} from "../../../fixtures/legacy-rc1/contracts/LegacyRC1StreamRevenueResolver.sol";
 import "../../../helpers/Assertions.sol";
 import "../helpers/CharacterizationTestBase.sol";
 

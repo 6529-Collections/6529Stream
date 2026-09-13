@@ -1,0 +1,184 @@
+cription">A set of identifying and indexing information about the collection the 
+								object/work in focus is gathered into or is a member of.<br/>
+								Collection applies to any accumulated group of physical or digital 
+								items, conceptually or physically brought together on the basis of 
+								a focal characteristic. Use cases for grouping items into a 
+								collection are various and may span curated holdings in museums, 
+								departmental collections, sets of items to be displayed in an exhibition, 
+								or aggregations bound informally for cataloging and retrieval purposes.</tei:ab>
+							<tei:ab type="label">Collection</tei:ab>
+						</xs:documentation>
+						<xs:appinfo>
+							<sch:pattern>
+								<sch:rule context="lido:collection">
+									<sch:extends rule="sch_collection"/>
+								</sch:rule>
+							</sch:pattern>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:attribute name="relatedencoding" type="xs:string" id="relatedencoding">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">An attribute indicating the format of the data source
+					from which the data were migrated. For each sub-element with data values the
+					related source data fields can be referenced through the attributes
+					<tei:ref target="#encodinganalog">encodinganalog</tei:ref> and <tei:ref target="#label">label</tei:ref>.
+				</tei:ab>
+				<tei:ab type="dataValues">Free text</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+	</xs:attribute>
+	<xs:complexType name="relatedEventSetComplexType" id="relatedEventSetComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines information about an event
+					related to the event in focus.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="relatedEvent" type="lido:eventSetComplexType" minOccurs="0" id="relatedEvent">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A wrapper for display and index elements for one event
+							related to the event in focus.</tei:ab>
+						<tei:ab type="label">Related Event</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="relatedEventRelType" type="lido:conceptComplexType" minOccurs="0" id="relatedEventRelType">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for the kind of relationship between the event in focus and the related event.</tei:ab>
+						<tei:ab type="note">For implementation of the data, note that relationships
+							are conceptually reciprocal, but the Relationship Type is often
+							different on either side of the relationship.</tei:ab>
+						<tei:ab type="label">Related Event Relationship Type</tei:ab>
+						<tei:ab type="dataValues">Controlled Terminology</tei:ab>
+					</xs:documentation>
+
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:relatedEventRelType">
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="relatedWorkSetComplexType" id="relatedWorkSetComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines information about an object or
+					work, or a group of objects or works related to the object/work in focus.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="displayRelatedWork" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="displayRelatedWork">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A display element for the description of the related object or work,
+							corresponding to the subsequent <tei:ref target="#relatedWork">Related Work</tei:ref> element, including identifying information about the
+							object and, possibly, information about the kind of the relation.<br/>
+							Repeated for language variants only.</tei:ab>
+						<tei:ab type="label">Display Related Work</tei:ab>
+						<tei:ab type="dataValues">Free text</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="relatedWork" type="lido:objectSetComplexType" minOccurs="0" id="relatedWork">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A wrapper for display and reference elements of
+							an object or work related to the object/work in focus.</tei:ab>
+						<tei:ab type="label">Related Work</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="relatedWorkRelType" type="lido:conceptComplexType" minOccurs="0" id="relatedWorkRelType">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for the kind of
+							relationship between the object/work in focus and the related object or
+							work.</tei:ab>
+						<tei:ab type="note">For implementation of the data, note that relationships
+							are conceptually reciprocal, but the Relationship Type is often
+							different on either side of the relationship (e.g. one work is part of a
+							second work, but from the point of view of the second record, the first
+							work is the larger context for the second work). Whether or not
+							relationships are physically reciprocal as implemented in systems is a
+							local decision.</tei:ab>
+						<tei:ab type="label">Related Work Relationship Type</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">LIDO Terminology for
+							<tei:ref target="../../documents/terminology-recommendation.html#relatedWorkRelType">Related Work Relationship Type</tei:ref></tei:ab>
+					</xs:documentation>
+
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:relatedWorkRelType">
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="sourceRelatedWorkSet" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="sourceRelatedWorkSet">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A text element identifying the source of information about the relationship 
+							or the type of relationship between the entity in focus and the related entity. 
+							Whenever possible, a published source should be given.
+						</tei:ab>
+						<tei:ab type="label">Source Related Work Set</tei:ab>
+						<tei:ab type="dataValues">Free text</tei:ab>
+						
+						
+						</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="relatedWorksWrap" id="relatedWorksWrap">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">A wrapper for information about an object or work related
+					to the object/work in focus.</tei:ab>
+				<tei:ab type="label">Related Works Wrapper</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="relatedWorkSet" minOccurs="0" maxOccurs="unbounded" id="relatedWorkSet">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">A set of structured information about an object or work, or a group
+								of objects or works related to the object/work in focus, including the kind of relationship between them. 
+								May include bibliographic objects in which the object/work is documented or mentioned.<br/>
+								Repeated if there is more than one object or work, or more than one group of objects or works referred to.</tei:ab>
+							<tei:ab type="label">Related Work Set</tei:ab>
+						</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:complexContent>
+							<xs:extension base="lido:relatedWorkSetComplexType">
+								<xs:attribute ref="lido:sortorder"/>
+							</xs:extension>
+						</xs:complexContent>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="repositorySetComplexType" id="repositorySetComplexT

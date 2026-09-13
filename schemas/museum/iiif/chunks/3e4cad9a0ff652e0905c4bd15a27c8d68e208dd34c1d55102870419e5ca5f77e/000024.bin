@@ -1,0 +1,62 @@
+oint, the class of the resource that has the property is the primary governing factor. Thus properties on Annotation based resources use the context from the <a href="http://w3.org/TR/annotation-model/" title="Web Annotation Model">Web Annotation Data Model</a>, whereas properties on classes defined by this specification use the <abbr title="International Image Interoperability Framework">IIIF</abbr> Presentation <abbr title="Application Programming Interface">API</abbr> context’s definition.</p>
+
+<p>There is one property that is in direct conflict - the <code class="language-plaintext highlighter-rouge">label</code> property is defined by both and is available for every resource. The use of <code class="language-plaintext highlighter-rouge">label</code> in <abbr title="International Image Interoperability Framework">IIIF</abbr> follows modern best practices for internationalization by allowing the language to be associated with the value using the language map construction <a href="/api/presentation/3.0/#language-of-property-values" title="Language of Property Values">described above</a>. The Web Annotation Data Model uses it only for <a href="/api/presentation/3.0/#58-annotation-collection">Annotation Collections</a>, and mandates the format is a string. For this property, the <abbr title="Application Programming Interface">API</abbr> overrides the definition from the Annotation model to ensure that labels can consistently be represented in multiple languages.</p>
+
+<p>The following properties are defined by both, and the <abbr title="International Image Interoperability Framework">IIIF</abbr> representation is more specific than the Web Annotation Data Model but are not in conflict, or are never used on the same resource:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">homepage</code>: In <abbr title="International Image Interoperability Framework">IIIF</abbr> the home page of a resource is represented as a <abbr title="JavaScript Object Notation">JSON</abbr> object, whereas in the Web Annotation Data Model it can also be a string.</li>
+  <li><code class="language-plaintext highlighter-rouge">type</code>: In <abbr title="International Image Interoperability Framework">IIIF</abbr> the type is singular, whereas in the Web Annotation Data Model there can be more than one type.</li>
+  <li><code class="language-plaintext highlighter-rouge">format</code>: In <abbr title="International Image Interoperability Framework">IIIF</abbr> the format of a resource is also singular, whereas in the Web Annotation Data Model there can be more than one format.</li>
+  <li><code class="language-plaintext highlighter-rouge">language</code>: In <abbr title="International Image Interoperability Framework">IIIF</abbr> the <code class="language-plaintext highlighter-rouge">language</code> property always takes an array, whereas in the Web Annotation Data Model it can be a single string.</li>
+  <li><code class="language-plaintext highlighter-rouge">start</code>: The <code class="language-plaintext highlighter-rouge">start</code> property is used on a Manifest to refer to the start Canvas or part of a Canvas and thus is a <abbr title="JavaScript Object Notation">JSON</abbr> object, whereas in the Web Annotation Data Model it is used on a TextPositionSelector to give the start offset into the textual content and is thus an integer.</li>
+</ul>
+
+<p>The <code class="language-plaintext highlighter-rouge">rights</code>, <code class="language-plaintext highlighter-rouge">partOf</code>, and <code class="language-plaintext highlighter-rouge">items</code> properties are defined by both in the same way.</p>
+      <h3 id="48-keyword-mappings">
+        
+        
+          4.8. Keyword Mappings <a href="#48-keyword-mappings" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>The <abbr title="JSON for Linking Data">JSON-LD</abbr> keywords <code class="language-plaintext highlighter-rouge">@id</code>, <code class="language-plaintext highlighter-rouge">@type</code> and <code class="language-plaintext highlighter-rouge">@none</code> are mapped to <code class="language-plaintext highlighter-rouge">id</code>, <code class="language-plaintext highlighter-rouge">type</code> and <code class="language-plaintext highlighter-rouge">none</code> by the Presentation <abbr title="Application Programming Interface">API</abbr> <a href="/api/presentation/3.0/#46-linked-data-context-and-extensions" title="Linked Data Context and Extensions">linked data context</a>. Thus in content conforming to this version of the Presentation <abbr title="Application Programming Interface">API</abbr>, the only <abbr title="JavaScript Object Notation">JSON</abbr> key beginning with <code class="language-plaintext highlighter-rouge">@</code> will be <code class="language-plaintext highlighter-rouge">@context</code>. However, the content may include data conforming to older specifications or external specifications that use keywords beginning with <code class="language-plaintext highlighter-rouge">@</code>. Clients should expect to encounter both syntaxes.</p>
+      <h2 id="5-resource-structure">
+        
+        
+          5. Resource Structure <a href="#5-resource-structure" class="anchorClass"></a>
+        
+        
+      </h2>
+    
+
+<p>This section provides detailed description of the resource types used in this specification. <a href="/api/presentation/3.0/#2-resource-type-overview">Section 2</a> provides an overview of the resource types and figures illustrating allowed relationships between them, and <a href="/api/presentation/3.0/#a-summary-of-property-requirements">Appendix A</a> provides summary tables of the property requirements.</p>
+      <h3 id="51-collection">
+        
+        
+          5.1. Collection <a href="#51-collection" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>Collections are used to list the Manifests available for viewing. Collections <em class="rfc">may</em> include both other Collections and Manifests, in order to form a tree-structured hierarchy.  Collections might align with the curated management of cultural heritage resources in sets, also called “collections”, but may have absolutely no such similarity.</p>
+
+<p>The intended usage of Collections is to allow clients to:</p>
+
+<ul>
+  <li>Load a pre-defined set of Manifests at initialization time.</li>
+  <li>Receive a set of Manifests, such as search results, for rendering.</li>
+  <li>Visualize lists or hierarchies of related Manifests.</li>
+  <li>Provide navigation through a list or hierarchy of available Manifests.</li>
+</ul>
+
+<p>Collections <em class="rfc">may</em> be <a href="/api/presentation/3.0/#12-terminology">embedded</a> inline within other Collections, such as when the Collection is used primarily to subdivide a larger one into more manageable pieces, however Manifests <em class="rfc">must not</em> be <a href="/api/presentation/3.0/#12-terminology">embedded</a> within Collections. An <a href="/api/presentation/3.0/#12-terminology">embedded</a> Collection <em class="rfc">should</em> also have its own URI from which the <abbr title="JavaScript Object Notation">JSON</abbr> description is available.</p>
+
+<p>Manifests or Collections <em class="rfc">may</em> be <a href="/api/presentation/3.0/#12-terminology">referenced</a> from more than one Collection. For example, an institution might define four Collections: one for modern works, one for historical works, one for newspapers and one for books. The Manifest for a modern newspaper would then appear in both the modern Collection and the newspaper Collection. Alternatively, the institution may choose to have two separate newspaper Collections, and reference each as a sub-Collection of modern and historical.</p>
+
+<p>Collections with an empty <code class="language-plaintext highlighter-rouge">items</code> property are allowed but discouraged.  For example, if the user performs a search that matches no Manifests, then the server <em class="rfc">may</em> return a Collection response with no Manifests.</p>
+
+<p>Collections or Manifests <a href="/api/presentation/3.0/#12-terminology">referenced</a> in the <code class="language-plaint

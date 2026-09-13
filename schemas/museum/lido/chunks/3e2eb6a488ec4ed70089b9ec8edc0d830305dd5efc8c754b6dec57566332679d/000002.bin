@@ -1,0 +1,69 @@
+otation>
+		<sequence>
+			<group ref="gml:Value" maxOccurs="unbounded"/>
+		</sequence>
+	</complexType>
+	<!-- ====================== utility typed valueProperty types ===================  -->
+	<complexType name="ScalarValuePropertyType">
+		<annotation>
+			<documentation>Property whose content is a scalar value.</documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:ValuePropertyType">
+				<sequence minOccurs="0">
+					<!-- <element ref="gml:_ScalarValue"/> -->
+					<group ref="gml:ScalarValue"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="BooleanPropertyType">
+		<annotation>
+			<documentation>Property whose content is a Boolean value.</documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:ValuePropertyType">
+				<sequence minOccurs="0">
+					<element ref="gml:Boolean"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="CategoryPropertyType">
+		<annotation>
+			<documentation>Property whose content is a Category.</documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:ValuePropertyType">
+				<sequence minOccurs="0">
+					<element ref="gml:Category"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="QuantityPropertyType">
+		<annotation>
+			<documentation>Property whose content is a Quantity.</documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:ValuePropertyType">
+				<sequence minOccurs="0">
+					<element ref="gml:Quantity"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="CountPropertyType">
+		<annotation>
+			<documentation>Property whose content is a Count.</documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:ValuePropertyType">
+				<sequence minOccurs="0">
+					<element ref="gml:Count"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ====================================================================== -->
+</schema>

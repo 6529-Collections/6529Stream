@@ -1,0 +1,78 @@
+{
+  "schema": "6529stream.arweave-network-inclusion-fixture.v1",
+  "qualification": "Historical native Arweave-mainnet data retrieved from one gateway. Native inclusion verified locally. Transaction ID is SHA256(signature) and is in the returned block. No RSA signature, consensus, independent observer quorum, current storage-family taxonomy or onchain coverage acceptance is claimed.",
+  "transactionIdBase64": "w_-CNv-QMjj5I8y9zeZv29SASeX5HnFSZ2orPIZ-I3s",
+  "transactionId": "0xc3ff8236ff903238f923ccbdcde66fdbd48049e5f91e7152676a2b3c867e237b",
+  "blockHashBase64": "cqC1O3GaVAzy4nejIAp_7xZpT5ZHSQ4dynyB9lFj5PaO7eMwFSHK6EkQpK7R4vMh",
+  "blockHash": "0x72a0b53b719a540cf2e277a3200a7fef16694f9647490e1dca7c81f65163e4f68eede3301521cae84910a4aed1e2f321",
+  "blockHeight": 899979,
+  "blockTimestamp": 1648247748,
+  "transactionRoot": "0x25b96bf5fb2001c39ba61dd95665c74768acfa1937351e0254f25c1c1619d6f7",
+  "blockDataSize": 6736314368,
+  "dataRoot": "0xbb076ac299e81d37b6dfb1081083a2cd2624bbcc2489564963e13a72fdf7c2de",
+  "dataSize": 4,
+  "transactionStart": 4680056832,
+  "transactionEnd": 4680056836,
+  "payload": "0x74657374",
+  "payloadSHA256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+  "transactionPath": "0xe910c1f6d6365535a4407b2774b12964b281a982f8899f2258036648395dabca2650e61dba43397a9d1264c5492c7e1d19e9edd30cfdc4cb8c7bab0b97e747cf0000000000000000000000000000000000000000000000000000000147fc0000717e92f03507060c3cdb45aaacd2f7197b18f198a8ff17fa6194772711dd861ad7c8ae6f804e522d46927882b5d164126887573eedeb5f80d97050dfddfddbe5000000000000000000000000000000000000000000000000000000006f44000074d789047171f5caa0ddc7d33b69e88b9905738edcf990503ca593a7037c40e5c05271e69dc8d12e9f0cc9e7a629e925e50b252ef9e79448317c9f01aadc610700000000000000000000000000000000000000000000000000000000fcd40000cb8385fa1621771a9bbd0fead2d85badce08aa7d5b371833a1114466fde6a383d999bb91ff9ecb619387345ef9cea3d2b46624ca220f202d0c24dfcf911ad3580000000000000000000000000000000000000000000000000000000116f400001be3aa085fd723690c50836ccb4526518e871931c8eb2f23e3a0dce8bfb2aabaf20fec5faed95e0ec12123e4001f2b78c4580311fca0d4d0ba1f95f83648b3b50000000000000000000000000000000000000000000000000000000116f8000044f76fbe5f1c9c28c08a25968d3994a325554a8bb047f91dcaf8ee08dac1d2f33857ebabe96d583fdab8644fbf4049df4bf04811daba455bb0e153bc260fb49a0000000000000000000000000000000000000000000000000000000116f40004bb076ac299e81d37b6dfb1081083a2cd2624bbcc2489564963e13a72fdf7c2de0000000000000000000000000000000000000000000000000000000116f40004",
+  "dataPath": "0x9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a080000000000000000000000000000000000000000000000000000000000000004",
+  "sources": [
+    "https://arweave.net/tx/w_-CNv-QMjj5I8y9zeZv29SASeX5HnFSZ2orPIZ-I3s",
+    "https://arweave.net/tx/w_-CNv-QMjj5I8y9zeZv29SASeX5HnFSZ2orPIZ-I3s/status",
+    "https://arweave.net/tx/w_-CNv-QMjj5I8y9zeZv29SASeX5HnFSZ2orPIZ-I3s/offset",
+    "https://arweave.net/block/hash/cqC1O3GaVAzy4nejIAp_7xZpT5ZHSQ4dynyB9lFj5PaO7eMwFSHK6EkQpK7R4vMh",
+    "https://arweave.net/w_-CNv-QMjj5I8y9zeZv29SASeX5HnFSZ2orPIZ-I3s",
+    "https://arweave.net/chunk/62762638680314"
+  ],
+  "sourceResponses": [
+    {
+      "name": "transaction",
+      "url": "https://arweave.net/tx/w_-CNv-QMjj5I8y9zeZv29SASeX5HnFSZ2orPIZ-I3s",
+      "retrievedAt": "2026-09-12T07:28:56.416342+00:00",
+      "status": 200,
+      "bytes": 1791,
+      "sha256": "8d8c549852431bed4111ce1198102cab64c8ca67636143d01bc9f0568050b129"
+    },
+    {
+      "name": "status",
+      "url": "https://arweave.net/tx/w_-CNv-QMjj5I8y9zeZv29SASeX5HnFSZ2orPIZ-I3s/status",
+      "retrievedAt": "2026-09-12T07:28:56.416793+00:00",
+      "status": 200,
+      "bytes": 143,
+      "sha256": "b97ca480da6c6fd8b6bafbaa2ad1133a286656a2a89df060c9cce53263e9294d"
+    },
+    {
+      "name": "offset",
+      "url": "https://arweave.net/tx/w_-CNv-QMjj5I8y9zeZv29SASeX5HnFSZ2orPIZ-I3s/offset",
+      "retrievedAt": "2026-09-12T07:28:56.416793+00:00",
+      "status": 200,
+      "bytes": 38,
+      "sha256": "48db3527c25e2517519e04ae64ba281fe4376c9f8d17db27cc775ca8ec4619ea"
+    },
+    {
+      "name": "block",
+      "url": "https://arweave.net/block/hash/cqC1O3GaVAzy4nejIAp_7xZpT5ZHSQ4dynyB9lFj5PaO7eMwFSHK6EkQpK7R4vMh",
+      "retrievedAt": "2026-09-12T07:28:56.442415+00:00",
+      "status": 200,
+      "bytes": 353656,
+      "sha256": "2f27140f539143a2baad30938b02db5741c484401550a1e2c317325babdd2ad0"
+    },
+    {
+      "name": "payload",
+      "url": "https://arweave.net/w_-CNv-QMjj5I8y9zeZv29SASeX5HnFSZ2orPIZ-I3s",
+      "retrievedAt": "2026-09-12T07:28:56.453335+00:00",
+      "status": 200,
+      "bytes": 4,
+      "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    {
+      "name": "chunk",
+      "url": "https://arweave.net/chunk/62762638680314",
+      "retrievedAt": "2026-09-12T07:28:56.68195+00:00",
+      "status": 200,
+      "bytes": 1063,
+      "sha256": "c6eb3a0f864283b653f0ab0a438d6d9c91af61dfc0b295befa204c481ded8579"
+    }
+  ]
+}

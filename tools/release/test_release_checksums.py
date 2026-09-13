@@ -3602,6 +3602,40 @@ class ReleaseChecksumTests(unittest.TestCase):
             {"lf", "crlf"},
         )
 
+    def test_whitespace_diagnostic_override_preserves_canonical_eol_rules(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            attributes = root / ".gitattributes"
+            attributes.write_bytes(
+                b"* text=auto\n.gitattributes text eol=lf\n*.html text eol=lf\n"
+                b"notice.html whitespace=-blank-at-eol\n"
+            )
+            notice = root / "notice.html"
+            original = b"upstream notice retains spaces  \n"
+            notice.write_bytes(original)
+            facts = generator.validate_covered_file_line_endings(root, [attributes, notice])
+            self.assertEqual(facts["notice.html"].classification, "lf")
+            self.assertEqual(notice.read_bytes(), original)
+            notice.write_bytes(original.replace(b"\n", b"\r\n"))
+            with self.assertRaisesRegex(generator.ChecksumError, "eol=lf"):
+                generator.validate_covered_file_line_endings(root, [attributes, notice])
+
+    def test_whitespace_diagnostic_override_can_share_explicit_text_rule(self) -> None:
+        self.assertEqual(
+            generator._parse_root_gitattributes(
+                b"notice.html text eol=lf whitespace=-blank-at-eol\n"
+            ),
+            [("notice.html", "text", "lf")],
+        )
+
+    def test_whitespace_diagnostic_override_does_not_allow_other_attributes(self) -> None:
+        for attribute in (b"filter=external", b"working-tree-encoding=UTF-16", b"whitespace=unknown"):
+            with self.subTest(attribute=attribute):
+                with self.assertRaisesRegex(generator.ChecksumError, "unsupported .* attribute"):
+                    generator._parse_root_gitattributes(
+                        b"*.html text eol=lf\nnotice.html whitespace=-blank-at-eol " + attribute + b"\n"
+                    )
+
     def test_line_ending_validator_accepts_declared_canonical_parity(
         self,
     ) -> None:

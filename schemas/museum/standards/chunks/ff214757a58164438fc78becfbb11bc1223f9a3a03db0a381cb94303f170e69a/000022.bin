@@ -1,0 +1,111 @@
+bel>
+    <rdfs:label xml:lang="el">μετακινήθηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a déplacé depuis</rdfs:label>
+    <rdfs:label xml:lang="pt">locomoveu de</rdfs:label>
+    <rdfs:label xml:lang="ru">пeрeмeщeн из</rdfs:label>
+    <rdfs:label xml:lang="zh">移自</rdfs:label>
+    <rdfs:comment>This property identifies an origin, an instance of E53 Place, of an instance of E9 Move.
+A move will be linked to an origin, such as the move of an artifact from storage to display. A move may be linked to many starting instances of E53 Place by multiple instances of this property. In this case the move describes the picking up of a set of objects. The area of the move includes the origin(s), route and destination(s).
+Therefore, the described origin is an instance of E53 Place which P89 falls within (contains) the instance of E53 Place the move P7 took place at.</rdfs:comment>
+    <rdfs:domain rdf:resource="E9_Move" />
+    <rdfs:range rdf:resource="E53_Place" />
+    <owl:inverseOf rdf:resource="P27i_was_origin_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P27i_was_origin_of">
+    <rdfs:label xml:lang="en">was origin of</rdfs:label>
+    <rdfs:label xml:lang="de">war Ausgangsort von</rdfs:label>
+    <rdfs:label xml:lang="el">ήταν αφετηρία του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">a été le point de départ de</rdfs:label>
+    <rdfs:label xml:lang="pt">era origem de</rdfs:label>
+    <rdfs:label xml:lang="ru">был исходной точкой отправки для</rdfs:label>
+    <rdfs:label xml:lang="zh">是起点</rdfs:label>
+    <rdfs:domain rdf:resource="E53_Place" />
+    <rdfs:range rdf:resource="E9_Move" />
+    <owl:inverseOf rdf:resource="P27_moved_from" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P28_custody_surrendered_by">
+    <rdfs:label xml:lang="en">custody surrendered by</rdfs:label>
+    <rdfs:label xml:lang="de">übergab Gewahrsam an</rdfs:label>
+    <rdfs:label xml:lang="el">μετεβίβασε κατοχή από</rdfs:label>
+    <rdfs:label xml:lang="fr">a mis fin à la garde par</rdfs:label>
+    <rdfs:label xml:lang="pt">custódia concedida por</rdfs:label>
+    <rdfs:label xml:lang="ru">хранeниe отдано</rdfs:label>
+    <rdfs:label xml:lang="zh">监护权转自</rdfs:label>
+    <rdfs:comment>This property identifies the instance(s) of E39 Actor who surrender custody of an instance of E18 Physical Thing in an instance of E10 Transfer of Custody.
+The property will typically describe an Actor surrendering custody of an object when it is handed over to someone else’s care. On occasion, physical custody may be surrendered involuntarily, e.g. through accident, loss, or theft.
+In reality, custody is either transferred to someone or from someone, or both.</rdfs:comment>
+    <rdfs:domain rdf:resource="E10_Transfer_of_Custody" />
+    <rdfs:range rdf:resource="E39_Actor" />
+    <rdfs:subPropertyOf rdf:resource="P14_carried_out_by" />
+    <owl:inverseOf rdf:resource="P28i_surrendered_custody_through" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P28i_surrendered_custody_through">
+    <rdfs:label xml:lang="en">surrendered custody through</rdfs:label>
+    <rdfs:label xml:lang="de">wurde Gewahrsam übergeben durch</rdfs:label>
+    <rdfs:label xml:lang="el">παρέδωσε κατοχή μέσω</rdfs:label>
+    <rdfs:label xml:lang="fr">a cédé la garde par</rdfs:label>
+    <rdfs:label xml:lang="pt">final da custódia por meio de</rdfs:label>
+    <rdfs:label xml:lang="ru">отдано на хранeниe посрeдством</rdfs:label>
+    <rdfs:label xml:lang="zh">出让监护权</rdfs:label>
+    <rdfs:domain rdf:resource="E39_Actor" />
+    <rdfs:range rdf:resource="E10_Transfer_of_Custody" />
+    <rdfs:subPropertyOf rdf:resource="P14i_performed" />
+    <owl:inverseOf rdf:resource="P28_custody_surrendered_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P29_custody_received_by">
+    <rdfs:label xml:lang="en">custody received by</rdfs:label>
+    <rdfs:label xml:lang="de">übertrug Gewahrsam auf</rdfs:label>
+    <rdfs:label xml:lang="el">μετεβίβασε κατοχή σε</rdfs:label>
+    <rdfs:label xml:lang="fr">a confié la garde par</rdfs:label>
+    <rdfs:label xml:lang="pt">custódia recebida por</rdfs:label>
+    <rdfs:label xml:lang="ru">получил хранeниe</rdfs:label>
+    <rdfs:label xml:lang="zh">监护权转至</rdfs:label>
+    <rdfs:comment>This property identifies the instance(s) of E39 Actor who receive custody of an instance of E18 Physical Thing in an instance of E10 Transfer of Custody.
+The property will typically describe Actors receiving custody of an object when it is handed over from another Actor’s care. On occasion, physical custody may be received involuntarily or illegally, e.g. through accident, unsolicited donation, or theft.
+In reality, custody is either transferred to someone or from someone, or both.</rdfs:comment>
+    <rdfs:domain rdf:resource="E10_Transfer_of_Custody" />
+    <rdfs:range rdf:resource="E39_Actor" />
+    <rdfs:subPropertyOf rdf:resource="P14_carried_out_by" />
+    <owl:inverseOf rdf:resource="P29i_received_custody_through" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P29i_received_custody_through">
+    <rdfs:label xml:lang="en">received custody through</rdfs:label>
+    <rdfs:label xml:lang="de">erhielt Gewahrsam durch</rdfs:label>
+    <rdfs:label xml:lang="el">παρέλαβε κατοχή μέσω</rdfs:label>
+    <rdfs:label xml:lang="fr">a reçu la garde par</rdfs:label>
+    <rdfs:label xml:lang="pt">início da custódia por meio de</rdfs:label>
+    <rdfs:label xml:lang="ru">хранeниe получeно посрeдством</rdfs:label>
+    <rdfs:label xml:lang="zh">获得监护权</rdfs:label>
+    <rdfs:domain rdf:resource="E39_Actor" />
+    <rdfs:range rdf:resource="E10_Transfer_of_Custody" />
+    <rdfs:subPropertyOf rdf:resource="P14i_performed" />
+    <owl:inverseOf rdf:resource="P29_custody_received_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P30_transferred_custody_of">
+    <rdfs:label xml:lang="en">transferred custody of</rdfs:label>
+    <rdfs:label xml:lang="de">übertrug Gewahrsam über</rdfs:label>
+    <rdfs:label xml:lang="el">μετεβίβασε κατοχή του/της/των</rdfs:label>
+    <rdfs:label xml:lang="fr">a transféré la garde de</rdfs:label>
+    <rdfs:label xml:lang="pt">transferida custódia de</rdfs:label>
+    <rdfs:label xml:lang="ru">пeрeдал хранeниe</rdfs:label>
+    <rdfs:label xml:lang="zh">转移监护权的是</rdfs:label>
+    <rdfs:comment>This property identifies the instance(s) of E18 Physical Thing concerned in an instance of E10 Transfer of Custody.
+The property will typically describe the object that is handed over by an instance of E39 Actor to the custody of another instance of E39 Actor. On occasion, physical custody may be transferred involuntarily or illegally, e.g. through accident, unsolicited donation, or theft.</rdfs:comment>
+    <rdfs:domain rdf:resource="E10_Transfer_of_Custody" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <owl:inverseOf rdf:resource="P30i_custody_transferred_through" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P30i_custody_transferred_through">
+    <rdfs:label xml:lang="en">custody transferred through</rdfs:label>
+    <rdfs:label xml:lang="de">wechselte Gewahrsam durch</rdfs:label>
+    <rdfs:label xml:lang="el">άλλαξε κατοχή μέσω</rdfs:label>
+    <rdfs:label xml:lang="fr">a été l’objet d’un transfert de garde par</rdfs:label>
+    <rdfs:label xml:lang="pt">custódia transferida por meio de</rdfs:label>
+    <rdfs:label xml:lang="ru">хранeниe пeрeдано посрeдством</rdfs:label>
+    <rdfs:label xml:lang="zh">变更监护权</rdfs:label>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E10_Transfer_of_Custody" />
+    <owl:inverseOf rdf:resource="P30_transferred_custody_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P31_has_modified">
+    <rdfs:label xml:lang="en">has modified</rdfs:label

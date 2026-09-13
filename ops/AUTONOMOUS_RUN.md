@@ -1,226 +1,622 @@
 # Stream delivery state
 
-Updated 11 September 2026. The owner authorizes autonomous implementation,
-repository reorganization, independent adversarial review, and testnet delivery.
+Updated 13 September 2026. The owner authorizes autonomous completion of the
+remaining full v1 features, independent adversarial review and matching testnet
+delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Current Repository State
 
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream` |
-| Active PR branch | `codex/developer-launch-kit` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/741` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/738` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/742` |
+| Active PR branch | `codex/v1-integration` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/742` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
+| Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `afa176d3496601abc2c9028a40a757ce2deb838d` (merged PR #741 baseline) |
+| Source checkpoint | Coordinator inventory `66579293`, conservation `25d3392c`, recovery prerequisites `a3b430d8 / 3a2c0544`; complete provider/current assembly remain active. Immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-09-11 UTC` |
+| Last updated | `2026-09-13 UTC` |
 
 ## Active work
 
-[PR #741](https://github.com/6529-Collections/6529Stream/pull/741) merged as
-`afa176d3496601abc2c9028a40a757ce2deb838d` after all four CI jobs passed and all
-seven review threads were resolved. Its merged tree matches the reviewed
-`640cd995` tree. The original checkout is clean on main at that merge.
+Inherited RELEASE, SEASON and VIEW recovery approval is integrated as 0e58111d.
+The actual Artist/companion flow consumes current published membership and
+preserves approved history; three family cases pass in IR alongside the retained
+TOKEN case. This is an explicit union of captured runs. The companion's 16-million
+Artist callback budget needs more than 16,353,968 gas at its inner calling frame;
+it does not prove a 12- or 16-million whole-transaction envelope. Typed governance,
+original provider and full deployment boundaries remain in the ADR. Explicit
+adjudicated identity authority is the next artist implementation.
 
-[PR #742](https://github.com/6529-Collections/6529Stream/pull/742) is the active
-developer-kit increment on `codex/developer-launch-kit`. Current-stack tests,
-campaigns, client validation and the completed public Sepolia flow are recorded
-below. Current release coverage contains 704 files.
+Original-coordinator inventory `66579293` now traverses every actual scope member's retained
+Core coordinator, preserving old sources across pointer replacement. Seventeen
+focused cases pass both modes as a retained 15-case cohort plus two added controls,
+including 256 fuzz inputs and all sixteen public selectors invoked through real
+threshold-Safe 1.4.1. A separate four-case IR cohort passes: two new actual
+Core/Executor/Safe replacement-and-membership cases and two retained foundation
+cases. The runtime pin is explicitly observed at indexing, not proven at mint.
+Complete inventory and per-entry live validation remain separate, and this does
+not complete entropy policy/output or final discovery. See
+[original coordinator inventory](../docs/integrations/original-coordinator-inventory.md).
 
-Final integration remains pending. The Windows CI job now builds the client
-before operator tests, and the verifier-test fixture binds the reviewed Slither
-source hash. Developer-tool review corrections have focused passing tests and
-independent review, including ABI-ordered PowerShell authorization recovery.
-Refresh the dependent release evidence and finish final local validation,
-independent review and all six CI jobs before merging PR #742. The supported testnet candidate
-freeze and publication follow that merge; neither has occurred. Historical
-production and public-beta gate placeholders remain unchanged.
+Conservation records are integrated as 25d3392c: complete artist-intent, waiver
+and interview JSON, eight definitions, seven canonical examples and pinned
+language tooling. Thirty-five Solidity cases pass each compiler mode with two
+256-input properties; twenty-four Python cases pass separately. Original record
+authority, current conservation selection and archival coverage are the next
+consumer work. The dedicated
+[conservation guide](../docs/integrations/conservation-record-json.md) preserves
+those boundaries. Recovery membership authentication a3b430d8 and permanent
+identity-recovery hashing 3a2c0544 are also integrated; neither prerequisite
+alone implements adjudicated recovery.
 
-## Retained PR #741 implementation and validation
+Current description consumption is integrated as `821c66ee`. Actual WORK and
+RIGHTS selectors now feed their exact authorized heads, payload commitments and
+original receipts to the finality-input consumer. Twenty-three cases pass both
+compiler modes, including 256 selection-hash inputs, direct linked-library and
+fixed-consumer Safe calls, and an exact 8,192-byte registered format catalog with
+maximum original record URIs. Core, artist owners, Executor and the consuming
+provider remain explicit boundaries. This closes the two-description join;
+complete membership, ROOT and the other finality inputs remain separate. See
+[description evidence](../docs/integrations/finality-description-evidence.md).
 
-The following record retains its original checkpoints and rerun/merge-gate
-language. Those pending references are historical; PR #741's final acceptance
-is recorded above.
+Inherited TOKEN artist recovery approval is integrated as `89eab3f4`. Fresh
+approval verifies actual completed/burned token identity under its collection's
+original finality; saved approval preserves that admitted relation and the
+companion rechecks execution eligibility. The independent review accepts four
+actual Artist/companion cases plus two corrected estate cases, with separate
+actual Core and helper cohorts. The estate fixture switches its unit Executor
+between explicit phases; full real-governance/provider composition is separate.
+Original approval ABI, signing preimages and storage remain unchanged. Other
+inherited families and explicit adjudicated identity recovery remain in progress.
+The separate `ac870f09` compiler repair reduces verification stack lifetime;
+the original hash preimage and tested IR executable remain unchanged, and the
+selected reader now compiles in default mode. This is not a full-build pass.
 
-The owner requested further implementation while waiting for Sepolia funding.
-That funding has arrived and the matching current deployment and native
-demonstration have completed successfully.
-The active branch is `codex/offline-release-completion`, from merged
-[PR #740](https://github.com/6529-Collections/6529Stream/pull/740). This increment
-has completed executable product paths in three parallel lanes. The contract changes are
-stable. All four CI jobs and the complete source-bound native validation passed
-on `3ab8be81`. Two final review corrections bind fallback compiler caches to
-Foundry settings and reject literal failing guards in the source-policy checker.
-Their focused tests and refreshed release package pass. The final CI run for
-`640cd995` passed its earlier checks but reached the 90-minute job limit during
-the concluding deployment rehearsal. That job is rerunning in
-[run 34535587115](https://github.com/6529-Collections/6529Stream/actions/runs/34535587115).
-The developer-kit increment moves checksum/verifier suites into an independent
-CI job, removing that serial work from Solidity compilation and rehearsals.
+Authoritative scope membership is integrated as `0f3805ab`. Actual Metadata,
+Schema, Store and Inventory contracts publish complete RELEASE, SEASON and VIEW
+membership, including all 64 supported native chunks. Publication and capacity
+cases pass both compiler modes; separate actual Core cases pass in IR. Router
+membership readers are integrated as `a9aa1aeb`, bound to the original provider
+and its immutable membership host. Their four composed cases pass both modes.
+See [scope membership](../docs/scope-membership.md).
 
-| Owner | Delivery |
+Action-bound TOKEN owner recovery notices and response evidence are integrated
+as `f79ddb0d`. Bounded preparation follows in `04390f62`: the publisher records
+the original complete designation and delivery commitment, publishes delivery
+evidence in bounded calls, and opens the notice after a fresh ownership/head
+check. Opening preserves the complete response queue and starts the 72-hour
+period. All 119 focused and retained cases pass both modes. Wider notice scopes
+and complete finality execution remain open. See
+[owner notices](../docs/integrations/owner-recovery-notices.md).
+
+The contact-capacity correction `dad44218` preserves endpoint order, exact JSON
+and the existing payload limit while replacing quadratic duplicate checks and
+repeated prefix copying. All 131 focused and retained cases pass both modes,
+including three 256-input properties. The named cold 214-endpoint original writer
+uses 13.075 / 13.626 million gas under its unchanged 16-million test budget.
+This is the measured payload and named cold accounts, excluding transaction
+intrinsic gas; it does not imply every possible payload has the same cost.
+
+Shared JSON escaping is optimized in `e9b6a7bc`. An independent literal copy of
+the previous implementation proves exact output preservation for controls,
+arbitrary bytes and maximum escaped strings. All 135 focused/retained cases pass
+both modes, including seven 256-input properties. The named ASCII measurements
+show approximately 64% / 66% less escaping gas; these are function measurements,
+not a claim about the complete transaction.
+
+Native entropy policy and a fixed evidence provider are integrated as `4819c079`.
+The actual Coordinator reports its original locked provider/reveal policy,
+independently of whether output randomness has completed. Forty-eight focused
+and retained cases pass both modes, including all new provider selectors and
+the native policy read through actual threshold Safe. The provider describes
+one original coordinator; complete discovery must still join every token's
+retained `coordinatorAtMint`. See
+[entropy evidence](../docs/integrations/entropy-finality-evidence.md).
+
+The latest actual Core/Coordinator/Router cohort passes all 32 cases in IR,
+including two new original-policy cases across minting and coordinator
+replacement. Local typed rendering avoids an unnecessary encode/decode cycle;
+externally supplied frozen rendering keeps strict canonical-byte validation.
+The retained maximum 16-KiB data and escaped-script case now uses 11,939,859 gas
+for the named cold Router call, below its unchanged 12-million limit. Core's
+outer `tokenURI` call uses 12,749,169 gas. Router runtime fits at 24,158 bytes in
+the default production-only closure and 24,443 in the current IR cohort.
+Artist attribution, original-unfinalized Finality and oracle service remain
+explicit fixtures in this cohort. Full cold frozen Core/provider composition
+still needs its own acceptance test.
+
+Earlier typed stewardship, WORK and RIGHTS selection, six-family Router
+evidence, archived content, museum account records, IIIF and LIDO remain
+integrated. Their guides and earlier entries retain the exact tested boundaries.
+Full typed finality requires all ten metadata references and actual authority,
+inventory and preserved-record consumers; passing individual producers does
+not complete that join.
+
+| Owner | Next deliverable |
 | --- | --- |
-| Integrator | Governance-hosted state-export publication, challenge, supersession and historical reads ([#668](https://github.com/6529-Collections/6529Stream/issues/668)); shared integration and release evidence |
-| Payment builder | Real ERC-20 fixed-price purchase using pinned payer intents, canonical primary policy, exact token settlement and current Core mint ([#664](https://github.com/6529-Collections/6529Stream/issues/664)) |
-| Deployment builder | Corrected local/Sepolia runners, artist acceptance and receipt-based token discovery; actual local transactions and fresh-transaction entropy callback proof |
-| Independent reviewer | Adversarial review of each implementation and integrated behavior; no implementation ownership |
+| Integrator | Complete typed metadata/finality provider, original-coordinator discovery and current deployment assembly; shared tests, CI and release |
+| Artist builder | Adjudicated identity recovery, adopted receipt occurrences and complete authority integration |
+| Museum/payment builder | Actual conservation original-record interpretation, current artist/estate selection and interview linkage |
+| Independent reviewer | Challenge exact implementations, real-contract composition and integration evidence |
 
-The publisher stays on the actual Executor. Linked scheduling validation frees
-runtime space without moving existing storage or the execution loop. The payment
-lane installs the existing primary revenue resolver for supported fixed-profile
-assignments; unsupported primary templates and deferred escrow remain explicit.
-Both features are covered by real current-stack integration tests. The integrated
-revision passes 1,379 default Foundry tests across 114 suites and 28 current-stack
-tests across five suites. The current Windows wrapper also passes its 44 Python
-tests. The exact current compilation exports 86 targets from 186 sources; the
-independent release verifier and packaging review pass all 625 checksummed files.
-The earlier 1,390-execution run included twelve additional via-IR executions of
-the Core target suite. The latest run retains every distinct test and adds one
-payment-cap regression; its smaller count reflects that compiler-profile duplicate.
+The full build remains red. At pushed head `7630e3c3`, museum CI passed on
+Windows and Linux; client/wrapper checks passed, while current integration,
+Foundry smoke, static baseline and release artifact checks failed. The retained compiler diagnostic has two missing actual
+Finality arguments in Coordinator assembly; the immutable deployment order in
+ADR 0041 must be implemented with the complete provider. Static-analysis
+baseline and release artifacts also need reconciliation after implementation
+stabilizes. Complete Safe selector/version/nesting acceptance, remaining
+commerce/royalty/entropy behavior, museum conformance and a newly frozen tested
+candidate remain required. No new full-v1 freeze or deployment is claimed.
+All 57 artist operations, the accepted extension, 37 genesis roles and adopted
+museum requirements remain in scope. Initial RC1 remains immutable.
 
-The patched deployment runner completed a fresh local deployment with its normal
-115% gas multiplier: all 43 deployment transactions succeeded after the complete
-unsigned plan passed preflight. Paid native mint, final metadata, the Core update
-event, both 90/10 split withdrawals, artist transfer and 40 bytecode readbacks
-passed. A separate fresh-transaction VRF rehearsal passed with 500,000 gas
-forwarded to the real provider/coordinator/Core path; its upstream coordinator is
-a local mock, so this does not attest Chainlink service, billing or live fulfilment.
-Independent reviewers cleared the implementation, package and local evidence.
+### Earlier integrated increments
 
-The aggregate native check found a stale test-discovery assertion after three
-diagnostic tests were added. Its count is corrected to 127 while retaining every
-existing suite-partition assertion. Native validation subsequently completed all 285 wrapper statements through
-source-bound continuations and focused final-input supplements. Original failed
-logs remain retained. The last review-only delta passes 29 governance-policy
-tests, 33 toolchain tests and the 625-file offline verifier; the new final CI run
-remains a merge gate.
+Current rights selection now joins actual MetadataV1 records, full registered
+schema/profile/JCS bytes and the existing RIGHTS-family grants. Seventeen focused
+cases and 256 supersession fuzz inputs pass both compiler modes, including exact
+event/selection commitments, original publisher versus selector provenance,
+retained history, low-gas rollback/retry and threshold Safe calls. Registered
+artist references retain an immutable identity hash without imposing today's
+active status. Core/Executor and the artist graph are typed fixtures here;
+actual artist-owner, provider, broader scopes and Finality composition remain
+required. The [selection design](../docs/adr/0042-current-rights-record-selection.md)
+also distinguishes Core's stored installation status from live module eligibility.
 
-The merged baseline passed 1,346 configured Foundry tests across 111 suites,
-eleven current-stack scenarios, thirteen gas snapshots, the complete native
-wrapper and all four CI jobs. Its current export has 76 targets from one exact
-168-source compiler input; the independent verifier covers 606 files. The source
-layout evidence tag preserves the pre-squash provenance required by the release
-package. These are completed baseline results, not results for this increment.
+Complete WORK JSON is integrated as `4f31b392`: twenty Solidity cases with two
+256-input fuzz properties pass both compiler modes, and twenty independent Python
+cases pass. The format catalog and every supported typed field are committed
+exactly. This builds on the shared [artist/curator authority](../docs/integrations/work-description-authority.md)
+in `82909797`, with 28 focused cases and three current artist/estate/Safe cases.
+The known-artist reader is integrated as `601ed179`, with ten independently
+reviewed cases in both modes. The museum builder now owns current WORK selection; root owns provider consumption.
+The complete WORK-to-LIDO mapping has since been integrated above.
 
-The reorganization received independent adversarial review. Automatic approval
-review rejected the attempted `AGENTS.md` correction with only
-`rejected: blocked by policy`; that file still has stale flat-script commands.
-Working commands are in the contributor guides and `scripts/dev.py`. Do not retry
-or bypass the rejected edit.
+Artist recovery approval operation 22 is integrated as `ae473558`, following
+the unavailability finding in `48774674`. Independent review accepts the exact
+26-name pass union: 24 retained cases and two corrected test-only cases, with
+unchanged production artifacts, original ABI/storage compatibility and all
+production runtimes within the limit. The shared configuration oracle includes
+operation 22. Approval covers its exact original scope; inherited and adjudicated
+scope paths and actual companion execution remain open. The separately integrated
+owner-evidence reader (`6aafa56f`, six focused cases in both modes) is a prerequisite;
+it does not implement the owner's action-bound 72-hour notice and objections.
 
-Builders hand over coherent changes to one integrator. Ordinary implementation
-choices do not require owner decisions. Run focused checks during implementation;
-run the broad integrated validation and deterministic artifact refresh after the
-supported behavior stabilizes. Resolve substantive review findings before merge.
+Museum input now includes actual recorded, account-authored semantic records:
+`fe9b5b90` adds independent anchored history, `16d68963` binds exact publication
+event order, and `14c206b9` adds registered interpretation and account authority.
+The last increment has 100 independently reviewed cases; root readback matches
+all 45 integrated files and passes 19 focused cases plus its profile generator.
+The local captures retain original records and explicit trusted-RPC and typed
+Core/Executor boundaries. Account authorship does not identify a human or prove
+institutional independence. See [recorded account input](../docs/museum-recorded-account.md).
+Complete museum conformance and public deployment acceptance remain open.
 
-## Developer launch kit and testing upgrade
+Operation 13 sanction confirmation is integrated as `9ab6a717`. The independent
+review accepts all 303 test names across the retained 302-pass run and one
+corrected stale-mock test; all prior 293 cases pass. No production source
+changed for that test correction. Confirmation uses the original executed
+Finality record, stored components and archival witness, commits atomically
+through the existing owners/Archive and preserves historical authority rules.
+The separate Attribution stack/preimage repair is integrated as `c7447881`,
+with six focused tests and 256 inputs in old IR, new default and new IR modes.
+The existing `IdentityConsentState.policyDigest` default-stack issue remains.
+The artist builder proceeds to the recovery companion and actual execution
+composition as the integrator completes typed records/provider/discovery.
 
-The active increment is [PR #742](https://github.com/6529-Collections/6529Stream/pull/742)
-on `codex/developer-launch-kit`, following the now-merged PR #741. It does not
-change production Solidity behavior. Completed pieces include the TypeScript
-client, a selected-state snapshot exporter, a second-artist product demonstration
-and resumable Sepolia stages.
+The current-content consumer is integrated as `60ec0ba3`: 32 focused/retained
+cases and two 256-input fuzz properties pass both compiler modes, with
+independent artifact/source review. Actual current root records, complete
+checkpoint/inventory and preserved leaf bytes are joined without replaying old
+publisher authorization. Complete typed record interpretation, provider,
+discovery and Finality execution remain next; see the
+[consumer guide](../docs/integrations/finality-content-evidence.md).
 
-- The client passes 38 tests plus its build, type checks and retained-ABI checks.
-  Its snapshot records selected public facts at one block, with explicit coverage,
-  canonical hashes and fresh RPC readback. It is not a complete archival export.
-- The product demonstration executes 31 local transactions across native/ERC-20
-  purchases, auction bids/refunds/settlement, withdrawals and export publication.
-  A fresh scenario using the final 177-source production compilation and a
-  separately compiled payment-token mock also passes all 31 transactions.
-  Production compiler output and cache remain byte-identical. Repeating every
-  stage sends no duplicate transactions.
-- Launch recovery retains exact transaction intents, reconciles receipts before
-  constructing fresh authorizations and provides credential-free status. Its
-  independent journal/status suites pass 78 and 27 cases respectively.
-- Collection two has completed its artwork, closure, burn block and collection/
-  royalty freezes through the normal governance actions. Its portable collector
-  package passes independent reconstruction and integrity checks; repeating the
-  workflow sends no new transactions. Global metadata, entropy, artist and royalty
-  pointers remain governed. This is scoped collection completion, not the full
-  artwork-finality design or a freeze of all future rendering authority.
-- Five input-fuzz properties cover native settlement and rounding, incorrect
-  value, altered signatures, replay and expiry. The first focused run passes
-  256 cases per property, plus 32 stateful runs with 2,048 actions and no unexpected
-  reverts or discards. Both the successful-activity check and the deliberately
-  corrupted payer-accounting oracle test pass. An initial test-helper compiler
-  failure is retained separately from the corrected passing run.
-- The campaign command and CI wiring pass 20 tooling regressions and independent
-  review. The canonical-source quick run and two extended seeds pass 42,240 input
-  cases and 133,120 stateful calls across 544 sequences, with no unexpected reverts
-  or discards. The warm extended runs take about two minutes each. A separately
-  labeled tiny tooling fixture proves failure retention, exact saved-case replay
-  under a different seed and full-budget success after correcting the property.
-  The focused campaigns use a 112-source closure. Separately, all 36 current
-  tests across seven suites pass. A fresh deployment compilation exports 86
-  targets from 177 sources; all selected ABI and bytecode files match the prior
-  export exactly. Historical snapshots retain their original input identity.
+LIDO is integrated as `03693f36`, with all 202 tests, eight generators and
+37 exact reproduced composite outputs. Original standards and all previous
+package/projection outputs remain unchanged. The 183-test IIIF revision passes
+Windows/Linux CI at `8ad1e43d` (34713924514); LIDO202 now passes both platforms
+at `739ef458` (34715965661). Shared CI checks all eight generators and allows
+40 minutes for the measured 24-minute test cohort. The museum builder has
+delivered the bounded chain/account input and full WORK JSON, and now owns WORK-to-LIDO mapping.
 
-Builders exchange adversarial reviews before integration. The owner explicitly
-requests this testing upgrade and defers Lean verification until traditional
-implementation stabilizes. The immutable non-release tag
-`evidence/developer-kit-2026-09-10` preserves the reviewed collector and original
-client/snapshot ancestry before integration. Historical snapshots retain their
-original compiler/client provenance when current generated exports change.
+The integrator has committed and pushed the independently reviewed content-root
+publication increment as `bf5fa1b6`:
+17 cases and 256 fuzz inputs pass both compiler modes, alongside 61 retained
+renderer cases and two maximum-content gas checks. Actual Router/schema/store,
+inventory, checkpoint, leaf verifier, archival aggregator and threshold Safe
+are composed. Exact artist/provider/Finality execution remains the next join;
+the fixture boundaries are explicit in the
+[publication guide](../docs/integrations/content-root-publication.md). Router
+runtime is 24,248 default / 23,666 IR, preserving the existing ABI/storage prefix.
 
-## Sepolia and release
+The IIIF increment is integrated as `22318d25`, with independently verified
+seven generators, 28 example outputs and the 183-name test union. The preceding
+149-case revision passes Windows/Linux CI at `d0094ca6` (34709755563). LIDO is
+integrated above. Delegation compiler and split-metadata admission fixes
+are integrated as `54087312` and `c7de0ad6`; the artist builder's corrected
+303-name confirmation pass union is integrated above. Full deployment construction,
+complete finality and candidate freeze remain open. No new testnet broadcast
+is required at this point.
 
-The [historical prototype](../deployments/current/sepolia-2026-09-09/README.md)
-completed deployment, paid mint and a real VRF request. It predates the final
-entropy correction. The prepared
-[replacement compilation](../deployments/current/sepolia-current-rc-1/compilation/manifest.json)
-is also retained exactly; its source paths predate this reorganization.
+Signed sanctions and canonical finality admission are integrated as `50bd3935`,
+with the separate historical migration `cb332bc7`. Independent review accepts
+the exact 293-name pass union (292 original plus one corrected test oracle),
+all production sizes and prior artist ABI/storage bridges. The separate 101-case
+migration retains 79 historical tests and 22 current read/retirement cases.
+Full archive-proof finalization, current preview and
+root-owned deployment/current constructor migration remain open.
 
-Funding was confirmed at Sepolia block 11,678,000 on 10 September at 23:00 UTC:
-2.562757914017426305 ETH was available to the dedicated deployer
-`0x26A3f4505145b5E6164260cc868e50ddd9863697`. The fresh 45-transaction plan passed
-preflight against the matching 177-source compilation. All 45 transactions
-succeeded from the frozen `codex/sepolia-launch-kit` checkout. Independent public
-readback verifies 40 runtime addresses and 81 configuration checks. The real
-paid mint, Chainlink callback, final metadata, both split withdrawals and transfer
-to the dedicated artist also succeeded. The immutable non-release tag
-`evidence/sepolia-deployment-2026-09-10` preserves the exact deployed source.
-The [public instance package](../deployments/current/sepolia-2026-09-10/README.md)
-retains independent deployment and demonstration verification. Sourcify reports
-creation and runtime matches for all 34 named instances: 25 fresh submissions
-and nine existing deterministic library records. Independent comparison of all
-68 templates to the current compiler output passes with only declared library
-link spans normalized. Final repository integration and review precede the
-supported candidate freeze. Only the deployment owner broadcasts.
+The integrator's complete leaf-list manifest verifier passes 13 cases and two
+256-input fuzz properties in both compiler modes, including actual checkpoint,
+document store, artifact aggregator and Safe calls. Independent review binds
+the exact source and compiler artifacts. It establishes preserved manifest
+contents; the separate root consumer above now enforces artist consent and
+governed interpretation registration. Full artist/provider composition and larger
+manifests beyond the existing 64-chunk artifact bound remain required. The
+reviewer's small explicit-library artifact CREATE probe passes default Foundry
+protection; the actual deployment/link graph is the next script task.
 
-Core runtime measurements belong to the
-[canonical bytecode proof](../release-artifacts/latest/bytecode-release-proof.json)
-and its bound compiler/ABI inputs; they are not duplicated in this active run state.
-Reread that proof after the reorganized tree is rebuilt and its evidence refreshed.
-The source-bound local checks and completed Sepolia flow are distinct evidence.
-A frozen testnet release candidate still requires the final reviewed package.
+Exact artist publication authorization is integrated as `a7114aeb`, with the
+complete 271-test artist cohort independently reviewed. Actual registry-to-
+metadata-host publication passes four reviewed cases and is integrated as
+`85f44fbd`; Core and Executor remain explicit unit boundaries. The dedicated
+independent-attestor host is integrated as `4673f248`, with 22 reviewed cases,
+256 fuzz inputs and both production profiles fitting. Artist signed-sanction
+admission is integrated in the latest handoff above. Stable router presentation is integrated
+as `f445ac79`; the second builder resumes the remaining museum mappings.
+The integrator's 17-case checkpoint suite and seven actual Core/router cases
+pass, including Safe custody, burns and atomic retry. Inline-image admission
+and the Base64 padding repair (`164f867b`) have 19 focused tests with fuzzing.
+The corrected Router fits both compiler modes; the retained renderer cohort
+passes 61 IR cases. The typed evidence producer and full finality remain open.
 
-## Recovery and remaining scope
+The first PREMIS file-object correspondence is integrated as `9f6afe60`, with
+149 tests and six generators passing locally and on Windows/Linux CI at
+`4c7cc4b6` (run 34708017861). Exact source assertions
+remain distinct from actual file-byte verification. The preceding faithful
+abstract/nonvisual projections (`db3c8153`) pass Windows/Linux CI at `d8f0eef2`.
+IIIF and LIDO are integrated above. All prior package versions remain exact.
+Full authenticated-chain exports and institutional acceptance remain open.
+Complete archival artifact coverage is integrated as `880bac6d`, with 26
+reviewed domain tests and fuzzing. The corrected metadata host/adapter cohort
+passes 23 tests in both compiler modes; separate actual-Executor tests cover
+root authority, ordinary-proposer rejection and multi-call execution. Actual
+artist publication, typed finality and discovery still need composition.
 
-The original checkout is clean on merged main. Cleanup has retired 58 registered
-worktrees and archived 19 superseded tasks. All 160 original changed/untracked
-paths, recovery refs/bundles and 6,646 original ignored files were preserved and
-verified. The latest three retirements additionally preserve 2,064 ignored files
-and verified source bundles. Three registered worktrees remain: original,
-developer launch kit and frozen Sepolia launch. The launch-kit checkout is active
-implementation work. The retired integration directory is empty but a process
-still holds its directory handle; its Git worktree registration has been removed.
+The artist owner/acceptance compiler repair is integrated as `1e3087a2`, with
+exact preimage/event checks and matching owner interfaces/storage.
+Complete deployment remains unresolved:
+the catalog self-view call helps minimal compiler
+probes but fails current Foundry execution protection, even outside broadcasting.
+The separate helper now passes six plan/catalog tests with 256 fuzz inputs and
+a real Core/Executor/registry/manifest script rehearsal under default protection.
+Its creation/read consume no deployer nonce; the three resumed governance writes
+complete. Actual full product-script compilation reached its 600-second bound
+without a result, so full compiler and deployment acceptance remain open.
+The latest `8ad1e43d` CI run (34713924529) passes client/wrapper jobs but fails
+smoke/current compilation and release-artifact/Slither gates. Two wildcard
+Router import collisions are repaired as `7772e7b2`; a 269-source syntax/type
+diagnostic now reaches only the two known one-argument Coordinator calls.
+Actual `Coordinator(s, finality)` construction still needs the full dependency
+graph. No complete-build or working deployment-script repair is claimed. Release
+checksums and the Slither snapshot also await the later
+stabilized-source regeneration. See [V1_DELIVERY.md](V1_DELIVERY.md).
 
-After the final merge and validation finish, preserve and hash the developer
-kit's remaining compiler outputs, caches and recovery files before retiring that
-worktree. The intended two retained checkouts are the original repository and
-the frozen Sepolia launch checkout. Retained evidence and prior user changes
-must remain recoverable.
+One integrator owns technical decisions and delivery. Two builders and a separate
+reviewer advance independent domains; all rows in [V1_DELIVERY.md](V1_DELIVERY.md)
+remain in scope. [Safe acceptance](SAFE_ACCEPTANCE.md) covers every supported
+contract call, including owner actions, payments, NFT custody and reads.
 
-The separate Seize artist-provenance task completed; it is not a Stream implementation lane. An empty previously retired
-directory remains after automatic approval review blocked its removal.
+| Lane | Branch | Current deliverable |
+| --- | --- | --- |
+| Integrator | `codex/v1-integration` | Actual metadata/finality producers and discovery, staged product/operator activation, whole-current compiler diagnostic, client and release |
+| Artist | `codex/v1-artist-authority` | Confirmation303 and separate default4 integrated; actual finality and recovery operations 22/23 |
+| Revenue | `codex/v1-revenue` | Museum LIDO202 integrated; actual local-EVM chain-source adapter, remaining formats and institutional acceptance |
+| Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |
 
-Issue [#738](https://github.com/6529-Collections/6529Stream/issues/738) tracks the
-supported working release and testnet outcome. Full artist lifecycle/recovery,
-broader payment modes, finality recovery, archival export operations, the full production
-configuration and external audit evidence remain explicit unfinished work.
-See [the roadmap](ROADMAP.md) and [execution backlog](EXECUTION_BACKLOG.md).
+Signing-domain discovery is integrated as `134e0f58`. The native fixed,
+native price-program and universal fixed families retain their distinct signed
+preimages and existing interface IDs. Four focused tests and 256 fuzz inputs
+pass independent review, including actual threshold Safe reads and native
+purchases. Both production compiler profiles fit; that domain suite uses
+explicit Core, Manager and artist fixtures. The
+[integration guide](../docs/integrations/sale-signing-domains.md) explains which
+getter clients must use. Full ABI/client and selector acceptance remain open.
+
+Refund-window source is integrated as `ea107e58`: all 38 files match the
+independently accepted handoff, with 63 tests, two 256-input fuzz properties,
+128 compiler sources, 160 artifacts and both production profiles verified.
+The current refund composition passes all eight cases with independent review:
+four refund workflows and four retained identity-dispute regressions. It covers
+real Core, Manager, artist, settlement, entropy, governance and threshold Safe
+contracts; only the external randomness service is doubled. This captured run
+predates dismissal. Standard native Dutch source is integrated as `b3152198`,
+with 33 domain cases and two 256-input fuzz properties independently accepted.
+Its separate four-case current-contract run passes independent review after
+correcting a test-only role name. The initial three-pass/one-fail
+snapshot is retained, and the production snapshot is unchanged by the correction.
+
+Dismissal operation 58 is integrated as `3489d360` with the separate timing
+interface move `09afe2b8`. The final 202-case domain run passes independent
+review. Four actual Executor/Safe dismissal cases plus eight refund/dispute
+regressions now pass independent review. Five new current lifecycle tests cover
+succession records, rotated-cohort timing and retirement-specific standing.
+All five now pass alongside four Dutch and four refund regressions on the
+integrated supplemental recorder, with independent source and artifact review.
+The initial twelve-pass/one-fail run is retained: the succession test supplied
+nonce zero despite reading nonce eleven. The one-line correction submits the
+observed nonce; all production artifacts are unchanged. The effective
+source/configuration gate remains separate work.
+
+Supplemental clearing settlement is integrated as `f49e7bc1`, with 21 new tests,
+103 prior regressions, five 256-input fuzz properties and both production
+compiler profiles independently accepted. This is a financial primitive tied
+to an original paid mint. The complete clearing consumer is now integrated as
+`d807421e`: 59 domain cases, five fuzz properties and both compiler profiles
+pass independent review. Two actual-current Safe cases also pass independent
+review (`d9d7d46b`): required artist consent, paid mints, excess and immediate
+rebate claims, official supplemental settlement, and partial escape preserving
+NFT custody. They use a fixed profile, zero reveal fee and the explicit external
+randomness double. The original domain purchase measured 6,843,542 gas. A
+separate actual-current trace measures 8,755,856 gas in the first consumer call;
+its real Manager and recorder calls each exceed the 500,000 collector ceiling
+alone. These are qualified in-test measurements, not a cold-call admission.
+Compression and storage optimization continue, with shared-path gas work kept
+explicit so it does not serialize every remaining sale feature.
+The new fixed linked libraries are documented in its
+[integration guide](../docs/integrations/native-clearing-supplemental-settlement.md).
+
+The archival provider prerequisite is integrated as `ee21cff9`: 14 checkpoint
+tests and 15 coverage tests, two fuzz properties and separate default compiler
+products pass independent review. Its explicit observer-quorum profile, native
+inclusion checks and independent storage/fixity records are described in
+[ADR 0031](../docs/adr/0031-quorum-anchored-estate-archival-profile.md).
+The network-derived native inclusion fixture in `352e3e26` passes four cases
+and fuzzing in both profiles with independent review. It verifies a historical
+four-byte public payload and real native paths retrieved through one gateway;
+quorum and consensus authentication remain distinct. Five new current-contract
+2-of-3 Safe governance cases pass independent review (`c980f8d6`). Estate domain
+activation and cancellation have nine independently reviewed cases on the
+builder's branch; its complete 225-case regression run is in progress.
+Estate/current-stack composition, complete network rehearsal and the full call
+gas budget remain open.
+
+The actual constructor dependency exposed a deployment-order gap: the provider
+requires initialized canonical roles before the artist suite can deploy.
+[ADR 0032](../docs/adr/0032-governance-foundation-before-product-activation.md)
+resolves this through the existing governance foundation and later product
+activation paths. The shared planner and two actual-current foundation tests
+pass independent review (`97599d12`). The original five-leaf foundation seal is
+historical evidence, distinct from the complete release inventory. A further
+three-case cohort exercises delayed Safe catalog extension and mint-product
+activation; migration of the shared artist fixture and broadcast script remains
+integration work.
+
+The deployment script's large positional return expression caused the isolated
+CI compiler failure. Named return fields fix that exact reproduction without
+changing its ABI or compiler settings (`fa52a5b3`). The separate compile against
+260 integrated deployment inputs also passes independent review; this is script
+code generation, not a deployment or full CI pass. Shared sale/permit interfaces
+are separated in `c2332e48`. The active source inventory now contains 392 files
+and the layout check passes; the refresher's 46 tests passed at its earlier
+365-file checkpoint. Scoped formatting still identifies three artist collaborator
+files and the entropy coordinator for their owners to format at the next source
+checkpoint. Historical artist-57
+checks now execute against their exact RC1 baseline while enforcing unchanged
+frozen files in the active checkout. Current design and contract checks continue
+against current sources. Full CI, generated
+candidate artifacts and the new testnet rehearsal remain pending.
+
+The twelve-case snapshot at `72c208f2` passes independent review for actual
+Core/Manager/artist/Executor/Safe composition: five native sale cases, three
+universal ERC-20 cases and four ARRNG cases. Its captured production inputs are
+`ed8f0e40`; later fee and consent source changes need their own evidence.
+Rotation (`c71003dc`) and price programs (`9eae0d67`) are integrated with their
+133-case and 72-case focused reviews. Sale consent and attribution state now have
+144 distinct focused cases and a corrected actual-Safe negative follow-up.
+The 29-case legacy rejection and 82-case native/universal enforcement results
+are independently accepted, and all 30 integrated source files match their
+accepted handoffs. The ten-case explicit-capability correction is integrated as `592635fc`.
+The next current snapshot passed all fourteen prior cases, including the final
+unique-holder activation planner. Its three new REQUIRED purchase tests failed
+in their direct artist-approval nonce setup; the corrected two-file fixture
+change has independent source review and its separate three-case runtime now
+passes independent artifact review. All 114 production artifacts match the
+original snapshot; the original fourteen-pass/three-fail result is retained. This captured composition predates governed entropy timing
+and the later operation-33 artist source.
+
+The reveal-fee increment has independently reviewed 44-case domain and
+30-case actual-Core metadata results, plus six planner regressions using the
+actual RoleRegistry and an explicit execution-context fixture. Both production
+compiler profiles fit. The fourteen-case current composition has passed and
+received independent source/artifact review, including actual Safe-funded
+ARRNG mint, reveal, residual treasury withdrawal and requester credit.
+The final planner adds unique treasury/reveal-owner checks after that run's
+capture; its separate six-case proof must not be confused with actual Executor
+composition. The new governed timing host and permissionless lapsed-SLO request
+have independently accepted 54-case domain and 30-case metadata results; both
+production compiler profiles fit. Its separate seven-case actual Executor/Safe
+composition passes independent review, including the final unique-holder planner.
+That run predates the later operation-33 artist source. This constructor and
+storage-layout increment is for new
+deployments. The later refund composition now proves admitted AT_MINT requests
+and provider-failure retry. Complete entropy recovery remains. Every feature
+row in the ledger stays in scope.
+
+Identity-compromise operation 33 is integrated as `677b9ae9`: 159 focused tests,
+existing interface/storage compatibility and seven actual deployment traces
+passed independent review. Actual current composition `b002c4d4` adds four
+Safe/Executor cases alongside seven retained entropy cases, all independently
+accepted against 245 captured files and 273 compiler artifacts. It covers exact
+delayed arbitration, per-call batch context, role-loss/reason rollback and mint
+denial without blocking held-NFT transfers. Class 2 proves the indexed guardian
+window and delayed execution, not a guardian veto. Deployment catalog admission
+is separately source-reviewed. This run predates succession.
+
+Succession operations 36/37 are integrated as `8227e0b6` from the independently
+reviewed 17-file handoff: 185 tests, 201 compiler sources, 87 production artifacts,
+25 prior ABI/storage comparisons and eight actual CREATE traces pass. Its new
+fixed reader deployment library preserves Registry child nonces and pins. Only
+the existing IR artist profile is accepted; actual current succession and
+deployment inventory composition remain to be demonstrated.
+
+[ADR 0029](../docs/adr/0029-identity-contest-dismissal-and-cohort-closure.md)
+defines the missing dismissal transition and history-preserving cohort closure.
+The design requires typed cause capture on both veto and filing paths. Its
+[effective extension design](../docs/architecture/artist-operation-extension-v1.md)
+preserves all historical packet/schema bytes and adds the exact typed row 58.
+The design check and eleven adversarial tests pass. Source and domain runtime
+are now integrated; effective source/configuration and actual Executor/Safe
+acceptance remain pending. Estate implementation continues in parallel.
+
+Fixed-sale and auction funding, scoped delegation, refusal/withdrawal and
+expected-binding acceptance are integrated. Collaborator operations 5/6/7
+(`90369bf0`) and current template economics consent (`871046b2`) bring the
+integration source to 15 of the 57 artist operation IDs. Revocation operation 54
+is integrated as `6a0f5a4f`; content-authority operations 17 and 21 are integrated
+as `bcb43e06`, bringing the source count to 18. Their 96-case domain suite and
+exact production artifacts received independent review. The metadata counterpart
+is committed separately as `f73882e0`. Actual composition (`af37d8ed`) passes
+seven tests: two content workflows and five Safe workflows, including real
+minting and template settlement. Independent review binds the captured inputs
+and all 209 relevant artifacts. Identity revision operation 25 (`3f6a5dd4`)
+brings the source count to 19. Its 109 tests, preserved interface/storage
+prefixes and 30 production artifacts received independent review; its current
+composition now passes with the payment, content and Safe workflows below.
+
+Collection template materialization and typed economics facts are integrated.
+Template fixed-sale funding (`ddf01864`) passed 76 focused tests and four fuzz
+properties per compiler mode. Governed asset permit-capability attestations
+(`3287fcd5`) passed 13 tests plus fuzzing per mode. These increments received
+independent review. Shared settlement, the ERC-20 payer adapter and signed
+fixed-profile consumer are integrated as `18dbe54c`. Their 29 tests plus 256 fuzz
+inputs pass with independent source/artifact review. Current-Core composition now
+passes in the ten-case snapshot below. Native shared settlement is integrated as
+`f9162df3`: 55 domain cases and three fuzz properties with 256 inputs each pass
+with independent source/artifact review. Both product compiler profiles fit the
+runtime caps and preserve the preceding recorder interface/storage and ERC-20
+payer implementation. The native domain suite uses actual resolver, factory,
+wallet, escrow and Safe contracts. The separate actual Core/Manager/artist
+composition now passes all three native cases and three ERC-20 regressions.
+Independent review verifies the captured sources and all 245 compiler artifacts,
+with all 95 nonempty production runtimes within the deployment cap. The original
+five-pass/one-fail snapshot is retained; its template setup was corrected to
+create the template through its actual governance owner before assignment.
+The canonical full-digest Manager authorization correction is integrated as
+`5ecae362`, with two focused tests and independent source/artifact review. A
+ten-case actual-current run passes all three new universal payment workflows,
+two content and five existing Safe cases, using the accepted identity revision.
+Independent review matched all 218 Solidity sources and three Safe fixtures to
+`4e9a41b1`, bound 237 artifacts to retained compiler outputs, and confirmed all
+90 nonempty production runtimes fit. These actual mint, replay and rollback
+results do not establish full-repository or new-candidate acceptance.
+
+The completed combined snapshot passed 36 cases, including all nine ERC-20 and
+22 native-sale/auction cases. Two failures were an incorrect Safe event-layout
+assertion and an old invariant counterexample loaded from the wrong directory.
+The corrected runner passes all three invariant tests with 32 sequences of 64
+calls and zero reverts against the unchanged snapshot. Original failed evidence
+is preserved. The Safe assertion is corrected in source.
+
+The new combined snapshot passed all 39 executed Safe, ERC-20, native-sale,
+auction and invariant cases, including actual Safe template consent/purchase/
+escrow/flush/claim and 2,048 stateful calls with zero reverts. Its 11 royalty cases
+were initially blocked by a one-day execution window below the seven-day floor.
+The corrected window exposed six fixture errors: three omitted authorization
+IDs and three reads passed the wrong mapped collection. Five tests passed.
+The corrected requests pass all 11 cases in a separate unchanged-production
+snapshot, independently reviewed. Original results remain. The evidence is the
+original 39 cases plus this separate 11-case run, not a latest-source full pass.
+These planning gas allowances do not establish normative cold-gas acceptance.
+
+The metadata host counterpart for artist content consent and defensive freezes
+passes 30 domain tests, including actual Safe administration and a separate Safe
+freeze relayer. One-use approval records, exact content evolution and versioned
+events are independently reviewed. Actual modular artist composition now passes
+the separate seven-case current run. Executed-finality composition and the
+source export/client projection still require implementation and migration.
+
+The saved artist-authority activation plan publishes calldata and checks exact
+commitments, submission headroom, resumption and prior execution. The new
+stateless phase setup planner passes seven actual-current tests with real
+two-owner Safes, exact direct consent nonces, confirmed-state resumption,
+multiple phases, final Manager handoff and an actual paid mint/reveal. Its JSON
+encoder uses the matching compiled planner ABI. Independent review verified
+203 Solidity inputs, three Safe fixtures and 223 exact compiler artifacts; the
+planner runtime is 11,219 bytes and the protocol contracts are unchanged.
+Full identity onboarding and
+the older deployment runners still need a complete consumer. A proposed immediate genesis activation failed
+three actual tests because the bootstrap actor cannot propose final-root role
+mutations. That prototype is withdrawn; the same snapshot's five existing Safe
+cases pass. The accepted delayed activation and production guards are retained.
+The client prepares exact Safe CALL payloads
+and checks the expected Safe execution result. Its ABI/signing projection still
+targets retained RC1; migration to the new stack remains explicit work.
+
+Independently accepted fixture migration checkpoints include 58 historical
+Manager/manifest, six flat-attribution, 16 ERC-20 adapter and 75 resolver/factory/
+auction domain tests. The royalty fixture now uses actual current artist consent
+and canonical governance publication. Five preserved resolver tests (`f803f482`)
+replace the old fixture's still-supported resolver assertions; the obsolete
+settlement API is retired. The latest ABI-only check covers 474 Solidity sources,
+including the operator setup tests, with zero
+errors. This is not a broad build or candidate
+acceptance. Client checks pass 47 tests; three new tests also
+exercise successful and failed calls through actual pinned Safe versions.
+
+Draft [PR #744](https://github.com/6529-Collections/6529Stream/pull/744) exposes
+the current integrated implementation and its exact acceptance boundaries.
+CodeRabbit review is requested. Builders run focused checks before handoff; root owns broad validation,
+deterministic artifacts, deployment and completion of the entire v1 ledger.
+
+## Completed supported RC1
+
+[PR #742](https://github.com/6529-Collections/6529Stream/pull/742) merged as
+`569bf87f1fa808787d324f6e1582924b5ccf1d40`; its tree matches reviewed
+`66f48d55b17a3cb79ba9b8bb0fcaa0ba4e8102f8`. All six final CI jobs and four
+rehearsals passed. The [published testnet RC1](https://github.com/6529-Collections/6529Stream/releases/tag/testnet/current-rc-1)
+contains the exact source archive and independently verified freeze record.
+Issue #738 is closed completed.
+
+The Sepolia native demonstration completed a paid mint, actual Chainlink
+fulfillment, final metadata, both split withdrawals and artist transfer. The
+public package records 45 deployment and nine activation/demo transactions.
+Current validation passed 36 tests, 38 client tests, 42,240 input-fuzz cases and
+133,120 stateful calls. The default suite passed 1,387 distinct tests; the
+release verifier checked 704 files. ERC-20, auction, export and collection
+completion have their separately scoped local demonstrations.
+
+All nine reported CodeRabbit findings were resolved. Its final requested rerun
+was rate-limited; the final source and published assets received separate
+independent review. Broader v1 and audit acceptance were not claimed.
+
+Cleanup retired 59 worktrees, archived 19 superseded tasks and retired 285 merged
+origin branches after exact preservation. Original main and the frozen Sepolia
+checkout were retained. This phase adds only one integration and two builder
+worktrees; retire them after reviewed integration. Preserve recovery bundles,
+source tags, private deployment evidence and the security remote.
+
+The [RC1 run-state history](https://github.com/6529-Collections/6529Stream/blob/569bf87f1fa808787d324f6e1582924b5ccf1d40/ops/AUTONOMOUS_RUN.md)
+retains earlier checkpoints. Its pending-merge/funding language is historical.
+Automatic approval review previously rejected correcting AGENTS.md and one empty
+retired-folder deletion with only `blocked by policy`; neither was bypassed.
+Current commands are in CONTRIBUTING.md, docs/tooling.md and scripts/dev.py.
+
+## Continuation
+
+Read the current feature ledger and process/commit checkpoint before resuming.
+Continue active workers rather than creating duplicate compilers or broadcasts.
+The completed RC1 checkpoint is historical; this phase has a separate full-v1
+checkpoint and tracker. Report meaningful delivered capabilities, failures or
+critical-path changes. Keep routine choices with the integrator.
+
+Lean remains deferred. External audit and production acceptance stay separate
+from feature implementation. A new candidate must have its own source identity
+and deployment evidence; never move the RC1 tag or reuse its public proof for
+changed contracts.

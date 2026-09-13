@@ -1,0 +1,178 @@
+ containing the definition of that datum. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:EngineeringDatum"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="ImageDatum" type="gml:ImageDatumType" substitutionGroup="gml:_Datum"/>
+	<!-- =================================================== -->
+	<complexType name="ImageDatumType">
+		<annotation>
+			<documentation>An image datum defines the origin of an image coordinate reference system, and is used in a local context only. For more information, see OGC Abstract Specification Topic 2. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractDatumType">
+				<sequence>
+					<element ref="gml:pixelInCell"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="pixelInCell" type="gml:PixelInCellType"/>
+	<!-- =================================================== -->
+	<complexType name="PixelInCellType">
+		<annotation>
+			<documentation>Specification of the way an image grid is associated with the image data attributes. </documentation>
+		</annotation>
+		<simpleContent>
+			<restriction base="gml:CodeType">
+				<attribute name="codeSpace" type="anyURI" use="required">
+					<annotation>
+						<documentation>Reference to a source of information specifying the values and meanings of all the allowed string values for this PixelInCellType. </documentation>
+					</annotation>
+				</attribute>
+			</restriction>
+		</simpleContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="imageDatumRef" type="gml:ImageDatumRefType"/>
+	<!-- =================================================== -->
+	<complexType name="ImageDatumRefType">
+		<annotation>
+			<documentation>Association to an image datum, either referencing or containing the definition of that datum. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:ImageDatum"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="VerticalDatum" type="gml:VerticalDatumType" substitutionGroup="gml:_Datum"/>
+	<!-- =================================================== -->
+	<complexType name="VerticalDatumType">
+		<annotation>
+			<documentation>A textual description and/or a set of parameters identifying a particular reference level surface used as a zero-height surface, including its position with respect to the Earth for any of the height types recognized by this standard. There are several types of Vertical Datums, and each may place constraints on the Coordinate Axis with which it is combined to create a Vertical CRS. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractDatumType">
+				<sequence>
+					<element ref="gml:verticalDatumType" minOccurs="0"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="verticalDatumType" type="gml:VerticalDatumTypeType"/>
+	<!-- =================================================== -->
+	<complexType name="VerticalDatumTypeType">
+		<annotation>
+			<documentation>Type of a vertical datum. </documentation>
+		</annotation>
+		<simpleContent>
+			<restriction base="gml:CodeType">
+				<attribute name="codeSpace" type="anyURI" use="required">
+					<annotation>
+						<documentation>Reference to a source of information specifying the values and meanings of all the allowed string values for this VerticalDatumTypeType. </documentation>
+					</annotation>
+				</attribute>
+			</restriction>
+		</simpleContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="verticalDatumRef" type="gml:VerticalDatumRefType"/>
+	<!-- =================================================== -->
+	<complexType name="VerticalDatumRefType">
+		<annotation>
+			<documentation>Association to a vertical datum, either referencing or containing the definition of that datum. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:VerticalDatum"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="TemporalDatum" type="gml:TemporalDatumType" substitutionGroup="gml:_Datum"/>
+	<!-- =================================================== -->
+	<complexType name="TemporalDatumBaseType" abstract="true">
+		<annotation>
+			<documentation>Partially defines the origin of a temporal coordinate reference system. This type restricts the AbstractDatumType to remove the "anchorPoint" and "realizationEpoch" elements. </documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:AbstractDatumType">
+				<sequence>
+					<element ref="gml:metaDataProperty" minOccurs="0" maxOccurs="unbounded"/>
+					<element ref="gml:datumName"/>
+					<element ref="gml:datumID" minOccurs="0" maxOccurs="unbounded"/>
+					<element ref="gml:validArea" minOccurs="0"/>
+					<element ref="gml:scope" minOccurs="0"/>
+				</sequence>
+				<attribute ref="gml:id" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<complexType name="TemporalDatumType">
+		<annotation>
+			<documentation>Defines the origin of a temporal coordinate reference system. This type extends the TemporalDatumRestrictionType to add the "origin" element with the dateTime type. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:TemporalDatumBaseType">
+				<sequence>
+					<element ref="gml:origin"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="origin" type="dateTime">
+		<annotation>
+			<documentation>The date and time origin of this temporal datum. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="temporalDatumRef" type="gml:TemporalDatumRefType"/>
+	<!-- =================================================== -->
+	<complexType name="TemporalDatumRefType">
+		<annotation>
+			<documentation>Association to a temporal datum, either referencing or containing the definition of that datum. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:TemporalDatum"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="GeodeticDatum" type="gml:GeodeticDatumType" substitutionGroup="gml:_Datum"/>
+	<!-- =================================================== -->
+	<complexType name="GeodeticDatumType">
+		<annotation>
+			<documentation>A geodetic datum defines the precise location and orientation in 3-dimensional space of a defined ellipsoid (or sphere) that approximates the shape of the earth, or of a Cartesian coordinate system centered in this ellipsoid (or sphere). </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractDatumType">
+				<sequence>
+					<element ref="gml:usesPrimeMeridian"/>
+					<element ref="gml:usesEllipsoid"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="usesPrimeMeridian" type="gml:PrimeMeridianRefType">
+		<annotation>
+			<documentation>Association to the prime meridian used by this geodetic datum. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="usesEllipsoid" type="gml:EllipsoidRefType">
+		<annotation>
+			<documentation>Association to the ellipsoid used by this geodetic datum. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="geodeticDatumRef" type="gml:GeodeticDatumRefType"/>
+	<!-- =================================================== -->
+	<co

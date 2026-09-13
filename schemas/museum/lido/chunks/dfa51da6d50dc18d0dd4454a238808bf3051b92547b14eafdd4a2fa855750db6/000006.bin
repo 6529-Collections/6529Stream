@@ -1,0 +1,194 @@
+ei:ab>
+						<tei:ab type="label">Event Identifier</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:any minOccurs="0" maxOccurs="unbounded" processContents="skip" namespace="http://www.w3.org/2002/07/owl#"/>
+			<xs:element name="eventType" type="lido:conceptComplexType" id="eventType">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for the particular kind of event
+							the object/work participated in or was present at.</tei:ab>
+						<tei:ab type="label">Event Type</tei:ab>
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						
+						
+
+							<tei:ab type="recommendation">LIDO Terminology for
+							<tei:ref target="../../documents/terminology-recommendation.html#eventType">Event Type</tei:ref></tei:ab>
+					</xs:documentation>
+
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:eventType">
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="roleInEvent" type="lido:conceptComplexType" minOccurs="0" maxOccurs="unbounded" id="roleInEvent">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for the role played by
+							the described entity within the event in focus.</tei:ab>
+						<tei:ab type="label">Role in Event</tei:ab>
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open vocabuary for
+							<tei:ref target="../../documents/terminology-recommendation.html#roleInEvent">Role in Event</tei:ref></tei:ab>
+					</xs:documentation>
+
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:roleInEvent">
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="eventName" type="lido:appellationComplexType" minOccurs="0" maxOccurs="unbounded" id="eventName">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A text element for the event as an individual
+							entity, such as a title or a proper name.</tei:ab>
+						<tei:ab type="label">Event Name</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="eventActor" minOccurs="0" maxOccurs="unbounded" id="eventActor">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A set of display and index elements for an
+							actor participating in or being present at the event, including
+							role information.<br/>
+							Repeated if multiple actors are involved in the event.</tei:ab>
+						<tei:ab type="label">Event Actor</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:actorInRoleSetComplexType">
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="culture" minOccurs="0" maxOccurs="unbounded" id="culture">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for the cultural context from which the object/work
+							in focus originated.<br/>
+							Used if the creator or producer is unknown, or if the cultural context is of particular interest.<br/>
+							Examples may include the name of a culture, a nation, or an ethnic group.</tei:ab>
+						<tei:ab type="label">Culture</tei:ab>
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						
+						
+								<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#culture">Culture</tei:ref></tei:ab>
+					</xs:documentation>
+
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:culture">
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:conceptComplexType">
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="eventDate" type="lido:dateSetComplexType" minOccurs="0" id="eventDate">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A wrapper for structured information about the date or range of
+							dates the event in focus took place.</tei:ab>
+						<tei:ab type="label">Event Date</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="periodName" minOccurs="0" maxOccurs="unbounded" id="periodName">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for the period in which the event happened, comprising information
+							about geologic time scale, archaelogical, historical, or artistic period, style, or art movement,
+							whose characteristics are represented by the object or work.<br/>
+							Note that "Period/Style" corresponds to "Style" in CDWA as shorthand for
+							<tei:ref target="https://www.getty.edu/research/publications/electronic_publications/cdwa/17styles.html">Style/Period/Group/Movement/Dynasty</tei:ref>.<br/>
+							Examples may be <em>Neolithic</em> for a period, <em>Impressionist</em> for a style, or <em>Cubism</em> for a movement.
+						</tei:ab>
+						<tei:ab type="label">Period/Style</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#periodName">Period/Style</tei:ref>
+						</tei:ab>
+					</xs:documentation>
+
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:periodName">
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:conceptComplexType">
+							<xs:attribute ref="lido:type" id="periodName_type">
+								<xs:annotation>
+									<xs:documentation>
+										<tei:ab type="description">An attribute for the particular kind of period information,
+											whether it refers to, for instance, artistic styles, historical periods, or art movements.</tei:ab>
+										<tei:ab type="dataValues">Controlled terminology</tei:ab>
+										<tei:ab type="recommendation">LIDO Terminology for
+											<tei:ref target="../../documents/terminology-recommendation.html#periodName_type">Type of Period/Style</tei:ref></tei:ab>
+									</xs:documentation>
+								</xs:annotation>
+							</xs:attribute>
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="eventPlace" minOccurs="0" maxOccurs="unbounded" id="eventPlace">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A set of structured information indicating the place or
+							location where an object/work was associated with a particular event.</tei:ab>
+						<tei:ab type="label">Event Place</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open authority file for
+							<tei:ref target="../../documents/terminology-recommendation.html#eventPlace">Event Place</tei:ref></tei:ab>
+		        	</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:placeSetComplexType">
+							<xs:attribute ref="lido:type" id="eventPlace_type">
+								<xs:annotation>
+									<xs:documentation>
+										<tei:ab type="description">An attribute typifying the place according to its role or function in the context of an event,
+											whether it is, for instance, a <em>place of discovery</em> or a <em>point of destination</em>.</tei:ab>
+										<tei:ab type="dataValues">Controlled terminology</tei:ab>
+										<tei:ab type="recommendation">LIDO Terminology for
+											<tei:ref target="../../

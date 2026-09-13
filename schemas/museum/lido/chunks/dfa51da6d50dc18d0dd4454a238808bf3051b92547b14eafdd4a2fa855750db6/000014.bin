@@ -1,0 +1,181 @@
+:annotation>
+			</xs:element>
+			<xs:any minOccurs="0" maxOccurs="unbounded" processContents="skip" namespace="http://www.w3.org/2002/07/owl#"/>
+			<xs:element name="namePlaceSet" type="lido:appellationComplexType" minOccurs="0" maxOccurs="unbounded" id="namePlaceSet">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A set of one or more names for a place, and
+							the source from which it is taken.<br/>
+							Repeated to record different sources for multiple appellations.
+							</tei:ab>
+						<tei:ab type="label">Place Name Set</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="gml" minOccurs="0" maxOccurs="unbounded" id="gml">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A set of structured information containing a georeference of the place using the
+							GML specification.</tei:ab>
+						<tei:ab type="note">For further documentation on GML refer to <tei:ref target="http://www.opengis.net/gml/">http://www.opengis.net/gml/</tei:ref>.</tei:ab>
+						<tei:ab type="label">Geography Markup Language</tei:ab>
+						<tei:ab type="dataValues">GML elements</tei:ab>
+						
+						
+						
+						<tei:ab type="recommendation">Refer to <tei:ref target="https://www.ogc.org/standards/gml">Geography Markup Language (OGC)</tei:ref>
+						</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:gmlComplexType">
+							<xs:attribute ref="xml:lang"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="partOfPlace" type="lido:placeComplexType" minOccurs="0" maxOccurs="unbounded" id="partOfPlace">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A set of structured information about a place
+							that is the broader context for the place in focus, such as the district, state, or nation
+							to which a city belongs.</tei:ab>
+						<tei:ab type="label">Part of Place</tei:ab>
+						
+						
+					</xs:documentation>
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:partOfPlace">
+								<sch:extends rule="sch_OWL"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="placeClassification" minOccurs="0" maxOccurs="unbounded" id="placeClassification">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element indicating the kind of place based on political or physical division, 
+							including physical features such as pieces of land or bodies of water, or mobile objects such as ships.<br/>							
+							Examples may be <em>country</em> or <em>city</em> for a political unit, or <em>forest</em> or <em>river</em> for a 
+							physical feature.<br/>							
+							Note that "political unit" here includes administrative territorial entities. Place Classification may hold index terms 
+							similar to the values for "political entity" and "geographical entity", thus superseding these attributes.
+							However, they may still be in use alternatively or for stating explicitly that an entity is of type either 
+							"political" or "geographical", corresponding, for instance, to the TGN Record Types 
+							<tei:ref target="http://vocab.getty.edu/ontology#AdminPlaceConcept">"administrative"</tei:ref> and 
+							<tei:ref target="http://vocab.getty.edu/ontology#PhysPlaceConcept">"physical"</tei:ref>.</tei:ab>
+						<tei:ab type="label">Place Classification</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#placeClassification">Place Classification</tei:ref>
+						</tei:ab>
+					</xs:documentation>
+
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:placeClassification">
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:conceptComplexType">
+							<xs:attribute ref="lido:type" id="placeClassification_type">
+								<xs:annotation>
+									<xs:documentation>
+										<tei:ab type="description">An attribute designating a type of place by a given context, 
+											such as the geological or ecological aspect in a field collection.
+											Examples may be <em>stratigraphic unit</em> or <em>habitat type</em>.<br/>
+											Note that this type attribute is primarily intended for use in application profiles.</tei:ab>
+										<tei:ab type="dataValues">Controlled terminology</tei:ab>
+										<tei:ab type="recommendation">To be determined by application profiles.</tei:ab>
+									</xs:documentation>
+								</xs:annotation>
+							</xs:attribute>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute ref="lido:politicalEntity" id="placeComplexType_politicalEntity"/>
+		<xs:attribute ref="lido:geographicalEntity" id="placeComplexType_geographicalEntity"/>
+	</xs:complexType>
+	<xs:complexType name="placeSetComplexType" id="placeSetComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines display and index elements for information about an
+					individual place.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="displayPlace" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="displayPlace">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A display element for a place,
+							corresponding to the subsequent <tei:ref target="#place">Place</tei:ref> element.<br/>
+							Repeated for language variants only.</tei:ab>
+						<tei:ab type="label">Display Place</tei:ab>
+						<tei:ab type="dataValues">Free text</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="place" type="lido:placeComplexType" minOccurs="0" id="place">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A wrapper for identifying and indexing a place.</tei:ab>
+						<tei:ab type="label">Place</tei:ab>
+						
+						
+					</xs:documentation>
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:place">
+								<sch:extends rule="sch_OWL"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:attribute name="politicalEntity" type="xs:string" id="politicalEntity">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">An attribute for the kind of place as a political, administrative entity, 
+					such as a nation or a city.<br/>
+					Note that the kind of political place can be indexed in more detail in the 
+					<tei:ref target="#placeClassification">Place Classification</tei:ref> element.
+				</tei:ab>
+				<tei:ab type="dataValues">Controlled</tei:ab>
+				
+				
+				<tei:ab type="recommendation">Linked open vocabulary for
+					<tei:ref target="../../documents/terminology-recommendation.html#politicalEntity">political entity</tei:ref></tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+	</xs:attribute>
+	<xs:attribute name="pref" type="xs:string" id="pref">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">An attribute indicating the preference role of a term,
+					an appellation value, an identifier, or a resource set.<br/>
+					Values most commonly used are <em>preferred</em> or <em>alternative</em>.
+					For index terms and appellation values it is strongly recommended to provide one (and only one) 
+					preferred term or appellation for each concept or individual (named) entity per language.
+					If there is only one term it is the preferred one by default.</tei:ab>
+				<tei:ab type="dataValues">Controlled terminology</tei:ab>
+				
+				
+				<tei:ab type="recommendation">LIDO Terminology for the
+					<tei:ref target="../../documents/terminology-recommendation.html#pref">preference</tei:ref></tei:a

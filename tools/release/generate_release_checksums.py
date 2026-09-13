@@ -932,12 +932,18 @@ def _parse_root_gitattributes(
             for token in attributes
             if token not in {"text", "text=auto", "-text", "binary"}
             and not token.startswith("eol=")
+            and token != "whitespace=-blank-at-eol"
         ]
         if unknown:
             raise ChecksumError(
                 f"unsupported .gitattributes attribute at line {line_number}: "
                 f"{unknown[0]}"
             )
+        # Git's whitespace diagnostic override preserves upstream license bytes;
+        # it neither changes checkout bytes nor replaces earlier text/eol rules.
+        # The complete .gitattributes file is still hashed by the release bundle.
+        if not text_modes and not eol_tokens:
+            continue
         if len(text_modes) != 1:
             raise ChecksumError(
                 f"ambiguous .gitattributes text mode at line {line_number}"

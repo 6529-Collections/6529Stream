@@ -7,6 +7,7 @@ import "../../../smart-contracts/domains/finality/StreamCoreFinalityAdapter.sol"
 import "../../helpers/Assertions.sol";
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 import "../../helpers/FinalityMocks.sol";
+import "../../helpers/FinalityCanonicalReadFixture.sol";
 
 /// @notice Golden tests: every pinned finality domain constant is recomputed from its spec
 ///         preimage string and asserted against both the library constant and the literal
@@ -195,7 +196,8 @@ contract StreamFinalityDomainsGoldenTest is CharacterizationTestBase {
         uint256(registry.TERMINAL_FREEZE_VETO_FLOOR()).assertEq(72 hours, "72h veto floor");
         uint256(registry.TERMINAL_FREEZE_EXECUTION_WINDOW_FLOOR())
             .assertEq(7 days, "7d open-to-execute floor");
-        registry.FINALITY_COMPONENT_READ_GAS().assertEq(30_000, "genesis diagnostic gas");
+        registry.FINALITY_COMPONENT_READ_GAS()
+            .assertEq(30_000, "retained historical diagnostic constant");
         registry.GGP_FINALITY_COMPONENT_READ_GAS_KEY()
             .assertEq(StreamFinalityDomains.GGP_FINALITY_COMPONENT_READ_GAS, "GGP key mirror");
         registry.isStreamArtworkFinalityRegistry().assertTrue("marker");
@@ -477,20 +479,6 @@ contract StreamFinalityDomainsGoldenTest is CharacterizationTestBase {
     }
 
     function _deployRegistry() private returns (StreamArtworkFinalityRegistry) {
-        MockFinalityAuthority authority = new MockFinalityAuthority();
-        MockFinalityCore coreMock = new MockFinalityCore();
-        MockFinalityMetadata metadataMock = new MockFinalityMetadata();
-        MockFinalitySanction sanctionMock = new MockFinalitySanction();
-        MockFinalityDiscovery discoveryMock = new MockFinalityDiscovery();
-        StreamCoreFinalityAdapter coreAdapter =
-            new StreamCoreFinalityAdapter(address(coreMock), address(metadataMock));
-        return new StreamArtworkFinalityRegistry(
-            address(coreMock),
-            address(metadataMock),
-            address(coreAdapter),
-            address(sanctionMock),
-            address(authority),
-            address(discoveryMock)
-        );
+        return new FinalityCanonicalReadFixture().deploy();
     }
 }

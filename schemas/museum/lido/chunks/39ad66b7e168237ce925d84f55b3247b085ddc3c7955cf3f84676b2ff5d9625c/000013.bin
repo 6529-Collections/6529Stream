@@ -1,0 +1,74 @@
+ xml"><code class="sourceCode xml"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:objectMeasurementsSet</span>&gt;</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:displayObjectMeasurements</span><span class="ot"> xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;height x width [...]&lt;/<span class="kw">lido:displayObjectMeasurements</span>&gt;</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:objectMeasurements</span>&gt;</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:measurementsSet</span>&gt;</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:measurementType</span>&gt;</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">skos:Concept</span><span class="ot"> rdf:about=</span><span class="st">&quot;{...}&quot;</span>&gt;</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">skos:prefLabel</span><span class="ot"> xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>                        height</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>                    &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:measurementType</span>&gt;</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:measurementUnit</span>&gt;</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">skos:Concept</span><span class="ot"> rdf:about=</span><span class="st">&quot;{...}&quot;</span>&gt;&lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:measurementUnit</span>&gt;</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:measurementValue</span>&gt;[...]&lt;/<span class="kw">lido:measurementValue</span>&gt;</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:measurementsSet</span>&gt;</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:measurementsSet</span>&gt;</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:measurementType</span>&gt;</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">skos:Concept</span><span class="ot"> rdf:about=</span><span class="st">&quot;{...}&quot;</span>&gt;</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">skos:prefLabel</span><span class="ot"> xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>                        width</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>                    &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:measurementType</span>&gt;</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:measurementUnit</span>&gt;</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">skos:Concept</span><span class="ot"> rdf:about=</span><span class="st">&quot;{...}&quot;</span>&gt;&lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:measurementUnit</span>&gt;</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:measurementValue</span>&gt;[...]&lt;/<span class="kw">lido:measurementValue</span>&gt;</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:measurementsSet</span>&gt;</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:objectMeasurements</span>&gt;</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:objectMeasurementsSet</span>&gt;</span></code></pre></div>
+            <h3 data-number="4.3.2" id="content-elements"><span
+            class="header-section-number">4.3.2</span> Content
+            elements</h3>
+            <p>The LIDO element descriptions distinguish between the
+            following kinds of content elements:</p>
+            <ol type="1">
+            <li>Text elements for free-text notes</li>
+            <li>Display elements, a kind of text elements</li>
+            <li>Index elements holding indexing terms</li>
+            <li>Identifier elements for all kinds of entities</li>
+            </ol>
+            <h4 data-number="4.3.2.1" id="text-elements"><span
+            class="header-section-number">4.3.2.1</span> Text
+            elements</h4>
+            <p><strong>Note:</strong> In the <a
+            href="https://lido-schema.org/schema/latest/lido.html">LIDO
+            Schema Documentation</a>, an element is introduced as “A
+            text element …” if it is intended to present human-readable
+            notes or explanations, populated with free-text data values.
+            Most of the text elements are used for display and source
+            information, or for more detailed textual descriptions of
+            the object or work. Note that exactly one
+            &lt;lido:appellationValue&gt; per language should be marked
+            as the preferred one.</p>
+            <p><strong>Features:</strong> Defined by <a
+            href="https://lido-schema.org/schema/latest/lido.html#textComplexType"><em>textComplexType</em></a>,
+            a text element can have attributes, is repeatable (under
+            conditions), and has free text (xs:string) as its data
+            value.</p>
+            <p><strong>Example:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#appellationValue">lido:appellationValue</a>&gt;
+            is a text element contained by several elements for naming
+            entities. This element is required if an element for naming
+            entities is used, e.g., &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#nameActorSet">lido:nameActorSet</a>&gt;.</p>
+            <blockquote>
+            <p><strong>Creator:</strong> Leonardo da Vinci
+            <strong><em>Preference:</em></strong> Preferred</p>
+            </blockquote>
+            <div class="sourceCode" id="cb13"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:nameActorSet</span>&gt;</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:appellationValue</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:pref=</span><span cla

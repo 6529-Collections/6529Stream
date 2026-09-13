@@ -1,0 +1,87 @@
+t represent the parts of a manuscript that have been transcribed or translated, when there are other parts that have yet to be worked on. The Annotation Collection would be the Annotations that transcribe or translate, respectively.</p>
+
+<p>The value <em class="rfc">must</em> be a <abbr title="JavaScript Object Notation">JSON</abbr> object, which <em class="rfc">must</em> have the <code class="language-plaintext highlighter-rouge">id</code> and <code class="language-plaintext highlighter-rouge">type</code> properties, and the <code class="language-plaintext highlighter-rouge">type</code> <em class="rfc">must</em> be <code class="language-plaintext highlighter-rouge">AnnotationCollection</code>.</p>
+
+<ul>
+  <li>A Range <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">supplementary</code> property.<br />
+Clients <em class="rfc">may</em> process <code class="language-plaintext highlighter-rouge">supplementary</code> on a Range.</li>
+  <li>Other types of resource <em class="rfc">must not</em> have the <code class="language-plaintext highlighter-rouge">supplementary</code> property.<br />
+Clients <em class="rfc">should</em> ignore <code class="language-plaintext highlighter-rouge">supplementary</code> on other types of resource.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nl">"supplementary"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/1/annos/1"</span><span class="p">,</span><span class="w"> </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AnnotationCollection"</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h3 id="34-structural-properties">
+        
+        
+          3.4. Structural Properties <a href="#34-structural-properties" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>These properties define the structure of the object being represented in <abbr title="International Image Interoperability Framework">IIIF</abbr> by allowing the inclusion of child resources within parents, such as a Canvas within a Manifest, or a Manifest within a Collection. The majority of cases use <code class="language-plaintext highlighter-rouge">items</code>, however there are two special cases for different sorts of structures.</p>
+      <h5 id="items">
+        
+        
+          items <a href="#items" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>Much of the functionality of the <abbr title="International Image Interoperability Framework">IIIF</abbr> Presentation <abbr title="Application Programming Interface">API</abbr> is simply recording the order in which child resources occur within a parent resource, such as Collections or Manifests within a parent Collection, or Canvases within a Manifest. All of these situations are covered with a single property, <code class="language-plaintext highlighter-rouge">items</code>.</p>
+
+<p>The value <em class="rfc">must</em> be an array of <abbr title="JavaScript Object Notation">JSON</abbr> objects. Each item <em class="rfc">must</em> have the <code class="language-plaintext highlighter-rouge">id</code> and <code class="language-plaintext highlighter-rouge">type</code> properties. The items will be resources of different types, as described below.</p>
+
+<ul>
+  <li>A Collection <em class="rfc">must</em> have the <code class="language-plaintext highlighter-rouge">items</code> property. Each item <em class="rfc">must</em> be either a Collection or a Manifest.<br />
+Clients <em class="rfc">must</em> process <code class="language-plaintext highlighter-rouge">items</code> on a Collection.</li>
+  <li>A Manifest <em class="rfc">must</em> have the <code class="language-plaintext highlighter-rouge">items</code> property with at least one item. Each item <em class="rfc">must</em> be a Canvas.<br />
+Clients <em class="rfc">must</em> process <code class="language-plaintext highlighter-rouge">items</code> on a Manifest.</li>
+  <li>A Canvas <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">items</code> property with at least one item. Each item <em class="rfc">must</em> be an Annotation Page.<br />
+Clients <em class="rfc">must</em> process <code class="language-plaintext highlighter-rouge">items</code> on a Canvas.</li>
+  <li>An Annotation Page <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">items</code> property with at least one item. Each item <em class="rfc">must</em> be an Annotation.<br />
+Clients <em class="rfc">must</em> process <code class="language-plaintext highlighter-rouge">items</code> on an Annotation Page.</li>
+  <li>A Range <em class="rfc">must</em> have the <code class="language-plaintext highlighter-rouge">items</code> property with at least one item. Each item <em class="rfc">must</em> be a Range, a Canvas or a Specific Resource where the source is a Canvas.<br />
+Clients <em class="rfc">should</em> process <code class="language-plaintext highlighter-rouge">items</code> on a Range.</li>
+  <li>Other types of resource <em class="rfc">must not</em> have the <code class="language-plaintext highlighter-rouge">items</code> property.<br />
+Clients <em class="rfc">should</em> ignore <code class="language-plaintext highlighter-rouge">items</code> on other types of resource.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"items"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/manifest1"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Manifest"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/collection1"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Collection"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+    </span><span class="c1">// ...</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="structures">
+        
+        
+          structures <a href="#structures" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>The structure of an object represented as a Manifest can be described using a hierarchy of Ranges. Ranges can be used to describe the “table of contents” of the object or other structures that the user can interact with beyond the order given by the <code class="language-plaintext highlighter-rouge">items</code> property of the Manifest. The hierarchy is built by nesting the child Range resources in the <code class="language-plaintext highlighter-rouge">items</code> array of the higher level Range. The top level Ranges of these hierarchies are given in the <code class="language-plaintext

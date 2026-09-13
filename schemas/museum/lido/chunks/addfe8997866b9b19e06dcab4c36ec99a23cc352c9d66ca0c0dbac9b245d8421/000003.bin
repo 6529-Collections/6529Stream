@@ -1,0 +1,175 @@
+nsion>
+		</simpleContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="posList" type="gml:DirectPositionListType">
+		<annotation>
+			<appinfo>
+				<sch:pattern name="Check SRS tags">
+					<sch:rule context="gml:posList">
+						<sch:extends rule="CRSLabels"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+			<appinfo>
+				<sch:pattern name="Check Dimension">
+					<sch:rule context="gml:posList">
+						<sch:extends rule="Count"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+		</annotation>
+	</element>
+	<!-- ============================================================== -->
+	<complexType name="DirectPositionListType">
+		<annotation>
+			<documentation>DirectPositionList instances hold the coordinates for a sequence of direct positions within the same coordinate 
+			reference system (CRS).</documentation>
+		</annotation>
+		<simpleContent>
+			<extension base="gml:doubleList">
+				<attributeGroup ref="gml:SRSReferenceGroup"/>
+				<attribute name="count" type="positiveInteger" use="optional">
+					<annotation>
+						<documentation>"count" allows to specify the number of direct positions in the list. If the attribute count is present then 
+						the attribute srsDimension shall be present, too.</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</simpleContent>
+	</complexType>
+	<!-- ============================================================== -->
+	<element name="vector" type="gml:VectorType">
+		<annotation>
+			<appinfo>
+				<sch:pattern name="Check SRS tags">
+					<sch:rule context="gml:vector">
+						<sch:extends rule="CRSLabels"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+		</annotation>
+	</element>
+	<!-- ============================================================== -->
+	<complexType name="VectorType">
+		<annotation>
+			<documentation>Vector instances hold the compoents for a (usually spatial) vector within some coordinate reference system (CRS). 
+			Since Vectors will often be included in larger objects that have references to CRS, the "srsName" attribute may be missing. 
+			In this case, the CRS is implicitly assumed to take on the value of the containing object's CRS.
+
+			Note that this content model is the same as DirectPositionType, but is defined separately to reflect the distinct semantics, and to avoid validation problems. SJDC 2004-12-02</documentation>
+		</annotation>
+		<simpleContent>
+			<extension base="gml:doubleList">
+				<attributeGroup ref="gml:SRSReferenceGroup"/>
+			</extension>
+		</simpleContent>
+	</complexType>
+	<!-- ============================================================== -->
+	<group name="geometricPositionGroup">
+		<annotation>
+			<documentation>A geometric position represented either by a DirectPosition or a Point.</documentation>
+		</annotation>
+		<choice>
+			<element ref="gml:pos"/>
+			<element ref="gml:pointProperty"/>
+		</choice>
+	</group>
+	<!-- ============================================================== -->
+	<group name="geometricPositionListGroup">
+		<annotation>
+			<documentation>A list of geometric positions represented either by a DirectPosition or a Point.</documentation>
+		</annotation>
+		<choice>
+			<element ref="gml:posList"/>
+			<group ref="gml:geometricPositionGroup" maxOccurs="unbounded"/>
+		</choice>
+	</group>
+	<!-- ============================================================== -->
+	<element name="coordinates" type="gml:CoordinatesType">
+		<annotation>
+			<documentation>Deprecated with GML version 3.1.0.</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<!-- Envelope -->
+	<!-- =========================================================== -->
+	<element name="Envelope" type="gml:EnvelopeType"/>
+	<!-- =========================================================== -->
+	<complexType name="EnvelopeType">
+		<annotation>
+			<documentation>Envelope defines an extent using a pair of positions defining opposite corners in arbitrary dimensions. The first direct 
+			position is the "lower corner" (a coordinate position consisting of all the minimal ordinates for each dimension for all points within the envelope), 
+			the second one the "upper corner" (a coordinate position consisting of all the maximal ordinates for each dimension for all points within the 
+			envelope).</documentation>
+		</annotation>
+		<choice>
+			<sequence>
+				<element name="lowerCorner" type="gml:DirectPositionType"/>
+				<element name="upperCorner" type="gml:DirectPositionType"/>
+			</sequence>
+			<element ref="gml:coord" minOccurs="2" maxOccurs="2">
+				<annotation>
+					<appinfo>deprecated</appinfo>
+					<documentation>deprecated with GML version 3.0</documentation>
+				</annotation>
+			</element>
+			<element ref="gml:pos" minOccurs="2" maxOccurs="2">
+				<annotation>
+					<appinfo>deprecated</appinfo>
+					<documentation>Deprecated with GML version 3.1. Use the explicit properties "lowerCorner" and "upperCorner" instead.</documentation>
+				</annotation>
+			</element>
+			<element ref="gml:coordinates">
+				<annotation>
+					<documentation>Deprecated with GML version 3.1.0. Use the explicit properties "lowerCorner" and "upperCorner" instead.</documentation>
+				</annotation>
+			</element>
+		</choice>
+		<attributeGroup ref="gml:SRSReferenceGroup"/>
+	</complexType>
+	<!-- =========================================================== -->
+	<!-- =========================================================== -->
+	<!-- =========================================================== -->
+	<!--  	 	The following types and elements are deprecated and should not be used ! 	 	-->
+	<element name="coord" type="gml:CoordType">
+		<annotation>
+			<documentation>Deprecated with GML 3.0 and included for backwards compatibility with GML 2. Use the "pos" element instead.</documentation>
+		</annotation>
+	</element>
+	<complexType name="CoordType">
+		<annotation>
+			<documentation>Represents a coordinate tuple in one, two, or three dimensions. Deprecated with GML 3.0 and replaced by 
+			DirectPositionType.</documentation>
+		</annotation>
+		<sequence>
+			<element name="X" type="decimal"/>
+			<element name="Y" type="decimal" minOccurs="0"/>
+			<element name="Z" type="decimal" minOccurs="0"/>
+		</sequence>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="lineStringProperty" type="gml:LineStringPropertyType">
+		<annotation>
+			<documentation>Deprecated with GML 3.0 and included only for backwards compatibility with GML 2.0. Use "curveProperty" instead. This 
+			property element either references a line string via the XLink-attributes or contains the line string element.</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<complexType name="LineStringPropertyType">
+		<annotation>
+			<documentation>This type is deprecated with GML 3 and shall not be used. It is included for backwards compatibility with GML 2. Use 
+			CurvePropertyType instead. A property that has a line string as its value domain can either be an appropriate geometry element encapsulated 
+			in an element of this type or an XLink reference to a remote geometry element (where remote includes geometry elements located elsewhere 
+			in the same document). Either the reference or the contained element must be given, but neither both nor none.</documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:LineString"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup">
+			<annotation>
+				<documentation>This attribute group includes the XLink attributes (see xlinks.xsd). XLink is used in GML to reference remote resources 
+				(including those elsewhere in the same document). A simple link element can be constructed by including a specific set of XLink attributes. 
+				The XML Linking Language (XLink) is currently a Proposed Recommendation of the World Wide Web Consortium. XLink allows elements to 
+				be inserted into XML documents so as to create sophisticated links between resources; such links can be used to reference remote properties. 
+				A simple link element can be used to implement pointer functionality

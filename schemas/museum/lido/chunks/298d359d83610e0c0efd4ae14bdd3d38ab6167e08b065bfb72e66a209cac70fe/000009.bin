@@ -1,0 +1,183 @@
+lexContent>
+			<extension base="gml:AbstractGriddedSurfaceType">
+				<attribute name="horizontalCurveType" type="gml:CurveInterpolationType" fixed="circularArc3Points"/>
+				<attribute name="verticalCurveType" type="gml:CurveInterpolationType" fixed="circularArc3Points"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ======================================================== -->
+	<element name="PolyhedralSurface" type="gml:PolyhedralSurfaceType" substitutionGroup="gml:Surface"/>
+	<!-- ======================================================== -->
+	<complexType name="PolyhedralSurfaceType">
+		<annotation>
+			<documentation>A polyhedral surface is a surface composed
+   of polygon surfaces connected along their common boundary 
+   curves. This differs from the surface type only in the
+   restriction on the types of surface patches acceptable.</documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:SurfaceType">
+				<sequence>
+					<group ref="gml:StandardObjectProperties"/>
+					<element ref="gml:polygonPatches">
+						<annotation>
+							<documentation>This property encapsulates the patches of 
+      the polyhedral surface.</documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ======================================================== -->
+	<element name="polygonPatches" type="gml:PolygonPatchArrayPropertyType" substitutionGroup="gml:patches">
+		<annotation>
+			<documentation>This property element contains a list of
+   polygon patches. The order of the patches is significant and 
+   shall be preserved when processing the list.</documentation>
+		</annotation>
+	</element>
+	<!-- ======================================================== -->
+	<complexType name="PolygonPatchArrayPropertyType">
+		<annotation>
+			<documentation>This type defines a container for an array of 
+   polygon patches.</documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:SurfacePatchArrayPropertyType">
+				<sequence minOccurs="0" maxOccurs="unbounded">
+					<element ref="gml:PolygonPatch"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ======================================================== -->
+	<element name="trianglePatches" type="gml:TrianglePatchArrayPropertyType" substitutionGroup="gml:patches">
+		<annotation>
+			<documentation>This property element contains a list of
+   triangle patches. The order of the patches is significant and 
+   shall be preserved when processing the list.</documentation>
+		</annotation>
+	</element>
+	<!-- ======================================================== -->
+	<complexType name="TrianglePatchArrayPropertyType">
+		<annotation>
+			<documentation>This type defines a container for an array of 
+     triangle patches.</documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:SurfacePatchArrayPropertyType">
+				<sequence minOccurs="0" maxOccurs="unbounded">
+					<element ref="gml:Triangle"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ======================================================== -->
+	<element name="TriangulatedSurface" type="gml:TriangulatedSurfaceType" substitutionGroup="gml:Surface"/>
+	<!-- ======================================================== -->
+	<complexType name="TriangulatedSurfaceType">
+		<annotation>
+			<documentation>A triangulated surface is a polyhedral 
+   surface that is composed only of triangles. There is no
+   restriction on how the triangulation is derived.</documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:SurfaceType">
+				<sequence>
+					<group ref="gml:StandardObjectProperties"/>
+					<element ref="gml:trianglePatches">
+						<annotation>
+							<documentation>This property encapsulates the patches of 
+      the triangulated surface.</documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ======================================================== -->
+	<element name="Tin" type="gml:TinType" substitutionGroup="gml:TriangulatedSurface"/>
+	<!-- ======================================================== -->
+	<complexType name="TinType">
+		<annotation>
+			<documentation>A tin is a triangulated surface that uses
+   the Delauny algorithm or a similar algorithm complemented with
+   consideration of breaklines, stoplines, and maximum length of 
+   triangle sides. These networks satisfy the Delauny's criterion
+   away from the modifications: Fore each triangle in the 
+   network, the circle passing through its vertices does not
+   contain, in its interior, the vertex of any other triangle.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:TriangulatedSurfaceType">
+				<sequence>
+					<element name="stopLines" type="gml:LineStringSegmentArrayPropertyType" minOccurs="0" maxOccurs="unbounded">
+						<annotation>
+							<documentation>Stoplines are lines where the local
+       continuity or regularity of the surface is questionable.
+       In the area of these pathologies, triangles intersecting
+       a stopline shall be removed from the tin surface, leaving
+       holes in the surface. If coincidence occurs on surface
+       boundary triangles, the result shall be a change of the 
+       surface boundary. Stoplines contains all these
+       pathological segments as a set of line strings.</documentation>
+						</annotation>
+					</element>
+					<element name="breakLines" type="gml:LineStringSegmentArrayPropertyType" minOccurs="0" maxOccurs="unbounded">
+						<annotation>
+							<documentation>Breaklines are lines of a critical
+       nature to the shape of the surface, representing local
+       ridges, or depressions (such as drainage lines) in the
+       surface. As such their constituent segments must be
+       included in the tin eve if doing so
+       violates the Delauny criterion. Break lines contains these
+       critical segments as a set of line strings.</documentation>
+						</annotation>
+					</element>
+					<element name="maxLength" type="gml:LengthType">
+						<annotation>
+							<documentation>Areas of the surface where data is not 
+       sufficiently dense to assure reasonable calculation shall be    
+       removed by adding a retention criterion for triangles based 
+       on the length of their sides. For many triangle sides  
+       exceeding maximum length, the adjacent triangles to that 
+       triangle side shall be removed from the surface.</documentation>
+						</annotation>
+					</element>
+					<element name="controlPoint">
+						<annotation>
+							<documentation>The corners of the triangles in the TIN 
+  are often referred to as pots. ControlPoint shall contain a 
+  set of the GM_Position used as posts for this TIN. Since each  
+  TIN contains triangles, there must be at least 3 posts. The 
+       order in which these points are given does not affect the 
+       surface that is represented. Application schemas may add 
+       information based on ordering of control points to facilitate 
+       the reconstruction of the TIN from the control points.</documentation>
+						</annotation>
+						<complexType>
+							<choice>
+								<element ref="gml:posList"/>
+								<group ref="gml:geometricPositionGroup" minOccurs="3" maxOccurs="unbounded"/>
+							</choice>
+						</complexType>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="LineStringSegmentArrayPropertyType">
+		<sequence>
+			<element ref="gml:LineStringSegment" minOccurs="0" maxOccurs="unbounded"/>
+		</sequence>
+	</complexType>
+	<!-- =========================================================== -->
+	<!-- primitive geometry objects (3-dimensional) -->
+	<!-- =========================================================== -->
+	<!-- =========================================================== -->
+	<element name="_Solid" type="gml:AbstractSolidType" abstract="true" substitutionGroup="gml:_GeometricPrimitive">
+		<annotation>
+			<documentation>The "_Solid" element is the abstract head of the substituition group for all (continuous) solid elements.</documentation>
+		</annotation>
+	</el

@@ -1,0 +1,93 @@
+/span>&gt;</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">&lt;!-- Display label --&gt;</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:term</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00526&quot;</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="ot">        xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>        Oil painting</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:term</span>&gt;</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:objectWorkType</span>&gt;</span></code></pre></div>
+            <blockquote>
+            <p>See also <a
+            href="https://vraweb.org/wp-content/uploads/2020/04/CatalogingCulturalObjectsFullv2.pdf">Cataloging
+            Cultural Objects</a>: 1.1 About Object Naming,
+            pp. 48–50.</p>
+            </blockquote>
+            <h3 data-number="5.1.4" id="title-set"><span
+            class="header-section-number">5.1.4</span> Title Set</h3>
+            <p><strong>Element name:</strong> &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#titleSet">lido:titleSet</a>&gt;</p>
+            <p><strong>Note:</strong> The Title Set element holds values
+            for the appellation of the object or work, such as a title
+            proper for a work or a name by which the object is known. A
+            title is critical to always have a human-readable text to
+            refer to an object, and making it distinguishable from
+            similar objects in search results. There may exist multiple
+            titles in a given language, as well as titles in different
+            languages. One title has to be marked as the preferred one
+            in each language, if there is more than one title; all other
+            titles are regarded as alternative ones. It is strongly
+            recommended to provide a descriptive, concise title that
+            indicates the most important features to be recognized at a
+            glance. If no title or name is available, a descriptive one
+            should be constructed based on the object/work type and
+            further characteristics sufficient to select and distinguish
+            the object in information retrieval. For example, “Daucus
+            carota L.” as a title may apply to dozens of plant
+            specimens. Enriching the title with information from place
+            and date elements can yield unique object titles such as
+            “Daucus carota L. from Gmünd, Niederösterreich, 2009”, or
+            “Seats from <a
+            href="https://www.deutsche-digitale-bibliothek.de/item/WMSGMGOH7OC4LBHIZ3B4TVSBVMSALBYU">Zea
+            mays L. from Missahoe (Togo)</a>, 1914”. Where multiple
+            titles are taken from different sources, the title set has
+            to be repeated for each source. Note that (local) inventory
+            numbers should not be recorded in titles.</p>
+            <p><strong>Example:</strong> The following example shows a
+            published title sufficiently descriptive for identification.
+            The type for &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#titleSet">lido:titleSet</a>&gt;
+            is taken from the AAT “<a
+            href="http://vocab.getty.edu/hier/aat/300417193">titles
+            (general, names)</a>” hierarchy as suggested in the LIDO
+            Terminology Recommendation. The preferred title in this
+            example is the best known one, “Mona Lisa”. The published
+            title is marked as an alternative one and useful for search
+            queries. The CDWA guidelines recommend to always provide a
+            descriptive title which in this example is drawn from the
+            CONA record for “<a
+            href="http://vocab.getty.edu/page/cona/700000213">Mona
+            Lisa</a>”.</p>
+            <blockquote>
+            <p><strong>Title:</strong> Mona Lisa
+            <strong><em>Preference:</em></strong> Preferred |
+            <strong>Source:</strong> Getty Vocabulary Program, CONA
+            [online], Mona Lisa.<br/> <strong>Descriptive
+            title:</strong> Portrait of Lisa Gherardini
+            <strong><em>Preference:</em></strong> Alternative |
+            <strong>Source:</strong> Getty Vocabulary Program, CONA
+            [online], Mona Lisa.<br/> <strong>Published title:</strong>
+            PORTRAIT DE MONA LISA (1479-1528) ; DITE LA JOCONDE
+            <strong><em>Preference:</em></strong> Alternative |
+            <strong>Source:</strong> Collections des musées de France
+            (Joconde), Portait de Mona Lisa.</p>
+            </blockquote>
+            <div class="sourceCode" id="cb22"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Preferred title --&gt;</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:titleSet</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00169&quot;</span>&gt;</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Preferred appellation --&gt;</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:appellationValue</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00169&quot;</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="ot">        xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>        Mona Lisa</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:appellationValue</span>&gt;</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:appellationValue</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00169&quot;</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="ot">        xml:lang=</span><span class="st">&quot;de&quot;</span>&gt;</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>        Mona Lisa</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:appellationValue</span>&gt;</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:sourceAppellation</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="ot">        xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>        Getty Vocabulary Program, CONA [online], Mona Lisa. URL: http://vocab.getty.edu/page/cona/700000213 [2022-07-04]</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:sourc

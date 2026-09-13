@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.opengis.net/gml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gml="http://www.opengis.net/gml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sch="http://www.ascc.net/xml/schematron" xmlns="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" version="3.1.1.2">
+	<annotation>
+		<appinfo source="urn:opengis:specification:gml:schema-xsd:gmlBase:3.1.1">
+			<sch:title>Schematron validation</sch:title>
+			<sch:ns prefix="gml" uri="http://www.opengis.net/gml"/>
+			<sch:ns prefix="xlink" uri="http://www.w3.org/1999/xlink"/>
+			<sch:pattern name="Check either href or content not both">
+				<sch:rule abstract="true" id="hrefOrContent">
+					<sch:report test="@xlink:href and (*|text())">Property element may not carry both a reference to an object and contain an object.</sch:report>
+					<sch:assert test="@xlink:href | (*|text())">Property element must either carry a reference to an object or contain an object.</sch:assert>
+				</sch:rule>
+			</sch:pattern>
+		</appinfo>
+		<documentation>GML base schema for GML 3
+			Components to support the GML encoding model.
+			The abstract Schematron rules can be used by any schema that includes gmlBase.
+			
+			GML is an OGC Standard.
+			Copyright (c) 2001,2005,2010 Open Geospatial Consortium.
+			To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .
+		</documentation>
+	</annotation>
+	<!-- ==============================================================
+       includes and imports
+	============================================================== -->
+	<include schemaLocation="gml.xsd"/>
+	<include schemaLocation="basicTypes.xsd"/>
+	<import namespace="http://www.w3.org/1999/xlink" schemaLocation="http://www.w3.org/1999/xlink.xsd"/>
+	<!-- =========================================================== -->
+	<!-- ==================== Objects ================================ -->
+	<!-- =========================================================== -->
+	<!-- =========== Abstract "Object" is "anyType" ============= -->
+	<!-- ===== Global element at the head of the "Object" substitution group ======== -->
+	<element name="_Object" abstract="true">
+		<annotation>
+			<documentation>This abstract element is the head of a substitutionGroup hierararchy which may contain either simpleContent or complexContent elements.  It is used to assert the model position of "class" elements declared in other GML schemas.</documentation>
+		</annotation>
+	</element>
+	<!-- ============================================================= -->
+	<!-- =========== Abstract "GMLobject" supertype ========================= -->
+	<element name="_GML" type="gml:AbstractGMLType" abstract="true" substitutionGroup="gml:_Object">
+		<annotation>
+			<documentation>Global element which acts as the head of a substitution group that may include any element which is a GML feature, object, geometry or complex value</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<group name="StandardObjectProperties">
+		<annotation>
+			<documentation>This content model group makes it easier to construct types that 
+      derive from AbstractGMLType and its descendents "by restriction".  
+      A reference to the group saves having to enumerate the standard object properties.</documentation>
+		</annotation>
+		<sequence>
+			<element ref="gml:metaDataProperty" minOccurs="0" maxOccurs="unbounded"/>
+			<element ref="gml:description" minOccurs="0"/>
+			<element ref="gml:name" minOccurs="0" maxOccurs="unbounded">
+				<annotation>
+					<documentation>Multiple names may be provided.  These will often be distinguished by being assigned by different authorities, as indicated by the value of the codeSpace attribute.  In an instance document there will usually only be one name per authority.</documentation>
+				</annotation>
+			</element>
+		</sequence>
+	</group>
+	<!-- =========================================================== -->
+	<complexType name="AbstractGMLType" abstract="true">
+		<annotation>
+			<documentation>All complexContent GML elements are directly or indirectly derived from this abstract supertype 
+	to establish a hierarchy of GML types that may be distinguished from other XML types by their ancestry. 
+	Elements in this hierarchy may have an ID and are thus referenceable.</documentation>
+		</annotation>
+		<sequence>
+			<group ref="gml:StandardObjectProperties"/>
+		</sequence>
+		<attribute ref="gml:id" use="optional"/>
+	</complexType>
+	<!-- =========================================================== -->
+	<!-- =========== Concrete "Collection" supertype ========================= -->
+	<element name="Bag" type="gml:BagType" substitutionGroup="gml:_GML">
+		<annotation>
+			<documentation>Generic GML element to contain a heterogeneous collection of GML _Objects</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<complexType name="BagType">
+		<annotation>
+			<documentation>A non-abstract generic collection type that can be used as a document element for a collection of any GML types - Geometries, Topologies, Features ...
+
+FeatureCollections may only contain Features.  GeometryCollections may only contain Geometrys.  Bags are less constrained  they must contain objects that are substitutable for gml:_Object.  This may mix several levels, including Features, Definitions, Dictionaries, Geometries etc.  
+
+The content model would ideally be 
+   member 0..*
+   members 0..1
+   member 0..*
+for maximum flexibility in building a collection from both homogeneous and distinct components: 
+included "member" elements each contain a single Object
+an included "members" element contains a set of Objects 
+
+However, this is non-deterministic, thus prohibited by XSD.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractGMLType">
+				<sequence>
+					<element ref="gml:member" minOccurs="0" maxOccurs="unbounded"/>
+					<element ref="gml:members" minOccurs="0"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<!-- =========== Concrete "Array" supertype ========================= -->
+	<element name="Array" type="gml:ArrayType" substitutionGroup="gml:_GML">
+		<annotation>
+			<documentation>Generic GML element to contain a homogeneous array of GML _Objects</documentation>
+		</annotation>
+	</element>
+	<!-- ======================================================================= -->
+	<complexType name="ArrayType">
+		<annotation>
+			<documentation>A non-abstract generic collection type that can be used as a document element for a homogeneous collection of any GML types - Geometries, Topologies, Features ...</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractGMLType">
+				<sequence>
+					<element ref="gml:members" minOccurs="0"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<!-- =========== Abstract Metadata supertype ========================= -->
+	<element name="_MetaData" type="gml:AbstractMetaDataType" abstract="true" substitutionGroup="gml:_Object">
+		<annotation>
+			<documentation>Abstract element which acts as the head of a substitution group for packages of MetaData properties.</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<complexType name="AbstractMetaDataType" abstract="true" mixed="true">
+		<annotation>
+			<documentation>An abstract base type for complex metadata types.</documentation>
+		</annotation>
+		<attribute ref="gml:id" use="optional"/>
+	</complexType>
+	<!-- =========================================================== -->
+	<!-- =========== Container for Generic Metadata ========================= -->
+	<element name="GenericMetaData" type="gml:GenericMetaDataType" substitutionGroup="gml:_MetaData">
+		<annotation>
+			<documentation>Concrete element in the _MetaData substitution group, which permits any well-formed XML content.  Intended to act as a container

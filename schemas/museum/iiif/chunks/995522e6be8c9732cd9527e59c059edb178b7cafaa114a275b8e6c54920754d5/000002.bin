@@ -1,0 +1,127 @@
+operty must be “Manifest”. The <code>label</code> property is mandatory, and the language of its value must be given (or the special value “none”), using a <a href="https://iiif.io/api/presentation/4.0/model/#language-of-property-values" title="Language of Property Values">language map</a>. Here the language of the label is English and its value is “Simplest Image Example (IIIF Presentation v4)”. The manifest’s <code>items</code> property is a list of canvases. In this example there is only one canvas, with a <code>height</code> of 1800 and a <code>width</code> of 1200. These units have no dimension; they establish a coordinate space that in this case the single image will fill. The Canvas’s <code>id</code> property is used later as part of the <code>target</code> of the annotation that links to the single image.</p>
+
+<p>The <code>items</code> property of the Canvas is a list of annotation pages. In this case there is only one. The <code>items</code> property of the annotation page is a list of annotations. Again, in this case there is only one. This annotation links the image resource and the Canvas. The <code>body</code> of the annotation is an image, the url of which is the <code>id</code> property of the body. The dimensions of the image, in pixels, are given and here match the Canvas dimensions exactly. Matching is not required, but mismatches may change the image’s display. The <code>target</code> property tells us both that the image is associated with the entirety of the container and that the container is a canvas, and the <code>motivation</code> property of <code>painting</code> tells us that a client should render the image to fill the Canvas.</p>
+
+<h2 id="restrictions">Restrictions</h2>
+
+<p>This recipe is not for large images or deep zoom functionality. For this, see the <a href="https://iiif.io/api/cookbook/recipe/0005-image-service/" title="Support Deep Viewing with Basic Use of a IIIF Image Service">Support Deep Viewing with Basic Use of a IIIF Image Service (v3)</a> recipe.</p>
+
+<h2 id="example">Example</h2>
+
+<p><a href="v4/manifest.json">JSON-LD</a> | 
+<a href="https://uv-v4.netlify.app/#?manifest=https://iiif.io/api/cookbook/recipe/0001-mvm-image/v4/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0001-mvm-image/v4/manifest.json" target="_blank">View in Universal Viewer</a>
+| 
+<a href="https://ncsu-libraries.github.io/annona/tools/#/display?url=https://iiif.io/api/cookbook/recipe/0001-mvm-image/v4/manifest.json&amp;viewtype=iiif-storyboard&amp;settings=%7B%22fullpage%22%3Atrue%7D" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0001-mvm-image/v4/manifest.json" target="_blank">View in Annona</a>
+| 
+<a href="https://samvera-labs.github.io/clover-iiif/docs/viewer/demo?iiif-content=https://iiif.io/api/cookbook/recipe/0001-mvm-image/v4/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0001-mvm-image/v4/manifest.json" target="_blank">View in Clover</a>
+| 
+<a href="https://theseusviewer.org/?iiif-content=https://iiif.io/api/cookbook/recipe/0001-mvm-image/v4/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0001-mvm-image/v4/manifest.json" target="_blank">View in Theseus</a>
+| 
+<a href="https://tify-iiif-viewer.github.io/tify/?iiif-content=https://iiif.io/api/cookbook/recipe/0001-mvm-image/v4/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0001-mvm-image/v4/manifest.json" target="_blank">View in TIFY</a>
+| 
+<a href="https://d-flood.github.io/triiiceratops/viewer/?iiif-content=https://iiif.io/api/cookbook/recipe/0001-mvm-image/v4/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0001-mvm-image/v4/manifest.json" target="_blank">View in Triiiceratops</a></p>
+
+<pre class="line-numbers data-download-link" data-download-link-label="Download me" data-src="v4/manifest.json"></pre>
+
+<h1 id="related-recipes">Related Recipes</h1>
+
+<ul>
+  <li><a href="https://iiif.io/api/cookbook/recipe/0002-mvm-audio/#version-4" title="Simplest Manifest - Audio">Simplest Manifest - Audio</a> for a minimal audio Manifest</li>
+  <li><a href="https://iiif.io/api/cookbook/recipe/0003-mvm-video/#version-4" title="Simplest Manifest - Video">Simplest Manifest - Video</a> for a minimal video Manifest</li>
+  <li><a href="https://iiif.io/api/cookbook/recipe/0608-mvm-3d/#version-4" title="Simplest Manifest - 3D model">Simplest Manifest - 3D</a> for a minimal 3D Manifest</li>
+  <li><a href="https://iiif.io/api/cookbook/recipe/0005-image-service/" title="Support Deep Viewing with Basic Use of a IIIF Image Service">Support Deep Viewing with Basic Use of a IIIF Image Service</a> (v3) shows a basic manifest for use with a IIIF Image server.</li>
+  <li><a href="https://iiif.io/api/cookbook/recipe/0004-canvas-size/" title="Image and Canvas with Differing Dimensions">Image and Canvas with Differing Dimensions</a> (v3) shows a canvas with dimensions different from the pixel dimensions of its content.</li>
+  <li><a href="https://iiif.io/api/cookbook/recipe/0006-text-language/" title="Internationalization and Multi-language Values">Multiple values and languages</a> (v3) demonstrates language map variations, for multiple values and multiple languages.</li>
+</ul>
+
+<!-- acronyms.md as placeholder for API equivalent -->
+
+
+  </div>
+  
+  <div id="manifest-comparison" class="content-tab" style="display:none;">
+    
+<h2>Manifest Comparison</h2>
+<p>Below is an auto generated diff showing the changes between IIIF Presentation API version 3 and version 4 of the recipe Manifest. </p>
+
+<div id="diff-panel" class="manifest-diff">
+  <p>Loading diff&hellip;</p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/diff@5.2.0/dist/diff.min.js"></script>
+
+<script>
+(function () {
+  var recipe = "0001-mvm-image";
+  var base = "https://iiif.io/api/cookbook" + "/recipe/" + recipe;
+  var container = document.getElementById("diff-panel");
+
+  Promise.all([
+    fetch(base + "/manifest.json").then(function (r) { return r.json(); }),
+    fetch(base + "/v4/manifest.json").then(function (r) { return r.json(); })
+  ]).then(function (results) {
+    var v3 = JSON.stringify(results[0], null, 2);
+    var v4 = JSON.stringify(results[1], null, 2);
+    var parts = Diff.diffLines(v3, v4);
+    var lines = [];
+    parts.forEach(function (part) {
+      var prefix = part.added ? "+" : part.removed ? "-" : " ";
+      part.value.replace(/\n$/, "").split("\n").forEach(function (line) {
+        lines.push(prefix + line);
+      });
+    });
+
+    var pre = document.createElement("pre");
+    pre.className = "language-diff-json diff-highlight";
+    var code = document.createElement("code");
+    code.className = "language-diff-json diff-highlight";
+    code.textContent = lines.join("\n");
+    pre.appendChild(code);
+
+    container.innerHTML = "";
+    container.appendChild(pre);
+    Prism.highlightElement(code);
+  }).catch(function (err) {
+    container.textContent = "Unable to load manifests for comparison: " + err.message;
+  });
+})();
+</script>
+
+
+  </div>
+  
+</div>
+
+    <script src="https://iiif.io/api/cookbook/assets/js/tabSwitch.js"></script>
+
+  </div></div>
+<script>
+  if (!window.location.hash) {
+    let el = document.getElementById("version-3-heading");
+    el.className += " is-active";
+  }  
+</script>
+
+
+
+<script src='https://iiif.io/api/cookbook/js/prism.js'></script>
+<script>
+    Prism.plugins.customClass.map({
+        number: 'prism-number'
+    });
+</script>
+
+  </div>
+</div></div>
+
+      
+    </section>
+<footer id="footer" class="footer">
+  <div class="container">
+    <div class="columns">
+
+      <div class="navbar-brand column is-half">
+        <a class="navbar-item" href="https://iiif.io/api/cookbook/">
+          <img src="https://iiif.io/api/cookbook/assets/images/logos/logo-sm.png" alt="IIIF logo" height="28">
+          <span class="brand-title blue-text">International Image Interoperability Framework</span>
+        </a>
+        <p>IIIF is a set of open standards for delivering high-quality, attributed digital objects online at scale. It’s also an international community developing and implementing the IIIF APIs. IIIF is backed by a consorti

@@ -309,9 +309,9 @@ def load_manifest(repo_root: Path) -> dict[str, Any]:
     return payload
 
 
-def load_current_manifest(repo_root: Path) -> dict[str, Any]:
+def load_current_manifest(repo_root: Path, *, candidate: Any = None) -> dict[str, Any]:
     """Load one flat active owner; historical v1 never becomes current semantic proof."""
-    value = _read_json(repo_root / CURRENT_MANIFEST_PATH)
+    value = _read_json(repo_root / CURRENT_MANIFEST_PATH) if candidate is None else candidate
     fields = {"schema_version", "source_root", "historical_manifest",
               "historical_equivalence_receipt", "policy", "relocations",
               "source_paths", "frozen_evidence"}
@@ -393,7 +393,14 @@ def _relative(path: Path, repo_root: Path) -> str:
 
 
 def _solidity_declaration_kinds(path: Path) -> list[str]:
-    return DECLARATION_RE.findall(path.read_text(encoding="utf-8"))
+    # Declaration-shaped documentation and literal bytes are not Solidity declarations.
+    # Consume whole comments/quoted strings so comment markers inside a string stay data.
+    non_code = re.compile(
+        r"""//[^\r\n]*|/\*.*?\*/|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'""",
+        re.DOTALL,
+    )
+    code = non_code.sub(" ", path.read_text(encoding="utf-8"))
+    return DECLARATION_RE.findall(code)
 
 
 def _text_files(repo_root: Path) -> list[Path]:
@@ -414,12 +421,12 @@ def _text_files(repo_root: Path) -> list[Path]:
     return sorted(files)
 
 
-def check_repository(repo_root: Path) -> list[str]:
+def check_repository(repo_root: Path, *, current_candidate: Any = None) -> list[str]:
     repo_root = repo_root.resolve()
     errors: list[str] = []
     try:
         manifest = load_manifest(repo_root)
-        current = load_current_manifest(repo_root)
+        current = load_current_manifest(repo_root, candidate=current_candidate)
     except SourceLayoutError as exc:
         return [str(exc)]
 
