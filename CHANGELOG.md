@@ -5,6 +5,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Added a fixed evidence provider for six actual Router serving families, with
+  independent source commitments and explicit current-candidate checks against
+  live module eligibility and the saved original-Finality anchor. Complete typed
+  finality inputs, entropy and full deployment acceptance remain in progress.
+
 ### Added
 
 - Fixed release checksum parsing for the pinned upstream license's Git whitespace

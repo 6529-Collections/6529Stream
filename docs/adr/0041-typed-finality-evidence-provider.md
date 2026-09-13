@@ -106,6 +106,41 @@ a self-invalidating checkpoint. See the
 boundaries. The complete normative publication facade, scope profiles and actual
 artist/provider/Finality composition remain required.
 
+## Provider construction and delayed record consumers
+
+The concrete [Router serving base](../integrations/finality-router-evidence.md)
+is constructed from already-live Core, generic metadata, Router and membership
+hosts. Serving adapters follow the provider, and fixed discovery follows those
+adapters. The complete typed provider must implement all required reads before
+it can serve the original Registry. The six-family base alone does not satisfy
+that constructor or provide complete finality evidence.
+
+The original Registry precedes the Coordinator, as specified in ADR 0039.
+Current WORK and RIGHTS selectors require the live Coordinator and selected
+generic metadata at their construction; WORK also requires the selected artist.
+Requiring already-live selectors in the provider constructor would create a
+cycle. The complete provider therefore binds their predicted, fixed deployment
+addresses and exact expected runtime hashes, and rejects every operative record
+read until their actual code and reciprocal source/artist bindings match. There
+is no mutable binding phase, missing-code readiness or substitute Coordinator.
+
+The accepted selector compiler artifacts embed nine environment immutables:
+Core, metadata, schema and store addresses; those four runtime hashes; and chain
+ID. Coordinator and artist-owner pins are storage, not runtime immutables. Their
+expected runtime hashes can therefore be derived after fixing the exact compiler
+product, library links and those nine earlier deployment values. Deployment
+tooling must perform that calculation and verify the later actual creations;
+an assumed hash or bytecode-size comparison is insufficient.
+
+Use a controlled CREATE sequence or fixed child factory for the predicted
+Coordinator, original Registry and later selectors. Include every relevant
+creation and transaction when calculating nonces. Mutually dependent CREATE2
+initcodes are not solved by sequential address hashing. After Coordinator
+construction, governed selection of the metadata and artist hosts precedes
+actual selector deployment. Candidate validation then enforces the saved
+Router original-Finality anchor and live selected graph. None of these
+operative checks is moved into a constructor that precedes its dependencies.
+
 ## Delivery boundaries
 
 This design neither changes permanent artist signing preimages nor grants
