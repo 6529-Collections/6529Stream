@@ -78,22 +78,28 @@ library StreamArtistSanctionCandidate {
             actual.sanctionSubjectHash != StreamArtistSanctionHashes.subject(p)
                 || actual.scopeInputsHash == 0
         ) revert S.InvalidSanction();
-        bytes memory raw = _read(
+        bytes memory raw = _readReview(
             pins.provider,
             abi.encodeCall(
                 IStreamFinalitySanctionReview.requireSanctionReviewFacts,
                 (scope, q.manifest.contentHash)
             ),
-            288,
             pins.readGas
         );
-        // Canonical dynamic tuple for explicitly supported version1/profile1. No arbitrary offsets,
-        // unchecked lengths or unknown profiles reach the ABI decoder.
+        uint256 referenceCount = _word(raw, 224);
+        uint256 profile = _word(raw, 64);
+        // Two explicitly admitted native ONCHAIN profiles. Both retain every ordered original
+        // reference artifact occurrence, including repeated bytes, and have no media objects.
         if (
-            _word(raw, 0) != 32 || _word(raw, 32) != 1 || _word(raw, 64) != 1 || _word(raw, 96) == 0
+            _word(raw, 0) != 32 || _word(raw, 32) != 1 || _word(raw, 96) == 0
                 || _word(raw, 128) != 160 || _word(raw, 160) != 192 || _word(raw, 192) != 0
-                || _word(raw, 224) != 1 || _word(raw, 256) == 0
+                || referenceCount == 0 || referenceCount > 16
+                || raw.length != 256 + referenceCount * 32
+                || !((profile == 1 && referenceCount == 1) || (profile == 2 && referenceCount >= 2))
         ) revert S.InvalidSanctionCeremony();
+        for (uint256 i; i < referenceCount; ++i) {
+            if (_word(raw, 256 + i * 32) == 0) revert S.InvalidSanctionCeremony();
+        }
         IStreamFinalitySanctionReview.ReviewFacts memory reviewed =
             abi.decode(raw, (IStreamFinalitySanctionReview.ReviewFacts));
         S.Ceremony memory c = S.Ceremony(
@@ -124,19 +130,43 @@ library StreamArtistSanctionCandidate {
         assembly ("memory-safe") { word := mload(add(add(value, 32), offset)) }
     }
 
+    // Match the shared finality reader: cap is an upper bound, measured after allocation.
+    function _readReview(address target, bytes memory data, uint256 cap)
+        private
+        view
+        returns (bytes memory raw)
+    {
+        if (cap == 0 || cap > type(uint256).max / 64) revert T.InvalidBinding();
+        raw = new bytes(768);
+        uint256 available = gasleft();
+        if (available <= 100000) revert SanctionParentGas(available, 100000);
+        uint256 forwarded = available - 100000;
+        if (cap < forwarded) forwarded = cap;
+        bool ok;
+        uint256 returned;
+        assembly ("memory-safe") {
+            ok := staticcall(forwarded, target, add(data, 32), mload(data), add(raw, 32), 768)
+            returned := returndatasize()
+        }
+        if (!ok || returned < 288 || returned > 768) revert SanctionReadFailed(target);
+        assembly ("memory-safe") { mstore(raw, returned) }
+    }
+
     function _read(address target, bytes memory data, uint256 size, uint256 cap)
         private
         view
         returns (bytes memory raw)
     {
         if (cap == 0 || cap > type(uint256).max / 64) revert T.InvalidBinding();
-        uint256 required = cap + cap / 63 + 100000;
-        if (gasleft() <= required) revert SanctionParentGas(gasleft(), required);
         raw = new bytes(size);
+        uint256 available = gasleft();
+        if (available <= 100000) revert SanctionParentGas(available, 100000);
+        uint256 forwarded = available - 100000;
+        if (cap < forwarded) forwarded = cap;
         bool ok;
         uint256 returned;
         assembly ("memory-safe") {
-            ok := staticcall(cap, target, add(data, 32), mload(data), add(raw, 32), size)
+            ok := staticcall(forwarded, target, add(data, 32), mload(data), add(raw, 32), size)
             returned := returndatasize()
         }
         if (!ok || returned != size) revert SanctionReadFailed(target);
