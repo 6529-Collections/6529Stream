@@ -7,6 +7,8 @@ deployment evidence.
 
 | Task | Guide |
 | --- | --- |
+| Discover the fixed required finality components | [Fixed finality discovery](fixed-finality-discovery.md) |
+| Preserve and verify large external runtime objects | [External object archive](../guides/external-object-archive.md) |
 | Publish and retrieve retained native collection snapshots | [Native onchain snapshots](native-onchain-snapshots.md) |
 | Freeze and serve every original entropy source through one route | [Original entropy source sets](original-entropy-source-sets.md) |
 | Validate a published root against current preserved content | [Finality content evidence](finality-content-evidence.md) |

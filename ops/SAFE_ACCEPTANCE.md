@@ -36,6 +36,21 @@ The integrator owns the combined inventory; each builder supplies its domain's
 rows and executable evidence. Final acceptance requires no unclassified or
 uncovered supported ABI functions, rather than a sample of wallet workflows.
 
+## Fixed discovery and native-source composition increment
+
+The [discovery cohort](../test/unit/finality/StreamFinalityCurrentDiscovery.t.sol)
+executes three named reads through a real threshold Safe: independent discovery
+facts, full component count and full discovery hash. Twenty-one discovery and
+retained adapter tests pass both modes with explicit producer/Core fixtures.
+This does not cover every new configuration, binding or scoped selector.
+
+The [actual native-source cohort](../test/unit/finality/StreamFinalityEntropySourceSetCurrentCore.t.sol)
+uses real Safe-initiated Executor/role/module/manifest flows to configure and
+replace original coordinators, plus Safe source-set preparation. Four IR cases
+pass, including two retained foundation cases. These flows add concrete coverage;
+all ABI selectors, supported Safe versions and nesting still require the complete
+acceptance inventory above.
+
 ## Content-root publication increment
 
 The focused [root-publication tests](../test/unit/metadata/StreamContentRootPublication.t.sol)

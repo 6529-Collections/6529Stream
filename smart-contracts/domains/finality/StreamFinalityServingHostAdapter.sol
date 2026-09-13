@@ -208,6 +208,9 @@ contract StreamFinalityServingHostAdapter is IStreamFinalityServingHostAdapter {
     }
 
     function _identity(bytes32 family) private pure returns (bytes32, bytes4) {
+        if (family == StreamFinalityDomains.COMPONENT_COLLECTION_METADATA) {
+            return (family, type(IStreamCollectionMetadataV1).interfaceId);
+        }
         if (family == StreamFinalityDomains.COMPONENT_ENTROPY_COORDINATOR) {
             return (family, type(IStreamEntropyCoordinator).interfaceId);
         }

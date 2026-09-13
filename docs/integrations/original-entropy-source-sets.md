@@ -106,3 +106,19 @@ insufficient outer call rejects and its exact funded retry succeeds. These
 figures exclude transaction intrinsic gas and are not an arbitrary inventory
 capacity or universal cold-state claim. All captured production runtimes fit
 the EVM size limit, including the factory's embedded child creation code.
+
+## Actual Core and governed replacement
+
+A separate four-case IR capture uses actual Core, Governance Executor, role and
+module registries, System Manifest and a threshold Safe. Two new cases execute
+native-source registration, governed pointer replacement, real mint-time source
+retention and callback fulfillment. They prove pending and completed seeds,
+retained reads after burn, exclusion of later collection tokens, and unchanged
+published RELEASE/SEASON/VIEW membership after the parent collection grows.
+The production typed entropy-serving path returns each token's original seed.
+Two existing governed-foundation cases also pass in this capture.
+
+Mint-manager admission and artist/original-Finality selection remain fixture
+boundaries, and randomness is supplied by an explicit test provider. This closes
+the earlier Core/governance boundary for the named flows without claiming an
+assembled original Registry, complete provider or external VRF integration.

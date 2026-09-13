@@ -20,6 +20,9 @@ interface IStreamNonSanctionFinalityDiscovery {
 
     /// @notice Exact member at an index of the same current authoritative ordered projection.
     /// @dev Reverts for an unknown scope or out-of-range index, never supplies a zero placeholder.
+    ///      A fixed-family implementation may validate only this slot after checking global
+    ///      bindings. It does not thereby assert that other slots are ready; the complete facts
+    ///      read and the Registry's whole hash/live comparisons validate all required entries.
     function nonSanctionComponentAt(StreamFinalityScope calldata scope, uint256 index)
         external
         view

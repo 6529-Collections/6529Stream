@@ -5,6 +5,15 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Added fixed current finality discovery with mandatory component families,
+  unsigned artist preparation, shared producer bindings and bounded indexed reads.
+- Added native external-object proofs, complete archival coverage and current
+  liveness for original receipt pairs, with portable runtime capture tooling.
+- Retained guardian history at actual authority vesting and split estate execution
+  preparation to keep its creation helper within the EVM runtime size limit.
+- Added actual Core/Executor/Safe tests for original native entropy across
+  coordinator replacement, token burn and later collection growth.
+
 - Added native full-byte collection snapshots with original source commitments,
   independent publisher grants, immutable history and a fixed finality consumer.
 - Extended living-artist recovery to completed ordinary rotation histories and

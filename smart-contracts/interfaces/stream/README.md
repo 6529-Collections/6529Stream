@@ -6,6 +6,7 @@ not select a different contract or grant a caller additional authority.
 
 | Operation | Import | Implementation |
 | --- | --- | --- |
+| Fixed current component discovery and shared producer bindings | [IStreamArtworkFinalityDiscovery](finality/IStreamArtworkFinalityDiscovery.sol), [IStreamFinalityDiscoverySources](finality/IStreamFinalityDiscoverySources.sol) | [StreamFinalityCurrentDiscovery](../../domains/finality/StreamFinalityCurrentDiscovery.sol); [caller guide](../../../docs/integrations/fixed-finality-discovery.md) |
 | Retained native snapshot publication and history | [IStreamCollectionSnapshots](metadata/IStreamCollectionSnapshots.sol) | [StreamCollectionSnapshots](../../domains/metadata/StreamCollectionSnapshots.sol); [snapshot guide](../../../docs/integrations/native-onchain-snapshots.md) |
 | Complete original entropy preparation and token serving | [IStreamFinalityEntropySourceFactory](finality/IStreamFinalityEntropySourceFactory.sol), [IStreamFinalityEntropySourceSet](finality/IStreamFinalityEntropySourceSet.sol) | [StreamFinalityEntropySourceFactory](../../domains/finality/StreamFinalityEntropySourceFactory.sol) and its immutable source sets; [caller guide](../../../docs/integrations/original-entropy-source-sets.md) |
 | Current collection record bytes, family grants and attributed history | [IStreamCollectionMetadataV1](metadata/IStreamCollectionMetadataV1.sol) | [StreamCollectionMetadataV1](../../domains/metadata/StreamCollectionMetadataV1.sol); see [record guide](../../../docs/integrations/metadata-records.md) |
