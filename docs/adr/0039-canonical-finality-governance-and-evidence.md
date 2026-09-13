@@ -1272,6 +1272,45 @@ adopted 58 operations, auxiliary 65534 and 37 genesis roles. Broader role-admin
 delegation, historical and estate appeals, other record families, exceptional
 provisional adjudication, maximum capacity and complete deployment remain open.
 
+## First estate-authority recovery
+
+The `6529STREAM_ARTIST_FIRST_ESTATE_RECOVERY_PROFILE_V1` increment extends
+operation 35 to the original class-3 successor after one actual, nonaccelerated
+estate activation. The exact operation-33 subject is that activation. Its saved
+post-vesting window must have elapsed without an earlier contest, and its closure
+must be completely empty. Exact-expiry and later contests remain eligible.
+The original operation-40 vesting snapshot proves the first authority change;
+its complete guardian prefix, including last guardian-admission owner revision,
+must equal the current prefix. No history is inferred or backfilled.
+
+The full original request, execution, transition, vesting, designation and
+paired/forbidden directives enter the authenticated recovery context. Current
+operative designation/directive heads must equal those original records; the
+recomputed capability mask must equal the saved activation mask. Zero is valid.
+Original operation-38/40 admission supplies historical authorization and coverage
+validity; recovery does not replay those old signatures or reauthorize past
+coverage against current providers. The recovered key remains class 3/status 3,
+retains the original activation and identity record, and receives exactly those
+saved capabilities. The original designation still names its original successor.
+
+The full terminal action, arbiter, independent governance veto, original Safe
+acceptance and lifetime registered-guardian veto requirements remain intact.
+Recovery increments the delegation epoch once, retains both old principals'
+standing, appends the original two receipts under one owner revision, and records
+a new operation-35 vesting snapshot chained to the estate activation. All state
+and Archive effects share the original atomic transaction. The existing living
+library entry points remain living-only; fixed owner consumers use the explicit
+estate-aware entry points. Linked context and mutation extractions preserve
+same-owner storage/address domains and do not create public owner admission.
+
+This increment admits only an empty supersession list and unchanged original
+estate plan/history. Accelerated, previously closed, later estate/rotation and
+post-activation guardian histories; subsequent recoveries; estate supersession
+and appeals; other record families; maximum-capacity and combined deployment
+remain required work. The [preparation guide](../architecture/artist-recovery-preparation-v1.md#first-estate-authority-recovery)
+details the exact consumer and fixture boundaries. Existing permanent hashes,
+57 operations plus adopted 58, auxiliary 65534 and all 37 genesis roles are unchanged.
+
 ## Acceptance and remaining work
 
 Required tests include an actual threshold-Safe/Executor class-2 path, direct

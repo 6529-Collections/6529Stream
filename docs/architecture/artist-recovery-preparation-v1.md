@@ -467,3 +467,72 @@ reads, constructor/factory sizes and aggregate transaction gas remain separate
 capacity gates. The Artist/Safe tests and actual Executor/RoleRegistry witness
 tests are complementary deployments; neither alone establishes the combined
 full-system deployment.
+
+## First estate-authority recovery
+
+The first estate recovery profile uses the same public operation 35 request,
+acceptance, scheduled action and operation 34 veto interfaces. Its request must
+vest authority class 3 with an empty supersession list. The current original
+compromise cause must save class 3/prior status 3 and identify the exact original
+estate activation as its subject and executed transition. Request evidence and
+reason must equal that original cause and Contest record. These are limits of
+this profile, not a general prohibition on other estate resolution evidence.
+
+The owner authenticates one nonaccelerated operation-38/40 request/execution:
+original record hash, phases, actual old-address retirement, authorityActivation,
+latest execution/transition, exact notice and post-window arithmetic, original
+coverage and timing supplements, and a completely empty closure. Execution must
+follow the full original notice; the compromise must be at or after the saved
+post-window end, with no strictly earlier contest. The immutable operation-40
+vesting snapshot has no predecessor and commits the same current guardian count,
+root and last-admission owner revision. Multiple and lower-nonce original sets
+are supported. Missing history and post-activation admissions fail closed.
+
+The full original designation and paired/forbidden directives are reconstructed
+and authenticated under their original hashes. Current operative heads must
+still equal those originals. The effective capability intersection is recomputed
+and must equal the original execution facts; zero is a valid mask. The stored
+original request, authorization and coverage evidence remain historical facts
+from the trusted original admission, not fresh recovery authorizations. No old
+signature, current original-key capability or current historical-coverage grant
+is required to keep an already admitted activation true.
+
+Recovery updates the current principal to the new accepted Safe with class 3 and
+status 3 while preserving the original activation, designation successor address,
+identity record and exact saved capability mask. It increments the delegation
+epoch once. It creates a separate recovery transition/standing tail and vesting
+snapshot chained to operation 40; original estate/living records and unrevoked
+prior-address standing remain readable. The selected operative guardian floor
+sets the new window through the usual maximum with the rotation window. Every
+retained guardian in the complete original prefix keeps the staged recovery veto,
+even if its lower-nonce record never became selected. This does not broaden the
+separate singular post-recovery contest-standing interface.
+
+The fixed Identity owner passes actual succession and Contest storage to named
+estate-aware State entry points. Old State entry points remain living-only and
+retain their ABI. Both derive the authenticated context before delegating to the
+fixed mutation library. Its supplied context is internal linked-call evidence;
+the library is not a new external owner authorization surface. The original
+same-owner replay, primary/list hashes, one revision/two receipts, emitter and
+late-Archive rollback boundary are unchanged. Context and mutation libraries add
+linked calls and gas costs; deployment libraries and child templates remain
+subject to their independent runtime and initcode limits.
+
+The focused actual tests cover a first estate activation and exact-expiry
+compromise, new Safe recovery with original mask 2304, zero-mask recovery and
+blocked guardian removal, and a lower-nonce lifetime Safe veto after notBefore.
+The Archive overflow case retries the identical registered action and original
+acceptance after verifying rollback. Retained living-recovery and root-appeal
+cases exercise the extraction. The positive guardian-removal case requires both
+CAP_GUARDIAN_SET (256) and CAP_GUARDIAN_DISPLACE (2048), hence mask 2304. The
+estate cases use original designation masks 2304/2048/0 and zero paired/forbidden
+directives; they do not establish a nonzero
+estate directive-intersection matrix. The unit Executor switches from the actual
+archival coverage role graph to the constructor-pinned Artist role graph after
+activation. Typed action facts/roles/Core and the separate real delayed governance
+cohort remain complementary evidence, not one combined authority deployment.
+
+General estate histories, accelerated/closed windows, successor-authored guardian
+history, nonempty estate supersession and appeals, later recoveries, dormancy and
+steward branches remain open. No maximum history/list, aggregate gas or complete
+system deployment claim follows from these focused cases.

@@ -472,8 +472,17 @@ contract StreamArtistIdentityAuthority is
         IdentityRecovery.Request calldata p,
         T.Authorization calldata a
     ) external view returns (IdentityRecovery.Context memory) {
-        return StreamArtistIdentityRecoveryState.context(
-            _identityRecovery, _identity, _rotations, _resolutions, _estate, _ownerContext(), p, a
+        return StreamArtistIdentityRecoveryState.contextWithEstate(
+            _identityRecovery,
+            _identity,
+            _rotations,
+            _resolutions,
+            _estate,
+            _succession,
+            _identityContests,
+            _ownerContext(),
+            p,
+            a
         );
     }
 

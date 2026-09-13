@@ -92,12 +92,14 @@ contract StreamArtistIdentityRecoveryExtension is
                 || witness.executorCodeHash != _recoveryExecutorCodeHash
         ) revert T.InvalidBinding();
         StreamArtistIdentityState.Mutation memory m;
-        (m, association) = StreamArtistIdentityRecoveryState.prepare(
+        (m, association) = StreamArtistIdentityRecoveryState.prepareWithEstate(
             _identityRecovery,
             _identity,
             _rotations,
             _resolutions,
             _estate,
+            _succession,
+            _identityContests,
             _replay,
             StreamArtistIdentityRecoveryState.PrepareInput(
                 _ownerContext(), c, p, a, witness, previousAssociation, previousTerminal
@@ -147,23 +149,26 @@ contract StreamArtistIdentityRecoveryExtension is
     ) external onlyHost returns (bytes32 record) {
         _check(c, 35);
         bytes32 previousVesting = _rotations.latestExecution[p.artistId];
-        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityRecoveryState.recover(
-            _identityRecovery,
-            _identity,
-            _rotations,
-            _resolutions,
-            _estate,
-            _replay,
-            StreamArtistIdentityRecoveryState.Input(
-                _ownerContext(),
-                c,
-                p,
-                a,
-                proof,
-                governance,
-                IStreamArtistIdentityContestOwner(address(this)).artistWindowAuthority()
-            )
-        );
+        StreamArtistIdentityState.Mutation memory m =
+            StreamArtistIdentityRecoveryState.recoverWithEstate(
+                _identityRecovery,
+                _identity,
+                _rotations,
+                _resolutions,
+                _estate,
+                _succession,
+                _identityContests,
+                _replay,
+                StreamArtistIdentityRecoveryState.Input(
+                    _ownerContext(),
+                    c,
+                    p,
+                    a,
+                    proof,
+                    governance,
+                    IStreamArtistIdentityContestOwner(address(this)).artistWindowAuthority()
+                )
+            );
         _noteGuardianVesting(
             _environment(), V.Input(p.artistId, m.record, previousVesting, _revision + 1, 35), m
         );
