@@ -22,57 +22,104 @@ and evidence instead of deriving completion from test or interface counts.
 
 ## Latest integration: 13 September
 
-Owner dossier records and the shared bounded readers are integrated as
-`001bfaa5`. Forty-one focused/retained tests pass in both compiler modes, including
-payload fuzzing, actual threshold Safe calls, all six digest shapes, replay and
-rollback. Actual maximum registration and record shapes fit the unchanged
-150,000-gas read budget. Existing Metadata/Schema interfaces and storage are
-preserved. These are generic owner statements; typed steward designations,
-recovery responses and action-bound 72-hour notices remain implementation
-work. The museum builder owns the typed profiles; root owns their actual
-owner/independent-carrier and notice integration.
+Typed owner steward designations are integrated as `1cb3530f`, using the
+original direct/relayed owner signature, receipt and history. Fifty focused and
+retained cases pass in both compiler modes, including actual threshold Safe
+calls, two retained fuzz properties, exact registered schema/profile/JCS bytes,
+atomic supersession and an 8,192-byte typed payload. Per-author designations
+survive transfers and reactivate if that owner reacquires the token. No ownership
+epoch is inferred. The original owner interface and storage prefix are preserved;
+the new typed interface and index are additive. Core custody and Executor remain
+explicit boundaries in this cohort. See the [owner integration guide](../docs/integrations/owner-records.md).
 
-Canonical recovery execution is integrated as `b8768972`, with append/refresh
-state in `ff531e5b`. Five actual Core/Executor/registry/manifest/Safe composition
-cases pass, including batch context, late rollback and exact retry. Artist,
-original Finality and owner-notice evidence are still explicit boundaries in
-that composition. The separate nonempty Core refresh increment is integrated
-as `71cff6ff`: two completed Core tokens, an actual refresh event and
-incomplete-cutover rollback with exact retry pass alongside the retained
-composition cases. The artist builder now owns Router recovery serving,
-including frozen-route rejection and exact current recovery-pointer bindings.
+Complete steward/recovery-response JSON definitions are integrated as `df3fb50b`.
+Fifteen Solidity cases pass in both profiles, and fifteen Python cases plus exact
+generation checks pass. This preserves all six hash algorithms and every array
+entry fitting the 8,192-byte payload. Response authority, counting and notice
+execution are separate from the pure serializer and remain in progress.
 
-Complete typed WORK-to-LIDO mapping is integrated as `579c92dd`: 53 focused
-mapping/typed-WORK cases pass and root reproduces all 30 mapping outputs. Original
-standards and prior outputs are preserved. This mapping is not authenticated
-current selection or institutional ingest.
+Recovery-aware Router serving is integrated as `88d198bd`. The actual original
+Registry, companion, Router and serving adapters demonstrate original finalized
+rendering and replacement-renderer consumption after the old renderer loses code,
+with explicit authority/provider boundaries. Separate actual Core/governance
+tests demonstrate cold unfinalized serving and maximum 16-KiB token-data reads.
+The corrected 2-million-gas raw-source limit accommodates the measured cold data;
+the earlier 1-million token and 150,000-gas fact limits did not. Router runtime
+fits both profiles. Full cold frozen Core/provider composition under the current
+12-million-gas serving profile remains required. A further reviewed source finding
+is resolved in `f397d17d`: original and recovered rendering survive owner-evidence
+or Executor runtime loss, while new recovery preparation still requires those
+pins. Seven actual topology cases pass in IR; all 155 production ABI/storage
+comparisons in that capture remain unchanged.
 
-Authenticated current WORK selection is integrated as `03f74207`. Thirty cases
-pass in both compiler modes, including complete typed descriptions,
-artist adoption, curator grants, cold maximum URIs and Safe calls. It uses the
-actual Metadata/Schema/Store with explicit Core/Executor/artist graph fixtures.
-The museum builder next implements typed steward and recovery-response profiles.
+The Router's saved original-Finality anchor preserves historical classification
+after pointer changes. New candidate admission must require a locked presentation
+and the saved anchor's exact registry/code match to that candidate's Registry.
+This is a mandatory actual-provider integration join; it is not supplied by a
+caller-selected current pointer or inferred from the serving tests.
 
-Bounded rights selection is integrated as `4bf64532`: twenty-two cases and
-256 supersession inputs pass both compiler modes. Its complete original-record
-witness supports maximum URIs while retaining the old interface, grants,
-history and signed commitments.
+The complete scheduled-action verifier is integrated as `b58eee55`. It authenticates
+the entire published call array, exact recovery request and original execution
+window. Twenty-seven focused cases pass both modes, two actual Executor cases
+pass in IR, and two actual companion capacity cases pass both modes. These are
+31 distinct cases across separate captures. Maximum 24,544-byte requests require
+the measured 8-million-gas admission budget; later notice eligibility avoids
+repeating that entire preparation inside the owner callback.
 
-Compact governance action facts are integrated as `021e9389`. The actual
-Executor exposes the complete batch commitment and execution window without
-copying a long reason URI. Twelve executions of eight distinct cases pass in
-IR, retaining actual recovery and nonempty refresh behavior. Existing production
-interfaces and storage are preserved. A test-only wording correction identifies
-the tested 2,048-byte reason as a long example, not a governance URI limit.
-This is a prerequisite for authenticated notices, not a notice implementation.
+Canonical scope membership encoding is integrated as `043f0ba7`: six pure cases,
+including two 256-input fuzz properties, pass both modes. Actual authenticated
+membership publication, complete inventories and current Core composition are
+being completed by the artist builder; the encoding alone does not prove them.
 
-Root proceeds to actual owner-notice execution. Full typed provider/discovery,
-broader scope membership, remaining record types, constructor migration and whole-system
-Finality acceptance remain required before the next candidate.
+Actual six-family Router evidence is integrated as `f6a79668`. Eighteen
+cases pass both modes, including 256 scope inputs, actual specialized serving
+adapters and all provider selectors through threshold Safe. The provider binds
+original source runtimes and derives independent display, media, script,
+renderer, context and dependency commitments. It authenticates the saved original
+Finality anchor and actual live module eligibility for new candidate checks.
+Maximum source reads use 1,328,267/1,337,443 gas with four named hosts cooled;
+linked accounts are not all cold, and adapter calls are not under a governed
+Registry budget. Core, metadata, membership, artist and Finality remain typed
+boundaries here. Full ten-reference evidence, entropy and actual scope-host
+composition remain open. See [Router evidence](../docs/integrations/finality-router-evidence.md).
 
-No full-v1 freeze or new deployment is claimed. RC1 remains immutable. The next
-whole-system validation follows completed implementation and constructor joins;
-focused passing components do not substitute for that acceptance.
+Earlier current WORK selection `03f74207`, bounded RIGHTS selection `4bf64532`,
+WORK-to-LIDO mapping `579c92dd`, owner/shared readers `001bfaa5`, canonical recovery
+`b8768972` and nonempty Core refresh `71cff6ff` remain integrated. Their focused
+evidence and explicit boundary qualifications are retained. Compact governance
+action facts `021e9389` support authenticated notices without copying long reason
+URIs; they do not themselves implement the notice mechanism.
+
+Implementation ownership now separates the remaining dependencies:
+
+| Owner | Next deliverable |
+| --- | --- |
+| Integrator | Actual typed metadata/finality provider, current discovery and remaining typed record consumers; shared integration, CI and release |
+| Artist builder | Authoritative RELEASE/SEASON/VIEW membership and actual Core composition |
+| Museum/payment builder | Actual owner response indexing and action-bound 72-hour notices in the dedicated owner-notices worktree |
+| Independent reviewer | Challenge each implementation and its real-target tests before integration |
+
+Notice admission will use a separately measured proof-read budget. Later notice
+eligibility verifies the retained complete action commitment and exact execution
+context; the companion owns current recovery-lineage validation before and after
+its owner-evidence read. Repeating that entire preparation inside the small owner
+callback is not a viable gas design. The actual composed callback remains a test
+requirement, and wider notice scopes remain part of full v1. Original responses
+for an exact action/manifest are retained even before opening. The host must
+process that complete ordered queue before supplying execution evidence, without
+making permanent owner documentation depend on action liveness. Late objections
+remain visible; objections themselves do not automatically veto recovery.
+
+At `76fd111b`, museum CI, the TypeScript client and Windows wrapper passed. Main
+CI still failed full current compilation, Slither and release checksums. The checksum attribute
+parser and import-name failures are fixed in `e3af3184`; the retained current-build
+diagnostic now has two missing actual Finality arguments in Coordinator assembly.
+The concrete deployment order and immutable predicted WORK/RIGHTS bindings are
+specified in ADR 0041. Whole-system construction and stale release artifacts
+remain open; focused passing increments
+do not substitute for them. No new full-v1 freeze or deployment is claimed.
+All 57 artist operations, 37 genesis roles and adopted museum requirements remain
+in scope. RC1 remains immutable.
 
 ### Earlier integrated increments
 
