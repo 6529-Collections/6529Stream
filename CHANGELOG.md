@@ -7,6 +7,27 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added authenticated current WORK selection with curator grants or explicit
+  adoption of an artist's predecessor-bound publication, complete typed meaning,
+  original provenance and retained history. Full provider/deployment composition
+  remains open.
+- Added current-owner dossier records with retained payloads, direct and relayed
+  Safe/EOA calls, unordered replay protection and custody history. Typed recovery
+  notices, responses and steward interpretation remain separate implementation work.
+- Added bounded schema facts and original collection-record receipts, preserving
+  existing interfaces and storage. Maximum supported registration and record
+  shapes now fit the existing dependency cap for these readers and record ingress.
+- Added compact governance action facts, so a long reason URI does not consume
+  the onchain budget for reading the original batch identity and execution window.
+- Added an original-record witness entrypoint for rights selection, preserving
+  existing selectors, grants and history while supporting maximum record URIs
+  under the unchanged read cap.
+- Added canonical governed recovery execution, original lineage and bounded refresh
+  plans. Actual Core/Executor/Safe composition is tested with explicit artist,
+  original Finality and owner-notice boundaries.
+- Added complete typed WORK-to-LIDO mapping with original-field accounting,
+  exact provenance and reproducible fixtures; authenticated current selection
+  and institutional ingest remain separate from this mapping profile.
 - Added explicit current rights-record selection backed by original metadata
   receipts, exact registered definitions, existing RIGHTS-family grants and
   immutable history. Complete provider, scope and Finality composition remain open.

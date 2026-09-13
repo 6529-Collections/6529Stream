@@ -22,6 +22,60 @@ and evidence instead of deriving completion from test or interface counts.
 
 ## Latest integration: 13 September
 
+Owner dossier records and the shared bounded readers are integrated as
+`001bfaa5`. Forty-one focused/retained tests pass in both compiler modes, including
+payload fuzzing, actual threshold Safe calls, all six digest shapes, replay and
+rollback. Actual maximum registration and record shapes fit the unchanged
+150,000-gas read budget. Existing Metadata/Schema interfaces and storage are
+preserved. These are generic owner statements; typed steward designations,
+recovery responses and action-bound 72-hour notices remain implementation
+work. The museum builder owns the typed profiles; root owns their actual
+owner/independent-carrier and notice integration.
+
+Canonical recovery execution is integrated as `b8768972`, with append/refresh
+state in `ff531e5b`. Five actual Core/Executor/registry/manifest/Safe composition
+cases pass, including batch context, late rollback and exact retry. Artist,
+original Finality and owner-notice evidence are still explicit boundaries in
+that composition. The separate nonempty Core refresh increment is integrated
+as `71cff6ff`: two completed Core tokens, an actual refresh event and
+incomplete-cutover rollback with exact retry pass alongside the retained
+composition cases. The artist builder now owns Router recovery serving,
+including frozen-route rejection and exact current recovery-pointer bindings.
+
+Complete typed WORK-to-LIDO mapping is integrated as `579c92dd`: 53 focused
+mapping/typed-WORK cases pass and root reproduces all 30 mapping outputs. Original
+standards and prior outputs are preserved. This mapping is not authenticated
+current selection or institutional ingest.
+
+Authenticated current WORK selection is integrated as `03f74207`. Thirty cases
+pass in both compiler modes, including complete typed descriptions,
+artist adoption, curator grants, cold maximum URIs and Safe calls. It uses the
+actual Metadata/Schema/Store with explicit Core/Executor/artist graph fixtures.
+The museum builder next implements typed steward and recovery-response profiles.
+
+Bounded rights selection is integrated as `4bf64532`: twenty-two cases and
+256 supersession inputs pass both compiler modes. Its complete original-record
+witness supports maximum URIs while retaining the old interface, grants,
+history and signed commitments.
+
+Compact governance action facts are integrated as `021e9389`. The actual
+Executor exposes the complete batch commitment and execution window without
+copying a long reason URI. Twelve executions of eight distinct cases pass in
+IR, retaining actual recovery and nonempty refresh behavior. Existing production
+interfaces and storage are preserved. A test-only wording correction identifies
+the tested 2,048-byte reason as a long example, not a governance URI limit.
+This is a prerequisite for authenticated notices, not a notice implementation.
+
+Root proceeds to actual owner-notice execution. Full typed provider/discovery,
+broader scope membership, remaining record types, constructor migration and whole-system
+Finality acceptance remain required before the next candidate.
+
+No full-v1 freeze or new deployment is claimed. RC1 remains immutable. The next
+whole-system validation follows completed implementation and constructor joins;
+focused passing components do not substitute for that acceptance.
+
+### Earlier integrated increments
+
 Current rights selection now joins actual MetadataV1 records, full registered
 schema/profile/JCS bytes and the existing RIGHTS-family grants. Seventeen focused
 cases and 256 supersession fuzz inputs pass both compiler modes, including exact
@@ -39,8 +93,8 @@ cases pass. The format catalog and every supported typed field are committed
 exactly. This builds on the shared [artist/curator authority](../docs/integrations/work-description-authority.md)
 in `82909797`, with 28 focused cases and three current artist/estate/Safe cases.
 The known-artist reader is integrated as `601ed179`, with ten independently
-reviewed cases in both modes. Current WORK selection/provider consumption remains
-root-owned; the museum builder now maps actual WORK descriptions to LIDO.
+reviewed cases in both modes. The museum builder now owns current WORK selection; root owns provider consumption.
+The complete WORK-to-LIDO mapping has since been integrated above.
 
 Artist recovery approval operation 22 is integrated as `ae473558`, following
 the unavailability finding in `48774674`. Independent review accepts the exact

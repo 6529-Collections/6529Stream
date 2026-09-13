@@ -59,12 +59,13 @@ jobs:
       - name: Check dependency compatibility
         run: python -m pip check
       - name: Test typed record schemas and canonical fixtures
-        run: python -m unittest tools.metadata.test_rights_profile tools.metadata.test_work_profile -v
+        run: python -m unittest tools.metadata.test_rights_profile tools.metadata.test_work_profile tools.metadata.test_work_definitions -v
       - name: Check typed record definition generation
         run: |
           python -m tools.metadata.rights_profile --check
           python -m tools.metadata.work_profile --check
           python -m tools.metadata.rights_definitions --check
+          python -m tools.metadata.work_definitions --check
       - name: Test offline validation and export
         run: python -m unittest discover -s tools/museum -t . -p "test_*.py" -v
       - name: Check schema generation
@@ -83,3 +84,5 @@ jobs:
         run: python -m tools.museum.iiif_model --check
       - name: Check LIDO correspondence generation
         run: python -m tools.museum.lido_model --check
+      - name: Check typed work-description LIDO fixtures
+        run: python -m tools.museum.work_lido_fixture --check

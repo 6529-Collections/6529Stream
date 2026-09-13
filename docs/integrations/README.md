@@ -35,6 +35,7 @@ deployment evidence.
 | Append institutional records as the current NFT owner | [Owner records](owner-records.md) |
 | Read complete evidence without copying long registration URIs | [Bounded record reads](bounded-record-reads.md) |
 | Publish an artist or curatorial description under one record type | [Work-description authority](work-description-authority.md) |
+| Select an authenticated current WORK description | [Work-record selection](work-record-selection.md) |
 | Encode the complete typed description and its format catalog | [Work-description JSON profile](../work-description-json-profile.md) |
 | Reconstruct and validate the complete supported rights JSON bytes | [Rights interpretation profile](rights-json-profile.md) |
 | Select a current rights statement and preserve its original evidence | [Rights selection design](../adr/0042-current-rights-record-selection.md) |
