@@ -10,6 +10,7 @@ deployment evidence.
 | Validate a published root against current preserved content | [Finality content evidence](finality-content-evidence.md) |
 | Derive independent serving families from actual Router sources | [Router evidence provider](finality-router-evidence.md) |
 | Read a fixed coordinator's original locked collection policy | [Entropy policy evidence](entropy-finality-evidence.md) |
+| Consume exact current WORK and RIGHTS selections | [Description evidence](finality-description-evidence.md) |
 | Authenticate published RELEASE, SEASON and VIEW membership | [Scope membership](../scope-membership.md) |
 | Resume the developing artist and reveal authority batch | [Current activation](current-artist-activation.md) |
 | Fund reveal requests and settle collection escrow | [Reveal-fee funding](reveal-fee-funding.md) |

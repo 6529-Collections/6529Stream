@@ -60,6 +60,13 @@ version and nested-wallet acceptance matrix.
 
 ## Shared foundation
 
+The [description evidence tests](../test/unit/finality/StreamFinalityDescriptionReads.t.sol)
+also execute the fixed consuming boundary and the linked library's sole public
+read through actual threshold-Safe 1.4.1 transactions. All 23 cases pass both
+compiler modes. This consumes actual WORK/RIGHTS selectors, Metadata, Schema and
+Store, with explicit Core/artist/Executor boundaries; it does not complete the
+eventual provider's deployment or full-call acceptance matrix.
+
 Use the [pinned official Safe fixtures](../test/fixtures/safe/README.md) and
 [shared helper](../test/helpers/OfficialSafeFixture.sol). Baseline versions are
 1.3.0, 1.4.1 and 1.5.0 with the appropriate CompatibilityFallbackHandler. Start

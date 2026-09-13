@@ -5,6 +5,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Added inherited TOKEN artist recovery approval using actual retained Core
+  identity, with separate historical approval and fresh execution checks.
+- Added fixed-graph finality consumption of actual selected WORK and RIGHTS
+  records, preserving original receipts and current interpretation checks.
+  Complete scope membership and the other finality inputs remain separate joins.
 - Added authenticated scope membership and original-provider Router reads, typed
   owner recovery responses and action-bound notice windows, and bounded immutable
   preparation for complete delivery claims. Wider recovery scopes remain in progress.

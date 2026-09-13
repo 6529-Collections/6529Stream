@@ -14,13 +14,36 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Scope membership `0f3805ab`, prepared notices `04390f62`, capacity `dad44218`, JSON escaping `e9b6a7bc`, entropy policy/provider `4819c079`; complete provider/current assembly remain active. Immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | Description consumption `821c66ee`, inherited TOKEN recovery `89eab3f4`, compiler repair `ac870f09`; complete provider/current assembly remain active. Immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
 | Last updated | `2026-09-13 UTC` |
 
 ## Active work
+
+Current description consumption is integrated as `821c66ee`. Actual WORK and
+RIGHTS selectors now feed their exact authorized heads, payload commitments and
+original receipts to the finality-input consumer. Twenty-three cases pass both
+compiler modes, including 256 selection-hash inputs, direct linked-library and
+fixed-consumer Safe calls, and an exact 8,192-byte registered format catalog with
+maximum original record URIs. Core, artist owners, Executor and the consuming
+provider remain explicit boundaries. This closes the two-description join;
+complete membership, ROOT and the other finality inputs remain separate. See
+[description evidence](../docs/integrations/finality-description-evidence.md).
+
+Inherited TOKEN artist recovery approval is integrated as `89eab3f4`. Fresh
+approval verifies actual completed/burned token identity under its collection's
+original finality; saved approval preserves that admitted relation and the
+companion rechecks execution eligibility. The independent review accepts four
+actual Artist/companion cases plus two corrected estate cases, with separate
+actual Core and helper cohorts. The estate fixture switches its unit Executor
+between explicit phases; full real-governance/provider composition is separate.
+Original approval ABI, signing preimages and storage remain unchanged. Other
+inherited families and explicit adjudicated identity recovery remain in progress.
+The separate `ac870f09` compiler repair reduces verification stack lifetime;
+the original hash preimage and tested IR executable remain unchanged, and the
+selected reader now compiles in default mode. This is not a full-build pass.
 
 Authoritative scope membership is integrated as `0f3805ab`. Actual Metadata,
 Schema, Store and Inventory contracts publish complete RELEASE, SEASON and VIEW

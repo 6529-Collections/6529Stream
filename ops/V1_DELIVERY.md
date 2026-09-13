@@ -14,13 +14,36 @@ through actual current contracts, with independent review, tests, developer
 interfaces and a newly identified candidate. External audit and production
 ceremony acceptance remain separately visible requirements.
 
-The latest owner-facing estimate is approximately 65% of full v1, with a
-60-70% uncertainty range. This is engineering judgment, not a measured
+The latest owner-facing estimate is approximately 65-70% of full v1.
+This is engineering judgment, not a measured
 requirements pass rate or estimate of remaining time. The remaining work
 includes difficult integration. This ledger tracks concrete capabilities
 and evidence instead of deriving completion from test or interface counts.
 
 ## Latest integration: 13 September
+
+Current description consumption is integrated as `821c66ee`. Actual WORK and
+RIGHTS selectors now feed their exact authorized heads, payload commitments and
+original receipts to the finality-input consumer. Twenty-three cases pass both
+compiler modes, including 256 selection-hash inputs, direct linked-library and
+fixed-consumer Safe calls, and an exact 8,192-byte registered format catalog with
+maximum original record URIs. Core, artist owners, Executor and the consuming
+provider remain explicit boundaries. This closes the two-description join;
+complete membership, ROOT and the other finality inputs remain separate. See
+[description evidence](../docs/integrations/finality-description-evidence.md).
+
+Inherited TOKEN artist recovery approval is integrated as `89eab3f4`. Fresh
+approval verifies actual completed/burned token identity under its collection's
+original finality; saved approval preserves that admitted relation and the
+companion rechecks execution eligibility. The independent review accepts four
+actual Artist/companion cases plus two corrected estate cases, with separate
+actual Core and helper cohorts. The estate fixture switches its unit Executor
+between explicit phases; full real-governance/provider composition is separate.
+Original approval ABI, signing preimages and storage remain unchanged. Other
+inherited families and explicit adjudicated identity recovery remain in progress.
+The separate `ac870f09` compiler repair reduces verification stack lifetime;
+the original hash preimage and tested IR executable remain unchanged, and the
+selected reader now compiles in default mode. This is not a full-build pass.
 
 Authoritative scope membership is integrated as `0f3805ab`. Actual Metadata,
 Schema, Store and Inventory contracts publish complete RELEASE, SEASON and VIEW
