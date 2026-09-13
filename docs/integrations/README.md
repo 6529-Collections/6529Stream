@@ -10,6 +10,9 @@ deployment evidence.
 | Validate a published root against current preserved content | [Finality content evidence](finality-content-evidence.md) |
 | Derive independent serving families from actual Router sources | [Router evidence provider](finality-router-evidence.md) |
 | Discover all coordinators retained at mint for a scope | [Original coordinator inventory](original-coordinator-inventory.md) |
+| Read every original coordinator policy for a scope | [Complete original policy evidence](original-coordinator-policy-evidence.md) |
+| Consume authenticated artist intent, waiver and interview selections | [Conservation evidence](finality-conservation-evidence.md) |
+| Prepare recovery with complete guardian history and veto rights | [Recovery preparation](../architecture/artist-recovery-preparation-v1.md) |
 | Encode complete artist intent, waiver and interview records | [Conservation record JSON](conservation-record-json.md) |
 | Select original intent/waiver records and preserve interview attribution | [Conservation selection](../architecture/conservation-record-selection-profile.md) |
 | Integrate the initial adjudicated identity-recovery profile | [Initial identity recovery](initial-identity-recovery.md) |

@@ -5,6 +5,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Added Identity-owned scheduled recovery preparation, action-bound guardian veto
+  and complete admitted guardian history for the initial living-artist profile.
+- Added fixed finality consumers for selected conservation records and every
+  original coordinator policy, with independent locks and source commitments.
+
 - Added the initial living-artist adjudicated recovery path, original authority
   acceptance, atomic owner/archive continuity and contest/dismissal behavior.
   Registered-guardian and broader historical/estate profiles remain in development.

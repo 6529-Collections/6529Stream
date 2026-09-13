@@ -14,13 +14,65 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Coordinator inventory `66579293`, conservation `25d3392c`, recovery prerequisites `a3b430d8 / 3a2c0544`; complete provider/current assembly remain active. Immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | Guardian history `5bf36e34`, original policy reads `11ef55ba`, conservation evidence `2a2610eb`; complete provider/current assembly remain active. Immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
 | Last updated | `2026-09-13 UTC` |
 
 ## Active work
+
+Guardian recovery is integrated through `5bf36e34`, following the scheduled
+recovery reader `77b4f7d5`, preparation/veto `11acd4e9` and history primitive
+`b10cacb5`. The Identity owner records the exact scheduled recovery action;
+registered guardians can veto until execution. Preparation freezes the complete
+admitted guardian-history prefix, including empty, unselected and older sets,
+so later selection cannot silently remove an admitted guardian's veto standing.
+The initial living-artist profile now supports this history. Recovery after a
+prior rotation, posthumous recovery and nonempty supersession remain required.
+See [recovery preparation](../docs/architecture/artist-recovery-preparation-v1.md).
+
+The reader's six cases and history primitive's six cases pass both compiler
+modes; the latter includes 256 fuzz inputs. Actual guarded Artist/Safe recovery
+passes four IR cases; actual Core/Executor scheduled authority passes four
+separate IR cases. Actual history has six distinct passing outcomes from five
+retained cases and one corrected timing assertion, with identical production
+artifacts across the two captures. These reviewed cohorts retain explicit
+boundaries between actual Artist and actual governance composition.
+
+Conservation finality consumption is integrated as `2a2610eb`. The fixed reader
+joins selected original artist intent or waiver, attributed interview status,
+original publication receipts and an independently required head lock. Its
+27 cases pass both modes with two 256-input properties per mode. Original
+archive correspondence and complete finality aggregation remain separate.
+See [conservation evidence](../docs/integrations/finality-conservation-evidence.md).
+
+Complete original-coordinator policy reads are integrated as `11ef55ba`.
+The consumer reconstructs the full indexed source list and reads each original
+native policy, preserving source order and rejecting missing or changed sources.
+Its 16 cases pass both modes with 256 fuzz inputs per mode and actual Safe
+calls. Core, governance and randomness-provider fixtures remain explicit;
+full source-adapter discovery and arbitrary-size aggregate capacity remain open.
+See [original policy evidence](../docs/integrations/original-coordinator-policy-evidence.md).
+
+The fresh recovery/conservation composition at `ecbf3fd8` passed all eight IR
+cases with independently bound sources and compiler outputs. It uses actual
+Artist owners, Archive, Metadata, Schema, Store and Safe, with typed Core,
+Executor, roles and finality boundaries. It predates the guardian additions
+above and does not establish a full current deployment.
+
+At pushed head `ddc772bc`, museum tooling passed on Windows and Linux, and client
+and Windows-wrapper jobs passed. Current-stack integration, Foundry smoke,
+static baseline and release-artifact jobs failed. Complete finality assembly,
+snapshot/reference-render publication, source discovery and the new deployment
+remain the integration critical path. The onboarding configuration oracle now
+lists operations 34/35 and both adopted recovery profile tags; that oracle edit
+has source-level comparison only, pending its broad runtime cohort.
+
+### Earlier integration checkpoints
+
+These paragraphs retain the state at each recorded commit. Current assignments
+and completion are given above and in the active delivery ledger.
 
 Inherited RELEASE, SEASON and VIEW recovery approval is integrated as 0e58111d.
 The actual Artist/companion flow consumes current published membership and
@@ -139,8 +191,8 @@ not complete that join.
 | Owner | Next deliverable |
 | --- | --- |
 | Integrator | Complete typed metadata/finality provider, original-coordinator discovery and current deployment assembly; shared tests, CI and release |
-| Artist builder | Adjudicated identity recovery, adopted receipt occurrences and complete authority integration |
-| Museum/payment builder | Actual conservation original-record interpretation, current artist/estate selection and interview linkage |
+| Artist builder | Recovery after completed rotation, then historical, posthumous and supersession profiles |
+| Snapshot builder | Actual retained snapshot publication, canonical manifests and preservation joins |
 | Independent reviewer | Challenge exact implementations, real-contract composition and integration evidence |
 
 The full build remains red. At pushed head `7630e3c3`, museum CI passed on

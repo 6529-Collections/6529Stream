@@ -2871,6 +2871,8 @@ contract StreamArtistOnboardingTest is ArtistOnboardingFixture {
                 uint16(31),
                 uint16(32),
                 uint16(33),
+                uint16(34),
+                uint16(35),
                 uint16(36),
                 uint16(37),
                 uint16(38),
@@ -2879,7 +2881,10 @@ contract StreamArtistOnboardingTest is ArtistOnboardingFixture {
                 uint16(51),
                 uint16(52),
                 uint16(54),
-                uint16(58)
+                uint16(58),
+                uint16(65534),
+                keccak256("6529STREAM_ARTIST_RECOVERY_PREPARATION_PROFILE_V1"),
+                keccak256("6529STREAM_ARTIST_RECOVERY_GUARDIAN_HISTORY_PROFILE_V1")
             )
         );
         require(coordinator.configurationHash() == expected, "full executable operation commitment");

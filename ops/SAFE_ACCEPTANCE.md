@@ -82,7 +82,10 @@ dismissal. Five cases pass in IR across the retained three plus corrected two
 cohorts. [Actual governance tests](../test/unit/artist/StreamArtistRecoveryActualGovernance.t.sol)
 separately cover sealed delayed terminal authority, per-call witnesses, global
 veto and current arbiter roles through Core/Executor/Safe. The combined real
-Artist/governance deployment and registered artist guardian veto remain open.
+Artist/governance deployment remains open. Registered guardian preparation/veto
+and the complete admitted-history prefix are now integrated in the initial
+living-artist profile, with separate reviewed actual Artist and governance
+cohorts. Broader lifecycle and complete Safe acceptance remain open.
 
 The [conservation composition tests](../test/unit/artist/StreamConservationActualArtist.t.sol)
 pass three IR cases with actual Artist publication, Metadata, Schema, Store and
@@ -90,6 +93,15 @@ threshold Safes: rotation and original-voice locking, estate/lifetime separation
 and rejected signature rollback followed by prepared-interview parent adoption.
 Their Core and governance remain typed test boundaries. Neither increment
 completes all ABI selectors, Safe versions or nested-wallet acceptance.
+
+## Complete original-policy consumer
+
+The [policy tests](../test/unit/finality/StreamFinalityCoordinatorPolicyReads.t.sol)
+execute both the fixed consumer and the linked public library through actual
+threshold Safe 1.4.1 CALLs. All 16 cases pass both compiler modes, including
+256 fuzz inputs per mode. Native coordinator, inventory and Metadata contracts
+are actual; Core and governance remain named fixtures. Successful invocation
+does not establish captured Safe return bytes, nesting or every protocol call.
 
 ## Shared foundation
 
