@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "../../../smart-contracts/domains/records/StreamConservationLanguage.sol";
+
 /// @notice RFC5646 syntax plus case-insensitive variant/singleton uniqueness.
 /// @dev This does not prove dated IANA subtag registration or extension-specific semantics.
 /// Original tag bytes are never rewritten; lowercase bytes exist only for parsing/comparison.
-library StreamConservationLanguage {
+library ConservationLiteralPriorLanguage {
     error InvalidConservationLanguage();
 
     /// @notice Validate ordered tags in one linked call and emit their exact ASCII JSON array.
@@ -35,9 +37,6 @@ library StreamConservationLanguage {
 
     function requireWellFormed(string memory value) public pure {
         (bytes memory b, uint256[] memory parts) = _parts(value);
-        // A single2..8ASCII-alpha primary already satisfies the complete original grammar.
-        // Grandfathered tags are all multipart; preserve their existing path and exact bytes.
-        if (parts.length == 1 && _size(parts[0]) >= 2 && _alpha(b, parts[0])) return;
         if (_grandfathered(keccak256(b))) return;
         uint256 n = parts.length;
         if (_size(parts[0]) == 1 && b[0] == "x") {
@@ -196,5 +195,98 @@ library StreamConservationLanguage {
             || h == keccak256("cel-gaulish") || h == keccak256("no-bok") || h == keccak256("no-nyn")
             || h == keccak256("zh-guoyu") || h == keccak256("zh-hakka") || h == keccak256("zh-min")
             || h == keccak256("zh-min-nan") || h == keccak256("zh-xiang");
+    }
+}
+
+/// @notice Literal accepted prior parser, plus independent syntax boundaries and arbitrary bytes.
+contract StreamConservationLanguageFastPathTest {
+    function current(string memory value) external pure {
+        StreamConservationLanguage.requireWellFormed(value);
+    }
+
+    function previous(string memory value) external pure {
+        ConservationLiteralPriorLanguage.requireWellFormed(value);
+    }
+
+    function testSinglePrimaryCaseAndFullGrammarBranchesRemainExact() public view {
+        string[14] memory values = [
+            "en",
+            "EN",
+            "abc",
+            "ABCD",
+            "abcdefg",
+            "abcdefgh",
+            "zh-Hant-TW",
+            "de-CH-1901",
+            "i-klingon",
+            "x-Private",
+            "en-a-aaa-x-AbC",
+            "sgn-BE-FR",
+            "en-Latn-US-u-ca-gregory",
+            "zh-cmn-Hans-CN"
+        ];
+        for (uint256 i; i < values.length; ++i) {
+            require(_same(values[i]), "literal valid syntax");
+        }
+    }
+
+    function testInvalidSingleAndMultipartBranchesStillRejectExactly() public view {
+        string[14] memory values = [
+            "a",
+            "1",
+            "e1",
+            "abcdefghi",
+            "",
+            "en-",
+            "-en",
+            "en--US",
+            "en-US-US",
+            "en-1901-1901",
+            "en-a-one-A-two",
+            "x",
+            "en-@",
+            "en-Latn-Latn"
+        ];
+        for (uint256 i; i < values.length; ++i) {
+            require(!_same(values[i]), "literal invalid syntax");
+        }
+        bytes memory invalidUtf8 = hex"ff";
+        require(!_same(string(invalidUtf8)), "invalid UTF8 is not ASCII grammar");
+        require(!_same("en\n"), "no trimming or control normalization");
+    }
+
+    function testOrderedLanguageArrayPreservesCaseAndDuplicates() public pure {
+        string[] memory values = new string[](5);
+        values[0] = "EN";
+        values[1] = "en";
+        values[2] = "i-klingon";
+        values[3] = "x-AbC";
+        values[4] = "EN";
+        string memory current_ = StreamConservationLanguage.arrayJSON(values);
+        require(
+            keccak256(bytes(current_)) == keccak256(bytes('["EN","en","i-klingon","x-AbC","EN"]')),
+            "hardcoded exact lexical ordered JSON"
+        );
+        require(
+            keccak256(bytes(current_))
+                == keccak256(bytes(ConservationLiteralPriorLanguage.arrayJSON(values))),
+            "literal original row serialization"
+        );
+    }
+
+    function testFuzzLiteralPriorLanguageMatchesArbitraryBytes(bytes memory raw) public view {
+        _same(string(raw));
+    }
+
+    function _same(string memory value) private view returns (bool) {
+        (bool before_, bytes memory oldRaw) =
+            address(this).staticcall(abi.encodeCall(this.previous, (value)));
+        (bool after_, bytes memory newRaw) =
+            address(this).staticcall(abi.encodeCall(this.current, (value)));
+        require(
+            before_ == after_ && keccak256(oldRaw) == keccak256(newRaw),
+            "literal prior/current exact acceptance/revert"
+        );
+        return after_;
     }
 }
