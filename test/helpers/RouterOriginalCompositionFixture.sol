@@ -701,6 +701,48 @@ contract RouterOriginalCompositionFixture is RecoveryCompanionBoundaryFixture {
         );
     }
 
+    function prepareRendererSuccessor(bytes32 predecessor)
+        external
+        returns (StreamFinalityRecoveryRequest memory r)
+    {
+        StreamFinalityRecoveryRecord memory previous = recovery.finalityRecoveryRecord(predecessor);
+        require(previous.executed, "actual predecessor required");
+        r = recovery.finalityRecoveryIntentRequest(previous.recoveryManifest.contentHash);
+        r.expectedPredecessorRecoveryId = predecessor;
+        (,, r.expectedOldRouteHash,,) =
+            recovery.resolvedFinalityRoute(keccak256("RENDERER"), r.scope);
+        r.reasonHash = keccak256("separately admitted successor");
+        r.recoveryManifest.contentHash = 0;
+        r.recoveryManifest.contentHash =
+            recovery.stageFinalityRecoveryManifest(recovery.finalityRecoveryIntentBytes(r));
+        recovery.registerFinalityRecoveryIntent(r);
+        artist.answer(
+            abi.encodeCall(
+                IStreamArtistRecoveryApproval.verifyRecoveryApproval,
+                (1, originalHash, r.recoveryManifest.contentHash)
+            ),
+            abi.encode(true, keccak256("successor approval boundary"), address(0xA11CE), uint8(1))
+        );
+        ownerEvidence.answer(
+            abi.encodeCall(
+                IStreamFinalityRecoveryOwnerEvidence.verifyRecoveryOwnerEvidence,
+                (
+                    r.scope,
+                    keccak256("successor recovery context boundary"),
+                    r.recoveryManifest.contentHash
+                )
+            ),
+            abi.encode(
+                true,
+                keccak256("successor owner boundary"),
+                uint64(1),
+                uint64(1000),
+                uint32(3),
+                uint32(0)
+            )
+        );
+    }
+
     function _sort() private {
         for (uint256 i; i < entries.length; ++i) {
             for (uint256 j = i + 1; j < entries.length; ++j) {

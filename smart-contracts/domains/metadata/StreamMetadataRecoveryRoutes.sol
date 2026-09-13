@@ -9,7 +9,6 @@ import "../../interfaces/stream/finality/IStreamArtworkFinalityRecovery.sol";
 import "../../interfaces/stream/finality/IStreamFinalityHostAdapter.sol";
 import "../../interfaces/stream/finality/IStreamFinalityDeploymentBindings.sol";
 import "../../interfaces/stream/finality/IStreamFinalityRecoveryServingBindings.sol";
-import "../../interfaces/stream/finality/IStreamFinalityRecoveryOwnerBindings.sol";
 import "../../interfaces/stream/artist/IStreamArtistFinalityBinding.sol";
 
 /// @notice Current recovery selection and immutable adapter-to-host joins for serving.
@@ -159,15 +158,12 @@ library StreamMetadataRecoveryRoutes {
             true
         );
         c.recovery = recovery.target;
-        address executor = _address(
+        address executor = _identityAddress(
             c.recovery,
             abi.encodeCall(IStreamFinalityRecoveryServingBindings.governanceAuthority, ())
         );
         address artist = _address(
             c.recovery, abi.encodeCall(IStreamFinalityRecoveryServingBindings.artistEvidence, ())
-        );
-        address owner = _address(
-            c.recovery, abi.encodeCall(IStreamFinalityRecoveryServingBindings.ownerEvidence, ())
         );
         if (
             _address(c.recovery, abi.encodeCall(IStreamFinalityRecoveryServingBindings.core, ()))
@@ -185,19 +181,15 @@ library StreamMetadataRecoveryRoutes {
                         original,
                         abi.encodeCall(IStreamFinalityDeploymentBindings.sanctionReads, ())
                     ) != artist
-                || _address(
+                || _identityAddress(
                         original,
                         abi.encodeCall(
                             IStreamFinalityRecoveryServingBindings.governanceAuthority, ()
                         )
                     ) != executor
-                || _address(owner, abi.encodeCall(IStreamFinalityRecoveryOwnerBindings.core, ()))
-                    != core
-                || _address(
-                        owner,
-                        abi.encodeCall(IStreamFinalityRecoveryOwnerBindings.governanceAuthority, ())
-                    ) != executor
         ) revert MetadataRecoveryBindingInvalid(c.recovery);
+        // OwnerRecords was authenticated at companion construction and recovery execution.
+        // Historical serving uses the recorded evidence and canonical route/status reads.
         Route memory r = route(c, StreamFinalityDomains.COMPONENT_METADATA_ROUTER, true);
         frozen = r.pinned;
     }
@@ -393,6 +385,16 @@ library StreamMetadataRecoveryRoutes {
     function _address(address target, bytes memory input) private view returns (address value) {
         value = abi.decode(read(target, input, 32, READ_GAS), (address));
         if (value.code.length == 0) revert MetadataRecoveryBindingInvalid(value);
+    }
+
+    /// @dev Historical Executor identity is exact but its current runtime is not route evidence.
+    function _identityAddress(address target, bytes memory input)
+        private
+        view
+        returns (address value)
+    {
+        value = abi.decode(read(target, input, 32, READ_GAS), (address));
+        if (value == address(0)) revert MetadataRecoveryBindingInvalid(value);
     }
 
     function read(address target, bytes memory input, uint256 length, uint256 cap)

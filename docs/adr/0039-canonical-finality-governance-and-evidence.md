@@ -625,6 +625,19 @@ execution-time Core high-water snapshot and rolls back with a failed Core
 callback. The first actual-governance composition's zero high-water control
 does not establish nonempty actual Core refresh or actual owner-notice authority.
 
+Router historical serving follows the companion's same evidence boundary:
+OwnerRecords construction bindings and execution-time evidence remain mandatory,
+but an already executed original or recovered route does not reopen the owner
+host's current reciprocal reads or code liveness. Its immutable evidence snapshot
+remains part of the executed record. New recovery preparation and execution still
+require the constructor-pinned current evidence hosts, including OwnerRecords.
+The original Registry and companion must still identify the exact same nonzero
+Executor, but decoding those two immutable identities does not demand current
+Executor code for historical serving. New recovery preparation retains its
+Executor runtime pin. Core, artist, Coordinator, Consent, original Registry,
+selected companion, current ModuleRegistry and serving-host dependencies retain
+their respective canonical current-selection or historical runtime checks.
+
 ## Recovery-aware Router serving
 
 The Router classifies permanent finality using the original Registry bound by
