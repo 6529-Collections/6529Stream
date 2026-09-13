@@ -716,6 +716,41 @@ renderer execution with explicit Core, artist, OwnerRecords and provider authori
 boundaries. The retained Router suite and specialized-adapter fixtures alone do
 not establish the authoritative provider inventory or full-v1 scope completion.
 
+## Published scope membership profile
+
+The approved pre-genesis membership profile introduces an explicitly registered
+`SCOPE_MEMBERSHIP` record type, `STREAM_SCOPE_MEMBERSHIP_V1` schema and
+`STREAM_SCOPE_MEMBERSHIP_ABI_V1` canonicalization. The actual collection Metadata
+host publishes its full bytes under the canonical collection subject, using
+only governed IDENTITY-family authorization classes 7/8. This is original
+metadata provenance, not artist sanction or render-affecting VIEW adoption.
+
+A fixed membership host authenticates the saved record, recorder/class, exact
+generic record preimage, original definitions and full native bytes. It derives
+the family-qualified scope ID from the versioned domain, chain, Core, collection,
+scope type and original record hash. The payload omits that ID. Different
+published records intentionally produce distinct scope identities even when
+their token sets match; old arbitrary scope IDs are never silently aliased.
+
+The full list commits strictly increasing token IDs in up to 64 native 8192-byte
+parts, with an exact count and whole-byte hash. Continuation validates only the
+next parts against actual completed/burned Core identities and the existing
+collection token inventory. An unindexed part can retry; no incomplete prefix
+is fixed at begin, and a partial list cannot seal. Sealed scopes are immutable.
+Burns remain members and later parent mints cannot change a scoped commitment.
+
+COLLECTION reads deliberately expose current complete inventory; historical
+collection serving retains its original saved inventory/checkpoint commitment.
+TOKEN reads retain the actual completed/burned identity. RELEASE/SEASON/VIEW
+reads retain the sealed record/list without a mutable parent-inventory prefix.
+The provider and Router must consume the same fixed membership host through the
+original provider binding, without consulting today's replacement provider.
+The complete byte grammar, authority separation, eight-word facts and measured
+dependency budgets are specified in [the membership guide](../scope-membership.md).
+
+This profile does not itself complete inherited-scope recovery approval,
+adjudicated supersession, VIEW content adoption or whole-stack finality.
+
 ## Acceptance and remaining work
 
 Required tests include an actual threshold-Safe/Executor class-2 path, direct

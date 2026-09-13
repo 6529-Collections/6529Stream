@@ -1,0 +1,21 @@
+{
+  "name": "STREAM_SCOPE_MEMBERSHIP_V1",
+  "version": 1,
+  "format": "flat Solidity ABI tuple",
+  "canonicalization": "STREAM_SCOPE_MEMBERSHIP_ABI_V1",
+  "fields": [
+    { "name": "version", "type": "uint16", "constant": 1 },
+    { "name": "chainId", "type": "uint256" },
+    { "name": "core", "type": "address", "nonzero": true },
+    { "name": "collectionId", "type": "uint256", "nonzero": true },
+    { "name": "scopeType", "type": "uint8", "values": { "RELEASE": 2, "SEASON": 3, "VIEW": 4 } },
+    { "name": "tokenCount", "type": "uint256" },
+    { "name": "tokenListHash", "type": "bytes32", "meaning": "Keccak-256 of the complete concatenation of ordered 32-byte unsigned token IDs" },
+    { "name": "chunkHashes", "type": "bytes32[]", "meaning": "ordered native document-store Keccak-256 chunk keys" }
+  ],
+  "scopeIdentity": "Keccak-256(abi.encode(Keccak-256(UTF8(6529STREAM_SCOPE_MEMBERSHIP_ID_V1)), chainId, core, collectionId, uint8(scopeType), exactMetadataRecordHash))",
+  "record": "An authenticated SCOPE_MEMBERSHIP collection-subject record under metadata-authorized IDENTITY family classes 7 or 8. The scopeId is derived after recording and is absent from this payload.",
+  "tokenList": "Strictly increasing token IDs. Every member must be an actual completed MINTED or BURNED Core identity of the collection with matching lifecycle/burn state and collection-inventory serial. Prepared and unallocated identities are invalid. The complete list is immutable after sealing; later mints do not enlarge it.",
+  "authority": "Membership provenance does not grant artist sanction, recovery authority or permission to alter view rendering. Distinct record provenance intentionally creates distinct scope identities, including for identical token sets.",
+  "validation": "These are normative binary-profile rules enforced by the typed consumer, not executable JSON Schema keywords. The exact registered definition and canonicalization bytes are pinned. Existing legacy IDs are never aliased. Empty lists convey no finality readiness."
+}
