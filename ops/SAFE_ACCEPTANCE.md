@@ -173,3 +173,19 @@ unfinished obligations, even if a small Safe passes existing verification.
 Safe acceptance is complete only when the actual integrated flows above, their
 supported configurations, independent review, developer guidance and matching
 candidate evidence are retained. The shared foundation is the first increment.
+
+## Original-entropy source-set and historical-recovery increments
+
+The [source-set tests](../test/unit/finality/StreamFinalityEntropySourceSet.t.sol)
+use a real two-signature Safe 1.4.1 for permissionless preparation, current
+component discovery, source-set validation, finality state, retained policy and
+token output reads. The source-set/policy cohort has 31 passing cases in both
+compiler modes. This covers the named calls; new binding/constant getters, every
+ABI selector, other Safe versions and nested-wallet acceptance remain tracked
+by the complete inventory requirement above.
+
+The [historical recovery tests](../test/unit/artist/StreamArtistRecoveryHistoricalActual.t.sol)
+pass four IR cases with actual Artist owners, Archive and Safe authority,
+including earlier ordinary rotations, resolved contests, discarded guardian veto
+and atomic failure/retry. Core and Executor remain typed boundaries; complete
+real governance composition and the broader recovery profiles remain required.

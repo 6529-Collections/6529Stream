@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Guardian history `5bf36e34`, original policy reads `11ef55ba`, conservation evidence `2a2610eb`; complete provider/current assembly remain active. Immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | Original entropy routing `4ca03662`, historical recovery `1b07ca6c`, native snapshots `293e5ae2`; complete provider/current assembly remain active. Immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -22,52 +22,51 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active work
 
-Guardian recovery is integrated through `5bf36e34`, following the scheduled
-recovery reader `77b4f7d5`, preparation/veto `11acd4e9` and history primitive
-`b10cacb5`. The Identity owner records the exact scheduled recovery action;
-registered guardians can veto until execution. Preparation freezes the complete
-admitted guardian-history prefix, including empty, unselected and older sets,
-so later selection cannot silently remove an admitted guardian's veto standing.
-The initial living-artist profile now supports this history. Recovery after a
-prior rotation, posthumous recovery and nonempty supersession remain required.
-See [recovery preparation](../docs/architecture/artist-recovery-preparation-v1.md).
+Reviewed integration now includes first completed-rotation recovery `eea1a041`,
+later ordinary-rotation recovery `1b07ca6c`, native snapshot publication
+`293e5ae2`, and complete original-entropy source-set routing `4ca03662`.
 
-The reader's six cases and history primitive's six cases pass both compiler
-modes; the latter includes 256 fuzz inputs. Actual guarded Artist/Safe recovery
-passes four IR cases; actual Core/Executor scheduled authority passes four
-separate IR cases. Actual history has six distinct passing outcomes from five
-retained cases and one corrected timing assertion, with identical production
-artifacts across the two captures. These reviewed cohorts retain explicit
-boundaries between actual Artist and actual governance composition.
+Artist recovery authenticates original executions and resolved prior contests,
+including a rotation completed early with guardian approval. Discarded guardian
+sets retain the applicable veto standing. The later-history increment passes
+four actual Artist/Safe IR cases and six focused helper IR cases. These profiles
+remain living-artist, empty-supersession and without prior adjudicated recovery;
+appeal, estate and nonempty-supersession work continues. Core and Executor are
+typed boundaries in this cohort. See [recovery preparation](../docs/architecture/artist-recovery-preparation-v1.md).
 
-Conservation finality consumption is integrated as `2a2610eb`. The fixed reader
-joins selected original artist intent or waiver, attributed interview status,
-original publication receipts and an independently required head lock. Its
-27 cases pass both modes with two 256-input properties per mode. Original
-archive correspondence and complete finality aggregation remain separate.
-See [conservation evidence](../docs/integrations/finality-conservation-evidence.md).
+[Native snapshots](../docs/integrations/native-onchain-snapshots.md) retain the
+actual canonical document bytes, original content-root/checkpoint references and
+all original entropy policies. The first profile is native collection-level
+IDENTITY_DISPLAY, with separate snapshot and identity-display publisher grants,
+append-only history and exact head/revision checks. Its 23 cases pass both
+compiler modes; schema/tooling validation has 15 passing Python cases. Other
+snapshot profiles and complete provider composition remain open.
 
-Complete original-coordinator policy reads are integrated as `11ef55ba`.
-The consumer reconstructs the full indexed source list and reads each original
-native policy, preserving source order and rejecting missing or changed sources.
-Its 16 cases pass both modes with 256 fuzz inputs per mode and actual Safe
-calls. Core, governance and randomness-provider fixtures remain explicit;
-full source-adapter discovery and arbitrary-size aggregate capacity remain open.
-See [original policy evidence](../docs/integrations/original-coordinator-policy-evidence.md).
+[Original entropy source sets](../docs/integrations/original-entropy-source-sets.md)
+now provide one unambiguous frozen route containing every original coordinator.
+The token resolver checks retained membership and uses that token's actual
+mint-time source. Current discovery and historical serving have separate checks.
+The combined 65-case capture passes both compiler modes: 31 source-set/policy,
+23 snapshot and 11 serving cases. These overlap the snapshot results above;
+they are not 65 additional distinct tests. Actual native coordinators are used,
+with explicit Core/governance fixtures and a separate typed renderer-dispatch
+boundary. Full Registry/companion/provider composition is still required.
 
-The fresh recovery/conservation composition at `ecbf3fd8` passed all eight IR
-cases with independently bound sources and compiler outputs. It uses actual
-Artist owners, Archive, Metadata, Schema, Store and Safe, with typed Core,
-Executor, roles and finality boundaries. It predates the guardian additions
-above and does not establish a full current deployment.
-
-At pushed head `ddc772bc`, museum tooling passed on Windows and Linux, and client
+At pushed head `1d69e746`, museum tooling passed on Windows and Linux, and client
 and Windows-wrapper jobs passed. Current-stack integration, Foundry smoke,
-static baseline and release-artifact jobs failed. Complete finality assembly,
-snapshot/reference-render publication, source discovery and the new deployment
-remain the integration critical path. The onboarding configuration oracle now
-lists operations 34/35 and both adopted recovery profile tags; that oracle edit
-has source-level comparison only, pending its broad runtime cohort.
+static baseline and release-artifact jobs failed. Complete finality aggregation,
+reference-render publication, remaining scope/profile coverage and immutable
+current deployment assembly remain the critical path. The onboarding oracle
+now includes both completed-rotation configuration tags; its source comparison
+is separate from its still-pending broad runtime cohort.
+
+Preservation is building a practical external bulk archive. Native storage roots
+and sizes remain distinct from whole-file SHA-256/Keccak commitments. Two original
+independent storage families, independent retrieval/fixity and live coverage
+checks are required. Full browser binaries will use external archive storage; compact
+interpretation records and commitments remain onchain. A runnable retained engine
+package exists, but complete original reference-render publication, external host
+composition and a real archival delivery are not yet accepted.
 
 ### Earlier integration checkpoints
 
@@ -191,11 +190,11 @@ not complete that join.
 | Owner | Next deliverable |
 | --- | --- |
 | Integrator | Complete typed metadata/finality provider, original-coordinator discovery and current deployment assembly; shared tests, CI and release |
-| Artist builder | Recovery after completed rotation, then historical, posthumous and supersession profiles |
-| Snapshot builder | Actual retained snapshot publication, canonical manifests and preservation joins |
+| Artist builder | Transition-time history needed for nonempty supersession, then remaining appeal and estate recovery |
+| Preservation builder | External bulk archives, runnable reference render, original publication and current finality consumption |
 | Independent reviewer | Challenge exact implementations, real-contract composition and integration evidence |
 
-The full build remains red. At pushed head `7630e3c3`, museum CI passed on
+The full build remains red. At pushed head `1d69e746`, museum CI passed on
 Windows and Linux; client/wrapper checks passed, while current integration,
 Foundry smoke, static baseline and release artifact checks failed. The retained compiler diagnostic has two missing actual
 Finality arguments in Coordinator assembly; the immutable deployment order in

@@ -6,6 +6,8 @@ not select a different contract or grant a caller additional authority.
 
 | Operation | Import | Implementation |
 | --- | --- | --- |
+| Retained native snapshot publication and history | [IStreamCollectionSnapshots](metadata/IStreamCollectionSnapshots.sol) | [StreamCollectionSnapshots](../../domains/metadata/StreamCollectionSnapshots.sol); [snapshot guide](../../../docs/integrations/native-onchain-snapshots.md) |
+| Complete original entropy preparation and token serving | [IStreamFinalityEntropySourceFactory](finality/IStreamFinalityEntropySourceFactory.sol), [IStreamFinalityEntropySourceSet](finality/IStreamFinalityEntropySourceSet.sol) | [StreamFinalityEntropySourceFactory](../../domains/finality/StreamFinalityEntropySourceFactory.sol) and its immutable source sets; [caller guide](../../../docs/integrations/original-entropy-source-sets.md) |
 | Current collection record bytes, family grants and attributed history | [IStreamCollectionMetadataV1](metadata/IStreamCollectionMetadataV1.sol) | [StreamCollectionMetadataV1](../../domains/metadata/StreamCollectionMetadataV1.sol); see [record guide](../../../docs/integrations/metadata-records.md) |
 | Artist-approved publication of a verified collection content root | [IStreamContentRootPublication](metadata/IStreamContentRootPublication.sol) | [StreamMetadataRouter](../../domains/metadata/StreamMetadataRouter.sol); see [publication guide](../../../docs/integrations/content-root-publication.md) |
 | Current published content facts for provider assembly | [StreamFinalityContentTypes](finality/StreamFinalityContentTypes.sol) | [StreamFinalityContentReads](../../domains/finality/StreamFinalityContentReads.sol); [fixed-binding consumer guide](../../../docs/integrations/finality-content-evidence.md) |

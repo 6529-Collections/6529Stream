@@ -7,6 +7,8 @@ deployment evidence.
 
 | Task | Guide |
 | --- | --- |
+| Publish and retrieve retained native collection snapshots | [Native onchain snapshots](native-onchain-snapshots.md) |
+| Freeze and serve every original entropy source through one route | [Original entropy source sets](original-entropy-source-sets.md) |
 | Validate a published root against current preserved content | [Finality content evidence](finality-content-evidence.md) |
 | Derive independent serving families from actual Router sources | [Router evidence provider](finality-router-evidence.md) |
 | Discover all coordinators retained at mint for a scope | [Original coordinator inventory](original-coordinator-inventory.md) |

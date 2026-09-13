@@ -5,6 +5,13 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Added native full-byte collection snapshots with original source commitments,
+  independent publisher grants, immutable history and a fixed finality consumer.
+- Extended living-artist recovery to completed ordinary rotation histories and
+  prior resolved contests while retaining discarded guardians' applicable vetoes.
+- Added immutable complete entropy source sets and token-specific frozen serving
+  across coordinator replacement, with separate current-discovery validation.
+
 - Added Identity-owned scheduled recovery preparation, action-bound guardian veto
   and complete admitted guardian history for the initial living-artist profile.
 - Added fixed finality consumers for selected conservation records and every
