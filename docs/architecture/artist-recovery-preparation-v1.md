@@ -177,3 +177,79 @@ and no later unresolved phase3 latest head. Dismissal is an ordinary typed
 resolution, not appeal authority or supersession. Estate, prior recovery,
 nonempty supersession/selection rewinds, appeal-tier disqualification and
 complete post-recovery historical contest standing remain implementation work.
+
+## Guardian history at authority vesting
+
+The `6529STREAM_ARTIST_GUARDIAN_VESTING_PROFILE_V1` profile records an immutable
+snapshot at each implemented authority vesting: ordinary rotation (32), estate
+activation (40), and an admitted identity recovery (35). This is chronology
+for later supersession admission, not a decision to exclude any guardian. The
+canonical 57 operations, adopted dismissal58, auxiliary preparation65534 and
+37 genesis roles are unchanged.
+
+The fixed Identity owner captures its actual previous executed transition before
+the original mutation. Immediately after that mutation, a linked admission
+helper joins the original stored record, executed phase2 transition, current
+principal/address/class, active-identity mapping and old-address retirement.
+Operations32/40 use the expected original rotation/activation record because
+their existing mutation contains no semantic record. Operation35 uses its
+owner-recomputed new recovery record. Approval, staging and cancellation do not
+create vesting snapshots.
+
+The snapshot retains artist, original transition hash, operation, successful
+owner revision, actual execution timestamp, old/new address, vested class, the
+complete GuardianHistory Head, previous actual execution and its snapshot
+commitment. Its successful owner revision is distinct from the Head revision,
+which records the last successful guardian admission. Every guardian entry in
+that prefix precedes the vesting even at the same block timestamp. An entry
+admitted afterward has a later owner revision/index; author-supplied signedAt
+and nonce do not establish that ordering.
+
+The commitment has exactly seventeen static ABI words:
+`keccak256(abi.encode(keccak256("6529STREAM_ARTIST_GUARDIAN_VESTING_V1"),
+chainId, artistRegistry, identityOwner, artistId, transitionRecordHash,
+operationId, successfulOwnerRevision, executedAt, oldAddress, newAddress,
+authorityClass, completeGuardianHead, previousTransitionRecordHash,
+previousSnapshotCommitment))`. The Head contributes three words. The implementation
+concatenates the static four-word environment and thirteen-word facts encodings;
+there is no dynamic offset or change to the preimage. Empty history still has
+a nonzero snapshot commitment. `guardianVestingSnapshot(artistId,recordHash)`
+on the fixed Identity owner returns the fourteen-word Snapshot, including its
+commitment. Unknown or wrong-artist records reject. Historical reads use the
+immutable saved record and do not depend on current guardian selection.
+
+The two snapshot mappings append inside the existing final Recovery storage
+root. Only the original mutation's next-state hash additionally commits the
+snapshot commitment. The original action/replay, permanent semantic hashes,
+signatures and record append rules stay intact: one owner revision for each
+operation; no semantic append for32/40; two ordered receipts for35. Snapshot
+storage and its exact `ArtistGuardianVestingRecorded` event participate in the
+same lock and transaction as the original owner commit and Archive write.
+Any late failure rolls the complete transition back.
+
+This profile requires fresh, completely counted guardian history and a snapshot
+for each prior actual execution. A nonzero previous execution with no matching
+snapshot rejects; there is no retrospective backfill or migration claim. The
+current zero guardian count also rejects unexplained stable/provisional heads.
+A future vesting producer, including any not-yet-implemented dormancy path,
+must add the same owner-authenticated hook before claiming complete chronology.
+
+The later consumer must authenticate the earliest vesting actually contested
+by its resolution evidence. It cannot select a later snapshot to exclude more
+guardians. AA-GUARD7's separate still-provisional lane requires the exact
+original association/transition/window/closure and scope of evidence; a
+persisting provisional field is not proof of current ineligibility. This
+prerequisite does not implement that consumer, appeal-tier authorization,
+hostile-guardian findings, directive constraints, nonempty supersession,
+operative-selection rewinds, or expanded historical contest standing.
+
+Estate execution preparation runs in the linked `StreamArtistEstateExecutionMutation`
+helper to keep the fixed second-child deployment library within EIP170. The child
+retains its original only-host and owner-context guards, then delegates the exact
+coverage, execution-facts, optional governance witness, original mutation and
+snapshot sequence before its original single commit. The environment and revision
+are derived by the fixed owner. The extra delegatecall preserves owner storage,
+address and event emitter while adding a code/gas dependency. The original
+factory and six-argument child constructor are unchanged. Deployment acceptance
+must measure every linked deployment library as well as deployed children; the
+passing-test code-size allowance is not that acceptance gate.

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistGuardianVestingHistory } from "./StreamArtistGuardianVestingHistory.sol";
 import {
     StreamArtistGuardianHistoryTypes as GH
 } from "../../interfaces/stream/artist/StreamArtistGuardianHistoryTypes.sol";
@@ -357,6 +358,18 @@ contract StreamArtistIdentityAuthority is
         uint64 contestedAt,
         bytes32 contestRecordHash
     );
+
+    function guardianVestingSnapshot(bytes32 artistId, bytes32 recordHash)
+        external
+        view
+        returns (V.Snapshot memory)
+    {
+        _returnResolution(
+            StreamArtistGuardianVestingHistory.encoded(
+                _identityRecovery.vestingHistory, artistId, recordHash
+            )
+        );
+    }
 
     function guardianHistoryState(bytes32 artistId, uint64 index, address actor, bytes32 actionId)
         external

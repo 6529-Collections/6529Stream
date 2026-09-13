@@ -124,6 +124,7 @@ contract StreamArtistIdentityRecoveryExtension is
         Contest.GovernanceWitness calldata governance
     ) external onlyHost returns (bytes32 record) {
         _check(c, 35);
+        bytes32 previousVesting = _rotations.latestExecution[p.artistId];
         StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityRecoveryState.recover(
             _identityRecovery,
             _identity,
@@ -140,6 +141,9 @@ contract StreamArtistIdentityRecoveryExtension is
                 governance,
                 IStreamArtistIdentityContestOwner(address(this)).artistWindowAuthority()
             )
+        );
+        _noteGuardianVesting(
+            _environment(), V.Input(p.artistId, m.record, previousVesting, _revision + 1, 35), m
         );
         IdentityRecovery.Record memory item = _identityRecovery.records[m.record];
         RecoveryReceipts.Pair memory pair = _commitIdentityRecovery(

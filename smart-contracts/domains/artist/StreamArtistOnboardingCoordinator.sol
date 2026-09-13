@@ -200,7 +200,8 @@ contract StreamArtistOnboardingCoordinator is
                 keccak256("6529STREAM_ARTIST_RECOVERY_PREPARATION_PROFILE_V1"),
                 keccak256("6529STREAM_ARTIST_RECOVERY_GUARDIAN_HISTORY_PROFILE_V1"),
                 keccak256("6529STREAM_ARTIST_RECOVERY_FIRST_ROTATION_PROFILE_V1"),
-                keccak256("6529STREAM_ARTIST_RECOVERY_HISTORICAL_ROTATION_PROFILE_V1")
+                keccak256("6529STREAM_ARTIST_RECOVERY_HISTORICAL_ROTATION_PROFILE_V1"),
+                keccak256("6529STREAM_ARTIST_GUARDIAN_VESTING_PROFILE_V1")
             )
         );
         reads = StreamArtistOnboardingReadDeployment.deployReader(suite);

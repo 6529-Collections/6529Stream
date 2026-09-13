@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistGuardianVestingAdmission } from "./StreamArtistGuardianVestingAdmission.sol";
+import {
+    StreamArtistGuardianVestingTypes as V
+} from "../../interfaces/stream/artist/StreamArtistGuardianVestingTypes.sol";
 
 import "./StreamArtistContentHashes.sol";
 
@@ -106,5 +110,16 @@ abstract contract StreamArtistIdentityData {
         returns (Dismissal.Closure memory)
     {
         return _resolutions.closures[_rotations.latestExecution[artistId]];
+    }
+
+    function _noteGuardianVesting(
+        StreamArtistHashes.Environment memory environment,
+        V.Input memory input,
+        StreamArtistIdentityState.Mutation memory mutation
+    ) internal {
+        bytes32 commitment = StreamArtistGuardianVestingAdmission.record(
+            _identityRecovery, _identity, _rotations, _estate, environment, input
+        );
+        mutation.state = keccak256(abi.encode(mutation.state, commitment));
     }
 }

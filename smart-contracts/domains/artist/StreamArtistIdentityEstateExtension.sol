@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistEstateExecutionMutation } from "./StreamArtistEstateExecutionMutation.sol";
 import { StreamArtistGuardianHistory } from "./StreamArtistGuardianHistory.sol";
 import "./StreamArtistIdentityRecoveryApprovalState.sol";
 import "../../interfaces/stream/artist/IStreamArtistUnavailability.sol";
@@ -41,6 +42,8 @@ contract StreamArtistIdentityEstateExtension is
     IStreamArtistUnavailabilityEvents
 {
     error ExtensionWrongHost(address actual);
+    /// @dev Retained ABI entry for the error bubbled by the linked execution mutation.
+    error InvalidEstateAcceleration();
     address private immutable _host;
 
     constructor(
@@ -326,8 +329,12 @@ contract StreamArtistIdentityEstateExtension is
         onlyHost
     {
         _check(c, 32);
+        bytes32 previousVesting = _rotations.latestExecution[artistId];
         StreamArtistIdentityState.Mutation memory m = StreamArtistRotationState.execute(
             _rotations, _identity, _replay, _ownerContext(), c, artistId, expected
+        );
+        _noteGuardianVesting(
+            _environment(), V.Input(artistId, expected, previousVesting, _revision + 1, 32), m
         );
         _commit(c, m.action, m.state, m.replay, m.record);
     }
@@ -433,48 +440,19 @@ contract StreamArtistIdentityEstateExtension is
         Contest.GovernanceWitness calldata governance
     ) external onlyHost {
         _check(c, 40);
-        Estate.RequestRecord storage request = _estate.requests[p.expectedActivationRecordHash];
-        _coverage(coverage, p.currentCoverageHash, p.artistId, request.terms.evidenceHash);
-        (uint32 capabilities, Estate.AccelerationContext memory x) = StreamArtistEstateReads.executionFacts(
-            _estate,
+        StreamArtistIdentityState.Mutation memory m = StreamArtistEstateExecutionMutation.execute(
+            _identityRecovery,
             _identity,
             _rotations,
             _succession,
             _resolutions,
-            _environment(),
-            p,
-            coverage.envelopeHash
-        );
-        bytes32 witness;
-        if (governance.actionId != bytes32(0)) {
-            address executor =
-                IStreamArtistIdentityContestOwner(address(this)).artistWindowAuthority();
-            if (
-                c.actor != executor || governance.actionClass != 1
-                    || governance.proposer == address(0) || governance.scopeHash != x.scopeHash
-                    || governance.oldValueHash != x.oldValueHash
-                    || governance.newValueHash != x.newValueHash
-                    || governance.roleMutationHash != bytes32(0) || governance.roleRevision != 0
-            ) revert Estate.InvalidEstateAcceleration();
-            witness = keccak256(abi.encode(governance));
-        } else {
-            Contest.GovernanceWitness memory empty;
-            if (keccak256(abi.encode(governance)) != keccak256(abi.encode(empty))) {
-                revert Estate.InvalidEstateAcceleration();
-            }
-        }
-        StreamArtistIdentityState.Mutation memory m = StreamArtistEstateState.execute(
             _estate,
-            _identity,
-            _rotations,
             _replay,
             _ownerContext(),
             c,
             p,
-            capabilities,
-            x,
-            governance.actionId,
-            witness
+            coverage,
+            governance
         );
         _commit(c, m.action, m.state, m.replay, m.record);
     }

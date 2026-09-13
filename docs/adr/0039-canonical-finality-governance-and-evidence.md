@@ -1129,6 +1129,49 @@ The focused actual Artist/Safe/Archive tests retain typed Core/governance
 boundaries and do not establish the combined deployed system, a default-profile
 build or an aggregate transaction gas limit.
 
+## Guardian vesting snapshots for supersession chronology
+
+The additive `6529STREAM_ARTIST_GUARDIAN_VESTING_PROFILE_V1` profile captures the
+complete owner-maintained guardian prefix at actual rotation32, estate40 and
+admitted recovery35 execution. The immutable snapshot records the original
+transition, exact successful owner revision, actual execution time, old/new
+principal and class, prior execution/snapshot chain and full guardian Head.
+Count0 has a nonzero snapshot marker. Missing prior execution snapshots or an
+incomplete counted history reject; no legacy backfill is authorized.
+
+The new helper derives these facts from the fixed owner's just-executed original
+record and current identity/retirement state. The existing mutation is extended
+only in next-state commitment before its single original owner commit. The
+expected original rotation/activation hash keys32/40, whose mutation record is
+zero; the owner-recomputed recovery primary keys35. Permanent hashes, signature
+preimages, action/replay behavior, semantic sequence and ordinary receipt rules
+are unchanged. A late Archive failure rolls back vesting, snapshot, owner roots,
+replay and any newly consumed acceptance together. The fixed owner's additive
+fourteen-word `guardianVestingSnapshot` read rejects unknown/wrong-artist input.
+The full encoding and producer rules are in the
+[recovery preparation profile](../architecture/artist-recovery-preparation-v1.md#guardian-history-at-authority-vesting).
+
+Successful guardian admission revision/index establishes before/after ordering
+even when both actions share a timestamp. The Head's last guardian revision is
+retained separately from the successful vesting revision. Author nonce,
+signedAt, current selected head and a surviving provisional association do not
+supply a supersession cutoff. Future consumers must authenticate the earliest
+transition actually contested by resolution evidence, and independently prove
+any still-provisional exception under AA-GUARD7/8. Ordinary dismissal does not
+supply appeal authority. This is a prerequisite for required nonempty
+supersession and does not itself remove any admitted guardian's veto standing.
+The existing57 operations, adopted58, auxiliary65534 and37 genesis roles remain
+unchanged; missing historical/appeal/posthumous consumers and any future
+vesting producers still require implementation and actual integration evidence.
+
+The fixed Estate deployment library embeds its child's creation code. Its own
+EIP170 limit therefore applies in addition to the child runtime limit. Estate
+execution preparation is extracted into a linked mutation helper, with the
+original owner guard, coverage/witness order, actual execution, snapshot and
+single-commit boundary preserved. Constructor/API/creation-nonce behavior stays
+unchanged; the extra delegatecall and linked deployment artifact must remain in
+runtime, gas and complete size evidence.
+
 ## Acceptance and remaining work
 
 Required tests include an actual threshold-Safe/Executor class-2 path, direct

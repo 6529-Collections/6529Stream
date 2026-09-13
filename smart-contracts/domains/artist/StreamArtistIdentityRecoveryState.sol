@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistGuardianVestingHistory } from "./StreamArtistGuardianVestingHistory.sol";
 import {
     StreamArtistRecoveryHistoricalPredecessor as HistoricalPredecessor
 } from "./StreamArtistRecoveryHistoricalPredecessor.sol";
@@ -57,6 +58,7 @@ library StreamArtistIdentityRecoveryState {
         mapping(bytes32 => bytes32) actionExecutions;
         mapping(bytes32 => bytes32) recoveryGuardians;
         GuardianHistory.State guardianHistory;
+        StreamArtistGuardianVestingHistory.State vestingHistory;
     }
 
     struct Input {
