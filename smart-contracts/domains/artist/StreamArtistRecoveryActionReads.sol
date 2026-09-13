@@ -59,7 +59,7 @@ library StreamArtistRecoveryActionReads {
                 || facts.notBefore > facts.expiresAfter || delay < 72 hours
                 || delay > type(uint64).max || block.timestamp > type(uint64).max
                 || block.timestamp + delay > facts.notBefore || acceptance.time < facts.notBefore
-                || acceptance.signature.length > 4096 || request.supersededRecordHashes.length != 0
+                || acceptance.signature.length > 4096 || request.supersededRecordHashes.length > 64
         ) revert A.InvalidRecoveryAction(actionId);
         w.actionId = actionId;
         w.callsHash = keccak256(abi.encode(CALLS, calls));

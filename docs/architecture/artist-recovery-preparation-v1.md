@@ -253,3 +253,68 @@ address and event emitter while adding a code/gas dependency. The original
 factory and six-argument child constructor are unchanged. Deployment acceptance
 must measure every linked deployment library as well as deployed children; the
 passing-test code-size allowance is not that acceptance gate.
+
+## Nonempty post-vesting guardian adjudication
+
+`6529STREAM_ARTIST_GUARDIAN_SUPERSESSION_PROFILE_V1` admits a first nonempty
+recovery list for a living identity after its sole original ordinary rotation.
+The current operation 33 record must name that exact executed rotation, and its
+evidence and reason must equal the recovery request and current cause. The
+immutable vesting snapshot must prove that there was no earlier vesting. This
+profile therefore authenticates its earliest contested transition; a current
+execution pointer or caller-supplied timestamp cannot supply the cutoff.
+
+The sorted, unique list contains one through sixty-four original guardian-set
+hashes, retaining the [validation profile's existing bound](../adr/0021-0022-validation-adapter-interface-freeze.md).
+Every record must belong to the same artist, have been admitted by the
+vested incumbent after the saved guardian prefix and successful vesting owner
+revision, and remain within the complete current history. Both admission index
+and owner revision are checked, so a later admission at the same timestamp is
+classified correctly. A pre-vesting record rejects at this arbiter-only tier.
+The separate still-provisional exception is not inferred from a persistent
+provisional field.
+
+This increment rejects both current stable/provisional heads and every record
+whose nonce is equal to or above the operative guardian's nonce. An excluded
+record need not have been unselected throughout its entire history. These
+records cannot win the preserved monotone selector; execution permanently
+records their actual recovery/action coordinate without changing original
+guardian records, signatures, executed transitions or semantic hashes. A later
+head-supersession/rewind implementation must consult this permanent status
+before selecting historical records. Selected-head supersession and rewind
+remain required work.
+
+Every actual operation 28 also appends the record's admission index to each
+member's per-artist index, inside the same original owner mutation and Archive
+transaction. Empty sets advance the complete indexed head too. The new indexing
+maps append after vesting history inside the final Recovery root. Missing
+preexisting indexing rejects both a subsequent indexed operation 28 and nonempty
+recovery; this is a fresh-deployment profile with no backfill claim.
+
+Preparation commits the exact exclusions in its immutable owner-local action
+association and freezes each actor's excluded membership count. Veto reads use
+binary search over that actor's admission indices up to the saved prefix and
+subtract only the frozen excluded memberships. Any membership in another
+retained record preserves the actor's veto, including a later retained set when
+the actor's first membership was excluded. No list-wide or history-wide scan is
+needed when the guardian calls veto. The full remaining terminal delay, actual
+SCHEDULED lifetime and authoritative cancellation/replacement rules remain
+unchanged.
+
+Preparation creates no executed supersession. Successful operation 35 saves each
+original record's `(artistId,recoveryRecordHash,actionId)` status under
+`guardianRecordSupersession(recordHash)` on the fixed Identity owner, folds the
+adjudication into the same owner next-state commitment, and retains the original
+one-revision/two-receipt append. A late Archive failure rolls back statuses,
+acceptance nonce and the entire recovery together. The saved request and recovery
+event retain the full nonempty list and unchanged supersession-domain hash.
+
+The cardinality grammar is not a maximum-capacity acceptance claim. Sixty-four
+sets can contain 512 distinct members; materializing all frozen exclusion counts
+requires a separately measured preparation envelope. Small-list current-Artist
+tests do not prove that maximum, full governed deployment, or aggregate gas.
+Appeal-tier hostile pre-transition exclusions, absolute directive forbiddance,
+estate/posthumous recovery, other superseded record families, selected-head and
+chain rewinds, and expanded historical contest standing remain required
+consumers. This increment neither fabricates their authority nor weakens their
+conditions.

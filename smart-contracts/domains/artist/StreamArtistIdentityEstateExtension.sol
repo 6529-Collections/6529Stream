@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistGuardianSupersession as GuardianSupersession
+} from "./StreamArtistGuardianSupersession.sol";
 import { StreamArtistEstateExecutionMutation } from "./StreamArtistEstateExecutionMutation.sol";
 import { StreamArtistGuardianHistory } from "./StreamArtistGuardianHistory.sol";
 import "./StreamArtistIdentityRecoveryApprovalState.sol";
@@ -239,6 +242,11 @@ contract StreamArtistIdentityEstateExtension is
             admitted,
             _revision + 1
         );
+        bytes32 membershipCommitment = GuardianSupersession.indexAdmission(
+            _identityRecovery.guardianSupersession,
+            _identityRecovery.guardianHistory.entries[m.record],
+            _rotations.guardians[m.record]
+        );
         m.state = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_GUARDIAN_ADMISSION_COUNT_V1"),
@@ -248,6 +256,7 @@ contract StreamArtistIdentityEstateExtension is
                 historyCommitment
             )
         );
+        m.state = keccak256(abi.encode(m.state, membershipCommitment));
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }

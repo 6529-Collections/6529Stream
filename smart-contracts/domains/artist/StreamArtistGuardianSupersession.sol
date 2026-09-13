@@ -1,0 +1,296 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+
+import {
+    StreamArtistGuardianSupersessionTypes as S
+} from "../../interfaces/stream/artist/StreamArtistGuardianSupersessionTypes.sol";
+import {
+    StreamArtistGuardianHistoryTypes as GH
+} from "../../interfaces/stream/artist/StreamArtistGuardianHistoryTypes.sol";
+import {
+    StreamArtistGuardianVestingTypes as V
+} from "../../interfaces/stream/artist/StreamArtistGuardianVestingTypes.sol";
+import {
+    StreamArtistRotationTypes as R
+} from "../../interfaces/stream/artist/StreamArtistRotationTypes.sol";
+import {
+    StreamArtistIdentityRecoveryOperationTypes as Recovery
+} from "../../interfaces/stream/artist/StreamArtistIdentityRecoveryOperationTypes.sol";
+import {
+    StreamArtistIdentityDismissalTypes as D
+} from "../../interfaces/stream/artist/StreamArtistIdentityDismissalTypes.sol";
+import {
+    StreamArtistIdentityContestTypes as C
+} from "../../interfaces/stream/artist/StreamArtistIdentityContestTypes.sol";
+import {
+    IStreamArtistIdentityContestOwner
+} from "../../interfaces/stream/artist/IStreamArtistIdentityContest.sol";
+import { StreamArtistGuardianHistory as History } from "./StreamArtistGuardianHistory.sol";
+import {
+    StreamArtistGuardianVestingHistory as Vesting
+} from "./StreamArtistGuardianVestingHistory.sol";
+import { StreamArtistRotationState as Rotations } from "./StreamArtistRotationState.sol";
+import { StreamArtistHashes } from "./StreamArtistHashes.sol";
+
+/// @notice First-rotation, post-vesting, unselected guardian adjudication.
+/// @dev Fixed Identity owner authenticates governance, current cause and original rotation.
+library StreamArtistGuardianSupersession {
+    struct State {
+        mapping(bytes32 => S.IndexHead) indexedHeads;
+        mapping(bytes32 => mapping(address => uint64[])) memberships;
+        mapping(bytes32 => S.Plan) plans;
+        mapping(bytes32 => S.Status) statuses;
+        mapping(bytes32 => mapping(address => uint64)) excludedMemberships;
+    }
+
+    /// @dev Called only after the same owner's successful original operation28 and History.append.
+    function indexAdmission(State storage s, GH.Entry memory entry, R.GuardianRecord memory record)
+        public
+        returns (bytes32)
+    {
+        S.IndexHead storage head = s.indexedHeads[entry.artistId];
+        if (
+            entry.artistId == 0 || entry.recordHash == 0 || entry.index != head.count + 1
+                || entry.previousCommitment != head.historyCommitment || entry.commitment == 0
+                || record.recordHash != entry.recordHash || record.terms.artistId != entry.artistId
+                || entry.recordDataHash != keccak256(abi.encode(record))
+        ) {
+            revert S.IncompleteGuardianMembershipIndex(entry.artistId);
+        }
+        for (uint256 i; i < record.terms.guardians.length; ++i) {
+            uint64[] storage indices = s.memberships[entry.artistId][record.terms.guardians[i]];
+            if (indices.length != 0 && indices[indices.length - 1] >= entry.index) {
+                revert S.IncompleteGuardianMembershipIndex(entry.artistId);
+            }
+            indices.push(entry.index);
+        }
+        head.count = entry.index;
+        head.historyCommitment = entry.commitment;
+        return
+            keccak256(
+                abi.encode(keccak256("6529STREAM_ARTIST_GUARDIAN_MEMBERSHIP_INDEX_V1"), entry)
+            );
+    }
+
+    function context(
+        State storage s,
+        History.State storage history,
+        Vesting.State storage vesting,
+        Rotations.State storage rotations,
+        StreamArtistHashes.Environment memory environment,
+        D.Cause memory cause,
+        Recovery.Request memory request,
+        uint64 actualCount
+    ) public view returns (bytes32) {
+        if (request.supersededRecordHashes.length == 0) return bytes32(0);
+        GH.Head memory head = History.requireComplete(history, request.artistId, actualCount);
+        _complete(s, request.artistId, head);
+        bytes32 transition = rotations.latestExecution[request.artistId];
+        V.Snapshot memory cutoff = vesting.snapshots[transition];
+        R.RotationRecord storage rotation = rotations.rotations[transition];
+        if (
+            request.supersededRecordHashes.length > 64 || cause.facts.kind != 1
+                || cause.facts.artistId != request.artistId
+                || cause.facts.executedTransitionHash != transition || transition == 0
+                || rotation.recordHash != transition
+                || rotation.terms.expectedPreviousTransitionRecordHash != 0
+                || cutoff.artistId != request.artistId || cutoff.transitionRecordHash != transition
+                || cutoff.operationId != 32 || cutoff.authorityClass != 1 || cutoff.commitment == 0
+                || cutoff.previousTransitionRecordHash != 0 || cutoff.previousCommitment != 0
+                || cutoff.newAddress != cause.facts.incumbent
+                || cutoff.oldAddress != rotation.terms.oldAddress
+                || cutoff.executedAt != rotation.transition.executedAt || cutoff.ownerRevision == 0
+                || cutoff.guardians.count >= head.count
+                || cutoff.guardians.ownerRevision >= cutoff.ownerRevision
+                || cutoff.ownerRevision >= head.ownerRevision
+        ) {
+            revert S.InvalidGuardianSupersession(transition);
+        }
+        C.Record memory contest = IStreamArtistIdentityContestOwner(address(this))
+            .identityContestRecord(cause.facts.referenceHash);
+        _contest(environment, request, cause, contest, transition);
+        bytes32 selected = Rotations.operativeGuardian(rotations, request.artistId);
+        R.GuardianRecord storage operative = rotations.guardians[selected];
+        if (selected == 0 || operative.recordHash != selected) {
+            revert S.InvalidGuardianSupersession(selected);
+        }
+        bytes32 previous;
+        for (uint256 i; i < request.supersededRecordHashes.length; ++i) {
+            bytes32 hash = request.supersededRecordHashes[i];
+            GH.Entry storage entry = history.entries[hash];
+            R.GuardianRecord storage record = rotations.guardians[hash];
+            if (
+                hash <= previous || entry.recordHash != hash || entry.artistId != request.artistId
+                    || entry.index <= cutoff.guardians.count || entry.index > head.count
+                    || entry.ownerRevision <= cutoff.ownerRevision
+                    || entry.ownerRevision > head.ownerRevision
+                    || history.records[request.artistId][entry.index] != hash
+                    || entry.commitment == 0 || record.recordHash != hash
+                    || record.terms.artistId != request.artistId || record.authorityClass != 1
+                    || record.signer != cutoff.newAddress
+                    || entry.recordDataHash != keccak256(abi.encode(record))
+                    || hash == rotations.stableGuardian[request.artistId]
+                    || hash == rotations.provisionalGuardian[request.artistId]
+                    || record.nonce >= operative.nonce || s.statuses[hash].recoveryRecordHash != 0
+            ) {
+                revert S.InvalidGuardianSupersession(hash);
+            }
+            previous = hash;
+        }
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_POSTVESTING_GUARDIAN_SUPERSESSION_V1"),
+                cutoff,
+                contest,
+                head,
+                selected,
+                request.supersededRecordHashes
+            )
+        );
+    }
+
+    function freeze(
+        State storage s,
+        History.State storage history,
+        Rotations.State storage rotations,
+        bytes32 artistId,
+        bytes32 actionId,
+        bytes32 associationHash,
+        bytes32 commitment,
+        bytes32[] memory excluded
+    ) public returns (bytes32) {
+        GH.Snapshot storage snapshot = history.snapshots[actionId];
+        if (
+            commitment == 0 || associationHash == 0 || excluded.length == 0 || excluded.length > 64
+                || snapshot.artistId != artistId || snapshot.associationHash != associationHash
+                || s.plans[actionId].associationHash != 0
+        ) revert S.InvalidGuardianSupersession(actionId);
+        s.plans[actionId] = S.Plan(
+            artistId,
+            associationHash,
+            commitment,
+            snapshot.count,
+            snapshot.historyCommitment,
+            excluded
+        );
+        for (uint256 i; i < excluded.length; ++i) {
+            R.GuardianRecord storage record = rotations.guardians[excluded[i]];
+            for (uint256 j; j < record.terms.guardians.length; ++j) {
+                ++s.excludedMemberships[actionId][record.terms.guardians[j]];
+            }
+        }
+        return keccak256(abi.encode(s.plans[actionId]));
+    }
+
+    function member(
+        State storage s,
+        History.State storage history,
+        bytes32 artistId,
+        bytes32 actionId,
+        bytes32 associationHash,
+        address actor
+    ) public view returns (bool) {
+        S.Plan storage plan = s.plans[actionId];
+        GH.Snapshot storage snapshot = history.snapshots[actionId];
+        if (
+            plan.artistId != artistId || plan.associationHash != associationHash
+                || associationHash == 0 || plan.count != snapshot.count
+                || plan.historyCommitment != snapshot.historyCommitment
+                || snapshot.artistId != artistId || snapshot.associationHash != associationHash
+        ) {
+            revert S.InvalidGuardianSupersession(actionId);
+        }
+        uint64[] storage indices = s.memberships[artistId][actor];
+        uint256 low;
+        uint256 high = indices.length;
+        while (low < high) {
+            uint256 mid = low + (high - low) / 2;
+            if (indices[mid] <= plan.count) low = mid + 1;
+            else high = mid;
+        }
+        uint256 excludedMemberships = s.excludedMemberships[actionId][actor];
+        if (excludedMemberships > low) revert S.IncompleteGuardianMembershipIndex(artistId);
+        return actor != address(0) && low > excludedMemberships;
+    }
+
+    function applyRecovery(
+        State storage s,
+        bytes32 artistId,
+        bytes32 actionId,
+        bytes32 associationHash,
+        bytes32 recoveryRecord,
+        bytes32 commitment,
+        bytes32[] memory excluded
+    ) public returns (bytes32) {
+        S.Plan storage plan = s.plans[actionId];
+        if (
+            recoveryRecord == 0 || plan.artistId != artistId
+                || plan.associationHash != associationHash || plan.contextCommitment != commitment
+                || commitment == 0
+                || keccak256(abi.encode(plan.excluded)) != keccak256(abi.encode(excluded))
+        ) {
+            revert S.InvalidGuardianSupersession(actionId);
+        }
+        for (uint256 i; i < excluded.length; ++i) {
+            if (s.statuses[excluded[i]].recoveryRecordHash != 0) {
+                revert S.InvalidGuardianSupersession(excluded[i]);
+            }
+            s.statuses[excluded[i]] = S.Status(artistId, recoveryRecord, actionId);
+        }
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_GUARDIAN_SUPERSESSION_APPLIED_V1"),
+                artistId,
+                actionId,
+                associationHash,
+                recoveryRecord,
+                commitment,
+                excluded
+            )
+        );
+    }
+
+    function _complete(State storage s, bytes32 artistId, GH.Head memory head) private view {
+        S.IndexHead storage indexedHead = s.indexedHeads[artistId];
+        if (indexedHead.count != head.count || indexedHead.historyCommitment != head.commitment) {
+            revert S.IncompleteGuardianMembershipIndex(artistId);
+        }
+    }
+
+    function _contest(
+        StreamArtistHashes.Environment memory e,
+        Recovery.Request memory p,
+        D.Cause memory cause,
+        C.Record memory c,
+        bytes32 transition
+    ) private pure {
+        if (
+            c.recordHash == 0 || c.recordHash != cause.facts.referenceHash
+                || c.terms.artistId != p.artistId || c.terms.subjectRecordHash != transition
+                || c.terms.evidenceHash != p.evidenceHash || c.terms.reasonHash != p.reasonHash
+                || cause.facts.evidenceHash != p.evidenceHash
+                || cause.facts.reasonHash != p.reasonHash || c.contester != cause.facts.actor
+                || c.contestedAt != cause.facts.enteredAt || c.priorStatus != 1
+                || c.pendingTransitionRecordHash != 0
+                || c.executedTransitionRecordHash != transition
+                || c.recordHash
+                    != keccak256(
+                        abi.encode(
+                            bytes32(
+                                0x26a4221cd1625ab88b1ac279e1708a73efa176e486242b26832cdc94fe25e6bb
+                            ),
+                            e.chainId,
+                            e.registry,
+                            p.artistId,
+                            c.contester,
+                            transition,
+                            p.evidenceHash,
+                            p.reasonHash,
+                            c.contestedAt
+                        )
+                    )
+        ) {
+            revert S.InvalidGuardianSupersession(c.recordHash);
+        }
+    }
+}

@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistGuardianSupersession as GuardianSupersession
+} from "./StreamArtistGuardianSupersession.sol";
 import { StreamArtistGuardianVestingHistory } from "./StreamArtistGuardianVestingHistory.sol";
 import {
     StreamArtistRecoveryHistoricalPredecessor as HistoricalPredecessor
@@ -59,6 +62,7 @@ library StreamArtistIdentityRecoveryState {
         mapping(bytes32 => bytes32) recoveryGuardians;
         GuardianHistory.State guardianHistory;
         StreamArtistGuardianVestingHistory.State vestingHistory;
+        GuardianSupersession.State guardianSupersession;
     }
 
     struct Input {
@@ -109,8 +113,7 @@ library StreamArtistIdentityRecoveryState {
         ) revert Recovery.InvalidIdentityRecovery(p.artistId);
         if (
             p.vestedAuthorityClass != 1 || cause.facts.authorityClass != 1
-                || cause.facts.priorStatus != 1 || p.supersededRecordHashes.length != 0
-                || rotations.pending[p.artistId] != bytes32(0)
+                || cause.facts.priorStatus != 1 || rotations.pending[p.artistId] != bytes32(0)
                 || cause.facts.pendingTransitionHash != bytes32(0)
                 || s.latest[p.artistId] != bytes32(0)
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
@@ -204,6 +207,23 @@ library StreamArtistIdentityRecoveryState {
                         : keccak256("6529STREAM_ARTIST_RECOVERY_FIRST_ROTATION_CONTEXT_V1"),
                     c.oldValueHash,
                     predecessor
+                )
+            );
+        }
+        if (p.supersededRecordHashes.length != 0) {
+            c.oldValueHash = keccak256(
+                abi.encode(
+                    c.oldValueHash,
+                    GuardianSupersession.context(
+                        s.guardianSupersession,
+                        s.guardianHistory,
+                        s.vestingHistory,
+                        rotations,
+                        o.environment,
+                        cause,
+                        p,
+                        s.guardianRecordsSeen[p.artistId]
+                    )
                 )
             );
         }
@@ -355,6 +375,22 @@ library StreamArtistIdentityRecoveryState {
                 )
             );
         }
+        if (i.request.supersededRecordHashes.length != 0) {
+            m.state = keccak256(
+                abi.encode(
+                    m.state,
+                    GuardianSupersession.applyRecovery(
+                        s.guardianSupersession,
+                        i.request.artistId,
+                        i.governance.actionId,
+                        s.actions[i.governance.actionId].associationHash,
+                        item.recordHash,
+                        item.contextHash,
+                        i.request.supersededRecordHashes
+                    )
+                )
+            );
+        }
     }
 
     function prepare(
@@ -426,6 +462,23 @@ library StreamArtistIdentityRecoveryState {
             s.guardianRecordsSeen[a.artistId]
         );
         m.state = keccak256(abi.encode(a, s.pendingAction[a.artistId], history));
+        if (i.request.supersededRecordHashes.length != 0) {
+            m.state = keccak256(
+                abi.encode(
+                    m.state,
+                    GuardianSupersession.freeze(
+                        s.guardianSupersession,
+                        s.guardianHistory,
+                        rotations,
+                        a.artistId,
+                        w.actionId,
+                        associationHash,
+                        a.contextHash,
+                        i.request.supersededRecordHashes
+                    )
+                )
+            );
+        }
         m.replay = _consume(
             replay,
             i.owner,
@@ -454,9 +507,19 @@ library StreamArtistIdentityRecoveryState {
                 || s.actionExecutions[expectedAction] != bytes32(0) || block.timestamp == 0
                 || block.timestamp > type(uint64).max
         ) revert A.InvalidRecoveryAction(expectedAction);
-        if (!GuardianHistory.member(
+        bool eligible = s.guardianSupersession.plans[expectedAction].associationHash == 0
+            ? GuardianHistory.member(
                 s.guardianHistory, expectedAction, a.associationHash, artistId, c.actor
-            )) {
+            )
+            : GuardianSupersession.member(
+                s.guardianSupersession,
+                s.guardianHistory,
+                artistId,
+                expectedAction,
+                a.associationHash,
+                c.actor
+            );
+        if (!eligible) {
             revert A.InvalidRecoveryGuardian(c.actor);
         }
         s.vetoes[expectedAction] = A.Veto(c.actor, reason, uint64(block.timestamp));

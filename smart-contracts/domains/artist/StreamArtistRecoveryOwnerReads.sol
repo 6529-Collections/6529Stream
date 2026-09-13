@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistIdentityContestState } from "./StreamArtistIdentityContestState.sol";
 import { StreamArtistGuardianHistory as GuardianHistory } from "./StreamArtistGuardianHistory.sol";
 import {
     StreamArtistGuardianHistoryTypes as GH
@@ -21,6 +22,22 @@ import {
 
 /// @notice Fixed Identity wrappers authenticate the storage supplying these encoded reads.
 library StreamArtistRecoveryOwnerReads {
+    function contest(StreamArtistIdentityContestState.State storage s, bytes32 hash)
+        public
+        view
+        returns (bytes memory)
+    {
+        return abi.encode(s.records[hash]);
+    }
+
+    function guardianSupersession(RecoveryState.State storage s, bytes32 hash)
+        public
+        view
+        returns (bytes memory)
+    {
+        return abi.encode(s.guardianSupersession.statuses[hash]);
+    }
+
     function history(
         RecoveryState.State storage s,
         bytes32 artistId,

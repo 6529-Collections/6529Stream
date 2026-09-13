@@ -1172,6 +1172,39 @@ single-commit boundary preserved. Constructor/API/creation-nonce behavior stays
 unchanged; the extra delegatecall and linked deployment artifact must remain in
 runtime, gas and complete size evidence.
 
+## First nonempty guardian supersession consumer
+
+`6529STREAM_ARTIST_GUARDIAN_SUPERSESSION_PROFILE_V1` permits a sorted nonempty
+guardian list only for the explicitly authenticated sole original rotation of
+a living identity with no prior recovery. The actual current operation 33
+subject, evidence, reason and cause must join that original transition and its
+immutable vesting snapshot. Records must fall strictly after its saved prefix
+and successful owner revision; no signed timestamp, nonce or latest-pointer
+proxy establishes the chronological cutoff. The current stable/provisional
+heads and records with nonce at or above the operative head are excluded from
+this first supported profile. Pre-transition enumeration rejects at the ordinary
+arbiter tier.
+
+Complete per-member admission indices are maintained atomically with original
+operation 28. Preparation freezes only the enumerated records' membership counts,
+and every other saved-prefix membership preserves guardian veto standing.
+Operation 35 permanently records the exact executed supersession coordinates in
+the final Identity Recovery storage root, without rewriting the original records
+or permanent list/primary hashes. Original one-revision/two-receipt continuity and
+late-Archive rollback remain intact. Empty-list recovery retains its existing
+context and application branches.
+
+The [recovery preparation profile](../architecture/artist-recovery-preparation-v1.md#nonempty-post-vesting-guardian-adjudication)
+defines the fixed-owner read, complete indexing, fresh-deployment restriction and
+bounded membership mechanism. The list permits at most 64 entries; this grammar
+alone does not establish maximum preparation capacity for 512 distinct members.
+Future selection rewinds must consult the permanent supersession status. Full
+head/chain rewinds, other record families, appeal-tier authority and hostile
+guardian evidence, absolute directive constraints, posthumous/estate recovery
+and complete historical standing remain required; this increment supplies no
+proxy approval for them. Canonical 57 operations, adopted 58, auxiliary 65534 and
+37 genesis roles remain unchanged.
+
 ## Acceptance and remaining work
 
 Required tests include an actual threshold-Safe/Executor class-2 path, direct

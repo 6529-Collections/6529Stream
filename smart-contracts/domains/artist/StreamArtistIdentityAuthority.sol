@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistGuardianSupersessionTypes as GuardianSupersessionTypes
+} from "../../interfaces/stream/artist/StreamArtistGuardianSupersessionTypes.sol";
 import { StreamArtistGuardianVestingHistory } from "./StreamArtistGuardianVestingHistory.sol";
 import {
     StreamArtistGuardianHistoryTypes as GH
@@ -359,6 +362,16 @@ contract StreamArtistIdentityAuthority is
         bytes32 contestRecordHash
     );
 
+    function guardianRecordSupersession(bytes32 recordHash)
+        external
+        view
+        returns (GuardianSupersessionTypes.Status memory)
+    {
+        _returnResolution(
+            StreamArtistRecoveryOwnerReads.guardianSupersession(_identityRecovery, recordHash)
+        );
+    }
+
     function guardianVestingSnapshot(bytes32 artistId, bytes32 recordHash)
         external
         view
@@ -543,7 +556,7 @@ contract StreamArtistIdentityAuthority is
     }
 
     function identityContestRecord(bytes32 record) external view returns (Contest.Record memory) {
-        return _identityContests.records[record];
+        _returnResolution(StreamArtistRecoveryOwnerReads.contest(_identityContests, record));
     }
 
     function latestIdentityContest(bytes32 artistId) external view returns (bytes32) {
