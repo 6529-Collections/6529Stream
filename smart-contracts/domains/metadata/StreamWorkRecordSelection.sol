@@ -2,11 +2,15 @@
 pragma solidity ^0.8.19;
 
 import "../records/StreamWorkRecordReads.sol";
+import {
+    IStreamRecordSelectionLock
+} from "../../interfaces/stream/metadata/IStreamRecordSelectionLock.sol";
+import { StreamRecordSelectionLocks as SelectionLocks } from "./StreamRecordSelectionLocks.sol";
 
 /// @notice Fixed authoritative WORK head with separate artist-record adoption and curator grants.
 /// @dev Only static dependency calls precede the one append. No publisher grants, nonces or
 ///      deadlines are modified; raw selected history is independent of later provider health.
-contract StreamWorkRecordSelection is IStreamWorkRecordSelection {
+contract StreamWorkRecordSelection is IStreamWorkRecordSelection, IStreamRecordSelectionLock {
     address public immutable override core;
     address public immutable override metadata;
     address public immutable override schemaRegistry;
@@ -19,6 +23,7 @@ contract StreamWorkRecordSelection is IStreamWorkRecordSelection {
     address[5] private _artists;
     bytes32[5] private _artistCodeHashes;
     mapping(bytes32 => Selection[]) private _history;
+    mapping(bytes32 => SelectionLock) private _selectionLocks;
 
     constructor(address core_, address metadata_, address schemas_) {
         if (core_.code.length == 0 || metadata_.code.length == 0 || schemas_.code.length == 0) {
@@ -42,7 +47,8 @@ contract StreamWorkRecordSelection is IStreamWorkRecordSelection {
     }
 
     function supportsInterface(bytes4 id) external pure override returns (bool) {
-        return id == type(IStreamWorkRecordSelection).interfaceId || id == 0x01ffc9a7;
+        return id == type(IStreamWorkRecordSelection).interfaceId
+            || id == type(IStreamRecordSelectionLock).interfaceId || id == 0x01ffc9a7;
     }
 
     function selectCurrent(
@@ -92,6 +98,9 @@ contract StreamWorkRecordSelection is IStreamWorkRecordSelection {
         Witness calldata witness,
         AdoptionMode mode
     ) private returns (Selection memory selected) {
+        if (_selectionLocks[_key(collectionId, subjectId)].locked) {
+            revert RecordSelectionLocked(collectionId, subjectId);
+        }
         Selection memory previous = currentWork(collectionId, subjectId);
         if (
             previous.recordHash != expectedHead || previous.revision != expectedRevision
@@ -107,7 +116,9 @@ contract StreamWorkRecordSelection is IStreamWorkRecordSelection {
         StreamWorkRecordContext.definitions(d);
         selected = StreamWorkRecordReads.recorded(d, collectionId, subjectId, recordHash, witness);
         if (mode == AdoptionMode.ARTIST_RECORD_ADOPTION && selected.recorderAuthorizationClass != 1)
-        revert WorkSelectionAuthorityRequired();
+        {
+            revert WorkSelectionAuthorityRequired();
+        }
         if (expectedHead != 0 && selected.recordIndex <= previous.recordIndex) {
             revert WorkSelectionConflict();
         }
@@ -192,6 +203,76 @@ contract StreamWorkRecordSelection is IStreamWorkRecordSelection {
         d.artistCodeHashes = _artistCodeHashes;
         d.chainId = deploymentChainId;
         return StreamWorkRecordContext.currentContext(d);
+    }
+
+    function selectionLockTransition(
+        uint256 collectionId,
+        bytes32 subjectId,
+        bytes32 expectedRecord,
+        uint64 expectedRevision
+    )
+        external
+        view
+        override
+        returns (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash)
+    {
+        (SelectionLocks.Environment memory e, SelectionLocks.Head memory h) =
+            _lockData(collectionId, subjectId, expectedRecord, expectedRevision);
+        SelectionLock memory item = SelectionLocks.context(e, h);
+        return (item.scopeHash, item.oldValueHash, item.newValueHash);
+    }
+
+    function lockSelection(
+        uint256 collectionId,
+        bytes32 subjectId,
+        bytes32 expectedRecord,
+        uint64 expectedRevision
+    ) external override {
+        (SelectionLocks.Environment memory e, SelectionLocks.Head memory h) =
+            _lockData(collectionId, subjectId, expectedRecord, expectedRevision);
+        SelectionLocks.lock(_selectionLocks, e, h);
+    }
+
+    function selectionLock(uint256 collectionId, bytes32 subjectId)
+        external
+        view
+        override
+        returns (SelectionLock memory)
+    {
+        return _selectionLocks[_key(collectionId, subjectId)];
+    }
+
+    function _lockData(
+        uint256 collectionId,
+        bytes32 subjectId,
+        bytes32 expectedRecord,
+        uint64 expectedRevision
+    ) private view returns (SelectionLocks.Environment memory e, SelectionLocks.Head memory h) {
+        if (_selectionLocks[_key(collectionId, subjectId)].locked) {
+            revert RecordSelectionLocked(collectionId, subjectId);
+        }
+        Selection memory selected = currentWork(collectionId, subjectId);
+        if (
+            selected.recordHash == 0 || selected.recordHash != expectedRecord
+                || selected.revision != expectedRevision
+        ) {
+            revert RecordSelectionLockConflict(collectionId, subjectId);
+        }
+        StreamWorkRecordContext.Dependencies memory d = _context();
+        StreamWorkRecordContext.definitions(d);
+        StreamWorkRecordReads.requireSelectedAssociation(d, collectionId, selected);
+        e = SelectionLocks.Environment(
+            core,
+            metadata,
+            coreCodeHash,
+            metadataCodeHash,
+            deploymentChainId,
+            d.readGas,
+            keccak256("WORK_DESCRIPTION")
+        );
+        h = SelectionLocks.Head(
+            collectionId, subjectId, selected.recordHash, selected.revision, selected.selectionHash
+        );
     }
 
     function _key(uint256 collectionId, bytes32 subjectId) private pure returns (bytes32) {

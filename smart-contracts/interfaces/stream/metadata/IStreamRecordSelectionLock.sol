@@ -59,5 +59,7 @@ interface IStreamRecordSelectionLock is IERC165 {
     /// @notice Immutable original seal; no current grant, definition or Executor liveness gate.
     /// @dev Unknown keys return the canonical empty tuple with locked=false.
     function selectionLock(uint256 collectionId, bytes32 subjectId)
-        external view returns (SelectionLock memory);
+        external
+        view
+        returns (SelectionLock memory);
 }

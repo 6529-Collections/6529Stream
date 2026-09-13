@@ -103,3 +103,14 @@ collection record and does not remove the finality scope's own rights-record
 requirement; consumers must preserve both for per-use-class precedence.
 RELEASE, SEASON and VIEW subject admission, complete provider/snapshot binding,
 instrument coverage and finality execution remain required full-v1 work.
+
+## Permanent selected-head seal
+
+The adopted [selection-lock profile](../integrations/record-selection-locks.md)
+adds one irreversible local lock per exact selected key. It authenticates the
+canonical Metadata/Core/ModuleRegistry Executor, its current root and an exact
+root-proposed TERMINAL_FREEZE action. Both RIGHTS selection entrypoints share
+the lock guard. Original selection grants and historical receipts are unchanged;
+the terminal seal retains its own governance evidence. Generic per-author
+dossiers remain appendable. This selected-head lock supplies a distinct finality
+input fact and does not substitute for complete provider or deployment evidence.

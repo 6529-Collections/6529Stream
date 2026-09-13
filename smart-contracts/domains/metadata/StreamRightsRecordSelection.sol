@@ -5,12 +5,17 @@ import "../../interfaces/stream/metadata/IStreamRightsRecordSelection.sol";
 import "../../interfaces/stream/metadata/IStreamRightsRecordWitnessSelection.sol";
 import "../records/StreamRightsRecordReads.sol";
 import "../records/StreamRecordArtistIdentityReads.sol";
+import {
+    IStreamRecordSelectionLock
+} from "../../interfaces/stream/metadata/IStreamRecordSelectionLock.sol";
+import { StreamRecordSelectionLocks as SelectionLocks } from "./StreamRecordSelectionLocks.sol";
 
 /// @notice Explicit current rights statements selected by the existing RIGHTS authority.
 /// @dev Fixed auxiliary for the typed provider; no new Core role, grant store or mutable binder.
 contract StreamRightsRecordSelection is
     IStreamRightsRecordSelection,
-    IStreamRightsRecordWitnessSelection
+    IStreamRightsRecordWitnessSelection,
+    IStreamRecordSelectionLock
 {
     address public immutable override core;
     address public immutable override metadata;
@@ -23,6 +28,7 @@ contract StreamRightsRecordSelection is
     bytes32 public immutable chunkStoreCodeHash;
     StreamRecordArtistIdentityReads.Pins private _artistPins;
     mapping(bytes32 => Selection[]) private _history;
+    mapping(bytes32 => SelectionLock) private _selectionLocks;
 
     struct SelectionRequest {
         uint256 collectionId;
@@ -60,7 +66,8 @@ contract StreamRightsRecordSelection is
 
     function supportsInterface(bytes4 id) external pure override returns (bool) {
         return id == type(IStreamRightsRecordSelection).interfaceId
-            || id == type(IStreamRightsRecordWitnessSelection).interfaceId || id == 0x01ffc9a7;
+            || id == type(IStreamRightsRecordWitnessSelection).interfaceId
+            || id == type(IStreamRecordSelectionLock).interfaceId || id == 0x01ffc9a7;
     }
 
     function selectCurrent(
@@ -102,6 +109,9 @@ contract StreamRightsRecordSelection is
         IStreamPreservationRecords.CollectionRecord memory original,
         bool supplied
     ) private returns (Selection memory selected) {
+        if (_selectionLocks[_key(request.collectionId, request.subjectId)].locked) {
+            revert RecordSelectionLocked(request.collectionId, request.subjectId);
+        }
         Selection memory previous = currentRights(request.collectionId, request.subjectId);
         if (
             previous.recordHash != request.expectedHead
@@ -205,6 +215,75 @@ contract StreamRightsRecordSelection is
                 || selected.revision != expectedRevision
         ) revert RightsSelectionConflict();
         StreamRightsRecordReads.definitions(_context());
+    }
+
+    function selectionLockTransition(
+        uint256 collectionId,
+        bytes32 subjectId,
+        bytes32 expectedRecord,
+        uint64 expectedRevision
+    )
+        external
+        view
+        override
+        returns (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash)
+    {
+        (SelectionLocks.Environment memory e, SelectionLocks.Head memory h) =
+            _lockData(collectionId, subjectId, expectedRecord, expectedRevision);
+        SelectionLock memory item = SelectionLocks.context(e, h);
+        return (item.scopeHash, item.oldValueHash, item.newValueHash);
+    }
+
+    function lockSelection(
+        uint256 collectionId,
+        bytes32 subjectId,
+        bytes32 expectedRecord,
+        uint64 expectedRevision
+    ) external override {
+        (SelectionLocks.Environment memory e, SelectionLocks.Head memory h) =
+            _lockData(collectionId, subjectId, expectedRecord, expectedRevision);
+        SelectionLocks.lock(_selectionLocks, e, h);
+    }
+
+    function selectionLock(uint256 collectionId, bytes32 subjectId)
+        external
+        view
+        override
+        returns (SelectionLock memory)
+    {
+        return _selectionLocks[_key(collectionId, subjectId)];
+    }
+
+    function _lockData(
+        uint256 collectionId,
+        bytes32 subjectId,
+        bytes32 expectedRecord,
+        uint64 expectedRevision
+    ) private view returns (SelectionLocks.Environment memory e, SelectionLocks.Head memory h) {
+        if (_selectionLocks[_key(collectionId, subjectId)].locked) {
+            revert RecordSelectionLocked(collectionId, subjectId);
+        }
+        Selection memory selected = currentRights(collectionId, subjectId);
+        if (
+            selected.recordHash == 0 || selected.recordHash != expectedRecord
+                || selected.revision != expectedRevision
+        ) {
+            revert RecordSelectionLockConflict(collectionId, subjectId);
+        }
+        StreamRightsRecordReads.Dependencies memory d = _context();
+        StreamRightsRecordReads.definitions(d);
+        e = SelectionLocks.Environment(
+            core,
+            metadata,
+            coreCodeHash,
+            metadataCodeHash,
+            deploymentChainId,
+            d.readGas,
+            keccak256("RIGHTS_STATEMENT")
+        );
+        h = SelectionLocks.Head(
+            collectionId, subjectId, selected.recordHash, selected.revision, selected.selectionHash
+        );
     }
 
     function _context() private view returns (StreamRightsRecordReads.Dependencies memory d) {

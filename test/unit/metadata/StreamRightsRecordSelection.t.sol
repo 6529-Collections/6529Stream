@@ -22,14 +22,14 @@ interface RightsSelectionFileVm {
 /// @notice Actual metadata, multi-chunk definitions, rights selection and threshold Safe.
 /// @dev Core membership/execution remain explicit fixture boundaries; no full Finality claim.
 contract StreamRightsRecordSelectionTest is CollectionMetadataV1Fixture {
-    StreamRightsRecordSelection private selection;
+    StreamRightsRecordSelection internal selection;
     RecordArtistReadFixture private rightsArtistFacade;
     RecordArtistReadFixture private rightsArtistCoordinator;
     RecordArtistReadFixture private rightsArtistIdentity;
     bytes32 private constant RIGHTS_TYPE = keccak256("RIGHTS_STATEMENT");
     string private registrationURI;
 
-    function _prepare() private {
+    function _prepare() internal {
         _register(
             "RFC8785_JCS",
             IStreamSchemaRegistry.DocumentKind.CANONICALIZATION,
@@ -130,7 +130,7 @@ contract StreamRightsRecordSelectionTest is CollectionMetadataV1Fixture {
         core.setPointer(keccak256("ARTIST_REGISTRY"), address(rightsArtistFacade));
     }
 
-    function _statement() private view returns (StreamRightsRecordTypes.Statement memory s) {
+    function _statement() internal view returns (StreamRightsRecordTypes.Statement memory s) {
         s.subjectId = subject;
         s.profileHash = StreamRightsRecordDefinitions.PROFILE_HASH;
         s.licensor.kind = StreamRightsRecordTypes.LicensorKind.ACCOUNT;
@@ -139,7 +139,7 @@ contract StreamRightsRecordSelectionTest is CollectionMetadataV1Fixture {
         s.openEnd = true;
     }
 
-    function _published(StreamRightsRecordTypes.Statement memory s) private returns (bytes32) {
+    function _published(StreamRightsRecordTypes.Statement memory s) internal returns (bytes32) {
         bytes memory payload = StreamRightsRecordJson.serialize(s);
         IStreamPreservationRecords.CollectionRecord memory record = _record(RIGHTS_TYPE, payload);
         record.subjectId = s.subjectId;

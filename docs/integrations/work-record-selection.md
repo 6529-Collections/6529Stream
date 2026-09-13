@@ -130,3 +130,11 @@ receipts, with a complete original record witness, to retain those valid
 shapes. Cold maximum-shape controls cover both registration and record URIs
 without raising the cap or shortening supported values. The broad deployment
 and full current-owner composition qualifications above still apply.
+
+## Permanent selected-head seal
+
+The additive [selection-lock interface](record-selection-locks.md) seals an
+existing exact head through the canonical Executor's root-proposed class-2
+transition. Both curator selection and permissionless artist adoption then reject
+for that key. The original receipt and generic author dossiers remain intact;
+seal authority is recorded separately from original publication and selection.
