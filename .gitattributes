@@ -41,3 +41,6 @@ schemas/museum/iiif/licenses/multicodec-LICENSE text eol=lf
 
 # Preserve original whitespace in the pinned W3C license notice.
 schemas/museum/lido/licenses/W3C-SOFTWARE-NOTICE-2002.html whitespace=-blank-at-eol
+
+# Preserve generated WORK-to-LIDO XML bytes on every checkout.
+schemas/museum/work-lido/**/record.xml text eol=lf
