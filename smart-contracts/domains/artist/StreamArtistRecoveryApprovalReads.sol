@@ -94,13 +94,21 @@ library StreamArtistRecoveryApprovalReads {
                 || keccak256(abi.encode(r.terms)) != keccak256(abi.encode(terms))
                 || !StreamArtistRecoveryApprovalScopes.supported(o.scope, a.scope)
                 || a.originalFinalityCodeHash != pins.finalityCodeHash
-                || StreamArtistRecoveryHashes.approvalRecord(
-                        StreamArtistHashes.Environment(
-                            block.chainid, suite.registry, suite.core, suite.mintManager
-                        ),
-                        r
-                    ) != hash
+                || _recordHash(suite, r) != hash
         ) revert Recovery.InvalidRecoveryApproval();
         return (true, hash, r.signer, r.authorityClass);
+    }
+
+    function _recordHash(T.SuiteConfiguration memory suite, Recovery.ApprovalRecord memory r)
+        private
+        view
+        returns (bytes32)
+    {
+        return StreamArtistRecoveryHashes.approvalRecord(
+            StreamArtistHashes.Environment(
+                block.chainid, suite.registry, suite.core, suite.mintManager
+            ),
+            r
+        );
     }
 }
