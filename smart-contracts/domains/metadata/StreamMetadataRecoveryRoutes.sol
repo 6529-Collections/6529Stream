@@ -236,7 +236,17 @@ library StreamMetadataRecoveryRoutes {
     }
 
     function host(Context memory c, bytes32 family) public view returns (address target) {
+        (target,) = hostWithAdapter(c, family);
+    }
+
+    /// @notice Return the exact selected adapter alongside its authenticated serving host.
+    function hostWithAdapter(Context memory c, bytes32 family)
+        public
+        view
+        returns (address target, address adapter)
+    {
         Route memory r = route(c, family, true);
+        adapter = r.module;
         _supports(r.module, type(IStreamFinalityHostAdapter).interfaceId);
         target = _address(r.module, abi.encodeCall(IStreamFinalityHostAdapter.host, ()));
         if (

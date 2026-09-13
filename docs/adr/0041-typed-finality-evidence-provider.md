@@ -141,6 +141,35 @@ actual selector deployment. Candidate validation then enforces the saved
 Router original-Finality anchor and live selected graph. None of these
 operative checks is moved into a constructor that precedes its dependencies.
 
+## Complete original entropy as one serving route
+
+Accepted implementation interpretation, 13 September 2026: represent the complete
+original entropy source set with one explicit composite adapter per actual scope
+inventory. LTA-FINALITY requires every participating source's frozen state and
+permits adapters; this profile validates and exposes every native identity/policy
+inside the single component commitment. It does not describe a composite as a
+native coordinator or omit historical sources.
+
+Individual same-family expectations are unsuitable for the existing serving
+contract: the original Registry's frozen-route getter returns the first match,
+while the recovery companion rejects an ambiguous family. The composite keeps
+one complete route and the existing hash-bound family/scope recovery semantics.
+Its explicit token resolver proves retained scope membership, then derives the
+actual Core coordinatorAtMint and validates that original source's runtime/policy.
+Collection membership uses the saved inventory prefix/count and exact serial;
+published subsets retain their sealed membership independently of later mints.
+
+A fixed, constructor-bound factory precedes the original Registry. Permissionless
+later preparation derives the actual current plan and admits the complete locked
+source list into a constructor-only child. The factory's append-only plan/child
+and runtime mapping is not a mutable source allowlist. Complete current discovery
+must call its current-component projection; the Registry does not automatically
+perform an adapter's current-selection check. Historical child reads use retained
+scope/source evidence, while current admission separately rejects stale membership.
+
+The [source-set guide](../integrations/original-entropy-source-sets.md) documents
+its exact commitments, serving budgets and current test/composition boundaries.
+
 ## Delivery boundaries
 
 The [original-coordinator inventory](../integrations/original-coordinator-inventory.md)

@@ -48,14 +48,14 @@ contract StreamFinalityCoordinatorPolicyReadsTest is
         uint256[] ids;
         bytes32 plan;
     }
-    CoordinatorPolicyVm private constant cheat =
+    CoordinatorPolicyVm internal constant cheat =
         CoordinatorPolicyVm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
-    function _scope() private pure returns (StreamFinalityScope memory) {
+    function _scope() internal pure returns (StreamFinalityScope memory) {
         return StreamFinalityScope(StreamFinalityScopeType.COLLECTION, 1, 0, 0);
     }
 
-    function _native(bool locked) private returns (StreamEntropyCoordinator n) {
+    function _native(bool locked) internal returns (StreamEntropyCoordinator n) {
         if (address(roleRegistry) == address(0)) {
             roleRegistry = new MockEntropyRoleRegistry(address(this));
         }
@@ -86,7 +86,7 @@ contract StreamFinalityCoordinatorPolicyReadsTest is
     }
 
     function _dependencies(StreamFinalityCoordinatorInventory sources)
-        private
+        internal
         view
         returns (StreamFinalityCoordinatorPolicyReads.Dependencies memory d)
     {
@@ -99,7 +99,7 @@ contract StreamFinalityCoordinatorPolicyReadsTest is
         d.inventoryGas = 3000000;
     }
 
-    function _setup(uint256 count, bool secondLocked) private returns (Fixture memory f) {
+    function _setup(uint256 count, bool secondLocked) internal returns (Fixture memory f) {
         f.first = _native(true);
         f.second = _native(secondLocked);
         f.sources = new StreamFinalityCoordinatorInventory(

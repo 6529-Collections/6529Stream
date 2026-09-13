@@ -3,6 +3,56 @@ pragma solidity ^0.8.19;
 import "../../helpers/MetadataRecoveryServingBoundaries.sol";
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 
+contract CompositeEntropyRouteBoundary {
+    address public immutable core;
+    bytes32 public immutable coreCodeHash;
+
+    constructor(address c) {
+        core = c;
+        coreCodeHash = c.codehash;
+    }
+
+    function host() external view returns (address) {
+        return address(this);
+    }
+
+    function hostCodeHash() external view returns (bytes32) {
+        return address(this).codehash;
+    }
+
+    function componentType() external pure returns (bytes32) {
+        return keccak256("ENTROPY_COORDINATOR");
+    }
+
+    function supportsInterface(bytes4 id) external pure returns (bool) {
+        return id == 0x01ffc9a7 || id == type(IStreamFinalityHostAdapter).interfaceId
+            || id == type(IStreamFinalityEntropySourceSet).interfaceId;
+    }
+
+    function tokenSeedForFinality(uint256 id) external pure returns (bytes32, bool) {
+        require(id == 9);
+        return (keccak256("composite-specific-seed"), true);
+    }
+
+    function tokenSeed(uint256) external pure returns (bytes32, bool) {
+        revert("wrong native selector");
+    }
+}
+
+contract EntropySeedRendererBoundary {
+    function renderingProfile() external pure returns (bytes32, bytes32, bytes32) {
+        return StreamMetadataRenderTypes.profile();
+    }
+
+    function renderForFinality(bool, bytes calldata input) external pure returns (string memory) {
+        (StreamMetadataRenderTypes.Token memory t,,) = abi.decode(
+            input,
+            (StreamMetadataRenderTypes.Token, IStreamMetadataServingFacts.ServingSource, bytes)
+        );
+        return string(abi.encodePacked(t.seed));
+    }
+}
+
 /// @notice Serving mechanism with explicit Core/registry/original/companion/host boundaries.
 contract StreamMetadataRecoveryServingTest is CharacterizationTestBase {
     MetadataRecoveryCoreBoundary private core;
@@ -92,6 +142,20 @@ contract StreamMetadataRecoveryServingTest is CharacterizationTestBase {
             harness.token(address(core), address(artist), false, false);
         require(pin, "pinned");
         return output;
+    }
+
+    function testCompositeEntropyRouteSuppliesExactSeedToFrozenRenderer() public {
+        EntropySeedRendererBoundary renderer = new EntropySeedRendererBoundary();
+        MetadataRecoverySourceBoundary rendererHost =
+            new MetadataRecoverySourceBoundary(address(core), address(renderer), "unused");
+        _route(keccak256("RENDERER"), rendererHost, 0);
+        CompositeEntropyRouteBoundary composite = new CompositeEntropyRouteBoundary(address(core));
+        companion.setRoute(keccak256("ENTROPY_COORDINATOR"), address(composite), 0);
+        require(
+            keccak256(bytes(_read()))
+                == keccak256(abi.encodePacked(keccak256("composite-specific-seed"))),
+            "production frozen serving invokes explicit resolver then passes its exact seed"
+        );
     }
 
     function testFrozenOriginalUsesActualPureRendererStaticCall() public {

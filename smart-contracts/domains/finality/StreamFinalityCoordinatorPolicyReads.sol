@@ -29,6 +29,61 @@ library StreamFinalityCoordinatorPolicyReads {
     error PolicyInventory(bytes32 planId);
     error PolicyUnavailable(address coordinator);
 
+    /// @notice Validate a consuming host's fixed graph without requiring a particular scope.
+    function validateDependencies(Dependencies memory d) public view {
+        _bindings(d);
+    }
+
+    /// @notice Derive the exact current inventory plan from authoritative scope facts.
+    function currentInventoryPlan(Dependencies memory d, StreamFinalityScope memory scope)
+        public
+        view
+        returns (bytes32)
+    {
+        _bindings(d);
+        bytes memory raw = _read(
+            d.targets[2],
+            abi.encodeCall(IStreamFinalityScopeMembership.requireScopeMembership, (scope)),
+            256,
+            d.inventoryGas
+        );
+        StreamScopeMembershipFacts memory f = abi.decode(raw, (StreamScopeMembershipFacts));
+        if (
+            keccak256(raw) != keccak256(abi.encode(f)) || f.membershipHash == 0
+                || f.scopeSubject
+                    != StreamMetadataSubjects.scopeSubject(d.chainId, d.targets[0], scope)
+        ) {
+            revert PolicyInventory(0);
+        }
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_COORDINATOR_INVENTORY_PLAN_V1"),
+                d.chainId,
+                d.targets[3],
+                d.targets[0],
+                d.codeHashes[0],
+                d.targets[2],
+                d.codeHashes[2],
+                scope,
+                f
+            )
+        );
+    }
+
+    /// @notice Revalidate a native policy previously admitted into immutable host-owned evidence.
+    /// @dev This does not admit the supplied source into an inventory. The consuming host must
+    /// retain the complete scope/source association from requireCurrent; caller-supplied tuples
+    /// alone convey no provenance or finality authority. Current membership is checked separately.
+    function requireRetainedPolicy(
+        Dependencies memory d,
+        StreamFinalityScope memory scope,
+        IStreamFinalityCoordinatorInventory.Coordinator memory original
+    ) public view returns (StreamFinalityCoordinatorPolicy memory) {
+        _bindings(d);
+        StreamMetadataSubjects.scopeSubject(d.chainId, d.targets[0], scope);
+        return _policy(d, scope, original);
+    }
+
     function requireCurrent(Dependencies memory d, StreamFinalityScope memory scope, bytes32 planId)
         public
         view

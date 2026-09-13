@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamMetadataRecoveryRoutes.sol";
+import "../finality/StreamFinalityEntropyServing.sol";
 import "./StreamMetadataTokenReads.sol";
 import "./StreamMetadataRenderPreparation.sol";
 import "../../interfaces/stream/metadata/IStreamMetadataTokenRendering.sol";
@@ -55,15 +56,11 @@ library StreamMetadataFinalityServing {
         bool asURI
     ) private view returns (string memory result) {
         uint256 id = c.scope.tokenId;
-        address entropy = StreamMetadataRecoveryRoutes.host(
+        (address entropy, address entropyAdapter) = StreamMetadataRecoveryRoutes.hostWithAdapter(
             c, StreamFinalityDomains.COMPONENT_ENTROPY_COORDINATOR
         );
-        (bytes32 seed, bool finalized) = abi.decode(
-            StreamMetadataRecoveryRoutes.read(
-                entropy, abi.encodeCall(IStreamEntropyView.tokenSeed, (id)), 64, 150000
-            ),
-            (bytes32, bool)
-        );
+        (bytes32 seed, bool finalized) =
+            StreamFinalityEntropyServing.read(entropyAdapter, entropy, id);
         if (!finalized) revert TokenEntropyNotFinalized(id);
         bytes memory encodedData =
             _dynamic(c.core, abi.encodeCall(IStreamCoreMint.tokenData, (id)), 16448, SOURCE_GAS);
