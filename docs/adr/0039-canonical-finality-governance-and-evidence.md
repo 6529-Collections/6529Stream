@@ -904,6 +904,79 @@ supersession or full operation35. None of these identity changes alone invalidat
 saved recovery approvals or rewrites consumed consent, sanction or executed
 recovery history; exact approval-target adjudication remains separate work.
 
+## Registered guardian recovery preparation
+
+The next admitted initial-living profile permits one original, nonprovisional
+class1 guardian record, including an authenticated empty first set. It still
+requires the saved living pre-contest incumbent and no prior pending or executed
+authority transition, and it still admits only an empty supersession list. Every
+successful operation28 guardian admission increments an Identity-owned count,
+including empty sets and lower-nonce records that never become operative. The
+count is appended inside the final Recovery storage root and enters that same
+operation28 state commitment and Archive rollback. The guarded profile requires
+count1 and the exact original operative record; the never-guarded branch requires
+count0 and both guardian heads absent. These rules apply to fresh deployments of
+the counted implementation. A zero newly appended count cannot establish the
+history of an earlier deployed implementation.
+
+The supporting `registerIdentityRecoveryAction` operation has the exact auxiliary
+`uint16` identifier65534 in its separate versioned configuration profile. It is
+not a new canonical matrix operation or a validator operation-bitmask member.
+The permissionless indexer submits the complete original GovernanceCall array,
+recovery request and RotationAcceptance. The pinned canonical Executor must be
+bound/sealed and store that exact full batch as a SCHEDULED TERMINAL_FREEZE
+class2 action. Exactly one original recovery selector may occur anywhere in the
+batch, with zero value and the fixed facade target. Its exact request/acceptance
+calldata hash and per-call scope/old/new hashes must match the owner-derived
+context. The original proposer, reason and current arbiter role facts are
+corroborated against the same Executor and fixed suite.
+
+Preparation must occur early enough to leave the entire actual terminal minimum
+delay before `notBefore`; equality is accepted. A late indexer cannot shorten the
+registered guardian's veto opportunity. Guardian `minContestSeconds` does not
+extend Executor timing. It is instead included in the eventual post-vesting
+window as `max(rotationSeconds, savedGuardianMinimum)`.
+
+The Identity owner stores one immutable association containing action/batch/call
+index, exact request and acceptance hashes, context hash, the complete original
+guardian record, Executor runtime pin and original governance facts. The owner
+rederives the context and guardian from its own state under the shared lock.
+The actual indexer and preparation time are recorded. The scheduled context
+excludes association/action identifiers, preparation time and owner revision;
+registration therefore cannot invalidate its own previously scheduled action.
+The separate association hash commits those fields and the prior pending action.
+A current live action cannot be overwritten, including a locally vetoed action.
+Replacement requires an authenticated terminal Executor status or a still
+SCHEDULED action strictly past its authoritative expiry.
+
+Auxiliary preparation and operation34 each use the existing owner zero-record
+commit: one revision with the actual fourteen-word owner state preimage,
+`recordDelta = keccak256(abi.encode(bytes32(0)))`, and unchanged record sequence
+and chain tip. There is no invented semantic primary, new-side signature or nonce
+consumption, or authority assignment. This is the explicit auxiliary profile in
+[the preparation definition](../architecture/artist-recovery-preparation-v1.md),
+not a claim of the continuity packet's separate twenty-word zero-record delta.
+The actual Archive append follows atomically and binds the before/after owner
+snapshots and retained association evidence.
+
+`vetoIdentityRecovery(artistId, reasonHash)` preserves operation34's original ABI
+and event. The actual direct actor must occur in the saved original guardian
+array. Its permanent local action-keyed veto remains available throughout the
+actual SCHEDULED status, including at and after `notBefore` until execution. It
+does not call the Executor's global guardian-veto function. Execution retains the
+existing strict active per-call governance witness, rechecks the exact stored
+association and request against current owner facts, and refuses any local veto.
+A historical EXECUTED action alone cannot reauthorize a call. The original
+RotationAcceptance signature and nonce are consumed only by actual recovery.
+The resulting recovery stores the admitted original guardian for common standing
+and provisional-window consumers; later guardian changes do not rewrite it.
+
+This is a bounded initial-authority increment. Historical eligible-set selection,
+appeal-tier and prior-transition cases, posthumous recovery, nonempty adjudicated
+supersession and exact approval-target adjudication remain required. Typed action
+observations in Artist tests and separate real Executor reader tests do not by
+themselves prove one combined authority deployment or maximum batch gas capacity.
+
 ## Acceptance and remaining work
 
 Required tests include an actual threshold-Safe/Executor class-2 path, direct

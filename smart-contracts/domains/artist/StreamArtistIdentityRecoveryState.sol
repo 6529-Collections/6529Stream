@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import {
+    StreamArtistRecoveryActionTypes as A
+} from "../../interfaces/stream/artist/StreamArtistRecoveryActionTypes.sol";
+import { StreamArtistRotationHashes } from "./StreamArtistRotationHashes.sol";
 import { StreamArtistIdentityState } from "./StreamArtistIdentityState.sol";
 import { StreamArtistRotationState } from "./StreamArtistRotationState.sol";
 import { StreamArtistIdentityResolutionState } from "./StreamArtistIdentityResolutionState.sol";
@@ -28,7 +32,7 @@ import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 
-/// @notice Identity recovery for an initial living authority with no admitted transition/guardian history.
+/// @notice Initial living authority recovery with no transition and a counted original guardian profile.
 /// @dev Owner calls this only after pinned governance/signature observations and commits both receipts once.
 library StreamArtistIdentityRecoveryState {
     struct State {
@@ -36,6 +40,12 @@ library StreamArtistIdentityRecoveryState {
         mapping(bytes32 => R.TransitionState) transitions;
         mapping(bytes32 => bytes32) latest;
         Receipts.State receipts;
+        mapping(bytes32 => uint64) guardianRecordsSeen;
+        mapping(bytes32 => A.Association) actions;
+        mapping(bytes32 => bytes32) pendingAction;
+        mapping(bytes32 => A.Veto) vetoes;
+        mapping(bytes32 => bytes32) actionExecutions;
+        mapping(bytes32 => bytes32) recoveryGuardians;
     }
 
     struct Input {
@@ -46,6 +56,16 @@ library StreamArtistIdentityRecoveryState {
         T.SignerApproval approval;
         Contest.GovernanceWitness governance;
         address executor;
+    }
+
+    struct PrepareInput {
+        StreamArtistIdentityState.OwnerContext owner;
+        T.ActionContext action;
+        Recovery.Request request;
+        T.Authorization acceptance;
+        A.Witness witness;
+        bytes32 previousAssociation;
+        bool previousTerminal;
     }
 
     function context(
@@ -80,7 +100,6 @@ library StreamArtistIdentityRecoveryState {
                 || rotations.latestExecution[p.artistId] != bytes32(0)
                 || rotations.latestTransition[p.artistId] != bytes32(0)
                 || rotations.pending[p.artistId] != bytes32(0)
-                || rotations.stableGuardian[p.artistId] != bytes32(0)
                 || rotations.provisionalGuardian[p.artistId] != bytes32(0)
                 || cause.facts.pendingTransitionHash != bytes32(0)
                 || cause.facts.executedTransitionHash != bytes32(0)
@@ -92,6 +111,10 @@ library StreamArtistIdentityRecoveryState {
         c.causeHash = cause.causeHash;
         c.incumbent = principal.authorityAddress;
         c.postContestSeconds = StreamArtistRotationState.rotationSeconds(rotations);
+        R.GuardianRecord memory guardian = _guardian(s, rotations, o, p.artistId, c.incumbent);
+        if (guardian.terms.minContestSeconds > c.postContestSeconds) {
+            c.postContestSeconds = guardian.terms.minContestSeconds;
+        }
         c.standingTailSeconds = StreamArtistRotationState.standingSeconds(rotations);
         c.timingRevision = rotations.timingRevision == 0 ? 1 : rotations.timingRevision;
         c.delegationEpoch = estate.delegationEpoch[p.artistId];
@@ -117,6 +140,17 @@ library StreamArtistIdentityRecoveryState {
                 c.delegationEpoch
             )
         );
+        // Registration changes owner revision, but never these scheduled transition facts.
+        if (guardian.recordHash != bytes32(0)) {
+            c.oldValueHash = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_GUARDED_RECOVERY_STATE_V1"),
+                    c.oldValueHash,
+                    guardian,
+                    s.guardianRecordsSeen[p.artistId]
+                )
+            );
+        }
         c.newValueHash = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_IDENTITY_RECOVERY_INTENT_V2"),
@@ -151,6 +185,7 @@ library StreamArtistIdentityRecoveryState {
                 || i.governance.newValueHash != c.newValueHash || block.timestamp == 0
                 || block.timestamp > type(uint64).max
         ) revert Recovery.InvalidIdentityRecoveryGovernance();
+        bytes32 guardian = _requirePrepared(s, rotations, i, c);
         uint64 now_ = uint64(block.timestamp);
         uint64 postEnds = now_ + c.postContestSeconds;
         if (c.postContestSeconds < 72 hours || c.standingTailSeconds < 30 days) {
@@ -251,6 +286,179 @@ library StreamArtistIdentityRecoveryState {
             )
         );
         m.state = _stateHash(s, identity, rotations, item);
+        if (guardian != bytes32(0)) {
+            s.actionExecutions[i.governance.actionId] = item.recordHash;
+            s.recoveryGuardians[item.recordHash] = guardian;
+            m.state = keccak256(
+                abi.encode(
+                    m.state,
+                    s.actions[i.governance.actionId].associationHash,
+                    i.governance.actionId,
+                    item.recordHash,
+                    guardian
+                )
+            );
+        }
+    }
+
+    function prepare(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        StreamArtistIdentityResolutionState.State storage resolutions,
+        StreamArtistEstateState.State storage estate,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        PrepareInput memory i
+    ) public returns (StreamArtistIdentityState.Mutation memory m, bytes32 associationHash) {
+        Recovery.Context memory c =
+            context(s, identity, rotations, resolutions, estate, i.owner, i.request, i.acceptance);
+        R.GuardianRecord memory guardian =
+            _guardian(s, rotations, i.owner, i.request.artistId, c.incumbent);
+        A.Witness memory w = i.witness;
+        if (
+            i.action.operationId != A.PREPARE_OPERATION || i.action.actor == address(0)
+                || guardian.recordHash == bytes32(0) || w.actionId == bytes32(0)
+                || w.executor == address(0) || w.executorCodeHash == bytes32(0)
+                || w.callsHash == bytes32(0) || w.proposer == address(0)
+                || w.roleMutationHash == bytes32(0) || w.roleRevision == 0
+                || w.minimumDelay < 72 hours || block.timestamp == 0
+                || block.timestamp > type(uint64).max
+                || block.timestamp + w.minimumDelay > w.notBefore || w.notBefore > w.expiresAfter
+                || i.acceptance.time < w.notBefore
+                || s.actions[w.actionId].associationHash != bytes32(0)
+        ) {
+            revert A.InvalidRecoveryAction(w.actionId);
+        }
+        bytes32 previous = s.pendingAction[i.request.artistId];
+        if (s.actions[previous].associationHash != i.previousAssociation) {
+            revert A.InvalidRecoveryAction(previous);
+        }
+        if (previous != bytes32(0) && !i.previousTerminal) {
+            revert A.RecoveryActionStillLive(previous);
+        }
+        A.Association memory a;
+        a.artistId = i.request.artistId;
+        a.requestHash = keccak256(abi.encode(i.request));
+        a.acceptanceHash = keccak256(abi.encode(i.acceptance));
+        a.contextHash = keccak256(abi.encode(c));
+        a.action = w;
+        a.guardian = guardian;
+        a.preparedBy = i.action.actor;
+        a.preparedAt = uint64(block.timestamp);
+        a.ownerRevision = i.owner.revision + 1;
+        associationHash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_RECOVERY_PREPARATION_V1"),
+                i.owner.environment.chainId,
+                i.owner.environment.registry,
+                address(this),
+                i.owner.coordinator,
+                i.owner.archive,
+                previous,
+                a
+            )
+        );
+        a.associationHash = associationHash;
+        s.actions[w.actionId] = a;
+        s.pendingAction[a.artistId] = w.actionId;
+        m.action = keccak256(abi.encode(A.PREPARE_OPERATION, a, previous));
+        m.state = keccak256(abi.encode(a, s.pendingAction[a.artistId]));
+        m.replay = _consume(
+            replay,
+            i.owner,
+            keccak256("identity_authority.replay.recovery_preparation"),
+            w.actionId,
+            associationHash
+        );
+        // No semantic primary, sequence append, signature consumption or authority mutation.
+    }
+
+    function veto(
+        State storage s,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        bytes32 artistId,
+        bytes32 expectedAction,
+        bytes32 reason,
+        bool scheduled
+    ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        A.Association storage a = s.actions[s.pendingAction[artistId]];
+        if (
+            c.operationId != 34 || a.associationHash == bytes32(0) || a.artistId != artistId
+                || a.action.actionId != expectedAction || !scheduled || reason == bytes32(0)
+                || s.vetoes[expectedAction].vetoer != address(0)
+                || s.actionExecutions[expectedAction] != bytes32(0) || block.timestamp == 0
+                || block.timestamp > type(uint64).max
+        ) revert A.InvalidRecoveryAction(expectedAction);
+        bool member;
+        for (uint256 n; n < a.guardian.terms.guardians.length; ++n) {
+            if (a.guardian.terms.guardians[n] == c.actor) member = true;
+        }
+        if (!member || c.actor == address(0)) revert A.InvalidRecoveryGuardian(c.actor);
+        s.vetoes[expectedAction] = A.Veto(c.actor, reason, uint64(block.timestamp));
+        m.action = keccak256(abi.encode(artistId, expectedAction, c.actor, reason));
+        m.state = keccak256(abi.encode(a.associationHash, s.vetoes[expectedAction]));
+        m.replay = _consume(
+            replay,
+            o,
+            keccak256("identity_authority.replay.recovery_veto_key"),
+            expectedAction,
+            m.action
+        );
+    }
+
+    function _guardian(
+        State storage s,
+        StreamArtistRotationState.State storage r,
+        StreamArtistIdentityState.OwnerContext memory o,
+        bytes32 artistId,
+        address incumbent
+    ) private view returns (R.GuardianRecord memory g) {
+        bytes32 head = r.stableGuardian[artistId];
+        uint64 count = s.guardianRecordsSeen[artistId];
+        if (head == bytes32(0)) {
+            if (count != 0) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+            return g;
+        }
+        g = r.guardians[head];
+        if (
+            count != 1 || g.recordHash != head || g.terms.artistId != artistId
+                || g.authorityClass != 1 || g.signer != incumbent
+                || g.provisional.transitionRecordHash != bytes32(0)
+                || g.provisional.windowEndsAt != 0 || g.terms.guardians.length > 8
+                || g.terms.minContestSeconds > 30 days
+                || StreamArtistRotationHashes.guardianRecord(
+                        o.environment, g.terms, T.Authorization(g.nonce, g.signedAt, bytes(""))
+                    ) != head
+        ) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+        }
+    }
+
+    function _requirePrepared(
+        State storage s,
+        StreamArtistRotationState.State storage rotations,
+        Input memory i,
+        Recovery.Context memory c
+    ) private view returns (bytes32 guardian) {
+        guardian = rotations.stableGuardian[i.request.artistId];
+        if (guardian == bytes32(0)) return guardian;
+        A.Association storage a = s.actions[i.governance.actionId];
+        if (
+            a.associationHash == bytes32(0) || a.artistId != i.request.artistId
+                || s.pendingAction[a.artistId] != i.governance.actionId
+                || a.action.executor != i.executor || a.action.proposer != i.governance.proposer
+                || a.requestHash != keccak256(abi.encode(i.request))
+                || a.acceptanceHash != keccak256(abi.encode(i.acceptance))
+                || a.contextHash != keccak256(abi.encode(c)) || a.guardian.recordHash != guardian
+                || keccak256(abi.encode(a.guardian))
+                    != keccak256(abi.encode(rotations.guardians[guardian]))
+                || s.actionExecutions[i.governance.actionId] != bytes32(0)
+        ) revert A.InvalidRecoveryAction(i.governance.actionId);
+        if (s.vetoes[i.governance.actionId].vetoer != address(0)) {
+            revert A.RecoveryActionVetoed(i.governance.actionId);
+        }
     }
 
     /// @notice Marks retained recovery transitions after the same owner's successful operation33 admission.

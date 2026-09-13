@@ -1,5 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamArtistRecoveryActionOwner,
+    IStreamArtistRecoveryActionCoordinator
+} from "../../interfaces/stream/artist/IStreamArtistRecoveryAction.sol";
+import {
+    StreamArtistRecoveryActionTypes as RecoveryAction
+} from "../../interfaces/stream/artist/StreamArtistRecoveryActionTypes.sol";
+import { GovernanceCall } from "../../interfaces/stream/governance/StreamGovernanceTypes.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
 
@@ -100,6 +108,21 @@ contract StreamArtistRegistryWriterExtension {
     {
         return IStreamArtistSaleCoordinator(operationCoordinator)
             .coordinateRecordSaleConsent(msg.sender, p, a);
+    }
+
+    function registerIdentityRecoveryAction(
+        bytes32 actionId,
+        GovernanceCall[] calldata calls,
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a
+    ) external onlyHost returns (bytes32) {
+        return IStreamArtistRecoveryActionCoordinator(operationCoordinator)
+            .coordinateRegisterIdentityRecoveryAction(msg.sender, actionId, calls, p, a);
+    }
+
+    function vetoIdentityRecovery(bytes32 artistId, bytes32 reasonHash) external onlyHost {
+        IStreamArtistRecoveryActionCoordinator(operationCoordinator)
+            .coordinateVetoIdentityRecovery(msg.sender, artistId, reasonHash);
     }
 
     function recoverArtistIdentity(IdentityRecovery.Request calldata p, T.Authorization calldata a)

@@ -1,5 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamArtistRecoveryActionOwner,
+    IStreamArtistRecoveryActionCoordinator
+} from "../../interfaces/stream/artist/IStreamArtistRecoveryAction.sol";
+import {
+    StreamArtistRecoveryActionTypes as RecoveryAction
+} from "../../interfaces/stream/artist/StreamArtistRecoveryActionTypes.sol";
+import { GovernanceCall } from "../../interfaces/stream/governance/StreamGovernanceTypes.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
 
@@ -41,6 +49,16 @@ contract StreamArtistRegistryFinalityReadExtension {
     modifier onlyHost() {
         if (msg.sender != _host) revert ExtensionWrongHost(msg.sender);
         _;
+    }
+
+    function identityRecoveryActionState(bytes32 artistId, bytes32 actionId)
+        external
+        view
+        onlyHost
+        returns (RecoveryAction.Association memory, RecoveryAction.Veto memory, bytes32, uint64)
+    {
+        return IStreamArtistRecoveryActionOwner(_contentSuite().owners[2])
+            .identityRecoveryActionState(artistId, actionId);
     }
 
     function unavailabilityFindingRecord(bytes32 hash)
@@ -312,5 +330,23 @@ contract StreamArtistRegistryFinalityReadExtension {
         T.Authorization calldata a
     ) external view onlyHost returns (bytes32) {
         return StreamArtistCollaboratorHashes.acceptanceDigest(_environment(), p, a);
+    }
+
+    function guardianSet(bytes32 artistId)
+        external
+        view
+        onlyHost
+        returns (address[] memory, uint32, uint64, bytes32)
+    {
+        return IStreamArtistRotationOwner(_contentSuite().owners[2]).guardianSet(artistId);
+    }
+
+    function artistTransitionState(bytes32 record)
+        external
+        view
+        onlyHost
+        returns (R.TransitionState memory)
+    {
+        return IStreamArtistRotationOwner(_contentSuite().owners[2]).artistTransitionState(record);
     }
 }

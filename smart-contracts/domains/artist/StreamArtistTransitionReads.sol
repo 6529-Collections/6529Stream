@@ -55,7 +55,7 @@ library StreamArtistTransitionReads {
         if (!ok || size != 96) revert R.InvalidRotation(record);
         (priorAddress, guardianRecord, standingTail) =
             abi.decode(result, (address, bytes32, uint64));
-        if (priorAddress == address(0) || guardianRecord != bytes32(0) || standingTail < 30 days) {
+        if (priorAddress == address(0) || standingTail < 30 days) {
             revert R.InvalidRotation(record);
         }
     }

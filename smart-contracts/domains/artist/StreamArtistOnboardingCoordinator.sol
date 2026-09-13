@@ -1,7 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamArtistRecoveryActionOwner,
+    IStreamArtistRecoveryActionCoordinator
+} from "../../interfaces/stream/artist/IStreamArtistRecoveryAction.sol";
+import {
+    StreamArtistRecoveryActionTypes as RecoveryAction
+} from "../../interfaces/stream/artist/StreamArtistRecoveryActionTypes.sol";
+import { GovernanceCall } from "../../interfaces/stream/governance/StreamGovernanceTypes.sol";
 import "./StreamArtistIdentityDismissalOperations.sol";
 import "./StreamArtistIdentityRecoveryOperations.sol";
+import { StreamArtistRecoveryActionOperations } from "./StreamArtistRecoveryActionOperations.sol";
 import "./StreamArtistUnavailabilityOperations.sol";
 import "./StreamArtistRecoveryApprovalOperations.sol";
 import "../../interfaces/stream/artist/IStreamArtistRecoveryApproval.sol";
@@ -176,6 +185,7 @@ contract StreamArtistOnboardingCoordinator is
                 uint16(31),
                 uint16(32),
                 uint16(33),
+                uint16(34),
                 uint16(35),
                 uint16(36),
                 uint16(37),
@@ -185,7 +195,9 @@ contract StreamArtistOnboardingCoordinator is
                 uint16(51),
                 uint16(52),
                 uint16(54),
-                uint16(58)
+                uint16(58),
+                uint16(65534),
+                keccak256("6529STREAM_ARTIST_RECOVERY_PREPARATION_PROFILE_V1")
             )
         );
         reads = StreamArtistOnboardingReadDeployment.deployReader(suite);
@@ -352,6 +364,25 @@ contract StreamArtistOnboardingCoordinator is
         T.Authorization calldata a
     ) external operation returns (bytes32) {
         return StreamArtistSaleOperations.record(_economicContext(), actor, p, a);
+    }
+
+    function coordinateRegisterIdentityRecoveryAction(
+        address actor,
+        bytes32 actionId,
+        GovernanceCall[] calldata calls,
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistRecoveryActionOperations.prepare(
+            _economicContext(), actor, actionId, calls, p, a
+        );
+    }
+
+    function coordinateVetoIdentityRecovery(address actor, bytes32 artistId, bytes32 reasonHash)
+        external
+        operation
+    {
+        StreamArtistRecoveryActionOperations.veto(_economicContext(), actor, artistId, reasonHash);
     }
 
     function coordinateRecoverArtistIdentity(

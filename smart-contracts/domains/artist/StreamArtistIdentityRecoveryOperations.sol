@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveryActionOperations } from "./StreamArtistRecoveryActionOperations.sol";
 
 import {
     StreamArtistIdentityRecoveryGovernance
@@ -54,6 +55,7 @@ library StreamArtistIdentityRecoveryOperations {
             p.reasonHash,
             c
         );
+        StreamArtistRecoveryActionOperations.requireExecution(identity, p.artistId, g.actionId);
         T.SignerApproval memory proof = _verify(x, actor, p, a, c.incumbent);
         record = owner.recoverIdentity(T.ActionContext(35, actor, before_[2]), p, a, proof, g);
         IdentityRecovery.Record memory item = owner.identityRecoveryRecord(record);

@@ -1,17 +1,27 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamArtistRecoveryActionEvents
+} from "../../interfaces/stream/artist/IStreamArtistRecoveryAction.sol";
+import {
+    StreamArtistRecoveryActionTypes as RecoveryAction
+} from "../../interfaces/stream/artist/StreamArtistRecoveryActionTypes.sol";
+import { StreamArtistTimingState } from "./StreamArtistTimingState.sol";
 import "./StreamArtistOwner.sol";
 import "./StreamArtistIdentityData.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityContest.sol";
 
-/// @notice Fixed third Identity child for the typed operation35 owner commit.
+/// @notice Fixed third Identity child for recovery preparation, guardian veto and operation35.
 contract StreamArtistIdentityRecoveryExtension is
     StreamArtistOwner,
     StreamArtistIdentityData,
-    IStreamArtistIdentityRecoveryEvents
+    IStreamArtistIdentityRecoveryEvents,
+    IStreamArtistRecoveryActionEvents
 {
     address private immutable _host;
+    address private immutable _recoveryExecutor;
+    bytes32 private immutable _recoveryExecutorCodeHash;
     error ExtensionWrongHost(address actual);
 
     constructor(
@@ -33,10 +43,77 @@ contract StreamArtistIdentityRecoveryExtension is
     {
         if (host_ == address(0) || host_ == address(this)) revert T.InvalidBinding();
         _host = host_;
+        address executor = StreamArtistTimingState.canonicalAuthority(core_, manager_);
+        _recoveryExecutor = executor;
+        _recoveryExecutorCodeHash = executor.codehash;
     }
     modifier onlyHost() {
         if (address(this) != _host) revert ExtensionWrongHost(address(this));
         _;
+    }
+
+    function recoveryExecutorBinding() external view returns (address, bytes32) {
+        return (_recoveryExecutor, _recoveryExecutorCodeHash);
+    }
+
+    function prepareIdentityRecoveryAction(
+        T.ActionContext calldata c,
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        RecoveryAction.Witness calldata witness,
+        bytes32 previousAssociation,
+        bool previousTerminal
+    ) external onlyHost returns (bytes32 association) {
+        _check(c, RecoveryAction.PREPARE_OPERATION);
+        if (
+            witness.executor != _recoveryExecutor
+                || witness.executorCodeHash != _recoveryExecutorCodeHash
+        ) revert T.InvalidBinding();
+        StreamArtistIdentityState.Mutation memory m;
+        (m, association) = StreamArtistIdentityRecoveryState.prepare(
+            _identityRecovery,
+            _identity,
+            _rotations,
+            _resolutions,
+            _estate,
+            _replay,
+            StreamArtistIdentityRecoveryState.PrepareInput(
+                _ownerContext(), c, p, a, witness, previousAssociation, previousTerminal
+            )
+        );
+        _commit(c, m.action, m.state, m.replay, bytes32(0));
+        RecoveryAction.Association storage item = _identityRecovery.actions[witness.actionId];
+        emit ArtistIdentityRecoveryPrepared(
+            1,
+            p.artistId,
+            witness.actionId,
+            association,
+            item.guardian.recordHash,
+            c.actor,
+            item.preparedAt
+        );
+    }
+
+    function vetoPreparedIdentityRecovery(
+        T.ActionContext calldata c,
+        bytes32 artistId,
+        bytes32 actionId,
+        bytes32 reasonHash,
+        bool scheduled
+    ) external onlyHost {
+        _check(c, 34);
+        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityRecoveryState.veto(
+            _identityRecovery,
+            _replay,
+            _ownerContext(),
+            c,
+            artistId,
+            actionId,
+            reasonHash,
+            scheduled
+        );
+        _commit(c, m.action, m.state, m.replay, bytes32(0));
+        emit ArtistIdentityRecoveryVetoed(2, artistId, c.actor, reasonHash, actionId);
     }
 
     function recoverIdentity(

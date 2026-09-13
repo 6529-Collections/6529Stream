@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamArtistRecoveryActionOwner
+} from "../../interfaces/stream/artist/IStreamArtistRecoveryAction.sol";
+import {
+    StreamArtistRecoveryActionTypes as RecoveryAction
+} from "../../interfaces/stream/artist/StreamArtistRecoveryActionTypes.sol";
+import { StreamArtistRecoveryOwnerReads } from "./StreamArtistRecoveryOwnerReads.sol";
 
 import "./StreamArtistContentHashes.sol";
 
@@ -348,6 +355,41 @@ contract StreamArtistIdentityAuthority is
         bytes32 contestRecordHash
     );
 
+    function recoveryExecutorBinding() external view returns (address, bytes32) {
+        return IStreamArtistRecoveryActionOwner(identityRecoveryExtension).recoveryExecutorBinding();
+    }
+
+    function identityRecoveryActionState(bytes32 artistId, bytes32 actionId)
+        external
+        view
+        returns (RecoveryAction.Association memory, RecoveryAction.Veto memory, bytes32, uint64)
+    {
+        _returnResolution(
+            StreamArtistRecoveryOwnerReads.action(_identityRecovery, artistId, actionId)
+        );
+    }
+
+    function prepareIdentityRecoveryAction(
+        T.ActionContext calldata c,
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        RecoveryAction.Witness calldata witness,
+        bytes32 previousAssociation,
+        bool previousTerminal
+    ) external returns (bytes32) {
+        _forwardRecoveryWriter();
+    }
+
+    function vetoPreparedIdentityRecovery(
+        T.ActionContext calldata c,
+        bytes32 artistId,
+        bytes32 actionId,
+        bytes32 reasonHash,
+        bool scheduled
+    ) external {
+        _forwardRecoveryWriter();
+    }
+
     function recoverIdentity(
         T.ActionContext calldata c,
         IdentityRecovery.Request calldata p,
@@ -372,7 +414,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (IdentityRecovery.Record memory)
     {
-        return _identityRecovery.records[record];
+        _returnResolution(StreamArtistRecoveryOwnerReads.record(_identityRecovery, record));
     }
 
     function latestIdentityRecovery(bytes32 artistId) external view returns (bytes32) {
@@ -392,16 +434,8 @@ contract StreamArtistIdentityAuthority is
         view
         returns (address, bytes32, uint64)
     {
-        IdentityRecovery.Record storage item = _identityRecovery.records[record];
-        R.TransitionState storage t = _identityRecovery.transitions[record];
-        if (
-            record == bytes32(0) || item.recordHash != record || item.fields.artistId == bytes32(0)
-                || item.fields.oldAddress == address(0) || item.standingTailSeconds < 30 days
-                || t.recordHash != record || t.artistId != item.fields.artistId || t.phase == 0
-                || _rotations.rotations[record].recordHash != bytes32(0)
-                || _estate.requests[record].recordHash != bytes32(0)
-        ) revert R.InvalidRotation(record);
-        return (item.fields.oldAddress, bytes32(0), item.standingTailSeconds);
+        return
+            StreamArtistRecoveryOwnerReads.standing(_identityRecovery, _rotations, _estate, record);
     }
 
     function dismissIdentityContest(

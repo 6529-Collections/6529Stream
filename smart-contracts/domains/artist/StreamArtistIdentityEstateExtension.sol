@@ -227,6 +227,15 @@ contract StreamArtistIdentityEstateExtension is
                 _currentIdentityClosure(p.artistId)
             );
         _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, c.operationId, m);
+        uint64 admitted = ++_identityRecovery.guardianRecordsSeen[p.artistId];
+        m.state = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_GUARDIAN_ADMISSION_COUNT_V1"),
+                m.state,
+                p.artistId,
+                admitted
+            )
+        );
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
