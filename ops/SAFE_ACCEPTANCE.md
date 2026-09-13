@@ -36,6 +36,33 @@ The integrator owns the combined inventory; each builder supplies its domain's
 rows and executable evidence. Final acceptance requires no unclassified or
 uncovered supported ABI functions, rather than a sample of wallet workflows.
 
+## Current route increment
+
+The fixed discovery cohort exercises both `requireCurrentRoutes` projections and
+the production strict state checker/route reader through a real threshold Safe.
+Thirty-two tests pass in both modes. The full Preparation ceremony and complete Safe
+selector/version/nesting reconciliation remain separate acceptance requirements.
+
+The separate current entropy-route regression also passes both modes and calls
+`requireCurrentRoute` through a threshold Safe using actual source-set/native
+policy and inventory contracts. The fixture Core/governance boundaries remain
+explicit; this is one selected case, not a rerun of its inherited suites.
+
+## Reference publication and recovery increments
+
+Native reference publication includes actual threshold-Safe publication, grant,
+lock, rollback/retry and read paths. The isolated exact `execTransaction` entry
+test consumes 16,070,437 gas including 906,616 intrinsic gas for its own calldata.
+Its 706,779 margin is a Paris simulation for the retained native collection
+profile; raw modern-fork receipts, other sizes and full version/nesting acceptance
+remain open. See [the reference guide](../docs/guides/native-reference-render.md).
+
+Guardian restoration and restricted appeals have twelve actual Artist/Safe
+IR cases and five separate real governance IR cases. Their joint deployment,
+maximum histories and broader recovery remain required. The onboarding oracle
+includes the reviewed head-selection and root-appeal profile tags at source level;
+this is not a new passing broad onboarding runtime cohort.
+
 ## Independent input-manifest increment
 
 The [input-manifest tests](../test/unit/finality/StreamFinalityInputManifestReads.t.sol)

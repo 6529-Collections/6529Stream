@@ -401,4 +401,49 @@ contract StreamFinalityEntropySourceSetTest is StreamFinalityCoordinatorPolicyRe
         (bytes32 seed, bool done) = a.tokenSeedForFinality(f.ids[0]);
         require(done && seed == expected);
     }
+
+    function testCurrentRouteRetainsCompletePlanAndSelectionWithoutCallingFinalityState() public {
+        Fixture memory f = _setup(3, true);
+        StreamFinalityEntropySourceFactory factory = _factory(f);
+        vm.expectRevert();
+        factory.requireCurrentRoute(_scope());
+        address child = factory.prepareSourceSet(_scope());
+        StreamFinalityCurrentComponentRoute memory route = factory.requireCurrentRoute(_scope());
+        require(
+            route.component == child && route.codeHash == child.codehash
+                && route.componentType == keccak256("ENTROPY_COORDINATOR")
+                && route.interfaceId == type(IStreamArtworkFinalityComponent).interfaceId
+        );
+        uint256[] memory keys = new uint256[](2);
+        keys[0] = 78731;
+        keys[1] = 78733;
+        OfficialSafe safe =
+            createOfficialSafe(deploySafeComponents("1.4.1"), safeOwnerAddresses(keys), 2, 78735);
+        require(
+            executeSafe(
+                safe,
+                keys,
+                address(factory),
+                0,
+                abi.encodeCall(factory.requireCurrentRoute, (_scope())),
+                0
+            )
+        );
+        // Sabotage only finalityState. Current route keeps all real current inventory/policy checks.
+        cheat.mockCall(
+            child, abi.encodeCall(IStreamArtworkFinalityComponent.finalityState, (1)), hex"01"
+        );
+        require(factory.requireCurrentRoute(_scope()).component == child);
+        vm.expectRevert();
+        factory.requireCurrentComponent(_scope());
+        cheat.mockCall(
+            address(core),
+            abi.encodeWithSignature(
+                "getSatellitePointer(bytes32)", keccak256("COLLECTION_METADATA")
+            ),
+            new bytes(0)
+        );
+        vm.expectRevert();
+        factory.requireCurrentRoute(_scope());
+    }
 }

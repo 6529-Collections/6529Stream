@@ -50,7 +50,7 @@ This ordering requirement does not itself prove the complete deployment works.
 Count methods validate the current dependency graph and return ten structural
 slots. A count is not a readiness certificate. Indexed reads validate only the
 selected slot after the global dependency checks. Full hash methods and
-`nonSanctionDiscoveryFacts` validate every required slot. Consumers must compare
+`nonSanctionDiscoveryFacts` validate every required slot. Legacy consumers compare
 the complete hash and perform their required live component checks; collecting
 a count and one healthy entry is insufficient.
 
@@ -61,10 +61,43 @@ Missing reference evidence, incomplete entropy inventory, malformed returns,
 wrong families and changed dependencies reject. A prepared entropy child is
 derived from the fixed factory's current authoritative membership plan.
 
+## Current route projection
+
+`requireCurrentRoutes(scope, includeSanction)` is an additive fixed-profile
+capability: it returns exactly nine or ten canonical family/address/interface/code
+identities. It checks all fixed runtime and current-selection bindings, including
+the entropy factory's complete current membership plan and selected Metadata.
+It does not read the components' finality state; an unsigned read also avoids the
+artist's sanction record. Discovery construction now requires the additive
+`IStreamFinalityCurrentEntropyRoute` capability, so an older factory needs a new
+matching deployment. The original factory interface identifier remains unchanged.
+
+The original Registry's preparation library always performs the existing strict
+live-state checks, mandatory family floors and sanction rules. On a route-capable
+discovery it then compares the complete ordered identities once. Frozen state,
+version, manifest and data still come directly from each actual component and
+all seven expectation fields remain in the permanent hashes. This removes the
+repeated state traversal through aggregate discovery and indexed discovery.
+Routes alone never establish readiness.
+
+The optional capability probe is limited to 30,000 gas. A reverting or empty
+probe, or canonical `false`, takes the existing legacy path. Successful nonempty
+malformed support replies reject. After canonical `true`, route failures never
+fall back: missing, extra, reordered, malformed or mismatching entries reject.
+The return buffer is bounded to 1,216 or 1,344 bytes and must be exact canonical ABI.
+The route call requests the smaller of its governed cap and remaining gas minus
+a parent reserve; EIP-150 may forward less. A large configured component cap does
+not itself reject a cheaper route read. Exhaustion remains a typed failure. These
+structural savings do not establish the complete transaction's gas budget.
+
 ## Validation boundary
 
-Fifteen discovery cases and six retained serving-adapter cases pass in both
-compiler modes, including a 256-input source-drift property. Tests use the actual
+Twenty-six discovery cases and six retained serving-adapter cases pass in both
+compiler modes, including two 256-input properties. The eleven new route cases
+exercise both projections, unchanged routes with changed or unfrozen live state,
+malformed and reordered route sets, advertised failure, legacy probe behavior,
+current selection, real Safe calls, a low-budget exact retry and a gas-exhausting
+target with typed failure and retained caller gas. Tests use the actual
 discovery contract, serving adapters and threshold Safe. Core, complete evidence
 provider, membership, reference, entropy factory and artist are explicit typed
 response fixtures in this cohort. These tests cover binding, ordering, negative

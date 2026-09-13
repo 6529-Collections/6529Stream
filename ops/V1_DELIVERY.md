@@ -22,6 +22,45 @@ and evidence instead of deriving completion from test or interface counts.
 
 ## Latest integration: 13 September
 
+Guardian head restoration `1457a33b` and restricted root-authorized guardian
+appeals `8b7b5822` are integrated. Restoration re-elects the highest admissible
+retained guardian record from complete indexed history and preserves the restored
+set's veto standing. The appeal profile binds original hostile-transition evidence,
+current root/APPEAL authority and owner revisions, while respecting directive
+prohibitions. Twelve actual Artist/Safe cases and five separate actual governance
+cases pass in IR; the helper cohorts pass both modes. Prior production ABIs and
+storage are preserved. Identity is 24,501 bytes (75 bytes below the runtime limit).
+Combined deployment, maximum histories, estate and broader recovery remain open.
+
+[Original reference-render publication](../docs/guides/native-reference-render.md)
+`47678da2` is integrated for native STATIC/BYTE_EXACT COLLECTION. It retains the
+exact 83,420-byte manifest and binds original renderer, capture and package
+commitments; the preserved local runnable ZIP has 253,440,410 bytes and 364 members. Nineteen actual-composition IR cases, six serializer
+cases in both modes and eighteen Python cases pass. The exact isolated Safe entry
+simulation accounts for its complete 106,276-byte calldata and uses 16,070,437 gas,
+leaving 706,779 below the transaction limit. This is a Paris execution simulation,
+not a raw transaction receipt, all-profile capacity proof or public archive upload.
+The fixed finality reader's six-byte compiler-context scratch difference remains
+explicit in its evidence; all captured production runtimes fit.
+
+The integrator is removing repeated live component reads from finality preparation
+and assembling the complete ten-input provider. A separate preservation builder
+now owns the genuine render-critical inventory and complete per-item bundle archive
+coverage; no leaf or source-list hash substitutes for those commitments. The artist
+builder is implementing class-3 estate-key recovery, with independent review across
+all three lanes. Current routes now pass thirty-two tests in both compiler modes,
+including two 256-input properties and actual Safe calls. Their strict-state
+harness does not establish the complete Preparation ceremony; complete assembly
+remains under development.
+
+At PR head `a6da2644`, CI failed on the missing original-Finality constructor
+arguments, a changed frozen continuity packet, stale static-analysis provenance,
+and archive attribute/checksum reconciliation. TypeScript, Windows wrapper and
+Museum Windows/Linux passed. Those results describe that earlier head, not the
+new local imports. No full-v1 candidate or deployment has been accepted.
+
+### Earlier accepted increments
+
 The next artist increment `adb8ade9` admits a nonempty, sorted list of guardian
 records made obsolete by the adjudicated original rotation. It preserves every
 pre-vesting record and any guardian membership retained elsewhere. Four actual

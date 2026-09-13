@@ -49,6 +49,23 @@ Historical reads do not require today's selected entropy pointer or newly
 extended collection membership. New discovery separately requires current
 completeness. The indexing-time code pin does not prove mint-time code.
 
+## Additive current route
+
+`requireCurrentRoute` returns only the complete entropy child's four-field route
+identity. It derives the same current inventory plan, checks the retained child
+and runtime pin and calls `requireCurrentSelection`. The Registry must separately
+check the child's complete live frozen state. The original `requireCurrentComponent`
+keeps its original seven-field behavior and interface identifier. This split avoids
+repeating finality-state validation without substituting a historical child's
+state for current membership completeness.
+
+A separate focused regression passes in both compiler modes with the actual
+factory, source set, native policy, Metadata and inventory, plus a threshold Safe.
+It proves missing-plan rejection, four-field identity, Safe read, independence
+from the child's full finality-state read, and rejection after current Metadata
+selection becomes unreadable. Core and governance remain fixture boundaries;
+the earlier complete native/Core cohorts are separate evidence.
+
 ## Token serving and recovery
 
 The adapter explicitly advertises `IStreamFinalityEntropySourceSet`; it does

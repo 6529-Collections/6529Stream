@@ -2888,7 +2888,9 @@ contract StreamArtistOnboardingTest is ArtistOnboardingFixture {
                 keccak256("6529STREAM_ARTIST_RECOVERY_FIRST_ROTATION_PROFILE_V1"),
                 keccak256("6529STREAM_ARTIST_RECOVERY_HISTORICAL_ROTATION_PROFILE_V1"),
                 keccak256("6529STREAM_ARTIST_GUARDIAN_VESTING_PROFILE_V1"),
-                keccak256("6529STREAM_ARTIST_GUARDIAN_SUPERSESSION_PROFILE_V1")
+                keccak256("6529STREAM_ARTIST_GUARDIAN_SUPERSESSION_PROFILE_V1"),
+                keccak256("6529STREAM_ARTIST_GUARDIAN_HEAD_SELECTION_PROFILE_V1"),
+                keccak256("6529STREAM_ARTIST_GUARDIAN_ROOT_APPEAL_PROFILE_V1")
             )
         );
         require(coordinator.configurationHash() == expected, "full executable operation commitment");

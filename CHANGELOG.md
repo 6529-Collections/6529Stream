@@ -5,6 +5,13 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Added current-head guardian restoration and restricted root-authorized appeals,
+  preserving original transition evidence, directives and retained veto rights.
+- Added native original reference-render publication, complete retained runtime
+  manifests and a fixed consumer, with exact Safe transaction-envelope tests.
+- Added optional fixed current component routes so finality preparation keeps one
+  strict live-state pass and unchanged permanent hashes, with legacy discovery support.
+
 - Added exact independent finality ABI manifests with complete portable tuple
   definitions, fixed source bindings and matching Store/original-Registry bytes.
 - Added bounded nonempty guardian-record supersession after an adjudicated

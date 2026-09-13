@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamFinalityRouterEvidence.sol";
+import "../../interfaces/stream/finality/IStreamFinalityCurrentComponentRoutes.sol";
 import "../../interfaces/stream/finality/IStreamFinalityServingEvidenceProvider.sol";
 import "../../interfaces/stream/finality/IStreamFinalityDiscoverySources.sol";
 import "../metadata/StreamMetadataRecoveryRoutes.sol";
@@ -25,6 +26,7 @@ contract StreamFinalityCurrentDiscovery is
     IStreamArtworkFinalityDiscovery,
     IStreamArtworkScopedFinalityDiscovery,
     IStreamNonSanctionFinalityDiscovery,
+    IStreamFinalityCurrentComponentRoutes,
     IStreamFinalityEvidenceDiscoveryBinding
 {
     address public immutable core;
@@ -94,6 +96,7 @@ contract StreamFinalityCurrentDiscovery is
         _supports(c.provider, type(IStreamFinalityRouterEvidenceBinding).interfaceId);
         _supports(c.provider, type(IStreamFinalityDiscoverySources).interfaceId);
         _supports(c.entropyFactory, type(IStreamFinalityEntropySourceFactory).interfaceId);
+        _supports(c.entropyFactory, type(IStreamFinalityCurrentEntropyRoute).interfaceId);
         _supports(c.referenceRender, type(IStreamArtworkFinalityComponent).interfaceId);
         _supports(c.referenceRender, type(IStreamArtworkScopedFinalityComponent).interfaceId);
         _supports(c.artist, type(IStreamArtworkFinalityComponent).interfaceId);
@@ -110,6 +113,7 @@ contract StreamFinalityCurrentDiscovery is
             || id == type(IStreamArtworkFinalityDiscovery).interfaceId
             || id == type(IStreamArtworkScopedFinalityDiscovery).interfaceId
             || id == type(IStreamNonSanctionFinalityDiscovery).interfaceId
+            || id == type(IStreamFinalityCurrentComponentRoutes).interfaceId
             || id == type(IStreamFinalityEvidenceDiscoveryBinding).interfaceId;
     }
 
@@ -188,6 +192,77 @@ contract StreamFinalityCurrentDiscovery is
         returns (StreamFinalityComponentExpectation memory)
     {
         return _at(scope, index, false);
+    }
+
+    /// @inheritdoc IStreamFinalityCurrentComponentRoutes
+    function requireCurrentRoutes(StreamFinalityScope calldata scope, bool includeSanction)
+        external
+        view
+        override
+        returns (StreamFinalityCurrentComponentRoute[] memory routes)
+    {
+        _current(scope, _configuration);
+        uint8[] memory order = _order(includeSanction);
+        routes = new StreamFinalityCurrentComponentRoute[](order.length);
+        for (uint256 i; i < order.length; ++i) {
+            routes[i] = _identity(scope, order[i]);
+        }
+    }
+
+    function _identity(StreamFinalityScope memory scope, uint8 index)
+        private
+        view
+        returns (StreamFinalityCurrentComponentRoute memory route)
+    {
+        StreamFinalityDiscoveryTypes.Configuration memory c = _configuration;
+        bytes32 family = _family(index);
+        bytes4 expected = scope.scopeType == StreamFinalityScopeType.COLLECTION
+            ? type(IStreamArtworkFinalityComponent).interfaceId
+            : type(IStreamArtworkScopedFinalityComponent).interfaceId;
+        address target;
+        if (index < 7) {
+            target = index < 6 ? c.routerAdapters[index] : c.metadataAdapter;
+            _selection(target);
+        } else if (index == 7) {
+            route = abi.decode(
+                _read(
+                    c.entropyFactory,
+                    abi.encodeCall(IStreamFinalityCurrentEntropyRoute.requireCurrentRoute, (scope)),
+                    128,
+                    c.entropyGas
+                ),
+                (StreamFinalityCurrentComponentRoute)
+            );
+            if (
+                route.componentType != family || route.interfaceId != expected
+                    || route.component.code.length == 0
+                    || route.codeHash != route.component.codehash
+            ) {
+                revert DiscoveryComponent(route.component, family);
+            }
+            _supports(route.component, expected);
+            return route;
+        } else {
+            target = index == 8 ? c.referenceRender : c.artist;
+            if (
+                index == 9
+                    && abi.decode(
+                            _read(
+                                c.artist,
+                                abi.encodeCall(
+                                    IStreamFinalitySanctionReads.collectionSanctionComponentType,
+                                    (scope.collectionId)
+                                ),
+                                32,
+                                c.componentGas
+                            ),
+                            (bytes32)
+                        ) != family
+            ) revert DiscoveryUnsupportedProfile();
+        }
+        _pin(target);
+        _supports(target, expected);
+        return StreamFinalityCurrentComponentRoute(family, target, expected, target.codehash);
     }
 
     function _components(StreamFinalityScope memory scope, bool full)

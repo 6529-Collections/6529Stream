@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 import "../../helpers/OfficialSafeFixture.sol";
+import "../../../smart-contracts/domains/finality/StreamFinalityRouteReads.sol";
 import "../../../smart-contracts/domains/finality/StreamFinalityCurrentDiscovery.sol";
 import "../../../smart-contracts/domains/finality/StreamFinalityServingHostAdapter.sol";
 import "../../../smart-contracts/interfaces/stream/core/IStreamCorePointers.sol";
@@ -27,6 +28,47 @@ contract DiscoveryReadTable {
         require(_set[key], "unconfigured typed boundary");
         bytes memory result = _values[key];
         assembly ("memory-safe") { return(add(result, 32), mload(result)) }
+    }
+}
+
+/// @dev Exercises the production strict state checker and optional route reader together.
+/// Preparation's complete Core/input/sanction gates are outside this narrow harness.
+contract DiscoveryStrictRouteHarness {
+    function verify(
+        address target,
+        StreamFinalityScope calldata scope,
+        StreamFinalityComponentExpectation[] calldata entries,
+        bool full
+    ) external view returns (bool) {
+        bytes memory input = abi.encodeCall(
+            IStreamArtworkFinalityComponent.finalityState, (scope.collectionId)
+        );
+        (uint8 code,) = StreamFinalityComponentSet.verifyComponentsStrict(entries, input, 1000000);
+        require(code == StreamFinalityComponentSet.STRICT_OK, "live state rejected");
+        return StreamFinalityRouteReads.verifyIfSupported(target, scope, entries, full, 4000000);
+    }
+
+    function routes(
+        address target,
+        StreamFinalityScope calldata scope,
+        StreamFinalityComponentExpectation[] calldata entries,
+        bool full
+    ) external view returns (bool) {
+        return StreamFinalityRouteReads.verifyIfSupported(target, scope, entries, full, 4000000);
+    }
+}
+
+contract DiscoveryGasBurner {
+    function supportsInterface(bytes4) external pure returns (bool) {
+        return true;
+    }
+
+    function requireCurrentRoutes(StreamFinalityScope calldata, bool)
+        external
+        pure
+        returns (StreamFinalityCurrentComponentRoute[] memory)
+    {
+        assembly ("memory-safe") { invalid() }
     }
 }
 
@@ -280,6 +322,20 @@ contract StreamFinalityCurrentDiscoveryTest is CharacterizationTestBase, Officia
         _support(c.provider, type(IStreamFinalityRouterEvidenceBinding).interfaceId);
         _support(c.provider, type(IStreamFinalityDiscoverySources).interfaceId);
         _support(c.entropyFactory, type(IStreamFinalityEntropySourceFactory).interfaceId);
+        _support(c.entropyFactory, type(IStreamFinalityCurrentEntropyRoute).interfaceId);
+        _put(
+            c.entropyFactory,
+            abi.encodeCall(IStreamFinalityCurrentEntropyRoute.requireCurrentRoute, (scope)),
+            abi.encode(
+                StreamFinalityCurrentComponentRoute(
+                    keccak256("ENTROPY_COORDINATOR"),
+                    address(entropy),
+                    type(IStreamArtworkFinalityComponent).interfaceId,
+                    address(entropy).codehash
+                )
+            )
+        );
+        _record(address(entropy), keccak256("ENTROPY_COORDINATOR"), true);
         _support(c.referenceRender, type(IStreamArtworkFinalityComponent).interfaceId);
         _support(c.referenceRender, type(IStreamArtworkScopedFinalityComponent).interfaceId);
         _support(c.artist, type(IStreamArtworkFinalityComponent).interfaceId);
@@ -554,5 +610,268 @@ contract StreamFinalityCurrentDiscoveryTest is CharacterizationTestBase, Officia
         require(discovery.nonSanctionComponentAt(scope, index).componentType == script);
         vm.expectRevert();
         discovery.nonSanctionDiscoveryFacts(scope);
+    }
+
+    function _entries(bool full)
+        private
+        view
+        returns (StreamFinalityComponentExpectation[] memory es)
+    {
+        es = new StreamFinalityComponentExpectation[](full ? 10 : 9);
+        for (uint256 i; i < es.length; ++i) {
+            es[i] = full
+                ? discovery.finalityComponentAtForScope(scope, i)
+                : discovery.nonSanctionComponentAt(scope, i);
+        }
+    }
+
+    function testRoutesPreserveEveryIdentityWithoutReadingReferenceOrUnsignedArtistState() public {
+        StreamFinalityComponentExpectation[] memory es = _entries(false);
+        DiscoveryReadTable(c.referenceRender)
+            .remove(abi.encodeCall(IStreamArtworkFinalityComponent.finalityState, (1)));
+        StreamFinalityCurrentComponentRoute[] memory routes =
+            discovery.requireCurrentRoutes(scope, false);
+        require(routes.length == 9);
+        for (uint256 i; i < 9; ++i) {
+            require(
+                routes[i].component == es[i].component
+                    && routes[i].componentType == es[i].componentType
+                    && routes[i].codeHash == es[i].codeHash
+                    && routes[i].interfaceId == es[i].interfaceId
+            );
+        }
+        vm.expectRevert();
+        discovery.nonSanctionDiscoveryFacts(scope);
+        DiscoveryStrictRouteHarness h = new DiscoveryStrictRouteHarness();
+        vm.expectRevert();
+        h.verify(address(discovery), scope, es, false);
+    }
+
+    function testStrictStateStillRejectsUnfrozenOrChangedVersionManifestAndDataWithSameRoutes()
+        public
+    {
+        StreamFinalityComponentExpectation[] memory es = _entries(false);
+        DiscoveryStrictRouteHarness h = new DiscoveryStrictRouteHarness();
+        require(h.verify(address(discovery), scope, es, false));
+        bytes memory callData = abi.encodeCall(IStreamArtworkFinalityComponent.finalityState, (1));
+        for (uint256 i; i < 4; ++i) {
+            StreamFinalityComponentState memory bad =
+                _state(c.referenceRender, keccak256("REFERENCE_RENDER"), true);
+            if (i == 0) bad.frozen = false;
+            if (i == 1) bad.moduleVersion = keccak256("different version");
+            if (i == 2) bad.manifestHash = keccak256("different manifest");
+            if (i == 3) bad.dataHash = keccak256("different data");
+            _put(c.referenceRender, callData, abi.encode(bad));
+            require(h.routes(address(discovery), scope, es, false));
+            vm.expectRevert();
+            h.verify(address(discovery), scope, es, false);
+        }
+    }
+
+    function testFullRoutesRequireArtistKindButDoNotReadSignedRecord() public {
+        _sign();
+        StreamFinalityComponentExpectation[] memory es = _entries(true);
+        DiscoveryStrictRouteHarness h = new DiscoveryStrictRouteHarness();
+        require(h.verify(address(discovery), scope, es, true));
+        DiscoveryReadTable(c.artist)
+            .remove(abi.encodeCall(IStreamArtworkFinalityComponent.finalityState, (1)));
+        require(h.routes(address(discovery), scope, es, true));
+        vm.expectRevert();
+        h.verify(address(discovery), scope, es, true);
+        _put(
+            c.artist,
+            abi.encodeCall(IStreamFinalitySanctionReads.collectionSanctionComponentType, (1)),
+            abi.encode(keccak256("PLATFORM_WORKS_DECLARATION"))
+        );
+        vm.expectRevert();
+        discovery.requireCurrentRoutes(scope, true);
+        require(discovery.requireCurrentRoutes(scope, false).length == 9);
+    }
+
+    function _routeBoundary(bool full)
+        private
+        returns (
+            DiscoveryReadTable b,
+            StreamFinalityComponentExpectation[] memory es,
+            bytes memory callData
+        )
+    {
+        if (full) _sign();
+        es = _entries(full);
+        b = new DiscoveryReadTable();
+        _support(address(b), type(IStreamFinalityCurrentComponentRoutes).interfaceId);
+        callData = abi.encodeCall(
+            IStreamFinalityCurrentComponentRoutes.requireCurrentRoutes, (scope, full)
+        );
+        b.put(callData, abi.encode(discovery.requireCurrentRoutes(scope, full)));
+    }
+
+    function testAdvertisedRoutesRevertMalformedAndNoncanonicalOutputsNeverFallBack() public {
+        (DiscoveryReadTable b, StreamFinalityComponentExpectation[] memory es, bytes memory input) =
+            _routeBoundary(false);
+        DiscoveryStrictRouteHarness h = new DiscoveryStrictRouteHarness();
+        require(h.verify(address(b), scope, es, false));
+        b.remove(input);
+        vm.expectRevert();
+        h.verify(address(b), scope, es, false);
+        b.put(input, new bytes(7));
+        vm.expectRevert();
+        h.verify(address(b), scope, es, false);
+        bytes memory canonical = abi.encode(discovery.requireCurrentRoutes(scope, false));
+        b.put(input, bytes.concat(canonical, hex"00"));
+        vm.expectRevert();
+        h.verify(address(b), scope, es, false);
+        // A dirty ABI address word cannot be normalized into an accepted identity.
+        canonical[96] = 0x01;
+        b.put(input, canonical);
+        vm.expectRevert();
+        h.verify(address(b), scope, es, false);
+    }
+
+    function testRoutesRejectMissingExtraReorderedAndChangedIdentity() public {
+        (DiscoveryReadTable b, StreamFinalityComponentExpectation[] memory es, bytes memory input) =
+            _routeBoundary(false);
+        DiscoveryStrictRouteHarness h = new DiscoveryStrictRouteHarness();
+        StreamFinalityCurrentComponentRoute[] memory routes =
+            discovery.requireCurrentRoutes(scope, false);
+        b.put(input, abi.encode(new StreamFinalityCurrentComponentRoute[](8)));
+        vm.expectRevert();
+        h.verify(address(b), scope, es, false);
+        b.put(input, abi.encode(new StreamFinalityCurrentComponentRoute[](10)));
+        vm.expectRevert();
+        h.verify(address(b), scope, es, false);
+        (routes[0], routes[1]) = (routes[1], routes[0]);
+        b.put(input, abi.encode(routes));
+        vm.expectRevert();
+        h.verify(address(b), scope, es, false);
+        (routes[0], routes[1]) = (routes[1], routes[0]);
+        routes[0].codeHash = keccak256("bad pin");
+        b.put(input, abi.encode(routes));
+        vm.expectRevert();
+        h.verify(address(b), scope, es, false);
+    }
+
+    function testLegacyAbsentOrFalseCapabilityReturnsToExistingPathAndMalformedAnswerRejects()
+        public
+    {
+        DiscoveryReadTable b = new DiscoveryReadTable();
+        DiscoveryStrictRouteHarness h = new DiscoveryStrictRouteHarness();
+        StreamFinalityComponentExpectation[] memory es = _entries(false);
+        require(!h.routes(address(b), scope, es, false));
+        bytes memory input = abi.encodeCall(
+            IERC165.supportsInterface, (type(IStreamFinalityCurrentComponentRoutes).interfaceId)
+        );
+        b.put(input, abi.encode(false));
+        require(!h.routes(address(b), scope, es, false));
+        b.put(input, abi.encode(uint256(2)));
+        vm.expectRevert();
+        h.routes(address(b), scope, es, false);
+        b.put(input, new bytes(31));
+        vm.expectRevert();
+        h.routes(address(b), scope, es, false);
+    }
+
+    function testRoutesKeepSelectedAdapterAndCurrentEntropyPlanGates() public {
+        DiscoveryReadTable(c.entropyFactory)
+            .remove(abi.encodeCall(IStreamFinalityCurrentEntropyRoute.requireCurrentRoute, (scope)));
+        vm.expectRevert();
+        discovery.requireCurrentRoutes(scope, false);
+        _put(
+            c.entropyFactory,
+            abi.encodeCall(IStreamFinalityCurrentEntropyRoute.requireCurrentRoute, (scope)),
+            abi.encode(
+                StreamFinalityCurrentComponentRoute(
+                    keccak256("ENTROPY_COORDINATOR"),
+                    address(entropy),
+                    type(IStreamArtworkFinalityComponent).interfaceId,
+                    address(entropy).codehash
+                )
+            )
+        );
+        require(discovery.requireCurrentRoutes(scope, false).length == 9);
+        _selected(_new(), keccak256("METADATA_ROUTER"), type(IStreamMetadataRouter).interfaceId);
+        vm.expectRevert();
+        discovery.requireCurrentRoutes(scope, false);
+    }
+
+    function testFuzzRouteDriftCannotMatchOriginalExpectation(bytes32 badHash) public {
+        (DiscoveryReadTable b, StreamFinalityComponentExpectation[] memory es, bytes memory input) =
+            _routeBoundary(false);
+        StreamFinalityCurrentComponentRoute[] memory routes =
+            discovery.requireCurrentRoutes(scope, false);
+        if (badHash == routes[0].codeHash) return;
+        routes[0].codeHash = badHash;
+        b.put(input, abi.encode(routes));
+        DiscoveryStrictRouteHarness h = new DiscoveryStrictRouteHarness();
+        vm.expectRevert();
+        h.verify(address(b), scope, es, false);
+    }
+
+    function testSafeReadsBothRoutesAndStrictlyValidatesTheLiveComponentSet() public {
+        uint256[] memory keys = new uint256[](2);
+        keys[0] = 701;
+        keys[1] = 907;
+        OfficialSafe safe =
+            createOfficialSafe(deploySafeComponents("1.4.1"), safeOwnerAddresses(keys), 2, 77666);
+        require(
+            executeSafe(
+                safe,
+                keys,
+                address(discovery),
+                0,
+                abi.encodeCall(discovery.requireCurrentRoutes, (scope, false)),
+                0
+            )
+        );
+        _sign();
+        require(
+            executeSafe(
+                safe,
+                keys,
+                address(discovery),
+                0,
+                abi.encodeCall(discovery.requireCurrentRoutes, (scope, true)),
+                0
+            )
+        );
+        DiscoveryStrictRouteHarness h = new DiscoveryStrictRouteHarness();
+        require(
+            executeSafe(
+                safe,
+                keys,
+                address(h),
+                0,
+                abi.encodeCall(h.verify, (address(discovery), scope, _entries(true), true)),
+                0
+            )
+        );
+    }
+
+    function testRouteCapIsUpperBoundAndLowParentGasRejectsThenExactRetryPasses() public {
+        StreamFinalityComponentExpectation[] memory es = _entries(false);
+        DiscoveryStrictRouteHarness h = new DiscoveryStrictRouteHarness();
+        bytes memory input = abi.encodeCall(h.routes, (address(discovery), scope, es, false));
+        // The harness configures4M. A much smaller real parent may still validate all routes.
+        (bool low,) = address(h).staticcall{ gas: 100000 }(input);
+        require(!low, "low parent cannot skip discovery");
+        (bool ok, bytes memory result) = address(h).staticcall{ gas: 3000000 }(input);
+        require(ok && result.length == 32 && abi.decode(result, (bool)), "bounded exact retry");
+    }
+
+    function testGasExhaustingAdvertisedRouteKeepsTypedFailureAndParentReserve() public {
+        StreamFinalityComponentExpectation[] memory es = _entries(false);
+        DiscoveryStrictRouteHarness h = new DiscoveryStrictRouteHarness();
+        DiscoveryGasBurner burner = new DiscoveryGasBurner();
+        bytes memory input = abi.encodeCall(h.routes, (address(burner), scope, es, false));
+        uint256 beforeGas = gasleft();
+        (bool ok, bytes memory reason) = address(h).staticcall{ gas: 3000000 }(input);
+        uint256 used = beforeGas - gasleft();
+        require(
+            !ok && reason.length == 4
+                && bytes4(reason) == StreamFinalityRouteReads.FinalityRoutesUnreadable.selector,
+            "advertised exhausted read is typed failure"
+        );
+        require(used < 2900000, "caller retains reserve after burning route");
+        require(h.routes(address(discovery), scope, es, false), "healthy exact-input retry");
     }
 }

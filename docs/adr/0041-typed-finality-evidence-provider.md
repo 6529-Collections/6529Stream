@@ -163,7 +163,9 @@ A fixed, constructor-bound factory precedes the original Registry. Permissionles
 later preparation derives the actual current plan and admits the complete locked
 source list into a constructor-only child. The factory's append-only plan/child
 and runtime mapping is not a mutable source allowlist. Complete current discovery
-must call its current-component projection; the Registry does not automatically
+must call its current-component or additive current-route projection; both retain
+complete current selection. The route projection omits only the redundant child
+finality-state read, which the Registry performs independently. The Registry does not automatically
 perform an adapter's current-selection check. Historical child reads use retained
 scope/source evidence, while current admission separately rejects stale membership.
 

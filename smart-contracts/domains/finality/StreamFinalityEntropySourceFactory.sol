@@ -1,13 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamFinalityEntropySourceSet.sol";
+import "../../interfaces/stream/finality/IStreamFinalityCurrentComponentRoutes.sol";
 import "../../interfaces/stream/finality/IStreamFinalityEntropySourceFactory.sol";
 
 /// @notice Permissionless preparation of immutable complete entropy source sets.
 /// @dev The complete provider/discovery pins this factory before the original Registry exists.
 /// Later scopes derive from actual membership and must already have a complete original inventory.
 /// No mutable allowlist, current coordinator substitution or caller source list is introduced.
-contract StreamFinalityEntropySourceFactory is IStreamFinalityEntropySourceFactory {
+contract StreamFinalityEntropySourceFactory is
+    IStreamFinalityEntropySourceFactory,
+    IStreamFinalityCurrentEntropyRoute
+{
     address public immutable override core;
     address public immutable override metadataHost;
     address public immutable override scopeMembershipHost;
@@ -29,7 +33,8 @@ contract StreamFinalityEntropySourceFactory is IStreamFinalityEntropySourceFacto
 
     function supportsInterface(bytes4 id) external pure override returns (bool) {
         return id == type(IERC165).interfaceId
-            || id == type(IStreamFinalityEntropySourceFactory).interfaceId;
+            || id == type(IStreamFinalityEntropySourceFactory).interfaceId
+            || id == type(IStreamFinalityCurrentEntropyRoute).interfaceId;
     }
 
     function currentInventoryPlan(StreamFinalityScope calldata scope)
@@ -98,6 +103,29 @@ contract StreamFinalityEntropySourceFactory is IStreamFinalityEntropySourceFacto
             s.moduleVersion,
             s.manifestHash,
             s.dataHash
+        );
+    }
+
+    function requireCurrentRoute(StreamFinalityScope calldata scope)
+        external
+        view
+        override
+        returns (StreamFinalityCurrentComponentRoute memory)
+    {
+        bytes32 plan = currentInventoryPlan(scope);
+        address sourceSet = _sets[plan];
+        if (sourceSet == address(0)) revert EntropySourceSetMissing(plan);
+        _requireSet(plan, sourceSet);
+        // Current completeness and selected Metadata remain mandatory. Historical finalityState
+        // alone does not establish them; the Registry independently reads that state afterward.
+        IStreamFinalityEntropySourceSet(sourceSet).requireCurrentSelection();
+        return StreamFinalityCurrentComponentRoute(
+            StreamFinalityDomains.COMPONENT_ENTROPY_COORDINATOR,
+            sourceSet,
+            scope.scopeType == StreamFinalityScopeType.COLLECTION
+                ? type(IStreamArtworkFinalityComponent).interfaceId
+                : type(IStreamArtworkScopedFinalityComponent).interfaceId,
+            _codeHashes[plan]
         );
     }
 

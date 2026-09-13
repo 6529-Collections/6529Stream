@@ -15,6 +15,7 @@ import "../../interfaces/stream/finality/IStreamFinalityEvidenceDiscoveryBinding
 import "../../interfaces/stream/finality/IStreamCoreFinalityEvidenceBinding.sol";
 import "../../interfaces/stream/core/IStreamCorePointers.sol";
 import "./StreamFinalityHashes.sol";
+import "./StreamFinalityRouteReads.sol";
 import "../../interfaces/stream/finality/IStreamFinalityMetadataReads.sol";
 import "../../interfaces/stream/finality/IStreamFinalitySanctionReads.sol";
 import "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
@@ -146,6 +147,9 @@ library StreamFinalityPreparation {
         StreamFinalityComponentExpectation[] calldata components,
         bytes32 submittedHash
     ) private view {
+        if (StreamFinalityRouteReads.verifyIfSupported(
+                deps.finalityDiscovery, scope, components, false, deps.readGas
+            )) return;
         (uint256 count, bytes32 hash) = abi.decode(
             _requiredRead(
                 deps,
@@ -763,6 +767,9 @@ library StreamFinalityPreparation {
         StreamFinalityComponentExpectation[] calldata components,
         bytes32 submittedHash
     ) private view {
+        if (StreamFinalityRouteReads.verifyIfSupported(
+                deps.finalityDiscovery, scope, components, true, deps.readGas
+            )) return;
         uint256 submittedCount = components.length;
         address discovery = deps.finalityDiscovery;
         (bool factsReadable, uint256 discoveredCount, bytes32 discoveredHash) =

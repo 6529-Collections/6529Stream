@@ -7,6 +7,7 @@ deployment evidence.
 
 | Task | Guide |
 | --- | --- |
+| Publish original native reference renders and retained runtime evidence | [Native reference render](../guides/native-reference-render.md) |
 | Retain and validate exact independent finality manifest bytes | [Finality input manifests](finality-input-manifests.md) |
 | Discover the fixed required finality components | [Fixed finality discovery](fixed-finality-discovery.md) |
 | Preserve and verify large external runtime objects | [External object archive](../guides/external-object-archive.md) |

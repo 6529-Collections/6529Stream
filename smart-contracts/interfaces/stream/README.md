@@ -6,6 +6,8 @@ not select a different contract or grant a caller additional authority.
 
 | Operation | Import | Implementation |
 | --- | --- | --- |
+| Current route identities without repeated state reads | [IStreamFinalityCurrentComponentRoutes](finality/IStreamFinalityCurrentComponentRoutes.sol) | [Fixed discovery guide](../../../docs/integrations/fixed-finality-discovery.md); Registry still checks every complete live state |
+| Original reference-render publication | [IStreamReferenceRenderPublication](preservation/IStreamReferenceRenderPublication.sol) | [Native reference render guide](../../../docs/guides/native-reference-render.md) |
 | Independent finality input-manifest statement | [StreamFinalityInputManifestTypes](finality/StreamFinalityInputManifestTypes.sol) | [StreamFinalityInputManifestReads](../../domains/finality/StreamFinalityInputManifestReads.sol); [caller guide](../../../docs/integrations/finality-input-manifests.md) |
 | Fixed current component discovery and shared producer bindings | [IStreamArtworkFinalityDiscovery](finality/IStreamArtworkFinalityComponents.sol), [IStreamFinalityDiscoverySources](finality/IStreamFinalityDiscoverySources.sol) | [StreamFinalityCurrentDiscovery](../../domains/finality/StreamFinalityCurrentDiscovery.sol); [caller guide](../../../docs/integrations/fixed-finality-discovery.md) |
 | Retained native snapshot publication and history | [IStreamCollectionSnapshots](metadata/IStreamCollectionSnapshots.sol) | [StreamCollectionSnapshots](../../domains/metadata/StreamCollectionSnapshots.sol); [snapshot guide](../../../docs/integrations/native-onchain-snapshots.md) |
