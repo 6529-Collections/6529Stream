@@ -281,6 +281,13 @@ contract StreamArtworkFinalityRecovery is
                 request.expectedOriginalFinalityRecordHash, selected.originalFinalityRecordHash
             );
         }
+        // A first inherited selection was checked by resolve. Historical exact heads deliberately
+        // skip that dependency, so new preparation must recheck the admitted inherited relation.
+        if (selected.exactHead != 0) {
+            StreamFinalityRecoveryRoutes.requireInheritedFamily(
+                b, selected.originalScope, request.scope
+            );
+        }
         if (selected.exactHead != request.expectedPredecessorRecoveryId) {
             revert StreamFinalityRecoveryState.FinalityRecoveryPredecessorMismatch(
                 request.expectedPredecessorRecoveryId, selected.exactHead

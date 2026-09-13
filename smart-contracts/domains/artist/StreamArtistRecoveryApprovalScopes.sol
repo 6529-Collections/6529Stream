@@ -12,6 +12,39 @@ library StreamArtistRecoveryApprovalScopes {
     error RecoveryApprovalScopeReadFailed(address core, bytes4 selector);
     error RecoveryApprovalScopeParentGas(uint256 available, uint256 required);
 
+    /// @notice Recognizes immutable recorded scope relations; it does not establish fresh membership.
+    function supportedAdmission(
+        StreamFinalityScope memory original,
+        StreamFinalityScope memory requested
+    ) internal pure returns (bool) {
+        return supported(original, requested) || _familyShape(original, requested);
+    }
+
+    /// @notice Exact/TOKEN admission retains its reads. New family identity is checked by the
+    ///         authenticated companion's subsequent exact Request preparation in approvalIntent.
+    function requireFreshAdmission(
+        address core,
+        StreamFinalityScope memory original,
+        StreamFinalityScope memory requested,
+        uint256 cap
+    ) public view {
+        if (_familyShape(original, requested)) return;
+        requireFresh(core, original, requested, cap);
+    }
+
+    function _familyShape(StreamFinalityScope memory original, StreamFinalityScope memory requested)
+        private
+        pure
+        returns (bool)
+    {
+        return original.scopeType == StreamFinalityScopeType.COLLECTION
+            && original.collectionId != 0 && original.tokenId == 0 && original.scopeId == 0
+            && requested.scopeType >= StreamFinalityScopeType.RELEASE
+            && requested.scopeType <= StreamFinalityScopeType.VIEW
+            && requested.collectionId == original.collectionId && requested.tokenId == 0
+            && requested.scopeId != 0;
+    }
+
     function supported(StreamFinalityScope memory original, StreamFinalityScope memory requested)
         internal
         pure

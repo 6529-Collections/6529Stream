@@ -3,12 +3,13 @@ pragma solidity ^0.8.19;
 
 import "./StreamFinalityRecoveryBindings.sol";
 import "./StreamFinalityRecoveryState.sol";
+import "./StreamFinalityRecoveryScopeMembership.sol";
 import "../artist/StreamArtistRecoveryOriginalReads.sol";
 import { IStreamCoreIdentity } from "../../interfaces/stream/core/IStreamCoreIdentity.sol";
 
 /// @notice Original artist-sanctioned lineage and exact-scope recovery route selection.
-/// @dev New inherited RELEASE/SEASON/VIEW admission remains unsupported until the authoritative
-///      family-qualified producer is composed. Existing exact finality authenticates its scope.
+/// @dev Inherited families use the original Registry's fixed membership universe. Historical
+///      exact recovery heads retain their admitted original scope without fresh membership reads.
 library StreamFinalityRecoveryRoutes {
     error FinalityRecoveryRouteMissing(bytes32 routeType);
     error FinalityRecoveryRouteAmbiguous(bytes32 routeType);
@@ -192,7 +193,8 @@ library StreamFinalityRecoveryRoutes {
         StreamFinalityScope memory scope
     ) private view {
         if (scope.scopeType != StreamFinalityScopeType.TOKEN) {
-            revert FinalityRecoveryInheritedScopeUnsupported(uint8(scope.scopeType));
+            _family(b, scope);
+            return;
         }
         bytes memory raw = StreamFinalityRecoveryBindings.fixedRead(
             b.inputs.core,
@@ -223,5 +225,39 @@ library StreamFinalityRecoveryRoutes {
         if ((lifecycle != 2 && lifecycle != 3) || (burned == 1) != (lifecycle == 3)) {
             revert FinalityRecoveryScopeMembershipInvalid();
         }
+    }
+
+    /// @notice New preparation rechecks inherited family membership even after an exact head exists.
+    /// @dev Exact original scopes and TOKEN retain their existing independent admission rules.
+    function requireInheritedFamily(
+        StreamFinalityRecoveryBindings.Bound memory b,
+        StreamFinalityScope memory original,
+        StreamFinalityScope memory requested
+    ) public view {
+        if (
+            original.scopeType != StreamFinalityScopeType.COLLECTION
+                || requested.scopeType < StreamFinalityScopeType.RELEASE
+        ) return;
+        if (
+            original.collectionId == 0 || original.collectionId != requested.collectionId
+                || original.tokenId != 0 || original.scopeId != 0
+        ) revert FinalityRecoveryScopeMembershipInvalid();
+        _family(b, requested);
+    }
+
+    function _family(
+        StreamFinalityRecoveryBindings.Bound memory b,
+        StreamFinalityScope memory scope
+    ) private view {
+        StreamFinalityRecoveryScopeMembership.read(
+            StreamFinalityRecoveryScopeMembership.Environment(
+                b.inputs.core,
+                b.inputs.originalFinality,
+                b.codeHashes[4],
+                b.suite.metadata,
+                b.inputs.readGas
+            ),
+            scope
+        );
     }
 }

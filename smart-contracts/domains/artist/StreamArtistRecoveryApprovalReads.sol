@@ -29,7 +29,7 @@ library StreamArtistRecoveryApprovalReads {
         if (request.terms.collectionId != original.scope.collectionId) {
             revert Recovery.InvalidRecoveryApproval();
         }
-        StreamArtistRecoveryApprovalScopes.requireFresh(
+        StreamArtistRecoveryApprovalScopes.requireFreshAdmission(
             suite.core, original.scope, request.scope, pins.readGas
         );
         p.binding_ =
@@ -92,7 +92,7 @@ library StreamArtistRecoveryApprovalReads {
                 || r.bindingGeneration != o.sanction.bindingGeneration
                 || r.bindingHash != o.sanction.bindingHash
                 || keccak256(abi.encode(r.terms)) != keccak256(abi.encode(terms))
-                || !StreamArtistRecoveryApprovalScopes.supported(o.scope, a.scope)
+                || !StreamArtistRecoveryApprovalScopes.supportedAdmission(o.scope, a.scope)
                 || a.originalFinalityCodeHash != pins.finalityCodeHash
                 || _recordHash(suite, r) != hash
         ) revert Recovery.InvalidRecoveryApproval();

@@ -786,6 +786,57 @@ dependency budgets are specified in [the membership guide](../scope-membership.m
 This profile does not itself complete inherited-scope recovery approval,
 adjudicated supersession, VIEW content adoption or whole-stack finality.
 
+## Inherited published-family recovery admission
+
+New recovery preparation supports inheritance from an authenticated canonical
+COLLECTION finality record to RELEASE, SEASON and VIEW in the same collection.
+The requested scope has zero token ID and a nonzero family-qualified scope ID.
+The companion authenticates that ID through the original Registry's saved
+provider and code hash, the provider's fixed Core, generic Metadata, Router and
+membership host bindings, and the actual sealed membership facts. It recomputes
+the subject, original-record-derived scope ID and full membership commitment.
+Empty sealed scopes retain their valid grammar; membership alone does not imply
+readiness, artist sanction or VIEW content adoption.
+
+The Artist admission wrapper recognizes this canonical scope relation, then the
+existing selected-companion proof loads the exact immutable full Request bound
+to the original finality record and recovery manifest. The companion performs
+the fresh membership check; Artist operation22 repeats this preparation under
+its lock. Existing exact-scope and inherited TOKEN rules remain unchanged.
+Authority restrictions use the requested scope, including the scoped steward
+exclusion. Original signature fields, permanent approval hashes, nonce lanes and
+stored Admission tuples remain unchanged.
+
+An existing exact recovery head does not waive the fresh membership check for
+another recovery inherited from COLLECTION. The companion revalidates that
+relation during new preparation even though historical exact-head resolution
+retains its saved original scope and record. Saved approval verification relies
+on the immutable relation admitted with the exact manifest; it does not consult
+today's membership source, token state, signer authority or deadline. A membership
+source outage therefore blocks new inherited preparation while saved consent and
+executed recovery evidence remain readable under their existing historical pins.
+
+The membership read uses the companion's existing governed
+GGP_RECOVERY_DEPENDENCY_READ_GAS. The Artist outer FINALITY_READ_GAS budget must
+independently cover nested work and EIP-150 reserves. The retained lower-budget
+controls and actual parameter-host raises are separate from proof of delayed
+scheduling: the Artist composition profile raises the companion dependency read
+to two million, Artist finality reads to eight million and the companion Artist
+read to sixteen million through bounded successive host updates. The final
+promised child cap requires strictly more than 16,353,968 gas at its inner caller
+frame, in addition to preceding work and outer call reductions. Lower actual gas
+consumption does not prove a twelve- or sixteen-million total transaction budget.
+The fixture uses an exact typed Executor context, while real metadata publication, sealed membership, owner mutations, Safe
+signatures and Archive callbacks execute normally. The helper cohort supplies
+the actual provider/Router membership graph; original Registry and governance
+boundaries in that cohort and the Artist cohort do not become a single complete
+authority deployment by combining their results.
+
+This admission extension does not implement operation35, explicit adjudicated
+approval supersession, family VIEW presentation adoption or full finality
+construction and launch acceptance. No Binding-generation or generic identity
+change is an approval-supersession signal.
+
 ## Acceptance and remaining work
 
 Required tests include an actual threshold-Safe/Executor class-2 path, direct
