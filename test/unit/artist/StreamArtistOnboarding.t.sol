@@ -2859,6 +2859,7 @@ contract StreamArtistOnboardingTest is ArtistOnboardingFixture {
                 uint16(18),
                 uint16(20),
                 uint16(21),
+                uint16(22),
                 uint16(23),
                 uint16(24),
                 uint16(25),
