@@ -109,6 +109,92 @@ class ArtistOwnerRecordContinuityTests(unittest.TestCase):
             CHECKER.EXPECTED_AUTHORITY_BINDINGS = original_bindings
             CHECKER.SEMANTIC_DIGEST = original_semantic
 
+    def test_occurrence_reuses_lists_only_across_distinct_primaries(self) -> None:
+        rows = self._packet()["operation35_secondary_occurrence"]["vectors"]
+        for a, b in ((rows[0], rows[1]), (rows[2], rows[3])):
+            self.assertEqual(a["superseded_record_hashes"], b["superseded_record_hashes"])
+            self.assertEqual(a["expected_secondary_semantic_hash"], b["expected_secondary_semantic_hash"])
+            self.assertNotEqual(a["expected_primary_recovery_record_hash"], b["expected_primary_recovery_record_hash"])
+            self.assertNotEqual(a["expected_occurrence_key"], b["expected_occurrence_key"])
+        self.assertNotEqual(rows[0]["artist_id"], rows[1]["artist_id"])
+        self.assertNotEqual(rows[2]["governance_action_id"], rows[3]["governance_action_id"])
+
+    def test_occurrence_exception_cannot_move_to_another_slot_or_owner(self) -> None:
+        for field, value in (("operation_id", 34), ("record_position", 0), ("owner_domain", "consent_finality")):
+            with self.subTest(field=field):
+                packet = self._packet()
+                packet["operation35_secondary_occurrence"][field] = value
+                self._write_packet(packet)
+                self._assert_rejected("schema validation failed")
+                shutil.copy2(REPO_ROOT / CHECKER.PACKET_PATH, self.root / CHECKER.PACKET_PATH)
+
+    def test_occurrence_cannot_accept_caller_primary_or_change_preimages(self) -> None:
+        for field in ("ordinary_coordinate_unchanged", "permanent_semantic_preimages_unchanged", "owner_record_commitment_preimage_unchanged", "existing_or_caller_selected_primary_allowed"):
+            with self.subTest(field=field):
+                packet = self._packet()
+                item = packet["operation35_secondary_occurrence"]
+                item[field] = not item[field]
+                self._write_packet(packet)
+                self._assert_rejected("schema validation failed")
+                shutil.copy2(REPO_ROOT / CHECKER.PACKET_PATH, self.root / CHECKER.PACKET_PATH)
+
+    def test_occurrence_requires_one_revision_two_appends_and_atomic_failure(self) -> None:
+        for field, value in (("owner_revision_delta", 2), ("ordered_record_appends", 1), ("second_append_failure", "keep_first_append"), ("duplicate_primary_action_or_nonce", "accept_idempotently")):
+            with self.subTest(field=field):
+                packet = self._packet()
+                packet["operation35_secondary_occurrence"][field] = value
+                self._write_packet(packet)
+                self._assert_rejected("schema validation failed")
+                shutil.copy2(REPO_ROOT / CHECKER.PACKET_PATH, self.root / CHECKER.PACKET_PATH)
+
+    def test_occurrence_domain_or_primary_vector_substitution_is_rejected(self) -> None:
+        packet = self._packet()
+        packet["operation35_secondary_occurrence"]["vectors"][0]["expected_primary_recovery_record_hash"] = "0x" + "ee" * 32
+        self._write_packet(packet)
+        self._assert_rejected("schema validation failed")
+
+    def test_occurrence_coordinated_packet_schema_and_digest_repin_is_rejected(self) -> None:
+        packet = self._packet()
+        item = packet["operation35_secondary_occurrence"]
+        item["existing_or_caller_selected_primary_allowed"] = True
+        schema = self._read(CHECKER.SCHEMA_PATH)
+        schema["properties"]["operation35_secondary_occurrence"]["const"] = copy.deepcopy(item)
+        self._write(CHECKER.SCHEMA_PATH, schema)
+        self._write_packet(packet)
+        old_schema, old_semantic = CHECKER.SCHEMA_SHA256, CHECKER.SEMANTIC_DIGEST
+        try:
+            CHECKER.SCHEMA_SHA256 = hashlib.sha256((self.root / CHECKER.SCHEMA_PATH).read_bytes()).hexdigest()
+            CHECKER.SEMANTIC_DIGEST = self._refresh_packet_semantic_digest()
+            self._assert_rejected("operation35 occurrence policy or vectors drifted")
+        finally:
+            CHECKER.SCHEMA_SHA256, CHECKER.SEMANTIC_DIGEST = old_schema, old_semantic
+
+    def test_current_owner_domain_is_constructor_identity_not_logical_namespace(self) -> None:
+        packet = self._packet()
+        profile = packet["operation35_secondary_occurrence"]["operative_owner_binding"]
+        self.assertEqual(CHECKER._keccak_text("domain:identity_authority"), profile["owner_domain_id"])
+        old_domain = packet["canonical_vectors"]["fixture_identity"]["owner_domain_id"]
+        self.assertNotEqual(old_domain, profile["owner_domain_id"])
+        profile["owner_domain_id"] = old_domain
+        self._write_packet(packet)
+        self._assert_rejected("schema validation failed")
+
+    def test_current_owner_vector_and_schema_repin_still_rejects(self) -> None:
+        packet = self._packet()
+        item = packet["operation35_secondary_occurrence"]
+        item["operative_owner_binding"]["vectors"][0]["record_delta"] = "0x" + "ee" * 32
+        schema = self._read(CHECKER.SCHEMA_PATH)
+        schema["properties"]["operation35_secondary_occurrence"]["const"] = copy.deepcopy(item)
+        self._write(CHECKER.SCHEMA_PATH, schema)
+        self._write_packet(packet)
+        old_schema, old_semantic = CHECKER.SCHEMA_SHA256, CHECKER.SEMANTIC_DIGEST
+        try:
+            CHECKER.SCHEMA_SHA256 = hashlib.sha256((self.root / CHECKER.SCHEMA_PATH).read_bytes()).hexdigest()
+            CHECKER.SEMANTIC_DIGEST = self._refresh_packet_semantic_digest()
+            self._assert_rejected("operation35 occurrence policy or vectors drifted")
+        finally:
+            CHECKER.SCHEMA_SHA256, CHECKER.SEMANTIC_DIGEST = old_schema, old_semantic
+
     def test_baseline_is_valid(self) -> None:
         CHECKER.check(self.root)
 

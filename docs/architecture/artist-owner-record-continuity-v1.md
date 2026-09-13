@@ -67,6 +67,69 @@ The logical receipt coordinate is the typed pair `(recordDomain, semanticRecordH
 
 The physical mapping slot and surrounding domain storage remain unresolved. Freezing this logical receipt therefore does not accept `owner_storage`.
 
+## Adopted pre-genesis operation35 occurrence amendment
+
+The singleton coordinate above remains the rule for ordinary records. The second
+record of operation35 has one explicit exception: its permanent semantic hash
+commits only the superseded-record list. Empty or identical lists legitimately
+recur across different recoveries, so that content hash cannot serve as the
+unique receipt occurrence by itself.
+
+The dedicated secondary occurrence coordinate is:
+
+```text
+keccak256(abi.encode(
+  keccak256("6529STREAM_ARTIST_IDENTITY_RECOVERY_SECONDARY_OCCURRENCE_V2"),
+  uint16(2),
+  primaryRecoveryRecordHash,
+  IDENTITY_RECOVERY_SUPERSESSION_DOMAIN,
+  secondarySemanticHash
+))
+```
+
+This exception applies only to Identity's operation35 second slot. The owner
+recomputes the primary recovery record from admitted typed fields in that same
+batch and recomputes the exact secondary list hash; the primary's
+`supersededRecordsHash` must equal that secondary hash before either append.
+A caller-selected or separately existing primary record cannot authorize an
+occurrence. The dedicated storage remains local to the authenticated owner.
+
+The permanent primary12 and secondary-list preimages, all signatures, the
+thirteen-word owner receipt commitment, and the ordered record-chain and delta
+preimages remain unchanged. One successful owner revision appends primary then
+secondary at checked sequence+1 and sequence+2. Distinct authenticated recoveries
+may reuse a list, including empty content; an exact primary, governance action or
+nonce retry still rejects. Receipt insertion is immutable, with no replacement
+or latest pointer. A second-append or later failure rolls back both receipts,
+sequences, roots, replay, events and Archive evidence atomically.
+
+The packet and checker retain all predecessor vectors and add independently
+recomputed cases for two artists with empty lists and two recovery actions sharing
+a nonempty list. This amendment resolves receipt identity only. It does not widen
+the first operative recovery profile to nonempty supersession, decide which saved
+approval may lose pending use, or rewrite consumed consent and executed history.
+The existing implementation's one-record `_commit` path predates the packet's
+logical receipts and is not relabeled as complete packet conformance by this
+amendment; the new two-record path requires its own matching source and runtime
+evidence.
+
+### Current Identity constructor binding
+
+The current operation35 consumer uses the actual Identity owner's immutable
+`domainId`, `keccak256("domain:identity_authority")` (`0x6579e41542b1bfc6684ea87b09373c4f4690857bd046eb4faf0f92a42bc88adb`), in
+its owner receipt, record delta and record chain. The existing Identity and both
+writer constructors, Coordinator binding, ordinary owner state and replay remain
+unchanged. The earlier logical namespace label
+`keccak256("6529stream.artist.identity-authority.v2")` is retained in this packet's
+historical prerequisite rows and original vectors; it is not a substitute for
+the current constructor identity and is rejected by the operative consumer.
+
+The operation35 exception's `operative_owner_binding` pins this concrete profile
+and adds independent receipt and chain vectors. It changes no preimage shape,
+permanent semantic hash, signature, occurrence key or earlier owner history.
+The original packet-domain receipt mechanism capture is preserved separately;
+only the corrected actual-domain successor can support current Identity wiring.
+
 ## Bounded ordering and record chain
 
 The record/event correction supplies exact operation record bindings. They are filtered per owner and ordered `primary`, then `secondary`. There are 39 owner-record batches and 40 created records. Operation 35, `recoverArtistIdentity`, is the only two-record owner batch: `IDENTITY_RECOVERY_RECORD_DOMAIN` followed by `IDENTITY_RECOVERY_SUPERSESSION_DOMAIN`. Every other owner batch has one record; owner actions without a created record have zero.

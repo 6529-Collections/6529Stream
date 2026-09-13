@@ -3,6 +3,12 @@ pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/artist/IStreamArtistOwner.sol";
 import "./StreamArtistHashes.sol";
+import {
+    StreamArtistIdentityRecoveryReceipts as RecoveryReceipts
+} from "./StreamArtistIdentityRecoveryReceipts.sol";
+import {
+    StreamArtistIdentityRecoveryTypes as RecoveryRecord
+} from "../../interfaces/stream/artist/StreamArtistIdentityRecoveryTypes.sol";
 
 /// @notice Common immutable binding, replay and history accumulator for artist owners.
 /// @dev No owner may call another owner. The coordinator snapshots cross-domain facts
@@ -196,6 +202,51 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
             _recordSequence = nextSequence;
         }
         _revision = nextRevision;
+    }
+
+    /// @dev Additive operation35 path only. Existing one-record commits retain their old history.
+    ///      The concrete Identity owner supplies appended receipt storage and admitted typed facts.
+    function _commitIdentityRecovery(
+        RecoveryReceipts.State storage receipts,
+        StreamArtistOnboardingTypes.ActionContext calldata context,
+        bytes32 action,
+        bytes32 nextState,
+        bytes32 replayDelta,
+        RecoveryRecord.RecordFields memory fields,
+        bytes32[] memory sortedRecords
+    ) internal returns (RecoveryReceipts.Pair memory pair) {
+        _check(context, 35);
+        RecoveryReceipts.Environment memory e;
+        e.chainId = deploymentChainId;
+        e.registry = artistRegistry;
+        e.coordinator = operationCoordinator;
+        e.archive = archiveV2;
+        e.owner = address(this);
+        e.domain = domainId;
+        e.revision = _revision;
+        e.sequence = _recordSequence;
+        e.tip = _recordChainTip;
+        e.actor = context.actor;
+        pair = RecoveryReceipts.append(receipts, e, fields, sortedRecords);
+        StateTransitionPreimage memory preimage;
+        preimage.tag = keccak256("6529STREAM_ARTIST_OWNER_STATE_TRANSITION_V2");
+        preimage.chainId = deploymentChainId;
+        preimage.registry = artistRegistry;
+        preimage.coordinator = operationCoordinator;
+        preimage.archive = archiveV2;
+        preimage.owner = address(this);
+        preimage.domain = domainId;
+        preimage.previousRevision = _revision;
+        preimage.nextRevision = _revision + 1;
+        preimage.previousState = _stateRoot;
+        preimage.action = keccak256(abi.encode(context.operationId, context.actor, action));
+        preimage.nextState = nextState;
+        preimage.replayDelta = replayDelta;
+        preimage.recordDelta = pair.recordDelta;
+        _stateRoot = keccak256(abi.encode(preimage));
+        _recordSequence = pair.nextSequence;
+        _recordChainTip = pair.nextTip;
+        _revision = preimage.nextRevision;
     }
 
     function _now() internal view returns (uint64) {
