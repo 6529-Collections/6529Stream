@@ -393,7 +393,14 @@ def _relative(path: Path, repo_root: Path) -> str:
 
 
 def _solidity_declaration_kinds(path: Path) -> list[str]:
-    return DECLARATION_RE.findall(path.read_text(encoding="utf-8"))
+    # Declaration-shaped documentation and literal bytes are not Solidity declarations.
+    # Consume whole comments/quoted strings so comment markers inside a string stay data.
+    non_code = re.compile(
+        r"""//[^\r\n]*|/\*.*?\*/|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'""",
+        re.DOTALL,
+    )
+    code = non_code.sub(" ", path.read_text(encoding="utf-8"))
+    return DECLARATION_RE.findall(code)
 
 
 def _text_files(repo_root: Path) -> list[Path]:

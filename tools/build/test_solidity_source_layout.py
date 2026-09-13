@@ -345,6 +345,37 @@ class SoliditySourceLayoutTests(unittest.TestCase):
             self.add_current_source(root, extra)
             self.assertEqual(self.errors(root), [])
 
+    def test_declaration_scan_ignores_comments_and_literals(self) -> None:
+        source = r"""
+pragma solidity 0.8.19;
+// Exact case/order; contract grammar and registry validity are distinct.
+/* interface Misleading {} ; contract AlsoMisleading {} */
+library Types {
+    string constant A = "; contract Fake {} //";
+    string constant B = '/* ; interface Fake {} */';
+    string constant C = "escaped quote \" ; contract StillLiteral {}";
+}
+"""
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "Types.sol"
+            path.write_text(source, encoding="utf-8")
+            self.assertEqual(checker._solidity_declaration_kinds(path), ["library"])
+
+    def test_declaration_scan_retains_code_after_masked_text(self) -> None:
+        source = r"""
+pragma solidity 0.8.19;
+library Types { string constant A = "// fake comment"; }
+/* interface Placeholder {} */ abstract contract Actual {}
+interface/* separating comment */Real {}
+"""
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "Types.sol"
+            path.write_text(source, encoding="utf-8")
+            self.assertEqual(
+                checker._solidity_declaration_kinds(path),
+                ["library", "contract", "interface"],
+            )
+
     def test_concrete_compatibility_directory_rejects_interface(self) -> None:
         with self.fixture() as temp:
             root = Path(temp)
