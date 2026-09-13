@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistGuardianAppealTypes as GuardianAppeal
+} from "../../../smart-contracts/interfaces/stream/artist/StreamArtistGuardianAppealTypes.sol";
+import {
     IStreamArtistGuardianSelectionPreparation,
     IStreamArtistGuardianSelectionBinding,
     IStreamArtistGuardianSelectionOwner
@@ -710,7 +713,7 @@ contract StreamArtistGuardianSupersessionActualTest is ArtistOnboardingFixture {
         bytes32 roots = _roots();
         p.supersededRecordHashes[0] = lifetimeGuardian;
         vm.expectRevert(
-            abi.encodeWithSelector(GS.InvalidGuardianSupersession.selector, lifetimeGuardian)
+            abi.encodeWithSelector(GuardianAppeal.InvalidGuardianAppeal.selector, p.evidenceHash)
         );
         ingress.identityRecoveryContext(p, a);
         p.supersededRecordHashes[0] = retainedAttackerGuardian;

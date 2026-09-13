@@ -399,3 +399,71 @@ or estate election needs all relevant eligibility invalidators, not just the
 single elapsed transition used here. Appeal authority, hostile pre-transition
 evidence, absolute directive restrictions, other superseded record families and
 full chain rewinds remain required consumers.
+
+## Restricted root appeal for pre-transition guardians
+
+`6529STREAM_ARTIST_GUARDIAN_ROOT_APPEAL_PROFILE_V1` adds a pre-transition
+guardian lane to the sole-original-rotation, living-authority profile. The
+Identity owner derives the required tier from complete original history and
+the saved successful vesting revision. A requested pre-cutoff record requires
+APPEAL; post-cutoff-only lists retain ARBITER. Unknown artists, incomplete
+chronology, missing records and prior permanent exclusions fail closed. This
+does not change operations 34/35, permanent hashes, the 57 plus adopted 58
+operation inventory, auxiliary 65534 or the 37 genesis roles.
+
+The supported appeal proposer is the actual current GovernanceRoot. The fixed
+Executor must own the actual RoleRegistry, point to that registry, and identify
+the same root in `owner()` and `governanceRootState()`. That root must have the
+current APPEAL role, with the exact saved root code hash/revision and role
+mutation chain/revision. This establishes root-mediated administration of the
+ROOT-class ARBITER role. It does not implement a general delegated role-admin
+relation. The stored original proposer must equal that root. Both scheduled
+association and active sealed TERMINAL_FREEZE execution authenticate these
+facts; registration still leaves the full terminal minimum delay, and the
+independent governance guardian veto remains intact.
+
+The third fixed Identity child exposes `guardianAppealEvidenceBinding()` for a
+permissionless immutable content publisher. The publisher observes the owner
+runtime only after construction, when publishing. It creates no Identity
+revision, pending action, signature authority or adjudication. A typed document
+binds the exact current cause and original contest, saved original vesting
+commitment, full request commitment, a hostile-findings reference and every
+requested pre-cutoff guardian record with its exact original party array.
+The owner reconstructs that complete subset from original records; omitted,
+additional or substituted parties/records reject. Empty pre-cutoff guardian
+sets are outside this explicit hostile-party profile.
+
+The request commitment has its own domain/version and substitutes zero for
+only `evidenceHash`. The resulting document hash fills that one request field;
+the original expected cause/resolution, new principal, reason and complete
+supersession list remain committed. The original Contest evidence and reason
+are reconstructed from the retained original record and cause. The new request
+must retain that original reason; its evidence field identifies the separate
+hostile document. This avoids a circular commitment or a rewritten contest.
+A nonzero hostile-findings hash identifies evidence assessed by the authorized
+appeal adjudicator; it is not machine proof of hostility.
+
+The actual operative artist directive is authenticated and included in the
+scheduled context. A `CAP_GUARDIAN_SET` prohibition is absolute even at APPEAL.
+Root/role/directive changes invalidate the original scheduled context; regranting
+a role does not restore its earlier revision. Preparation and execution Archive
+payloads retain the original payload plus the complete document, authority and
+directive evidence. The document identifies the original cause and Contest
+records already retained by operation 33 Archive evidence, and the immutable
+vesting snapshot by transition and commitment. The owner validates those full
+records in the scheduled context; these exact references preserve the
+transitive Archive and owner-record join without duplicating their payloads.
+Permanent original guardian/rotation records, one owner
+revision, the two recovery receipts and late-Archive rollback are preserved.
+Complete election and all retained guardian memberships still govern restored
+selection and veto; a mixed pre/post list subtracts only its exact exclusions.
+
+This profile remains limited to a fresh deployment with complete admission and
+vesting indexes, one original ordinary rotation and no earlier recovery.
+General historical/appeal/estate recovery, other superseded record families,
+the exceptional still-provisional lane and full chain rewinds remain required.
+Maximum 64-record/eight-party publication and preparation, repeated context
+reads, constructor/factory sizes and aggregate transaction gas remain separate
+capacity gates. The Artist/Safe tests and actual Executor/RoleRegistry witness
+tests are complementary deployments; neither alone establishes the combined
+full-system deployment.

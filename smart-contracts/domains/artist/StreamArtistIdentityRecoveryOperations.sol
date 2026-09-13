@@ -1,5 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistGuardianAppealTypes as Appeal
+} from "../../interfaces/stream/artist/StreamArtistGuardianAppealTypes.sol";
+import {
+    IStreamArtistGuardianAppealOwner
+} from "../../interfaces/stream/artist/IStreamArtistGuardianAppealEvidence.sol";
+import { StreamArtistGuardianAppealGovernance } from "./StreamArtistGuardianAppealGovernance.sol";
+import { StreamArtistGuardianAppealReads } from "./StreamArtistGuardianAppealReads.sol";
 import { StreamArtistRecoveryActionOperations } from "./StreamArtistRecoveryActionOperations.sol";
 
 import {
@@ -48,13 +56,37 @@ library StreamArtistIdentityRecoveryOperations {
         before_[2] = IStreamArtistOwner(identity).ownerStateSnapshotV2();
         IStreamArtistIdentityRecoveryOwner owner = IStreamArtistIdentityRecoveryOwner(identity);
         IdentityRecovery.Context memory c = owner.identityRecoveryContext(p, a);
-        Contest.GovernanceWitness memory g = StreamArtistIdentityRecoveryGovernance.read(
-            x,
-            IStreamArtistIdentityContestOwner(identity).artistWindowAuthority(),
-            actor,
-            p.reasonHash,
-            c
-        );
+        bool appeal = p.supersededRecordHashes.length != 0
+            && IStreamArtistGuardianAppealOwner(identity)
+                    .guardianRecoveryAuthorityRole(p.artistId, p.supersededRecordHashes)
+                == Appeal.APPEAL;
+        Contest.GovernanceWitness memory g = appeal
+            ? StreamArtistGuardianAppealGovernance.read(
+                x,
+                IStreamArtistIdentityContestOwner(identity).artistWindowAuthority(),
+                actor,
+                p.reasonHash,
+                c
+            )
+            : StreamArtistIdentityRecoveryGovernance.read(
+                x,
+                IStreamArtistIdentityContestOwner(identity).artistWindowAuthority(),
+                actor,
+                p.reasonHash,
+                c
+            );
+        bytes memory appealEvidence;
+        if (appeal) {
+            appealEvidence = abi.encode(
+                StreamArtistGuardianAppealReads.read(
+                    identity,
+                    StreamArtistHashes.Environment(
+                        block.chainid, x.suite.registry, x.suite.core, x.suite.mintManager
+                    ),
+                    p
+                )
+            );
+        }
         StreamArtistRecoveryActionOperations.requireExecution(identity, p.artistId, g.actionId);
         T.SignerApproval memory proof = _verify(x, actor, p, a, c.incumbent);
         record = owner.recoverIdentity(T.ActionContext(35, actor, before_[2]), p, a, proof, g);
@@ -62,7 +94,9 @@ library StreamArtistIdentityRecoveryOperations {
         if (item.recordHash != record || owner.latestIdentityRecovery(p.artistId) != record) {
             revert T.InvalidRecord();
         }
-        _archive(x, actor, record, before_, abi.encode(p, a, proof, g, c, item));
+        bytes memory payload = abi.encode(p, a, proof, g, c, item);
+        if (appeal) payload = abi.encode(payload, appealEvidence);
+        _archive(x, actor, record, before_, payload);
     }
 
     function _verify(

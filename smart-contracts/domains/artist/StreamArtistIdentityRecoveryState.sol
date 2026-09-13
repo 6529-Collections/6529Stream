@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistGuardianAppealTypes as Appeal
+} from "../../interfaces/stream/artist/StreamArtistGuardianAppealTypes.sol";
+import { StreamArtistGuardianAppealReads } from "./StreamArtistGuardianAppealReads.sol";
+import {
     StreamArtistGuardianSupersession as GuardianSupersession
 } from "./StreamArtistGuardianSupersession.sol";
 import { StreamArtistGuardianVestingHistory } from "./StreamArtistGuardianVestingHistory.sol";
@@ -260,6 +264,15 @@ library StreamArtistIdentityRecoveryState {
                 || i.governance.newValueHash != c.newValueHash || block.timestamp == 0
                 || block.timestamp > type(uint64).max
         ) revert Recovery.InvalidIdentityRecoveryGovernance();
+        _requireAppealWitness(
+            s,
+            rotations,
+            i.owner,
+            i.request,
+            i.governance.proposer,
+            i.governance.roleMutationHash,
+            i.governance.roleRevision
+        );
         bytes32 guardian = _requirePrepared(s, rotations, i, c);
         uint64 now_ = uint64(block.timestamp);
         uint64 postEnds = now_ + c.postContestSeconds;
@@ -408,6 +421,9 @@ library StreamArtistIdentityRecoveryState {
         R.GuardianRecord memory guardian =
             _guardian(s, rotations, i.owner, i.request.artistId, c.incumbent);
         A.Witness memory w = i.witness;
+        _requireAppealWitness(
+            s, rotations, i.owner, i.request, w.proposer, w.roleMutationHash, w.roleRevision
+        );
         if (
             i.action.operationId != A.PREPARE_OPERATION || i.action.actor == address(0)
                 || guardian.recordHash == bytes32(0) || w.actionId == bytes32(0)
@@ -489,6 +505,33 @@ library StreamArtistIdentityRecoveryState {
             associationHash
         );
         // No semantic primary, sequence append, signature consumption or authority mutation.
+    }
+
+    function _requireAppealWitness(
+        State storage s,
+        StreamArtistRotationState.State storage rotations,
+        StreamArtistIdentityState.OwnerContext memory o,
+        Recovery.Request memory p,
+        address proposer,
+        bytes32 mutation,
+        uint64 revision
+    ) private view {
+        if (
+            p.supersededRecordHashes.length != 0
+                && GuardianSupersession.authorityRole(
+                        s.guardianSupersession,
+                        s.guardianHistory,
+                        s.vestingHistory,
+                        rotations,
+                        p.artistId,
+                        p.supersededRecordHashes,
+                        s.guardianRecordsSeen[p.artistId]
+                    ) == Appeal.APPEAL
+        ) {
+            StreamArtistGuardianAppealReads.requireWitness(
+                o.environment, proposer, mutation, revision
+            );
+        }
     }
 
     function veto(

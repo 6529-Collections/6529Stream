@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistGuardianAppealDeployment } from "./StreamArtistGuardianAppealDeployment.sol";
 import {
     StreamArtistGuardianSelectionDeployment
 } from "./StreamArtistGuardianSelectionDeployment.sol";
@@ -27,6 +28,8 @@ contract StreamArtistIdentityRecoveryExtension is
     bytes32 private immutable _recoveryExecutorCodeHash;
     address private immutable _guardianSelectionPreparation;
     bytes32 private immutable _guardianSelectionPreparationCodeHash;
+    address private immutable _guardianAppealEvidence;
+    bytes32 private immutable _guardianAppealEvidenceCodeHash;
     error ExtensionWrongHost(address actual);
 
     constructor(
@@ -54,6 +57,9 @@ contract StreamArtistIdentityRecoveryExtension is
         address selection = StreamArtistGuardianSelectionDeployment.deploy(host_, registry_);
         _guardianSelectionPreparation = selection;
         _guardianSelectionPreparationCodeHash = selection.codehash;
+        address evidence = StreamArtistGuardianAppealDeployment.deploy(host_, registry_);
+        _guardianAppealEvidence = evidence;
+        _guardianAppealEvidenceCodeHash = evidence.codehash;
     }
     modifier onlyHost() {
         if (address(this) != _host) revert ExtensionWrongHost(address(this));
@@ -66,6 +72,10 @@ contract StreamArtistIdentityRecoveryExtension is
 
     function guardianSelectionPreparationBinding() external view returns (address, bytes32) {
         return (_guardianSelectionPreparation, _guardianSelectionPreparationCodeHash);
+    }
+
+    function guardianAppealEvidenceBinding() external view returns (address, bytes32) {
+        return (_guardianAppealEvidence, _guardianAppealEvidenceCodeHash);
     }
 
     function prepareIdentityRecoveryAction(

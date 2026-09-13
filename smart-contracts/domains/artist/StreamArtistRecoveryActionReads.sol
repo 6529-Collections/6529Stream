@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistGuardianAppealAuthority } from "./StreamArtistGuardianAppealAuthority.sol";
 
 import {
     StreamArtistRecoveryActionTypes as A
@@ -39,6 +40,29 @@ library StreamArtistRecoveryActionReads {
         T.Authorization memory acceptance,
         R.Context memory context
     ) public view returns (A.Witness memory w) {
+        return _prepare(e, actionId, calls, request, acceptance, context, false);
+    }
+
+    function prepareAppeal(
+        A.Environment memory e,
+        bytes32 actionId,
+        GovernanceCall[] memory calls,
+        R.Request memory request,
+        T.Authorization memory acceptance,
+        R.Context memory context
+    ) public view returns (A.Witness memory w) {
+        return _prepare(e, actionId, calls, request, acceptance, context, true);
+    }
+
+    function _prepare(
+        A.Environment memory e,
+        bytes32 actionId,
+        GovernanceCall[] memory calls,
+        R.Request memory request,
+        T.Authorization memory acceptance,
+        R.Context memory context,
+        bool appeal
+    ) private view returns (A.Witness memory w) {
         _pin(e.executor, e.executorCodeHash);
         if (e.registry.code.length == 0 || e.roles.code.length == 0) {
             revert A.InvalidRecoveryAction(actionId);
@@ -89,7 +113,7 @@ library StreamArtistRecoveryActionReads {
         w.notBefore = facts.notBefore;
         w.expiresAfter = facts.expiresAfter;
         w.minimumDelay = uint64(delay);
-        _proposer(e, w, request.reasonHash, facts);
+        _proposer(e, w, request.reasonHash, facts, appeal);
     }
 
     /// @notice An expired SCHEDULED action cannot execute, even before its status is materialized.
@@ -142,7 +166,8 @@ library StreamArtistRecoveryActionReads {
         A.Environment memory e,
         A.Witness memory w,
         bytes32 reason,
-        IStreamGovernanceActionFacts.ActionFacts memory facts
+        IStreamGovernanceActionFacts.ActionFacts memory facts,
+        bool appeal
     ) private view {
         (bytes memory h, uint256 size) = _read(
             e.executor, abi.encodeCall(IStreamGovernanceReads.governanceAction, (w.actionId)), 640
@@ -160,6 +185,11 @@ library StreamArtistRecoveryActionReads {
         ) revert A.InvalidRecoveryAction(w.actionId);
         w.proposer = address(uint160(_word(h, 12)));
         w.manifestHash = bytes32(_word(h, 18));
+        if (appeal) {
+            (w.roleMutationHash, w.roleRevision) =
+                StreamArtistGuardianAppealAuthority.requireProposer(e.executor, e.roles, w.proposer);
+            return;
+        }
         uint256 roles = _word(_fixed(e.executor, abi.encodeWithSignature("roleRegistry()"), 32), 0);
         bytes32 role = keccak256("ROLE_ATTRIBUTION_ARBITER");
         if (

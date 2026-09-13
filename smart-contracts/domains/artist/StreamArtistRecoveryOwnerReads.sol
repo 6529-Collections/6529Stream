@@ -50,6 +50,25 @@ library StreamArtistRecoveryOwnerReads {
         );
     }
 
+    function authorityRole(
+        RecoveryState.State storage s,
+        RotationState.State storage rotations,
+        bytes32 artistId,
+        bytes32[] memory records
+    ) public view returns (bytes memory) {
+        return abi.encode(
+            GuardianSupersession.authorityRole(
+                s.guardianSupersession,
+                s.guardianHistory,
+                s.vestingHistory,
+                rotations,
+                artistId,
+                records,
+                s.guardianRecordsSeen[artistId]
+            )
+        );
+    }
+
     function contest(StreamArtistIdentityContestState.State storage s, bytes32 hash)
         public
         view

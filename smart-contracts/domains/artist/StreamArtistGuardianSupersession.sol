@@ -31,6 +31,10 @@ import {
 } from "./StreamArtistGuardianVestingHistory.sol";
 import { StreamArtistRotationState as Rotations } from "./StreamArtistRotationState.sol";
 import { StreamArtistHashes } from "./StreamArtistHashes.sol";
+import {
+    StreamArtistGuardianAppealTypes as Appeal
+} from "../../interfaces/stream/artist/StreamArtistGuardianAppealTypes.sol";
+import { StreamArtistGuardianAppealReads } from "./StreamArtistGuardianAppealReads.sol";
 import { StreamArtistGuardianSelectionReads } from "./StreamArtistGuardianSelectionReads.sol";
 import {
     StreamArtistGuardianSelectionTypes as Selection
@@ -106,40 +110,41 @@ library StreamArtistGuardianSupersession {
                 || cutoff.newAddress != cause.facts.incumbent
                 || cutoff.oldAddress != rotation.terms.oldAddress
                 || cutoff.executedAt != rotation.transition.executedAt || cutoff.ownerRevision == 0
-                || cutoff.guardians.count >= head.count
+                || cutoff.guardians.count > head.count
                 || cutoff.guardians.ownerRevision >= cutoff.ownerRevision
-                || cutoff.ownerRevision >= head.ownerRevision
         ) {
             revert S.InvalidGuardianSupersession(transition);
         }
         C.Record memory contest = IStreamArtistIdentityContestOwner(address(this))
             .identityContestRecord(cause.facts.referenceHash);
-        _contest(environment, request, cause, contest, transition);
+        Appeal.Finding[] memory findings = _admissions(
+            s, history, rotations, request.artistId, request.supersededRecordHashes, cutoff, head
+        );
+        bool appeal = findings.length != 0;
+        if (appeal) {
+            // Authenticate the original contest using its own evidence. The new request links the hostile document separately.
+            Recovery.Request memory original = Recovery.Request(
+                request.artistId,
+                request.newAddress,
+                request.vestedAuthorityClass,
+                request.expectedCauseHash,
+                request.expectedResolutionHash,
+                contest.terms.evidenceHash,
+                request.reasonHash,
+                request.supersededRecordHashes
+            );
+            _contest(environment, original, cause, contest, transition);
+        } else {
+            if (cutoff.guardians.count >= head.count || cutoff.ownerRevision >= head.ownerRevision)
+            {
+                revert S.InvalidGuardianSupersession(transition);
+            }
+            _contest(environment, request, cause, contest, transition);
+        }
         bytes32 selected = Rotations.operativeGuardian(rotations, request.artistId);
         R.GuardianRecord storage operative = rotations.guardians[selected];
         if (selected == 0 || operative.recordHash != selected) {
             revert S.InvalidGuardianSupersession(selected);
-        }
-        bytes32 previous;
-        for (uint256 i; i < request.supersededRecordHashes.length; ++i) {
-            bytes32 hash = request.supersededRecordHashes[i];
-            GH.Entry storage entry = history.entries[hash];
-            R.GuardianRecord storage record = rotations.guardians[hash];
-            if (
-                hash <= previous || entry.recordHash != hash || entry.artistId != request.artistId
-                    || entry.index <= cutoff.guardians.count || entry.index > head.count
-                    || entry.ownerRevision <= cutoff.ownerRevision
-                    || entry.ownerRevision > head.ownerRevision
-                    || history.records[request.artistId][entry.index] != hash
-                    || entry.commitment == 0 || record.recordHash != hash
-                    || record.terms.artistId != request.artistId || record.authorityClass != 1
-                    || record.signer != cutoff.newAddress
-                    || entry.recordDataHash != keccak256(abi.encode(record))
-                    || s.statuses[hash].recoveryRecordHash != 0
-            ) {
-                revert S.InvalidGuardianSupersession(hash);
-            }
-            previous = hash;
         }
         bytes32 commitment = keccak256(
             abi.encode(
@@ -151,6 +156,16 @@ library StreamArtistGuardianSupersession {
                 request.supersededRecordHashes
             )
         );
+        if (appeal) {
+            commitment = keccak256(
+                abi.encode(
+                    commitment,
+                    StreamArtistGuardianAppealReads.requireEvidence(
+                        environment, request, cause, contest, cutoff, findings
+                    )
+                )
+            );
+        }
         Selection.Result memory chosen =
             election(s, history, rotations, environment, request, actualCount);
         if (chosen.commitment == 0) return commitment;
@@ -161,6 +176,91 @@ library StreamArtistGuardianSupersession {
                 chosen
             )
         );
+    }
+
+    /// @notice Policy classification only after exact owner-local chronology, record identity and status checks.
+    /// @dev Full current cause/context validation precedes the Coordinator's use of this getter.
+    function authorityRole(
+        State storage s,
+        History.State storage history,
+        Vesting.State storage vesting,
+        Rotations.State storage rotations,
+        bytes32 artistId,
+        bytes32[] memory records,
+        uint64 actualCount
+    ) public view returns (bytes32) {
+        if (records.length == 0) return Appeal.ARBITER;
+        GH.Head memory head = History.requireComplete(history, artistId, actualCount);
+        _complete(s, artistId, head);
+        bytes32 transition = rotations.latestExecution[artistId];
+        V.Snapshot memory cutoff = vesting.snapshots[transition];
+        R.RotationRecord storage rotation = rotations.rotations[transition];
+        if (
+            artistId == 0 || transition == 0 || rotation.recordHash != transition
+                || rotation.terms.artistId != artistId
+                || rotation.terms.expectedPreviousTransitionRecordHash != 0
+                || cutoff.artistId != artistId || cutoff.transitionRecordHash != transition
+                || cutoff.commitment == 0 || cutoff.operationId != 32 || cutoff.authorityClass != 1
+                || cutoff.ownerRevision == 0 || cutoff.previousTransitionRecordHash != 0
+                || cutoff.previousCommitment != 0 || cutoff.oldAddress != rotation.terms.oldAddress
+                || cutoff.newAddress != rotation.terms.newAddress
+                || cutoff.executedAt != rotation.transition.executedAt
+                || cutoff.guardians.count > head.count
+                || cutoff.guardians.ownerRevision >= cutoff.ownerRevision
+        ) {
+            revert S.InvalidGuardianSupersession(transition);
+        }
+        return _admissions(s, history, rotations, artistId, records, cutoff, head).length == 0
+            ? Appeal.ARBITER
+            : Appeal.APPEAL;
+    }
+
+    function _admissions(
+        State storage s,
+        History.State storage history,
+        Rotations.State storage rotations,
+        bytes32 artistId,
+        bytes32[] memory records,
+        V.Snapshot memory cutoff,
+        GH.Head memory head
+    ) private view returns (Appeal.Finding[] memory findings) {
+        if (records.length == 0 || records.length > 64) {
+            revert S.InvalidGuardianSupersession(artistId);
+        }
+        findings = new Appeal.Finding[](records.length);
+        uint256 count;
+        bytes32 previous;
+        for (uint256 i; i < records.length; ++i) {
+            bytes32 hash = records[i];
+            GH.Entry storage entry = history.entries[hash];
+            R.GuardianRecord storage record = rotations.guardians[hash];
+            if (
+                hash <= previous || entry.recordHash != hash || entry.artistId != artistId
+                    || entry.index == 0 || entry.index > head.count || entry.ownerRevision == 0
+                    || entry.ownerRevision > head.ownerRevision
+                    || history.records[artistId][entry.index] != hash || entry.commitment == 0
+                    || record.recordHash != hash || record.terms.artistId != artistId
+                    || record.authorityClass != 1 || record.signer == address(0)
+                    || entry.recordDataHash != keccak256(abi.encode(record))
+                    || s.statuses[hash].recoveryRecordHash != 0
+            ) {
+                revert S.InvalidGuardianSupersession(hash);
+            }
+            if (entry.index <= cutoff.guardians.count) {
+                if (
+                    entry.ownerRevision > cutoff.guardians.ownerRevision
+                        || entry.ownerRevision >= cutoff.ownerRevision
+                        || record.terms.guardians.length == 0
+                ) revert S.InvalidGuardianSupersession(hash);
+                findings[count++] = Appeal.Finding(hash, record.terms.guardians);
+            } else if (
+                entry.ownerRevision <= cutoff.ownerRevision || record.signer != cutoff.newAddress
+            ) {
+                revert S.InvalidGuardianSupersession(hash);
+            }
+            previous = hash;
+        }
+        assembly ("memory-safe") { mstore(findings, count) }
     }
 
     function election(

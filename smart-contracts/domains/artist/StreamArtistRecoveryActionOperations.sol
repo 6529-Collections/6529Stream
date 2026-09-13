@@ -1,6 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistGuardianAppealTypes as Appeal
+} from "../../interfaces/stream/artist/StreamArtistGuardianAppealTypes.sol";
+import {
+    IStreamArtistGuardianAppealOwner
+} from "../../interfaces/stream/artist/IStreamArtistGuardianAppealEvidence.sol";
+import { StreamArtistGuardianAppealReads } from "./StreamArtistGuardianAppealReads.sol";
+import { StreamArtistHashes } from "./StreamArtistHashes.sol";
+import {
     IStreamArtistGuardianSelectionOwner
 } from "../../interfaces/stream/artist/IStreamArtistGuardianSelectionPreparation.sol";
 import {
@@ -56,14 +64,27 @@ library StreamArtistRecoveryActionOperations {
             IStreamArtistIdentityRecoveryOwner(identity).identityRecoveryContext(p, acceptance);
         IStreamArtistRecoveryActionOwner owner = IStreamArtistRecoveryActionOwner(identity);
         (address executor, bytes32 codeHash) = owner.recoveryExecutorBinding();
-        A.Witness memory w = Reads.prepare(
-            A.Environment(x.suite.registry, executor, codeHash, x.suite.roleRegistry),
-            actionId,
-            calls,
-            p,
-            acceptance,
-            context
-        );
+        bool appeal = p.supersededRecordHashes.length != 0
+            && IStreamArtistGuardianAppealOwner(identity)
+                    .guardianRecoveryAuthorityRole(p.artistId, p.supersededRecordHashes)
+                == Appeal.APPEAL;
+        A.Witness memory w = appeal
+            ? Reads.prepareAppeal(
+                A.Environment(x.suite.registry, executor, codeHash, x.suite.roleRegistry),
+                actionId,
+                calls,
+                p,
+                acceptance,
+                context
+            )
+            : Reads.prepare(
+                A.Environment(x.suite.registry, executor, codeHash, x.suite.roleRegistry),
+                actionId,
+                calls,
+                p,
+                acceptance,
+                context
+            );
         (A.Association memory previous,,,) =
             owner.identityRecoveryActionState(p.artistId, bytes32(0));
         bool terminal = previous.associationHash == bytes32(0) || Reads.terminal(previous.action);
@@ -90,14 +111,23 @@ library StreamArtistRecoveryActionOperations {
                 || history.count != count || head.count != count
                 || history.historyCommitment != head.commitment
         ) revert T.InvalidRecord();
-        _archive(
-            x,
-            actor,
-            A.PREPARE_OPERATION,
-            association,
-            before_,
-            _preparationPayload(identity, p, acceptance, context, saved, count, history)
-        );
+        bytes memory payload =
+            _preparationPayload(identity, p, acceptance, context, saved, count, history);
+        if (appeal) {
+            payload = abi.encode(
+                payload,
+                abi.encode(
+                    StreamArtistGuardianAppealReads.read(
+                        identity,
+                        StreamArtistHashes.Environment(
+                            block.chainid, x.suite.registry, x.suite.core, x.suite.mintManager
+                        ),
+                        p
+                    )
+                )
+            );
+        }
+        _archive(x, actor, A.PREPARE_OPERATION, association, before_, payload);
     }
 
     function _preparationPayload(

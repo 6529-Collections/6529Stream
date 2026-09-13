@@ -1237,6 +1237,41 @@ auxiliary 65534 and 37 genesis roles are unchanged. This extension does not
 supply appeal/hostile-guardian authority, estate recovery, other record-family
 adjudication or a maximum-capacity/full-deployment claim.
 
+## Restricted guardian appeal profile
+
+The pre-genesis `6529STREAM_ARTIST_GUARDIAN_ROOT_APPEAL_PROFILE_V1` supports
+explicit pre-transition guardian adjudication in the first ordinary-rotation
+profile. Identity derives the tier from its complete original history and saved
+vesting revision; a publisher or caller cannot select APPEAL. The actual current
+GovernanceRoot must hold APPEAL and control the actual Executor/RoleRegistry
+ownership chain, establishing its root-mediated administration over ARBITER.
+Root runtime/revision and APPEAL mutation state enter the scheduled context and
+are authenticated again during sealed TERMINAL_FREEZE execution. The original
+stored proposer, full batch, per-call context, full registration delay and
+independent global guardian veto are preserved.
+
+A fixed content publisher retains a versioned typed hostile-guardian document.
+The owner independently joins its exact current original contest/cause, first
+vesting snapshot, entire request and every requested pre-cutoff guardian record
+and party. The request commitment zeroes only the self-derived document evidence
+hash. Original contest evidence remains unchanged; the request retains the
+original reason and points to the new document. The evidence reference expresses
+the authorized adjudicator's findings, not an automated determination of
+hostility. Empty pre-cutoff sets are outside this hostile-party profile.
+
+The actual operative directive remains an absolute constraint:
+`CAP_GUARDIAN_SET` forbiddance blocks these exclusions even at APPEAL. Complete
+election, retained-prefix veto, permanent original records, one owner revision,
+two receipts and atomic Archive rollback remain required. The exact document,
+root/role and directive facts are retained in preparation and execution evidence.
+The [preparation guide](../architecture/artist-recovery-preparation-v1.md#restricted-root-appeal-for-pre-transition-guardians)
+defines this narrow authority graph and commitment profile.
+
+Operations 34/35 and their permanent hashes remain unchanged, as do the 57 plus
+adopted 58 operations, auxiliary 65534 and 37 genesis roles. Broader role-admin
+delegation, historical and estate appeals, other record families, exceptional
+provisional adjudication, maximum capacity and complete deployment remain open.
+
 ## Acceptance and remaining work
 
 Required tests include an actual threshold-Safe/Executor class-2 path, direct

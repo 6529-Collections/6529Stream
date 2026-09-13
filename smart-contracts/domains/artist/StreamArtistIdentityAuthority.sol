@@ -383,6 +383,22 @@ contract StreamArtistIdentityAuthority is
         _returnResolution(StreamArtistRecoveryOwnerReads.selection(_identityRecovery, actionId));
     }
 
+    function guardianRecoveryAuthorityRole(bytes32 artistId, bytes32[] calldata records)
+        external
+        view
+        returns (bytes32)
+    {
+        if (
+            artistId == 0 || _identity.identities[artistId].authorityAddress == address(0)
+                || _identity.identities[artistId].status != 4
+        ) revert T.InvalidIdentity(artistId);
+        _returnResolution(
+            StreamArtistRecoveryOwnerReads.authorityRole(
+                _identityRecovery, _rotations, artistId, records
+            )
+        );
+    }
+
     function guardianVestingSnapshot(bytes32 artistId, bytes32 recordHash)
         external
         view
