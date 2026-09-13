@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
+import "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
 
 import "./StreamArtistEconomicsHashes.sol";
 import "./StreamArtistSanctionReads.sol";
@@ -270,5 +271,46 @@ contract StreamArtistRegistryFinalityReadExtension {
         returns (bytes32)
     {
         return StreamArtistContentHashes.freezeDigest(_environment(), p, a);
+    }
+
+    function identityRecoveryContext(
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a
+    ) external view onlyHost returns (IdentityRecovery.Context memory) {
+        return
+            IStreamArtistIdentityRecoveryOwner(_contentSuite().owners[2])
+                .identityRecoveryContext(p, a);
+    }
+
+    function identityRecoveryRecord(bytes32 record)
+        external
+        view
+        onlyHost
+        returns (IdentityRecovery.Record memory)
+    {
+        return IStreamArtistIdentityRecoveryOwner(_contentSuite().owners[2])
+            .identityRecoveryRecord(record);
+    }
+
+    function latestIdentityRecovery(bytes32 artistId) external view onlyHost returns (bytes32) {
+        return IStreamArtistIdentityRecoveryOwner(_contentSuite().owners[2])
+            .latestIdentityRecovery(artistId);
+    }
+
+    function collaboratorIdentityDigest(
+        address account,
+        bytes32 identityRecordHash,
+        T.Authorization calldata a
+    ) external view onlyHost returns (bytes32) {
+        return StreamArtistCollaboratorHashes.identityDigest(
+            _environment(), account, identityRecordHash, a
+        );
+    }
+
+    function collaboratorAcceptanceDigest(
+        C.BindingAcceptance calldata p,
+        T.Authorization calldata a
+    ) external view onlyHost returns (bytes32) {
+        return StreamArtistCollaboratorHashes.acceptanceDigest(_environment(), p, a);
     }
 }

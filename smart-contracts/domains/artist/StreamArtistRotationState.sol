@@ -446,6 +446,23 @@ library StreamArtistRotationState {
         nextNonce = s.acceptanceHint[lane];
     }
 
+    /// @dev Operation35 shares the original acceptance digest, replay key and nonce index.
+    ///      The concrete Identity owner authenticates recovery authority and typed facts first.
+    function acceptIdentityRecovery(
+        State storage s,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        R.Rotation memory p,
+        T.Authorization memory a,
+        T.SignerApproval memory proof,
+        bytes32 record
+    ) public returns (bytes32) {
+        if (c.operationId != 35) revert T.InvalidOperation(c.operationId);
+        if (block.timestamp > a.time) revert T.ExpiredAuthorization(a.time);
+        return _newSide(s, replay, o, c, p, a, proof, record);
+    }
+
     function _newSide(
         State storage s,
         mapping(bytes32 => T.ReplayCell) storage replay,

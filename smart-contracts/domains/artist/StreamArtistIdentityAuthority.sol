@@ -9,8 +9,10 @@ import "./StreamArtistOwner.sol";
 import "./StreamArtistIdentityData.sol";
 import "../../interfaces/stream/artist/IStreamArtistUnavailability.sol";
 import "./StreamArtistIdentityWriterExtension.sol";
+import "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
 import "./StreamArtistIdentityExtensionDeployment.sol";
 import "./StreamArtistEstateExtensionDeployment.sol";
+import "./StreamArtistRecoveryExtensionDeployment.sol";
 import "./StreamArtistIdentityDismissalState.sol";
 import "./StreamArtistIdentityCauseState.sol";
 import "./StreamArtistIdentityResolutionReads.sol";
@@ -35,13 +37,14 @@ import {
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 
 /// @notice Sole owner of artist identities, authorization replay, liveness and signature bytes.
-/// @dev Current-principal rotation and economics/freeze delegation are supported; recovery remains separate.
+/// @dev Fixed children apply typed mutations; recovery admits the initial living-authority profile.
 contract StreamArtistIdentityAuthority is
     StreamArtistOwner,
     StreamArtistIdentityData,
     IStreamArtistIdentityDismissalEvents,
     IStreamArtistEstateEvents,
-    IStreamArtistUnavailabilityEvents
+    IStreamArtistUnavailabilityEvents,
+    IStreamArtistIdentityRecoveryEvents
 {
     // Retain the owner ABI for errors propagated by the linked mechanics.
     error InvalidPriorStanding(address priorAddress);
@@ -61,6 +64,7 @@ contract StreamArtistIdentityAuthority is
     address public immutable artistWindowAuthority;
     address public immutable identityWriterExtension;
     address public immutable identityEstateExtension;
+    address public immutable identityRecoveryExtension;
 
     function recordUnavailability(T.ActionContext calldata c, U.Input calldata p)
         external
@@ -344,6 +348,62 @@ contract StreamArtistIdentityAuthority is
         bytes32 contestRecordHash
     );
 
+    function recoverIdentity(
+        T.ActionContext calldata c,
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof,
+        Contest.GovernanceWitness calldata governance
+    ) external returns (bytes32) {
+        _forwardRecoveryWriter();
+    }
+
+    function identityRecoveryContext(
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a
+    ) external view returns (IdentityRecovery.Context memory) {
+        return StreamArtistIdentityRecoveryState.context(
+            _identityRecovery, _identity, _rotations, _resolutions, _estate, _ownerContext(), p, a
+        );
+    }
+
+    function identityRecoveryRecord(bytes32 record)
+        external
+        view
+        returns (IdentityRecovery.Record memory)
+    {
+        return _identityRecovery.records[record];
+    }
+
+    function latestIdentityRecovery(bytes32 artistId) external view returns (bytes32) {
+        return _identityRecovery.latest[artistId];
+    }
+
+    function identityRecoveryReceipts(bytes32 record)
+        external
+        view
+        returns (bytes32, bytes32, bytes32)
+    {
+        return StreamArtistIdentityRecoveryState.receiptCommitments(_identityRecovery, record);
+    }
+
+    function recoveryTransitionStanding(bytes32 record)
+        external
+        view
+        returns (address, bytes32, uint64)
+    {
+        IdentityRecovery.Record storage item = _identityRecovery.records[record];
+        R.TransitionState storage t = _identityRecovery.transitions[record];
+        if (
+            record == bytes32(0) || item.recordHash != record || item.fields.artistId == bytes32(0)
+                || item.fields.oldAddress == address(0) || item.standingTailSeconds < 30 days
+                || t.recordHash != record || t.artistId != item.fields.artistId || t.phase == 0
+                || _rotations.rotations[record].recordHash != bytes32(0)
+                || _estate.requests[record].recordHash != bytes32(0)
+        ) revert R.InvalidRotation(record);
+        return (item.fields.oldAddress, bytes32(0), item.standingTailSeconds);
+    }
+
     function dismissIdentityContest(
         T.ActionContext calldata c,
         Dismissal.Request calldata p,
@@ -590,6 +650,9 @@ contract StreamArtistIdentityAuthority is
         identityEstateExtension = StreamArtistEstateExtensionDeployment.deployEstateWriter(
             registry_, coordinator_, archive_, core_, manager_
         );
+        identityRecoveryExtension = StreamArtistRecoveryExtensionDeployment.deployRecoveryWriter(
+            registry_, coordinator_, archive_, core_, manager_
+        );
     }
 
     function setGuardians(
@@ -705,9 +768,16 @@ contract StreamArtistIdentityAuthority is
         }
         bool rotation = _rotations.rotations[record].recordHash == record;
         bool estate = _estate.requests[record].recordHash == record;
-        if (rotation == estate) revert R.InvalidRotation(record);
-        R.TransitionState memory t =
-            rotation ? _rotations.rotations[record].transition : _estate.transitions[record];
+        bool recovered = _identityRecovery.records[record].recordHash == record;
+        if ((rotation ? 1 : 0) + (estate ? 1 : 0) + (recovered ? 1 : 0) != 1) {
+            revert R.InvalidRotation(record);
+        }
+        R.TransitionState memory t = rotation
+            ? _rotations.rotations[record].transition
+            : estate ? _estate.transitions[record] : _identityRecovery.transitions[record];
+        if (recovered && t.artistId != _identityRecovery.records[record].fields.artistId) {
+            revert R.InvalidRotation(record);
+        }
         if (t.recordHash != record || t.artistId == bytes32(0) || t.phase == 0) {
             revert R.InvalidRotation(record);
         }
@@ -1093,6 +1163,18 @@ contract StreamArtistIdentityAuthority is
 
     function _forwardEstateWriter() private {
         address target = identityEstateExtension;
+        assembly ("memory-safe") {
+            let pointer := mload(0x40)
+            calldatacopy(pointer, 0, calldatasize())
+            let success := delegatecall(gas(), target, pointer, calldatasize(), 0, 0)
+            returndatacopy(pointer, 0, returndatasize())
+            if iszero(success) { revert(pointer, returndatasize()) }
+            return(pointer, returndatasize())
+        }
+    }
+
+    function _forwardRecoveryWriter() private {
+        address target = identityRecoveryExtension;
         assembly ("memory-safe") {
             let pointer := mload(0x40)
             calldatacopy(pointer, 0, calldatasize())

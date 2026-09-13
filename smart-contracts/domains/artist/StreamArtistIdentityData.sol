@@ -9,6 +9,7 @@ import "./StreamArtistOwner.sol";
 import "./StreamArtistNonceAvailability.sol";
 import "./StreamArtistDelegationState.sol";
 import "./StreamArtistIdentityState.sol";
+import { StreamArtistIdentityRecoveryState } from "./StreamArtistIdentityRecoveryState.sol";
 import "./StreamArtistBindingOperations.sol";
 import "./StreamArtistCollaboratorIdentityState.sol";
 import "./StreamArtistAuthorizationState.sol";
@@ -41,6 +42,8 @@ abstract contract StreamArtistIdentityData {
     // Estate state is appended after every prior Identity root; existing nested structs stay fixed.
     StreamArtistEstateState.State internal _estate;
     StreamArtistUnavailabilityState.State internal _unavailability;
+    // Operation35 appends its own history/receipt roots after every existing Identity field.
+    StreamArtistIdentityRecoveryState.State internal _identityRecovery;
 
     function _noteLiving(
         StreamArtistIdentityState.OwnerContext memory o,

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistIdentityDismissalOperations.sol";
+import "./StreamArtistIdentityRecoveryOperations.sol";
 import "./StreamArtistUnavailabilityOperations.sol";
 import "./StreamArtistRecoveryApprovalOperations.sol";
 import "../../interfaces/stream/artist/IStreamArtistRecoveryApproval.sol";
@@ -175,6 +176,7 @@ contract StreamArtistOnboardingCoordinator is
                 uint16(31),
                 uint16(32),
                 uint16(33),
+                uint16(35),
                 uint16(36),
                 uint16(37),
                 uint16(38),
@@ -190,6 +192,12 @@ contract StreamArtistOnboardingCoordinator is
     }
 
     modifier operation() {
+        _beginOperation();
+        _;
+        _entered = 0;
+    }
+
+    function _beginOperation() private {
         if (msg.sender != _suite.registry) revert T.Unauthorized(msg.sender);
         if (_entered != 0) revert T.ReentrantOperation();
         if (block.chainid != deploymentChainId) revert T.InvalidBinding();
@@ -197,8 +205,6 @@ contract StreamArtistOnboardingCoordinator is
             if (_targets[i].codehash != _runtimeHashes[i]) revert T.ComponentChanged(_targets[i]);
         }
         _entered = 1;
-        _;
-        _entered = 0;
     }
 
     function suiteConfiguration() external view returns (T.SuiteConfiguration memory) {
@@ -346,6 +352,14 @@ contract StreamArtistOnboardingCoordinator is
         T.Authorization calldata a
     ) external operation returns (bytes32) {
         return StreamArtistSaleOperations.record(_economicContext(), actor, p, a);
+    }
+
+    function coordinateRecoverArtistIdentity(
+        address actor,
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistIdentityRecoveryOperations.recover(_economicContext(), actor, p, a);
     }
 
     function coordinateDismissArtistIdentityContest(address actor, Dismissal.Request calldata p)

@@ -169,7 +169,7 @@ duplicates cannot fill missing positions. Larger multipart executable archives
 require an explicit complete profile, not a relaxed manifest-only shortcut.
 
 The first whole-object profile partitions actual bytes into at most 64 parts:
-every non-final part is 8192 bytes, and the final part is 1–8192 bytes. The
+every non-final part is 8192 bytes, and the final part is 1â€“8192 bytes. The
 artifact retains exact ordered part hashes and lengths. Equal bytes at different
 positions are legitimate. Each pointer must be the actual canonical chunk-store
 pointer for that content, with matching STOP-prefixed bytes, length and codehash.
@@ -239,7 +239,7 @@ size alone.
 A new sanction requires the actual current authority and its applicable sanction
 capability. AA-GUARD4 rejects new sanctions and authorizations while the Identity
 is contested. That rule does not retroactively invalidate an existing sanction
-or independently prohibit its consumption by finality. AA-SANCTION1–3 instead
+or independently prohibit its consumption by finality. AA-SANCTION1â€“3 instead
 requires the exact current subject and a collection attribution that is neither
 disputed nor revoked. The platform-works contest stop is a separate scope rule.
 
@@ -836,6 +836,73 @@ This admission extension does not implement operation35, explicit adjudicated
 approval supersession, family VIEW presentation adoption or full finality
 construction and launch acceptance. No Binding-generation or generic identity
 change is an approval-supersession signal.
+
+## Initial living-authority identity recovery
+
+The first operation35 ingress is restricted to a contested initial living
+artist authority. The saved cause must identify the same incumbent with prior
+status1/class1, and the new address must be different and absent from the active-identity
+index. The owner requires no prior pending or executed authority transition and no admitted
+stable or provisional guardian record, including an empty guardian-set record.
+It also rejects a nonempty supersession list in this first profile. Recovery
+leaves a permanent execution marker, so the same artist cannot reenter this
+initial-authority profile after dismissal or a later contest.
+
+The facade captures the actual caller and the Coordinator retains its existing
+lock and constructor runtime checks. Recovery requires the fixed Identity
+Executor, an exact TERMINAL_FREEZE class2 per-call context, the stored executed
+action and reason, its original proposer with the current Attribution Arbiter
+role and mutation state, and a bound and sealed SystemManifest bootstrap state.
+The sealed check excludes the current atomic genesis exception to ordinary
+scheduling windows. The Executor's published action catalog must admit the
+actual facade runtime, selector, class and zero-value call. Global terminal-veto
+guardians and their scheduling commitments remain Executor responsibilities;
+this first profile does not substitute them for artist-installed guardians.
+
+The new side signs the original RotationAcceptance schema and consumes its
+existing shared nonce allocator, digest revocation and observed-authorization
+lanes. No permanent signed field or recovery semantic hash changes. The owner
+recomputes the governance-bound request and new-side digest, consumes the current
+cause and recovery action, advances the existing delegation epoch, preserves the
+artist ID and prior-address standing, and assigns the new living authority.
+It records a fresh executed transition with the snapshotted post-vesting window.
+This governed action does not count as current artist activity: the new-side
+signer was not the current principal at admission. Existing liveness and pending
+fallback activity epochs therefore remain unchanged by operation35 itself.
+
+The new owner commit uses the adopted operation35 receipt occurrence profile in
+[the continuity packet](../architecture/artist-owner-record-continuity-v1.md).
+The actual constructor-captured Identity domain is preserved. One successful
+owner revision makes two ordered immutable receipt appends, binding the secondary
+occurrence to the same-batch recomputed primary and unchanged list hash. The
+Archive append follows atomically; any late failure restores authority, shared
+nonce, delegation epoch, replay, both receipts and owner roots. Ordinary earlier
+owner commits are not retroactively described as logical-receipt conformant.
+
+The two relocated collaborator digest bodies preserve their inputs and hashing
+under the authenticated fixed suite. The finality reader also reads the
+Coordinator suite configuration, so this extraction does not claim identical
+external-read behavior or gas cost.
+
+The new recovery transition participates in the existing common window and
+prior-standing reads. A successful later compromise filing marks its first
+contested timestamp within the same operation33 commit. A contest before the
+window ends prevents provisional records from becoming operative; a contest at
+the exact end preserves their maturity. The existing typed dismissal closes that
+transition and selects or discards the provisional cohort using the recorded
+marker. A closed marker is not rewritten by a later valid contest. Recovery
+records and stored receipt commitments remain immutable throughout. Recovery
+does not populate the dismissal-specific record or latest-dismissal getter.
+
+The current evidence separates actual Artist/Safe/owner/Archive execution under
+typed Core/Executor/role boundaries from the actual sealed/delayed governance
+reader cohort with Core, Executor, RoleRegistry, catalog, SystemManifest and Safe.
+Those cohorts are complementary, not one combined authority deployment. The
+first profile does not complete installed or historical guardian veto, prior
+rotation/estate/recovery cohorts, posthumous recovery, nonempty adjudicated
+supersession or full operation35. None of these identity changes alone invalidates
+saved recovery approvals or rewrites consumed consent, sanction or executed
+recovery history; exact approval-target adjudication remains separate work.
 
 ## Acceptance and remaining work
 

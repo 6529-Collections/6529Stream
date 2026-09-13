@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
+import "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
 import "../../interfaces/stream/artist/IStreamArtistFinalityBinding.sol";
 
 import "./StreamArtistEconomicsHashes.sol";
@@ -54,6 +55,7 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistIdentityContest,
     IStreamArtistSuccessionRecords,
     IStreamArtistIdentityDismissal,
+    IStreamArtistIdentityRecovery,
     IStreamArtistEstateActivation,
     IStreamArtistEstateBinding,
     IStreamArtistCommercialAuthority,
@@ -309,6 +311,7 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtworkScopedFinalityComponent).interfaceId
             || id == type(IStreamArtistSuccessionRecords).interfaceId
             || id == type(IStreamArtistSuccessionReads).interfaceId
+            || id == type(IStreamArtistIdentityRecovery).interfaceId
             || id == type(IStreamArtistWindows).interfaceId || super.supportsInterface(id);
     }
 
@@ -463,6 +466,32 @@ contract StreamArtistOnboardingRegistry is
         Succ.PublicDocument calldata document
     ) external view returns (bytes memory) {
         _forwardRegistryRead();
+    }
+
+    function recoverArtistIdentity(IdentityRecovery.Request calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function identityRecoveryContext(
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a
+    ) external view returns (IdentityRecovery.Context memory) {
+        _forwardFinalityRead();
+    }
+
+    function identityRecoveryRecord(bytes32 record)
+        external
+        view
+        returns (IdentityRecovery.Record memory)
+    {
+        _forwardFinalityRead();
+    }
+
+    function latestIdentityRecovery(bytes32 artistId) external view returns (bytes32) {
+        _forwardFinalityRead();
     }
 
     function dismissArtistIdentityContest(Dismissal.Request calldata p) external returns (bytes32) {
@@ -874,16 +903,14 @@ contract StreamArtistOnboardingRegistry is
         bytes32 identityRecordHash,
         T.Authorization calldata a
     ) external view returns (bytes32) {
-        return StreamArtistCollaboratorHashes.identityDigest(
-            _environment(), account, identityRecordHash, a
-        );
+        _forwardFinalityRead();
     }
 
     function collaboratorAcceptanceDigest(
         C.BindingAcceptance calldata p,
         T.Authorization calldata a
     ) external view returns (bytes32) {
-        return StreamArtistCollaboratorHashes.acceptanceDigest(_environment(), p, a);
+        _forwardFinalityRead();
     }
 
     function collaboratorIdentityProposal(address account, bytes32 identityRecordHash)

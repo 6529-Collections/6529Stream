@@ -8,9 +8,10 @@ import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 import "../../interfaces/stream/artist/IStreamArtistEstateOwner.sol";
+import "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
 import "../../interfaces/stream/artist/IStreamArtistRotationOwner.sol";
 
-/// @notice Linked actual-transition reads; estate fallback is hardwired to the same Identity.
+/// @notice Linked actual-transition reads; estate/recovery fallbacks are hardwired to the same Identity.
 library StreamArtistTransitionReads {
     function pendingTransition(StreamArtistRotationState.State storage s, bytes32 artistId)
         public
@@ -44,8 +45,19 @@ library StreamArtistTransitionReads {
             ok := staticcall(gas(), address(), add(data, 32), mload(data), add(result, 32), 96)
             size := returndatasize()
         }
+        if (ok && size == 96) return abi.decode(result, (address, bytes32, uint64));
+        data =
+            abi.encodeCall(IStreamArtistIdentityRecoveryOwner.recoveryTransitionStanding, (record));
+        assembly ("memory-safe") {
+            ok := staticcall(gas(), address(), add(data, 32), mload(data), add(result, 32), 96)
+            size := returndatasize()
+        }
         if (!ok || size != 96) revert R.InvalidRotation(record);
-        return abi.decode(result, (address, bytes32, uint64));
+        (priorAddress, guardianRecord, standingTail) =
+            abi.decode(result, (address, bytes32, uint64));
+        if (priorAddress == address(0) || guardianRecord != bytes32(0) || standingTail < 30 days) {
+            revert R.InvalidRotation(record);
+        }
     }
 
     function transitionState(StreamArtistRotationState.State storage s, bytes32 record)

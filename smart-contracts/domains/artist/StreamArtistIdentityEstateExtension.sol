@@ -364,6 +364,15 @@ contract StreamArtistIdentityEstateExtension is
         );
         if (estateState != bytes32(0)) m.state = keccak256(abi.encode(m.state, estateState));
         if (estateReplay != bytes32(0)) m.replay = keccak256(abi.encode(m.replay, estateReplay));
+        bytes32 recoveryState = StreamArtistIdentityRecoveryState.contest(
+            _identityRecovery,
+            p.artistId,
+            p.subjectRecordHash,
+            _rotations.latestExecution[p.artistId],
+            _resolutions.closures[p.subjectRecordHash].dismissalRecordHash != bytes32(0),
+            _currentIdentityClosure(p.artistId).dismissalRecordHash != bytes32(0)
+        );
+        if (recoveryState != bytes32(0)) m.state = keccak256(abi.encode(m.state, recoveryState));
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
