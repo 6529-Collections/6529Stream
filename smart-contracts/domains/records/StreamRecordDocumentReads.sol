@@ -2,38 +2,41 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/metadata/IStreamSchemaRegistry.sol";
+import "../../interfaces/stream/metadata/IStreamSchemaDocumentFacts.sol";
 import "../../interfaces/stream/metadata/IStreamCollectionMetadataV1.sol";
 import "../metadata/StreamSchemaDocumentStore.sol";
 
 /// @notice Bounded interpretation and payload reads shared by record hosts.
-/// @dev Public library functions keep dynamic document decoding outside the host runtime.
+/// @dev Static document facts avoid registration URI/chunk-array costs under the governed cap.
 library StreamRecordDocumentReads {
     function activeSchema(address registry, bytes32 schemaId, bytes32 canonId, uint256 gasCap)
         public
         view
         returns (bytes32, bytes32)
     {
-        IStreamSchemaRegistry.DocumentView memory schema = abi.decode(
-            _read(
-                registry, abi.encodeCall(IStreamSchemaRegistry.document, (schemaId)), 8192, gasCap
-            ),
-            (IStreamSchemaRegistry.DocumentView)
-        );
-        IStreamSchemaRegistry.DocumentView memory canon = abi.decode(
-            _read(
-                registry, abi.encodeCall(IStreamSchemaRegistry.document, (canonId)), 8192, gasCap
-            ),
-            (IStreamSchemaRegistry.DocumentView)
-        );
+        IStreamSchemaDocumentFacts.DocumentFacts memory schema = _facts(registry, schemaId, gasCap);
+        IStreamSchemaDocumentFacts.DocumentFacts memory canon = _facts(registry, canonId, gasCap);
         if (
             !schema.exists || schema.status != IStreamSchemaRegistry.DocumentStatus.ACTIVE
-                || schema.specification.kind != IStreamSchemaRegistry.DocumentKind.SCHEMA
+                || schema.kind != IStreamSchemaRegistry.DocumentKind.SCHEMA
         ) revert IStreamCollectionMetadataV1.MetadataSchemaUnavailable(schemaId);
         if (
             !canon.exists || canon.status != IStreamSchemaRegistry.DocumentStatus.ACTIVE
-                || canon.specification.kind != IStreamSchemaRegistry.DocumentKind.CANONICALIZATION
+                || canon.kind != IStreamSchemaRegistry.DocumentKind.CANONICALIZATION
         ) revert IStreamCollectionMetadataV1.MetadataSchemaUnavailable(canonId);
-        return (schema.specification.contentHash, canon.specification.contentHash);
+        return (schema.contentHash, canon.contentHash);
+    }
+
+    function _facts(address registry, bytes32 id, uint256 cap)
+        private
+        view
+        returns (IStreamSchemaDocumentFacts.DocumentFacts memory)
+    {
+        bytes memory output = _read(
+            registry, abi.encodeCall(IStreamSchemaDocumentFacts.documentFacts, (id)), 288, cap
+        );
+        if (output.length != 288) revert IStreamCollectionMetadataV1.MetadataReadFailed(registry);
+        return abi.decode(output, (IStreamSchemaDocumentFacts.DocumentFacts));
     }
 
     function chunk(address store, bytes32 hash, uint256 gasCap) public view returns (bytes memory) {

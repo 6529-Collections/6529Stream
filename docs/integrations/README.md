@@ -32,6 +32,8 @@ deployment evidence.
 | Verify the preserved list behind a content root | [Content leaf manifests](content-leaf-manifests.md) |
 | Adopt a verified root with artist consent and governed publisher authority | [Content-root publication](content-root-publication.md) |
 | Publish full-byte collection records and recover attributed history | [Developing metadata record host](metadata-records.md) |
+| Append institutional records as the current NFT owner | [Owner records](owner-records.md) |
+| Read complete evidence without copying long registration URIs | [Bounded record reads](bounded-record-reads.md) |
 | Publish an artist or curatorial description under one record type | [Work-description authority](work-description-authority.md) |
 | Encode the complete typed description and its format catalog | [Work-description JSON profile](../work-description-json-profile.md) |
 | Reconstruct and validate the complete supported rights JSON bytes | [Rights interpretation profile](rights-json-profile.md) |

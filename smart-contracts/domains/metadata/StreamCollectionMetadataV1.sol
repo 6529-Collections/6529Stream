@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/metadata/IStreamCollectionMetadataV1.sol";
+import "../../interfaces/stream/metadata/IStreamCollectionRecordReceipts.sol";
 import "../../interfaces/stream/metadata/IStreamSchemaRegistry.sol";
 import "../../interfaces/stream/core/IStreamCore.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttribution.sol";
@@ -24,7 +25,8 @@ contract StreamCollectionMetadataV1 is
     StreamModuleBase,
     StreamGasParameterHost,
     IStreamCollectionMetadataV1,
-    IStreamArtistRecordPublicationHost
+    IStreamArtistRecordPublicationHost,
+    IStreamCollectionRecordReceipts
 {
     using StreamRecordFamilies for bytes32;
 
@@ -103,6 +105,8 @@ contract StreamCollectionMetadataV1 is
                 || c.artistRegistry.code.length == 0 || c.deploymentManifestHash == 0
                 || c.manifestHash == 0 || !IERC165(c.core).supportsInterface(0x80ac58cd)
                 || !IERC165(c.schemas).supportsInterface(type(IStreamSchemaRegistry).interfaceId)
+                || !IERC165(c.schemas)
+                    .supportsInterface(type(IStreamSchemaDocumentFacts).interfaceId)
                 || IStreamSchemaRegistry(c.schemas).governanceAuthority() != c.executor
                 || IStreamArtistAttribution(c.artistRegistry).core() != c.core
         ) revert InvalidMetadataConfiguration();
@@ -144,6 +148,7 @@ contract StreamCollectionMetadataV1 is
         returns (bool)
     {
         return id == type(IStreamCollectionMetadataV1).interfaceId
+            || id == type(IStreamCollectionRecordReceipts).interfaceId
             || id == type(IStreamArtistRecordPublicationHost).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId || super.supportsInterface(id);
     }
@@ -383,6 +388,15 @@ contract StreamCollectionMetadataV1 is
         address recorder
     ) public view override returns (bytes32) {
         return _latest[keccak256(abi.encode(collectionId, recordType, subjectId, recorder))];
+    }
+
+    function collectionRecordReceipt(bytes32 hash)
+        external
+        view
+        override
+        returns (RecordReceipt memory)
+    {
+        return _knownRecord(hash).receipt;
     }
 
     function collectionRecordPayload(uint256 collectionId, bytes32 recordType, bytes32 subjectId)

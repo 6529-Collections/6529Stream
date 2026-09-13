@@ -2,13 +2,14 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/metadata/IStreamSchemaRegistry.sol";
+import "../../interfaces/stream/metadata/IStreamSchemaDocumentFacts.sol";
 import "../../interfaces/stream/parameters/IStreamGovernedParameterAuthority.sol";
 import "./StreamSchemaDocumentStore.sol";
 
 /// @notice Governance-approved schema, canonicalization, catalog and dependency bytes.
 /// @dev JSON and ontology meaning are validated by the pinned publication tooling. This host
 ///      verifies exact retained bytes, immutable identity/lineage and executing governance.
-contract StreamSchemaRegistry is IStreamSchemaRegistry {
+contract StreamSchemaRegistry is IStreamSchemaRegistry, IStreamSchemaDocumentFacts {
     uint256 public constant MAX_DOCUMENT_CHUNKS = 64;
     uint256 public constant CHUNK_BYTES = 8192;
     uint256 public constant MAX_DOCUMENT_BYTES = MAX_DOCUMENT_CHUNKS * CHUNK_BYTES;
@@ -44,7 +45,8 @@ contract StreamSchemaRegistry is IStreamSchemaRegistry {
     }
 
     function supportsInterface(bytes4 id) external pure override returns (bool) {
-        return id == type(IStreamSchemaRegistry).interfaceId || id == 0x01ffc9a7;
+        return id == type(IStreamSchemaRegistry).interfaceId
+            || id == type(IStreamSchemaDocumentFacts).interfaceId || id == 0x01ffc9a7;
     }
 
     function registerDocument(DocumentSpec calldata specification, bytes32[] calldata chunkHashes)
@@ -106,6 +108,30 @@ contract StreamSchemaRegistry is IStreamSchemaRegistry {
 
     function document(bytes32 id) external view override returns (DocumentView memory) {
         return _documents[id];
+    }
+
+    function documentFacts(bytes32 id) external view override returns (DocumentFacts memory facts) {
+        DocumentView storage row = _documents[id];
+        facts.exists = row.exists;
+        facts.kind = row.specification.kind;
+        facts.status = row.status;
+        facts.contentHash = row.specification.contentHash;
+        facts.canonicalizationId = row.specification.canonicalizationId;
+        facts.supersedesId = row.specification.supersedesId;
+        facts.totalBytes = row.specification.totalBytes;
+        facts.chunkCount = row.chunkHashes.length;
+        facts.declarationHash = row.declarationHash;
+    }
+
+    function documentChunkHashAt(bytes32 id, uint256 index)
+        external
+        view
+        override
+        returns (bytes32)
+    {
+        DocumentView storage row = _documents[id];
+        if (!row.exists) revert DocumentUnknown(id);
+        return row.chunkHashes[index];
     }
 
     function documentBytes(bytes32 id) external view override returns (bytes memory payload) {
