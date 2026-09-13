@@ -86,30 +86,65 @@ library StreamFinalityPreparation {
         StreamFinalityComponentExpectation[] calldata components,
         StreamFinalityManifestRef calldata manifest
     ) public view returns (StreamArtistSanctionPreparation memory prepared) {
+        (prepared,) = _prepareSanction(deps, scope, components, manifest, false);
+    }
+
+    function prepareSanctionWithReview(
+        Dependencies memory deps,
+        StreamFinalityScope memory scope,
+        StreamFinalityComponentExpectation[] calldata components,
+        StreamFinalityManifestRef calldata manifest
+    )
+        public
+        view
+        returns (
+            StreamArtistSanctionPreparation memory prepared,
+            IStreamFinalitySanctionReview.ReviewFacts memory review
+        )
+    {
+        return _prepareSanction(deps, scope, components, manifest, true);
+    }
+
+    function _prepareSanction(
+        Dependencies memory deps,
+        StreamFinalityScope memory scope,
+        StreamFinalityComponentExpectation[] calldata components,
+        StreamFinalityManifestRef calldata manifest,
+        bool includeReview
+    )
+        private
+        view
+        returns (
+            StreamArtistSanctionPreparation memory prepared,
+            IStreamFinalitySanctionReview.ReviewFacts memory review
+        )
+    {
         _requireCurrentBindings(deps);
-        bytes32 requiredType = abi.decode(
-            _requiredRead(
-                deps,
-                address(deps.sanctionReads),
-                abi.encodeCall(
-                    IStreamFinalitySanctionReads.collectionSanctionComponentType,
-                    (scope.collectionId)
+        {
+            bytes32 requiredType = abi.decode(
+                _requiredRead(
+                    deps,
+                    address(deps.sanctionReads),
+                    abi.encodeCall(
+                        IStreamFinalitySanctionReads.collectionSanctionComponentType,
+                        (scope.collectionId)
+                    ),
+                    32
                 ),
-                32
-            ),
-            (bytes32)
-        );
-        if (requiredType != StreamFinalityDomains.COMPONENT_ARTIST_SANCTION) {
-            revert FinalitySanctionComponentWrongType(
-                StreamFinalityDomains.COMPONENT_ARTIST_SANCTION, requiredType
+                (bytes32)
             );
-        }
-        for (uint256 i; i < components.length; ++i) {
-            bytes32 kind = components[i].componentType;
-            if (
-                kind == StreamFinalityDomains.COMPONENT_ARTIST_SANCTION
-                    || kind == StreamFinalityDomains.COMPONENT_PLATFORM_WORKS_DECLARATION
-            ) revert FinalitySanctionComponentWrongType(bytes32(0), kind);
+            if (requiredType != StreamFinalityDomains.COMPONENT_ARTIST_SANCTION) {
+                revert FinalitySanctionComponentWrongType(
+                    StreamFinalityDomains.COMPONENT_ARTIST_SANCTION, requiredType
+                );
+            }
+            for (uint256 i; i < components.length; ++i) {
+                bytes32 kind = components[i].componentType;
+                if (
+                    kind == StreamFinalityDomains.COMPONENT_ARTIST_SANCTION
+                        || kind == StreamFinalityDomains.COMPONENT_PLATFORM_WORKS_DECLARATION
+                ) revert FinalitySanctionComponentWrongType(bytes32(0), kind);
+            }
         }
         uint8 metadataMode = abi.decode(
             _requiredRead(
@@ -126,15 +161,24 @@ library StreamFinalityPreparation {
             revert FinalityMetadataModeInvalid(metadataMode);
         }
         _requireSnapshotManifestForScriptWorks(deps, scope.collectionId, metadataMode);
-        uint256 leafCount;
-        bool exactLeafCount;
-        (prepared.coreFactsHash, leafCount, exactLeafCount) = _verifyCoreGatesAndFacts(deps, scope);
-        _verifyContentRoot(deps, scope, leafCount, exactLeafCount);
+        {
+            uint256 leafCount;
+            bool exactLeafCount;
+            (prepared.coreFactsHash, leafCount, exactLeafCount) =
+                _verifyCoreGatesAndFacts(deps, scope);
+            _verifyContentRoot(deps, scope, leafCount, exactLeafCount);
+        }
         _requireMandatoryComponents(deps, components, metadataMode);
         _verifyComponentsLiveStrict(deps, components, _componentCallData(deps, scope));
         prepared.nonSanctionComponentsHash = _componentsHash(deps, components);
         _verifyNonSanctionDiscovery(deps, scope, components, prepared.nonSanctionComponentsHash);
-        prepared.scopeInputsHash = _scopeInputsHash(deps, scope, manifest, metadataMode, components);
+        if (includeReview) {
+            (prepared.scopeInputsHash, review) =
+                _scopeInputsHashWithReview(deps, scope, manifest, metadataMode, components);
+        } else {
+            prepared.scopeInputsHash =
+                _scopeInputsHash(deps, scope, manifest, metadataMode, components);
+        }
         prepared.sanctionSubjectHash = _sanctionSubjectHash(
             deps, scope, prepared.coreFactsHash, prepared.nonSanctionComponentsHash, manifest
         );
@@ -263,6 +307,30 @@ library StreamFinalityPreparation {
         bytes memory raw = StreamFinalityPreparedScopeReads.read(
             address(deps.metadataReads), scope, manifest.contentHash, components, deps.readGas
         );
+        return _hashScopeInputs(deps, scope, manifest, metadataMode, raw);
+    }
+
+    function _scopeInputsHashWithReview(
+        Dependencies memory deps,
+        StreamFinalityScope memory scope,
+        StreamFinalityManifestRef calldata manifest,
+        uint8 metadataMode,
+        StreamFinalityComponentExpectation[] calldata components
+    ) private view returns (bytes32 hash, IStreamFinalitySanctionReview.ReviewFacts memory review) {
+        bytes memory raw;
+        (raw, review) = StreamFinalityPreparedScopeReads.readWithReview(
+            address(deps.metadataReads), scope, manifest.contentHash, components, deps.readGas
+        );
+        hash = _hashScopeInputs(deps, scope, manifest, metadataMode, raw);
+    }
+
+    function _hashScopeInputs(
+        Dependencies memory deps,
+        StreamFinalityScope memory scope,
+        StreamFinalityManifestRef calldata manifest,
+        uint8 metadataMode,
+        bytes memory raw
+    ) private view returns (bytes32) {
         (StreamFinalityScopeInputs memory inputs, bytes32 schema, bytes32 canonicalization) =
             abi.decode(raw, (StreamFinalityScopeInputs, bytes32, bytes32));
         bool artistBound = abi.decode(

@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Added combined artist candidate preparation and original-image review from one
+  validated current statement, retaining legacy interfaces and permanent hashes.
+
 - Added original ordered image facts for native artist approval and a separately
   registered multi-capture profile, preserving original signed definitions.
 - Extended the candidate consumer's bounded review decoding and adaptive gas

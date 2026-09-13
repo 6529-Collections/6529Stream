@@ -22,7 +22,22 @@ and evidence instead of deriving completion from test or interface counts.
 
 ## Latest integration: 13 September
 
-The latest artist approval integration adds the candidate's bounded review decoder
+The combined candidate/review path now derives the native input commitment and
+original image facts from one current statement. The original Registry retains
+all scope, Core, strict component, discovery and manifest gates. The provider's
+combined entry remains restricted to that original Registry/runtime; absent
+capabilities preserve legacy reads and advertised failures cannot fall back.
+Permanent subject, scope-input, ceremony and review hashes remain unchanged.
+
+The corrected combined cohort passes 75 tests in both compiler modes, including
+five 256-input fuzz properties. It includes the retained 55 provider/projection
+and eight candidate cases plus 12 combined-dispatch controls. The new controls use
+real Candidate/read libraries with typed Registry/provider boundaries; the actual
+combined Registry/provider entrypoints have matching codegen and source review,
+but their complete execution and Safe transaction capacity remain pending. All
+captured production runtimes fit; no full-v1 candidate is claimed.
+
+The preceding artist approval integration adds the candidate's bounded review decoder
 (`8cd9b761`) and native original-image projection. The corrected provider cohort
 passes 55 focused tests in both compiler modes, including two 256-input fuzz
 properties per mode. It uses actual SchemaRegistry/Store contracts and explicit
@@ -37,17 +52,20 @@ unchanged. Older projection captures retain their test/artifact results but are
 superseded for correctness by the corrected real-producer digest join. The complete
 public provider/Artist/Safe ceremony and historical sanction execution remain open.
 
-A retained preservation-builder run passes the complete 547-item archival bundle,
-including both actual backends and a full refresh. One separate reference-stage
-Safe transaction still exceeds its gas allowance. The successor removes redundant
-large-array copies; its complete capacity run is pending. The many-stage bundle
-test is not proof that every stage fits one transaction.
+The latest preservation-builder run passes 28 cases, including the complete
+547-item archival bundle through both actual backends and a full refresh. Its
+one remaining failure is the separate reference-stage Safe transaction allowance.
+The next successor removes temporary allocation overhead while preserving every
+original item, hash and complete event. Its capacity run is pending. The many-stage
+bundle test is not proof that every stage fits one transaction.
 
 Actual native assembly has advanced through metadata selection and manifest
-publication. The latest five-case run stops at a test artifact JSON-path error;
-there is no successful whole-assembly outcome yet. The builder is correcting the
-fixture and reducing the cost of fixture-only iteration. No new full-v1 candidate
-or deployment is claimed.
+publication. The retained five-case run stops at a test artifact JSON-path error.
+Nine focused Solidity parser/projection cases and nine Python checks now pass.
+The next full assembly build isolates reusable creation templates and reads compact
+projections of its exact compiler artifacts. Its complete runtime result and the
+speed benefit for later fixture corrections remain pending. No whole-assembly
+pass, new full-v1 candidate or deployment is claimed.
 
 The current reviewed artist integration adds first estate recovery `5700804a`
 and successor-authored guardian history `c9281b67`, following the directive gate

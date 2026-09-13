@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 import "./StreamFinalityRouterEvidenceProvider.sol";
 import "./StreamFinalityNativeMetadataFacts.sol";
 import "./StreamFinalityNativeSanctionReview.sol";
+import "../../interfaces/stream/finality/IStreamFinalityPreparedSanctionReview.sol";
 import "./StreamFinalityRouteReads.sol";
 import "../../interfaces/stream/finality/IStreamFinalityPreparedScopeEvidence.sol";
 import "../../interfaces/stream/finality/IStreamFinalityEvidenceProvider.sol";
@@ -60,7 +61,8 @@ contract StreamFinalityNativeEvidenceProvider is StreamFinalityRouterEvidencePro
             || id == type(IStreamFinalityPreparedScopeEvidence).interfaceId
             || id == type(IStreamFinalityDiscoverySources).interfaceId
             || id == type(IStreamContentRootEvidenceBinding).interfaceId
-            || id == type(IStreamFinalitySanctionReview).interfaceId;
+            || id == type(IStreamFinalitySanctionReview).interfaceId
+            || id == type(IStreamFinalityPreparedSanctionReview).interfaceId;
     }
 
     function nativeConfiguration()
@@ -235,6 +237,48 @@ contract StreamFinalityNativeEvidenceProvider is StreamFinalityRouterEvidencePro
         StreamFinalityComponentExpectation[] calldata components
     ) external view returns (StreamFinalityScopeInputs memory, bytes32, bytes32) {
         StreamFinalityNativeProviderReads.Config memory c = _native;
+        _requirePreparedCandidate(c, scope, components);
+        return _admit(
+            c,
+            scope,
+            manifestHash,
+            StreamFinalityNativeProviderReads.independentComponents(components)
+        );
+    }
+
+    /// @notice Original Registry-only inputs and image facts from one complete current statement.
+    function requirePreparedFinalityScopeInputsAndReview(
+        StreamFinalityScope calldata scope,
+        bytes32 manifestHash,
+        StreamFinalityComponentExpectation[] calldata components
+    )
+        external
+        view
+        returns (
+            StreamFinalityScopeInputs memory inputs,
+            bytes32 schema,
+            bytes32 canon,
+            IStreamFinalitySanctionReview.ReviewFacts memory review
+        )
+    {
+        StreamFinalityNativeProviderReads.Config memory c = _native;
+        _requirePreparedCandidate(c, scope, components);
+        StreamFinalityInputManifestTypes.Statement memory s =
+            StreamFinalityNativeProviderReads.statement(
+                c, scope, StreamFinalityNativeProviderReads.independentComponents(components)
+            );
+        (schema, canon) = StreamFinalityInputManifestReads.requireCurrent(
+            StreamFinalityNativeProviderReads.manifestDependencies(c), s, manifestHash
+        );
+        inputs = s.inputs;
+        review = StreamFinalityNativeSanctionReview.review(c, s);
+    }
+
+    function _requirePreparedCandidate(
+        StreamFinalityNativeProviderReads.Config memory c,
+        StreamFinalityScope calldata scope,
+        StreamFinalityComponentExpectation[] calldata components
+    ) private view {
         if (
             msg.sender != c.targets[12] || msg.sender.code.length == 0
                 || msg.sender.codehash != c.codeHashes[12]
@@ -247,12 +291,6 @@ contract StreamFinalityNativeEvidenceProvider is StreamFinalityRouterEvidencePro
             )) {
             revert StreamFinalityNativeProviderReads.NativeProviderSource();
         }
-        return _admit(
-            c,
-            scope,
-            manifestHash,
-            StreamFinalityNativeProviderReads.independentComponents(components)
-        );
     }
 
     function _admit(

@@ -220,3 +220,20 @@ resolves its identity through the original Registry's immutable provider binding
 Retiring the profile cannot rewrite an original signature or erase document bytes.
 The existing Archive verifier continues to rely on original Artist admission;
 independent parsing of the fifth definition is not claimed for that verifier.
+
+## One current statement for candidate inputs and review
+
+Accepted implementation interpretation, 13 September 2026: the original Registry
+may return artist preparation and review facts together. It retains all original
+scope, component, discovery, Core and manifest gates. After those checks, a fixed
+provider may derive one current statement for both the input commitment and the
+ordered original image facts. Only the exact original Registry/runtime can use
+that prepared provider entrypoint; public methods retain complete validation.
+
+Capability selection is explicit at each boundary. An older Registry preserves
+the original Artist candidate calls; an older provider preserves the original
+input/public-review reads inside the Registry. Failure after a capability was
+advertised is terminal. No readiness cache, different permanent preimage or
+weaker finalization check is introduced. The
+[native provider guide](../integrations/native-finality-provider.md) documents
+these interfaces and the separate complete-ceremony/gas acceptance boundary.

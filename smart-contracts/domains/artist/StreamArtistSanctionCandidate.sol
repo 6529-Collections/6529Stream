@@ -3,6 +3,8 @@ pragma solidity ^0.8.19;
 
 import "./StreamArtistSanctionHashes.sol";
 import "./StreamArtistSanctionCeremony.sol";
+import "../finality/StreamFinalitySanctionReviewReads.sol";
+import "../../interfaces/stream/finality/IStreamArtistSanctionReviewPreparation.sol";
 import {
     StreamArtistSanctionRequestTypes as Q
 } from "../../interfaces/stream/artist/StreamArtistSanctionRequestTypes.sol";
@@ -47,18 +49,40 @@ library StreamArtistSanctionCandidate {
             q.terms.tokenId,
             q.terms.scopeId
         );
-        StreamArtistSanctionPreparation memory actual = abi.decode(
-            _read(
+        StreamArtistSanctionPreparation memory actual;
+        bytes memory raw;
+        if (StreamFinalityBoundedReads.supportsOptional(
+                pins.finalityRegistry,
+                type(IStreamArtistSanctionReviewPreparation).interfaceId,
+                pins.readGas
+            )) {
+            bytes memory combined = StreamFinalitySanctionReviewReads.read(
                 pins.finalityRegistry,
                 abi.encodeCall(
-                    IStreamArtistSanctionPreparation.prepareSanction,
+                    IStreamArtistSanctionReviewPreparation.prepareSanctionWithReview,
                     (scope, q.nonSanctionComponents, q.manifest)
                 ),
-                128,
+                896,
                 pins.readGas
-            ),
-            (StreamArtistSanctionPreparation)
-        );
+            );
+            IStreamFinalitySanctionReview.ReviewFacts memory review =
+                StreamFinalitySanctionReviewReads.review(combined, 160);
+            actual = abi.decode(combined, (StreamArtistSanctionPreparation));
+            raw = abi.encode(review);
+        } else {
+            actual = abi.decode(
+                _read(
+                    pins.finalityRegistry,
+                    abi.encodeCall(
+                        IStreamArtistSanctionPreparation.prepareSanction,
+                        (scope, q.nonSanctionComponents, q.manifest)
+                    ),
+                    128,
+                    pins.readGas
+                ),
+                (StreamArtistSanctionPreparation)
+            );
+        }
         S.Subject memory p;
         p.domain = keccak256("6529STREAM_ARTIST_SANCTION_SUBJECT_V1");
         p.chainId = e.chainId;
@@ -78,14 +102,16 @@ library StreamArtistSanctionCandidate {
             actual.sanctionSubjectHash != StreamArtistSanctionHashes.subject(p)
                 || actual.scopeInputsHash == 0
         ) revert S.InvalidSanction();
-        bytes memory raw = _readReview(
-            pins.provider,
-            abi.encodeCall(
-                IStreamFinalitySanctionReview.requireSanctionReviewFacts,
-                (scope, q.manifest.contentHash)
-            ),
-            pins.readGas
-        );
+        if (raw.length == 0) {
+            raw = _readReview(
+                pins.provider,
+                abi.encodeCall(
+                    IStreamFinalitySanctionReview.requireSanctionReviewFacts,
+                    (scope, q.manifest.contentHash)
+                ),
+                pins.readGas
+            );
+        }
         uint256 referenceCount = _word(raw, 224);
         uint256 profile = _word(raw, 64);
         // Two explicitly admitted native ONCHAIN profiles. Both retain every ordered original

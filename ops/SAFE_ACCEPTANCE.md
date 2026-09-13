@@ -36,6 +36,21 @@ The integrator owns the combined inventory; each builder supplies its domain's
 rows and executable evidence. Final acceptance requires no unclassified or
 uncovered supported ABI functions, rather than a sample of wallet workflows.
 
+## Combined artist preparation
+
+`prepareSanctionWithReview` is a public Registry read. The native provider's
+`requirePreparedFinalityScopeInputsAndReview` is intentionally restricted to the
+original Registry after its strict live component/route checks. Both create
+explicit acceptance obligations for actual Safe-initiated workflows and direct
+protocol-only rejection, in addition to the original methods below.
+
+The 75-case cohort passes both compiler modes with five 256-input properties.
+Its 12 new cases cover combined and legacy dispatch, identical original candidate
+results, canonical bounded returns and advertised failure/retry using typed
+Registry/provider boundaries. They retain the existing two named actual Safe
+cases, but do not add complete native combined-entrypoint or transaction-capacity
+acceptance. Those remain required in the assembled-contract workflow.
+
 ## Native artist review and complete archive progress
 
 The new public `requireSanctionReviewFacts` selector creates a separate Safe
@@ -45,7 +60,8 @@ projection uses typed producer boundaries with actual SchemaRegistry/Store;
 it does not establish a real Safe call through the complete manifest/Artist flow.
 That selector and full ceremony gas remain pending actual assembled evidence.
 
-The preservation builder's complete 547-item bundle flow passes with actual
+The preservation builder's latest 28-pass/one-failure run includes the complete
+547-item bundle flow with actual
 archive backends and refresh. Its separate reference-stage Safe transaction
 still exceeds its measured allowance. The successor's removal of redundant
 large-array copies must pass that exact test and an isolated entry measurement

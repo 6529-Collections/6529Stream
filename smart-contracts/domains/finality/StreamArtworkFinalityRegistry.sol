@@ -11,6 +11,7 @@ import "../../interfaces/stream/finality/IStreamCoreFinalitySource.sol";
 import "../../interfaces/stream/finality/IStreamCanonicalArtworkFinality.sol";
 import "../../interfaces/stream/finality/IStreamFinalityScopeEvidence.sol";
 import "../../interfaces/stream/finality/IStreamArtistSanctionPreparation.sol";
+import "../../interfaces/stream/finality/IStreamArtistSanctionReviewPreparation.sol";
 import "../../interfaces/stream/finality/IStreamFinalityEvidenceProvider.sol";
 import "../../interfaces/stream/finality/IStreamFinalityEvidenceDiscoveryBinding.sol";
 import "../../interfaces/stream/finality/IStreamCoreFinalityEvidenceBinding.sol";
@@ -40,6 +41,7 @@ contract StreamArtworkFinalityRegistry is
     IStreamArtworkScopedFrozenRouteRegistry,
     IStreamCanonicalArtworkFinality,
     IStreamArtistSanctionPreparation,
+    IStreamArtistSanctionReviewPreparation,
     IStreamFinalitySanctionArchive
 {
     error FinalityZeroAddress();
@@ -84,6 +86,7 @@ contract StreamArtworkFinalityRegistry is
     IStreamCoreFinalityAdapter public immutable coreFinalityAdapter;
     IStreamFinalityMetadataReads public immutable metadataReads;
     address public immutable scopeEvidenceProvider;
+
     /// @notice Original provider runtime pin for publication before a content root exists.
     function scopeEvidenceProviderCodeHash() external view returns (bytes32) {
         return _providerCodeHash;
@@ -222,6 +225,7 @@ contract StreamArtworkFinalityRegistry is
             || id == type(IStreamArtworkScopedFrozenRouteRegistry).interfaceId
             || id == type(IStreamCanonicalArtworkFinality).interfaceId
             || id == type(IStreamArtistSanctionPreparation).interfaceId
+            || id == type(IStreamArtistSanctionReviewPreparation).interfaceId
             || id == type(IStreamFinalitySanctionArchive).interfaceId || super.supportsInterface(id);
     }
 
@@ -724,6 +728,32 @@ contract StreamArtworkFinalityRegistry is
         _requireComponentListWellFormed(nonSanctionComponents);
         _requireManifestValid(manifest);
         return StreamFinalityPreparation.prepareSanction(
+            _preparationDependencies(), scope, nonSanctionComponents, manifest
+        );
+    }
+
+    /// @inheritdoc IStreamArtistSanctionReviewPreparation
+    function prepareSanctionWithReview(
+        StreamFinalityScope calldata scope,
+        StreamFinalityComponentExpectation[] calldata nonSanctionComponents,
+        StreamFinalityManifestRef calldata manifest
+    )
+        external
+        view
+        override
+        returns (
+            StreamArtistSanctionPreparation memory,
+            IStreamFinalitySanctionReview.ReviewFacts memory
+        )
+    {
+        if (msg.data.length > MAX_FINALITY_CALLDATA_BYTES) {
+            revert FinalityCalldataTooLarge(msg.data.length, MAX_FINALITY_CALLDATA_BYTES);
+        }
+        _requireCanonicalScopeShape(scope);
+        if (_scopeFinalized(scope)) revert FinalityAlreadyFinalized(_scopeKey(scope));
+        _requireComponentListWellFormed(nonSanctionComponents);
+        _requireManifestValid(manifest);
+        return StreamFinalityPreparation.prepareSanctionWithReview(
             _preparationDependencies(), scope, nonSanctionComponents, manifest
         );
     }

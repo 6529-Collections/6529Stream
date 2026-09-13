@@ -9,8 +9,8 @@ those remain full-v1 delivery requirements.
 ## Implementation and acceptance
 
 The concrete provider, source derivation, local metadata facts and Registry
-prepared-input dispatch are implemented. The independently reviewed 55-case
-cohort passes both compiler modes, with two 256-input fuzz properties and the
+prepared-input dispatch are implemented. The independently reviewed 75-case
+cohort passes both compiler modes, with five 256-input fuzz properties and the
 retained two named actual two-owner Safe cases. Source derivation tests use explicit typed producer boundaries. They are not the complete eight-producer assembly, finalization
 ceremony, deployed graph, or transaction-capacity acceptance. Producer runtime and integration acceptance are tracked separately. Complete producer assembly and Safe transaction capacity remain pending. WORK/RIGHTS seals are integrated
 with independently reviewed focused builder evidence; the complete assembled
@@ -124,6 +124,35 @@ Safe can call public provider reads through ordinary CALL. The prepared entry is
 intentionally protocol-only, including when the external caller is a Safe. Its
 restriction prevents externally supplied expectations from bypassing live-state
 validation.
+
+## Combined artist candidate and review
+
+The original Registry exposes `prepareSanctionWithReview` alongside
+`prepareSanction`. It performs the same current scope, Core, component, discovery
+and manifest checks and returns the original preparation fields together with
+the image review facts. The Artist candidate uses this optional capability when
+the fixed Registry advertises it; older Registries retain the two-call path.
+
+A capable native provider implements
+`requirePreparedFinalityScopeInputsAndReview`. Only the exact original Registry
+may call it, after the Registry's strict component and current route checks. The
+provider derives one current Statement, validates its exact registered manifest,
+and returns both the ten original inputs and images from that same Statement.
+This removes the second full inventory derivation from artist preparation. There
+is no stored readiness flag or caller-supplied substitute for live evidence.
+
+When a provider lacks the combined capability, the Registry retains its original
+input read followed by the public image-review read. An advertised capability's
+failure cannot select the legacy path. Both combined return envelopes have fixed
+maximum sizes and canonical offset, version, count and ordered-hash validation.
+The original subject, scope-input, ceremony and review commitments are unchanged.
+
+The existing public provider methods still perform their complete checks.
+Finalization independently revalidates current evidence and the recorded sanction.
+The 12 combined dispatch controls exercise actual Candidate/read libraries with
+typed Registry/provider boundaries. Matching actual Registry/provider codegen and
+source review do not establish execution of their complete entrypoints or the
+Artist/Safe ceremony and transaction gas capacity; those remain assembly requirements.
 
 ## Local metadata facts
 
