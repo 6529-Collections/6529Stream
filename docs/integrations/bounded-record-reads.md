@@ -10,6 +10,16 @@ and existing APIs.
 | `IStreamSchemaDocumentFacts.documentFacts` | Nine ABI words | Document identity, kind, status, content hash, canonicalization, predecessor, length, chunk count and declaration hash |
 | `IStreamSchemaDocumentFacts.documentChunkHashAt` | One ABI word | Original ordered chunk hash, including repetitions |
 | `IStreamCollectionRecordReceipts.collectionRecordReceipt` | Nine ABI words | Original receipt without copying the record URI |
+| `IStreamGovernanceActionFacts.governanceActionFacts` | Five ABI words | Current action status, class, complete calls hash and execution window |
+
+The [governance reader](../../smart-contracts/interfaces/stream/governance/IStreamGovernanceActionFacts.sol)
+returns zero-valued `NONE` facts for unknown actions. It exposes current stored
+status without copying the governance reason URI. A cold 2,048-byte reason
+regression exercises the actual Executor, complete published recovery batch
+and Safe. That length is a tested example, not a new governance URI limit.
+Consumers must authenticate the full call-array witness against `callHash`;
+the first target and selector in a batch cannot authenticate a later call.
+This reader does not implement an owner notice or establish its elapsed time.
 
 The [schema interface](../../smart-contracts/interfaces/stream/metadata/IStreamSchemaDocumentFacts.sol)
 returns `exists=false` for an unknown document. An unknown document's chunk

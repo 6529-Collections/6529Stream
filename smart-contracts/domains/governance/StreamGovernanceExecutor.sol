@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/governance/IStreamGovernanceExecutor.sol";
+import "../../interfaces/stream/governance/IStreamGovernanceActionFacts.sol";
 import "../../interfaces/stream/governance/IStreamGenesisInitializer.sol";
 import "../../interfaces/stream/parameters/IStreamGovernedParameterAuthority.sol";
 import "../../interfaces/stream/governance/IStreamRoleRegistry.sol";
@@ -29,6 +30,7 @@ import "../../vendor/openzeppelin/IERC165.sol";
 ///     isolated governed self-call with a direction-sensitive action class.
 contract StreamGovernanceExecutor is
     IStreamGovernanceExecutor,
+    IStreamGovernanceActionFacts,
     IStreamGenesisInitializer,
     IStreamGovernanceCatalog,
     IStreamGovernedParameterAuthority,
@@ -105,7 +107,8 @@ contract StreamGovernanceExecutor is
         return interfaceId == type(IERC165).interfaceId
             || interfaceId == type(IStreamStateExportPublisher).interfaceId
             || interfaceId == type(IStreamStateExportOperations).interfaceId
-            || interfaceId == type(IStreamStateExportHistory).interfaceId;
+            || interfaceId == type(IStreamStateExportHistory).interfaceId
+            || interfaceId == type(IStreamGovernanceActionFacts).interfaceId;
     }
 
     /// @inheritdoc IStreamStateExportPublisher
@@ -691,6 +694,20 @@ contract StreamGovernanceExecutor is
         assembly ("memory-safe") {
             return(add(encoded, 0x20), mload(encoded))
         }
+    }
+
+    function governanceActionFacts(bytes32 id)
+        external
+        view
+        override
+        returns (ActionFacts memory facts)
+    {
+        GovernanceAction storage row = _actions[id];
+        facts.status = row.status;
+        facts.actionClass = row.actionClass;
+        facts.callHash = row.callHash;
+        facts.notBefore = row.notBefore;
+        facts.expiresAfter = row.expiresAfter;
     }
 
     /// @inheritdoc IStreamGovernanceExecutor
