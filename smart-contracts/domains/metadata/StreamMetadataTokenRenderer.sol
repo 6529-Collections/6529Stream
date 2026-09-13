@@ -13,6 +13,31 @@ import "./StreamMetadataRenderer.sol";
 library StreamMetadataTokenRenderer {
     using Strings for uint256;
 
+    /// @notice The render/renderURI selectors consume the fixed Token/ServingSource/artist tuple.
+    /// @dev Their Base64/Strings implementation is embedded in the renderer runtime; these
+    ///      two selectors perform no external reads. Preparation functions are a separate path.
+    function renderingProfile() public pure returns (bytes32, bytes32, bytes32) {
+        return StreamMetadataRenderTypes.profile();
+    }
+
+    /// @notice Stable library/contract-compatible static rendering entry for selected finality.
+    error NoncanonicalFinalityRenderInput();
+
+    function renderForFinality(bool asURI, bytes memory input) public pure returns (string memory) {
+        (
+            StreamMetadataRenderTypes.Token memory token,
+            IStreamMetadataServingFacts.ServingSource memory metadata,
+            bytes memory artist
+        ) = abi.decode(
+            input,
+            (StreamMetadataRenderTypes.Token, IStreamMetadataServingFacts.ServingSource, bytes)
+        );
+        if (keccak256(input) != keccak256(abi.encode(token, metadata, artist))) {
+            revert NoncanonicalFinalityRenderInput();
+        }
+        return asURI ? renderURI(token, metadata, artist) : render(token, metadata, artist);
+    }
+
     function render(
         StreamMetadataRenderTypes.Token memory token,
         IStreamMetadataServingFacts.ServingSource memory metadata,

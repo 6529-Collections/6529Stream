@@ -26,6 +26,9 @@ import "./StreamMetadataImageURI.sol";
 import "./StreamMetadataContentRoot.sol";
 import "./StreamMetadataContentLocks.sol";
 import "./StreamMetadataContentAuthorization.sol";
+import "./StreamMetadataFinalityServing.sol";
+import "./StreamMetadataRouterCollectionReads.sol";
+import "../../interfaces/stream/metadata/IStreamMetadataRenderingProfile.sol";
 import {
     IStreamContentRootPublication
 } from "../../interfaces/stream/metadata/IStreamContentRootPublication.sol";
@@ -63,6 +66,7 @@ contract StreamMetadataRouter is
     IStreamCore public immutable core;
     address public immutable authority;
     IStreamArtistAttribution public immutable artistRegistry;
+    bytes32 private immutable _artistRegistryCodeHash;
     mapping(uint256 => CollectionMetadata) private _collections;
     mapping(uint256 => PreparedMetadata) private _prepared;
     string private _contractMetadataURI;
@@ -73,6 +77,7 @@ contract StreamMetadataRouter is
     mapping(uint256 => ArtistPresentation) private _artistPresentation;
     mapping(uint256 => bool) private _displayMetadataLocked;
     StreamMetadataContentRoot.State private _contentRoots;
+    mapping(uint256 => StreamMetadataRecoveryRoutes.OriginalAnchor) public originalFinalityAnchor;
 
     bytes32 public constant CONTENT_SCRIPT = keccak256("SCRIPT");
     bytes32 public constant CONTENT_MEDIA = keccak256("MEDIA_MANIFEST");
@@ -157,6 +162,7 @@ contract StreamMetadataRouter is
                 || IERC165(address(artistRegistry_)).supportsInterface(0xffffffff)
         ) revert InvalidManifest();
         artistRegistry = artistRegistry_;
+        _artistRegistryCodeHash = address(artistRegistry_).codehash;
     }
 
     function streamModuleType() public pure override returns (bytes32) {
@@ -178,6 +184,7 @@ contract StreamMetadataRouter is
         returns (bool)
     {
         return id == type(IStreamMetadataRouter).interfaceId
+            || id == type(IStreamMetadataRenderingProfile).interfaceId
             || id == type(IStreamContentRootPublication).interfaceId
             || id == type(IStreamMetadataServingFacts).interfaceId
             || id == type(IStreamArtistContentFacts).interfaceId
@@ -262,16 +269,14 @@ contract StreamMetadataRouter is
 
     function lockArtistIdentity(uint256 collectionId) external override returns (bytes32) {
         _requirePresentationAuthority(collectionId);
-        if (_artistPresentation[collectionId].locked) {
-            revert PresentationAlreadyLocked(collectionId, LOCK_ARTIST_IDENTITY);
-        }
-        ArtistPresentation memory snapshot = StreamMetadataArtistPresentation.snapshot(
-            address(core), address(artistRegistry), collectionId
+        return StreamMetadataRouterCollectionReads.lockArtistIdentity(
+            _artistPresentation,
+            originalFinalityAnchor,
+            StreamMetadataRecoveryRoutes.Environment(
+                address(core), address(artistRegistry), _artistRegistryCodeHash
+            ),
+            collectionId
         );
-        _artistPresentation[collectionId] = snapshot;
-        emit CollectionMetadataLocked(collectionId, LOCK_ARTIST_IDENTITY, msg.sender, 0, 0, 1);
-        emit ArtistPresentationLocked(collectionId, snapshot.snapshotHash, snapshot, 1);
-        return snapshot.snapshotHash;
     }
 
     function lockDisplayMetadata(uint256 collectionId) external override {
@@ -306,25 +311,15 @@ contract StreamMetadataRouter is
         override
         returns (ServingFacts memory result)
     {
-        if (!core.collectionExists(collectionId)) revert InvalidCollection(collectionId);
-        CollectionMetadata storage metadata = _collections[collectionId];
-        result.presentationProfile = PRESENTATION_PROFILE;
-        result.configured = metadata.configured;
-        uint256 length = bytes(metadata.animationScript).length;
-        result.mode = length == 0 ? keccak256("OFFCHAIN") : keccak256("ONCHAIN");
-        result.renderer = address(StreamMetadataTokenRenderer);
-        result.rendererCodeHash = result.renderer.codehash;
-        result.scriptHash = keccak256(bytes(metadata.animationScript));
-        result.scriptBytes = uint32(length); // Writes enforce the 8192-byte bound.
-        result.imageURIHash = keccak256(bytes(metadata.image));
-        result.animationBaseURIHash = keccak256(bytes(metadata.animationBaseURI));
-        result.scriptLocked = _artistContentLocks[collectionId][CONTENT_SCRIPT];
-        result.mediaLocked = _artistContentLocks[collectionId][CONTENT_MEDIA];
-        result.baseURILocked = _artistContentLocks[collectionId][LOCK_BASE_URI];
-        result.dependenciesLocked = true; // No mutable renderer/library assignment exists.
-        result.artistIdentityLocked = _artistPresentation[collectionId].locked;
-        result.displayMetadataLocked = _displayMetadataLocked[collectionId];
-        result.coreFrozen = core.collectionFreezeStatus(collectionId);
+        return StreamMetadataRouterCollectionReads.facts(
+            _collections,
+            _artistContentLocks,
+            _artistPresentation,
+            _displayMetadataLocked,
+            core,
+            collectionId,
+            address(StreamMetadataTokenRenderer)
+        );
     }
 
     function collectionServingSource(uint256 collectionId)
@@ -333,15 +328,7 @@ contract StreamMetadataRouter is
         override
         returns (ServingSource memory)
     {
-        if (!core.collectionExists(collectionId)) revert InvalidCollection(collectionId);
-        CollectionMetadata storage metadata = _collections[collectionId];
-        return ServingSource(
-            metadata.name,
-            metadata.description,
-            metadata.image,
-            metadata.animationBaseURI,
-            metadata.animationScript
-        );
+        return StreamMetadataRouterCollectionReads.source(_collections, core, collectionId);
     }
 
     function collectionLiveArtistStatus(uint256 collectionId)
@@ -666,12 +653,17 @@ contract StreamMetadataRouter is
         returns (string memory)
     {
         _requireCore(core_);
-        return _renderToken(_tokenFacts(tokenId, false), true);
+        return _serveToken(tokenId, false, true);
+    }
+
+    /// @notice Exact profile of the locally linked renderer, without routed serving recursion.
+    function renderingProfile() external pure returns (bytes32, bytes32, bytes32) {
+        return StreamMetadataRenderTypes.profile();
     }
 
     function tokenMetadataJSON(address core_, uint256 tokenId) public view returns (string memory) {
         _requireCore(core_);
-        return _renderToken(_tokenFacts(tokenId, false), false);
+        return _serveToken(tokenId, false, false);
     }
 
     function historicalTokenMetadataJSON(address core_, uint256 tokenId)
@@ -681,9 +673,28 @@ contract StreamMetadataRouter is
         returns (string memory)
     {
         _requireCore(core_);
-        StreamMetadataTokenReads.TokenFacts memory facts = _tokenFacts(tokenId, true);
-        if (!facts.finalized) revert TokenEntropyNotFinalized(tokenId);
-        return _renderToken(facts, false);
+        return _serveToken(tokenId, true, false);
+    }
+
+    function _serveToken(uint256 tokenId, bool allowBurned, bool asURI)
+        private
+        view
+        returns (string memory)
+    {
+        (bool frozen, string memory resolved) = StreamMetadataFinalityServing.token(
+            _artistPresentation,
+            originalFinalityAnchor,
+            StreamMetadataRecoveryRoutes.Environment(
+                address(core), address(artistRegistry), _artistRegistryCodeHash
+            ),
+            tokenId,
+            allowBurned,
+            asURI
+        );
+        if (frozen) return resolved;
+        StreamMetadataTokenReads.TokenFacts memory facts = _tokenFacts(tokenId, allowBurned);
+        if (allowBurned && !facts.finalized) revert TokenEntropyNotFinalized(tokenId);
+        return _renderToken(facts, asURI);
     }
 
     function _renderToken(StreamMetadataTokenReads.TokenFacts memory facts, bool asURI)
@@ -710,9 +721,10 @@ contract StreamMetadataRouter is
             _collections[facts.collectionId].configured
         );
         bytes memory artist = _artistJSON(facts.collectionId);
-        return asURI
-            ? StreamMetadataTokenRenderer.renderURI(token, metadata, artist)
-            : StreamMetadataTokenRenderer.render(token, metadata, artist);
+        return
+            StreamMetadataTokenRenderer.renderForFinality(
+                asURI, abi.encode(token, metadata, artist)
+            );
     }
 
     function _tokenFacts(uint256 tokenId, bool allowBurned)
@@ -743,19 +755,18 @@ contract StreamMetadataRouter is
     {
         _requireCore(core_);
         if (!core.collectionExists(collectionId)) revert InvalidCollection(collectionId);
+        (bool frozen, string memory resolved) = StreamMetadataFinalityServing.collection(
+            _artistPresentation,
+            originalFinalityAnchor,
+            StreamMetadataRecoveryRoutes.Environment(
+                address(core), address(artistRegistry), _artistRegistryCodeHash
+            ),
+            collectionId
+        );
+        if (frozen) return resolved;
         PreparedMetadata storage metadata = _prepared[collectionId];
-        return _dataURI(
-            string(
-                abi.encodePacked(
-                    '{"name":"',
-                    metadata.name,
-                    '","description":"',
-                    metadata.description,
-                    '","image":"',
-                    metadata.image,
-                    '"}'
-                )
-            )
+        return StreamMetadataRenderPreparation.collectionURI(
+            metadata.name, metadata.description, metadata.image
         );
     }
 
@@ -770,7 +781,7 @@ contract StreamMetadataRouter is
     }
 
     function _dataURI(string memory json) private pure returns (string memory) {
-        return StreamMetadataTokenRenderer.dataURI(json);
+        return StreamMetadataRenderPreparation.dataURI(json);
     }
 
     function _prepareCollectionMetadata(

@@ -4,8 +4,16 @@ pragma solidity ^0.8.19;
 import "../../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 import "../../helpers/OfficialSafeFixture.sol";
+import "../../helpers/MetadataRecoveryServingBoundaries.sol";
 
 contract PresentationCoreBoundary {
+    mapping(bytes32 => StreamMetadataRecoveryRoutes.Pointer) private recoveryPointers;
+
+    function setRecoveryPointer(bytes32 key, StreamMetadataRecoveryRoutes.Pointer calldata value)
+        external
+    {
+        recoveryPointers[key] = value;
+    }
     address public selected;
     address public entropy;
     bool public frozen;
@@ -50,11 +58,15 @@ contract PresentationCoreBoundary {
         overrideCodeHash = value;
     }
 
-    function getSatellitePointer(bytes32)
+    function getSatellitePointer(bytes32 key)
         external
         view
         returns (address, bytes32, bool, bytes32, bytes4, address, uint8, bytes32, bytes32, uint64)
     {
+        if (key != keccak256("ARTIST_REGISTRY")) {
+            bytes memory raw = abi.encode(recoveryPointers[key]);
+            assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
+        }
         return (
             selected,
             overrideCodeHash == 0 ? selected.codehash : overrideCodeHash,
@@ -107,6 +119,8 @@ contract PresentationEntropyBoundary {
 }
 
 contract PresentationArtistBoundary {
+    address public immutable finalityRegistry;
+    bytes32 public immutable finalityRegistryCodeHash;
     address public immutable core;
     uint8 public state = 2;
     uint8 public status = 1;
@@ -116,6 +130,9 @@ contract PresentationArtistBoundary {
 
     constructor(address c) {
         core = c;
+        finalityRegistry =
+            address(new MetadataRecoveryOriginalBoundary(c, address(this), msg.sender));
+        finalityRegistryCodeHash = finalityRegistry.codehash;
     }
 
     function set(uint8 s, uint8 a, address who) external {
@@ -200,6 +217,143 @@ contract StreamMetadataServingTest is CharacterizationTestBase, OfficialSafeFixt
             "urn:router",
             keccak256("manifest"),
             IStreamArtistAttribution(address(artist))
+        );
+    }
+
+    function testSavedOriginalAnchorSurvivesFacadeLossAndCurrentPointerReplacement() public {
+        router.lockArtistIdentity(1);
+        (address original, bytes32 codeHash) = router.originalFinalityAnchor(1);
+        require(
+            original == artist.finalityRegistry() && codeHash == original.codehash,
+            "exact fixed facade binding"
+        );
+        bytes32 json = keccak256(bytes(router.tokenMetadataJSON(address(core), 91)));
+        bytes32 collection = keccak256(bytes(router.contractURIForCollection(address(core), 1)));
+        StreamMetadataRecoveryRoutes.Pointer memory pointer;
+        pointer.target = original;
+        pointer.codeHash = original.codehash;
+        pointer.revision = 1;
+        core.setRecoveryPointer(keccak256("ARTWORK_FINALITY_REGISTRY"), pointer);
+        MetadataRecoveryOriginalBoundary replacement =
+            new MetadataRecoveryOriginalBoundary(address(core), address(artist), address(this));
+        pointer.target = address(replacement);
+        pointer.codeHash = address(replacement).codehash;
+        pointer.revision = 2;
+        core.setRecoveryPointer(keccak256("ARTWORK_FINALITY_REGISTRY"), pointer);
+        vm.etch(address(artist), hex"00");
+        core.setLifecycle(3);
+        require(
+            keccak256(bytes(router.historicalTokenMetadataJSON(address(core), 91))) == json,
+            "saved burned rendering"
+        );
+        require(
+            keccak256(bytes(router.contractURIForCollection(address(core), 1))) == collection,
+            "saved collection rendering"
+        );
+        (address afterAddress, bytes32 afterCode) = router.originalFinalityAnchor(1);
+        require(afterAddress == original && afterCode == codeHash, "snapshot never rebinds");
+    }
+
+    function testLockedMissingOrPartialAnchorCannotConcealFinalizedHistory() public {
+        router.lockArtistIdentity(1);
+        (address original, bytes32 codeHash) = router.originalFinalityAnchor(1);
+        MetadataRecoveryOriginalBoundary(original).setCount(1);
+        // Slot 12 is the single appended mapping, independently checked against compiler layout.
+        bytes32 first = keccak256(abi.encode(uint256(1), uint256(12)));
+        bytes32 second = bytes32(uint256(first) + 1);
+        require(
+            vm.load(address(router), first) == bytes32(uint256(uint160(original)))
+                && vm.load(address(router), second) == codeHash,
+            "exact corruption target"
+        );
+        for (uint256 i; i < 3; ++i) {
+            vm.store(
+                address(router), first, i == 1 ? bytes32(uint256(uint160(original))) : bytes32(0)
+            );
+            vm.store(address(router), second, i == 0 ? codeHash : bytes32(0));
+            vm.expectRevert();
+            router.tokenMetadataJSON(address(core), 91);
+            vm.expectRevert();
+            router.contractURIForCollection(address(core), 1);
+        }
+        vm.store(address(router), first, bytes32(uint256(uint160(original))));
+        vm.store(address(router), second, codeHash);
+        // Complete saved history still requires its companion; restoring bytes is no bypass.
+        vm.expectRevert();
+        router.tokenMetadataJSON(address(core), 91);
+        MetadataRecoveryOriginalBoundary(original).setCount(0);
+        require(
+            bytes(router.tokenMetadataJSON(address(core), 91)).length != 0, "exact healthy restore"
+        );
+    }
+
+    function testUnlockedUnexpectedAnchorAndLostFacadeRejectWithoutLocalFallback() public {
+        address original = artist.finalityRegistry();
+        bytes32 first = keccak256(abi.encode(uint256(1), uint256(12)));
+        vm.store(address(router), first, bytes32(uint256(uint160(original))));
+        vm.expectRevert();
+        router.tokenMetadataJSON(address(core), 91);
+        vm.expectRevert();
+        router.lockArtistIdentity(1);
+        require(!router.artistPresentation(1).locked, "unexpected anchor cannot be adopted");
+        vm.store(address(router), first, bytes32(0));
+        MetadataRecoveryOriginalBoundary(original).setCount(1);
+        bytes memory facadeCode = address(artist).code;
+        vm.etch(address(artist), hex"00");
+        vm.expectRevert();
+        router.tokenMetadataJSON(address(core), 91);
+        vm.etch(address(artist), facadeCode);
+        vm.expectRevert();
+        router.tokenMetadataJSON(address(core), 91);
+        MetadataRecoveryOriginalBoundary(original).setCount(0);
+        require(
+            bytes(router.tokenMetadataJSON(address(core), 91)).length != 0,
+            "live fixed facade healthy restore"
+        );
+    }
+
+    function testLockOriginalCoreAndRuntimeValidationRollsBackBeforeSnapshotEvents() public {
+        address original = artist.finalityRegistry();
+        bytes memory code = original.code;
+        vm.etch(original, hex"00");
+        vm.recordLogs();
+        vm.expectRevert();
+        router.lockArtistIdentity(1);
+        require(
+            vm.getRecordedLogs().length == 0 && !router.artistPresentation(1).locked,
+            "runtime failure before logs/storage"
+        );
+        (address a, bytes32 h) = router.originalFinalityAnchor(1);
+        require(a == address(0) && h == 0, "no partial anchor");
+        vm.etch(original, code);
+        bytes32 oldCore = vm.load(original, bytes32(0));
+        require(oldCore == bytes32(uint256(uint160(address(core)))), "actual fixture Core root");
+        vm.store(original, bytes32(0), bytes32(uint256(uint160(address(artist)))));
+        vm.recordLogs();
+        vm.expectRevert();
+        router.lockArtistIdentity(1);
+        require(
+            vm.getRecordedLogs().length == 0 && !router.artistPresentation(1).locked,
+            "reciprocal failure rollback"
+        );
+        vm.store(original, bytes32(0), oldCore);
+        require(router.lockArtistIdentity(1) != 0, "same authorized lock restores");
+    }
+
+    function testSavedOriginalRuntimeLossIsUnreadableRatherThanUnfinalized() public {
+        router.lockArtistIdentity(1);
+        (address original,) = router.originalFinalityAnchor(1);
+        bytes32 json = keccak256(bytes(router.tokenMetadataJSON(address(core), 91)));
+        bytes memory code = original.code;
+        vm.etch(original, hex"00");
+        vm.expectRevert();
+        router.tokenMetadataJSON(address(core), 91);
+        vm.expectRevert();
+        router.contractURIForCollection(address(core), 1);
+        vm.etch(original, code);
+        require(
+            keccak256(bytes(router.tokenMetadataJSON(address(core), 91))) == json,
+            "original code exact restore"
         );
     }
 

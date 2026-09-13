@@ -625,6 +625,84 @@ execution-time Core high-water snapshot and rolls back with a failed Core
 callback. The first actual-governance composition's zero high-water control
 does not establish nonempty actual Core refresh or actual owner-notice authority.
 
+## Recovery-aware Router serving
+
+The Router classifies permanent finality using the original Registry bound by
+its constructor-fixed artist facade. The current Core original-Finality pointer
+is not a historical lookup. During the existing authenticated, one-way
+`lockArtistIdentity` operation, the Router also stores that original Registry's
+address and runtime hash in a separately appended per-collection mapping. The
+existing artist snapshot hash, tuple, lock rejection and two events are
+unchanged. The new binding is derived from the facade and checked against the
+actual Registry code and reciprocal Core before any snapshot store or event.
+There is no caller-selected target, rebind operation or mutable activation flag.
+
+A locked presentation requires both saved binding fields. Missing, half-cleared
+or unreadable saved data rejects; it cannot fall back to a new facade or an empty
+registry. An unlocked presentation requires an empty saved binding and a healthy
+constructor-fixed facade. After facade code loss the saved presentation remains
+usable for absence classification and local unfinalized rendering. Finalized
+serving still requires the companion's artist, Coordinator and Consent runtime
+pins and can fail closed after facade loss. Original Registry code loss is unreadability rather
+than evidence that the collection is unfinalized. Immutable original component
+counts only classify absence, including collection inheritance for TOKEN.
+
+For a finalized scope, the current Core-selected recovery companion is required.
+The Router checks its current pointer, runtime, primary interface, module type,
+live registry eligibility and reciprocal deployment bindings. Every consumed
+family joins both canonical resolved-route and current-status results, including
+route hash, original record and recovery ID. A missing or unhealthy frozen route
+rejects without a direct-original or local-render fallback. Current eligibility
+for new discovery is separate from the immutable pins used by historical adapter
+state reads.
+
+A specialized provider-backed serving adapter keeps the adapter identity,
+actual Router or entropy host, and immutable evidence provider distinct. Its
+provider identifies the exact host for each family and reads raw source/lock
+facts; it never calls routed serving or the adapter again. The original
+`StreamFinalityHostAdapter` constructor and history are unchanged. The new
+adapter cannot supply readiness from caller-provided facts.
+
+New candidate admission must also join the selected Router collection's saved
+`originalFinalityAnchor(uint256)` to the specific candidate Registry and its
+runtime code hash. That getter returns the exact 64-byte `(address, bytes32)`
+pair with selector `0xe0e6f53a`. The first serving profile requires locked artist
+presentation and therefore admits only the complete saved pair. A current
+original-Registry pointer or an unauthenticated current facade lookup cannot
+replace this join. A future profile permitting unlocked presentation needs a
+separate read that authenticates the Router's constructor facade code pin before
+deriving its original Registry. Historical serving retains the recorded anchor.
+
+METADATA_ROUTER supplies configured mode, display and saved artist presentation; MEDIA_MANIFEST
+supplies image and base URI; SCRIPT_SOURCE supplies exact script bytes; ENTROPY
+supplies the terminal seed. RENDERER selects the actual invoked renderer.
+RENDER_CONTEXT and DEPENDENCY_SOURCE must match the explicit fixed presentation,
+context and dependency profile. Their commitments are distinct from renderer
+identity, so an independently recovered renderer does not require the old
+renderer to remain alive. Only the selected renderer's code is needed to render;
+unchanged source-family reads do not impose unrelated renderer liveness.
+
+The new bytes-only renderer entry uses canonical `abi.encode(Token,
+ServingSource, bytes artist)` and exact re-encoding checks. It avoids Solidity's
+different library-versus-contract selectors for nested struct parameters while
+preserving old renderer methods. The first profile has bounded raw fields,
+16-KiB token data and 64-KiB returned ABI. Profile declarations do not prove that
+arbitrary renderer bytecode has no external reads; runtime admission remains
+an independent review responsibility.
+
+The first serving implementation uses two-million-gas payload reads for complete
+cold Router source/facts and 16-KiB Core token data, a two-million
+gas resolver ceiling and an eight-million gas renderer ceiling. Their parent-gas
+requirements are explicit. Older Core fixtures use a 500,000-gas metadata budget,
+which is not claimed to support frozen rendering under this profile. The current
+accepted deployment planner supplies 12,000,000 gas; this does not change any
+already deployed Core's parameter. Actual cold Core calls and governed budget
+admission require matching runtime evidence. The actual original Registry,
+companion and Router composition separately covers stored routes and replacement
+renderer execution with explicit Core, artist, OwnerRecords and provider authority
+boundaries. The retained Router suite and specialized-adapter fixtures alone do
+not establish the authoritative provider inventory or full-v1 scope completion.
+
 ## Acceptance and remaining work
 
 Required tests include an actual threshold-Safe/Executor class-2 path, direct
