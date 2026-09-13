@@ -5,6 +5,15 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Added complete conservation JSON profiles, schemas, format catalogs and dated
+  language validation for artist intent, waivers and interviews. Original record
+  authority, current selection and archive coverage remain separate consumers.
+- Added complete scoped indexing of retained Core coordinators across pointer
+  replacement, with bounded atomic batches, immutable history and explicit
+  indexing-time runtime validation.
+- Added inherited recovery scope-membership authentication and exact permanent
+  identity-recovery hash encodings; complete operative recovery is tracked separately.
+
 - Added inherited TOKEN artist recovery approval using actual retained Core
   identity, with separate historical approval and fresh execution checks.
 - Added fixed-graph finality consumption of actual selected WORK and RIGHTS

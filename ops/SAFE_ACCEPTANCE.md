@@ -58,6 +58,21 @@ membership, governance and the external oracle service are explicit boundaries;
 this proves the named reads, not the complete deployment or final selector,
 version and nested-wallet acceptance matrix.
 
+## Original-coordinator inventory increment
+
+The [inventory tests](../test/unit/finality/StreamFinalityCoordinatorInventory.t.sol)
+invoke every one of this host's sixteen public ABI selectors through actual
+two-signature Safe 1.4.1 calls: seven operative/history methods, eight public
+binding/constant getters and ERC-165. Separate assertions check progress,
+source identities, configured bindings and interface answers. The retained
+15-case cohort and two added controls pass both compiler modes; the latter
+also proves low-parent-gas rollback and retry.
+
+This is complete selector invocation for this one host/version. It does not
+capture return bytes inside Safe, exercise nested wallets or complete the
+protocol-wide final acceptance matrix. Actual Core/Executor/Safe replacement
+composition is captured separately from the focused Core-response fixture.
+
 ## Shared foundation
 
 The [description evidence tests](../test/unit/finality/StreamFinalityDescriptionReads.t.sol)

@@ -14,13 +14,35 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Description consumption `821c66ee`, inherited TOKEN recovery `89eab3f4`, compiler repair `ac870f09`; complete provider/current assembly remain active. Immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | Coordinator inventory `66579293`, conservation `25d3392c`, recovery prerequisites `a3b430d8 / 3a2c0544`; complete provider/current assembly remain active. Immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
 | Last updated | `2026-09-13 UTC` |
 
 ## Active work
+
+Original-coordinator inventory `66579293` now traverses every actual scope member's retained
+Core coordinator, preserving old sources across pointer replacement. Seventeen
+focused cases pass both modes as a retained 15-case cohort plus two added controls,
+including 256 fuzz inputs and all sixteen public selectors invoked through real
+threshold-Safe 1.4.1. A separate four-case IR cohort passes: two new actual
+Core/Executor/Safe replacement-and-membership cases and two retained foundation
+cases. The runtime pin is explicitly observed at indexing, not proven at mint.
+Complete inventory and per-entry live validation remain separate, and this does
+not complete entropy policy/output or final discovery. See
+[original coordinator inventory](../docs/integrations/original-coordinator-inventory.md).
+
+Conservation records are integrated as 25d3392c: complete artist-intent, waiver
+and interview JSON, eight definitions, seven canonical examples and pinned
+language tooling. Thirty-five Solidity cases pass each compiler mode with two
+256-input properties; twenty-four Python cases pass separately. Original record
+authority, current conservation selection and archival coverage are the next
+consumer work. The dedicated
+[conservation guide](../docs/integrations/conservation-record-json.md) preserves
+those boundaries. Recovery membership authentication a3b430d8 and permanent
+identity-recovery hashing 3a2c0544 are also integrated; neither prerequisite
+alone implements adjudicated recovery.
 
 Current description consumption is integrated as `821c66ee`. Actual WORK and
 RIGHTS selectors now feed their exact authorized heads, payload commitments and
@@ -109,11 +131,12 @@ not complete that join.
 | --- | --- |
 | Integrator | Complete typed metadata/finality provider, original-coordinator discovery and current deployment assembly; shared tests, CI and release |
 | Artist builder | Actual inherited approval and recovery across TOKEN, RELEASE, SEASON and VIEW, followed by adjudicated identity recovery |
-| Museum/payment builder | Typed artist intent, waiver and interview profiles; conservation tooling and remaining owner/museum work |
+| Museum/payment builder | Actual conservation original-record interpretation, current artist/estate selection and interview linkage |
 | Independent reviewer | Challenge exact implementations, real-contract composition and integration evidence |
 
-The full build remains red. At pushed head `ca906119`, museum CI passed and the
-main workflow failed. The retained compiler diagnostic has two missing actual
+The full build remains red. At pushed head `7630e3c3`, museum CI passed on
+Windows and Linux; client/wrapper checks passed, while current integration,
+Foundry smoke, static baseline and release artifact checks failed. The retained compiler diagnostic has two missing actual
 Finality arguments in Coordinator assembly; the immutable deployment order in
 ADR 0041 must be implemented with the complete provider. Static-analysis
 baseline and release artifacts also need reconciliation after implementation
