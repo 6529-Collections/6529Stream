@@ -574,6 +574,57 @@ a separate absolute-URI grammar. Larger request profiles and actual companion
 scope/route/authority admission are separate work. The bounded storage tests
 do not imply those operative gates have been implemented.
 
+## First operative recovery companion profile
+
+The companion retains the original sixteen-selector recovery interface and
+adds the separate complete-request availability interface. Construction takes
+five fixed targets (Core, Executor, original Finality, artist facade and owner
+evidence), three independent governed read budgets, and immutable module
+document identity. The facade supplies its fixed Coordinator; that Coordinator
+supplies its complete owner suite and original Finality pin. Construction
+checks reciprocal Core, Executor, roles and owner bindings, including the
+owner-evidence ERC165 triad and exact `core()`/`governanceAuthority()` reads.
+All required targets must already have code. Construction does not require
+their current Core selection, allowing staged deployment before activation.
+
+New preparation and execution require the exact current Core-selected companion
+and artist, their pinned runtime identities, and current ModuleRegistry
+eligibility. A staged intent and its immutable full Request establish byte
+availability only. Preparation independently derives the original record,
+current exact-scope predecessor/generation, old route and healthy frozen
+replacement, then produces the four intent facts. Executor-only mutation checks
+the actual class-2 per-call context, reads artist and action-specific owner
+evidence, repeats preparation and context checks, and appends once under the
+host mutation guard. The evidence snapshot is outside the staged intent and
+inside the immutable executed record and recovery-route commitment.
+
+The initial original-record branch requires authenticated artist-sanctioned
+finality. It supports exact original records for all five scopes and inherited
+COLLECTION-to-TOKEN route resolution using completed token lifecycle and
+retained membership. New inherited RELEASE/SEASON/VIEW scopes remain unsupported
+until the fixed metadata provider implements authoritative family-qualified
+membership. The additive `requireRecoveryScope` interface is a boundary only:
+its subject must be recomputed locally; COLLECTION/TOKEN manifest hashes are
+zero, while other scopes require the exact family-qualified stored manifest
+and its provenance. An old collection/scope-ID-only manifest is insufficient.
+
+Route resolution does not widen the earlier operation-22 admission profile:
+new approvals still require the exact authenticated original scope. Inherited
+approval admission, platform originals, collaborator/delegate/steward approval
+paths and adjudicated supersession remain separate work. An approval returned
+as already recorded is never reauthorized against current signer capability or
+expiry. The alternative finding is bound to this companion, exact action,
+scope and manifest and must have reached its snapshotted notice end.
+
+Raw executed records remain usable after permitted pointer replacement and
+later evidence changes. Historical route reads retain original runtime pins;
+current route health is a separate observation. Permissionless refresh checks
+its own chain, fixed Core and current selected companion, without reopening
+artist or owner authorization. It advances the stored bounded plan against the
+execution-time Core high-water snapshot and rolls back with a failed Core
+callback. The first actual-governance composition's zero high-water control
+does not establish nonempty actual Core refresh or actual owner-notice authority.
+
 ## Acceptance and remaining work
 
 Required tests include an actual threshold-Safe/Executor class-2 path, direct
