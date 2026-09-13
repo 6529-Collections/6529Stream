@@ -133,12 +133,25 @@ Metadata/provider pointers; new-candidate selection checks belong to the caller.
 ## Provider and Router integration
 
 The provider fixes `scopeMembershipHost()` and `scopeMembershipHostCodeHash()` and
-joins the membership host's Core and Metadata identities to its own. The Router
-must resolve membership from its saved original Finality anchor, then that
+joins the membership host's Core and Metadata identities to its own. The Router's
+additive `IStreamMetadataScopeMembership` interface exposes
+`scopeCoversToken(scope, tokenId)` and `scopeTokenAt(scope, index)`. Both resolve
+membership from that collection's saved original Finality anchor, then the
 registry's original provider and the provider's same fixed membership host.
+They check the original provider runtime and its Core, Router, Metadata and
+membership runtime bindings before forwarding the entire scope unchanged.
+
 An unlocked collection uses the authenticated fixed facade's original binding.
-A missing or partial saved anchor fails; today's replacement provider is not a
-fallback. The developing Router wrappers are a separate integration increment.
+A missing or partial saved anchor fails. Replacing current provider, Metadata,
+artist or Finality pointers does not replace this original membership authority.
+Locked reads retain their saved anchor after facade or Executor code loss; the
+original Registry, provider, membership and their required source pins must
+remain valid. These historical reads do not add fresh OwnerRecords or Executor
+code checks. New candidate selection and authorization remain separate.
+
+The two calls accept exactly 164 bytes of canonical calldata and return one
+canonical 32-byte word. The Router's existing primary interface and storage are
+unchanged. Read-only VIEW membership does not authorize view-content adoption.
 
 The maximum cold record URI and manifest were exercised through the actual
 Metadata, Schema Registry and Store at the 500,000 cap. The actual IR call costs
@@ -164,6 +177,16 @@ Manifest and threshold Safe. They exercise delayed governed installation and
 publication policy, all three scoped families, actual mint/burn identity,
 interleaved collections, later mints and grant-revocation/indexing retry. Mint,
 entropy and artist authority remain explicit boundaries in those tests.
+
+Four Router membership tests pass in both modes using the actual Router,
+serving provider, membership host, Metadata, Schema Registry, Store and Inventory.
+They cover all five scopes, canonical calldata, original runtime loss and healthy
+restoration, locked continuity across current pointer replacements, and invalid
+saved anchors. Original Registry, Core, artist and Executor are explicit boundary
+contracts in this cohort. The separate actual-Core tests above do not turn that
+Router cohort into an executed original-finality composition. Complete original
+Registry/provider/scope-finality integration and aggregate serving gas remain
+separate gates.
 
 Membership alone does not complete inherited-scope artist recovery approval,
 adjudicated association supersession, VIEW content adoption, complete scope

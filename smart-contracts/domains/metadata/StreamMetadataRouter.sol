@@ -28,6 +28,8 @@ import "./StreamMetadataContentLocks.sol";
 import "./StreamMetadataContentAuthorization.sol";
 import "./StreamMetadataFinalityServing.sol";
 import "./StreamMetadataRouterCollectionReads.sol";
+import "./StreamMetadataScopeMembership.sol";
+import "../../interfaces/stream/metadata/IStreamMetadataScopeMembership.sol";
 import "../../interfaces/stream/metadata/IStreamMetadataRenderingProfile.sol";
 import {
     IStreamContentRootPublication
@@ -40,7 +42,8 @@ contract StreamMetadataRouter is
     IStreamArtistContentFacts,
     IStreamArtistContentMutationFacts,
     IStreamMetadataServingFacts,
-    IStreamContentRootPublication
+    IStreamContentRootPublication,
+    IStreamMetadataScopeMembership
 {
     struct CollectionMetadata {
         string name;
@@ -189,7 +192,38 @@ contract StreamMetadataRouter is
             || id == type(IStreamMetadataServingFacts).interfaceId
             || id == type(IStreamArtistContentFacts).interfaceId
             || id == type(IStreamArtistContentMutationFacts).interfaceId
+            || id == type(IStreamMetadataScopeMembership).interfaceId
             || super.supportsInterface(id);
+    }
+
+    function scopeCoversToken(StreamFinalityScope calldata, uint256)
+        external
+        view
+        override
+        returns (bool)
+    {
+        _scopeMembership();
+    }
+
+    function scopeTokenAt(StreamFinalityScope calldata, uint256)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        _scopeMembership();
+    }
+
+    function _scopeMembership() private view {
+        uint256 result = StreamMetadataScopeMembership.read(
+            _artistPresentation,
+            originalFinalityAnchor,
+            StreamMetadataRecoveryRoutes.Environment(
+                address(core), address(artistRegistry), _artistRegistryCodeHash
+            ),
+            msg.data
+        );
+        assembly ("memory-safe") { mstore(0, result) return(0, 32) }
     }
 
     function setCollectionMetadata(
