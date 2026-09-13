@@ -101,3 +101,37 @@ entry/snapshot, and a known snapshot from another artist rejects. Positive
 admission count without complete indexed history rejects. The read bundle does
 not replace the existing singular transition-standing tuple or grant union
 standing to post-recovery contests.
+
+## First completed-rotation extension
+
+The additive `6529STREAM_ARTIST_RECOVERY_FIRST_ROTATION_PROFILE_V1` tag permits
+one actual first rotation whose original uncontested window has completed, with
+no later transition cohort, pending transition or earlier identity recovery.
+The current contested cause must bind that execution and incumbent. Original
+rotation hash, record, executed transition and old-address retirement are read
+from Identity-owned storage; the exact stored window is never recomputed from
+today's configuration. Both the cause and any first contest marker must be at
+or after that original end. Earlier contests do not expire into eligibility.
+
+The predecessor commitment is `keccak256(abi.encode(
+keccak256("6529STREAM_ARTIST_RECOVERY_FIRST_ROTATION_FACTS_V1"),
+fullOriginalRotationRecord, originalRetirementHash))`. After the existing
+initial/guarded/history context calculation, only this new branch wraps the
+old-value hash and predecessor commitment under
+`keccak256("6529STREAM_ARTIST_RECOVERY_FIRST_ROTATION_CONTEXT_V1")`.
+This wrapper contains no pending association or future preparation revision.
+The original initial-authority branch remains unchanged.
+
+Use the actual operative guardian record, including an eligible provisional
+candidate that has matured through reads alone. The exact full record must match
+its indexed History entry and permanent GuardianRecord hash. Original authorship
+is preserved; a changed incumbent does not invalidate a prior key's admitted
+set. The full non-superseded history prefix remains the staged-veto source,
+while the selected record controls the new post-vesting minimum and common
+standing tuple. Existing Association fields, action membership, local veto,
+cancellation/replacement, original acceptance and receipt rules are unchanged.
+
+This is an empty-supersession first-rotation profile. It does not implement later
+rotation/appeal/estate histories, earlier adjudicated exclusions, nonempty
+supersession or all-history post-recovery contest standing. Counted/indexed fresh
+deployments remain required; an unindexed legacy history cannot be asserted.

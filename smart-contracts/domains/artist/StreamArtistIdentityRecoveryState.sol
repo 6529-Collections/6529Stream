@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistRecoveryPredecessor as Predecessor
+} from "./StreamArtistRecoveryPredecessor.sol";
 import { StreamArtistGuardianHistory as GuardianHistory } from "./StreamArtistGuardianHistory.sol";
 import {
     StreamArtistGuardianHistoryTypes as GH
@@ -36,7 +39,7 @@ import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 
-/// @notice Initial living authority recovery with no transition and a counted original guardian profile.
+/// @notice Living recovery for initial authority or a first rotation whose uncontested window completed.
 /// @dev Owner calls this only after pinned governance/signature observations and commits both receipts once.
 library StreamArtistIdentityRecoveryState {
     struct State {
@@ -102,14 +105,24 @@ library StreamArtistIdentityRecoveryState {
         if (
             p.vestedAuthorityClass != 1 || cause.facts.authorityClass != 1
                 || cause.facts.priorStatus != 1 || p.supersededRecordHashes.length != 0
-                || rotations.latestExecution[p.artistId] != bytes32(0)
-                || rotations.latestTransition[p.artistId] != bytes32(0)
                 || rotations.pending[p.artistId] != bytes32(0)
-                || rotations.provisionalGuardian[p.artistId] != bytes32(0)
                 || cause.facts.pendingTransitionHash != bytes32(0)
-                || cause.facts.executedTransitionHash != bytes32(0)
                 || s.latest[p.artistId] != bytes32(0)
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
+        bytes32 predecessor;
+        if (rotations.latestExecution[p.artistId] == bytes32(0)) {
+            if (
+                rotations.latestTransition[p.artistId] != bytes32(0)
+                    || rotations.provisionalGuardian[p.artistId] != bytes32(0)
+                    || cause.facts.executedTransitionHash != bytes32(0)
+            ) {
+                revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
+            }
+        } else {
+            predecessor = Predecessor.firstRotation(
+                rotations, o.environment, cause.facts, principal.authorityAddress
+            );
+        }
         if (identity.activeIdentity[p.newAddress] != bytes32(0)) {
             revert T.AddressAlreadyRegistered(p.newAddress);
         }
@@ -165,6 +178,15 @@ library StreamArtistIdentityRecoveryState {
                     keccak256("6529STREAM_ARTIST_RECOVERY_GUARDIAN_HISTORY_CONTEXT_V1"),
                     c.oldValueHash,
                     history
+                )
+            );
+        }
+        if (predecessor != bytes32(0)) {
+            c.oldValueHash = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_RECOVERY_FIRST_ROTATION_CONTEXT_V1"),
+                    c.oldValueHash,
+                    predecessor
                 )
             );
         }
@@ -446,6 +468,11 @@ library StreamArtistIdentityRecoveryState {
         bytes32 artistId,
         address incumbent
     ) private view returns (R.GuardianRecord memory g) {
+        if (r.latestExecution[artistId] != bytes32(0)) {
+            return Predecessor.guardian(
+                s.guardianHistory, r, o.environment, artistId, s.guardianRecordsSeen[artistId]
+            );
+        }
         bytes32 head = r.stableGuardian[artistId];
         uint64 count = s.guardianRecordsSeen[artistId];
         if (head == bytes32(0)) {
@@ -474,7 +501,9 @@ library StreamArtistIdentityRecoveryState {
         Input memory i,
         Recovery.Context memory c
     ) private view returns (bytes32 guardian) {
-        guardian = rotations.stableGuardian[i.request.artistId];
+        guardian = rotations.latestExecution[i.request.artistId] == bytes32(0)
+            ? rotations.stableGuardian[i.request.artistId]
+            : StreamArtistRotationState.operativeGuardian(rotations, i.request.artistId);
         if (guardian == bytes32(0)) return guardian;
         A.Association storage a = s.actions[i.governance.actionId];
         if (

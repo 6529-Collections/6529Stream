@@ -1024,6 +1024,53 @@ contest standing. Complete prior-transition/appeal eligibility, posthumous
 recovery, nonempty supersession and exact approval-target adjudication remain
 required, as does one combined actual Artist/governance deployment.
 
+## First completed-rotation living recovery
+
+The next bounded profile also admits a living authority whose first actual
+rotation completed its original uncontested post-vesting window. It requires
+the saved contested cause to identify that exact executed rotation and current
+incumbent. Identity authenticates its local RotationRecord and permanent hash,
+transition artist/hash and executed phase, the original old-address retirement,
+and the stored window arithmetic. The original rotation must have no previous
+transition; latest transition must still equal that execution, no pending
+transition may exist, and no earlier identity recovery may exist. A later
+abandoned cohort, estate transition or earlier recovery is not inferred to be an
+eligible first rotation.
+
+A contest entered before the stored post-window end remains outside this
+profile after time elapses. A first contest at or after the end preserves the
+rotation's matured status. The saved cause entry time and the transition's first
+contestedAt must both satisfy that boundary; governance cannot substitute a
+current timestamp for them. The context binds the full authenticated original
+RotationRecord and retirement under a separate first-rotation facts/context
+version. Initial-authority contexts acquire no such tail.
+
+Selected guardians come from the owner's actual operative selection. A matured
+provisional candidate can be selected without a checkpoint write and keeps its
+original provisional association. A prior key's valid guardian record does not
+need a signature from today's incumbent. Instead, the selected full record must
+match its original indexed admission, record-data hash, permanent hash and
+current provisional eligibility in the same complete owner history. Context,
+preparation and execution use the same operative record. The full prefix retains
+staged-recovery veto because this bounded profile has no earlier adjudicated
+supersession and the current supersession list is empty. Provisional or lower-
+nonce status alone never disqualifies a registered guardian from that veto.
+
+The added configuration tag is
+`keccak256("6529STREAM_ARTIST_RECOVERY_FIRST_ROTATION_PROFILE_V1")`.
+Operation34/35 and Association ABI, permanent record/signature preimages, owner
+storage layout and one-revision/two-receipt recovery commit remain unchanged.
+The selected set alone supplies its minimum for the new post-vesting window and
+saved common standing. Original executed rotation records remain immutable.
+
+This increment does not establish general prior-transition or appeal eligibility,
+posthumous recovery, nonempty supersession, exact approval-target adjudication,
+or the full history union for post-recovery contest standing. Actual Artist/Safe/
+Archive tests and separate governance tests retain their respective dependency
+boundaries; a typed scheduled-action fixture is not a combined real Executor
+and Artist deployment. Complete default-profile and deployment-capacity evidence
+remain separate from the focused IR implementation evidence.
+
 ## Acceptance and remaining work
 
 Required tests include an actual threshold-Safe/Executor class-2 path, direct
