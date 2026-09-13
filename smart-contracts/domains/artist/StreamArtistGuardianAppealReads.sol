@@ -135,8 +135,8 @@ library StreamArtistGuardianAppealReads {
             ) {
                 revert A.InvalidGuardianAppeal(directive);
             }
-            if ((saved.terms.forbiddenCapabilities & 2048) != 0) {
-                revert S.ForbiddenCapability(p.artistId, 2048, directive);
+            if ((saved.terms.forbiddenCapabilities & 256) != 0) {
+                revert S.ForbiddenCapability(p.artistId, 256, directive);
             }
         }
     }

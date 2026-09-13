@@ -255,20 +255,69 @@ contract StreamArtistGuardianAppealActualTest is ArtistGuardianAppealFixture {
     }
 
     function testActualOperativeDirectiveAbsolutelyForbidsAppeal() public {
-        _appealCase(2048, false);
+        _forbiddenGuardianMaintenance(256);
+    }
+
+    function testActualBothGuardianPermissionsForbiddenRejectAppeal() public {
+        _forbiddenGuardianMaintenance(2304);
+    }
+
+    function _forbiddenGuardianMaintenance(uint32 forbidden) private {
+        _appealCase(forbidden, false);
         (IdentityRecovery.Request memory p, T.Authorization memory a) = _publishAppeal();
         bytes32 directive = ingress.operativeEstateDirective(artistId);
         require(directive != 0);
+        bytes32 roots = _roots();
         vm.expectRevert(
             abi.encodeWithSelector(
-                Succ.ForbiddenCapability.selector, artistId, uint32(2048), directive
+                Succ.ForbiddenCapability.selector, artistId, uint32(256), directive
             )
         );
         ingress.identityRecoveryContext(p, a);
         require(
-            ingress.latestIdentityRecovery(artistId) == 0
+            _roots() == roots && ingress.latestIdentityRecovery(artistId) == 0
                 && _status(attackerGuardian).recoveryRecordHash == 0
         );
+    }
+
+    function testActualDisplacementOnlyDirectiveAllowsGuardianAppeal() public {
+        _allowedGuardianAppeal(2048);
+    }
+
+    function testActualNoForbiddenDirectiveAllowsGuardianAppeal() public {
+        _allowedGuardianAppeal(0);
+    }
+
+    function _allowedGuardianAppeal(uint32 forbidden) private {
+        _appealCase(forbidden, false);
+        (IdentityRecovery.Request memory p, T.Authorization memory a) = _publishAppeal();
+        bytes32 directive = ingress.operativeEstateDirective(artistId);
+        require((directive == 0) == (forbidden == 0), "exact operative directive case");
+        if (directive != 0) {
+            require(
+                ingress.estateDirectiveRecord(directive).terms.forbiddenCapabilities == forbidden,
+                "exact authenticated forbidden mask"
+            );
+        }
+        _election(p);
+        GovernanceCall[] memory calls = _scheduleAppeal(p, a);
+        ingress.registerIdentityRecoveryAction(currentId, calls, p, a);
+        vm.warp(scheduled.notBefore);
+        scheduled.status = GovernanceActionStatus.EXECUTED;
+        _publish();
+        bytes32 record = this.executeRegistered(p, a);
+        _inactive();
+        require(
+            record != 0 && ingress.latestIdentityRecovery(artistId) == record
+                && _status(attackerGuardian).recoveryRecordHash == record
+                && _status(lifetimeGuardian).recoveryRecordHash == 0,
+            "actual appeal excludes only the hostile pre-transition guardian"
+        );
+        require(
+            ingress.operativeEstateDirective(artistId) == directive,
+            "recovery preserves the original directive"
+        );
+        _appealSizes();
     }
 
     function _rejectDocument(IdentityRecovery.Request memory p, Appeal.Document memory d) private {
