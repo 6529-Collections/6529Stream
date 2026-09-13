@@ -62,6 +62,12 @@ historical 57-operation packets and derives the additive 58-row inventory.
 Its implementation gate remains closed until matching source and execution
 evidence exist; it is not a substitute for the current test suite.
 
+The adopted recovery continuity extension has its own current check:
+`python -m tools.protocol.check_artist_owner_record_continuity_extension` and
+`python -m tools.protocol.test_artist_owner_record_continuity_extension`. It pins
+the four historical packet/schema/checker/test files and verifies the current
+operation-35 occurrence and owner vectors. These checks do not accept a release.
+
 The three frozen artist-57 design gates use the accepted RC1 Git tree
 `569bf87f1fa808787d324f6e1582924b5ccf1d40`. Run them with
 `python -m tools.protocol.run_frozen_artist_checks matrix`, `reconstruction`,

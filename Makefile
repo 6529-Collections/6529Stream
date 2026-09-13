@@ -43,8 +43,8 @@ release-manifest-check: fork-ceremony-evidence-check fork-randomizer-operations-
 .PHONY: governed-parameter-inventory-check
 .PHONY: governance-action-policy-check
 .PHONY: record-family-authorization-check artist-semantic-owner-matrix-check artist-record-event-reconstruction-correction-check artist-owner-record-continuity-check
-.PHONY: artist-operation-extension-check frozen-artist-runner-check
-check: artist-operation-extension-check frozen-artist-runner-check
+.PHONY: artist-operation-extension-check artist-owner-record-continuity-extension-check frozen-artist-runner-check
+check: artist-operation-extension-check artist-owner-record-continuity-extension-check frozen-artist-runner-check
 check: governed-parameter-identifiers-check
 check: governed-parameter-inventory-check
 check: governance-action-policy-check
@@ -56,7 +56,9 @@ current-stack-check:
 	forge build
 	forge test -vvv
 	$(PYTHON) -m tools.protocol.test_artist_operation_extension
+	$(PYTHON) -m tools.protocol.test_artist_owner_record_continuity_extension
 	$(PYTHON) -m tools.protocol.check_artist_operation_extension
+	$(PYTHON) -m tools.protocol.check_artist_owner_record_continuity_extension
 	$(PYTHON) -m tools.build.test_release_artifacts
 	$(PYTHON) -m tools.deployment.test_current_stack_artifacts
 	$(PYTHON) -m tools.deployment.test_prepare_current_stack_compilation
@@ -518,6 +520,10 @@ artist-owner-record-continuity-check:
 artist-operation-extension-check:
 	$(PYTHON) -m tools.protocol.test_artist_operation_extension
 	$(PYTHON) -m tools.protocol.check_artist_operation_extension
+
+artist-owner-record-continuity-extension-check:
+	$(PYTHON) -m tools.protocol.test_artist_owner_record_continuity_extension
+	$(PYTHON) -m tools.protocol.check_artist_owner_record_continuity_extension
 
 frozen-artist-runner-check:
 	$(PYTHON) -m tools.protocol.test_frozen_artist_checks

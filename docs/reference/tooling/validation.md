@@ -9,7 +9,11 @@ The three historical artist-57 gates run through
 or `continuity`. They validate frozen active inputs and execute against the exact
 RC1 Git baseline; see [the isolation rules](../../tooling.md#pick-the-relevant-tests).
 The effective artist extension and all current contract, layout, ABI and release
-checks continue to use the active checkout.
+checks continue to use the active checkout. The adopted recovery continuity
+extension runs separately with
+`python -m tools.protocol.test_artist_owner_record_continuity_extension` and
+`python -m tools.protocol.check_artist_owner_record_continuity_extension`; passing
+the historical runner cannot hide changes to that current packet.
 
 ## Local Checks
 

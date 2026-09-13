@@ -1,6 +1,16 @@
 # Artist owner dual-record continuity prerequisite
 
-Status: **Proposed, pre-audit, source-blocking**.
+Status of the historical packet: **Proposed, pre-audit, source-blocking**.
+
+The original JSON, schema, checker and tests are preserved exactly from RC1.
+The adopted current recovery extension is recorded separately in
+[artist-owner-record-continuity-extension-v1.json](artist-owner-record-continuity-extension-v1.json),
+with its [schema](artist-owner-record-continuity-extension-v1.schema.json),
+[checker](../../tools/protocol/check_artist_owner_record_continuity_extension.py) and
+[tests](../../tools/protocol/test_artist_owner_record_continuity_extension.py). It
+retains the operation-35 secondary occurrence and current constructor-owner
+identity vectors described below. Document versioning does not change the V2
+commitment preimages. Neither evidence packet establishes full-v1 readiness.
 
 This packet freezes one dependency of the modular artist-authority successor: how an exact retained semantic record hash is paired with an owner-local V2 commitment and folded into bounded owner history. It does not accept `owner_storage`, `owner_snapshots`, or `replay_keys`; authorize any owner or Coordinator source; define an entrypoint ABI; or provide deployment, audit, or readiness credit.
 

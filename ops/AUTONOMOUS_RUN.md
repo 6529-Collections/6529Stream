@@ -43,10 +43,19 @@ selector outcomes across retained five-plus-one captures and five separate actua
 canonical-governance cases received independent review. Generic dossier publication
 remains separate. Neither a Core freeze nor an evidence hash substitutes for a seal.
 
-The latest remote checks at `c385c1a2` passed Museum tooling on both platforms,
-TypeScript and the Windows wrapper. The same existing constructor, frozen packet,
-static provenance and release-artifact issues failed; independent comparison found
-no new failure class. Those results do not accept this newer local integration.
+Remote checks at `7f853204` passed TypeScript and the Windows wrapper. The same
+constructor, frozen-packet, static-provenance and release-artifact failure classes
+remained; independent comparison found no new reached failure. Museum jobs were
+still running at that review; their earlier `c385c1a2` results passed both platforms.
+
+The current recovery evidence now lives in a separately versioned continuity
+extension. All four historical packet/schema/checker/test files match RC1 exactly.
+The new 13-case extension suite, nine runner tests, unchanged 11-case operation
+extension suite and all three historical gates pass (56 matrix, 109 reconstruction
+and 50 continuity tests). Two focused checksum-policy cases pass after correcting
+the LIDO subtree LF rule. The complete release checksum refresh and new remote
+acceptance remain pending. No contract source or protocol vector changed in this
+repair, and these checks do not establish full-v1 runtime acceptance.
 Full provider/producer assembly, manifest parity, complete Safe ceremony and gas
 capacity remain pending; there is no new full-v1 candidate or deployment.
 

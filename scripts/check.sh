@@ -75,7 +75,9 @@ fi
 "$python_bin" -m tools.protocol.run_frozen_artist_checks continuity
 # The effective design is checked against this checkout; implementation is separate.
 "$python_bin" -m tools.protocol.test_artist_operation_extension
+"$python_bin" -m tools.protocol.test_artist_owner_record_continuity_extension
 "$python_bin" -m tools.protocol.check_artist_operation_extension
+"$python_bin" -m tools.protocol.check_artist_owner_record_continuity_extension
 "$python_bin" -m tools.protocol.test_system_manifest_payload_vector
 "$python_bin" -m tools.protocol.check_system_manifest_payload_vector
 "$python_bin" -m tools.protocol.test_system_manifest_payload_vector_reference

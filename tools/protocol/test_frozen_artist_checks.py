@@ -13,6 +13,7 @@ from unittest.mock import patch
 
 from tools.protocol import run_frozen_artist_checks as runner
 from tools.protocol import check_artist_operation_extension as current
+from tools.protocol import check_artist_owner_record_continuity_extension as continuity
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -92,17 +93,38 @@ class FrozenArtistChecksTests(unittest.TestCase):
             with self.assertRaisesRegex(current.ExtensionError, "cannot claim implementation"):
                 current.check(live)
 
+    def test_current_continuity_mutation_is_not_hidden_by_historical_success(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            live, baseline = Path(temporary) / "live", Path(temporary) / "baseline"
+            paths = set((*runner.HISTORICAL, *runner.PRESERVED_TOOLS,
+                         continuity.PACKET_PATH.as_posix(), continuity.SCHEMA_PATH.as_posix()))
+            for directory in (live, baseline):
+                for relative in paths:
+                    target = directory / relative
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(ROOT / relative, target)
+            runner.validate_preserved_inputs(live, baseline)
+            continuity.check(live)
+            packet = json.loads((live / continuity.PACKET_PATH).read_bytes())
+            packet["operation35_secondary_occurrence"]["existing_or_caller_selected_primary_allowed"] = True
+            (live / continuity.PACKET_PATH).write_bytes(json.dumps(packet).encode("utf-8"))
+            runner.validate_preserved_inputs(live, baseline)
+            with self.assertRaisesRegex(continuity.ContinuityError, "schema validation failed"):
+                continuity.check(live)
+
     def test_entrypoints_keep_current_checks_outside_the_historical_runner(self):
         for relative in ("Makefile", "scripts/check.sh", "scripts/check.ps1", ".github/workflows/ci.yml"):
             source = (ROOT / relative).read_text(encoding="utf-8")
             with self.subTest(path=relative):
                 for alias, old in runner.GATES.items():
                     self.assertRegex(source, rf'run_frozen_artist_checks[" ]+{alias}')
-                    self.assertNotIn(f"tools.protocol.test_{old}", source)
-                    self.assertNotIn(f"tools.protocol.check_{old}", source)
+                    self.assertNotRegex(source, rf"tools\.protocol\.test_{old}(?![A-Za-z0-9_])")
+                    self.assertNotRegex(source, rf"tools\.protocol\.check_{old}(?![A-Za-z0-9_])")
                 self.assertIn("tools.protocol.test_frozen_artist_checks", source)
                 self.assertIn("tools.protocol.test_artist_operation_extension", source)
                 self.assertIn("tools.protocol.check_artist_operation_extension", source)
+                self.assertIn("tools.protocol.test_artist_owner_record_continuity_extension", source)
+                self.assertIn("tools.protocol.check_artist_owner_record_continuity_extension", source)
                 self.assertIn("tools.build.check_solidity_source_layout", source)
                 self.assertIn("tools.build.check_abi_compatibility", source)
                 self.assertIn("forge test", source)

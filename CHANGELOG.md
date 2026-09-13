@@ -5,6 +5,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Restored immutable RC1 owner-continuity evidence and moved the adopted recovery
+  occurrence and owner vectors into a separately checked current extension.
+- Corrected the museum LIDO subtree LF rule for release checksum validation.
+
 - Added permanent WORK/RIGHTS selected-head seals through canonical terminal
   governance, with guarded selector writes and historical seal receipts.
 
