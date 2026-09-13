@@ -9,11 +9,10 @@ those remain full-v1 delivery requirements.
 ## Implementation and acceptance
 
 The concrete provider, source derivation, local metadata facts and Registry
-prepared-input dispatch are implemented. The independently reviewed 27-case
-cohort passes both compiler modes, with one 256-input fuzz property and an actual
-two-owner Safe. Source derivation tests use explicit typed producer boundaries. They are not the complete eight-producer assembly, finalization
-ceremony, deployed graph, or transaction-capacity acceptance. Producer runtime and integration acceptance are tracked separately. Full inventory
-and bundle runtime validation remain pending. WORK/RIGHTS seals are integrated
+prepared-input dispatch are implemented. The independently reviewed 55-case
+cohort passes both compiler modes, with two 256-input fuzz properties and the
+retained two named actual two-owner Safe cases. Source derivation tests use explicit typed producer boundaries. They are not the complete eight-producer assembly, finalization
+ceremony, deployed graph, or transaction-capacity acceptance. Producer runtime and integration acceptance are tracked separately. Complete producer assembly and Safe transaction capacity remain pending. WORK/RIGHTS seals are integrated
 with independently reviewed focused builder evidence; the complete assembled
 provider/Registry ceremony is the next integration step.
 See [full-v1 delivery](../../ops/V1_DELIVERY.md) for current integration evidence.
@@ -68,6 +67,41 @@ are different inputs. The root's schema result is the leaf schema.
 Core closure, burn blocking, configuration freeze and exact minted leaf count are
 checked independently of the inventory. A nonzero archive hash cannot supply
 those facts.
+
+## Original images for artist approval
+
+`requireSanctionReviewFacts(scope, manifestContentHash)` validates the complete
+current scope and independently retained manifest before returning the artist's
+review facts. It resolves every capture from the original reference publication
+through the fixed external archive. The returned image hashes are the complete
+PNG content hashes, in original order with repeated occurrences preserved. A
+reference record, archive object descriptor, coverage receipt or SHA-256 digest
+cannot replace an image content hash. The PNG object's SHA-256 must match both
+repeated PNG capture digests. The separate `sourceSha256` identifies the HTML
+source and is validated by the original reference publisher.
+
+A single capture retains schema version 1/profile 1. Two to sixteen captures use
+schema version 1/profile 2 and require the exact ACTIVE
+[`6529STREAM_ARTIST_SANCTION_NATIVE_CAPTURES_V1` profile](../schemas/finality/sanction-native-captures-v1.profile.json)
+as a CATALOG registered under RAW_BYTES, with no superseded document. Registry
+facts, full document bytes and the immutable Store chunk must agree. This extends
+only the original ceremony schema's single-capture producer restriction; the four
+base ceremony/archive definitions and permanent signed preimages remain unchanged.
+The source publisher must still satisfy its own admitted sampling limits.
+
+Retirement blocks new multi-capture approvals while retaining the original
+interpretation bytes. Historical profile 2 interpretation needs this fifth
+document alongside the four original definitions. The original ceremony/archive
+identifies the Finality Registry, whose fixed provider address and runtime hash
+bind the exact profile. The unchanged Archive verifier relies on original Artist
+admission; it does not independently parse the additional profile document.
+
+This first profile has no separate media array. It depends on the admitted native
+inline-content sources and does not establish arbitrary JavaScript dependency
+closure. Projection tests use explicit original-record boundaries with actual
+SchemaRegistry and immutable document Store contracts. Whole provider admission,
+actual historical sanction/Archive reads and the complete Safe ceremony require
+separate assembled-contract evidence.
 
 ## Registry preparation and Safe
 

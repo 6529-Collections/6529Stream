@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 import "./StreamFinalityRouterEvidenceProvider.sol";
 import "./StreamFinalityNativeMetadataFacts.sol";
+import "./StreamFinalityNativeSanctionReview.sol";
 import "./StreamFinalityRouteReads.sol";
 import "../../interfaces/stream/finality/IStreamFinalityPreparedScopeEvidence.sol";
 import "../../interfaces/stream/finality/IStreamFinalityEvidenceProvider.sol";
@@ -58,7 +59,8 @@ contract StreamFinalityNativeEvidenceProvider is StreamFinalityRouterEvidencePro
             || id == type(IStreamFinalityScopeEvidence).interfaceId
             || id == type(IStreamFinalityPreparedScopeEvidence).interfaceId
             || id == type(IStreamFinalityDiscoverySources).interfaceId
-            || id == type(IStreamContentRootEvidenceBinding).interfaceId;
+            || id == type(IStreamContentRootEvidenceBinding).interfaceId
+            || id == type(IStreamFinalitySanctionReview).interfaceId;
     }
 
     function nativeConfiguration()
@@ -204,13 +206,27 @@ contract StreamFinalityNativeEvidenceProvider is StreamFinalityRouterEvidencePro
     {
         StreamFinalityNativeProviderReads.Config memory c = _native;
         _candidate(c, scope);
-        return
-            _admit(
-                c,
-                scope,
-                manifestHash,
-                StreamFinalityNativeProviderReads.currentComponents(c, scope)
+        return _admit(
+            c, scope, manifestHash, StreamFinalityNativeProviderReads.currentComponents(c, scope)
+        );
+    }
+
+    /// @notice Original ordered capture bytes for the artist's review of this exact current manifest.
+    function requireSanctionReviewFacts(StreamFinalityScope calldata scope, bytes32 manifestHash)
+        external
+        view
+        returns (IStreamFinalitySanctionReview.ReviewFacts memory)
+    {
+        StreamFinalityNativeProviderReads.Config memory c = _native;
+        _candidate(c, scope);
+        StreamFinalityInputManifestTypes.Statement memory s =
+            StreamFinalityNativeProviderReads.statement(
+                c, scope, StreamFinalityNativeProviderReads.currentComponents(c, scope)
             );
+        StreamFinalityInputManifestReads.requireCurrent(
+            StreamFinalityNativeProviderReads.manifestDependencies(c), s, manifestHash
+        );
+        return StreamFinalityNativeSanctionReview.review(c, s);
     }
 
     function requirePreparedFinalityScopeInputs(

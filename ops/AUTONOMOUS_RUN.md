@@ -14,13 +14,40 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Reviewed guardian directive correction `144f33e6`, first estate recovery `5700804a`, successor guardians `c9281b67`; native provider focused27 both modes accepted, seals `56e6ff3c` integrated; actual complete assembly active. Immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | Reviewed guardian directive correction `144f33e6`, first estate recovery `5700804a`, successor guardians `c9281b67`; native provider focused55 both modes accepted with corrected original PNG projection and registered profile, candidate `8cd9b761`, seals `56e6ff3c`; actual complete assembly active. Immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
 | Last updated | `2026-09-13 UTC` |
 
 ## Active work
+
+The latest artist approval integration adds the candidate's bounded review decoder
+(`8cd9b761`) and native original-image projection. The corrected provider cohort
+passes 55 focused tests in both compiler modes, including two 256-input fuzz
+properties per mode. It uses actual SchemaRegistry/Store contracts and explicit
+typed original-record/governance boundaries. Independent review checks both the
+compiler products and field meanings against the actual reference publisher.
+The projection binds PNG digests to repeated PNG captures and keeps the original
+HTML source digest separate. All captured production runtimes fit.
+
+The exact additional native multi-capture profile is registered separately; all
+four original ceremony/archive definitions and permanent signed preimages remain
+unchanged. Older projection captures retain their test/artifact results but are
+superseded for correctness by the corrected real-producer digest join. The complete
+public provider/Artist/Safe ceremony and historical sanction execution remain open.
+
+A retained preservation-builder run passes the complete 547-item archival bundle,
+including both actual backends and a full refresh. One separate reference-stage
+Safe transaction still exceeds its gas allowance. The successor removes redundant
+large-array copies; its complete capacity run is pending. The many-stage bundle
+test is not proof that every stage fits one transaction.
+
+Actual native assembly has advanced through metadata selection and manifest
+publication. The latest five-case run stops at a test artifact JSON-path error;
+there is no successful whole-assembly outcome yet. The builder is correcting the
+fixture and reducing the cost of fixture-only iteration. No new full-v1 candidate
+or deployment is claimed.
 
 The current reviewed artist integration adds first estate recovery `5700804a`
 and successor-authored guardian history `c9281b67`, following the directive gate
@@ -43,10 +70,12 @@ selector outcomes across retained five-plus-one captures and five separate actua
 canonical-governance cases received independent review. Generic dossier publication
 remains separate. Neither a Core freeze nor an evidence hash substitutes for a seal.
 
-Remote checks at `7f853204` passed TypeScript and the Windows wrapper. The same
-constructor, frozen-packet, static-provenance and release-artifact failure classes
-remained; independent comparison found no new reached failure. Museum jobs were
-still running at that review; their earlier `c385c1a2` results passed both platforms.
+Remote checks at `ff2c0991` passed TypeScript and the Windows wrapper. The smoke
+job now passes the restored historical evidence gate and reaches the two unmigrated
+original-Finality constructor arguments in the current deployment script/fixture.
+Static-analysis provenance and deterministic release artifacts remain pending.
+Those results do not validate the later native approval source. Earlier museum
+Windows/Linux results are retained separately.
 
 The current recovery evidence now lives in a separately versioned continuity
 extension. All four historical packet/schema/checker/test files match RC1 exactly.

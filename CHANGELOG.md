@@ -5,6 +5,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Added original ordered image facts for native artist approval and a separately
+  registered multi-capture profile, preserving original signed definitions.
+- Extended the candidate consumer's bounded review decoding and adaptive gas
+  forwarding while retaining the original single-capture profile.
+
 - Restored immutable RC1 owner-continuity evidence and moved the adopted recovery
   occurrence and owner vectors into a separately checked current extension.
 - Corrected the museum LIDO subtree LF rule for release checksum validation.

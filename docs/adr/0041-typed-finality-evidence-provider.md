@@ -197,3 +197,26 @@ render-critical inventory and archival coverage remain separately validated
 inputs. Every full-v1 scope and museum requirement remains in the
 [delivery ledger](../../ops/V1_DELIVERY.md). A reviewed enumeration primitive
 does not close those requirements.
+
+## Registered native multi-capture artist review
+
+Accepted implementation interpretation, 13 September 2026: extend the native
+artist-bound COLLECTION review to an ordered two-to-sixteen-capture profile
+through an additional exact registered CATALOG. Preserve the four existing
+ceremony/archive definitions, their identities and all permanent sanction
+preimages. A single capture continues to select the original profile.
+
+The [native provider](../integrations/native-finality-provider.md) performs full
+current manifest admission before deriving each original PNG content hash. Its
+multi-capture path requires exact ACTIVE profile facts and complete identical
+bytes from the original SchemaRegistry and Store. Caller-supplied lists and
+record or coverage commitments cannot substitute for original image content.
+
+The profile is a composite interpretation that overrides only the original
+single-capture producer applicability restriction. It does not supersede the
+base schema or alter the permanent ceremony encoding. New admission requires
+current eligibility; historical interpretation retains the fifth document and
+resolves its identity through the original Registry's immutable provider binding.
+Retiring the profile cannot rewrite an original signature or erase document bytes.
+The existing Archive verifier continues to rely on original Artist admission;
+independent parsing of the fifth definition is not claimed for that verifier.

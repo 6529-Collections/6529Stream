@@ -426,6 +426,8 @@
     "smart-contracts/domains/finality/StreamFinalityNativeEvidenceProvider.sol",
     "smart-contracts/domains/finality/StreamFinalityNativeMetadataFacts.sol",
     "smart-contracts/domains/finality/StreamFinalityNativeProviderReads.sol",
+    "smart-contracts/domains/finality/StreamFinalityNativeSanctionProfile.sol",
+    "smart-contracts/domains/finality/StreamFinalityNativeSanctionReview.sol",
     "smart-contracts/domains/finality/StreamFinalityPreparation.sol",
     "smart-contracts/domains/finality/StreamFinalityPreparedScopeReads.sol",
     "smart-contracts/domains/finality/StreamFinalityRecordState.sol",

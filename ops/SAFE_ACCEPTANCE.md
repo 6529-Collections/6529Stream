@@ -36,6 +36,22 @@ The integrator owns the combined inventory; each builder supplies its domain's
 rows and executable evidence. Final acceptance requires no unclassified or
 uncovered supported ABI functions, rather than a sample of wallet workflows.
 
+## Native artist review and complete archive progress
+
+The new public `requireSanctionReviewFacts` selector creates a separate Safe
+coverage obligation. The corrected 55-case provider/projection cohort passes
+both modes, retaining the existing two named Safe cases below. Original capture
+projection uses typed producer boundaries with actual SchemaRegistry/Store;
+it does not establish a real Safe call through the complete manifest/Artist flow.
+That selector and full ceremony gas remain pending actual assembled evidence.
+
+The preservation builder's complete 547-item bundle flow passes with actual
+archive backends and refresh. Its separate reference-stage Safe transaction
+still exceeds its measured allowance. The successor's removal of redundant
+large-array copies must pass that exact test and an isolated entry measurement
+before this stage is accepted. Multi-stage success does not close the complete
+selector or transaction-capacity inventory.
+
 ## Native provider and estate increments
 
 The native provider's independently reviewed 27-case cohort passes both compiler
