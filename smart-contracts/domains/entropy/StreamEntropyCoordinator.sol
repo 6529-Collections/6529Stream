@@ -9,6 +9,7 @@ import "../../interfaces/stream/entropy/IStreamEntropyProviderFeeQuote.sol";
 import "../../interfaces/stream/entropy/IStreamRevealFeeEscrow.sol";
 import "../../interfaces/stream/entropy/IStreamRevealPolicyAdmin.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyTiming.sol";
+import "../../interfaces/stream/entropy/IStreamEntropyFinalityPolicy.sol";
 import "../../interfaces/stream/governance/IStreamRoleRegistry.sol";
 import "../../interfaces/stream/governance/IStreamGovernanceRoleSources.sol";
 import "../../interfaces/stream/mint/IStreamMintGovernanceRegistry.sol";
@@ -27,7 +28,8 @@ contract StreamEntropyCoordinator is
     IStreamEntropyCoordinator,
     IStreamEntropyView,
     IStreamRevealPolicyAdmin,
-    IStreamEntropyTiming
+    IStreamEntropyTiming,
+    IStreamEntropyFinalityPolicy
 {
     bytes32 public constant GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS =
         keccak256("6529STREAM_GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS");
@@ -247,7 +249,8 @@ contract StreamEntropyCoordinator is
             || id == type(IStreamRevealPolicyAdmin).interfaceId
             || id == type(IStreamTimeParameterHost).interfaceId
             || id == type(IStreamEntropyTiming).interfaceId
-            || id == type(IStreamEntropyView).interfaceId || super.supportsInterface(id);
+            || id == type(IStreamEntropyView).interfaceId
+            || id == type(IStreamEntropyFinalityPolicy).interfaceId || super.supportsInterface(id);
     }
 
     function configureCollection(
@@ -297,6 +300,71 @@ contract StreamEntropyCoordinator is
         returns (IStreamRevealFeeEscrow.CollectionRevealPolicy memory)
     {
         return _revealPolicies[collectionId];
+    }
+
+    /// @inheritdoc IStreamEntropyFinalityPolicy
+    function entropyPolicyFrozen(uint256 collectionId)
+        external
+        view
+        override
+        returns (
+            bool frozen,
+            bytes32 policyManifestHash,
+            address provider,
+            uint32 providerEpoch,
+            bytes32 collectionSaltCommitment
+        )
+    {
+        CollectionConfig storage config = collectionEntropyConfig[collectionId];
+        IStreamRevealFeeEscrow.CollectionRevealPolicy storage reveal = _revealPolicies[collectionId];
+        if (config.provider == address(0) || !reveal.declared) {
+            return (false, bytes32(0), address(0), 0, bytes32(0));
+        }
+        collectionSaltCommitment = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ENTROPY_COLLECTION_SALT_V1"),
+                block.chainid,
+                address(this),
+                address(core),
+                collectionId,
+                config.collectionSalt
+            )
+        );
+        // This profile makes the currently implemented epoch and absence of fresh recovery
+        // explicit. A later implementation must use a new profile for additional semantics.
+        bytes32 providerPolicy = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ENTROPY_SINGLE_PROVIDER_POLICY_V1"),
+                config.provider,
+                config.providerCodeHash,
+                uint32(1),
+                config.providerConfigHash,
+                collectionSaltCommitment,
+                config.publicRequests,
+                config.timeoutBlocks
+            )
+        );
+        bytes32 revealPolicy = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ENTROPY_DECLARED_REVEAL_POLICY_V1"),
+                reveal.requestMode,
+                reveal.revealOwnerRole,
+                reveal.requestSLOBlocks
+            )
+        );
+        policyManifestHash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ENTROPY_FINALITY_POLICY_V1"),
+                block.chainid,
+                address(this),
+                address(core),
+                collectionId,
+                keccak256("6529STREAM_ENTROPY_EPOCH1_NO_FRESH_RECOVERY_V1"),
+                providerPolicy,
+                revealPolicy
+            )
+        );
+        return (config.locked, policyManifestHash, config.provider, 1, collectionSaltCommitment);
     }
 
     function configureCollectionRevealPolicy(
