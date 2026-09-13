@@ -4,6 +4,15 @@ pragma solidity ^0.8.19;
 import "../helpers/StreamCurrentStackFixture.sol";
 import "../helpers/OfficialSafeFixture.sol";
 import {
+    IStreamMetadataServingFacts
+} from "../../smart-contracts/interfaces/stream/metadata/IStreamMetadataServingFacts.sol";
+import {
+    StreamMetadataTokenRenderer
+} from "../../smart-contracts/domains/metadata/StreamMetadataTokenRenderer.sol";
+import {
+    StreamArtistContentTypes
+} from "../../smart-contracts/interfaces/stream/artist/StreamArtistContentTypes.sol";
+import {
     StreamArtistRotationTypes as R
 } from "../../smart-contracts/interfaces/stream/artist/StreamArtistRotationTypes.sol";
 

@@ -18,7 +18,7 @@ import "../../smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol";
 import "../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
 import "../../smart-contracts/domains/revenue/StreamRoyaltyResolver.sol";
 import "../../smart-contracts/domains/entropy/StreamEntropyCoordinator.sol";
-import "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
+import { StreamMetadataRouter } from "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
 import "../../script/current/StreamCurrentStackPlan.sol";
 import "../../script/current/StreamArtistActivationPlan.sol";
 import "../../script/current/StreamRevealActivationPlan.sol";

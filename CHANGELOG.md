@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Fixed release checksum parsing for the pinned upstream license's Git whitespace
+  diagnostic override while preserving its exact bytes and the existing LF policy.
+  Current deployment and test imports now name their Router dependencies explicitly;
+  full Finality/Coordinator deployment assembly remains in progress.
 - Added complete steward/recovery-response JSON profiles and atomic typed
   owner steward designations using the original direct/relayed owner record
   authorization, exact registered definitions and durable per-author history.

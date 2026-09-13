@@ -40,6 +40,12 @@ environment for independent JSON Schema and canonical-byte tests. Run
 `python -m tools.metadata.rights_profile --check` for the rights profile.
 Both commands are included in museum CI; they do not register anything onchain.
 
+Release checksum validation accepts the exact Git diagnostic override
+`whitespace=-blank-at-eol` used by the preserved W3C license notice. This does not
+change its inherited text/LF policy or remove trailing spaces from the upstream
+bytes. The complete `.gitattributes` file remains part of the checksum inputs;
+other unsupported attributes still fail validation.
+
 Draft pull requests retain their running CI job when new commits arrive. GitHub
 keeps the newest pending run for that pull request, so repeated integration
 pushes do not keep discarding an unfinished compiler run. Ready pull requests
