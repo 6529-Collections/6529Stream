@@ -74,20 +74,22 @@ library StreamGovernanceScheduling {
             IStreamGovernanceExecutor.sealSystemManifestBootstrap.selector
         );
         prepared.callsHash = StreamGovernanceBootstrap.governanceCallsHash(calls);
-        (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash) =
-            StreamGovernanceBootstrap.deriveBatchTransitionHashes(calls, prepared.callsHash);
-        if (ctx.scopeHash != scopeHash) {
-            revert IStreamGovernanceExecutor.BatchScopeHashMismatch(scopeHash, ctx.scopeHash);
-        }
-        if (ctx.oldValueHash != oldValueHash) {
-            revert IStreamGovernanceExecutor.BatchOldValueHashMismatch(
-                oldValueHash, ctx.oldValueHash
-            );
-        }
-        if (ctx.newValueHash != newValueHash) {
-            revert IStreamGovernanceExecutor.BatchNewValueHashMismatch(
-                newValueHash, ctx.newValueHash
-            );
+        {
+            (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash) =
+                StreamGovernanceBootstrap.deriveBatchTransitionHashes(calls, prepared.callsHash);
+            if (ctx.scopeHash != scopeHash) {
+                revert IStreamGovernanceExecutor.BatchScopeHashMismatch(scopeHash, ctx.scopeHash);
+            }
+            if (ctx.oldValueHash != oldValueHash) {
+                revert IStreamGovernanceExecutor.BatchOldValueHashMismatch(
+                    oldValueHash, ctx.oldValueHash
+                );
+            }
+            if (ctx.newValueHash != newValueHash) {
+                revert IStreamGovernanceExecutor.BatchNewValueHashMismatch(
+                    newValueHash, ctx.newValueHash
+                );
+            }
         }
         // The atomic committed initializer alone has immediate windows.
         if (runtime.genesisInitialized && !manifest.isSealed) {
