@@ -118,3 +118,8 @@ authorization for catalog admission and family grants.
 [ADR 0043: Deferred auction clocks and unpaid endings](0043-deferred-auction-clocks-and-no-bid.md)
 resolves first-bid anti-snipe timing, buyer-signed expiry during pause tolling,
 and deferred no-bid completion for the new versioned native auction.
+
+[ADR 0044: Artist consent for prepared royalty snapshots](0044-prepared-royalty-snapshot-consent.md)
+defines the additive current mode election, original operation-15 source consent,
+authenticated token derivation and unchanged canonical policy hashes. Joined
+current-system execution and complete royalty profiles remain separate work.

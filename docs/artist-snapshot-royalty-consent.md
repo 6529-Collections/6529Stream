@@ -1,5 +1,9 @@
 # Artist consent for elected collection royalty snapshots
 
+[ADR 0044](adr/0044-prepared-royalty-snapshot-consent.md) defines this additive
+prepared-mode consent rule and its explicit relationship to the historical
+separate token-consent packet.
+
 The Artist reads distinguish live royalties from an explicitly elected collection
 snapshot mode. They use the selected immutable Royalty Resolver's additive
 `IStreamArtistSnapshotRoyaltyFacts` capability. An older Resolver that does not

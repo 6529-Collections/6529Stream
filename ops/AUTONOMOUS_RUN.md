@@ -14,13 +14,32 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Accepted custody `8147a504`, stored-evidence gas `15fbed73`, template auctions `9bd530fd` and consent provider `a0d7792b`; actual Safe commerce activation25 independently accepted on its retained pre-template capture. Actual Artist template consent and expanded low-take consumer composition remain active. Immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | Accepted Artist template consent `019b9f23`, snapshot provider/consumer `0e35c98f` + `4e1b28ee` and Artist snapshot consent `16d83a62`; real Artist/commerce joined workflows are in the current native validation batch. Immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
 | Last updated | `2026-09-14 UTC` |
 
 ## Active work
+
+The latest accepted increments add actual Artist consent for positive-share
+primary templates (`019b9f23`) and the consent-qualified auction consumer
+(`46676fda`). The two domains have independent passing 15- and 12-test cohorts;
+their complete current Artist/Safe/auction/payment workflow is now under test.
+
+Prepared royalty snapshots are integrated as `0e35c98f` and `4e1b28ee`, followed
+by actual Artist mode consent `16d83a62`. The corrected commerce cohort passes
+23 cases, including actual prepared-token provenance, source rechecks, atomic
+Safe failure/retry and refusal of incompatible refund deposits. The separate
+Artist cohort passes 12 cases through the actual facade, Archive and Safe. Its
+Core boundary is typed; the commerce cohort's Artist/governance/entropy boundaries
+are typed. They are not counted as one joined system result. The earlier shared
+source-config memory-alias failure is retained and corrected by an independent
+token config copy. All production products fit in the reviewed captures; Manager
+has 157 bytes of runtime headroom there, so current combined size validation
+remains material. [ADR 0044](../docs/adr/0044-prepared-royalty-snapshot-consent.md)
+records the explicit versioned collection-consent decision without changing the
+canonical royalty policy hash or narrowing remaining v1 profiles.
 
 The current graph deployment now passes an independently reviewed local rehearsal
 with 530 successful transactions across six processes, including four delayed

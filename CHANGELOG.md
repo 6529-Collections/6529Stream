@@ -5,6 +5,12 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add explicit Artist Safe consent for positive-share primary templates and
+  consume that consent through native auction settlement.
+- Add elected collection royalty snapshots to actual prepared mint paths, with
+  original Artist approval, immutable token provenance and refund admission
+  that rejects incompatible deposits before payment.
+
 - Add exact native commerce activation plans for Safe-root catalog extension,
   delayed module/escrow admission and one-time Manager/custody binding.
 

@@ -30,6 +30,25 @@ the denominator. The integrator owns this reporting correction and delivery.
 
 ## Latest integration: 14 September
 
+The latest accepted increments add actual Artist consent for positive-share
+primary templates (`019b9f23`) and the consent-qualified auction consumer
+(`46676fda`). The two domains have independent passing 15- and 12-test cohorts;
+their complete current Artist/Safe/auction/payment workflow is now under test.
+
+Prepared royalty snapshots are integrated as `0e35c98f` and `4e1b28ee`, followed
+by actual Artist mode consent `16d83a62`. The corrected commerce cohort passes
+23 cases, including actual prepared-token provenance, source rechecks, atomic
+Safe failure/retry and refusal of incompatible refund deposits. The separate
+Artist cohort passes 12 cases through the actual facade, Archive and Safe. Its
+Core boundary is typed; the commerce cohort's Artist/governance/entropy boundaries
+are typed. They are not counted as one joined system result. The earlier shared
+source-config memory-alias failure is retained and corrected by an independent
+token config copy. All production products fit in the reviewed captures; Manager
+has 157 bytes of runtime headroom there, so current combined size validation
+remains material. [ADR 0044](../docs/adr/0044-prepared-royalty-snapshot-consent.md)
+records the explicit versioned collection-consent decision without changing the
+canonical royalty policy hash or narrowing remaining v1 profiles.
+
 The current graph deployment now passes an independently reviewed local rehearsal
 with 530 successful transactions across six processes, including four delayed
 governance actions. Every transaction uses and declares at most 16,777,216 gas;
