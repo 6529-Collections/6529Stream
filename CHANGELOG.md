@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Added an operator-owned deployment slot with deterministic CREATE coordinates,
+  atomic rollback, actual Safe retry tests and a portable local rehearsal command.
+
 - Added complete native render-critical inventories and independently refreshed
   archival bundles, with original signed evidence and bounded Safe reference stages.
 

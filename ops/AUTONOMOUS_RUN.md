@@ -22,6 +22,24 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active work
 
+The artist builder's current native assembly now passes three actual workflows:
+complete original contract deployment with runtime pins, paid minting with a Safe
+as the artist and entropy fulfillment, and original content consent with checkpoint
+and dual archival coverage. Its two later cases exposed a fixture attestation URI
+that differed from the record URI. The canonical decoder rejected it; the corrected
+fixture is under test. Complete description seals, snapshot and finality ceremony
+acceptance remain pending, and these builder captures are not a new frozen candidate.
+
+A reusable operator-owned CREATE slot now has ten passing focused tests in both
+compiler modes, one 256-input property each and a protected local script rehearsal.
+It preserves fixed future addresses across intermediate governance/deployment,
+with explicit authority, one successful CREATE, runtime/size checks and atomic
+constructor rollback. An actual two-owner Safe passes identical signed failure
+and retry. This is a preparatory deployment helper; both old monolithic current
+callers still need the actual intervening Finality graph. The
+[deployment guide](../script/current/README.md#reserved-deployment-coordinates)
+provides its reproducible focused command and the remaining orchestration boundary.
+
 The combined candidate/review path now derives the native input commitment and
 original image facts from one current statement. The original Registry retains
 all scope, Core, strict component, discovery and manifest gates. The provider's
@@ -67,15 +85,12 @@ Paris execution simulation is not a network receipt or proof of every stage's
 capacity. See the [inventory guide](../docs/guides/preservation-inventory.md) for
 original evidence, scope, backend and fixture boundaries.
 
-Actual native assembly has advanced through metadata selection and manifest
-publication. Complete current compiler-output exports now replace the failed test
-artifact JSON-path read while retaining separately authenticated older caches.
-The first five-case cached run exhausted memory in test-only runtime verification.
-Packed byte-position maps now pass that point while preserving complete creation
-and runtime comparisons. All five cases then reach an actual WORK constructor
-prerequisite: the Core must already select the original artist registry. The next
-fixture successor moves its real governance selection before WORK construction.
-No whole assembly pass, iteration speedup, new candidate or deployment is claimed.
+The earlier artifact JSON-path, test-only memory allocation and WORK constructor
+ordering failures are retained with their exact source and runtime captures. The
+current builder now uses complete current compiler-output exports, packed runtime
+comparison maps and real artist selection before WORK construction. Source25's
+three passing workflows and two record-publication failures supersede those
+earlier runtime attempts; full ceremony and deployment acceptance remain open.
 
 The current reviewed artist integration adds first estate recovery `5700804a`
 and successor-authored guardian history `c9281b67`, following the directive gate

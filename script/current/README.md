@@ -1,12 +1,16 @@
 # Current-stack development deployment
 
-The full-v1 branch is migrating the operator workflow to staged governance and
-the modular artist suite. `DeployCurrentStack.s.sol` now returns a version-2
-deployment tuple. It initializes and seals the five-leaf governance foundation,
-then constructs the archival checkpoint, coverage provider and artist suite
-against that canonical foundation. Its output expressly reports
-`productsActivated = false` and contains registrations and catalog additions
-for later stages. It does not schedule an artist activation or complete onboarding.
+The full-v1 operator entry points are being migrated to the original Finality
+registry required by the artist Coordinator. The existing monolithic artist-suite
+call still needs to be split around construction of the actual Finality graph;
+complete current entry-point compilation and rehearsal remain open.
+
+The existing version-2 output describes a sealed five-leaf governance foundation
+and unactivated products, with registrations and catalog additions for later
+stages. Its `metadata` field means the Router and `provider` means the entropy
+provider. Generic collection Metadata and the native finality provider need
+separate fields when that output is expanded. Do not reinterpret the old tuple
+or report incomplete artist construction as a completed deployment.
 
 The declared product inventory includes minting, native fixed sales, English
 auctions, entropy, metadata and revenue dependencies. It does not yet include
@@ -46,6 +50,44 @@ describes that separate authority stage.
 The development compiler profile is Solidity 0.8.19, optimizer 200 runs and
 global via-IR. Development module hashes identify engineering configurations;
 release binding and full-v1 acceptance remain separate work.
+
+## Reserved deployment coordinates
+
+[StreamDeploymentSlot](StreamDeploymentSlot.sol) reserves one CREATE address while
+other deployment and governance transactions occur. Its immutable `operator` may
+be an EOA or Safe. Read `product()` before constructing contracts that must pin
+that future address; later the operator calls `deploy` with argument-inclusive
+creation bytes and the exact linked runtime commitment.
+
+The helper enforces one successful deployment, the predicted address, nonempty
+runtime, and the EVM creation/runtime size bounds. A failed constructor or runtime
+comparison rolls back consumption, the child and all constructor effects. The
+same coordinate remains available for retry. It always deploys with zero value.
+A product sees the slot as its constructor caller, so use it only when intended
+protocol authorities are explicit constructor arguments. The slot is a deployment
+helper and receives no Stream role or module registration.
+
+The required native sequence has two governance boundaries: select the real
+collection Metadata and Router before constructing Snapshot/Reference and the
+original provider/discovery/Finality graph; then construct Coordinator and select
+the actual artist registry before constructing WORK/RIGHTS selectors. Preserve
+all existing SystemManifest members at each publication. The slot removes the
+old sender-nonce-plus-12 assumption; wiring these stages into both current
+callers remains separate work.
+
+Run its reproducible focused checks from the repository root:
+
+```sh
+python tools/deployment/check_deployment_slot.py
+```
+
+Add `--output <new-directory>` to retain exact source, logs and native artifacts.
+The command runs ten cases in both compiler modes, including 256 fuzz inputs,
+actual two-owner Safe failure/identical-signature retry, and a protected local
+script rehearsal. It does not use an RPC or submit broadcast transactions.
+Its larger test harness limit exercises the helper's own product-size guard;
+this does not increase production EVM limits. These checks validate the helper,
+not the full native deployment or its transaction capacities.
 
 ## Local planning boundary
 
