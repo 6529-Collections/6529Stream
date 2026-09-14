@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Added complete native render-critical inventories and independently refreshed
+  archival bundles, with original signed evidence and bounded Safe reference stages.
+
 - Added combined artist candidate preparation and original-image review from one
   validated current statement, retaining legacy interfaces and permanent hashes.
 

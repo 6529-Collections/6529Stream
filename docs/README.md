@@ -18,6 +18,7 @@ their own scope and must not be read as a list of installed features.
 | Publish attributed records and recover their original bytes | [Current metadata records](integrations/metadata-records.md) |
 | Bind content roots and inspect finality component hosts | [Finality adapters and content commitments](finality-host-adapters.md) |
 | Verify every content leaf against preserved manifest bytes | [Content leaf manifests](integrations/content-leaf-manifests.md) |
+| Inventory native artwork dependencies and prove their archival coverage | [Render-critical inventory and archive bundles](guides/preservation-inventory.md) |
 | Validate retained Linked Art documents offline | [Museum tooling](../tools/museum/README.md), [validation boundary](museum-linked-art-validation.md) |
 | Run a second artist through sales and auctions | [Product scenarios](integrations/product-demo.md) |
 | Complete a collection and retain its artwork | [Collector package](integrations/collector-package.md) |

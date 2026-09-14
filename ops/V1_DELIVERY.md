@@ -20,7 +20,7 @@ requirements pass rate or estimate of remaining time. The remaining work
 includes difficult integration. This ledger tracks concrete capabilities
 and evidence instead of deriving completion from test or interface counts.
 
-## Latest integration: 13 September
+## Latest integration: 14 September
 
 The combined candidate/review path now derives the native input commitment and
 original image facts from one current statement. The original Registry retains
@@ -52,20 +52,28 @@ unchanged. Older projection captures retain their test/artifact results but are
 superseded for correctness by the corrected real-producer digest join. The complete
 public provider/Artist/Safe ceremony and historical sanction execution remain open.
 
-The latest preservation-builder run passes 28 cases, including the complete
-547-item archival bundle through both actual backends and a full refresh. Its
-one remaining failure is the separate reference-stage Safe transaction allowance.
-The next successor removes temporary allocation overhead while preserving every
-original item, hash and complete event. Its capacity run is pending. The many-stage
-bundle test is not proof that every stage fits one transaction.
+The complete render-critical inventory and archival bundle increment passes all
+31 named IR cases, including five 256-input properties, the full 547-item bundle
+through both actual backends, refresh and exact 479-item reference/event parity.
+Temporary hash buffers and overwritten default rows no longer consume the Safe
+reference stage's memory budget. Its isolated two-owner Safe execution simulation
+uses a 15,123,763-gas transaction envelope, with 1,653,453 gas of headroom below
+16,777,216. Both standalone production compiler modes pass with all runtimes fitting.
+
+This is the supported native STATIC/BYTE_EXACT COLLECTION profile. The matching
+builder capture uses its recorded dependency baseline; integration with the later
+combined provider remains a separate actual-assembly requirement. The isolated
+Paris execution simulation is not a network receipt or proof of every stage's
+capacity. See the [inventory guide](../docs/guides/preservation-inventory.md) for
+original evidence, scope, backend and fixture boundaries.
 
 Actual native assembly has advanced through metadata selection and manifest
-publication. The retained five-case run stops at a test artifact JSON-path error.
-Nine focused Solidity parser/projection cases and nine Python checks now pass.
-The next full assembly build isolates reusable creation templates and reads compact
-projections of its exact compiler artifacts. Its complete runtime result and the
-speed benefit for later fixture corrections remain pending. No whole-assembly
-pass, new full-v1 candidate or deployment is claimed.
+publication. Complete current compiler-output exports now replace the failed test
+artifact JSON-path read while retaining separately authenticated older caches.
+The five-case cached run then exhausted memory in test-only runtime verification.
+A separately frozen successor packs its byte-position maps while preserving the
+complete creation/runtime comparisons. Its runtime result is pending. No whole
+assembly pass, iteration speedup, new full-v1 candidate or deployment is claimed.
 
 The current reviewed artist integration adds first estate recovery `5700804a`
 and successor-authored guardian history `c9281b67`, following the directive gate

@@ -60,13 +60,19 @@ projection uses typed producer boundaries with actual SchemaRegistry/Store;
 it does not establish a real Safe call through the complete manifest/Artist flow.
 That selector and full ceremony gas remain pending actual assembled evidence.
 
-The preservation builder's latest 28-pass/one-failure run includes the complete
-547-item bundle flow with actual
-archive backends and refresh. Its separate reference-stage Safe transaction
-still exceeds its measured allowance. The successor's removal of redundant
-large-array copies must pass that exact test and an isolated entry measurement
-before this stage is accepted. Multi-stage success does not close the complete
-selector or transaction-capacity inventory.
+The preservation increment passes all 31 named IR cases, including the complete
+547-item bundle with both actual archive backends, refresh and five 256-input
+properties. Its reference stage also passes a separate isolated two-owner Safe
+execution simulation: 612 bytes of canonical calldata, 25,800 intrinsic gas and
+15,097,963 measured execution gas produce a 15,123,763-gas envelope. Headroom below
+16,777,216 is 1,653,453 gas. Success requires the complete original 479-item stage,
+unchanged curator and exactly one Safe nonce increment.
+
+This closes that named stage's simulated allowance in the captured builder graph.
+The Paris-compiled entry simulation is not a network transaction receipt or a
+modern-fork equivalence proof. The complete provider/Artist ceremony, other stages,
+current integration dependencies and every remaining selector retain their own
+acceptance requirements. See the [inventory guide](../docs/guides/preservation-inventory.md).
 
 ## Native provider and estate increments
 
