@@ -80,7 +80,7 @@ class ResumeCodecTest(unittest.TestCase):
     def test_inventory_excludes_artifact_directories_named_sol(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            files = ["foundry.toml", "smart-contracts/Address.sol",
+            files = ["foundry.toml", "smart-contracts/vendor/openzeppelin/Address.sol",
                      "out/current/Address.sol/Address.json",
                      "artifacts/current-graph/compiled/manifest.json"]
             for relative in files:
@@ -92,8 +92,8 @@ class ResumeCodecTest(unittest.TestCase):
             rehearsal.args = resume.argparse.Namespace(out="out/current")
             inventory = rehearsal.inventory()
             self.assertEqual(set(inventory), set(files))
-            self.assertEqual(inventory["smart-contracts/Address.sol"],
-                             resume.sha(root / "smart-contracts/Address.sol"))
+            self.assertEqual(inventory["smart-contracts/vendor/openzeppelin/Address.sol"],
+                             resume.sha(root / "smart-contracts/vendor/openzeppelin/Address.sol"))
 
     def test_receipt_waits_for_mining_and_does_not_retry_reverts(self):
         from unittest.mock import patch

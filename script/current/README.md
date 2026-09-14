@@ -1,9 +1,16 @@
 # Current-stack development deployment
 
-The full-v1 operator entry points are being migrated to the original Finality
-registry required by the artist Coordinator. The existing monolithic artist-suite
-call still needs to be split around construction of the actual Finality graph;
-complete current entry-point compilation and rehearsal remain open.
+The full-v1 operator entry points deploy the original Finality graph in stages.
+The first phase publishes a checkpoint with reserved addresses; resumption reads
+that checkpoint in a fresh process after the required governance actions. The
+original Finality registry is constructed before its artist Coordinator, and
+WORK/RIGHTS follow the actual artist selection.
+
+The current migration passes nine focused tests and an independently reviewed
+local rehearsal with six processes and 511 successful transactions. Its output
+still records unactivated products. Identity/Onboarding deployment gas, cold-call
+budgets, newer payment/auction wiring and full product activation remain open;
+the high-gas local rehearsal is not a shipping-capacity or testnet result.
 
 The existing version-2 output describes a sealed five-leaf governance foundation
 and unactivated products, with registrations and catalog additions for later
@@ -51,6 +58,24 @@ The development compiler profile is Solidity 0.8.19, optimizer 200 runs and
 global via-IR. Development module hashes identify engineering configurations;
 release binding and full-v1 acceptance remain separate work.
 
+## Local checkpoint rehearsal
+
+Install the local driver's pinned ABI and Ethereum-hash dependencies, then run
+its fast codec checks:
+
+```sh
+python -m pip install -r tools/deployment/requirements-current-graph.txt
+python scripts/test_current_graph_resume_codec.py
+```
+
+`scripts/test_current_graph_resume.py --help` lists the project, artifact output,
+Foundry profile, executable and local port options. The rehearsal starts its own
+Anvil chain using public unlocked development accounts. It requires a completed
+native build with current physical contract artifacts and matching graph
+projections; it does not compile or repair a mixed artifact cache. The portable
+operator artifact-preparation command is still being completed. Retain the
+reported gas multipliers and `transactionCapacityAccepted` flag with the result.
+
 ## Reserved deployment coordinates
 
 [StreamDeploymentSlot](StreamDeploymentSlot.sol) reserves one CREATE address while
@@ -72,8 +97,9 @@ collection Metadata and Router before constructing Snapshot/Reference and the
 original provider/discovery/Finality graph; then construct Coordinator and select
 the actual artist registry before constructing WORK/RIGHTS selectors. Preserve
 all existing SystemManifest members at each publication. The slot removes the
-old sender-nonce-plus-12 assumption; wiring these stages into both current
-callers remains separate work.
+old sender-nonce-plus-12 assumption. Both current callers now use these stages;
+remaining artist child-deployment capacity and product activation are separate
+requirements.
 
 Run its reproducible focused checks from the repository root:
 

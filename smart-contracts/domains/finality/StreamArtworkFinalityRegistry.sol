@@ -339,8 +339,19 @@ contract StreamArtworkFinalityRegistry is
         returns (bool readable, uint256 actualLength, bytes memory result)
     {
         result = new bytes(expectedLength);
-        uint256 availableGas = gasleft();
         uint256 forwardedGas = _componentReadGas();
+        uint256 availableGas = gasleft();
+        // Constructor-only pointer and canonical probes use available gas up to the
+        // configured runtime ceiling. Keep the parent reserve and cold-call overhead;
+        // heavy runtime evidence reads still require their entire configured budget.
+        uint256 admissionReserve = FINALITY_STRICT_PARENT_GAS_RESERVE + 5_000;
+        if (availableGas <= admissionReserve) {
+            return (false, 0, result);
+        }
+        uint256 forwardingCapacity = ((availableGas - admissionReserve) / 64) * 63;
+        if (forwardedGas > forwardingCapacity) {
+            forwardedGas = forwardingCapacity;
+        }
         if (
             forwardedGas > type(uint256).max / 64
                 || availableGas

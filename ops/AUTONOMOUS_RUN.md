@@ -45,11 +45,25 @@ gas-report attempt fails earlier in an Artist authority read. Foundry 1.7.1
 [enables transaction isolation for gas reports](https://github.com/foundry-rs/foundry/blob/v1.7.1/crates/forge/src/cmd/test/mod.rs#L283),
 so this is a concrete isolated-call gas blocker to shipping; the accepted
 aggregate ceremony does not establish cold-call capacity.
-The migrated current deployment graph also passes five current workflows and
-four checkpoint tests. Fresh-process operator resumption reaches successful
-simulation but fails Forge constructor decoding against an older cached Entropy
-artifact. A separate current-output operator copy is being prepared. Shipping
-capacity, operator completion and a new matching full-v1 candidate remain open.
+The migrated current deployment graph passes five current workflows and four
+checkpoint tests and is integrated. Its actual local operator rehearsal now
+passes independent review: six separate processes, 493 successful broadcast
+receipts and 18 direct receipts, four delayed governance actions and ten original
+one-use deployment slots. The recorded outputs retain `productsActivated=false`.
+The native capture predates the newer prepared-payment Manager; full integration
+with those products remains required. Local broadcast estimation uses 130% for
+phase one and 600% for resumption and is not shipping-capacity acceptance.
+
+That rehearsal exposed oversized Identity and Onboarding constructor transactions
+(19,511,180 and 17,301,259 gas). Their immutable child deployments are being split.
+The Registry also incorrectly required more than 30M available gas for its small
+constructor probes. Its constructor-only forwarding correction passes eleven
+isolated tests in both compiler modes, including 256 fuzz inputs each, exact
+malformed-return rejection and identical deployment retry. The actual Registry
+now deploys inside an 8M CALL envelope with its configured 30M runtime budget
+preserved. This focused test uses explicit dependency fixtures; complete operator
+shipping capacity, cold Artist reads, final activation and a new candidate remain
+open.
 
 The preservation Safe increment `0c6da9e4` is independently reviewed, integrated
 and pushed. Ten unique IR cases cover inventory, bundle and artifact calls,

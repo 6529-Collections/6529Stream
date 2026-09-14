@@ -1347,6 +1347,23 @@ details the original association, fixture and dependency limits. Permanent
 semantic hashes, the canonical 57 operations plus adopted 58, auxiliary 65534 and
 37 genesis roles are unchanged.
 
+## Constructor admission gas
+
+The original Registry's one-time pointer, interface and canonical adapter probes
+forward at most the configured component GGP and at most the constructor's
+available gas after its existing 100,000 parent reserve, cold-call setup allowance
+and EIP-150 headroom. They do not require the complete heavy runtime evidence
+budget simply to construct the Registry. No fixed external-call ceiling or new
+constructor argument is introduced.
+
+The output buffers and exact lengths, canonical words, interface checks and
+reciprocal bindings remain mandatory. A probe failure reverts construction; an
+underfunded deployment can be retried with the same inputs. Runtime finality,
+preparation and governance reads retain their existing full-budget semantics.
+Eleven isolated constructor tests cover the 30M runtime setting inside an 8M
+CALL envelope, smaller settings, budget fuzzing, hostile dependencies and retry.
+Those typed dependency fixtures do not establish full runtime-finality capacity.
+
 ## Acceptance and remaining work
 
 Required tests include an actual threshold-Safe/Executor class-2 path, direct

@@ -5,6 +5,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Stage current graph deployment through resumable checkpoints with actual local
+  transaction and governance rehearsal coverage; product activation remains open.
+- Bound Finality Registry constructor admission by available gas while preserving
+  its configured runtime budget, exact dependency checks and failed-deployment retry.
+
 - Add native deferred English auctions with atomic paid mint settlement, bounded
   clocks, pull refunds, original delegated delivery and tested Safe retry paths.
 - Complete the native preservation, Artist Safe sanction and canonical finality
