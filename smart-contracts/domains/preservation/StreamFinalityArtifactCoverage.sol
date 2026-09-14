@@ -2,6 +2,8 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/preservation/IStreamFinalityArtifactCoverage.sol";
+import "../../interfaces/stream/preservation/IStreamArtifactEnvironment.sol";
+import "../../interfaces/stream/preservation/IStreamArtifactOriginalEvidence.sol";
 import "../../interfaces/stream/preservation/IStreamFinalityArtifactBindings.sol";
 import "../../interfaces/stream/preservation/IStreamArchivalCoverage.sol";
 import "../../interfaces/stream/preservation/IStreamArchivalChunkCoverage.sol";
@@ -11,7 +13,12 @@ import "../parameters/StreamGasParameterHost.sol";
 /// @notice Ordered actual-byte artifact coverage under the existing independent archival families.
 /// @dev Admission is bounded to 64 canonical chunks. Coverage advances one index per call.
 ///      The global provider epoch conservatively invalidates plans after any replaced fixity.
-contract StreamFinalityArtifactCoverage is StreamGasParameterHost, IStreamFinalityArtifactCoverage {
+contract StreamFinalityArtifactCoverage is
+    StreamGasParameterHost,
+    IStreamFinalityArtifactCoverage,
+    IStreamArtifactEnvironment,
+    IStreamArtifactOriginalEvidence
+{
     uint256 public constant MAX_CHUNKS = 64;
     uint256 public constant CHUNK_BYTES = 8192;
     bytes32 private constant _READ_GAS =
@@ -77,6 +84,36 @@ contract StreamFinalityArtifactCoverage is StreamGasParameterHost, IStreamFinali
                         schema_, abi.encodeCall(IStreamGasParameterHost.governanceAuthority, ())
                     ) != executor
         ) revert InvalidArtifact();
+    }
+
+    function supportsInterface(bytes4 id) external pure returns (bool) {
+        return id == 0x01ffc9a7 || id == type(IStreamFinalityArtifactCoverage).interfaceId
+            || id == type(IStreamGasParameterHost).interfaceId
+            || id == type(IStreamArtifactEnvironment).interfaceId
+            || id == type(IStreamArtifactOriginalEvidence).interfaceId;
+    }
+
+    function currentArtifactEnvironment()
+        external
+        view
+        override
+        returns (bytes32 environmentHash, uint64 validationEpoch)
+    {
+        return _environment();
+    }
+
+    function originalArtifactChunkCoverage(bytes32 hash, uint32 index)
+        external
+        view
+        override
+        returns (bytes32 original)
+    {
+        F.Coverage storage c = _coverage[hash];
+        if (hash == 0 || c.completionHash != hash || index >= c.chunkCount) {
+            revert InvalidArtifactCoverage(hash);
+        }
+        original = _originalPartCoverage[_completionPlan[hash]][index];
+        if (original == 0) revert InvalidArtifactCoverage(hash);
     }
 
     function recordArtifact(F.Artifact calldata a) external override returns (bytes32 hash) {

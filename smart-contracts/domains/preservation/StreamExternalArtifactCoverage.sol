@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/preservation/IStreamExternalArtifactCoverage.sol";
 import "../../interfaces/stream/preservation/IStreamExternalArtifactCurrentPair.sol";
+import "../../interfaces/stream/preservation/IStreamExternalArtifactEnvironment.sol";
 import "../../interfaces/stream/preservation/IStreamExternalArtifactCheckpointVerifier.sol";
 import "../../interfaces/stream/preservation/IStreamArchivalBindings.sol";
 import "../../interfaces/stream/core/IStreamCorePointers.sol";
@@ -17,7 +18,8 @@ import "./StreamArchivalSignatures.sol";
 contract StreamExternalArtifactCoverage is
     StreamGasParameterHost,
     IStreamExternalArtifactCoverage,
-    IStreamExternalArtifactCurrentPair
+    IStreamExternalArtifactCurrentPair,
+    IStreamExternalArtifactEnvironment
 {
     bytes32 public constant override profileHash =
         keccak256("STREAM_EXTERNAL_ARTIFACT_COVERAGE_V1");
@@ -58,6 +60,7 @@ contract StreamExternalArtifactCoverage is
     mapping(bytes32 => bytes32) private _latestFixities;
     mapping(bytes32 => E.Coverage) private _coverage;
     mapping(bytes32 => bool) private _nonces;
+    uint64 private _healthRevision;
 
     constructor(
         address core_,
@@ -117,7 +120,47 @@ contract StreamExternalArtifactCoverage is
     function supportsInterface(bytes4 id) external pure override returns (bool) {
         return id == 0x01ffc9a7 || id == type(IStreamExternalArtifactCoverage).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId
-            || id == type(IStreamExternalArtifactCurrentPair).interfaceId;
+            || id == type(IStreamExternalArtifactCurrentPair).interfaceId
+            || id == type(IStreamExternalArtifactEnvironment).interfaceId;
+    }
+
+    function currentExternalArtifactEnvironment()
+        external
+        view
+        override
+        returns (bytes32 environmentHash, uint64 healthRevision)
+    {
+        _context();
+        bytes memory pointer = _read(
+            core,
+            abi.encodeCall(IStreamCorePointers.getSatellitePointer, (keccak256("MODULE_REGISTRY"))),
+            320
+        );
+        environmentHash = keccak256(
+            bytes.concat(
+                abi.encode(
+                    keccak256("6529STREAM_EXTERNAL_ARTIFACT_ENVIRONMENT_V1"),
+                    block.chainid,
+                    address(this),
+                    profileHash,
+                    core,
+                    _coreCodeHash,
+                    governanceAuthority,
+                    _executorCodeHash
+                ),
+                abi.encode(
+                    roleRegistry,
+                    _roleCodeHash,
+                    checkpointVerifier,
+                    _verifierCodeHash,
+                    _endowedConfiguration,
+                    _ENDOWED_PROFILE,
+                    _ENDOWED_NETWORK,
+                    keccak256(pointer)
+                )
+            )
+        );
+        healthRevision = _healthRevision;
     }
 
     /// @notice Register an unverified object commitment. This does not create preservation coverage.
@@ -187,6 +230,7 @@ contract StreamExternalArtifactCoverage is
         bytes32 action = _governed(scope, oldHash, newHash);
         _families[hash] = f;
         _familyStatus[hash] = 1;
+        ++_healthRevision;
         _familyRevisions[hash] = 1;
         emit ExternalFamilyRecorded(hash, action, name, f);
     }
@@ -214,6 +258,7 @@ contract StreamExternalArtifactCoverage is
         (bytes32 scope, bytes32 oldHash, bytes32 newHash) = familyStatusContext(hash, status);
         bytes32 action = _governed(scope, oldHash, newHash);
         _familyStatus[hash] = status;
+        ++_healthRevision;
         ++_familyRevisions[hash];
         emit ExternalFamilyStatus(hash, action, status, _familyRevisions[hash]);
     }
@@ -364,6 +409,7 @@ contract StreamExternalArtifactCoverage is
         _fixities[hash] = f;
         _fixitySignatures[hash] = signature;
         _latestFixities[f.receiptHash] = hash;
+        ++_healthRevision;
         emit ExternalFixityRecorded(hash, f.receiptHash, f);
     }
 
