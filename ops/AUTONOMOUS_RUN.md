@@ -70,10 +70,12 @@ original evidence, scope, backend and fixture boundaries.
 Actual native assembly has advanced through metadata selection and manifest
 publication. Complete current compiler-output exports now replace the failed test
 artifact JSON-path read while retaining separately authenticated older caches.
-The five-case cached run then exhausted memory in test-only runtime verification.
-A separately frozen successor packs its byte-position maps while preserving the
-complete creation/runtime comparisons. Its runtime result is pending. No whole
-assembly pass, iteration speedup, new full-v1 candidate or deployment is claimed.
+The first five-case cached run exhausted memory in test-only runtime verification.
+Packed byte-position maps now pass that point while preserving complete creation
+and runtime comparisons. All five cases then reach an actual WORK constructor
+prerequisite: the Core must already select the original artist registry. The next
+fixture successor moves its real governance selection before WORK construction.
+No whole assembly pass, iteration speedup, new candidate or deployment is claimed.
 
 The current reviewed artist integration adds first estate recovery `5700804a`
 and successor-authored guardian history `c9281b67`, following the directive gate
