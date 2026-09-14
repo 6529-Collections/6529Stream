@@ -15,11 +15,15 @@ import "./StreamMintArtistConsent.sol";
 import "./StreamMintPhaseState.sol";
 import "./StreamMintRevocation.sol";
 import "./StreamMintManagerAccounting.sol";
+import "./StreamPreparedNativeMintExecution.sol";
+import "./StreamMintManagerTranscript.sol";
 import "../parameters/StreamGasParameterHost.sol";
 
 /// @notice Outside-Core phase policy and prepared mint execution manager.
 contract StreamMintManager is
     IStreamMintManager,
+    StreamMintTranscriptTypes,
+    IStreamPreparedNativeMint,
     IStreamMintAuthorizationRevocation,
     Ownable,
     ReentrancyGuard,
@@ -30,6 +34,8 @@ contract StreamMintManager is
         keccak256("6529STREAM_GGP_ARTIST_AUTHORITY_GAS_LIMIT");
     bytes32 public constant GGP_MINT_REVOCATION_ERC1271_GAS_LIMIT =
         keccak256("6529STREAM_GGP_MINT_REVOCATION_ERC1271_GAS_LIMIT");
+    bytes32 public constant GGP_PREPARED_NATIVE_CALLBACK_GAS_LIMIT =
+        keccak256("6529STREAM_GGP_PREPARED_NATIVE_CALLBACK_GAS_LIMIT");
     event MintPhaseConsentRecorded(
         uint16 schemaVersion,
         uint256 indexed collectionId,
@@ -98,17 +104,6 @@ contract StreamMintManager is
     /// @notice Next nonce reserved for prepared mint operation IDs.
     uint256 public override nextOperationNonce;
 
-    struct OperationTranscript {
-        uint256 quantity;
-        uint256 firstOperationNonce;
-        bytes32 currentPolicyHash;
-        bytes32 boundPolicyHash;
-        bytes32 operationRoot;
-        bytes32[] operationIds;
-        IStreamMintLedger.CounterConsumption[] consumptions;
-        StreamMintOperationIdentity.MintAuthorization authorization;
-    }
-
     mapping(uint256 => mapping(bytes32 => StreamMintPhaseState.PhaseState)) private _phases;
     mapping(uint256 => mapping(bytes32 => MintGateConfig)) private _phaseGateConfigs;
     /// @notice Active manager policy hash for each configured phase.
@@ -120,6 +115,7 @@ contract StreamMintManager is
         _counterConfigs;
     mapping(uint256 => mapping(bytes32 => address[])) private _phaseExecutors;
     mapping(uint256 => mapping(bytes32 => mapping(address => uint256))) private _phaseExecutorIndex;
+    StreamPreparedNativeMintExecution.State private _preparedNative;
 
     constructor(IStreamCore core_, IStreamMintLedger mintLedger_, IERC165 moduleRegistry_)
         StreamGasParameterHost(StreamMintArtistConsent.governance(
@@ -159,6 +155,9 @@ contract StreamMintManager is
         _registerGasParameter(
             GasParameterConfig("MINT_REVOCATION_ERC1271_GAS_LIMIT", 400_000, 350_000, 2)
         );
+        _registerGasParameter(
+            GasParameterConfig("PREPARED_NATIVE_CALLBACK_GAS_LIMIT", 4_000_000, 500_000, 2)
+        );
     }
 
     /// @notice Returns true for deployment validation.
@@ -174,6 +173,7 @@ contract StreamMintManager is
         returns (bool)
     {
         return interfaceId == type(IStreamMintManager).interfaceId
+            || interfaceId == type(IStreamPreparedNativeMint).interfaceId
             || interfaceId == type(IStreamMintAuthorizationRevocation).interfaceId
             || super.supportsInterface(interfaceId);
     }
@@ -357,6 +357,88 @@ contract StreamMintManager is
         return (transcript.operationRoot, transcript.operationIds);
     }
 
+    function previewPreparedNativeMintOperation(MintBatch calldata batch, bytes calldata gateData)
+        external
+        view
+        override
+        returns (bytes32 operationRoot, bytes32[] memory operationIds)
+    {
+        OperationTranscript memory transcript =
+            _operationTranscript(batch, gateData, MINT_EXECUTION_PATH_PREPARED);
+        if (transcript.quantity != 1) revert InvalidPreparedNativeMint();
+        return (transcript.operationRoot, transcript.operationIds);
+    }
+
+    function activePreparedNativeMint()
+        external
+        view
+        override
+        returns (StreamPreparedNativeSettlementTypes.Facts memory)
+    {
+        return _preparedNative.active;
+    }
+
+    function bindPreparedNativeRecorder(address recorder) external override onlyOwner nonReentrant {
+        StreamPreparedNativeMintExecution.bindRecorder(
+            _preparedNative, address(core), address(moduleRegistry), recorder
+        );
+        emit PreparedNativeRecorderBound(
+            recorder,
+            _preparedNative.recorderCodeHash,
+            _preparedNative.boundAt,
+            _preparedNative.moduleRevision
+        );
+    }
+
+    function preparedNativeRecorder()
+        external
+        view
+        override
+        returns (address, bytes32, uint64, uint64)
+    {
+        return (
+            _preparedNative.recorder,
+            _preparedNative.recorderCodeHash,
+            _preparedNative.boundAt,
+            _preparedNative.moduleRevision
+        );
+    }
+
+    function executePreparedNativeMint(
+        MintBatch calldata batch,
+        bytes calldata gateData,
+        bytes32 intentHash
+    )
+        external
+        override
+        nonReentrant
+        returns (
+            uint256 tokenId,
+            bytes32 operationRoot,
+            bytes32 operationId,
+            StreamPrimarySettlementTypes.PrimarySettlementResult memory result
+        )
+    {
+        OperationTranscript memory transcript =
+            _operationTranscript(batch, gateData, MINT_EXECUTION_PATH_PREPARED);
+        if (transcript.quantity != 1) revert InvalidPreparedNativeMint();
+        _reserveOperationNonces(transcript.firstOperationNonce, transcript.quantity);
+        _consumeOperation(batch, transcript);
+        _emitGateValidation(batch, transcript);
+        StreamPreparedNativeMintExecution.Operation memory op;
+        op.core = core;
+        op.registry = address(moduleRegistry);
+        op.intentHash = intentHash;
+        op.operationRoot = transcript.operationRoot;
+        op.operationId = transcript.operationIds[0];
+        op.currentPolicyHash = transcript.currentPolicyHash;
+        op.boundPolicyHash = transcript.boundPolicyHash;
+        op.callbackGas = _gasParameterValue(GGP_PREPARED_NATIVE_CALLBACK_GAS_LIMIT);
+        (tokenId, result) = StreamPreparedNativeMintExecution.execute(_preparedNative, batch, op);
+        _emitOperationCompletion(batch, transcript, tokenId);
+        return (tokenId, transcript.operationRoot, transcript.operationIds[0], result);
+    }
+
     function _emitOperationCompletion(
         MintBatch calldata batch,
         OperationTranscript memory transcript,
@@ -528,106 +610,29 @@ contract StreamMintManager is
         }
     }
 
-    function _validateMintBatch(MintBatch calldata request, MintPhaseConfig memory config)
-        private
-        pure
-        returns (uint256 quantity)
-    {
-        quantity = request.initialRecipients.length;
-        if (
-            quantity == 0 || quantity != request.beneficiaries.length
-                || quantity != request.tokenData.length
-                || quantity != request.mintCommitments.length
-        ) {
-            revert MintArrayLengthMismatch();
-        }
-        if (quantity > config.maxBatchQuantity) {
-            revert MintBatchQuantityLimitExceeded(quantity, config.maxBatchQuantity);
-        }
-        for (uint256 i = 0; i < quantity; i++) {
-            if (
-                request.initialRecipients[i] == address(0) || request.beneficiaries[i] == address(0)
-            ) {
-                revert InvalidMintRecipient(
-                    i, request.initialRecipients[i], request.beneficiaries[i]
-                );
-            }
-        }
-    }
-
     function _operationTranscript(
         MintBatch calldata batch,
         bytes calldata gateData,
         bytes32 executionPath
     ) private view returns (OperationTranscript memory transcript) {
         StreamMintPhaseState.PhaseState storage phaseState = _requireExecutablePhase(batch);
-        transcript.quantity = _validateMintBatch(batch, phaseState.config);
-        transcript.currentPolicyHash = _computePolicyHash(batch.collectionId, batch.phaseId);
-        bytes32 registeredPolicyHash = phasePolicyHash[batch.collectionId][batch.phaseId];
-        if (transcript.currentPolicyHash != registeredPolicyHash) {
-            revert MintPolicyHashMismatch(registeredPolicyHash, transcript.currentPolicyHash);
-        }
-        transcript.boundPolicyHash = _requireBoundPolicyHash(batch, transcript.currentPolicyHash);
-        StreamMintArtistConsent.mint(
-            address(core),
-            batch.collectionId,
-            batch.phaseId,
-            transcript.currentPolicyHash,
-            _gasParameterValue(GGP_ARTIST_AUTHORITY_GAS_LIMIT)
-        );
-        transcript.authorization = StreamMintGateValidator.validateAuthorization(
+        return StreamMintManagerTranscript.build(
             batch,
             gateData,
-            transcript.quantity,
-            transcript.boundPolicyHash,
+            executionPath,
+            phaseState,
             _phaseGateConfigs[batch.collectionId][batch.phaseId],
-            moduleRegistry,
-            msg.sender
+            _phaseCounterIds[batch.collectionId][batch.phaseId],
+            _counterConfigs[batch.collectionId][batch.phaseId],
+            _phaseExecutors[batch.collectionId][batch.phaseId],
+            StreamMintManagerTranscript.Context(
+                address(core),
+                _policyContext(batch.collectionId, batch.phaseId),
+                phasePolicyHash[batch.collectionId][batch.phaseId],
+                nextOperationNonce,
+                _gasParameterValue(GGP_ARTIST_AUTHORITY_GAS_LIMIT)
+            )
         );
-        transcript.consumptions =
-            _counterConsumptions(batch, transcript.quantity, transcript.authorization.authorizer);
-        transcript.firstOperationNonce = nextOperationNonce;
-        if (type(uint256).max - transcript.firstOperationNonce < transcript.quantity) {
-            revert MintOperationNonceOverflow(transcript.firstOperationNonce, transcript.quantity);
-        }
-        StreamMintOperationIdentity.TranscriptContext memory context =
-            StreamMintOperationIdentity.TranscriptContext({
-                chainId: block.chainid,
-                manager: address(this),
-                coreAddress: address(core),
-                ledgerAddress: address(mintLedger),
-                gate: _phaseGateConfigs[batch.collectionId][batch.phaseId].gate,
-                executor: msg.sender,
-                executionPath: executionPath,
-                currentPolicyHash: transcript.currentPolicyHash,
-                boundPolicyHash: transcript.boundPolicyHash,
-                firstOperationNonce: transcript.firstOperationNonce,
-                quantity: transcript.quantity
-            });
-        (transcript.operationRoot, transcript.operationIds) = StreamMintOperationIdentity.derive(
-            batch, transcript.authorization, transcript.consumptions, context
-        );
-    }
-
-    function _requireBoundPolicyHash(MintBatch calldata batch, bytes32 currentPolicyHash)
-        private
-        view
-        returns (bytes32 boundPolicyHash)
-    {
-        boundPolicyHash = batch.expectedPolicyHash;
-        if (boundPolicyHash == bytes32(0)) {
-            revert MintPolicyHashRequired(batch.collectionId, batch.phaseId);
-        }
-        if (boundPolicyHash == currentPolicyHash) {
-            return boundPolicyHash;
-        }
-        // The ledger independently enforces predecessor revision adjacency during consume.
-        // slither-disable-next-line unused-return
-        (bytes32 previousPolicyHash,, uint64 graceUntil) =
-            mintLedger.policyGrace(address(this), batch.collectionId, batch.phaseId);
-        if (boundPolicyHash != previousPolicyHash || block.timestamp > graceUntil) {
-            revert MintPolicyHashMismatch(boundPolicyHash, currentPolicyHash);
-        }
     }
 
     function _reserveOperationNonces(uint256 firstOperationNonce, uint256 quantity) private {
@@ -645,21 +650,6 @@ contract StreamMintManager is
             transcript.authorization.nullifiers,
             transcript.boundPolicyHash,
             transcript.operationRoot
-        );
-    }
-
-    function _counterConsumptions(MintBatch calldata request, uint256 quantity, address authorizer)
-        private
-        view
-        returns (IStreamMintLedger.CounterConsumption[] memory consumptions)
-    {
-        return StreamMintManagerAccounting.counterConsumptions(
-            request,
-            quantity,
-            authorizer,
-            address(mintLedger),
-            _phaseCounterIds[request.collectionId][request.phaseId],
-            _counterConfigs[request.collectionId][request.phaseId]
         );
     }
 

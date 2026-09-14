@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "./StreamSettlementContext.sol";
 import "./StreamNativeSupplementalExecution.sol";
 import "./StreamNativePrimaryExecution.sol";
+import "./StreamNativePrimaryRecording.sol";
 import "./StreamPrimaryTokenRouting.sol";
 import "./StreamPrimarySettlementValidation.sol";
 import "./StreamPrimarySettlementHash.sol";
@@ -13,6 +14,8 @@ import "./StreamNativeSettlementSupport.sol";
 import "./StreamPrimarySettlementEmission.sol";
 import "./StreamPrimarySettlementRights.sol";
 import "./StreamDeferredNativeSettlementValidation.sol";
+import "./StreamPreparedNativeSettlementAccounting.sol";
+import "./StreamPreparedNativeSettlementExecution.sol";
 import "../../interfaces/stream/revenue/IStreamDeferredNativePrimarySaleSettlement.sol";
 import "../../interfaces/stream/revenue/IStreamNativePrimarySaleSettlement.sol";
 import "../mint/StreamSaleTemplate.sol";
@@ -27,6 +30,7 @@ contract StreamPrimarySaleSettlement is
     IStreamPrimarySaleSettlement,
     IStreamNativePrimarySaleSettlement,
     IStreamDeferredNativePrimarySaleSettlement,
+    IStreamPreparedNativePrimarySaleSettlement,
     IStreamNativeSupplementalSettlement,
     StreamSettlementContext,
     ReentrancyGuard,
@@ -49,6 +53,8 @@ contract StreamPrimarySaleSettlement is
     mapping(bytes32 => bool) public supplementalFloorConsumed;
     mapping(bytes32 => StreamNativeSupplementalTypes.NativeSupplementalResult) private
         _supplementalResults;
+    mapping(bytes32 => bytes32) public override preparedNativeFactsHash;
+    mapping(bytes32 => bool) public override preparedNativeSaleConsumed;
 
     constructor(IStreamRevenueResolver resolver, address registry, IStreamRevenueEscrow escrow)
         StreamSettlementContext(resolver, registry)
@@ -83,6 +89,7 @@ contract StreamPrimarySaleSettlement is
         return id == type(IStreamPrimarySaleSettlement).interfaceId
             || id == type(IStreamNativePrimarySaleSettlement).interfaceId
             || id == type(IStreamDeferredNativePrimarySaleSettlement).interfaceId
+            || id == type(IStreamPreparedNativePrimarySaleSettlement).interfaceId
             || id == type(IStreamNativeSupplementalSettlement).interfaceId
             || super.supportsInterface(id);
     }
@@ -185,46 +192,13 @@ contract StreamPrimarySaleSettlement is
         nonReentrant
         returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
     {
-        StreamNativeSettlementTypes.NativeSettlementCandidate memory n = candidate;
-        _validateNative(n);
-        bytes32 key = settlementKey(n.saleAdapter, n.executionBinding.executionId);
-        if (settlementConsumed[key]) revert SettlementAlreadyConsumed(key);
-        StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c =
-            StreamNativeSettlementHash.accountingContext(n);
-        StreamSaleTemplate.Selection memory selected = _resolve(c);
-        settlementConsumed[key] = true;
-        bool escrowed = StreamNativePrimaryExecution.fund(
-            StreamNativePrimaryExecution.Context(
-                _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
-            ),
-            c.sale.collectionId,
-            c.sale.amount,
-            selected
-        );
-        _requireNativeContext();
-        StreamNativeSettlementAdmission.requireAdmission(moduleRegistry, n);
-        _requireCurrent(c, selected);
-        result = StreamPrimarySettlementTypes.PrimarySettlementResult(
-            StreamNativeSettlementHash.candidateCommitment(address(this), n),
-            key,
-            selected.profileId,
-            selected.wallet,
-            address(0),
-            c.sale.amount,
-            c.executor,
-            c.executionBinding.executionId,
-            escrowed,
-            c.operationIdentityCommitment,
-            c.currentPolicyHash,
-            c.boundPolicyHash
-        );
-        _results[key] = result;
-        _officialSettled[
-            _totalKey(_CLASS, selected.profileId, selected.wallet, address(0))
-        ] += c.sale.amount;
-        totalOfficialSettled[address(0)] += c.sale.amount;
-        StreamPrimarySettlementEmission.emitSettlement(
-            c, result, address(0), c.sale.expectedPrimaryPolicyHash
+        return StreamNativePrimaryRecording.settleNative(
+            _nativeRecordingContext(),
+            settlementConsumed,
+            _results,
+            _officialSettled,
+            totalOfficialSettled,
+            candidate
         );
     }
 
@@ -245,61 +219,60 @@ contract StreamPrimarySaleSettlement is
         nonReentrant
         returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
     {
-        StreamDeferredNativeSettlementTypes.DeferredNativeCandidate memory d = candidate;
-        _requireNativeContext();
-        StreamDeferredNativeSettlementValidation.validate(
-            StreamDeferredNativeSettlementValidation.Bindings(
-                core, moduleRegistry, address(revenueResolver), address(revenueEscrow)
-            ),
-            d
-        );
-        bytes32 purchaseKey = deferredPurchaseKey(d.execution.saleAdapter, d.purchaseId);
-        if (deferredPurchaseConsumed[purchaseKey]) revert SettlementAlreadyConsumed(purchaseKey);
-        bytes32 key =
-            settlementKey(d.execution.saleAdapter, d.execution.executionBinding.executionId);
-        if (settlementConsumed[key]) revert SettlementAlreadyConsumed(key);
-        deferredPurchaseConsumed[purchaseKey] = true;
-        settlementConsumed[key] = true;
-        StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c =
-            StreamNativeSettlementHash.accountingContext(d.execution);
-        StreamSaleTemplate.Selection memory selected = _resolve(c);
-        bool escrowed = StreamNativePrimaryExecution.fund(
-            StreamNativePrimaryExecution.Context(
-                _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
-            ),
-            c.sale.collectionId,
-            c.sale.amount,
-            selected
-        );
-        _requireNativeContext();
-        StreamDeferredNativeSettlementAdmission.requireAdmission(moduleRegistry, d.execution);
-        _requireCurrent(c, selected);
-        result = StreamPrimarySettlementTypes.PrimarySettlementResult(
-            StreamDeferredNativeSettlementHash.candidateCommitment(address(this), d),
-            key,
-            selected.profileId,
-            selected.wallet,
-            address(0),
-            c.sale.amount,
-            c.executor,
-            c.executionBinding.executionId,
-            escrowed,
-            c.operationIdentityCommitment,
-            c.currentPolicyHash,
-            c.boundPolicyHash
-        );
-        _results[key] = result;
-        _officialSettled[
-            _totalKey(_CLASS, selected.profileId, selected.wallet, address(0))
-        ] += c.sale.amount;
-        totalOfficialSettled[address(0)] += c.sale.amount;
-        StreamPrimarySettlementEmission.emitSettlement(
-            c, result, address(0), d.originalPrimaryPolicyHash
+        return StreamNativePrimaryRecording.settleDeferred(
+            _nativeRecordingContext(),
+            settlementConsumed,
+            _results,
+            _officialSettled,
+            totalOfficialSettled,
+            deferredPurchaseConsumed,
+            candidate
         );
     }
 
     function supplementalPurchaseKey(address adapter, bytes32 id) public view returns (bytes32) {
         return StreamNativeSupplementalHash.purchaseKey(address(this), adapter, id);
+    }
+
+    function preparedNativeSaleKey(address adapter, bytes32 saleId, uint256 saleNonce)
+        public
+        view
+        override
+        returns (bytes32)
+    {
+        return StreamPreparedNativeSettlementHash.saleKey(address(this), adapter, saleId, saleNonce);
+    }
+
+    function settlePreparedNativePrimarySale(
+        StreamPreparedNativeSettlementTypes.Facts calldata facts,
+        StreamPreparedNativeSettlementTypes.Intent calldata intent
+    )
+        external
+        payable
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
+    {
+        return StreamPreparedNativeSettlementExecution.execute(
+            StreamPreparedNativeSettlementExecution.Context(
+                core,
+                coreCodeHash,
+                moduleRegistry,
+                moduleRegistryCodeHash,
+                resolverCodeHash,
+                StreamNativePrimaryExecution.Context(
+                    _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
+                )
+            ),
+            preparedNativeSaleConsumed,
+            settlementConsumed,
+            _results,
+            preparedNativeFactsHash,
+            _officialSettled,
+            totalOfficialSettled,
+            facts,
+            intent
+        );
     }
 
     function supplementalFloorKey(bytes32 originalKey) public view returns (bytes32) {
@@ -371,14 +344,21 @@ contract StreamPrimarySaleSettlement is
         StreamNativeSupplementalExecution.emitResult(c, result, common);
     }
 
-    function _validateNative(StreamNativeSettlementTypes.NativeSettlementCandidate memory c)
+    function _nativeRecordingContext()
         private
         view
+        returns (StreamNativePrimaryRecording.Context memory)
     {
-        StreamPrimarySettlementValidation.nativeFields(_validationBindings(), c);
-        _requireNativeContext();
-        StreamNativeSettlementAdmission.requireAdmission(moduleRegistry, c);
-        StreamPrimarySettlementValidation.nativeBindings(_validationBindings(), c);
+        return StreamNativePrimaryRecording.Context(
+            core,
+            coreCodeHash,
+            moduleRegistry,
+            moduleRegistryCodeHash,
+            resolverCodeHash,
+            StreamNativePrimaryExecution.Context(
+                _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
+            )
+        );
     }
 
     /// @dev Native payments do not consult ERC20 status or permit-policy availability.
