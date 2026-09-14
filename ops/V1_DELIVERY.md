@@ -14,11 +14,19 @@ through actual current contracts, with independent review, tests, developer
 interfaces and a newly identified candidate. External audit and production
 ceremony acceptance remain separately visible requirements.
 
-The latest owner-facing estimate is approximately 65-70% of full v1.
-This is engineering judgment, not a measured
-requirements pass rate or estimate of remaining time. The remaining work
-includes difficult integration. This ledger tracks concrete capabilities
-and evidence instead of deriving completion from test or interface counts.
+The repeated owner-facing estimate of 65-70% is withdrawn as of 14 September.
+It was not calculated from a reconciled requirements inventory or remaining
+effort, and repeating it obscured both accepted progress and unfinished work.
+The broad workstream rows below include historical initial states; their counts
+are not a current feature-completion denominator. No replacement percentage or
+remaining-time estimate is supported yet.
+
+Progress reports must identify the capabilities newly demonstrated through actual
+contracts, implementation awaiting integration, remaining behavior and the next
+end-to-end acceptance result. Compiler-size repairs, fixture corrections and
+evidence preparation are reported as enabling work, not additional completed
+features. Scope changes must be stated explicitly; they do not silently change
+the denominator. The integrator owns this reporting correction and delivery.
 
 ## Latest integration: 14 September
 
