@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamNativeEnglishAuctionState.sol";
+import "./StreamNativeEnglishAuctionCustodySettlement.sol";
 import "./StreamNativeEnglishAuctionRegistration.sol";
 import "./StreamNativeEnglishAuctionSettlement.sol";
 import "./StreamNativeEnglishAuctionContentSettlement.sol";
@@ -27,6 +28,7 @@ import "../../vendor/openzeppelin/IERC721Receiver.sol";
 contract StreamNativeEnglishAuction is
     IStreamNativeEnglishAuction,
     IStreamNativeCuratedAuction,
+    IStreamNativeCustodyAuction,
     IStreamNativeAuctionDelegatedDelivery,
     IStreamArtistSaleFacts,
     StreamSettlementContext,
@@ -80,6 +82,7 @@ contract StreamNativeEnglishAuction is
     StreamNativeEnglishAuctionState.State private _state;
     StreamNativeEnglishAuctionRuntime.Active private _active;
     mapping(bytes32 => StreamPreparedNativeContentTypes.Selection) private _curated;
+    StreamNativeEnglishAuctionCustodyState.State private _custody;
 
     constructor(DeploymentConfig memory d)
         StreamSettlementContext(d.recorder.revenueResolver(), d.recorder.moduleRegistry())
@@ -171,6 +174,7 @@ contract StreamNativeEnglishAuction is
                 && delegateRegistry != address(0))
             || id == type(IStreamNativeEnglishAuction).interfaceId
             || id == type(IStreamNativeCuratedAuction).interfaceId
+            || id == type(IStreamNativeCustodyAuction).interfaceId
             || id == type(IStreamPreparedNativeContentSale).interfaceId
             || id == type(IStreamPreparedNativeSaleBinding).interfaceId
             || id == type(IStreamArtistSaleFacts).interfaceId || super.supportsInterface(id);
@@ -418,6 +422,10 @@ contract StreamNativeEnglishAuction is
         nonReentrant
         returns (uint256 tokenId, bytes32 settlementKey)
     {
+        if (!_state.auctions[id].config.mintAtSettlement) {
+            return
+                StreamNativeEnglishAuctionCustodySettlement.settle(_state, _custody, _runtime(), id);
+        }
         if (_state.auctions[id].config.contentManifestRoot != 0) {
             return StreamNativeEnglishAuctionContentSettlement.settle(
                 _state, _active, _curated, _runtime(), id
@@ -446,10 +454,14 @@ contract StreamNativeEnglishAuction is
 
     function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata)
         external
-        view
         override
         returns (bytes4)
     {
+        if (_custody.acquiring != 0) {
+            return StreamNativeEnglishAuctionCustodyStart.onReceived(
+                _custody, _runtime(), operator, from, tokenId
+            );
+        }
         return StreamNativeEnglishAuctionSettlement.onERC721Received(
             _state, _active, _runtime(), operator, from, tokenId
         );
@@ -457,6 +469,7 @@ contract StreamNativeEnglishAuction is
 
     function unlockNoMint(bytes32 id, uint8 reason) external override nonReentrant {
         Auction storage a = StreamNativeEnglishAuctionState.requireAuction(_state, id);
+        if (!a.config.mintAtSettlement) revert UnsupportedNativeAuctionProfile();
         if (a.status == 6) return;
         if (a.status != 1 || a.winner.amount == 0) revert NativeAuctionTerminal(id);
         bytes32 hash;
@@ -512,6 +525,7 @@ contract StreamNativeEnglishAuction is
         ) revert NativeAuctionTerminal(id);
         (,,, a.terminalToll) = auctionDeadlines(id);
         a.status = 4;
+        if (!a.config.mintAtSettlement) _deliver(id, a, a.config.poster, false);
         emit NativeAuctionCancelled(id, a.saleId, reason);
     }
 
@@ -543,7 +557,7 @@ contract StreamNativeEnglishAuction is
         nonReentrant
     {
         Auction storage a = StreamNativeEnglishAuctionState.requireAuction(_state, id);
-        if (a.status != 3 || account == address(0) || a.nftClaimant != account) {
+        if (!_claimable(a) || account == address(0) || a.nftClaimant != account) {
             revert InvalidNativeAuction();
         }
         _deliver(id, a, _claimRecipient(account, witness), true);
@@ -552,14 +566,79 @@ contract StreamNativeEnglishAuction is
     function claimNFT(bytes32 id, address to) external override nonReentrant {
         Auction storage a = StreamNativeEnglishAuctionState.requireAuction(_state, id);
         if (
-            a.status != 3 || a.nftClaimant == address(0) || a.nftClaimant != msg.sender
+            !_claimable(a) || a.nftClaimant == address(0) || a.nftClaimant != msg.sender
                 || to == address(0) || to == address(this)
         ) revert InvalidNativeAuction();
         _deliver(id, a, to, true);
     }
 
     function _deliver(bytes32 id, Auction storage a, address to, bool claim) private {
-        StreamNativeEnglishAuctionSettlement.deliver(_runtime(), id, a, to, claim);
+        if (!a.config.mintAtSettlement) {
+            StreamNativeEnglishAuctionCustodySettlement.deliver(
+                _custody, _runtime(), id, a, to, claim
+            );
+        } else {
+            StreamNativeEnglishAuctionSettlement.deliver(_runtime(), id, a, to, claim);
+        }
+    }
+
+    function _claimable(Auction storage a) private view returns (bool) {
+        return a.status == 3 || (!a.config.mintAtSettlement && a.status >= 4 && a.status <= 6);
+    }
+
+    function custodyAcquisitionDigest(Acquisition calldata authorization)
+        external
+        view
+        override
+        returns (bytes32)
+    {
+        return StreamNativeEnglishAuctionCustodyStart.digest(authorization);
+    }
+
+    function registerCustodyAuction(
+        Configuration calldata c,
+        Acquisition calldata authorization,
+        bytes calldata artwork,
+        bytes calldata platformSignature,
+        bytes calldata artistSignature
+    ) external payable override nonReentrant returns (bytes32) {
+        return StreamNativeEnglishAuctionCustodyStart.registerAuction(
+                _state,
+                _custody,
+                _runtime(),
+                c,
+                authorization,
+                artwork,
+                platformSignature,
+                artistSignature
+            );
+    }
+
+    function custodyOrigin(bytes32 id)
+        external
+        view
+        override
+        returns (StreamNativeCustodySettlementTypes.Origin memory)
+    {
+        return _custody.origins[id];
+    }
+
+    function activeCustodySale(bytes32 id)
+        external
+        view
+        override
+        returns (StreamNativeCustodySettlementTypes.Facts memory)
+    {
+        Auction storage a = StreamNativeEnglishAuctionState.requireAuction(_state, id);
+        if (
+            a.status != 2 || a.config.mintAtSettlement || _custody.acquiring != 0
+                || !_custody.origins[id].eligible || a.winner.amount == 0
+        ) revert InvalidNativeCustody();
+        return StreamNativeCustodySettlementTypes.Facts(id, a, _custody.origins[id]);
+    }
+
+    function unlockCustodySale(bytes32 id, uint8 reason) external override nonReentrant {
+        StreamNativeEnglishAuctionCustodySettlement.unlock(_state, _custody, _runtime(), id, reason);
     }
 
     function pauseAdapter(bytes32 reason) external override nonReentrant {

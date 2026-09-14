@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamSettlementContext.sol";
+import "./StreamNativeCustodyPrimaryRecording.sol";
 import "./StreamNativeSupplementalExecution.sol";
 import "./StreamNativePrimaryExecution.sol";
 import "./StreamNativePrimaryRecording.sol";
@@ -34,6 +35,7 @@ contract StreamPrimarySaleSettlement is
     IStreamPreparedNativePrimarySaleSettlement,
     IStreamPreparedNativeContentSettlement,
     IStreamNativeSupplementalSettlement,
+    IStreamNativeCustodyPrimarySettlement,
     StreamSettlementContext,
     ReentrancyGuard,
     ERC165
@@ -58,6 +60,10 @@ contract StreamPrimarySaleSettlement is
     mapping(bytes32 => bytes32) public override preparedNativeFactsHash;
     mapping(bytes32 => bool) public override preparedNativeSaleConsumed;
     mapping(bytes32 => bytes32) public override preparedNativeContentHash;
+    address public immutable custodyGovernanceAuthority;
+    bytes32 public immutable custodyGovernanceAuthorityCodeHash;
+    StreamNativeCustodySettlementTypes.CanonicalHouse private _canonicalCustodyHouse;
+    mapping(bytes32 => bytes32) public override nativeCustodyFactsHash;
 
     constructor(IStreamRevenueResolver resolver, address registry, IStreamRevenueEscrow escrow)
         StreamSettlementContext(resolver, registry)
@@ -73,6 +79,10 @@ contract StreamPrimarySaleSettlement is
                     != uint256(factoryCodeHash)
                 || escrow.governanceAuthority() != splitFactory.governanceAuthority()
         ) revert InvalidSettlementContext(address(escrow));
+        custodyGovernanceAuthority = splitFactory.governanceAuthority();
+        custodyGovernanceAuthorityCodeHash = StreamNativeCustodyPrimaryAdmission.validateAuthority(
+            splitFactory.governanceAuthority()
+        );
         revenueEscrow = escrow;
         escrowCodeHash = address(escrow).codehash;
         walletCodeHash = splitFactory.splitWalletRuntimeCodeHash();
@@ -94,6 +104,7 @@ contract StreamPrimarySaleSettlement is
             || id == type(IStreamDeferredNativePrimarySaleSettlement).interfaceId
             || id == type(IStreamPreparedNativePrimarySaleSettlement).interfaceId
             || id == type(IStreamPreparedNativeContentSettlement).interfaceId
+            || id == type(IStreamNativeCustodyPrimarySettlement).interfaceId
             || id == type(IStreamNativeSupplementalSettlement).interfaceId
             || super.supportsInterface(id);
     }
@@ -309,6 +320,79 @@ contract StreamPrimarySaleSettlement is
             totalOfficialSettled,
             facts,
             intent
+        );
+    }
+
+    function _custodyAdmissionContext()
+        private
+        view
+        returns (StreamNativeCustodyPrimaryAdmission.Context memory)
+    {
+        return StreamNativeCustodyPrimaryAdmission.Context(
+            core,
+            coreCodeHash,
+            moduleRegistry,
+            moduleRegistryCodeHash,
+            custodyGovernanceAuthority,
+            custodyGovernanceAuthorityCodeHash
+        );
+    }
+
+    function canonicalCustodyHouse()
+        external
+        view
+        override
+        returns (StreamNativeCustodySettlementTypes.CanonicalHouse memory)
+    {
+        return _canonicalCustodyHouse;
+    }
+
+    function custodyHouseTransition(address house)
+        external
+        view
+        override
+        returns (bytes32, bytes32, bytes32)
+    {
+        return StreamNativeCustodyPrimaryAdmission.transition(
+            _custodyAdmissionContext(), _canonicalCustodyHouse, house
+        );
+    }
+
+    function bindCanonicalCustodyHouse(address house) external override nonReentrant {
+        StreamNativeCustodyPrimaryAdmission.bind(
+            _custodyAdmissionContext(), _canonicalCustodyHouse, house
+        );
+    }
+
+    function requireCanonicalCustodyHouse(address house) external view override {
+        StreamNativeCustodyPrimaryAdmission.requireCurrent(
+            _custodyAdmissionContext(), _canonicalCustodyHouse, house
+        );
+    }
+
+    function settleNativeCustodyPrimarySale(bytes32 id)
+        external
+        payable
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory)
+    {
+        return StreamNativeCustodyPrimaryRecording.execute(
+            StreamNativeCustodyPrimaryRecording.Context(
+                _custodyAdmissionContext(),
+                resolverCodeHash,
+                StreamNativePrimaryExecution.Context(
+                    _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
+                )
+            ),
+            _canonicalCustodyHouse,
+            preparedNativeSaleConsumed,
+            settlementConsumed,
+            _results,
+            nativeCustodyFactsHash,
+            _officialSettled,
+            totalOfficialSettled,
+            id
         );
     }
 

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamNativeEnglishAuctionRuntime.sol";
+import "./StreamNativeEnglishAuctionCustodyReads.sol";
 import {
     IStreamNativeEnglishAuction as A
 } from "../../interfaces/stream/auctions/IStreamNativeEnglishAuction.sol";
@@ -211,6 +212,24 @@ library StreamNativeEnglishAuctionRegistration {
         view
         returns (uint256 fee)
     {
+        if (!a.config.mintAtSettlement) {
+            bytes32 id = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_AUCTION_V1"),
+                    block.chainid,
+                    address(this),
+                    a.config.collectionId,
+                    a.auctionNonce,
+                    a.config.tokenId,
+                    false
+                )
+            );
+            StreamNativeEnglishAuctionCustodyReads.requireCurrent(
+                x, a, IStreamNativeCustodyAuction(address(this)).custodyOrigin(id)
+            );
+            StreamPreparedNativeSettlementAdmission.capture(x.registry, address(this));
+            return 0;
+        }
         StreamNativeEnglishAuctionRuntime.requireNativeContext(x);
         StreamNativeEnglishAuctionRuntime.requireRetained(x, a);
         StreamPreparedNativeSettlementAdmission.capture(x.registry, address(this));
