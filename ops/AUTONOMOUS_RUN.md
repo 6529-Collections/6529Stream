@@ -55,7 +55,9 @@ with those products remains required. Local broadcast estimation uses 130% for
 phase one and 600% for resumption and is not shipping-capacity acceptance.
 
 That rehearsal exposed oversized Identity and Onboarding constructor transactions
-(19,511,180 and 17,301,259 gas). Their immutable child deployments are being split.
+(19,511,180 and 17,301,259 gas). Their authenticated immutable-child deployment
+split is now integrated, with eight independently reviewed aggregate tests.
+Isolated deployment receipts remain pending.
 The Registry also incorrectly required more than 30M available gas for its small
 constructor probes. Its constructor-only forwarding correction passes eleven
 isolated tests in both compiler modes, including 256 fuzz inputs each, exact
@@ -93,15 +95,19 @@ after extracting complete registration and settlement workers into fixed linked
 libraries; its original API and physical storage layout are preserved. Every
 production product in the capture fits. The
 [native auction guide](../docs/integrations/native-deferred-auctions.md) explains
-its caller interfaces and boundaries. Curated 1/1 leaf/root/gate admission is
-next; custody-start and additional rights modes remain mandatory. The separately
-accepted content-proof helper is not yet connected to those broader profiles. [ADR 0043](../docs/adr/0043-deferred-auction-clocks-and-no-bid.md)
+its caller interfaces and boundaries. Curated publication, leaf/root/gate admission
+and actual paid settlement are now integrated as `d300d2d7`. The independently
+reviewed cohort passes all 42 cases, including three 256-input properties. Manager
+is 21,504 bytes, house 21,556 and recorder 22,665; all production products fit.
+The new path reconstructs the full retained manifest, preserves exact artwork
+bytes and rejects ordinary Manager bypass. Custody-start, additional rights
+modes and global operator adoption remain mandatory. [ADR 0043](../docs/adr/0043-deferred-auction-clocks-and-no-bid.md)
 owns clock and no-bid combinations; existing V2 behavior is retained.
 
 Current graph fixture preparation now has a portable repository command:
 `python scripts/dev.py prepare-graph`. It verifies the executed graph host,
 creation helper and current sources against complete native compiler output,
-then prepares the 54 fixture products. The existing current validation wrappers
+then prepares the 55 fixture products. The existing current validation wrappers
 invoke it between build and tests. This removes dependence on a machine-specific
 artifact snapshot; it does not establish a new complete-system test result.
 

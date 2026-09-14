@@ -67,7 +67,7 @@ python scripts/dev.py test
 
 The command uses the actual graph test host's cache coordinate, checks current
 source bytes, authenticates the host and creation helper against complete native
-compiler output, and generates the 54 required products for both graph fixtures.
+compiler output, and generates the 55 required products for both graph fixtures.
 For a custom cache, use `python -m tools.build.prepare_current_graph --out
 <output-directory> --cache-path <cache-directory>`; both paths must identify the
 same completed compilation. Campaigns select their actual fuzz/invariant hosts

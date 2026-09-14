@@ -5,6 +5,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Integrate published curated-work native auctions with complete manifest and
+  exact-byte admission, original counter accounting and atomic Safe retry.
+- Split Artist host deployments into authenticated fixed children while retaining
+  original host bindings and separate real-transaction capacity validation.
+
 - Add an exact separate governed artist read-budget expansion plan, preserving
   the original activation batch and requiring normal delayed execution.
 
@@ -20,7 +25,7 @@ the release policy in `docs/release-policy.md`.
 
 - Add atomic prepared native paid minting through the fixed official recorder,
   with original-sale replay protection, complete rollback and Safe retry tests.
-- Add the native auction content-proof helper; auction integration remains open.
+- Add the native auction content-proof helper and its curated settlement integration.
 - Prepare fuzz/invariant graph inputs from each campaign's own compiler context
   before execution, with retained preparation logs and a shared-fixture lock.
 

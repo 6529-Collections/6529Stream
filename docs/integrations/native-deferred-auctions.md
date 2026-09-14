@@ -2,9 +2,10 @@
 
 `StreamNativeEnglishAuction` runs an English auction whose winning token is
 minted and paid for atomically at settlement. Its implemented profile is a
-singleton collection PROFILE, exact `tokenData`, and a disabled mint gate.
-Optional NFTDelegation delivery is supported. Custody-start auctions, curated
-leaves, additional rights modes and enabled gates remain separate required work.
+singleton collection PROFILE with exact `tokenData`. A disabled gate and the
+original published curated-content gate are supported, with optional NFTDelegation
+delivery. Custody-start auctions, additional rights modes and other gate profiles
+remain separate required work.
 
 Use [IStreamNativeEnglishAuction](../../smart-contracts/interfaces/stream/auctions/IStreamNativeEnglishAuction.sol)
 for lifecycle calls and
@@ -55,6 +56,43 @@ reveal fee. Preset no-bid completion produces no NFT, revenue or NFT claim.
 Terminal clock snapshots remain stable. Use the explicit status and events;
 a completed call does not imply that an NFT was minted.
 
+## Publish and sell curated works
+
+Use [IStreamNativeCuratedAuction](../../smart-contracts/interfaces/stream/auctions/IStreamNativeCuratedAuction.sol)
+for the curated entrypoint. Each declared work has a `contentId`, the hash of its
+exact `tokenData` bytes, and a preview URI. Content IDs identify published works;
+Core still assigns sequential token IDs at settlement.
+
+1. Read `nextCuratedSaleId(collectionId, phaseId)` to obtain the expected sale
+   nonce and sale ID. This is an optimistic coordinate, not a reservation.
+2. Deploy `StreamNativeAuctionContentGate` for that Manager, house, sale,
+   collection, phase and context counter. Supply the complete rows in strictly
+   increasing content-ID order. The gate retains their canonical bytes, count,
+   manifest hash and Merkle root. A zero content ID and empty artwork bytes are
+   valid when explicitly published with their correct hash and a preview URI.
+3. Register the exact gate as `6529STREAM_MINT_GATE_V1`, version
+   `NATIVE_CURATED_GATE_V1`, with `IStreamMintGate`, its runtime hash and
+   `gateConfigHash`. Configure the phase with `maxBatchQuantity=1`, the same gate
+   and an enabled CONTEXT counter with STATIC cap one, STATIC increment one and
+   a nonzero counter-configuration hash. Authorize the original house as phase
+   executor. Preserve the required Artist consent for the resulting policy.
+4. Build the selected work's proof and the original platform/artist creation
+   authorizations. Call `registerCuratedAuction` with the exact artwork bytes,
+   selection and expected sale nonce. If another registration has consumed that
+   nonce, rebuild the sale-bound publication and authorizations; retrying an old
+   immutable gate cannot change its sale ID.
+5. Bid and settle through the ordinary house lifecycle. Manager independently
+   verifies the retained publication, selected bytes and counter admission before
+   its original prepared mint. The official recorder retains the exact content
+   evidence alongside payment; failed completion rolls back the operation.
+
+A claimed root or count without the matching complete retained manifest cannot
+open a sale. The ordinary Manager entrypoints cannot bypass the selected curated
+content admission. Preview URIs are declarations; publication does not prove that
+an external service will continue serving their contents. The
+[current fixture](../../test/helpers/NativeCuratedAuctionFixture.sol) gives the
+complete ordering, proof construction and signing example.
+
 ## Tested behavior
 
 Fifteen actual auction cases pass, including a 256-input configuration property,
@@ -64,8 +102,13 @@ and identical signed retry, and delegated refund failure/nonce rollback/retry.
 The fixture uses the actual Core, Manager, ledger, revenue contracts and
 NFTDelegation, with typed governance, Artist and entropy boundaries.
 
-The reviewed via-IR house runtime is 19,453 bytes, with fixed linked registration
-and settlement libraries; every production product in that capture fits the
-runtime limit. Whole-transaction capacity, complete operator wiring, additional
+The curated increment passes 42 cases across the curated, existing auction,
+prepared settlement and companion suites, including three 256-input properties.
+Its nine curated cases include complete retained publication, wrong proofs and
+bytes, ordinary-entry bypass rejection, gate incidents, sequential Core tokens
+and identical signed Safe retry. The reviewed via-IR house is 21,556 bytes,
+Manager 21,504 and the recorder 22,665; all production products in that capture
+fit the runtime limit. Whole-transaction capacity, complete operator wiring,
+additional
 auction profiles and a matching full-v1 candidate remain open in the
 [delivery ledger](../../ops/V1_DELIVERY.md).

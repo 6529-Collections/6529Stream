@@ -63,7 +63,9 @@ with those products remains required. Local broadcast estimation uses 130% for
 phase one and 600% for resumption and is not shipping-capacity acceptance.
 
 That rehearsal exposed oversized Identity and Onboarding constructor transactions
-(19,511,180 and 17,301,259 gas). Their immutable child deployments are being split.
+(19,511,180 and 17,301,259 gas). Their authenticated immutable-child deployment
+split is now integrated, with eight independently reviewed aggregate tests.
+Isolated deployment receipts remain pending.
 The Registry also incorrectly required more than 30M available gas for its small
 constructor probes. Its constructor-only forwarding correction passes eleven
 isolated tests in both compiler modes, including 256 fuzz inputs each, exact
@@ -101,15 +103,19 @@ after extracting complete registration and settlement workers into fixed linked
 libraries; its original API and physical storage layout are preserved. Every
 production product in the capture fits. The
 [native auction guide](../docs/integrations/native-deferred-auctions.md) explains
-its caller interfaces and boundaries. Curated 1/1 leaf/root/gate admission is
-next; custody-start and additional rights modes remain mandatory. The separately
-accepted content-proof helper is not yet connected to those broader profiles. [ADR 0043](../docs/adr/0043-deferred-auction-clocks-and-no-bid.md)
+its caller interfaces and boundaries. Curated publication, leaf/root/gate admission
+and actual paid settlement are now integrated as `d300d2d7`. The independently
+reviewed cohort passes all 42 cases, including three 256-input properties. Manager
+is 21,504 bytes, house 21,556 and recorder 22,665; all production products fit.
+The new path reconstructs the full retained manifest, preserves exact artwork
+bytes and rejects ordinary Manager bypass. Custody-start, additional rights
+modes and global operator adoption remain mandatory. [ADR 0043](../docs/adr/0043-deferred-auction-clocks-and-no-bid.md)
 owns clock and no-bid combinations; existing V2 behavior is retained.
 
 Current graph fixture preparation now has a portable repository command:
 `python scripts/dev.py prepare-graph`. It verifies the executed graph host,
 creation helper and current sources against complete native compiler output,
-then prepares the 54 fixture products. The existing current validation wrappers
+then prepares the 55 fixture products. The existing current validation wrappers
 invoke it between build and tests. This removes dependence on a machine-specific
 artifact snapshot; it does not establish a new complete-system test result.
 
@@ -940,12 +946,12 @@ commits, tests and retained results in the evidence column when advancing it.
 | SAFE-01 | Every supported public/external ABI function is classified and covered for correctly authorized Safe calls, reads or intentional protocol-only restrictions; real signatures, claims, NFT custody and client workflows pass the [Safe acceptance matrix](SAFE_ACCEPTANCE.md) | Integrator + both builders; shared fixtures first, verification accompanies each feature | Building |
 | PAY-02 | Signed release/revocation and specified deprecated-asset exits preserve owed funds and nonce rules | Revenue; existing wallet/asset policy | Building: source integrated as `6d2074fb`; 121 focused tests per compiler profile; combined current-stack acceptance pending |
 | PAY-03 | Revenue escrow records exact owed assets, captures the destination binding and supports permissionless flush/recovery | Revenue; typed settlement decision | Building: deferred registration/discovery and single-factory exact-credit/flush source integrated; fixed-sale and auction adoption source integrated; current acceptance and recovery still pending |
-| PAY-04 | One ERC-20 payer boundary, official settlement owner, exact typed mint orchestration and execution-bound replay, including specified permit branches | Revenue + integrator; PAY-03, ADR 0019 reconciliation | Building: universal ERC-20 recorder/payer/consumer integrated `18dbe54c`, 29 tests plus fuzzing independently accepted; canonical authorization fix `5ecae362` accepted with two tests; `4e9a41b1` actual-Core universal/content/Safe ten-case composition independently accepted; native and broader orchestration pending |
+| PAY-04 | One ERC-20 payer boundary, official settlement owner, exact typed mint orchestration and execution-bound replay, including specified permit branches | Revenue + integrator; PAY-03, ADR 0019 reconciliation | Building: universal ERC-20 recorder/payer/consumer integrated `18dbe54c`, 29 tests plus fuzzing independently accepted; canonical authorization fix `5ecae362` accepted with two tests; `4e9a41b1` actual-Core universal/content/Safe ten-case composition independently accepted; native prepared settlement18 and English/delegation/curated42 now independently accepted through actual Core/Manager/official recorder with Safe retry; custody, broader rights and global operator wiring remain |
 | PAY-05 | Required primary/royalty assignment profiles, templates, token overrides and freeze behavior work through current resolvers | Revenue; artist economics, PAY-04 | Building: immutable primary artist binding integrated as `8eb37037`; 38 focused tests per profile; remaining semantics and current-stack acceptance pending |
 | SALE-01 | Fixed/open-edition sale variants, zero/PWYW pricing and refund-window custody obey drift, cancellation, reveal and pause rules | Revenue; PAY-04 and artist consent | Building: signed free/open/PWYW programs and REQUIRED consent have separately captured current/Safe acceptance. Refund source `ea107e58` has 63 reviewed domain cases and two fuzz properties; actual refund4 plus retained dispute4 now pass independent review on the pre-dismissal snapshot. Wider variants and candidate acceptance remain |
 | SALE-02 | Dutch schedule, clearing rebates and maximum-price excess credits conserve funds | Revenue; PAY-04 | Building: standard native Dutch and supplemental settlement have independently reviewed current composition. Clearing consumer `d807421e` has 59 reviewed domain cases, five fuzz properties and both compiler profiles; two actual-current Safe clearing cases pass independent review (`d9d7d46b`). A qualified full-current trace measures 8,755,856 gas in the first consumer call versus the 500,000 ceiling. Aggregate/storage optimization and shared mint/rights/settlement costs remain open; no cold gas or deployment acceptance |
 | SALE-03 | Private sales/offers and owner-signed consignment grants have exact revocation and secondary-settlement semantics | Revenue; PAY-04 and artist consent | Building: `7139688b` implements native secondary PRIVATE_SALE and OFFER_SALE, with 42 reviewed domain cases and fuzzing. Prior collector delivery, actual-current Core/royalty composition and broader inventory sale kinds remain |
-| SALE-04 | Remaining English-auction branches, including first-bid-starts and mint-at-settlement, use shared authority and settlement | Revenue; PAY-04 | Building: new paid PREPARED handoff; shared clock13 both modes/three256 properties; actual house, escrow, Safe, delivery and full branch acceptance pending |
+| SALE-04 | Remaining English-auction branches, including first-bid-starts and mint-at-settlement, use shared authority and settlement | Revenue; PAY-04 | Building: actual paid English/delegation15 and curated42 cohorts independently accepted, including official recorder, escrow, clocks, Safe retry and deferred NFT delivery; custody-start, wider rights and global operator/transaction-capacity acceptance remain |
 | MINT-01 | Signed tickets, burn-to-mint and delegate gates, counter/nullifier continuity and required content-selection behavior | Integrator / revenue builder; shared artist/payment interfaces | Building: full-payload ticket/offer revocation at the Manager/Ledger boundary is assigned; other listed behaviors retain their acceptance scope |
 | ENT-01 | Reviewed non-VRF provider and safe-mode fallback instances are installed; actual provider failure/recovery follows the specified lifecycle | Integrator / freed builder; provider docs and exact interfaces | Building: ARRNG adapter and four actual-current Safe/Executor cases accepted in `72c208f2`; safe-mode, full recovery and deployed upstream acceptance remain |
 | ENT-02 | Scope/reveal policies, fee escrow, keeper/SLO fallback and recovery preserve committed entropy without discretionary rerolls | Integrator / freed builder; ENT-01 | Building: policy/escrow/typed quote source integrated `66d70e04`, with 44 focused cases, 30 metadata regressions and six planner cases; separate 14-case actual current/Safe composition independently accepted with its captured pre-unique-holder planner; governed timing/SLO source has 54 accepted domain cases and 30 metadata regressions, with a separately accepted seven-case actual governance/Safe run captured before operation 33; AT_MINT attempts and recovery remain |

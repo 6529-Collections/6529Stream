@@ -129,18 +129,18 @@ Use the smallest honest validation set first, then broaden when risk increases.
 For docs-only changes:
 
 ```bash
-python scripts/test_markdown_links.py
-python scripts/check_markdown_links.py
-python scripts/check_changelog.py
+python -m tools.docs.test_markdown_links
+python -m tools.docs.check_markdown_links
+python -m tools.docs.check_changelog
 ```
 
 If the root README or first-contributor path changes, also run:
 
 ```bash
-python scripts/test_readme.py
-python scripts/check_readme.py
-python scripts/test_first_30_minutes.py
-python scripts/check_first_30_minutes.py
+python -m tools.docs.test_readme
+python -m tools.docs.check_readme
+python -m tools.docs.test_first_30_minutes
+python -m tools.docs.check_first_30_minutes
 ```
 
 For Solidity or Foundry tests, run the focused test first, then:
