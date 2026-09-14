@@ -14,10 +14,15 @@ import "../../interfaces/stream/artist/IStreamArtistEconomicsAuthority.sol";
 import "../../interfaces/stream/revenue/IStreamRoyaltyFreeze.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
+import { StreamRoyaltyAssignmentHash } from "./StreamRoyaltyAssignmentHash.sol";
+import { StreamRoyaltySnapshot } from "./StreamRoyaltySnapshot.sol";
+import { IStreamRoyaltySnapshot } from "../../interfaces/stream/revenue/IStreamRoyaltySnapshot.sol";
+import {
+    IStreamArtistSnapshotRoyaltyFacts
+} from "../../interfaces/stream/artist/IStreamArtistSnapshotRoyaltyFacts.sol";
 
-/// @notice Governance-owned live token, collection, and default royalties with exact freezes.
-/// @dev Default/collection terms are independent of primary-sale profiles. This resolver does
-///      not implement mint-time snapshots. ERC-2981 discloses royalties;
+/// @notice Governance-owned live royalties and explicitly elected prepared collection snapshots.
+/// @dev Default/collection terms are independent of primary-sale profiles. ERC-2981 discloses royalties;
 ///      it does not restrict transfers or require a marketplace to pay them.
 contract StreamRoyaltyResolver is
     IStreamRoyaltyResolver,
@@ -26,11 +31,14 @@ contract StreamRoyaltyResolver is
     IStreamArtistRoyaltyScopeFacts,
     IStreamTokenRoyaltyResolver,
     IStreamRoyaltyFreeze,
+    IStreamRoyaltySnapshot,
+    IStreamArtistSnapshotRoyaltyFacts,
     ERC165,
     Ownable
 {
     uint16 public constant MAX_ROYALTY_BPS = 1_000;
     IStreamCore public immutable boundCore;
+    bytes32 public immutable boundCoreCodeHash;
     IStreamSplitFactory public immutable splitFactory;
     IStreamArtistAttribution public immutable artistRegistry;
     bytes32 public immutable artistRegistryCodeHash;
@@ -38,6 +46,7 @@ contract StreamRoyaltyResolver is
     RoyaltyConfig private _defaultRoyalty;
     mapping(uint256 => RoyaltyConfig) private _collectionRoyalties;
     mapping(uint256 => RoyaltyConfig) private _tokenRoyalties;
+    StreamRoyaltySnapshot.State private _snapshots;
     error ArtistEconomicsAuthorizationRequired(uint256 collectionId);
     error InvalidArtistRegistryBinding(address selected);
 
@@ -54,6 +63,7 @@ contract StreamRoyaltyResolver is
                 || governanceExecutor_.code.length == 0
         ) revert InvalidRoyaltyConfiguration();
         boundCore = core_;
+        boundCoreCodeHash = address(core_).codehash;
         splitFactory = splitFactory_;
         address artist = address(artistRegistry_);
         if (
@@ -74,7 +84,10 @@ contract StreamRoyaltyResolver is
             || id == type(IStreamArtistRoyaltyPreview).interfaceId
             || id == type(IStreamArtistRoyaltyScopeFacts).interfaceId
             || id == type(IStreamTokenRoyaltyResolver).interfaceId
-            || id == type(IStreamRoyaltyFreeze).interfaceId || super.supportsInterface(id);
+            || id == type(IStreamRoyaltyFreeze).interfaceId
+            || id == type(IStreamRoyaltySnapshot).interfaceId
+            || id == type(IStreamArtistSnapshotRoyaltyFacts).interfaceId
+            || super.supportsInterface(id);
     }
 
     function royaltyEconomicsFacts(uint256 collectionId, uint8 scope, uint256 scopeId)
@@ -100,6 +113,7 @@ contract StreamRoyaltyResolver is
         bool frozen
     ) external view override returns (StreamArtistOnboardingTypes.AssignmentFact memory fact) {
         _requireScopeContext(collectionId, scope, scopeId);
+        if (scope != 1) _requireLiveRoyaltyMutation(collectionId);
         RoyaltyConfig memory candidate = _candidate(profileHash, royaltyBps);
         candidate.frozen = frozen;
         return _fact(scope, scopeId, candidate);
@@ -115,6 +129,7 @@ contract StreamRoyaltyResolver is
         )
     {
         _requireScopeContext(collectionId, scope, scopeId);
+        _requireLiveRoyaltyMutation(collectionId);
         if (scope == 0) revert InvalidRoyaltyScope(scope, scopeId);
         RoyaltyConfig memory item = _key(scope, scopeId);
         if (!item.configured) revert RoyaltyAssignmentMissing(scope, scopeId);
@@ -191,19 +206,8 @@ contract StreamRoyaltyResolver is
         RoyaltyConfig memory item,
         bytes32 assignmentHash
     ) private view returns (bytes32) {
-        if (!item.configured) return bytes32(0);
-        return keccak256(
-            abi.encode(
-                keccak256("6529STREAM_ROYALTY_POLICY_V1"),
-                block.chainid,
-                address(this),
-                scope == 0 ? uint256(0) : collectionId,
-                scope == 2 ? scopeId : uint256(0),
-                item.profileId,
-                item.wallet,
-                item.royaltyBps,
-                assignmentHash
-            )
+        return StreamRoyaltyAssignmentHash.policy(
+            collectionId, scope, scopeId, item, assignmentHash
         );
     }
 
@@ -258,6 +262,7 @@ contract StreamRoyaltyResolver is
         returns (StreamArtistOnboardingTypes.AssignmentFact memory fact)
     {
         _requireCollection(collectionId);
+        _requireLiveRoyaltyMutation(collectionId);
         _requireSelectedArtistRegistry();
         RoyaltyConfig storage item = _collectionRoyalties[collectionId];
         bool collectionConfigured = item.configured;
@@ -278,59 +283,7 @@ contract StreamRoyaltyResolver is
         view
         returns (bytes32)
     {
-        bytes32 resolverContext = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_PRIMARY_ASSIGNMENT_RESOLVER_CONTEXT_V1"),
-                address(this),
-                address(splitFactory),
-                address(splitFactory.assetPolicyRegistry()),
-                splitFactory.splitWalletRuntimeCodeHash()
-            )
-        );
-        bytes32 scopeContext = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_PRIMARY_ASSIGNMENT_SCOPE_CONTEXT_V1"),
-                keccak256("ROYALTY_ERC2981"),
-                scope,
-                scopeId,
-                uint8(1)
-            )
-        );
-        bytes32 entriesHash = item.profileId == bytes32(0)
-            ? bytes32(0)
-            : splitFactory.profileEntriesHash(item.profileId);
-        bytes32 metadataHash = item.profileId == bytes32(0)
-            ? bytes32(0)
-            : splitFactory.profileMetadataURIHash(item.profileId);
-        // PROFILE type always has a profile context, including an explicitly disabled zero profile.
-        bytes32 profileContext = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_PRIMARY_ASSIGNMENT_PROFILE_CONTEXT_V1"),
-                item.wallet,
-                entriesHash,
-                metadataHash
-            )
-        );
-        bytes32 pointerContext = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_ROYALTY_ASSIGNMENT_POINTER_CONTEXT_V1"),
-                item.profileId,
-                profileContext,
-                item.royaltyBps
-            )
-        );
-        // This resolver advertises no loosening: the canonical assignment-policy input is zero.
-        return keccak256(
-            abi.encode(
-                keccak256("6529STREAM_PRIMARY_ASSIGNMENT_V1"),
-                block.chainid,
-                resolverContext,
-                scopeContext,
-                pointerContext,
-                bytes32(0),
-                item.frozen
-            )
-        );
+        return StreamRoyaltyAssignmentHash.assignment(splitFactory, item, scope, scopeId);
     }
 
     function royaltyReceiverAndBps(
@@ -375,7 +328,17 @@ contract StreamRoyaltyResolver is
         private
         view
     {
-        if (artistRegistry.attribution(collectionId).nominationHash != bytes32(0)) {
+        if (_snapshots.elections[collectionId].mode == 2) {
+            IStreamRoyaltySnapshot.Source memory source = StreamRoyaltySnapshot.source(
+                _snapshots, candidate, _snapshotContext(), collectionId, false
+            );
+            if (artistRegistry.attribution(collectionId).nominationHash == bytes32(0)) {
+                revert ArtistEconomicsAuthorizationRequired(collectionId);
+            }
+            _requireBoundArtistEconomicsHash(
+                collectionId, 1, collectionId, source.modeAssignmentHash
+            );
+        } else if (artistRegistry.attribution(collectionId).nominationHash != bytes32(0)) {
             _requireBoundArtistEconomicsHash(
                 collectionId, 1, collectionId, _assignmentHash(candidate, 1, collectionId)
             );
@@ -415,6 +378,7 @@ contract StreamRoyaltyResolver is
         onlyOwner
     {
         uint256 collectionId = _tokenCollection(tokenId);
+        _requireLiveRoyaltyMutation(collectionId);
         _requireSelectedArtistRegistry();
         RoyaltyConfig memory previous = _tokenRoyalties[tokenId];
         if (previous.frozen) revert RoyaltyAssignmentFrozen(2, tokenId);
@@ -453,6 +417,7 @@ contract StreamRoyaltyResolver is
 
     function _clearRoyalty(uint256 collectionId, uint8 scope, uint256 scopeId) private {
         _requireSelectedArtistRegistry();
+        _requireLiveRoyaltyMutation(collectionId);
         RoyaltyConfig memory previous = _key(scope, scopeId);
         if (!previous.configured) revert RoyaltyAssignmentMissing(scope, scopeId);
         if (previous.frozen) revert RoyaltyAssignmentFrozen(scope, scopeId);
@@ -477,6 +442,7 @@ contract StreamRoyaltyResolver is
 
     function freezeTokenRoyalty(uint256 tokenId) external override onlyOwner {
         uint256 collectionId = _tokenCollection(tokenId);
+        _requireLiveRoyaltyMutation(collectionId);
         _requireSelectedArtistRegistry();
         RoyaltyConfig memory previous = _tokenRoyalties[tokenId];
         if (previous.frozen) revert RoyaltyAssignmentFrozen(2, tokenId);
@@ -553,6 +519,7 @@ contract StreamRoyaltyResolver is
     /// @notice Materializes inherited defaults before freezing, including an inherited zero rate.
     function freezeCollectionRoyalty(uint256 collectionId) external override onlyOwner {
         _requireCollection(collectionId);
+        _requireLiveRoyaltyMutation(collectionId);
         _requireSelectedArtistRegistry();
         RoyaltyConfig storage item = _collectionRoyalties[collectionId];
         RoyaltyConfig memory candidate = item.configured ? item : _defaultRoyalty;
@@ -572,6 +539,7 @@ contract StreamRoyaltyResolver is
         override
     {
         _requireCollection(collectionId);
+        _requireLiveRoyaltyMutation(collectionId);
         _requireSelectedArtistRegistry();
         RoyaltyConfig storage item = _collectionRoyalties[collectionId];
         bytes32 currentHash = item.configured ? _assignmentHash(item, 1, collectionId) : bytes32(0);
@@ -651,6 +619,121 @@ contract StreamRoyaltyResolver is
     function _requireCollection(uint256 collectionId) private view {
         if (collectionId == 0 || !boundCore.collectionExists(collectionId)) {
             revert InvalidRoyaltyCollection(collectionId);
+        }
+    }
+
+    function electCollectionRoyaltyMode(uint256 collectionId, uint8 mode)
+        external
+        override
+        onlyOwner
+    {
+        if (_collectionRoyalties[collectionId].frozen) {
+            revert RoyaltyConfigurationFrozen(collectionId);
+        }
+        StreamRoyaltySnapshot.elect(_snapshots, _snapshotContext(), collectionId, mode);
+    }
+
+    function collectionRoyaltyMode(uint256 collectionId)
+        external
+        view
+        override
+        returns (uint8 mode, bytes32 electionHash)
+    {
+        _requireCollection(collectionId);
+        StreamRoyaltySnapshot.Election memory e = _snapshots.elections[collectionId];
+        return (e.mode == 0 ? 1 : e.mode, e.hash);
+    }
+
+    function previewArtistSnapshotRoyaltyAssignment(
+        uint256 collectionId,
+        bytes32 profileHash,
+        uint16 royaltyBps,
+        bool frozen
+    ) external view override returns (StreamArtistOnboardingTypes.AssignmentFact memory) {
+        _requireSelectedArtistRegistry();
+        if (frozen) revert RoyaltySnapshotMutationClosed(collectionId);
+        IStreamRoyaltySnapshot.Source memory source = StreamRoyaltySnapshot.source(
+            _snapshots, _candidate(profileHash, royaltyBps), _snapshotContext(), collectionId, false
+        );
+        return _snapshotFact(collectionId, source.modeAssignmentHash);
+    }
+
+    function currentArtistSnapshotRoyaltyAssignment(uint256 collectionId)
+        external
+        view
+        override
+        returns (StreamArtistOnboardingTypes.AssignmentFact memory)
+    {
+        _requireSelectedArtistRegistry();
+        IStreamRoyaltySnapshot.Source memory source = StreamRoyaltySnapshot.source(
+            _snapshots, _collectionRoyalties[collectionId], _snapshotContext(), collectionId, false
+        );
+        return _snapshotFact(collectionId, source.modeAssignmentHash);
+    }
+
+    function currentRoyaltySnapshotSource(uint256 collectionId)
+        external
+        view
+        override
+        returns (IStreamRoyaltySnapshot.Source memory)
+    {
+        return StreamRoyaltySnapshot.source(
+            _snapshots, _collectionRoyalties[collectionId], _snapshotContext(), collectionId, true
+        );
+    }
+
+    function royaltySnapshot(uint256 tokenId)
+        external
+        view
+        override
+        returns (IStreamRoyaltySnapshot.Snapshot memory)
+    {
+        return _snapshots.snapshots[tokenId];
+    }
+
+    function snapshotTokenRoyaltyAtMint(
+        uint256 tokenId,
+        uint256 collectionId,
+        bytes32 operationRoot,
+        bytes32 operationId,
+        bytes32 revenueClass,
+        bytes32 expectedRoyaltyAssignmentHash
+    ) external override returns (bytes32) {
+        return StreamRoyaltySnapshot.create(
+            _snapshots,
+            _collectionRoyalties,
+            _tokenRoyalties,
+            _snapshotContext(),
+            StreamRoyaltySnapshot.Hook(
+                tokenId,
+                collectionId,
+                operationRoot,
+                operationId,
+                revenueClass,
+                expectedRoyaltyAssignmentHash
+            )
+        );
+    }
+
+    function _snapshotContext() private view returns (StreamRoyaltySnapshot.Context memory) {
+        return StreamRoyaltySnapshot.Context(
+            boundCore, boundCoreCodeHash, splitFactory, artistRegistry, artistRegistryCodeHash
+        );
+    }
+
+    function _snapshotFact(uint256 collectionId, bytes32 hash)
+        private
+        view
+        returns (StreamArtistOnboardingTypes.AssignmentFact memory)
+    {
+        return StreamArtistOnboardingTypes.AssignmentFact(
+            address(this), keccak256("ROYALTY_ERC2981"), 1, collectionId, hash
+        );
+    }
+
+    function _requireLiveRoyaltyMutation(uint256 collectionId) private view {
+        if (_snapshots.elections[collectionId].mode == 2) {
+            revert RoyaltySnapshotMutationClosed(collectionId);
         }
     }
 }
