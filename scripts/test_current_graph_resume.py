@@ -618,7 +618,7 @@ class Rehearsal:
             require(not self.code(phase1["reservedCoordinator"]), "reserved is not deployed")
             journal = json.loads((self.evidence / "invocation-0-broadcast.json").read_bytes())
             slots = [t["contractAddress"].lower() for t in journal["transactions"]
-                     if t.get("contractName") == "StreamDeploymentSlot"]
+                     if t.get("contractName") == "StreamDeploymentSlot" and t.get("transactionType") == "CREATE"]
             require(len(slots) == len(set(slots)) == 12 and phase1["coordinatorSlot"] in slots,
                     "two completed Artist and ten reserved graph slots")
             consumed = [slot for slot in slots if self.read("StreamDeploymentSlot", slot, "consumed")[0]]
