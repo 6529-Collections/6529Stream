@@ -12,6 +12,10 @@ import "../../interfaces/stream/governance/IStreamRoleRegistry.sol";
 import "../revenue/StreamNativeSettlementSupport.sol";
 import "../revenue/StreamDeferredNativeSettlementHash.sol";
 import "./StreamSaleConsent.sol";
+import { StreamMintRoyaltyPolicy } from "./StreamMintRoyaltyPolicy.sol";
+import {
+    IStreamMintRoyaltyPolicy
+} from "../../interfaces/stream/mint/IStreamMintRoyaltyPolicy.sol";
 
 /// @notice Typed reads, authentication and mint preparation for the deferred native consumer.
 /// @dev The consumer owns purchase replay, liabilities, pauses and the one active settlement.
@@ -253,6 +257,30 @@ library StreamRefundWindowSupport {
                 || IStreamMintReads(address(x.manager)).phasePolicyHash(c.collectionId, c.phaseId)
                     != c.mintPolicyHash
         ) revert IStreamNativeRefundWindowSale.InvalidRefundSale();
+        // This consumer finalizes through the single-step entry. Reject a prepared-only
+        // royalty election before accepting buyer principal or its saved reveal allowance.
+        IStreamMintRoyaltyPolicy.Policy memory royaltyPolicy;
+        bool royaltyCapable;
+        try IERC165(address(x.manager))
+            .supportsInterface(type(IStreamMintRoyaltyPolicy).interfaceId) returns (
+            bool supported
+        ) {
+            royaltyCapable = supported;
+        } catch { }
+        if (royaltyCapable) {
+            royaltyPolicy = IStreamMintRoyaltyPolicy(address(x.manager))
+                .phaseRoyaltyPolicy(c.collectionId, c.phaseId);
+        }
+        StreamMintRoyaltyPolicy.requireCurrent(
+            royaltyPolicy,
+            StreamMintRoyaltyPolicy.Context(
+                x.core, address(IStreamMintReads(address(x.manager)).moduleRegistry())
+            ),
+            c.collectionId,
+            c.phaseId,
+            bytes32(0),
+            true
+        );
         fee = revealPolicy(x, c.collectionId).revealFeePerTokenWei;
     }
 

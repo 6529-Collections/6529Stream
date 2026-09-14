@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import { StreamMintRoyaltyPolicy } from "./StreamMintRoyaltyPolicy.sol";
+
 import "../../interfaces/stream/mint/IStreamPreparedNativeMint.sol";
 import "../../interfaces/stream/core/IStreamCore.sol";
 import "../../interfaces/stream/revenue/IStreamPrimarySaleSettlement.sol";
@@ -134,6 +136,14 @@ library StreamPreparedNativeMintExecution {
                 batch.collectionId, batch.tokenData[0], f.tokenDataHash, f.operationId
             );
         state.active = f;
+        StreamMintRoyaltyPolicy.snapshot(
+            StreamMintRoyaltyPolicy.Context(address(op.core), op.registry),
+            f.collectionId,
+            f.phaseId,
+            f.tokenId,
+            f.operationRoot,
+            f.operationId
+        );
         emit PreparedMintStarted(
             1,
             f.operationId,
@@ -168,6 +178,14 @@ library StreamPreparedNativeMintExecution {
         ) {
             revert IStreamPreparedNativeMint.PreparedNativeResultMismatch();
         }
+        StreamMintRoyaltyPolicy.completed(
+            StreamMintRoyaltyPolicy.Context(address(op.core), op.registry),
+            f.collectionId,
+            f.phaseId,
+            f.tokenId,
+            f.operationRoot,
+            f.operationId
+        );
         emit PreparedMintCompleted(
             1, f.operationId, f.tokenId, f.collectionId, f.operationRoot, f.initialRecipient
         );

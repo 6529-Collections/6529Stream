@@ -20,6 +20,10 @@ import "./StreamPreparedNativeContentExecution.sol";
 import "./StreamMintManagerTranscript.sol";
 import "./StreamMintManagerExecution.sol";
 import "./StreamMintManagerPolicy.sol";
+import { StreamMintRoyaltyPolicy } from "./StreamMintRoyaltyPolicy.sol";
+import {
+    IStreamMintRoyaltyPolicy
+} from "../../interfaces/stream/mint/IStreamMintRoyaltyPolicy.sol";
 import "../parameters/StreamGasParameterHost.sol";
 
 /// @notice Outside-Core phase policy and prepared mint execution manager.
@@ -30,6 +34,7 @@ contract StreamMintManager is
     IStreamPreparedNativeContentMint,
     IStreamPreparedNativeRightsMint,
     IStreamMintAuthorizationRevocation,
+    IStreamMintRoyaltyPolicy,
     Ownable,
     ReentrancyGuard,
     ERC165,
@@ -123,6 +128,7 @@ contract StreamMintManager is
     StreamPreparedNativeMintExecution.State private _preparedNative;
     StreamPreparedNativeContentExecution.State private _preparedContent;
     StreamPreparedNativeRightsExecution.State private _preparedRights;
+    mapping(uint256 => mapping(bytes32 => IStreamMintRoyaltyPolicy.Policy)) private _phaseRoyalties;
 
     constructor(IStreamCore core_, IStreamMintLedger mintLedger_, IERC165 moduleRegistry_)
         StreamGasParameterHost(StreamMintArtistConsent.governance(
@@ -184,6 +190,7 @@ contract StreamMintManager is
             || interfaceId == type(IStreamPreparedNativeContentMint).interfaceId
             || interfaceId == type(IStreamPreparedNativeRightsMint).interfaceId
             || interfaceId == type(IStreamMintAuthorizationRevocation).interfaceId
+            || interfaceId == type(IStreamMintRoyaltyPolicy).interfaceId
             || super.supportsInterface(interfaceId);
     }
 
@@ -244,6 +251,14 @@ contract StreamMintManager is
         if (_phases[collectionId][phaseId].exists) {
             revert MintPhaseAlreadyConfigured(collectionId, phaseId);
         }
+        StreamMintRoyaltyPolicy.requireCurrent(
+            _phaseRoyalties[collectionId][phaseId],
+            _royaltyContext(),
+            collectionId,
+            phaseId,
+            config.configHash,
+            false
+        );
         return StreamMintPhaseState.configure(
             _phases[collectionId][phaseId],
             _phaseGateConfigs[collectionId],
@@ -663,6 +678,14 @@ contract StreamMintManager is
         bytes32 executionPath
     ) private view returns (OperationTranscript memory transcript) {
         StreamMintPhaseState.PhaseState storage phaseState = _requireExecutablePhase(batch);
+        StreamMintRoyaltyPolicy.requireCurrent(
+            _phaseRoyalties[batch.collectionId][batch.phaseId],
+            _royaltyContext(),
+            batch.collectionId,
+            batch.phaseId,
+            phaseState.config.configHash,
+            executionPath == MINT_EXECUTION_PATH_SINGLE_STEP
+        );
         return StreamMintManagerTranscript.build(
             batch,
             gateData,
@@ -759,5 +782,40 @@ contract StreamMintManager is
         if (collectionId == 0 || phaseId == bytes32(0)) {
             revert InvalidMintPhase(collectionId, phaseId);
         }
+    }
+
+    function registerPhaseRoyaltyPolicy(
+        uint256 collectionId,
+        bytes32 phaseId,
+        IStreamMintRoyaltyPolicy.Policy calldata policy
+    ) external override onlyOwner nonReentrant returns (bytes32) {
+        _requirePhaseIdentity(collectionId, phaseId);
+        if (_phases[collectionId][phaseId].exists) {
+            revert MintPhaseAlreadyConfigured(collectionId, phaseId);
+        }
+        return StreamMintRoyaltyPolicy.register(
+            _phaseRoyalties[collectionId][phaseId], _royaltyContext(), collectionId, phaseId, policy
+        );
+    }
+
+    function phaseRoyaltyPolicy(uint256 collectionId, bytes32 phaseId)
+        external
+        view
+        override
+        returns (IStreamMintRoyaltyPolicy.Policy memory)
+    {
+        return _phaseRoyalties[collectionId][phaseId];
+    }
+
+    function phaseRoyaltyConfigHash(
+        uint256 collectionId,
+        bytes32 phaseId,
+        IStreamMintRoyaltyPolicy.Policy calldata policy
+    ) external view override returns (bytes32) {
+        return StreamMintRoyaltyPolicy.configHash(collectionId, phaseId, policy);
+    }
+
+    function _royaltyContext() private view returns (StreamMintRoyaltyPolicy.Context memory) {
+        return StreamMintRoyaltyPolicy.Context(address(core), address(moduleRegistry));
     }
 }
