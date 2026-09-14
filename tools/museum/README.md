@@ -197,5 +197,13 @@ attribution and source-field coverage. Its verifier rebuilds all four formats
 from only the archive and an external manifest hash. Run
 `python -m tools.museum.package_v2 --help` for the build/verify CLI and
 `python -m unittest tools.museum.test_package_v2 -v` for its focused checks.
-Original v1 packages and recorded-account projections keep their existing
-boundaries; this package does not claim recorded-state or institutional conformance.
+Original v1 packages keep their existing boundary. The separate `build-recorded`
+entrypoint packages the existing verified account capture, registered definitions
+and Linked Art output without converting a synthetic source. It retains exact
+transcript/deployment/captured-result bytes and requires explicit public input
+classification; restricted exports reject before writing. Recorded PREMIS, IIIF
+and LIDO are explicitly unsupported, with no invented format data. `verify`
+replays archived evidence offline. Run
+`python -m unittest tools.museum.test_package_recorded -v` for this path. The
+recorded package preserves the source environment and trusted-RPC limitations;
+it does not claim institutional conformance.

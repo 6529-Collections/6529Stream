@@ -1,8 +1,8 @@
-"""Reproducible, wholly public fixture packages with four corresponding formats.
+"""Offline v2 packages with explicit fixture or recorded-account source admission.
 
-This additive package version archives the existing v2 Linked Art -> PREMIS ->
-IIIF -> LIDO pipeline. It does not promote fixture authority to recorded state,
-change a format profile, retrieve media, or claim BagIt/OCFL or Museum conformance.
+Fixture packages compose all four existing formats. Recorded-account packages
+replay captured evidence and report unsupported formats explicitly. Neither
+mode retrieves media or claims BagIt/OCFL or institutional conformance.
 """
 from hashlib import sha256
 from pathlib import Path
@@ -25,8 +25,8 @@ DEFINITIONS = {"crosswalk-v2.json": CROSSWALK_V2_BYTES, "premis-profile.json": P
                "iiif-profile.json": IIIF_BYTES, "lido-profile.json": LIDO_BYTES}
 
 
-def _dependencies(root):
-    """Archive all five exact local interpretation closures; no whole-tree copy or fetch."""
+def _dependencies(root, *, recorded=False):
+    """Archive only the required exact interpretation closures; no tree copy or fetch."""
     files = {}
 
     def retain(path):
@@ -38,13 +38,14 @@ def _dependencies(root):
         files[target] = raw
         return raw
 
-    for subroot, name in (
+    indices = (
         (root, "linked-art-v2/validation-index.json"),
         (root / "standards", "vocabulary-index.json"),
         (root, "premis/dependency-index.json"),
         (root, "iiif/dependency-index.json"),
         (root, "lido/dependency-index.json"),
-    ):
+    )
+    for subroot, name in (indices[:2] if recorded else indices):
         index_path = safe_path(subroot, name)
         if index_path.stat().st_size > 524288:
             raise MuseumError("multiformat dependency index bound")
@@ -56,12 +57,13 @@ def _dependencies(root):
                 raw = retain(path)
                 if len(raw) != uint(chunk["byteLength"], 32) or sha256(raw).digest() != hex_bytes(chunk["sha256"], 32):
                     raise MuseumError("multiformat dependency changed during construction")
-    for name in ("linked-art-v2/validation-policy.json", "standards/vocabulary-policy.json",
-                 "iiif/sound-context.json", "iiif/target.schema.json",
-                 "linked-art-v2/LICENSE.linked-art.txt", "standards/LICENSE.linked-art.txt",
-                 "fixtures/dependencies/LICENSE.linked-art.txt",
-                 "iiif/licenses/cid-LICENSE", "iiif/licenses/arweave-LICENSE.md",
-                 "iiif/licenses/multicodec-LICENSE"):
+    names = ["linked-art-v2/validation-policy.json", "standards/vocabulary-policy.json",
+             "linked-art-v2/LICENSE.linked-art.txt", "standards/LICENSE.linked-art.txt",
+             "fixtures/dependencies/LICENSE.linked-art.txt"]
+    if not recorded:
+        names += ["iiif/sound-context.json", "iiif/target.schema.json",
+                  "iiif/licenses/cid-LICENSE", "iiif/licenses/arweave-LICENSE.md", "iiif/licenses/multicodec-LICENSE"]
+    for name in names:
         retain(safe_path(root, name))
     return files
 
@@ -123,6 +125,12 @@ def build_fixture_package(state, selection_bytes, plan_bytes, premis_plan_bytes,
         "validation": validation_hash, "vocabulary": vocabulary_hash,
         "crosswalk": CROSSWALK_V2_HASH, "premis_profile": PREMIS_HASH,
         "iiif_profile": IIIF_HASH, "lido_profile": LIDO_HASH}
+    return _assemble(root, files, {"mode": "synthetic_candidate_resource_package", "version": "2",
+        "formats": FORMATS, "sourceStateHash": state.commitment, "pins": pins, "claims": CLAIMS})
+
+
+def _assemble(root, files, metadata):
+    """Shared bounded file envelope; source-specific builders own their evidence and claims."""
     if len(files) > MAX_FILES or sum(map(len, files.values())) > MAX_BYTES:
         raise MuseumError("multiformat package bounds exceeded")
     # Validate portability before writing, including cross-platform case collisions.
@@ -132,18 +140,15 @@ def build_fixture_package(state, selection_bytes, plan_bytes, premis_plan_bytes,
         if name.casefold() in folded:
             raise MuseumError("multiformat package path collision")
         folded.add(name.casefold())
-    manifest = dumps({"mode": "synthetic_candidate_resource_package", "version": "2",
-        "formats": FORMATS, "sourceStateHash": state.commitment, "pins": pins,
-        "files": [{"path": name, "bytes": str(len(raw)), "sha256": "0x" + sha256(raw).hexdigest(),
-                   "keccak256": keccak256(raw)} for name, raw in sorted(files.items())],
-        "claims": CLAIMS})
+    manifest = dumps({**metadata, "files": [{"path": name, "bytes": str(len(raw)), "sha256": "0x" + sha256(raw).hexdigest(),
+                   "keccak256": keccak256(raw)} for name, raw in sorted(files.items())]})
     if len(manifest) > MAX_MANIFEST:
         raise MuseumError("multiformat manifest bound exceeded")
     return ResourcePackage(tuple(sorted(files.items())), manifest)
 
 
-def verify_fixture_package(directory, expected_manifest_hash):
-    """Check external fixity, then regenerate from only the archived inputs/dependencies."""
+def _read_package(directory, expected_manifest_hash):
+    """Authenticate the bounded exact file inventory before source-specific replay."""
     directory = Path(directory).resolve()
     manifest_path = _package_path(directory, "manifest.json")
     if manifest_path.stat().st_size > MAX_MANIFEST:
@@ -152,17 +157,9 @@ def verify_fixture_package(directory, expected_manifest_hash):
     if keccak256(raw) != expected_manifest_hash:
         raise MuseumError("multiformat manifest external hash mismatch")
     manifest = loads(raw, maximum=MAX_MANIFEST, canonical=True)
-    pin_names = {"profile", "selection", "plan", "premis_plan", "iiif_plan", "lido_plan",
-                 "validation", "vocabulary", "crosswalk", "premis_profile", "iiif_profile", "lido_profile"}
-    if (not isinstance(manifest, dict)
-            or set(manifest) != {"mode", "version", "formats", "sourceStateHash", "pins", "files", "claims"}
-            or manifest["mode"] != "synthetic_candidate_resource_package" or manifest["version"] != "2"
-            or manifest["formats"] != FORMATS or manifest["claims"] != CLAIMS
-            or not isinstance(manifest["pins"], dict) or set(manifest["pins"]) != pin_names
-            or not isinstance(manifest["files"], list) or len(manifest["files"]) > MAX_FILES):
+    if (not isinstance(manifest, dict) or not isinstance(manifest.get("files"), list)
+            or len(manifest["files"]) > MAX_FILES):
         raise MuseumError("unsupported multiformat package manifest")
-    for value in manifest["pins"].values():
-        hex_bytes(value, 32)
     files, folded, total = {}, set(), 0
     for row in manifest["files"]:
         if not isinstance(row, dict) or set(row) != {"path", "bytes", "sha256", "keccak256"}:
@@ -183,6 +180,24 @@ def verify_fixture_package(directory, expected_manifest_hash):
     actual = {p.relative_to(directory).as_posix() for p in directory.rglob("*") if p.is_file()}
     if actual != set(files) | {"manifest.json"}:
         raise MuseumError("undeclared or missing multiformat files")
+    return raw, manifest, files
+
+
+def verify_fixture_package(directory, expected_manifest_hash):
+    """Check external fixity, then regenerate from only the archived inputs/dependencies."""
+    directory = Path(directory).resolve()
+    raw, manifest, files = _read_package(directory, expected_manifest_hash)
+    pin_names = {"profile", "selection", "plan", "premis_plan", "iiif_plan", "lido_plan",
+                 "validation", "vocabulary", "crosswalk", "premis_profile", "iiif_profile", "lido_profile"}
+    if (not isinstance(manifest, dict)
+            or set(manifest) != {"mode", "version", "formats", "sourceStateHash", "pins", "files", "claims"}
+            or manifest["mode"] != "synthetic_candidate_resource_package" or manifest["version"] != "2"
+            or manifest["formats"] != FORMATS or manifest["claims"] != CLAIMS
+            or not isinstance(manifest["pins"], dict) or set(manifest["pins"]) != pin_names
+            or not isinstance(manifest["files"], list) or len(manifest["files"]) > MAX_FILES):
+        raise MuseumError("unsupported multiformat package manifest")
+    for value in manifest["pins"].values():
+        hex_bytes(value, 32)
     try:
         pins = manifest["pins"]
         rebuilt = build_fixture_package(fixture_state_from_bytes(files["inputs/source-state.json"]),
@@ -195,6 +210,18 @@ def verify_fixture_package(directory, expected_manifest_hash):
     if rebuilt.manifest != raw or dict(rebuilt.files) != files:
         raise MuseumError("multiformat semantic reconstruction differs")
     return rebuilt
+
+
+def verify_package(directory, expected_manifest_hash):
+    """Dispatch only distinct v2 source modes; each verifier authenticates the full manifest."""
+    path = _package_path(Path(directory).resolve(), "manifest.json")
+    if path.stat().st_size > MAX_MANIFEST:
+        raise MuseumError("multiformat manifest bound exceeded")
+    value = loads(path.read_bytes(), maximum=MAX_MANIFEST, canonical=True)
+    if isinstance(value, dict) and value.get("mode") == "recorded_account_resource_package":
+        from .package_recorded import verify_recorded_package
+        return verify_recorded_package(directory, expected_manifest_hash)
+    return verify_fixture_package(directory, expected_manifest_hash)
 
 
 def main():
@@ -212,10 +239,23 @@ def main():
     build.add_argument("--dependency-root", type=Path, default=Path(__file__).resolve().parents[2] / "schemas/museum")
     for name in ("profile", *INPUTS, "validation", "vocabulary"):
         build.add_argument("--" + name.replace("_", "-") + "-hash", required=True)
+    recorded = commands.add_parser("build-recorded", help="package an admitted public recorded-account capture")
+    recorded.add_argument("input", type=Path)
+    recorded.add_argument("directory", type=Path)
+    recorded.add_argument("--disclosure", choices=("public", "restricted"), required=True)
+    recorded.add_argument("--dependency-root", type=Path, default=Path(__file__).resolve().parents[2] / "schemas/museum")
+    for name in ("source", "publication", "interpretation", "profile", "selection", "plan"):
+        recorded.add_argument("--" + name + "-hash", required=True)
     args = parser.parse_args()
     try:
         if args.command == "verify":
-            result = verify_fixture_package(args.directory, args.manifest_hash)
+            result = verify_package(args.directory, args.manifest_hash)
+        elif args.command == "build-recorded":
+            from .package_recorded import build_recorded_directory
+            result = build_recorded_directory(args.input, root=args.dependency_root, disclosure=args.disclosure,
+                **{name + "_hash": getattr(args, name + "_hash")
+                   for name in ("source", "publication", "interpretation", "profile", "selection", "plan")})
+            write_package(result, args.directory)
         else:
             if args.state.stat().st_size > 64 * 1024 * 1024 or any(
                     getattr(args, name).stat().st_size > 524288 for name in INPUTS):
@@ -227,7 +267,7 @@ def main():
             write_package(result, args.directory)
     except (MuseumError, OSError, KeyError, TypeError) as exc:
         parser.exit(1, str(exc) + "\n")
-    print("synthetic_candidate_resource_package v2", result.manifest_hash, len(result.files))
+    print(loads(result.manifest, maximum=MAX_MANIFEST)["mode"], "v2", result.manifest_hash, len(result.files))
 
 
 if __name__ == "__main__":

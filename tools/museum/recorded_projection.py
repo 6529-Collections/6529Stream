@@ -11,15 +11,24 @@ from .recorded_semantic import RegisteredInterpretationCapture, RecordedSemantic
 from .recorded_selection import project_recorded
 
 
-def replay_source(root, directory, *, source_hash, publication_hash, interpretation_hash, profile_hash):
-    source = IndependentSourceAdapter((directory / "anchor.json").read_bytes(),
-        ReplayTransport((directory / "transcript.json").read_bytes(), source_hash), provenance="trusted_rpc")
-    publication = IndependentPublicationAdapter(source, (directory / "publication-hints.json").read_bytes(),
-        ReplayTransport((directory / "publication-transcript.json").read_bytes(), publication_hash), provenance="trusted_rpc")
+REPLAY_INPUTS = ("anchor.json", "transcript.json", "publication-hints.json",
+                 "publication-transcript.json", "interpretation-transcript.json")
+
+
+def replay_source_bytes(root, inputs, *, source_hash, publication_hash, interpretation_hash, profile_hash):
+    """Replay one retained byte snapshot; never reread mutable input paths during export."""
+    source = IndependentSourceAdapter(inputs["anchor.json"],
+        ReplayTransport(inputs["transcript.json"], source_hash), provenance="trusted_rpc")
+    publication = IndependentPublicationAdapter(source, inputs["publication-hints.json"],
+        ReplayTransport(inputs["publication-transcript.json"], publication_hash), provenance="trusted_rpc")
     profile = AccountProjectionProfile(root, expected_hash=profile_hash)
     interpretation = RegisteredInterpretationCapture(publication, profile,
-        ReplayTransport((directory / "interpretation-transcript.json").read_bytes(), interpretation_hash))
+        ReplayTransport(inputs["interpretation-transcript.json"], interpretation_hash))
     return RecordedSemanticSource(interpretation, profile_hash=profile_hash)
+
+
+def replay_source(root, directory, **pins):
+    return replay_source_bytes(root, {name: (directory / name).read_bytes() for name in REPLAY_INPUTS}, **pins)
 
 
 def output_files(result):
