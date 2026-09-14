@@ -80,7 +80,9 @@ def project(build_info: Path, artifact_root: Path, destination: Path,
         # Foundry's parsed metadata view omits some empty/default fields; its raw
         # compiler metadata retains the exact original output for this join.
         assert json.loads(artifact["rawMetadata"]) == json.loads(contract["metadata"]), (name, "metadata")
-        assert artifact["storageLayout"] == contract.get("storageLayout", {"storage": [], "types": {}}), (name, "storage layout")
+        assert ("storageLayout" in artifact) == ("storageLayout" in contract), (name, "storage layout emission")
+        if "storageLayout" in contract:
+            assert artifact["storageLayout"] == contract["storageLayout"], (name, "storage layout")
         assert artifact["methodIdentifiers"] == contract["evm"]["methodIdentifiers"], (name, "selectors")
         assert artifact["ast"] == output["sources"][source]["ast"], (name, "same-compilation AST")
         projected = {"compilationHash": context, "source": source, "contractName": name,
@@ -119,6 +121,7 @@ def project(build_info: Path, artifact_root: Path, destination: Path,
         data = canonical(projected)
         projections[name + ".json"] = data
         report["products"][name] = {"source": source,
+                                    "storageLayoutEmitted": "storageLayout" in contract,
                                     "sourceSha256": sha(compiler_input["sources"][source]["content"].encode()),
                                     ("currentNativeExport" if current_native_exports else "physicalArtifact"): str(artifact_path.resolve()),
                                     ("currentNativeExportSha256" if current_native_exports else "physicalArtifactSha256"): sha(artifact_raw),

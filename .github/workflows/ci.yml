@@ -75,6 +75,13 @@ jobs:
           python -m pip install --disable-pip-version-check --require-hashes --only-binary=:all: -r requirements-tools.lock
           python -m pip check
 
+      - name: Check native fixture tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m tools.build.test_native_artifact_storage
+          python -m tools.build.test_prepare_current_graph
+
       - name: Identify current compiler inputs
         id: current_compiler_inputs
         shell: bash

@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Preserve omitted compiler storage layouts in native graph fixtures and run
+  fixture-tooling regressions before expensive current-stack compilation.
+
 - Refresh the active Solidity source inventory and allow cold current-stack CI builds
   to complete before their checked compiler outputs are reused.
 

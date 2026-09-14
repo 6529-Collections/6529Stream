@@ -53,6 +53,8 @@ check: record-family-authorization-check artist-semantic-owner-matrix-check arti
 .PHONY: current-stack-check
 current-stack-check: export FOUNDRY_PROFILE := current
 current-stack-check:
+	$(PYTHON) -m tools.build.test_native_artifact_storage
+	$(PYTHON) -m tools.build.test_prepare_current_graph
 	forge build
 	python -m tools.build.prepare_current_graph
 	forge test -vvv

@@ -44,12 +44,14 @@ for name,source in sorted(products.items()):
             'compilerInputSha256':sha(canonical(build['input'])),
             'literalSourceHashes':{k:sha(v['content'].encode()) for k,v in build['input']['sources'].items()}}
     old=prior_builds[ident];native_old=old['output']['contracts'][source][name]
-    assert set(physical)=={'abi','bytecode','deployedBytecode','methodIdentifiers','rawMetadata','metadata','storageLayout','ast','id'}
+    assert set(physical)==({'abi','bytecode','deployedBytecode','methodIdentifiers','rawMetadata','metadata','ast','id'} | ({'storageLayout'} if 'storageLayout' in native_old else set()))
     assert physical['abi']==native_old['abi']
     assert json.loads(physical['rawMetadata'])==json.loads(native_old['metadata'])
     assert physical['metadata']['settings']['compilationTarget']=={source:name}
     assert physical['methodIdentifiers']==native_old['evm']['methodIdentifiers']
-    assert physical['storageLayout']==native_old.get('storageLayout',{'storage':[],'types':{}})
+    # Non-emission is not evidence of an empty storage layout.
+    if 'storageLayout' in native_old:
+        assert physical['storageLayout']==native_old['storageLayout']
     assert physical['ast']==old['output']['sources'][source]['ast']
     assert physical['id']==old['output']['sources'][source]['id']
     for field in ['bytecode','deployedBytecode']:
@@ -69,15 +71,17 @@ for name,source in sorted(products.items()):
     exported={'abi':native['abi'],'bytecode':{},'deployedBytecode':{},
               'methodIdentifiers':native['evm']['methodIdentifiers'],'rawMetadata':native['metadata'],
               'metadata':json.loads(native['metadata']),
-              'storageLayout':native.get('storageLayout',{'storage':[],'types':{}}),
               'ast':current['output']['sources'][source]['ast'],
               'id':current['output']['sources'][source]['id']}
+    if 'storageLayout' in native:
+        exported['storageLayout']=native['storageLayout']
     for field in ['bytecode','deployedBytecode']:
         v=native['evm'][field]
         exported[field]={'object':'0x'+code(v['object']),'sourceMap':v['sourceMap'],'linkReferences':v['linkReferences']}
         if field=='deployedBytecode':exported[field]['immutableReferences']=v.get('immutableReferences',{})
     payload=canonical(exported);relative=Path(source).name+'/'+name+'.json';exports[relative]=payload
-    comparison={k:physical[k]==exported[k] for k in ['abi','methodIdentifiers','storageLayout','ast','id']}
+    comparison={k:physical[k]==exported[k] for k in ['abi','methodIdentifiers','ast','id']}
+    comparison['storageLayout']=(('storageLayout' in physical)==('storageLayout' in exported) and physical.get('storageLayout')==exported.get('storageLayout'))
     comparison['rawMetadata']=json.loads(physical['rawMetadata'])==json.loads(native['metadata'])
     for field in ['bytecode','deployedBytecode']:
         for key in ['object','sourceMap','linkReferences','immutableReferences']:
@@ -87,6 +91,7 @@ for name,source in sorted(products.items()):
     report['products'][name]={'source':source,'physicalPath':str(path),'originalPhysicalArtifactSha256':sha(raw),
         'originalAuthorityBuildId':ident,'currentBuildId':a.build_id,'physicalVsCurrent':comparison,
         'currentExport':relative,'currentNativeExportSha256':sha(payload),
+        'storageLayoutEmitted':{'physical':'storageLayout' in physical,'current':'storageLayout' in native},
         'creationBytes':len(code(native['evm']['bytecode']['object']))//2,
         'runtimeBytes':len(code(native['evm']['deployedBytecode']['object']))//2}
 a.output.mkdir(parents=True,exist_ok=False)

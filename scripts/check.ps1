@@ -73,6 +73,8 @@ if ($CurrentStack) {
     $previousFoundryProfile = [Environment]::GetEnvironmentVariable("FOUNDRY_PROFILE")
     try {
         $env:FOUNDRY_PROFILE = "current"
+        & $pythonPath @pythonArgs "-m" "tools.build.test_native_artifact_storage"
+        & $pythonPath @pythonArgs "-m" "tools.build.test_prepare_current_graph"
         forge build
         & $pythonPath @pythonArgs "-m" "tools.build.prepare_current_graph"
         forge test -vvv
