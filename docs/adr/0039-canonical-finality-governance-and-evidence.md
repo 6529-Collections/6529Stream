@@ -1621,3 +1621,42 @@ source-only validation. Closed prior-recovery histories, intervening rotations,
 non-guardian record supersession and dormancy remain separate implementation
 work. All57 historical operations plus adopted58 retain their existing behavior;
 consolidated native/link/size/runtime acceptance remains required.
+
+
+## Closed repeated-recovery continuation
+
+The additive closed profile consumes the original operation35 recovery interval
+after an admitted operation41 dismissal and a fresh operation33 compromise.
+Living class1 and estate class3 both retain the original authority class. The
+prior recovery must still be the actual latest execution and canonical vesting
+head, with no pending or intervening authority transition and unchanged
+delegation epoch. Original record, accepted request, registered action,
+guardian prefix and Archive receipt checks remain the immediate profile's checks.
+
+The consumer authenticates the first immutable Closure against that recovery's
+actual transition, including its original contest marker, window and derived
+abandoned flag. It binds the original canonical Dismissal.Record, its saved
+Cause and actual operation33 record, including their historical evidence/reason
+and original previous-cause/resolution links. The current cause separately names
+the latest canonical dismissal and that dismissal's original cause. Later
+independent dismissals are permitted without replacing the first closure;
+original-dismissal <= latest-dismissal <= new-compromise chronology is required.
+This increment admits kind1 compromise histories only, not pending-rotation
+standing-contest histories or intervening executed rotations.
+
+An early abandoned closure ends the old window. A fresh compromise after that
+admitted dismissal can therefore precede the former window end; the newly
+proposed recovery still has its independent original governance delay, acceptance,
+veto and post-contest requirements. Abandoned provisional records remain
+permanently ineligible, while actual new post-dismissal records can be stable.
+A mature non-abandoned closure preserves legitimate original eligibility.
+Current capability intersection, complete lifetime guardian veto, permanent
+exclusions and the latest-recovery-bound election generation remain unchanged.
+
+Only the closed branch wraps the existing context in
+CLOSED_REPEAT_RECOVERY_STATE_V1 with its full admitted closure proof. Empty
+closure contexts and all operation/signature/record/receipt schemas remain
+unchanged. This consumes trusted fixed-owner history, not reconstructed current
+authorization of historical actions. The six new source regression recipes are
+ABI/type checked; consolidated native execution, links, sizes and gas remain
+required before claiming runtime acceptance. All57 operations plus58 remain.

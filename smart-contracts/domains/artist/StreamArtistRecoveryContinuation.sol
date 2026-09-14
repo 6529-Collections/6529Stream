@@ -23,6 +23,9 @@ import {
 import { StreamArtistRotationHashes } from "./StreamArtistRotationHashes.sol";
 import { StreamArtistHashes } from "./StreamArtistHashes.sol";
 import {
+    StreamArtistRecoveryClosedContinuation as Closed
+} from "./StreamArtistRecoveryClosedContinuation.sol";
+import {
     IStreamArtistIdentityRecoveryOwner
 } from "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
 import {
@@ -108,20 +111,13 @@ library StreamArtistRecoveryContinuation {
                 || transition.contestEndsAt != transition.executedAt
                 || uint256(transition.postWindowEndsAt)
                     != uint256(transition.executedAt) + prior.postContestSeconds
-                || transition.contestedAt != cause.facts.enteredAt
-                || cause.facts.enteredAt < transition.postWindowEndsAt
                 || block.timestamp < cause.facts.enteredAt
                 || prior.delegationEpoch != estate.delegationEpoch[p.artistId]
                 || prior.terms.expectedCauseHash == 0
-                || cause.facts.previousCauseHash != prior.terms.expectedCauseHash
-                || cause.facts.previousResolutionHash != prior.terms.expectedResolutionHash
         ) {
             revert I.UnsupportedIdentityRecoveryProfile(p.artistId);
         }
-        D.Closure memory empty;
-        if (keccak256(abi.encode(resolutions.closures[previous])) != keccak256(abi.encode(empty))) {
-            revert I.UnsupportedIdentityRecoveryProfile(p.artistId);
-        }
+        bytes32 closureProof = Closed.proof(resolutions, o.environment, prior, transition, cause);
         if (identity.activeIdentity[p.newAddress] != 0) {
             revert T.AddressAlreadyRegistered(p.newAddress);
         }
@@ -243,6 +239,15 @@ library StreamArtistRecoveryContinuation {
                 supersession
             )
         );
+        if (closureProof != 0) {
+            c.oldValueHash = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_CLOSED_REPEAT_RECOVERY_STATE_V1"),
+                    c.oldValueHash,
+                    closureProof
+                )
+            );
+        }
         c.newValueHash = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_IDENTITY_RECOVERY_INTENT_V2"),

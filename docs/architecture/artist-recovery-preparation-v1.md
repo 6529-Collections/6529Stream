@@ -952,3 +952,58 @@ unit Core/governance/role facts and aggregate CREATE semantics. This batch has
 ABI/type validation only. Integrated native execution, all linked-product sizes,
 whole-current behavior and transaction-capacity acceptance remain pending. The
 earlier 28-pass rotated-estate capture validates its original source only.
+
+
+## Dismissed and reopened prior-recovery intervals
+
+The closed continuation composes actual operation35 -> compromise33 ->
+dismissal41 -> fresh compromise33 -> a separately governed operation35. The
+prior recovery remains the latest execution and vesting head. Its original
+accepted request, action association/consumption, receipt commitments, authority
+class and delegation epoch stay authenticated. Estate authority retains the
+original operation40 activation and effective capabilities. Intervening executed
+rotations and standing-contest kind2 closures remain separate profiles.
+
+The original closure never moves. The reader checks its canonical dismissal,
+historical cause and original operation33 record independently from today's
+latest dismissal and current cause. Repeated legitimate dismissals may advance
+that latest pointer; they cannot substitute a newer record for the original
+closure. Current terms/signature bind the fresh cause and actual latest
+resolution. Historical action/class/witness/cohort facts are immutable admitted
+owner records; the consumer does not require those old governance actions or
+old evidence coverage to become current again.
+
+Before the old post-window ends, recovery requires an actual early-contested,
+abandoned closure followed by a fresh compromise. Waiting cannot mature the
+original in-window cause into an unclosed recovery. Abandoned provisional
+guardian sets never become eligible, even after time advances. Fresh guardian
+records written after the dismissal have their original empty association and
+can provide current evidence. A non-abandoned dismissal after the original
+window preserves mature guardian eligibility. Every retained lifetime member
+can still use the original veto rules.
+
+New guardian exclusions retain the actual current recovery cutoff, complete
+election and APPEAL/ARBITER distinction. Prior permanent judgments remain tied
+to their original recovery. A completed election from the old latest-recovery
+generation is rejected after the next recovery executes. No collection or
+Platform authority is introduced by this profile.
+
+`StreamArtistClosedRepeatedRecoveryActual.t.sol` adds six recipes: early living
+closure with stable replacement and exact late-Archive retry; estate continuation
+through an additional actual dismissal; mature-guardian exclusion and stale
+election denial; substitution of the latest dismissal for the first closure;
+latest-cause corruption/restoration with the identical acceptance; and original
+lower-nonce lifetime Safe veto. Successful recipes independently retain the
+original record/vesting/closure/Archive facts, verify the new vesting event and
+delegation epoch, and reject consumed action/acceptance replay.
+
+```powershell
+python scripts/dev.py test --suite unit --match-path test/unit/artist/StreamArtistClosedRepeatedRecoveryActual.t.sol --via-ir --code-size-limit 2000000 --gas-limit 1000000000 --memory-limit 1073741824
+```
+
+The source is ABI/type checked. These authored scenarios have not executed yet.
+They use actual Artist, threshold Safe and Archive contracts with the inherited
+typed Core/governance/role boundaries and aggregate CREATE semantics. The final
+campaign must copy the inherited fixture JSON data, then validate complete linked
+products and run the combined cases. No new native compiler was started for this
+batch. The earlier28-pass capture does not validate this newer source.
