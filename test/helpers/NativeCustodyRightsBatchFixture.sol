@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 import "./NativeCustodyAuctionFixture.sol";
 import "./NativeRightsAuctionFixture.sol";
 import "../../smart-contracts/interfaces/stream/artist/IStreamArtistTemplateEconomicsAuthority.sol";
+import "../../smart-contracts/interfaces/stream/artist/IStreamArtistTemplateMutationAuthority.sol";
 import {
     StreamArtistCollaboratorTypes as BC
 } from "../../smart-contracts/interfaces/stream/artist/StreamArtistCollaboratorTypes.sol";
@@ -19,7 +20,8 @@ contract CustodyRightsBatchArtist is NativeRightsAuctionArtist {
     constructor(address c, address m) NativeRightsAuctionArtist(c, m) { }
 
     function supportsInterface(bytes4 id) public pure override returns (bool) {
-        return id == type(IStreamArtistTemplateEconomicsAuthority).interfaceId
+        return id == type(IStreamArtistTemplateMutationAuthority).interfaceId
+            || id == type(IStreamArtistTemplateEconomicsAuthority).interfaceId
             || super.supportsInterface(id);
     }
 
@@ -166,8 +168,7 @@ abstract contract NativeCustodyRightsBatchFixture is NativeCustodyAuctionFixture
             e[1] = IStreamRevenueResolver.PrimaryTemplateEntry(
                 address(0xFEE), 0, 1000000 - share, keccak256("protocol")
             );
-            tid =
-                resolver.createPrimaryTemplate(
+            tid = resolver.createPrimaryTemplate(
                 e, keccak256(abi.encode("token static", token, mode))
             );
         }

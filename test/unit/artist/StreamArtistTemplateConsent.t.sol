@@ -173,9 +173,8 @@ contract StreamArtistTemplateConsentTest is ArtistOnboardingFixture {
         ingress.recordProspectiveTemplateEconomicsConsent(p, templateId, a);
         _install(templateId);
         address owner = primary.owner();
-        bytes memory reason = abi.encodeWithSelector(
-            IStreamRevenueResolver.PrimaryArtistConsentRequired.selector, uint256(1)
-        );
+        bytes memory reason =
+            abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("economics"));
         vm.expectRevert(reason);
         vm.prank(owner);
         primary.freezePrimaryAssignment(PRIMARY, 1, 1);
@@ -184,7 +183,7 @@ contract StreamArtistTemplateConsentTest is ArtistOnboardingFixture {
         primary.clearPrimaryAssignment(PRIMARY, 1, 1);
         require(
             primary.resolvePrimaryAssignment(1, 0, PRIMARY).assignmentHash == p.assignmentHash,
-            "freeze/clear stay explicitly closed"
+            "set-only approval authorizes neither freeze nor clear"
         );
     }
 

@@ -4,6 +4,7 @@ import "./StreamArtistAttributionPolicy.sol";
 import "./StreamArtistHashes.sol";
 import "./StreamArtistAuthorityPolicy.sol";
 import "./StreamArtistTemplateEconomicsReads.sol";
+import { StreamArtistTemplateMutationReads } from "./StreamArtistTemplateMutationReads.sol";
 
 import "../../interfaces/stream/artist/IStreamArtistBindingOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistCollaboratorBindingOwner.sol";
@@ -260,6 +261,25 @@ contract StreamArtistOnboardingReads {
         address payout
     ) external view returns (T.AssignmentFact memory fact, bytes32 previousHash) {
         return _requireProspectiveEconomics(p, candidate, payout);
+    }
+
+    /// @notice Validates an exact installed-template freeze proposal without prior result consent.
+    function requireProspectiveTemplateFreezeEconomics(
+        T.EconomicsConsent calldata p,
+        address payout
+    ) external view returns (bytes memory) {
+        address resolver = _suite.primaryResolver;
+        if (
+            p.resolver != resolver || p.revenueClass != _suite.primaryRevenueClass
+                || p.revenueClass != keccak256("PRIMARY_SALE")
+                || !_templateConsentCapability(resolver)
+        ) revert T.UnsupportedProfile();
+        T.Binding memory b = acceptedBinding(p.collectionId);
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory current = IStreamArtistPrimaryScopeFacts(
+                resolver
+            ).primaryEconomicsFacts(p.collectionId, p.scope, p.scopeId);
+        _requireTemplatePayout(p.collectionId, b, payout, current.templateId);
+        return StreamArtistTemplateMutationReads.freeze(p, current);
     }
 
     /// @notice Validates a set-only template proposal without resolving the current assignment.

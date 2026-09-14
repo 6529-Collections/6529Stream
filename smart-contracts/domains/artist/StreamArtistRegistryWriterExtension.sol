@@ -25,6 +25,7 @@ import "../../interfaces/stream/artist/IStreamArtistOnboarding.sol";
 import "../../interfaces/stream/artist/IStreamArtistContentRatification.sol";
 import "../../interfaces/stream/artist/IStreamArtistEconomicsAuthority.sol";
 import "../../interfaces/stream/artist/IStreamArtistTemplateEconomicsCoordinator.sol";
+import "../../interfaces/stream/artist/IStreamArtistTemplateMutationCoordinator.sol";
 import "../modules/StreamModuleBase.sol";
 import "../parameters/StreamGasParameterHost.sol";
 import {
@@ -394,6 +395,14 @@ contract StreamArtistRegistryWriterExtension {
     {
         return IStreamArtistOnboardingCoordinator(operationCoordinator)
             .coordinateRecordPayoutDesignation(msg.sender, p, a);
+    }
+
+    function recordProspectiveTemplateFreezeConsent(
+        T.EconomicsConsent calldata p,
+        T.Authorization calldata a
+    ) external onlyHost returns (bytes32) {
+        return IStreamArtistTemplateMutationCoordinator(operationCoordinator)
+            .coordinateRecordProspectiveTemplateFreezeConsent(msg.sender, p, a);
     }
 
     function recordProspectiveTemplateEconomicsConsent(

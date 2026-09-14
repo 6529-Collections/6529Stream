@@ -29,6 +29,7 @@ import "../../interfaces/stream/artist/IStreamArtistDefaultPrimaryTemplateFacts.
 import "../../interfaces/stream/artist/IStreamArtistPrimaryTemplateFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryTemplateConsentFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistTemplateEconomicsAuthority.sol";
+import "../../interfaces/stream/artist/IStreamArtistTemplateMutationAuthority.sol";
 import "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 import "../../interfaces/stream/artist/IStreamArtistBeneficiaryFacts.sol";
 import "../parameters/StreamGasParameterHost.sol";
@@ -507,7 +508,10 @@ contract StreamRevenueResolver is
         ResolvedPrimaryAssignment memory current = _resolvedAt(revenueClass, scope, scopeId);
         if (!current.exists) revert PrimaryAssignmentMissing(revenueClass, scope, scopeId);
         if (current.frozen) revert PrimaryAssignmentFrozen(revenueClass, scope, scopeId);
-        if (current.assignmentType != ASSIGNMENT_TYPE_PROFILE) {
+        if (
+            current.assignmentType != ASSIGNMENT_TYPE_PROFILE
+                && current.assignmentType != ASSIGNMENT_TYPE_TEMPLATE
+        ) {
             revert UnsupportedArtistPrimaryAssignment(collectionId);
         }
         fact = StreamArtistOnboardingTypes.AssignmentFact(
@@ -1033,8 +1037,8 @@ contract StreamRevenueResolver is
         _requireSelectedArtistRegistry();
     }
 
-    /// @dev The consent read happens before any assignment write. Bound template and other-class
-    ///      mutations remain unavailable. Default configuration remains global; use is collection-admitted.
+    /// @dev Consent precedes writes. Template clear/freeze require the explicit mutation capability;
+    ///      default configuration remains global, with independently collection-admitted use.
     function _requireArtistEconomics(
         bytes32 revenueClass,
         uint8 scope,
@@ -1051,9 +1055,16 @@ contract StreamRevenueResolver is
                 == bytes32(0)
         ) return;
         if (
-            assignmentType != ASSIGNMENT_TYPE_PROFILE || revenueClass != keccak256("PRIMARY_SALE")
+            (assignmentType != ASSIGNMENT_TYPE_PROFILE
+                    && assignmentType != ASSIGNMENT_TYPE_TEMPLATE)
+                || revenueClass != keccak256("PRIMARY_SALE")
                 || !IERC165(artistRegistry)
                     .supportsInterface(type(IStreamArtistEconomicsAuthority).interfaceId)
+        ) revert PrimaryArtistConsentRequired(collectionId);
+        if (
+            assignmentType == ASSIGNMENT_TYPE_TEMPLATE
+                && !IERC165(artistRegistry)
+                    .supportsInterface(type(IStreamArtistTemplateMutationAuthority).interfaceId)
         ) revert PrimaryArtistConsentRequired(collectionId);
         _requireConsent(collectionId, revenueClass, scope, scopeId, assignmentHash);
     }

@@ -122,7 +122,7 @@ including a frozen one, can receive its first approval through original
 validated before creating the record. Ordinary current consumption always requires
 the exact accepted binding's consent. Freezing changes the default assignment hash
 and requires approval of that new hash. There is no new global Artist setter,
-collection/token TEMPLATE clear/freeze authority, or consent bypass for a majority
+global Artist mutation authority, or consent bypass for a majority
 Artist share.
 
 Mode 5 keeps the strict template grammar and Artist floor. Mode 6 admits only a
@@ -136,11 +136,50 @@ All three template families preserve forced escrow and original receipt/result
 linkage. A failed late consent check rolls back payment and mint or custody transfer,
 so the same complete signed Safe transaction can be retried after repair.
 
+## TEMPLATE assignment clear and exact freeze
+
+For mutable collection or token TEMPLATE assignments, the existing
+`previewArtistPrimaryClear` now returns the original exact-key assignment hash
+and a zero result hash. The Artist approves that absent-key result through
+`recordProspectiveEconomicsConsent` with its entirely zero candidate. The original
+owner then calls `clearPrimaryAssignment`. This removes only that exact key;
+normal token → collection → default precedence applies afterward. A token-template
+auction refuses a resulting collection/default fallback until an independently
+approved token template is restored. A clear approval binds the original result
+hash zero for the specified key and current binding; it is not a signature over
+one particular previous template. The previous hash remains recorded evidence.
+
+To approve a freeze, use the additive
+`recordProspectiveTemplateFreezeConsent(payload, authorization)` Artist entry.
+Its original operation-15 payload names the collection, actual collection/token
+scope and canonical assignment hash with `frozen = true`. The reader obtains the
+installed mutable template, reconstructs both original hashes and retains the
+complete previous/current/result facts in supplemental Archive evidence. It
+requires the actual accepted binding, operative payout and all typed collaborator
+designations. The new entry leaves the original SET-only template interface and
+its ERC165 ID unchanged; a SET-only approval cannot authorize the new frozen hash.
+It does not mutate the Resolver or replace its owner/governance authority.
+
+After approval, the original owner calls `freezePrimaryAssignment`. The exact
+current frozen hash must have the Artist's binding-specific consent. A source
+change during approval or before the owner mutation cannot substitute another
+hash. Frozen assignments cannot be changed, cleared or frozen again. Template
+freeze pins the template assignment, not its materialized payout addresses:
+current typed Artist/collaborator payout rotation still resolves under the
+original immutable template entries. Default-key changes remain global owner
+operations; collection-specific default use approvals remain separate.
+
+This increment implements the existing exact-key freeze selector for TEMPLATE
+assignments. The wider normative INHERITED/global primary freeze modes and their
+mutable-descendant counters remain unimplemented; the original single frozen bit
+does not prove those policies. The five new mutation tests are source/type checked
+only and require the final consolidated native run.
+
 ## Boundaries and pending validation
 
 The old PROFILE path, collection-template modes 1–3, token-PROFILE activation,
 royalty live/snapshot/default/disabled choices and their hashes remain distinct.
-TEMPLATE clear/freeze mutation authority is not added. This is not a primary
+TEMPLATE clear and exact freeze retain separate explicit approval. This is not a primary
 allocation-time snapshot hook or a prepared future-token override reservation.
 Zero-Artist/platform-only primary profiles remain separate work. Dynamic
 templates retain their original maximum 64 entries and eight unique dynamic

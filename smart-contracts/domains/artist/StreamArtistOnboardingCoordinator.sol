@@ -44,6 +44,7 @@ import "./StreamArtistRegistryValidatorBase.sol";
 import "../../interfaces/stream/artist/IStreamArtistOnboardingCoordinator.sol";
 import "../../interfaces/stream/artist/IStreamArtistEconomicsCoordinator.sol";
 import "../../interfaces/stream/artist/IStreamArtistTemplateEconomicsCoordinator.sol";
+import "../../interfaces/stream/artist/IStreamArtistTemplateMutationCoordinator.sol";
 import "../../interfaces/stream/artist/IStreamArtistArchiveV2.sol";
 import "../../interfaces/stream/artist/IStreamArtistMintConsent.sol";
 import "../../interfaces/stream/artist/IStreamArtistIngressBinding.sol";
@@ -60,6 +61,7 @@ contract StreamArtistOnboardingCoordinator is
     IStreamArtistOnboardingCoordinator,
     IStreamArtistEconomicsCoordinator,
     IStreamArtistTemplateEconomicsCoordinator,
+    IStreamArtistTemplateMutationCoordinator,
     IStreamArtistDelegationCoordinator,
     IStreamArtistBindingLifecycleCoordinator,
     IStreamArtistCollaboratorCoordinator,
@@ -606,6 +608,16 @@ contract StreamArtistOnboardingCoordinator is
         return StreamArtistEconomicOperations.economicsCurrent(
             _economicContext(), actor, p, bytes32(0), a
         );
+    }
+
+    function coordinateRecordProspectiveTemplateFreezeConsent(
+        address actor,
+        T.EconomicsConsent calldata p,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistEconomicOperations.economicsProspectiveTemplateFreeze(
+                _economicContext(), actor, p, a
+            );
     }
 
     function coordinateRecordProspectiveTemplateEconomicsConsent(
