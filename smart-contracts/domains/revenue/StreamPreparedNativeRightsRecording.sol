@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 import "./StreamPreparedNativeRightsAccounting.sol";
 import "./StreamNativePrimaryExecution.sol";
+import "./StreamScopedNativePrimaryExecution.sol";
 import "./StreamPrimarySettlementEmission.sol";
 import "./StreamPrimarySettlementHash.sol";
 
@@ -82,7 +83,20 @@ library StreamPreparedNativeRightsRecording {
         saleConsumed[saleKey] = true;
         settlementConsumed[key] = true;
         bool escrowed;
-        if (original.original.mode == StreamPreparedNativeRightsTypes.DYNAMIC_COLLECTION_TEMPLATE) {
+        if (original.original.mode >= 5 && original.original.mode <= 7) {
+            escrowed = StreamScopedNativePrimaryExecution.fund(
+                x.funding,
+                c.sale.collectionId,
+                c.sale.tokenId,
+                original.original.mode,
+                intent.poster,
+                c.sale.amount,
+                selected,
+                beneficiaryHash
+            );
+        } else if (
+            original.original.mode == StreamPreparedNativeRightsTypes.DYNAMIC_COLLECTION_TEMPLATE
+        ) {
             escrowed = StreamNativePrimaryExecution.fundForPoster(
                 x.funding,
                 c.sale.collectionId,

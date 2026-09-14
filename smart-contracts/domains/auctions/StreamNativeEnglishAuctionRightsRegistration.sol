@@ -156,7 +156,10 @@ library StreamNativeEnglishAuctionRightsRegistration {
                     && original.mode
                         != StreamPreparedNativeRightsTypes.CONSENTED_COLLECTION_TEMPLATE
                     && original.mode != StreamPreparedNativeRightsTypes.DYNAMIC_COLLECTION_TEMPLATE
-                    && original.mode != StreamPreparedNativeRightsTypes.DEFAULT_PROFILE)
+                    && original.mode != StreamPreparedNativeRightsTypes.DEFAULT_PROFILE
+                    && original.mode != StreamPreparedNativeRightsTypes.DEFAULT_TEMPLATE
+                    && original.mode != StreamPreparedNativeRightsTypes.CONSENTED_DEFAULT_TEMPLATE
+                    && original.mode != StreamPreparedNativeRightsTypes.DYNAMIC_DEFAULT_TEMPLATE)
                 || original.assignmentHash != selection.assignmentHash
                 || original.templateId != selection.templateId
                 || StreamPreparedNativeRightsProjection.policyHash(

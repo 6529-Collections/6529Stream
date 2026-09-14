@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../mint/StreamSaleTemplate.sol";
 import "./StreamDefaultPrimaryProfile.sol";
+import { StreamDefaultSaleTemplate } from "../mint/StreamDefaultSaleTemplate.sol";
 import { StreamDynamicSaleTemplate } from "../mint/StreamDynamicSaleTemplate.sol";
 import { StreamConsentedSaleTemplate } from "../mint/StreamConsentedSaleTemplate.sol";
 import "../../interfaces/stream/revenue/IStreamPreparedNativeRightsPrimarySettlement.sol";
@@ -16,6 +17,10 @@ library StreamPreparedNativeRightsProjection {
         uint8 mode,
         address poster
     ) public view returns (StreamSaleTemplate.Selection memory s) {
+        if (mode >= 5 && mode <= 7) {
+            (s,) = StreamDefaultSaleTemplate.resolve(resolver, collectionId, 0, mode, poster);
+            return s;
+        }
         if (mode != StreamPreparedNativeRightsTypes.DYNAMIC_COLLECTION_TEMPLATE) {
             return collectionTemplateForMode(resolver, collectionId, mode);
         }
@@ -31,6 +36,14 @@ library StreamPreparedNativeRightsProjection {
         uint8 mode,
         address poster
     ) public view returns (StreamSaleTemplate.Selection memory s, bytes32 policy, bytes32 witness) {
+        if (mode >= 5 && mode <= 7) {
+            if (tokenId == 0) {
+                revert IStreamPreparedNativeRightsPrimarySettlement.InvalidPreparedNativeRights();
+            }
+            (s, witness) =
+                StreamDefaultSaleTemplate.resolve(resolver, collectionId, tokenId, mode, poster);
+            return (s, policyHash(resolver, collectionId, tokenId, s), witness);
+        }
         if (mode != StreamPreparedNativeRightsTypes.DYNAMIC_COLLECTION_TEMPLATE) {
             (s, policy) = preparedTemplateForMode(resolver, collectionId, tokenId, mode);
             return (s, policy, 0);
@@ -54,6 +67,11 @@ library StreamPreparedNativeRightsProjection {
         uint256 collectionId,
         uint8 mode
     ) public view returns (StreamSaleTemplate.Selection memory) {
+        if (mode == 5 || mode == 6) {
+            (StreamSaleTemplate.Selection memory selected,) =
+                StreamDefaultSaleTemplate.resolve(resolver, collectionId, 0, mode, address(0));
+            return selected;
+        }
         if (mode == StreamPreparedNativeRightsTypes.DEFAULT_PROFILE) {
             return StreamDefaultPrimaryProfile.resolve(resolver, collectionId, 0);
         }
@@ -74,6 +92,14 @@ library StreamPreparedNativeRightsProjection {
         uint256 tokenId,
         uint8 mode
     ) public view returns (StreamSaleTemplate.Selection memory selected, bytes32 policy) {
+        if (mode == 5 || mode == 6) {
+            if (tokenId == 0) {
+                revert IStreamPreparedNativeRightsPrimarySettlement.InvalidPreparedNativeRights();
+            }
+            (selected,) =
+                StreamDefaultSaleTemplate.resolve(resolver, collectionId, tokenId, mode, address(0));
+            return (selected, policyHash(resolver, collectionId, tokenId, selected));
+        }
         if (mode == StreamPreparedNativeRightsTypes.DEFAULT_PROFILE) {
             if (tokenId == 0) {
                 revert IStreamPreparedNativeRightsPrimarySettlement.InvalidPreparedNativeRights();

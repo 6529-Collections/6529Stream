@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistDefaultTemplateReads } from "./StreamArtistDefaultTemplateReads.sol";
 import { StreamArtistScopedTemplateReads } from "./StreamArtistScopedTemplateReads.sol";
 import { StreamArtistDynamicTemplateReads } from "./StreamArtistDynamicTemplateReads.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryTemplateFacts.sol";
@@ -20,6 +21,7 @@ library StreamArtistTemplateEconomicsReads {
         view
         returns (bytes memory)
     {
+        if (p.scope == 0) return StreamArtistDefaultTemplateReads.prospective(p, templateId);
         if (p.scope == 2) return StreamArtistScopedTemplateReads.prospective(p, templateId);
         if (StreamArtistDynamicTemplateReads.isDynamic(p.resolver, templateId)) {
             return StreamArtistDynamicTemplateReads.prospective(p, templateId);
@@ -56,6 +58,11 @@ library StreamArtistTemplateEconomicsReads {
         T.Binding memory binding_,
         IStreamRevenueResolver.ResolvedPrimaryAssignment memory current
     ) public view returns (bytes memory) {
+        if (current.scope == 0) {
+            return StreamArtistDefaultTemplateReads.current(
+                collectionId, resolver, primaryRevenueClass, consentOwner, binding_, current
+            );
+        }
         if (current.scope == 2) {
             return StreamArtistScopedTemplateReads.current(
                 collectionId, resolver, primaryRevenueClass, consentOwner, binding_, current

@@ -36,7 +36,7 @@ library StreamCustodyRightsActivation {
                 || rights.activations[q.auctionId].authorizationDigest != 0
                 || q.baseConfigHash != a.configHash || q.originHash != keccak256(abi.encode(o))
                 || q.tokenId != a.tokenId || q.tokenId == 0 || q.primaryPolicyMode != 1
-                || q.rightsMode < 1 || q.rightsMode > 4 || a.config.primaryPolicyMode != 1
+                || q.rightsMode < 1 || q.rightsMode > 7 || a.config.primaryPolicyMode != 1
                 || q.assignmentHash == 0 || q.primaryPolicyHash == 0 || q.artist == address(0)
                 || q.nonce == 0 || q.deadline < block.timestamp
                 || rights.nonceUsed[q.artist][q.nonce]

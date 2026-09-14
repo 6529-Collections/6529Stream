@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 import "./StreamNativePrimaryExecution.sol";
 import { StreamScopedSaleTemplate } from "../mint/StreamScopedSaleTemplate.sol";
+import { StreamDefaultSaleTemplate } from "../mint/StreamDefaultSaleTemplate.sol";
 
 library StreamScopedNativePrimaryExecution {
     function fund(
@@ -16,9 +17,15 @@ library StreamScopedNativePrimaryExecution {
     ) public returns (bool escrowed) {
         uint256 original = address(this).balance - msg.value;
         if (selected.templateId != 0) {
-            StreamScopedSaleTemplate.materialize(
-                x.rights.resolver, collection, token, mode, poster, selected, witness
-            );
+            if (mode >= 5 && mode <= 7) {
+                StreamDefaultSaleTemplate.materialize(
+                    x.rights.resolver, collection, token, mode, poster, selected, witness
+                );
+            } else {
+                StreamScopedSaleTemplate.materialize(
+                    x.rights.resolver, collection, token, mode, poster, selected, witness
+                );
+            }
         }
         StreamPrimarySettlementRights.requireWallet(x.rights, selected);
         uint256 cap = StreamNativeSettlementSupport.gasParameter(

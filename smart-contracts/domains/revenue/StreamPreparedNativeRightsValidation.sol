@@ -61,7 +61,12 @@ library StreamPreparedNativeRightsValidation {
                         != StreamPreparedNativeRightsTypes.CONSENTED_COLLECTION_TEMPLATE
                     && intent.original.mode
                         != StreamPreparedNativeRightsTypes.DYNAMIC_COLLECTION_TEMPLATE
-                    && intent.original.mode != StreamPreparedNativeRightsTypes.DEFAULT_PROFILE)
+                    && intent.original.mode != StreamPreparedNativeRightsTypes.DEFAULT_PROFILE
+                    && intent.original.mode != StreamPreparedNativeRightsTypes.DEFAULT_TEMPLATE
+                    && intent.original.mode
+                        != StreamPreparedNativeRightsTypes.CONSENTED_DEFAULT_TEMPLATE
+                    && intent.original.mode
+                        != StreamPreparedNativeRightsTypes.DYNAMIC_DEFAULT_TEMPLATE)
                 || intent.original.assignmentHash == 0
                 || ((intent.original.mode == StreamPreparedNativeRightsTypes.DEFAULT_PROFILE)
                         ? intent.original.templateId != 0

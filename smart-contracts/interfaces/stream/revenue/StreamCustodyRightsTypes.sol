@@ -8,7 +8,9 @@ library StreamCustodyRightsTypes {
         bytes32 baseConfigHash;
         bytes32 originHash;
         uint256 tokenId;
-        uint8 rightsMode; // 1 default PROFILE; 2 strict, 3 consented, 4 dynamic token TEMPLATE
+        // 1 default PROFILE; 2/3/4 strict/consented/dynamic token TEMPLATE;
+        // 5/6/7 strict/consented/dynamic default TEMPLATE.
+        uint8 rightsMode;
         bytes32 assignmentHash;
         bytes32 primaryPolicyHash;
         uint8 primaryPolicyMode;

@@ -25,6 +25,7 @@ import "../../interfaces/stream/artist/IStreamArtistEconomicsAuthority.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryScopeFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistScopedPrimaryTemplateFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistDefaultPrimaryTemplateFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryTemplateFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryTemplateConsentFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistTemplateEconomicsAuthority.sol";
@@ -46,6 +47,7 @@ contract StreamRevenueResolver is
     IStreamArtistPrimaryFacts,
     IStreamArtistPrimaryScopeFacts,
     IStreamArtistScopedPrimaryTemplateFacts,
+    IStreamArtistDefaultPrimaryTemplateFacts,
     IStreamArtistPrimaryTemplateFacts,
     IStreamArtistPrimaryTemplateConsentFacts,
     ERC165,
@@ -182,6 +184,7 @@ contract StreamRevenueResolver is
             || id == type(IStreamArtistPrimaryTemplateFacts).interfaceId
             || id == type(IStreamArtistPrimaryScopeFacts).interfaceId
             || id == type(IStreamArtistScopedPrimaryTemplateFacts).interfaceId
+            || id == type(IStreamArtistDefaultPrimaryTemplateFacts).interfaceId
             || id == type(IStreamArtistPrimaryFacts).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId || super.supportsInterface(id);
     }
@@ -352,6 +355,32 @@ contract StreamRevenueResolver is
                 templateId,
                 policyHash,
                 frozen
+            )
+        );
+    }
+
+    /// @notice Does not resolve current rights or require the approval being proposed.
+    function previewArtistDefaultPrimaryTemplateAssignment(
+        uint256 collectionId,
+        bytes32 templateId,
+        bytes32 policyHash,
+        bool frozen
+    ) external view override returns (StreamArtistOnboardingTypes.AssignmentFact memory) {
+        _requireArtistScopeIdentity(collectionId, SCOPE_DEFAULT, 0);
+        if (policyHash != 0) revert InvalidPrimaryPolicyHash();
+        if (TemplateRuntime.isDynamic(_templates[templateId])) {
+            _dynamicFacts(collectionId, templateId);
+        } else {
+            _requireTemplateShare(templateId, 1);
+        }
+        bytes32 cls = keccak256("PRIMARY_SALE");
+        return StreamArtistOnboardingTypes.AssignmentFact(
+            address(this),
+            cls,
+            SCOPE_DEFAULT,
+            0,
+            _primaryAssignmentHash(
+                cls, SCOPE_DEFAULT, 0, ASSIGNMENT_TYPE_TEMPLATE, 0, templateId, policyHash, frozen
             )
         );
     }
@@ -673,14 +702,16 @@ contract StreamRevenueResolver is
                     && ((resolved.scope == SCOPE_COLLECTION && resolved.scopeId == collectionId)
                         || (resolved.scope == SCOPE_TOKEN
                             && resolved.scopeId == tokenId
-                            && tokenId != 0))
+                            && tokenId != 0)
+                        || (resolved.scope == SCOPE_DEFAULT && resolved.scopeId == 0))
             ) {
                 if (TemplateRuntime.isDynamic(_templates[resolved.templateId])) {
                     _dynamicFacts(collectionId, resolved.templateId);
                     templateConsentRequired = true;
                 } else {
                     templateConsentRequired = _requireTemplateShare(resolved.templateId, 1)
-                            < 500_000 || resolved.scope == SCOPE_TOKEN;
+                            < 500_000 || resolved.scope == SCOPE_TOKEN
+                        || resolved.scope == SCOPE_DEFAULT;
                 }
                 if (templateConsentRequired) {
                     // Old Artist implementations retain the initial unsupported-template error.

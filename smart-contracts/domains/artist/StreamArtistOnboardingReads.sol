@@ -211,7 +211,7 @@ contract StreamArtistOnboardingReads {
         if (
             !p.exists
                 || !((p.scope == 1 && p.scopeId == collectionId)
-                    || (p.scope == 0 && p.scopeId == 0 && p.assignmentType == 1))
+                    || (p.scope == 0 && p.scopeId == 0))
                 || !((p.assignmentType == 1 && p.profileId != bytes32(0))
                     || (p.assignmentType == 2
                         && p.profileId == bytes32(0)
@@ -274,7 +274,8 @@ contract StreamArtistOnboardingReads {
             p.resolver != resolver || p.revenueClass != keccak256("PRIMARY_SALE")
                 || p.revenueClass != _suite.primaryRevenueClass
                 || !((p.scope == 1 && p.scopeId == p.collectionId)
-                    || (p.scope == 2 && p.scopeId != 0)) || p.assignmentHash == bytes32(0)
+                    || (p.scope == 2 && p.scopeId != 0)
+                    || (p.scope == 0 && p.scopeId == 0)) || p.assignmentHash == bytes32(0)
                 || templateId == bytes32(0) || !_templateConsentCapability(resolver)
         ) revert T.UnsupportedProfile();
         T.Binding memory b = acceptedBinding(p.collectionId);
@@ -527,6 +528,11 @@ contract StreamArtistOnboardingReads {
                 !current.exists || current.scope != p.scope || current.scopeId != p.scopeId
                     || current.assignmentHash != p.assignmentHash
             ) revert T.InvalidRecord();
+            if (current.assignmentType == 2 && current.scope == 0) {
+                T.Binding memory binding_ = acceptedBinding(p.collectionId);
+                _requireTemplatePayout(p.collectionId, binding_, payout, current.templateId);
+                return StreamArtistDefaultTemplateReads.currentForRecording(p, current);
+            }
             return _requireCurrentPrimary(p.collectionId, current, payout);
         }
         if (p.resolver != _suite.royaltyResolver || p.revenueClass != keccak256("ROYALTY_ERC2981"))
@@ -637,7 +643,8 @@ contract StreamArtistOnboardingReads {
         if (
             !current.exists
                 || !((current.scope == 1 && current.scopeId == collectionId)
-                    || (current.scope == 2 && current.scopeId != 0))
+                    || (current.scope == 2 && current.scopeId != 0)
+                    || (current.scope == 0 && current.scopeId == 0))
                 || current.profileId != bytes32(0) || current.templateId == bytes32(0)
                 || current.policyHash != bytes32(0)
                 || _suite.primaryRevenueClass != keccak256("PRIMARY_SALE")

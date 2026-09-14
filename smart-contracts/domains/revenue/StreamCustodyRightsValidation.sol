@@ -5,6 +5,7 @@ import "./StreamNativeCustodyPrimaryValidation.sol";
 import "./StreamCustodyRightsHash.sol";
 import "./StreamDefaultPrimaryProfile.sol";
 import { StreamScopedSaleTemplate } from "../mint/StreamScopedSaleTemplate.sol";
+import { StreamDefaultSaleTemplate } from "../mint/StreamDefaultSaleTemplate.sol";
 
 library StreamCustodyRightsValidation {
     function activation(address house, StreamNativeCustodySettlementTypes.Facts memory f)
@@ -18,7 +19,7 @@ library StreamCustodyRightsValidation {
             a.authorizationDigest == 0 || q.auctionId != f.auctionId
                 || q.baseConfigHash != f.auction.configHash
                 || q.originHash != keccak256(abi.encode(f.origin)) || q.tokenId != f.auction.tokenId
-                || q.primaryPolicyMode != 1 || q.rightsMode < 1 || q.rightsMode > 4
+                || q.primaryPolicyMode != 1 || q.rightsMode < 1 || q.rightsMode > 7
                 || q.assignmentHash == 0 || q.primaryPolicyHash == 0 || q.artist == address(0)
                 || q.nonce == 0 || a.authorizationDigest != StreamCustodyRightsHash.digest(house, q)
                 || a.effectiveConfigHash != StreamCustodyRightsHash.configuration(house, a)
@@ -59,11 +60,13 @@ library StreamCustodyRightsValidation {
         }
         if (mode == 1) {
             selected = StreamDefaultPrimaryProfile.resolve(x.resolver, collection, token);
+        } else if (mode >= 5 && mode <= 7) {
+            (selected, witness) =
+                StreamDefaultSaleTemplate.resolve(x.resolver, collection, token, mode, poster);
         } else {
             IStreamRevenueResolver.ResolvedPrimaryAssignment memory actual =
                 x.resolver.resolvePrimaryAssignment(collection, token, keccak256("PRIMARY_SALE"));
-            (selected, witness) =
-                StreamScopedSaleTemplate.preview(
+            (selected, witness) = StreamScopedSaleTemplate.preview(
                 x.resolver, collection, token, mode, poster, actual
             );
         }
