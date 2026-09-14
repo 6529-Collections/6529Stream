@@ -51,4 +51,4 @@ python -m unittest tools.museum.test_recorded_premis tools.museum.test_premis -v
 
 The retained actual capture exercises source admission and missing-fact reporting. Positive XML and complete-file controls use explicit synthetic selected facts and the shared exact renderer; they are not an actual recorded positive-file capture. No new capture campaign is performed by this increment.
 
-The output preserves declared fixity and format identifiers. It does not retrieve media, verify bytes, detect file format, create a preservation event or establish finality. Canonical preservation objects, recorded PREMIS events/agents/rights, recorded IIIF/LIDO and institutional acceptance remain separate work.
+The output preserves declared fixity and format identifiers. It does not retrieve media, verify bytes, detect file format, create a preservation event or establish finality. Canonical preservation objects, recorded PREMIS events/agents/rights, recorded LIDO and institutional acceptance remain separate work. The additive [recorded IIIF adapter](museum-recorded-iiif.md) now consumes this file projection plus explicit selected presentation facts.

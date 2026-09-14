@@ -25,7 +25,7 @@ DEFINITIONS = {"crosswalk-v2.json": CROSSWALK_V2_BYTES, "premis-profile.json": P
                "iiif-profile.json": IIIF_BYTES, "lido-profile.json": LIDO_BYTES}
 
 
-def _dependencies(root, *, recorded=False, premis=False):
+def _dependencies(root, *, recorded=False, premis=False, iiif=False):
     """Archive only the required exact interpretation closures; no tree copy or fetch."""
     files = {}
 
@@ -45,7 +45,7 @@ def _dependencies(root, *, recorded=False, premis=False):
         (root, "iiif/dependency-index.json"),
         (root, "lido/dependency-index.json"),
     )
-    for subroot, name in (indices[:3 if premis else 2] if recorded else indices):
+    for subroot, name in (indices[:4 if iiif else 3 if premis else 2] if recorded else indices):
         index_path = safe_path(subroot, name)
         if index_path.stat().st_size > 524288:
             raise MuseumError("multiformat dependency index bound")
@@ -60,7 +60,7 @@ def _dependencies(root, *, recorded=False, premis=False):
     names = ["linked-art-v2/validation-policy.json", "standards/vocabulary-policy.json",
              "linked-art-v2/LICENSE.linked-art.txt", "standards/LICENSE.linked-art.txt",
              "fixtures/dependencies/LICENSE.linked-art.txt"]
-    if not recorded:
+    if not recorded or iiif:
         names += ["iiif/sound-context.json", "iiif/target.schema.json",
                   "iiif/licenses/cid-LICENSE", "iiif/licenses/arweave-LICENSE.md", "iiif/licenses/multicodec-LICENSE"]
     for name in names:
@@ -218,7 +218,7 @@ def verify_package(directory, expected_manifest_hash):
     if path.stat().st_size > MAX_MANIFEST:
         raise MuseumError("multiformat manifest bound exceeded")
     value = loads(path.read_bytes(), maximum=MAX_MANIFEST, canonical=True)
-    if isinstance(value, dict) and value.get("mode") in ("recorded_account_resource_package", "recorded_account_premis_resource_package"):
+    if isinstance(value, dict) and value.get("mode") in ("recorded_account_resource_package", "recorded_account_premis_resource_package", "recorded_account_iiif_resource_package"):
         from .package_recorded import verify_recorded_package
         return verify_recorded_package(directory, expected_manifest_hash)
     return verify_fixture_package(directory, expected_manifest_hash)
@@ -249,6 +249,9 @@ def main():
     recorded.add_argument("--premis-plan", type=Path)
     recorded.add_argument("--premis-plan-hash")
     recorded.add_argument("--premis-profile-hash")
+    recorded.add_argument("--iiif-plan", type=Path)
+    recorded.add_argument("--iiif-plan-hash")
+    recorded.add_argument("--iiif-profile-hash")
     args = parser.parse_args()
     try:
         if args.command == "verify":
@@ -266,6 +269,16 @@ def main():
                     raise MuseumError("recorded PREMIS plan byte bound")
                 extra = dict(premis_plan_bytes=args.premis_plan.read_bytes(), premis_plan_hash=args.premis_plan_hash,
                              premis_profile_hash=args.premis_profile_hash)
+            iiif_requested = (args.iiif_plan, args.iiif_plan_hash, args.iiif_profile_hash)
+            if any(v is not None for v in iiif_requested):
+                if not all(v is not None for v in iiif_requested) or args.premis_plan is None:
+                    raise MuseumError("recorded IIIF requires PREMIS and IIIF plan with both pins")
+                if args.disclosure != "public":
+                    raise MuseumError("restricted export is unsupported")
+                if args.iiif_plan.stat().st_size > 524288:
+                    raise MuseumError("recorded IIIF plan byte bound")
+                extra.update(iiif_plan_bytes=args.iiif_plan.read_bytes(), iiif_plan_hash=args.iiif_plan_hash,
+                             iiif_profile_hash=args.iiif_profile_hash)
             result = build_recorded_directory(args.input, root=args.dependency_root, disclosure=args.disclosure, **extra,
                 **{name + "_hash": getattr(args, name + "_hash")
                    for name in ("source", "publication", "interpretation", "profile", "selection", "plan")})

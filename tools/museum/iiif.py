@@ -31,6 +31,17 @@ class IIIFProjection:
 def project_iiif_fixture(state, selection_bytes, plan_bytes, premis_plan_bytes, iiif_plan_bytes, *,
                          iiif_plan_hash, iiif_profile, **premis_kwargs):
     premis = project_premis_fixture(state, selection_bytes, plan_bytes, premis_plan_bytes, **premis_kwargs)
+    selection = select_canonical_fixture(state, selection_bytes, policy_hash=premis_kwargs["selection_hash"],
+                                         profile_hash=premis_kwargs["profile_hash"])
+    return _project_selected_presentation(state, premis, selection, selection_bytes, premis_plan_bytes,
+        iiif_plan_bytes, iiif_plan_hash=iiif_plan_hash, iiif_profile=iiif_profile, **premis_kwargs)
+
+
+def _project_selected_presentation(state, premis, selection, selection_bytes, premis_plan_bytes,
+                                   iiif_plan_bytes, *, iiif_plan_hash, iiif_profile,
+                                   mode="synthetic_iiif_projection", source_mode="synthetic_fixture",
+                                   export_profile_hash=PROFILE_HASH, **premis_kwargs):
+    """Shared strict renderer; each public adapter separately admits its source and selection."""
     premis_plan = loads(premis_plan_bytes, maximum=524288, canonical=True)
     premis_correspondence = loads(premis.correspondence, maximum=67108864)
     premis_provenance = loads(premis.provenance, maximum=67108864)
@@ -39,10 +50,10 @@ def project_iiif_fixture(state, selection_bytes, plan_bytes, premis_plan_bytes, 
     plan = loads(iiif_plan_bytes, maximum=524288, canonical=True)
     if (not isinstance(plan, dict) or set(plan) != {"mode", "version", "sourceStateHash", "profileHash", "linkedArtPlanHash",
             "premisPlanHash", "iiifProfileHash", "work", "manifestId", "canvases"}
-            or plan["mode"] != "synthetic_iiif_projection" or plan["version"] != "1"
+            or plan["mode"] != mode or plan["version"] != "1"
             or plan["sourceStateHash"] != state.commitment or plan["profileHash"] != premis_kwargs["profile_hash"]
             or plan["linkedArtPlanHash"] != premis_kwargs["plan_hash"]
-            or plan["premisPlanHash"] != premis_kwargs["premis_plan_hash"] or plan["iiifProfileHash"] != PROFILE_HASH):
+            or plan["premisPlanHash"] != premis_kwargs["premis_plan_hash"] or plan["iiifProfileHash"] != export_profile_hash):
         raise MuseumError("IIIF plan scope mismatch")
     canvases = plan["canvases"]
     if (not isinstance(canvases, list) or not 1 <= len(canvases) <= 128
@@ -64,8 +75,6 @@ def project_iiif_fixture(state, selection_bytes, plan_bytes, premis_plan_bytes, 
     policy = loads(selection_bytes, maximum=524288)
     if not set(FIELDS.values()).issubset(policy["singleValuedRelations"]):
         raise MuseumError("IIIF facts require exact single-valued conflict policy")
-    selection = select_canonical_fixture(state, selection_bytes, policy_hash=premis_kwargs["selection_hash"],
-                                         profile_hash=premis_kwargs["profile_hash"])
     claims = {}
     for c in selection.selected:
         value = loads(c.assertion)
@@ -146,8 +155,8 @@ def project_iiif_fixture(state, selection_bytes, plan_bytes, premis_plan_bytes, 
 
     manifest = {"@context": CONTEXT_SEQUENCE, "id": plan["manifestId"], "type": "Manifest", "label": label(work, "/label"),
         "summary": {"none": [plain_span(fact(work, "summary", "/summary/none/0"))]}, **ownership(work, ""),
-        SOURCE: {"@type": "@json", "@value": {"mode": "synthetic_fixture", "workEntity": work,
-            "sourceStateHash": state.commitment, "planHash": iiif_plan_hash, "iiifProfileHash": PROFILE_HASH,
+        SOURCE: {"@type": "@json", "@value": {"mode": source_mode, "workEntity": work,
+            "sourceStateHash": state.commitment, "planHash": iiif_plan_hash, "iiifProfileHash": export_profile_hash,
             "sourceAuthorityProfileHash": premis_kwargs["profile_hash"], "selectionPolicyHash": premis_kwargs["selection_hash"]}}, "items": []}
     for p in prior_provenance:
         if p["entity"] == work and p["targetPointer"] == "/id":
@@ -212,7 +221,7 @@ def project_iiif_fixture(state, selection_bytes, plan_bytes, premis_plan_bytes, 
                 continue
             provenance.append({k: v for k, v in p.items() if k != "targetXPath"} | {"targetPointer": target})
         selectors = sorted({dumps(p["source"]) for p in provenance if p["entity"] == entity})
-        body[SOURCE] = {"@type": "@json", "@value": {"mode": "synthetic_fixture", "fileEntity": entity,
+        body[SOURCE] = {"@type": "@json", "@value": {"mode": source_mode, "fileEntity": entity,
             "workEntity": work, "selectors": [loads(s) for s in selectors], "premisXmlHash": keccak256(premis.xml)}}
         duration = body.get("duration")
         interpretation = (kind, mime, body.get("width"), body.get("height"),
@@ -240,8 +249,8 @@ def project_iiif_fixture(state, selection_bytes, plan_bytes, premis_plan_bytes, 
                 field.update(disposition="mapped", rule=EXT + "coverage", reason="exact source field emitted in IIIF; original retained")
     correspondence_raw, coverage_raw = dumps(correspondence), dumps(coverage)
     provenance_raw = dumps(sorted(provenance, key=dumps))
-    report = dumps({"mode": "synthetic_iiif_projection", "version": "1", "sourceStateHash": state.commitment,
-        "profileHash": premis_kwargs["profile_hash"], "iiifProfileHash": PROFILE_HASH, "iiifPlanHash": iiif_plan_hash,
+    report = dumps({"mode": mode, "version": "1", "sourceStateHash": state.commitment,
+        "profileHash": premis_kwargs["profile_hash"], "iiifProfileHash": export_profile_hash, "iiifPlanHash": iiif_plan_hash,
         "premisReportHash": keccak256(premis.report), "manifestHash": keccak256(raw), "correspondenceHash": keccak256(correspondence_raw),
         "coverageHash": keccak256(coverage_raw), "provenanceHash": keccak256(provenance_raw),
         "validation": "pinned original standards, explicit named Sound supplement, finite local schema, Decimal-preserving offline expansion and shared-source recomputation",

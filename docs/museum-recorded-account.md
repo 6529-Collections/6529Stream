@@ -98,7 +98,7 @@ fields fit Linked Art; coverage accounts for unmapped and absent fields.
 The output report keeps source evidence separate from output claims. Its
 `registered=false` describes the generated export, not the registry documents
 that the input adapter actually verified. Full Museum gates, other source
-families (including WORK_DESCRIPTION/RIGHTS), recorded IIIF/LIDO exports,
+families (including WORK_DESCRIPTION/RIGHTS), recorded LIDO exports,
 complete dossiers, public deployment, independent reviewers and institutional
 acceptance remain open. The [v2 recorded-account package](museum-multiformat-package.md)
 now retains and replays this supported capture and Linked Art projection, with
@@ -134,3 +134,7 @@ and eight signed authority/profile/conflict controls. Its assertion schema and J
 definition are retired before the final read. Constructor and artifact evidence
 retain the named boundary contracts; it is not the full current Core/Executor
 stack. No new compiler is run by the fixture.
+
+The separately pinned [recorded IIIF adapter](museum-recorded-iiif.md) adds presentation
+from selected file/work assertions and recorded PREMIS, with precise unsupported
+results for missing evidence and unchanged account authority.

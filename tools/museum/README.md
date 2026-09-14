@@ -204,8 +204,10 @@ transcript/deployment/captured-result bytes and requires explicit public input
 classification; restricted exports reject before writing. An explicit
 [recorded PREMIS plan](../../docs/museum-recorded-premis.md) now enables the
 versioned selected-file adapter. Complete facts produce XML; missing facts
-produce exact unsupported diagnostics. Recorded IIIF and LIDO remain unsupported,
-with no invented format data. `verify`
+produce exact unsupported diagnostics. The separately pinned
+[recorded IIIF adapter](../../docs/museum-recorded-iiif.md) consumes those file facts
+and selected presentation evidence, or reports the exact missing inputs without a Manifest.
+Recorded LIDO remains unsupported. `verify`
 replays archived evidence offline. Run
 `python -m unittest tools.museum.test_package_recorded -v` for this path. The
 recorded package preserves the source environment and trusted-RPC limitations;

@@ -40,7 +40,8 @@ def build_recorded_directory(directory, *, root, disclosure, **pins):
 
 def build_recorded_package(inputs, *, root, disclosure, source_hash, publication_hash,
                            interpretation_hash, profile_hash, selection_hash, plan_hash,
-                           premis_plan_bytes=None, premis_plan_hash=None, premis_profile_hash=None):
+                           premis_plan_bytes=None, premis_plan_hash=None, premis_profile_hash=None,
+                           iiif_plan_bytes=None, iiif_plan_hash=None, iiif_profile_hash=None):
     """Replay actual capture evidence; no fixture state or Boolean authority promotion."""
     _public(disclosure)
     inputs = dict(inputs)
@@ -71,15 +72,31 @@ def build_recorded_package(inputs, *, root, disclosure, source_hash, publication
     extended = any(v is not None for v in requested)
     if extended and not all(v is not None for v in requested):
         raise MuseumError("recorded PREMIS requires plan and both pins")
-    premis_result = None
+    iiif_requested = (iiif_plan_bytes, iiif_plan_hash, iiif_profile_hash)
+    presentation = any(v is not None for v in iiif_requested)
+    if presentation and (not extended or not all(v is not None for v in iiif_requested)):
+        raise MuseumError("recorded IIIF requires PREMIS and IIIF plan with both pins")
+    premis_result = iiif_result = None
     if extended:
         from .recorded_premis import project_recorded_premis, PROFILE_BYTES as RECORDED_PREMIS_BYTES
         from .premis import PinnedPremis, PROFILE_BYTES as XSD_BYTES, PROFILE_HASH as XSD_HASH
-        premis_result = project_recorded_premis(source, inputs["selection.json"], inputs["plan.json"], premis_plan_bytes,
-            selection_hash=selection_hash, plan_hash=plan_hash, premis_plan_hash=premis_plan_hash,
-            premis_profile_hash=premis_profile_hash, premis_schema=PinnedPremis(root, XSD_BYTES, profile_hash=XSD_HASH))
+        schema = PinnedPremis(root, XSD_BYTES, profile_hash=XSD_HASH)
+        if presentation:
+            from .recorded_iiif import project_recorded_iiif, PROFILE_BYTES as RECORDED_IIIF_BYTES
+            from .iiif_model import PinnedIIIF, PROFILE_BYTES as IIIF_BYTES, PROFILE_HASH as IIIF_HASH
+            iiif_result = project_recorded_iiif(source, inputs["selection.json"], inputs["plan.json"],
+                premis_plan_bytes, iiif_plan_bytes, selection_hash=selection_hash, plan_hash=plan_hash,
+                premis_plan_hash=premis_plan_hash, premis_profile_hash=premis_profile_hash, premis_schema=schema,
+                iiif_plan_hash=iiif_plan_hash, iiif_profile_hash=iiif_profile_hash,
+                iiif_schema=PinnedIIIF(root, IIIF_BYTES, profile_hash=IIIF_HASH))
+            premis_result = iiif_result.premis
+            pins.update(iiif_plan=iiif_plan_hash, iiif_profile=iiif_profile_hash)
+        else:
+            premis_result = project_recorded_premis(source, inputs["selection.json"], inputs["plan.json"], premis_plan_bytes,
+                selection_hash=selection_hash, plan_hash=plan_hash, premis_plan_hash=premis_plan_hash,
+                premis_profile_hash=premis_profile_hash, premis_schema=schema)
         pins.update(premis_plan=premis_plan_hash, premis_profile=premis_profile_hash)
-    files = _dependencies(root, recorded=True, premis=extended)
+    files = _dependencies(root, recorded=True, premis=extended, iiif=presentation)
     files.update({"inputs/" + name: raw for name, raw in inputs.items()})
     # These bytes were verified against the registered interpretation by replay_source_bytes.
     for name, (_, raw) in source.profile.documents.items():
@@ -125,9 +142,22 @@ def build_recorded_package(inputs, *, root, disclosure, source_hash, publication
             files["premis/premis.xml"] = premis_result.projection.xml
             for name in ("coverage", "provenance", "correspondence"):
                 files["premis/" + name + ".json"] = getattr(premis_result.projection, name)
+    if presentation:
+        files["inputs/iiif-plan.json"] = iiif_plan_bytes
+        files["definitions/recorded-iiif-profile.json"] = RECORDED_IIIF_BYTES
+        files["iiif/report.json"] = iiif_result.report
+        report = loads(iiif_result.report, maximum=67108864)
+        support[2] = {"format": FORMATS[2], "status": report["status"], "profile": "recorded_account_iiif_v1",
+                      "report": "iiif/report.json"}
+        if iiif_result.projection is None:
+            support[2]["reasonCode"] = report["reasonCode"]
+        else:
+            files["iiif/manifest.json"] = iiif_result.projection.manifest
+            for name in ("coverage", "provenance", "correspondence"):
+                files["iiif/" + name + ".json"] = getattr(iiif_result.projection, name)
     files["reports/format-support.json"] = dumps({"sourceStateHash": source.state.commitment,
                                                 "formats": support})
-    return _assemble(root, files, {"mode": "recorded_account_premis_resource_package" if extended else "recorded_account_resource_package", "version": "2",
+    return _assemble(root, files, {"mode": "recorded_account_iiif_resource_package" if presentation else "recorded_account_premis_resource_package" if extended else "recorded_account_resource_package", "version": "2",
         "formats": support, "environment": source.anchor["environment"], "disclosure": disclosure,
         "sourceStateHash": source.state.commitment, "pins": pins, "claims": CLAIMS})
 
@@ -136,11 +166,12 @@ def verify_recorded_package(directory, expected_manifest_hash):
     """Reconstruct from the package alone after authenticating its external manifest pin."""
     directory = Path(directory).resolve()
     raw, manifest, files = _read_package(directory, expected_manifest_hash)
-    extended = manifest.get("mode") == "recorded_account_premis_resource_package"
-    pin_names = set(PIN_NAMES) | ({"premis_plan", "premis_profile"} if extended else set())
+    presentation = manifest.get("mode") == "recorded_account_iiif_resource_package"
+    extended = presentation or manifest.get("mode") == "recorded_account_premis_resource_package"
+    pin_names = set(PIN_NAMES) | ({"premis_plan", "premis_profile"} if extended else set()) | ({"iiif_plan", "iiif_profile"} if presentation else set())
     if (set(manifest) != {"mode", "version", "formats", "environment", "disclosure",
                          "sourceStateHash", "pins", "claims", "files"}
-            or manifest["mode"] not in ("recorded_account_resource_package", "recorded_account_premis_resource_package")
+            or manifest["mode"] not in ("recorded_account_resource_package", "recorded_account_premis_resource_package", "recorded_account_iiif_resource_package")
             or manifest["version"] != "2"
             or manifest["claims"] != CLAIMS or not isinstance(manifest["pins"], dict)
             or set(manifest["pins"]) != pin_names):
@@ -149,6 +180,9 @@ def verify_recorded_package(directory, expected_manifest_hash):
     try:
         extra = {} if not extended else {"premis_plan_bytes": files["inputs/premis-plan.json"],
             "premis_plan_hash": manifest["pins"]["premis_plan"], "premis_profile_hash": manifest["pins"]["premis_profile"]}
+        if presentation:
+            extra.update(iiif_plan_bytes=files["inputs/iiif-plan.json"], iiif_plan_hash=manifest["pins"]["iiif_plan"],
+                         iiif_profile_hash=manifest["pins"]["iiif_profile"])
         rebuilt = build_recorded_package({name: files["inputs/" + name] for name in INPUT_FILES},
             root=directory / "dependencies", disclosure=manifest["disclosure"], **extra,
             **{name + "_hash": manifest["pins"][name] for name in PIN_NAMES})
