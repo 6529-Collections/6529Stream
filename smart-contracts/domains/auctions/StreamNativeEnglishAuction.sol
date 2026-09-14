@@ -7,6 +7,8 @@ import "./StreamNativeEnglishAuctionRightsSettlement.sol";
 import "./StreamNativeEnglishAuctionState.sol";
 import "./StreamNativeEnglishAuctionCustodySettlement.sol";
 import "./StreamTokenProfileCustodyActivation.sol";
+import "./StreamCustodyRightsActivation.sol";
+import "./StreamCustodyRightsSettlement.sol";
 import "./StreamTokenProfileCustodySettlement.sol";
 import "./StreamNativeEnglishAuctionRegistration.sol";
 import "./StreamNativeEnglishAuctionSettlement.sol";
@@ -39,6 +41,7 @@ contract StreamNativeEnglishAuction is
     IStreamNativeCustodyAuction,
     IStreamPreparedNativeCustodyAuction,
     IStreamTokenProfileCustodyAuction,
+    IStreamCustodyRightsAuction,
     IStreamNativeRightsAuction,
     IStreamNativeAuctionDelegatedDelivery,
     IStreamArtistSaleFacts,
@@ -97,6 +100,7 @@ contract StreamNativeEnglishAuction is
     StreamNativeEnglishAuctionCustodyState.State private _custody;
     mapping(bytes32 => StreamPreparedNativeRightsTypes.OriginalPolicy) private _rights;
     StreamTokenProfileCustodyState.State private _tokenProfileCustody;
+    StreamCustodyRightsState.State private _custodyRights;
 
     constructor(DeploymentConfig memory d)
         StreamSettlementContext(d.recorder.revenueResolver(), d.recorder.moduleRegistry())
@@ -191,6 +195,7 @@ contract StreamNativeEnglishAuction is
             || id == type(IStreamNativeCustodyAuction).interfaceId
             || id == type(IStreamPreparedNativeCustodyAuction).interfaceId
             || id == type(IStreamTokenProfileCustodyAuction).interfaceId
+            || id == type(IStreamCustodyRightsAuction).interfaceId
             || id == type(IStreamNativeRightsAuction).interfaceId
             || id == type(IStreamPreparedNativeRightsSaleBinding).interfaceId
             || id == type(IStreamPreparedNativeContentSale).interfaceId
@@ -804,6 +809,7 @@ contract StreamNativeEnglishAuction is
         bytes calldata platformSignature,
         bytes calldata artistSignature
     ) external override nonReentrant {
+        StreamCustodyRightsHash.requireLegacy(address(this), authorization.auctionId);
         StreamTokenProfileCustodyActivation.activate(
             _state,
             _custody,
@@ -890,7 +896,111 @@ contract StreamNativeEnglishAuction is
         return StreamTokenProfileCustodySettlement.settle(_state, _custody, _runtime(), id);
     }
 
+    function custodyRightsDigest(StreamCustodyRightsTypes.Authorization calldata authorization)
+        external
+        view
+        override
+        returns (bytes32)
+    {
+        return StreamCustodyRightsHash.digest(address(this), authorization);
+    }
+
+    function activateCustodyRights(
+        StreamCustodyRightsTypes.Authorization calldata authorization,
+        bytes calldata platformSignature,
+        bytes calldata artistSignature
+    ) external override nonReentrant {
+        StreamCustodyRightsActivation.activate(
+            _state,
+            _custody,
+            _custodyRights,
+            _runtime(),
+            authorization,
+            platformSignature,
+            artistSignature
+        );
+    }
+
+    function custodyRightsActivation(bytes32 id)
+        external
+        view
+        override
+        returns (StreamCustodyRightsTypes.Activation memory)
+    {
+        return _custodyRights.activations[id];
+    }
+
+    function custodyRightsConfigurationHash(bytes32 id) external view override returns (bytes32) {
+        return _custodyRights.activations[id].effectiveConfigHash;
+    }
+
+    function custodyRightsNonceUsed(address artist, bytes32 nonce)
+        external
+        view
+        override
+        returns (bool)
+    {
+        return _custodyRights.nonceUsed[artist][nonce];
+    }
+
+    function bidCustodyRights(bytes32 id, address deliverTo)
+        external
+        payable
+        override
+        nonReentrant
+    {
+        bytes32 effective = _requireCustodyRightsEntry(id);
+        StreamNativeEnglishAuctionRegistration.bidPublicForConfiguration(
+            _state,
+            _runtime(),
+            0,
+            id,
+            deliverTo,
+            StreamNativeAuctionDelegation.Witness(false, 0),
+            false,
+            effective,
+            true
+        );
+    }
+
+    function bidSignedCustodyRights(
+        BidAuthorization calldata authorization,
+        bytes calldata signature
+    ) external payable override nonReentrant {
+        bytes32 effective = _requireCustodyRightsEntry(authorization.auctionId);
+        StreamNativeEnglishAuctionRegistration.bidSignedForConfiguration(
+            _state,
+            _runtime(),
+            0,
+            authorization,
+            signature,
+            StreamNativeAuctionDelegation.Witness(false, 0),
+            false,
+            effective,
+            true
+        );
+    }
+
+    function settleCustodyRights(bytes32 id)
+        external
+        override
+        nonReentrant
+        returns (uint256 tokenId, bytes32 settlementKey)
+    {
+        _requireCustodyRightsEntry(id);
+        return StreamCustodyRightsSettlement.settle(_state, _custody, _runtime(), id);
+    }
+
+    function _requireCustodyRightsEntry(bytes32 id) private view returns (bytes32) {
+        StreamCustodyRightsTypes.Activation storage activation = _custodyRights.activations[id];
+        if (activation.authorizationDigest == 0) revert InvalidCustodyRights();
+        return activation.effectiveConfigHash;
+    }
+
     function _requireLegacyCustodyEntry(bytes32 id) private view {
+        if (_custodyRights.activations[id].authorizationDigest != 0) {
+            revert CustodyRightsEntryRequired(id);
+        }
         if (_tokenProfileCustody.activations[id].authorizationDigest != 0) {
             revert TokenProfileCustodyEntryRequired(id);
         }

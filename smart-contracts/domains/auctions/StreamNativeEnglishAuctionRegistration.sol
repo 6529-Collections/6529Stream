@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 import "./StreamNativeEnglishAuctionRuntime.sol";
 import "./StreamNativeEnglishAuctionCustodyReads.sol";
 import "../revenue/StreamTokenProfileCustodyValidation.sol";
+import "../revenue/StreamCustodyRightsValidation.sol";
 import "../revenue/StreamPreparedNativeRightsProjection.sol";
 import {
     IStreamNativeEnglishAuction as A
@@ -286,6 +287,7 @@ library StreamNativeEnglishAuctionRegistration {
             rightsMode == StreamPreparedNativeRightsTypes.COLLECTION_TEMPLATE
                 || rightsMode == StreamPreparedNativeRightsTypes.CONSENTED_COLLECTION_TEMPLATE
                 || rightsMode == StreamPreparedNativeRightsTypes.DYNAMIC_COLLECTION_TEMPLATE
+                || rightsMode == StreamPreparedNativeRightsTypes.DEFAULT_PROFILE
         ) {
             StreamPreparedNativeRightsProjection.collectionTemplateForPoster(
                 x.base.resolver, a.config.collectionId, rightsMode, a.config.poster
@@ -320,14 +322,29 @@ library StreamNativeEnglishAuctionRegistration {
         StreamNativeEnglishAuctionCustodyReads.requireCustody(x, a, o);
         StreamNativeCustodySettlementTypes.Facts memory f =
             StreamNativeCustodySettlementTypes.Facts(id, a, o);
-        StreamTokenProfileCustodyValidation.activation(address(this), f);
-        StreamTokenProfileCustodyValidation.selection(
-            StreamPrimarySettlementRights.Context(
-                x.base.resolver, x.factory, x.factory.splitWalletRuntimeCodeHash()
-            ),
-            a.config.collectionId,
-            a.tokenId
-        );
+        StreamCustodyRightsTypes.Activation memory extra =
+            StreamCustodyRightsHash.readOptional(address(this), id);
+        if (extra.authorizationDigest != 0) {
+            StreamCustodyRightsValidation.activation(address(this), f);
+            StreamCustodyRightsValidation.selection(
+                StreamPrimarySettlementRights.Context(
+                    x.base.resolver, x.factory, x.factory.splitWalletRuntimeCodeHash()
+                ),
+                a.config.collectionId,
+                a.tokenId,
+                extra.authorization.rightsMode,
+                a.config.poster
+            );
+        } else {
+            StreamTokenProfileCustodyValidation.activation(address(this), f);
+            StreamTokenProfileCustodyValidation.selection(
+                StreamPrimarySettlementRights.Context(
+                    x.base.resolver, x.factory, x.factory.splitWalletRuntimeCodeHash()
+                ),
+                a.config.collectionId,
+                a.tokenId
+            );
+        }
         StreamPreparedNativeSettlementAdmission.capture(x.registry, address(this));
         return 0;
     }

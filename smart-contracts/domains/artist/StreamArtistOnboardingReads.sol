@@ -272,8 +272,9 @@ contract StreamArtistOnboardingReads {
         address resolver = _suite.primaryResolver;
         if (
             p.resolver != resolver || p.revenueClass != keccak256("PRIMARY_SALE")
-                || p.revenueClass != _suite.primaryRevenueClass || p.scope != 1
-                || p.scopeId != p.collectionId || p.assignmentHash == bytes32(0)
+                || p.revenueClass != _suite.primaryRevenueClass
+                || !((p.scope == 1 && p.scopeId == p.collectionId)
+                    || (p.scope == 2 && p.scopeId != 0)) || p.assignmentHash == bytes32(0)
                 || templateId == bytes32(0) || !_templateConsentCapability(resolver)
         ) revert T.UnsupportedProfile();
         T.Binding memory b = acceptedBinding(p.collectionId);
@@ -634,7 +635,9 @@ contract StreamArtistOnboardingReads {
             return "";
         }
         if (
-            !current.exists || current.scope != 1 || current.scopeId != collectionId
+            !current.exists
+                || !((current.scope == 1 && current.scopeId == collectionId)
+                    || (current.scope == 2 && current.scopeId != 0))
                 || current.profileId != bytes32(0) || current.templateId == bytes32(0)
                 || current.policyHash != bytes32(0)
                 || _suite.primaryRevenueClass != keccak256("PRIMARY_SALE")

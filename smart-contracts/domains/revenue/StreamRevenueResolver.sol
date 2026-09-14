@@ -24,6 +24,7 @@ import "../../interfaces/stream/artist/IStreamArtistAttribution.sol";
 import "../../interfaces/stream/artist/IStreamArtistEconomicsAuthority.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryScopeFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistScopedPrimaryTemplateFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryTemplateFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryTemplateConsentFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistTemplateEconomicsAuthority.sol";
@@ -44,6 +45,7 @@ contract StreamRevenueResolver is
     IStreamArtistDynamicPrimaryTemplateFacts,
     IStreamArtistPrimaryFacts,
     IStreamArtistPrimaryScopeFacts,
+    IStreamArtistScopedPrimaryTemplateFacts,
     IStreamArtistPrimaryTemplateFacts,
     IStreamArtistPrimaryTemplateConsentFacts,
     ERC165,
@@ -179,6 +181,7 @@ contract StreamRevenueResolver is
             || id == type(IStreamArtistPrimaryTemplateConsentFacts).interfaceId
             || id == type(IStreamArtistPrimaryTemplateFacts).interfaceId
             || id == type(IStreamArtistPrimaryScopeFacts).interfaceId
+            || id == type(IStreamArtistScopedPrimaryTemplateFacts).interfaceId
             || id == type(IStreamArtistPrimaryFacts).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId || super.supportsInterface(id);
     }
@@ -344,6 +347,45 @@ contract StreamRevenueResolver is
                 revenueClass,
                 SCOPE_COLLECTION,
                 collectionId,
+                ASSIGNMENT_TYPE_TEMPLATE,
+                bytes32(0),
+                templateId,
+                policyHash,
+                frozen
+            )
+        );
+    }
+
+    /// @notice The token-scoped preview uses actual Core identity and the original assignment hash.
+    function previewArtistScopedPrimaryTemplateAssignment(
+        uint256 collectionId,
+        uint8 scope,
+        uint256 scopeId,
+        bytes32 templateId,
+        bytes32 policyHash,
+        bool frozen
+    ) external view override returns (StreamArtistOnboardingTypes.AssignmentFact memory) {
+        _requireSelectedArtistRegistry();
+        if (scope != SCOPE_COLLECTION && scope != SCOPE_TOKEN) {
+            revert InvalidAssignmentScope(scope, scopeId);
+        }
+        _requireArtistScopeIdentity(collectionId, scope, scopeId);
+        if (policyHash != 0) revert InvalidPrimaryPolicyHash();
+        if (TemplateRuntime.isDynamic(_templates[templateId])) {
+            _dynamicFacts(collectionId, templateId);
+        } else {
+            _requireTemplateShare(templateId, 1);
+        }
+        bytes32 revenueClass = keccak256("PRIMARY_SALE");
+        return StreamArtistOnboardingTypes.AssignmentFact(
+            address(this),
+            revenueClass,
+            scope,
+            scopeId,
+            _primaryAssignmentHash(
+                revenueClass,
+                scope,
+                scopeId,
                 ASSIGNMENT_TYPE_TEMPLATE,
                 bytes32(0),
                 templateId,
@@ -628,14 +670,17 @@ contract StreamRevenueResolver is
             if (
                 resolved.assignmentType == ASSIGNMENT_TYPE_TEMPLATE
                     && revenueClass == keccak256("PRIMARY_SALE")
-                    && resolved.scope == SCOPE_COLLECTION && resolved.scopeId == collectionId
+                    && ((resolved.scope == SCOPE_COLLECTION && resolved.scopeId == collectionId)
+                        || (resolved.scope == SCOPE_TOKEN
+                            && resolved.scopeId == tokenId
+                            && tokenId != 0))
             ) {
                 if (TemplateRuntime.isDynamic(_templates[resolved.templateId])) {
                     _dynamicFacts(collectionId, resolved.templateId);
                     templateConsentRequired = true;
                 } else {
-                    templateConsentRequired =
-                        _requireTemplateShare(resolved.templateId, 1) < 500_000;
+                    templateConsentRequired = _requireTemplateShare(resolved.templateId, 1)
+                            < 500_000 || resolved.scope == SCOPE_TOKEN;
                 }
                 if (templateConsentRequired) {
                     // Old Artist implementations retain the initial unsupported-template error.
@@ -998,7 +1043,10 @@ contract StreamRevenueResolver is
             IStreamArtistAttribution(artistRegistry).attribution(collectionId).nominationHash
                 == bytes32(0)
         ) return;
-        if (revenueClass != keccak256("PRIMARY_SALE") || scope != SCOPE_COLLECTION) {
+        if (
+            revenueClass != keccak256("PRIMARY_SALE")
+                || (scope != SCOPE_COLLECTION && scope != SCOPE_TOKEN)
+        ) {
             revert PrimaryArtistConsentRequired(collectionId);
         }
         _requireTemplateConsentCapability(collectionId);

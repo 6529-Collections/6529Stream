@@ -10,6 +10,8 @@ library StreamPreparedNativeRightsTypes {
     uint8 internal constant CONSENTED_COLLECTION_TEMPLATE = 2;
     /// @dev Symbolic Artist consent plus authenticated sale poster and typed paid collaborators.
     uint8 internal constant DYNAMIC_COLLECTION_TEMPLATE = 3;
+    /// @dev Explicit contract-default PROFILE selected under actual resolver precedence.
+    uint8 internal constant DEFAULT_PROFILE = 4;
 
     /// @dev Signed at auction opening, before any sequential token identity exists.
     /// ALLOW_CURRENT retains this evidence without requiring the current assignment to equal it.
