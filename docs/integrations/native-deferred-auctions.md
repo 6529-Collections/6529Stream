@@ -125,6 +125,32 @@ payer refunds; releasing custody invalidates its sale origin. The current
 [fixture](../../test/helpers/NativeCustodyAuctionFixture.sol) demonstrates the
 complete sequence and signed Safe failure/repair/retry.
 
+## Prepared custody with royalty snapshots
+
+Use [IStreamPreparedNativeCustodyAuction](../../smart-contracts/interfaces/stream/auctions/IStreamPreparedNativeCustodyAuction.sol)
+when the acquisition phase uses prepared minting, including elected royalty
+snapshots. `registerPreparedCustodyAuction` retains the original `Acquisition`
+tuple and creator nonce, but requires signatures from
+`preparedCustodyAcquisitionDigest`. Its EIP-712 domain name is
+`6529StreamPreparedNativeCustodyAuction`, version `1`, bound to the current
+chain and actual house. An original single-step custody signature cannot
+authorize this entrypoint; both entries share the original replay protection.
+
+Pin the expected Core token/serial, Manager operation and context coordinates
+before signing. The phase must already bind the elected royalty policy and
+the current Artist consent. Registration performs the unpaid prepared mint
+and freezes that token's royalty snapshot once. Read
+`NativeAuctionPreparedCustodyBound` together with the original custody and
+mint events. Later paid settlement transfers the same token and records its
+sale without another mint or royalty snapshot. Late failures roll back the
+whole acquisition and preserve identical signed Safe retry.
+
+The house deployment must link the fixed custody registration worker used by
+`StreamNativeEnglishAuctionCustodyStart`. The original house/recorder binding
+and ordinary custody lifecycle described above remain required. This increment
+has independently reviewed focused acceptance; the latest complete operator
+and actual-Artist graph acceptance remain separate.
+
 ## Apply a collection template at settlement
 
 Use [IStreamNativeRightsAuction](../../smart-contracts/interfaces/stream/auctions/IStreamNativeRightsAuction.sol)
@@ -159,9 +185,10 @@ preserved. The [current fixture](../../test/helpers/NativeRightsAuctionFixture.s
 shows exact collection selection, opening-policy hashing and signing.
 
 This increment supports COLLECTION_ARTIST plus the existing static non-artist
-entries. Token overrides, mint-time royalty snapshots, dynamic poster/collaborator
-entries, approved low artist shares and template custody have separate remaining
-implementation and acceptance requirements.
+entries. Approved low artist shares and mint-time royalty snapshots now have integrated
+implementations; their joined actual-Artist commerce validation remains underway.
+Token overrides, dynamic poster/collaborator entries and template custody retain
+their remaining implementation and acceptance requirements.
 
 ## Tested behavior
 

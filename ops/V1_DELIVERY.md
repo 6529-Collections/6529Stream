@@ -1,5 +1,9 @@
 # Full v1 implementation delivery
 
+For current progress and the next acceptance targets, read
+[V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md). Historical checkpoints below retain
+their original scope and are not a current completion score.
+
 Started 11 September 2026 under the owner's autonomous delivery authority.
 This is the active implementation plan. The normative specification set in
 [spec policy](../docs/spec-policy.md) still defines v1; this plan organizes its

@@ -5,6 +5,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Support accelerated first-estate recovery with original guardian, veto and replay rules.
+- Support artist-approved configured-zero royalty snapshots and prepared custody acquisition.
+- Allow explicit compiler-selected typed client catalogs, preserving retained RC1
+  ABIs while supporting current interface calls, overloads, unnamed tuples and Safe CALLs.
+
 - Add explicit Artist Safe consent for positive-share primary templates and
   consume that consent through native auction settlement.
 - Add elected collection royalty snapshots to actual prepared mint paths, with

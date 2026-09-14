@@ -31,8 +31,12 @@ before the collection's first token allocation. An unelected collection keeps
 live behavior. The election hash commits the chain, Resolver, Core, collection
 and selected mode. An elected collection cannot return to an unelected state.
 
-Mode 2 requires an explicit, unfrozen collection profile, its actual split
-wallet, and a positive royalty rate no greater than 1,000 basis points. The
+Mode 2 requires an explicit, unfrozen collection source: either a positive
+profile with its actual split wallet and a royalty rate no greater than 1,000
+basis points, or the canonical configured-disabled zero tuple from
+[ADR 0038](0038-token-royalties-and-disabled-assignment-representation.md). The disabled source
+retains nonzero assignment and policy hashes, skips profile-specific zero-ID
+reads, and keeps the original payout and collaborator prerequisites. The
 Artist previews and independently reconstructs the original source assignment,
 then signs its election-bound assignment under the existing operation-15
 domain and nonce rules. Recording consent and installing collection terms are
@@ -85,7 +89,12 @@ boundaries. A separate 12-test cohort executes actual Artist operation 15,
 Archive, Resolver and Safe with a typed Core boundary. Those results do not
 establish one joined full-current flow; that integration is underway.
 
-Default fallback, zero-rate/disabled snapshots, wider royalty mutation profiles,
+Canonical configured-disabled snapshots additionally pass 28 independently
+reviewed cases across complementary actual Artist and actual Core cohorts.
+Existing zero token assignments suppress later positive fallback; original
+Artist payout and collaborator authority remain mandatory.
+
+Default fallback and wider royalty mutation profiles,
 complete Safe call coverage, normative gas ceilings and the new release
 candidate remain requirements in the [delivery ledger](../../ops/V1_DELIVERY.md).
 This increment does not remove them from full v1.
