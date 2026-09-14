@@ -5,6 +5,15 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Extend estate recovery across successive rotations and dismissed terminal histories.
+- Add scoped custody templates and explicit default-profile commerce with current
+  Artist consent; move large auction tuple getters into a fixed linked library.
+  Native size and full integration acceptance remain pending.
+- Package one selected public synthetic museum source as Linked Art, PREMIS, IIIF
+  and LIDO, and recorded account captures as Linked Art, with offline replay.
+- Add current custody approval signing, house digest readback, and explicit
+  activation, bid and settlement calls suitable for Safe transaction preparation.
+
 - Add source support for recovery after estate-successor rotation and token-specific
   PROFILE custody activation/settlement; comprehensive runtime validation remains pending.
 

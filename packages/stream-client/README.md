@@ -128,7 +128,8 @@ payload. Curated and rights configurations require their corresponding hash
 getters. Signing still requires the current authority, nonce, deadline and
 configuration to remain valid; payload construction alone checks encoding.
 
-`currentTypedDataFromJSON` accepts only these four explicit current kinds, with
+`currentTypedDataFromJSON` accepts these four kinds and the two custody-rights
+activation kinds described below, with
 uint fields represented as decimal strings. It does not reinterpret retained
 RC1 JSON requests. `walletTypedData` formats either kind for wallet RPC.
 For Safe calls, pass the current client’s prepared transaction to `toSafeCall`
@@ -224,3 +225,31 @@ These helpers have source-preimage and compiled-ABI encoding checks.
 `blockTag`, but does not establish current authorization or complete mint
 eligibility. Joined onboarding and new-candidate runtime acceptance follow the
 integrated feature batch.
+
+## Activate and settle current custody rights
+
+Two additional approval helpers preserve the separate contract domains:
+`tokenProfileCustodyActivationTypedData` for token PROFILE and
+`custodyRightsActivationTypedData` for default PROFILE or token TEMPLATE modes.
+Both bind the original auction, acquisition origin, actual token, initial terms,
+Artist, nonce and deadline. The latter also binds `rightsMode` (1 default PROFILE,
+2 strict template, 3 consent-qualified template, 4 dynamic template).
+
+`prepareCustodyActivation` returns the approval payload, unsigned activation CALL
+and digest CALL. Supply both platform and Artist signatures, including opaque
+ERC-1271 Safe signature bytes. The configured poster must send the transaction;
+an empty signature does not grant direct-authority approval. Before signing,
+check the current house with `assertCustodyActivationDigest`. Then convert the
+prepared call using `toSafeCall` and simulate from the actual poster Safe.
+
+Use `prepareCustodyBid` and `prepareCustodySettlement` with the same explicit
+activation kind. The bid preserves the exact native amount. For signed bids,
+use `nativeAuctionBidTypedData` with the activated configuration hash and the
+corresponding `bidSignedTokenProfileCustody` or `bidSignedCustodyRights` selector
+in the generated current client. Check `requireSafeExecution` on the receipt.
+
+These helpers do not reserve a nonce or establish current auction eligibility.
+The new custody tests compare exact compiler-generated interfaces and Solidity
+hash preimages; actual getter runtime and full Safe workflow acceptance remain
+part of consolidated integration testing. The earlier four native getter
+fixtures retain their distinct executed evidence.
