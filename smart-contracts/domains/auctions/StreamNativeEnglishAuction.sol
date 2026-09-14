@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamNativeEnglishAuctionRightsRegistration.sol";
+import "./StreamNativeEnglishAuctionTerminal.sol";
+import "./StreamNativeEnglishAuctionRightsSettlement.sol";
 
 import "./StreamNativeEnglishAuctionState.sol";
 import "./StreamNativeEnglishAuctionCustodySettlement.sol";
@@ -29,6 +32,7 @@ contract StreamNativeEnglishAuction is
     IStreamNativeEnglishAuction,
     IStreamNativeCuratedAuction,
     IStreamNativeCustodyAuction,
+    IStreamNativeRightsAuction,
     IStreamNativeAuctionDelegatedDelivery,
     IStreamArtistSaleFacts,
     StreamSettlementContext,
@@ -40,6 +44,7 @@ contract StreamNativeEnglishAuction is
     // Retain the original public error ABI after moving their emitting paths to fixed libraries.
     error SettlementBindingInvalid(address target);
     error AuctionClockConfigurationInvalid();
+    error RefundClockOverflow();
 
     struct DeploymentConfig {
         IStreamMintManager manager;
@@ -83,6 +88,7 @@ contract StreamNativeEnglishAuction is
     StreamNativeEnglishAuctionRuntime.Active private _active;
     mapping(bytes32 => StreamPreparedNativeContentTypes.Selection) private _curated;
     StreamNativeEnglishAuctionCustodyState.State private _custody;
+    mapping(bytes32 => StreamPreparedNativeRightsTypes.OriginalPolicy) private _rights;
 
     constructor(DeploymentConfig memory d)
         StreamSettlementContext(d.recorder.revenueResolver(), d.recorder.moduleRegistry())
@@ -175,6 +181,8 @@ contract StreamNativeEnglishAuction is
             || id == type(IStreamNativeEnglishAuction).interfaceId
             || id == type(IStreamNativeCuratedAuction).interfaceId
             || id == type(IStreamNativeCustodyAuction).interfaceId
+            || id == type(IStreamNativeRightsAuction).interfaceId
+            || id == type(IStreamPreparedNativeRightsSaleBinding).interfaceId
             || id == type(IStreamPreparedNativeContentSale).interfaceId
             || id == type(IStreamPreparedNativeSaleBinding).interfaceId
             || id == type(IStreamArtistSaleFacts).interfaceId || super.supportsInterface(id);
@@ -347,7 +355,7 @@ contract StreamNativeEnglishAuction is
         bool allowNew
     ) private {
         StreamNativeEnglishAuctionRegistration.bidPublic(
-            _state, _runtime(), id, deliverTo, witness, allowNew
+            _state, _runtime(), _rights[id].mode, id, deliverTo, witness, allowNew
         );
     }
 
@@ -380,7 +388,13 @@ contract StreamNativeEnglishAuction is
         bool allowNew
     ) private {
         StreamNativeEnglishAuctionRegistration.bidSigned(
-                _state, _runtime(), authorization, signature, witness, allowNew
+                _state,
+                _runtime(),
+                _rights[authorization.auctionId].mode,
+                authorization,
+                signature,
+                witness,
+                allowNew
             );
     }
 
@@ -401,21 +415,6 @@ contract StreamNativeEnglishAuction is
         );
     }
 
-    function _claimRecipient(address account, DelegationWitness calldata witness)
-        private
-        view
-        returns (address)
-    {
-        return StreamNativeAuctionDelegation.claimRecipient(
-            _delegationConfiguration(),
-            account,
-            msg.sender,
-            account,
-            StreamNativeAuctionDelegation.Witness(witness.walletWide, witness.index),
-            msg.sender == account ? 0 : gasParameter(StreamNativeAuctionDelegation.GAS_PARAMETER)
-        );
-    }
-
     function settle(bytes32 id)
         external
         override
@@ -425,6 +424,12 @@ contract StreamNativeEnglishAuction is
         if (!_state.auctions[id].config.mintAtSettlement) {
             return
                 StreamNativeEnglishAuctionCustodySettlement.settle(_state, _custody, _runtime(), id);
+        }
+        if (_rights[id].mode != 0) {
+            return
+                StreamNativeEnglishAuctionRightsSettlement.settle(
+                    _state, _active, _rights, _runtime(), id
+                );
         }
         if (_state.auctions[id].config.contentManifestRoot != 0) {
             return StreamNativeEnglishAuctionContentSettlement.settle(
@@ -468,65 +473,13 @@ contract StreamNativeEnglishAuction is
     }
 
     function unlockNoMint(bytes32 id, uint8 reason) external override nonReentrant {
-        Auction storage a = StreamNativeEnglishAuctionState.requireAuction(_state, id);
-        if (!a.config.mintAtSettlement) revert UnsupportedNativeAuctionProfile();
-        if (a.status == 6) return;
-        if (a.status != 1 || a.winner.amount == 0) revert NativeAuctionTerminal(id);
-        bytes32 hash;
-        if (reason == 0) {
-            (, uint64 deadline,,) = auctionDeadlines(id);
-            if (StreamEnglishAuctionClock.expired(deadline, StreamRefundClock.now64())) {
-                hash = keccak256("NATIVE_AUCTION_FINALIZATION_DEADLINE");
-            }
-        } else {
-            (uint64 end,,,) = auctionDeadlines(id);
-            if (end != 0 && block.timestamp >= end) {
-                if (a.config.contentManifestRoot != 0) {
-                    hash = StreamNativeEnglishAuctionContentUnlock.reasonHash(
-                        StreamNativeEnglishAuctionUnlock.Context(
-                            _support(),
-                            moduleRegistry,
-                            moduleRegistryCodeHash,
-                            coreCodeHash,
-                            mintManagerCodeHash,
-                            primarySaleSettlement
-                        ),
-                        a,
-                        reason,
-                        _curated[id].contentId
-                    );
-                } else {
-                    hash = StreamNativeEnglishAuctionUnlock.reasonHash(
-                        StreamNativeEnglishAuctionUnlock.Context(
-                            _support(),
-                            moduleRegistry,
-                            moduleRegistryCodeHash,
-                            coreCodeHash,
-                            mintManagerCodeHash,
-                            primarySaleSettlement
-                        ),
-                        a,
-                        reason
-                    );
-                }
-            }
-        }
-        if (hash == 0) revert NativeAuctionUnlockUnavailable(id, reason);
-        StreamNativeEnglishAuctionState.noMint(_state, id, hash);
+        StreamNativeEnglishAuctionTerminal.unlockNoMint(
+            _state, _custody, _runtime(), _curated, _rights, id, reason
+        );
     }
 
     function cancel(bytes32 id, bytes32 reason) external override nonReentrant {
-        Auction storage a = StreamNativeEnglishAuctionState.requireAuction(_state, id);
-        if (a.status == 4) return;
-        (uint64 end,,,) = auctionDeadlines(id);
-        if (
-            msg.sender != a.config.poster || a.status != 1 || a.winner.amount != 0 || reason == 0
-                || (end != 0 && block.timestamp >= end)
-        ) revert NativeAuctionTerminal(id);
-        (,,, a.terminalToll) = auctionDeadlines(id);
-        a.status = 4;
-        if (!a.config.mintAtSettlement) _deliver(id, a, a.config.poster, false);
-        emit NativeAuctionCancelled(id, a.saleId, reason);
+        StreamNativeEnglishAuctionTerminal.cancel(_state, _custody, _runtime(), id, reason);
     }
 
     function claimRefund(bytes32 saleId, address payable to)
@@ -544,11 +497,9 @@ contract StreamNativeEnglishAuction is
         nonReentrant
         returns (uint256)
     {
-        address recipient = _claimRecipient(account, witness);
-        return
-            StreamNativeEnglishAuctionState.claimAccount(
-                _state, saleId, account, payable(recipient)
-            );
+        return StreamNativeEnglishAuctionTerminal.claimRefundFor(
+            _state, _custody, _runtime(), saleId, account, witness
+        );
     }
 
     function claimNFTFor(bytes32 id, address account, DelegationWitness calldata witness)
@@ -556,34 +507,13 @@ contract StreamNativeEnglishAuction is
         override
         nonReentrant
     {
-        Auction storage a = StreamNativeEnglishAuctionState.requireAuction(_state, id);
-        if (!_claimable(a) || account == address(0) || a.nftClaimant != account) {
-            revert InvalidNativeAuction();
-        }
-        _deliver(id, a, _claimRecipient(account, witness), true);
+        StreamNativeEnglishAuctionTerminal.claimNFTFor(
+            _state, _custody, _runtime(), id, account, witness
+        );
     }
 
     function claimNFT(bytes32 id, address to) external override nonReentrant {
-        Auction storage a = StreamNativeEnglishAuctionState.requireAuction(_state, id);
-        if (
-            !_claimable(a) || a.nftClaimant == address(0) || a.nftClaimant != msg.sender
-                || to == address(0) || to == address(this)
-        ) revert InvalidNativeAuction();
-        _deliver(id, a, to, true);
-    }
-
-    function _deliver(bytes32 id, Auction storage a, address to, bool claim) private {
-        if (!a.config.mintAtSettlement) {
-            StreamNativeEnglishAuctionCustodySettlement.deliver(
-                _custody, _runtime(), id, a, to, claim
-            );
-        } else {
-            StreamNativeEnglishAuctionSettlement.deliver(_runtime(), id, a, to, claim);
-        }
-    }
-
-    function _claimable(Auction storage a) private view returns (bool) {
-        return a.status == 3 || (!a.config.mintAtSettlement && a.status >= 4 && a.status <= 6);
+        StreamNativeEnglishAuctionTerminal.claimNFT(_state, _custody, _runtime(), id, to);
     }
 
     function custodyAcquisitionDigest(Acquisition calldata authorization)
@@ -760,5 +690,65 @@ contract StreamNativeEnglishAuction is
         returns (StreamPreparedNativeContentTypes.Selection memory)
     {
         return _curated[id];
+    }
+
+    function rightsConfigurationHash(
+        Configuration calldata config,
+        StreamPreparedNativeRightsTypes.OriginalPolicy calldata original
+    ) external view override returns (bytes32) {
+        return StreamNativeEnglishAuctionRightsRegistration.configHash(config, original);
+    }
+
+    function registerRightsAuction(
+        Configuration calldata config,
+        StreamPreparedNativeRightsTypes.OriginalPolicy calldata original,
+        bytes calldata tokenData,
+        CreationAuthorization calldata authorization,
+        bytes calldata platformSignature,
+        bytes calldata artistSignature
+    ) external override nonReentrant returns (bytes32) {
+        return StreamNativeEnglishAuctionRightsRegistration.registerRightsAuction(
+                _state,
+                _rights,
+                _runtime(),
+                config,
+                original,
+                tokenData,
+                authorization,
+                platformSignature,
+                artistSignature
+            );
+    }
+
+    function originalAuctionRights(bytes32 id)
+        external
+        view
+        override
+        returns (StreamPreparedNativeRightsTypes.OriginalPolicy memory)
+    {
+        return _rights[id];
+    }
+
+    function activePreparedNativeRightsIntent(bytes32 hash)
+        external
+        view
+        override
+        returns (StreamPreparedNativeRightsTypes.Intent memory)
+    {
+        if (
+            hash == 0 || _active.intentHash != hash || _active.auction == 0
+                || _rights[_active.auction].mode == 0
+        ) revert InvalidNativeAuction();
+        return StreamPreparedNativeRightsTypes.Intent(_active.intent, _rights[_active.auction]);
+    }
+
+    function onPreparedNativeRightsMint(StreamPreparedNativeRightsTypes.Facts calldata facts)
+        external
+        override
+        returns (bytes4, StreamPrimarySettlementTypes.PrimarySettlementResult memory)
+    {
+        return StreamNativeEnglishAuctionRightsSettlement.onPreparedNativeRightsMint(
+            _state, _active, _rights, _runtime(), facts
+        );
     }
 }

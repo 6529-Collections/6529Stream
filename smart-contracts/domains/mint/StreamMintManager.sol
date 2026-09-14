@@ -28,6 +28,7 @@ contract StreamMintManager is
     StreamMintTranscriptTypes,
     IStreamPreparedNativeMint,
     IStreamPreparedNativeContentMint,
+    IStreamPreparedNativeRightsMint,
     IStreamMintAuthorizationRevocation,
     Ownable,
     ReentrancyGuard,
@@ -121,6 +122,7 @@ contract StreamMintManager is
     mapping(uint256 => mapping(bytes32 => mapping(address => uint256))) private _phaseExecutorIndex;
     StreamPreparedNativeMintExecution.State private _preparedNative;
     StreamPreparedNativeContentExecution.State private _preparedContent;
+    StreamPreparedNativeRightsExecution.State private _preparedRights;
 
     constructor(IStreamCore core_, IStreamMintLedger mintLedger_, IERC165 moduleRegistry_)
         StreamGasParameterHost(StreamMintArtistConsent.governance(
@@ -180,6 +182,7 @@ contract StreamMintManager is
         return interfaceId == type(IStreamMintManager).interfaceId
             || interfaceId == type(IStreamPreparedNativeMint).interfaceId
             || interfaceId == type(IStreamPreparedNativeContentMint).interfaceId
+            || interfaceId == type(IStreamPreparedNativeRightsMint).interfaceId
             || interfaceId == type(IStreamMintAuthorizationRevocation).interfaceId
             || super.supportsInterface(interfaceId);
     }
@@ -425,6 +428,45 @@ contract StreamMintManager is
             intentHash,
             transcript
         );
+    }
+
+    function executePreparedNativeRightsMint(
+        MintBatch calldata batch,
+        bytes calldata gateData,
+        bytes32 intentHash
+    )
+        external
+        override
+        nonReentrant
+        returns (
+            uint256 tokenId,
+            bytes32 operationRoot,
+            bytes32 operationId,
+            StreamPrimarySettlementTypes.PrimarySettlementResult memory result
+        )
+    {
+        OperationTranscript memory transcript =
+            _operationTranscript(batch, gateData, MINT_EXECUTION_PATH_PREPARED);
+        if (transcript.quantity != 1) revert InvalidPreparedNativeMint();
+        _reserveOperationNonces(transcript.firstOperationNonce, transcript.quantity);
+        return StreamMintManagerExecution.rightsPaid(
+            _executionContext(),
+            _phaseGateConfigs[batch.collectionId][batch.phaseId],
+            _preparedNative,
+            _preparedRights,
+            batch,
+            intentHash,
+            transcript
+        );
+    }
+
+    function activePreparedNativeRights()
+        external
+        view
+        override
+        returns (StreamPreparedNativeRightsTypes.Facts memory)
+    {
+        return _preparedRights.active;
     }
 
     function executePreparedNativeContentMint(

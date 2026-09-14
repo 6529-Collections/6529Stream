@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 import "./StreamNativeEnglishAuctionRuntime.sol";
 import "./StreamNativeEnglishAuctionCustodyReads.sol";
+import "../revenue/StreamPreparedNativeRightsProjection.sol";
 import {
     IStreamNativeEnglishAuction as A
 } from "../../interfaces/stream/auctions/IStreamNativeEnglishAuction.sol";
@@ -89,13 +90,14 @@ library StreamNativeEnglishAuctionRegistration {
     function bidPublic(
         StreamNativeEnglishAuctionState.State storage s,
         StreamNativeEnglishAuctionRuntime.Context memory x,
+        uint8 rightsMode,
         bytes32 id,
         address deliverTo,
         StreamNativeAuctionDelegation.Witness memory witness,
         bool allowNew
     ) public {
         A.Auction storage a = StreamNativeEnglishAuctionState.requireAuction(s, id);
-        uint256 fee = _bidPrecheck(x, a);
+        uint256 fee = _bidPrecheck(x, a, rightsMode);
         if (msg.sender == address(this) || msg.value <= fee) revert A.InvalidNativeAuction();
         address recipient = _delivery(s, x, id, msg.sender, deliverTo, witness, allowNew);
         bytes32 digest = keccak256(
@@ -124,6 +126,7 @@ library StreamNativeEnglishAuctionRegistration {
     function bidSigned(
         StreamNativeEnglishAuctionState.State storage s,
         StreamNativeEnglishAuctionRuntime.Context memory x,
+        uint8 rightsMode,
         A.BidAuthorization calldata authorization,
         bytes calldata signature,
         StreamNativeAuctionDelegation.Witness memory witness,
@@ -132,7 +135,7 @@ library StreamNativeEnglishAuctionRegistration {
         A.Auction storage a = StreamNativeEnglishAuctionState.requireAuction(
             s, authorization.auctionId
         );
-        uint256 fee = _bidPrecheck(x, a);
+        uint256 fee = _bidPrecheck(x, a, rightsMode);
         if (
             authorization.payer == address(0) || authorization.payer == address(this)
                 || authorization.executor != msg.sender || authorization.configHash != a.configHash
@@ -207,11 +210,11 @@ library StreamNativeEnglishAuctionRegistration {
         );
     }
 
-    function _bidPrecheck(StreamNativeEnglishAuctionRuntime.Context memory x, A.Auction storage a)
-        private
-        view
-        returns (uint256 fee)
-    {
+    function _bidPrecheck(
+        StreamNativeEnglishAuctionRuntime.Context memory x,
+        A.Auction storage a,
+        uint8 rightsMode
+    ) private view returns (uint256 fee) {
         if (!a.config.mintAtSettlement) {
             bytes32 id = keccak256(
                 abi.encode(
@@ -236,7 +239,15 @@ library StreamNativeEnglishAuctionRegistration {
         StreamNativeEnglishAuctionSupport.requirePhase(
             StreamNativeEnglishAuctionRuntime.support(x), a.config, true
         );
-        StreamNativeEnglishAuctionSupport.profilePolicy(x.base.resolver, a.config.collectionId);
+        if (rightsMode == 0) {
+            StreamNativeEnglishAuctionSupport.profilePolicy(x.base.resolver, a.config.collectionId);
+        } else if (rightsMode == StreamPreparedNativeRightsTypes.COLLECTION_TEMPLATE) {
+            StreamPreparedNativeRightsProjection.collectionTemplate(
+                x.base.resolver, a.config.collectionId
+            );
+        } else {
+            revert A.UnsupportedNativeAuctionProfile();
+        }
         fee =
         StreamRefundWindowSupport.revealPolicy(
             StreamNativeEnglishAuctionRuntime.support(x), a.config.collectionId

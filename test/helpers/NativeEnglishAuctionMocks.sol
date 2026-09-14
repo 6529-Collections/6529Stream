@@ -41,7 +41,7 @@ contract NativeAuctionArtist is IStreamArtistAttribution {
         state = value;
     }
 
-    function supportsInterface(bytes4 id) external pure returns (bool) {
+    function supportsInterface(bytes4 id) public pure virtual returns (bool) {
         return id == 0x01ffc9a7 || id == type(IStreamArtistAttribution).interfaceId
             || id == 0x606af4b9 || id == type(IStreamArtistAttributionState).interfaceId
             || id == type(IStreamArtistMintConsent).interfaceId

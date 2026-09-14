@@ -90,7 +90,7 @@ abstract contract NativeEnglishAuctionFixture is RevenueV1TestBase, OfficialSafe
             MANIFEST
         );
         _pointer(keccak256("MINT_MANAGER"), address(manager));
-        artists = new NativeAuctionArtist(address(core), address(manager));
+        artists = _deployAuctionArtist();
         _register(
             address(artists),
             keccak256("ARTIST_REGISTRY"),
@@ -213,6 +213,11 @@ abstract contract NativeEnglishAuctionFixture is RevenueV1TestBase, OfficialSafe
     /// @dev Deployment tests exercise the separate post-admission binding stage.
     function _bindPreparedRecorder() internal virtual {
         manager.bindPreparedNativeRecorder(address(recorder));
+    }
+
+    /// @dev Override only the explicitly typed Artist semantic boundary.
+    function _deployAuctionArtist() internal virtual returns (NativeAuctionArtist) {
+        return new NativeAuctionArtist(address(core), address(manager));
     }
 
     /// @dev Optional independently tested declaration profile; default fixture remains self-only.

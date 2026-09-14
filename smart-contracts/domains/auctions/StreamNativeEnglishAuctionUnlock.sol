@@ -21,6 +21,17 @@ library StreamNativeEnglishAuctionUnlock {
         IStreamNativeEnglishAuction.Auction memory a,
         uint8 reason
     ) public view returns (bytes32) {
+        return reasonHashWithContext(x, a, reason, bytes32(0));
+    }
+
+    /// @dev A new versioned entry supplies its actual counter context. Zero retains
+    /// the original exact-data entry's domain and original public selector.
+    function reasonHashWithContext(
+        Context memory x,
+        IStreamNativeEnglishAuction.Auction memory a,
+        uint8 reason,
+        bytes32 mintContext
+    ) public view returns (bytes32) {
         IStreamNativeEnglishAuction.Configuration memory c = a.config;
         IStreamMintReads manager = IStreamMintReads(address(x.support.manager));
         if (reason == 1) {
@@ -39,7 +50,9 @@ library StreamNativeEnglishAuctionUnlock {
                         >= core.collectionMaxSupply(c.collectionId)
             ) return keccak256("NATIVE_AUCTION_SUPPLY_EXHAUSTED");
             code(address(manager), x.managerHash);
-            if (counterExhausted(x, a)) return keccak256("NATIVE_AUCTION_COUNTER_EXHAUSTED");
+            if (counterExhausted(x, a, mintContext)) {
+                return keccak256("NATIVE_AUCTION_COUNTER_EXHAUSTED");
+            }
         } else if (reason == 3) {
             code(address(manager), x.managerHash);
             if (manager.phasePolicyHash(c.collectionId, c.phaseId) != c.mintPolicyHash) {
@@ -64,20 +77,22 @@ library StreamNativeEnglishAuctionUnlock {
         }
     }
 
-    function counterExhausted(Context memory x, IStreamNativeEnglishAuction.Auction memory a)
-        private
-        view
-        returns (bool)
-    {
+    function counterExhausted(
+        Context memory x,
+        IStreamNativeEnglishAuction.Auction memory a,
+        bytes32 context
+    ) private view returns (bool) {
         IStreamMintReads manager = IStreamMintReads(address(x.support.manager));
         IStreamNativeEnglishAuction.Configuration memory c = a.config;
-        StreamPreparedNativeSettlementTypes.Intent memory i =
-            StreamNativeEnglishAuctionSupport.intent(a);
-        bytes32 intentHash =
-            StreamPreparedNativeSettlementHash.intentHash(address(this), x.recorder, i);
-        bytes32 context = StreamPreparedNativeSettlementHash.mintContext(
-            address(manager), address(this), intentHash
-        );
+        if (context == 0) {
+            StreamPreparedNativeSettlementTypes.Intent memory i =
+                StreamNativeEnglishAuctionSupport.intent(a);
+            bytes32 intentHash =
+                StreamPreparedNativeSettlementHash.intentHash(address(this), x.recorder, i);
+            context = StreamPreparedNativeSettlementHash.mintContext(
+                address(manager), address(this), intentHash
+            );
+        }
         bytes32[] memory ids = manager.phaseCounterIds(c.collectionId, c.phaseId);
         for (uint256 j; j < ids.length; ++j) {
             IStreamMintManager.MintCounterConfig memory counter =
