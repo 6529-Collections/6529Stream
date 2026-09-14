@@ -54,7 +54,7 @@ It retains declared fixity without retrieving media or claiming a fixity check. 
 
 ## Package an existing recorded-account capture
 
-`build-recorded` produces the distinct `recorded_account_resource_package` v2 mode. It reuses the [recorded-account source, publication and registered interpretation verification](museum-recorded-account.md). It never converts a fixture state or changes a synthetic plan's mode. The supported output is Linked Art v2 through the account profile. PREMIS, IIIF and LIDO each receive an explicit `unsupported` result with `reasonCode=recorded_adapter_unavailable`; the current format adapters require synthetic source/plan profiles. No placeholder XML, IIIF manifest, media URI, dimensions or fixity claim is generated for those formats.
+`build-recorded` produces the distinct `recorded_account_resource_package` v2 mode. It reuses the [recorded-account source, publication and registered interpretation verification](museum-recorded-account.md). It never converts a fixture state or changes a synthetic plan's mode. The base mode supports Linked Art v2 through the account profile and retains its original unsupported-format results. An explicit [recorded PREMIS plan and profile](museum-recorded-premis.md) now opt into the separate `recorded_account_premis_resource_package` mode. That adapter produces PREMIS when all selected file facts are available, otherwise exact unsupported diagnostics. Recorded IIIF and LIDO remain unsupported. No placeholder XML, IIIF manifest, media URI, dimensions or fixity claim is generated for those formats.
 
 The input directory must retain these eleven original files:
 

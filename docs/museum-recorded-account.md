@@ -98,11 +98,12 @@ fields fit Linked Art; coverage accounts for unmapped and absent fields.
 The output report keeps source evidence separate from output claims. Its
 `registered=false` describes the generated export, not the registry documents
 that the input adapter actually verified. Full Museum gates, other source
-families (including WORK_DESCRIPTION/RIGHTS), recorded PREMIS/IIIF/LIDO exports,
+families (including WORK_DESCRIPTION/RIGHTS), recorded IIIF/LIDO exports,
 complete dossiers, public deployment, independent reviewers and institutional
 acceptance remain open. The [v2 recorded-account package](museum-multiformat-package.md)
 now retains and replays this supported capture and Linked Art projection, with
-explicit unsupported-format results for the three unimplemented recorded adapters. There is no synthetic-to-recorded Boolean switch.
+explicit format-support results. The optional [recorded PREMIS adapter](museum-recorded-premis.md)
+requires actual selected file facts; it never fills missing capture data. There is no synthetic-to-recorded Boolean switch.
 
 ## Local use
 

@@ -174,6 +174,44 @@ def project_premis_fixture(state, selection_bytes, plan_bytes, premis_plan_bytes
     if not set(FIELDS.values()).issubset(policy["singleValuedRelations"]):
         raise MuseumError("PREMIS facts require single-valued conflict policy")
     selection = select_canonical_fixture(state, selection_bytes, policy_hash=selection_hash, profile_hash=profile_hash)
+    return _project_selected_files(state, linked, selection, targets, selection_hash=selection_hash,
+        profile_hash=profile_hash, premis_plan_hash=premis_plan_hash, premis_profile=premis_profile,
+        mode="synthetic_premis_file_projection", export_profile_hash=PROFILE_HASH)
+
+
+def _file_facts(identifier, claims):
+    """Validate present facts without coercion and identify absent relations separately."""
+    values, evidence, missing = {}, {}, []
+    for field, relation in FIELDS.items():
+        rows = claims.get((identifier, relation), [])
+        if not rows:
+            missing.append({"entity": identifier, "relation": relation, "field": field})
+            continue
+        literals = [v["object"].get("literal") for v, _ in rows]
+        datatype = DATATYPE_NS + "nonNegativeInteger" if field == "size" else STRING
+        if any(not isinstance(v, dict) or v["datatype"] != datatype or any(v[k] is not None for k in
+                ("language", "unit", "precision")) for v in literals):
+            raise MuseumError("PREMIS exact unqualified literal required")
+        if len({dumps(v) for v in literals}) != 1:
+            raise MuseumError("PREMIS selected literal inconsistency")
+        values[field] = literals[0]["lexicalValue"]
+        evidence[field] = rows
+    if "category" in values and values["category"] != "file":
+        raise MuseumError("PREMIS explicit file category required")
+    if "size" in values:
+        size = uint(values["size"], 256)
+        if size > (1 << 63) - 1:
+            raise MuseumError("PREMIS xs:long size overflow; original source unchanged")
+    if "digest" in values and re.fullmatch(r"[0-9a-f]{64}", values["digest"]) is None:
+        raise MuseumError("PREMIS SHA-256 lexical value invalid")
+    if "puid" in values and re.fullmatch(r"(?:x-)?fmt/[1-9][0-9]*", values["puid"]) is None:
+        raise MuseumError("PREMIS PRONOM PUID syntax invalid")
+    return values, evidence, missing
+
+
+def _project_selected_files(state, linked, selection, targets, *, selection_hash, profile_hash,
+                            premis_plan_hash, premis_profile, mode, export_profile_hash):
+    """Render already-admitted selection; public entrypoints own source authority and plan checks."""
     resources = {r.identifier: r for r in linked.resources}
     source_provenance = loads(linked.provenance, maximum=67108864)
     claims = {}
@@ -190,29 +228,9 @@ def project_premis_fixture(state, selection_bytes, plan_bytes, premis_plan_bytes
         resource = resources.get(identifier)
         if resource is None or loads(resource.content)["type"] != "DigitalObject":
             raise MuseumError("PREMIS file must join a selected Linked Art digital object")
-        values, evidence = {}, {}
-        for field, relation in FIELDS.items():
-            rows = claims.get((identifier, relation), [])
-            if not rows:
-                raise MuseumError("PREMIS missing admitted fact: " + identifier + " " + relation)
-            literals = [v["object"].get("literal") for v, _ in rows]
-            datatype = DATATYPE_NS + "nonNegativeInteger" if field == "size" else STRING
-            if any(not isinstance(v, dict) or v["datatype"] != datatype or any(v[k] is not None for k in
-                    ("language", "unit", "precision")) for v in literals):
-                raise MuseumError("PREMIS exact unqualified literal required")
-            if len({dumps(v) for v in literals}) != 1:
-                raise MuseumError("PREMIS selected literal inconsistency")
-            values[field] = literals[0]["lexicalValue"]
-            evidence[field] = rows
-        if values["category"] != "file":
-            raise MuseumError("PREMIS explicit file category required")
-        size = uint(values["size"], 256)
-        if size > (1 << 63) - 1:
-            raise MuseumError("PREMIS xs:long size overflow; original source unchanged")
-        if re.fullmatch(r"[0-9a-f]{64}", values["digest"]) is None:
-            raise MuseumError("PREMIS SHA-256 lexical value invalid")
-        if re.fullmatch(r"(?:x-)?fmt/[1-9][0-9]*", values["puid"]) is None:
-            raise MuseumError("PREMIS PRONOM PUID syntax invalid")
+        values, evidence, missing = _file_facts(identifier, claims)
+        if missing:
+            raise MuseumError("PREMIS missing admitted fact: " + identifier + " " + missing[0]["relation"])
         obj = _element(root, "object", **{"{" + XSI + "}type": "premis:file"})
         ident = _element(obj, "objectIdentifier")
         _element(ident, "objectIdentifierType", "URI")
@@ -263,12 +281,12 @@ def project_premis_fixture(state, selection_bytes, plan_bytes, premis_plan_bytes
             if (record["recordHash"], field["pointer"]) in mapped:
                 field.update(disposition="mapped", rule=PREFIX + "coverage", reason="exact source field emitted in PREMIS; original retained")
         # Existing full inventory is retained verbatim in extent and exact bytes.
-        # verify_coverage is performed by project_fixture against the source;
+        # verify_coverage is performed by the Linked Art entrypoint against the source;
         # here only dispositions for additional emitted fields change.
     correspondence_raw, coverage_raw = dumps(correspondence), dumps(coverage)
     provenance_raw = dumps(sorted(provenance, key=dumps))
-    report = dumps({"mode": "synthetic_premis_file_projection", "version": "1", "sourceStateHash": state.commitment,
-        "profileHash": profile_hash, "premisProfileHash": PROFILE_HASH, "premisPlanHash": premis_plan_hash,
+    report = dumps({"mode": mode, "version": "1", "sourceStateHash": state.commitment,
+        "profileHash": profile_hash, "premisProfileHash": export_profile_hash, "premisPlanHash": premis_plan_hash,
         "selectionPolicyHash": selection_hash, "linkedArtReportHash": keccak256(linked.report),
         "schemaSha256": "0x" + SCHEMA_SHA256, "xmlHash": keccak256(raw), "correspondenceHash": keccak256(correspondence_raw),
         "coverageHash": keccak256(coverage_raw), "provenanceHash": keccak256(provenance_raw),

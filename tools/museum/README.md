@@ -201,8 +201,11 @@ Original v1 packages keep their existing boundary. The separate `build-recorded`
 entrypoint packages the existing verified account capture, registered definitions
 and Linked Art output without converting a synthetic source. It retains exact
 transcript/deployment/captured-result bytes and requires explicit public input
-classification; restricted exports reject before writing. Recorded PREMIS, IIIF
-and LIDO are explicitly unsupported, with no invented format data. `verify`
+classification; restricted exports reject before writing. An explicit
+[recorded PREMIS plan](../../docs/museum-recorded-premis.md) now enables the
+versioned selected-file adapter. Complete facts produce XML; missing facts
+produce exact unsupported diagnostics. Recorded IIIF and LIDO remain unsupported,
+with no invented format data. `verify`
 replays archived evidence offline. Run
 `python -m unittest tools.museum.test_package_recorded -v` for this path. The
 recorded package preserves the source environment and trusted-RPC limitations;

@@ -39,7 +39,8 @@ def build_recorded_directory(directory, *, root, disclosure, **pins):
 
 
 def build_recorded_package(inputs, *, root, disclosure, source_hash, publication_hash,
-                           interpretation_hash, profile_hash, selection_hash, plan_hash):
+                           interpretation_hash, profile_hash, selection_hash, plan_hash,
+                           premis_plan_bytes=None, premis_plan_hash=None, premis_profile_hash=None):
     """Replay actual capture evidence; no fixture state or Boolean authority promotion."""
     _public(disclosure)
     inputs = dict(inputs)
@@ -66,7 +67,19 @@ def build_recorded_package(inputs, *, root, disclosure, source_hash, publication
         raise MuseumError("recorded package cannot disclose restricted source records")
     result = project_recorded(source, inputs["selection.json"], inputs["plan.json"],
         selection_hash=selection_hash, plan_hash=plan_hash)
-    files = _dependencies(root, recorded=True)
+    requested = (premis_plan_bytes, premis_plan_hash, premis_profile_hash)
+    extended = any(v is not None for v in requested)
+    if extended and not all(v is not None for v in requested):
+        raise MuseumError("recorded PREMIS requires plan and both pins")
+    premis_result = None
+    if extended:
+        from .recorded_premis import project_recorded_premis, PROFILE_BYTES as RECORDED_PREMIS_BYTES
+        from .premis import PinnedPremis, PROFILE_BYTES as XSD_BYTES, PROFILE_HASH as XSD_HASH
+        premis_result = project_recorded_premis(source, inputs["selection.json"], inputs["plan.json"], premis_plan_bytes,
+            selection_hash=selection_hash, plan_hash=plan_hash, premis_plan_hash=premis_plan_hash,
+            premis_profile_hash=premis_profile_hash, premis_schema=PinnedPremis(root, XSD_BYTES, profile_hash=XSD_HASH))
+        pins.update(premis_plan=premis_plan_hash, premis_profile=premis_profile_hash)
+    files = _dependencies(root, recorded=True, premis=extended)
     files.update({"inputs/" + name: raw for name, raw in inputs.items()})
     # These bytes were verified against the registered interpretation by replay_source_bytes.
     for name, (_, raw) in source.profile.documents.items():
@@ -98,9 +111,23 @@ def build_recorded_package(inputs, *, root, disclosure, source_hash, publication
                 "entityIndex": "linked-art/entity-index.json", "report": "linked-art/report.json"}]
     support += [{"format": name, "status": "unsupported", "reasonCode": "recorded_adapter_unavailable",
                  "reason": UNSUPPORTED_REASON} for name in FORMATS[1:]]
+    if extended:
+        from .canonical import loads
+        files["inputs/premis-plan.json"] = premis_plan_bytes
+        files["definitions/recorded-premis-profile.json"] = RECORDED_PREMIS_BYTES
+        files["premis/report.json"] = premis_result.report
+        report = loads(premis_result.report, maximum=67108864)
+        support[1] = {"format": FORMATS[1], "status": report["status"], "profile": "recorded_account_premis_v1",
+                      "report": "premis/report.json"}
+        if premis_result.projection is None:
+            support[1]["reasonCode"] = report["reasonCode"]
+        else:
+            files["premis/premis.xml"] = premis_result.projection.xml
+            for name in ("coverage", "provenance", "correspondence"):
+                files["premis/" + name + ".json"] = getattr(premis_result.projection, name)
     files["reports/format-support.json"] = dumps({"sourceStateHash": source.state.commitment,
                                                 "formats": support})
-    return _assemble(root, files, {"mode": "recorded_account_resource_package", "version": "2",
+    return _assemble(root, files, {"mode": "recorded_account_premis_resource_package" if extended else "recorded_account_resource_package", "version": "2",
         "formats": support, "environment": source.anchor["environment"], "disclosure": disclosure,
         "sourceStateHash": source.state.commitment, "pins": pins, "claims": CLAIMS})
 
@@ -109,16 +136,21 @@ def verify_recorded_package(directory, expected_manifest_hash):
     """Reconstruct from the package alone after authenticating its external manifest pin."""
     directory = Path(directory).resolve()
     raw, manifest, files = _read_package(directory, expected_manifest_hash)
+    extended = manifest.get("mode") == "recorded_account_premis_resource_package"
+    pin_names = set(PIN_NAMES) | ({"premis_plan", "premis_profile"} if extended else set())
     if (set(manifest) != {"mode", "version", "formats", "environment", "disclosure",
                          "sourceStateHash", "pins", "claims", "files"}
-            or manifest["mode"] != "recorded_account_resource_package" or manifest["version"] != "2"
+            or manifest["mode"] not in ("recorded_account_resource_package", "recorded_account_premis_resource_package")
+            or manifest["version"] != "2"
             or manifest["claims"] != CLAIMS or not isinstance(manifest["pins"], dict)
-            or set(manifest["pins"]) != set(PIN_NAMES)):
+            or set(manifest["pins"]) != pin_names):
         raise MuseumError("unsupported recorded package manifest")
     _public(manifest["disclosure"])
     try:
+        extra = {} if not extended else {"premis_plan_bytes": files["inputs/premis-plan.json"],
+            "premis_plan_hash": manifest["pins"]["premis_plan"], "premis_profile_hash": manifest["pins"]["premis_profile"]}
         rebuilt = build_recorded_package({name: files["inputs/" + name] for name in INPUT_FILES},
-            root=directory / "dependencies", disclosure=manifest["disclosure"],
+            root=directory / "dependencies", disclosure=manifest["disclosure"], **extra,
             **{name + "_hash": manifest["pins"][name] for name in PIN_NAMES})
     except (KeyError, FileNotFoundError) as exc:
         raise MuseumError("recorded package reconstruction input missing") from exc

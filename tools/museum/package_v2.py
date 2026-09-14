@@ -25,7 +25,7 @@ DEFINITIONS = {"crosswalk-v2.json": CROSSWALK_V2_BYTES, "premis-profile.json": P
                "iiif-profile.json": IIIF_BYTES, "lido-profile.json": LIDO_BYTES}
 
 
-def _dependencies(root, *, recorded=False):
+def _dependencies(root, *, recorded=False, premis=False):
     """Archive only the required exact interpretation closures; no tree copy or fetch."""
     files = {}
 
@@ -45,7 +45,7 @@ def _dependencies(root, *, recorded=False):
         (root, "iiif/dependency-index.json"),
         (root, "lido/dependency-index.json"),
     )
-    for subroot, name in (indices[:2] if recorded else indices):
+    for subroot, name in (indices[:3 if premis else 2] if recorded else indices):
         index_path = safe_path(subroot, name)
         if index_path.stat().st_size > 524288:
             raise MuseumError("multiformat dependency index bound")
@@ -218,7 +218,7 @@ def verify_package(directory, expected_manifest_hash):
     if path.stat().st_size > MAX_MANIFEST:
         raise MuseumError("multiformat manifest bound exceeded")
     value = loads(path.read_bytes(), maximum=MAX_MANIFEST, canonical=True)
-    if isinstance(value, dict) and value.get("mode") == "recorded_account_resource_package":
+    if isinstance(value, dict) and value.get("mode") in ("recorded_account_resource_package", "recorded_account_premis_resource_package"):
         from .package_recorded import verify_recorded_package
         return verify_recorded_package(directory, expected_manifest_hash)
     return verify_fixture_package(directory, expected_manifest_hash)
@@ -246,13 +246,27 @@ def main():
     recorded.add_argument("--dependency-root", type=Path, default=Path(__file__).resolve().parents[2] / "schemas/museum")
     for name in ("source", "publication", "interpretation", "profile", "selection", "plan"):
         recorded.add_argument("--" + name + "-hash", required=True)
+    recorded.add_argument("--premis-plan", type=Path)
+    recorded.add_argument("--premis-plan-hash")
+    recorded.add_argument("--premis-profile-hash")
     args = parser.parse_args()
     try:
         if args.command == "verify":
             result = verify_package(args.directory, args.manifest_hash)
         elif args.command == "build-recorded":
             from .package_recorded import build_recorded_directory
-            result = build_recorded_directory(args.input, root=args.dependency_root, disclosure=args.disclosure,
+            requested = (args.premis_plan, args.premis_plan_hash, args.premis_profile_hash)
+            if any(v is not None for v in requested) and not all(v is not None for v in requested):
+                raise MuseumError("recorded PREMIS requires plan, plan hash and profile hash together")
+            extra = {}
+            if args.premis_plan is not None:
+                if args.disclosure != "public":
+                    raise MuseumError("restricted export is unsupported")
+                if args.premis_plan.stat().st_size > 524288:
+                    raise MuseumError("recorded PREMIS plan byte bound")
+                extra = dict(premis_plan_bytes=args.premis_plan.read_bytes(), premis_plan_hash=args.premis_plan_hash,
+                             premis_profile_hash=args.premis_profile_hash)
+            result = build_recorded_directory(args.input, root=args.dependency_root, disclosure=args.disclosure, **extra,
                 **{name + "_hash": getattr(args, name + "_hash")
                    for name in ("source", "publication", "interpretation", "profile", "selection", "plan")})
             write_package(result, args.directory)
