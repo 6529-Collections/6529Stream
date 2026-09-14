@@ -18,6 +18,16 @@ complete. No new funding or owner decision is required for current work.
 | Developer client and operator | RC1 client remains usable. Compiler-selected typed clients are integrated as `e409c134`, with 52 passing tests, independent review and exact generation/typechecking against accepted native output. Earlier local graph deployment completed 530 transactions within the deployment ceiling. | Four explicit current native auction/bid/custody signing helpers are integrated (`db3fca94`), with 59 client tests and independently reproduced actual-getter encoding vectors. Complete workflow examples and latest graph activation remain. The deployment rehearsal records `productsActivated=false`; it is not a full product launch. |
 | Candidate and testnet | Immutable supported RC1 and its Sepolia evidence are complete. | Expanded full-v1 implementation, complete Safe call inventory, required fuzz/stateful campaigns, all 37 genesis roles, gas conformance, full CI, new source freeze and matching testnet evidence remain. |
 
+## Delivery sequencing
+
+On 14 September the owner directed feature completion before comprehensive
+integration/testing. Builders now finish larger source-reviewed domain batches
+while existing frozen tests run. Cheap compilation/type checks and authored
+regressions accompany implementation; full current-stack/Safe runs, campaigns,
+gas conformance, CI and new release evidence follow the integrated feature
+batch. Source integration and demonstrated runtime acceptance are reported
+separately. [Current assignments](AUTONOMOUS_RUN.md#active-work) own this order.
+
 ## Current integration batch
 
 - Original `a65f7f3e` production graph: the repaired native-settlement cohort

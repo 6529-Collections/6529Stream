@@ -26,6 +26,28 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active work
 
+The owner explicitly prioritized feature completion on 14 September 2026.
+Builders continue coherent domain batches while frozen validation jobs run.
+Source review and cheap compilation/type checks are sufficient to hand off
+implementation; full runtime acceptance follows integration and is never
+implied by a source commit. Stop repeated source inventories, output hashing,
+release-artifact regeneration and historical reconciliation during unchanged
+implementation work. Use one concise batch handoff with changed behavior and
+pending checks. The immutable RC1 remains the released baseline.
+
+| Owner | Implementation batch |
+| --- | --- |
+| Integrator | Current Artist signing/onboarding client, shared operator wiring and integration; then remaining entropy/genesis gaps |
+| Artist builder | Multiple estate rotations, terminal closed/dismissed histories and abandonment/veto behavior; then remaining Artist operations |
+| Revenue builder | Known-token custody template families and explicit default-profile routes, preserving token/collection precedence |
+| Fourth engineer | Bounded test-loader performance prototype; then museum/finality feature gaps, with independent review at integration |
+
+Comprehensive current-stack/Safe integration, fuzz and stateful campaigns, gas
+conformance, complete genesis inventory, CI and matching new testnet evidence
+follow the integrated implementation batch. Existing frozen runs continue in
+the background and validate only their recorded source. No new date or
+percentage is inferred from these assignments.
+
 Root owns the latest combined graph and governed dynamic-template admission,
 client/operator completion, shared fixtures, CI and the new candidate. Artist
 work continues with recovery after an executed post-estate class-3 rotation.

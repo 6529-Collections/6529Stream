@@ -993,10 +993,13 @@ working half-day; investigate and split any lane that produces only paperwork.
 ## Feature completion ledger
 
 States: `Building` means source work is assigned; `Queued` means a named owner
-will take it after the listed dependency. Neither means complete. Promote a row
-to `Integrated` only with code and actual current-stack tests, and to `Verified`
-only with independent review and the specified demonstration. Keep links to
-commits, tests and retained results in the evidence column when advancing it.
+will take it after the listed dependency. `Source integrated` means a reviewed
+implementation is in the integration branch with runtime checks still pending.
+Under the owner's 14 September delivery order, source integration does not wait
+for each long native test cohort. Promote a row to `Integrated` only with code
+and actual current-stack tests, and to `Verified` only with independent review
+and the specified demonstration. No source-only state means feature acceptance.
+Keep concise commit and result links when advancing a state.
 
 | ID | Capability and completion test | Owner / dependencies | Initial state |
 | --- | --- | --- | --- |
