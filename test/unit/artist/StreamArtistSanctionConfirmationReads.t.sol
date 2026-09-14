@@ -23,6 +23,11 @@ contract ConfirmationArtistBoundary {
     T.Binding private _binding;
     S.Record private _sanction;
     uint8 private _attribution;
+    bool private _burn;
+
+    function burn(bool value) external {
+        _burn = value;
+    }
 
     function configure(T.Binding memory b, S.Record memory s, uint8 attribution) external {
         _binding = b;
@@ -31,6 +36,7 @@ contract ConfirmationArtistBoundary {
     }
 
     function binding(uint256) external view returns (T.Binding memory) {
+        if (_burn) assembly ("memory-safe") { for { } 1 { } { } }
         return _binding;
     }
 
@@ -124,6 +130,8 @@ contract ConfirmationFinalityBoundary {
 }
 
 contract ConfirmationReadHarness {
+    uint256 public writes;
+    bytes32 public lastObservation;
     T.SuiteConfiguration private _suite;
     StreamArtistSanctionConfirmationReads.Pins private _pins;
 
@@ -133,6 +141,13 @@ contract ConfirmationReadHarness {
     ) {
         _suite = suite;
         _pins = pins;
+    }
+
+    function accept() external returns (bytes32) {
+        ++writes;
+        lastObservation =
+            keccak256(abi.encode(StreamArtistSanctionConfirmationReads.observe(_suite, _pins, 1)));
+        return lastObservation;
     }
 
     function observe() external view returns (Confirmation.Observation memory) {
@@ -242,7 +257,7 @@ contract StreamArtistSanctionConfirmationReadsTest {
                 address(finality).codehash,
                 address(core).codehash,
                 address(artist).codehash,
-                300000
+                40000000
             )
         );
     }
@@ -442,7 +457,7 @@ contract StreamArtistSanctionConfirmationReadsTest {
     }
 
     function testConfirmationParentGasFailureAndSameHostHealthyRetry() external {
-        (bool ok, bytes memory reason) = address(reader).staticcall{ gas: 150000 }(
+        (bool ok, bytes memory reason) = address(reader).staticcall{ gas: 100000 }(
             abi.encodeCall(ConfirmationReadHarness.observe, ())
         );
         require(
@@ -451,5 +466,29 @@ contract StreamArtistSanctionConfirmationReadsTest {
             "parent reserve error"
         );
         _healthy();
+    }
+
+    function testConfirmationHighCapBurnerRollbackAndIdenticalHealthyRetry() external {
+        bytes32 expected = _healthy();
+        bytes memory original = abi.encodeCall(ConfirmationReadHarness.accept, ());
+        artist.burn(true);
+        (bool ok, bytes memory reason) = address(reader).call{ gas: 250000 }(original);
+        require(!ok && reader.writes() == 0 && reader.lastObservation() == 0, "burn rollback");
+        require(
+            keccak256(reason)
+                == keccak256(
+                    abi.encodeWithSelector(
+                        Confirmation.SanctionConfirmationReadFailed.selector, address(artist)
+                    )
+                ),
+            "typed burn failure"
+        );
+        artist.burn(false);
+        (ok, reason) = address(reader).call{ gas: 2000000 }(original);
+        require(ok && abi.decode(reason, (bytes32)) == expected, "identical healthy retry");
+        require(
+            reader.writes() == 1 && reader.lastObservation() == expected,
+            "commit original observation"
+        );
     }
 }

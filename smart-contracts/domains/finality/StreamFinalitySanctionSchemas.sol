@@ -88,14 +88,21 @@ library StreamFinalitySanctionSchemas {
         view
         returns (bytes memory out)
     {
-        if (cap == 0 || cap > type(uint256).max / 64 || gasleft() <= cap + cap / 63 + 100000) {
+        if (cap == 0 || cap > type(uint256).max / 64) {
             revert IStreamFinalitySanctionArchive.FinalitySanctionArchiveReadFailed(target);
         }
         out = new bytes(maximum);
+        uint256 available = gasleft();
+        // Stored evidence uses the configured maximum, retaining 100k plus cold-call setup.
+        if (available <= 105_000) {
+            revert IStreamFinalitySanctionArchive.FinalitySanctionArchiveReadFailed(target);
+        }
+        uint256 forwarded = available - 105_000;
+        if (cap < forwarded) forwarded = cap;
         bool ok;
         uint256 length;
         assembly ("memory-safe") {
-            ok := staticcall(cap, target, add(data, 32), mload(data), add(out, 32), maximum)
+            ok := staticcall(forwarded, target, add(data, 32), mload(data), add(out, 32), maximum)
             length := returndatasize()
         }
         if (!ok || length > maximum) {

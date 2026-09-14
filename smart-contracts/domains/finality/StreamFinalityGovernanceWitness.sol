@@ -137,12 +137,16 @@ library StreamFinalityGovernanceWitness {
         if (cap == 0 || cap > type(uint256).max / 2) {
             revert FinalityGovernanceParentGas(available, type(uint256).max);
         }
-        uint256 required = cap + (cap + 62) / 63 + 100_000;
-        if (available <= required) revert FinalityGovernanceParentGas(available, required);
         result = new bytes(length);
+        available = gasleft();
+        // Stored context uses the configured maximum, retaining 100k plus cold-call setup.
+        uint256 required = 105_000;
+        if (available <= required) revert FinalityGovernanceParentGas(available, required);
+        uint256 forwarded = available - required;
+        if (cap < forwarded) forwarded = cap;
         bool ok;
         assembly ("memory-safe") {
-            ok := staticcall(cap, target, add(data, 32), mload(data), add(result, 32), length)
+            ok := staticcall(forwarded, target, add(data, 32), mload(data), add(result, 32), length)
             size := returndatasize()
         }
         if (!ok || size < length) revert FinalityGovernanceReadFailed(target);

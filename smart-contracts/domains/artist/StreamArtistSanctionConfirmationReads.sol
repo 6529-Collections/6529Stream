@@ -354,15 +354,19 @@ library StreamArtistSanctionConfirmationReads {
     ) private view returns (bytes memory raw) {
         uint256 cap = trace.readGas;
         if (cap == 0 || cap > type(uint256).max / 64) revert T.InvalidBinding();
-        uint256 required = cap + cap / 63 + 100000;
-        if (gasleft() <= required) {
-            revert Confirmation.SanctionConfirmationParentGas(gasleft(), required);
-        }
         raw = new bytes(size);
+        uint256 available = gasleft();
+        // Stored confirmation uses the configured maximum, retaining 100k plus cold-call setup.
+        uint256 required = 105_000;
+        if (available <= required) {
+            revert Confirmation.SanctionConfirmationParentGas(available, required);
+        }
+        uint256 forwarded = available - required;
+        if (cap < forwarded) forwarded = cap;
         bool ok;
         uint256 returned;
         assembly ("memory-safe") {
-            ok := staticcall(cap, target, add(data, 32), mload(data), add(raw, 32), size)
+            ok := staticcall(forwarded, target, add(data, 32), mload(data), add(raw, 32), size)
             returned := returndatasize()
         }
         if (!ok || returned > size || (exact && returned != size)) {

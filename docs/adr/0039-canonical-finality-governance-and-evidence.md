@@ -1358,11 +1358,36 @@ constructor argument is introduced.
 
 The output buffers and exact lengths, canonical words, interface checks and
 reciprocal bindings remain mandatory. A probe failure reverts construction; an
-underfunded deployment can be retried with the same inputs. Runtime finality,
-preparation and governance reads retain their existing full-budget semantics.
+underfunded deployment can be retried with the same inputs. Runtime reads retain their existing semantics except for the four stored-evidence
+readers specified below.
 Eleven isolated constructor tests cover the 30M runtime setting inside an 8M
 CALL envelope, smaller settings, budget fuzzing, hostile dependencies and retry.
 Those typed dependency fixtures do not establish full runtime-finality capacity.
+
+## Stored-evidence read gas
+
+The configured GGP is an upper limit for the bounded reads in
+`StreamFinalitySanctionArchive`, `StreamFinalitySanctionSchemas`,
+`StreamFinalityGovernanceWitness` and `StreamArtistSanctionConfirmationReads`.
+A 30M or 40M limit does not require that much parent gas to read original sanction
+facts, current artifact coverage, registered interpretation bytes, stored
+confirmation evidence or the executing governance context. This exception does
+not change complete provider, preparation, current-component, discovery,
+inventory or manifest validation, including their existing budget rules.
+
+These four readers allocate their bounded output before measuring available gas,
+retain 100,000 gas plus a 5,000 cold-call/setup allowance, and forward the lesser
+of the configured maximum and the remainder. EIP-150 can reduce that forwarding
+further. Insufficient parent reserve or a failed child read retains the existing
+typed failure. There is no new GGP, fixed child-call ceiling or public ABI.
+
+Exact, maximum-length and fixed-header return contracts remain distinct and
+unchanged. Original hashes, canonical words, runtime pins, current association,
+current artifact coverage, definition bytes and governance authorization remain
+mandatory. Retired interpretation definitions still preserve historical reads.
+The reserve is for handling a bounded child failure; it does not promise enough
+gas to finish an arbitrary finality transaction. Complete cold transaction
+capacity requires its own measured execution.
 
 ## Acceptance and remaining work
 

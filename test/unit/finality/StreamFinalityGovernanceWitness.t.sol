@@ -6,6 +6,11 @@ import "../../../smart-contracts/domains/finality/StreamFinalityGovernanceWitnes
 /// @dev Raw response doubles exercise the bounded ABI boundary, not canonical governance lifecycle.
 contract FinalityWitnessBoundary {
     mapping(bytes4 => bytes) private _replies;
+    bytes4 private _burnSelector;
+
+    function burn(bytes4 selector) external {
+        _burnSelector = selector;
+    }
 
     function reply(bytes4 selector, bytes memory value) external {
         _replies[selector] = value;
@@ -19,6 +24,7 @@ contract FinalityWitnessBoundary {
     }
 
     fallback() external {
+        if (msg.sig == _burnSelector) assembly ("memory-safe") { for { } 1 { } { } }
         bytes memory result = _replies[msg.sig];
         assembly ("memory-safe") { return(add(result, 32), mload(result)) }
     }
@@ -47,9 +53,9 @@ contract FinalityWitnessHost {
     {
         StreamFinalityGovernanceWitness.Pins memory pins =
             StreamFinalityGovernanceWitness.Pins(_executor, _executorHash, _roles, _rolesHash);
+        ++writes;
         result = StreamFinalityGovernanceWitness.requireExecution(pins, context, _readGas);
         lastWitness = keccak256(abi.encode(result));
-        ++writes;
     }
 }
 
@@ -65,7 +71,7 @@ contract StreamFinalityGovernanceWitnessTest {
     function setUp() public {
         _executor = new FinalityWitnessBoundary();
         _roles = new FinalityWitnessBoundary();
-        _host = new FinalityWitnessHost(address(_executor), address(_roles), 200_000);
+        _host = new FinalityWitnessHost(address(_executor), address(_roles), 30_000_000);
         _restore();
     }
 
@@ -216,7 +222,7 @@ contract StreamFinalityGovernanceWitnessTest {
                 address(_executor)
             )
         );
-        (ok, result) = _executor.execute(address(_host), _callData(), 120_000);
+        (ok, result) = _executor.execute(address(_host), _callData(), 100_000);
         require(!ok && _host.writes() == 0, "parent gas accepted");
         require(result.length == 68, "parent error shape");
         bytes4 selector;
@@ -226,6 +232,62 @@ contract StreamFinalityGovernanceWitnessTest {
             "parent error selector"
         );
         _healthy(_host);
+    }
+
+    function testWitnessHighCapBurnerRollsBackAndIdenticalCallRetries() public {
+        bytes memory original = _callData();
+        bytes4[3] memory selectors = [
+            IStreamFinalityGovernanceBindings.roleRegistry.selector,
+            IStreamGovernanceReads.currentAction.selector,
+            IStreamGovernanceReads.governanceAction.selector
+        ];
+        for (uint256 i; i < selectors.length; ++i) {
+            uint256 before_ = _host.writes();
+            bytes32 previous = _host.lastWitness();
+            _executor.burn(selectors[i]);
+            (bool ok, bytes memory result) = _executor.execute(address(_host), original, 1_000_000);
+            require(
+                !ok && _host.writes() == before_ && _host.lastWitness() == previous, "burn rollback"
+            );
+            _exact(
+                result,
+                abi.encodeWithSelector(
+                    StreamFinalityGovernanceWitness.FinalityGovernanceReadFailed.selector,
+                    address(_executor)
+                )
+            );
+            _executor.burn(bytes4(0));
+            (ok, result) = _executor.execute(address(_host), original, 1_000_000);
+            require(ok && _host.writes() == before_ + 1, "identical healthy retry");
+            require(
+                abi.decode(result, (StreamFinalityExecutionWitness)).actionId == ACTION,
+                "same action"
+            );
+        }
+    }
+
+    function testWitnessColdBurnerNearReserveReturnsTypedFailure() public {
+        _executor.burn(IStreamFinalityGovernanceBindings.roleRegistry.selector);
+        (bool ok, bytes memory result) = _executor.execute(address(_host), _callData(), 200_000);
+        require(!ok && _host.writes() == 0, "near reserve rollback");
+        _exact(
+            result,
+            abi.encodeWithSelector(
+                StreamFinalityGovernanceWitness.FinalityGovernanceReadFailed.selector,
+                address(_executor)
+            )
+        );
+        _executor.burn(bytes4(0));
+        _healthy(_host);
+    }
+
+    function testFuzzWitnessHighCapWithinSmallParent(uint96 extra) public {
+        uint256 parentGas = 1_000_000 + uint256(extra) % 2_000_000;
+        (bool ok, bytes memory result) = _executor.execute(address(_host), _callData(), parentGas);
+        require(ok && _host.writes() == 1, "high cap small parent");
+        require(
+            abi.decode(result, (StreamFinalityExecutionWitness)).actionId == ACTION, "same witness"
+        );
     }
 
     function _restore() private {
