@@ -22,6 +22,7 @@ their own scope and must not be read as a list of installed features.
 | Validate retained Linked Art documents offline | [Museum tooling](../tools/museum/README.md), [validation boundary](museum-linked-art-validation.md) |
 | Declare platform works, file attribution claims and inspect corrective binding | [Platform works](guides/artist-platform-works.md) |
 | Fund native-sale reveals and claim unused ETH | [Immediate sale payments](native-immediate-reveal.md) |
+| Publish test-image records through actual contracts and export four museum formats | [Current media capture](museum-current-media-capture.md) |
 | Run a second artist through sales and auctions | [Product scenarios](integrations/product-demo.md) |
 | Complete a collection and retain its artwork | [Collector package](integrations/collector-package.md) |
 | Choose a command or compiler profile | [Tooling](tooling.md) |

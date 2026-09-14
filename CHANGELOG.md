@@ -5,6 +5,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Support recovery after a dismissed and reopened prior-recovery interval,
+  preserving original closure, guardian and accepted recovery history.
+- Add a reproducible actual-contract/Safe museum media capture with all four
+  recorded export formats and offline reconstruction.
+
 - Add platform-work declarations, permissionless claims, governed contests and
   corrective Artist binding, with collection-subject archival evidence and retained
   scoped finality history. Runtime and full display/commerce integration remain pending.

@@ -70,8 +70,12 @@ Recorded PREMIS (`2da5da31`), IIIF (`d3acf4fa`) and LIDO (`cb9a05d5`) are
 integrated with exact selected source facts and explicit missing-data reports.
 Focused adapter/compatibility runs pass 37 PREMIS, 37 IIIF and 13 LIDO cases;
 these sets overlap and must not be summed. Complete positive controls are
-synthetic. A complete positive export captured from the actual current stack
-is the next Museum acceptance target.
+synthetic. The newer complete-media capture (`a0824111`, `41dfe4ba`) publishes
+11 records through actual native foundation contracts and a two-owner Safe. Its
+four-format package independently reconstructs offline; nine input/loader/CLI
+tests pass. The same captured source without its selected publisher withholds
+only LIDO. This is a public test-image example on a selected local foundation,
+not whole-product or institutional acceptance.
 
 The native immediate-sale source now funds the live declared reveal fee apart
 from official revenue, attempts AT_MINT after the mint and credits unused fee
@@ -93,8 +97,11 @@ proofs and preserves declaration-versus-sanction finality history. The joined
 attribution display remain pending. The next Artist and metadata work completes
 the live attribution profile and the supporting canonical reads.
 
-Further recovery histories and the actual-current complete-media museum capture
-continue in parallel. Inherited/global primary freezes remain blocked pending
+Closed and reopened repeated-recovery histories are integrated (`a3bea3b4`)
+after root and independent production-source review. Six new scenarios are
+authored; their runtime acceptance is pending. The final combined ABI/type
+check covers 888 Solidity inputs. Artist and metadata work now builds the
+complete live attribution display and its canonical attestation/claim reads. Inherited/global primary freezes remain blocked pending
 the specific approval requested. Automatic review rejected the ERC-20 source
 write again despite explicit owner approval; its exact patch is being prepared
 for review. ADR 0045 records the selected denomination and refund design without
@@ -125,8 +132,8 @@ followed by consolidated current-stack/Safe acceptance.
   artist slice follows an executed class-3 rotation after estate succession.
 - Prepared custody, accelerated/closed estate recovery, disabled/default royalty
   snapshots and these two newest increments need latest combined acceptance.
-- Current typed client and four signing domains remain integrated, with 59
-  client tests. Complete workflow examples and operator activation remain open.
+- Current typed signing/call helpers are integrated, with 78 client tests.
+  Complete workflow examples and operator activation remain open.
 - Root owns latest integration, client/operator work, shared fixtures and
   candidate closure. Two builders continue the next artist and token-specific
   royalty workflows; the independent reviewer challenges source and behavior.

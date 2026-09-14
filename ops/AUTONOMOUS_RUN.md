@@ -38,9 +38,9 @@ pending checks. The immutable RC1 remains the released baseline.
 | Owner | Implementation batch |
 | --- | --- |
 | Integrator | Immediate native sales/client integrated; operator/genesis and combined acceptance |
-| Artist builder | Closed repeated-recovery histories; then Artist attestation/claim reads for complete attribution display |
+| Artist builder | Artist attestation/claim reads for complete attribution display; closed repeated-recovery histories integrated |
 | Revenue builder | Exact ERC-20 reveal-fee patch proposal after automatic review rejected the approved write; inherited/global freezes remain separately blocked |
-| Fourth engineer | Actual-current complete-media capture; then nested attribution projection and renderer integration |
+| Fourth engineer | Nested attribution projection and renderer integration; actual-current complete-media capture integrated and offline replayed |
 
 Comprehensive current-stack/Safe integration, fuzz and stateful campaigns, gas
 conformance, complete genesis inventory, CI and matching new testnet evidence
@@ -49,7 +49,7 @@ the background and validate only their recorded source. No new date or
 percentage is inferred from these assignments.
 
 Root owns the combined graph, shared operator/client work and the new candidate.
-The combined feature source passes an 886-source ABI/type check.
+The combined feature source passes an 888-source ABI/type check.
 The [current report](V1_CURRENT_STATUS.md#source-batch-integrated-before-comprehensive-testing)
 records the newest recovery, TEMPLATE, recorded-format and reveal changes. Client tests
 pass 78 cases and the four-format museum package passes 11; recorded-account
