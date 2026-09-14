@@ -80,6 +80,20 @@ planner rejects existing reveal-owner or treasury holders rather than creating
 ambiguous roles. Use a distinct governed rotation plan to replace existing
 holders.
 
+## Additional governed artist read budget
+
+`StreamArtistActivationPlan.buildReadBudgetExpansion(manager)` prepares a separate
+one-call plan after the original activation. It requires exactly 300,000 gas at
+revision 2, a 150,000 floor and failure class 2, and commits the next value of
+600,000 at revision 3. It changes no roles and does not execute anything.
+
+Publish, schedule and execute the retained plan through the normal governance
+batch path. The existing two-call `StreamArtistActivationPlan.execute` consumer
+is for the initial artist activation and does not accept this one-call expansion.
+Five isolated planning tests plus 256 fuzz inputs pass. Actual cold-call success
+at 600,000 is still being tested against the complete current artist graph; the
+planner result alone does not establish sufficient call capacity.
+
 ## What remains after authority activation
 
 Authority activation enables artist setup; it does not establish mint eligibility.

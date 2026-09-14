@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add an exact separate governed artist read-budget expansion plan, preserving
+  the original activation batch and requiring normal delayed execution.
+
 - Stage current graph deployment through resumable checkpoints with actual local
   transaction and governance rehearsal coverage; product activation remains open.
 - Bound Finality Registry constructor admission by available gas while preserving

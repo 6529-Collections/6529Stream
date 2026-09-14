@@ -87,6 +87,23 @@ library StreamArtistActivationPlan {
             );
     }
 
+    /// @notice Prepare the second governed doubling for the complete current artist read graph.
+    /// @dev Build only after the original 150k-to-300k activation. Retain this exact plan
+    ///      for normal delayed governance execution; construction does not grant authority.
+    function buildReadBudgetExpansion(IStreamGasParameterHost manager)
+        internal
+        view
+        returns (Plan memory plan)
+    {
+        plan.calls = new GovernanceCall[](1);
+        plan.callDatas = new bytes[](1);
+        (plan.calls[0], plan.callDatas[0]) = _readBudgetRaise(manager, 300_000, 600_000, 2);
+        (plan.scopeHash, plan.oldValueHash, plan.newValueHash) =
+            StreamGovernanceBootstrap.deriveBatchTransitionHashes(
+                plan.calls, StreamGovernanceBootstrap.governanceCallsHash(plan.calls)
+            );
+    }
+
     function _roleGrant(IStreamRoleRegistry roles, address administrator)
         private
         view
@@ -146,10 +163,20 @@ library StreamArtistActivationPlan {
         view
         returns (GovernanceCall memory call_, bytes memory data)
     {
+        return _readBudgetRaise(manager, 150_000, ARTIST_READ_VALUE, 1);
+    }
+
+    function _readBudgetRaise(
+        IStreamGasParameterHost manager,
+        uint256 expectedValue,
+        uint256 nextValue,
+        uint64 expectedRevision
+    ) private view returns (GovernanceCall memory call_, bytes memory data) {
         (uint256 value, uint256 floor, uint8 failureClass, uint64 revision) =
             manager.gasParameterInfo(ARTIST_READ_GAS);
         require(
-            value == 150_000 && floor == 150_000 && failureClass == 2 && revision == 1,
+            value == expectedValue && floor == 150_000 && failureClass == 2
+                && revision == expectedRevision,
             "unexpected artist read configuration"
         );
         bytes32 scope = keccak256(
@@ -161,14 +188,14 @@ library StreamArtistActivationPlan {
             )
         );
         bytes32 domain = keccak256("6529STREAM_GAS_PARAMETER_STATE_V2");
-        data = abi.encodeCall(manager.raiseGasParameter, (ARTIST_READ_GAS, ARTIST_READ_VALUE));
+        data = abi.encodeCall(manager.raiseGasParameter, (ARTIST_READ_GAS, nextValue));
         call_ = StreamCurrentStackPlan.call(
             address(manager),
             data,
             scope,
             keccak256(abi.encode(domain, scope, value, floor, failureClass, revision)),
             keccak256(
-                abi.encode(domain, scope, ARTIST_READ_VALUE, floor, failureClass, revision + 1)
+                abi.encode(domain, scope, nextValue, floor, failureClass, revision + 1)
             )
         );
     }
