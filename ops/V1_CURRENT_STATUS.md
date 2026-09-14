@@ -27,6 +27,9 @@ complete. No new funding or owner decision is required for current work.
   compilation and preserve sources, native artifacts, cache and graph inputs.
   The earlier 18/3 failure remains historical evidence; latest production still
   needs its own combined checkpoint.
+  That checkpoint is now compiling 105 changed/dependent files from retained
+  caches: latest accepted source plus a new governed-template admission test,
+  followed by 22 selected cases and the isolated cold regression.
 - Dynamic primary templates `217c996a`: all 98 focused cases pass, including one
   256-input property. A fixed linked worker reduces Resolver runtime to 22,442
   bytes; all 600 production products fit. Full previous ABI/storage compatibility
