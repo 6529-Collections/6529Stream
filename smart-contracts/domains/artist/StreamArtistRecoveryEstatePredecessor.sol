@@ -47,7 +47,7 @@ import {
     StreamArtistIdentityRecoveryOperationTypes as Recovery
 } from "../../interfaces/stream/artist/StreamArtistIdentityRecoveryOperationTypes.sol";
 
-/// @notice First nonaccelerated estate vesting with its original authority plan and guardian prefix.
+/// @notice First admitted estate vesting with its original authority plan and guardian prefix.
 /// @dev Reads admitted owner storage; it never reauthorizes historical coverage or rewrites a designation.
 library StreamArtistRecoveryEstatePredecessor {
     struct Facts {
@@ -106,9 +106,8 @@ library StreamArtistRecoveryEstatePredecessor {
                 || cause.facts.executedTransitionHash != head
                 || cause.facts.pendingTransitionHash != 0
                 || f.execution.activationRecordHash != head || f.execution.coverageRecordHash == 0
-                || f.execution.executedAt < f.request.noticeEndsAt
-                || f.execution.delegationEpoch == 0 || f.execution.governanceActionId != 0
-                || f.execution.governanceWitnessHash != 0 || f.transition.recordHash != head
+                || f.execution.executedAt < f.request.requestedAt
+                || f.execution.delegationEpoch == 0 || f.transition.recordHash != head
                 || f.transition.artistId != p.artistId || f.transition.phase != 2
                 || f.transition.stagedAt != f.request.requestedAt
                 || f.transition.contestEndsAt != f.request.noticeEndsAt
@@ -120,6 +119,15 @@ library StreamArtistRecoveryEstatePredecessor {
                 || (f.transition.contestedAt != 0
                     && f.transition.contestedAt < f.transition.postWindowEndsAt)
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
+        // Original operation40 already authenticated and consumed the historical accelerator.
+        // Preserve its exact timing/witness shape without reauthorizing old governance or coverage.
+        if (f.execution.executedAt < f.request.noticeEndsAt) {
+            if (f.execution.governanceActionId == 0 || f.execution.governanceWitnessHash == 0) {
+                revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
+            }
+        } else if (f.execution.governanceActionId != 0 || f.execution.governanceWitnessHash != 0) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
+        }
         Dismissal.Closure memory empty;
         if (keccak256(abi.encode(resolutions.closures[head])) != keccak256(abi.encode(empty))) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);

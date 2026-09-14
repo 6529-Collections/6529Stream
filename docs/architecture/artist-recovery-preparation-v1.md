@@ -478,7 +478,7 @@ estate activation as its subject and executed transition. Request evidence and
 reason must equal that original cause and Contest record. These are limits of
 this profile, not a general prohibition on other estate resolution evidence.
 
-The owner authenticates one nonaccelerated operation-38/40 request/execution:
+The initial ordinary profile authenticates one operation-38/40 request/execution:
 original record hash, phases, actual old-address retirement, authorityActivation,
 latest execution/transition, exact notice and post-window arithmetic, original
 coverage and timing supplements, and a completely empty closure. Execution must
@@ -532,16 +532,17 @@ archival coverage role graph to the constructor-pinned Artist role graph after
 activation. Typed action facts/roles/Core and the separate real delayed governance
 cohort remain complementary evidence, not one combined authority deployment.
 
-General estate histories, accelerated/closed windows, successor-authored guardian
-history, nonempty estate supersession and appeals, later recoveries, dormancy and
-steward branches remain open. No maximum history/list, aggregate gas or complete
+Successor-authored guardian history and accelerated first-estate activation are
+covered by the two extensions below. General or closed estate histories, nonempty
+estate supersession and appeals, later recoveries, dormancy and steward branches
+remain open. No maximum history/list, aggregate gas or complete
 system deployment claim follows from these focused cases.
 
 ## Estate successor guardian admissions
 
 The successor-guardian profile extends the preceding first-estate profile to
 guardian records actually admitted by the original estate successor. The original
-nonaccelerated operation-40 activation, exact current class-3 compromise cause,
+operation-40 activation, exact current class-3 compromise cause,
 empty closure, unchanged designation/directives/capability mask, no earlier
 vesting or recovery, and empty supersession list remain required. This extension
 does not authorize a new guardian publication or reconstruct missing history.
@@ -588,6 +589,44 @@ identical-action late-Archive failure/retry. Retained first-estate and initial
 living-recovery cases cover the prior branches. The original typed Core, action
 facts and archival-to-Artist Executor role-phase fixture limitations remain;
 these cases do not establish a combined actual governance deployment. General
-estate histories, accelerated or resolved windows, later recoveries, nonempty
+estate histories, resolved windows, later recoveries, nonempty
 estate supersession/appeals, other record families, and maximum-history or
 whole-transaction capacity remain separate requirements.
+
+## Accelerated first-estate continuation
+
+The same first-estate recovery profile also consumes an original activation
+executed before its saved notice deadline. The original operation 40 must have
+admitted it through the canonical class-1 accelerator described in ADR 0031.
+The consumer requires execution at or after the saved request time. Before the
+original notice deadline both saved governance action ID and witness hash must
+be nonzero; at or after that deadline both must be zero. The complete original
+execution, including those commitments, remains in the same predecessor Facts
+hash. Recovery neither accepts a replacement witness nor reauthorizes historical
+governance roles or coverage. Original operation 40 owns those checks and the
+one-use action replay key.
+
+Acceleration does not shorten the saved post-activation contest window. The
+current compromise must be at or after its exact end, with no earlier contest.
+The first-vesting, empty-closure, unchanged authority-plan and capability checks
+remain. The complete original guardian prefix and any eligible actual successor
+admissions use the preceding rules; every unsuperseded member retains its
+recovery veto, including members of unselected lower-nonce records. Recovery
+preserves the original acceleration record, witness, identity and capability
+mask, then appends its own vesting under the original atomic Archive boundary.
+
+The focused cohort is `StreamArtistAcceleratedEstateRecoveryActualTest`: exact
+expiry with successor history and identical signed retry after Archive failure;
+lower-nonce successor Safe veto; permanent in-window compromise rejection; and
+zero-capability recovery without living-authority or guardian-SET escalation.
+It uses the actual Artist, Safe and Archive with explicitly typed unit Core and
+governance action facts. It does not establish a complete delayed-Executor graph
+or public-transaction capacity. Closed/dismissed cohorts, later estate or recovery
+histories, nonempty supersession and appeals remain separate required work.
+
+Run the focused cases through the repository wrapper in aggregate mode, which
+preserves the inherited unit fixture's original CREATE sequence:
+
+```powershell
+python scripts/dev.py test --suite unit --match-path test/unit/artist/StreamArtistAcceleratedEstateRecoveryActual.t.sol --via-ir --code-size-limit 2000000 --gas-limit 1000000000 --memory-limit 1073741824
+```

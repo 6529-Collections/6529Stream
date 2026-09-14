@@ -1407,3 +1407,29 @@ Artist sanction/confirmation and accepted-or-sanctioned consumer migration,
 recovery owner notice/objection evidence, serving-route recovery, remaining
 artist operations and the general multipart archival profile remain explicit
 work until their source and executed integration evidence are accepted.
+
+## Accelerated first-estate historical continuation
+
+The first-estate consumer additionally admits the original early operation-40
+activation authorized by ADR 0031. This extends the historical input profile;
+original activation authorization, coverage and replay admission remain unchanged.
+Execution must be at or after the saved request time. Before the original notice
+deadline the saved action ID and witness hash must both be nonzero; at or after
+the deadline both must be zero, matching the original producer. Its complete
+execution remains committed by the same predecessor Facts hash. No historical
+role, signature or coverage is reauthorized during recovery, and no caller may
+supply a substitute witness for those retained original facts.
+
+All first-estate/current-cause, original vesting and guardian-prefix, unchanged
+plan and bounded capability, empty closure/supersession, arbiter, acceptance,
+replay and veto checks remain. The full saved post-activation window must mature
+without an earlier contest. Actual successor guardian history remains governed
+by the preceding admission extension. Original operation-40 records are permanent;
+new operation-35 effects retain the one-revision/two-receipt atomic boundary.
+
+Focused tests exercise actual Artist/Safe/Archive acceleration and recovery,
+retained lower-nonce veto, permanent in-window rejection and zero-capability
+limits, with typed unit Core/action facts. The [preparation guide](../architecture/artist-recovery-preparation-v1.md#accelerated-first-estate-continuation)
+records the exact scope. Closed/dismissed and later histories, nonempty estate
+supersession/appeals, full delayed governance and transaction capacity remain
+separate requirements. No operation, ABI, storage or permanent hash domain changes.
