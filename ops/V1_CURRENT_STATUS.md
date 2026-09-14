@@ -7,7 +7,9 @@ below. These workstreams are not a feature-count or percentage denominator.
 
 The supported RC1 is already deployed on Sepolia from
 `569bf87f1fa808787d324f6e1582924b5ccf1d40`. The expanded full-v1 candidate is not
-complete. No new funding or owner decision is required for current work.
+complete. No new funding is required. Automatic approval review has blocked
+local inherited/global primary-freeze implementation pending a more specific
+owner approval; the remaining work continues.
 
 | Workflow | Demonstrated or integrated | Next acceptance / remaining implementation |
 | --- | --- | --- |
@@ -45,8 +47,8 @@ client helpers (`4bfe443f`) prepare both approval domains, actual-getter readbac
 activation, bidding and settlement calls for Safe; all 72 client tests pass.
 All 11 four-format museum package tests pass on public synthetic input. The
 recorded-account package is now integrated (`c91bd027`), with all 30 package/account
-replay tests passing. It exports Linked Art; the other three formats remain
-explicitly unsupported for recorded inputs. Independent source review found no
+replay tests passing. That initial checkpoint exported Linked Art only; the newer recorded-format
+adapters described below supersede its limitation. Independent source review found no
 actionable mismatch in the new custody client encoding and Safe call helpers.
 
 The prior estate-rotation snapshot now passes all 28 actual Artist/Safe/Archive
@@ -57,11 +59,32 @@ gate stopped before any of its 120 tests. A fixed linked worker extraction is
 integrated (`97e53de0`); its final size and the later rights batch runtime still
 require the consolidated native build.
 
-Artist work now covers guardian supersession through historical and estate
-vesting. Revenue work continues explicit default TEMPLATE families after the
-house worker extraction. Museum work continues recorded-format adapters after
-recorded-account packaging. Root owns operator/client completion and remaining entropy /
-genesis implementation, followed by consolidated current-stack/Safe acceptance.
+The next source batch integrates guardian supersession across historical vesting
+(`2071ebc9`), repeated recovery (`4489d706`), default TEMPLATE commerce
+(`7180d9eb`) and exact TEMPLATE clear/freeze consent (`db6de32c`). Original
+Artist operation 15 and its signing domain are preserved for economics approval.
+
+Recorded PREMIS (`2da5da31`), IIIF (`d3acf4fa`) and LIDO (`cb9a05d5`) are
+integrated with exact selected source facts and explicit missing-data reports.
+Focused adapter/compatibility runs pass 37 PREMIS, 37 IIIF and 13 LIDO cases;
+these sets overlap and must not be summed. Complete positive controls are
+synthetic. A complete positive export captured from the actual current stack
+is the next Museum acceptance target.
+
+The native immediate-sale source now funds the live declared reveal fee apart
+from official revenue, attempts AT_MINT after the mint and credits unused fee
+allowance to the payer. The original purchase/signing surfaces remain, with an
+additive quote/refund interface and explicit deployment gas parameter. Ten new
+focused cases and the actual-current Safe success/fallback scenarios are
+written; native runtime, final size and transaction gas remain pending. Read
+[the caller guide](../docs/native-immediate-reveal.md) for the payment and Safe
+refund semantics. The combined ABI/type check covers 877 Solidity inputs.
+
+Artist work now implements PLATFORM_WORKS declaration/claims/correction.
+Revenue work proceeds to inherited/global primary freezes and descendant
+accounting. Museum work builds the actual-current complete-media capture.
+Root owns immediate-sale entropy, operator/client and genesis completion,
+followed by consolidated current-stack/Safe acceptance.
 
 ## Current integration batch
 
