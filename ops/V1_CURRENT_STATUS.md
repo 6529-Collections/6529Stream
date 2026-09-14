@@ -37,11 +37,31 @@ and token-PROFILE custody activation/settlement (`9d9147e1`). All 792 selected
 Solidity source units pass combined ABI/type compilation. The client suite and
 its additional Safe onboarding example pass their lightweight checks.
 
-The two new contract source batches still await runtime acceptance. The
-running frozen integration job predates them; its result cannot validate these
-new sources. Builders continue multiple-rotation/closed-estate histories,
-additional custody-rights families and a complete selected-source museum export
-package while the earlier frozen campaigns finish.
+The next integrated feature batch adds successive/returned-address rotations
+and closed terminal histories (`ce98c9eb`), token TEMPLATE and explicit default
+PROFILE commerce (`80b99ee8`), and an offline four-format museum package
+(`f38cbd4a`). The combined 813-source Solidity ABI/type check passes. New custody
+client helpers (`4bfe443f`) prepare both approval domains, actual-getter readback and explicit
+activation, bidding and settlement calls for Safe; all 72 client tests pass.
+All 11 four-format museum package tests pass on public synthetic input. The
+recorded-account package is now integrated (`c91bd027`), with all 30 package/account
+replay tests passing. It exports Linked Art; the other three formats remain
+explicitly unsupported for recorded inputs. Independent source review found no
+actionable mismatch in the new custody client encoding and Safe call helpers.
+
+The prior estate-rotation snapshot now passes all 28 actual Artist/Safe/Archive
+cases, with typed Core/governance boundaries. This does not validate the later
+multi-rotation history batch. The frozen token-PROFILE custody build compiled,
+but its house measured 24,962 bytes, 386 above the runtime limit, so the size
+gate stopped before any of its 120 tests. A fixed linked worker extraction is
+integrated (`97e53de0`); its final size and the later rights batch runtime still
+require the consolidated native build.
+
+Artist work now covers guardian supersession through historical and estate
+vesting. Revenue work continues explicit default TEMPLATE families after the
+house worker extraction. Museum work continues recorded-format adapters after
+recorded-account packaging. Root owns operator/client completion and remaining entropy /
+genesis implementation, followed by consolidated current-stack/Safe acceptance.
 
 ## Current integration batch
 

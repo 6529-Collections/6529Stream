@@ -37,10 +37,10 @@ pending checks. The immutable RC1 remains the released baseline.
 
 | Owner | Implementation batch |
 | --- | --- |
-| Integrator | Current Artist signing/onboarding client, shared operator wiring and integration; then remaining entropy/genesis gaps |
-| Artist builder | Multiple estate rotations, terminal closed/dismissed histories and abandonment/veto behavior; then remaining Artist operations |
-| Revenue builder | Known-token custody template families and explicit default-profile routes, preserving token/collection precedence |
-| Fourth engineer | Bounded test-loader performance prototype; then museum/finality feature gaps, with independent review at integration |
+| Integrator | Current Artist/custody client integrated; shared operator wiring and remaining entropy/genesis gaps |
+| Artist builder | Guardian supersession through history and estate vesting; multi-rotation and closed terminal batch integrated as `ce98c9eb` |
+| Revenue builder | Default TEMPLATE commerce; token/default PROFILE batch `80b99ee8` and house read-worker extraction `97e53de0` integrated |
+| Fourth engineer | Next recorded-format adapters after packages `f38cbd4a` / `c91bd027`; bounded independent SDK review at this integration checkpoint |
 
 Comprehensive current-stack/Safe integration, fuzz and stateful campaigns, gas
 conformance, complete genesis inventory, CI and matching new testnet evidence
@@ -48,13 +48,16 @@ follow the integrated implementation batch. Existing frozen runs continue in
 the background and validate only their recorded source. No new date or
 percentage is inferred from these assignments.
 
-Root owns the latest combined graph and governed dynamic-template admission,
-client/operator completion, shared fixtures, CI and the new candidate. Artist
-work continues with recovery after an executed post-estate class-3 rotation.
-Revenue work continues with versioned token-specific custody royalty approval.
-Both builders preserve prior accepted cases and use the independent reviewer.
-The new dynamic and estate-history increments respectively pass all 98 and 22
-focused cases; their actual Artist/Core composition remains a separate gate.
+Root owns the combined graph, shared operator/client work and the new candidate.
+The combined feature source passes an 813-source ABI/type check. Client tests
+pass 72 cases and the four-format museum package passes 11; recorded-account
+packaging and replay pass 30. The earlier estate
+rotation snapshot passes 28 actual Artist/Safe/Archive cases with typed
+Core/governance. The earlier custody snapshot stopped after native compilation
+because its auction house is 386 bytes over the runtime size limit; no test-body
+acceptance follows from that build. The fixed read worker is now integrated;
+final size remains unmeasured while the engineers continue implementation. No duplicate native
+build or per-increment release regeneration is needed.
 
 The following paragraphs retain earlier implementation checkpoints.
 
