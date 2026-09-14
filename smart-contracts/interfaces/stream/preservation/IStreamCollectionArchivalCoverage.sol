@@ -5,7 +5,7 @@ import { StreamArchivalTypes as A } from "./StreamArchivalTypes.sol";
 /// @notice Collection subjects have no fabricated Artist ID. Their envelope binds the collection.
 interface IStreamCollectionArchivalCoverage {
     event CollectionArchivalEnvelopeRecorded(
-        uint256 indexed collectionId, bytes32 indexed envelopeHash, bytes32 indexed evidenceHash
+        uint16 schemaVersion, uint256 indexed collectionId, bytes32 indexed envelopeHash, bytes32 indexed evidenceHash
     );
     function recordCollectionEnvelope(
         uint256 collectionId,

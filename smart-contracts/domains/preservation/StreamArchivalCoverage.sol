@@ -46,7 +46,7 @@ contract StreamArchivalCoverage is
     bytes32 private immutable _endowedNetwork;
     mapping(bytes32 => A.Envelope) private _envelopes;
     event CollectionArchivalEnvelopeRecorded(
-        uint256 indexed collectionId, bytes32 indexed envelopeHash, bytes32 indexed evidenceHash
+        uint16 schemaVersion, uint256 indexed collectionId, bytes32 indexed envelopeHash, bytes32 indexed evidenceHash
     );
     mapping(bytes32 => bytes) private _payloads;
     mapping(bytes32 => A.Family) private _families;
@@ -197,7 +197,7 @@ contract StreamArchivalCoverage is
         _envelopes[hash] = e;
         _payloads[hash] = payload;
         emit ArchivalEnvelopeRecorded(1, hash, e);
-        emit CollectionArchivalEnvelopeRecorded(collectionId, hash, e.evidenceHash);
+        emit CollectionArchivalEnvelopeRecorded(1, collectionId, hash, e.evidenceHash);
     }
 
     function selectCollectionCoverage(bytes32 hash) external {

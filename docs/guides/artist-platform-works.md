@@ -28,6 +28,11 @@ The document is a published allegation or decision, not self-authenticating
 truth. The claim operation places its exact document and proof references in
 the actual Artist Archive and immutable Attribution-owned claim history.
 
+This is the canonical commitment-document profile: the five-word wrapper
+bytes are stored and covered by the two archival families. `narrativeHash`
+is an opaque commitment. The referenced narrative bytes, their availability,
+content and truth are not independently read or proved by these contracts.
+
 Both evidenceHash and reasonHash require published, byte-exact documents and
 current dual-family archival coverage. They may reference the same document.
 Use `recordCollectionEnvelope` with the actual collection ID, artistId zero,
@@ -80,7 +85,9 @@ actual contracts; synthetic observer statements do not prove a network upload.
 Only ABI/type checking has been run for this batch. Runtime, complete linked
 product sizes, isolated transaction gas, paid platform commerce and the full
 current graph remain consolidated validation obligations. No independent C
-source review was performed; C is implementing the recorded-media batch.
+source review was performed; C is implementing the recorded-media batch. B completed
+a bounded source review; its event schema correction is included. This is
+source review, not runtime or deployment-size acceptance.
 
 The pending focused command uses the existing aggregate unit fixture:
 
