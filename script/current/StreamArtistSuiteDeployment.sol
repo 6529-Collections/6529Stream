@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistExtensionFactory
+} from "../../smart-contracts/domains/artist/StreamArtistExtensionFactory.sol";
 
 import { StreamCurrentFinalityGraph } from "./StreamCurrentFinalityGraph.sol";
 import { StreamCurrentGraphCreation } from "./StreamCurrentGraphCreation.sol";
@@ -81,12 +84,12 @@ abstract contract StreamArtistSuiteDeployment is StreamCurrentFinalityGraph {
             )
         );
         address nextCoordinator = _reserveCurrentCoordinator(_artistDeploymentSender());
-        artistRegistry = new StreamArtistOnboardingRegistry(
-            core_,
-            manager_,
-            nextCoordinator,
-            executor_,
-            address(archivalCoverage),
+        StreamArtistExtensionFactory artistExtensions = new StreamArtistExtensionFactory();
+        artistRegistry = _deploySplitArtistFacade(
+            _graphCreation(StreamCurrentGraphCreation.Kind.StreamArtistOnboardingRegistry),
+            _artistDeploymentSender(),
+            address(artistExtensions),
+            [core_, manager_, nextCoordinator, executor_, address(archivalCoverage)],
             deploymentHash,
             "urn:6529stream:development:artist",
             keccak256("development artist module")
@@ -103,10 +106,11 @@ abstract contract StreamArtistSuiteDeployment is StreamCurrentFinalityGraph {
                 s.registry, nextCoordinator, s.archive, core_, manager_
             )
         );
-        s.owners[2] = address(
-            new StreamArtistIdentityAuthority(
-                s.registry, nextCoordinator, s.archive, core_, manager_
-            )
+        s.owners[2] = _deploySplitArtistIdentity(
+            _graphCreation(StreamCurrentGraphCreation.Kind.StreamArtistIdentityAuthority),
+            _artistDeploymentSender(),
+            address(artistExtensions),
+            [s.registry, nextCoordinator, s.archive, core_, manager_]
         );
         s.owners[3] = address(
             new StreamArtistAcceptanceLifecycle(

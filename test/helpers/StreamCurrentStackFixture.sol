@@ -146,6 +146,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
         _activateRevealAuthority();
         _prepareArtistOnboarding();
         _onboardFixtureArtist(artist);
+        _expandArtistReadBudget();
         _configureMintPhase(PHASE, address(sale));
         _configureMintPhase(AUCTION_PHASE, address(auction));
         _configureAdditionalProducts();
@@ -278,6 +279,15 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
     /// @dev Ordinary examples retain ten tokens; stateful campaigns can raise this test-only limit.
     function _fixtureSupplyLimit() internal pure virtual returns (uint64) {
         return 10;
+    }
+
+    function _expandArtistReadBudget() private {
+        StreamArtistActivationPlan.Plan memory plan =
+            StreamArtistActivationPlan.buildReadBudgetExpansion(manager);
+        _executeInitialBatch(GenesisBatch(1, plan.calls, plan.callDatas));
+        (uint256 value,,, uint64 revision) =
+            manager.gasParameterInfo(manager.GGP_ARTIST_AUTHORITY_GAS_LIMIT());
+        require(value == 600_000 && revision == 3, "actual second governed artist read expansion");
     }
 
     function _configureMintPhase(bytes32 phase, address phaseExecutor) internal {

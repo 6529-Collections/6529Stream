@@ -121,16 +121,14 @@ contract StreamArtistOnboardingTest is ArtistOnboardingFixture {
             "read exposes notice without consuming recovery"
         );
         require(
-            owner.identityWriterExtension() == avm.computeCreateAddress(address(owner), 1)
-                && owner.identityEstateExtension() == avm.computeCreateAddress(address(owner), 2)
-                && ingress.registryWriterExtension()
-                    == avm.computeCreateAddress(address(ingress), 1)
-                && ingress.registryReadExtension() == avm.computeCreateAddress(address(ingress), 2)
-                && ingress.registryFinalityReadExtension()
-                    == avm.computeCreateAddress(address(ingress), 3)
+            _originalExtension(owner.identityWriterExtension(), address(owner), 1)
+                && _originalExtension(owner.identityEstateExtension(), address(owner), 2)
+                && _originalExtension(ingress.registryWriterExtension(), address(ingress), 4)
+                && _originalExtension(ingress.registryReadExtension(), address(ingress), 5)
+                && _originalExtension(ingress.registryFinalityReadExtension(), address(ingress), 6)
                 && address(coordinator.reads())
                     == avm.computeCreateAddress(address(coordinator), 1),
-            "actual original creator and child nonce pins"
+            "original factory births and Coordinator child nonce"
         );
         require(
             address(ingress).code.length <= 24576 && address(coordinator).code.length <= 24576
@@ -5617,13 +5615,13 @@ contract StreamArtistOnboardingTest is ArtistOnboardingFixture {
         _all();
         StreamArtistIdentityAuthority identity = StreamArtistIdentityAuthority(suite.owners[2]);
         address writer = identity.identityWriterExtension();
-        require(writer == avm.computeCreateAddress(address(identity), 1), "Identity child CREATE");
+        require(_originalExtension(writer, address(identity), 1), "Identity child CREATE");
         require(
-            ingress.registryWriterExtension() == avm.computeCreateAddress(address(ingress), 1),
+            _originalExtension(ingress.registryWriterExtension(), address(ingress), 4),
             "facade writer CREATE"
         );
         require(
-            ingress.registryReadExtension() == avm.computeCreateAddress(address(ingress), 2),
+            _originalExtension(ingress.registryReadExtension(), address(ingress), 5),
             "facade reader CREATE"
         );
         require(
@@ -7343,7 +7341,7 @@ contract StreamArtistOnboardingTest is ArtistOnboardingFixture {
             )
         );
         bytes memory deploymentCall =
-            abi.encodeWithSignature("deployReader(address)", address(coordinator));
+            abi.encodeWithSignature("deployReader(address,address)", address(ingress), address(coordinator));
         vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
         this.executeTargetSafe(address(StreamArtistRegistryExtensionDeployment), deploymentCall);
         require(
@@ -7391,10 +7389,9 @@ contract StreamArtistOnboardingTest is ArtistOnboardingFixture {
             "actual compiler-linked constructor helper fits"
         );
         require(
-            reader == avm.computeCreateAddress(address(ingress), 2)
-                && ingress.registryWriterExtension()
-                    == avm.computeCreateAddress(address(ingress), 1),
-            "same creator and child nonces"
+            _originalExtension(reader, address(ingress), 5)
+                && _originalExtension(ingress.registryWriterExtension(), address(ingress), 4),
+            "exact factory creator and fixed facade host"
         );
         require(
             address(ingress).code.length <= 24576 && suite.owners[2].code.length <= 24576,
@@ -10631,11 +10628,10 @@ contract StreamArtistOnboardingTest is ArtistOnboardingFixture {
             "actual Consent child nonce1"
         );
         require(
-            ingress.registryWriterExtension() == avm.computeCreateAddress(address(ingress), 1)
-                && ingress.registryReadExtension() == avm.computeCreateAddress(address(ingress), 2)
-                && ingress.registryFinalityReadExtension()
-                    == avm.computeCreateAddress(address(ingress), 3),
-            "facade child nonces1/2/3"
+            _originalExtension(ingress.registryWriterExtension(), address(ingress), 4)
+                && _originalExtension(ingress.registryReadExtension(), address(ingress), 5)
+                && _originalExtension(ingress.registryFinalityReadExtension(), address(ingress), 6),
+            "original factory facade births"
         );
     }
 
@@ -11382,12 +11378,13 @@ contract StreamArtistOnboardingTest is ArtistOnboardingFixture {
             "actual deployed product limits"
         );
         require(
-            writer == avm.computeCreateAddress(identity, 1),
-            "Identity remains exact child creator nonce1"
+            _originalExtension(writer, identity, 1),
+            "original factory birth and fixed Identity host"
         );
         emit DismissalIdentityDeploymentProof(helper, helper.code, identity, writer);
         bytes memory direct = abi.encodeWithSignature(
-            "deployWriter(address,address,address,address,address)",
+            "deployWriter(address,address,address,address,address,address)",
+            identity,
             address(ingress),
             address(coordinator),
             address(archive),

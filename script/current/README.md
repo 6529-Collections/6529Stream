@@ -461,3 +461,56 @@ pwsh -NoProfile -File scripts/test_current_stack_sepolia.ps1
 pwsh -NoProfile -File scripts/test_current_stack_transaction_journal.ps1
 pwsh -NoProfile -File scripts/test_current_stack_launch_status.ps1
 ```
+
+
+## Separate Artist extension deployments
+
+The new Artist constructor candidate predeploys the facade and Identity children
+through the fixed `StreamArtistExtensionFactory`. Every child call is a separate
+transaction. Each host has its own original operator-owned CREATE slot and checks
+all three original factory receipts before construction completes. Preserve the
+original phase-one broadcast journal and compiler-linked library addresses during
+retry. These additional slots finish in phase one; the ten later graph slots and
+the versioned checkpoint retain their existing meanings.
+
+The focused constructor and original Safe-ingress tests are:
+
+```powershell
+forge test --via-ir --match-path test/unit/artist/StreamArtistDeploymentSplit.t.sol --code-size-limit 2000000 --gas-limit 1000000000 -vvv
+```
+
+The large limits apply to the aggregate test harness. This existing unit fixture
+predicts direct CREATE nonces within one call frame; `--isolate` changes its sender
+nonce semantics and is not supported by this focused command. Its per-deployment
+call assertions are diagnostics. The actual operator uses original one-use slots
+across transactions. Run its receipt checks with the new candidate artifacts:
+
+```powershell
+python scripts/test_current_graph_resume.py --project . --evidence artifacts/current-graph-capacity --transaction-gas-cap 16777216
+```
+
+That command starts a fresh local chain with the target block cap, verifies every
+actual deployment and governance transaction limit and receipt, and rejects a
+nonce gap or duplicate. The output remains scoped to local Actor governance and
+partial product selection; it does not claim Safe, testnet or full ceremony
+capacity. Complete production runtime/initcode checks remain required.
+
+The complete graph also applies the second original governed Artist read-budget
+plan, from 300,000 at revision 2 to 600,000 at revision 3, before configuring mint
+phases. The initial activation remains unchanged. After building and preparing
+current graph artifacts as described in [tooling](../../docs/tooling.md), run the
+cold failure and identical-retry case explicitly:
+
+```powershell
+$env:FOUNDRY_PROFILE = 'current'
+$env:STREAM_EXPECT_COLD_ARTIST_FAILURE = 'true'
+forge test --match-contract '^StreamNativeFinalityAssemblyTest$' --match-test '^testActualColdArtistReadBudgetFailureGovernedExpansionAndIdenticalMintRetry\(' --isolate -vvv
+Remove-Item Env:STREAM_EXPECT_COLD_ARTIST_FAILURE
+Remove-Item Env:FOUNDRY_PROFILE
+```
+
+The captured isolated run must record the enabled flag and exactly one executed
+passing case. Ordinary aggregate runs explicitly skip that cold-only negative
+case; their regular paid-mint and ceremony cases still execute the real governed
+expansion. A skipped case, a successful warm call or an ABI-only check does not
+establish cold-call capacity.

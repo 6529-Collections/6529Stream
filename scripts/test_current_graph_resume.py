@@ -3,8 +3,8 @@
 
 Requires a prepared native current checkout (including the exact current-graph
 projections), Foundry, eth_abi and eth_hash. It never builds or prepares artifacts.
-Only public unlocked local accounts are used. This is an integration rehearsal,
-not a transaction-capacity or testnet deployment result.
+Only public unlocked local accounts are used. The optional transaction cap validates
+every actual local deployment/governance receipt; it does not prove Safe or testnet execution.
 """
 from __future__ import annotations
 
@@ -34,6 +34,7 @@ DISCOVERY = ["eventCatalogHash", "compatibilityMatrixHash", "numericIdCatalogHas
              "schemaCatalogHash", "canonicalizationCatalogHash", "specBundleHash",
              "reconstructionClientHash"]
 SCRIPT = "script/current/DeployCurrentStack.s.sol:DeployCurrentStack"
+TRANSACTION_CAP = 16_777_216
 
 
 def require(condition, message):
@@ -240,6 +241,17 @@ class RPCError(RuntimeError):
         self.error = error
 
 
+def check_transaction_capacity(transaction, receipt, cap):
+    require(receipt["transactionHash"].lower() == transaction["hash"].lower()
+            and receipt["blockHash"] == transaction["blockHash"], "receipt transaction identity")
+    used, limit = int(receipt["gasUsed"], 16), int(transaction["gas"], 16)
+    require(int(receipt["status"], 16) == 1 and 0 < used <= limit, "successful metered transaction")
+    if cap:
+        require(cap == TRANSACTION_CAP and limit <= cap and used < cap,
+                "actual transaction gas limit and usage below target")
+    return used, limit
+
+
 class Rehearsal:
     def __init__(self, args):
         self.args = args
@@ -250,6 +262,8 @@ class Rehearsal:
         self.url = f"http://127.0.0.1:{args.port}"
         self.abi = ABI(self.project, self.project / args.out)
         self.actions, self.transactions, self.invocations = [], [], []
+        self.capacity_receipts = []
+        require(args.transaction_gas_cap in (0, TRANSACTION_CAP), "supported transaction cap")
         self.rpc_id, self.anvil = 0, None
         self.initial = self.inventory()
         self.driver_hash = sha(Path(__file__))
@@ -298,11 +312,33 @@ class Rehearsal:
                 return receipt, attempts
             time.sleep(.05)
 
+    def retain_capacity(self, transaction, receipt, label):
+        used, limit = check_transaction_capacity(transaction, receipt, self.args.transaction_gas_cap)
+        block = self.rpc("eth_getBlockByHash", [receipt["blockHash"], False])
+        require(block and receipt["transactionHash"] in block["transactions"], "mined transaction in original block")
+        if self.args.transaction_gas_cap:
+            require(int(block["gasLimit"], 16) == self.args.transaction_gas_cap, "actual capped block")
+        require(transaction["from"].lower() == self.operator
+                and transaction["hash"] not in {r["transaction"]["hash"] for r in self.capacity_receipts},
+                "one original operator receipt")
+        if self.capacity_receipts:
+            require(int(transaction["nonce"], 16) == int(self.capacity_receipts[-1]["transaction"]["nonce"], 16) + 1,
+                    "consecutive original operator nonce")
+        else:
+            require(int(transaction["nonce"], 16) == 0, "receipt ledger starts at original fresh nonce zero")
+        self.capacity_receipts.append({"label": label, "transaction": transaction, "receipt": receipt,
+                                       "gasUsed": used, "gasLimit": limit})
+        self.save("capacity-receipts.json", self.capacity_receipts)
+
     def send(self, target, data, label):
         nonce = self.rpc("eth_getTransactionCount", [self.operator, "latest"])
         transaction = {"from": self.operator, "to": target, "data": hx(data), "nonce": nonce, "value": "0x0"}
         gas = int(self.rpc("eth_estimateGas", [transaction]), 16)
-        transaction["gas"] = hex(gas + gas // 5 + 100_000)
+        padded = gas + gas // 5 + 100_000
+        if self.args.transaction_gas_cap:
+            require(gas < self.args.transaction_gas_cap, "direct transaction estimate below target")
+            padded = min(padded, self.args.transaction_gas_cap)
+        transaction["gas"] = hex(padded)
         transaction_hash = self.rpc("eth_sendTransaction", [transaction])
         receipt, polls = self.transaction_receipt(transaction_hash)
         if not receipt or int(receipt["status"], 16) != 1:
@@ -320,6 +356,7 @@ class Rehearsal:
         require(actual["from"].lower() == self.operator and actual["to"].lower() == target.lower()
                 and actual["input"].lower() == hx(data) and actual["nonce"] == nonce
                 and int(actual["value"], 16) == 0, "confirmed exact public transaction")
+        self.retain_capacity(actual, receipt, label)
         self.transactions.append({"label": label, "transaction": actual, "receipt": receipt, "receiptPolls": polls})
         self.save("transactions.json", self.transactions)
         return receipt
@@ -341,7 +378,7 @@ class Rehearsal:
                    "--sender", sender, "--unlocked", "--json", "--offline"]
         if broadcast:
             command += ["--broadcast", "--slow", "--gas-estimate-multiplier",
-                        "600" if name == "resume" else "130"]
+                        "600" if name == "resume" and not self.args.transaction_gas_cap else "130"]
         ordinal = len(self.invocations)
         log_path = self.evidence / f"invocation-{ordinal}-{name}.log"
         with log_path.open("wb") as log:
@@ -386,10 +423,17 @@ class Rehearsal:
             saved = json.loads(raw)
             require(saved["receipts"] and all(int(r["status"], 16) == 1 for r in saved["receipts"]),
                     "all broadcast receipts successful")
+            transaction_hashes = [t["hash"].lower() for t in saved["transactions"]]
+            receipt_hashes = [r["transactionHash"].lower() for r in saved["receipts"]]
+            require(len(transaction_hashes) == len(set(transaction_hashes)) == len(receipt_hashes)
+                    == len(set(receipt_hashes)) and set(transaction_hashes) == set(receipt_hashes),
+                    "exact complete broadcast transaction and receipt hash sets")
             for receipt in saved["receipts"]:
                 onchain = self.rpc("eth_getTransactionReceipt", [receipt["transactionHash"]])
                 require(onchain and onchain["blockHash"] == receipt["blockHash"]
                         and int(onchain["status"], 16) == 1, "broadcast receipt confirmed on same chain")
+                transaction = self.rpc("eth_getTransactionByHash", [receipt["transactionHash"]])
+                self.retain_capacity(transaction, onchain, f"{name}:{transaction['nonce']}")
         self.save(f"invocation-{ordinal}-result.json", result)
         return result
 
@@ -523,7 +567,8 @@ class Rehearsal:
         with socket.socket() as probe:
             require(probe.connect_ex(("127.0.0.1", self.args.port)) != 0, "local port must be unused")
         command = [str(self.args.anvil), "--host", "127.0.0.1", "--port", str(self.args.port),
-                   "--chain-id", "31337", "--hardfork", "paris", "--gas-limit", "100000000", "--quiet"]
+                   "--chain-id", "31337", "--hardfork", "paris", "--gas-limit",
+                   str(self.args.transaction_gas_cap or 100_000_000), "--quiet"]
         # Suppress Anvil's test-key banner: only public accounts and receipts are retained.
         self.anvil = subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                                       creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
@@ -540,6 +585,8 @@ class Rehearsal:
             accounts = [a.lower() for a in self.rpc("eth_accounts")]
             require(len(accounts) >= 6 and self.rpc("eth_blockNumber") == "0x0", "fresh local chain")
             self.operator = accounts[0]
+            require(int(self.rpc("eth_getTransactionCount", [self.operator, "latest"]), 16) == 0,
+                    "original fresh operator nonce zero")
             self.environment = {"FOUNDRY_PROFILE": self.args.profile, "STREAM_DEPLOYER": self.operator,
                                 "STREAM_ARTIST": accounts[1], "STREAM_PLATFORM_SIGNER": accounts[2],
                                 "STREAM_PROTOCOL_TREASURY": accounts[3],
@@ -548,7 +595,8 @@ class Rehearsal:
                                              (accounts[5], domain("local observer two"))])]))}
             self.save("local-chain.json", {"command": command, "pid": self.anvil.pid,
                       "operator": self.operator, "configuration": self.environment,
-                      "limits": "100M local block, Paris; no shipping transaction-capacity claim"})
+                      "limits": {"blockGas": self.args.transaction_gas_cap or 100_000_000,
+                                 "transactionGasCap": self.args.transaction_gas_cap, "hardfork": "paris"}})
             phase1 = self.script("run", broadcast=True)[0]
             require(phase1["schemaVersion"] == 3 and phase1["phase"] == 1
                     and phase1["operator"] == self.operator and not phase1["graphPrerequisitesSelected"], "explicit original phase one")
@@ -571,15 +619,37 @@ class Rehearsal:
             journal = json.loads((self.evidence / "invocation-0-broadcast.json").read_bytes())
             slots = [t["contractAddress"].lower() for t in journal["transactions"]
                      if t.get("contractName") == "StreamDeploymentSlot"]
-            require(len(slots) == len(set(slots)) == 10 and phase1["coordinatorSlot"] in slots, "ten original slots")
+            require(len(slots) == len(set(slots)) == 12 and phase1["coordinatorSlot"] in slots,
+                    "two completed Artist and ten reserved graph slots")
+            consumed = [slot for slot in slots if self.read("StreamDeploymentSlot", slot, "consumed")[0]]
+            require(len(consumed) == 2, "only both Artist slots completed in phase one")
+            artist_slots = {}
+            for slot in consumed:
+                product = self.read("StreamDeploymentSlot", slot, "product")[0]
+                require(self.read("StreamDeploymentSlot", slot, "operator")[0] == self.operator
+                        and self.rpc("eth_getTransactionCount", [slot, "latest"]) == "0x2"
+                        and self.rpc("eth_getTransactionCount", [product, "latest"]) == "0x1"
+                        and 0 < len(self.code(product)) <= 24576, "original single-use Artist slot and child-free host")
+                artist_slots[product] = {"slot": slot, "slotRuntimeHash": keccak(self.code(slot)),
+                                         "runtimeHash": keccak(self.code(product))}
+            require(phase1["artistRegistry"] in artist_slots, "original facade slot")
+            identity = next(host for host in artist_slots if host != phase1["artistRegistry"])
+            require(self.read("StreamArtistIdentityAuthority", identity, "artistRegistry")[0] == phase1["artistRegistry"]
+                    and self.read("StreamArtistIdentityAuthority", identity, "core")[0] == core
+                    and self.read("StreamArtistIdentityAuthority", identity, "operationCoordinator")[0] == phase1["reservedCoordinator"],
+                    "original Identity host pins")
             original_slots = {}
             for slot in slots:
+                if slot in consumed:
+                    continue
                 product = self.read("StreamDeploymentSlot", slot, "product")[0]
                 require(self.read("StreamDeploymentSlot", slot, "operator")[0] == self.operator
                         and not self.read("StreamDeploymentSlot", slot, "consumed")[0]
                         and self.rpc("eth_getTransactionCount", [slot, "latest"]) == "0x1"
                         and not self.code(product), "original unconsumed nonce-one slot")
                 original_slots[slot] = {"product": product, "runtimeHash": keccak(self.code(slot))}
+            require(len(original_slots) == 10, "exact ten original late graph slots")
+            self.save("artist-slots.json", artist_slots)
             self.script("resume", [self.checkpoint], rejection="executed original graph pointer selection")
             self.script("resume", [self.checkpoint], operator=accounts[1], rejection="checkpoint operator")
             self.admit_catalog(phase1["catalogAdmissionIntent"])
@@ -606,6 +676,7 @@ class Rehearsal:
             require(legacy["schemaVersion"] == 2 and legacy["core"] == core and legacy["executor"] == self.executor
                     and legacy["artistRegistry"] == phase1["artistRegistry"]
                     and legacy["artistCoordinator"] == phase1["reservedCoordinator"]
+                    and legacy["artistOwners"][2] == identity
                     and legacy["metadata"] == phase1["metadataRouter"] and legacy["provider"] == phase1["entropyProvider"]
                     and legacy["foundationInitialized"] and not legacy["productsActivated"],
                     "legacy meanings and partial product-selection output preserved")
@@ -618,14 +689,26 @@ class Rehearsal:
                         and self.read("StreamDeploymentSlot", slot, "consumed")[0]
                         and self.rpc("eth_getTransactionCount", [slot, "latest"]) == "0x2"
                         and 0 < len(self.code(old["product"])) <= 24576, "same original consumed slot/runtime")
+            for host, original in artist_slots.items():
+                require(keccak(self.code(host)) == original["runtimeHash"]
+                        and keccak(self.code(original["slot"])) == original["slotRuntimeHash"]
+                        and self.read("StreamDeploymentSlot", original["slot"], "product")[0] == host
+                        and self.read("StreamDeploymentSlot", original["slot"], "consumed")[0],
+                        "same completed phase-one Artist slots after resume")
+            require(self.capacity_receipts and all(r["gasUsed"] > 0 for r in self.capacity_receipts)
+                    and int(self.rpc("eth_getTransactionCount", [self.operator, "latest"]), 16)
+                        == len(self.capacity_receipts), "complete original operator nonce range metered")
             require(self.read("StreamCurrentGraphCheckpoint", self.checkpoint, "payload")[0] == checkpoint_raw,
                     "checkpoint unchanged through governance and fresh resume")
             require(len({v["pid"] for v in self.invocations}) == len(self.invocations), "separate OS invocation identities")
             self.save("result.json", {"status": "PASS", "phase1": phase1, "phase2": phase2,
                       "originalSlots": original_slots, "actions": len(self.actions), "invocations": self.invocations,
                       "inputsUnchanged": self.inventory() == self.initial,
-                      "localBroadcastGasEstimateMultiplier": {"run": 130, "resume": 600},
-                      "transactionCapacityAccepted": False,
+                      "localBroadcastGasEstimateMultiplier": {"run": 130, "resume": 130 if self.args.transaction_gas_cap else 600},
+                      "transactionGasCap": self.args.transaction_gas_cap,
+                      "transactionCount": len(self.capacity_receipts),
+                      "maximumReceiptGas": max(r["gasUsed"] for r in self.capacity_receipts),
+                      "transactionCapacityAccepted": bool(self.args.transaction_gas_cap),
                       "scope": "actual local Actor/Executor governance and fresh-process checkpoint resume; not Safe or testnet execution"})
         except Exception:
             try:
@@ -651,6 +734,8 @@ def main():
     parser.add_argument("--forge", type=Path, default=Path("forge"))
     parser.add_argument("--anvil", type=Path, default=Path("anvil"))
     parser.add_argument("--port", type=int, default=18749)
+    parser.add_argument("--transaction-gas-cap", type=int, choices=[0, TRANSACTION_CAP], default=0,
+                        help="0 keeps the legacy local harness; 16777216 requires all actual deployment/governance transactions to fit")
     args = parser.parse_args()
     rehearsal = Rehearsal(args)
     try:

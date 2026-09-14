@@ -9,6 +9,7 @@
   "StreamArtistIdentityAuthority": "smart-contracts/domains/artist/StreamArtistIdentityAuthority.sol",
   "StreamArtistOnboardingCoordinator": "smart-contracts/domains/artist/StreamArtistOnboardingCoordinator.sol",
   "StreamArtistOnboardingRegistry": "smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol",
+  "StreamArtistOwner": "smart-contracts/domains/artist/StreamArtistOwner.sol",
   "StreamArtistPayoutLifecycle": "smart-contracts/domains/artist/StreamArtistPayoutLifecycle.sol",
   "StreamArtistRegistryValidatorBase": "smart-contracts/domains/artist/StreamArtistRegistryValidatorBase.sol",
   "StreamArtworkFinalityRegistry": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistExtensionFactory } from "../../../smart-contracts/domains/artist/StreamArtistExtensionFactory.sol";
 import "./StreamArtistGuardianHeadSelectionActual.t.sol";
 import {
     ArtistUnitCore,
@@ -163,10 +164,18 @@ abstract contract ArtistGuardianAppealFixture is StreamArtistGuardianHeadSelecti
         suite.primaryRevenueClass = PRIMARY;
         _deployEstateArchival(address(core), governance);
         sanctionFixture = new ArtistSanctionFinalityFixture();
+        artistExtensionFactory = new StreamArtistExtensionFactory();
         uint256 nonce = avm.getNonce(address(this));
         address predictedRegistry = avm.computeCreateAddress(address(this), nonce);
         address predictedArchive = avm.computeCreateAddress(address(this), nonce + 1);
         address predictedCoordinator = avm.computeCreateAddress(address(this), nonce + 12);
+        // Factory child CREATEs do not consume this monolithic fixture's CREATE nonce.
+        address[3] memory facadeChildren;
+        address[3] memory identityChildren;
+        address predictedIdentity = avm.computeCreateAddress(address(this), nonce + 4);
+        for (uint8 i; i < 3; ++i) facadeChildren[i] = artistExtensionFactory.deployRegistry(i + 4, predictedRegistry, predictedCoordinator);
+        for (uint8 i; i < 3; ++i) identityChildren[i] = artistExtensionFactory.deployIdentity(i + 1, [predictedIdentity,predictedRegistry,predictedCoordinator,predictedArchive,suite.core,suite.mintManager]);
+
         ingress = new StreamArtistOnboardingRegistry(
             suite.core,
             suite.mintManager,
@@ -175,7 +184,9 @@ abstract contract ArtistGuardianAppealFixture is StreamArtistGuardianHeadSelecti
             address(estateCoverageProvider),
             keccak256("unit deployment"),
             "urn:artist-unit",
-            keccak256("unit manifest")
+            keccak256("unit manifest"),
+            address(artistExtensionFactory),
+            facadeChildren
         );
         archive = new StreamArtistArchiveV2(address(ingress), predictedCoordinator);
         suite.registry = address(ingress);
@@ -205,7 +216,9 @@ abstract contract ArtistGuardianAppealFixture is StreamArtistGuardianHeadSelecti
                     predictedCoordinator,
                     predictedArchive,
                     suite.core,
-                    suite.mintManager
+                    suite.mintManager,
+                    address(artistExtensionFactory),
+                    identityChildren
                 )
             );
         } else {
@@ -215,7 +228,9 @@ abstract contract ArtistGuardianAppealFixture is StreamArtistGuardianHeadSelecti
                     predictedCoordinator,
                     predictedArchive,
                     suite.core,
-                    suite.mintManager
+                    suite.mintManager,
+                    address(artistExtensionFactory),
+                    identityChildren
                 )
             );
         }

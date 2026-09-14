@@ -117,3 +117,40 @@ The supported artist profile remains Solidity 0.8.19, via IR, optimizer 200,
 Paris, with bytecode hash and CBOR disabled. Both the prior and new non-IR
 snapshots retain the existing stack-depth failure in `StreamArtistRotationState.stage`;
 the succession result does not establish a new non-IR deployment profile.
+
+
+## Separate deployment transactions
+
+The next undeployed candidate separates the six Identity and facade extension
+CREATEs from host construction. The earlier creator/nonce measurements above
+remain evidence for their original candidates. Their constructor-created child
+rule is superseded only for this new deployment shape; semantic ownership,
+physical storage, immutable routing and the original caller guards remain.
+
+A permissionless, fixed-code `StreamArtistExtensionFactory` invokes six
+compiler-linked, typed creation libraries. Each call creates one extension for
+an explicit future host and retains a write-once receipt keyed by the actual
+child address. The receipt binds kind, host, chain, every constructor argument
+and the runtime hash observed after successful creation. The factory has no
+host-wide reservation, arbitrary implementation input or receipt writer.
+
+Each host constructor requires the exact compiler-linked factory runtime and
+its original receipts for all three children, including their current runtime
+hashes. Identity also joins the recovery child's captured Executor and codehash
+to the current canonical authority. A child cannot become a replacement through
+later storage configuration. Hosts initialize their own original genesis state
+and become usable only after all constructor checks succeed.
+
+Cross-transaction deployment uses an original operator-owned one-use CREATE
+slot for each future host. Child creation therefore cannot shift the host's
+address. The operator preserves the original linked code and broadcast journal
+through a phase-one retry. Monolithic unit fixtures may retain their verified
+fixture CREATE sequence because calls to the child factory consume only that
+factory's CREATE nonces. Recovery's two grandchildren, Coordinator's reader and
+Consent's writer retain their existing nested creation semantics.
+
+Acceptance requires separate deployment transaction gas and code-size checks
+for the factory, linked libraries, children and hosts, plus wrong-host, wrong-kind,
+wrong-configuration, runtime-change and authority-drift failures with healthy
+retry. Prior aggregate workflow acceptance does not establish this candidate's
+shipping capacity.

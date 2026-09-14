@@ -2,9 +2,10 @@
 pragma solidity ^0.8.19;
 import "./StreamArtistIdentityRecoveryExtension.sol";
 
-/// @notice Fixed third child construction; the original two Identity child nonces remain unchanged.
+/// @notice Fixed linked construction for an explicitly bound future Identity host.
 library StreamArtistRecoveryExtensionDeployment {
     function deployRecoveryWriter(
+        address host,
         address registry,
         address coordinator,
         address archive,
@@ -13,7 +14,7 @@ library StreamArtistRecoveryExtensionDeployment {
     ) public returns (address) {
         return address(
             new StreamArtistIdentityRecoveryExtension(
-                address(this), registry, coordinator, archive, core, manager
+                host, registry, coordinator, archive, core, manager
             )
         );
     }

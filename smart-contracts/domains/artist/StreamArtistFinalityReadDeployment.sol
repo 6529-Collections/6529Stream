@@ -2,9 +2,9 @@
 pragma solidity ^0.8.19;
 import "./StreamArtistRegistryFinalityReadExtension.sol";
 
-/// @notice Compiler-linked CREATE preserves the facade as creator and its third child nonce.
+/// @notice Fixed linked construction for an explicitly bound future facade.
 library StreamArtistFinalityReadDeployment {
-    function deployReader(address coordinator) public returns (address) {
-        return address(new StreamArtistRegistryFinalityReadExtension(address(this), coordinator));
+    function deployReader(address host, address coordinator) public returns (address) {
+        return address(new StreamArtistRegistryFinalityReadExtension(host, coordinator));
     }
 }

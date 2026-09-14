@@ -2,9 +2,10 @@
 pragma solidity ^0.8.19;
 import "./StreamArtistIdentityEstateExtension.sol";
 
-/// @notice Fixed second Identity child construction; delegatecall retains the real Identity creator.
+/// @notice Fixed linked construction for an explicitly bound future Identity host.
 library StreamArtistEstateExtensionDeployment {
     function deployEstateWriter(
+        address host,
         address registry,
         address coordinator,
         address archive,
@@ -13,7 +14,7 @@ library StreamArtistEstateExtensionDeployment {
     ) public returns (address) {
         return address(
             new StreamArtistIdentityEstateExtension(
-                address(this), registry, coordinator, archive, core, manager
+                host, registry, coordinator, archive, core, manager
             )
         );
     }

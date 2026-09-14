@@ -283,23 +283,6 @@ library StreamCurrentGraphCreation {
     }
 
     function creation(Kind kind) internal pure returns (bytes memory) {
-        if (kind == Kind.StreamArchivalCoverage) return type(StreamArchivalCoverage).creationCode;
-        if (kind == Kind.StreamArtistAcceptanceLifecycle) {
-            return type(StreamArtistAcceptanceLifecycle).creationCode;
-        }
-        if (kind == Kind.StreamArtistArchiveV2) return type(StreamArtistArchiveV2).creationCode;
-        if (kind == Kind.StreamArtistAttributionLifecycle) {
-            return type(StreamArtistAttributionLifecycle).creationCode;
-        }
-        if (kind == Kind.StreamArtistBindingLifecycle) {
-            return type(StreamArtistBindingLifecycle).creationCode;
-        }
-        if (kind == Kind.StreamArtistCollaboratorLifecycle) {
-            return type(StreamArtistCollaboratorLifecycle).creationCode;
-        }
-        if (kind == Kind.StreamArtistConsentFinalityLifecycle) {
-            return type(StreamArtistConsentFinalityLifecycle).creationCode;
-        }
         if (kind == Kind.StreamArtistIdentityAuthority) {
             return type(StreamArtistIdentityAuthority).creationCode;
         }
@@ -309,23 +292,11 @@ library StreamCurrentGraphCreation {
         if (kind == Kind.StreamArtistOnboardingRegistry) {
             return type(StreamArtistOnboardingRegistry).creationCode;
         }
-        if (kind == Kind.StreamArtistPayoutLifecycle) {
-            return type(StreamArtistPayoutLifecycle).creationCode;
-        }
-        if (kind == Kind.StreamArtistRegistryValidatorBase) {
-            return type(StreamArtistRegistryValidatorBase).creationCode;
-        }
         if (kind == Kind.StreamArtworkFinalityRegistry) {
             return type(StreamArtworkFinalityRegistry).creationCode;
         }
-        if (kind == Kind.StreamArweaveCheckpointVerifier) {
-            return type(StreamArweaveCheckpointVerifier).creationCode;
-        }
         if (kind == Kind.StreamArweaveObjectCheckpointVerifier) {
             return type(StreamArweaveObjectCheckpointVerifier).creationCode;
-        }
-        if (kind == Kind.StreamAssetPolicyRegistry) {
-            return type(StreamAssetPolicyRegistry).creationCode;
         }
         if (kind == Kind.StreamBundleArchiveCoverage) {
             return type(StreamBundleArchiveCoverage).creationCode;
@@ -345,12 +316,8 @@ library StreamCurrentGraphCreation {
         if (kind == Kind.StreamContentLeafManifest) {
             return type(StreamContentLeafManifest).creationCode;
         }
-        if (kind == Kind.StreamCore) return type(StreamCore).creationCode;
         if (kind == Kind.StreamCoreFinalityAdapter) {
             return type(StreamCoreFinalityAdapter).creationCode;
-        }
-        if (kind == Kind.StreamEntropyCoordinator) {
-            return type(StreamEntropyCoordinator).creationCode;
         }
         if (kind == Kind.StreamExternalArtifactCoverage) {
             return type(StreamExternalArtifactCoverage).creationCode;
@@ -376,16 +343,6 @@ library StreamCurrentGraphCreation {
         if (kind == Kind.StreamFinalityServingHostAdapter) {
             return type(StreamFinalityServingHostAdapter).creationCode;
         }
-        if (kind == Kind.StreamFixedPriceSaleAdapter) {
-            return type(StreamFixedPriceSaleAdapter).creationCode;
-        }
-        if (kind == Kind.StreamGovernanceExecutor) {
-            return type(StreamGovernanceExecutor).creationCode;
-        }
-        if (kind == Kind.StreamMetadataRouter) return type(StreamMetadataRouter).creationCode;
-        if (kind == Kind.StreamMintLedger) return type(StreamMintLedger).creationCode;
-        if (kind == Kind.StreamMintManager) return type(StreamMintManager).creationCode;
-        if (kind == Kind.StreamModuleRegistry) return type(StreamModuleRegistry).creationCode;
         if (kind == Kind.StreamOnchainContentCheckpoint) {
             return type(StreamOnchainContentCheckpoint).creationCode;
         }
@@ -395,16 +352,10 @@ library StreamCurrentGraphCreation {
         if (kind == Kind.StreamRenderCriticalInventory) {
             return type(StreamRenderCriticalInventory).creationCode;
         }
-        if (kind == Kind.StreamRevenueEscrow) return type(StreamRevenueEscrow).creationCode;
-        if (kind == Kind.StreamRevenueResolver) return type(StreamRevenueResolver).creationCode;
         if (kind == Kind.StreamRightsRecordSelection) {
             return type(StreamRightsRecordSelection).creationCode;
         }
-        if (kind == Kind.StreamRoleRegistry) return type(StreamRoleRegistry).creationCode;
-        if (kind == Kind.StreamRoyaltyResolver) return type(StreamRoyaltyResolver).creationCode;
         if (kind == Kind.StreamSchemaRegistry) return type(StreamSchemaRegistry).creationCode;
-        if (kind == Kind.StreamSplitFactory) return type(StreamSplitFactory).creationCode;
-        if (kind == Kind.StreamSystemManifest) return type(StreamSystemManifest).creationCode;
         if (kind == Kind.StreamWorkRecordSelection) {
             return type(StreamWorkRecordSelection).creationCode;
         }

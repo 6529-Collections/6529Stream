@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistExtensionFactory
+} from "../../smart-contracts/domains/artist/StreamArtistExtensionFactory.sol";
 
 import "../regression/legacy/helpers/CharacterizationTestBase.sol";
 import { StreamCurrentFinalityGraph } from "../../script/current/StreamCurrentFinalityGraph.sol";
@@ -62,12 +65,12 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
         s.primaryRevenueClass = PRIMARY_REVENUE_CLASS;
         _deployArtistArchival(core_, executor_, roles_);
         address nextCoordinator = _reserveCurrentCoordinator(address(this));
-        artists = new StreamArtistOnboardingRegistry(
-            core_,
-            manager_,
-            nextCoordinator,
-            executor_,
-            address(artistArchivalCoverage),
+        StreamArtistExtensionFactory artistExtensions = new StreamArtistExtensionFactory();
+        artists = _deploySplitArtistFacade(
+            _graphCreation(StreamCurrentGraphCreation.Kind.StreamArtistOnboardingRegistry),
+            address(this),
+            address(artistExtensions),
+            [core_, manager_, nextCoordinator, executor_, address(artistArchivalCoverage)],
             deploymentHash,
             "urn:6529stream:fixture:artist",
             keccak256("fixture artist module")
@@ -84,10 +87,11 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
                 s.registry, nextCoordinator, s.archive, core_, manager_
             )
         );
-        s.owners[2] = address(
-            new StreamArtistIdentityAuthority(
-                s.registry, nextCoordinator, s.archive, core_, manager_
-            )
+        s.owners[2] = _deploySplitArtistIdentity(
+            _graphCreation(StreamCurrentGraphCreation.Kind.StreamArtistIdentityAuthority),
+            address(this),
+            address(artistExtensions),
+            [s.registry, nextCoordinator, s.archive, core_, manager_]
         );
         s.owners[3] = address(
             new StreamArtistAcceptanceLifecycle(

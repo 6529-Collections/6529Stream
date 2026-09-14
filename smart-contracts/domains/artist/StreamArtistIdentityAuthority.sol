@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistExtensionAdmission } from "./StreamArtistExtensionAdmission.sol";
 import {
     StreamArtistGuardianSelectionTypes as GuardianSelectionTypes
 } from "../../interfaces/stream/artist/StreamArtistGuardianSelectionTypes.sol";
@@ -743,7 +744,9 @@ contract StreamArtistIdentityAuthority is
         address coordinator_,
         address archive_,
         address core_,
-        address manager_
+        address manager_,
+        address extensionFactory_,
+        address[3] memory extensions_
     )
         StreamArtistOwner(
             registry_,
@@ -755,15 +758,20 @@ contract StreamArtistIdentityAuthority is
         )
     {
         artistWindowAuthority = StreamArtistTimingState.canonicalAuthority(core_, manager_);
-        identityWriterExtension = StreamArtistIdentityExtensionDeployment.deployWriter(
-            registry_, coordinator_, archive_, core_, manager_
+        StreamArtistExtensionAdmission.identity(
+            extensionFactory_,
+            extensions_,
+            [address(this), registry_, coordinator_, archive_, core_, manager_]
         );
-        identityEstateExtension = StreamArtistEstateExtensionDeployment.deployEstateWriter(
-            registry_, coordinator_, archive_, core_, manager_
-        );
-        identityRecoveryExtension = StreamArtistRecoveryExtensionDeployment.deployRecoveryWriter(
-            registry_, coordinator_, archive_, core_, manager_
-        );
+        (address recoveryAuthority, bytes32 recoveryAuthorityHash) =
+            StreamArtistIdentityRecoveryExtension(extensions_[2]).recoveryExecutorBinding();
+        if (
+            recoveryAuthority != artistWindowAuthority
+                || recoveryAuthorityHash != artistWindowAuthority.codehash
+        ) revert T.InvalidBinding();
+        identityWriterExtension = extensions_[0];
+        identityEstateExtension = extensions_[1];
+        identityRecoveryExtension = extensions_[2];
     }
 
     function setGuardians(

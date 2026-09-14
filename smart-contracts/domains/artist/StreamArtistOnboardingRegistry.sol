@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistExtensionAdmission } from "./StreamArtistExtensionAdmission.sol";
 import {
     IStreamArtistRecoveryActionOwner,
     IStreamArtistRecoveryActionCoordinator
@@ -234,7 +235,9 @@ contract StreamArtistOnboardingRegistry is
         address archivalCoverage_,
         bytes32 deploymentHash,
         string memory manifestURI,
-        bytes32 manifestHash
+        bytes32 manifestHash,
+        address extensionFactory_,
+        address[3] memory extensions_
     )
         StreamModuleBase(
             keccak256("6529stream.artist-onboarding.v1"),
@@ -256,11 +259,12 @@ contract StreamArtistOnboardingRegistry is
             StreamArtistEstateCoverage.admit(core_, manager_, governance_, archivalCoverage_);
         archivalCoverage = archivalCoverage_;
         archivalCoverageCodeHash = archivalCoverage_.codehash;
-        registryWriterExtension =
-            address(new StreamArtistRegistryWriterExtension(address(this), coordinator_));
-        registryReadExtension = StreamArtistRegistryExtensionDeployment.deployReader(coordinator_);
-        registryFinalityReadExtension =
-            StreamArtistFinalityReadDeployment.deployReader(coordinator_);
+        StreamArtistExtensionAdmission.registry(
+            extensionFactory_, extensions_, address(this), coordinator_
+        );
+        registryWriterExtension = extensions_[0];
+        registryReadExtension = extensions_[1];
+        registryFinalityReadExtension = extensions_[2];
         _registerGasParameter(GasParameterConfig("ARTIST_ERC1271_VERIFY_GAS", 150_000, 90_000, 2));
         _registerGasParameter(GasParameterConfig("ARTIST_SALE_FACTS_READ_GAS", 150_000, 50_000, 2));
         _registerGasParameter(

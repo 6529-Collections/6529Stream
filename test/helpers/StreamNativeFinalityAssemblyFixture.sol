@@ -1,5 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamMintArtistConsent
+} from "../../smart-contracts/domains/mint/StreamMintArtistConsent.sol";
+import {
+    IStreamArtistContentRatification
+} from "../../smart-contracts/interfaces/stream/artist/IStreamArtistContentRatification.sol";
+import {
+    StreamArtistEstateCoverage
+} from "../../smart-contracts/domains/artist/StreamArtistEstateCoverage.sol";
+import {
+    StreamArtistTimingState
+} from "../../smart-contracts/domains/artist/StreamArtistTimingState.sol";
+import {
+    StreamArtistExtensionFactory
+} from "../../smart-contracts/domains/artist/StreamArtistExtensionFactory.sol";
+import "../../script/current/StreamDeploymentSlot.sol";
 
 import { StreamNativeAssemblyCreation } from "./StreamNativeAssemblyCreation.sol";
 
@@ -107,6 +123,9 @@ import {
 } from "../../smart-contracts/interfaces/stream/artist/StreamArtistSanctionRequestTypes.sol";
 
 interface NativeAssemblyVm {
+    function envOr(string calldata key, bool defaultValue) external view returns (bool);
+    function skip(bool condition) external;
+
     struct Log {
         bytes32[] topics;
         bytes data;
@@ -194,6 +213,10 @@ abstract contract StreamNativeFinalityAssemblyFixture is OfficialSafeFixture {
     StreamAssetPolicyRegistry internal assemblyAssetPolicy;
     StreamSplitFactory internal assemblySplits;
     StreamArtistOnboardingRegistry internal assemblyArtists;
+    StreamArtistExtensionFactory internal assemblyArtistExtensions;
+    bool internal assemblyRequireColdPhaseFailure;
+    bool internal assemblyColdPhaseFailureObserved;
+    bytes32 internal assemblyColdPhaseCalldataHash;
     StreamArtistOnboardingCoordinator internal assemblyCoordinator;
     T.SuiteConfiguration internal assemblySuite;
     StreamMetadataRouter internal assemblyRouter;
@@ -739,7 +762,75 @@ abstract contract StreamNativeFinalityAssemblyFixture is OfficialSafeFixture {
                 1, ASSEMBLY_PHASE, config, gate, counters, configs, executors
             )
         );
-        assemblyManager.configurePhase(1, ASSEMBLY_PHASE, config, gate, counters, configs);
+        bytes memory originalCall = abi.encodeCall(
+            assemblyManager.configurePhase, (1, ASSEMBLY_PHASE, config, gate, counters, configs)
+        );
+        bytes32 originalPolicy = assemblyManager.previewPhasePolicyHash(
+            1, ASSEMBLY_PHASE, config, gate, counters, configs, executors
+        );
+        if (assemblyRequireColdPhaseFailure) {
+            (bool existed, IStreamMintManager.MintPhaseConfig memory beforeConfig) =
+                assemblyManager.phase(1, ASSEMBLY_PHASE);
+            require(
+                !existed && assemblyManager.phasePolicyHash(1, ASSEMBLY_PHASE) == 0,
+                "unregistered original phase"
+            );
+            (bool premature, bytes memory failure) = address(assemblyManager).call(originalCall);
+            require(
+                !premature
+                    && keccak256(failure)
+                        == keccak256(
+                            abi.encodeWithSelector(
+                                StreamMintArtistConsent.ArtistAuthorityReadFailed.selector,
+                                address(assemblyArtists),
+                                IStreamArtistMintConsent.requireMintConsent.selector
+                            )
+                        ),
+                "exact original cold 300k failure"
+            );
+            (bool existsAfter, IStreamMintManager.MintPhaseConfig memory afterConfig) =
+                assemblyManager.phase(1, ASSEMBLY_PHASE);
+            require(
+                !existsAfter
+                    && keccak256(abi.encode(beforeConfig)) == keccak256(abi.encode(afterConfig))
+                    && assemblyManager.phasePolicyHash(1, ASSEMBLY_PHASE) == 0
+                    && assemblyManager.phaseCounterIds(1, ASSEMBLY_PHASE).length == 0,
+                "failed cold registration rolls back phase and counters"
+            );
+            assemblyColdPhaseFailureObserved = true;
+            assemblyColdPhaseCalldataHash = keccak256(originalCall);
+        }
+        StreamArtistActivationPlan.Plan memory expansion =
+            StreamArtistActivationPlan.buildReadBudgetExpansion(
+                IStreamGasParameterHost(address(assemblyManager))
+            );
+        GenesisBatch memory expansionBatch = GenesisBatch(1, expansion.calls, expansion.callDatas);
+        _admitAssemblyBatch(expansionBatch);
+        _assemblyGovernance(
+            expansionBatch, "https://fixtures.example.invalid/native-assembly/artist-read-expansion"
+        );
+        (uint256 expanded,,, uint64 revision) =
+            assemblyManager.gasParameterInfo(assemblyManager.GGP_ARTIST_AUTHORITY_GAS_LIMIT());
+        require(expanded == 600_000 && revision == 3, "exact original second governed doubling");
+        (bool registered, bytes memory registrationResult) =
+            address(assemblyManager).call(originalCall);
+        if (!registered) {
+            assembly ("memory-safe") { revert(
+                add(registrationResult, 32),
+                mload(registrationResult)
+            ) }
+        }
+        require(
+            registrationResult.length == 32
+                && abi.decode(registrationResult, (bytes32)) == originalPolicy,
+            "identical original phase calldata registration"
+        );
+        if (assemblyRequireColdPhaseFailure) {
+            require(
+                keccak256(originalCall) == assemblyColdPhaseCalldataHash,
+                "identical failure/retry bytes"
+            );
+        }
         executors = new address[](1);
         executors[0] = address(assemblySale);
         _assemblyPolicyConsent(
@@ -2170,20 +2261,23 @@ abstract contract StreamNativeFinalityAssemblyFixture is OfficialSafeFixture {
             )
         );
         s.primaryRevenueClass = keccak256("PRIMARY_SALE");
-        assemblyArtists = StreamArtistOnboardingRegistry(
-            payable(_assemblyCreate(
-                    StreamNativeAssemblyCreation.Kind.StreamArtistOnboardingRegistry,
-                    abi.encode(
-                        s.core,
-                        s.mintManager,
-                        assemblyCoordinatorAddress,
-                        address(assemblyExecutor),
-                        address(assemblyArchive),
-                        ASSEMBLY_DEPLOYMENT,
-                        "https://fixtures.example.invalid/native-assembly/artist",
-                        keccak256("native assembly artist")
-                    )
-                ))
+        assemblyArtistExtensions = new StreamArtistExtensionFactory();
+        assemblyArtists = _deploySplitArtistFacade(
+            StreamNativeAssemblyCreation.creation(
+                StreamNativeAssemblyCreation.Kind.StreamArtistOnboardingRegistry
+            ),
+            address(this),
+            address(assemblyArtistExtensions),
+            [
+                s.core,
+                s.mintManager,
+                assemblyCoordinatorAddress,
+                address(assemblyExecutor),
+                address(assemblyArchive)
+            ],
+            ASSEMBLY_DEPLOYMENT,
+            "https://fixtures.example.invalid/native-assembly/artist",
+            keccak256("native assembly artist")
         );
         s.registry = address(assemblyArtists);
         s.archive = address(
@@ -2214,15 +2308,13 @@ abstract contract StreamNativeFinalityAssemblyFixture is OfficialSafeFixture {
                     ))
             )
         );
-        s.owners[2] = address(
-            StreamArtistIdentityAuthority(
-                payable(_assemblyCreate(
-                        StreamNativeAssemblyCreation.Kind.StreamArtistIdentityAuthority,
-                        abi.encode(
-                            s.registry, assemblyCoordinatorAddress, s.archive, s.core, s.mintManager
-                        )
-                    ))
-            )
+        s.owners[2] = _deploySplitArtistIdentity(
+            StreamNativeAssemblyCreation.creation(
+                StreamNativeAssemblyCreation.Kind.StreamArtistIdentityAuthority
+            ),
+            address(this),
+            address(assemblyArtistExtensions),
+            [s.registry, assemblyCoordinatorAddress, s.archive, s.core, s.mintManager]
         );
         s.owners[3] = address(
             StreamArtistAcceptanceLifecycle(
@@ -5002,6 +5094,132 @@ abstract contract StreamNativeFinalityAssemblyFixture is OfficialSafeFixture {
                 && archived.evidenceHash != 0
                 && keccak256(abi.encode(archived.proof)) == keccak256(abi.encode(proof)),
             "actual canonical class2 finality with original sanction archive"
+        );
+    }
+
+    // Each factory call is a separate broadcast transaction; only the original slot creates the host.
+    function _deploySplitArtistFacade(
+        bytes memory creation,
+        address operator_,
+        address factory_,
+        address[5] memory p,
+        bytes32 deploymentHash,
+        string memory uri,
+        bytes32 manifestHash
+    ) internal returns (StreamArtistOnboardingRegistry) {
+        StreamDeploymentSlot slot = new StreamDeploymentSlot(operator_);
+        address[3] memory children;
+        for (uint8 i; i < 3; ++i) {
+            children[i] =
+                StreamArtistExtensionFactory(factory_).deployRegistry(i + 4, slot.product(), p[2]);
+        }
+        RuntimeValue[] memory v = new RuntimeValue[](14);
+        string memory name = "StreamArtistOnboardingRegistry";
+        v[0] = _runtimeValue("artist", name, "core", _addressWord(p[0]));
+        v[1] = _runtimeValue("artist", name, "mintManager", _addressWord(p[1]));
+        v[2] = _runtimeValue("artist", name, "operationCoordinator", _addressWord(p[2]));
+        v[3] = _runtimeValue("artist", name, "registryWriterExtension", _addressWord(children[0]));
+        v[4] = _runtimeValue("artist", name, "registryReadExtension", _addressWord(children[1]));
+        v[5] = _runtimeValue(
+            "artist", name, "registryFinalityReadExtension", _addressWord(children[2])
+        );
+        v[6] = _runtimeValue("artist", name, "archivalCoverage", _addressWord(p[4]));
+        v[7] = _runtimeValue("artist", name, "archivalCoverageCodeHash", p[4].codehash);
+        v[8] = _runtimeValue(
+            "artist",
+            name,
+            "archivalCoverageConfigurationHash",
+            StreamArtistEstateCoverage.admit(p[0], p[1], p[3], p[4])
+        );
+        v[9] = _runtimeValue(
+            "parameters", "StreamGasParameterHost", "governanceAuthority", _addressWord(p[3])
+        );
+        v[10] = _runtimeValue(
+            "modules",
+            "StreamModuleBase",
+            "_schemaHash",
+            keccak256("6529stream.artist-onboarding.v1")
+        );
+        v[11] = _runtimeValue("modules", "StreamModuleBase", "_supersedes", bytes32(0));
+        v[12] =
+            _runtimeValue("modules", "StreamModuleBase", "_deploymentManifestHash", deploymentHash);
+        v[13] = _runtimeValue("modules", "StreamModuleBase", "_manifestHash", manifestHash);
+        string[] memory parents = new string[](2);
+        parents[0] = "StreamGasParameterHost";
+        parents[1] = "StreamModuleBase";
+        bytes memory runtime = _productRuntime(name, parents, creation, v);
+        address host = slot.deploy(
+            bytes.concat(
+                creation,
+                abi.encode(
+                    p[0],
+                    p[1],
+                    p[2],
+                    p[3],
+                    p[4],
+                    deploymentHash,
+                    uri,
+                    manifestHash,
+                    factory_,
+                    children
+                )
+            ),
+            keccak256(runtime)
+        );
+        require(
+            host == slot.product() && keccak256(host.code) == keccak256(runtime),
+            "complete split facade runtime"
+        );
+        return StreamArtistOnboardingRegistry(payable(host));
+    }
+
+    function _deploySplitArtistIdentity(
+        bytes memory creation,
+        address operator_,
+        address factory_,
+        address[5] memory p
+    ) internal returns (address host) {
+        StreamDeploymentSlot slot = new StreamDeploymentSlot(operator_);
+        address[3] memory children;
+        address[6] memory pins = [slot.product(), p[0], p[1], p[2], p[3], p[4]];
+        for (uint8 i; i < 3; ++i) {
+            children[i] = StreamArtistExtensionFactory(factory_).deployIdentity(i + 1, pins);
+        }
+        RuntimeValue[] memory v = new RuntimeValue[](11);
+        string memory name = "StreamArtistIdentityAuthority";
+        v[0] = _runtimeValue("artist", "StreamArtistOwner", "artistRegistry", _addressWord(p[0]));
+        v[1] = _runtimeValue(
+            "artist", "StreamArtistOwner", "operationCoordinator", _addressWord(p[1])
+        );
+        v[2] = _runtimeValue("artist", "StreamArtistOwner", "archiveV2", _addressWord(p[2]));
+        v[3] = _runtimeValue("artist", "StreamArtistOwner", "core", _addressWord(p[3]));
+        v[4] = _runtimeValue("artist", "StreamArtistOwner", "mintManager", _addressWord(p[4]));
+        v[5] = _runtimeValue(
+            "artist", "StreamArtistOwner", "deploymentChainId", bytes32(block.chainid)
+        );
+        v[6] = _runtimeValue(
+            "artist", "StreamArtistOwner", "domainId", keccak256("domain:identity_authority")
+        );
+        v[7] = _runtimeValue(
+            "artist",
+            name,
+            "artistWindowAuthority",
+            _addressWord(StreamArtistTimingState.canonicalAuthority(p[3], p[4]))
+        );
+        v[8] = _runtimeValue("artist", name, "identityWriterExtension", _addressWord(children[0]));
+        v[9] = _runtimeValue("artist", name, "identityEstateExtension", _addressWord(children[1]));
+        v[10] =
+            _runtimeValue("artist", name, "identityRecoveryExtension", _addressWord(children[2]));
+        string[] memory parents = new string[](1);
+        parents[0] = "StreamArtistOwner";
+        bytes memory runtime = _productRuntime(name, parents, creation, v);
+        host = slot.deploy(
+            bytes.concat(creation, abi.encode(p[0], p[1], p[2], p[3], p[4], factory_, children)),
+            keccak256(runtime)
+        );
+        require(
+            host == slot.product() && keccak256(host.code) == keccak256(runtime),
+            "complete split Identity runtime"
         );
     }
 }

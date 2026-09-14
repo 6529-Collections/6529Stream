@@ -1,5 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistEstateCoverage
+} from "../../smart-contracts/domains/artist/StreamArtistEstateCoverage.sol";
+import {
+    StreamArtistTimingState
+} from "../../smart-contracts/domains/artist/StreamArtistTimingState.sol";
+import {
+    StreamArtistExtensionFactory
+} from "../../smart-contracts/domains/artist/StreamArtistExtensionFactory.sol";
 
 import "./StreamCurrentGraphCreation.sol";
 import "./StreamCurrentFinalityArtifacts.sol";
@@ -1165,7 +1174,7 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
         d.finalityRegistryCodeHash = keccak256(assemblyRuntimes[uint256(Late.REGISTRY)]);
         d.routerAdapters = assemblyRouterAdapters;
         d.readGas = 500000;
-        d.componentGas = 8000000;
+        d.componentGas = 12000000;
         d.entropyGas = 8000000;
         assemblyDiscovery = StreamFinalityCurrentDiscovery(
             _deployAssemblyLate(
@@ -1356,5 +1365,131 @@ abstract contract StreamCurrentFinalityGraph is StreamCurrentFinalityArtifacts {
             "one original product CREATE"
         );
         require(keccak256(product.code) == keccak256(runtime), "full actual runtime bytes");
+    }
+
+    // Each factory call is a separate broadcast transaction; only the original slot creates the host.
+    function _deploySplitArtistFacade(
+        bytes memory creation,
+        address operator_,
+        address factory_,
+        address[5] memory p,
+        bytes32 deploymentHash,
+        string memory uri,
+        bytes32 manifestHash
+    ) internal returns (StreamArtistOnboardingRegistry) {
+        StreamDeploymentSlot slot = new StreamDeploymentSlot(operator_);
+        address[3] memory children;
+        for (uint8 i; i < 3; ++i) {
+            children[i] =
+                StreamArtistExtensionFactory(factory_).deployRegistry(i + 4, slot.product(), p[2]);
+        }
+        RuntimeValue[] memory v = new RuntimeValue[](14);
+        string memory name = "StreamArtistOnboardingRegistry";
+        v[0] = _runtimeValue("artist", name, "core", _addressWord(p[0]));
+        v[1] = _runtimeValue("artist", name, "mintManager", _addressWord(p[1]));
+        v[2] = _runtimeValue("artist", name, "operationCoordinator", _addressWord(p[2]));
+        v[3] = _runtimeValue("artist", name, "registryWriterExtension", _addressWord(children[0]));
+        v[4] = _runtimeValue("artist", name, "registryReadExtension", _addressWord(children[1]));
+        v[5] = _runtimeValue(
+            "artist", name, "registryFinalityReadExtension", _addressWord(children[2])
+        );
+        v[6] = _runtimeValue("artist", name, "archivalCoverage", _addressWord(p[4]));
+        v[7] = _runtimeValue("artist", name, "archivalCoverageCodeHash", p[4].codehash);
+        v[8] = _runtimeValue(
+            "artist",
+            name,
+            "archivalCoverageConfigurationHash",
+            StreamArtistEstateCoverage.admit(p[0], p[1], p[3], p[4])
+        );
+        v[9] = _runtimeValue(
+            "parameters", "StreamGasParameterHost", "governanceAuthority", _addressWord(p[3])
+        );
+        v[10] = _runtimeValue(
+            "modules",
+            "StreamModuleBase",
+            "_schemaHash",
+            keccak256("6529stream.artist-onboarding.v1")
+        );
+        v[11] = _runtimeValue("modules", "StreamModuleBase", "_supersedes", bytes32(0));
+        v[12] =
+            _runtimeValue("modules", "StreamModuleBase", "_deploymentManifestHash", deploymentHash);
+        v[13] = _runtimeValue("modules", "StreamModuleBase", "_manifestHash", manifestHash);
+        string[] memory parents = new string[](2);
+        parents[0] = "StreamGasParameterHost";
+        parents[1] = "StreamModuleBase";
+        bytes memory runtime = _productRuntime(name, parents, creation, v);
+        address host = slot.deploy(
+            bytes.concat(
+                creation,
+                abi.encode(
+                    p[0],
+                    p[1],
+                    p[2],
+                    p[3],
+                    p[4],
+                    deploymentHash,
+                    uri,
+                    manifestHash,
+                    factory_,
+                    children
+                )
+            ),
+            keccak256(runtime)
+        );
+        require(
+            host == slot.product() && keccak256(host.code) == keccak256(runtime),
+            "complete split facade runtime"
+        );
+        return StreamArtistOnboardingRegistry(payable(host));
+    }
+
+    function _deploySplitArtistIdentity(
+        bytes memory creation,
+        address operator_,
+        address factory_,
+        address[5] memory p
+    ) internal returns (address host) {
+        StreamDeploymentSlot slot = new StreamDeploymentSlot(operator_);
+        address[3] memory children;
+        address[6] memory pins = [slot.product(), p[0], p[1], p[2], p[3], p[4]];
+        for (uint8 i; i < 3; ++i) {
+            children[i] = StreamArtistExtensionFactory(factory_).deployIdentity(i + 1, pins);
+        }
+        RuntimeValue[] memory v = new RuntimeValue[](11);
+        string memory name = "StreamArtistIdentityAuthority";
+        v[0] = _runtimeValue("artist", "StreamArtistOwner", "artistRegistry", _addressWord(p[0]));
+        v[1] = _runtimeValue(
+            "artist", "StreamArtistOwner", "operationCoordinator", _addressWord(p[1])
+        );
+        v[2] = _runtimeValue("artist", "StreamArtistOwner", "archiveV2", _addressWord(p[2]));
+        v[3] = _runtimeValue("artist", "StreamArtistOwner", "core", _addressWord(p[3]));
+        v[4] = _runtimeValue("artist", "StreamArtistOwner", "mintManager", _addressWord(p[4]));
+        v[5] = _runtimeValue(
+            "artist", "StreamArtistOwner", "deploymentChainId", bytes32(block.chainid)
+        );
+        v[6] = _runtimeValue(
+            "artist", "StreamArtistOwner", "domainId", keccak256("domain:identity_authority")
+        );
+        v[7] = _runtimeValue(
+            "artist",
+            name,
+            "artistWindowAuthority",
+            _addressWord(StreamArtistTimingState.canonicalAuthority(p[3], p[4]))
+        );
+        v[8] = _runtimeValue("artist", name, "identityWriterExtension", _addressWord(children[0]));
+        v[9] = _runtimeValue("artist", name, "identityEstateExtension", _addressWord(children[1]));
+        v[10] =
+            _runtimeValue("artist", name, "identityRecoveryExtension", _addressWord(children[2]));
+        string[] memory parents = new string[](1);
+        parents[0] = "StreamArtistOwner";
+        bytes memory runtime = _productRuntime(name, parents, creation, v);
+        host = slot.deploy(
+            bytes.concat(creation, abi.encode(p[0], p[1], p[2], p[3], p[4], factory_, children)),
+            keccak256(runtime)
+        );
+        require(
+            host == slot.product() && keccak256(host.code) == keccak256(runtime),
+            "complete split Identity runtime"
+        );
     }
 }

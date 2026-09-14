@@ -2,9 +2,10 @@
 pragma solidity ^0.8.19;
 import "./StreamArtistIdentityWriterExtension.sol";
 
-/// @notice Linked construction only; the Identity remains child CREATE creator.
+/// @notice Fixed linked construction for an explicitly bound future Identity host.
 library StreamArtistIdentityExtensionDeployment {
     function deployWriter(
+        address host,
         address registry,
         address coordinator,
         address archive,
@@ -13,7 +14,7 @@ library StreamArtistIdentityExtensionDeployment {
     ) public returns (address) {
         return address(
             new StreamArtistIdentityWriterExtension(
-                address(this), registry, coordinator, archive, core, manager
+                host, registry, coordinator, archive, core, manager
             )
         );
     }

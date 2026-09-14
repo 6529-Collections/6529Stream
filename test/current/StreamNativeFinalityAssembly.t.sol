@@ -9,6 +9,28 @@ import "../helpers/StreamNativeFinalityAssemblyFixture.sol";
 contract StreamNativeFinalityAssemblyTest is StreamNativeFinalityAssemblyFixture {
     event AssemblyFlowStep(string step, bytes32 commitment, uint256 count);
 
+    /// @dev Run with STREAM_EXPECT_COLD_ARTIST_FAILURE=true and --isolate. Ordinary aggregate runs explicitly skip this cold-only negative case.
+    function testActualColdArtistReadBudgetFailureGovernedExpansionAndIdenticalMintRetry() public {
+        assemblyVm.skip(!assemblyVm.envOr("STREAM_EXPECT_COLD_ARTIST_FAILURE", false));
+        assemblyRequireColdPhaseFailure = true;
+        _deployAssemblyGraph();
+        _activateAssemblyArtwork();
+        require(
+            assemblyColdPhaseFailureObserved && assemblyColdPhaseCalldataHash != 0,
+            "original isolated failure retained"
+        );
+        require(
+            assemblyManager.gasParameter(assemblyManager.GGP_ARTIST_AUTHORITY_GAS_LIMIT())
+                == 600_000,
+            "real governed budget"
+        );
+        require(
+            assemblyCore.ownerOf(1) == ASSEMBLY_BUYER && assemblyCore.ownerOf(2) == ASSEMBLY_BUYER
+                && assemblySale.totalNativeProceeds() == 0.02 ether,
+            "original executors and paid mints after identical retry"
+        );
+    }
+
     function testActualNativeCompletePreservationSafeSanctionAndCanonicalFinality() public {
         _deployAssemblyGraph();
         _activateAssemblyArtwork();
@@ -197,8 +219,8 @@ contract StreamNativeFinalityAssemblyTest is StreamNativeFinalityAssemblyFixture
 
     function _assertOriginalChildren(T.SuiteConfiguration memory suite) private view {
         require(
-            assemblyVm.getNonce(address(assemblyArtists)) == 4,
-            "facade created exactly its three original children"
+            assemblyVm.getNonce(address(assemblyArtists)) == 1,
+            "facade performs no nested child CREATE"
         );
         address[3] memory children = [
             assemblyArtists.registryWriterExtension(),
@@ -207,15 +229,19 @@ contract StreamNativeFinalityAssemblyTest is StreamNativeFinalityAssemblyFixture
         ];
         for (uint256 i; i < 3; ++i) {
             require(
-                children[i] == assemblyVm.computeCreateAddress(address(assemblyArtists), i + 1)
-                    && children[i].code.length != 0 && children[i].code.length <= 24576,
+                children[i]
+                        == assemblyVm.computeCreateAddress(address(assemblyArtistExtensions), i + 1)
+                    && assemblyArtistExtensions.birth(children[i]).host == address(assemblyArtists)
+                    && assemblyArtistExtensions.birth(children[i]).kind == i + 4
+                    && assemblyArtistExtensions.birth(children[i]).runtimeCodeHash
+                        == children[i].codehash && children[i].code.length != 0
+                    && children[i].code.length <= 24576,
                 "actual ordered facade children"
             );
         }
         StreamArtistIdentityAuthority identity = StreamArtistIdentityAuthority(suite.owners[2]);
         require(
-            assemblyVm.getNonce(address(identity)) == 4,
-            "Identity created exactly its three original children"
+            assemblyVm.getNonce(address(identity)) == 1, "Identity performs no nested child CREATE"
         );
         children = [
             identity.identityWriterExtension(),
@@ -224,8 +250,13 @@ contract StreamNativeFinalityAssemblyTest is StreamNativeFinalityAssemblyFixture
         ];
         for (uint256 i; i < 3; ++i) {
             require(
-                children[i] == assemblyVm.computeCreateAddress(address(identity), i + 1)
-                    && children[i].code.length != 0 && children[i].code.length <= 24576,
+                children[i]
+                        == assemblyVm.computeCreateAddress(address(assemblyArtistExtensions), i + 4)
+                    && assemblyArtistExtensions.birth(children[i]).host == address(identity)
+                    && assemblyArtistExtensions.birth(children[i]).kind == i + 1
+                    && assemblyArtistExtensions.birth(children[i]).runtimeCodeHash
+                        == children[i].codehash && children[i].code.length != 0
+                    && children[i].code.length <= 24576,
                 "actual ordered Identity children"
             );
         }

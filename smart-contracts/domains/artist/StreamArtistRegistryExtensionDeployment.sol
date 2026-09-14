@@ -3,10 +3,9 @@ pragma solidity ^0.8.19;
 
 import "./StreamArtistRegistryReadExtension.sol";
 
-/// @notice Compiler-linked constructor code; CREATE retains the calling Registry as creator.
-/// @dev The immutable reader host is address(this) in delegatecall context, never caller-supplied.
+/// @notice Fixed linked construction for an explicitly bound future facade.
 library StreamArtistRegistryExtensionDeployment {
-    function deployReader(address coordinator) public returns (address) {
-        return address(new StreamArtistRegistryReadExtension(address(this), coordinator));
+    function deployReader(address host, address coordinator) public returns (address) {
+        return address(new StreamArtistRegistryReadExtension(host, coordinator));
     }
 }

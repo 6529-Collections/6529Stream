@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistExtensionFactory } from "../../../smart-contracts/domains/artist/StreamArtistExtensionFactory.sol";
 
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 import "../../helpers/OfficialSafeFixture.sol";
@@ -500,8 +501,10 @@ contract ArtistRotationContestHarness is StreamArtistIdentityAuthority {
         address coordinator_,
         address archive_,
         address core_,
-        address manager_
-    ) StreamArtistIdentityAuthority(registry_, coordinator_, archive_, core_, manager_) { }
+        address manager_,
+        address extensionFactory_,
+        address[3] memory extensions_
+    ) StreamArtistIdentityAuthority(registry_, coordinator_, archive_, core_, manager_, extensionFactory_, extensions_) { }
 
     function simulateExecutedTransitionContest(bytes32 record) external {
         R.TransitionState storage transition = _rotations.rotations[record].transition;
@@ -533,6 +536,7 @@ abstract contract ArtistOnboardingFixture is
     OfficialSafe internal artist;
     SafeComponents internal safeComponents;
     StreamArtistOnboardingRegistry internal ingress;
+    StreamArtistExtensionFactory internal artistExtensionFactory;
     StreamArtistOnboardingCoordinator internal coordinator;
     StreamArtistArchiveV2 internal archive;
     T.SuiteConfiguration internal suite;
@@ -2904,10 +2908,18 @@ abstract contract ArtistOnboardingFixture is
         suite.primaryRevenueClass = PRIMARY;
         _deployEstateArchival(address(core), governance);
         sanctionFixture = new ArtistSanctionFinalityFixture();
+        artistExtensionFactory = new StreamArtistExtensionFactory();
         uint256 nonce = avm.getNonce(address(this));
         address predictedRegistry = avm.computeCreateAddress(address(this), nonce);
         address predictedArchive = avm.computeCreateAddress(address(this), nonce + 1);
         address predictedCoordinator = avm.computeCreateAddress(address(this), nonce + 12);
+        // Factory child CREATEs do not consume this monolithic fixture's CREATE nonce.
+        address[3] memory facadeChildren;
+        address[3] memory identityChildren;
+        address predictedIdentity = avm.computeCreateAddress(address(this), nonce + 4);
+        for (uint8 i; i < 3; ++i) facadeChildren[i] = artistExtensionFactory.deployRegistry(i + 4, predictedRegistry, predictedCoordinator);
+        for (uint8 i; i < 3; ++i) identityChildren[i] = artistExtensionFactory.deployIdentity(i + 1, [predictedIdentity,predictedRegistry,predictedCoordinator,predictedArchive,suite.core,suite.mintManager]);
+
         ingress = new StreamArtistOnboardingRegistry(
             suite.core,
             suite.mintManager,
@@ -2916,7 +2928,9 @@ abstract contract ArtistOnboardingFixture is
             address(estateCoverageProvider),
             keccak256("unit deployment"),
             "urn:artist-unit",
-            keccak256("unit manifest")
+            keccak256("unit manifest"),
+            address(artistExtensionFactory),
+            facadeChildren
         );
         archive = new StreamArtistArchiveV2(address(ingress), predictedCoordinator);
         suite.registry = address(ingress);
@@ -2946,7 +2960,9 @@ abstract contract ArtistOnboardingFixture is
                     predictedCoordinator,
                     predictedArchive,
                     suite.core,
-                    suite.mintManager
+                    suite.mintManager,
+                    address(artistExtensionFactory),
+                    identityChildren
                 )
             );
         } else {
@@ -2956,7 +2972,9 @@ abstract contract ArtistOnboardingFixture is
                     predictedCoordinator,
                     predictedArchive,
                     suite.core,
-                    suite.mintManager
+                    suite.mintManager,
+                    address(artistExtensionFactory),
+                    identityChildren
                 )
             );
         }
@@ -3579,6 +3597,16 @@ abstract contract ArtistOnboardingFixture is
             ),
             "Safe message approval"
         );
+    }
+
+    function _originalExtension(address child, address host, uint8 kind) internal view returns (bool) {
+        StreamArtistExtensionFactory.Birth memory b = artistExtensionFactory.birth(child);
+        bytes32 binding = kind <= 3
+            ? keccak256(abi.encode(keccak256("6529STREAM_ARTIST_EXTENSION_BIRTH_V1"), block.chainid, kind, [host,suite.registry,address(coordinator),suite.archive,suite.core,suite.mintManager]))
+            : keccak256(abi.encode(keccak256("6529STREAM_ARTIST_EXTENSION_BIRTH_V1"), block.chainid, kind, host, address(coordinator)));
+        return b.kind == kind && b.host == host && b.chainId == block.chainid && b.bindingHash == binding
+            && b.runtimeCodeHash == child.codehash && child.code.length != 0
+            && child == avm.computeCreateAddress(address(artistExtensionFactory), kind <= 3 ? kind + 3 : kind - 3);
     }
 
 }

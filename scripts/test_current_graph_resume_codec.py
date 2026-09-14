@@ -106,6 +106,52 @@ class ResumeCodecTest(unittest.TestCase):
             self.assertEqual(receipt, replies[-1])
             self.assertEqual(polls, expected_polls)
 
+    def test_transaction_capacity_rejects_over_limit_failed_or_mismatched_receipts(self):
+        from copy import deepcopy
+        cap = resume.TRANSACTION_CAP
+        transaction = {"hash": "0x" + "12" * 32, "blockHash": "0x" + "34" * 32,
+                       "gas": hex(cap)}
+        receipt = {"transactionHash": transaction["hash"], "blockHash": transaction["blockHash"],
+                   "status": "0x1", "gasUsed": hex(cap - 1)}
+        self.assertEqual(resume.check_transaction_capacity(transaction, receipt, cap), (cap - 1, cap))
+        for side, field, value in [("tx", "gas", hex(cap + 1)), ("receipt", "gasUsed", hex(cap)),
+                                   ("receipt", "status", "0x0"), ("receipt", "gasUsed", "0x0"),
+                                   ("receipt", "transactionHash", "0x" + "56" * 32),
+                                   ("receipt", "blockHash", "0x" + "78" * 32)]:
+            t, r = deepcopy(transaction), deepcopy(receipt)
+            (t if side == "tx" else r)[field] = value
+            with self.subTest(side=side, field=field), self.assertRaises(RuntimeError):
+                resume.check_transaction_capacity(t, r, cap)
+        transaction["gas"] = hex(cap + 1)
+        self.assertEqual(resume.check_transaction_capacity(transaction, receipt, 0), (cap - 1, cap + 1))
+
+    def test_capacity_ledger_rejects_duplicate_and_nonce_gap(self):
+        rehearsal = resume.Rehearsal.__new__(resume.Rehearsal)
+        rehearsal.args = resume.argparse.Namespace(transaction_gas_cap=resume.TRANSACTION_CAP)
+        rehearsal.operator = "0x" + "ab" * 20
+        rehearsal.capacity_receipts = []
+        rehearsal.save = lambda *args: None
+        tx = {"hash": "0x" + "12" * 32, "blockHash": "0x" + "34" * 32,
+              "gas": "0x10000", "from": rehearsal.operator, "nonce": "0x0"}
+        receipt = {"transactionHash": tx["hash"], "blockHash": tx["blockHash"],
+                   "status": "0x1", "gasUsed": "0x8000"}
+        rehearsal.rpc = lambda method, params: {"gasLimit": hex(resume.TRANSACTION_CAP),
+                                                 "transactions": [receipt["transactionHash"]]}
+        tx["nonce"] = "0x1"
+        with self.assertRaisesRegex(RuntimeError, "original fresh nonce zero"):
+            rehearsal.retain_capacity(tx, receipt, "missing prefix")
+        tx["nonce"] = "0x0"
+        rehearsal.retain_capacity(tx.copy(), receipt.copy(), "first")
+        with self.assertRaisesRegex(RuntimeError, "one original operator receipt"):
+            rehearsal.retain_capacity(tx, receipt, "duplicate")
+        tx["hash"] = receipt["transactionHash"] = "0x" + "56" * 32
+        tx["nonce"] = "0x2"
+        with self.assertRaisesRegex(RuntimeError, "consecutive original operator nonce"):
+            rehearsal.retain_capacity(tx, receipt, "gap")
+        tx["nonce"] = "0x1"
+        rehearsal.retain_capacity(tx.copy(), receipt.copy(), "second")
+        self.assertEqual(len(rehearsal.capacity_receipts), 2)
+
     def test_standard_ethereum_selector_and_domain_use_keccak(self):
         self.assertEqual(resume.domain("transfer(address,uint256)")[:4].hex(), "a9059cbb")
         self.assertEqual(resume.domain("").hex(), "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470")
