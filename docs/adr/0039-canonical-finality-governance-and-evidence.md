@@ -1585,3 +1585,39 @@ all57 historical operations plus adopted58, capabilities, complete retained
 membership veto, replay and Archive atomicity are unchanged. This source batch
 has focused typed-ABI validation only; combined native/link/size and end-to-end
 validation remain separate release requirements.
+
+
+## Immediate continuation after identity recovery
+
+AA-GUARD requirement7's append-only identity recovery is not limited to the
+first compromised key. The bounded continuation consumes the actual latest
+operation35 record and original current operation33 cause. It admits living
+class1/status1 or estate class3/status3 only, preserving the original class3
+activation/capability intersection. The prior execution must remain the current
+vesting head, with exact canonical record and prefix, saved transition and
+retirement, original action/association/receipt commitments, no intervening
+execution or closure, and unchanged delegation epoch. A new compromise must
+follow the prior post-window and retain the exact previous cause/resolution
+links. Historical admission is authenticated rather than replayed.
+
+Fresh governance, new-side acceptance, independent delay and guardian veto,
+permanent action/cause/nonce replay, delegation revocation and atomic Archive
+failure remain the original operation35 producer requirements. The new context
+is tagged REPEAT_RECOVERY_STATE_V1; original first-recovery context bytes and
+permanent operation/signature/receipt preimages remain unchanged. No operation,
+owner storage field or public signed schema is introduced.
+
+The guardian cutoff may now be the actual canonical operation35 vesting. Earlier
+prefix exclusions keep the exact APPEAL/Root/directive requirements; newer
+records keep ARBITER and actual signer/class requirements. The complete election
+also binds the owner's latest recovery hash after the first recovery, because
+permanent exclusion statuses change during that operation independently of the
+append-only history root. Its no-recovery key stays byte-for-byte unchanged.
+This is the narrow replacement for the prior no-recovery election restriction,
+not permission to choose a historical cutoff or ignore lifetime veto records.
+
+The preparation guide describes the six new regression recipes and current
+source-only validation. Closed prior-recovery histories, intervening rotations,
+non-guardian record supersession and dormancy remain separate implementation
+work. All57 historical operations plus adopted58 retain their existing behavior;
+consolidated native/link/size/runtime acceptance remains required.

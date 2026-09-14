@@ -63,6 +63,10 @@ import { StreamArtistRecoveryEstatePredecessor } from "./StreamArtistRecoveryEst
 import { StreamArtistSuccessionState } from "./StreamArtistSuccessionState.sol";
 import { StreamArtistIdentityContestState } from "./StreamArtistIdentityContestState.sol";
 
+import {
+    StreamArtistRecoveryContinuation as Continuation
+} from "./StreamArtistRecoveryContinuation.sol";
+
 /// @notice One-way delegated recovery context; State is imported only for its storage type.
 library StreamArtistIdentityRecoveryContext {
     function context(
@@ -75,6 +79,11 @@ library StreamArtistIdentityRecoveryContext {
         Recovery.Request memory p,
         T.Authorization memory acceptance
     ) public view returns (Recovery.Context memory c) {
+        if (s.latest[p.artistId] != 0) {
+            return Continuation.context(
+                s, identity, rotations, resolutions, estate, o, p, acceptance
+            );
+        }
         Dismissal.Cause memory cause = resolutions.causes[resolutions.currentCause[p.artistId]];
         T.Identity storage principal = identity.identities[p.artistId];
         if (
@@ -230,6 +239,11 @@ library StreamArtistIdentityRecoveryContext {
         Recovery.Request memory p,
         T.Authorization memory acceptance
     ) public view returns (Recovery.Context memory c) {
+        if (s.latest[p.artistId] != 0) {
+            return Continuation.context(
+                s, identity, rotations, resolutions, estate, o, p, acceptance
+            );
+        }
         if (p.vestedAuthorityClass != 3) {
             return context(s, identity, rotations, resolutions, estate, o, p, acceptance);
         }

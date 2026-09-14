@@ -890,3 +890,65 @@ document admission, incorrect cutoff retry and retained lifetime Safe veto. The
 cases use actual Artist, Safe and Archive contracts with typed unit Core,
 governance and role facts. The source batch is typechecked; integrated runtime,
 complete linked-product sizes and transaction-capacity validation remain pending.
+
+
+## Repeated recovery after an admitted operation35
+
+A fresh compromise of a previously recovered living or estate authority now
+has a separate continuation reader. The current executed subject must be the
+actual latest operation35, with no pending transition, intervening execution or
+closure. The new cause must be filed at or after that recovery's original
+post-window. A cause filed inside the window remains rejected after time passes.
+Its previous-cause and resolution links must still match the prior recovery's
+saved request. This increment does not silently traverse later dismissal or
+rotation histories.
+
+The fixed owner authenticates the prior permanent record hash, full request,
+canonical vesting head and guardian prefix, actual transition and retirement,
+recorded receipt commitments, and original registered action association and
+consumption when a guardian record required registration. These are immutable
+records admitted by the original operation35 writer. The consumer binds their
+contents; it does not ask today's governance to recreate old witness authority.
+The new action and new-side acceptance still pass all existing governed delay,
+registration, complete lifetime-veto, nonce, replay and Archive checks.
+
+Class1 remains living authority. Class3 remains estate authority with the actual
+unchanged operation40 activation and its originally stored effective capability
+intersection. A recovered estate cannot become class1 or replace that origin.
+The fresh operation35 increments the delegation epoch once and saves another
+append-only vesting snapshot, receipt pair and recovery record; no earlier
+record, consumed consent or permanent exclusion is rewritten.
+
+Current operational guardian evidence is selected from the full admitted history
+and must retain its canonical record, eligible actual provisional association
+and non-superseded status. Every lifetime member remains available to the
+existing veto rules. Operation35 now also supplies an authenticated guardian
+supersession cutoff. Earlier-prefix exclusions retain APPEAL requirements;
+post-cutoff records retain the exact recovered signer/class and ARBITER path.
+Only guardian-set supersession is added here, not other historical record
+families or the separate still-provisional exclusion exception.
+
+The permissionless election's old source key remains exact when there has been
+no recovery. After a recovery its key wraps the original source key with the
+fixed owner's actual latest recovery hash. This is necessary because permanent
+exclusions can change during operation35 without changing the append-only
+guardian history. Continuation and consumption recompute that key; an election
+from an earlier exclusion generation cannot be reused. This replaces the earlier
+no-prior-recovery election restriction only through actual owner-derived facts.
+
+`StreamArtistRepeatedRecoveryActual.t.sol` adds six source recipes for living and
+estate continuation, a third distinct action with another exclusion generation,
+an in-window cause that never matures, prior-record corruption/restoration and
+identical retry, and an original lower-nonce Safe guardian veto. Successful
+recipes include exact late Archive rollback/retry, class/capability continuity,
+old-history preservation, event/vesting joins and replay denial.
+
+```powershell
+python scripts/dev.py test --suite unit --match-path test/unit/artist/StreamArtistRepeatedRecoveryActual.t.sol --via-ir --code-size-limit 2000000 --gas-limit 1000000000 --memory-limit 1073741824
+```
+
+These tests use actual Artist, threshold Safe and Archive contracts with typed
+unit Core/governance/role facts and aggregate CREATE semantics. This batch has
+ABI/type validation only. Integrated native execution, all linked-product sizes,
+whole-current behavior and transaction-capacity acceptance remain pending. The
+earlier 28-pass rotated-estate capture validates its original source only.

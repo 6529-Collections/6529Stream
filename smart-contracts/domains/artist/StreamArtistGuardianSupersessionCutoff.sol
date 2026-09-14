@@ -29,6 +29,16 @@ import {
     StreamArtistEstateTypes as E
 } from "../../interfaces/stream/artist/StreamArtistEstateTypes.sol";
 
+import {
+    IStreamArtistIdentityRecoveryOwner
+} from "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
+import {
+    StreamArtistIdentityRecoveryOperationTypes as I
+} from "../../interfaces/stream/artist/StreamArtistIdentityRecoveryOperationTypes.sol";
+import {
+    StreamArtistIdentityRecoveryHashes as RecoveryHashes
+} from "./StreamArtistIdentityRecoveryHashes.sol";
+
 /// @notice Original admitted vesting prefix for the current contested execution.
 /// @dev Fixed owner state and canonical writer-chain records, never a caller-selected cutoff.
 library StreamArtistGuardianSupersessionCutoff {
@@ -98,6 +108,20 @@ library StreamArtistGuardianSupersessionCutoff {
                     || StreamArtistEstateHashes.record(
                             e, r.terms, r.authorization.nonce, r.requestedAt, r.noticeEndsAt
                         ) != terminal
+            ) {
+                revert S.InvalidGuardianSupersession(terminal);
+            }
+        } else if (v.operationId == 35 && (v.authorityClass == 1 || v.authorityClass == 3)) {
+            I.Record memory r =
+                IStreamArtistIdentityRecoveryOwner(address(this)).identityRecoveryRecord(terminal);
+            if (
+                r.recordHash != terminal || r.fields.artistId != artistId
+                    || r.fields.oldAddress != v.oldAddress || r.fields.newAddress != v.newAddress
+                    || r.fields.vestedAuthorityClass != v.authorityClass
+                    || r.fields.recoveredAt != v.executedAt
+                    || RecoveryHashes.record(e.chainId, e.registry, r.fields) != terminal
+                    || IStreamArtistIdentityRecoveryOwner(address(this))
+                            .latestIdentityRecovery(artistId) != terminal
             ) {
                 revert S.InvalidGuardianSupersession(terminal);
             }

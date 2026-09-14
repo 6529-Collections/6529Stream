@@ -58,6 +58,10 @@ import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 
+import {
+    StreamArtistRecoveryContinuation as Continuation
+} from "./StreamArtistRecoveryContinuation.sol";
+
 /// @notice Same-owner recovery mutations after the fixed State wrapper derives the full context.
 /// @dev The supplied context is internal linked-call evidence, not an external owner admission surface.
 library StreamArtistIdentityRecoveryMutation {
@@ -235,7 +239,15 @@ library StreamArtistIdentityRecoveryMutation {
         Recovery.Context memory c
     ) public returns (StreamArtistIdentityState.Mutation memory m, bytes32 associationHash) {
         R.GuardianRecord memory guardian;
-        if (i.request.vestedAuthorityClass == 3) {
+        if (s.latest[i.request.artistId] != 0) {
+            guardian = Continuation.guardian(
+                s,
+                rotations,
+                i.owner.environment,
+                i.request.artistId,
+                i.request.vestedAuthorityClass
+            );
+        } else if (i.request.vestedAuthorityClass == 3) {
             bytes32 activation = estate.authorityActivation[i.request.artistId];
             bytes32 terminal = rotations.latestExecution[i.request.artistId];
             guardian = terminal != activation

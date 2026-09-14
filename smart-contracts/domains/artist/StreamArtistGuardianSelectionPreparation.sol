@@ -38,6 +38,10 @@ import {
     StreamArtistIdentityDismissalTypes as D
 } from "../../interfaces/stream/artist/StreamArtistIdentityDismissalTypes.sol";
 
+import {
+    StreamArtistIdentityRecoveryOperationTypes as Recovery
+} from "../../interfaces/stream/artist/StreamArtistIdentityRecoveryOperationTypes.sol";
+
 /// @notice Permissionless, bounded computation; only Identity can admit the resulting election.
 /// @dev No scheduled action, guardian authority or owner revision is created by this helper.
 contract StreamArtistGuardianSelectionPreparation {
@@ -231,8 +235,6 @@ contract StreamArtistGuardianSelectionPreparation {
                 || (block.timestamp < basis.transition.postWindowEndsAt
                     && !(basis.transition.contestedAt != 0
                         && basis.transition.contestedAt < basis.transition.postWindowEndsAt))
-                || IStreamArtistIdentityRecoveryOwner(owner).latestIdentityRecovery(basis.artistId)
-                    != bytes32(0)
         ) revert S.InvalidGuardianSelection(_key(basis));
         R.RotationRecord memory rotation =
             IStreamArtistRotationReads(owner).rotationRecord(basis.transition.recordHash);
@@ -259,6 +261,18 @@ contract StreamArtistGuardianSelectionPreparation {
                     || rotation.terms.artistId != basis.artistId
                     || keccak256(abi.encode(rotation.transition))
                         != keccak256(abi.encode(basis.transition))
+            ) {
+                revert S.InvalidGuardianSelection(_key(basis));
+            }
+        } else if (
+            IStreamArtistIdentityRecoveryOwner(owner).latestIdentityRecovery(basis.artistId)
+                == basis.transition.recordHash
+        ) {
+            Recovery.Record memory r = IStreamArtistIdentityRecoveryOwner(owner)
+                .identityRecoveryRecord(basis.transition.recordHash);
+            if (
+                r.recordHash != basis.transition.recordHash || r.fields.artistId != basis.artistId
+                    || r.fields.recoveredAt != basis.transition.executedAt
             ) {
                 revert S.InvalidGuardianSelection(_key(basis));
             }
@@ -297,13 +311,25 @@ contract StreamArtistGuardianSelectionPreparation {
     }
 
     function _key(S.Basis memory basis) private view returns (bytes32) {
-        return keccak256(
+        bytes32 original = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_GUARDIAN_SELECTION_SOURCE_V1"),
                 deploymentChainId,
                 artistRegistry,
                 owner,
                 basis
+            )
+        );
+        // Permanent exclusions change only during op35. Capture its actual latest head:
+        // every continuation and consumption rejects an earlier status generation.
+        bytes32 recovery =
+            IStreamArtistIdentityRecoveryOwner(owner).latestIdentityRecovery(basis.artistId);
+        if (recovery == 0) return original;
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_GUARDIAN_SELECTION_RECOVERY_BASIS_V1"),
+                original,
+                recovery
             )
         );
     }
