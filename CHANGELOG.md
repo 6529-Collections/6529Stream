@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add explicit current native auction, bid and custody signing helpers with
+  native-getter parity vectors, preserving retained RC1 domains and Safe calls.
+
 - Support artist-approved default royalty snapshots and recovery after dismissed
   first-estate compromise, preserving original consent, veto and replay rules.
 

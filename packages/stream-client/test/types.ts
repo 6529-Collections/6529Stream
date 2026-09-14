@@ -12,3 +12,11 @@ client.read("nativeSale", "buy", [sale, "0x", "0x", "0x"]);
 client.prepare("nativeSale", "buy", [sale, "0x", "0x"]);
 // @ts-expect-error exact SaleAuthorization fields are required
 nativeSaleTypedData(31337n, "0x1", { collectionId: 1n });
+
+import { nativeAuctionBidTypedData, type NativeAuctionBidAuthorization } from "../src/index.js";
+declare const nativeBid: NativeAuctionBidAuthorization;
+nativeAuctionBidTypedData(31337n, "0x1", nativeBid);
+// @ts-expect-error native bids require bigint amounts
+nativeAuctionBidTypedData(31337n, "0x1", { ...nativeBid, amount: 1 });
+// @ts-expect-error current bid fields cannot be replaced by a creation authorization
+nativeAuctionBidTypedData(31337n, "0x1", { configHash: "0x1", artist: "0x1", nonce: "0x1", deadline: 1n });

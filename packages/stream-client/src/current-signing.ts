@@ -1,0 +1,78 @@
+import type { Address, Hex } from "./generated/contracts.js";
+import type { SigningPayload } from "./signing.js";
+import { buildSigningPayload } from "./signing-payload.js";
+
+/** Current native-auction domains. Retained RC1 auction helpers remain separate. */
+export interface NativeAuctionCreationAuthorization {
+  readonly configHash: Hex; readonly artist: Address; readonly nonce: Hex; readonly deadline: bigint;
+}
+export interface NativeAuctionBidAuthorization {
+  readonly auctionId: Hex; readonly configHash: Hex; readonly payer: Address;
+  readonly executor: Address; readonly deliverTo: Address; readonly amount: bigint;
+  readonly maxRevealFee: bigint; readonly nonce: Hex; readonly deadline: bigint; readonly finalizeBy: bigint;
+}
+export interface NativeCustodyAcquisitionAuthorization {
+  readonly configHash: Hex; readonly tokenDataHash: Hex; readonly expectedSaleNonce: bigint;
+  readonly expectedTokenId: bigint; readonly expectedCollectionSerial: bigint;
+  readonly expectedOperationNonce: bigint; readonly contextHash: Hex; readonly executor: Address;
+  readonly revealFeeDeposit: bigint; readonly artist: Address; readonly nonce: Hex; readonly deadline: bigint;
+}
+export type PreparedNativeCustodyAcquisitionAuthorization = NativeCustodyAcquisitionAuthorization;
+export interface CurrentSigningMessages {
+  nativeAuctionCreation: NativeAuctionCreationAuthorization;
+  nativeAuctionBid: NativeAuctionBidAuthorization;
+  nativeCustodyAcquisition: NativeCustodyAcquisitionAuthorization;
+  preparedNativeCustodyAcquisition: PreparedNativeCustodyAcquisitionAuthorization;
+}
+export type CurrentSigningKind = keyof CurrentSigningMessages;
+
+const custodyFields = [
+  ["configHash", "bytes32"], ["tokenDataHash", "bytes32"], ["expectedSaleNonce", "uint256"],
+  ["expectedTokenId", "uint256"], ["expectedCollectionSerial", "uint256"],
+  ["expectedOperationNonce", "uint256"], ["contextHash", "bytes32"], ["executor", "address"],
+  ["revealFeeDeposit", "uint256"], ["artist", "address"], ["nonce", "bytes32"], ["deadline", "uint64"],
+] as const;
+const schemes = {
+  nativeAuctionCreation: { name: "6529StreamNativeEnglishAuction", primaryType: "NativeAuctionCreation", fields: [
+    ["configHash", "bytes32"], ["artist", "address"], ["nonce", "bytes32"], ["deadline", "uint64"],
+  ] },
+  nativeAuctionBid: { name: "6529StreamNativeEnglishAuction", primaryType: "NativeAuctionBid", fields: [
+    ["auctionId", "bytes32"], ["configHash", "bytes32"], ["payer", "address"],
+    ["executor", "address"], ["deliverTo", "address"], ["amount", "uint256"],
+    ["maxRevealFee", "uint256"], ["nonce", "bytes32"], ["deadline", "uint64"], ["finalizeBy", "uint64"],
+  ] },
+  nativeCustodyAcquisition: { name: "6529StreamNativeCustodyAuction", primaryType: "NativeCustodyAcquisition", fields: custodyFields },
+  preparedNativeCustodyAcquisition: { name: "6529StreamPreparedNativeCustodyAuction", primaryType: "PreparedNativeCustodyAcquisition", fields: custodyFields },
+} as const;
+
+/** Encoding only: check the selected current house getter and live coordinates before signing. */
+export function currentTypedData<K extends CurrentSigningKind>(kind: K, chainId: bigint, house: Address, message: CurrentSigningMessages[K]): SigningPayload<CurrentSigningMessages[K]> {
+  if (typeof kind !== "string" || !Object.hasOwn(schemes, kind)) throw new Error("Unknown current signing kind");
+  const scheme = schemes[kind];
+  return buildSigningPayload(chainId, house, scheme.name, scheme.primaryType,
+    scheme.fields.map(([name, type]) => ({ name, type })), message);
+}
+
+export const nativeAuctionCreationTypedData = (chainId: bigint, house: Address, message: NativeAuctionCreationAuthorization) => currentTypedData("nativeAuctionCreation", chainId, house, message);
+export const nativeAuctionBidTypedData = (chainId: bigint, house: Address, message: NativeAuctionBidAuthorization) => currentTypedData("nativeAuctionBid", chainId, house, message);
+export const nativeCustodyAcquisitionTypedData = (chainId: bigint, house: Address, message: NativeCustodyAcquisitionAuthorization) => currentTypedData("nativeCustodyAcquisition", chainId, house, message);
+export const preparedNativeCustodyAcquisitionTypedData = (chainId: bigint, house: Address, message: PreparedNativeCustodyAcquisitionAuthorization) => currentTypedData("preparedNativeCustodyAcquisition", chainId, house, message);
+
+/** Explicit current JSON boundary; uints are canonical decimal strings, never JSON numbers. */
+export function currentTypedDataFromJSON(input: unknown): SigningPayload<CurrentSigningMessages[CurrentSigningKind]> {
+  if (input === null || typeof input !== "object" || Array.isArray(input)) throw new Error("Expected a current signing request object");
+  const request = input as Record<string, unknown>;
+  if (Object.keys(request).sort().join(",") !== "chainId,kind,message,verifyingContract") throw new Error("Expected kind, chainId, verifyingContract and message only");
+  const kind = request.kind as CurrentSigningKind;
+  if (typeof kind !== "string" || !Object.hasOwn(schemes, kind)) throw new Error("Unknown current signing kind");
+  if (typeof request.chainId !== "string" || !/^(0|[1-9][0-9]*)$/.test(request.chainId)) throw new Error("chainId must be a decimal string");
+  if (request.message === null || typeof request.message !== "object" || Array.isArray(request.message)) throw new Error("message must be an object");
+  const message = { ...request.message } as Record<string, unknown>;
+  for (const [field, type] of schemes[kind].fields) {
+    if (!type.startsWith("uint")) continue;
+    const value = message[field];
+    if (typeof value !== "string" || !/^(0|[1-9][0-9]*)$/.test(value)) throw new Error(`${field} must be a decimal string`);
+    message[field] = BigInt(value);
+  }
+  return currentTypedData(kind, BigInt(request.chainId), request.verifyingContract as Address, message as unknown as CurrentSigningMessages[CurrentSigningKind]);
+}

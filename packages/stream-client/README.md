@@ -51,14 +51,15 @@ with the current publisher's export/manifest hash fields. It does not reconstruc
 all history, expose private mappings, host files or publish a transaction. See
 the [snapshot workflow](../../docs/integrations/typescript-client.md#capture-and-verify-supported-state).
 
-The committed digest fixtures were observed on a local current-stack deployment.
+The retained RC1 digest fixtures were observed on its local stack deployment.
 Their addresses are encoding-vector inputs, not an address book or live launch
 evidence. No test or example imports their addresses as defaults.
 
 ## Use a newer compiler catalog
 
-`StreamClient` and the signing helpers exported by this package retain the RC1
-ABI and EIP-712 contracts. For a different build, generate a separate client from
+`StreamClient` and the original six signing helpers retain the RC1
+ABI and EIP-712 contracts. The four explicitly current auction helpers below
+use their separately verified domains. For a different build, generate a separate client from
 the exact compiler build-info and an explicit source/contract selection:
 
 ```sh
@@ -92,3 +93,60 @@ EIP-712 domain names, versions and semantic field layouts cannot be inferred
 from an ABI: the retained signing helpers must not be reused for a new domain
 without explicit implementation and onchain digest parity checks. Full-v1
 signing, workflow examples and new-candidate acceptance remain in progress.
+
+## Sign current native auctions and custody acquisitions
+
+Use the explicitly current helpers with a separately generated current client:
+
+| Helper | Current house digest getter |
+| --- | --- |
+| `nativeAuctionCreationTypedData` | `creationAuthorizationDigest` |
+| `nativeAuctionBidTypedData` | `bidAuthorizationDigest` |
+| `nativeCustodyAcquisitionTypedData` | `custodyAcquisitionDigest` |
+| `preparedNativeCustodyAcquisitionTypedData` | `preparedCustodyAcquisitionDigest` |
+
+All four use version `1`, the actual chain ID and the auction **house** as
+`verifyingContract`. A prepared-custody interface alias must point at that same
+house. Single-step and prepared custody use different domain and primary-type
+names, even for identical acquisition fields. The historical `auctionTypedData`
+helper remains tied to the retained RC1 auction.
+
+```js
+import { nativeAuctionCreationTypedData } from "@6529/stream-client";
+const payload = nativeAuctionCreationTypedData(
+  currentClient.config.chainId, currentClient.address("nativeAuction"), authorization,
+);
+await currentClient.assertDigest(
+  payload, "nativeAuction", "creationAuthorizationDigest", [payload.message],
+);
+```
+
+Get the exact configuration hash from the current house before requesting
+signatures. `examples/current-auction-signing.mjs` checks the ordinary auction
+configuration and the actual digest getter before returning its immutable
+payload. Curated and rights configurations require their corresponding hash
+getters. Signing still requires the current authority, nonce, deadline and
+configuration to remain valid; payload construction alone checks encoding.
+
+`currentTypedDataFromJSON` accepts only these four explicit current kinds, with
+uint fields represented as decimal strings. It does not reinterpret retained
+RC1 JSON requests. `walletTypedData` formats either kind for wallet RPC.
+For Safe calls, pass the current client’s prepared transaction to `toSafeCall`
+and simulate with the actual Safe sender and exact native value. Acquisitions
+bind the expected sale, token, collection serial and operation nonces; prepared
+acquisition cannot substitute a signature for the single-step path.
+
+The four current fixtures call actual native-compiled digest getters on an
+isolated Anvil. Their libraries are deployed normally; the linked house runtime
+is installed without its constructor. These getters read only the payload,
+chain and house address. This is encoding evidence, separate from lifecycle,
+deployment and complete Safe workflow acceptance. The fixture records compiler
+and runtime hashes, library addresses, exact calldata and returned bytes.
+Recreate it from a reviewed native build with Foundry’s `anvil` on PATH:
+
+```sh
+node scripts/generate-current-signing-vectors.mjs --build-info /path/to/native-build.json --output /path/to/current-native-auction-digests.json
+```
+
+The generator starts and stops its own loopback chain and accepts no existing
+RPC endpoint or signer. It requires no new Solidity compilation.

@@ -4,8 +4,10 @@ The [client package](../../packages/stream-client/README.md) gives applications
 typed calls and EIP-712 payloads for the retained testnet RC1 native sale, ERC-20
 sale, artist acceptance and auction contracts. Its generated ABIs and signing
 payloads are pinned to that export. The ongoing v1 implementation changes these
-interfaces; a matching export and client migration remain required. Full Artist
-V2, universal settlement and finality recovery are outside this package.
+interfaces; use an explicitly selected compiler catalog for their current calls.
+Four separately versioned current native-auction signing helpers are available
+below. Complete Artist V2 and finality-recovery workflows remain outside the
+package’s supplied examples.
 
 ## Build and connect
 
@@ -50,6 +52,48 @@ Chain checking prevents accidental use of another chain. It does not prove that
 the supplied addresses are the correct deployment, that their code matches the
 export, or that an RPC server is honest. Verify the deployment through its
 retained bytecode/source evidence before configuring an application.
+
+## Current native auction signing
+
+For the ongoing v1 system, first generate a separate client from its exact
+compiler build-info and selected interfaces using the
+[current catalog workflow](../../packages/stream-client/README.md#use-a-newer-compiler-catalog).
+Configure its `nativeAuction` address as the actual current house. A
+`preparedCustody` interface alias refers to that same house address.
+
+| Current helper | Domain / primary type | Canonical digest getter |
+| --- | --- | --- |
+| `nativeAuctionCreationTypedData` | `6529StreamNativeEnglishAuction` / `NativeAuctionCreation` | `creationAuthorizationDigest` |
+| `nativeAuctionBidTypedData` | `6529StreamNativeEnglishAuction` / `NativeAuctionBid` | `bidAuthorizationDigest` |
+| `nativeCustodyAcquisitionTypedData` | `6529StreamNativeCustodyAuction` / `NativeCustodyAcquisition` | `custodyAcquisitionDigest` |
+| `preparedNativeCustodyAcquisitionTypedData` | `6529StreamPreparedNativeCustodyAuction` / `PreparedNativeCustodyAcquisition` | `preparedCustodyAcquisitionDigest` |
+
+Each uses version `1`, the selected chain ID and the actual house as
+`verifyingContract`. Check the appropriate configuration hash on that house,
+then compare the resulting payload with its digest getter before requesting
+platform, artist or payer approval. The executable
+[ordinary creation example](../../packages/stream-client/examples/current-auction-signing.mjs)
+performs both checks and returns an immutable payload without requesting a
+signature or sending a transaction. Curated and rights configurations need their
+own configuration-hash getter.
+
+Use `currentTypedDataFromJSON` for these four kinds and canonical decimal-string
+uints. The retained RC1 JSON parser and `auctionTypedData` retain their original
+domains. The two custody authorizations contain the same twelve fields but
+have distinct signing domains; they cannot substitute for each other.
+
+A custody acquisition commits the expected sale, token, collection serial and
+Manager operation nonces, artwork hash, executor and reveal deposit. Read
+current coordinates and preserve the exact approved bytes for simulation and
+retry. A bid separately commits payer, executor, delivery address, amount,
+reveal-fee cap and settlement deadline. Its actual transaction value uses the
+current required fee, not automatically the fee cap.
+
+Use the existing `walletTypedData`, `toSafeCall`, sender-aware simulation and
+Safe receipt checks with the current client. ERC-1271 approval still comes from
+the Safe’s own signing integration. Four native-getter encoding vectors verify
+these helpers; they do not establish a complete current SDK lifecycle or Safe
+call-inventory acceptance.
 
 ## Build and sign exact payloads
 

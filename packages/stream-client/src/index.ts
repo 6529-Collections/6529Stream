@@ -5,3 +5,4 @@ export * from "./client.js";
 export * from "./signing.js";
 export * from "./snapshot.js";
 export * from "./safe.js";
+export * from "./current-signing.js";
