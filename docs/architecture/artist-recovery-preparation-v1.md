@@ -783,3 +783,64 @@ python scripts/dev.py test --suite unit --match-path test/unit/artist/StreamArti
 The raised limits accommodate aggregate fixture CREATE operations. This domain
 harness does not establish a full current-Core/delayed-Executor lifecycle or
 individual deployment and recovery transaction capacity.
+
+
+## Estate history after successive rotations and dismissals
+
+The next source batch extends the same original operation-40 authority origin
+through successive admitted class-3 operation-32 rotations and terminal histories
+closed by operation 41. An original compromise or a standing veto of a pending
+rotation may precede the current compromise. The original estate activation,
+selected plan and effective capability intersection remain unchanged.
+
+The original terminal Closure stays attached to its first Dismissal record.
+The reader authenticates that record, its original Cause and operation-33 record
+(or the distinct operation-31 pending rotation and its abandoned closure), then
+separately authenticates the current latest dismissal. Original evidence and
+reason fields come from their historical records. The later compromise must
+follow the latest admitted dismissal. An early abandoned closure releases its
+former post-window; passage of time never restores abandoned provisional
+records. An unclosed in-window compromise still cannot mature by waiting.
+
+Executed ancestry uses the fixed owner's write-once vesting snapshots. Each
+producer binds its actual preceding execution and canonical commitment, with
+increasing owner revisions and complete guardian prefixes. Registration starts
+in class 1; only the original estate operation establishes class 3, and ordinary
+rotations preserve it. This reader still excludes prior identity recovery and
+supersession. It therefore authenticates the unchanged original estate, current
+terminal and immediate executed parent without a caller-supplied history or a
+new depth ceiling. If the stage followed a dismissed pending rotation, that
+staging parent is authenticated separately from the executed vesting parent.
+Current terminal retirement is checked; old mutable retirement entries do not
+serve as permanent ancestry anchors when an address has returned and left again.
+
+An intermediate successor's guardian record may remain operative when its exact
+canonical entry belongs to the complete terminal prefix and its original
+association is eligible. Original class-1 records retain their earlier prefix
+checks. Fresh terminal records retain the current signer and association checks.
+All lifetime members remain in the veto history, including lower-nonce records
+whose provisional cohort was abandoned. Context construction and registration
+use the same guardian reader.
+
+The source tests in StreamArtistEstateHistoryBatchActualTest compose early
+closure and identical Archive retry, zero-mask authority, standing-veto closure
+with an intervening dismissal, abandoned-record lifetime veto, original-closure
+corruption/restoration, multiple rotations with an intermediate guardian,
+returned original addresses and distinct staging/execution parents. The previous
+single-rotation depth rejection becomes a canonical parent-drift/retry control.
+The combined source exposes 40 test cases, including four inherited living
+recovery/supersession cases beyond the scoped estate cohort. Its current
+validation is ABI/type
+checking and source review, with runtime acceptance deferred to the consolidated
+validation phase. The separate frozen 28-case resume8 capture contains the prior
+source and must not be relabelled as validation of this batch.
+
+```powershell
+python scripts/dev.py test --suite unit --match-path test/unit/artist/StreamArtistEstateHistoryBatchActual.t.sol --via-ir --code-size-limit 2000000 --gas-limit 1000000000 --memory-limit 1073741824
+```
+
+This domain harness uses actual Artist, threshold Safe and Archive contracts,
+with typed unit Core/governance/role-phase boundaries and aggregate CREATE
+semantics. Prior-recovery composition, supersession, a changed estate plan,
+full current-graph operation and transaction-capacity validation remain separate
+requirements; the batch does not remove their existing refusal or authority gates.

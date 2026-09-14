@@ -1532,3 +1532,34 @@ records the focused scope. Closed terminal histories, additional executed
 successor depth, prior recoveries and nonempty supersession remain separate;
 aggregate domain evidence does not replace whole-current or transaction-capacity
 acceptance.
+
+
+### Estate rotation ancestry and admitted terminal closures
+
+The historical recovery consumer may compose the unchanged operation-40 estate
+origin with successive owner-admitted class-3 operation-32 vestings. The fixed
+owner's write-once vesting history binds each actual preceding execution,
+canonical commitment, address continuity, owner revision and complete guardian
+prefix. The current estate profile excludes prior recovery and supersession;
+registration establishes class 1, operation 40 alone establishes class 3, and
+operation 32 preserves that class. The consumer authenticates the original
+activation and the current terminal/immediate-parent records under those producer
+invariants. A mutable retirement entry for a long-retired address is not an
+immutable lineage anchor. The current terminal's actual retirement remains bound.
+
+An operation-41 terminal closure is historical authority already admitted by its
+original producer. Consume the canonical original Closure, Dismissal and Cause
+plus the actual kind-specific record, and separately authenticate today's latest
+dismissal and chronology. Preserve original hashes and the old empty-closure
+path; commit additional facts under explicit new wrapper domains. A dismissed
+pending standing attempt is distinct from the executed vesting parent and its
+own abandoned closure must be present. Do not replay historical governance or
+substitute the latest dismissal for the original closure.
+
+Abandoned provisional cohorts never mature. Eligible intermediate-successor
+records retain their canonical author, association and original prefix position;
+fresh terminal records remain bound to the terminal signer. Complete lifetime
+veto history, current binding, original capability intersection, governed delay,
+acceptance nonce, replay consumption and atomic Archive failure behavior remain
+mandatory. These are source requirements for the consolidated history batch;
+they do not themselves establish runtime or transaction-capacity acceptance.

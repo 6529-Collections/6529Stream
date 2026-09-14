@@ -51,6 +51,12 @@ import {
 } from "../../interfaces/stream/artist/StreamArtistIdentityRecoveryOperationTypes.sol";
 
 import { StreamArtistRotationHashes } from "./StreamArtistRotationHashes.sol";
+import {
+    StreamArtistRecoveryEstateClosed as EstateClosed
+} from "./StreamArtistRecoveryEstateClosed.sol";
+import {
+    StreamArtistRecoveryEstateRotationHistory as RotationHistory
+} from "./StreamArtistRecoveryEstateRotationHistory.sol";
 
 /// @notice Immediate mature op32 continuation of an admitted original op40 estate.
 /// @dev Distinct origin/terminal proof; no historical authorization is replayed or synthesized.
@@ -85,6 +91,9 @@ library StreamArtistRecoveryEstateRotation {
         f.transition = estate.transitions[head];
         f.vesting = recovery.vestingHistory.snapshots[head];
         bytes32 terminal = rotations.latestExecution[p.artistId];
+        bool continued = recovery.vestingHistory.snapshots[terminal].previousTransitionRecordHash
+                != head
+            || rotations.rotations[terminal].terms.expectedPreviousTransitionRecordHash != head;
         if (
             head == 0 || f.request.recordHash != head || f.request.terms.artistId != p.artistId
                 || f.request.incumbent == address(0)
@@ -105,7 +114,7 @@ library StreamArtistRecoveryEstateRotation {
                         f.request.noticeEndsAt
                     ) != head || estate.phases[head] != 2 || estate.pending[p.artistId] != 0
                 || rotations.pending[p.artistId] != 0 || terminal == 0 || terminal == head
-                || rotations.retirement[p.artistId][f.request.incumbent] != head
+                || (!continued && rotations.retirement[p.artistId][f.request.incumbent] != head)
                 || cause.facts.executedTransitionHash != terminal
                 || cause.facts.pendingTransitionHash != 0
                 || f.execution.activationRecordHash != head || f.execution.coverageRecordHash == 0
@@ -131,8 +140,7 @@ library StreamArtistRecoveryEstateRotation {
         Dismissal.Closure memory empty;
         if (
             keccak256(abi.encode(resolutions.closures[head])) != keccak256(abi.encode(empty))
-                || keccak256(abi.encode(resolutions.closures[terminal]))
-                    != keccak256(abi.encode(empty)) || f.transition.contestedAt != 0
+                || f.transition.contestedAt != 0
         ) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         }
@@ -171,7 +179,23 @@ library StreamArtistRecoveryEstateRotation {
         }
         Contest.Record memory contest = contests.records[cause.facts.referenceHash];
         _contest(e, cause, p, contest, terminal);
-        bytes32 terminalProof = _terminal(recovery, rotations, e, cause, f, terminal);
+        bytes32 closureProof = EstateClosed.proof(
+            rotations, resolutions, contests, e, cause, rotations.rotations[terminal].transition
+        );
+        bytes32 terminalProof = continued
+            ? RotationHistory.terminal(
+                recovery,
+                rotations,
+                resolutions,
+                contests,
+                e,
+                f.vesting,
+                f.transition,
+                cause,
+                terminal,
+                closureProof
+            )
+            : _terminal(recovery, rotations, e, cause, f, terminal, closureProof);
         f.designation = succession.designations[f.request.designationRecordHash];
         if (
             f.request.designationRecordHash == 0
@@ -210,7 +234,7 @@ library StreamArtistRecoveryEstateRotation {
         ) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         }
-        return keccak256(
+        bytes32 factsHash = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_RECOVERY_ROTATED_ESTATE_FACTS_V1"),
                 e.chainId,
@@ -222,6 +246,15 @@ library StreamArtistRecoveryEstateRotation {
                 contest
             )
         );
+        if (closureProof == 0 && !continued) return factsHash;
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_RECOVERY_CLOSED_ROTATED_ESTATE_FACTS_V1"),
+                factsHash,
+                closureProof,
+                continued
+            )
+        );
     }
 
     function _terminal(
@@ -230,7 +263,8 @@ library StreamArtistRecoveryEstateRotation {
         StreamArtistHashes.Environment memory e,
         Dismissal.Cause memory cause,
         Origin memory origin,
-        bytes32 head
+        bytes32 head,
+        bytes32 closureProof
     ) private view returns (bytes32) {
         bytes32 artistId = cause.facts.artistId;
         R.RotationRecord memory r = rotations.rotations[head];
@@ -243,16 +277,17 @@ library StreamArtistRecoveryEstateRotation {
                 || r.terms.newAddress != cause.facts.incumbent || r.terms.newAddress == address(0)
                 || r.terms.newAddress == r.terms.oldAddress
                 || r.terms.expectedPreviousTransitionRecordHash != origin.request.recordHash
-                || rotations.latestTransition[artistId] != head || retired != head
-                || t.artistId != artistId || t.recordHash != head || t.phase != 2
+                || (closureProof == 0 && rotations.latestTransition[artistId] != head)
+                || retired != head || t.artistId != artistId || t.recordHash != head || t.phase != 2
                 || t.stagedAt < origin.transition.postWindowEndsAt || t.contestEndsAt < t.stagedAt
                 || t.executedAt < t.stagedAt || t.executedAt == 0 || r.effectiveWindow < 72 hours
                 || r.standingTail < 30 days || r.timingRevision == 0
                 || (t.executedAt < t.contestEndsAt
                     && (r.approvalThreshold == 0 || r.guardianApprovals < r.approvalThreshold))
                 || uint256(t.postWindowEndsAt) != uint256(t.executedAt) + r.effectiveWindow
-                || cause.facts.enteredAt < t.postWindowEndsAt
-                || t.contestedAt != cause.facts.enteredAt
+                || (closureProof == 0
+                    && (cause.facts.enteredAt < t.postWindowEndsAt
+                        || t.contestedAt != cause.facts.enteredAt))
                 || StreamArtistRotationHashes.rotationRecord(
                         e, r.terms, r.oldNonce, t.stagedAt, t.contestEndsAt
                     ) != head || v.artistId != artistId || v.transitionRecordHash != head

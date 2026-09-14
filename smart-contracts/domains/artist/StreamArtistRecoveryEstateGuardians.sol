@@ -136,7 +136,7 @@ library StreamArtistRecoveryEstateGuardians {
         g = rotations.guardians[head];
         if (g.recordHash != head) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
         GH.Entry memory entry = _record(history, environment, artistId, current, g);
-        if (g.authorityClass == 1 || g.signer == origin.newAddress) {
+        if (g.authorityClass == 1) {
             if (
                 entry.index > terminal.guardians.count
                     || entry.ownerRevision >= terminal.ownerRevision
@@ -145,6 +145,20 @@ library StreamArtistRecoveryEstateGuardians {
             return guardian(
                 history, rotations, environment, artistId, count, origin, originalWindowEndsAt
             );
+        }
+        if (entry.index <= terminal.guardians.count) {
+            if (
+                g.authorityClass != 3 || entry.index <= origin.guardians.count
+                    || entry.ownerRevision <= origin.ownerRevision
+                    || entry.ownerRevision >= terminal.ownerRevision
+                    || g.signedAt < origin.executedAt || g.signedAt > terminal.executedAt
+                    || !_priorEstateAssociation(
+                        rotations, environment, artistId, origin, originalWindowEndsAt, g
+                    ) || !RotationState.eligible(rotations, artistId, g.provisional)
+            ) {
+                revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+            }
+            return g;
         }
         if (
             g.authorityClass != 3 || g.signer != terminal.newAddress
@@ -156,6 +170,31 @@ library StreamArtistRecoveryEstateGuardians {
                         || g.provisional.windowEndsAt != terminalWindowEndsAt)
                 || !RotationState.eligible(rotations, artistId, g.provisional)
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+    }
+
+    function _priorEstateAssociation(
+        RotationState.State storage rotations,
+        StreamArtistHashes.Environment memory e,
+        bytes32 artistId,
+        V.Snapshot memory origin,
+        uint64 originalWindowEndsAt,
+        R.GuardianRecord memory g
+    ) private view returns (bool) {
+        R.ProvisionalAssociation memory a = g.provisional;
+        if (a.transitionRecordHash == 0) return a.windowEndsAt == 0;
+        if (a.transitionRecordHash == origin.transitionRecordHash) {
+            return g.signer == origin.newAddress && a.windowEndsAt == originalWindowEndsAt;
+        }
+        R.RotationRecord memory r = rotations.rotations[a.transitionRecordHash];
+        return r.recordHash == a.transitionRecordHash && r.terms.artistId == artistId
+            && r.terms.oldAddress != address(0) && r.terms.newAddress == g.signer
+            && r.terms.oldAddress != r.terms.newAddress && r.transition.artistId == artistId
+            && r.transition.recordHash == r.recordHash && r.transition.phase == 2
+            && r.transition.executedAt >= origin.executedAt && r.transition.executedAt <= g.signedAt
+            && g.signedAt < a.windowEndsAt && r.transition.postWindowEndsAt == a.windowEndsAt
+            && StreamArtistRotationHashes.rotationRecord(
+                e, r.terms, r.oldNonce, r.transition.stagedAt, r.transition.contestEndsAt
+            ) == r.recordHash;
     }
 
     function _livingAssociation(

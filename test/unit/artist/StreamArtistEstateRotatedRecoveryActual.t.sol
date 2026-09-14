@@ -11,17 +11,17 @@ import {
 contract StreamArtistEstateRotatedRecoveryActualTest is
     StreamArtistEstateStandingHistoryActualTest
 {
-    bytes32 private erOrigin;
-    bytes32 private erTerminal;
-    bytes32 private erGuardian;
-    bytes32 private erLower;
-    bytes32 private erOriginals;
-    uint32 private erCaps;
-    OfficialSafe private erLiving;
-    uint256[] private erLivingKeys;
-    OfficialSafe private erVeto;
-    uint256[] private erVetoKeys;
-    uint64 private erWindow;
+    bytes32 internal erOrigin;
+    bytes32 internal erTerminal;
+    bytes32 internal erGuardian;
+    bytes32 internal erLower;
+    bytes32 internal erOriginals;
+    uint32 internal erCaps;
+    OfficialSafe internal erLiving;
+    uint256[] internal erLivingKeys;
+    OfficialSafe internal erVeto;
+    uint256[] internal erVetoKeys;
+    uint64 internal erWindow;
 
     function rotatedEstateSetup(uint32 caps, bool early, bool freshGuardian, uint8 livingDepth)
         external
@@ -164,7 +164,7 @@ contract StreamArtistEstateRotatedRecoveryActualTest is
         erOriginals = _erHistory();
     }
 
-    function _erHistory() private view returns (bytes32) {
+    function _erHistory() internal view returns (bytes32) {
         (Estate.RequestRecord memory r, uint8 phase, Estate.ExecutionFacts memory x) =
             ingress.estateActivationRecord(erOrigin);
         return keccak256(
@@ -313,7 +313,7 @@ contract StreamArtistEstateRotatedRecoveryActualTest is
         bytes32 id,
         uint8 field,
         bytes32 context
-    ) private {
+    ) internal {
         ClosedEstateStorageVm probe = ClosedEstateStorageVm(address(vm));
         probe.record();
         bytes32 original;
@@ -385,22 +385,15 @@ contract StreamArtistEstateRotatedRecoveryActualTest is
         );
     }
 
-    function testRotatedEstateRejectsAnExtraExecutedSuccessorDepth() public {
+    function testRotatedEstateAuthenticatesAnExtraExecutedSuccessorDepth() public {
         this.rotatedEstateSetup(0, false, false, 0);
         this.historyWarp(erWindow);
         this.rotatedEstateStage(erTerminal, false, 60161);
         this.rotatedEstateCompromise(erWindow);
         (IdentityRecovery.Request memory p, T.Authorization memory a) = this.historyPrepare(60162);
-        bytes32 old = _erHistory();
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IdentityRecovery.UnsupportedIdentityRecoveryProfile.selector, artistId
-            )
-        );
-        ingress.identityRecoveryContext(p, a);
-        require(
-            _erHistory() == old && ingress.latestIdentityRecovery(artistId) == 0,
-            "one immediate op40-op32 proof cannot stand in for an extra executed class3 history"
-        );
+        bytes32 context = keccak256(abi.encode(ingress.identityRecoveryContext(p, a)));
+        _erCorrupt(p, a, erTerminal, 1, context);
+        this.rotatedEstateRegister(p, a);
+        this.rotatedEstateRecover(p, a, true);
     }
 }
