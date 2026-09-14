@@ -2767,7 +2767,7 @@ abstract contract StreamNativeFinalityAssemblyFixture is OfficialSafeFixture {
         );
         v[8] = _finalityValue(base, "deploymentChainId", bytes32(block.chainid));
         v[9] = _finalityValue(base, "readGas", bytes32(uint256(500000)));
-        v[10] = _finalityValue(base, "sourceGas", bytes32(uint256(16000000)));
+        v[10] = _finalityValue(base, "sourceGas", bytes32(uint256(4000000)));
         v[11] = _finalityValue(base, "routerModuleVersion", assemblyRouter.streamModuleVersion());
         (, bytes32 routerManifest) = assemblyRouter.streamModuleManifest();
         (, bytes32 metadataManifest) = assemblyMetadata.streamModuleManifest();
@@ -3222,6 +3222,7 @@ abstract contract StreamNativeFinalityAssemblyFixture is OfficialSafeFixture {
         c.chainId = block.chainid;
         c.readGas = 500000;
         c.sourceGas = 16000000;
+        c.componentSourceGas = 4000000;
         c.inventoryDependencyHash = keccak256(abi.encode(_assemblyInventoryDependencies()));
     }
 
@@ -3298,8 +3299,8 @@ abstract contract StreamNativeFinalityAssemblyFixture is OfficialSafeFixture {
         d.finalityRegistryCodeHash = keccak256(assemblyRuntimes[uint256(Late.REGISTRY)]);
         d.routerAdapters = assemblyRouterAdapters;
         d.readGas = 500000;
-        d.componentGas = 16000000;
-        d.entropyGas = 16000000;
+        d.componentGas = 8000000;
+        d.entropyGas = 8000000;
         assemblyDiscovery = StreamFinalityCurrentDiscovery(
             _deployAssemblyLate(
                 Late.DISCOVERY,

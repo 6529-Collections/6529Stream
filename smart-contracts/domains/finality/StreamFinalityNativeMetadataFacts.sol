@@ -49,7 +49,7 @@ library StreamFinalityNativeMetadataFacts {
         }
         d.chainId = c.chainId;
         d.readGas = c.readGas;
-        d.selectionGas = c.sourceGas;
+        d.selectionGas = c.componentSourceGas;
         f.descriptions = StreamFinalityDescriptionReads.requireCurrent(d, scope);
         StreamFinalityConservationReads.Dependencies memory v;
         uint256[5] memory vi = [uint256(0), 1, 4, 5, 17];
@@ -59,7 +59,7 @@ library StreamFinalityNativeMetadataFacts {
         }
         v.chainId = c.chainId;
         v.readGas = c.readGas;
-        v.selectionGas = c.sourceGas;
+        v.selectionGas = c.componentSourceGas;
         f.conservation = StreamFinalityConservationReads.requireCurrent(v, scope);
         f.workLock = _seal(
             c,

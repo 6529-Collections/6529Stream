@@ -27,12 +27,15 @@ contract StreamFinalityNativeEvidenceProvider is StreamFinalityRouterEvidencePro
             c.targets[2],
             c.targets[3],
             uint32(c.readGas),
-            uint32(c.sourceGas)
+            uint32(c.componentSourceGas)
         )
     {
         if (
             c.chainId != block.chainid || c.readGas > type(uint32).max
-                || c.sourceGas > type(uint32).max || c.inventoryDependencyHash == 0
+                || c.sourceGas > type(uint32).max || c.componentSourceGas > type(uint32).max
+                || c.componentSourceGas < c.readGas
+                || c.sourceGas <= c.componentSourceGas + c.componentSourceGas / 63 + 100000
+                || c.inventoryDependencyHash == 0
         ) {
             revert StreamFinalityNativeProviderReads.NativeProviderConfiguration();
         }

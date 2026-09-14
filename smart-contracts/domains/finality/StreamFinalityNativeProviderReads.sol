@@ -29,6 +29,8 @@ library StreamFinalityNativeProviderReads {
         uint256 chainId;
         uint256 readGas;
         uint256 sourceGas;
+        // Nested component callbacks use a smaller leaf budget than the outer source read.
+        uint256 componentSourceGas;
         bytes32 inventoryDependencyHash;
     }
     error NativeProviderConfiguration();
@@ -40,7 +42,9 @@ library StreamFinalityNativeProviderReads {
 
     function requirePins(Config memory c) public view {
         if (
-            c.chainId != block.chainid || c.readGas < 50000 || c.sourceGas < c.readGas
+            c.chainId != block.chainid || c.readGas < 50000 || c.componentSourceGas < c.readGas
+                || c.componentSourceGas > type(uint32).max
+                || c.sourceGas <= c.componentSourceGas + c.componentSourceGas / 63 + 100000
                 || c.inventoryDependencyHash == 0
         ) revert NativeProviderConfiguration();
         for (uint256 i; i < 22; ++i) {

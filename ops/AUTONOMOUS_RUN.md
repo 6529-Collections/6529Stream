@@ -22,15 +22,27 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active work
 
-The current native assembly retains three passing actual workflows: complete
-original contract deployment with runtime pins, paid minting with a Safe artist
-and EOA buyer plus entropy fulfillment, and original content consent/checkpoint
-with dual archival coverage. The corrected attestation URI now passes decoding.
-Two later cases next fail because the fixture used its relay as recorder instead
-of the actual Artist Safe. The reviewed successor consistently uses that Safe,
-publishes exact Store payload bytes before admission and raises the original
-publication read budget through governance. Description seals, snapshot and the
-full finality ceremony still require successful execution; no new candidate exists.
+The current native assembly now passes all five selected workflows, with an
+independent source, compiler-product and runtime review. These cover actual
+contract deployment and runtime pins; paid minting with a Safe artist and EOA
+buyer plus entropy; original content consent and dual archival coverage; original
+Artist record publication with governed WORK/RIGHTS seals; and the original
+snapshot, entropy-source set and remaining local seals. The reviewed correction
+uses the actual Artist Safe as recorder, publishes the exact Store payload before
+admission and sets the original publication read budget through governance.
+
+The exact five-case run passed in 12.217 seconds using the completed native build;
+all 352 nonempty production runtimes fit. Its elevated aggregate test allowance
+covers many deployments and operations, not one shipping transaction. The full
+sixth ceremony is separate: fresh repeated browser captures are verified, while
+its first complete run exhausted the 10-billion aggregate harness allowance
+during bundle coverage. A cached retry with a 20-billion aggregate allowance
+passed that point and exposed incompatible nested component-read budgets. The
+native provider now separates component leaf reads from complete-source reads;
+29 focused cases pass in both compiler modes, including one 256-input property
+per mode. The fixture's matching budget configuration has separate source review.
+The updated complete ceremony and per-transaction capacity remain open; no new
+candidate exists.
 
 The preservation Safe increment `0c6da9e4` is independently reviewed, integrated
 and pushed. Ten unique IR cases cover inventory, bundle and artifact calls,
@@ -40,11 +52,16 @@ are mapped. Read-only calls use a stateless test probe executed by the real Safe
 small typed bundle boundaries are explicit. This adds call-surface evidence, not
 a new full-bundle capacity or complete Stream-wide Safe claim.
 
-The next commerce increment implements the actual paid PREPARED mint handoff for
-a new versioned native auction while retaining the existing V2 interface.
-[ADR 0043](../docs/adr/0043-deferred-auction-clocks-and-no-bid.md) resolves the three
-clock/no-bid combinations found during source review. Auction implementation and
-all remaining SALE-04 acceptance remain open.
+The new paid PREPARED mint handoff and first native-auction profile have passed
+independent source review. Runtime acceptance is still open: the first paid-handoff
+build exceeded contract size limits before any behavior test ran. A reviewed
+extraction brings Manager below the limit; the settlement recorder still requires
+a smaller runtime before the thirteen behavior cases can execute. The attempted
+raw-return size optimization did not help and is being replaced by a substantive
+execution extraction. No failed setup is counted as a passing sale test. The
+actual-auction cohort awaits the corrected handoff. [ADR 0043](../docs/adr/0043-deferred-auction-clocks-and-no-bid.md) resolves
+clock and no-bid combinations; broader custody, delegation, content-proof and
+rights profiles remain mandatory. Existing V2 behavior is retained.
 
 The reusable auction clock now passes 13 focused tests in both compiler modes,
 including three 256-input properties per mode. It validates clock modes and

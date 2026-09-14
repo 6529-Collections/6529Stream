@@ -42,6 +42,39 @@ configuration hash is also pinned. Snapshot dependencies must use the same leaf
 manifest, checkpoint and membership host. Snapshot and entropy discovery must
 share the original coordinator inventory.
 
+## Read budgets
+
+The native constructor configuration separates three budgets:
+
+| Field | Purpose |
+| --- | --- |
+| `readGas` | Small fixed-shape dependency reads |
+| `componentSourceGas` | Membership, Router and selected-record reads made inside a component callback |
+| `sourceGas` | Outer Discovery, component and complete inventory/reference reads |
+
+`componentSourceGas` is a new constructor/configuration tuple field, immediately
+after `sourceGas`. Rebuild native-provider constructor payloads and deployment
+runtime predictions together. The inherited public `sourceGas()` getter reports
+the component leaf allowance; `nativeConfiguration().sourceGas` reports the
+outer allowance. The standalone Router provider keeps its existing constructor.
+
+A component adapter calls back into the provider. Reserving the entire outer
+allowance again inside that callback cannot work. The constructor therefore
+requires the leaf allowance to cover `readGas`, and the outer allowance to exceed
+`leaf + leaf / 63 + 100000`. This is minimum forwarding headroom, not a complete
+transaction-capacity proof. Discovery's full component and entropy allowances
+must also leave room for their own nested reads; checking only its route list
+would miss the full component path.
+
+The current assembly uses a 4-million leaf allowance, 8-million Discovery
+component/entropy allowances and a 16-million outer source allowance. The
+29-case focused cohort passes both compiler modes with one 256-input property
+per mode. Its new regression traverses the actual component helper, serving
+adapter and native provider with explicitly typed route peers and leaf responses.
+It covers a bounded successful callback, insufficient gas and successful retry.
+The complete updated Discovery/Metadata families and finality ceremony remain
+separate current-stack acceptance work.
+
 ## Independent manifest
 
 `inputManifestBytes(scope)` derives the exact independent manifest before it is

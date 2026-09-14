@@ -5,6 +5,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Added actual native graph, Artist record/seal and snapshot assembly tests.
+- Separated native finality component leaf budgets from outer source-read budgets,
+  with bounded adapter/provider callback regressions and matching constructor pins.
+
 - Added reviewed Safe preservation call and atomic-retry coverage.
 - Added a tested auction clock library for first-bid timing, capped extensions,
   pause tolling, rounded increments and signed settlement deadline ceilings.

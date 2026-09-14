@@ -4,6 +4,7 @@ import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 import "../../helpers/OfficialSafeFixture.sol";
 import "../../../smart-contracts/domains/finality/StreamFinalityPreparedScopeReads.sol";
 import "../../../smart-contracts/domains/finality/StreamFinalityNativeEvidenceProvider.sol";
+import "../../../smart-contracts/domains/finality/StreamFinalityServingHostAdapter.sol";
 
 /// @dev Explicit dependency/returndata boundary; no table represents validated original evidence.
 contract NativeProviderReadTable {
@@ -264,6 +265,7 @@ contract StreamFinalityPreparedScopeTest is CharacterizationTestBase, OfficialSa
     {
         c.targets[13] = address(table);
         c.sourceGas = 16000000;
+        c.componentSourceGas = 4000000;
         routes = new StreamFinalityCurrentComponentRoute[](9);
         for (uint256 i; i < 9; ++i) {
             NativeProviderReadTable component = new NativeProviderReadTable();
@@ -353,6 +355,7 @@ contract StreamFinalityPreparedScopeTest is CharacterizationTestBase, OfficialSa
         c.chainId = block.chainid;
         c.readGas = 500000;
         c.sourceGas = 16000000;
+        c.componentSourceGas = 4000000;
         c.inventoryDependencyHash = keccak256("pending real inventory");
         for (uint256 i; i < 22; ++i) {
             c.targets[i] = address(new NativeProviderReadTable());
@@ -412,6 +415,117 @@ contract StreamFinalityPreparedScopeTest is CharacterizationTestBase, OfficialSa
         bytes memory output
     ) private {
         NativeProviderReadTable(c.targets[i]).put(input, output);
+    }
+
+    /// @dev Actual native Provider -> actual serving adapter -> same Provider -> membership
+    /// and Router reads. Only original leaf responses are typed table boundaries here.
+    function testNativeComponentCallbackFitsItsOuterBudget() public {
+        StreamFinalityNativeProviderReads.Config memory c = _baseConfig();
+        StreamScopeMembershipFacts memory membership;
+        membership.scopeSubject =
+            StreamMetadataSubjects.scopeSubject(block.chainid, c.targets[0], scope);
+        membership.membershipHash = keccak256("bounded original membership");
+        membership.tokenCount = 1;
+        _put(
+            c,
+            3,
+            abi.encodeWithSignature(
+                "requireScopeMembership((uint8,uint256,uint256,bytes32))", scope
+            ),
+            abi.encode(membership)
+        );
+        IStreamMetadataServingFacts.ServingFacts memory facts;
+        facts.configured = true;
+        facts.mode = keccak256("ONCHAIN");
+        facts.presentationProfile = keccak256("6529STREAM_ROUTER_STABLE_PRESENTATION_V1");
+        facts.scriptBytes = 1;
+        facts.scriptLocked = true;
+        facts.scriptHash = keccak256("original script");
+        _put(
+            c,
+            2,
+            abi.encodeCall(IStreamMetadataServingFacts.collectionServingFacts, (uint256(1))),
+            abi.encode(facts)
+        );
+        StreamFinalityNativeEvidenceProvider provider = new StreamFinalityNativeEvidenceProvider(c);
+        StreamFinalityServingHostAdapter adapter = new StreamFinalityServingHostAdapter(
+            c.targets[0],
+            c.targets[2],
+            address(provider),
+            StreamFinalityDomains.COMPONENT_SCRIPT_SOURCE
+        );
+        StreamFinalityCurrentComponentRoute[] memory routes =
+            new StreamFinalityCurrentComponentRoute[](9);
+        for (uint256 i; i < 9; ++i) {
+            address target = address(new NativeProviderReadTable());
+            bytes32 family = bytes32(i + 1);
+            StreamFinalityComponentState memory state = StreamFinalityComponentState(
+                true,
+                family,
+                target,
+                type(IStreamArtworkFinalityComponent).interfaceId,
+                target.codehash,
+                keccak256("version"),
+                keccak256("manifest"),
+                keccak256("data")
+            );
+            NativeProviderReadTable(target)
+                .put(
+                    abi.encodeCall(IStreamArtworkFinalityComponent.finalityState, (uint256(1))),
+                    abi.encode(state)
+                );
+            routes[i] = StreamFinalityCurrentComponentRoute(
+                family, target, type(IStreamArtworkFinalityComponent).interfaceId, target.codehash
+            );
+        }
+        // Eight typed peers keep the native nine-component route shape. The last component
+        // traverses the real recursive callback that previously reserved the whole outer cap.
+        routes[8] = StreamFinalityCurrentComponentRoute(
+            StreamFinalityDomains.COMPONENT_SCRIPT_SOURCE,
+            address(adapter),
+            type(IStreamArtworkFinalityComponent).interfaceId,
+            address(adapter).codehash
+        );
+        _put(
+            c,
+            13,
+            abi.encodeCall(
+                IStreamFinalityCurrentComponentRoutes.requireCurrentRoutes, (scope, false)
+            ),
+            abi.encode(routes)
+        );
+        StreamFinalityComponentExpectation[] memory got = harness.components(c, scope);
+        require(
+            got.length == 9 && got[8].component == address(adapter) && got[8].dataHash != 0,
+            "actual nested component succeeded"
+        );
+        require(
+            provider.sourceGas() == c.componentSourceGas
+                && provider.nativeConfiguration().sourceGas == c.sourceGas,
+            "independent leaf and aggregate budgets"
+        );
+        (bool ok, bytes memory raw) = address(adapter).staticcall{ gas: 8000000 }(
+            abi.encodeCall(adapter.finalityState, (uint256(1)))
+        );
+        require(ok && raw.length == 256, "component fits a smaller Discovery outer cap too");
+        (ok,) = address(adapter).staticcall{ gas: 100000 }(
+            abi.encodeCall(adapter.finalityState, (uint256(1)))
+        );
+        require(!ok, "underfunded callback rejects");
+        (ok, raw) = address(adapter).staticcall{ gas: 8000000 }(
+            abi.encodeCall(adapter.finalityState, (uint256(1)))
+        );
+        require(ok && raw.length == 256, "same callback retries without weakening pins");
+    }
+
+    function testNativeProviderRejectsEqualAndUnderfundedComponentBudgets() public {
+        StreamFinalityNativeProviderReads.Config memory c = _baseConfig();
+        c.componentSourceGas = c.sourceGas;
+        vm.expectRevert();
+        new StreamFinalityNativeEvidenceProvider(c);
+        c.componentSourceGas = c.readGas - 1;
+        vm.expectRevert();
+        new StreamFinalityNativeEvidenceProvider(c);
     }
 
     function testProviderRejectsDirectPreparedCaller() public {
