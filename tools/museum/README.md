@@ -214,3 +214,11 @@ replays archived evidence offline. Run
 `python -m unittest tools.museum.test_package_recorded -v` for this path. The
 recorded package preserves the source environment and trusted-RPC limitations;
 it does not claim institutional conformance.
+
+
+The [actual current foundation capture](../../docs/museum-current-media-capture.md)
+adds a positive recorded complete-media example using prebuilt native contracts,
+real delayed governance and two-owner Safe calls on an owned loopback Anvil. It
+retains the actual PNG and recorded facts, reconstructs all four formats offline,
+and checks that missing publisher selection withholds LIDO only. It does not run
+a Solidity compiler or claim whole-product deployment or institutional acceptance.
