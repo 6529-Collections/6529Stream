@@ -113,7 +113,7 @@ contract StreamRoyaltyResolver is
         bool frozen
     ) external view override returns (StreamArtistOnboardingTypes.AssignmentFact memory fact) {
         _requireScopeContext(collectionId, scope, scopeId);
-        if (scope != 1) _requireLiveRoyaltyMutation(collectionId);
+        if (scope == 2) _requireLiveRoyaltyMutation(collectionId);
         RoyaltyConfig memory candidate = _candidate(profileHash, royaltyBps);
         candidate.frozen = frozen;
         return _fact(scope, scopeId, candidate);
@@ -665,8 +665,13 @@ contract StreamRoyaltyResolver is
         returns (StreamArtistOnboardingTypes.AssignmentFact memory)
     {
         _requireSelectedArtistRegistry();
-        IStreamRoyaltySnapshot.Source memory source = StreamRoyaltySnapshot.source(
-            _snapshots, _collectionRoyalties[collectionId], _snapshotContext(), collectionId, false
+        IStreamRoyaltySnapshot.Source memory source = StreamRoyaltySnapshot.selectedSource(
+            _snapshots,
+            _defaultRoyalty,
+            _collectionRoyalties,
+            _snapshotContext(),
+            collectionId,
+            false
         );
         return _snapshotFact(collectionId, source.modeAssignmentHash);
     }
@@ -677,8 +682,13 @@ contract StreamRoyaltyResolver is
         override
         returns (IStreamRoyaltySnapshot.Source memory)
     {
-        return StreamRoyaltySnapshot.source(
-            _snapshots, _collectionRoyalties[collectionId], _snapshotContext(), collectionId, true
+        return StreamRoyaltySnapshot.selectedSource(
+            _snapshots,
+            _defaultRoyalty,
+            _collectionRoyalties,
+            _snapshotContext(),
+            collectionId,
+            true
         );
     }
 
@@ -701,6 +711,7 @@ contract StreamRoyaltyResolver is
     ) external override returns (bytes32) {
         return StreamRoyaltySnapshot.create(
             _snapshots,
+            _defaultRoyalty,
             _collectionRoyalties,
             _tokenRoyalties,
             _snapshotContext(),

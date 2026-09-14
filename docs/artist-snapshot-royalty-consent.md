@@ -58,8 +58,29 @@ entries. They retain a nonzero original assignment hash, source policy hash and
 signed mode hash. No profile-specific observation is made for profile zero;
 the original factory identity reads remain part of the canonical hash context.
 
-This first mode does not admit default fallback, generic token economics
-consent, collection freezing or clearing. Snapshot
+When the collection key is missing, mode 2 snapshots the configured default.
+A configured collection key, including disabled zero, always takes precedence.
+The default keeps its original scope-0/id-0 assignment hash and its canonical
+policy hash with collection and token coordinates both zero. The mode approval
+still uses scope 1 and the actual collection ID: its wrapper commits that
+collection election and the original default hash. It confers no authority over
+the global default or another collection. A frozen default is valid, with its
+frozen bit retained in the source hash; the derived token is independently
+frozen. A default change or freeze needs new current mode approval and a new
+phase commitment before further minting. Existing token snapshots stay fixed.
+
+Approve an already selected default through the original
+`recordEconomicsConsent` route using
+`currentArtistSnapshotRoyaltyAssignment(collectionId)`. Artist current reads
+independently reconstruct the exact collection key and then the default key,
+validate the selected configuration, and retain both raw and wrapped facts in
+the original operation-15 evidence. Prospective fixed SET remains approval of a
+collection override and cannot be repurposed as a default-source approval.
+Raw scope-0 preview is read-only reconstruction; global mutation authority is
+unchanged. A missing collection and missing default still reject.
+
+This mode does not admit generic token economics consent, collection freezing
+or clearing, or dynamic royalty templates. Snapshot
 freeze proposals are rejected; the existing boolean freeze-eligibility query
 returns false for an authenticated mode-2 collection. Malformed mode reads still
 revert. Derived token snapshot authority belongs to the separate prepared
@@ -80,7 +101,12 @@ transaction capacity. The separate `StreamCurrentDisabledRoyaltySnapshotTest`
 uses actual Core, Manager, Ledger, Resolver, recorder, auction and Safe to check
 prepared zero-rate snapshots, full receipts, idempotence and atomic payment
 failure/retry. Its Artist, governance and entropy boundaries are typed fixtures;
-combining the two suites does not establish a joined actual Artist commerce flow.
+combining the suites does not establish a joined actual Artist commerce flow.
+`StreamCurrentDefaultRoyaltySnapshotTest` adds actual prepared default selection,
+canonical scope-0 hashes, collection-specific approval, frozen and disabled
+defaults, receipts, no-op, atomic batch rollback and identical paid Safe retry.
+The Artist suite separately exercises original current-consent Archive evidence,
+actual payout enforcement, default freeze reapproval and signed Safe retry.
 
 Run the focused suite from the checkout:
 

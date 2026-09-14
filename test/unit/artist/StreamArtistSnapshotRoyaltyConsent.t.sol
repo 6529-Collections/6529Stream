@@ -529,6 +529,89 @@ contract StreamArtistSnapshotRoyaltyConsentTest is ArtistOnboardingFixture {
             "disabled source retains exact current binding association requirement");
     }
 
+    function testDefaultSnapshotCurrentSafeApprovalPreservesOriginalArchiveAndMintRead() public {
+        _defaultSnapshotSetup(false, 500); _policy();
+        StreamArtistOnboardingReads reads = coordinator.reads();
+        (T.AssignmentFact memory primaryFact, T.AssignmentFact memory fact) = reads.currentAssignments(1);
+        (T.AssignmentFact memory raw, IStreamRoyaltyResolver.RoyaltyConfig memory config) = royalty.royaltyEconomicsFacts(1, 0, 0);
+        (, bytes32 election) = royalty.collectionRoyaltyMode(1);
+        require(fact.scope == 1 && fact.scopeId == 1 && raw.scope == 0 && raw.scopeId == 0
+            && fact.assignmentHash == keccak256(abi.encode(keccak256("6529STREAM_SNAPSHOT_ROYALTY_ASSIGNMENT_V1"),
+                block.chainid, address(royalty), suite.core, uint256(1), election, raw.assignmentHash)),
+            "current approval binds actual collection and original default key");
+        T.EconomicsConsent memory p = _snapshotTerms(fact); T.Authorization memory a = _authorization(false);
+        T.Binding memory binding_ = reads.acceptedBinding(1);
+        (, bytes32 payoutRecord) = ingress.artistPayoutAccount(artistId);
+        bytes32 expected = StreamArtistEconomicsHashes.economicsRecord(
+            StreamArtistHashes.Environment(block.chainid, address(ingress), suite.core, suite.mintManager),
+            p, payoutRecord, artistId, address(artist), a.nonce, uint64(block.timestamp));
+        vm.recordLogs();
+        require(executeSafe(artist, keys, address(ingress), 0,
+            abi.encodeCall(IStreamArtistOnboarding.recordEconomicsConsent, (p, a)), 0), "original direct Artist Safe current approval");
+        _associationEvent(vm.getRecordedLogs(), expected, p, binding_, expected);
+        _assertRoyaltyCurrentArchive(p, a, expected, binding_, abi.encode(
+            keccak256("6529STREAM_CURRENT_SNAPSHOT_ROYALTY_ECONOMICS_EVIDENCE_V1"), election, raw, fact, config));
+        IStreamRoyaltySnapshot.Source memory source = royalty.currentRoyaltySnapshotSource(1);
+        require(!royalty.collectionRoyalty(1).configured && source.sourceAssignmentHash == raw.assignmentHash
+            && source.sourceRoyaltyPolicyHash == keccak256(abi.encode(keccak256("6529STREAM_ROYALTY_POLICY_V1"),
+                block.chainid, address(royalty), uint256(0), uint256(0), config.profileId, config.wallet,
+                config.royaltyBps, raw.assignmentHash)), "default approval never installs an override or changes canonical source policy");
+        _economicsRecord(primaryFact); _ratify(); _attestations(); ingress.requireMintConsent(1, PHASE, POLICY);
+        T.FixedEconomicsCandidate memory candidate = T.FixedEconomicsCandidate(config.profileId, 0, config.royaltyBps, false);
+        T.Authorization memory wrong = _signedSnapshot(p);
+        avm.expectRevert(T.InvalidRecord.selector); ingress.recordProspectiveEconomicsConsent(p, candidate, wrong);
+        address owner = royalty.owner();
+        vm.expectRevert(abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("economics")));
+        vm.prank(owner); royalty.configureCollectionRoyalty(1, config.profileId, config.royaltyBps);
+    }
+
+    function testDefaultSnapshotPayoutFailurePreservesIdenticalSignedSafeRetry() public {
+        _defaultSnapshotSetup(false, 500);
+        StreamArtistOnboardingReads reads = coordinator.reads();
+        (, T.AssignmentFact memory fact) = reads.currentAssignments(1);
+        T.EconomicsConsent memory p = _snapshotTerms(fact); T.Authorization memory a = _signedSnapshot(p);
+        bytes memory data = abi.encodeCall(IStreamArtistOnboarding.recordEconomicsConsent, (p, a));
+        uint256 nonce = artist.nonce();
+        bytes32 digest = artist.getTransactionHash(address(ingress), 0, data, 0, 0, 0, 0, address(0), address(0), nonce);
+        bytes memory exact = abi.encodeCall(artist.execTransaction,
+            (address(ingress), 0, data, 0, 0, 0, 0, address(0), payable(address(0)), safeThresholdSignature(keys, digest)));
+        _snapshotPayout(address(0xCAFE)); bytes32 roots = _roots();
+        (bool ok,) = address(artist).call(exact);
+        require(!ok && artist.nonce() == nonce && _roots() == roots
+            && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce), "payout mismatch rolls back original current-consent lanes");
+        _snapshotPayout(address(artist)); (ok,) = address(artist).call(exact);
+        require(ok && artist.nonce() == nonce + 1 && royalty.currentRoyaltySnapshotSource(1).modeAssignmentHash == p.assignmentHash,
+            "same signed Safe transaction and op15 payload retry after actual payout repair");
+        vm.prank(royalty.owner()); royalty.freezeDefaultRoyalty();
+        vm.expectRevert(abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("economics")));
+        royalty.currentRoyaltySnapshotSource(1);
+        (, fact) = reads.currentAssignments(1); require(fact.assignmentHash != p.assignmentHash, "default freeze changes mode-bound approval");
+        _economicsRecord(fact); require(royalty.currentRoyaltySnapshotSource(1).config.frozen, "current approval accepts original frozen default");
+    }
+
+    function testDisabledDefaultSnapshotCurrentApprovalRetainsPayoutAndZeroHashDistinction() public {
+        _defaultSnapshotSetup(true, 0); _forbidDisabledProfileReads();
+        StreamArtistOnboardingReads reads = coordinator.reads();
+        (, T.AssignmentFact memory fact) = reads.currentAssignments(1);
+        (T.AssignmentFact memory raw,) = royalty.royaltyEconomicsFacts(1, 0, 0);
+        require(raw.assignmentHash != 0 && fact.assignmentHash != 0 && raw.assignmentHash != fact.assignmentHash
+            && !royalty.collectionRoyalty(1).configured, "frozen disabled default is configured source, never clear result");
+        _economicsRecord(fact);
+        IStreamRoyaltySnapshot.Source memory source = royalty.currentRoyaltySnapshotSource(1);
+        require(source.config.configured && source.config.frozen && source.config.wallet == address(0)
+            && source.config.royaltyBps == 0 && source.config.profileId == 0 && source.sourceAssignmentHash == raw.assignmentHash,
+            "original zero source needs no invented profile observations");
+    }
+
+    function _defaultSnapshotSetup(bool frozen, uint16 bps) private {
+        _accept(); _payout();
+        bytes32 profile = royalty.collectionRoyalty(1).profileId;
+        _clearRoyalty(1, 1);
+        vm.prank(royalty.owner()); royalty.configureDefaultRoyalty(bps == 0 ? bytes32(0) : profile, bps);
+        if (frozen) { vm.prank(royalty.owner()); royalty.freezeDefaultRoyalty(); }
+        _elect(2);
+    }
+
     function _disabledSnapshotCandidate()
         private view returns (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate)
     {

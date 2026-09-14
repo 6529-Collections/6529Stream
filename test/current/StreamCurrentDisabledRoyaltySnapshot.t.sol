@@ -52,11 +52,10 @@ contract StreamCurrentDisabledRoyaltySnapshotTest is NativeRoyaltySnapshotFixtur
         require(!ok && bytes4(why) == IStreamMintRoyaltyPolicy.PreparedRoyaltySnapshotRequired.selector
             && manager.nextOperationNonce() == 0 && core.lastAllocatedTokenId() == 0, "zero rate cannot bypass prepared execution");
         StreamRoyaltyResolver missing = new StreamRoyaltyResolver(core, factory, address(revenueAuthority), artists);
-        vm.prank(address(revenueAuthority)); missing.configureDefaultRoyalty(profile, 900);
         vm.prank(address(revenueAuthority)); missing.electCollectionRoyaltyMode(1, 2);
         (ok, why) = address(missing).staticcall(abi.encodeCall(missing.currentRoyaltySnapshotSource, (uint256(1))));
         require(!ok && bytes4(why) == IStreamRoyaltySnapshot.InvalidRoyaltySnapshot.selector,
-            "missing collection is not disabled or an implemented default snapshot");
+            "missing collection and default are not a configured disabled snapshot");
     }
 
     function testDisabledBatchEmitsFullCanonicalReceiptsAndFrozenZeroSurvivesFuturePositiveTerms() public {

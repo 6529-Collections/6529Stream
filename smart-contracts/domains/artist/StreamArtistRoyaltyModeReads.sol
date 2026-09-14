@@ -80,6 +80,13 @@ library StreamArtistRoyaltyModeReads {
         if (election != bytes32(0) && (scope != 1 || scopeId != collectionId)) {
             revert T.UnsupportedProfile();
         }
+        if (election != bytes32(0)) {
+            (fact, config) = _currentSnapshotRaw(resolver, collectionId);
+            T.AssignmentFact memory snapshot = IStreamArtistSnapshotRoyaltyFacts(resolver)
+                .currentArtistSnapshotRoyaltyAssignment(collectionId);
+            _requireSnapshot(core, collectionId, election, fact, snapshot);
+            return (snapshot, config);
+        }
         (fact, config) = IStreamArtistRoyaltyScopeFacts(resolver)
             .royaltyEconomicsFacts(collectionId, scope, scopeId);
         if (
@@ -87,31 +94,6 @@ library StreamArtistRoyaltyModeReads {
                 || fact.scope != scope || fact.scopeId != scopeId
                 || (config.configured == (fact.assignmentHash == bytes32(0)))
         ) revert T.InvalidRecord();
-        if (election != bytes32(0)) {
-            _snapshotShape(
-                collectionId, scope, scopeId, config.profileId, config.royaltyBps, config.frozen
-            );
-            if (
-                !config.configured
-                    || (config.wallet == address(0)) != (config.profileId == bytes32(0))
-            ) revert T.InvalidRecord();
-            T.AssignmentFact memory raw = _preview(
-                resolver,
-                collectionId,
-                scope,
-                scopeId,
-                config.profileId,
-                config.royaltyBps,
-                config.frozen
-            );
-            if (keccak256(abi.encode(raw)) != keccak256(abi.encode(fact))) {
-                revert T.InvalidRecord();
-            }
-            T.AssignmentFact memory snapshot = IStreamArtistSnapshotRoyaltyFacts(resolver)
-                .currentArtistSnapshotRoyaltyAssignment(collectionId);
-            _requireSnapshot(core, collectionId, election, fact, snapshot);
-            fact = snapshot;
-        }
     }
 
     function rebuild(
@@ -122,13 +104,20 @@ library StreamArtistRoyaltyModeReads {
     ) public view returns (bytes memory) {
         bytes32 election = _election(core, fact.resolver, collectionId);
         if (election != bytes32(0)) {
-            _snapshotShape(
-                collectionId,
-                fact.scope,
-                fact.scopeId,
-                config.profileId,
-                config.royaltyBps,
-                config.frozen
+            (
+                T.AssignmentFact memory selected,
+                IStreamRoyaltyResolver.RoyaltyConfig memory currentConfig
+            ) = _currentSnapshotRaw(fact.resolver, collectionId);
+            if (keccak256(abi.encode(currentConfig)) != keccak256(abi.encode(config))) {
+                revert T.InvalidRecord();
+            }
+            _requireSnapshot(core, collectionId, election, selected, fact);
+            return abi.encode(
+                keccak256("6529STREAM_CURRENT_SNAPSHOT_ROYALTY_ECONOMICS_EVIDENCE_V1"),
+                election,
+                selected,
+                fact,
+                config
             );
         }
         T.AssignmentFact memory raw = _preview(
@@ -140,16 +129,6 @@ library StreamArtistRoyaltyModeReads {
             config.royaltyBps,
             config.frozen
         );
-        if (election != bytes32(0)) {
-            _requireSnapshot(core, collectionId, election, raw, fact);
-            return abi.encode(
-                keccak256("6529STREAM_CURRENT_SNAPSHOT_ROYALTY_ECONOMICS_EVIDENCE_V1"),
-                election,
-                raw,
-                fact,
-                config
-            );
-        }
         if (keccak256(abi.encode(raw)) != keccak256(abi.encode(fact))) revert T.InvalidRecord();
         return
             abi.encode(keccak256("6529STREAM_CURRENT_ROYALTY_ECONOMICS_EVIDENCE_V1"), fact, config);
@@ -200,6 +179,52 @@ library StreamArtistRoyaltyModeReads {
             );
     }
 
+    function _currentSnapshotRaw(address resolver, uint256 collectionId)
+        private
+        view
+        returns (T.AssignmentFact memory raw, IStreamRoyaltyResolver.RoyaltyConfig memory config)
+    {
+        (raw, config) = IStreamArtistRoyaltyScopeFacts(resolver)
+            .royaltyEconomicsFacts(collectionId, 1, collectionId);
+        _requireRawKey(resolver, 1, collectionId, raw, config);
+        if (!config.configured) {
+            (raw, config) =
+                IStreamArtistRoyaltyScopeFacts(resolver).royaltyEconomicsFacts(collectionId, 0, 0);
+            _requireRawKey(resolver, 0, 0, raw, config);
+        }
+        if (
+            !config.configured || (config.profileId == bytes32(0)) != (config.royaltyBps == 0)
+                || (config.wallet == address(0)) != (config.profileId == bytes32(0))
+                || config.royaltyBps > 1_000 || (raw.scope == 1 && config.frozen)
+        ) revert T.InvalidRecord();
+        T.AssignmentFact memory rebuilt = _preview(
+            resolver,
+            collectionId,
+            raw.scope,
+            raw.scopeId,
+            config.profileId,
+            config.royaltyBps,
+            config.frozen
+        );
+        if (keccak256(abi.encode(raw)) != keccak256(abi.encode(rebuilt))) {
+            revert T.InvalidRecord();
+        }
+    }
+
+    function _requireRawKey(
+        address resolver,
+        uint8 scope,
+        uint256 scopeId,
+        T.AssignmentFact memory raw,
+        IStreamRoyaltyResolver.RoyaltyConfig memory config
+    ) private pure {
+        if (
+            raw.resolver != resolver || raw.revenueClass != keccak256("ROYALTY_ERC2981")
+                || raw.scope != scope || raw.scopeId != scopeId
+                || (config.configured == (raw.assignmentHash == bytes32(0)))
+        ) revert T.InvalidRecord();
+    }
+
     function _snapshotShape(
         uint256 collectionId,
         uint8 scope,
@@ -225,7 +250,8 @@ library StreamArtistRoyaltyModeReads {
     ) private view {
         if (
             raw.resolver == address(0) || raw.revenueClass != keccak256("ROYALTY_ERC2981")
-                || raw.scope != 1 || raw.scopeId != collectionId || raw.assignmentHash == bytes32(0)
+                || !((raw.scope == 1 && raw.scopeId == collectionId)
+                    || (raw.scope == 0 && raw.scopeId == 0)) || raw.assignmentHash == bytes32(0)
                 || snapshot.resolver != raw.resolver || snapshot.revenueClass != raw.revenueClass
                 || snapshot.scope != 1 || snapshot.scopeId != collectionId
                 || snapshot.assignmentHash

@@ -112,10 +112,40 @@ library StreamRoyaltySnapshot {
         uint256 collectionId,
         bool requireConsent
     ) public view returns (IStreamRoyaltySnapshot.Source memory s) {
+        return _source(state, config, x, collectionId, requireConsent, 1, collectionId);
+    }
+
+    /// @notice Resolve the original configured collection key, otherwise the actual default.
+    /// @dev Approval remains collection-specific; canonical source hashes retain their real scope.
+    function selectedSource(
+        State storage state,
+        IStreamRoyaltyResolver.RoyaltyConfig storage defaultConfig,
+        mapping(uint256 => IStreamRoyaltyResolver.RoyaltyConfig) storage collections,
+        Context memory x,
+        uint256 collectionId,
+        bool requireConsent
+    ) public view returns (IStreamRoyaltySnapshot.Source memory) {
+        if (collections[collectionId].configured) {
+            return _source(
+                state, collections[collectionId], x, collectionId, requireConsent, 1, collectionId
+            );
+        }
+        return _source(state, defaultConfig, x, collectionId, requireConsent, 0, 0);
+    }
+
+    function _source(
+        State storage state,
+        IStreamRoyaltyResolver.RoyaltyConfig memory config,
+        Context memory x,
+        uint256 collectionId,
+        bool requireConsent,
+        uint8 scope,
+        uint256 scopeId
+    ) private view returns (IStreamRoyaltySnapshot.Source memory s) {
         _core(x, collectionId);
         Election memory e = state.elections[collectionId];
         if (e.mode != 2) revert IStreamRoyaltySnapshot.RoyaltySnapshotModeRequired(collectionId);
-        if (!config.configured || config.frozen || config.royaltyBps > 1000) {
+        if (!config.configured || (scope == 1 && config.frozen) || config.royaltyBps > 1000) {
             revert IStreamRoyaltySnapshot.InvalidRoyaltySnapshot();
         }
         if (config.royaltyBps == 0) {
@@ -134,9 +164,9 @@ library StreamRoyaltySnapshot {
         s.electionHash = e.hash;
         s.config = config;
         s.sourceAssignmentHash =
-            StreamRoyaltyAssignmentHash.assignment(x.factory, config, 1, collectionId);
+            StreamRoyaltyAssignmentHash.assignment(x.factory, config, scope, scopeId);
         s.sourceRoyaltyPolicyHash = StreamRoyaltyAssignmentHash.policy(
-            collectionId, 1, collectionId, config, s.sourceAssignmentHash
+            collectionId, scope, scopeId, config, s.sourceAssignmentHash
         );
         s.modeAssignmentHash = modeHash(x, collectionId, e.hash, s.sourceAssignmentHash);
         if (requireConsent) _consent(x, collectionId, s.modeAssignmentHash);
@@ -144,7 +174,10 @@ library StreamRoyaltySnapshot {
 
     function create(
         State storage state,
-        mapping(uint256 => IStreamRoyaltyResolver.RoyaltyConfig) storage collections,
+        IStreamRoyaltyResolver.RoyaltyConfig storage defaultConfig,
+        mapping(
+            uint256 => IStreamRoyaltyResolver.RoyaltyConfig
+        ) storage collections,
         mapping(uint256 => IStreamRoyaltyResolver.RoyaltyConfig) storage tokens,
         Context memory x,
         Hook memory h
@@ -165,7 +198,7 @@ library StreamRoyaltySnapshot {
         );
         bytes32 proofHash = StreamRoyaltyPreparedProof.requireCurrent(proof);
         IStreamRoyaltySnapshot.Source memory s =
-            source(state, collections[h.collectionId], x, h.collectionId, true);
+            selectedSource(state, defaultConfig, collections, x, h.collectionId, true);
         if (s.sourceRoyaltyPolicyHash != h.expectedSourcePolicy) {
             revert IStreamRoyaltySnapshot.InvalidRoyaltySnapshot();
         }
@@ -200,7 +233,9 @@ library StreamRoyaltySnapshot {
             StreamRoyaltyPreparedProof.requireCurrent(proof) != proofHash
                 || keccak256(
                         abi.encode(
-                            source(state, collections[h.collectionId], x, h.collectionId, true)
+                            selectedSource(
+                                state, defaultConfig, collections, x, h.collectionId, true
+                            )
                         )
                     ) != keccak256(abi.encode(s))
         ) {
