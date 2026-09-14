@@ -18,7 +18,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Prepared custody `603e885b`, accelerated estate `465aef77`, disabled royalty snapshots `700f7712`, and compiler-selected clients `e409c134` are integrated. Frozen joined validation remains at `a65f7f3e`; immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
+| Source checkpoint | Prepared custody `603e885b`, accelerated estate `465aef77`, disabled royalties `700f7712`, default snapshots `93b489c9`, closed-estate recovery `2e10aef8`, and compiler-selected clients `e409c134` are integrated. Frozen `a65f7f3e` combined execution has 18 passes/three setup failures; the four new Artist commerce/snapshot cases pass, while batch acceptance and isolated cold validation remain open; immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |

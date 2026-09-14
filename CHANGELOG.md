@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Support artist-approved default royalty snapshots and recovery after dismissed
+  first-estate compromise, preserving original consent, veto and replay rules.
+
 - Preserve omitted compiler storage layouts in native graph fixtures and run
   fixture-tooling regressions before expensive current-stack compilation.
 

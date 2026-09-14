@@ -19,7 +19,8 @@ This explicitly amends the separate future-token consent rule for the new
 prepared mode. The historical [ADR 0021 interface packet](0021-revenue-resolver-validation-adapter-interface-packet.md)
 requires the snapshot consumer to obtain consent for the derived scope-2 token
 assignment. The current additive capability instead consumes the approved
-mode-bound scope-1 source and an authenticated in-flight prepared token proof.
+collection-specific mode-bound source and an authenticated in-flight prepared
+token proof.
 It does not claim to implement the old physical adapter transcript or silently
 reinterpret its existing selectors. Other token economics mutations retain
 their own authority requirements.
@@ -31,7 +32,7 @@ before the collection's first token allocation. An unelected collection keeps
 live behavior. The election hash commits the chain, Resolver, Core, collection
 and selected mode. An elected collection cannot return to an unelected state.
 
-Mode 2 requires an explicit, unfrozen collection source: either a positive
+Mode 2 selects an explicit, unfrozen collection source when configured: either a positive
 profile with its actual split wallet and a royalty rate no greater than 1,000
 basis points, or the canonical configured-disabled zero tuple from
 [ADR 0038](0038-token-royalties-and-disabled-assignment-representation.md). The disabled source
@@ -42,6 +43,16 @@ then signs its election-bound assignment under the existing operation-15
 domain and nonce rules. Recording consent and installing collection terms are
 separate calls. Consuming either source or mint authorization requires the
 current Artist binding and payout association.
+
+When the collection key is missing, mode 2 selects the configured default.
+A configured collection key, including disabled zero, always takes precedence.
+The default retains its canonical scope-0/id-0 source assignment and policy
+hashes, including its frozen bit. Its mode approval remains collection-specific
+under operation 15 and cannot authorize another collection or global mutation.
+An already selected default uses current-consent recording; prospective fixed
+SET still authorizes a collection override. Default changes or freezing require
+new current mode approval and phase commitments for subsequent mints. Existing
+token snapshots remain fixed. Missing collection and default keys reject.
 
 `6529STREAM_SNAPSHOT_ROYALTY_ASSIGNMENT_V1` commits the election and original
 source assignment. The canonical `ROYALTY_POLICY_V1` hash remains unchanged;
@@ -94,7 +105,11 @@ reviewed cases across complementary actual Artist and actual Core cohorts.
 Existing zero token assignments suppress later positive fallback; original
 Artist payout and collaborator authority remain mandatory.
 
-Default fallback and wider royalty mutation profiles,
-complete Safe call coverage, normative gas ceilings and the new release
+Default-source snapshots additionally have 37 independently reviewed cases
+across complementary Artist and Core cohorts. This is separate from the joined
+current-system result.
+
+Dynamic templates, wider royalty mutation profiles, complete Safe call coverage,
+normative gas ceilings and the new release
 candidate remain requirements in the [delivery ledger](../../ops/V1_DELIVERY.md).
 This increment does not remove them from full v1.
