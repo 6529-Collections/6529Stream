@@ -5,6 +5,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add native deferred English auctions with atomic paid mint settlement, bounded
+  clocks, pull refunds, original delegated delivery and tested Safe retry paths.
+- Complete the native preservation, Artist Safe sanction and canonical finality
+  integration rehearsal; individual transaction capacity remains separate.
+
 - Add atomic prepared native paid minting through the fixed official recorder,
   with original-sale replay protection, complete rollback and Safe retry tests.
 - Add the native auction content-proof helper; auction integration remains open.

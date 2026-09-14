@@ -31,21 +31,25 @@ snapshot, entropy-source set and remaining local seals. The reviewed correction
 uses the actual Artist Safe as recorder, publishes the exact Store payload before
 admission and sets the original publication read budget through governance.
 
-The updated exact five-case run passes in 12.469 seconds using the native build;
-all 352 nonempty production runtimes fit. Its elevated aggregate test allowance
-covers many deployments and operations, not one shipping transaction. The full
-sixth ceremony is separate: fresh repeated browser captures are verified, while
-its first complete run exhausted the 10-billion aggregate harness allowance
-during bundle coverage. A cached retry with a 20-billion aggregate allowance
-passed that point and exposed incompatible nested component-read budgets. The
-native provider now separates component leaf reads from complete-source reads;
-29 focused cases pass in both compiler modes, including one 256-input property
-per mode. The fixture's matching budget configuration has separate source review.
-The updated complete ceremony reaches the direct Discovery-to-Reference read
-and fails a confirmed nested gas-reserve check. A separately reviewed correction
-raises only the fixture component cap from 8M to 12M; its native successor is
-running. Complete ceremony and per-transaction capacity remain open; no new
-candidate exists.
+The original five workflows now pass in 12.505 seconds, and the complete sixth
+ceremony also passes in 17.924 seconds with independent review. It covers fresh
+repeated reference renders, the complete original inventory and archival bundle,
+original Artist Safe sanction/archive and governed canonical finality. All 352
+nonempty production runtimes in that capture fit. The final correction changes
+only the fixture's Discovery component read cap from 8M to 12M, preserving the
+separate 4M component leaf and 16M complete-source budgets.
+
+The full test uses a 20-billion aggregate allowance for many deployments and
+operations; it does not establish individual transaction capacity. A separate
+gas-report attempt fails earlier in an Artist authority read. Foundry 1.7.1
+[enables transaction isolation for gas reports](https://github.com/foundry-rs/foundry/blob/v1.7.1/crates/forge/src/cmd/test/mod.rs#L283),
+so this is a concrete isolated-call gas blocker to shipping; the accepted
+aggregate ceremony does not establish cold-call capacity.
+The migrated current deployment graph also passes five current workflows and
+four checkpoint tests. Fresh-process operator resumption reaches successful
+simulation but fails Forge constructor decoding against an older cached Entropy
+artifact. A separate current-output operator copy is being prepared. Shipping
+capacity, operator completion and a new matching full-v1 candidate remain open.
 
 The preservation Safe increment `0c6da9e4` is independently reviewed, integrated
 and pushed. Ten unique IR cases cover inventory, bundle and artifact calls,
@@ -67,14 +71,17 @@ profiles and global deployment wiring remain required. The
 [caller guide](../docs/integrations/prepared-native-settlement.md) describes the
 one-time owner binding and complete transaction path.
 
-The auction delegation helper is integrated with six reviewed tests, including
-one 256-input property and the actual NFTDelegation registry. The content-proof
-helper also passes five cases and a 256-input property in each compiler mode.
-The new house's first native run fails its setup size check at 33,651 bytes,
-9,075 over EIP-170, before any of its fifteen selected behavior tests execute.
-The builder is extracting complete registration and settlement workers into
-fixed linked libraries while retaining the house's API and storage layout.
-Broader custody, content-leaf, rights and gate profiles remain mandatory. [ADR 0043](../docs/adr/0043-deferred-auction-clocks-and-no-bid.md)
+The new native deferred auction is independently accepted and integrated for
+its first exact-tokenData collection PROFILE with a disabled gate. All fifteen
+actual auction cases pass, including a 256-input property, original delegation,
+Safe settlement retry and delegated refund retry. The house is 19,453 bytes
+after extracting complete registration and settlement workers into fixed linked
+libraries; its original API and physical storage layout are preserved. Every
+production product in the capture fits. The
+[native auction guide](../docs/integrations/native-deferred-auctions.md) explains
+its caller interfaces and boundaries. Curated 1/1 leaf/root/gate admission is
+next; custody-start and additional rights modes remain mandatory. The separately
+accepted content-proof helper is not yet connected to those broader profiles. [ADR 0043](../docs/adr/0043-deferred-auction-clocks-and-no-bid.md)
 owns clock and no-bid combinations; existing V2 behavior is retained.
 
 Current graph fixture preparation now has a portable repository command:

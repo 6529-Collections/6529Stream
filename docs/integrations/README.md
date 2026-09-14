@@ -31,6 +31,7 @@ deployment evidence.
 | Integrate the new native/ERC-20 funding boundary | [Sale funding](sale-funding.md) |
 | Prepare a token and settle its native payment atomically | [Prepared native settlement](prepared-native-settlement.md) |
 | Integrate auction V2 and retained proceeds rights | [Auction funding](auction-funding.md) |
+| Mint and pay atomically at native auction settlement | [Native deferred auctions](native-deferred-auctions.md) |
 | Build typed calls, signing payloads and portable snapshots | [TypeScript client](typescript-client.md) |
 | Onboard another artist and exercise sales and auctions | [Executable product scenarios](product-demo.md) |
 | Finish a collection and verify its portable artwork | [Collection completion and collector package](collector-package.md) |
