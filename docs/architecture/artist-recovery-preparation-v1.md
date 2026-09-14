@@ -630,3 +630,55 @@ preserves the inherited unit fixture's original CREATE sequence:
 ```powershell
 python scripts/dev.py test --suite unit --match-path test/unit/artist/StreamArtistAcceleratedEstateRecoveryActual.t.sol --via-ir --code-size-limit 2000000 --gas-limit 1000000000 --memory-limit 1073741824
 ```
+
+
+## Closed first-estate compromise continuation
+
+A first ordinary or accelerated estate activation may also continue through an
+original dismissed identity-compromise cause (kind 1, operation 33). Recovery
+reads the immutable closure, its original operation-41 dismissal and saved cause,
+and the original contest record. It checks their complete canonical hashes,
+artist, class-3 incumbent, restored status, activation, governance commitments
+and chronology. Historical reason and evidence belong to that original episode;
+they need not equal the new recovery request. Those records were authorized by
+the original producers and are not reauthorized using current governance roles.
+
+The closure's abandoned flag must equal the original transition predicate. An
+early abandoned closure permits a new compromise and recovery preparation before
+the old window ends. A non-abandoned closure requires the original window to have
+ended before dismissal. Both retain the full new recovery scheduling delay. The
+original closure never moves: an intervening actual dismissal is permitted, with
+today's latest immutable dismissal and cause authenticated separately against the
+current cause, same incumbent and activation. Original dismissal time must not
+exceed latest dismissal time, which must not exceed the new compromise time.
+
+The empty-closure path and original first-estate Facts hash remain unchanged.
+Only the newly supported closed branch wraps that hash with a commitment to the
+complete original closure and both original/latest dismissal, cause and contest
+proofs. First vesting, no prior recovery, unchanged estate plan and capability
+mask, current binding, Safe acceptance, governance, replay and complete-history
+veto requirements remain. No producer operation, public ABI or storage changes.
+
+Abandoned provisional documents, payout accounts and guardian sets remain
+permanently ineligible, even after the old deadline and after recovery. Their
+original records and associations stay intact. A fresh class-3 guardian record
+admitted after dismissal is stable; an unsuperseded member found only in an
+abandoned lower-nonce guardian record still retains the recovery veto. Dismissal
+never disqualifies those historical guardians.
+
+`StreamArtistClosedEstateRecoveryActualTest` covers early ordinary closure with
+fresh guardian selection and identical signed retry after a real Archive failure;
+accelerated closure with an intervening actual dismissal; non-abandoned post-end
+closure with zero capabilities; an abandoned lower-nonce Safe veto; corrupted
+original/latest immutable proof fields with exact restoration and retry; and
+wrong latest-resolution or unclosed in-window refusal. Its retained ordinary and
+accelerated cases continue to exercise the original branches. These use actual
+Artist, Safe and Archive with typed unit Core, action facts and role phases.
+The aggregate CREATE fixture is not a full delayed-Executor/current-Core graph or
+individual transaction-capacity claim. Standing-contest (kind 2) closures, later
+activations/rotations/recoveries, nonempty supersession and appeals remain separate
+required work.
+
+```powershell
+python scripts/dev.py test --suite unit --match-path test/unit/artist/StreamArtistClosedEstateRecoveryActual.t.sol --via-ir --code-size-limit 2000000 --gas-limit 1000000000 --memory-limit 1073741824
+```

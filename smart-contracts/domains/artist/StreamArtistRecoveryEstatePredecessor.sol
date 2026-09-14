@@ -114,10 +114,7 @@ library StreamArtistRecoveryEstatePredecessor {
                 || f.transition.executedAt != f.execution.executedAt
                 || uint256(f.transition.postWindowEndsAt)
                     != uint256(f.execution.executedAt) + f.request.postContestSeconds
-                || cause.facts.enteredAt < f.transition.postWindowEndsAt
                 || block.timestamp < cause.facts.enteredAt
-                || (f.transition.contestedAt != 0
-                    && f.transition.contestedAt < f.transition.postWindowEndsAt)
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         // Original operation40 already authenticated and consumed the historical accelerator.
         // Preserve its exact timing/witness shape without reauthorizing old governance or coverage.
@@ -128,10 +125,7 @@ library StreamArtistRecoveryEstatePredecessor {
         } else if (f.execution.governanceActionId != 0 || f.execution.governanceWitnessHash != 0) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         }
-        Dismissal.Closure memory empty;
-        if (keccak256(abi.encode(resolutions.closures[head])) != keccak256(abi.encode(empty))) {
-            revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
-        }
+        bytes32 closureProof = _closure(resolutions, contests, e, cause, f.transition);
         if (
             recovery.vestingHistory.latest[p.artistId] != head || f.vesting.artistId != p.artistId
                 || f.vesting.transitionRecordHash != head || f.vesting.operationId != 40
@@ -202,13 +196,149 @@ library StreamArtistRecoveryEstatePredecessor {
         ) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         }
-        return keccak256(
+        bytes32 factsHash = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_RECOVERY_FIRST_ESTATE_FACTS_V1"),
                 e.chainId,
                 e.registry,
                 address(this),
                 f
+            )
+        );
+        if (closureProof == 0) return factsHash;
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_RECOVERY_CLOSED_FIRST_ESTATE_FACTS_V1"),
+                factsHash,
+                closureProof
+            )
+        );
+    }
+
+    // Consume authenticated immutable owner records, not a fresh historical governance decision.
+    // Kind-2 standing contests and later activation/rotation histories remain outside this profile.
+    function _closure(
+        Resolution.State storage resolutions,
+        ContestState.State storage contests,
+        StreamArtistHashes.Environment memory e,
+        Dismissal.Cause memory current,
+        R.TransitionState memory t
+    ) private view returns (bytes32) {
+        Dismissal.Closure memory closed = resolutions.closures[t.recordHash];
+        Dismissal.Closure memory empty;
+        if (keccak256(abi.encode(closed)) == keccak256(abi.encode(empty))) {
+            if (
+                current.facts.enteredAt < t.postWindowEndsAt
+                    || (t.contestedAt != 0 && t.contestedAt < t.postWindowEndsAt)
+            ) {
+                revert Recovery.UnsupportedIdentityRecoveryProfile(current.facts.artistId);
+            }
+            return 0;
+        }
+        bool abandoned = t.contestedAt != 0 && t.contestedAt < t.postWindowEndsAt;
+        if (
+            closed.artistId != current.facts.artistId || closed.transitionRecordHash != t.recordHash
+                || closed.dismissalRecordHash == 0 || closed.windowEndsAt != t.postWindowEndsAt
+                || closed.contestedAt != t.contestedAt || closed.contestedAt < t.executedAt
+                || closed.abandoned != abandoned || current.facts.previousResolutionHash == 0
+        ) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(current.facts.artistId);
+        }
+        Dismissal.Record memory original = resolutions.records[closed.dismissalRecordHash];
+        bytes32 originalProof = _dismissed(
+            resolutions, contests, e, current.facts, t, original, closed.dismissalRecordHash
+        );
+        Dismissal.Cause memory firstCause = resolutions.causes[original.terms.expectedCauseHash];
+        if (
+            firstCause.facts.enteredAt != closed.contestedAt
+                || (!abandoned && original.dismissedAt < t.postWindowEndsAt)
+        ) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(current.facts.artistId);
+        }
+        // The closure never moves. Today's latest admitted dismissal may be a later episode.
+        Dismissal.Record memory latest = resolutions.records[current.facts.previousResolutionHash];
+        bytes32 latestProof = _dismissed(
+            resolutions, contests, e, current.facts, t, latest, current.facts.previousResolutionHash
+        );
+        if (
+            latest.dismissedAt < original.dismissedAt
+                || current.facts.previousCauseHash != latest.terms.expectedCauseHash
+        ) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(current.facts.artistId);
+        }
+        return keccak256(abi.encode(closed, originalProof, latestProof));
+    }
+
+    function _dismissed(
+        Resolution.State storage resolutions,
+        ContestState.State storage contests,
+        StreamArtistHashes.Environment memory e,
+        Dismissal.CauseFacts memory current,
+        R.TransitionState memory t,
+        Dismissal.Record memory r,
+        bytes32 expected
+    ) private view returns (bytes32) {
+        Dismissal.Cause memory cause = resolutions.causes[r.terms.expectedCauseHash];
+        if (
+            expected == 0 || r.recordHash != expected || r.terms.artistId != current.artistId
+                || r.terms.evidenceHash == 0 || r.terms.reasonHash == 0 || r.executor == address(0)
+                || r.proposer == address(0) || (r.actionClass != 1 && r.actionClass != 2)
+                || r.actionId == 0 || r.incumbent != current.incumbent || r.authorityClass != 3
+                || r.restoredStatus != 3 || r.dismissedAt == 0 || r.dismissedAt > current.enteredAt
+                || r.cohortHash == 0 || r.governanceWitnessHash == 0
+                || r.recordHash != _dismissalHash(e, r) || cause.causeHash == 0
+                || cause.causeHash != r.terms.expectedCauseHash
+                || cause.causeHash
+                    != keccak256(
+                        abi.encode(
+                            keccak256("6529STREAM_ARTIST_IDENTITY_CONTEST_CAUSE_V1"),
+                            e.chainId,
+                            e.registry,
+                            address(this),
+                            cause.facts
+                        )
+                    ) || cause.facts.artistId != current.artistId
+                || cause.facts.executedTransitionHash != t.recordHash
+                || cause.facts.pendingTransitionHash != 0
+                || cause.facts.incumbent != current.incumbent || cause.facts.actor == address(0)
+                || cause.facts.referenceHash == 0 || cause.facts.evidenceHash == 0
+                || cause.facts.reasonHash == 0 || cause.facts.enteredAt < t.executedAt
+                || cause.facts.enteredAt > r.dismissedAt
+                || cause.facts.previousResolutionHash != r.terms.expectedResolutionHash
+        ) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(current.artistId);
+        }
+        Recovery.Request memory historical;
+        historical.artistId = current.artistId;
+        historical.evidenceHash = cause.facts.evidenceHash;
+        historical.reasonHash = cause.facts.reasonHash;
+        Contest.Record memory contest = contests.records[cause.facts.referenceHash];
+        _contest(e, cause, historical, contest, t.recordHash);
+        return keccak256(abi.encode(r, cause, contest));
+    }
+
+    function _dismissalHash(StreamArtistHashes.Environment memory e, Dismissal.Record memory r)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_IDENTITY_DISMISSAL_RECORD_V1"),
+                e.chainId,
+                e.registry,
+                address(this),
+                r.terms,
+                r.executor,
+                r.proposer,
+                r.actionClass,
+                r.actionId,
+                r.incumbent,
+                r.authorityClass,
+                r.restoredStatus,
+                r.dismissedAt,
+                r.cohortHash,
+                r.governanceWitnessHash
             )
         );
     }

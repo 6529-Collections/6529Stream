@@ -1433,3 +1433,38 @@ limits, with typed unit Core/action facts. The [preparation guide](../architectu
 records the exact scope. Closed/dismissed and later histories, nonempty estate
 supersession/appeals, full delayed governance and transaction capacity remain
 separate requirements. No operation, ABI, storage or permanent hash domain changes.
+
+
+## Closed first-estate compromise history
+
+The first-estate historical consumer additionally admits an original closed
+kind-1 identity-compromise episode. The original Closure, operation-41 Dismissal,
+saved Cause and operation-33 Contest must all authenticate to the same first
+operation-40 activation, artist and class-3 incumbent. Original execution,
+vesting, complete guardian prefix, authority plan and capabilities remain bound.
+No later transition, prior recovery, standing-contest cause, supersession or
+appeal is admitted by this extension.
+
+The consumer preserves the producer's exact abandoned predicate and original
+contest timestamp. Early abandoned closure releases the old window; non-abandoned
+closure is admitted only after that window ends. A later current compromise must
+follow the original dismissal. Intervening independent dismissals are permitted:
+the current cause must name the actual latest immutable dismissal and its cause,
+with original-dismissal <= latest-dismissal <= current-compromise chronology and
+the same unchanged incumbent and activation. Original and latest full records,
+causes and contest proofs are committed separately; the original closure is
+never rewritten and intermediate historical governance is not replayed.
+
+Original operation-33/41 signature, role, exact governance witness and replay
+admission remain producer responsibilities. Recovery checks their immutable
+canonical records and joins; a caller cannot supply replacement historical
+facts. The original empty-closure Facts hash is preserved. The closed branch
+adds only a distinct CLOSED_FIRST_ESTATE_FACTS_V1 wrapper around that original
+hash and the full closure proofs. Current recovery governance, acceptance,
+capability and nonce requirements and atomic Archive effects remain unchanged.
+
+Abandoned provisional records never mature. Fresh post-dismissal successor
+records retain their existing admission semantics. Complete-history veto still
+includes unsuperseded members of abandoned and lower-nonce guardian sets.
+The [preparation guide](../architecture/artist-recovery-preparation-v1.md#closed-first-estate-compromise-continuation)
+records the focused actual Artist/Safe/Archive scope and remaining lifecycle work.
