@@ -54,3 +54,41 @@ the [snapshot workflow](../../docs/integrations/typescript-client.md#capture-and
 The committed digest fixtures were observed on a local current-stack deployment.
 Their addresses are encoding-vector inputs, not an address book or live launch
 evidence. No test or example imports their addresses as defaults.
+
+## Use a newer compiler catalog
+
+`StreamClient` and the signing helpers exported by this package retain the RC1
+ABI and EIP-712 contracts. For a different build, generate a separate client from
+the exact compiler build-info and an explicit source/contract selection:
+
+```sh
+node scripts/generate-bindings.mjs --build-info /path/to/build-info.json --targets scripts/current-binding-targets.example.json --out /path/to/app/stream-bindings
+node scripts/generate-bindings.mjs --build-info /path/to/build-info.json --targets scripts/current-binding-targets.example.json --out /path/to/app/stream-bindings --check
+```
+
+The example target list is a small current-commerce selection, not the complete
+v1 call inventory. Add each required host or interface by its exact compiler
+source key and contract name. An interface alias can use the same configured
+address as its host; this makes fallback-routed Artist capabilities explicit.
+The command requires literal compiler input and matching output ABIs. It records
+the build file, target selection, source and ABI digests, then emits `abis.ts`,
+`contracts.ts`, `provenance.ts` and `index.ts`. It does not compile Solidity.
+
+Install this private package as a local dependency in the consuming app and
+import `StreamClient` from the generated `index.js`. Supply that build’s actual
+addresses through its `stackConfigFromJSON`; `core` and a positive decimal
+`chainId` are required. Calls support typed arguments/results, overloads,
+positional unnamed tuples, reads, sender-aware simulation, gas estimation and
+exact-emitter receipt decoding. Pass `client.prepare(...)` to the existing
+`toSafeCall` helper for an ordinary Safe CALL with unchanged target/value/data.
+
+Each client captures its supplied ABI catalog at construction. It never falls
+back to the retained RC1 ABI when a new method is absent. `--check` compares the
+generated files byte-for-byte with the same selected build and target file.
+
+Compiler provenance alone does not establish the identity of a deployed stack.
+Verify source/build/deployment correspondence before using those addresses.
+EIP-712 domain names, versions and semantic field layouts cannot be inferred
+from an ABI: the retained signing helpers must not be reused for a new domain
+without explicit implementation and onchain digest parity checks. Full-v1
+signing, workflow examples and new-candidate acceptance remain in progress.

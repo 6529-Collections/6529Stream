@@ -1,0 +1,26 @@
+{
+  "core": {
+    "source": "smart-contracts/core/StreamCore.sol",
+    "contract": "StreamCore"
+  },
+  "manager": {
+    "source": "smart-contracts/domains/mint/StreamMintManager.sol",
+    "contract": "StreamMintManager"
+  },
+  "nativeAuction": {
+    "source": "smart-contracts/domains/auctions/StreamNativeEnglishAuction.sol",
+    "contract": "StreamNativeEnglishAuction"
+  },
+  "royalty": {
+    "source": "smart-contracts/domains/revenue/StreamRoyaltyResolver.sol",
+    "contract": "StreamRoyaltyResolver"
+  },
+  "preparedCustody": {
+    "source": "smart-contracts/interfaces/stream/auctions/IStreamPreparedNativeCustodyAuction.sol",
+    "contract": "IStreamPreparedNativeCustodyAuction"
+  },
+  "artistSnapshot": {
+    "source": "smart-contracts/interfaces/stream/artist/IStreamArtistSnapshotRoyaltyFacts.sol",
+    "contract": "IStreamArtistSnapshotRoyaltyFacts"
+  }
+}
