@@ -91,7 +91,10 @@ library StreamArtistRoyaltyModeReads {
             _snapshotShape(
                 collectionId, scope, scopeId, config.profileId, config.royaltyBps, config.frozen
             );
-            if (!config.configured || config.wallet == address(0)) revert T.InvalidRecord();
+            if (
+                !config.configured
+                    || (config.wallet == address(0)) != (config.profileId == bytes32(0))
+            ) revert T.InvalidRecord();
             T.AssignmentFact memory raw = _preview(
                 resolver,
                 collectionId,
@@ -159,9 +162,9 @@ library StreamArtistRoyaltyModeReads {
         returns (bytes32)
     {
         if (!IERC165(resolver)
-                .supportsInterface(type(IStreamArtistSnapshotRoyaltyFacts).interfaceId)) return bytes32(
-            0
-        );
+                .supportsInterface(type(IStreamArtistSnapshotRoyaltyFacts).interfaceId)) {
+            return bytes32(0);
+        }
         (uint8 mode, bytes32 election) =
             IStreamArtistSnapshotRoyaltyFacts(resolver).collectionRoyaltyMode(collectionId);
         if (mode != 1 && mode != 2) revert T.InvalidRecord();
@@ -206,7 +209,7 @@ library StreamArtistRoyaltyModeReads {
         bool frozen
     ) private pure {
         if (
-            scope != 1 || scopeId != collectionId || profile == bytes32(0) || bps == 0
+            scope != 1 || scopeId != collectionId || (profile == bytes32(0)) != (bps == 0)
                 || bps > 1_000 || frozen
         ) {
             revert T.UnsupportedProfile();

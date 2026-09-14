@@ -115,9 +115,16 @@ library StreamRoyaltySnapshot {
         _core(x, collectionId);
         Election memory e = state.elections[collectionId];
         if (e.mode != 2) revert IStreamRoyaltySnapshot.RoyaltySnapshotModeRequired(collectionId);
-        if (
-            !config.configured || config.frozen || config.royaltyBps == 0
-                || config.royaltyBps > 1000 || config.profileId == 0 || config.wallet == address(0)
+        if (!config.configured || config.frozen || config.royaltyBps > 1000) {
+            revert IStreamRoyaltySnapshot.InvalidRoyaltySnapshot();
+        }
+        if (config.royaltyBps == 0) {
+            // ADR 0038: configured zero suppresses fallback without claiming a split profile.
+            if (config.profileId != 0 || config.wallet != address(0)) {
+                revert IStreamRoyaltySnapshot.InvalidRoyaltySnapshot();
+            }
+        } else if (
+            config.profileId == 0 || config.wallet == address(0)
                 || !x.factory.splitWalletExists(config.profileId)
                 || x.factory.walletFor(config.profileId) != config.wallet
         ) {

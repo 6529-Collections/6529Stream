@@ -288,7 +288,7 @@ contract StreamArtistSnapshotRoyaltyConsentTest is ArtistOnboardingFixture {
         reads.requireCurrentEconomics(p, address(artist));
     }
 
-    function testSnapshotTokenDefaultClearFreezeAndDisabledConsentAreExplicitlyClosed() public {
+    function testSnapshotTokenDefaultClearFreezeAndMixedZeroConsentAreExplicitlyClosed() public {
         _accept();
         _payout();
         _elect(2);
@@ -318,7 +318,7 @@ contract StreamArtistSnapshotRoyaltyConsentTest is ArtistOnboardingFixture {
             if (i == 3) candidate.frozen = true;
             if (i == 4) {
                 candidate.profileHash = 0;
-                candidate.royaltyBps = 0;
+                candidate.royaltyBps = 600;
             }
             if (i == 5) candidate.royaltyBps = 1001;
             T.Authorization memory a = _signedSnapshot(p);
@@ -466,6 +466,89 @@ contract StreamArtistSnapshotRoyaltyConsentTest is ArtistOnboardingFixture {
                 && address(coordinator).code.length <= 24576,
             "actual linked Artist product sizes"
         );
+    }
+
+    function testDisabledSnapshotSafeOp15PreservesOriginalArchiveAndAllMintPrerequisites() public {
+        _accept(); _policy(); _payout(); _elect(2);
+        _forbidDisabledProfileReads();
+        (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate) = _disabledSnapshotCandidate();
+        T.Authorization memory a = _signedSnapshot(p);
+        StreamArtistOnboardingReads reads = coordinator.reads();
+        T.Binding memory binding_ = reads.acceptedBinding(1);
+        T.Payout memory payout;
+        (payout.account, payout.recordHash) = ingress.artistPayoutAccount(artistId);
+        bytes32 expected = StreamArtistEconomicsHashes.economicsRecord(
+            StreamArtistHashes.Environment(block.chainid, address(ingress), suite.core, suite.mintManager),
+            p, payout.recordHash, artistId, address(artist), a.nonce, uint64(block.timestamp));
+        IStreamRoyaltyResolver.RoyaltyConfig memory before_ = royalty.collectionRoyalty(1);
+        vm.recordLogs();
+        bytes32 record = ingress.recordProspectiveEconomicsConsent(p, candidate, a);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        require(record == expected && keccak256(abi.encode(royalty.collectionRoyalty(1))) == keccak256(abi.encode(before_)),
+            "same original Safe op15 approves zero economics without installing them");
+        _associationEvent(logs, record, p, binding_, record);
+        _snapshotArchive(p, candidate, a, binding_, payout, record);
+        _installSnapshot(candidate);
+        IStreamRoyaltySnapshot.Source memory source = royalty.currentRoyaltySnapshotSource(1);
+        require(source.config.configured && !source.config.frozen && source.config.profileId == 0
+            && source.config.wallet == address(0) && source.config.royaltyBps == 0
+            && source.sourceAssignmentHash != 0 && source.sourceRoyaltyPolicyHash != 0
+            && source.modeAssignmentHash == p.assignmentHash && p.assignmentHash != source.sourceAssignmentHash,
+            "disabled SET retains original nonzero source plus exact mode authority");
+        (T.AssignmentFact memory primaryFact, T.AssignmentFact memory royaltyFact) = reads.currentAssignments(1);
+        require(royaltyFact.assignmentHash == p.assignmentHash, "current Artist reads see zero mode consent");
+        _economicsRecord(primaryFact); _ratify(); _attestations();
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        require(!royalty.royaltySnapshot(1).exists, "Artist approval is not prepared Core proof");
+        bytes32 roots = _roots();
+        avm.expectPartialRevert(T.Replay.selector);
+        ingress.recordProspectiveEconomicsConsent(p, candidate, a);
+        require(_roots() == roots, "original authorization nonce still protects disabled consent");
+        avm.clearMockedCalls();
+    }
+
+    function testDisabledSnapshotMissingPayoutRollsBackAndIdenticalSignedConsentRetries() public {
+        _accept(); _elect(2);
+        (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate) = _disabledSnapshotCandidate();
+        T.Authorization memory a = _signedSnapshot(p);
+        bytes memory exact = abi.encodeCall(IStreamArtistEconomicsAuthority.recordProspectiveEconomicsConsent, (p, candidate, a));
+        bytes32 roots = _roots();
+        (bool ok, bytes memory why) = address(ingress).call(exact);
+        require(!ok && keccak256(why) == keccak256(abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("payout")))
+            && _roots() == roots && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce),
+            "zero economics cannot bypass actual Artist payout designation");
+        _payout();
+        (ok,) = address(ingress).call(exact); require(ok, "identical original signed consent retries after actual prerequisite");
+        _installSnapshot(candidate);
+        T.Binding memory next = _correctEconomicsBinding(address(artist));
+        vm.expectRevert(abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("economics")));
+        royalty.currentRoyaltySnapshotSource(1);
+        bytes32 fresh = ingress.recordProspectiveEconomicsConsent(p, candidate, _signedSnapshot(p));
+        require(IStreamArtistEconomicsEvidence(suite.owners[6]).economicsRecordForBinding(p, next.artistId, next.generation, next.bindingHash) == fresh
+            && royalty.currentRoyaltySnapshotSource(1).modeAssignmentHash == p.assignmentHash,
+            "disabled source retains exact current binding association requirement");
+    }
+
+    function _disabledSnapshotCandidate()
+        private view returns (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate)
+    {
+        candidate = T.FixedEconomicsCandidate(0, 0, 0, false);
+        T.AssignmentFact memory raw = royalty.previewArtistRoyaltyAssignmentForScope(1, 1, 1, 0, 0, false);
+        T.AssignmentFact memory fact = royalty.previewArtistSnapshotRoyaltyAssignment(1, 0, 0, false);
+        (, bytes32 election) = royalty.collectionRoyaltyMode(1);
+        require(raw.assignmentHash != 0 && fact.assignmentHash == keccak256(abi.encode(
+            keccak256("6529STREAM_SNAPSHOT_ROYALTY_ASSIGNMENT_V1"), block.chainid, address(royalty), suite.core,
+            uint256(1), election, raw.assignmentHash)), "disabled is an original configured source plus signed mode, never clear-zero");
+        p = _snapshotTerms(fact);
+    }
+
+    function _forbidDisabledProfileReads() private {
+        bytes memory reason = abi.encodeWithSelector(ProviderUnavailable.selector);
+        IStreamSplitFactory selected = royalty.splitFactory();
+        avm.mockCallRevert(address(selected), abi.encodeCall(selected.splitWalletExists, (bytes32(0))), reason);
+        avm.mockCallRevert(address(selected), abi.encodeCall(selected.walletFor, (bytes32(0))), reason);
+        avm.mockCallRevert(address(selected), abi.encodeCall(selected.profileEntriesHash, (bytes32(0))), reason);
+        avm.mockCallRevert(address(selected), abi.encodeCall(selected.profileMetadataURIHash, (bytes32(0))), reason);
     }
 
     function _elect(uint8 mode) private {
