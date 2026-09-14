@@ -277,7 +277,7 @@ contract StreamArtistOnboardingReads {
                 || templateId == bytes32(0) || !_templateConsentCapability(resolver)
         ) revert T.UnsupportedProfile();
         T.Binding memory b = acceptedBinding(p.collectionId);
-        _requireTemplatePayout(p.collectionId, b, payout);
+        _requireTemplatePayout(p.collectionId, b, payout, templateId);
         return StreamArtistTemplateEconomicsReads.prospective(p, templateId);
     }
 
@@ -640,7 +640,7 @@ contract StreamArtistOnboardingReads {
                 || _suite.primaryRevenueClass != keccak256("PRIMARY_SALE")
         ) revert T.UnsupportedProfile();
         T.Binding memory binding_ = acceptedBinding(collectionId);
-        _requireTemplatePayout(collectionId, binding_, payout);
+        _requireTemplatePayout(collectionId, binding_, payout, current.templateId);
         return StreamArtistTemplateEconomicsReads.current(
             collectionId, resolver, _suite.primaryRevenueClass, _suite.owners[6], binding_, current
         );
@@ -651,13 +651,19 @@ contract StreamArtistOnboardingReads {
             .supportsInterface(type(IStreamArtistPrimaryTemplateConsentFacts).interfaceId);
     }
 
-    function _requireTemplatePayout(uint256 collectionId, T.Binding memory binding_, address payout)
-        private
-        view
-    {
+    function _requireTemplatePayout(
+        uint256 collectionId,
+        T.Binding memory binding_,
+        address payout,
+        bytes32 templateId
+    ) private view {
         (address operative, bytes32 designation) = artistPayoutAccount(binding_.artistId);
         if (payout == address(0) || payout != operative || designation == bytes32(0)) {
             revert T.MissingMintPrerequisite(keccak256("payout"));
+        }
+        if (StreamArtistDynamicTemplateReads.isDynamic(_suite.primaryResolver, templateId)) {
+            _requireCollaboratorDesignations(collectionId, payout);
+            return;
         }
         uint32 count =
             IStreamArtistCollaboratorBindingOwner(_suite.owners[0])

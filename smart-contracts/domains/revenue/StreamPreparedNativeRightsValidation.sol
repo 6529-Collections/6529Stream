@@ -58,7 +58,9 @@ library StreamPreparedNativeRightsValidation {
         if (
             (intent.original.mode != StreamPreparedNativeRightsTypes.COLLECTION_TEMPLATE
                     && intent.original.mode
-                        != StreamPreparedNativeRightsTypes.CONSENTED_COLLECTION_TEMPLATE)
+                        != StreamPreparedNativeRightsTypes.CONSENTED_COLLECTION_TEMPLATE
+                    && intent.original.mode
+                        != StreamPreparedNativeRightsTypes.DYNAMIC_COLLECTION_TEMPLATE)
                 || intent.original.assignmentHash == 0 || intent.original.templateId == 0
                 || keccak256(abi.encode(facts.original)) != keccak256(abi.encode(intent.original))
         ) {

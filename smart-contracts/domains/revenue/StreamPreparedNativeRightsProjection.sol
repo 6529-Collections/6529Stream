@@ -2,12 +2,52 @@
 pragma solidity ^0.8.19;
 
 import "../mint/StreamSaleTemplate.sol";
+import { StreamDynamicSaleTemplate } from "../mint/StreamDynamicSaleTemplate.sol";
 import { StreamConsentedSaleTemplate } from "../mint/StreamConsentedSaleTemplate.sol";
 import "../../interfaces/stream/revenue/IStreamPreparedNativeRightsPrimarySettlement.sol";
 
 /// @notice Context-aware collection-template projection for the explicitly new prepared entry.
 /// @dev The signed opening policy and actual-token settlement policy are different coordinates.
 library StreamPreparedNativeRightsProjection {
+    function collectionTemplateForPoster(
+        IStreamRevenueResolver resolver,
+        uint256 collectionId,
+        uint8 mode,
+        address poster
+    ) public view returns (StreamSaleTemplate.Selection memory s) {
+        if (mode != StreamPreparedNativeRightsTypes.DYNAMIC_COLLECTION_TEMPLATE) {
+            return collectionTemplateForMode(resolver, collectionId, mode);
+        }
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory a =
+            resolver.resolvePrimaryAssignment(collectionId, 0, keccak256("PRIMARY_SALE"));
+        (s,) = StreamDynamicSaleTemplate.preview(resolver, collectionId, poster, a);
+    }
+
+    function preparedTemplateForPoster(
+        IStreamRevenueResolver resolver,
+        uint256 collectionId,
+        uint256 tokenId,
+        uint8 mode,
+        address poster
+    ) public view returns (StreamSaleTemplate.Selection memory s, bytes32 policy, bytes32 witness) {
+        if (mode != StreamPreparedNativeRightsTypes.DYNAMIC_COLLECTION_TEMPLATE) {
+            (s, policy) = preparedTemplateForMode(resolver, collectionId, tokenId, mode);
+            return (s, policy, 0);
+        }
+        if (tokenId == 0) {
+            revert IStreamPreparedNativeRightsPrimarySettlement.InvalidPreparedNativeRights();
+        }
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory actual =
+            resolver.resolvePrimaryAssignment(collectionId, tokenId, keccak256("PRIMARY_SALE"));
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory collection =
+            resolver.resolvePrimaryAssignment(collectionId, 0, keccak256("PRIMARY_SALE"));
+        if (keccak256(abi.encode(actual)) != keccak256(abi.encode(collection))) {
+            revert IStreamPreparedNativeRightsPrimarySettlement.UnsupportedPreparedNativeRightsMode();
+        }
+        (s, witness) = StreamDynamicSaleTemplate.preview(resolver, collectionId, poster, actual);
+        policy = policyHash(resolver, collectionId, tokenId, s);
+    }
+
     function collectionTemplateForMode(
         IStreamRevenueResolver resolver,
         uint256 collectionId,

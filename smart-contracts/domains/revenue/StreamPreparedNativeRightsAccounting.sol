@@ -17,15 +17,17 @@ library StreamPreparedNativeRightsAccounting {
         view
         returns (
             StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c,
-            StreamSaleTemplate.Selection memory selected
+            StreamSaleTemplate.Selection memory selected,
+            bytes32 beneficiaryHash
         )
     {
         StreamPreparedNativeSettlementTypes.Facts memory facts = rights.mint;
         StreamPreparedNativeSettlementTypes.Intent memory intent = original.sale;
         bytes32 policy;
-        (selected, policy) = StreamPreparedNativeRightsProjection.preparedTemplateForMode(
-            x.resolver, facts.collectionId, facts.tokenId, original.original.mode
-        );
+        (selected, policy, beneficiaryHash) =
+            StreamPreparedNativeRightsProjection.preparedTemplateForPoster(
+                x.resolver, facts.collectionId, facts.tokenId, original.original.mode, intent.poster
+            );
         // A template preview can name a profile not yet materialized. The fixed funding
         // worker verifies Factory registration and wallet identity after actual materialization.
         c.saleAdapter = facts.saleAdapter;

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistDynamicTemplateReads } from "./StreamArtistDynamicTemplateReads.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryTemplateFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryTemplateConsentFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistEconomicsEvidence.sol";
@@ -18,6 +19,9 @@ library StreamArtistTemplateEconomicsReads {
         view
         returns (bytes memory)
     {
+        if (StreamArtistDynamicTemplateReads.isDynamic(p.resolver, templateId)) {
+            return StreamArtistDynamicTemplateReads.prospective(p, templateId);
+        }
         address resolver = p.resolver;
         IStreamArtistPrimaryTemplateConsentFacts provider =
             IStreamArtistPrimaryTemplateConsentFacts(resolver);
@@ -50,6 +54,11 @@ library StreamArtistTemplateEconomicsReads {
         T.Binding memory binding_,
         IStreamRevenueResolver.ResolvedPrimaryAssignment memory current
     ) public view returns (bytes memory) {
+        if (StreamArtistDynamicTemplateReads.isDynamic(resolver, current.templateId)) {
+            return StreamArtistDynamicTemplateReads.current(
+                collectionId, resolver, primaryRevenueClass, consentOwner, binding_, current
+            );
+        }
         bytes32 entriesHash;
         bytes32 metadataURIHash;
         uint32 artistShare;

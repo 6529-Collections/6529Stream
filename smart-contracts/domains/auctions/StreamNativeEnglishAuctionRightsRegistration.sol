@@ -148,13 +148,14 @@ library StreamNativeEnglishAuctionRightsRegistration {
         );
         StreamNativeEnglishAuctionSupport.requirePhase(x, c, false);
         StreamSaleTemplate.Selection memory selection =
-            StreamPreparedNativeRightsProjection.collectionTemplateForMode(
-                x.resolver, c.collectionId, original.mode
+            StreamPreparedNativeRightsProjection.collectionTemplateForPoster(
+                x.resolver, c.collectionId, original.mode, c.poster
             );
         if (
             (original.mode != StreamPreparedNativeRightsTypes.COLLECTION_TEMPLATE
                     && original.mode
-                        != StreamPreparedNativeRightsTypes.CONSENTED_COLLECTION_TEMPLATE)
+                        != StreamPreparedNativeRightsTypes.CONSENTED_COLLECTION_TEMPLATE
+                    && original.mode != StreamPreparedNativeRightsTypes.DYNAMIC_COLLECTION_TEMPLATE)
                 || original.assignmentHash != selection.assignmentHash
                 || original.templateId != selection.templateId
                 || StreamPreparedNativeRightsProjection.policyHash(

@@ -244,9 +244,10 @@ library StreamNativeEnglishAuctionRegistration {
         } else if (
             rightsMode == StreamPreparedNativeRightsTypes.COLLECTION_TEMPLATE
                 || rightsMode == StreamPreparedNativeRightsTypes.CONSENTED_COLLECTION_TEMPLATE
+                || rightsMode == StreamPreparedNativeRightsTypes.DYNAMIC_COLLECTION_TEMPLATE
         ) {
-            StreamPreparedNativeRightsProjection.collectionTemplateForMode(
-                x.base.resolver, a.config.collectionId, rightsMode
+            StreamPreparedNativeRightsProjection.collectionTemplateForPoster(
+                x.base.resolver, a.config.collectionId, rightsMode, a.config.poster
             );
         } else {
             revert A.UnsupportedNativeAuctionProfile();

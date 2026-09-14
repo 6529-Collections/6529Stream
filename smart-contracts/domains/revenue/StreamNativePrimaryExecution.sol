@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamNativeSettlementSupport.sol";
+import { StreamDynamicSaleTemplate } from "../mint/StreamDynamicSaleTemplate.sol";
 import "./StreamPrimarySettlementRights.sol";
 import "../../interfaces/stream/revenue/IStreamPrimarySaleSettlement.sol";
 
@@ -14,6 +15,27 @@ library StreamNativePrimaryExecution {
         IStreamRevenueEscrow escrow;
         bytes32 escrowHash;
         bytes32 factoryHash;
+    }
+
+    function fundForPoster(
+        Context memory x,
+        uint256 collectionId,
+        uint256 amount,
+        StreamSaleTemplate.Selection memory selected,
+        address poster,
+        bytes32 witness
+    ) public returns (bool escrowed) {
+        uint256 original = address(this).balance - msg.value;
+        StreamDynamicSaleTemplate.materialize(
+            x.rights.resolver, collectionId, poster, selected, witness
+        );
+        StreamPrimarySettlementRights.requireWallet(x.rights, selected);
+        uint256 cap = StreamNativeSettlementSupport.gasParameter(
+            x.rights.factory, x.factoryHash, keccak256("6529STREAM_GGP_WALLET_DEPOSIT_GAS_LIMIT")
+        );
+        escrowed =
+            StreamNativeSettlementSupport.fundNative(x.escrow, x.escrowHash, selected, amount, cap);
+        if (address(this).balance != original) revert SettlementAmountMismatch(address(0));
     }
 
     function fund(
