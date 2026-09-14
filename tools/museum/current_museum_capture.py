@@ -314,7 +314,8 @@ def main():
     parser.add_argument("--anvil", default="anvil")
     args = parser.parse_args()
     require(args.disclosure == "public", "restricted current capture is unsupported")
-    require(hashlib.sha256(args.native_manifest.read_bytes()).hexdigest() == args.native_manifest_sha256, "native manifest hash mismatch")
+    manifest_raw = args.native_manifest.read_bytes()
+    require(hashlib.sha256(manifest_raw).hexdigest() == args.native_manifest_sha256, "native manifest hash mismatch")
     args.output.mkdir(parents=True, exist_ok=False)
     args.output.joinpath("native-inputs.json").write_bytes(manifest_raw)
     with socket.socket() as sock:

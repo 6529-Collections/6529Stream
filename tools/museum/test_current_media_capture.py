@@ -1,6 +1,7 @@
 """Lightweight prospective-input and native-loader controls; no compiler or RPC."""
 import base64
 import hashlib
+import io
 import struct
 import json
 import tempfile
@@ -8,7 +9,8 @@ import sys
 import unittest
 import zlib
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import patch, Mock
+from types import SimpleNamespace
 
 from .canonical import MuseumError, loads, schema_id
 from .current_media_inputs import PREFIX, PUBLISHER, image_bytes, media_description, payloads, selected_plans
@@ -102,6 +104,35 @@ class CurrentMediaInputs(unittest.TestCase):
             with patch.object(CurrentNativeFixture, "rpc", return_value=["0x" + "11" * 20]):
                 with self.assertRaisesRegex(MuseumError, "source/contract identity differs"):
                     CurrentNativeFixture(path, "http://127.0.0.1:1", expected_manifest_sha256=hashlib.sha256(path.read_bytes()).hexdigest())
+
+    def test_main_retains_validated_manifest_and_cleans_owned_process(self):
+        from .current_museum_capture import main
+        for fail in (False, True):
+            with self.subTest(fail=fail), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary); manifest = root / "manifest.json"; output = root / "output"
+                raw = b'{"mode":"current_museum_native_products_v1"}'
+                manifest.write_bytes(raw); digest = hashlib.sha256(raw).hexdigest()
+                fixture = SimpleNamespace(receipts=[], artifact_rows={})
+                process = Mock()
+                with patch.object(sys, "argv", ["capture", "--native-manifest", str(manifest),
+                        "--native-manifest-sha256", digest, "--output", str(output), "--disclosure", "public"]), \
+                        patch("tools.museum.current_museum_capture.socket.socket") as socket, \
+                        patch("tools.museum.current_museum_capture.subprocess.Popen", return_value=process) as start, \
+                        patch("tools.museum.current_museum_capture.CurrentMuseumFixture", return_value=fixture) as create, \
+                        patch("tools.museum.current_museum_capture.capture", return_value="complete",
+                            side_effect=RuntimeError("test capture failure") if fail else None) as run, \
+                        patch.object(sys, "stdout", io.StringIO()):
+                    socket.return_value.__enter__.return_value.getsockname.return_value = ("127.0.0.1", 17321)
+                    if fail:
+                        with self.assertRaisesRegex(RuntimeError, "test capture failure"): main()
+                    else: main()
+                    self.assertEqual((output / "native-inputs.json").read_bytes(), raw)
+                    create.assert_called_once_with(manifest, "http://127.0.0.1:17321", expected_manifest_sha256=digest)
+                    start.assert_called_once()
+                    run.assert_called_once_with(fixture, output)
+                    process.terminate.assert_called_once()
+                    process.wait.assert_called_once_with(timeout=10)
+                    self.assertEqual(json.loads((output / "execution-journal.json").read_bytes()), {"transactions": [], "artifacts": {}})
 
     def test_restricted_classification_rejects_before_start_or_input_read(self):
         from .current_museum_capture import main
