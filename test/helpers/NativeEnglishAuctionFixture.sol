@@ -177,7 +177,7 @@ abstract contract NativeEnglishAuctionFixture is RevenueV1TestBase, OfficialSafe
             type(IStreamPreparedNativeSaleBinding).interfaceId,
             keccak256("6529STREAM_PREPARED_NATIVE_SETTLEMENT_V1")
         );
-        manager.bindPreparedNativeRecorder(address(recorder));
+        _bindPreparedRecorder();
         bytes32[] memory ids = new bytes32[](1);
         ids[0] = COUNTER;
         IStreamMintManager.MintCounterConfig[] memory counters =
@@ -208,6 +208,11 @@ abstract contract NativeEnglishAuctionFixture is RevenueV1TestBase, OfficialSafe
             "actual production EIP170"
         );
         vm.deal(payer, 1 ether);
+    }
+
+    /// @dev Deployment tests exercise the separate post-admission binding stage.
+    function _bindPreparedRecorder() internal virtual {
+        manager.bindPreparedNativeRecorder(address(recorder));
     }
 
     /// @dev Optional independently tested declaration profile; default fixture remains self-only.
