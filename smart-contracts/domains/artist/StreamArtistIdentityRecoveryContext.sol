@@ -56,6 +56,9 @@ import {
 import {
     StreamArtistIdentityRecoveryState as RecoveryState
 } from "./StreamArtistIdentityRecoveryState.sol";
+import {
+    StreamArtistRecoveryEstateRotation as EstateRotation
+} from "./StreamArtistRecoveryEstateRotation.sol";
 import { StreamArtistRecoveryEstatePredecessor } from "./StreamArtistRecoveryEstatePredecessor.sol";
 import { StreamArtistSuccessionState } from "./StreamArtistSuccessionState.sol";
 import { StreamArtistIdentityContestState } from "./StreamArtistIdentityContestState.sol";
@@ -251,25 +254,43 @@ library StreamArtistIdentityRecoveryContext {
                 || cause.facts.pendingTransitionHash != bytes32(0)
                 || s.latest[p.artistId] != bytes32(0) || p.supersededRecordHashes.length != 0
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
-        bytes32 predecessor = StreamArtistRecoveryEstatePredecessor.firstEstate(
-            s, estate, rotations, resolutions, succession, contests, o.environment, cause, p
-        );
+        bytes32 activation = estate.authorityActivation[p.artistId];
+        bytes32 terminal = rotations.latestExecution[p.artistId];
+        bool rotated = terminal != activation;
+        bytes32 predecessor = rotated
+            ? EstateRotation.afterRotation(
+                s, estate, rotations, resolutions, succession, contests, o.environment, cause, p
+            )
+            : StreamArtistRecoveryEstatePredecessor.firstEstate(
+                s, estate, rotations, resolutions, succession, contests, o.environment, cause, p
+            );
         if (identity.activeIdentity[p.newAddress] != bytes32(0)) {
             revert T.AddressAlreadyRegistered(p.newAddress);
         }
         c.causeHash = cause.causeHash;
         c.incumbent = principal.authorityAddress;
         c.postContestSeconds = StreamArtistRotationState.rotationSeconds(rotations);
-        bytes32 activation = estate.authorityActivation[p.artistId];
-        R.GuardianRecord memory guardian = EstateGuardians.guardian(
-            s.guardianHistory,
-            rotations,
-            o.environment,
-            p.artistId,
-            s.guardianRecordsSeen[p.artistId],
-            s.vestingHistory.snapshots[activation],
-            estate.transitions[activation].postWindowEndsAt
-        );
+        R.GuardianRecord memory guardian = rotated
+            ? EstateGuardians.afterRotation(
+                s.guardianHistory,
+                rotations,
+                o.environment,
+                p.artistId,
+                s.guardianRecordsSeen[p.artistId],
+                s.vestingHistory.snapshots[activation],
+                estate.transitions[activation].postWindowEndsAt,
+                s.vestingHistory.snapshots[terminal],
+                rotations.rotations[terminal].transition.postWindowEndsAt
+            )
+            : EstateGuardians.guardian(
+                s.guardianHistory,
+                rotations,
+                o.environment,
+                p.artistId,
+                s.guardianRecordsSeen[p.artistId],
+                s.vestingHistory.snapshots[activation],
+                estate.transitions[activation].postWindowEndsAt
+            );
         if (guardian.terms.minContestSeconds > c.postContestSeconds) {
             c.postContestSeconds = guardian.terms.minContestSeconds;
         }

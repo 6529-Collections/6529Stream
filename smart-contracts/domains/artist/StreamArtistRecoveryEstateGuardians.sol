@@ -114,6 +114,50 @@ library StreamArtistRecoveryEstateGuardians {
         }
     }
 
+    /// @dev Caller authenticates the exact original op40/terminal op32 pair before this read.
+    function afterRotation(
+        History.State storage history,
+        RotationState.State storage rotations,
+        StreamArtistHashes.Environment memory environment,
+        bytes32 artistId,
+        uint64 count,
+        V.Snapshot memory origin,
+        uint64 originalWindowEndsAt,
+        V.Snapshot memory terminal,
+        uint64 terminalWindowEndsAt
+    ) public view returns (R.GuardianRecord memory g) {
+        GH.Head memory current = prefix(history, rotations, environment, artistId, count, origin);
+        bytes32 head = RotationState.operativeGuardian(rotations, artistId);
+        if (head == 0) {
+            return guardian(
+                history, rotations, environment, artistId, count, origin, originalWindowEndsAt
+            );
+        }
+        g = rotations.guardians[head];
+        if (g.recordHash != head) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+        GH.Entry memory entry = _record(history, environment, artistId, current, g);
+        if (g.authorityClass == 1 || g.signer == origin.newAddress) {
+            if (
+                entry.index > terminal.guardians.count
+                    || entry.ownerRevision >= terminal.ownerRevision
+                    || g.signedAt > terminal.executedAt
+            ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+            return guardian(
+                history, rotations, environment, artistId, count, origin, originalWindowEndsAt
+            );
+        }
+        if (
+            g.authorityClass != 3 || g.signer != terminal.newAddress
+                || entry.index <= terminal.guardians.count
+                || entry.ownerRevision <= terminal.ownerRevision || g.signedAt < terminal.executedAt
+                || (g.provisional.transitionRecordHash == 0
+                        ? g.provisional.windowEndsAt != 0
+                        : g.provisional.transitionRecordHash != terminal.transitionRecordHash
+                        || g.provisional.windowEndsAt != terminalWindowEndsAt)
+                || !RotationState.eligible(rotations, artistId, g.provisional)
+        ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+    }
+
     function _livingAssociation(
         RotationState.State storage rotations,
         StreamArtistHashes.Environment memory e,

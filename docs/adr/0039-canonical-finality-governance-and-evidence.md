@@ -1504,3 +1504,31 @@ acceptance, capability, nonce, registration, veto and Archive checks intact.
 The [preparation guide](../architecture/artist-recovery-preparation-v1.md#standing-veto-and-living-history-estate-continuation)
 records this bounded scope and its actual-contract test recipe. Full-current
 and transaction-capacity acceptance remain separate from aggregate domain tests.
+
+
+## Immediate executed rotation after estate activation
+
+Original authority policy admits class-3 operation 29 without a new capability
+bit, and original operation 32 records the completed rotation as the new current
+execution and immutable guardian-vesting head. The authorized recovery consumer
+may authenticate that immediate mature, unclosed op40-to-op32 history without
+changing the original producers or replaying their historical authorization.
+The old first-estate Facts and context preimages remain unchanged for old paths.
+Only this additional path uses RECOVERY_ROTATED_ESTATE_FACTS_V1, retaining the
+original estate origin separately from the terminal rotation and current cause.
+
+The proof requires exact original request/execution/plan/capability facts,
+canonical origin and terminal vesting commitments, immediate predecessor link,
+address/revision/time continuity, actual retirement, and original timed or
+quorum-accelerated execution. Current compromise must name the terminal rotation
+and occur after that rotation's post-window. Both prefixes and all lifetime
+guardians remain retained; terminal operational guardian evidence must be signed
+by its actual new incumbent or be an eligible pre-terminal record. Context and
+preparation apply the same selection. There is no new operation, public signed
+schema, producer permission, replay key or mutable owner storage field.
+
+The [preparation guide](../architecture/artist-recovery-preparation-v1.md#recovery-after-one-executed-estate-successor-rotation)
+records the focused scope. Closed terminal histories, additional executed
+successor depth, prior recoveries and nonempty supersession remain separate;
+aggregate domain evidence does not replace whole-current or transaction-capacity
+acceptance.

@@ -735,3 +735,51 @@ Executed successor rotations after estate activation, prior recoveries, nonempty
 supersession and later estate plans remain distinct continuation work. The
 existing request producer remains living class 1/status 1, so this increment
 does not invent a second successor-to-successor estate activation.
+
+
+## Recovery after one executed estate-successor rotation
+
+An admitted estate successor may complete an original two-sided operation-32
+rotation and later recover from an operation-33 compromise. This continuation
+keeps the original operation-40 request, execution, plan, capability intersection
+and guardian prefix as the authority origin. A distinct tagged proof binds the
+immediate class-3 operation-32 RotationRecord and immutable vesting snapshot to
+that origin, including its saved previous commitment, addresses, owner revisions,
+retirement, canonical hashes, timing and early guardian-quorum condition. A
+zero-capability successor may rotate under the original operation-29 policy;
+this continuation introduces no rotation capability bit.
+
+The current execution and vesting heads must both be that terminal rotation.
+The original estate and terminal rotation must be unclosed, with no earlier
+in-window contest. The current original kind-1 compromise names the terminal
+rotation and occurs at or after its own post-window. Expiry of the earlier estate
+window is insufficient. The immediate terminal parent is the original op40;
+additional executed successor depth, closed terminal histories, prior recovery
+and nonempty supersession remain separate required profiles.
+
+Both original vesting prefixes remain authenticated. Earlier eligible guardian
+records must precede the terminal snapshot; a later class-3 record must be signed
+by its actual new incumbent, follow that snapshot, and retain either its exact
+eligible terminal association or the canonical empty stable association. Context
+and registration use the same reader. The full lifetime history still supplies
+veto membership, including the original lower-nonce living guardian. A recovered
+class-3 authority retains the original estate mask and activation while its new
+op35 vesting links the terminal op32. Existing signatures, replay consumption,
+registered action gates and both atomic Archive receipts are unchanged.
+
+The focused StreamArtistEstateRotatedRecoveryActualTest uses actual Artist,
+threshold Safe and Archive contracts with typed unit Core, governance action and
+role-phase boundaries. Six source cases exercise timed and early-quorum rotation,
+zero capabilities, a matured terminal guardian, original living ancestry and
+lower-nonce veto, original/terminal proof corruption with exact restoration,
+in-window refusal, additional-depth refusal and an identical late-Archive retry.
+Native execution and complete product measurements are required independently;
+this guide does not claim them from the test source.
+
+```powershell
+python scripts/dev.py test --suite unit --match-path test/unit/artist/StreamArtistEstateRotatedRecoveryActual.t.sol --via-ir --code-size-limit 2000000 --gas-limit 1000000000 --memory-limit 1073741824
+```
+
+The raised limits accommodate aggregate fixture CREATE operations. This domain
+harness does not establish a full current-Core/delayed-Executor lifecycle or
+individual deployment and recovery transaction capacity.

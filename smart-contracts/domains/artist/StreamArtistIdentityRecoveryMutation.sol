@@ -237,15 +237,28 @@ library StreamArtistIdentityRecoveryMutation {
         R.GuardianRecord memory guardian;
         if (i.request.vestedAuthorityClass == 3) {
             bytes32 activation = estate.authorityActivation[i.request.artistId];
-            guardian = EstateGuardians.guardian(
-                s.guardianHistory,
-                rotations,
-                i.owner.environment,
-                i.request.artistId,
-                s.guardianRecordsSeen[i.request.artistId],
-                s.vestingHistory.snapshots[activation],
-                estate.transitions[activation].postWindowEndsAt
-            );
+            bytes32 terminal = rotations.latestExecution[i.request.artistId];
+            guardian = terminal != activation
+                ? EstateGuardians.afterRotation(
+                    s.guardianHistory,
+                    rotations,
+                    i.owner.environment,
+                    i.request.artistId,
+                    s.guardianRecordsSeen[i.request.artistId],
+                    s.vestingHistory.snapshots[activation],
+                    estate.transitions[activation].postWindowEndsAt,
+                    s.vestingHistory.snapshots[terminal],
+                    rotations.rotations[terminal].transition.postWindowEndsAt
+                )
+                : EstateGuardians.guardian(
+                    s.guardianHistory,
+                    rotations,
+                    i.owner.environment,
+                    i.request.artistId,
+                    s.guardianRecordsSeen[i.request.artistId],
+                    s.vestingHistory.snapshots[activation],
+                    estate.transitions[activation].postWindowEndsAt
+                );
         } else {
             guardian = _guardian(s, rotations, i.owner, i.request.artistId, c.incumbent);
         }
