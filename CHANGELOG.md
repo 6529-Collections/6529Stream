@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add current native fixed-price/price-program signing and Safe call preparation,
+  live reveal-policy reads, digest checks and native excess-refund calls.
+
 - Support repeated Artist recovery and guardian supersession across retained histories.
 - Add default TEMPLATE custody commerce and Artist-approved exact TEMPLATE clear/freeze.
 - Extend recorded-account museum exports through PREMIS, IIIF and LIDO, requiring

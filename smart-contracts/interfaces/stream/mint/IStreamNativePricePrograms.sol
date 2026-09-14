@@ -3,7 +3,8 @@ pragma solidity ^0.8.19;
 
 import "../revenue/StreamNativeSettlementTypes.sol";
 
-/// @notice Explicit signed native price kinds, one token per execution, with no reveal-fee line item.
+/// @notice Explicit signed native price kinds, one token per execution.
+/// @dev Charged revenue excludes the separately funded native reveal-fee line item.
 interface IStreamNativePricePrograms {
     struct PriceProgramConfig {
         uint256 collectionId;

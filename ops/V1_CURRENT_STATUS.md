@@ -9,7 +9,9 @@ The supported RC1 is already deployed on Sepolia from
 `569bf87f1fa808787d324f6e1582924b5ccf1d40`. The expanded full-v1 candidate is not
 complete. No new funding is required. Automatic approval review has blocked
 local inherited/global primary-freeze implementation pending a more specific
-owner approval; the remaining work continues.
+owner approval. The separate ERC-20 payable reveal-fee implementation is also
+awaiting explicit approval after automatic review rejected it; the remaining
+work continues.
 
 | Workflow | Demonstrated or integrated | Next acceptance / remaining implementation |
 | --- | --- | --- |
@@ -79,10 +81,17 @@ focused cases and the actual-current Safe success/fallback scenarios are
 written; native runtime, final size and transaction gas remain pending. Read
 [the caller guide](../docs/native-immediate-reveal.md) for the payment and Safe
 refund semantics. The combined ABI/type check covers 877 Solidity inputs.
+The immediate-sale client now prepares both preserved signing domains, exact
+Safe payment/refund calls and quote/digest reads. All 78 client tests pass;
+compiled ABI and literal Solidity preimages anchor the new encoding cases.
+Live digest execution and the new contract runtime remain separate acceptance.
 
-Artist work now implements PLATFORM_WORKS declaration/claims/correction.
-Revenue work proceeds to inherited/global primary freezes and descendant
-accounting. Museum work builds the actual-current complete-media capture.
+Artist PLATFORM_WORKS declaration/claims/correction is in independent review.
+Further recovery histories and the actual-current complete-media museum capture
+continue in parallel. Inherited/global primary freezes and the separate ERC-20
+reveal-fee implementation await the specific approvals requested after automatic
+review rejected those source changes. ADR 0045 records the selected denomination
+and refund design without claiming that implementation has shipped.
 Root owns immediate-sale entropy, operator/client and genesis completion,
 followed by consolidated current-stack/Safe acceptance.
 

@@ -185,7 +185,7 @@ contract StreamNativeImmediateRevealTest is NativePriceProgramTestBase {
         _entropy().configure(true, 0, 5, 0);
         uint8[3] memory kinds = [uint8(0), uint8(1), uint8(13)];
         for (uint256 i; i < kinds.length; ++i) {
-            bytes32 id = _program(kinds[i], 777, kinds[i] == 13 ? 1000 : 777, 2);
+            bytes32 id = _program(kinds[i], 777, kinds[i] == 13 ? 1000 : 777, kinds[i] == 1 ? 0 : 2);
             IStreamNativePricePrograms.PriceProgramExecution memory e =
                 _execution(id, i + 1, 777, 777);
             vm.prank(payer);

@@ -27,7 +27,15 @@ export interface CustodyRightsActivationAuthorization extends TokenProfileCustod
   /** 1: default PROFILE; 2/3/4: strict/consented/dynamic token TEMPLATE; 5/6/7: default TEMPLATE. */
   readonly rightsMode: bigint;
 }
+export interface NativeFixedPriceSaleAuthorization {
+  readonly saleId: Hex; readonly saleConfigHash: Hex; readonly payer: Address; readonly executor: Address;
+  readonly recipient: Address; readonly artist: Address; readonly tokenDataHash: Hex; readonly mintCommitment: Hex;
+  readonly executionNonce: bigint; readonly nonce: Hex; readonly deadline: bigint; readonly expectedPrimaryPolicyHash: Hex;
+}
+export interface NativePriceProgramAuthorization extends NativeFixedPriceSaleAuthorization { readonly unitPrice: bigint }
 export interface CurrentSigningMessages {
+  nativeFixedPriceSale: NativeFixedPriceSaleAuthorization;
+  nativePriceProgram: NativePriceProgramAuthorization;
   tokenProfileCustodyActivation: TokenProfileCustodyActivationAuthorization;
   custodyRightsActivation: CustodyRightsActivationAuthorization;
   nativeAuctionCreation: NativeAuctionCreationAuthorization;
@@ -45,7 +53,14 @@ const custodyFields = [
 ] as const;
 const activationPrefix = [["auctionId", "bytes32"], ["baseConfigHash", "bytes32"], ["originHash", "bytes32"], ["tokenId", "uint256"]] as const;
 const activationSuffix = [["assignmentHash", "bytes32"], ["primaryPolicyHash", "bytes32"], ["primaryPolicyMode", "uint8"], ["artist", "address"], ["nonce", "bytes32"], ["deadline", "uint64"]] as const;
+const immediateFields = [
+  ["saleId", "bytes32"], ["saleConfigHash", "bytes32"], ["payer", "address"], ["executor", "address"],
+  ["recipient", "address"], ["artist", "address"], ["tokenDataHash", "bytes32"], ["mintCommitment", "bytes32"],
+  ["executionNonce", "uint256"], ["nonce", "bytes32"], ["deadline", "uint64"], ["expectedPrimaryPolicyHash", "bytes32"],
+] as const;
 const schemes = {
+  nativeFixedPriceSale: { name: "6529StreamNativeFixedPriceSaleAdapter", primaryType: "NativeSaleAuthorization", fields: immediateFields },
+  nativePriceProgram: { name: "6529StreamNativePricePrograms", primaryType: "NativePriceProgramAuthorization", fields: [...immediateFields, ["unitPrice", "uint256"]] },
   tokenProfileCustodyActivation: { name: "6529StreamTokenProfileCustodyAllowCurrent", primaryType: "TokenProfileCustodyActivation", fields: [...activationPrefix, ...activationSuffix] },
   custodyRightsActivation: { name: "6529StreamCustodyRightsAllowCurrent", primaryType: "CustodyRightsActivation", fields: [...activationPrefix, ["rightsMode", "uint8"], ...activationSuffix] },
   nativeAuctionCreation: { name: "6529StreamNativeEnglishAuction", primaryType: "NativeAuctionCreation", fields: [
@@ -75,6 +90,9 @@ export const preparedNativeCustodyAcquisitionTypedData = (chainId: bigint, house
 
 export const tokenProfileCustodyActivationTypedData = (chainId: bigint, house: Address, message: TokenProfileCustodyActivationAuthorization) => currentTypedData("tokenProfileCustodyActivation", chainId, house, message);
 export const custodyRightsActivationTypedData = (chainId: bigint, house: Address, message: CustodyRightsActivationAuthorization) => currentTypedData("custodyRightsActivation", chainId, house, message);
+
+export const nativeFixedPriceSaleTypedData = (chainId: bigint, adapter: Address, message: NativeFixedPriceSaleAuthorization) => currentTypedData("nativeFixedPriceSale", chainId, adapter, message);
+export const nativePriceProgramTypedData = (chainId: bigint, adapter: Address, message: NativePriceProgramAuthorization) => currentTypedData("nativePriceProgram", chainId, adapter, message);
 
 /** Explicit current JSON boundary; uints are canonical decimal strings, never JSON numbers. */
 export function currentTypedDataFromJSON(input: unknown): SigningPayload<CurrentSigningMessages[CurrentSigningKind]> {

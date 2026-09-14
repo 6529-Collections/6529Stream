@@ -123,3 +123,8 @@ and deferred no-bid completion for the new versioned native auction.
 defines the additive current mode election, original operation-15 source consent,
 authenticated token derivation and unchanged canonical policy hashes. Joined
 current-system execution and complete royalty profiles remain separate work.
+
+[ADR 0045: Native reveal fees for token sales](0045-native-reveal-fees-for-token-sales.md)
+defines the executor-funded ETH allowance independently of token-denominated
+payment limits, with excess refunded to the native funder. Implementation
+is awaiting the specific source-change approval requested after automatic review.

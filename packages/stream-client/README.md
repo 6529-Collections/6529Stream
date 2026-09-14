@@ -254,3 +254,39 @@ The new custody tests compare exact compiler-generated interfaces and Solidity
 hash preimages; actual getter runtime and full Safe workflow acceptance remain
 part of consolidated integration testing. The earlier four native getter
 fixtures retain their distinct executed evidence.
+
+## Prepare native immediate sales and reveal refunds
+
+Use `nativeFixedPriceSaleTypedData` or `nativePriceProgramTypedData` for the
+current immediate adapter. These use separate domains and match its
+`authorizationDigest` and `priceProgramAuthorizationDigest` getters. The
+strict `currentTypedDataFromJSON` boundary also accepts both kinds.
+
+Read `readImmediateSaleRevealQuote(provider, adapter, saleId)` for the live
+policy, SLO and fee. Supply a separate allowance: a fee update within that
+allowance changes the eventual refund without changing the sale signature.
+For price programs, `saleAmount` is the buyer's chosen price; the signed
+`unitPrice` remains the minimum that the contract checks against its live band.
+
+```typescript
+const prepared = prepareNativeImmediateSale(
+  "nativePriceProgram", chainId, adapter, authorization,
+  { tokenData, platformSignature, artistSignature,
+    saleAmount: 777n, revealFeeAllowance: 20n },
+);
+await assertNativeImmediateSaleDigest(provider, prepared);
+const safeTransaction = toSafeCall(prepared.call); // CALL, value "797"
+```
+
+The actual payer must also be the executor and send the transaction. Signatures
+remain opaque ERC-1271-compatible bytes. The helper verifies data hashing and
+encoding; simulate against the actual current host for timing, consent, price
+band and caller eligibility. The final fee comes from the purchase transaction,
+not the earlier quote. These helpers target native sales, not ERC-20 funding.
+
+`prepareImmediateSaleRefund(adapter, saleId, recipient)` produces a zero-value
+CALL for the credited payer's Safe. A rejected destination preserves the credit
+for retry; adapter pause does not prevent withdrawal. The new six client tests
+compare compiler-selected interfaces and independent Solidity type preimages;
+actual current getter/runtime acceptance remains part of the combined contract
+validation. See the [native immediate-sale guide](../../docs/native-immediate-reveal.md).
