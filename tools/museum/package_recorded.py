@@ -41,7 +41,8 @@ def build_recorded_directory(directory, *, root, disclosure, **pins):
 def build_recorded_package(inputs, *, root, disclosure, source_hash, publication_hash,
                            interpretation_hash, profile_hash, selection_hash, plan_hash,
                            premis_plan_bytes=None, premis_plan_hash=None, premis_profile_hash=None,
-                           iiif_plan_bytes=None, iiif_plan_hash=None, iiif_profile_hash=None):
+                           iiif_plan_bytes=None, iiif_plan_hash=None, iiif_profile_hash=None,
+                           lido_plan_bytes=None, lido_plan_hash=None, lido_profile_hash=None):
     """Replay actual capture evidence; no fixture state or Boolean authority promotion."""
     _public(disclosure)
     inputs = dict(inputs)
@@ -76,7 +77,11 @@ def build_recorded_package(inputs, *, root, disclosure, source_hash, publication
     presentation = any(v is not None for v in iiif_requested)
     if presentation and (not extended or not all(v is not None for v in iiif_requested)):
         raise MuseumError("recorded IIIF requires PREMIS and IIIF plan with both pins")
-    premis_result = iiif_result = None
+    lido_requested = (lido_plan_bytes, lido_plan_hash, lido_profile_hash)
+    description = any(v is not None for v in lido_requested)
+    if description and (not presentation or not all(v is not None for v in lido_requested)):
+        raise MuseumError("recorded LIDO requires IIIF and LIDO plan with both pins")
+    premis_result = iiif_result = lido_result = None
     if extended:
         from .recorded_premis import project_recorded_premis, PROFILE_BYTES as RECORDED_PREMIS_BYTES
         from .premis import PinnedPremis, PROFILE_BYTES as XSD_BYTES, PROFILE_HASH as XSD_HASH
@@ -84,11 +89,22 @@ def build_recorded_package(inputs, *, root, disclosure, source_hash, publication
         if presentation:
             from .recorded_iiif import project_recorded_iiif, PROFILE_BYTES as RECORDED_IIIF_BYTES
             from .iiif_model import PinnedIIIF, PROFILE_BYTES as IIIF_BYTES, PROFILE_HASH as IIIF_HASH
-            iiif_result = project_recorded_iiif(source, inputs["selection.json"], inputs["plan.json"],
-                premis_plan_bytes, iiif_plan_bytes, selection_hash=selection_hash, plan_hash=plan_hash,
+            iiif_options = dict(selection_hash=selection_hash, plan_hash=plan_hash,
                 premis_plan_hash=premis_plan_hash, premis_profile_hash=premis_profile_hash, premis_schema=schema,
                 iiif_plan_hash=iiif_plan_hash, iiif_profile_hash=iiif_profile_hash,
                 iiif_schema=PinnedIIIF(root, IIIF_BYTES, profile_hash=IIIF_HASH))
+            if description:
+                from .recorded_lido import project_recorded_lido, PROFILE_BYTES as RECORDED_LIDO_BYTES
+                from .lido_model import PinnedLIDO, PROFILE_BYTES as LIDO_BYTES, PROFILE_HASH as LIDO_HASH
+                lido_result = project_recorded_lido(source, inputs["selection.json"], inputs["plan.json"],
+                    premis_plan_bytes, iiif_plan_bytes, lido_plan_bytes, **iiif_options,
+                    lido_plan_hash=lido_plan_hash, lido_profile_hash=lido_profile_hash,
+                    lido_schema=PinnedLIDO(root, LIDO_BYTES, profile_hash=LIDO_HASH))
+                iiif_result = lido_result.iiif
+                pins.update(lido_plan=lido_plan_hash, lido_profile=lido_profile_hash)
+            else:
+                iiif_result = project_recorded_iiif(source, inputs["selection.json"], inputs["plan.json"],
+                    premis_plan_bytes, iiif_plan_bytes, **iiif_options)
             premis_result = iiif_result.premis
             pins.update(iiif_plan=iiif_plan_hash, iiif_profile=iiif_profile_hash)
         else:
@@ -96,7 +112,7 @@ def build_recorded_package(inputs, *, root, disclosure, source_hash, publication
                 selection_hash=selection_hash, plan_hash=plan_hash, premis_plan_hash=premis_plan_hash,
                 premis_profile_hash=premis_profile_hash, premis_schema=schema)
         pins.update(premis_plan=premis_plan_hash, premis_profile=premis_profile_hash)
-    files = _dependencies(root, recorded=True, premis=extended, iiif=presentation)
+    files = _dependencies(root, recorded=True, premis=extended, iiif=presentation, lido=description)
     files.update({"inputs/" + name: raw for name, raw in inputs.items()})
     # These bytes were verified against the registered interpretation by replay_source_bytes.
     for name, (_, raw) in source.profile.documents.items():
@@ -155,9 +171,22 @@ def build_recorded_package(inputs, *, root, disclosure, source_hash, publication
             files["iiif/manifest.json"] = iiif_result.projection.manifest
             for name in ("coverage", "provenance", "correspondence"):
                 files["iiif/" + name + ".json"] = getattr(iiif_result.projection, name)
+    if description:
+        files["inputs/lido-plan.json"] = lido_plan_bytes
+        files["definitions/recorded-lido-profile.json"] = RECORDED_LIDO_BYTES
+        files["lido/report.json"] = lido_result.report
+        report = loads(lido_result.report, maximum=67108864)
+        support[3] = {"format": FORMATS[3], "status": report["status"], "profile": "recorded_account_lido_v1",
+                      "report": "lido/report.json"}
+        if lido_result.projection is None:
+            support[3]["reasonCode"] = report["reasonCode"]
+        else:
+            files["lido/lido.xml"] = lido_result.projection.xml
+            for name in ("coverage", "provenance", "correspondence"):
+                files["lido/" + name + ".json"] = getattr(lido_result.projection, name)
     files["reports/format-support.json"] = dumps({"sourceStateHash": source.state.commitment,
                                                 "formats": support})
-    return _assemble(root, files, {"mode": "recorded_account_iiif_resource_package" if presentation else "recorded_account_premis_resource_package" if extended else "recorded_account_resource_package", "version": "2",
+    return _assemble(root, files, {"mode": "recorded_account_lido_resource_package" if description else "recorded_account_iiif_resource_package" if presentation else "recorded_account_premis_resource_package" if extended else "recorded_account_resource_package", "version": "2",
         "formats": support, "environment": source.anchor["environment"], "disclosure": disclosure,
         "sourceStateHash": source.state.commitment, "pins": pins, "claims": CLAIMS})
 
@@ -166,12 +195,13 @@ def verify_recorded_package(directory, expected_manifest_hash):
     """Reconstruct from the package alone after authenticating its external manifest pin."""
     directory = Path(directory).resolve()
     raw, manifest, files = _read_package(directory, expected_manifest_hash)
-    presentation = manifest.get("mode") == "recorded_account_iiif_resource_package"
+    description = manifest.get("mode") == "recorded_account_lido_resource_package"
+    presentation = description or manifest.get("mode") == "recorded_account_iiif_resource_package"
     extended = presentation or manifest.get("mode") == "recorded_account_premis_resource_package"
-    pin_names = set(PIN_NAMES) | ({"premis_plan", "premis_profile"} if extended else set()) | ({"iiif_plan", "iiif_profile"} if presentation else set())
+    pin_names = set(PIN_NAMES) | ({"premis_plan", "premis_profile"} if extended else set()) | ({"iiif_plan", "iiif_profile"} if presentation else set()) | ({"lido_plan", "lido_profile"} if description else set())
     if (set(manifest) != {"mode", "version", "formats", "environment", "disclosure",
                          "sourceStateHash", "pins", "claims", "files"}
-            or manifest["mode"] not in ("recorded_account_resource_package", "recorded_account_premis_resource_package", "recorded_account_iiif_resource_package")
+            or manifest["mode"] not in ("recorded_account_resource_package", "recorded_account_premis_resource_package", "recorded_account_iiif_resource_package", "recorded_account_lido_resource_package")
             or manifest["version"] != "2"
             or manifest["claims"] != CLAIMS or not isinstance(manifest["pins"], dict)
             or set(manifest["pins"]) != pin_names):
@@ -183,6 +213,9 @@ def verify_recorded_package(directory, expected_manifest_hash):
         if presentation:
             extra.update(iiif_plan_bytes=files["inputs/iiif-plan.json"], iiif_plan_hash=manifest["pins"]["iiif_plan"],
                          iiif_profile_hash=manifest["pins"]["iiif_profile"])
+        if description:
+            extra.update(lido_plan_bytes=files["inputs/lido-plan.json"], lido_plan_hash=manifest["pins"]["lido_plan"],
+                         lido_profile_hash=manifest["pins"]["lido_profile"])
         rebuilt = build_recorded_package({name: files["inputs/" + name] for name in INPUT_FILES},
             root=directory / "dependencies", disclosure=manifest["disclosure"], **extra,
             **{name + "_hash": manifest["pins"][name] for name in PIN_NAMES})

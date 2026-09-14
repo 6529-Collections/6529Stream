@@ -25,7 +25,7 @@ DEFINITIONS = {"crosswalk-v2.json": CROSSWALK_V2_BYTES, "premis-profile.json": P
                "iiif-profile.json": IIIF_BYTES, "lido-profile.json": LIDO_BYTES}
 
 
-def _dependencies(root, *, recorded=False, premis=False, iiif=False):
+def _dependencies(root, *, recorded=False, premis=False, iiif=False, lido=False):
     """Archive only the required exact interpretation closures; no tree copy or fetch."""
     files = {}
 
@@ -45,7 +45,7 @@ def _dependencies(root, *, recorded=False, premis=False, iiif=False):
         (root, "iiif/dependency-index.json"),
         (root, "lido/dependency-index.json"),
     )
-    for subroot, name in (indices[:4 if iiif else 3 if premis else 2] if recorded else indices):
+    for subroot, name in (indices[:5 if lido else 4 if iiif else 3 if premis else 2] if recorded else indices):
         index_path = safe_path(subroot, name)
         if index_path.stat().st_size > 524288:
             raise MuseumError("multiformat dependency index bound")
@@ -218,7 +218,7 @@ def verify_package(directory, expected_manifest_hash):
     if path.stat().st_size > MAX_MANIFEST:
         raise MuseumError("multiformat manifest bound exceeded")
     value = loads(path.read_bytes(), maximum=MAX_MANIFEST, canonical=True)
-    if isinstance(value, dict) and value.get("mode") in ("recorded_account_resource_package", "recorded_account_premis_resource_package", "recorded_account_iiif_resource_package"):
+    if isinstance(value, dict) and value.get("mode") in ("recorded_account_resource_package", "recorded_account_premis_resource_package", "recorded_account_iiif_resource_package", "recorded_account_lido_resource_package"):
         from .package_recorded import verify_recorded_package
         return verify_recorded_package(directory, expected_manifest_hash)
     return verify_fixture_package(directory, expected_manifest_hash)
@@ -252,6 +252,9 @@ def main():
     recorded.add_argument("--iiif-plan", type=Path)
     recorded.add_argument("--iiif-plan-hash")
     recorded.add_argument("--iiif-profile-hash")
+    recorded.add_argument("--lido-plan", type=Path)
+    recorded.add_argument("--lido-plan-hash")
+    recorded.add_argument("--lido-profile-hash")
     args = parser.parse_args()
     try:
         if args.command == "verify":
@@ -279,6 +282,16 @@ def main():
                     raise MuseumError("recorded IIIF plan byte bound")
                 extra.update(iiif_plan_bytes=args.iiif_plan.read_bytes(), iiif_plan_hash=args.iiif_plan_hash,
                              iiif_profile_hash=args.iiif_profile_hash)
+            lido_requested = (args.lido_plan, args.lido_plan_hash, args.lido_profile_hash)
+            if any(v is not None for v in lido_requested):
+                if not all(v is not None for v in lido_requested) or args.iiif_plan is None:
+                    raise MuseumError("recorded LIDO requires IIIF and LIDO plan with both pins")
+                if args.disclosure != "public":
+                    raise MuseumError("restricted export is unsupported")
+                if args.lido_plan.stat().st_size > 524288:
+                    raise MuseumError("recorded LIDO plan byte bound")
+                extra.update(lido_plan_bytes=args.lido_plan.read_bytes(), lido_plan_hash=args.lido_plan_hash,
+                             lido_profile_hash=args.lido_profile_hash)
             result = build_recorded_directory(args.input, root=args.dependency_root, disclosure=args.disclosure, **extra,
                 **{name + "_hash": getattr(args, name + "_hash")
                    for name in ("source", "publication", "interpretation", "profile", "selection", "plan")})

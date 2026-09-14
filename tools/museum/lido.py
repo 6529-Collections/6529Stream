@@ -148,12 +148,21 @@ class _Evidence:
 def project_lido_fixture(state, selection_bytes, plan_bytes, premis_plan_bytes, iiif_plan_bytes, lido_plan_bytes, *,
                          lido_plan_hash, lido_profile, **iiif_kwargs):
     iiif = project_iiif_fixture(state, selection_bytes, plan_bytes, premis_plan_bytes, iiif_plan_bytes, **iiif_kwargs)
+    selection = select_canonical_fixture(state, selection_bytes, policy_hash=iiif_kwargs["selection_hash"], profile_hash=iiif_kwargs["profile_hash"])
+    return _project_selected_work(state, iiif, selection, selection_bytes, plan_bytes, lido_plan_bytes,
+        lido_plan_hash=lido_plan_hash, lido_profile=lido_profile, **iiif_kwargs)
+
+
+def _project_selected_work(state, iiif, selection, selection_bytes, plan_bytes, lido_plan_bytes, *,
+                           lido_plan_hash, lido_profile, mode="synthetic_lido_projection",
+                           export_profile_hash=PROFILE_HASH, publishers=None, **iiif_kwargs):
+    """Strict renderer after public source admission; publisher mappings require selected evidence."""
     if keccak256(lido_plan_bytes) != lido_plan_hash:
         raise MuseumError("LIDO plan hash mismatch")
     plan = loads(lido_plan_bytes, maximum=524288, canonical=True)
-    expected = {"mode": "synthetic_lido_projection", "version": "1", "sourceStateHash": state.commitment,
+    expected = {"mode": mode, "version": "1", "sourceStateHash": state.commitment,
         "profileHash": iiif_kwargs["profile_hash"], "linkedArtPlanHash": iiif_kwargs["plan_hash"],
-        "premisPlanHash": iiif_kwargs["premis_plan_hash"], "iiifPlanHash": iiif_kwargs["iiif_plan_hash"], "lidoProfileHash": PROFILE_HASH}
+        "premisPlanHash": iiif_kwargs["premis_plan_hash"], "iiifPlanHash": iiif_kwargs["iiif_plan_hash"], "lidoProfileHash": export_profile_hash}
     if not isinstance(plan, dict) or set(plan) != set(expected) | {"recordId"} or any(plan[k] != v for k, v in expected.items()):
         raise MuseumError("LIDO plan scope mismatch")
     record_id = plan["recordId"]
@@ -173,7 +182,6 @@ def project_lido_fixture(state, selection_bytes, plan_bytes, premis_plan_bytes, 
     policy = loads(selection_bytes, maximum=524288)
     if not set(FIELDS.values()).issubset(policy["singleValuedRelations"]):
         raise MuseumError("LIDO single-valued conflict policy required")
-    selection = select_canonical_fixture(state, selection_bytes, policy_hash=iiif_kwargs["selection_hash"], profile_hash=iiif_kwargs["profile_hash"])
     la_plan = loads(plan_bytes, maximum=524288)
     evidence = _Evidence(state, selection, la_plan["entityAuthoritySet"], loads(iiif.provenance, maximum=67108864))
     evidence.entity(work, {"abstract_work"})
@@ -231,17 +239,28 @@ def project_lido_fixture(state, selection_bytes, plan_bytes, premis_plan_bytes, 
     source_rows, issuers = [], set()
     for record in sorted((r for r in state.records if r.selector.record_hash in selected_hashes), key=lambda r: source_record_id(r)):
         issuer = loads(record.authority_evidence)["agentIri"]
-        evidence.entity(issuer, {"person", "group"})
+        if publishers is None:
+            evidence.entity(issuer, {"person", "group"})
+        elif issuer not in publishers:
+            raise MuseumError("LIDO selected publisher evidence missing for account issuer")
         rid = source_record_id(record)
         _e(record_wrap, "recordID", rid, **{"{" + NS + "}type": "URI"})
         source_rows.append({"lidoRecordId": rid, "selector": record.selector.__dict__, "payloadHash": record.payload_hash,
             "authorityEvidenceHash": keccak256(record.authority_evidence), "issuer": issuer})
+        if publishers is not None:
+            source_rows[-1]["declaredRecordPublisher"] = publishers[issuer]["entity"]
         issuers.add(issuer)
     _e(_e(record_wrap, "recordType"), "term", "item")
-    for issuer in sorted(issuers):
+    providers = issuers if publishers is None else {publishers[issuer]["entity"] for issuer in issuers}
+    for provider_id in sorted(providers):
+        evidence.entity(provider_id, {"person", "group"})
         provider = _e(record_wrap, "recordSource")
-        node = _e(provider, "legalBodyID", issuer, **{"{" + NS + "}type": "URI"}); evidence.identity(node, issuer)
-        evidence.names(provider, "legalBodyName", issuer)
+        node = _e(provider, "legalBodyID", provider_id, **{"{" + NS + "}type": "URI"}); evidence.identity(node, provider_id)
+        evidence.names(provider, "legalBodyName", provider_id)
+        if publishers is not None:
+            for issuer in sorted(issuers):
+                if publishers[issuer]["entity"] == provider_id:
+                    evidence.proof(node, publishers[issuer]["proofs"])
     resources = _e(admin, "resourceWrap")
     correspondence = loads(iiif.correspondence, maximum=67108864)
     resource_nodes = []
@@ -289,8 +308,8 @@ def project_lido_fixture(state, selection_bytes, plan_bytes, premis_plan_bytes, 
     corresponding = dumps({"lidoRecordId": record_id, "workId": work, "creatorId": creator, "creationEventId": event,
         "sourceRecords": source_rows, "files": correspondence})
     coverage_raw, provenance = dumps(coverage), dumps(sorted(evidence.provenance(), key=dumps))
-    report = dumps({"mode": "synthetic_lido_projection", "version": "1", "sourceStateHash": state.commitment,
-        "profileHash": iiif_kwargs["profile_hash"], "lidoProfileHash": PROFILE_HASH, "lidoPlanHash": lido_plan_hash,
+    report = dumps({"mode": mode, "version": "1", "sourceStateHash": state.commitment,
+        "profileHash": iiif_kwargs["profile_hash"], "lidoProfileHash": export_profile_hash, "lidoPlanHash": lido_plan_hash,
         "iiifReportHash": keccak256(iiif.report), "xmlHash": keccak256(raw), "correspondenceHash": keccak256(corresponding),
         "coverageHash": keccak256(coverage_raw), "provenanceHash": keccak256(provenance),
         "schemaWarnings": list(lido_profile.schema_warnings), "originalSource": "all original public bytes in iiif.premis.linked_art.sidecar",

@@ -207,7 +207,9 @@ versioned selected-file adapter. Complete facts produce XML; missing facts
 produce exact unsupported diagnostics. The separately pinned
 [recorded IIIF adapter](../../docs/museum-recorded-iiif.md) consumes those file facts
 and selected presentation evidence, or reports the exact missing inputs without a Manifest.
-Recorded LIDO remains unsupported. `verify`
+The [recorded LIDO adapter](../../docs/museum-recorded-lido.md) additionally requires
+explicit work/creation facts and selected publisher statements from every
+contributing account; account issuers stay separate from named legal bodies. `verify`
 replays archived evidence offline. Run
 `python -m unittest tools.museum.test_package_recorded -v` for this path. The
 recorded package preserves the source environment and trusted-RPC limitations;

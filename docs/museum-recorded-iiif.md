@@ -47,4 +47,4 @@ python -m unittest tools.museum.test_recorded_iiif tools.museum.test_iiif -v
 
 The retained actual capture exercises recorded admission, missing-fact diagnostics and package replay. Complete four-media rendering controls are explicitly synthetic; they are not a new recorded positive capture. No capture campaign or on-chain change accompanies this adapter.
 
-No media are fetched, no declared digest is verified against bytes, and no format detection, viewer interoperability, consensus finality or institutional conformance is claimed. Recorded LIDO, broader PREMIS object/event/agent/rights support, canonical preservation-source admission and institutional acceptance remain separate work.
+No media are fetched, no declared digest is verified against bytes, and no format detection, viewer interoperability, consensus finality or institutional conformance is claimed. The [recorded LIDO adapter](museum-recorded-lido.md) now adds explicit work/event/publisher facts to this output. Broader PREMIS object/event/agent/rights support, canonical preservation-source admission and institutional acceptance remain separate work.
