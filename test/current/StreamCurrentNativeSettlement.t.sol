@@ -53,8 +53,20 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
         SafeComponents memory components = deploySafeComponents("1.4.1");
         artistSafe = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 101);
         payerSafe = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 102);
-        _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
         vm.deal(address(payerSafe), 1 ether);
+    }
+
+    /// @dev Select immutable onboarding terms before constructing this scenario's only graph.
+    function deployNativeScenario(bool template, bool saleConsent) external {
+        require(msg.sender == address(this), "fixture caller");
+        useTemplate = template;
+        requireSaleConsent = saleConsent;
+        _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
+    }
+
+    /// @dev Observe each post-warp time in a fresh frame under the via-IR test profile.
+    function nativeScenarioTime() external view returns (uint256) {
+        return block.timestamp;
     }
 
     function _artistProof(bytes32 digest) internal override returns (bytes memory) {
@@ -141,7 +153,7 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
         (bytes32 scope, bytes32 before_, bytes32 after_) = StreamGovernanceBootstrap.deriveBatchTransitionHashes(
             calls, StreamGovernanceBootstrap.governanceCallsHash(calls)
         );
-        uint64 ready = uint64(block.timestamp + 48 hours);
+        uint64 ready = uint64(this.nativeScenarioTime() + 48 hours);
         executor.publishGovernanceCallData(data);
         bytes memory scheduled = governanceRoot.execute(
             address(executor),
@@ -171,7 +183,7 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
                 NATIVE_PHASE,
                 PRICE,
                 0,
-                uint64(block.timestamp + 30 days),
+                uint64(this.nativeScenarioTime() + 30 days),
                 manager.phasePolicyHash(1, NATIVE_PHASE),
                 primaryResolver.resolvePrimaryAssignment(1, 0, PRIMARY_REVENUE_CLASS).assignmentHash
             )
@@ -196,7 +208,7 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
                 maximum,
                 limit,
                 0,
-                uint64(block.timestamp + 30 days),
+                uint64(this.nativeScenarioTime() + 30 days),
                 1,
                 manager.phasePolicyHash(1, NATIVE_PHASE),
                 kind == 12
@@ -208,8 +220,7 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
     }
 
     function testRequiredFixedSaleRejectsSafeUntilArtistSafeRecordsExactTerms() public {
-        requireSaleConsent = true;
-        _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
+        this.deployNativeScenario(false, true);
         require(artists.saleConsentScope(1) == 1, "actual immutable REQUIRED election");
         IStreamNativeFixedPriceSaleAdapter.SaleExecutionData memory e =
             _signedExecution(61, address(payerSafe));
@@ -234,8 +245,7 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
     }
 
     function testRequiredFreePayWhatYouWantAndOpenProgramsNeedSeparateArtistConsents() public {
-        requireSaleConsent = true;
-        _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
+        this.deployNativeScenario(false, true);
         bytes32[3] memory ids = [zeroProgram, pwywProgram, openProgram];
         uint256[3] memory prices = [uint256(0), uint256(2000), PRICE];
         uint256 initialBalance = address(payerSafe).balance;
@@ -284,7 +294,7 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
         T.Authorization memory authorization = T.Authorization(
             IStreamArtistAuthorizationRevocation(address(artists))
                 .artistAuthorizationState(fixtureArtistId, bytes32(0), 0).nextUnusedNonce,
-            uint64(block.timestamp + 1 days),
+            uint64(this.nativeScenarioTime() + 1 days),
             ""
         );
         require(
@@ -305,6 +315,7 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
     }
 
     function testSafeZeroPriceProgramMintsWithoutOfficialRevenueAndCannotReplay() public {
+        this.deployNativeScenario(false, false);
         IStreamNativePricePrograms.PriceProgramExecution memory e =
             _programExecution(zeroProgram, 41, 0, 0);
         IStreamNativePricePrograms.PriceProgramResult memory expected =
@@ -356,6 +367,7 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
     }
 
     function testSafePayWhatYouWantSettlesChosenPriceAndOpenEditionSharesActualMintLedger() public {
+        this.deployNativeScenario(false, false);
         IStreamNativePricePrograms.PriceProgramExecution memory e =
             _programExecution(pwywProgram, 42, 2000, 500);
         IStreamNativePricePrograms.PriceProgramResult memory expected =
@@ -441,7 +453,7 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
             keccak256(abi.encode("current price program", nonce)),
             nonce,
             bytes32(nonce),
-            uint64(block.timestamp + 1 days),
+            uint64(this.nativeScenarioTime() + 1 days),
             id == zeroProgram ? bytes32(0) : _nativePrimaryPolicyHash(),
             signedPrice
         );
@@ -465,6 +477,7 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
     }
 
     function testSafeNativePurchaseMintsRevealsClaimsAndRejectsReplay() public {
+        this.deployNativeScenario(false, false);
         (
             IStreamNativeFixedPriceSaleAdapter.SaleExecutionData memory e,
             StreamNativeSettlementTypes.NativeSettlementCandidate memory c
@@ -502,8 +515,7 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
     }
 
     function testActualArtistTemplateDefersWalletThenSafeFlushesAndClaims() public {
-        useTemplate = true;
-        _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
+        this.deployNativeScenario(true, false);
         require(
             wallet.code.length == 0 && !factory.profileExists(profile),
             "undeployed template destination"
@@ -564,6 +576,7 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
     }
 
     function testLateNativeRecipientRejectionRollsBackAndIdenticalSafeCallRetries() public {
+        this.deployNativeScenario(false, false);
         CurrentNativeRecipient recipient = new CurrentNativeRecipient();
         (
             IStreamNativeFixedPriceSaleAdapter.SaleExecutionData memory e,
@@ -641,7 +654,7 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
             keccak256(abi.encode("native mint", nonce)),
             nonce,
             bytes32(nonce),
-            uint64(block.timestamp + 1 days),
+            uint64(this.nativeScenarioTime() + 1 days),
             _nativePrimaryPolicyHash()
         );
         bytes32 digest = nativeSale.authorizationDigest(e.authorization);
@@ -759,8 +772,8 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
             bytes32(0),
             bytes32(0),
             bytes32(0),
-            uint64(block.timestamp + 48 hours),
-            uint64(block.timestamp + 9 days),
+            uint64(this.nativeScenarioTime() + 48 hours),
+            uint64(this.nativeScenarioTime() + 9 days),
             keccak256("Safe governance test"),
             "urn:6529stream:fixture:safe-governance",
             DEPLOYMENT_HASH
