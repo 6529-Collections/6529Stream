@@ -5,6 +5,12 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add exact native commerce activation plans for Safe-root catalog extension,
+  delayed module/escrow admission and one-time Manager/custody binding.
+
+- Add versioned native collection-template auctions with original opening consent,
+  actual-token policy recording, escrow materialization and atomic Safe retry.
+
 - Add native auction custody acquisition and paid transfer of the original NFT,
   with canonical house admission, terminal claims and signed Safe retry coverage.
 - Add current native recorder/auction deployment and exact module/escrow admission.

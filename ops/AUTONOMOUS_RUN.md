@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Accepted native addon `b0bd766e`, capped deployment parser `6246aa06`, custody auctions `8147a504`, stored-evidence gas fix `15fbed73`; actual Safe commerce activation and expanded rights tests running separately. Immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | Accepted custody `8147a504`, stored-evidence gas `15fbed73`, template auctions `9bd530fd` and consent provider `a0d7792b`; actual Safe commerce activation25 independently accepted on its retained pre-template capture. Actual Artist template consent and expanded low-take consumer composition remain active. Immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -46,8 +46,11 @@ constructs the official recorder and auction house against the actual Core,
 Manager, Registry and revenue dependencies. It verifies exact registration,
 escrow admission and one-time owner binding, including Safe failure/retry.
 Artist, entropy and governance semantics are named test boundaries in that
-cohort. Actual Safe/Executor catalog extension and complete activation have a
-separate implementation and runtime check in progress.
+cohort. A separate actual Safe/Executor cohort now passes all 25 cases and three
+256-input properties, with independent source and native-output review. Its four
+new cases execute catalog extension, module/escrow admission and Manager/custody
+binding. That governance capture precedes the later template-rights and
+consent-provider changes; new combined-current acceptance remains separate.
 
 Custody auctions are integrated as `8147a504`: an unpaid original mint places
 one NFT in auction custody, and a later paid settlement transfers that same NFT
@@ -64,6 +67,17 @@ correction passes 25 isolated cases plus 256 fuzz inputs in each compiler mode;
 the same healthy high-budget scenarios fail under the original code. Their
 public ABIs, exact return validation and complete-provider/preparation gates
 remain unchanged. Complete Safe finality transaction capacity remains open.
+
+Collection-template native auctions are integrated as `9bd530fd`. The opening
+signature retains the original template and assignment; settlement materializes
+the current permitted template and records the policy against Core's actual
+allocated token ID. Independent acceptance combines 51 retained cases with nine
+corrected cases, totaling 60 unique cases and four 256-input properties. It covers
+actual escrow credit/flush, current payout changes before settlement, rollback
+and identical signed Safe retry, with typed Artist/governance/entropy boundaries.
+All 229 production products in that capture fit. Successful token overrides,
+snapshots, dynamic poster/collaborator templates, approved low-take and complete
+operator composition remain required.
 
 The preservation Safe increment `0c6da9e4` is independently reviewed, integrated
 and pushed. Ten unique IR cases cover inventory, bundle and artifact calls,

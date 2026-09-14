@@ -60,6 +60,10 @@ The development compiler profile is Solidity 0.8.19, optimizer 200 runs and
 global via-IR. Development module hashes identify engineering configurations;
 release binding and full-v1 acceptance remain separate work.
 
+For an existing current graph, the [native commerce deployment guide](../../docs/integrations/native-commerce-deployment.md)
+covers the separate recorder/house deployment, exact catalog and escrow
+admission, and Manager/custody binding through the correct owner or Safe root.
+
 ## Local checkpoint rehearsal
 
 Install the local driver's pinned ABI and Ethereum-hash dependencies, then run

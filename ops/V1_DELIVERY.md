@@ -54,8 +54,11 @@ constructs the official recorder and auction house against the actual Core,
 Manager, Registry and revenue dependencies. It verifies exact registration,
 escrow admission and one-time owner binding, including Safe failure/retry.
 Artist, entropy and governance semantics are named test boundaries in that
-cohort. Actual Safe/Executor catalog extension and complete activation have a
-separate implementation and runtime check in progress.
+cohort. A separate actual Safe/Executor cohort now passes all 25 cases and three
+256-input properties, with independent source and native-output review. Its four
+new cases execute catalog extension, module/escrow admission and Manager/custody
+binding. That governance capture precedes the later template-rights and
+consent-provider changes; new combined-current acceptance remains separate.
 
 Custody auctions are integrated as `8147a504`: an unpaid original mint places
 one NFT in auction custody, and a later paid settlement transfers that same NFT
@@ -72,6 +75,17 @@ correction passes 25 isolated cases plus 256 fuzz inputs in each compiler mode;
 the same healthy high-budget scenarios fail under the original code. Their
 public ABIs, exact return validation and complete-provider/preparation gates
 remain unchanged. Complete Safe finality transaction capacity remains open.
+
+Collection-template native auctions are integrated as `9bd530fd`. The opening
+signature retains the original template and assignment; settlement materializes
+the current permitted template and records the policy against Core's actual
+allocated token ID. Independent acceptance combines 51 retained cases with nine
+corrected cases, totaling 60 unique cases and four 256-input properties. It covers
+actual escrow credit/flush, current payout changes before settlement, rollback
+and identical signed Safe retry, with typed Artist/governance/entropy boundaries.
+All 229 production products in that capture fit. Successful token overrides,
+snapshots, dynamic poster/collaborator templates, approved low-take and complete
+operator composition remain required.
 
 The preservation Safe increment `0c6da9e4` is independently reviewed, integrated
 and pushed. Ten unique IR cases cover inventory, bundle and artifact calls,
@@ -945,7 +959,7 @@ commits, tests and retained results in the evidence column when advancing it.
 | PAY-02 | Signed release/revocation and specified deprecated-asset exits preserve owed funds and nonce rules | Revenue; existing wallet/asset policy | Building: source integrated as `6d2074fb`; 121 focused tests per compiler profile; combined current-stack acceptance pending |
 | PAY-03 | Revenue escrow records exact owed assets, captures the destination binding and supports permissionless flush/recovery | Revenue; typed settlement decision | Building: deferred registration/discovery and single-factory exact-credit/flush source integrated; fixed-sale and auction adoption source integrated; current acceptance and recovery still pending |
 | PAY-04 | One ERC-20 payer boundary, official settlement owner, exact typed mint orchestration and execution-bound replay, including specified permit branches | Revenue + integrator; PAY-03, ADR 0019 reconciliation | Building: universal ERC-20 recorder/payer/consumer integrated `18dbe54c`, 29 tests plus fuzzing independently accepted; canonical authorization fix `5ecae362` accepted with two tests; `4e9a41b1` actual-Core universal/content/Safe ten-case composition independently accepted; native prepared settlement18 and English/delegation/curated42 now independently accepted through actual Core/Manager/official recorder with Safe retry; custody51 is independently accepted and integrated; broader rights and global operator wiring remain |
-| PAY-05 | Required primary/royalty assignment profiles, templates, token overrides and freeze behavior work through current resolvers | Revenue; artist economics, PAY-04 | Building: immutable primary artist binding integrated as `8eb37037`; 38 focused tests per profile; remaining semantics and current-stack acceptance pending |
+| PAY-05 | Required primary/royalty assignment profiles, templates, token overrides and freeze behavior work through current resolvers | Revenue; artist economics, PAY-04 | Building: immutable primary artist binding integrated as `8eb37037`; 38 focused tests per profile; actual native collection-template settlement60 is independently accepted and integrated; token overrides, snapshots, dynamic templates, low-take and wider current-stack acceptance remain |
 | SALE-01 | Fixed/open-edition sale variants, zero/PWYW pricing and refund-window custody obey drift, cancellation, reveal and pause rules | Revenue; PAY-04 and artist consent | Building: signed free/open/PWYW programs and REQUIRED consent have separately captured current/Safe acceptance. Refund source `ea107e58` has 63 reviewed domain cases and two fuzz properties; actual refund4 plus retained dispute4 now pass independent review on the pre-dismissal snapshot. Wider variants and candidate acceptance remain |
 | SALE-02 | Dutch schedule, clearing rebates and maximum-price excess credits conserve funds | Revenue; PAY-04 | Building: standard native Dutch and supplemental settlement have independently reviewed current composition. Clearing consumer `d807421e` has 59 reviewed domain cases, five fuzz properties and both compiler profiles; two actual-current Safe clearing cases pass independent review (`d9d7d46b`). A qualified full-current trace measures 8,755,856 gas in the first consumer call versus the 500,000 ceiling. Aggregate/storage optimization and shared mint/rights/settlement costs remain open; no cold gas or deployment acceptance |
 | SALE-03 | Private sales/offers and owner-signed consignment grants have exact revocation and secondary-settlement semantics | Revenue; PAY-04 and artist consent | Building: `7139688b` implements native secondary PRIVATE_SALE and OFFER_SALE, with 42 reviewed domain cases and fuzzing. Prior collector delivery, actual-current Core/royalty composition and broader inventory sale kinds remain |

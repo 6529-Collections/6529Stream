@@ -6,7 +6,7 @@ singleton collection PROFILE with exact `tokenData`. A disabled gate and the
 original published curated-content gate are supported, with optional NFTDelegation
 delivery. The separate custody-start API mints before bidding, then sells that
 original token. Additional rights modes and other gate profiles remain required
-work.
+work. Collection TEMPLATE settlement has its own versioned entrypoint below.
 
 Use [IStreamNativeEnglishAuction](../../smart-contracts/interfaces/stream/auctions/IStreamNativeEnglishAuction.sol)
 for lifecycle calls and
@@ -125,6 +125,44 @@ payer refunds; releasing custody invalidates its sale origin. The current
 [fixture](../../test/helpers/NativeCustodyAuctionFixture.sol) demonstrates the
 complete sequence and signed Safe failure/repair/retry.
 
+## Apply a collection template at settlement
+
+Use [IStreamNativeRightsAuction](../../smart-contracts/interfaces/stream/auctions/IStreamNativeRightsAuction.sol)
+for a mint-at-settlement auction using a collection TEMPLATE. Capture its original
+`assignmentHash` and `templateId` in `OriginalPolicy`, with `mode=1`. Build the
+configuration commitment using `rightsConfigurationHash(config, original)`, then
+use that commitment in the house's original `CreationAuthorization` digest and
+platform/artist signatures. The poster calls `registerRightsAuction`. Read
+`originalAuctionRights` and `NativeAuctionRightsBound` to retain that opening
+authorization.
+
+This entry uses `primaryPolicyMode=1` (`ALLOW_CURRENT`). Valid assignment and
+payout changes before settlement are permitted; the retained opening declaration
+remains unchanged. At settlement Manager prepares the actual Core token and calls
+the versioned rights callback. The original recorder materializes the selected
+template and records `PRIMARY_POLICY_V1` using that actual token ID. Assignment,
+payout, profile and wallet must remain stable during the transaction or the
+complete mint and payment revert.
+
+An initially unregistered profile is registered and its funds credited to the
+actual RevenueEscrow. Permissionless flush deploys and funds its wallet; a later
+settlement can pay that wallet directly. Observe the escrow and recording events
+instead of assuming every successful sale immediately funds a deployed wallet.
+
+The Manager interface is
+[IStreamPreparedNativeRightsMint](../../smart-contracts/interfaces/stream/mint/IStreamPreparedNativeRightsMint.sol);
+the callback and official receipt use separate
+[IStreamPreparedNativeRightsSaleBinding](../../smart-contracts/interfaces/stream/revenue/IStreamPreparedNativeRightsSaleBinding.sol)
+and [IStreamPreparedNativeRightsPrimarySettlement](../../smart-contracts/interfaces/stream/revenue/IStreamPreparedNativeRightsPrimarySettlement.sol)
+interfaces. The existing PROFILE, curated and custody signatures and tuples are
+preserved. The [current fixture](../../test/helpers/NativeRightsAuctionFixture.sol)
+shows exact collection selection, opening-policy hashing and signing.
+
+This increment supports COLLECTION_ARTIST plus the existing static non-artist
+entries. Token overrides, mint-time royalty snapshots, dynamic poster/collaborator
+entries, approved low artist shares and template custody have separate remaining
+implementation and acceptance requirements.
+
 ## Tested behavior
 
 Fifteen actual auction cases pass, including a 256-input configuration property,
@@ -138,9 +176,9 @@ The curated increment passes 42 cases across the curated, existing auction,
 prepared settlement and companion suites, including three 256-input properties.
 Its nine curated cases include complete retained publication, wrong proofs and
 bytes, ordinary-entry bypass rejection, gate incidents, sequential Core tokens
-and identical signed Safe retry. That pre-custody capture fits the runtime limit for every production product. Whole-transaction capacity, complete operator wiring,
-additional
-auction profiles and a matching full-v1 candidate remain open in the
+and identical signed Safe retry. That pre-custody capture fits the runtime limit
+for every production product. Whole-transaction capacity, complete operator
+wiring, additional auction profiles and a matching full-v1 candidate remain open in the
 [delivery ledger](../../ops/V1_DELIVERY.md).
 
 The custody increment retains 42 unchanged cases and passes nine corrected
@@ -149,3 +187,11 @@ reviewed. The accepted house is 24,220 bytes, Manager 21,504 and recorder 24,510
 all production products in that capture fit. This covers the described original
 mint, paid transfer, incident claims and Safe retries; broader rights and complete
 Safe/operator activation remain separately tracked.
+
+The collection-template increment retains 51 passing cases and adds nine corrected
+rights/ERC-20 cases, totaling 60 unique cases and four 256-input properties across
+the two independently reviewed captures. The house is 22,045 bytes, Manager 23,890
+and recorder 17,803 after fixed-library extraction; all production products fit.
+This adds current-template and actual ERC-20 recording regression evidence, with
+explicit typed Artist/governance/entropy boundaries. It does not replace complete
+operator, transaction-capacity or new-candidate validation.

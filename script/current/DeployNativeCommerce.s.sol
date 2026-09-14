@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamNativeCommerceDeployment.sol";
+import "./StreamNativeCommerceGovernancePlan.sol";
 
 interface NativeCommerceDeploymentVm {
     function envAddress(string calldata key) external view returns (address);
@@ -43,6 +44,28 @@ contract DeployNativeCommerce {
             StreamNativeCommerceDeployment.admission(products),
             StreamNativeCommerceDeployment.policies(products)
         );
+    }
+
+    /// @notice Build after observed module admission; schedule through the original Executor.
+    function prepareCustodyBinding(StreamNativeCommerceDeployment.Products calldata products)
+        external
+        view
+        returns (GenesisBatch memory)
+    {
+        return StreamNativeCommerceGovernancePlan.custodyBinding(products);
+    }
+
+    function prepareGovernedManagerBinding(
+        StreamNativeCommerceDeployment.Products calldata products
+    ) external view returns (GenesisBatch memory) {
+        return StreamNativeCommerceGovernancePlan.managerBinding(products);
+    }
+
+    function prepareCatalogAdditions(
+        StreamNativeCommerceDeployment.Products calldata products,
+        GovernanceActionPolicyEntry[] calldata knownEntries
+    ) external view returns (GovernanceActionPolicyEntry[] memory) {
+        return StreamNativeCommerceGovernancePlan.catalogAdditions(products, knownEntries);
     }
 
     function prepareManagerBinding(StreamNativeCommerceDeployment.Products calldata products)

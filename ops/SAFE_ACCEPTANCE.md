@@ -36,6 +36,23 @@ The integrator owns the combined inventory; each builder supplies its domain's
 rows and executable evidence. Final acceptance requires no unclassified or
 uncovered supported ABI functions, rather than a sample of wallet workflows.
 
+## Native commerce governance activation
+
+[StreamNativeCommerceGovernanceTest](../test/current/StreamNativeCommerceGovernance.t.sol)
+uses the actual threshold-two Safe root, Core, Executor, Registry and native
+commerce pair. Its four cases cover catalog extension, delayed module/escrow
+admission, Executor-owned Manager binding and canonical custody-house binding.
+They verify exact saved-action completion, skip completed execution, reject
+scheduling before catalog admission, reject direct Safe bypass of the original
+Executor, and reject early execution before accepting the same delayed action.
+
+These four cases pass with twelve addon and nine custody regressions: 25 exact
+cases and three 256-input properties. Artist and entropy are typed boundaries.
+This capture precedes the later collection-template and consent-provider changes;
+it is not whole-graph deployment, transaction-capacity, all-version or all-selector
+acceptance. [The operator guide](../docs/integrations/native-commerce-deployment.md)
+provides the call order and resume rules.
+
 ## Combined artist preparation
 
 `prepareSanctionWithReview` is a public Registry read. The native provider's
