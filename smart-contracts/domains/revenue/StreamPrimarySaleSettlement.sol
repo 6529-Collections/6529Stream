@@ -5,6 +5,7 @@ import "./StreamSettlementContext.sol";
 import "./StreamERC20PrimaryRecording.sol";
 import "./StreamPreparedNativeRightsRecording.sol";
 import "./StreamNativeCustodyPrimaryRecording.sol";
+import "./StreamTokenProfileCustodyRecording.sol";
 import "./StreamNativeSupplementalExecution.sol";
 import "./StreamNativePrimaryExecution.sol";
 import "./StreamNativePrimaryRecording.sol";
@@ -38,6 +39,7 @@ contract StreamPrimarySaleSettlement is
     IStreamPreparedNativeContentSettlement,
     IStreamNativeSupplementalSettlement,
     IStreamNativeCustodyPrimarySettlement,
+    IStreamTokenProfileCustodySettlement,
     IStreamPreparedNativeRightsPrimarySettlement,
     StreamSettlementContext,
     ReentrancyGuard,
@@ -118,6 +120,7 @@ contract StreamPrimarySaleSettlement is
             || id == type(IStreamPreparedNativePrimarySaleSettlement).interfaceId
             || id == type(IStreamPreparedNativeContentSettlement).interfaceId
             || id == type(IStreamNativeCustodyPrimarySettlement).interfaceId
+            || id == type(IStreamTokenProfileCustodySettlement).interfaceId
             || id == type(IStreamPreparedNativeRightsPrimarySettlement).interfaceId
             || id == type(IStreamNativeSupplementalSettlement).interfaceId
             || super.supportsInterface(id);
@@ -383,6 +386,32 @@ contract StreamPrimarySaleSettlement is
     {
         return StreamNativeCustodyPrimaryRecording.execute(
             StreamNativeCustodyPrimaryRecording.Context(
+                _custodyAdmissionContext(),
+                resolverCodeHash,
+                StreamNativePrimaryExecution.Context(
+                    _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
+                )
+            ),
+            _canonicalCustodyHouse,
+            preparedNativeSaleConsumed,
+            settlementConsumed,
+            _results,
+            nativeCustodyFactsHash,
+            _officialSettled,
+            totalOfficialSettled,
+            id
+        );
+    }
+
+    function settleTokenProfileCustodyPrimarySale(bytes32 id)
+        external
+        payable
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory)
+    {
+        return StreamTokenProfileCustodyRecording.execute(
+            StreamTokenProfileCustodyRecording.Context(
                 _custodyAdmissionContext(),
                 resolverCodeHash,
                 StreamNativePrimaryExecution.Context(

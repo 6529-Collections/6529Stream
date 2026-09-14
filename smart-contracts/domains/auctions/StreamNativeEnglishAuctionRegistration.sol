@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 import "./StreamNativeEnglishAuctionRuntime.sol";
 import "./StreamNativeEnglishAuctionCustodyReads.sol";
+import "../revenue/StreamTokenProfileCustodyValidation.sol";
 import "../revenue/StreamPreparedNativeRightsProjection.sol";
 import {
     IStreamNativeEnglishAuction as A
@@ -96,8 +97,24 @@ library StreamNativeEnglishAuctionRegistration {
         StreamNativeAuctionDelegation.Witness memory witness,
         bool allowNew
     ) public {
+        bidPublicForConfiguration(
+            s, x, rightsMode, id, deliverTo, witness, allowNew, s.auctions[id].configHash, false
+        );
+    }
+
+    function bidPublicForConfiguration(
+        StreamNativeEnglishAuctionState.State storage s,
+        StreamNativeEnglishAuctionRuntime.Context memory x,
+        uint8 rightsMode,
+        bytes32 id,
+        address deliverTo,
+        StreamNativeAuctionDelegation.Witness memory witness,
+        bool allowNew,
+        bytes32 effectiveConfigHash,
+        bool tokenProfile
+    ) public {
         A.Auction storage a = StreamNativeEnglishAuctionState.requireAuction(s, id);
-        uint256 fee = _bidPrecheck(x, a, rightsMode);
+        uint256 fee = tokenProfile ? _tokenProfileBidPrecheck(x, a) : _bidPrecheck(x, a, rightsMode);
         if (msg.sender == address(this) || msg.value <= fee) revert A.InvalidNativeAuction();
         address recipient = _delivery(s, x, id, msg.sender, deliverTo, witness, allowNew);
         bytes32 digest = keccak256(
@@ -106,7 +123,7 @@ library StreamNativeEnglishAuctionRegistration {
                 block.chainid,
                 address(this),
                 id,
-                a.configHash,
+                effectiveConfigHash,
                 msg.sender,
                 recipient,
                 msg.value - fee,
@@ -132,16 +149,40 @@ library StreamNativeEnglishAuctionRegistration {
         StreamNativeAuctionDelegation.Witness memory witness,
         bool allowNew
     ) public {
+        bidSignedForConfiguration(
+            s,
+            x,
+            rightsMode,
+            authorization,
+            signature,
+            witness,
+            allowNew,
+            s.auctions[authorization.auctionId].configHash,
+            false
+        );
+    }
+
+    function bidSignedForConfiguration(
+        StreamNativeEnglishAuctionState.State storage s,
+        StreamNativeEnglishAuctionRuntime.Context memory x,
+        uint8 rightsMode,
+        A.BidAuthorization calldata authorization,
+        bytes calldata signature,
+        StreamNativeAuctionDelegation.Witness memory witness,
+        bool allowNew,
+        bytes32 effectiveConfigHash,
+        bool tokenProfile
+    ) public {
         A.Auction storage a = StreamNativeEnglishAuctionState.requireAuction(
             s, authorization.auctionId
         );
-        uint256 fee = _bidPrecheck(x, a, rightsMode);
+        uint256 fee = tokenProfile ? _tokenProfileBidPrecheck(x, a) : _bidPrecheck(x, a, rightsMode);
         if (
             authorization.payer == address(0) || authorization.payer == address(this)
-                || authorization.executor != msg.sender || authorization.configHash != a.configHash
-                || authorization.amount == 0 || authorization.nonce == 0
-                || authorization.deadline < block.timestamp || fee > authorization.maxRevealFee
-                || msg.value != authorization.amount + fee
+                || authorization.executor != msg.sender
+                || authorization.configHash != effectiveConfigHash || authorization.amount == 0
+                || authorization.nonce == 0 || authorization.deadline < block.timestamp
+                || fee > authorization.maxRevealFee || msg.value != authorization.amount + fee
         ) revert A.InvalidNativeAuction();
         if (s.bidUsed[authorization.payer][authorization.nonce]) {
             revert A.NativeAuctionAuthorizationUsed(authorization.payer, authorization.nonce);
@@ -257,5 +298,37 @@ library StreamNativeEnglishAuctionRegistration {
             StreamNativeEnglishAuctionRuntime.support(x), a.config.collectionId
         )
         .revealFeePerTokenWei;
+    }
+
+    function _tokenProfileBidPrecheck(
+        StreamNativeEnglishAuctionRuntime.Context memory x,
+        A.Auction storage a
+    ) private view returns (uint256) {
+        bytes32 id = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_AUCTION_V1"),
+                block.chainid,
+                address(this),
+                a.config.collectionId,
+                a.auctionNonce,
+                a.config.tokenId,
+                false
+            )
+        );
+        StreamNativeCustodySettlementTypes.Origin memory o =
+            IStreamNativeCustodyAuction(address(this)).custodyOrigin(id);
+        StreamNativeEnglishAuctionCustodyReads.requireCustody(x, a, o);
+        StreamNativeCustodySettlementTypes.Facts memory f =
+            StreamNativeCustodySettlementTypes.Facts(id, a, o);
+        StreamTokenProfileCustodyValidation.activation(address(this), f);
+        StreamTokenProfileCustodyValidation.selection(
+            StreamPrimarySettlementRights.Context(
+                x.base.resolver, x.factory, x.factory.splitWalletRuntimeCodeHash()
+            ),
+            a.config.collectionId,
+            a.tokenId
+        );
+        StreamPreparedNativeSettlementAdmission.capture(x.registry, address(this));
+        return 0;
     }
 }

@@ -10,6 +10,26 @@ library StreamNativeEnglishAuctionCustodyReads {
         IStreamNativeEnglishAuction.Auction storage a,
         StreamNativeCustodySettlementTypes.Origin memory o
     ) public view {
+        requireCustody(x, a, o);
+        StreamNativeCustodySettlementTypes.Facts memory f;
+        f.auction = a;
+        f.origin = o;
+        StreamNativeCustodyPrimaryValidation.derive(
+            StreamPrimarySettlementRights.Context(
+                x.base.resolver, x.factory, x.factory.splitWalletRuntimeCodeHash()
+            ),
+            f,
+            address(this),
+            x.recorder
+        );
+    }
+
+    /// @dev Original custody/current-context prefix, without selecting the legacy collection rights.
+    function requireCustody(
+        StreamNativeEnglishAuctionRuntime.Context memory x,
+        IStreamNativeEnglishAuction.Auction storage a,
+        StreamNativeCustodySettlementTypes.Origin memory o
+    ) public view {
         StreamSettlementAdmission.requireRegistry(
             x.base.core, x.coreHash, x.registry, x.registryHash
         );
@@ -25,16 +45,5 @@ library StreamNativeEnglishAuctionCustodyReads {
             .requireCanonicalCustodyHouse(address(this));
         StreamNativeEnglishAuctionRuntime.requireRetained(x, a);
         StreamNativeEnglishAuctionCustodyStart.requireToken(x.base.core, a, o);
-        StreamNativeCustodySettlementTypes.Facts memory f;
-        f.auction = a;
-        f.origin = o;
-        StreamNativeCustodyPrimaryValidation.derive(
-            StreamPrimarySettlementRights.Context(
-                x.base.resolver, x.factory, x.factory.splitWalletRuntimeCodeHash()
-            ),
-            f,
-            address(this),
-            x.recorder
-        );
     }
 }
