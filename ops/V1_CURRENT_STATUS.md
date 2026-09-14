@@ -11,41 +11,36 @@ complete. No new funding or owner decision is required for current work.
 
 | Workflow | Demonstrated or integrated | Next acceptance / remaining implementation |
 | --- | --- | --- |
-| Native auctions, acquisition and payment | Governed commerce activation, deferred minting, curated works, collection templates and custody sales have independently accepted focused workflows. Prepared custody now creates the royalty snapshot during original acquisition and later transfers the same NFT (`603e885b`). | The frozen `a65f7f3e` combined run now executes: both actual Artist/Safe consented-commerce cases and both royalty-snapshot cases pass. The 21-case aggregate has 18 passes and three graph-setup failures; independent review confirms unchanged compiler inputs, native exports and compiled projections. The separate isolated cold-call case passes. A single-construction test repair is compiling incrementally from the retained cache. It excludes later integrated production changes. Complete latest operator activation and transaction-capacity acceptance remain. |
-| Artist-approved royalty terms | Positive collection snapshots and mode-bound Artist approval are integrated. Canonical configured-zero snapshots now retain immutable zero token royalties and suppress future fallback (`700f7712`), with independently accepted complementary Artist and Core cohorts. | Default-source snapshots are integrated (`93b489c9`), with independently reviewed complementary Artist and Core cases covering collection precedence, disabled/frozen defaults and collection-specific consent. Dynamic templates, remaining rights profiles and joined acceptance remain required. |
-| Artist succession and recovery | Ordinary and accelerated first-estate continuation have independently accepted actual Artist/Safe/Archive cases. Accelerated continuation retains guardian veto, capability restrictions and atomic retry (`465aef77`). | Closed/dismissed first-estate continuation is integrated (`2e10aef8`) with 16 independently reviewed actual Artist/Safe/Archive cases and typed Core/governance boundaries. Remaining historical/rotation/estate/dormancy branches, actual delayed-governance composition and capacity still require acceptance. All 57 historical operations plus adopted operation 58 remain in scope. |
+| Native auctions, acquisition and payment | Governed commerce activation, deferred minting, curated works, collection templates and custody sales have independently accepted focused workflows. Prepared custody now creates the royalty snapshot during original acquisition and later transfers the same NFT (`603e885b`). | The frozen `a65f7f3e` production graph plus the accepted scenario repair (`7fa610bd`) now passes all 21 selected cases together and the separate isolated cold-call case. Cached execution uses each actual compiler owner without recompilation. This excludes later integrated production changes. Complete latest operator activation and transaction-capacity acceptance remain. |
+| Artist-approved royalty terms | Positive collection snapshots and mode-bound Artist approval are integrated. Canonical configured-zero snapshots now retain immutable zero token royalties and suppress future fallback (`700f7712`), with independently accepted complementary Artist and Core cohorts. | Default-source snapshots are integrated (`93b489c9`), with independently reviewed complementary Artist and Core cases covering collection precedence, disabled/frozen defaults and collection-specific consent. Dynamic poster/collaborator primary templates are integrated (`217c996a`), with all 98 focused cases and one 256-input property passing. Actual Artist and actual Core cohorts remain complementary; joined dynamic transactions, remaining rights profiles and operator admission remain required. |
+| Artist succession and recovery | Ordinary and accelerated first-estate continuation have independently accepted actual Artist/Safe/Archive cases. Accelerated continuation retains guardian veto, capability restrictions and atomic retry (`465aef77`). | Closed/dismissed first-estate continuation is integrated (`2e10aef8`) with 16 independently reviewed actual Artist/Safe/Archive cases and typed Core/governance boundaries. Standing-veto and living-estate ancestry are integrated (`4b52f2c0`), with all 22 actual Artist/Safe/Archive cases passing. Later executed rotations, remaining history/dormancy branches, actual delayed-governance composition and capacity still require acceptance. All 57 historical operations plus adopted operation 58 remain in scope. |
 | Preservation, museum records and finality | An earlier graph passes one complete preservation/finality ceremony; the supported collection bundle and museum export increments have separate evidence. | Remaining scope variants, recovery/cutover, reconstruction, museum conformance and latest-system composition remain. One collection ceremony does not establish every finality or genesis profile. |
 | Developer client and operator | RC1 client remains usable. Compiler-selected typed clients are integrated as `e409c134`, with 52 passing tests, independent review and exact generation/typechecking against accepted native output. Earlier local graph deployment completed 530 transactions within the deployment ceiling. | Four explicit current native auction/bid/custody signing helpers are integrated (`db3fca94`), with 59 client tests and independently reproduced actual-getter encoding vectors. Complete workflow examples and latest graph activation remain. The deployment rehearsal records `productsActivated=false`; it is not a full product launch. |
 | Candidate and testnet | Immutable supported RC1 and its Sepolia evidence are complete. | Expanded full-v1 implementation, complete Safe call inventory, required fuzz/stateful campaigns, all 37 genesis roles, gas conformance, full CI, new source freeze and matching testnet evidence remain. |
 
 ## Current integration batch
 
-- Frozen current graph: `a65f7f3e`. Native compilation completed in 143 minutes.
-  A Python projection fix permits cached execution: 18 of the selected 21 cases
-  pass, including all four new actual Artist commerce/snapshot cases. Three
-  older cases fail because their setup constructs the graph twice. The successor
-  runner then stopped on an overly broad artifact-tree guard: independent review
-  confirms all native exports and compiled projections are unchanged, with only
-  five expected render/source-record outputs added. The isolated cold case passes
-  independently. A source-reviewed single-construction/fresh-clock test repair
-  is compiling one changed file from the retained native cache; its seven-case
-  result remains pending, so the aggregate batch is not accepted.
-- Integrated after that freeze: prepared custody `603e885b`, accelerated
-  estate `465aef77`, disabled royalties `700f7712`, default snapshots `93b489c9`,
-  and closed-estate recovery `2e10aef8`. Their focused acceptance is retained;
-  they need a subsequent combined checkpoint.
-- Client bindings `e409c134` preserve the RC1 export and support explicit current
-  compiler catalogs. New signing domains and complete workflow migration remain.
-- Current auction signing `db3fca94` keeps RC1 schemas separate. Its native
-  getter vectors use a linked runtime fixture and establish encoding only.
-- Artist standing/living-history implementation retains all 16 prior cases;
-  four new test-oracle failures are being corrected in a cached 22-case run.
-- Dynamic primary-template implementation reached native code generation but
-  exceeded the Resolver runtime limit (27,971 bytes versus 24,576). A fixed
-  linked worker extraction is compiling from that retained cache before its
-  98-case behavioral run; this feature has no runtime acceptance yet.
-  Root owns integration, client/operator work and candidate closure. Independent
-  review challenges source and test behavior before expensive compilation.
+- Original `a65f7f3e` production graph: the repaired native-settlement cohort
+  passes all seven cases. The reusable preparation fix then passes the full
+  selected 21-case cohort and the separate isolated cold regression on an
+  isolated copy of the retained native compiler outputs. Both runs skip
+  compilation and preserve sources, native artifacts, cache and graph inputs.
+  The earlier 18/3 failure remains historical evidence; latest production still
+  needs its own combined checkpoint.
+- Dynamic primary templates `217c996a`: all 98 focused cases pass, including one
+  256-input property. A fixed linked worker reduces Resolver runtime to 22,442
+  bytes; all 600 production products fit. Full previous ABI/storage compatibility
+  is retained. Complete current Artist/Core composition and gas remain open.
+- Standing-veto/living-estate history `4b52f2c0`: all 22 focused cases pass,
+  including all 16 retained cases. All 560 production products fit. The next
+  artist slice follows an executed class-3 rotation after estate succession.
+- Prepared custody, accelerated/closed estate recovery, disabled/default royalty
+  snapshots and these two newest increments need latest combined acceptance.
+- Current typed client and four signing domains remain integrated, with 59
+  client tests. Complete workflow examples and operator activation remain open.
+- Root owns latest integration, client/operator work, shared fixtures and
+  candidate closure. Two builders continue the next artist and token-specific
+  royalty workflows; the independent reviewer challenges source and behavior.
 
 ## Issues that affect delivery
 

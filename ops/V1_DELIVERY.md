@@ -34,6 +34,25 @@ the denominator. The integrator owns this reporting correction and delivery.
 
 ## Latest integration: 14 September
 
+Dynamic poster/collaborator primary templates are integrated as `217c996a` after
+all 98 focused cases and one 256-input property passed. Resolver runtime is
+22,442 bytes after its fixed linked worker extraction; all 600 production
+products fit and prior ABI/storage remains compatible. Complementary actual
+Artist and actual Core cohorts do not establish a joined dynamic transaction.
+Standing-veto and living-estate ancestry are integrated as `4b52f2c0` after all
+22 actual Artist/Safe/Archive cases passed, with all 560 production products
+within size limits. Later rotation/history profiles remain active work.
+
+The native-settlement fixture repair `7fa610bd` passes its seven scenarios.
+A subsequent isolated portable-preparation verification passes all 21 selected
+original-graph cases and the separate isolated cold regression without compiling.
+This closes that original `a65f7f3e` integration cohort; later production increments
+still require a fresh combined checkpoint. New tooling selects the actual cached
+creation owner and authenticates each test host in its own context, allowing
+incremental test changes to reuse existing native outputs safely.
+
+The paragraphs below preserve earlier implementation checkpoints.
+
 The current reporting entry point above supersedes the historical checkpoints
 below. Current native auction, bid and custody signing is integrated as
 `db3fca94`: 59 client tests pass and four actual native-getter encoding vectors

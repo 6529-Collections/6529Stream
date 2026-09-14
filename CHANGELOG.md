@@ -5,6 +5,13 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Support dynamic poster/collaborator primary templates and standing-veto/living-estate
+  recovery history, preserving original Artist consent, guardian and payment rules.
+- Reuse the actual cached creation-library context when preparing current graph
+  tests, independently binding changed test hosts and rejecting stale imports.
+- Construct each native settlement scenario once, including required Artist consent
+  and Safe failure/repair/retry cases.
+
 - Add explicit current native auction, bid and custody signing helpers with
   native-getter parity vectors, preserving retained RC1 domains and Safe calls.
 

@@ -18,13 +18,23 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Prepared custody `603e885b`, accelerated estate `465aef77`, disabled royalties `700f7712`, default snapshots `93b489c9`, closed-estate recovery `2e10aef8`, and compiler-selected clients `e409c134` are integrated. Frozen `a65f7f3e` combined execution has 18 passes/three setup failures; the four new Artist commerce/snapshot cases pass, while batch acceptance and isolated cold validation remain open; immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
+| Source checkpoint | Dynamic templates `217c996a`, standing/living-estate history `4b52f2c0`, seven-scenario repair `7fa610bd`, portable graph preparation `c5428e68`. Original `a65f7f3e` graph plus repair passes the full 21-case cohort and separate isolated cold case. Latest production composition remains open; immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
 | Last updated | `2026-09-14 UTC` |
 
 ## Active work
+
+Root owns the latest combined graph and governed dynamic-template admission,
+client/operator completion, shared fixtures, CI and the new candidate. Artist
+work continues with recovery after an executed post-estate class-3 rotation.
+Revenue work continues with versioned token-specific custody royalty approval.
+Both builders preserve prior accepted cases and use the independent reviewer.
+The new dynamic and estate-history increments respectively pass all 98 and 22
+focused cases; their actual Artist/Core composition remains a separate gate.
+
+The following paragraphs retain earlier implementation checkpoints.
 
 The latest accepted increments add actual Artist consent for positive-share
 primary templates (`019b9f23`) and the consent-qualified auction consumer
