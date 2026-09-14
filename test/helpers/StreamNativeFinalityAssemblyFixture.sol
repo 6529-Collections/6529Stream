@@ -3299,7 +3299,7 @@ abstract contract StreamNativeFinalityAssemblyFixture is OfficialSafeFixture {
         d.finalityRegistryCodeHash = keccak256(assemblyRuntimes[uint256(Late.REGISTRY)]);
         d.routerAdapters = assemblyRouterAdapters;
         d.readGas = 500000;
-        d.componentGas = 8000000;
+        d.componentGas = 12000000;
         d.entropyGas = 8000000;
         assemblyDiscovery = StreamFinalityCurrentDiscovery(
             _deployAssemblyLate(
