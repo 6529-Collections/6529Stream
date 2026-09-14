@@ -37,10 +37,10 @@ pending checks. The immutable RC1 remains the released baseline.
 
 | Owner | Implementation batch |
 | --- | --- |
-| Integrator | Native immediate-sale fee/reveal/refunds; then ERC-20 counterpart, operator/client and genesis completion |
-| Artist builder | PLATFORM_WORKS declaration, claims, contest and correction; guardian supersession and repeated recovery integrated |
-| Revenue builder | Inherited/global primary freeze modes and descendant accounting; default TEMPLATE and exact mutation consent integrated |
-| Fourth engineer | Actual-current complete-media capture; recorded PREMIS, IIIF and LIDO integrated; bounded immediate-reveal review complete |
+| Integrator | Immediate native sales/client integrated; operator/genesis and combined acceptance |
+| Artist builder | Closed repeated-recovery histories; then Artist attestation/claim reads for complete attribution display |
+| Revenue builder | Exact ERC-20 reveal-fee patch proposal after automatic review rejected the approved write; inherited/global freezes remain separately blocked |
+| Fourth engineer | Actual-current complete-media capture; then nested attribution projection and renderer integration |
 
 Comprehensive current-stack/Safe integration, fuzz and stateful campaigns, gas
 conformance, complete genesis inventory, CI and matching new testnet evidence
@@ -49,10 +49,10 @@ the background and validate only their recorded source. No new date or
 percentage is inferred from these assignments.
 
 Root owns the combined graph, shared operator/client work and the new candidate.
-The combined feature source passes an 877-source ABI/type check.
+The combined feature source passes an 886-source ABI/type check.
 The [current report](V1_CURRENT_STATUS.md#source-batch-integrated-before-comprehensive-testing)
 records the newest recovery, TEMPLATE, recorded-format and reveal changes. Client tests
-pass 72 cases and the four-format museum package passes 11; recorded-account
+pass 78 cases and the four-format museum package passes 11; recorded-account
 packaging and replay pass 30. The earlier estate
 rotation snapshot passes 28 actual Artist/Safe/Archive cases with typed
 Core/governance. The earlier custody snapshot stopped after native compilation

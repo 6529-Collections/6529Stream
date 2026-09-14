@@ -5,6 +5,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add platform-work declarations, permissionless claims, governed contests and
+  corrective Artist binding, with collection-subject archival evidence and retained
+  scoped finality history. Runtime and full display/commerce integration remain pending.
+
 - Add current native fixed-price/price-program signing and Safe call preparation,
   live reveal-policy reads, digest checks and native excess-refund calls.
 

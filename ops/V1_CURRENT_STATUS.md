@@ -10,12 +10,12 @@ The supported RC1 is already deployed on Sepolia from
 complete. No new funding is required. Automatic approval review has blocked
 local inherited/global primary-freeze implementation pending a more specific
 owner approval. The separate ERC-20 payable reveal-fee implementation is also
-awaiting explicit approval after automatic review rejected it; the remaining
-work continues.
+blocked by automatic review even after the owner explicitly approved that local
+implementation. The exact patch is being prepared for review; other work continues.
 
 | Workflow | Demonstrated or integrated | Next acceptance / remaining implementation |
 | --- | --- | --- |
-| Native auctions, acquisition and payment | Governed commerce activation, deferred minting, curated works, collection templates and custody sales have independently accepted focused workflows. Prepared custody now creates the royalty snapshot during original acquisition and later transfers the same NFT (`603e885b`). | The frozen `a65f7f3e` production graph plus the accepted scenario repair (`7fa610bd`) now passes all 21 selected cases together and the separate isolated cold-call case. Cached execution uses each actual compiler owner without recompilation. This excludes later integrated production changes. Complete latest operator activation and transaction-capacity acceptance remain. |
+| Native auctions, acquisition and payment | Governed commerce activation, deferred minting, curated works, collection templates and custody sales have independently accepted focused workflows. Prepared custody now creates the royalty snapshot during original acquisition and later transfers the same NFT (`603e885b`). | The newer frozen `80df18c3` graph plus its recorded governed-template admission overlay passes all 22 selected current-stack cases and the separate isolated cold-call case. This excludes later integrated production changes. Complete latest operator activation and transaction-capacity acceptance remain. |
 | Artist-approved royalty terms | Positive collection snapshots and mode-bound Artist approval are integrated. Canonical configured-zero snapshots now retain immutable zero token royalties and suppress future fallback (`700f7712`), with independently accepted complementary Artist and Core cohorts. | Default-source snapshots are integrated (`93b489c9`), with independently reviewed complementary Artist and Core cases covering collection precedence, disabled/frozen defaults and collection-specific consent. Dynamic poster/collaborator primary templates are integrated (`217c996a`), with all 98 focused cases and one 256-input property passing. Actual Artist and actual Core cohorts remain complementary; joined dynamic transactions, remaining rights profiles and operator admission remain required. |
 | Artist succession and recovery | Ordinary and accelerated first-estate continuation have independently accepted actual Artist/Safe/Archive cases. Accelerated continuation retains guardian veto, capability restrictions and atomic retry (`465aef77`). | Closed/dismissed first-estate continuation is integrated (`2e10aef8`) with 16 independently reviewed actual Artist/Safe/Archive cases and typed Core/governance boundaries. Standing-veto and living-estate ancestry are integrated (`4b52f2c0`), with all 22 actual Artist/Safe/Archive cases passing. Later executed rotations, remaining history/dormancy branches, actual delayed-governance composition and capacity still require acceptance. All 57 historical operations plus adopted operation 58 remain in scope. |
 | Preservation, museum records and finality | An earlier graph passes one complete preservation/finality ceremony; the supported collection bundle and museum export increments have separate evidence. | Remaining scope variants, recovery/cutover, reconstruction, museum conformance and latest-system composition remain. One collection ceremony does not establish every finality or genesis profile. |
@@ -86,12 +86,19 @@ Safe payment/refund calls and quote/digest reads. All 78 client tests pass;
 compiled ABI and literal Solidity preimages anchor the new encoding cases.
 Live digest execution and the new contract runtime remain separate acceptance.
 
-Artist PLATFORM_WORKS declaration/claims/correction is in independent review.
+Artist PLATFORM_WORKS declaration/claims/correction is integrated (`be95e191`,
+`0c2d7d65`) after independent review. It adds exact collection-subject archival
+proofs and preserves declaration-versus-sanction finality history. The joined
+886-source ABI/type check passes; runtime, paid platform commerce and full
+attribution display remain pending. The next Artist and metadata work completes
+the live attribution profile and the supporting canonical reads.
+
 Further recovery histories and the actual-current complete-media museum capture
-continue in parallel. Inherited/global primary freezes and the separate ERC-20
-reveal-fee implementation await the specific approvals requested after automatic
-review rejected those source changes. ADR 0045 records the selected denomination
-and refund design without claiming that implementation has shipped.
+continue in parallel. Inherited/global primary freezes remain blocked pending
+the specific approval requested. Automatic review rejected the ERC-20 source
+write again despite explicit owner approval; its exact patch is being prepared
+for review. ADR 0045 records the selected denomination and refund design without
+claiming that implementation has shipped.
 Root owns immediate-sale entropy, operator/client and genesis completion,
 followed by consolidated current-stack/Safe acceptance.
 
@@ -104,10 +111,11 @@ followed by consolidated current-stack/Safe acceptance.
   compilation and preserve sources, native artifacts, cache and graph inputs.
   The earlier 18/3 failure remains historical evidence; latest production still
   needs its own combined checkpoint.
-  That frozen checkpoint is compiling 105 changed/dependent files from retained
-  caches: dynamic templates, standing/living-estate history and governed-template
-  admission, followed by 22 selected cases and the isolated cold regression.
-  It excludes the later estate-rotation and token-PROFILE custody source batches.
+  The newer frozen `80df18c3` graph plus its recorded governed-template admission
+  overlay has now compiled and passes all 22 selected cases and the isolated cold
+  regression. A result-reader correction handled an omitted empty compiler map;
+  compiled artifacts were preserved and no second build ran. This excludes the
+  later estate-rotation, custody, native reveal and PLATFORM_WORKS changes.
 - Dynamic primary templates `217c996a`: all 98 focused cases pass, including one
   256-input property. A fixed linked worker reduces Resolver runtime to 22,442
   bytes; all 600 production products fit. Full previous ABI/storage compatibility

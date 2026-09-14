@@ -84,10 +84,9 @@ actual contracts; synthetic observer statements do not prove a network upload.
 
 Only ABI/type checking has been run for this batch. Runtime, complete linked
 product sizes, isolated transaction gas, paid platform commerce and the full
-current graph remain consolidated validation obligations. No independent C
-source review was performed; C is implementing the recorded-media batch. B completed
-a bounded source review; its event schema correction is included. This is
-source review, not runtime or deployment-size acceptance.
+current graph remain consolidated validation obligations. Independent source
+review is complete and its event-schema correction is included; runtime and
+deployment-size acceptance remain pending.
 
 The pending focused command uses the existing aggregate unit fixture:
 

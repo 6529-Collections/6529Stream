@@ -20,6 +20,8 @@ their own scope and must not be read as a list of installed features.
 | Verify every content leaf against preserved manifest bytes | [Content leaf manifests](integrations/content-leaf-manifests.md) |
 | Inventory native artwork dependencies and prove their archival coverage | [Render-critical inventory and archive bundles](guides/preservation-inventory.md) |
 | Validate retained Linked Art documents offline | [Museum tooling](../tools/museum/README.md), [validation boundary](museum-linked-art-validation.md) |
+| Declare platform works, file attribution claims and inspect corrective binding | [Platform works](guides/artist-platform-works.md) |
+| Fund native-sale reveals and claim unused ETH | [Immediate sale payments](native-immediate-reveal.md) |
 | Run a second artist through sales and auctions | [Product scenarios](integrations/product-demo.md) |
 | Complete a collection and retain its artwork | [Collector package](integrations/collector-package.md) |
 | Choose a command or compiler profile | [Tooling](tooling.md) |
