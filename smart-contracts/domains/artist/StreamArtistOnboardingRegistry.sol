@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistPlatformWorks.sol";
 import { StreamArtistExtensionAdmission } from "./StreamArtistExtensionAdmission.sol";
 import {
     IStreamArtistRecoveryActionOwner,
@@ -302,6 +303,7 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistEconomicsAuthority).interfaceId
             || id == type(IStreamArtistTemplateEconomicsAuthority).interfaceId
             || id == type(IStreamArtistTemplateMutationAuthority).interfaceId
+            || id == type(IStreamArtistPlatformWorks).interfaceId
             || id == type(IStreamArtistDelegation).interfaceId
             || id == type(IStreamArtistBindingLifecycle).interfaceId
             || id == type(IStreamArtistBeneficiaryFacts).interfaceId
@@ -1154,6 +1156,77 @@ contract StreamArtistOnboardingRegistry is
         returns (bytes32)
     {
         _forwardRegistryWriter();
+    }
+
+    function declarePlatformWorks(uint256 id, bytes32 statement) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function filePlatformWorksClaim(
+        uint256 id,
+        bytes32 evidence,
+        bytes32 reason,
+        string calldata uri
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function setPlatformWorksContest(
+        uint256 id,
+        uint8 state,
+        bytes32 claim_,
+        bytes32 evidence,
+        bytes32 reason
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function approvePlatformWorksCorrection(
+        uint256 id,
+        bytes32 claim_,
+        bytes32 evidence,
+        bytes32 reason
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function platformWorksState(uint256 id) external view returns (PW.State memory) {
+        _forwardRegistryRead();
+    }
+
+    function platformWorksDeclaration(uint256 id) external view returns (bool, bytes32, uint64) {
+        _forwardRegistryRead();
+    }
+
+    function platformWorksContest(uint256 id) external view returns (uint8, bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function platformWorksClaims(uint256 id) external view returns (uint256, bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function platformWorksCorrection(uint256 id) external view returns (uint64, bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function platformWorksClaimRecord(bytes32 hash) external view returns (PW.Claim memory) {
+        _forwardRegistryRead();
+    }
+
+    function platformWorksContestRecord(bytes32 hash) external view returns (PW.Contest memory) {
+        _forwardRegistryRead();
+    }
+
+    function platformWorksContext(
+        uint256 id,
+        uint8 state,
+        bytes32 claim_,
+        bytes32 evidence,
+        bytes32 reason,
+        bool correction
+    ) external view returns (PW.Context memory) {
+        _forwardRegistryRead();
     }
 
     function recordProspectiveTemplateFreezeConsent(

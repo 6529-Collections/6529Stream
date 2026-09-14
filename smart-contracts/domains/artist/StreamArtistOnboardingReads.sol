@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistPlatformReads.sol";
 import "./StreamArtistAttributionPolicy.sol";
 import "./StreamArtistHashes.sol";
 import "./StreamArtistAuthorityPolicy.sol";
@@ -142,6 +143,8 @@ contract StreamArtistOnboardingReads {
 
     function consentMode(uint256 collectionId) external view returns (uint8) {
         T.Binding memory b = IStreamArtistBindingOwner(_suite.owners[0]).binding(collectionId);
+        PW.Admission memory platform = StreamArtistPlatformReads.admission(_suite, collectionId);
+        if (platform.declarationHash != 0 && !platform.corrected) return 3;
         return b.accepted ? b.consentMode : 0;
     }
 
@@ -185,6 +188,11 @@ contract StreamArtistOnboardingReads {
         view
         returns (bool, bytes32)
     {
+        PW.Admission memory platform = StreamArtistPlatformReads.admission(_suite, collectionId);
+        if (platform.declarationHash != 0 && !platform.corrected) {
+            StreamArtistPlatformReads.mintAllowed(platform, collectionId);
+            return (phaseId != 0 && policyHash != 0, platform.declarationHash);
+        }
         bytes32 record = IStreamArtistConsentOwner(_suite.owners[6])
             .policyRecord(collectionId, phaseId, policyHash);
         return (record != bytes32(0), record);
@@ -450,6 +458,12 @@ contract StreamArtistOnboardingReads {
     {
         if (block.chainid != _chainId) revert T.InvalidBinding();
         bool registryFrozen = _requireSelected(keccak256("ARTIST_REGISTRY"), _suite.registry);
+        PW.Admission memory platform = StreamArtistPlatformReads.admission(_suite, collectionId);
+        if (platform.declarationHash != 0 && !platform.corrected) {
+            StreamArtistPlatformReads.mintAllowed(platform, collectionId);
+            if (phaseId == 0 || policyHash == 0) revert PW.InvalidPlatformWorks(collectionId);
+            return;
+        }
         T.Binding memory b = acceptedBinding(collectionId);
         if (b.registryImmutabilityElection == 1 && !registryFrozen) {
             revert T.MissingMintPrerequisite(keccak256("registry-freeze"));

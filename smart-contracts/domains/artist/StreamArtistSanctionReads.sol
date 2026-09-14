@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistPlatformReads.sol";
 import "./StreamArtistAttributionPolicy.sol";
 
 import "../../interfaces/stream/artist/IStreamArtistSanction.sol";
@@ -65,6 +66,24 @@ library StreamArtistSanctionReads {
         view
         returns (StreamFinalityComponentState memory result)
     {
+        PW.State memory p = StreamArtistPlatformReads.state(suite, scope.collectionId);
+        bool recorded =
+            p.declaration.recordHash != 0 && StreamArtistPlatformReads.finalized(suite, scope);
+        if (p.declaration.recordHash != 0 && (!p.correction.accepted || recorded)) {
+            (, bytes32 manifest) = IStreamModule(suite.registry).streamModuleManifest();
+            return StreamFinalityComponentState(
+                recorded || (p.contestState != 1 && p.contestState != 3),
+                keccak256("PLATFORM_WORKS_DECLARATION"),
+                suite.registry,
+                scope.scopeType == StreamFinalityScopeType.COLLECTION
+                    ? type(IStreamArtworkFinalityComponent).interfaceId
+                    : type(IStreamArtworkScopedFinalityComponent).interfaceId,
+                suite.registry.codehash,
+                IStreamModule(suite.registry).streamModuleVersion(),
+                manifest,
+                p.declaration.recordHash
+            );
+        }
         S.Record memory r = currentRecord(suite, scope);
         (, bytes32 manifestHash) = IStreamModule(suite.registry).streamModuleManifest();
         result = StreamFinalityComponentState(
@@ -87,6 +106,15 @@ library StreamArtistSanctionReads {
         returns (bytes32)
     {
         T.Binding memory b = IStreamArtistBindingOwner(suite.owners[0]).binding(collectionId);
+        PW.State memory p = StreamArtistPlatformReads.state(suite, collectionId);
+        if (
+            p.declaration.recordHash != 0
+                && (!p.correction.accepted
+                    || StreamArtistPlatformReads.finalized(
+                        suite,
+                        StreamFinalityScope(StreamFinalityScopeType.COLLECTION, collectionId, 0, 0)
+                    ))
+        ) return keccak256("PLATFORM_WORKS_DECLARATION");
         if (b.artistId == 0) revert T.UnsupportedProfile();
         return keccak256("ARTIST_SANCTION");
     }

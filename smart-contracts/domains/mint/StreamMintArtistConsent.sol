@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistPlatformWorks.sol";
 
 import "../../interfaces/stream/artist/IStreamArtistMintConsent.sol";
 import "../../interfaces/stream/core/IStreamCorePointers.sol";
@@ -48,9 +49,23 @@ library StreamMintArtistConsent {
             ),
             (uint8)
         );
-        // This vertical profile implements signed policy only. Missing attribution, delegated
-        // and platform-work modes remain closed until their own records are implemented.
-        if (mode != 1) revert UnsupportedArtistConsentMode(collectionId, mode);
+        // Mode3 supplies the immutable declaration as evidence; it does not fabricate an Artist signature.
+        if (mode != 1 && mode != 3) revert UnsupportedArtistConsentMode(collectionId, mode);
+        if (
+            mode == 3
+                && !abi.decode(
+                    _read(
+                        authority,
+                        abi.encodeCall(
+                            IERC165.supportsInterface,
+                            (type(IStreamArtistPlatformWorks).interfaceId)
+                        ),
+                        32,
+                        cap
+                    ),
+                    (bool)
+                )
+        ) revert UnsupportedArtistConsentMode(collectionId, mode);
         bool consented;
         (consented, evidence) = abi.decode(
             _read(
@@ -65,6 +80,22 @@ library StreamMintArtistConsent {
         );
         if (!consented || evidence == bytes32(0)) {
             revert ArtistPolicyNotConsented(collectionId, phaseId, policyHash);
+        }
+        if (mode == 3) {
+            (bool declared, bytes32 declaration, uint64 declaredAt) = abi.decode(
+                _read(
+                    authority,
+                    abi.encodeCall(
+                        IStreamArtistPlatformWorks.platformWorksDeclaration, (collectionId)
+                    ),
+                    96,
+                    cap
+                ),
+                (bool, bytes32, uint64)
+            );
+            if (!declared || declaration != evidence || declaredAt > block.timestamp) {
+                revert ArtistPolicyNotConsented(collectionId, phaseId, policyHash);
+            }
         }
         _read(
             authority,

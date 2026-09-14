@@ -129,6 +129,7 @@ contract StreamMintManager is
     StreamPreparedNativeContentExecution.State private _preparedContent;
     StreamPreparedNativeRightsExecution.State private _preparedRights;
     mapping(uint256 => mapping(bytes32 => IStreamMintRoyaltyPolicy.Policy)) private _phaseRoyalties;
+    mapping(uint256 => bool) public hasRegisteredPhasePolicy;
 
     constructor(IStreamCore core_, IStreamMintLedger mintLedger_, IERC165 moduleRegistry_)
         StreamGasParameterHost(StreamMintArtistConsent.governance(
@@ -259,6 +260,8 @@ contract StreamMintManager is
             config.configHash,
             false
         );
+        // Atomic with policy admission: a reverted registration leaves no history.
+        hasRegisteredPhasePolicy[collectionId] = true;
         return StreamMintPhaseState.configure(
             _phases[collectionId][phaseId],
             _phaseGateConfigs[collectionId],

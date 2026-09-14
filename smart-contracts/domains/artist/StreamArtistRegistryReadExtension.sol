@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistPlatformWorks.sol";
 import "./StreamArtistAttributionPolicy.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 
@@ -139,6 +140,69 @@ contract StreamArtistRegistryReadExtension {
             f.status,
             f.effectiveCapabilities
         );
+    }
+
+    function platformWorksState(uint256 id) external view onlyHost returns (PW.State memory) {
+        return _platformOwner().platformWorksState(id);
+    }
+
+    function platformWorksDeclaration(uint256 id)
+        external
+        view
+        onlyHost
+        returns (bool, bytes32, uint64)
+    {
+        PW.State memory p = _platformOwner().platformWorksState(id);
+        return (p.declaration.recordHash != 0, p.declaration.recordHash, p.declaration.declaredAt);
+    }
+
+    function platformWorksContest(uint256 id) external view onlyHost returns (uint8, bytes32) {
+        PW.State memory p = _platformOwner().platformWorksState(id);
+        return (p.contestState, p.contestClaim);
+    }
+
+    function platformWorksClaims(uint256 id) external view onlyHost returns (uint256, bytes32) {
+        PW.State memory p = _platformOwner().platformWorksState(id);
+        return (p.claimCount, p.latestClaim);
+    }
+
+    function platformWorksCorrection(uint256 id) external view onlyHost returns (uint64, bytes32) {
+        PW.State memory p = _platformOwner().platformWorksState(id);
+        return (p.correction.correctiveGeneration, p.correction.approvalActionId);
+    }
+
+    function platformWorksClaimRecord(bytes32 hash)
+        external
+        view
+        onlyHost
+        returns (PW.Claim memory)
+    {
+        return _platformOwner().platformWorksClaimRecord(hash);
+    }
+
+    function platformWorksContestRecord(bytes32 hash)
+        external
+        view
+        onlyHost
+        returns (PW.Contest memory)
+    {
+        return _platformOwner().platformWorksContestRecord(hash);
+    }
+
+    function platformWorksContext(
+        uint256 id,
+        uint8 state,
+        bytes32 claim_,
+        bytes32 evidence,
+        bytes32 reason,
+        bool correction
+    ) external view onlyHost returns (PW.Context memory) {
+        return IStreamArtistPlatformCoordinator(operationCoordinator)
+            .platformWorksContext(id, state, claim_, evidence, reason, correction);
+    }
+
+    function _platformOwner() private view returns (IStreamArtistPlatformOwner) {
+        return IStreamArtistPlatformOwner(_contentSuite().owners[4]);
     }
 
     function _contentSuite() private view returns (T.SuiteConfiguration memory) {

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistPlatformOperations.sol";
 import {
     IStreamArtistRecoveryActionOwner,
     IStreamArtistRecoveryActionCoordinator
@@ -230,6 +231,64 @@ contract StreamArtistOnboardingCoordinator is
             if (_targets[i].codehash != _runtimeHashes[i]) revert T.ComponentChanged(_targets[i]);
         }
         _entered = 1;
+    }
+
+    function coordinateDeclarePlatformWorks(address actor, uint256 id, bytes32 statement)
+        external
+        operation
+        returns (bytes32)
+    {
+        return StreamArtistPlatformOperations.declare(_economicContext(), actor, id, statement);
+    }
+
+    function coordinateFilePlatformWorksClaim(
+        address actor,
+        uint256 id,
+        bytes32 evidence,
+        bytes32 reason,
+        string calldata uri
+    ) external operation returns (bytes32) {
+        return StreamArtistPlatformOperations.claim(
+            _economicContext(), actor, id, evidence, reason, uri
+        );
+    }
+
+    function coordinateSetPlatformWorksContest(
+        address actor,
+        uint256 id,
+        uint8 state,
+        bytes32 claim_,
+        bytes32 evidence,
+        bytes32 reason
+    ) external operation returns (bytes32) {
+        return StreamArtistPlatformOperations.resolve(
+            _economicContext(), actor, id, state, claim_, evidence, reason, false
+        );
+    }
+
+    function coordinateApprovePlatformWorksCorrection(
+        address actor,
+        uint256 id,
+        bytes32 claim_,
+        bytes32 evidence,
+        bytes32 reason
+    ) external operation returns (bytes32) {
+        return StreamArtistPlatformOperations.resolve(
+            _economicContext(), actor, id, 3, claim_, evidence, reason, true
+        );
+    }
+
+    function platformWorksContext(
+        uint256 id,
+        uint8 state,
+        bytes32 claim_,
+        bytes32 evidence,
+        bytes32 reason,
+        bool correction
+    ) external view returns (PW.Context memory) {
+        return StreamArtistPlatformOperations.context(
+            _economicContext(), id, state, claim_, evidence, reason, correction
+        );
     }
 
     function suiteConfiguration() external view returns (T.SuiteConfiguration memory) {

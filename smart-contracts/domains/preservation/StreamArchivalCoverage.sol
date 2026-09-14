@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/preservation/IStreamCollectionArchivalCoverage.sol";
+import "../../interfaces/stream/core/IStreamCoreCollectionView.sol";
 
 import "../../interfaces/stream/preservation/IStreamArchivalCoverage.sol";
 import "../../interfaces/stream/preservation/IStreamArchivalChunkCoverage.sol";
@@ -43,6 +45,9 @@ contract StreamArchivalCoverage is
     bytes32 private immutable _endowedConfiguration;
     bytes32 private immutable _endowedNetwork;
     mapping(bytes32 => A.Envelope) private _envelopes;
+    event CollectionArchivalEnvelopeRecorded(
+        uint256 indexed collectionId, bytes32 indexed envelopeHash, bytes32 indexed evidenceHash
+    );
     mapping(bytes32 => bytes) private _payloads;
     mapping(bytes32 => A.Family) private _families;
     mapping(bytes32 => uint8) private _familyStatus;
@@ -62,6 +67,8 @@ contract StreamArchivalCoverage is
     }
     mapping(bytes32 => ChunkPointer) private _chunkPointers;
     uint64 public override coverageValidationEpoch = 1;
+    mapping(bytes32 => uint256) public collectionEnvelopeSubject;
+    mapping(uint256 => mapping(bytes32 => bytes32)) private _collectionEvidence;
     bytes32 private constant _CHUNK_SCHEMA = keccak256("6529STREAM_FINALITY_ARTIFACT_CHUNK_V1");
 
     constructor(
@@ -155,7 +162,88 @@ contract StreamArchivalCoverage is
     function supportsInterface(bytes4 id) external pure override returns (bool) {
         return id == 0x01ffc9a7 || id == type(IStreamArchivalCoverage).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId
-            || id == type(IStreamArchivalChunkCoverage).interfaceId;
+            || id == type(IStreamArchivalChunkCoverage).interfaceId
+            || id == type(IStreamCollectionArchivalCoverage).interfaceId;
+    }
+
+    function recordCollectionEnvelope(
+        uint256 collectionId,
+        A.Envelope calldata e,
+        bytes calldata payload
+    ) external returns (bytes32 hash) {
+        if (
+            collectionId == 0 || !IStreamCoreCollectionView(core).collectionExists(collectionId)
+                || e.artistId != 0
+                || e.schemaId != keccak256("6529STREAM_PLATFORM_WORKS_EVIDENCE_V1")
+                || e.canonicalizationId != keccak256("BINARY_EXACT_V1") || e.digestAlgorithm != 2
+                || e.visibility != 1 || e.custodyPolicyHash != 0 || payload.length == 0
+                || payload.length > 8192 || e.byteSize != payload.length
+                || e.evidenceHash != keccak256(payload) || e.payloadDigest != sha256(payload)
+        ) {
+            revert A.InvalidArchivalEnvelope();
+        }
+        hash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_COLLECTION_ARCHIVAL_ENVELOPE_V1"),
+                block.chainid,
+                address(this),
+                core,
+                collectionId,
+                e
+            )
+        );
+        if (collectionEnvelopeSubject[hash] != 0) revert A.ArchivalRecordExists(hash);
+        collectionEnvelopeSubject[hash] = collectionId;
+        _envelopes[hash] = e;
+        _payloads[hash] = payload;
+        emit ArchivalEnvelopeRecorded(1, hash, e);
+        emit CollectionArchivalEnvelopeRecorded(collectionId, hash, e.evidenceHash);
+    }
+
+    function selectCollectionCoverage(bytes32 hash) external {
+        A.CoverageFacts memory f = _coverage[hash];
+        uint256 collectionId = collectionEnvelopeSubject[f.envelopeHash];
+        _requireCollectionCoverage(hash, collectionId, f.evidenceHash);
+        _collectionEvidence[collectionId][f.evidenceHash] = hash;
+    }
+
+    function requireCollectionCoverage(bytes32 hash, uint256 collectionId, bytes32 evidenceHash)
+        external
+        view
+        returns (A.CoverageFacts memory)
+    {
+        return _requireCollectionCoverage(hash, collectionId, evidenceHash);
+    }
+
+    function requireCollectionEvidence(uint256 collectionId, bytes32 evidenceHash)
+        external
+        view
+        returns (A.CoverageFacts memory)
+    {
+        return _requireCollectionCoverage(
+            _collectionEvidence[collectionId][evidenceHash], collectionId, evidenceHash
+        );
+    }
+
+    function _requireCollectionCoverage(bytes32 hash, uint256 collectionId, bytes32 evidenceHash)
+        private
+        view
+        returns (A.CoverageFacts memory saved)
+    {
+        _requireArtistBinding();
+        saved = _coverage[hash];
+        if (
+            collectionId == 0 || hash == 0 || saved.coverageRecordHash != hash
+                || saved.artistId != 0
+                || collectionEnvelopeSubject[saved.envelopeHash] != collectionId
+                || saved.evidenceHash != evidenceHash || evidenceHash == 0
+        ) revert A.InvalidArchivalCoverage();
+        A.CoverageFacts memory actual =
+            _coverageFacts(saved.firstReceiptRecordHash, saved.secondReceiptRecordHash);
+        actual.coverageRecordHash = hash;
+        if (keccak256(abi.encode(actual)) != keccak256(abi.encode(saved))) {
+            revert A.InvalidArchivalCoverage();
+        }
     }
 
     function recordEnvelope(A.Envelope calldata e, bytes calldata payload)
@@ -320,8 +408,9 @@ contract StreamArchivalCoverage is
         A.Family storage f = _families[t.familyRecordHash];
         if (e.schemaId == _CHUNK_SCHEMA) _chunkPayload(t.envelopeHash);
         if (
-            e.artistId == bytes32(0) || _familyStatus[t.familyRecordHash] != 1
-                || t.writer != f.storingAgent || t.observedAt == 0 || t.observedAt > block.timestamp
+            (e.artistId == bytes32(0) && collectionEnvelopeSubject[t.envelopeHash] == 0)
+                || _familyStatus[t.familyRecordHash] != 1 || t.writer != f.storingAgent
+                || t.observedAt == 0 || t.observedAt > block.timestamp
                 || t.deadline < block.timestamp || t.storageIdentifierHash != keccak256(identifier)
                 || t.proofProfileHash != f.verifierProfileHash
         ) {
@@ -478,6 +567,8 @@ contract StreamArchivalCoverage is
         if (_coverage[hash].coverageRecordHash != bytes32(0)) revert A.ArchivalRecordExists(hash);
         f.coverageRecordHash = hash;
         _coverage[hash] = f;
+        uint256 collectionId = collectionEnvelopeSubject[f.envelopeHash];
+        if (collectionId != 0) _collectionEvidence[collectionId][f.evidenceHash] = hash;
         emit ArchivalCoverageRecorded(1, hash, f.envelopeHash, f);
     }
 
@@ -494,7 +585,7 @@ contract StreamArchivalCoverage is
         _requireArtistBinding();
         saved = _coverage[hash];
         if (
-            saved.coverageRecordHash == bytes32(0) || saved.artistId != artistId
+            artistId == 0 || saved.coverageRecordHash == bytes32(0) || saved.artistId != artistId
                 || saved.evidenceHash != evidenceHash
         ) revert A.InvalidArchivalCoverage();
         A.CoverageFacts memory actual =

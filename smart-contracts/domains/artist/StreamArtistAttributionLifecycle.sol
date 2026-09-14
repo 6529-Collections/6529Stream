@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistPlatformState.sol";
 import "./StreamArtistAttributionPolicy.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityRevision.sol";
 
@@ -34,6 +35,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
     mapping(bytes32 => T.AttestationRecord) private _records;
     mapping(bytes32 => bytes) private _statements;
     mapping(bytes32 => IStreamArtistRecordPublicationOwner.Record) private _publications;
+    StreamArtistPlatformState.Store private _platform;
     /// @notice Additional context reconstructing a refusal's exact normative record from events.
     event ArtistBindingTerminationContext(
         uint16 schemaVersion,
@@ -130,6 +132,123 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         );
     }
 
+    function platformWorksAdmission(uint256 collectionId)
+        external
+        view
+        returns (PW.Admission memory)
+    {
+        PW.State storage p = _platform.collections[collectionId];
+        return PW.Admission(
+            p.declaration.recordHash,
+            p.contestState,
+            p.correction.correctiveGeneration,
+            p.correction.accepted
+        );
+    }
+
+    function platformWorksState(uint256 collectionId) external view returns (PW.State memory) {
+        return _platform.collections[collectionId];
+    }
+
+    function platformWorksClaimRecord(bytes32 hash) external view returns (PW.Claim memory) {
+        return _platform.claims[hash];
+    }
+
+    function platformWorksContestRecord(bytes32 hash) external view returns (PW.Contest memory) {
+        return _platform.contests[hash];
+    }
+
+    function declarePlatformWorks(
+        T.ActionContext calldata c,
+        uint256 collectionId,
+        bytes32 statementHash
+    ) external returns (bytes32 hash) {
+        _check(c, 8);
+        if (_attributions[collectionId].generation != 0 || _attributions[collectionId].state != 0) {
+            revert PW.InvalidPlatformWorks(collectionId);
+        }
+        hash = StreamArtistPlatformState.declare(
+            _platform, artistRegistry, core, c.actor, collectionId, statementHash
+        );
+        _platformCommit(c, collectionId, hash, bytes32(collectionId), hash);
+    }
+
+    function filePlatformWorksClaim(
+        T.ActionContext calldata c,
+        uint256 collectionId,
+        bytes32 evidenceHash,
+        bytes32 reasonHash,
+        string calldata reasonURI,
+        address proposedArtist
+    ) external returns (bytes32 hash) {
+        _check(c, 9);
+        hash = StreamArtistPlatformState.claim(
+            _platform,
+            artistRegistry,
+            core,
+            c.actor,
+            collectionId,
+            evidenceHash,
+            reasonHash,
+            reasonURI,
+            proposedArtist
+        );
+        _platformCommit(
+            c,
+            collectionId,
+            hash,
+            keccak256(abi.encode(collectionId, c.actor, evidenceHash, reasonHash)),
+            hash
+        );
+    }
+
+    function setPlatformWorksContest(
+        T.ActionContext calldata c,
+        uint256 collectionId,
+        uint8 state,
+        bytes32 claim_,
+        bytes32 evidence,
+        bytes32 reason,
+        bytes32 actionId,
+        address adjudicatedArtist
+    ) external returns (bytes32 hash) {
+        _check(c, 11);
+        hash = StreamArtistPlatformState.contest(
+            _platform, collectionId, state, claim_, evidence, reason, actionId, adjudicatedArtist
+        );
+        _platformCommit(
+            c, collectionId, hash, keccak256(abi.encode(collectionId, actionId)), bytes32(0)
+        );
+    }
+
+    function approvePlatformWorksCorrection(
+        T.ActionContext calldata c,
+        uint256 collectionId,
+        bytes32 claim_,
+        bytes32 evidence,
+        bytes32 reason,
+        bytes32 actionId
+    ) external returns (bytes32 hash) {
+        _check(c, 53);
+        hash = StreamArtistPlatformState.correct(
+            _platform, artistRegistry, core, collectionId, claim_, evidence, reason, actionId
+        );
+        _platformCommit(c, collectionId, hash, keccak256(abi.encode(collectionId, actionId)), hash);
+    }
+
+    function _platformCommit(
+        T.ActionContext calldata c,
+        uint256 id,
+        bytes32 hash,
+        bytes32 scope,
+        bytes32 primary
+    ) private {
+        bytes32 replay = _consume(
+            keccak256(abi.encode("PLATFORM_WORKS", c.operationId)), scope, hash
+        );
+        _commit(c, hash, keccak256(abi.encode(id, _platform.collections[id])), replay, primary);
+    }
+
     function attributionState(uint256 collectionId) external view returns (uint8, uint64) {
         Attribution storage a = _attributions[collectionId];
         return (a.state, a.generation);
@@ -172,6 +291,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             (prior.state != 0 && prior.state != 5) || b.generation != prior.generation + 1
                 || b.bindingHash == bytes32(0)
         ) revert T.InvalidAttribution(collectionId);
+        StreamArtistPlatformState.consumeBinding(_platform, collectionId, b);
         _attributions[collectionId] = Attribution(1, b.generation);
         _commit(
             c,
@@ -342,6 +462,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         if (a.state != 1 || a.generation != b.generation || record == bytes32(0)) {
             revert T.InvalidAttribution(collectionId);
         }
+        StreamArtistPlatformState.acceptBinding(_platform, collectionId, b.generation);
         a.state = 2;
         _commit(
             c,

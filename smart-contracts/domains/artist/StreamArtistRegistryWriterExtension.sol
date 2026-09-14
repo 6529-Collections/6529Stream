@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistPlatformWorks.sol";
 import {
     IStreamArtistRecoveryActionOwner,
     IStreamArtistRecoveryActionCoordinator
@@ -51,6 +52,46 @@ contract StreamArtistRegistryWriterExtension {
     modifier onlyHost() {
         if (address(this) != _host) revert ExtensionWrongHost(address(this));
         _;
+    }
+
+    function declarePlatformWorks(uint256 id, bytes32 statement)
+        external
+        onlyHost
+        returns (bytes32)
+    {
+        return IStreamArtistPlatformCoordinator(operationCoordinator)
+            .coordinateDeclarePlatformWorks(msg.sender, id, statement);
+    }
+
+    function filePlatformWorksClaim(
+        uint256 id,
+        bytes32 evidence,
+        bytes32 reason,
+        string calldata uri
+    ) external onlyHost returns (bytes32) {
+        return IStreamArtistPlatformCoordinator(operationCoordinator)
+            .coordinateFilePlatformWorksClaim(msg.sender, id, evidence, reason, uri);
+    }
+
+    function setPlatformWorksContest(
+        uint256 id,
+        uint8 state,
+        bytes32 claim_,
+        bytes32 evidence,
+        bytes32 reason
+    ) external onlyHost returns (bytes32) {
+        return IStreamArtistPlatformCoordinator(operationCoordinator)
+            .coordinateSetPlatformWorksContest(msg.sender, id, state, claim_, evidence, reason);
+    }
+
+    function approvePlatformWorksCorrection(
+        uint256 id,
+        bytes32 claim_,
+        bytes32 evidence,
+        bytes32 reason
+    ) external onlyHost returns (bytes32) {
+        return IStreamArtistPlatformCoordinator(operationCoordinator)
+            .coordinateApprovePlatformWorksCorrection(msg.sender, id, claim_, evidence, reason);
     }
 
     function recordUnavailabilityFinding(
