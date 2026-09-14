@@ -1563,3 +1563,25 @@ veto history, current binding, original capability intersection, governed delay,
 acceptance nonce, replay consumption and atomic Archive failure behavior remain
 mandatory. These are source requirements for the consolidated history batch;
 they do not themselves establish runtime or transaction-capacity acceptance.
+
+
+## Current historical and estate guardian adjudication
+
+The guardian supersession consumer now accepts the actual current operation33
+executed subject's canonical operation32 or operation40 vesting snapshot through
+the already admitted living/estate history profiles. The current prefix and
+successful owner revision remain the chronological authority. Earlier-prefix
+records still require exact APPEAL findings and current Root authority; later
+records require the cutoff's actual class/signer and retain ARBITER. Historical
+dismissal alone grants no disqualification authority. The current-cause profile
+does not substitute an older disputed transition or implement the separate
+still-provisional exception.
+
+Complete head election now evaluates each original association against its own
+actual admitted transition, preserving abandoned-cohort ineligibility. Current
+history/transition/runtime and no-prior-recovery checks retain the bounded
+election's invalidators. Original empty-list commitments, operation34/35 hashes,
+all57 historical operations plus adopted58, capabilities, complete retained
+membership veto, replay and Archive atomicity are unchanged. This source batch
+has focused typed-ABI validation only; combined native/link/size and end-to-end
+validation remain separate release requirements.

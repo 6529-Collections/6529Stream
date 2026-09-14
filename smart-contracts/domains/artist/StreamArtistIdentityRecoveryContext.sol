@@ -252,17 +252,48 @@ library StreamArtistIdentityRecoveryContext {
             p.vestedAuthorityClass != 3 || cause.facts.authorityClass != 3
                 || cause.facts.priorStatus != 3 || rotations.pending[p.artistId] != bytes32(0)
                 || cause.facts.pendingTransitionHash != bytes32(0)
-                || s.latest[p.artistId] != bytes32(0) || p.supersededRecordHashes.length != 0
+                || s.latest[p.artistId] != bytes32(0)
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
+        // Original history joins the actual op33 evidence. The unchanged caller request,
+        // including an Appeal document reference, is independently authenticated below.
+        Recovery.Request memory historical = p;
+        if (p.supersededRecordHashes.length != 0) {
+            historical = Recovery.Request(
+                p.artistId,
+                p.newAddress,
+                p.vestedAuthorityClass,
+                p.expectedCauseHash,
+                p.expectedResolutionHash,
+                contests.records[cause.facts.referenceHash].terms.evidenceHash,
+                p.reasonHash,
+                new bytes32[](0)
+            );
+        }
         bytes32 activation = estate.authorityActivation[p.artistId];
         bytes32 terminal = rotations.latestExecution[p.artistId];
         bool rotated = terminal != activation;
         bytes32 predecessor = rotated
             ? EstateRotation.afterRotation(
-                s, estate, rotations, resolutions, succession, contests, o.environment, cause, p
+                s,
+                estate,
+                rotations,
+                resolutions,
+                succession,
+                contests,
+                o.environment,
+                cause,
+                historical
             )
             : StreamArtistRecoveryEstatePredecessor.firstEstate(
-                s, estate, rotations, resolutions, succession, contests, o.environment, cause, p
+                s,
+                estate,
+                rotations,
+                resolutions,
+                succession,
+                contests,
+                o.environment,
+                cause,
+                historical
             );
         if (identity.activeIdentity[p.newAddress] != bytes32(0)) {
             revert T.AddressAlreadyRegistered(p.newAddress);
@@ -291,7 +322,20 @@ library StreamArtistIdentityRecoveryContext {
                 s.vestingHistory.snapshots[activation],
                 estate.transitions[activation].postWindowEndsAt
             );
-        if (guardian.terms.minContestSeconds > c.postContestSeconds) {
+        bytes32 supersessionContext;
+        if (p.supersededRecordHashes.length != 0) {
+            (supersessionContext, c.postContestSeconds) = GuardianSupersession.contextAndWindow(
+                s.guardianSupersession,
+                s.guardianHistory,
+                s.vestingHistory,
+                rotations,
+                o.environment,
+                cause,
+                p,
+                s.guardianRecordsSeen[p.artistId],
+                c.postContestSeconds
+            );
+        } else if (guardian.terms.minContestSeconds > c.postContestSeconds) {
             c.postContestSeconds = guardian.terms.minContestSeconds;
         }
         c.standingTailSeconds = StreamArtistRotationState.standingSeconds(rotations);
@@ -349,6 +393,9 @@ library StreamArtistIdentityRecoveryContext {
                 predecessor
             )
         );
+        if (p.supersededRecordHashes.length != 0) {
+            c.oldValueHash = keccak256(abi.encode(c.oldValueHash, supersessionContext));
+        }
         c.newValueHash = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_IDENTITY_RECOVERY_INTENT_V2"),

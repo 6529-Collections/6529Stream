@@ -844,3 +844,49 @@ with typed unit Core/governance/role-phase boundaries and aggregate CREATE
 semantics. Prior-recovery composition, supersession, a changed estate plan,
 full current-graph operation and transaction-capacity validation remain separate
 requirements; the batch does not remove their existing refusal or authority gates.
+
+
+## Historical and estate guardian supersession
+
+The current operation33 cause supplies the exact executed transition whose
+guardian vesting snapshot classifies the requested exclusions. A later ordinary
+rotation or an executed estate can supply this cutoff; a caller cannot substitute
+an older snapshot. The fixed Identity authenticates the current write-once
+vesting head, canonical commitment, exact saved guardian prefix, immediate
+admitted parent and original operation32 or operation40 record. Existing living
+and estate predecessor validation remains a separate requirement. This consumes
+trusted admitted history; it does not replay historical governance authorization.
+
+Records admitted after the cutoff revision and prefix must belong to its exact
+vested class and signer. They retain the ordinary ARBITER path. Any requested
+record in the earlier prefix requires the existing APPEAL path, with the current
+GovernanceRoot, exact hostile-party document and absolute operative-directive
+constraints. A dismissed earlier episode supplies neither a different cutoff nor
+appeal authority. This batch adjudicates only the current compromise cause; it
+does not resolve a caller-selected chain of earlier contested transitions or
+implement the separate still-provisional pre-vesting exception.
+
+The permissionless election scans the complete admitted history and resolves
+each original provisional association against its own actual transition. It can
+therefore restore a mature living or intermediate class3 record after a later
+rotation or estate. An abandoned cohort remains ineligible even after its former
+deadline. Every chunk and consumption retains the whole current guardian
+count/root/revision, current transition and owner-runtime basis, and the original
+no-prior-recovery gate. Before expiry, preparation is possible only for an
+already early-contested transition, whose associated records cannot mature;
+the recovery context independently authenticates the admitted closure.
+
+For estate APPEAL, predecessor validation reads the original operation33 evidence
+from the actual saved contest. The unchanged signed recovery request separately
+commits the new hostile-document evidence and is checked by the existing APPEAL
+consumer. This is not a mutation of the original contest or acceptance. Empty
+supersession keeps the original context hashes. Exact scheduled registration,
+complete retained-membership veto, permanent exclusion status, nonce/replay,
+capability preservation and atomic Archive rollback remain unchanged.
+
+`StreamArtistHistoricalGuardianSupersessionActual.t.sol` adds six source-level
+recipes for living history, estate and rotated-estate elections, exact Root and
+document admission, incorrect cutoff retry and retained lifetime Safe veto. The
+cases use actual Artist, Safe and Archive contracts with typed unit Core,
+governance and role facts. The source batch is typechecked; integrated runtime,
+complete linked-product sizes and transaction-capacity validation remain pending.

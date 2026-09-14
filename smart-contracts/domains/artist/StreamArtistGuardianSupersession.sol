@@ -40,7 +40,11 @@ import {
     StreamArtistGuardianSelectionTypes as Selection
 } from "../../interfaces/stream/artist/StreamArtistGuardianSelectionTypes.sol";
 
-/// @notice First-rotation, post-vesting, unselected guardian adjudication.
+import {
+    StreamArtistGuardianSupersessionCutoff as Cutoff
+} from "./StreamArtistGuardianSupersessionCutoff.sol";
+
+/// @notice Exact current-contest guardian adjudication through admitted living and estate history.
 /// @dev Fixed Identity owner authenticates governance, current cause and original rotation.
 library StreamArtistGuardianSupersession {
     struct State {
@@ -96,22 +100,15 @@ library StreamArtistGuardianSupersession {
         GH.Head memory head = History.requireComplete(history, request.artistId, actualCount);
         _complete(s, request.artistId, head);
         bytes32 transition = rotations.latestExecution[request.artistId];
-        V.Snapshot memory cutoff = vesting.snapshots[transition];
-        R.RotationRecord storage rotation = rotations.rotations[transition];
+        V.Snapshot memory cutoff =
+            Cutoff.current(vesting, history, rotations, request.artistId, head);
         if (
             request.supersededRecordHashes.length > 64 || cause.facts.kind != 1
                 || cause.facts.artistId != request.artistId
-                || cause.facts.executedTransitionHash != transition || transition == 0
-                || rotation.recordHash != transition
-                || rotation.terms.expectedPreviousTransitionRecordHash != 0
-                || cutoff.artistId != request.artistId || cutoff.transitionRecordHash != transition
-                || cutoff.operationId != 32 || cutoff.authorityClass != 1 || cutoff.commitment == 0
-                || cutoff.previousTransitionRecordHash != 0 || cutoff.previousCommitment != 0
+                || cause.facts.executedTransitionHash != transition
                 || cutoff.newAddress != cause.facts.incumbent
-                || cutoff.oldAddress != rotation.terms.oldAddress
-                || cutoff.executedAt != rotation.transition.executedAt || cutoff.ownerRevision == 0
-                || cutoff.guardians.count > head.count
-                || cutoff.guardians.ownerRevision >= cutoff.ownerRevision
+                || cutoff.authorityClass != cause.facts.authorityClass
+                || request.vestedAuthorityClass != cutoff.authorityClass
         ) {
             revert S.InvalidGuardianSupersession(transition);
         }
@@ -193,23 +190,7 @@ library StreamArtistGuardianSupersession {
         GH.Head memory head = History.requireComplete(history, artistId, actualCount);
         _complete(s, artistId, head);
         bytes32 transition = rotations.latestExecution[artistId];
-        V.Snapshot memory cutoff = vesting.snapshots[transition];
-        R.RotationRecord storage rotation = rotations.rotations[transition];
-        if (
-            artistId == 0 || transition == 0 || rotation.recordHash != transition
-                || rotation.terms.artistId != artistId
-                || rotation.terms.expectedPreviousTransitionRecordHash != 0
-                || cutoff.artistId != artistId || cutoff.transitionRecordHash != transition
-                || cutoff.commitment == 0 || cutoff.operationId != 32 || cutoff.authorityClass != 1
-                || cutoff.ownerRevision == 0 || cutoff.previousTransitionRecordHash != 0
-                || cutoff.previousCommitment != 0 || cutoff.oldAddress != rotation.terms.oldAddress
-                || cutoff.newAddress != rotation.terms.newAddress
-                || cutoff.executedAt != rotation.transition.executedAt
-                || cutoff.guardians.count > head.count
-                || cutoff.guardians.ownerRevision >= cutoff.ownerRevision
-        ) {
-            revert S.InvalidGuardianSupersession(transition);
-        }
+        V.Snapshot memory cutoff = Cutoff.current(vesting, history, rotations, artistId, head);
         return _admissions(s, history, rotations, artistId, records, cutoff, head).length == 0
             ? Appeal.ARBITER
             : Appeal.APPEAL;
@@ -240,7 +221,8 @@ library StreamArtistGuardianSupersession {
                     || entry.ownerRevision > head.ownerRevision
                     || history.records[artistId][entry.index] != hash || entry.commitment == 0
                     || record.recordHash != hash || record.terms.artistId != artistId
-                    || record.authorityClass != 1 || record.signer == address(0)
+                    || (record.authorityClass != 1 && record.authorityClass != 3)
+                    || record.signer == address(0)
                     || entry.recordDataHash != keccak256(abi.encode(record))
                     || s.statuses[hash].recoveryRecordHash != 0
             ) {
@@ -255,6 +237,7 @@ library StreamArtistGuardianSupersession {
                 findings[count++] = Appeal.Finding(hash, record.terms.guardians);
             } else if (
                 entry.ownerRevision <= cutoff.ownerRevision || record.signer != cutoff.newAddress
+                    || record.authorityClass != cutoff.authorityClass
             ) {
                 revert S.InvalidGuardianSupersession(hash);
             }
@@ -291,9 +274,7 @@ library StreamArtistGuardianSupersession {
                     || entry.index > head.count
                     || history.records[request.artistId][entry.index] != record.recordHash
                     || s.statuses[record.recordHash].recoveryRecordHash != 0
-                    || !R.eligible(
-                        request.artistId, record.provisional, transition, block.timestamp
-                    )
+                    || !Rotations.eligible(rotations, request.artistId, record.provisional)
             ) revert Selection.InvalidGuardianSelection(result.sourceKey);
             for (uint256 i; i < request.supersededRecordHashes.length; ++i) {
                 if (request.supersededRecordHashes[i] == record.recordHash) {
@@ -567,7 +548,10 @@ library StreamArtistGuardianSupersession {
                 || c.terms.evidenceHash != p.evidenceHash || c.terms.reasonHash != p.reasonHash
                 || cause.facts.evidenceHash != p.evidenceHash
                 || cause.facts.reasonHash != p.reasonHash || c.contester != cause.facts.actor
-                || c.contestedAt != cause.facts.enteredAt || c.priorStatus != 1
+                || c.contestedAt != cause.facts.enteredAt
+                || c.priorStatus != cause.facts.priorStatus
+                || !((cause.facts.authorityClass == 1 && c.priorStatus == 1)
+                    || (cause.facts.authorityClass == 3 && c.priorStatus == 3))
                 || c.pendingTransitionRecordHash != 0
                 || c.executedTransitionRecordHash != transition
                 || c.recordHash

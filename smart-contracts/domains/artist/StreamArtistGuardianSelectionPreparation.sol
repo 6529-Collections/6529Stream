@@ -25,6 +25,19 @@ import {
     IStreamArtistIdentityRecoveryOwner
 } from "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
 
+import {
+    IStreamArtistEstateOwner
+} from "../../interfaces/stream/artist/IStreamArtistEstateOwner.sol";
+import {
+    IStreamArtistIdentityDismissalOwner
+} from "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
+import {
+    StreamArtistEstateTypes as Estate
+} from "../../interfaces/stream/artist/StreamArtistEstateTypes.sol";
+import {
+    StreamArtistIdentityDismissalTypes as D
+} from "../../interfaces/stream/artist/StreamArtistIdentityDismissalTypes.sol";
+
 /// @notice Permissionless, bounded computation; only Identity can admit the resulting election.
 /// @dev No scheduled action, guardian authority or owner revision is created by this helper.
 contract StreamArtistGuardianSelectionPreparation {
@@ -166,14 +179,22 @@ contract StreamArtistGuardianSelectionPreparation {
         ) revert S.InvalidGuardianSelection(key);
         R.GuardianRecord memory record =
             IStreamArtistRotationReads(owner).guardianSetRecord(entry.recordHash);
+        R.TransitionState memory associated;
+        if (record.provisional.transitionRecordHash != 0) {
+            associated = IStreamArtistRotationReads(owner)
+                .artistTransitionState(record.provisional.transitionRecordHash);
+        }
         if (
             record.recordHash != entry.recordHash || record.terms.artistId != basis.artistId
                 || entry.recordDataHash != keccak256(abi.encode(record))
-                || (record.provisional.transitionRecordHash == bytes32(0)
+                || (record.provisional.transitionRecordHash == 0
                         ? record.provisional.windowEndsAt != 0
-                        : record.provisional.transitionRecordHash != basis.transition.recordHash
-                        || record.provisional.windowEndsAt != basis.transition.postWindowEndsAt)
-        ) revert S.InvalidGuardianSelection(key);
+                        : associated.recordHash != record.provisional.transitionRecordHash
+                        || associated.artistId != basis.artistId
+                        || record.provisional.windowEndsAt != associated.postWindowEndsAt)
+        ) {
+            revert S.InvalidGuardianSelection(key);
+        }
         Supersession.Status memory status =
             IStreamArtistGuardianSupersession(owner).guardianRecordSupersession(record.recordHash);
         if (status.recoveryRecordHash == bytes32(0)) {
@@ -187,7 +208,7 @@ contract StreamArtistGuardianSelectionPreparation {
         if (excludedIndex != 0) p.excludedSeen |= uint64(1) << (excludedIndex - 1);
         if (
             excludedIndex == 0 && status.recoveryRecordHash == bytes32(0)
-                && R.eligible(basis.artistId, record.provisional, basis.transition, block.timestamp)
+                && R.eligible(basis.artistId, record.provisional, associated, block.timestamp)
                 && (p.selectedRecordHash == bytes32(0) || record.nonce > p.selectedNonce)
         ) {
             p.selectedRecordHash = record.recordHash;
@@ -207,7 +228,9 @@ contract StreamArtistGuardianSelectionPreparation {
                 || basis.transition.artistId != basis.artistId
                 || basis.transition.recordHash == bytes32(0) || basis.transition.phase != 2
                 || basis.transition.executedAt == 0
-                || block.timestamp < basis.transition.postWindowEndsAt
+                || (block.timestamp < basis.transition.postWindowEndsAt
+                    && !(basis.transition.contestedAt != 0
+                        && basis.transition.contestedAt < basis.transition.postWindowEndsAt))
                 || IStreamArtistIdentityRecoveryOwner(owner).latestIdentityRecovery(basis.artistId)
                     != bytes32(0)
         ) revert S.InvalidGuardianSelection(_key(basis));
@@ -217,17 +240,49 @@ contract StreamArtistGuardianSelectionPreparation {
             IStreamArtistRotationReads(owner).artistTransitionState(basis.transition.recordHash);
         (H.Head memory head,,,) = IStreamArtistGuardianHistory(owner)
             .guardianHistoryState(basis.artistId, 0, address(0), bytes32(0));
+        bytes32 latest = IStreamArtistRotationReads(owner).lastArtistTransition(basis.artistId);
+        if (latest != basis.transition.recordHash) {
+            D.Cause memory cause = IStreamArtistIdentityDismissalOwner(owner)
+                .currentIdentityContestCause(basis.artistId);
+            if (
+                cause.facts.artistId != basis.artistId || cause.facts.kind != 1
+                    || cause.facts.executedTransitionHash != basis.transition.recordHash
+                    || cause.facts.pendingTransitionHash != 0
+                    || IStreamArtistRotationReads(owner).artistTransitionState(latest).phase != 3
+            ) {
+                revert S.InvalidGuardianSelection(_key(basis));
+            }
+        }
+        if (rotation.recordHash != 0) {
+            if (
+                rotation.recordHash != basis.transition.recordHash
+                    || rotation.terms.artistId != basis.artistId
+                    || keccak256(abi.encode(rotation.transition))
+                        != keccak256(abi.encode(basis.transition))
+            ) {
+                revert S.InvalidGuardianSelection(_key(basis));
+            }
+        } else {
+            (
+                Estate.RequestRecord memory request,
+                uint8 phase,
+                Estate.ExecutionFacts memory execution
+            ) = IStreamArtistEstateOwner(owner).estateActivationRecord(basis.transition.recordHash);
+            if (
+                request.recordHash != basis.transition.recordHash
+                    || request.terms.artistId != basis.artistId || phase != 2
+                    || execution.activationRecordHash != request.recordHash
+                    || execution.executedAt != basis.transition.executedAt
+            ) {
+                revert S.InvalidGuardianSelection(_key(basis));
+            }
+        }
         if (
-            rotation.recordHash != basis.transition.recordHash
-                || rotation.terms.artistId != basis.artistId
-                || rotation.terms.expectedPreviousTransitionRecordHash != bytes32(0)
-                || IStreamArtistRotationReads(owner).lastArtistTransition(basis.artistId)
-                    != basis.transition.recordHash
-                || keccak256(abi.encode(rotation.transition))
-                    != keccak256(abi.encode(basis.transition))
-                || keccak256(abi.encode(transition)) != keccak256(abi.encode(basis.transition))
+            keccak256(abi.encode(transition)) != keccak256(abi.encode(basis.transition))
                 || keccak256(abi.encode(head)) != keccak256(abi.encode(basis.history))
-        ) revert S.InvalidGuardianSelection(_key(basis));
+        ) {
+            revert S.InvalidGuardianSelection(_key(basis));
+        }
     }
 
     function _shape(bytes32[] calldata excluded) private pure {
