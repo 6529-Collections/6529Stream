@@ -6,11 +6,13 @@ that checkpoint in a fresh process after the required governance actions. The
 original Finality registry is constructed before its artist Coordinator, and
 WORK/RIGHTS follow the actual artist selection.
 
-The current migration passes nine focused tests and an independently reviewed
-local rehearsal with six processes and 511 successful transactions. Its output
-still records unactivated products. Identity/Onboarding deployment gas, cold-call
-budgets, newer payment/auction wiring and full product activation remain open;
-the high-gas local rehearsal is not a shipping-capacity or testnet result.
+The current graph passes nine focused workflows and an independently reviewed
+local rehearsal with six processes and 530 successful transactions. Every
+transaction declares and consumes at most 16,777,216 gas; the largest receipt
+uses 10,709,754. The Artist child deployment split resolves the earlier oversized
+constructors. The saved output still records unactivated products. Newer commerce
+activation, complete user-call capacity and a matching testnet release remain
+separate requirements.
 
 The existing version-2 output describes a sealed five-leaf governance foundation
 and unactivated products, with registrations and catalog additions for later
@@ -98,8 +100,8 @@ original provider/discovery/Finality graph; then construct Coordinator and selec
 the actual artist registry before constructing WORK/RIGHTS selectors. Preserve
 all existing SystemManifest members at each publication. The slot removes the
 old sender-nonce-plus-12 assumption. Both current callers now use these stages;
-remaining artist child-deployment capacity and product activation are separate
-requirements.
+the child-deployment capacity rehearsal now passes, while product activation
+remains a separate requirement.
 
 Run its reproducible focused checks from the repository root:
 
@@ -137,10 +139,9 @@ python scripts/dev.py test --match-contract '^StreamDeploymentPlanTest$'
 forge script test/fixtures/deployment-planner/ProtectedFoundation.s.sol:ProtectedFoundation --sig 'run()' --via-ir
 ```
 
-The helper compiles and the bounded foundation rehearsal passes. Full product
-entry-point compilation exceeded the local ten-minute diagnostic limit; complete
-script execution and expanded product inventory remain open. These focused
-results do not establish a complete deployment or candidate acceptance.
+The helper and bounded foundation rehearsal pass. The staged current product
+entrypoints also complete the capped local rehearsal described above. Expanded
+commerce activation and a matching new candidate remain open.
 
 ## Retained RC1 operator recipes
 

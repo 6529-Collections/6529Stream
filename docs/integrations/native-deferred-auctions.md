@@ -4,8 +4,9 @@
 minted and paid for atomically at settlement. Its implemented profile is a
 singleton collection PROFILE with exact `tokenData`. A disabled gate and the
 original published curated-content gate are supported, with optional NFTDelegation
-delivery. Custody-start auctions, additional rights modes and other gate profiles
-remain separate required work.
+delivery. The separate custody-start API mints before bidding, then sells that
+original token. Additional rights modes and other gate profiles remain required
+work.
 
 Use [IStreamNativeEnglishAuction](../../smart-contracts/interfaces/stream/auctions/IStreamNativeEnglishAuction.sol)
 for lifecycle calls and
@@ -93,6 +94,37 @@ an external service will continue serving their contents. The
 [current fixture](../../test/helpers/NativeCuratedAuctionFixture.sol) gives the
 complete ordering, proof construction and signing example.
 
+## Mint into custody before bidding
+
+Use [IStreamNativeCustodyAuction](../../smart-contracts/interfaces/stream/auctions/IStreamNativeCustodyAuction.sol)
+for this versioned acquisition path. Before opening a sale, the original Executor
+must bind the ACTIVE house once through
+[IStreamNativeCustodyPrimarySettlement](../../smart-contracts/interfaces/stream/revenue/IStreamNativeCustodyPrimarySettlement.sol).
+`custodyHouseTransition(house)` supplies the exact scope and old/new commitments
+for a class-one, zero-value `bindCanonicalCustodyHouse(house)` governance action.
+Read back `canonicalCustodyHouse()` and its event after delayed execution.
+
+`registerCustodyAuction` requires the exact configuration and artwork hashes,
+expected sale nonce, token ID, collection serial, Manager operation nonce,
+context, executor, fee deposit, artist and signed nonce/deadline. Build both
+platform and artist signatures from `custodyAcquisitionDigest`. These coordinates
+are optimistic; registration checks them against the actual original mint and
+reverts atomically if they have changed. The ordinary creation signature is not
+a custody-acquisition authorization.
+
+Registration mints one token into the house without recording sale revenue.
+Read `custodyOrigin(auctionId)` and `NativeAuctionCustodyAcquired` for the retained
+Manager, operation and original mint evidence. Bidding uses the normal house
+calls. At paid settlement the recorder authenticates this origin, records the
+payment and delivers the same NFT. It does not mint again or consume the mint
+phase again. Payment evidence and original acquisition evidence remain distinct.
+
+A failed receiver leaves a claim for the original token. No-bid, cancellation
+and accepted terminal escape paths preserve the poster's NFT claim and applicable
+payer refunds; releasing custody invalidates its sale origin. The current
+[fixture](../../test/helpers/NativeCustodyAuctionFixture.sol) demonstrates the
+complete sequence and signed Safe failure/repair/retry.
+
 ## Tested behavior
 
 Fifteen actual auction cases pass, including a 256-input configuration property,
@@ -106,9 +138,14 @@ The curated increment passes 42 cases across the curated, existing auction,
 prepared settlement and companion suites, including three 256-input properties.
 Its nine curated cases include complete retained publication, wrong proofs and
 bytes, ordinary-entry bypass rejection, gate incidents, sequential Core tokens
-and identical signed Safe retry. The reviewed via-IR house is 21,556 bytes,
-Manager 21,504 and the recorder 22,665; all production products in that capture
-fit the runtime limit. Whole-transaction capacity, complete operator wiring,
+and identical signed Safe retry. That pre-custody capture fits the runtime limit for every production product. Whole-transaction capacity, complete operator wiring,
 additional
 auction profiles and a matching full-v1 candidate remain open in the
 [delivery ledger](../../ops/V1_DELIVERY.md).
+
+The custody increment retains 42 unchanged cases and passes nine corrected
+custody cases: 51 unique cases with four 256-input properties, independently
+reviewed. The accepted house is 24,220 bytes, Manager 21,504 and recorder 24,510;
+all production products in that capture fit. This covers the described original
+mint, paid transfer, incident claims and Safe retries; broader rights and complete
+Safe/operator activation remain separately tracked.

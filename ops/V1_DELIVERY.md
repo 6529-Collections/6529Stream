@@ -30,50 +30,48 @@ the denominator. The integrator owns this reporting correction and delivery.
 
 ## Latest integration: 14 September
 
-The current native assembly now passes all five selected workflows, with an
-independent source, compiler-product and runtime review. These cover actual
-contract deployment and runtime pins; paid minting with a Safe artist and EOA
-buyer plus entropy; original content consent and dual archival coverage; original
-Artist record publication with governed WORK/RIGHTS seals; and the original
-snapshot, entropy-source set and remaining local seals. The reviewed correction
-uses the actual Artist Safe as recorder, publishes the exact Store payload before
-admission and sets the original publication read budget through governance.
+The current graph deployment now passes an independently reviewed local rehearsal
+with 530 successful transactions across six processes, including four delayed
+governance actions. Every transaction uses and declares at most 16,777,216 gas;
+the largest receipt uses 10,709,754. The Artist Identity and facade deployments
+now use 5,597,812 and 6,047,668 gas after their fixed-child split. The output still
+records `productsActivated=false`: deployment capacity is demonstrated for this
+local graph, while full activation and a matching new testnet candidate remain.
 
-The original five workflows now pass in 12.505 seconds, and the complete sixth
-ceremony also passes in 17.924 seconds with independent review. It covers fresh
-repeated reference renders, the complete original inventory and archival bundle,
-original Artist Safe sanction/archive and governed canonical finality. All 352
-nonempty production runtimes in that capture fit. The final correction changes
-only the fixture's Discovery component read cap from 8M to 12M, preserving the
-separate 4M component leaf and 16M complete-source budgets.
+The same frozen graph passes nine current workflows, five native workflows and
+one separately isolated cold-call regression. That regression demonstrates the
+original Artist read failure, the normal governed expansion to 600,000 gas and
+successful identical-calldata retry. A complete preservation/finality ceremony
+also passes against that graph, including fresh repeated reference renders.
+Its multi-operation test retains a large aggregate allowance; this is separate
+from the 530 actual capped deployment receipts and does not prove every user
+transaction fits its specified ceiling. These graph results precede the newest
+commerce integration.
 
-The full test uses a 20-billion aggregate allowance for many deployments and
-operations; it does not establish individual transaction capacity. A separate
-gas-report attempt fails earlier in an Artist authority read. Foundry 1.7.1
-[enables transaction isolation for gas reports](https://github.com/foundry-rs/foundry/blob/v1.7.1/crates/forge/src/cmd/test/mod.rs#L283),
-so this is a concrete isolated-call gas blocker to shipping; the accepted
-aggregate ceremony does not establish cold-call capacity.
-The migrated current deployment graph passes five current workflows and four
-checkpoint tests and is integrated. Its actual local operator rehearsal now
-passes independent review: six separate processes, 493 successful broadcast
-receipts and 18 direct receipts, four delayed governance actions and ten original
-one-use deployment slots. The recorded outputs retain `productsActivated=false`.
-The native capture predates the newer prepared-payment Manager; full integration
-with those products remains required. Local broadcast estimation uses 130% for
-phase one and 600% for resumption and is not shipping-capacity acceptance.
+Native commerce deployment and admission are integrated as `b0bd766e`. Its
+independently reviewed 50-case cohort, including four 256-input properties,
+constructs the official recorder and auction house against the actual Core,
+Manager, Registry and revenue dependencies. It verifies exact registration,
+escrow admission and one-time owner binding, including Safe failure/retry.
+Artist, entropy and governance semantics are named test boundaries in that
+cohort. Actual Safe/Executor catalog extension and complete activation have a
+separate implementation and runtime check in progress.
 
-That rehearsal exposed oversized Identity and Onboarding constructor transactions
-(19,511,180 and 17,301,259 gas). Their authenticated immutable-child deployment
-split is now integrated, with eight independently reviewed aggregate tests.
-Isolated deployment receipts remain pending.
-The Registry also incorrectly required more than 30M available gas for its small
-constructor probes. Its constructor-only forwarding correction passes eleven
-isolated tests in both compiler modes, including 256 fuzz inputs each, exact
-malformed-return rejection and identical deployment retry. The actual Registry
-now deploys inside an 8M CALL envelope with its configured 30M runtime budget
-preserved. This focused test uses explicit dependency fixtures; complete operator
-shipping capacity, cold Artist reads, final activation and a new candidate remain
-open.
+Custody auctions are integrated as `8147a504`: an unpaid original mint places
+one NFT in auction custody, and a later paid settlement transfers that same NFT
+through the official recorder without a second mint. Independent acceptance
+combines 42 unchanged cases with nine corrected custody cases, totaling 51
+unique cases and four 256-input properties; it is not a fresh 51-case rerun.
+Canonical house admission, original mint evidence, terminal claims and signed
+Safe rollback/retry are covered. Broader rights modes and operator adoption
+remain separate requirements.
+
+Four stored Finality evidence readers now treat their configured read gas as
+an upper limit, retaining a bounded call reserve. The integrated `15fbed73`
+correction passes 25 isolated cases plus 256 fuzz inputs in each compiler mode;
+the same healthy high-budget scenarios fail under the original code. Their
+public ABIs, exact return validation and complete-provider/preparation gates
+remain unchanged. Complete Safe finality transaction capacity remains open.
 
 The preservation Safe increment `0c6da9e4` is independently reviewed, integrated
 and pushed. Ten unique IR cases cover inventory, bundle and artifact calls,
@@ -108,7 +106,7 @@ and actual paid settlement are now integrated as `d300d2d7`. The independently
 reviewed cohort passes all 42 cases, including three 256-input properties. Manager
 is 21,504 bytes, house 21,556 and recorder 22,665; all production products fit.
 The new path reconstructs the full retained manifest, preserves exact artwork
-bytes and rejects ordinary Manager bypass. Custody-start, additional rights
+bytes and rejects ordinary Manager bypass. Custody-start is integrated as `8147a504`; additional rights
 modes and global operator adoption remain mandatory. [ADR 0043](../docs/adr/0043-deferred-auction-clocks-and-no-bid.md)
 owns clock and no-bid combinations; existing V2 behavior is retained.
 
@@ -946,12 +944,12 @@ commits, tests and retained results in the evidence column when advancing it.
 | SAFE-01 | Every supported public/external ABI function is classified and covered for correctly authorized Safe calls, reads or intentional protocol-only restrictions; real signatures, claims, NFT custody and client workflows pass the [Safe acceptance matrix](SAFE_ACCEPTANCE.md) | Integrator + both builders; shared fixtures first, verification accompanies each feature | Building |
 | PAY-02 | Signed release/revocation and specified deprecated-asset exits preserve owed funds and nonce rules | Revenue; existing wallet/asset policy | Building: source integrated as `6d2074fb`; 121 focused tests per compiler profile; combined current-stack acceptance pending |
 | PAY-03 | Revenue escrow records exact owed assets, captures the destination binding and supports permissionless flush/recovery | Revenue; typed settlement decision | Building: deferred registration/discovery and single-factory exact-credit/flush source integrated; fixed-sale and auction adoption source integrated; current acceptance and recovery still pending |
-| PAY-04 | One ERC-20 payer boundary, official settlement owner, exact typed mint orchestration and execution-bound replay, including specified permit branches | Revenue + integrator; PAY-03, ADR 0019 reconciliation | Building: universal ERC-20 recorder/payer/consumer integrated `18dbe54c`, 29 tests plus fuzzing independently accepted; canonical authorization fix `5ecae362` accepted with two tests; `4e9a41b1` actual-Core universal/content/Safe ten-case composition independently accepted; native prepared settlement18 and English/delegation/curated42 now independently accepted through actual Core/Manager/official recorder with Safe retry; custody, broader rights and global operator wiring remain |
+| PAY-04 | One ERC-20 payer boundary, official settlement owner, exact typed mint orchestration and execution-bound replay, including specified permit branches | Revenue + integrator; PAY-03, ADR 0019 reconciliation | Building: universal ERC-20 recorder/payer/consumer integrated `18dbe54c`, 29 tests plus fuzzing independently accepted; canonical authorization fix `5ecae362` accepted with two tests; `4e9a41b1` actual-Core universal/content/Safe ten-case composition independently accepted; native prepared settlement18 and English/delegation/curated42 now independently accepted through actual Core/Manager/official recorder with Safe retry; custody51 is independently accepted and integrated; broader rights and global operator wiring remain |
 | PAY-05 | Required primary/royalty assignment profiles, templates, token overrides and freeze behavior work through current resolvers | Revenue; artist economics, PAY-04 | Building: immutable primary artist binding integrated as `8eb37037`; 38 focused tests per profile; remaining semantics and current-stack acceptance pending |
 | SALE-01 | Fixed/open-edition sale variants, zero/PWYW pricing and refund-window custody obey drift, cancellation, reveal and pause rules | Revenue; PAY-04 and artist consent | Building: signed free/open/PWYW programs and REQUIRED consent have separately captured current/Safe acceptance. Refund source `ea107e58` has 63 reviewed domain cases and two fuzz properties; actual refund4 plus retained dispute4 now pass independent review on the pre-dismissal snapshot. Wider variants and candidate acceptance remain |
 | SALE-02 | Dutch schedule, clearing rebates and maximum-price excess credits conserve funds | Revenue; PAY-04 | Building: standard native Dutch and supplemental settlement have independently reviewed current composition. Clearing consumer `d807421e` has 59 reviewed domain cases, five fuzz properties and both compiler profiles; two actual-current Safe clearing cases pass independent review (`d9d7d46b`). A qualified full-current trace measures 8,755,856 gas in the first consumer call versus the 500,000 ceiling. Aggregate/storage optimization and shared mint/rights/settlement costs remain open; no cold gas or deployment acceptance |
 | SALE-03 | Private sales/offers and owner-signed consignment grants have exact revocation and secondary-settlement semantics | Revenue; PAY-04 and artist consent | Building: `7139688b` implements native secondary PRIVATE_SALE and OFFER_SALE, with 42 reviewed domain cases and fuzzing. Prior collector delivery, actual-current Core/royalty composition and broader inventory sale kinds remain |
-| SALE-04 | Remaining English-auction branches, including first-bid-starts and mint-at-settlement, use shared authority and settlement | Revenue; PAY-04 | Building: actual paid English/delegation15 and curated42 cohorts independently accepted, including official recorder, escrow, clocks, Safe retry and deferred NFT delivery; custody-start, wider rights and global operator/transaction-capacity acceptance remain |
+| SALE-04 | Remaining English-auction branches, including first-bid-starts and mint-at-settlement, use shared authority and settlement | Revenue; PAY-04 | Building: actual paid English/delegation15 and curated42 cohorts independently accepted, including official recorder, escrow, clocks, Safe retry and deferred NFT delivery; custody51 is independently accepted and integrated; wider rights and global operator/transaction-capacity acceptance remain |
 | MINT-01 | Signed tickets, burn-to-mint and delegate gates, counter/nullifier continuity and required content-selection behavior | Integrator / revenue builder; shared artist/payment interfaces | Building: full-payload ticket/offer revocation at the Manager/Ledger boundary is assigned; other listed behaviors retain their acceptance scope |
 | ENT-01 | Reviewed non-VRF provider and safe-mode fallback instances are installed; actual provider failure/recovery follows the specified lifecycle | Integrator / freed builder; provider docs and exact interfaces | Building: ARRNG adapter and four actual-current Safe/Executor cases accepted in `72c208f2`; safe-mode, full recovery and deployed upstream acceptance remain |
 | ENT-02 | Scope/reveal policies, fee escrow, keeper/SLO fallback and recovery preserve committed entropy without discretionary rerolls | Integrator / freed builder; ENT-01 | Building: policy/escrow/typed quote source integrated `66d70e04`, with 44 focused cases, 30 metadata regressions and six planner cases; separate 14-case actual current/Safe composition independently accepted with its captured pre-unique-holder planner; governed timing/SLO source has 54 accepted domain cases and 30 metadata regressions, with a separately accepted seven-case actual governance/Safe run captured before operation 33; AT_MINT attempts and recovery remain |

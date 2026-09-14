@@ -5,6 +5,13 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add native auction custody acquisition and paid transfer of the original NFT,
+  with canonical house admission, terminal claims and signed Safe retry coverage.
+- Add current native recorder/auction deployment and exact module/escrow admission.
+- Complete the staged local graph rehearsal within enforced transaction gas caps.
+- Bound stored Finality evidence reads by available gas while preserving public
+  interfaces, exact evidence validation and complete-provider admission gates.
+
 - Integrate published curated-work native auctions with complete manifest and
   exact-byte admission, original counter accounting and atomic Safe retry.
 - Split Artist host deployments into authenticated fixed children while retaining

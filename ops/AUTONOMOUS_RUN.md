@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Reviewed guardian directive correction `144f33e6`, first estate recovery `5700804a`, successor guardians `c9281b67`; combined preparation focused75 both modes accepted with corrected original PNG projection and registered profile, candidate `8cd9b761`, seals `56e6ff3c`; complete inventory/bundle `2f7b8e2c` with31 IR cases and isolated Safe stage accepted; actual complete assembly active. Immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | Accepted native addon `b0bd766e`, capped deployment parser `6246aa06`, custody auctions `8147a504`, stored-evidence gas fix `15fbed73`; actual Safe commerce activation and expanded rights tests running separately. Immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -22,50 +22,48 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active work
 
-The current native assembly now passes all five selected workflows, with an
-independent source, compiler-product and runtime review. These cover actual
-contract deployment and runtime pins; paid minting with a Safe artist and EOA
-buyer plus entropy; original content consent and dual archival coverage; original
-Artist record publication with governed WORK/RIGHTS seals; and the original
-snapshot, entropy-source set and remaining local seals. The reviewed correction
-uses the actual Artist Safe as recorder, publishes the exact Store payload before
-admission and sets the original publication read budget through governance.
+The current graph deployment now passes an independently reviewed local rehearsal
+with 530 successful transactions across six processes, including four delayed
+governance actions. Every transaction uses and declares at most 16,777,216 gas;
+the largest receipt uses 10,709,754. The Artist Identity and facade deployments
+now use 5,597,812 and 6,047,668 gas after their fixed-child split. The output still
+records `productsActivated=false`: deployment capacity is demonstrated for this
+local graph, while full activation and a matching new testnet candidate remain.
 
-The original five workflows now pass in 12.505 seconds, and the complete sixth
-ceremony also passes in 17.924 seconds with independent review. It covers fresh
-repeated reference renders, the complete original inventory and archival bundle,
-original Artist Safe sanction/archive and governed canonical finality. All 352
-nonempty production runtimes in that capture fit. The final correction changes
-only the fixture's Discovery component read cap from 8M to 12M, preserving the
-separate 4M component leaf and 16M complete-source budgets.
+The same frozen graph passes nine current workflows, five native workflows and
+one separately isolated cold-call regression. That regression demonstrates the
+original Artist read failure, the normal governed expansion to 600,000 gas and
+successful identical-calldata retry. A complete preservation/finality ceremony
+also passes against that graph, including fresh repeated reference renders.
+Its multi-operation test retains a large aggregate allowance; this is separate
+from the 530 actual capped deployment receipts and does not prove every user
+transaction fits its specified ceiling. These graph results precede the newest
+commerce integration.
 
-The full test uses a 20-billion aggregate allowance for many deployments and
-operations; it does not establish individual transaction capacity. A separate
-gas-report attempt fails earlier in an Artist authority read. Foundry 1.7.1
-[enables transaction isolation for gas reports](https://github.com/foundry-rs/foundry/blob/v1.7.1/crates/forge/src/cmd/test/mod.rs#L283),
-so this is a concrete isolated-call gas blocker to shipping; the accepted
-aggregate ceremony does not establish cold-call capacity.
-The migrated current deployment graph passes five current workflows and four
-checkpoint tests and is integrated. Its actual local operator rehearsal now
-passes independent review: six separate processes, 493 successful broadcast
-receipts and 18 direct receipts, four delayed governance actions and ten original
-one-use deployment slots. The recorded outputs retain `productsActivated=false`.
-The native capture predates the newer prepared-payment Manager; full integration
-with those products remains required. Local broadcast estimation uses 130% for
-phase one and 600% for resumption and is not shipping-capacity acceptance.
+Native commerce deployment and admission are integrated as `b0bd766e`. Its
+independently reviewed 50-case cohort, including four 256-input properties,
+constructs the official recorder and auction house against the actual Core,
+Manager, Registry and revenue dependencies. It verifies exact registration,
+escrow admission and one-time owner binding, including Safe failure/retry.
+Artist, entropy and governance semantics are named test boundaries in that
+cohort. Actual Safe/Executor catalog extension and complete activation have a
+separate implementation and runtime check in progress.
 
-That rehearsal exposed oversized Identity and Onboarding constructor transactions
-(19,511,180 and 17,301,259 gas). Their authenticated immutable-child deployment
-split is now integrated, with eight independently reviewed aggregate tests.
-Isolated deployment receipts remain pending.
-The Registry also incorrectly required more than 30M available gas for its small
-constructor probes. Its constructor-only forwarding correction passes eleven
-isolated tests in both compiler modes, including 256 fuzz inputs each, exact
-malformed-return rejection and identical deployment retry. The actual Registry
-now deploys inside an 8M CALL envelope with its configured 30M runtime budget
-preserved. This focused test uses explicit dependency fixtures; complete operator
-shipping capacity, cold Artist reads, final activation and a new candidate remain
-open.
+Custody auctions are integrated as `8147a504`: an unpaid original mint places
+one NFT in auction custody, and a later paid settlement transfers that same NFT
+through the official recorder without a second mint. Independent acceptance
+combines 42 unchanged cases with nine corrected custody cases, totaling 51
+unique cases and four 256-input properties; it is not a fresh 51-case rerun.
+Canonical house admission, original mint evidence, terminal claims and signed
+Safe rollback/retry are covered. Broader rights modes and operator adoption
+remain separate requirements.
+
+Four stored Finality evidence readers now treat their configured read gas as
+an upper limit, retaining a bounded call reserve. The integrated `15fbed73`
+correction passes 25 isolated cases plus 256 fuzz inputs in each compiler mode;
+the same healthy high-budget scenarios fail under the original code. Their
+public ABIs, exact return validation and complete-provider/preparation gates
+remain unchanged. Complete Safe finality transaction capacity remains open.
 
 The preservation Safe increment `0c6da9e4` is independently reviewed, integrated
 and pushed. Ten unique IR cases cover inventory, bundle and artifact calls,
@@ -100,7 +98,7 @@ and actual paid settlement are now integrated as `d300d2d7`. The independently
 reviewed cohort passes all 42 cases, including three 256-input properties. Manager
 is 21,504 bytes, house 21,556 and recorder 22,665; all production products fit.
 The new path reconstructs the full retained manifest, preserves exact artwork
-bytes and rejects ordinary Manager bypass. Custody-start, additional rights
+bytes and rejects ordinary Manager bypass. Custody-start is integrated as `8147a504`; additional rights
 modes and global operator adoption remain mandatory. [ADR 0043](../docs/adr/0043-deferred-auction-clocks-and-no-bid.md)
 owns clock and no-bid combinations; existing V2 behavior is retained.
 
