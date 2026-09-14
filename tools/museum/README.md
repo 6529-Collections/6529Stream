@@ -188,3 +188,14 @@ authorship before entering the same finite v2 model. Run
 example. Same-account SELF reviews are explicit and never establish independent
 human review. The local-EVM example is distinct from public-chain acceptance;
 existing synthetic packages and format commands keep their prior input boundary.
+
+
+The additive [multi-format resource package](../../docs/museum-multiformat-package.md)
+archives the same selected public fixture as Linked Art v2, PREMIS, IIIF and LIDO,
+with complete local validation dependencies and per-format correspondence,
+attribution and source-field coverage. Its verifier rebuilds all four formats
+from only the archive and an external manifest hash. Run
+`python -m tools.museum.package_v2 --help` for the build/verify CLI and
+`python -m unittest tools.museum.test_package_v2 -v` for its focused checks.
+Original v1 packages and recorded-account projections keep their existing
+boundaries; this package does not claim recorded-state or institutional conformance.
