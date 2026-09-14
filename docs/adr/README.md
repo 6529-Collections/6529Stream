@@ -114,3 +114,7 @@ artifact commitments for the developing finality implementation.
 [ADR 0040: Current metadata record host](0040-current-metadata-record-host.md)
 defines the new interface boundary, retained byte history and live-root
 authorization for catalog admission and family grants.
+
+[ADR 0043: Deferred auction clocks and unpaid endings](0043-deferred-auction-clocks-and-no-bid.md)
+resolves first-bid anti-snipe timing, buyer-signed expiry during pause tolling,
+and deferred no-bid completion for the new versioned native auction.

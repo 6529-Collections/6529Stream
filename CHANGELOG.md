@@ -5,6 +5,12 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Added reviewed Safe preservation call and atomic-retry coverage.
+- Added a tested auction clock library for first-bid timing, capped extensions,
+  pause tolling, rounded increments and signed settlement deadline ceilings.
+- Specified first-bid clocks, signed deadline ceilings and deferred no-bid outcomes
+  for the new native auction under ADR 0043; implementation remains in progress.
+
 - Added an operator-owned deployment slot with deterministic CREATE coordinates,
   atomic rollback, actual Safe retry tests and a portable local rehearsal command.
 

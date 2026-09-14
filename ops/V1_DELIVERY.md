@@ -22,13 +22,38 @@ and evidence instead of deriving completion from test or interface counts.
 
 ## Latest integration: 14 September
 
-The artist builder's current native assembly now passes three actual workflows:
-complete original contract deployment with runtime pins, paid minting with a Safe
-as the artist and entropy fulfillment, and original content consent with checkpoint
-and dual archival coverage. Its two later cases exposed a fixture attestation URI
-that differed from the record URI. The canonical decoder rejected it; the corrected
-fixture is under test. Complete description seals, snapshot and finality ceremony
-acceptance remain pending, and these builder captures are not a new frozen candidate.
+The current native assembly retains three passing actual workflows: complete
+original contract deployment with runtime pins, paid minting with a Safe artist
+and EOA buyer plus entropy fulfillment, and original content consent/checkpoint
+with dual archival coverage. The corrected attestation URI now passes decoding.
+Two later cases next fail because the fixture used its relay as recorder instead
+of the actual Artist Safe. The reviewed successor consistently uses that Safe,
+publishes exact Store payload bytes before admission and raises the original
+publication read budget through governance. Description seals, snapshot and the
+full finality ceremony still require successful execution; no new candidate exists.
+
+The preservation Safe increment `0c6da9e4` is independently reviewed, integrated
+and pushed. Ten unique IR cases cover inventory, bundle and artifact calls,
+including one 256-input property, actual Safe mutations and identical signed
+failure/repair/retry. Twenty selector IDs across 27 per-host interface occurrences
+are mapped. Read-only calls use a stateless test probe executed by the real Safe;
+small typed bundle boundaries are explicit. This adds call-surface evidence, not
+a new full-bundle capacity or complete Stream-wide Safe claim.
+
+The next commerce increment implements the actual paid PREPARED mint handoff for
+a new versioned native auction while retaining the existing V2 interface.
+[ADR 0043](../docs/adr/0043-deferred-auction-clocks-and-no-bid.md) resolves the three
+clock/no-bid combinations found during source review. Auction implementation and
+all remaining SALE-04 acceptance remain open.
+
+The reusable auction clock now passes 13 focused tests in both compiler modes,
+including three 256-input properties per mode. It validates clock modes and
+waivers, starts the first-bid clock once, caps subsequent anti-snipe extensions,
+keeps pause toll separate, rounds bid increments upward and preserves a signed
+absolute settlement ceiling. An initial memory-alias defect was caught by the
+boundary tests and fixed with an explicit state copy. This internal library still
+needs the new auction's actual escrow, authority, events and terminal-state
+integration; it does not change the existing V2 house or close SALE-04.
 
 A reusable operator-owned CREATE slot now has ten passing focused tests in both
 compiler modes, one 256-input property each and a protected local script rehearsal.
@@ -853,7 +878,7 @@ commits, tests and retained results in the evidence column when advancing it.
 | SALE-01 | Fixed/open-edition sale variants, zero/PWYW pricing and refund-window custody obey drift, cancellation, reveal and pause rules | Revenue; PAY-04 and artist consent | Building: signed free/open/PWYW programs and REQUIRED consent have separately captured current/Safe acceptance. Refund source `ea107e58` has 63 reviewed domain cases and two fuzz properties; actual refund4 plus retained dispute4 now pass independent review on the pre-dismissal snapshot. Wider variants and candidate acceptance remain |
 | SALE-02 | Dutch schedule, clearing rebates and maximum-price excess credits conserve funds | Revenue; PAY-04 | Building: standard native Dutch and supplemental settlement have independently reviewed current composition. Clearing consumer `d807421e` has 59 reviewed domain cases, five fuzz properties and both compiler profiles; two actual-current Safe clearing cases pass independent review (`d9d7d46b`). A qualified full-current trace measures 8,755,856 gas in the first consumer call versus the 500,000 ceiling. Aggregate/storage optimization and shared mint/rights/settlement costs remain open; no cold gas or deployment acceptance |
 | SALE-03 | Private sales/offers and owner-signed consignment grants have exact revocation and secondary-settlement semantics | Revenue; PAY-04 and artist consent | Building: `7139688b` implements native secondary PRIVATE_SALE and OFFER_SALE, with 42 reviewed domain cases and fuzzing. Prior collector delivery, actual-current Core/royalty composition and broader inventory sale kinds remain |
-| SALE-04 | Remaining English-auction branches, including first-bid-starts and mint-at-settlement, use shared authority and settlement | Revenue; PAY-04 | Queued |
+| SALE-04 | Remaining English-auction branches, including first-bid-starts and mint-at-settlement, use shared authority and settlement | Revenue; PAY-04 | Building: new paid PREPARED handoff; shared clock13 both modes/three256 properties; actual house, escrow, Safe, delivery and full branch acceptance pending |
 | MINT-01 | Signed tickets, burn-to-mint and delegate gates, counter/nullifier continuity and required content-selection behavior | Integrator / revenue builder; shared artist/payment interfaces | Building: full-payload ticket/offer revocation at the Manager/Ledger boundary is assigned; other listed behaviors retain their acceptance scope |
 | ENT-01 | Reviewed non-VRF provider and safe-mode fallback instances are installed; actual provider failure/recovery follows the specified lifecycle | Integrator / freed builder; provider docs and exact interfaces | Building: ARRNG adapter and four actual-current Safe/Executor cases accepted in `72c208f2`; safe-mode, full recovery and deployed upstream acceptance remain |
 | ENT-02 | Scope/reveal policies, fee escrow, keeper/SLO fallback and recovery preserve committed entropy without discretionary rerolls | Integrator / freed builder; ENT-01 | Building: policy/escrow/typed quote source integrated `66d70e04`, with 44 focused cases, 30 metadata regressions and six planner cases; separate 14-case actual current/Safe composition independently accepted with its captured pre-unique-holder planner; governed timing/SLO source has 54 accepted domain cases and 30 metadata regressions, with a separately accepted seven-case actual governance/Safe run captured before operation 33; AT_MINT attempts and recovery remain |

@@ -22,13 +22,38 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active work
 
-The artist builder's current native assembly now passes three actual workflows:
-complete original contract deployment with runtime pins, paid minting with a Safe
-as the artist and entropy fulfillment, and original content consent with checkpoint
-and dual archival coverage. Its two later cases exposed a fixture attestation URI
-that differed from the record URI. The canonical decoder rejected it; the corrected
-fixture is under test. Complete description seals, snapshot and finality ceremony
-acceptance remain pending, and these builder captures are not a new frozen candidate.
+The current native assembly retains three passing actual workflows: complete
+original contract deployment with runtime pins, paid minting with a Safe artist
+and EOA buyer plus entropy fulfillment, and original content consent/checkpoint
+with dual archival coverage. The corrected attestation URI now passes decoding.
+Two later cases next fail because the fixture used its relay as recorder instead
+of the actual Artist Safe. The reviewed successor consistently uses that Safe,
+publishes exact Store payload bytes before admission and raises the original
+publication read budget through governance. Description seals, snapshot and the
+full finality ceremony still require successful execution; no new candidate exists.
+
+The preservation Safe increment `0c6da9e4` is independently reviewed, integrated
+and pushed. Ten unique IR cases cover inventory, bundle and artifact calls,
+including one 256-input property, actual Safe mutations and identical signed
+failure/repair/retry. Twenty selector IDs across 27 per-host interface occurrences
+are mapped. Read-only calls use a stateless test probe executed by the real Safe;
+small typed bundle boundaries are explicit. This adds call-surface evidence, not
+a new full-bundle capacity or complete Stream-wide Safe claim.
+
+The next commerce increment implements the actual paid PREPARED mint handoff for
+a new versioned native auction while retaining the existing V2 interface.
+[ADR 0043](../docs/adr/0043-deferred-auction-clocks-and-no-bid.md) resolves the three
+clock/no-bid combinations found during source review. Auction implementation and
+all remaining SALE-04 acceptance remain open.
+
+The reusable auction clock now passes 13 focused tests in both compiler modes,
+including three 256-input properties per mode. It validates clock modes and
+waivers, starts the first-bid clock once, caps subsequent anti-snipe extensions,
+keeps pause toll separate, rounds bid increments upward and preserves a signed
+absolute settlement ceiling. An initial memory-alias defect was caught by the
+boundary tests and fixed with an explicit state copy. This internal library still
+needs the new auction's actual escrow, authority, events and terminal-state
+integration; it does not change the existing V2 house or close SALE-04.
 
 A reusable operator-owned CREATE slot now has ten passing focused tests in both
 compiler modes, one 256-input property each and a protected local script rehearsal.
