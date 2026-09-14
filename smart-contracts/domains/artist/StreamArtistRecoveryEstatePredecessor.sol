@@ -16,6 +16,9 @@ import {
     StreamArtistRecoveryEstateGuardians as EstateGuardians
 } from "./StreamArtistRecoveryEstateGuardians.sol";
 import { StreamArtistHashes } from "./StreamArtistHashes.sol";
+import {
+    StreamArtistRecoveryEstateHistory as EstateHistory
+} from "./StreamArtistRecoveryEstateHistory.sol";
 import { StreamArtistRotationState } from "./StreamArtistRotationState.sol";
 import { StreamArtistSuccessionState } from "./StreamArtistSuccessionState.sol";
 import { StreamArtistSuccessionHashes } from "./StreamArtistSuccessionHashes.sol";
@@ -101,7 +104,6 @@ library StreamArtistRecoveryEstatePredecessor {
                     ) != head || estate.phases[head] != 2 || estate.pending[p.artistId] != 0
                 || rotations.pending[p.artistId] != 0
                 || rotations.latestExecution[p.artistId] != head
-                || rotations.latestTransition[p.artistId] != head
                 || rotations.retirement[p.artistId][f.request.incumbent] != head
                 || cause.facts.executedTransitionHash != head
                 || cause.facts.pendingTransitionHash != 0
@@ -125,7 +127,11 @@ library StreamArtistRecoveryEstatePredecessor {
         } else if (f.execution.governanceActionId != 0 || f.execution.governanceWitnessHash != 0) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         }
-        bytes32 closureProof = _closure(resolutions, contests, e, cause, f.transition);
+        bytes32 closureProof = _closure(rotations, resolutions, contests, e, cause, f.transition);
+        bytes32 laterProof = _lastVeto(rotations, resolutions, contests, e, cause, f.transition);
+        if (laterProof != 0 && closureProof == 0) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
+        }
         if (
             recovery.vestingHistory.latest[p.artistId] != head || f.vesting.artistId != p.artistId
                 || f.vesting.transitionRecordHash != head || f.vesting.operationId != 40
@@ -133,9 +139,9 @@ library StreamArtistRecoveryEstatePredecessor {
                 || f.vesting.newAddress != cause.facts.incumbent
                 || f.vesting.executedAt != f.execution.executedAt || f.vesting.ownerRevision == 0
                 || f.vesting.ownerRevision <= f.vesting.guardians.ownerRevision
-                || f.vesting.previousTransitionRecordHash != 0 || f.vesting.previousCommitment != 0
                 || f.vesting.commitment == 0 || f.vesting.commitment != _vestingHash(e, f.vesting)
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
+        bytes32 ancestry = EstateHistory.previous(recovery, rotations, e, f.request, f.vesting);
         f.guardians = EstateGuardians.prefix(
             recovery.guardianHistory,
             rotations,
@@ -173,10 +179,10 @@ library StreamArtistRecoveryEstatePredecessor {
                 || f.designation.terms.artistId != p.artistId
                 || f.designation.terms.successor != f.request.terms.successor
                 || f.designation.terms.directiveHash != f.request.pairedDirectiveRecordHash
-                || f.designation.authorityClass != 1 || f.designation.signer != f.request.incumbent
+                || f.designation.authorityClass != 1 || f.designation.signer == address(0)
+                || (ancestry == 0 && f.designation.signer != f.request.incumbent)
                 || f.designation.signedAt > f.request.requestedAt
-                || f.designation.provisional.transitionRecordHash != 0
-                || f.designation.provisional.windowEndsAt != 0
+                || !_planAssociation(rotations, p.artistId, f.designation.provisional, ancestry)
                 || StreamArtistSuccessionHashes.designationRecord(
                         e,
                         f.designation.terms,
@@ -185,8 +191,10 @@ library StreamArtistRecoveryEstatePredecessor {
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         f.paired = succession.directives[f.request.pairedDirectiveRecordHash];
         f.forbidden = succession.directives[f.request.forbiddenDirectiveRecordHash];
-        _directive(e, f.request, f.paired, f.request.pairedDirectiveRecordHash);
-        _directive(e, f.request, f.forbidden, f.request.forbiddenDirectiveRecordHash);
+        _directive(rotations, e, f.request, f.paired, f.request.pairedDirectiveRecordHash, ancestry);
+        _directive(
+            rotations, e, f.request, f.forbidden, f.request.forbiddenDirectiveRecordHash, ancestry
+        );
         f.capabilities = EstateState.activationCapabilities(
             succession, f.request.designationRecordHash, f.request.forbiddenDirectiveRecordHash
         );
@@ -205,19 +213,30 @@ library StreamArtistRecoveryEstatePredecessor {
                 f
             )
         );
-        if (closureProof == 0) return factsHash;
+        if (closureProof != 0) {
+            factsHash = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_RECOVERY_CLOSED_FIRST_ESTATE_FACTS_V1"),
+                    factsHash,
+                    closureProof
+                )
+            );
+        }
+        if (ancestry == 0 && laterProof == 0) return factsHash;
         return keccak256(
             abi.encode(
-                keccak256("6529STREAM_ARTIST_RECOVERY_CLOSED_FIRST_ESTATE_FACTS_V1"),
+                keccak256("6529STREAM_ARTIST_RECOVERY_ESTATE_CONTINUATION_FACTS_V1"),
                 factsHash,
-                closureProof
+                ancestry,
+                laterProof
             )
         );
     }
 
     // Consume authenticated immutable owner records, not a fresh historical governance decision.
-    // Kind-2 standing contests and later activation/rotation histories remain outside this profile.
+    // Original immutable causes distinguish compromise from a pending-rotation standing veto.
     function _closure(
+        StreamArtistRotationState.State storage rotations,
         Resolution.State storage resolutions,
         ContestState.State storage contests,
         StreamArtistHashes.Environment memory e,
@@ -239,18 +258,29 @@ library StreamArtistRecoveryEstatePredecessor {
         if (
             closed.artistId != current.facts.artistId || closed.transitionRecordHash != t.recordHash
                 || closed.dismissalRecordHash == 0 || closed.windowEndsAt != t.postWindowEndsAt
-                || closed.contestedAt != t.contestedAt || closed.contestedAt < t.executedAt
+                || closed.contestedAt != t.contestedAt
+                || (closed.contestedAt != 0 && closed.contestedAt < t.executedAt)
                 || closed.abandoned != abandoned || current.facts.previousResolutionHash == 0
         ) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(current.facts.artistId);
         }
         Dismissal.Record memory original = resolutions.records[closed.dismissalRecordHash];
         bytes32 originalProof = _dismissed(
-            resolutions, contests, e, current.facts, t, original, closed.dismissalRecordHash
+            rotations,
+            resolutions,
+            contests,
+            e,
+            current.facts,
+            t,
+            original,
+            closed.dismissalRecordHash
         );
         Dismissal.Cause memory firstCause = resolutions.causes[original.terms.expectedCauseHash];
         if (
-            firstCause.facts.enteredAt != closed.contestedAt
+            (firstCause.facts.kind == 1
+                        ? firstCause.facts.enteredAt != closed.contestedAt
+                        : closed.contestedAt != 0 || abandoned
+                        || firstCause.facts.enteredAt < t.postWindowEndsAt)
                 || (!abandoned && original.dismissedAt < t.postWindowEndsAt)
         ) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(current.facts.artistId);
@@ -258,7 +288,14 @@ library StreamArtistRecoveryEstatePredecessor {
         // The closure never moves. Today's latest admitted dismissal may be a later episode.
         Dismissal.Record memory latest = resolutions.records[current.facts.previousResolutionHash];
         bytes32 latestProof = _dismissed(
-            resolutions, contests, e, current.facts, t, latest, current.facts.previousResolutionHash
+            rotations,
+            resolutions,
+            contests,
+            e,
+            current.facts,
+            t,
+            latest,
+            current.facts.previousResolutionHash
         );
         if (
             latest.dismissedAt < original.dismissedAt
@@ -270,6 +307,7 @@ library StreamArtistRecoveryEstatePredecessor {
     }
 
     function _dismissed(
+        StreamArtistRotationState.State storage rotations,
         Resolution.State storage resolutions,
         ContestState.State storage contests,
         StreamArtistHashes.Environment memory e,
@@ -299,12 +337,19 @@ library StreamArtistRecoveryEstatePredecessor {
                         )
                     ) || cause.facts.artistId != current.artistId
                 || cause.facts.executedTransitionHash != t.recordHash
-                || cause.facts.pendingTransitionHash != 0
                 || cause.facts.incumbent != current.incumbent || cause.facts.actor == address(0)
-                || cause.facts.referenceHash == 0 || cause.facts.evidenceHash == 0
-                || cause.facts.reasonHash == 0 || cause.facts.enteredAt < t.executedAt
+                || cause.facts.referenceHash == 0 || cause.facts.enteredAt < t.executedAt
                 || cause.facts.enteredAt > r.dismissedAt
                 || cause.facts.previousResolutionHash != r.terms.expectedResolutionHash
+        ) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(current.artistId);
+        }
+        if (cause.facts.kind == 2) {
+            return EstateHistory.standing(rotations, resolutions, e, cause, r, t);
+        }
+        if (
+            cause.facts.pendingTransitionHash != 0 || cause.facts.evidenceHash == 0
+                || cause.facts.reasonHash == 0
         ) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(current.artistId);
         }
@@ -315,6 +360,32 @@ library StreamArtistRecoveryEstatePredecessor {
         Contest.Record memory contest = contests.records[cause.facts.referenceHash];
         _contest(e, cause, historical, contest, t.recordHash);
         return keccak256(abi.encode(r, cause, contest));
+    }
+
+    function _lastVeto(
+        StreamArtistRotationState.State storage rotations,
+        Resolution.State storage resolutions,
+        ContestState.State storage contests,
+        StreamArtistHashes.Environment memory e,
+        Dismissal.Cause memory current,
+        R.TransitionState memory t
+    ) private view returns (bytes32) {
+        bytes32 latest = rotations.latestTransition[current.facts.artistId];
+        if (latest == t.recordHash) return 0;
+        Dismissal.Closure memory closed = resolutions.closures[latest];
+        Dismissal.Record memory r = resolutions.records[closed.dismissalRecordHash];
+        Dismissal.Cause memory cause = resolutions.causes[r.terms.expectedCauseHash];
+        if (
+            latest == 0 || closed.transitionRecordHash != latest || cause.facts.kind != 2
+                || cause.facts.referenceHash != latest
+                || r.dismissedAt
+                    > resolutions.records[current.facts.previousResolutionHash].dismissedAt
+        ) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(current.facts.artistId);
+        }
+        return _dismissed(
+            rotations, resolutions, contests, e, current.facts, t, r, closed.dismissalRecordHash
+        );
     }
 
     function _dismissalHash(StreamArtistHashes.Environment memory e, Dismissal.Record memory r)
@@ -379,10 +450,12 @@ library StreamArtistRecoveryEstatePredecessor {
     }
 
     function _directive(
+        StreamArtistRotationState.State storage rotations,
         StreamArtistHashes.Environment memory e,
         Estate.RequestRecord memory request,
         Succ.DirectiveRecord memory d,
-        bytes32 hash
+        bytes32 hash,
+        bytes32 ancestry
     ) private view {
         if (hash == 0) {
             Succ.DirectiveRecord memory empty;
@@ -393,13 +466,26 @@ library StreamArtistRecoveryEstatePredecessor {
         }
         if (
             d.recordHash != hash || d.terms.artistId != request.terms.artistId
-                || d.authorityClass != 1 || d.signer != request.incumbent
-                || d.signedAt > request.requestedAt || d.provisional.transitionRecordHash != 0
-                || d.provisional.windowEndsAt != 0
+                || d.authorityClass != 1 || d.signer == address(0)
+                || (ancestry == 0 && d.signer != request.incumbent)
+                || d.signedAt > request.requestedAt
+                || !_planAssociation(rotations, request.terms.artistId, d.provisional, ancestry)
                 || StreamArtistSuccessionHashes.directiveRecord(
                         e, d.terms, T.Authorization(d.nonce, d.signedAt, bytes(""))
                     ) != hash
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(request.terms.artistId);
+    }
+
+    function _planAssociation(
+        StreamArtistRotationState.State storage rotations,
+        bytes32 artistId,
+        R.ProvisionalAssociation memory a,
+        bytes32 ancestry
+    ) private view returns (bool) {
+        if (ancestry == 0) {
+            return a.transitionRecordHash == 0 && a.windowEndsAt == 0;
+        }
+        return StreamArtistRotationState.eligible(rotations, artistId, a);
     }
 
     function _vestingHash(StreamArtistHashes.Environment memory e, V.Snapshot memory v)

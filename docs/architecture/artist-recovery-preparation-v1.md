@@ -682,3 +682,56 @@ required work.
 ```powershell
 python scripts/dev.py test --suite unit --match-path test/unit/artist/StreamArtistClosedEstateRecoveryActual.t.sol --via-ir --code-size-limit 2000000 --gas-limit 1000000000 --memory-limit 1073741824
 ```
+
+
+## Standing veto and living-history estate continuation
+
+The next estate continuation keeps current recovery tied to the original
+operation-33 class-3 compromise. Historical operation-31 standing vetoes are a
+different producer: they veto a pending rotation, store a kind-2 Cause with zero
+evidence (and possibly zero reason), and consume that rotation's veto key.
+Operation 41 may then abandon the pending rotation and close the original
+expired estate window without fabricating an estate contest timestamp. The
+reader authenticates the original RotationRecord, its canonical hash and
+phase-3 timestamp, the exact pending Closure, Dismissal and Cause. The original
+estate closure never moves when a later episode is dismissed. Today's latest
+admitted dismissal and latest closed pending rotation are checked separately.
+
+An estate activation may also follow living-authority rotations. The actual
+operation-40 vesting links the then-current operation-32 vesting and its original
+commitment. The reader checks that immutable parent, its original executed
+rotation, class-1 authority, addresses, chronology, owner revision and guardian
+prefix, together with the parent's already-recorded predecessor commitment.
+This is bounded consumption of admitted owner history, not an unbounded replay
+of historical signatures or governance. A selected estate designation or
+directive may retain its earlier living signer's address. A class-1 guardian
+record that matured during a prior actual rotation may remain operative; its
+original association, signer, canonical record, captured window and eligibility
+must all match. Abandoned associations never become eligible.
+
+The original zero-parent first-estate and kind-1 closure commitments remain
+byte-for-byte unchanged. Only the additional paths use the separately tagged
+ESTATE_CONTINUATION_FACTS_V1 wrapper around the original facts, with the exact
+ancestry and latest standing proof. Complete guardian-history registration and
+lifetime veto membership remain unchanged, including earlier lower-nonce sets.
+Current binding, new-address acceptance, replay lanes, capability intersection,
+governance delay and atomic Archive effects retain their existing checks.
+
+The focused StreamArtistEstateStandingHistoryActualTest uses actual Artist,
+threshold Safe and Archive contracts with explicitly typed unit Core and
+governance boundaries. Its cases cover zero-reason standing closure, mixed
+episodes, two prior living rotations with an earlier signer plan and mature
+guardian, lower-nonce veto, corrupted immutable links, and identical Archive
+retry. This guide does not infer native acceptance from those source cases.
+Run the aggregate unit harness with its required limits:
+
+```powershell
+python scripts/dev.py test --suite unit --match-path test/unit/artist/StreamArtistEstateStandingHistoryActual.t.sol --via-ir --code-size-limit 2000000 --gas-limit 1000000000 --memory-limit 1073741824
+```
+
+Those raised aggregate limits accommodate the test's fixture CREATE operations;
+they do not establish individual deployment or recovery transaction capacity.
+Executed successor rotations after estate activation, prior recoveries, nonempty
+supersession and later estate plans remain distinct continuation work. The
+existing request producer remains living class 1/status 1, so this increment
+does not invent a second successor-to-successor estate activation.

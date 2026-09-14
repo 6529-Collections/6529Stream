@@ -1468,3 +1468,39 @@ records retain their existing admission semantics. Complete-history veto still
 includes unsuperseded members of abandoned and lower-nonce guardian sets.
 The [preparation guide](../architecture/artist-recovery-preparation-v1.md#closed-first-estate-compromise-continuation)
 records the focused actual Artist/Safe/Archive scope and remaining lifecycle work.
+
+
+## Estate standing and pre-activation living history
+
+The authorized continuation extends the closed first-estate consumer to actual
+operation-31 kind-2 standing veto history and an operation-40 activation with
+original living operation-32 vesting ancestry. It changes no operation, signed
+schema, producer, authorization rule, replay key or owner storage layout.
+Current estate recovery still requires the actual operation-33 kind-1 Cause.
+
+A historical standing veto is authenticated by its saved kind-2 Cause and
+original pending RotationRecord, including the exact canonical hash, incumbent,
+phase 3 and contest timestamp. Its pending Closure must be abandoned and name
+the same actual Dismissal. A zero original veto reason is valid; its evidence
+field remains the producer's zero. Original operation-41 evidence, class,
+cohort, witness, action and complete record hash remain required. The original
+executed estate has a separate non-abandoned closure after its captured window;
+its zero contest marker is never rewritten into an operation-33 event. Later
+dismissal heads are authenticated independently without moving the first closure
+or replaying intermediate historical governance.
+
+Original operation-40 and guardian-vesting admission already required the actual
+previous execution and linked immutable vesting commitment. The later-estate
+consumer authenticates that class-1 operation-32 parent and original rotation,
+its predecessor link, chronology and full saved guardian prefix. Selected
+class-1 plans may retain an earlier living signer, and eligible class-1 guardian
+associations retain the actual prior rotation. The full original record/hash,
+current eligibility, complete prefix and lifetime veto are preserved. This
+does not promote a class-3, abandoned or fabricated provisional association.
+
+Existing first-estate Facts and kind-1 closure preimages remain exact. New
+ancestry/standing paths add a distinct committed wrapper, keeping current
+acceptance, capability, nonce, registration, veto and Archive checks intact.
+The [preparation guide](../architecture/artist-recovery-preparation-v1.md#standing-veto-and-living-history-estate-continuation)
+records this bounded scope and its actual-contract test recipe. Full-current
+and transaction-capacity acceptance remain separate from aggregate domain tests.

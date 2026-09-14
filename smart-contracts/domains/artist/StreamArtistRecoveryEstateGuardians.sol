@@ -84,7 +84,7 @@ library StreamArtistRecoveryEstateGuardians {
             if (
                 entry.index > vesting.guardians.count
                     || entry.ownerRevision >= vesting.ownerRevision
-                    || g.provisional.transitionRecordHash != 0 || g.provisional.windowEndsAt != 0
+                    || !_livingAssociation(rotations, environment, artistId, vesting, g)
             ) {
                 revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
             }
@@ -112,6 +112,30 @@ library StreamArtistRecoveryEstateGuardians {
         if (!RotationState.eligible(rotations, artistId, g.provisional)) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
         }
+    }
+
+    function _livingAssociation(
+        RotationState.State storage rotations,
+        StreamArtistHashes.Environment memory e,
+        bytes32 artistId,
+        V.Snapshot memory estate,
+        R.GuardianRecord memory g
+    ) private view returns (bool) {
+        R.ProvisionalAssociation memory a = g.provisional;
+        if (a.transitionRecordHash == 0) return a.windowEndsAt == 0;
+        if (estate.previousTransitionRecordHash == 0 || estate.previousCommitment == 0) {
+            return false;
+        }
+        R.RotationRecord memory r = rotations.rotations[a.transitionRecordHash];
+        return r.recordHash == a.transitionRecordHash && r.terms.artistId == artistId
+            && r.terms.oldAddress != address(0) && r.terms.newAddress == g.signer
+            && r.terms.oldAddress != r.terms.newAddress && r.transition.artistId == artistId
+            && r.transition.recordHash == r.recordHash && r.transition.phase == 2
+            && r.transition.executedAt != 0 && r.transition.executedAt <= g.signedAt
+            && g.signedAt < a.windowEndsAt && r.transition.postWindowEndsAt == a.windowEndsAt
+            && StreamArtistRotationHashes.rotationRecord(
+                e, r.terms, r.oldNonce, r.transition.stagedAt, r.transition.contestEndsAt
+            ) == r.recordHash && RotationState.eligible(rotations, artistId, a);
     }
 
     function _record(
