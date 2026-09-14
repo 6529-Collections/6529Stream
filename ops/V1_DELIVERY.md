@@ -39,7 +39,7 @@ snapshot, entropy-source set and remaining local seals. The reviewed correction
 uses the actual Artist Safe as recorder, publishes the exact Store payload before
 admission and sets the original publication read budget through governance.
 
-The exact five-case run passed in 12.217 seconds using the completed native build;
+The updated exact five-case run passes in 12.469 seconds using the native build;
 all 352 nonempty production runtimes fit. Its elevated aggregate test allowance
 covers many deployments and operations, not one shipping transaction. The full
 sixth ceremony is separate: fresh repeated browser captures are verified, while
@@ -49,7 +49,10 @@ passed that point and exposed incompatible nested component-read budgets. The
 native provider now separates component leaf reads from complete-source reads;
 29 focused cases pass in both compiler modes, including one 256-input property
 per mode. The fixture's matching budget configuration has separate source review.
-The updated complete ceremony and per-transaction capacity remain open; no new
+The updated complete ceremony reaches the direct Discovery-to-Reference read
+and fails a confirmed nested gas-reserve check. A separately reviewed correction
+raises only the fixture component cap from 8M to 12M; its native successor is
+running. Complete ceremony and per-transaction capacity remain open; no new
 candidate exists.
 
 The preservation Safe increment `0c6da9e4` is independently reviewed, integrated
@@ -60,22 +63,26 @@ are mapped. Read-only calls use a stateless test probe executed by the real Safe
 small typed bundle boundaries are explicit. This adds call-surface evidence, not
 a new full-bundle capacity or complete Stream-wide Safe claim.
 
-The paid PREPARED mint handoff now fits the production runtime limit after moving
-complete native/deferred recording workers into a fixed linked library: Manager
-is 22,341 bytes and the recorder 22,000 in the reviewed native compilation. The
-corrected test selection executes the actual fourteen-case handoff suite: two
-pass and twelve fail at incorrect fixture serial/nonce expectations. Four older
-companion suites initially lacked their Permit2 JSON; with the original fixture
-restored, their four selected bodies pass using unchanged compiler artifacts.
-The source-reviewed full eighteen-case successor corrects the test baselines and
-includes both runtime fixtures. Its run remains pending; no failed or absent
-body is counted as passing.
+The atomic prepared native paid handoff is independently accepted and integrated.
+All eighteen selected cases pass: fourteen exercise the actual Core, Manager,
+ledger, funding and official recorder, including one 256-input property, and four
+retain original native/deferred companion controls. The actual suite includes
+complete rollback and identical signed Safe retry. Manager is 22,341 bytes and
+the recorder 22,000 in the reviewed via-IR compilation; all production products
+fit. Final formatting has a separate source/control-flow bridge. The supported
+profile is exact-tokenData singleton collection PROFILE; broader rights/content
+profiles and global deployment wiring remain required. The
+[caller guide](../docs/integrations/prepared-native-settlement.md) describes the
+one-time owner binding and complete transaction path.
 
 The auction delegation helper is integrated with six reviewed tests, including
-one 256-input property and the actual NFTDelegation registry. The new house has
-fifteen source-reviewed cases, including delegated bidding and Safe refund/claim
-paths, awaiting runtime acceptance after the paid handoff. Broader custody,
-content-leaf, rights and gate profiles remain mandatory. [ADR 0043](../docs/adr/0043-deferred-auction-clocks-and-no-bid.md)
+one 256-input property and the actual NFTDelegation registry. The content-proof
+helper also passes five cases and a 256-input property in each compiler mode.
+The new house's first native run fails its setup size check at 33,651 bytes,
+9,075 over EIP-170, before any of its fifteen selected behavior tests execute.
+The builder is extracting complete registration and settlement workers into
+fixed linked libraries while retaining the house's API and storage layout.
+Broader custody, content-leaf, rights and gate profiles remain mandatory. [ADR 0043](../docs/adr/0043-deferred-auction-clocks-and-no-bid.md)
 owns clock and no-bid combinations; existing V2 behavior is retained.
 
 Current graph fixture preparation now has a portable repository command:

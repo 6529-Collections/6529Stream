@@ -1,10 +1,11 @@
 """Reject stale or ambiguous native graph input before producing fixture files."""
 import copy
+import os
 import tempfile
 import unittest
 from pathlib import Path
 
-from tools.build.prepare_current_graph import CREATION_NAME, CREATION_SOURCE, select_build, validate_sources
+from tools.build.prepare_current_graph import CAMPAIGN_HOSTS, CREATION_NAME, CREATION_SOURCE, check_campaign_owner, select_build, validate_sources
 
 
 class CurrentGraphInputsTests(unittest.TestCase):
@@ -23,6 +24,33 @@ class CurrentGraphInputsTests(unittest.TestCase):
         del cache["files"][source]
         with self.assertRaises(ValueError):
             select_build(cache)
+
+    def test_campaign_uses_executed_host_context_instead_of_unrelated_current_suite(self):
+        source, name = CAMPAIGN_HOSTS[0]
+        cache = {"files": {source: {"artifacts": {name: {"0.8.19": {
+            "current": {"path": Path(source).name + "/" + name + ".json", "build_id": "campaign"}}}}},
+            "test/current/StreamCurrentStack.t.sol": {"artifacts": {
+                "StreamCurrentStackTest": {"0.8.19": {"current": {
+                    "path": "StreamCurrentStack.t.sol/StreamCurrentStackTest.json", "build_id": "unrelated"}}}}}}}
+        self.assertEqual(select_build(cache), "unrelated")
+        self.assertEqual(select_build(cache, CAMPAIGN_HOSTS), "campaign")
+        del cache["files"][source]
+        with self.assertRaises(ValueError):
+            select_build(cache, CAMPAIGN_HOSTS)
+
+    def test_only_the_active_campaign_child_can_prepare_shared_inputs(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            lease = root / "cache/current-graph.campaign.lock"
+            lease.parent.mkdir()
+            check_campaign_owner(root, False)
+            lease.write_text(str(os.getppid()), encoding="ascii")
+            check_campaign_owner(root, True)
+            with self.assertRaises(ValueError):
+                check_campaign_owner(root, False)
+            lease.write_text("different-owner", encoding="ascii")
+            with self.assertRaises(ValueError):
+                check_campaign_owner(root, True)
 
     def test_changed_source_cannot_reuse_a_passing_old_build(self):
         with tempfile.TemporaryDirectory() as folder:

@@ -68,7 +68,11 @@ python scripts/dev.py test
 The command uses the actual graph test host's cache coordinate, checks current
 source bytes, authenticates the host and creation helper against complete native
 compiler output, and generates the 54 required products for both graph fixtures.
-Complete exports remain under ignored `artifacts/current-graph/native`; original
+For a custom cache, use `python -m tools.build.prepare_current_graph --out
+<output-directory> --cache-path <cache-directory>`; both paths must identify the
+same completed compilation. Campaigns select their actual fuzz/invariant hosts
+automatically. Complete exports remain under ignored
+`artifacts/current-graph/native`; original
 Forge outputs stay unchanged. CRLF-to-LF compiler transport is recorded explicitly.
 A stale source, ambiguous cache entry or changed executable fails preparation.
 For mixed incremental compiler contexts, a fresh current build with `--force`
@@ -156,8 +160,13 @@ execution also fail it. These budgets are not correctness or security claims.
 Ordinary current/default tests use the quick invariant limits in `foundry.toml`.
 The campaign overrides runtime fuzz settings without changing compiler inputs.
 Each preset/seed normally uses its own `out/campaigns/` and `cache/campaigns/`
-pair, protected by an exclusive campaign lock. Different seeds or presets can
-run concurrently when resources permit. `--reuse-current` saves a cold build by
+pair. Before execution, the command compiles/lists the exact two campaign hosts
+and prepares their graph inputs from that cache. `compile.log` and
+`prepare-graph.log` retain those steps; a failed preparation executes no properties.
+The report binds the resulting projection manifest and checks it again afterward.
+A checkout-wide campaign lock protects the shared graph fixture paths, so run
+parallel campaigns in separate worktrees. Do not rebuild or prepare graph inputs
+in a checkout while its campaign is running. `--reuse-current` saves a cold build by
 using `out/current` and `cache/current`; use it only when no other build, exporter
 or campaign accesses those paths. The CLI lock coordinates campaigns, not
 independently launched Forge processes.

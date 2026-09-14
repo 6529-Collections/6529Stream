@@ -5,6 +5,12 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add atomic prepared native paid minting through the fixed official recorder,
+  with original-sale replay protection, complete rollback and Safe retry tests.
+- Add the native auction content-proof helper; auction integration remains open.
+- Prepare fuzz/invariant graph inputs from each campaign's own compiler context
+  before execution, with retained preparation logs and a shared-fixture lock.
+
 - Add portable current graph fixture preparation from authenticated native compiler
   outputs and exact NFTDelegation grant helpers for the new auction integration.
 

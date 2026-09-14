@@ -11,8 +11,11 @@ p.add_argument('--build-id',required=True)
 p.add_argument('--output',type=Path,required=True)
 p.add_argument('--products',type=Path)
 p.add_argument('--helpers',type=Path)
+p.add_argument('--out',type=Path)
+p.add_argument('--cache-path',type=Path)
 a=p.parse_args()
-base=a.project/'out/current'; cache_path=a.project/'cache/current/solidity-files-cache.json'
+base=a.out or a.project/'out/current'
+cache_path=(a.cache_path or a.project/'cache/current')/'solidity-files-cache.json'
 cache_raw=cache_path.read_bytes();cache=json.loads(cache_raw)
 current_path=base/'build-info'/(a.build_id+'.json');current_raw=current_path.read_bytes();current=json.loads(current_raw)
 assert current['id']==a.build_id and current['solcVersion']=='0.8.19'

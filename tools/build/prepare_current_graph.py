@@ -25,12 +25,20 @@ def sha(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
 
 
-def select_build(cache: dict) -> str:
+GRAPH_HOSTS = (
+    ("test/current/StreamCurrentStack.t.sol", "StreamCurrentStackTest"),
+    ("test/current/StreamNativeFinalityAssembly.t.sol", "StreamNativeFinalityAssemblyTest"),
+)
+CAMPAIGN_HOSTS = (
+    ("test/current/StreamCurrentStackFuzz.t.sol", "StreamCurrentStackFuzzTest"),
+    ("test/current/StreamCurrentStackInvariant.t.sol", "StreamCurrentStackInvariantTest"),
+)
+
+
+def select_build(cache: dict, hosts: tuple | None = None) -> str:
     # The creation library may be unchanged and cached from an older compilation.
     # The actual graph test host determines the context whose linked products run.
-    hosts = (("test/current/StreamCurrentStack.t.sol", "StreamCurrentStackTest"),
-             ("test/current/StreamNativeFinalityAssembly.t.sol", "StreamNativeFinalityAssemblyTest"))
-    for source, name in hosts:
+    for source, name in hosts or GRAPH_HOSTS:
         if source not in cache["files"]:
             continue
         entries = cache["files"][source]["artifacts"][name]["0.8.19"]
@@ -68,8 +76,18 @@ def validate_sources(project: Path, build: dict) -> list[str]:
     return transports
 
 
-def prepare(project: Path, products_path: Path) -> dict:
+def check_campaign_owner(project: Path, campaign: bool) -> None:
+    lease = project / "cache/current-graph.campaign.lock"
+    if lease.exists() and (not campaign or lease.read_text(encoding="ascii") != str(os.getppid())):
+        raise ValueError("An active campaign owns these graph inputs; finish it before preparation")
+
+
+def prepare(project: Path, products_path: Path, *, out: Path | None = None,
+            cache_dir: Path | None = None, campaign: bool = False) -> dict:
     project = project.resolve()
+    out = (project / (out or "out/current")).resolve()
+    cache_dir = (project / (cache_dir or "cache/current")).resolve()
+    hosts = CAMPAIGN_HOSTS if campaign else GRAPH_HOSTS
     artifact_root = project / "artifacts/current-graph"
     artifact_root.mkdir(parents=True, exist_ok=True)
     lock = artifact_root / ".prepare.lock"
@@ -79,11 +97,16 @@ def prepare(project: Path, products_path: Path) -> dict:
         raise ValueError("Graph preparation is already locked; check the active owner before recovery") from exc
     try:
         os.write(fd, str(os.getpid()).encode()); os.close(fd)
-        cache_path = project / "cache/current/solidity-files-cache.json"
+        # Check inside the prepare lock. A campaign cannot begin execution until its
+        # own child prepares successfully; other preparers then see its retained lease.
+        check_campaign_owner(project, campaign)
+        cache_path = cache_dir / "solidity-files-cache.json"
         cache_raw = cache_path.read_bytes()
         cache = json.loads(cache_raw)
-        build_id = select_build(cache)
-        build_path = project / "out/current/build-info" / (build_id + ".json")
+        if campaign and any(source not in cache["files"] for source, _ in hosts):
+            raise ValueError("Both campaign hosts must be compiled before preparation")
+        build_id = select_build(cache, hosts)
+        build_path = out / "build-info" / (build_id + ".json")
         build_raw = build_path.read_bytes()
         build = json.loads(build_raw)
         if build["id"] != build_id:
@@ -93,10 +116,7 @@ def prepare(project: Path, products_path: Path) -> dict:
         if not products or any(not source.startswith("smart-contracts/") for source in products.values()):
             raise ValueError("Graph product inventory must name production sources")
         helper = {CREATION_NAME: CREATION_SOURCE}
-        for source, name in (
-            ("test/current/StreamCurrentStack.t.sol", "StreamCurrentStackTest"),
-            ("test/current/StreamNativeFinalityAssembly.t.sol", "StreamNativeFinalityAssemblyTest"),
-        ):
+        for source, name in hosts:
             if source in cache["files"]:
                 helper[name] = source
         with tempfile.TemporaryDirectory(prefix="prepare-", dir=artifact_root) as temporary:
@@ -107,6 +127,7 @@ def prepare(project: Path, products_path: Path) -> dict:
             command = [sys.executable, str(ROOT / "test/helpers/native_assembly_native_exports.py"),
                        "--project", str(project), "--build-id", build_id,
                        "--products", str(products_path), "--helpers", str(helper_path),
+                       "--out", str(out), "--cache-path", str(cache_dir),
                        "--output", str(exports)]
             subprocess.run(command, check=True)
             spec = importlib.util.spec_from_file_location(
@@ -115,7 +136,10 @@ def prepare(project: Path, products_path: Path) -> dict:
             spec.loader.exec_module(module)
             # Retain the complete exports at a stable address so the projection's
             # provenance remains inspectable after this temporary directory closes.
-            retained = artifact_root / "native" / (build_id + "-" + sha(build_raw)[:16])
+            # Export provenance includes the original paths, selected hosts and exporter.
+            # The same compilation in a different campaign cache has its own provenance.
+            export_digest = sha((exports / "manifest.json").read_bytes())[:16]
+            retained = artifact_root / "native" / (build_id + "-" + export_digest)
             generated_files = {f.relative_to(exports) for f in exports.rglob("*") if f.is_file()}
             if retained.exists():
                 existing_files = {f.relative_to(retained) for f in retained.rglob("*") if f.is_file()}
@@ -149,6 +173,8 @@ def prepare(project: Path, products_path: Path) -> dict:
             result = {"buildId": build_id, "buildInfoSha256": sha(build_raw),
                       "sourceLineEndingTransports": transports, "products": len(products),
                       "productionRuntimes": len(report["productionRuntimeSizes"]),
+                      "out": str(out), "cache": str(cache_dir), "hosts": helper,
+                      "projectionManifestSha256": sha((projected / "manifest.json").read_bytes()),
                       "qualification": "Native fixture projections only; no tests, deployment or release accepted."}
             (artifact_root / "preparation.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
             return result
@@ -160,9 +186,13 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", type=Path, default=ROOT)
     parser.add_argument("--products", type=Path, default=ROOT / "test/fixtures/current-graph/products.json")
+    parser.add_argument("--out", type=Path, help="Completed Forge output directory, relative to project or absolute")
+    parser.add_argument("--cache-path", type=Path, help="Matching Forge cache directory")
+    parser.add_argument("--campaign", action="store_true", help="Bind both executed fuzz/invariant hosts")
     args = parser.parse_args()
     try:
-        print(json.dumps(prepare(args.project, args.products), indent=2))
+        print(json.dumps(prepare(args.project, args.products, out=args.out,
+                                 cache_dir=args.cache_path, campaign=args.campaign), indent=2))
         return 0
     except (AssertionError, KeyError, OSError, ValueError, subprocess.CalledProcessError) as exc:
         print(f"Graph preparation failed: {exc}", file=sys.stderr)

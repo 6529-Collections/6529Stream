@@ -104,6 +104,30 @@ def campaign_budget(results: dict[str, object], runs: int, depth: int, fuzz_runs
                 raise ValueError("Successful invariant did not complete the sequence budget")
 
 
+def campaign_graph_inputs() -> dict[str, str]:
+    """Bind the bytes read by both graph fixtures to their manifest declarations."""
+    result = {}
+    for relative in ("artifacts/current-graph/compiled", "artifacts/native-assembly/compiled"):
+        folder = ROOT / relative
+        manifest = folder / "manifest.json"
+        raw = manifest.read_bytes()
+        data = json.loads(raw)
+        products = data["products"]
+        expected = {name + ".json" for name in products} | {"manifest.json"}
+        if not products or {p.name for p in folder.iterdir()} != expected:
+            raise ValueError("Graph projection file inventory differs from its manifest")
+        result[relative + "/manifest.json"] = hashlib.sha256(raw).hexdigest()
+        for name, facts in products.items():
+            if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name):
+                raise ValueError("Graph projection has a non-contract product name")
+            payload = (folder / (name + ".json")).read_bytes()
+            digest = hashlib.sha256(payload).hexdigest()
+            if len(payload) != facts["projectionBytes"] or digest != facts["projectionSha256"]:
+                raise ValueError("Graph projection bytes differ from their manifest")
+            result[relative + "/" + name + ".json"] = digest
+    return result
+
+
 def campaign(args: argparse.Namespace) -> int:
     """Run a local, reproducible handler campaign without touching release exports."""
     runs, depth, fuzz_runs = CAMPAIGNS[args.mode]
@@ -127,13 +151,14 @@ def campaign(args: argparse.Namespace) -> int:
     if not forge:
         print("Missing forge. See docs/first-30-minutes.md.", file=sys.stderr)
         return 127
-    lock = cache.parent / (cache.name + ".campaign.lock")
+    lock = ROOT / "cache/current-graph.campaign.lock"
     lock.parent.mkdir(parents=True, exist_ok=True)
     try:
         lock_fd = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
     except FileExistsError:
-        print(f"A campaign already owns this cache: {lock}. Do not remove an active lock.", file=sys.stderr)
+        print(f"A campaign already owns this checkout's graph fixtures: {lock}. Do not remove an active lock.", file=sys.stderr)
         return 1
+    os.write(lock_fd, str(os.getpid()).encode("ascii"))
     os.close(lock_fd)
     try:
         artifact.mkdir(parents=True, exist_ok=False)
@@ -199,6 +224,34 @@ def campaign(args: argparse.Namespace) -> int:
         (artifact / "campaign.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
         print(f"[current] {args.mode}: seed={args.seed}, invariant={runs}x{depth}, fuzz={fuzz_runs}/property", flush=True)
         print(f"Evidence: {artifact}; compile/cache: {cache}. Logs stream to forge.log.", flush=True)
+        # Compile the exact selected hosts without executing them, then prepare their
+        # native graph products before any setUp can read the fixture files.
+        preparation_commands = [
+            [*command, "--list"],
+            python_tool("tools.build.prepare_current_graph", "--out", str(out),
+                        "--cache-path", str(cache), "--campaign"),
+        ]
+        report["preparationCommands"] = preparation_commands
+        for stage, preparation_command in zip(("compile", "prepare-graph"), preparation_commands):
+            with (artifact / (stage + ".log")).open("w", encoding="utf-8") as log:
+                prepared = subprocess.run(preparation_command, cwd=ROOT, env=env,
+                                          stdout=log, stderr=subprocess.STDOUT)
+            if prepared.returncode:
+                raise ValueError(f"Campaign {stage} failed; inspect {stage}.log; no properties executed")
+        preparation = ROOT / "artifacts/current-graph/preparation.json"
+        report["graphPreparation"] = json.loads(preparation.read_text(encoding="utf-8"))
+        graph_manifest = ROOT / "artifacts/current-graph/compiled/manifest.json"
+        expected_hosts = {key.rsplit(":", 1)[1]: key.rsplit(":", 1)[0] for key in CAMPAIGN_SUITES}
+        expected_hosts["StreamNativeAssemblyCreation"] = "test/helpers/StreamNativeAssemblyCreation.sol"
+        graph_preparation = report["graphPreparation"]
+        if (Path(graph_preparation["out"]).resolve() != out.resolve()
+                or Path(graph_preparation["cache"]).resolve() != cache.resolve()
+                or graph_preparation["hosts"] != expected_hosts):
+            raise ValueError("Graph preparation does not belong to the selected campaign hosts/cache")
+        graph_before = campaign_graph_inputs()
+        report["graphInputSha256"] = graph_before
+        if graph_before["artifacts/current-graph/compiled/manifest.json"] != graph_preparation["projectionManifestSha256"]:
+            raise ValueError("Graph manifest changed after preparation; no properties executed")
         with (artifact / "forge.log").open("w", encoding="utf-8") as log:
             process = subprocess.Popen(command, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT)
             try:
@@ -209,6 +262,12 @@ def campaign(args: argparse.Namespace) -> int:
                 report["status"] = "INTERRUPTED"
                 return 130
         report["forgeExitCode"] = code
+        try:
+            graph_after = campaign_graph_inputs()
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            raise ValueError("Graph projections changed during campaign; retain output but rerun stable inputs") from error
+        if graph_after != graph_before:
+            raise ValueError("Graph projections changed during campaign; retain output but rerun stable inputs")
         if report["sources"] != campaign_sources():
             raise ValueError("Compiler inputs changed during campaign; retain output but rerun stable sources")
         results = campaign_results((artifact / "forge.log").read_text(encoding="utf-8"))
