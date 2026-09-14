@@ -34,6 +34,16 @@ the denominator. The integrator owns this reporting correction and delivery.
 
 ## Latest integration: 14 September
 
+The current reporting entry point above supersedes the historical checkpoints
+below. Current native auction, bid and custody signing is integrated as
+`db3fca94`: 59 client tests pass and four actual native-getter encoding vectors
+reproduce independently. These are encoding checks, separate from complete
+current SDK lifecycle acceptance. The frozen `a65f7f3e` joined run passes its four
+new Artist commerce/snapshot cases and the separate isolated cold regression;
+three older settlement scenarios need the single-construction fixture repair
+now under incremental compilation. Default snapshots and closed-estate recovery
+are integrated with focused evidence; latest combined acceptance remains open.
+
 The latest accepted increments add actual Artist consent for positive-share
 primary templates (`019b9f23`) and the consent-qualified auction consumer
 (`46676fda`). The two domains have independent passing 15- and 12-test cohorts;
