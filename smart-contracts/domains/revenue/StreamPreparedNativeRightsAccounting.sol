@@ -23,8 +23,8 @@ library StreamPreparedNativeRightsAccounting {
         StreamPreparedNativeSettlementTypes.Facts memory facts = rights.mint;
         StreamPreparedNativeSettlementTypes.Intent memory intent = original.sale;
         bytes32 policy;
-        (selected, policy) = StreamPreparedNativeRightsProjection.preparedTemplate(
-            x.resolver, facts.collectionId, facts.tokenId
+        (selected, policy) = StreamPreparedNativeRightsProjection.preparedTemplateForMode(
+            x.resolver, facts.collectionId, facts.tokenId, original.original.mode
         );
         // A template preview can name a profile not yet materialized. The fixed funding
         // worker verifies Factory registration and wallet identity after actual materialization.

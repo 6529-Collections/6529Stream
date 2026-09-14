@@ -339,7 +339,7 @@ contract StreamCurrentNativeRightsAuctionTest is NativeRightsAuctionFixture {
                     (c, o, bytes("rights artwork"), a, platform, artistSig)
                 )
             );
-        require(!ok, "unimplemented mode cannot alias profile");
+        require(!ok, "unsigned mode cannot substitute the authorized mode");
         o.mode = 1;
         bytes32 id =
             house.registerRightsAuction(c, o, bytes("rights artwork"), a, platform, artistSig);

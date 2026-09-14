@@ -73,7 +73,11 @@ contract NativeAuctionArtist is IStreamArtistAttribution {
             (state, 1, keccak256("native auction artist"), 1, keccak256("native auction binding"));
     }
 
-    function requireEconomicsConsent(uint256, bytes32, uint8, uint256, bytes32) external view {
+    function requireEconomicsConsent(uint256, bytes32, uint8, uint256, bytes32)
+        external
+        view
+        virtual
+    {
         require(consent, "artist economics");
     }
 

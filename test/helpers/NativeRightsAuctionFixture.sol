@@ -11,7 +11,7 @@ contract NativeRightsAuctionArtist is NativeAuctionArtist, IStreamArtistBenefici
 
     constructor(address c, address m) NativeAuctionArtist(c, m) { }
 
-    function supportsInterface(bytes4 id) public pure override returns (bool) {
+    function supportsInterface(bytes4 id) public pure virtual override returns (bool) {
         return id == type(IStreamArtistBeneficiaryFacts).interfaceId || super.supportsInterface(id);
     }
 
@@ -46,7 +46,7 @@ abstract contract NativeRightsAuctionFixture is NativeEnglishAuctionFixture {
     bytes32 internal template;
     uint256 internal rightsNonce;
 
-    function _deployAuctionArtist() internal override returns (NativeAuctionArtist) {
+    function _deployAuctionArtist() internal virtual override returns (NativeAuctionArtist) {
         rightsArtist = new NativeRightsAuctionArtist(address(core), address(manager));
         return rightsArtist;
     }
@@ -97,7 +97,7 @@ abstract contract NativeRightsAuctionFixture is NativeEnglishAuctionFixture {
         c.mintPolicyHash = manager.phasePolicyHash(1, PHASE);
     }
 
-    function _selected() internal view returns (StreamSaleTemplate.Selection memory) {
+    function _selected() internal view virtual returns (StreamSaleTemplate.Selection memory) {
         return StreamPreparedNativeRightsProjection.collectionTemplate(resolver, 1);
     }
 
@@ -126,6 +126,7 @@ abstract contract NativeRightsAuctionFixture is NativeEnglishAuctionFixture {
     function _original()
         internal
         view
+        virtual
         returns (StreamPreparedNativeRightsTypes.OriginalPolicy memory)
     {
         StreamSaleTemplate.Selection memory s = _selected();

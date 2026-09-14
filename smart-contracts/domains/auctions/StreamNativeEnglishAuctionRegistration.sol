@@ -241,9 +241,12 @@ library StreamNativeEnglishAuctionRegistration {
         );
         if (rightsMode == 0) {
             StreamNativeEnglishAuctionSupport.profilePolicy(x.base.resolver, a.config.collectionId);
-        } else if (rightsMode == StreamPreparedNativeRightsTypes.COLLECTION_TEMPLATE) {
-            StreamPreparedNativeRightsProjection.collectionTemplate(
-                x.base.resolver, a.config.collectionId
+        } else if (
+            rightsMode == StreamPreparedNativeRightsTypes.COLLECTION_TEMPLATE
+                || rightsMode == StreamPreparedNativeRightsTypes.CONSENTED_COLLECTION_TEMPLATE
+        ) {
+            StreamPreparedNativeRightsProjection.collectionTemplateForMode(
+                x.base.resolver, a.config.collectionId, rightsMode
             );
         } else {
             revert A.UnsupportedNativeAuctionProfile();
