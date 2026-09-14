@@ -9,13 +9,16 @@ p=argparse.ArgumentParser()
 p.add_argument('--project',type=Path,required=True)
 p.add_argument('--build-id',required=True)
 p.add_argument('--output',type=Path,required=True)
+p.add_argument('--products',type=Path)
+p.add_argument('--helpers',type=Path)
 a=p.parse_args()
 base=a.project/'out/current'; cache_path=a.project/'cache/current/solidity-files-cache.json'
 cache_raw=cache_path.read_bytes();cache=json.loads(cache_raw)
 current_path=base/'build-info'/(a.build_id+'.json');current_raw=current_path.read_bytes();current=json.loads(current_raw)
 assert current['id']==a.build_id and current['solcVersion']=='0.8.19'
-products=json.loads((a.project/'projection-products.json').read_bytes())
+products=json.loads((a.products or a.project/'projection-products.json').read_bytes())
 helpers={'StreamNativeAssemblyCreation':'test/helpers/StreamNativeAssemblyCreation.sol', 'StreamNativeFinalityAssemblyTest':'test/current/StreamNativeFinalityAssembly.t.sol'}
+if a.helpers: helpers=json.loads(a.helpers.read_bytes())
 products.update(helpers)
 prior_builds={};exports={}
 report={'currentBuildInfo':str(current_path),'currentBuildInfoSha256':sha(current_raw),

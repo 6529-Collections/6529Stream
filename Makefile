@@ -54,6 +54,7 @@ check: record-family-authorization-check artist-semantic-owner-matrix-check arti
 current-stack-check: export FOUNDRY_PROFILE := current
 current-stack-check:
 	forge build
+	python -m tools.build.prepare_current_graph
 	forge test -vvv
 	$(PYTHON) -m tools.protocol.test_artist_operation_extension
 	$(PYTHON) -m tools.protocol.test_artist_owner_record_continuity_extension

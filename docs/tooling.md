@@ -8,6 +8,7 @@ a different build. Start with the [setup guide](first-30-minutes.md).
 | --- | --- |
 | `python scripts/dev.py doctor` | Check Python, Foundry and compiler configuration |
 | `python scripts/dev.py build` | Build the current product profile |
+| `python scripts/dev.py prepare-graph` | Prepare graph test inputs from the completed native build |
 | `python scripts/dev.py test` | Run the current whole-stack tests |
 | `python scripts/dev.py campaign --mode quick --seed 0x6529` | Reproducible input fuzzing and handler invariant sequences |
 | `python scripts/dev.py check` | Current build/tests and focused interface/layout checks |
@@ -52,6 +53,34 @@ pushes do not keep discarding an unfinished compiler run. Ready pull requests
 still cancel superseded runs. Always associate a result with its tested commit;
 a completed earlier run does not validate the pending revision. This uses
 [GitHub's workflow concurrency behavior](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency).
+
+## Current graph fixture preparation
+
+After a current native build, prepare its compact graph inputs before running
+current tests or a campaign:
+
+```text
+python scripts/dev.py build
+python scripts/dev.py prepare-graph
+python scripts/dev.py test
+```
+
+The command uses the actual graph test host's cache coordinate, checks current
+source bytes, authenticates the host and creation helper against complete native
+compiler output, and generates the 54 required products for both graph fixtures.
+Complete exports remain under ignored `artifacts/current-graph/native`; original
+Forge outputs stay unchanged. CRLF-to-LF compiler transport is recorded explicitly.
+A stale source, ambiguous cache entry or changed executable fails preparation.
+For mixed incremental compiler contexts, a fresh current build with `--force`
+may be necessary; a failed preparation never substitutes older test inputs.
+
+This requires no machine-specific snapshot directory. Re-run preparation after
+rebuilding changed contracts or graph fixtures. Its command lock protects the
+projection write; finish other builds before preparing or testing the same
+output directory. The current profile's large aggregate fixture limits cover
+many deployments and calls. Native product checks still enforce the 24,576-byte
+runtime limit, and the fixture checks constructor and deployed products; these
+local allowances do not establish a shipping transaction's gas capacity.
 
 ## Pick the relevant tests
 

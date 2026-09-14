@@ -74,6 +74,7 @@ if ($CurrentStack) {
     try {
         $env:FOUNDRY_PROFILE = "current"
         forge build
+        & $pythonPath @pythonArgs "-m" "tools.build.prepare_current_graph"
         forge test -vvv
         & $pythonPath @pythonArgs "-m" "tools.protocol.test_artist_operation_extension"
         & $pythonPath @pythonArgs "-m" "tools.protocol.test_artist_owner_record_continuity_extension"

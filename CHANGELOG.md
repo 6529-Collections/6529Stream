@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add portable current graph fixture preparation from authenticated native compiler
+  outputs and exact NFTDelegation grant helpers for the new auction integration.
+
 - Added actual native graph, Artist record/seal and snapshot assembly tests.
 - Separated native finality component leaf budgets from outer source-read budgets,
   with bounded adapter/provider callback regressions and matching constructor pins.
@@ -117,6 +120,7 @@ the release policy in `docs/release-policy.md`.
   finality inputs, entropy and full deployment acceptance remain in progress.
 
 ### Added
+
 
 - Fixed release checksum parsing for the pinned upstream license's Git whitespace
   diagnostic override while preserving its exact bytes and the existing LF policy.

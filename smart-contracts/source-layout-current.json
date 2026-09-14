@@ -394,6 +394,7 @@
     "smart-contracts/domains/artist/StreamCollectionArtistRegistry.sol",
     "smart-contracts/domains/auctions/StreamEnglishAuctionClock.sol",
     "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+    "smart-contracts/domains/auctions/StreamNativeAuctionDelegation.sol",
     "smart-contracts/domains/auctions/legacy/AuctionContract.sol",
     "smart-contracts/domains/dependencies/DependencyRegistry.sol",
     "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol",

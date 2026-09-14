@@ -60,16 +60,30 @@ are mapped. Read-only calls use a stateless test probe executed by the real Safe
 small typed bundle boundaries are explicit. This adds call-surface evidence, not
 a new full-bundle capacity or complete Stream-wide Safe claim.
 
-The new paid PREPARED mint handoff and first native-auction profile have passed
-independent source review. Runtime acceptance is still open: the first paid-handoff
-build exceeded contract size limits before any behavior test ran. A reviewed
-extraction brings Manager below the limit; the settlement recorder still requires
-a smaller runtime before the thirteen behavior cases can execute. The attempted
-raw-return size optimization did not help and is being replaced by a substantive
-execution extraction. No failed setup is counted as a passing sale test. The
-actual-auction cohort awaits the corrected handoff. [ADR 0043](../docs/adr/0043-deferred-auction-clocks-and-no-bid.md) resolves
-clock and no-bid combinations; broader custody, delegation, content-proof and
-rights profiles remain mandatory. Existing V2 behavior is retained.
+The paid PREPARED mint handoff now fits the production runtime limit after moving
+complete native/deferred recording workers into a fixed linked library: Manager
+is 22,341 bytes and the recorder 22,000 in the reviewed native compilation. The
+corrected test selection executes the actual fourteen-case handoff suite: two
+pass and twelve fail at incorrect fixture serial/nonce expectations. Four older
+companion suites initially lacked their Permit2 JSON; with the original fixture
+restored, their four selected bodies pass using unchanged compiler artifacts.
+The source-reviewed full eighteen-case successor corrects the test baselines and
+includes both runtime fixtures. Its run remains pending; no failed or absent
+body is counted as passing.
+
+The auction delegation helper is integrated with six reviewed tests, including
+one 256-input property and the actual NFTDelegation registry. The new house has
+fifteen source-reviewed cases, including delegated bidding and Safe refund/claim
+paths, awaiting runtime acceptance after the paid handoff. Broader custody,
+content-leaf, rights and gate profiles remain mandatory. [ADR 0043](../docs/adr/0043-deferred-auction-clocks-and-no-bid.md)
+owns clock and no-bid combinations; existing V2 behavior is retained.
+
+Current graph fixture preparation now has a portable repository command:
+`python scripts/dev.py prepare-graph`. It verifies the executed graph host,
+creation helper and current sources against complete native compiler output,
+then prepares the 54 fixture products. The existing current validation wrappers
+invoke it between build and tests. This removes dependence on a machine-specific
+artifact snapshot; it does not establish a new complete-system test result.
 
 The reusable auction clock now passes 13 focused tests in both compiler modes,
 including three 256-input properties per mode. It validates clock modes and

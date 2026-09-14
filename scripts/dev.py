@@ -338,6 +338,7 @@ def main(argv: list[str] | None = None) -> int:
     commands.add_parser("doctor", help="Check local tools and the current Foundry profile")
     commands.add_parser("clean", help="Clear build/cache outputs; retain broadcast and deployment evidence")
     commands.add_parser("build", help="Compile the supported current stack")
+    commands.add_parser("prepare-graph", help="Prepare current graph fixture inputs from the completed native build")
     test = commands.add_parser("test", help="Run current flows or a selected test suite")
     test.add_argument("--suite", choices=SUITES, default="current")
     test.add_argument("--match-path", help="Narrow a suite to a path or glob within its directory")
@@ -361,6 +362,8 @@ def main(argv: list[str] | None = None) -> int:
         return clean()
     if args.command == "campaign":
         return campaign(args)
+    if args.command == "prepare-graph":
+        return run(python_tool("tools.build.prepare_current_graph"))
     if args.command == "build":
         return run(["forge", "build", *forge_args])
     if args.command == "test":
@@ -391,6 +394,7 @@ def main(argv: list[str] | None = None) -> int:
             python_tool("tools.build.check_solidity_formatting"),
             python_tool("tools.build.check_solidity_source_layout"),
             ["forge", "build"],
+            python_tool("tools.build.prepare_current_graph"),
             ["forge", "test", "-vv"],
             python_tool("tools.build.check_abi_compatibility", "--target-only"),
         ]
