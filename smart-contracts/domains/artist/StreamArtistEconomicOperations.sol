@@ -107,6 +107,23 @@ library StreamArtistEconomicOperations {
         );
     }
 
+    function economicsProspectiveTemplate(
+        D.CoordinatorContext memory x,
+        address actor,
+        T.EconomicsConsent memory p,
+        bytes32 templateId,
+        T.Authorization memory a
+    ) public returns (bytes32) {
+        T.Snapshot[7] memory before_ = _snapshots(x, 15);
+        StreamArtistOnboardingReads reads = StreamArtistOnboardingReads(x.reads);
+        T.Binding memory b = reads.acceptedBinding(p.collectionId);
+        _collection(x, p.collectionId);
+        T.Payout memory payout = _payout(x, b.artistId);
+        bytes memory evidence =
+            reads.requireProspectiveTemplateEconomics(p, templateId, payout.account);
+        return _economics(x, actor, b, p, payout, bytes32(0), a, before_, evidence);
+    }
+
     function _economics(
         D.CoordinatorContext memory x,
         address actor,

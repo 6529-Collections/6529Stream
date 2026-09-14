@@ -35,6 +35,7 @@ import "./StreamArtistOnboardingCoordinator.sol";
 import "../../interfaces/stream/artist/IStreamArtistOnboarding.sol";
 import "../../interfaces/stream/artist/IStreamArtistContentRatification.sol";
 import "../../interfaces/stream/artist/IStreamArtistEconomicsAuthority.sol";
+import "../../interfaces/stream/artist/IStreamArtistTemplateEconomicsAuthority.sol";
 import "../modules/StreamModuleBase.sol";
 import "../parameters/StreamGasParameterHost.sol";
 import {
@@ -50,6 +51,7 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistAttribution,
     IStreamArtistContentRatification,
     IStreamArtistEconomicsAuthority,
+    IStreamArtistTemplateEconomicsAuthority,
     IStreamArtistDelegation,
     IStreamArtistBindingLifecycle,
     IStreamArtistBeneficiaryFacts,
@@ -296,6 +298,7 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistOnboarding).interfaceId
             || id == type(IStreamArtistContentRatification).interfaceId
             || id == type(IStreamArtistEconomicsAuthority).interfaceId
+            || id == type(IStreamArtistTemplateEconomicsAuthority).interfaceId
             || id == type(IStreamArtistDelegation).interfaceId
             || id == type(IStreamArtistBindingLifecycle).interfaceId
             || id == type(IStreamArtistBeneficiaryFacts).interfaceId
@@ -1147,6 +1150,14 @@ contract StreamArtistOnboardingRegistry is
         external
         returns (bytes32)
     {
+        _forwardRegistryWriter();
+    }
+
+    function recordProspectiveTemplateEconomicsConsent(
+        T.EconomicsConsent calldata p,
+        bytes32 templateId,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
         _forwardRegistryWriter();
     }
 

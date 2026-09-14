@@ -3453,16 +3453,18 @@ contract StreamArtistOnboardingTest is ArtistOnboardingFixture {
             _payout();
             StreamArtistOnboardingReads reads = coordinator.reads();
             vm.expectRevert(
-                abi.encodeWithSelector(
-                    IStreamArtistPrimaryTemplateFacts.UnsupportedArtistPrimaryTemplate.selector,
-                    templateFixtureId
-                )
+                kind == 4
+                    ? abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("economics"))
+                    : abi.encodeWithSelector(
+                        IStreamArtistPrimaryTemplateFacts.UnsupportedArtistPrimaryTemplate.selector,
+                        templateFixtureId
+                    )
             );
             reads.requireCurrentArtistEconomics(1, address(primary), address(artist));
         }
     }
 
-    function testCurrentTemplateCannotBecomeFixedProspectiveCandidateOrAuthorizeReplacement()
+    function testCurrentTemplateCannotBecomeFixedCandidateButExactConsentAuthorizesSet()
         public
     {
         _freshTemplateFixture(1);
@@ -3484,13 +3486,9 @@ contract StreamArtistOnboardingTest is ArtistOnboardingFixture {
         ingress.recordProspectiveEconomicsConsent(p, candidate, a);
         require(_roots() == before_, "template ID not a fixed profile alias");
         address governor = primary.owner();
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamRevenueResolver.PrimaryArtistConsentRequired.selector, uint256(1)
-            )
-        );
         vm.prank(governor);
         primary.setPrimaryTemplateAssignment(PRIMARY, 1, 1, templateFixtureId, bytes32(0));
+        require(primary.resolvePrimaryAssignment(1, 0, PRIMARY).assignmentHash == p.assignmentHash, "exact existing consent authorizes template set");
     }
 
     function testCollaboratorSafeIdentityIsTwoSidedAndConsumesBothNonceLanes() public {

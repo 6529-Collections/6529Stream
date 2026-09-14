@@ -43,6 +43,7 @@ import "../../interfaces/stream/artist/IStreamArtistCollaboratorOwner.sol";
 import "./StreamArtistRegistryValidatorBase.sol";
 import "../../interfaces/stream/artist/IStreamArtistOnboardingCoordinator.sol";
 import "../../interfaces/stream/artist/IStreamArtistEconomicsCoordinator.sol";
+import "../../interfaces/stream/artist/IStreamArtistTemplateEconomicsCoordinator.sol";
 import "../../interfaces/stream/artist/IStreamArtistArchiveV2.sol";
 import "../../interfaces/stream/artist/IStreamArtistMintConsent.sol";
 import "../../interfaces/stream/artist/IStreamArtistIngressBinding.sol";
@@ -58,6 +59,7 @@ import {
 contract StreamArtistOnboardingCoordinator is
     IStreamArtistOnboardingCoordinator,
     IStreamArtistEconomicsCoordinator,
+    IStreamArtistTemplateEconomicsCoordinator,
     IStreamArtistDelegationCoordinator,
     IStreamArtistBindingLifecycleCoordinator,
     IStreamArtistCollaboratorCoordinator,
@@ -603,6 +605,17 @@ contract StreamArtistOnboardingCoordinator is
     ) external operation returns (bytes32) {
         return StreamArtistEconomicOperations.economicsCurrent(
             _economicContext(), actor, p, bytes32(0), a
+        );
+    }
+
+    function coordinateRecordProspectiveTemplateEconomicsConsent(
+        address actor,
+        T.EconomicsConsent calldata p,
+        bytes32 templateId,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistEconomicOperations.economicsProspectiveTemplate(
+            _economicContext(), actor, p, templateId, a
         );
     }
 

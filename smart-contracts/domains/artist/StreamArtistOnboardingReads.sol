@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 import "./StreamArtistAttributionPolicy.sol";
 import "./StreamArtistHashes.sol";
 import "./StreamArtistAuthorityPolicy.sol";
+import "./StreamArtistTemplateEconomicsReads.sol";
 
 import "../../interfaces/stream/artist/IStreamArtistBindingOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistCollaboratorBindingOwner.sol";
@@ -23,6 +24,8 @@ import "../../interfaces/stream/artist/IStreamArtistRoyaltyScopeFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryScopeFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryTemplateFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistPrimaryTemplateConsentFacts.sol";
+import "../../vendor/openzeppelin/IERC165.sol";
 import "../../interfaces/stream/artist/IStreamArtistRoyaltyPreview.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttribution.sol";
 import "../../interfaces/stream/core/IStreamCorePointers.sol";
@@ -255,6 +258,25 @@ contract StreamArtistOnboardingReads {
         address payout
     ) external view returns (T.AssignmentFact memory fact, bytes32 previousHash) {
         return _requireProspectiveEconomics(p, candidate, payout);
+    }
+
+    /// @notice Validates a set-only template proposal without resolving the current assignment.
+    /// @dev The prospective path cannot require the consent it is about to record.
+    function requireProspectiveTemplateEconomics(
+        T.EconomicsConsent calldata p,
+        bytes32 templateId,
+        address payout
+    ) external view returns (bytes memory) {
+        address resolver = _suite.primaryResolver;
+        if (
+            p.resolver != resolver || p.revenueClass != keccak256("PRIMARY_SALE")
+                || p.revenueClass != _suite.primaryRevenueClass || p.scope != 1
+                || p.scopeId != p.collectionId || p.assignmentHash == bytes32(0)
+                || templateId == bytes32(0) || !_templateConsentCapability(resolver)
+        ) revert T.UnsupportedProfile();
+        T.Binding memory b = acceptedBinding(p.collectionId);
+        _requireTemplatePayout(p.collectionId, b, payout);
+        return StreamArtistTemplateEconomicsReads.prospective(p, templateId);
     }
 
     function _requireProspectiveEconomics(
@@ -636,22 +658,25 @@ contract StreamArtistOnboardingReads {
                 || _suite.primaryRevenueClass != keccak256("PRIMARY_SALE")
         ) revert T.UnsupportedProfile();
         T.Binding memory binding_ = acceptedBinding(collectionId);
+        _requireTemplatePayout(collectionId, binding_, payout);
+        return StreamArtistTemplateEconomicsReads.current(
+            collectionId, resolver, _suite.primaryRevenueClass, _suite.owners[6], binding_, current
+        );
+    }
+
+    function _templateConsentCapability(address resolver) private view returns (bool) {
+        return IERC165(resolver)
+            .supportsInterface(type(IStreamArtistPrimaryTemplateConsentFacts).interfaceId);
+    }
+
+    function _requireTemplatePayout(uint256 collectionId, T.Binding memory binding_, address payout)
+        private
+        view
+    {
         (address operative, bytes32 designation) = artistPayoutAccount(binding_.artistId);
         if (payout == address(0) || payout != operative || designation == bytes32(0)) {
             revert T.MissingMintPrerequisite(keccak256("payout"));
         }
-        IStreamArtistPrimaryTemplateFacts provider = IStreamArtistPrimaryTemplateFacts(resolver);
-        (bytes32 entriesHash, bytes32 metadataURIHash, uint32 artistShare) =
-            provider.primaryTemplateEconomicsFacts(current.templateId);
-        T.AssignmentFact memory preview = provider.previewArtistPrimaryTemplateAssignment(
-            collectionId, current.templateId, current.policyHash, current.frozen
-        );
-        if (
-            entriesHash == bytes32(0) || artistShare < 500_000 || preview.resolver != resolver
-                || preview.revenueClass != _suite.primaryRevenueClass || preview.scope != 1
-                || preview.scopeId != collectionId
-                || preview.assignmentHash != current.assignmentHash
-        ) revert T.InvalidRecord();
         uint32 count =
             IStreamArtistCollaboratorBindingOwner(_suite.owners[0])
         .bindingTerms(collectionId, binding_.generation)
@@ -659,17 +684,9 @@ contract StreamArtistOnboardingReads {
         for (uint256 i; i < count; ++i) {
             C.Row memory row = collaboratorAt(collectionId, binding_.generation, i);
             if (!row.accepted) revert T.InvalidAttribution(collectionId);
-            // This first template profile represents only the primary artist dynamically.
-            // A paid collaborator must never disappear behind an unrelated static entry.
+            // This capability represents only the primary artist dynamically.
             if (row.shareLabelId != bytes32(0)) revert T.UnsupportedProfile();
         }
-        return abi.encode(
-            keccak256("6529STREAM_CURRENT_PRIMARY_TEMPLATE_ECONOMICS_EVIDENCE_V1"),
-            current.templateId,
-            entriesHash,
-            metadataURIHash,
-            artistShare
-        );
     }
 
     /// @notice Verifies that actual static profile artist entries pay the operative designation.
