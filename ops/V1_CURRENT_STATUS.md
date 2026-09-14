@@ -28,6 +28,21 @@ gas conformance, CI and new release evidence follow the integrated feature
 batch. Source integration and demonstrated runtime acceptance are reported
 separately. [Current assignments](AUTONOMOUS_RUN.md#active-work) own this order.
 
+## Source batch integrated before comprehensive testing
+
+The 14 September feature-first batch adds current Artist/collaborator client
+signing and Safe CALL preparation (`35911382`), governed dynamic-template
+admission (`b08af8a8`), recovery after an estate-successor rotation (`a992f183`)
+and token-PROFILE custody activation/settlement (`9d9147e1`). All 792 selected
+Solidity source units pass combined ABI/type compilation. The client suite and
+its additional Safe onboarding example pass their lightweight checks.
+
+The two new contract source batches still await runtime acceptance. The
+running frozen integration job predates them; its result cannot validate these
+new sources. Builders continue multiple-rotation/closed-estate histories,
+additional custody-rights families and a complete selected-source museum export
+package while the earlier frozen campaigns finish.
+
 ## Current integration batch
 
 - Original `a65f7f3e` production graph: the repaired native-settlement cohort
@@ -37,9 +52,10 @@ separately. [Current assignments](AUTONOMOUS_RUN.md#active-work) own this order.
   compilation and preserve sources, native artifacts, cache and graph inputs.
   The earlier 18/3 failure remains historical evidence; latest production still
   needs its own combined checkpoint.
-  That checkpoint is now compiling 105 changed/dependent files from retained
-  caches: latest accepted source plus a new governed-template admission test,
-  followed by 22 selected cases and the isolated cold regression.
+  That frozen checkpoint is compiling 105 changed/dependent files from retained
+  caches: dynamic templates, standing/living-estate history and governed-template
+  admission, followed by 22 selected cases and the isolated cold regression.
+  It excludes the later estate-rotation and token-PROFILE custody source batches.
 - Dynamic primary templates `217c996a`: all 98 focused cases pass, including one
   256-input property. A fixed linked worker reduces Resolver runtime to 22,442
   bytes; all 600 production products fit. Full previous ABI/storage compatibility

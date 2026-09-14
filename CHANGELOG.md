@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add source support for recovery after estate-successor rotation and token-specific
+  PROFILE custody activation/settlement; comprehensive runtime validation remains pending.
+
 - Add current Artist and collaborator signing, digest readback and Safe CALL
   preparation for eight onboarding operations; broader runtime acceptance follows
   the integrated feature batch.
