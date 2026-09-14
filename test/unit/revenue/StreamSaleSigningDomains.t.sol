@@ -156,7 +156,11 @@ contract StreamSaleSigningDomainsTest is NativeSettlementTestBase {
         );
         vm.chainId(original);
         StreamNativeFixedPriceSaleAdapter other = new StreamNativeFixedPriceSaleAdapter(
-            IStreamMintManager(address(manager)), recorder, vm.addr(PLATFORM_KEY), artists
+            IStreamMintManager(address(manager)),
+            recorder,
+            vm.addr(PLATFORM_KEY),
+            artists,
+            IStreamGasParameterHost.GasParameterConfig("REVEAL_ATTEMPT_GAS_LIMIT", 2_000_000, 50_000, 2)
         );
         bytes32 otherDomain = _domain(
             address(other), IERC5267.eip712Domain.selector, "6529StreamNativeFixedPriceSaleAdapter"

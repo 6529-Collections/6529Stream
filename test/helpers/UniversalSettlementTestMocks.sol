@@ -2,12 +2,16 @@
 pragma solidity ^0.8.19;
 
 import "./SaleFundingTestMocks.sol";
+import "./ImmediateRevealFixture.sol";
 import "../../smart-contracts/interfaces/stream/modules/IStreamModuleRegistry.sol";
 
 /// @dev Pointer and token-identity seam, not the actual Core governance implementation.
 contract UniversalCoreMock {
     address public artists;
     address public registry;
+    address public entropy;
+    constructor() { entropy = address(new ImmediateRevealFixture(address(this))); }
+    function setEntropy(address value) external { entropy = value; }
 
     function configure(address a, address r) external {
         artists = a;
@@ -23,7 +27,8 @@ contract UniversalCoreMock {
         view
         returns (address, bytes32, bool, bytes32, bytes4, address, uint8, bytes32, bytes32, uint64)
     {
-        address target = kind == keccak256("ARTIST_REGISTRY") ? artists : registry;
+        address target = kind == keccak256("ENTROPY_COORDINATOR") ? entropy
+            : kind == keccak256("ARTIST_REGISTRY") ? artists : registry;
         bytes4 capability = kind == keccak256("ARTIST_REGISTRY")
             ? type(IStreamArtistAttribution).interfaceId
             : type(IStreamModuleRegistry).interfaceId;

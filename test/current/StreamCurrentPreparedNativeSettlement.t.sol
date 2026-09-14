@@ -54,6 +54,11 @@ contract NativeRecordingRegressionReceiver is IERC721Receiver {
 
 /// @dev Entropy completion boundary only; no seed/oracle/full coordinator claim.
 contract PreparedNativeEntropyFixture {
+    address public core;
+    function setCore(address value) external { require(core == address(0), "once"); core = value; }
+    function collectionRevealPolicy(uint256) external pure returns (IStreamRevealFeeEscrow.CollectionRevealPolicy memory) {
+        return IStreamRevealFeeEscrow.CollectionRevealPolicy(true, 1, keccak256("ROLE_ENTROPY_REVEAL_OWNER"), 100, 0);
+    }
     bool public rejecting;
     uint256 public calls;
     function supportsInterface(bytes4 id) external pure returns (bool) {
@@ -111,6 +116,7 @@ contract StreamCurrentPreparedNativeSettlementTest is RevenueV1TestBase, Officia
         _register(address(artists), keccak256("ARTIST_REGISTRY"), type(IStreamArtistMintConsent).interfaceId, MANIFEST);
         _pointer(keccak256("ARTIST_REGISTRY"), address(artists));
         entropy = new PreparedNativeEntropyFixture();
+        entropy.setCore(address(core));
         _register(address(entropy), keccak256("ENTROPY_COORDINATOR"), type(IStreamEntropyCoordinator).interfaceId, MANIFEST);
         _pointer(keccak256("ENTROPY_COORDINATOR"), address(entropy));
         _collection();
@@ -374,7 +380,11 @@ contract StreamCurrentPreparedNativeSettlementTest is RevenueV1TestBase, Officia
 
     function testOriginalNativeFixedSaleActualCoreRollsBackThenSameSignedPaymentRetries() public {
         StreamNativeFixedPriceSaleAdapter nativeSale = new StreamNativeFixedPriceSaleAdapter(
-            manager, recorder, vm.addr(SIGNER_KEY), artists
+            manager,
+            recorder,
+            vm.addr(SIGNER_KEY),
+            artists,
+            IStreamGasParameterHost.GasParameterConfig("REVEAL_ATTEMPT_GAS_LIMIT", 2_000_000, 50_000, 2)
         );
         require(address(nativeSale).code.length <= 24576, "original native adapter fits");
         _register(address(nativeSale), keccak256("NATIVE_PRIMARY_SALE_ADAPTER"),

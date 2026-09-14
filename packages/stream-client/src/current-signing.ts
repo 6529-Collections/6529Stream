@@ -24,7 +24,7 @@ export interface TokenProfileCustodyActivationAuthorization {
   readonly primaryPolicyMode: bigint; readonly artist: Address; readonly nonce: Hex; readonly deadline: bigint;
 }
 export interface CustodyRightsActivationAuthorization extends TokenProfileCustodyActivationAuthorization {
-  /** 1: default PROFILE; 2: strict, 3: consented, 4: dynamic token TEMPLATE. */
+  /** 1: default PROFILE; 2/3/4: strict/consented/dynamic token TEMPLATE; 5/6/7: default TEMPLATE. */
   readonly rightsMode: bigint;
 }
 export interface CurrentSigningMessages {

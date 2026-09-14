@@ -141,7 +141,11 @@ contract StreamNativePriceProgramsSafeTest is NativePriceProgramTestBase {
         vm.chainId(chain);
         require(PriceProgramChainVm(address(vm)).getChainId() == chain, "restored chain");
         StreamNativeFixedPriceSaleAdapter other = new StreamNativeFixedPriceSaleAdapter(
-            IStreamMintManager(address(manager)), recorder, vm.addr(PLATFORM_KEY), artists
+            IStreamMintManager(address(manager)),
+            recorder,
+            vm.addr(PLATFORM_KEY),
+            artists,
+            IStreamGasParameterHost.GasParameterConfig("REVEAL_ATTEMPT_GAS_LIMIT", 2_000_000, 50_000, 2)
         );
         bytes32 foreign = other.priceProgramAuthorizationDigest(e.authorization);
         e.platformSignature = _sign(PLATFORM_KEY, foreign);

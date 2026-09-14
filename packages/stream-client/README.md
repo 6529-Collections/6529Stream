@@ -230,10 +230,11 @@ integrated feature batch.
 
 Two additional approval helpers preserve the separate contract domains:
 `tokenProfileCustodyActivationTypedData` for token PROFILE and
-`custodyRightsActivationTypedData` for default PROFILE or token TEMPLATE modes.
+`custodyRightsActivationTypedData` for default PROFILE and token or default TEMPLATE modes.
 Both bind the original auction, acquisition origin, actual token, initial terms,
 Artist, nonce and deadline. The latter also binds `rightsMode` (1 default PROFILE,
-2 strict template, 3 consent-qualified template, 4 dynamic template).
+2 strict token template, 3 consent-qualified token template, 4 dynamic token
+template; 5/6/7 the corresponding default TEMPLATE modes).
 
 `prepareCustodyActivation` returns the approval payload, unsigned activation CALL
 and digest CALL. Supply both platform and Artist signatures, including opaque

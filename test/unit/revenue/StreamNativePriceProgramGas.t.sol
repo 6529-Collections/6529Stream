@@ -23,7 +23,11 @@ contract StreamNativePriceProgramGasTest is NativePriceProgramTestBase {
         nativeSale.saleRecord(nativeId).config;
         PriceProgramSignatureBudgetWitness witness = new PriceProgramSignatureBudgetWitness();
         nativeSale = new StreamNativeFixedPriceSaleAdapter(
-            IStreamMintManager(address(manager)), recorder, address(witness), artists
+            IStreamMintManager(address(manager)),
+            recorder,
+            address(witness),
+            artists,
+            IStreamGasParameterHost.GasParameterConfig("REVEAL_ATTEMPT_GAS_LIMIT", 2_000_000, 50_000, 2)
         );
         _register(
             address(nativeSale),

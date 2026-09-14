@@ -110,11 +110,8 @@ contract StreamNativePriceProgramsTest is NativePriceProgramTestBase {
         nativeSale.previewPriceProgram(e);
         e.authorization.saleId = id;
         vm.prank(payer);
-        vm.expectRevert(
-            abi.encodeWithSelector(IStreamNativePricePrograms.InvalidNativePriceProgram.selector)
-        );
         nativeSale.executePriceProgram{ value: 1 }(e);
-        _execute(e);
+        require(nativeSale.refundableBalance(id, payer) == 1, "unused fee allowance remains payer-owned");
         require(
             manager.ownerOf(1) == payer && recorder.totalOfficialSettled(address(0)) == 0,
             "declared free mint"
@@ -225,7 +222,7 @@ contract StreamNativePriceProgramsTest is NativePriceProgramTestBase {
         vm.expectRevert(
             abi.encodeWithSelector(IStreamNativePricePrograms.InvalidNativePriceProgram.selector)
         );
-        nativeSale.executePriceProgram{ value: 778 }(e);
+        nativeSale.executePriceProgram{ value: 776 }(e);
         uint256 before = payer.balance;
         IStreamNativePricePrograms.PriceProgramResult memory r = _execute(e);
         require(

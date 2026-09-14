@@ -73,20 +73,20 @@ contract StreamNativeSettlementTest is NativeSettlementTestBase {
         nativeSale.previewExecution(e);
     }
 
-    function testExactValueAndPayerRequiredNoRelayerOrOverpayment() public {
-        (
-            IStreamNativeFixedPriceSaleAdapter.SaleExecutionData memory e,
-            StreamNativeSettlementTypes.NativeSettlementCandidate memory c
-        ) = _nativeExecution(payer, payer, 1);
-        for (uint256 i; i < 3; ++i) {
+    function testSalePriceFloorAndPayerRequiredWhileExcessIsCredited() public {
+        (IStreamNativeFixedPriceSaleAdapter.SaleExecutionData memory e,
+            StreamNativeSettlementTypes.NativeSettlementCandidate memory c) = _nativeExecution(payer, payer, 1);
+        for (uint256 i; i < 2; ++i) {
             vm.deal(address(this), 1000);
-            vm.prank(i == 2 ? address(this) : payer);
-            (bool ok,) = address(nativeSale).call{ value: i == 0 ? 999 : i == 1 ? 1001 : 1000 }(
-                abi.encodeCall(nativeSale.purchase, (e))
-            );
-            require(!ok, "wrong payer or value rejects");
+            vm.prank(i == 0 ? payer : address(this));
+            (bool ok,) = address(nativeSale).call{value: i == 0 ? 999 : 1000}(abi.encodeCall(nativeSale.purchase, (e)));
+            require(!ok, "underpayment or wrong payer rejects");
             _unchanged(c, 10 ether);
         }
+        vm.prank(payer);
+        nativeSale.purchase{value: 1001}(e);
+        require(nativeSale.refundableBalance(nativeId, payer) == 1 && nativeSale.refundLiability() == 1, "overpayment is payer credit");
+        require(recorder.totalOfficialSettled(address(0)) == 1000, "excess excluded from revenue");
     }
 
     function testMintRootIdAndReceiverFailuresRollbackFundingAndRetry() public {

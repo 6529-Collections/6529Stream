@@ -5,6 +5,8 @@ import "./StreamSaleArtist.sol";
 import "./StreamSaleConsent.sol";
 import "./StreamNativePriceProgram.sol";
 import "./StreamSaleTemplate.sol";
+import "./StreamImmediateSaleReveal.sol";
+import "../parameters/StreamGasParameterHost.sol";
 import "../revenue/StreamSettlementContext.sol";
 import "../revenue/StreamPrimarySettlementHash.sol";
 import "../revenue/StreamNativeSettlementHash.sol";
@@ -22,7 +24,7 @@ import "../../vendor/openzeppelin/ReentrancyGuard.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 
 /// @notice Typed native paid mints through the shared official recorder.
-/// @dev PROFILE and current artist-only templates; exact value and no persistent payment custody.
+/// @dev Sale revenue excludes reveal fees; unused fee allowance is a payer-owned pull credit.
 contract StreamNativeFixedPriceSaleAdapter is
     IStreamNativeFixedPriceSaleAdapter,
     IStreamNativePricePrograms,
@@ -30,6 +32,8 @@ contract StreamNativeFixedPriceSaleAdapter is
     IERC5267,
     IStreamArtistSaleFacts,
     StreamSettlementContext,
+    StreamGasParameterHost,
+    IStreamImmediateSaleReveal,
     Ownable,
     ReentrancyGuard,
     ERC165
@@ -52,6 +56,12 @@ contract StreamNativeFixedPriceSaleAdapter is
     bytes32 public immutable artistRegistryCodeHash;
     uint256 public nextSaleNonce = 1;
     bool public paused;
+    bytes32 private constant _REVEAL_GAS = keccak256("6529STREAM_GGP_REVEAL_ATTEMPT_GAS_LIMIT");
+    uint256 public override refundLiability;
+    mapping(bytes32 => mapping(address => uint256)) private _refunds;
+    mapping(bytes32 => mapping(address => bool)) private _refundAccountSeen;
+    bytes32[] private _refundSales;
+    address[] private _refundPayers;
     mapping(bytes32 => SaleRecord) private _sales;
     mapping(address => mapping(bytes32 => bool)) public authorizationUsed;
     mapping(bytes32 => mapping(uint256 => bytes32)) public executionIdByNonce;
@@ -62,8 +72,18 @@ contract StreamNativeFixedPriceSaleAdapter is
         IStreamMintManager manager,
         IStreamPrimarySaleSettlement recorder,
         address signer,
-        IStreamArtistAttribution artists
-    ) StreamSettlementContext(recorder.revenueResolver(), recorder.moduleRegistry()) {
+        IStreamArtistAttribution artists,
+        GasParameterConfig memory revealGas
+    )
+        StreamSettlementContext(recorder.revenueResolver(), recorder.moduleRegistry())
+        StreamGasParameterHost(IStreamSplitFactory(recorder.revenueResolver().splitFactory())
+                .governanceAuthority())
+    {
+        if (
+            keccak256(bytes(revealGas.name)) != keccak256("REVEAL_ATTEMPT_GAS_LIMIT")
+                || revealGas.failureClass != FAILURE_CLASS_FAIL_CLOSED_PRECHECK
+        ) revert InvalidNativeSale();
+        _registerGasParameter(revealGas);
         if (
             !StreamSettlementAdmission.isContract(address(manager)) || signer == address(0)
                 || !StreamSettlementAdmission.isContract(address(recorder))
@@ -87,11 +107,12 @@ contract StreamNativeFixedPriceSaleAdapter is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return id == type(IStreamNativeFixedPriceSaleAdapter).interfaceId
+        return id == type(IStreamImmediateSaleReveal).interfaceId
+            || id == type(IStreamGasParameterHost).interfaceId
+            || id == type(IStreamNativeFixedPriceSaleAdapter).interfaceId
             || id == type(IStreamNativePricePrograms).interfaceId
             || id == type(IStreamNativePriceProgramDomain).interfaceId
-            || id == type(IERC5267).interfaceId
-            || id == type(IStreamArtistSaleFacts).interfaceId
+            || id == type(IERC5267).interfaceId || id == type(IStreamArtistSaleFacts).interfaceId
             || id == type(IStreamNativeSaleBinding).interfaceId || super.supportsInterface(id);
     }
 
@@ -112,8 +133,13 @@ contract StreamNativeFixedPriceSaleAdapter is
         )
     {
         return (
-            hex"0f", "6529StreamNativeFixedPriceSaleAdapter", "1", block.chainid,
-            address(this), bytes32(0), new uint256[](0)
+            hex"0f",
+            "6529StreamNativeFixedPriceSaleAdapter",
+            "1",
+            block.chainid,
+            address(this),
+            bytes32(0),
+            new uint256[](0)
         );
     }
 
@@ -133,8 +159,13 @@ contract StreamNativeFixedPriceSaleAdapter is
         )
     {
         return (
-            hex"0f", "6529StreamNativePricePrograms", "1", block.chainid,
-            address(this), bytes32(0), new uint256[](0)
+            hex"0f",
+            "6529StreamNativePricePrograms",
+            "1",
+            block.chainid,
+            address(this),
+            bytes32(0),
+            new uint256[](0)
         );
     }
 
@@ -172,6 +203,7 @@ contract StreamNativeFixedPriceSaleAdapter is
     {
         _requireSaleContext();
         StreamNativePriceProgram.validateConfig(_priceProgramContext(), config);
+        StreamImmediateSaleReveal.quote(core, config.collectionId);
         StreamNativeSettlementTypes.SaleLifecycleBinding memory lifecycle =
             StreamNativeSettlementAdmission.capture(moduleRegistry, address(this));
         uint256 nonce = nextSaleNonce++;
@@ -256,10 +288,14 @@ contract StreamNativeFixedPriceSaleAdapter is
             StreamNativeSettlementTypes.NativeSettlementCandidate memory c,
             IStreamMintManager.MintBatch memory batch
         ) = _preparePriceProgram(e);
-        if (msg.sender != c.sale.payer || msg.sender != c.executor || msg.value != c.sale.amount) {
+        if (msg.sender != c.sale.payer || msg.sender != c.executor || msg.value < c.sale.amount) {
             revert InvalidNativePriceProgram();
         }
         uint256 original = address(this).balance - msg.value;
+        RevealQuote memory reveal = StreamImmediateSaleReveal.quote(core, c.sale.collectionId);
+        uint256 revealCap = gasParameter(_REVEAL_GAS);
+        uint256 excess =
+            StreamImmediateSaleReveal.preflight(reveal, msg.value - c.sale.amount, revealCap);
         PriceProgramRecord storage record = _pricePrograms[e.authorization.saleId];
         authorizationUsed[e.authorization.artist][e.authorization.nonce] = true;
         executionIdByNonce[e.authorization.saleId][e.authorization.executionNonce] =
@@ -279,6 +315,9 @@ contract StreamNativeFixedPriceSaleAdapter is
             tokens.length != 1 || tokens[0] == 0 || root != c.operationIdentityCommitment
                 || ids.length != 1 || ids[0] != c.operationId
         ) revert NativeMintResultInvalid();
+        StreamImmediateSaleReveal.fundAndAttempt(
+            core, c.sale.collectionId, tokens[0], reveal, revealCap
+        );
         if (c.sale.amount != 0) {
             _requireRetained(c, e.authorization.artist);
         } else {
@@ -289,10 +328,61 @@ contract StreamNativeFixedPriceSaleAdapter is
                 artistRegistry, artistRegistryCodeHash, c.sale.collectionId, e.authorization.artist
             );
         }
-        if (address(this).balance != original) revert NativeSettlementFailed();
+        if (address(this).balance != original + excess) revert NativeSettlementFailed();
+        _creditRefund(c.sale.settlementId, c.sale.payer, excess);
         r.tokenId = tokens[0];
         executionStatus[c.executionBinding.executionId] = 2;
         StreamNativePriceProgram.emitCompletion(e.authorization.saleId, c, r, record.mintedQuantity);
+    }
+
+    /// @inheritdoc IStreamImmediateSaleReveal
+    function saleRevealQuote(bytes32 id) external view override returns (RevealQuote memory) {
+        uint256 collectionId = _sales[id].saleNonce != 0
+            ? _sales[id].config.collectionId
+            : _pricePrograms[id].config.collectionId;
+        if (collectionId == 0) revert NativeSaleUnavailable(id);
+        return StreamImmediateSaleReveal.quote(core, collectionId);
+    }
+
+    function refundableBalance(bytes32 id, address payer) external view override returns (uint256) {
+        return _refunds[id][payer];
+    }
+
+    function refundAccountCount() external view override returns (uint256) {
+        return _refundPayers.length;
+    }
+
+    function refundAccountAt(uint256 index) external view override returns (bytes32, address) {
+        return (_refundSales[index], _refundPayers[index]);
+    }
+
+    /// @dev Claims remain available while paused or after module retirement.
+    function claimRefund(bytes32 id, address recipient) external override nonReentrant {
+        uint256 amount = _refunds[id][msg.sender];
+        if (amount == 0) revert SaleRefundEmpty(id, msg.sender);
+        if (recipient == address(0) || recipient == address(this)) {
+            revert SaleRefundTransferFailed(recipient);
+        }
+        uint256 beforeBalance = address(this).balance;
+        if (beforeBalance < refundLiability) revert SaleRevealAccountingMismatch();
+        _refunds[id][msg.sender] = 0;
+        refundLiability -= amount;
+        (bool ok,) = recipient.call{ value: amount }("");
+        if (!ok) revert SaleRefundTransferFailed(recipient);
+        if (address(this).balance != beforeBalance - amount) revert SaleRevealAccountingMismatch();
+        emit SaleRefundClaimed(1, id, msg.sender, recipient, amount);
+    }
+
+    function _creditRefund(bytes32 id, address payer, uint256 excess) private {
+        if (excess == 0) return;
+        if (!_refundAccountSeen[id][payer]) {
+            _refundAccountSeen[id][payer] = true;
+            _refundSales.push(id);
+            _refundPayers.push(payer);
+        }
+        _refunds[id][payer] += excess;
+        refundLiability += excess;
+        emit SalePaymentExcessCredited(1, id, payer, excess);
     }
 
     function _preparePriceProgram(PriceProgramExecution calldata e)
@@ -360,6 +450,7 @@ contract StreamNativeFixedPriceSaleAdapter is
                         .phasePolicyHash(config.collectionId, config.phaseId)
                     != config.mintPolicyHash
         ) revert InvalidNativeSale();
+        StreamImmediateSaleReveal.quote(core, config.collectionId);
         StreamSaleTemplate.Selection memory rights = _rights(config.collectionId);
         if (rights.assignmentHash != config.primaryAssignmentHash) revert InvalidNativeSale();
         StreamNativeSettlementTypes.SaleLifecycleBinding memory binding =
@@ -483,10 +574,14 @@ contract StreamNativeFixedPriceSaleAdapter is
             StreamNativeSettlementTypes.NativeSettlementCandidate memory c,
             IStreamMintManager.MintBatch memory batch
         ) = _candidate(execution);
-        if (msg.sender != c.sale.payer || msg.sender != c.executor || msg.value != c.sale.amount) {
+        if (msg.sender != c.sale.payer || msg.sender != c.executor || msg.value < c.sale.amount) {
             revert InvalidNativeSale();
         }
         uint256 original = address(this).balance - msg.value;
+        RevealQuote memory reveal = StreamImmediateSaleReveal.quote(core, c.sale.collectionId);
+        uint256 revealCap = gasParameter(_REVEAL_GAS);
+        uint256 excess =
+            StreamImmediateSaleReveal.preflight(reveal, msg.value - c.sale.amount, revealCap);
         StreamNativeSettlementAdmission.requireAdmission(moduleRegistry, c);
         authorizationUsed[execution.authorization.artist][execution.authorization.nonce] = true;
         executionIdByNonce[execution.authorization.saleId][execution.authorization.executionNonce] =
@@ -509,8 +604,12 @@ contract StreamNativeFixedPriceSaleAdapter is
             tokens.length != 1 || tokens[0] == 0 || root != c.operationIdentityCommitment
                 || ids.length != 1 || ids[0] != c.operationId
         ) revert NativeMintResultInvalid();
+        StreamImmediateSaleReveal.fundAndAttempt(
+            core, c.sale.collectionId, tokens[0], reveal, revealCap
+        );
         _requireRetained(c, execution.authorization.artist);
-        if (address(this).balance != original) revert NativeSettlementFailed();
+        if (address(this).balance != original + excess) revert NativeSettlementFailed();
+        _creditRefund(c.sale.settlementId, c.sale.payer, excess);
         tokenId = tokens[0];
         executionStatus[c.executionBinding.executionId] = 2;
         emit NativeSaleExecution(

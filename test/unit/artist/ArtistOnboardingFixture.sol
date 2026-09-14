@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../helpers/ImmediateRevealFixture.sol";
 import { StreamArtistExtensionFactory } from "../../../smart-contracts/domains/artist/StreamArtistExtensionFactory.sol";
 
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
@@ -42,6 +43,7 @@ interface ArtistTestVm {
 
 /// @dev Unit boundary double. These tests do not establish real Core/metadata/royalty integration.
 contract ArtistUnitCore {
+    constructor() { targets[keccak256("ENTROPY_COORDINATOR")] = address(new ImmediateRevealFixture(address(this))); }
     function collectionHasMaxSupply(uint256 id) external pure returns (bool) {
         return id == 1;
     }
@@ -860,7 +862,13 @@ abstract contract ArtistOnboardingFixture is
         StreamPrimarySaleSettlement recorder =
             new StreamPrimarySaleSettlement(primary, address(saleModules), escrow);
         nativeSale =
-            new StreamNativeFixedPriceSaleAdapter(manager, recorder, address(artist), ingress);
+            new StreamNativeFixedPriceSaleAdapter(
+                manager,
+                recorder,
+                address(artist),
+                ingress,
+                IStreamGasParameterHost.GasParameterConfig("REVEAL_ATTEMPT_GAS_LIMIT", 2_000_000, 50_000, 2)
+            );
         _saleRegister(
             saleModules,
             factory.governanceAuthority(),

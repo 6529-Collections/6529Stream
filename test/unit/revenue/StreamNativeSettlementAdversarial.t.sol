@@ -59,13 +59,18 @@ contract StreamNativeSettlementAdversarialTest is NativeSettlementTestBase {
             IStreamMintManager(address(manager)),
             IStreamPrimarySaleSettlement(address(old)),
             vm.addr(PLATFORM_KEY),
-            artists
+            artists,
+            IStreamGasParameterHost.GasParameterConfig("REVEAL_ATTEMPT_GAS_LIMIT", 2_000_000, 50_000, 2)
         );
     }
 
     function testNativeRoleCannotRegisterAsERC20OrEnterItsRecorderBoundary() public {
         StreamNativeFixedPriceSaleAdapter wrong = new StreamNativeFixedPriceSaleAdapter(
-            IStreamMintManager(address(manager)), recorder, vm.addr(PLATFORM_KEY), artists
+            IStreamMintManager(address(manager)),
+            recorder,
+            vm.addr(PLATFORM_KEY),
+            artists,
+            IStreamGasParameterHost.GasParameterConfig("REVEAL_ATTEMPT_GAS_LIMIT", 2_000_000, 50_000, 2)
         );
         _register(
             address(wrong),

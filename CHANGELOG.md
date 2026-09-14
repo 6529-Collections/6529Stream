@@ -5,6 +5,13 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Support repeated Artist recovery and guardian supersession across retained histories.
+- Add default TEMPLATE custody commerce and Artist-approved exact TEMPLATE clear/freeze.
+- Extend recorded-account museum exports through PREMIS, IIIF and LIDO, requiring
+  selected file facts and a separate declared publisher instead of inventing missing data.
+- Add native immediate-sale reveal funding, bounded post-mint attempts and Safe-owned
+  excess refunds. Native runtime, gas and final deployment integration remain pending.
+
 - Extend estate recovery across successive rotations and dismissed terminal histories.
 - Add scoped custody templates and explicit default-profile commerce with current
   Artist consent; move large auction tuple getters into a fixed linked library.

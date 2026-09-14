@@ -77,10 +77,18 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
         recorder =
             new StreamPrimarySaleSettlement(primaryResolver, address(registry), revenueEscrow);
         nativeSale = new StreamNativeFixedPriceSaleAdapter(
-            manager, recorder, vm.addr(PLATFORM_KEY), IStreamArtistAttribution(address(artists))
+            manager,
+            recorder,
+            vm.addr(PLATFORM_KEY),
+            IStreamArtistAttribution(address(artists)),
+            IStreamGasParameterHost.GasParameterConfig("REVEAL_ATTEMPT_GAS_LIMIT", 2_000_000, 50_000, 2)
         );
         _assertDeployableProductionInstance(address(recorder));
         _assertDeployableProductionInstance(address(nativeSale));
+    }
+
+    function _revealPrincipals() internal view override returns (StreamRevealActivationPlan.Principals memory) {
+        return StreamRevealActivationPlan.Principals(address(this), address(nativeSale), address(governanceRoot));
     }
 
     function _additionalEscrowProducers() internal view override returns (address[] memory rows) {
@@ -476,6 +484,23 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
         );
     }
 
+    function testSafeNativeProviderFeeShortfallPreservesMintAndLaterRequest() public {
+        this.deployNativeScenario(false, false);
+        provider.setFee(1);
+        (IStreamNativeFixedPriceSaleAdapter.SaleExecutionData memory e,
+            StreamNativeSettlementTypes.NativeSettlementCandidate memory c) = _execution(1, address(payerSafe));
+        uint256 before_ = address(payerSafe).balance;
+        require(executeSafe(payerSafe, keys, address(nativeSale), PRICE, abi.encodeCall(nativeSale.purchase, (e)), 0), "provider cannot undo Safe purchase");
+        _settled(c, address(payerSafe), before_);
+        uint256 tokenId = core.lastAllocatedTokenId();
+        require(entropy.tokenEntropyStatus(tokenId) == StreamEntropyStatus.REGISTERED, "request isolated");
+        provider.setFee(0);
+        (, uint256 requestId) = entropy.requestEntropy(tokenId);
+        provider.fulfill(requestId, keccak256("later native entropy"));
+        (, bool finalized) = entropy.tokenSeed(tokenId);
+        require(finalized, "ordinary retry after provider funding recovers");
+    }
+
     function testSafeNativePurchaseMintsRevealsClaimsAndRejectsReplay() public {
         this.deployNativeScenario(false, false);
         (
@@ -489,7 +514,8 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
         );
         _settled(c, address(payerSafe), before_);
         uint256 tokenId = core.lastAllocatedTokenId();
-        (, uint256 requestId) = entropy.requestEntropy(tokenId);
+        require(entropy.tokenEntropyStatus(tokenId) == StreamEntropyStatus.REQUESTED, "adapter requested in purchase");
+        (,,,,,, uint256 requestId,) = entropy.tokenEntropy(tokenId);
         provider.fulfill(requestId, keccak256("current native entropy"));
         (, bool finalized) = entropy.tokenSeed(tokenId);
         require(finalized && bytes(core.tokenURI(tokenId)).length != 0, "real native reveal");
