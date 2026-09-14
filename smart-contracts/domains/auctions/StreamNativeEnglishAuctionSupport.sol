@@ -4,6 +4,8 @@ pragma solidity ^0.8.19;
 import "../../interfaces/stream/auctions/IStreamNativeEnglishAuction.sol";
 import "../mint/StreamRefundWindowSupport.sol";
 import "../mint/StreamRefundClock.sol";
+import "../mint/StreamPreparedNativeContentReads.sol";
+import "../revenue/StreamPreparedNativeSettlementValidation.sol";
 import "../revenue/StreamPreparedNativeSettlementHash.sol";
 import "../../interfaces/stream/mint/IStreamPreparedNativeMint.sol";
 
@@ -154,8 +156,25 @@ library StreamNativeEnglishAuctionSupport {
         if (
             !exists || phase.paused
                 || !manager.phaseExecutor(c.collectionId, c.phaseId, address(this))
-                || manager.phaseGate(c.collectionId, c.phaseId).gate != address(0)
+                || (c.contentManifestRoot == 0
+                    && manager.phaseGate(c.collectionId, c.phaseId).gate != address(0))
         ) revert IStreamNativeEnglishAuction.UnsupportedNativeAuctionProfile();
+        if (c.contentManifestRoot != 0) {
+            address gate = manager.phaseGate(c.collectionId, c.phaseId).gate;
+            StreamPreparedNativeContentTypes.Publication memory p =
+                IStreamNativeAuctionContentGate(gate).publication();
+            StreamPreparedNativeContentReads.requirePublication(
+                address(x.manager),
+                StreamPreparedNativeSettlementValidation.addressWord(
+                    address(x.manager), "moduleRegistry()"
+                ),
+                address(this),
+                c.collectionId,
+                c.phaseId,
+                p.saleId,
+                c.contentManifestRoot
+            );
+        }
         bytes32 current = manager.phasePolicyHash(c.collectionId, c.phaseId);
         if (current != c.mintPolicyHash) {
             (bytes32 prior, uint64 until) = manager.phasePolicyGrace(c.collectionId, c.phaseId);

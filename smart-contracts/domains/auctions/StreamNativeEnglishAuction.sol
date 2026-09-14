@@ -4,10 +4,13 @@ pragma solidity ^0.8.19;
 import "./StreamNativeEnglishAuctionState.sol";
 import "./StreamNativeEnglishAuctionRegistration.sol";
 import "./StreamNativeEnglishAuctionSettlement.sol";
+import "./StreamNativeEnglishAuctionContentSettlement.sol";
+import "../../interfaces/stream/auctions/IStreamNativeCuratedAuction.sol";
 import "./StreamNativeAuctionDelegation.sol";
 import "../../interfaces/stream/auctions/IStreamNativeAuctionDelegatedDelivery.sol";
 import "./StreamNativeEnglishAuctionSupport.sol";
 import "./StreamNativeEnglishAuctionUnlock.sol";
+import "./StreamNativeEnglishAuctionContentUnlock.sol";
 import "../revenue/StreamSettlementContext.sol";
 import "../revenue/StreamPreparedNativeSettlementValidation.sol";
 import "../parameters/StreamGasParameterHost.sol";
@@ -23,6 +26,7 @@ import "../../vendor/openzeppelin/IERC721Receiver.sol";
 /// Other declared v1 profiles remain separate work.
 contract StreamNativeEnglishAuction is
     IStreamNativeEnglishAuction,
+    IStreamNativeCuratedAuction,
     IStreamNativeAuctionDelegatedDelivery,
     IStreamArtistSaleFacts,
     StreamSettlementContext,
@@ -75,6 +79,7 @@ contract StreamNativeEnglishAuction is
     uint256 private immutable _delegationChainId;
     StreamNativeEnglishAuctionState.State private _state;
     StreamNativeEnglishAuctionRuntime.Active private _active;
+    mapping(bytes32 => StreamPreparedNativeContentTypes.Selection) private _curated;
 
     constructor(DeploymentConfig memory d)
         StreamSettlementContext(d.recorder.revenueResolver(), d.recorder.moduleRegistry())
@@ -165,6 +170,8 @@ contract StreamNativeEnglishAuction is
         return (id == type(IStreamNativeAuctionDelegatedDelivery).interfaceId
                 && delegateRegistry != address(0))
             || id == type(IStreamNativeEnglishAuction).interfaceId
+            || id == type(IStreamNativeCuratedAuction).interfaceId
+            || id == type(IStreamPreparedNativeContentSale).interfaceId
             || id == type(IStreamPreparedNativeSaleBinding).interfaceId
             || id == type(IStreamArtistSaleFacts).interfaceId || super.supportsInterface(id);
     }
@@ -284,6 +291,21 @@ contract StreamNativeEnglishAuction is
         return _active.intent;
     }
 
+    function activePreparedNativeContentIntent(bytes32 hash)
+        external
+        view
+        returns (StreamPreparedNativeSettlementTypes.Intent memory)
+    {
+        if (_state.auctions[_active.auction].config.contentManifestRoot == 0) {
+            revert InvalidNativeAuction();
+        }
+        if (
+            hash == 0 || hash != _active.intentHash || _active.auction == 0
+                || _state.auctions[_active.auction].status != 2
+        ) revert InvalidNativeAuction();
+        return _active.intent;
+    }
+
     function registerAuction(
         Configuration calldata c,
         bytes calldata artwork,
@@ -396,6 +418,11 @@ contract StreamNativeEnglishAuction is
         nonReentrant
         returns (uint256 tokenId, bytes32 settlementKey)
     {
+        if (_state.auctions[id].config.contentManifestRoot != 0) {
+            return StreamNativeEnglishAuctionContentSettlement.settle(
+                _state, _active, _curated, _runtime(), id
+            );
+        }
         return StreamNativeEnglishAuctionSettlement.settle(_state, _active, _runtime(), id);
     }
 
@@ -404,6 +431,15 @@ contract StreamNativeEnglishAuction is
         returns (bytes4, StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
     {
         return StreamNativeEnglishAuctionSettlement.onPreparedNativeMint(
+            _state, _active, _runtime(), facts
+        );
+    }
+
+    function onPreparedNativeContentMint(StreamPreparedNativeSettlementTypes.Facts calldata facts)
+        external
+        returns (bytes4, StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
+    {
+        return StreamNativeEnglishAuctionContentSettlement.onPreparedNativeContentMint(
             _state, _active, _runtime(), facts
         );
     }
@@ -432,18 +468,34 @@ contract StreamNativeEnglishAuction is
         } else {
             (uint64 end,,,) = auctionDeadlines(id);
             if (end != 0 && block.timestamp >= end) {
-                hash = StreamNativeEnglishAuctionUnlock.reasonHash(
-                    StreamNativeEnglishAuctionUnlock.Context(
-                        _support(),
-                        moduleRegistry,
-                        moduleRegistryCodeHash,
-                        coreCodeHash,
-                        mintManagerCodeHash,
-                        primarySaleSettlement
-                    ),
-                    a,
-                    reason
-                );
+                if (a.config.contentManifestRoot != 0) {
+                    hash = StreamNativeEnglishAuctionContentUnlock.reasonHash(
+                        StreamNativeEnglishAuctionUnlock.Context(
+                            _support(),
+                            moduleRegistry,
+                            moduleRegistryCodeHash,
+                            coreCodeHash,
+                            mintManagerCodeHash,
+                            primarySaleSettlement
+                        ),
+                        a,
+                        reason,
+                        _curated[id].contentId
+                    );
+                } else {
+                    hash = StreamNativeEnglishAuctionUnlock.reasonHash(
+                        StreamNativeEnglishAuctionUnlock.Context(
+                            _support(),
+                            moduleRegistry,
+                            moduleRegistryCodeHash,
+                            coreCodeHash,
+                            mintManagerCodeHash,
+                            primarySaleSettlement
+                        ),
+                        a,
+                        reason
+                    );
+                }
             }
         }
         if (hash == 0) revert NativeAuctionUnlockUnavailable(id, reason);
@@ -577,5 +629,57 @@ contract StreamNativeEnglishAuction is
         x.recorder = primarySaleSettlement;
         x.recorderHash = settlementCodeHash;
         x.delegation = _delegationConfiguration();
+    }
+
+    function nextCuratedSaleId(uint256 collectionId, bytes32 phaseId)
+        external
+        view
+        override
+        returns (uint256 saleNonce, bytes32 saleId)
+    {
+        saleNonce = _state.nextNonce + 1;
+        saleId = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_SALE_V1"),
+                block.chainid,
+                address(this),
+                uint8(2),
+                collectionId,
+                phaseId,
+                saleNonce
+            )
+        );
+    }
+
+    function registerCuratedAuction(
+        Configuration calldata config,
+        bytes calldata tokenData,
+        StreamPreparedNativeContentTypes.Selection calldata selection,
+        uint256 expectedSaleNonce,
+        CreationAuthorization calldata authorization,
+        bytes calldata platformSignature,
+        bytes calldata artistSignature
+    ) external override nonReentrant returns (bytes32) {
+        return StreamNativeEnglishAuctionCurated.registerCuratedAuction(
+            _state,
+            _curated,
+            _runtime(),
+            config,
+            tokenData,
+            selection,
+            expectedSaleNonce,
+            authorization,
+            platformSignature,
+            artistSignature
+        );
+    }
+
+    function curatedSelection(bytes32 id)
+        external
+        view
+        override
+        returns (StreamPreparedNativeContentTypes.Selection memory)
+    {
+        return _curated[id];
     }
 }
