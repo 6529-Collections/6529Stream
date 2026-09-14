@@ -20,6 +20,7 @@ import "../../interfaces/stream/artist/IStreamArtistEconomicsEvidence.sol";
 import "../../interfaces/stream/artist/IStreamArtistContentFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistContentMutationFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistRoyaltyFacts.sol";
+import { StreamArtistRoyaltyModeReads } from "./StreamArtistRoyaltyModeReads.sol";
 import "../../interfaces/stream/artist/IStreamArtistRoyaltyScopeFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryScopeFacts.sol";
@@ -234,6 +235,7 @@ contract StreamArtistOnboardingReads {
         returns (T.AssignmentFact memory royalty)
     {
         _requireSelected(keccak256("ROYALTY_RESOLVER"), _suite.royaltyResolver);
+        StreamArtistRoyaltyModeReads.requireLive(_suite.core, _suite.royaltyResolver, collectionId);
         royalty = IStreamArtistRoyaltyFacts(_suite.royaltyResolver)
             .currentArtistRoyaltyAssignment(collectionId);
         if (
@@ -301,6 +303,7 @@ contract StreamArtistOnboardingReads {
                     .previewArtistPrimaryClear(p.collectionId, p.scope, p.scopeId);
             } else {
                 _requireSelected(keccak256("ROYALTY_RESOLVER"), p.resolver);
+                StreamArtistRoyaltyModeReads.requireLive(_suite.core, p.resolver, p.collectionId);
                 (fact, previousHash) = IStreamArtistRoyaltyScopeFacts(p.resolver)
                     .previewArtistRoyaltyClear(p.collectionId, p.scope, p.scopeId);
             }
@@ -339,15 +342,7 @@ contract StreamArtistOnboardingReads {
             if (p.revenueClass != keccak256("ROYALTY_ERC2981")) {
                 revert T.UnsupportedProfile();
             }
-            fact = IStreamArtistRoyaltyScopeFacts(p.resolver)
-                .previewArtistRoyaltyAssignmentForScope(
-                    p.collectionId,
-                    p.scope,
-                    p.scopeId,
-                    candidate.profileHash,
-                    candidate.royaltyBps,
-                    candidate.frozen
-                );
+            fact = StreamArtistRoyaltyModeReads.prospective(_suite.core, p, candidate);
         } else {
             revert T.UnsupportedProfile();
         }
@@ -411,6 +406,9 @@ contract StreamArtistOnboardingReads {
         if (block.chainid != _chainId) revert T.InvalidBinding();
         _requireSelected(keccak256("ARTIST_REGISTRY"), _suite.registry);
         _requireSelected(keccak256("ROYALTY_RESOLVER"), _suite.royaltyResolver);
+        if (StreamArtistRoyaltyModeReads.isSnapshot(
+                _suite.core, _suite.royaltyResolver, collectionId
+            )) return false;
         T.Binding memory b = defensiveBinding(collectionId);
         T.RoyaltyFreeze memory p = T.RoyaltyFreeze(
             _suite.royaltyResolver,
@@ -550,14 +548,9 @@ contract StreamArtistOnboardingReads {
         returns (T.AssignmentFact memory fact, IStreamRoyaltyResolver.RoyaltyConfig memory config)
     {
         _requireSelected(keccak256("ROYALTY_RESOLVER"), _suite.royaltyResolver);
-        (fact, config) = IStreamArtistRoyaltyScopeFacts(_suite.royaltyResolver)
-            .royaltyEconomicsFacts(collectionId, scope, scopeId);
-        if (
-            fact.resolver != _suite.royaltyResolver
-                || fact.revenueClass != keccak256("ROYALTY_ERC2981") || fact.scope != scope
-                || fact.scopeId != scopeId
-                || (config.configured == (fact.assignmentHash == bytes32(0)))
-        ) revert T.InvalidRecord();
+        return StreamArtistRoyaltyModeReads.current(
+            _suite.core, _suite.royaltyResolver, collectionId, scope, scopeId
+        );
     }
 
     function _rawSelectedCollectionRoyalty(uint256 collectionId)
@@ -578,18 +571,8 @@ contract StreamArtistOnboardingReads {
         if (!config.configured || fact.assignmentHash == bytes32(0)) {
             revert T.InvalidRecord();
         }
-        T.AssignmentFact memory rebuilt = IStreamArtistRoyaltyScopeFacts(_suite.royaltyResolver)
-            .previewArtistRoyaltyAssignmentForScope(
-                collectionId,
-                fact.scope,
-                fact.scopeId,
-                config.profileId,
-                config.royaltyBps,
-                config.frozen
-            );
-        if (keccak256(abi.encode(rebuilt)) != keccak256(abi.encode(fact))) {
-            revert T.InvalidRecord();
-        }
+        bytes memory evidence =
+            StreamArtistRoyaltyModeReads.rebuild(_suite.core, collectionId, fact, config);
         if (config.profileId == bytes32(0)) {
             if (config.wallet != address(0) || config.royaltyBps != 0) revert T.InvalidRecord();
             _requireCollaboratorDesignations(collectionId, payout);
@@ -602,8 +585,7 @@ contract StreamArtistOnboardingReads {
                 collectionId, _suite.royaltyResolver, factory, config.profileId, payout
             );
         }
-        return
-            abi.encode(keccak256("6529STREAM_CURRENT_ROYALTY_ECONOMICS_EVIDENCE_V1"), fact, config);
+        return evidence;
     }
 
     function _rawSelectedCollectionPrimary(uint256 collectionId)
