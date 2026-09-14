@@ -221,12 +221,14 @@ All remain above the normative **500,000-gas** single paid
 `PRE_REVENUE_SINGLE_STEP` ceiling in
 [MPA-GAS-BUDGET](../mint-policy-and-accounting.md#gas-budget-artifact).
 This is a deployment blocker. Functional acceptance does not waive the ceiling.
-A separate cached trace of the original current-stack composition measured a
-first successful 2-of-3 Safe transaction frame of8,805,429, including the
+A separate cached trace of the original, pre-compression current-stack composition
+measured a first successful 2-of-3 Safe transaction frame of8,805,429, including the
 consumer8,755,856, recorder553,549 and actual Manager798,823. The latter includes
 Core469,659; those nested costs must not be added again. The second Manager frame
-still used602,423. That trace has prior test activity and is not an all-cold
-rehearsal. It demonstrates that clearing-only storage changes cannot by
+still used602,423. Setup, a rejected purchase and Artist consent precede the
+successful purchase. That trace is neither all-cold nor a measurement of the
+current compressed implementation. The newer actual-current functional cases
+also exclude cold-gas acceptance; whole-test totals are not collector-call costs. It demonstrates that clearing-only storage changes cannot by
 themselves satisfy the ceiling while those shared paths remain unchanged.
 Shared mint, authorization and receipt cost work remains open for integration;
 this implementation neither changes the ceiling nor calls those costs accepted.

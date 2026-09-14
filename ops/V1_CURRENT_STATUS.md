@@ -49,11 +49,15 @@ complete. No new funding or owner decision is required for current work.
 
 ## Issues that affect delivery
 
-The specified all-cold collector gas ceiling remains unresolved: a previously
-captured current clearing call used 8,755,856 gas against a 500,000 ceiling.
-Successful deployment within the separate transaction limit does not resolve
-that gap. Required behavior must be made to conform or an explicit specification
-decision must be recorded; the limit has not been silently waived.
+The specified 500,000-gas all-cold collector ceiling remains unproven. The
+retained 8,755,856-gas clearing trace is an earlier implementation's first
+successful purchase after setup, rejection and consent; it is neither all-cold
+nor a measurement of the current compressed implementation. Later optimized
+domain measurements remain above the ceiling, and later actual-current tests
+establish functional behavior without a current all-cold measurement. Fresh
+current transaction measurements and shared-path cost work remain required.
+Successful deployment within its separate transaction limit does not establish
+collector conformance; the specification limit has not been waived.
 
 Full CI is not green and release artifacts still describe the retained baseline.
 Generate new candidate evidence from a stable integrated build, without changing

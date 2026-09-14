@@ -711,9 +711,11 @@ review (`d9d7d46b`): required artist consent, paid mints, excess and immediate
 rebate claims, official supplemental settlement, and partial escape preserving
 NFT custody. They use a fixed profile, zero reveal fee and the explicit external
 randomness double. The original domain purchase measured 6,843,542 gas. A
-separate actual-current trace measures 8,755,856 gas in the first consumer call;
-its real Manager and recorder calls each exceed the 500,000 collector ceiling
-alone. These are qualified in-test measurements, not a cold-call admission.
+separate trace of that earlier composition measures 8,755,856 gas in the first
+successful consumer call after setup, rejection and consent. Its real Manager
+and recorder calls each exceed the 500,000 collector ceiling alone. This is
+not an all-cold measurement or a measurement of the later compressed code;
+newer functional captures do not yet establish current cold-call conformance.
 Compression and storage optimization continue, with shared-path gas work kept
 explicit so it does not serialize every remaining sale feature.
 The new fixed linked libraries are documented in its
