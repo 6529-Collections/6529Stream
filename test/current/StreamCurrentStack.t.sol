@@ -2,6 +2,12 @@
 pragma solidity ^0.8.19;
 
 import "../helpers/StreamCurrentStackFixture.sol";
+import {
+    IStreamRevenueResolver as TemplateResolver
+} from "../../smart-contracts/interfaces/stream/revenue/IStreamRevenueResolver.sol";
+import {
+    IStreamDynamicPrimaryTemplates as DynamicTemplates
+} from "../../smart-contracts/interfaces/stream/revenue/IStreamDynamicPrimaryTemplates.sol";
 
 /// @notice Product tests use the deployable Core and every included protocol satellite.
 /// @dev Only the external randomness service is substituted by a controllable provider.
@@ -150,6 +156,62 @@ contract StreamCurrentStackTest is StreamCurrentStackFixture {
         require(
             sale.platformSigner() == SECOND_OWNER && sale.signerEpoch() == 2,
             "governed signer rotation"
+        );
+    }
+
+    function testGovernedDynamicTemplateCreationRequiresOwnerAndDelay() public {
+        TemplateResolver.PrimaryTemplateEntry[] memory entries =
+            new TemplateResolver.PrimaryTemplateEntry[](2);
+        entries[0] = TemplateResolver.PrimaryTemplateEntry(
+            address(0), keccak256("COLLECTION_ARTIST"), 700000, keccak256("artist")
+        );
+        entries[1] = TemplateResolver.PrimaryTemplateEntry(
+            address(0), keccak256("SALE_POSTER"), 300000, keccak256("poster")
+        );
+        if (uint256(entries[0].accountSource) > uint256(entries[1].accountSource)) {
+            TemplateResolver.PrimaryTemplateEntry memory first = entries[0];
+            entries[0] = entries[1];
+            entries[1] = first;
+        }
+        bytes32 terms = keccak256("governed dynamic template terms");
+        bytes32 entriesHash = keccak256(abi.encode(entries));
+        bytes32 templateId = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_PRIMARY_TEMPLATE_V1"),
+                block.chainid,
+                address(primaryResolver),
+                uint16(1),
+                uint16(1),
+                entriesHash,
+                terms
+            )
+        );
+        bytes32 previousAssignment =
+            primaryResolver.resolvePrimaryAssignment(1, 0, PRIMARY_REVENUE_CLASS).assignmentHash;
+        bytes memory data = abi.encodeCall(
+            primaryResolver.createDynamicPrimaryTemplate,
+            (entries, terms, new DynamicTemplates.CollaboratorReference[](0))
+        );
+        (bool direct,) = address(primaryResolver).call(data);
+        require(!direct, "unprivileged template creation rejected");
+        (bool exists,,) = primaryResolver.primaryTemplate(templateId);
+        require(!exists, "unauthorized call leaves template absent");
+        // The ordinary helper checks pre-delay rejection before executing the same action.
+        _executeDelayed(address(primaryResolver), data);
+        bytes32 recordedEntries;
+        bytes32 recordedTerms;
+        (exists, recordedEntries, recordedTerms) = primaryResolver.primaryTemplate(templateId);
+        require(
+            exists && recordedEntries == entriesHash && recordedTerms == terms,
+            "governance publishes exact symbolic template"
+        );
+        require(
+            primaryResolver.primaryTemplateEntryCount(templateId) == 2, "complete template rows"
+        );
+        require(
+            primaryResolver.resolvePrimaryAssignment(1, 0, PRIMARY_REVENUE_CLASS).assignmentHash
+                == previousAssignment,
+            "publication cannot bypass Artist-approved assignment"
         );
     }
 

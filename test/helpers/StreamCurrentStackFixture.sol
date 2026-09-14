@@ -970,7 +970,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
 
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {
         GovernanceActionPolicyEntry[] memory additional = _additionalOperatingPolicies();
-        rows = new GovernanceActionPolicyEntry[](66 + additional.length);
+        rows = new GovernanceActionPolicyEntry[](67 + additional.length);
         rows[0] = _operatingPolicy(address(manager), manager.configurePhase.selector);
         rows[1] = _operatingPolicy(address(manager), manager.setPhaseExecutor.selector);
         rows[2] = _operatingPolicy(address(manager), manager.setPhasePaused.selector);
@@ -1048,6 +1048,9 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
             _operatingPolicy(address(primaryResolver), primaryResolver.raiseGasParameter.selector);
         rows[i++] = _operatingPolicy(
             address(primaryResolver), primaryResolver.createPrimaryTemplate.selector
+        );
+        rows[i++] = _operatingPolicy(
+            address(primaryResolver), primaryResolver.createDynamicPrimaryTemplate.selector
         );
         rows[i++] =
             _operatingPolicy(address(assetPolicy), assetPolicy.setAssetPermitPolicy.selector);

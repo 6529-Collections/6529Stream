@@ -752,7 +752,7 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
     }
 
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {
-        rows = new GovernanceActionPolicyEntry[](localDevelopment ? 77 : 78);
+        rows = new GovernanceActionPolicyEntry[](localDevelopment ? 78 : 79);
         rows[0] = _operatingPolicy(address(manager), manager.configurePhase.selector);
         rows[1] = _operatingPolicy(address(manager), manager.setPhaseExecutor.selector);
         rows[2] = _operatingPolicy(address(manager), manager.setPhasePaused.selector);
@@ -846,6 +846,9 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
             _operatingPolicy(address(primaryRevenue), primaryRevenue.raiseGasParameter.selector);
         rows[i++] = _operatingPolicy(
             address(primaryRevenue), primaryRevenue.createPrimaryTemplate.selector
+        );
+        rows[i++] = _operatingPolicy(
+            address(primaryRevenue), primaryRevenue.createDynamicPrimaryTemplate.selector
         );
         rows[i++] =
             _operatingPolicy(address(assetPolicy), assetPolicy.setAssetPermitPolicy.selector);
