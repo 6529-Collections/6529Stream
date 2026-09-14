@@ -5,6 +5,7 @@ import "./StreamNativeEnglishAuctionTerminal.sol";
 import "./StreamNativeEnglishAuctionRightsSettlement.sol";
 
 import "./StreamNativeEnglishAuctionState.sol";
+import "./StreamNativeEnglishAuctionReadWorker.sol";
 import "./StreamNativeEnglishAuctionCustodySettlement.sol";
 import "./StreamTokenProfileCustodyActivation.sol";
 import "./StreamCustodyRightsActivation.sol";
@@ -249,7 +250,8 @@ contract StreamNativeEnglishAuction is
     }
 
     function auction(bytes32 id) external view override returns (Auction memory) {
-        return StreamNativeEnglishAuctionState.requireAuction(_state, id);
+        bytes memory encoded = _encodedRead(1, id);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function auctionDeadlines(bytes32 id)
@@ -311,11 +313,8 @@ contract StreamNativeEnglishAuction is
         view
         returns (StreamPreparedNativeSettlementTypes.Intent memory)
     {
-        if (
-            hash == 0 || hash != _active.intentHash || _active.auction == 0
-                || _state.auctions[_active.auction].status != 2
-        ) revert InvalidNativeAuction();
-        return _active.intent;
+        bytes memory encoded = _encodedRead(2, hash);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function activePreparedNativeContentIntent(bytes32 hash)
@@ -323,14 +322,8 @@ contract StreamNativeEnglishAuction is
         view
         returns (StreamPreparedNativeSettlementTypes.Intent memory)
     {
-        if (_state.auctions[_active.auction].config.contentManifestRoot == 0) {
-            revert InvalidNativeAuction();
-        }
-        if (
-            hash == 0 || hash != _active.intentHash || _active.auction == 0
-                || _state.auctions[_active.auction].status != 2
-        ) revert InvalidNativeAuction();
-        return _active.intent;
+        bytes memory encoded = _encodedRead(3, hash);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function registerAuction(
@@ -596,7 +589,8 @@ contract StreamNativeEnglishAuction is
         override
         returns (StreamNativeCustodySettlementTypes.Origin memory)
     {
-        return _custody.origins[id];
+        bytes memory encoded = _encodedRead(5, id);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function activeCustodySale(bytes32 id)
@@ -605,12 +599,8 @@ contract StreamNativeEnglishAuction is
         override
         returns (StreamNativeCustodySettlementTypes.Facts memory)
     {
-        Auction storage a = StreamNativeEnglishAuctionState.requireAuction(_state, id);
-        if (
-            a.status != 2 || a.config.mintAtSettlement || _custody.acquiring != 0
-                || !_custody.origins[id].eligible || a.winner.amount == 0
-        ) revert InvalidNativeCustody();
-        return StreamNativeCustodySettlementTypes.Facts(id, a, _custody.origins[id]);
+        bytes memory encoded = _encodedRead(6, id);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function unlockCustodySale(bytes32 id, uint8 reason) external override nonReentrant {
@@ -735,7 +725,8 @@ contract StreamNativeEnglishAuction is
         override
         returns (StreamPreparedNativeContentTypes.Selection memory)
     {
-        return _curated[id];
+        bytes memory encoded = _encodedRead(9, id);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function rightsConfigurationHash(
@@ -781,11 +772,8 @@ contract StreamNativeEnglishAuction is
         override
         returns (StreamPreparedNativeRightsTypes.Intent memory)
     {
-        if (
-            hash == 0 || _active.intentHash != hash || _active.auction == 0
-                || _rights[_active.auction].mode == 0
-        ) revert InvalidNativeAuction();
-        return StreamPreparedNativeRightsTypes.Intent(_active.intent, _rights[_active.auction]);
+        bytes memory encoded = _encodedRead(4, hash);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function onPreparedNativeRightsMint(StreamPreparedNativeRightsTypes.Facts calldata facts)
@@ -827,7 +815,8 @@ contract StreamNativeEnglishAuction is
         override
         returns (StreamTokenProfileCustodyTypes.Activation memory)
     {
-        return _tokenProfileCustody.activations[id];
+        bytes memory encoded = _encodedRead(7, id);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function tokenProfileCustodyConfigurationHash(bytes32 id)
@@ -927,7 +916,8 @@ contract StreamNativeEnglishAuction is
         override
         returns (StreamCustodyRightsTypes.Activation memory)
     {
-        return _custodyRights.activations[id];
+        bytes memory encoded = _encodedRead(8, id);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function custodyRightsConfigurationHash(bytes32 id) external view override returns (bytes32) {
@@ -1011,5 +1001,20 @@ contract StreamNativeEnglishAuction is
             _tokenProfileCustody.activations[id];
         if (activation.authorizationDigest == 0) revert InvalidTokenProfileCustody();
         return activation.effectiveConfigHash;
+    }
+
+    /// @dev Only large view getters use terminal ABI forwarding; execution modifiers are untouched.
+    function _encodedRead(uint8 kind, bytes32 key) private view returns (bytes memory) {
+        return StreamNativeEnglishAuctionReadWorker.read(
+            _state,
+            _active,
+            _custody,
+            _curated,
+            _rights,
+            _tokenProfileCustody,
+            _custodyRights,
+            kind,
+            key
+        );
     }
 }
