@@ -2,6 +2,9 @@
 pragma solidity ^0.8.19;
 
 import "../regression/legacy/helpers/CharacterizationTestBase.sol";
+import { StreamCurrentFinalityGraph } from "../../script/current/StreamCurrentFinalityGraph.sol";
+import { StreamCurrentGraphCreation } from "../../script/current/StreamCurrentGraphCreation.sol";
+import { StreamNativeAssemblyCreation } from "./StreamNativeAssemblyCreation.sol";
 import "../../smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol";
 import "../../smart-contracts/domains/artist/StreamArtistOnboardingCoordinator.sol";
 import "../../smart-contracts/domains/artist/StreamArtistArchiveV2.sol";
@@ -14,7 +17,9 @@ import "../../smart-contracts/domains/artist/StreamArtistPayoutLifecycle.sol";
 import "../../smart-contracts/domains/artist/StreamArtistConsentFinalityLifecycle.sol";
 import "../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
 import "../../smart-contracts/domains/revenue/StreamRoyaltyResolver.sol";
-import { StreamMetadataRouter } from "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
+import {
+    StreamMetadataRouter
+} from "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
 import "../../smart-contracts/domains/preservation/StreamArchivalCoverage.sol";
 import "../../smart-contracts/domains/preservation/StreamArweaveCheckpointVerifier.sol";
 import "../../smart-contracts/interfaces/stream/preservation/StreamArchivalTypes.sol";
@@ -26,7 +31,7 @@ interface ArtistSuiteVm {
 
 /// @notice Real artist owners and real provider dependencies shared by current-stack scenarios.
 /// @dev CREATE predictions break constructor references only; no code, storage or authority is mocked.
-abstract contract StreamArtistSuiteFixture is CharacterizationTestBase {
+abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCurrentFinalityGraph {
     bytes32 internal constant PRIMARY_REVENUE_CLASS = keccak256("PRIMARY_SALE");
     StreamArtistOnboardingRegistry internal artists;
     StreamArtistOnboardingCoordinator internal artistCoordinator;
@@ -56,10 +61,7 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase {
         s.validator = address(new StreamArtistRegistryValidatorBase());
         s.primaryRevenueClass = PRIMARY_REVENUE_CLASS;
         _deployArtistArchival(core_, executor_, roles_);
-        ArtistSuiteVm prediction = ArtistSuiteVm(address(vm));
-        uint256 nonce = prediction.getNonce(address(this));
-        // Facade, archive, seven owners, metadata, primary, royalty, then coordinator.
-        address nextCoordinator = prediction.computeCreateAddress(address(this), nonce + 12);
+        address nextCoordinator = _reserveCurrentCoordinator(address(this));
         artists = new StreamArtistOnboardingRegistry(
             core_,
             manager_,
@@ -110,7 +112,7 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase {
             core_,
             executor_,
             deploymentHash,
-            "urn:6529stream:fixture:metadata",
+            "https://engineering.example.invalid/6529stream/fixture/router",
             keccak256("fixture metadata module"),
             attribution
         );
@@ -127,9 +129,39 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase {
         s.metadata = address(router);
         s.primaryResolver = address(primaryResolver);
         s.royaltyResolver = address(royalties);
-        artistCoordinator = new StreamArtistOnboardingCoordinator(s);
-        require(address(artistCoordinator) == nextCoordinator, "artist deployment order");
         artistSuite = s;
+        _bindCurrentArtistGraph(
+            s,
+            _fixtureModuleRegistry(),
+            executor_,
+            _fixtureSystemManifest(),
+            address(artistArchivalCoverage),
+            address(artistArchivalCheckpoint),
+            deploymentHash
+        );
+    }
+
+    function _fixtureModuleRegistry() internal view virtual returns (address);
+    function _fixtureSystemManifest() internal view virtual returns (address);
+
+    function _graphCreation(StreamCurrentGraphCreation.Kind kind)
+        internal
+        view
+        override
+        returns (bytes memory)
+    {
+        return StreamNativeAssemblyCreation.creation(
+            StreamNativeAssemblyCreation.Kind(uint256(kind))
+        );
+    }
+
+    function _completeFixtureArtistSuite(bytes memory rendererCatalog) internal {
+        _completeCurrentFinalityGraph(rendererCatalog);
+        artistCoordinator = assemblyCoordinator;
+        require(
+            address(artistCoordinator) == assemblyCoordinatorAddress,
+            "original Coordinator slot fulfilled"
+        );
     }
 
     /// @dev Canonical governance must already bind its RoleRegistry. Observer signatures in

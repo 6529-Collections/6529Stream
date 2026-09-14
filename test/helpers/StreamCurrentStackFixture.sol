@@ -2,6 +2,12 @@
 pragma solidity ^0.8.19;
 
 import "./StreamArtistSuiteFixture.sol";
+import {
+    IStreamCollectionMetadataV1
+} from "../../smart-contracts/interfaces/stream/metadata/IStreamCollectionMetadataV1.sol";
+import {
+    IStreamArtworkFinalityRegistry
+} from "../../smart-contracts/interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol";
 import "../../smart-contracts/interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 import "../../smart-contracts/core/StreamCore.sol";
 import "../../smart-contracts/domains/governance/StreamGovernanceExecutor.sol";
@@ -18,7 +24,9 @@ import "../../smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol";
 import "../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
 import "../../smart-contracts/domains/revenue/StreamRoyaltyResolver.sol";
 import "../../smart-contracts/domains/entropy/StreamEntropyCoordinator.sol";
-import { StreamMetadataRouter } from "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
+import {
+    StreamMetadataRouter
+} from "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
 import "../../script/current/StreamCurrentStackPlan.sol";
 import "../../script/current/StreamArtistActivationPlan.sol";
 import "../../script/current/StreamRevealActivationPlan.sol";
@@ -59,6 +67,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
     bytes32 internal profile;
     address[] internal guardians;
     GovernanceActionPolicyEntry[] private _foundationPolicies;
+    uint64 private _fixtureCatalogRevision;
 
     function _deployCurrentStack(address artist_, address platform) internal {
         artist = artist_;
@@ -129,6 +138,8 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
         ledger.transferOwnership(address(executor));
         sale.transferOwnership(address(executor));
         auction.transferOwnership(address(executor));
+        _activateFixtureGraphPrerequisites();
+        _completeFixtureArtistSuite(_currentGraphRendererCatalog(1));
         _assertDeployableProductionContracts();
         _activateInitialProducts();
         _activateArtistAuthority();
@@ -139,6 +150,74 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
         _configureMintPhase(AUCTION_PHASE, address(auction));
         _configureAdditionalProducts();
         _handoffManager();
+    }
+
+    function _fixtureModuleRegistry() internal view override returns (address) {
+        return address(registry);
+    }
+
+    function _fixtureSystemManifest() internal view override returns (address) {
+        return address(manifest);
+    }
+
+    function _activateFixtureGraphPrerequisites() private {
+        StreamModuleRegistration[] memory records = new StreamModuleRegistration[](3);
+        records[0] = _record(
+            address(router),
+            keccak256("METADATA_ROUTER"),
+            type(IStreamMetadataRouter).interfaceId,
+            keccak256("fixture metadata module")
+        );
+        records[1] = _record(
+            address(artists),
+            keccak256("ARTIST_REGISTRY"),
+            type(IStreamArtistMintConsent).interfaceId,
+            keccak256("fixture artist module")
+        );
+        records[2] = _record(
+            address(assemblyMetadata),
+            keccak256("COLLECTION_METADATA"),
+            type(IStreamCollectionMetadataV1).interfaceId,
+            keccak256("current-stack collection metadata module v1")
+        );
+        GenesisBatch[] memory batches = new GenesisBatch[](2);
+        batches[0].actionClass = 1;
+        (GovernanceCall[] memory registrations, bytes[] memory registrationData) =
+            StreamCurrentStackPlan.registrationCalls(registry, records);
+        batches[0].calls = new GovernanceCall[](4);
+        batches[0].callDatas = new bytes[](4);
+        for (uint256 i; i < 3; ++i) {
+            batches[0].calls[i] = registrations[i];
+            batches[0].callDatas[i] = registrationData[i];
+        }
+        (batches[0].calls[3], batches[0].callDatas[3]) =
+            StreamCurrentStackPlan.createCollectionCall(core, 1, _fixtureSupplyLimit());
+        bytes32[] memory keys = new bytes32[](3);
+        keys[0] = keccak256("METADATA_ROUTER");
+        keys[1] = keccak256("ARTIST_REGISTRY");
+        keys[2] = keccak256("COLLECTION_METADATA");
+        batches[1].actionClass = 3;
+        (batches[1].calls, batches[1].callDatas) =
+            StreamCurrentStackPlan.pointerCalls(core, registry, keys, records);
+        _admitInitialProductPolicies(batches);
+        _executeInitialBatch(batches[0]);
+        GovernanceCall[] memory calls = new GovernanceCall[](4);
+        bytes[] memory datas = new bytes[](4);
+        for (uint256 i; i < 3; ++i) {
+            calls[i] = batches[1].calls[i];
+            datas[i] = batches[1].callDatas[i];
+        }
+        StreamSystemManifest.ModuleAddresses memory modules =
+        StreamGenesisManifestPlan.readAggregate(manifest).modules;
+        modules.artistRegistry = address(artists);
+        modules.metadataRouter = address(router);
+        modules.collectionMetadata = address(assemblyMetadata);
+        (calls[3], datas[3]) =
+            _initialPublication(modules, keccak256("actual early graph selection"));
+        batches[1].calls = calls;
+        batches[1].callDatas = datas;
+        _executeInitialBatch(batches[1]);
+        _requireCurrentGraphSelections();
     }
 
     /// @dev Operator scenarios can retain their real initial owner until setup completes.
@@ -447,29 +526,31 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
     /// @dev New products use ordinary delayed governance after the foundation seal.
     function _activateInitialProducts() private {
         StreamModuleRegistration[] memory allRecords = _moduleRecords();
+        // Foundation, Router and Artist were already admitted and selected in the first phase.
         StreamModuleRegistration[] memory records =
-            new StreamModuleRegistration[](allRecords.length - 2);
-        for (uint256 i; i < records.length; ++i) {
-            records[i] = allRecords[i + 2];
+            new StreamModuleRegistration[](allRecords.length - 4);
+        uint256 nextRecord;
+        for (uint256 i = 2; i < allRecords.length; ++i) {
+            if (i == 5 || i == 7) continue;
+            records[nextRecord++] = allRecords[i];
         }
+        require(nextRecord == records.length, "complete remaining product registration");
         GenesisBatch[] memory batches = new GenesisBatch[](3);
         batches[0].actionClass = 1;
         (GovernanceCall[] memory registrations, bytes[] memory registrationData) =
             StreamCurrentStackPlan.registrationCalls(registry, records);
-        batches[0].calls = new GovernanceCall[](records.length + 2);
-        batches[0].callDatas = new bytes[](records.length + 2);
+        batches[0].calls = new GovernanceCall[](records.length + 1);
+        batches[0].callDatas = new bytes[](records.length + 1);
         for (uint256 i; i < records.length; ++i) {
             batches[0].calls[i] = registrations[i];
             batches[0].callDatas[i] = registrationData[i];
         }
-        (batches[0].calls[records.length], batches[0].callDatas[records.length]) =
-            StreamCurrentStackPlan.createCollectionCall(core, 1, _fixtureSupplyLimit());
         bytes memory data = abi.encodeCall(
             entropy.configureCollection,
             (1, address(provider), keccak256("collection salt"), true, uint64(100))
         );
-        batches[0].callDatas[records.length + 1] = data;
-        batches[0].calls[records.length + 1] = _configurationCall(address(entropy), data);
+        batches[0].callDatas[records.length] = data;
+        batches[0].calls[records.length] = _configurationCall(address(entropy), data);
         batches[2].actionClass = 1;
         address[] memory extraProducers = _additionalEscrowProducers();
         batches[2].calls = new GovernanceCall[](6 + extraProducers.length);
@@ -542,7 +623,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
     }
 
     function _moduleRecords() private view returns (StreamModuleRegistration[] memory records) {
-        records = new StreamModuleRegistration[](9);
+        records = new StreamModuleRegistration[](10);
         records[0] = _record(
             address(registry),
             keccak256("MODULE_REGISTRY"),
@@ -596,6 +677,12 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
             keccak256("GOVERNANCE_LAYER"),
             type(IStreamStateExportPublisher).interfaceId,
             keccak256("fixture state export publisher")
+        );
+        records[9] = _record(
+            address(assemblyFinality),
+            keccak256("ARTWORK_FINALITY_REGISTRY"),
+            type(IStreamArtworkFinalityRegistry).interfaceId,
+            graphFinalityManifestHash
         );
     }
 
@@ -699,9 +786,10 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
         (bytes32 candidate, bytes32 catalog, uint256 existingCount, uint64 revision) =
             executor.governanceActionPolicyState();
         require(
-            revision == 0 && existingCount == _foundationPolicies.length,
+            revision == _fixtureCatalogRevision && existingCount == _foundationPolicies.length,
             "exact original foundation catalog"
         );
+        if (count == 0) return;
         (bytes32 next, bytes32 scope, bytes32 oldHash, bytes32 newHash) = StreamGovernanceActionPolicy.extensionTransition(
             address(executor), candidate, catalog, existingCount, revision, additions
         );
@@ -718,6 +806,17 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
         (batch.calls[1], batch.callDatas[1]) =
             _initialPublication(StreamGenesisManifestPlan.readAggregate(manifest).modules, next);
         _executeInitialBatch(batch);
+        (, bytes32 appliedCatalog, uint256 appliedCount, uint64 appliedRevision) =
+            executor.governanceActionPolicyState();
+        require(
+            appliedCatalog == next && appliedRevision == revision + 1
+                && appliedCount == existingCount + count,
+            "exact applied catalog extension"
+        );
+        _fixtureCatalogRevision = appliedRevision;
+        for (uint256 i; i < count; ++i) {
+            _foundationPolicies.push(additions[i]);
+        }
     }
 
     function _initialProductModules()
@@ -725,7 +824,9 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
         view
         returns (StreamSystemManifest.ModuleAddresses memory modules)
     {
+        modules = StreamGenesisManifestPlan.readAggregate(manifest).modules;
         modules.artistRegistry = address(artists);
+        modules.artworkFinalityRegistry = address(assemblyFinality);
         modules.revenueResolver = address(royalties);
         modules.metadataRouter = address(router);
         modules.entropyCoordinator = address(entropy);

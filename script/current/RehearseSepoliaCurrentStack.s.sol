@@ -17,18 +17,35 @@ interface SepoliaVRFSubscriptions {
     function fundSubscriptionWithNative(uint256) external payable;
     function addConsumer(uint256, address) external;
     function getSubscription(uint256)
-        external view returns (uint96, uint96, uint64, address, address[] memory);
+        external
+        view
+        returns (uint96, uint96, uint64, address, address[] memory);
 }
 
 /// @notice Fork-only deployment rehearsal against the actual Sepolia coordinator.
 /// @dev Never broadcast this entry point: it grants simulated ETH and its simulated
 ///      subscription ID depends on a fork block hash. The live PowerShell helper
-///      waits for the real createSubscription receipt before deploying the stack.
+///      waits for the real createSubscription receipt before deploying phase one. This result
+///      is a partial checkpoint; selected governance and phase two use the live deployment flow.
 contract RehearseSepoliaCurrentStack is StreamCurrentStackDeployment {
     SepoliaRehearsalVm private constant vm =
         SepoliaRehearsalVm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
-    function run() external returns (address deployedCore, address deployedProvider, uint256 subId) {
+    struct RehearsalPhase1V3 {
+        uint16 schemaVersion;
+        uint8 phase;
+        address core;
+        address entropyProvider;
+        uint256 subscriptionId;
+        address checkpoint;
+        bytes32 checkpointPayloadHash;
+        address coordinatorSlot;
+        address reservedCoordinator;
+        bool graphPrerequisitesSelected;
+    }
+
+    function run() external returns (RehearsalPhase1V3 memory staged) {
+        uint256 subId;
         require(vm.isContext(5), "dry-run context required");
         vm.activeFork();
         require(block.chainid == 11155111, "Sepolia fork required");
@@ -44,7 +61,7 @@ contract RehearseSepoliaCurrentStack is StreamCurrentStackDeployment {
         vm.deal(deployer, 10 ether);
         vm.startBroadcast(deployer);
         subId = SepoliaVRFSubscriptions(upstream).createSubscription();
-        SepoliaVRFSubscriptions(upstream).fundSubscriptionWithNative{value: 0.005 ether}(subId);
+        SepoliaVRFSubscriptions(upstream).fundSubscriptionWithNative{ value: 0.005 ether }(subId);
         vrfConfig.vrfCoordinator = upstream;
         vrfConfig.subscriptionId = subId;
         vrfConfig.keyHash = 0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae;
@@ -54,18 +71,33 @@ contract RehearseSepoliaCurrentStack is StreamCurrentStackDeployment {
         vrfConfig.nativePayment = true;
         _deployCurrentStack(selectedArtist, platform);
         SepoliaVRFSubscriptions(upstream).addConsumer(subId, address(provider));
+        StreamCurrentGraphCheckpoint checkpoint = _savePhaseOne();
         vm.stopBroadcast();
         (, uint96 balance,, address subscriptionOwner, address[] memory consumers) =
             SepoliaVRFSubscriptions(upstream).getSubscription(subId);
         require(balance == 0.005 ether && subscriptionOwner == deployer, "subscription readback");
         require(consumers.length == 1 && consumers[0] == address(provider), "consumer readback");
-        require(StreamEntropyProviderVRF(address(provider)).subscriptionId() == subId, "adapter subId");
+        require(
+            StreamEntropyProviderVRF(address(provider)).subscriptionId() == subId, "adapter subId"
+        );
         require(executor.genesisInitialized(), "foundation incomplete");
         require(
-            StreamCurrentStackPlan.readPointer(core, keccak256("ARTIST_REGISTRY")).target == address(0),
+            StreamCurrentStackPlan.readPointer(core, keccak256("ARTIST_REGISTRY")).target
+                == address(0),
             "rehearsal deploys products without claiming activation"
         );
-        return (address(core), address(provider), subId);
+        staged = RehearsalPhase1V3(
+            3,
+            1,
+            address(core),
+            address(provider),
+            subId,
+            address(checkpoint),
+            checkpoint.payloadHash(),
+            address(assemblyCoordinatorSlot),
+            assemblyCoordinatorAddress,
+            false
+        );
     }
 
     function _buildGovernanceFoundationPlan(

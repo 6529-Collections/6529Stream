@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import { StreamCurrentFinalityGraph } from "./StreamCurrentFinalityGraph.sol";
+import { StreamCurrentGraphCreation } from "./StreamCurrentGraphCreation.sol";
 import "../../smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol";
 import "../../smart-contracts/domains/artist/StreamArtistOnboardingCoordinator.sol";
 import "../../smart-contracts/domains/artist/StreamArtistArchiveV2.sol";
@@ -13,7 +15,9 @@ import "../../smart-contracts/domains/artist/StreamArtistPayoutLifecycle.sol";
 import "../../smart-contracts/domains/artist/StreamArtistConsentFinalityLifecycle.sol";
 import "../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
 import "../../smart-contracts/domains/revenue/StreamRoyaltyResolver.sol";
-import { StreamMetadataRouter } from "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
+import {
+    StreamMetadataRouter
+} from "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
 import "../../smart-contracts/domains/preservation/StreamArweaveCheckpointVerifier.sol";
 import "../../smart-contracts/domains/preservation/StreamArchivalCoverage.sol";
 
@@ -23,9 +27,9 @@ interface ArtistDeploymentVm {
 }
 
 /// @notice Foundry deployment assembly for the real immutable artist owners and providers.
-/// @dev CREATE prediction reads the actual broadcast sender's nonce. The caller must keep
-///      this sequence uninterrupted; the final equality check verifies every immutable edge.
-abstract contract StreamArtistSuiteDeployment {
+/// @dev The early facade pins a one-use operator-owned CREATE slot. The actual Coordinator
+/// is constructed only after the real selected prerequisites and actual Finality Registry exist.
+abstract contract StreamArtistSuiteDeployment is StreamCurrentFinalityGraph {
     bytes32 internal constant PRIMARY_REVENUE_CLASS = keccak256("PRIMARY_SALE");
     StreamArtistOnboardingRegistry internal artistRegistry;
     StreamArtistOnboardingCoordinator internal artistCoordinator;
@@ -67,17 +71,16 @@ abstract contract StreamArtistSuiteDeployment {
             executor_, archivalObservers, archivalQuorum, signatureGas
         );
         archivalCoverage = new StreamArchivalCoverage(
-            core_, executor_, roles_, address(archivalCheckpoint), signatureGas,
+            core_,
+            executor_,
+            roles_,
+            address(archivalCheckpoint),
+            signatureGas,
             IStreamGasParameterHost.GasParameterConfig(
                 "ARCHIVAL_DEPENDENCY_READ_GAS", archivalReadGas, 50_000, 2
             )
         );
-        ArtistDeploymentVm prediction =
-            ArtistDeploymentVm(address(uint160(uint256(keccak256("hevm cheat code")))));
-        uint256 nonce = prediction.getNonce(_artistDeploymentSender());
-        // Facade, archive, seven owners, metadata, primary, royalty, then coordinator.
-        address nextCoordinator =
-            prediction.computeCreateAddress(_artistDeploymentSender(), nonce + 12);
+        address nextCoordinator = _reserveCurrentCoordinator(_artistDeploymentSender());
         artistRegistry = new StreamArtistOnboardingRegistry(
             core_,
             manager_,
@@ -131,7 +134,7 @@ abstract contract StreamArtistSuiteDeployment {
                 core_,
                 executor_,
                 deploymentHash,
-                "urn:6529stream:development:metadata",
+                "https://engineering.example.invalid/6529stream/current/router",
                 keccak256("development metadata module"),
                 attribution
             )
@@ -155,8 +158,36 @@ abstract contract StreamArtistSuiteDeployment {
         s.metadata = address(router);
         s.primaryResolver = address(primaryRevenue);
         s.royaltyResolver = address(royalty);
-        artistCoordinator = new StreamArtistOnboardingCoordinator(s);
-        require(address(artistCoordinator) == nextCoordinator, "artist deployment order");
         artistSuite = s;
+        _bindCurrentArtistGraph(
+            s,
+            _deploymentModuleRegistry(),
+            executor_,
+            _deploymentSystemManifest(),
+            address(archivalCoverage),
+            address(archivalCheckpoint),
+            deploymentHash
+        );
+    }
+
+    function _deploymentModuleRegistry() internal view virtual returns (address);
+    function _deploymentSystemManifest() internal view virtual returns (address);
+
+    function _graphCreation(StreamCurrentGraphCreation.Kind kind)
+        internal
+        view
+        override
+        returns (bytes memory)
+    {
+        return StreamCurrentGraphCreation.creation(kind);
+    }
+
+    function _completeDeploymentArtistSuite(bytes memory rendererCatalog) internal {
+        _completeCurrentFinalityGraph(rendererCatalog);
+        artistCoordinator = assemblyCoordinator;
+        require(
+            address(artistCoordinator) == assemblyCoordinatorAddress,
+            "original Coordinator slot fulfilled"
+        );
     }
 }
