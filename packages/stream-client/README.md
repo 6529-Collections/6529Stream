@@ -150,3 +150,77 @@ node scripts/generate-current-signing-vectors.mjs --build-info /path/to/native-b
 
 The generator starts and stops its own loopback chain and accepts no existing
 RPC endpoint or signer. It requires no new Solidity compilation.
+
+## Prepare current Artist and collaborator operations
+
+The current Artist helpers support eight signed operations: binding acceptance,
+policy consent, economics consent, payout designation, attestation, content
+ratification, collaborator identity acceptance and collaborator acceptance.
+They use the current `StreamArtistOnboardingRegistry` facade as the EIP-712
+verifying contract, with domain name `6529StreamArtistRegistry` and version `1`.
+They are separate from the retained RC1 `artistAcceptanceTypedData` helper.
+
+`currentArtistTypedData(kind, chainId, registry, message)` creates an immutable,
+wallet-readable payload. `currentArtistTypedDataFromJSON` accepts the same
+explicit request shape as the current auction parser, with all integer fields
+represented as decimal strings. The kinds are the keys of
+`CurrentArtistSigningMessages`; TypeScript exposes every exact message field.
+
+`prepareCurrentArtistOperation` returns the signing payload, transaction
+calldata and matching digest-getter calldata together. Its submission details
+include an explicit signature: `"0x"` selects direct execution by the actual
+authorized account, including a Safe; a nonempty value contains the EOA or
+ERC-1271 authorization bytes for a relayed call.
+
+```js
+import {
+  prepareCurrentArtistOperation, assertCurrentArtistDigest, toSafeCall,
+} from "@6529/stream-client";
+
+const prepared = prepareCurrentArtistOperation(
+  "artistAcceptance", chainId, artistFacade,
+  {
+    core, collectionId, bindingGeneration, bindingHash, identityRecordHash,
+    nonce, deadline,
+  },
+  { signature: "0x" },
+);
+await assertCurrentArtistDigest(provider, prepared);
+const safeTransaction = toSafeCall(prepared.call);
+```
+
+Submit that transaction through the Safe which currently holds Artist authority.
+For a relayed signature, construct and review the payload first, collect the
+signature with the appropriate wallet, then prepare again with those signature
+bytes. Nonce and authority checks remain onchain. Read current state after each
+confirmed onboarding operation; do not assume an entire multi-transaction
+sequence can reserve consecutive nonces.
+
+The usual order is registry-admin binding proposal, Artist acceptance and payout,
+collaborator acceptance/designation when applicable, both primary and royalty
+economics consent, content ratification and required attestations/policy consent.
+Existing compiler-generated bindings expose the unsigned proposal and state
+reads. Collaborator identity registration has its own nonce namespace; subsequent
+collaborator operations use that identity's current authorization state.
+`examples/current-artist-onboarding.mjs` prepares a direct Safe call after
+checking the selected facade's digest getter.
+
+Submission details carry the bytes that are represented by hashes in a signature:
+attestations require `statementURI` and `statement`, and collaborator identity
+acceptance requires `document` and `displayName`. Hash mismatches are rejected
+before calldata is returned. Display names are supplied to the contract and are
+not fields of the permanent collaborator identity signature. Payout and attestation
+signatures use `signedAt`; the other six operations use `deadline`. An explicit
+zero `signedAt` is supported only for direct execution.
+
+Economics consent also requires an explicit submission `collectionId`. The
+permanent signature binds the resolver, revenue class, scope and assignment,
+while the contract separately admits and records its collection/binding
+association. The helper preserves that distinction; a default consent is not
+automatically reusable for another collection.
+
+These helpers have source-preimage and compiled-ABI encoding checks.
+`assertCurrentArtistDigest` checks the live chain and digest at an optional
+`blockTag`, but does not establish current authorization or complete mint
+eligibility. Joined onboarding and new-candidate runtime acceptance follow the
+integrated feature batch.

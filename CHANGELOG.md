@@ -5,6 +5,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add current Artist and collaborator signing, digest readback and Safe CALL
+  preparation for eight onboarding operations; broader runtime acceptance follows
+  the integrated feature batch.
+
 - Support dynamic poster/collaborator primary templates and standing-veto/living-estate
   recovery history, preserving original Artist consent, guardian and payment rules.
 - Reuse the actual cached creation-library context when preparing current graph
