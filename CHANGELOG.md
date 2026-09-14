@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Refresh the active Solidity source inventory and allow cold current-stack CI builds
+  to complete before their checked compiler outputs are reused.
+
 - Support accelerated first-estate recovery with original guardian, veto and replay rules.
 - Support artist-approved configured-zero royalty snapshots and prepared custody acquisition.
 - Allow explicit compiler-selected typed client catalogs, preserving retained RC1

@@ -27,7 +27,8 @@ jobs:
   current-stack:
     name: Current stack integration
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    # A cold via-IR graph build exceeds 90 minutes; retain its checked cache for successors.
+    timeout-minutes: 240
 
     steps:
       - name: Checkout
