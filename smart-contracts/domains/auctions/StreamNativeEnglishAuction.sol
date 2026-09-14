@@ -10,6 +10,9 @@ import "./StreamNativeEnglishAuctionRegistration.sol";
 import "./StreamNativeEnglishAuctionSettlement.sol";
 import "./StreamNativeEnglishAuctionContentSettlement.sol";
 import "../../interfaces/stream/auctions/IStreamNativeCuratedAuction.sol";
+import {
+    IStreamPreparedNativeCustodyAuction
+} from "../../interfaces/stream/auctions/IStreamPreparedNativeCustodyAuction.sol";
 import "./StreamNativeAuctionDelegation.sol";
 import "../../interfaces/stream/auctions/IStreamNativeAuctionDelegatedDelivery.sol";
 import "./StreamNativeEnglishAuctionSupport.sol";
@@ -32,6 +35,7 @@ contract StreamNativeEnglishAuction is
     IStreamNativeEnglishAuction,
     IStreamNativeCuratedAuction,
     IStreamNativeCustodyAuction,
+    IStreamPreparedNativeCustodyAuction,
     IStreamNativeRightsAuction,
     IStreamNativeAuctionDelegatedDelivery,
     IStreamArtistSaleFacts,
@@ -181,6 +185,7 @@ contract StreamNativeEnglishAuction is
             || id == type(IStreamNativeEnglishAuction).interfaceId
             || id == type(IStreamNativeCuratedAuction).interfaceId
             || id == type(IStreamNativeCustodyAuction).interfaceId
+            || id == type(IStreamPreparedNativeCustodyAuction).interfaceId
             || id == type(IStreamNativeRightsAuction).interfaceId
             || id == type(IStreamPreparedNativeRightsSaleBinding).interfaceId
             || id == type(IStreamPreparedNativeContentSale).interfaceId
@@ -426,10 +431,9 @@ contract StreamNativeEnglishAuction is
                 StreamNativeEnglishAuctionCustodySettlement.settle(_state, _custody, _runtime(), id);
         }
         if (_rights[id].mode != 0) {
-            return
-                StreamNativeEnglishAuctionRightsSettlement.settle(
-                    _state, _active, _rights, _runtime(), id
-                );
+            return StreamNativeEnglishAuctionRightsSettlement.settle(
+                _state, _active, _rights, _runtime(), id
+            );
         }
         if (_state.auctions[id].config.contentManifestRoot != 0) {
             return StreamNativeEnglishAuctionContentSettlement.settle(
@@ -533,6 +537,34 @@ contract StreamNativeEnglishAuction is
         bytes calldata artistSignature
     ) external payable override nonReentrant returns (bytes32) {
         return StreamNativeEnglishAuctionCustodyStart.registerAuction(
+                _state,
+                _custody,
+                _runtime(),
+                c,
+                authorization,
+                artwork,
+                platformSignature,
+                artistSignature
+            );
+    }
+
+    function preparedCustodyAcquisitionDigest(Acquisition calldata authorization)
+        external
+        view
+        override
+        returns (bytes32)
+    {
+        return StreamNativeEnglishAuctionCustodyStart.preparedDigest(authorization);
+    }
+
+    function registerPreparedCustodyAuction(
+        Configuration calldata c,
+        Acquisition calldata authorization,
+        bytes calldata artwork,
+        bytes calldata platformSignature,
+        bytes calldata artistSignature
+    ) external payable override nonReentrant returns (bytes32) {
+        return StreamNativeEnglishAuctionCustodyStart.registerPreparedAuction(
                 _state,
                 _custody,
                 _runtime(),
