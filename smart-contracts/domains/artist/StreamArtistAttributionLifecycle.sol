@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistPlatformState.sol";
+import "./StreamArtistAttributionClaimState.sol";
+import "../../interfaces/stream/artist/IStreamArtistAttributionClaims.sol";
+import "../../interfaces/stream/artist/IStreamArtistDisplayFacts.sol";
 import "./StreamArtistAttributionPolicy.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityRevision.sol";
 
@@ -36,6 +39,9 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
     mapping(bytes32 => bytes) private _statements;
     mapping(bytes32 => IStreamArtistRecordPublicationOwner.Record) private _publications;
     StreamArtistPlatformState.Store private _platform;
+    mapping(bytes32 => uint8) private _attestationClasses;
+    StreamArtistAttributionClaimState.Store private _attributionClaims;
+    mapping(uint256 => bytes32) private _latestDisplayClaim;
     /// @notice Additional context reconstructing a refusal's exact normative record from events.
     event ArtistBindingTerminationContext(
         uint16 schemaVersion,
@@ -193,6 +199,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             reasonURI,
             proposedArtist
         );
+        _latestDisplayClaim[collectionId] = hash;
         _platformCommit(
             c,
             collectionId,
@@ -247,6 +254,98 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             keccak256(abi.encode("PLATFORM_WORKS", c.operationId)), scope, hash
         );
         _commit(c, hash, keccak256(abi.encode(id, _platform.collections[id])), replay, primary);
+    }
+
+    function fileAttributionClaim(
+        T.ActionContext calldata c,
+        uint256 id,
+        bytes32 evidence,
+        bytes32 reason,
+        string calldata uri,
+        address proposedArtist
+    ) external returns (bytes32 record) {
+        _check(c, 10);
+        record = StreamArtistAttributionClaimState.file(
+            _attributionClaims,
+            artistRegistry,
+            core,
+            c.actor,
+            id,
+            evidence,
+            reason,
+            uri,
+            proposedArtist
+        );
+        _latestDisplayClaim[id] = record;
+        bytes32 replay = _consume(
+            keccak256("attribution_lifecycle.replay.claim_record_hash_uniqueness"),
+            keccak256(abi.encode(id, c.actor, evidence, reason)),
+            record
+        );
+        _commit(
+            c,
+            keccak256(abi.encode(id, c.actor, evidence, reason, uri, proposedArtist)),
+            keccak256(abi.encode(_attributionClaims.records[record])),
+            replay,
+            record
+        );
+    }
+
+    function attributionClaims(uint256 id) external view returns (uint256, bytes32) {
+        PW.State storage p = _platform.collections[id];
+        uint256 artistClaims = _attributionClaims.counts[id];
+        // Original Platform-only histories predate this additive display pointer.
+        if (artistClaims == 0) return (p.claimCount, p.latestClaim);
+        return (p.claimCount + artistClaims, _latestDisplayClaim[id]);
+    }
+
+    function attributionClaimRecord(bytes32 hash)
+        external
+        view
+        returns (StreamArtistAttributionClaimTypes.Claim memory)
+    {
+        return _attributionClaims.records[hash];
+    }
+
+    function attestationAuthorityClass(bytes32 hash) public view returns (uint8) {
+        if (hash == 0 || _records[hash].recordHash != hash) return 0;
+        uint8 class_ = _attestationClasses[hash];
+        if (class_ != 0) return class_;
+        // Existing publication history has an exact saved class; other old records remain unknown.
+        if (_publications[hash].evidence.attestationRecordHash == hash) {
+            return _publications[hash].evidence.authorityClass;
+        }
+        return 0;
+    }
+
+    function artistAttestationStatus(uint256 id, uint8 kind, bytes32 subjectId, bytes32 currentHash)
+        external
+        view
+        returns (uint8 status, bytes32 record, bytes32 attested, uint8 class_, uint64 signedAt)
+    {
+        T.AttestationRecord storage item = _attestations[keccak256(abi.encode(id, kind, subjectId))];
+        if (item.recordHash == 0) return (0, 0, 0, 0, 0);
+        Attribution storage attr = _attributions[id];
+        status = attr.state == 4
+            ? 3
+            : attr.generation != item.generation
+                || !StreamArtistAttributionPolicy.acceptedOrSanctioned(attr.state)
+                || (kind != 8 && item.subjectStateHash != currentHash)
+                ? 2
+                : 1;
+        return (
+            status,
+            item.recordHash,
+            item.subjectStateHash,
+            attestationAuthorityClass(item.recordHash),
+            item.signedAt
+        );
+    }
+
+    function deploymentAttestation(uint256 id) external view returns (bytes32, uint8, uint64) {
+        T.AttestationRecord storage item =
+            _attestations[keccak256(abi.encode(id, uint8(9), bytes32(uint256(uint160(core)))))];
+        return (item.recordHash, attestationAuthorityClass(item.recordHash), item.signedAt);
     }
 
     function attributionState(uint256 collectionId) external view returns (uint8, uint64) {
@@ -581,6 +680,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         (bytes32 record, bytes32 action, bytes32 stateDelta) = StreamArtistRecordPublicationState.record(
             _records, _attestations, _statements, _publications, input_
         );
+        _attestationClasses[record] = authority.authorityClass;
         _commit(c, action, stateDelta, bytes32(0), record);
         return record;
     }
@@ -637,6 +737,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             x.signer
         );
         _records[record] = item;
+        _attestationClasses[record] = x.authorityClass;
         _attestations[keccak256(abi.encode(p.collectionId, p.subjectKind, p.subjectId))] = item;
         if (_statements[p.statementHash].length == 0) _statements[p.statementHash] = statement;
         _commit(

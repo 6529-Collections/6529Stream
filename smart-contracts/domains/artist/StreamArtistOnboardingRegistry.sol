@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "../../interfaces/stream/artist/IStreamArtistPlatformWorks.sol";
+import "../../interfaces/stream/artist/IStreamArtistDisplayFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistAttributionClaims.sol";
 import { StreamArtistExtensionAdmission } from "./StreamArtistExtensionAdmission.sol";
 import {
     IStreamArtistRecoveryActionOwner,
@@ -304,6 +306,8 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistTemplateEconomicsAuthority).interfaceId
             || id == type(IStreamArtistTemplateMutationAuthority).interfaceId
             || id == type(IStreamArtistPlatformWorks).interfaceId
+            || id == type(IStreamArtistDisplayFacts).interfaceId
+            || id == type(IStreamArtistAttributionClaims).interfaceId
             || id == type(IStreamArtistDelegation).interfaceId
             || id == type(IStreamArtistBindingLifecycle).interfaceId
             || id == type(IStreamArtistBeneficiaryFacts).interfaceId
@@ -1159,6 +1163,53 @@ contract StreamArtistOnboardingRegistry is
     }
 
     function declarePlatformWorks(uint256 id, bytes32 statement) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function displayBinding(uint256 id) external view returns (T.Binding memory) {
+        _forwardRegistryRead();
+    }
+
+    function artistAttestationStatus(uint256 id, uint8 kind, bytes32 subjectId, bytes32 currentHash)
+        external
+        view
+        returns (uint8, bytes32, bytes32, uint8, uint64)
+    {
+        _forwardRegistryRead();
+    }
+
+    function displaySanction(StreamFinalityScope calldata scope)
+        external
+        view
+        returns (S.Record memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function attributionClaims(uint256 id) external view returns (uint256, bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function deploymentAttestation(uint256 id) external view returns (bytes32, uint8, uint64) {
+        _forwardRegistryRead();
+    }
+
+    function attestationAuthorityClass(bytes32 record) external view returns (uint8) {
+        _forwardRegistryRead();
+    }
+
+    function attributionClaimRecord(bytes32 record)
+        external
+        view
+        returns (StreamArtistAttributionClaimTypes.Claim memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function fileAttributionClaim(uint256 id, bytes32 evidence, bytes32 reason, string calldata uri)
+        external
+        returns (bytes32)
+    {
         _forwardRegistryWriter();
     }
 

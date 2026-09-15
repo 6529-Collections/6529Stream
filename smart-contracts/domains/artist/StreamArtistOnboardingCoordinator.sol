@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAttributionClaimOperations.sol";
 import "./StreamArtistPlatformOperations.sol";
 import {
     IStreamArtistRecoveryActionOwner,
@@ -239,6 +240,18 @@ contract StreamArtistOnboardingCoordinator is
         returns (bytes32)
     {
         return StreamArtistPlatformOperations.declare(_economicContext(), actor, id, statement);
+    }
+
+    function coordinateFileAttributionClaim(
+        address actor,
+        uint256 id,
+        bytes32 evidence,
+        bytes32 reason,
+        string calldata uri
+    ) external operation returns (bytes32) {
+        return StreamArtistAttributionClaimOperations.file(
+            _economicContext(), actor, id, evidence, reason, uri
+        );
     }
 
     function coordinateFilePlatformWorksClaim(

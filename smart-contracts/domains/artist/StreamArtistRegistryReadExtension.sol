@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "../../interfaces/stream/artist/IStreamArtistPlatformWorks.sol";
+import "../../interfaces/stream/artist/IStreamArtistDisplayFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistAttributionClaims.sol";
 import "./StreamArtistAttributionPolicy.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 
@@ -159,6 +161,57 @@ contract StreamArtistRegistryReadExtension {
     function platformWorksContest(uint256 id) external view onlyHost returns (uint8, bytes32) {
         PW.State memory p = _platformOwner().platformWorksState(id);
         return (p.contestState, p.contestClaim);
+    }
+
+    function displayBinding(uint256 id) external view onlyHost returns (T.Binding memory) {
+        return IStreamArtistBindingOwner(_contentSuite().owners[0]).binding(id);
+    }
+
+    function artistAttestationStatus(uint256 id, uint8 kind, bytes32 subjectId, bytes32 currentHash)
+        external
+        view
+        onlyHost
+        returns (uint8, bytes32, bytes32, uint8, uint64)
+    {
+        return IStreamArtistDisplayFacts(_contentSuite().owners[4])
+            .artistAttestationStatus(id, kind, subjectId, currentHash);
+    }
+
+    function displaySanction(StreamFinalityScope calldata scope)
+        external
+        view
+        onlyHost
+        returns (S.Record memory)
+    {
+        return StreamArtistSanctionReads.currentRecord(_contentSuite(), scope);
+    }
+
+    function attributionClaims(uint256 id) external view onlyHost returns (uint256, bytes32) {
+        return IStreamArtistDisplayFacts(_contentSuite().owners[4]).attributionClaims(id);
+    }
+
+    function deploymentAttestation(uint256 id)
+        external
+        view
+        onlyHost
+        returns (bytes32, uint8, uint64)
+    {
+        return IStreamArtistDisplayFacts(_contentSuite().owners[4]).deploymentAttestation(id);
+    }
+
+    function attestationAuthorityClass(bytes32 record) external view onlyHost returns (uint8) {
+        return
+            IStreamArtistDisplayFacts(_contentSuite().owners[4]).attestationAuthorityClass(record);
+    }
+
+    function attributionClaimRecord(bytes32 record)
+        external
+        view
+        onlyHost
+        returns (StreamArtistAttributionClaimTypes.Claim memory)
+    {
+        return IStreamArtistAttributionClaimsOwner(_contentSuite().owners[4])
+            .attributionClaimRecord(record);
     }
 
     function platformWorksClaims(uint256 id) external view onlyHost returns (uint256, bytes32) {
