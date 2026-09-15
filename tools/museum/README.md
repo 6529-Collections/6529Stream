@@ -239,3 +239,11 @@ comparison without changing file-only PREMIS meaning. Its distinct derivative
 package retains the original recorded package literally and regenerates offline.
 Historical execution, time and named-agent identity remain recorded claims.
 Run `python -m unittest tools.museum.test_recorded_fixity -v` for focused checks.
+
+The [recorded preservation event adapter](../../docs/museum-preservation-events.md)
+adds twelve general event kinds, six reported outcomes and multi-file/agent links
+beside the unchanged performed-fixity path. Explicit planned, cancelled and unknown
+reports retain source evidence without becoming performed PREMIS events. Its
+versioned offline derivative rebuilds the literal recorded source package and
+all outputs. Run `python -m unittest tools.museum.test_preservation_events -v`;
+positive typed controls remain distinct from actual recorded evidence.
