@@ -4,6 +4,7 @@ import "./StreamNativeEnglishAuctionRuntime.sol";
 import "../revenue/StreamPreparedNativeRightsProjection.sol";
 import "../mint/StreamPlatformSaleTemplate.sol";
 import "../../interfaces/stream/revenue/IStreamPlatformNativePrimarySettlement.sol";
+import "../../interfaces/stream/revenue/IStreamPlatformProfilePrimarySettlement.sol";
 import {
     IStreamPlatformNativeRightsAuction as P
 } from "../../interfaces/stream/auctions/IStreamPlatformNativeRightsAuction.sol";
@@ -150,6 +151,18 @@ library StreamPlatformNativeAuctionRegistration {
         ) {
             revert A.UnsupportedNativeAuctionProfile();
         }
+        if (original.mode == 10 || original.mode == 11) {
+            if (
+                !IERC165(x.recorder)
+                        .supportsInterface(
+                            type(IStreamPlatformProfilePrimarySettlement).interfaceId
+                        )
+                    || !IStreamPlatformProfilePrimarySettlement(x.recorder)
+                        .isStreamPlatformProfilePrimarySettlement()
+            ) {
+                revert A.UnsupportedNativeAuctionProfile();
+            }
+        }
         if (s.globalPause.paused || msg.sender != c.poster) revert A.InvalidNativeAuction();
         if (s.creationUsed[x.base.platform][authorization.nonce]) {
             revert A.NativeAuctionAuthorizationUsed(x.base.platform, authorization.nonce);
@@ -234,7 +247,7 @@ library StreamPlatformNativeAuctionRegistration {
                 || c.expectedPrimaryPolicyHash == 0 || c.settlementWindow < 86400
                 || c.settlementWindow > 7776000 || c.mintPolicyHash == 0 || authorization.nonce == 0
                 || authorization.deadline < block.timestamp || authorization.declarationHash == 0
-                || (original.mode != 8 && original.mode != 9)
+                || (original.mode < 8 || original.mode > 11)
                 || authorization.configHash
                     != configHash(c, original, authorization.declarationHash)
         ) {
@@ -245,9 +258,16 @@ library StreamPlatformNativeAuctionRegistration {
             0, c.reservePrice, c.minIncrementBps, c.incrementFloorWaived
         );
         StreamNativeEnglishAuctionSupport.requirePhase(x, c, false);
-        (StreamSaleTemplate.Selection memory selected,) = StreamPlatformSaleTemplate.resolve(
-            x.resolver, c.collectionId, 0, original.mode, c.poster
-        );
+        StreamSaleTemplate.Selection memory selected;
+        if (original.mode == 10 || original.mode == 11) {
+            (selected,) = StreamPlatformPrimaryProfile.resolve(
+                x.resolver, c.collectionId, 0, original.mode, c.poster
+            );
+        } else {
+            (selected,) = StreamPlatformSaleTemplate.resolve(
+                x.resolver, c.collectionId, 0, original.mode, c.poster
+            );
+        }
         if (
             original.assignmentHash != selected.assignmentHash
                 || original.templateId != selected.templateId

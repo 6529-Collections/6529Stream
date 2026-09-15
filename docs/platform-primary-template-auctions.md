@@ -1,6 +1,6 @@
-# PLATFORM_WORKS primary-template auctions
+# PLATFORM_WORKS primary-rights auctions
 
-This source batch adds declared artist-less deferred native auctions through the
+This source supports declared artist-less deferred native auctions through the
 existing Core/Manager/official recorder. ABI/type and targeted deployment-size
 checks are recorded in the handoff. Focused runtime and joined actual-Artist
 acceptance remain pending; this guide does not describe a deployed product.
@@ -20,10 +20,15 @@ The only added rights families are:
 | --- | --- |
 | 8 | Collection TEMPLATE, scope 1 / actual collection |
 | 9 | Default TEMPLATE, scope 0 / id 0 |
+| 10 | Collection PROFILE, scope 1 / actual collection |
+| 11 | Default PROFILE, scope 0 / id 0 |
 
-Both admit static recipients and `SALE_POSTER`. Artist labels,
+Families 8 and 9 admit static recipients and `SALE_POSTER`. Artist labels,
 `COLLECTION_ARTIST`, paid-collaborator references and other dynamic sources are
-rejected. Existing Artist families and their floor/consent requirements retain
+rejected in those template families. Families 10 and 11 select existing verified
+fixed profiles with deployed canonical wallets and an explicit zero template ID.
+They do not turn static profile recipients into dynamic Artist or poster sources.
+Existing Artist families and their floor/consent requirements retain
 separate explicit modes. An Artist-bound collection cannot choose this route.
 
 The exact new EIP-712 domain is `6529StreamPlatformNativeRightsAuction`, version
@@ -39,7 +44,7 @@ Configuration, OriginalPolicy and original declaration hash with `abi.encode`.
 `platformRightsCreationDigest` provides the matching digest. Both differ from the
 unchanged Artist-authorized creation surface. The shared creator nonce is keyed
 by the configured platform signer; the sale/auction nonce and original IDs are
-unchanged. Original registration rejects modes 8 and 9.
+unchanged. Original Artist registration rejects all four platform modes.
 
 Opening requires the canonical current Artist facade/Core/runtime and the full
 matching declaration/state reads. NONE or DISMISSED contest state is admitted.
@@ -63,19 +68,26 @@ configuration and creation digest. `SALE_POSTER` always resolves the original
 configuration's poster, never the latest payer, executor or NFT recipient.
 
 `primaryPolicyMode` must be ALLOW_CURRENT (1). Later owner-authorized template
-changes are allowed within the signed source family. Token/collection/default
+changes are allowed within the signed source and PROFILE/TEMPLATE family. Token/collection/default
 precedence is enforced: a default route cannot skip a collection override, and
 a prepared route cannot skip an actual token override. The original assignment
 and template remain opening evidence. Preview, materialization and post-funding
 checks compare the complete selected current assignment, concrete profile,
-wallet, entries, original poster and current declaration witness. Current
+wallet, entries, original poster and current declaration witness. Fixed-profile
+witnesses use `6529STREAM_PLATFORM_PRIMARY_PROFILE_WITNESS_V1` with `abi.encode`
+over chain, Resolver, collection, actual token (zero only at opening), signed
+mode, declaration, poster, complete resolved assignment and concrete Selection.
+The existing template-witness domain and preimage are unchanged. Current
 platform authority is checked before bids, before payment, after funding and
 after Manager completion. Canonical PRIMARY_POLICY_V1 uses the actual prepared
 token ID; the token-0 opening hash remains distinct.
 
 The official recorder advertises the additive
 `IStreamPlatformNativePrimarySettlement` capability; registration rejects an
-older recorder without it. It retains the original result, facts and replay
+older recorder without it. Fixed PROFILE families additionally require the
+`IStreamPlatformProfilePrimarySettlement` marker, so the earlier template-only
+platform capability cannot authorize an opening that its recorder cannot settle.
+It retains the original result, facts and replay
 mappings. A separate schema-1 `PlatformPreparedPrimaryBound` receipt links the
 canonical settlement/sale keys, original declaration, family, beneficiary
 witness, poster and actual-token policy. Existing rights receipt bytes retain
@@ -83,7 +95,9 @@ their original tuple layout. Predicted profiles are materialized through the
 real Resolver/Factory. If their wallet is not deployed, the original native
 funding worker credits the existing template escrow; a deployed verified wallet
 retains the original direct-funding behavior. No new treasury or refund route
-is introduced.
+is introduced. Fixed profiles pay their already verified wallet through the
+original direct native-funding path; they neither materialize a template nor
+pretend that its escrow rules apply.
 
 A failed late current-state check rolls back mint, counters, replay, escrow and
 payment together, allowing the same complete signed Safe transaction to retry
@@ -96,7 +110,12 @@ Factory, house, recorder, escrow and threshold Safe, with explicit typed Artist,
 governance and entropy boundaries. It covers collection/default and
 static/poster payments, raw receipt coordinates, current-state rejection,
 source precedence/drift, canonical signing/replay, no-bid/refund exits and an
-exact two-credit-call late-failure/identical Safe retry. Actual Artist declaration
+exact two-credit-call late-failure/identical Safe retry. The fixed-profile
+successor adds collection/default direct payment, independently reconstructed
+profile receipts, older-recorder and wallet-code refusal with identical opening
+retry, source/type drift rejection, corrective-Artist refund escape and an exact
+two-wallet-call Safe rollback/retry. These are authored source cases; they have
+not been executed as part of this source handoff. Actual Artist declaration
 and correction production are accepted prerequisites, not claimed as executed
 by this fixture. Token-TEMPLATE platform custody, primary allocation-time
 snapshots, other sale products and transaction-capacity acceptance remain

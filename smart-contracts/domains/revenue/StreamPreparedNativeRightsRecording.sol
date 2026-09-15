@@ -94,7 +94,7 @@ library StreamPreparedNativeRightsRecording {
         saleConsumed[saleKey] = true;
         settlementConsumed[key] = true;
         bool escrowed;
-        if (original.original.mode >= 5 && original.original.mode <= 9) {
+        if (original.original.mode >= 5 && original.original.mode <= 11) {
             escrowed = StreamScopedNativePrimaryExecution.fund(
                 x.funding,
                 c.sale.collectionId,
@@ -165,7 +165,7 @@ library StreamPreparedNativeRightsRecording {
         StreamPrimarySettlementEmission.emitSettlement(
             c, result, address(0), intent.originalPrimaryPolicyHash
         );
-        if (original.original.mode == 8 || original.original.mode == 9) {
+        if (original.original.mode >= 8 && original.original.mode <= 11) {
             emit PlatformPreparedPrimaryBound(
                 1,
                 key,

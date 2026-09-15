@@ -260,9 +260,9 @@ contract PlatformPrimaryArtist is IStreamArtistAttribution {
             if (mode == 9) {
                 IStreamRevenueResolver.ResolvedPrimaryAssignment memory current =
                     resolver.resolvePrimaryAssignment(2, 0, CLASS);
-                if (current.exists && current.scope == 1) resolver.clearPrimaryAssignment(
-                    CLASS, 1, 2
-                );
+                if (current.exists && current.scope == 1) {
+                    resolver.clearPrimaryAssignment(CLASS, 1, 2);
+                }
             }
             resolver.setPrimaryTemplateAssignment(
                 CLASS, mode == 8 ? 1 : 0, mode == 8 ? 2 : 0, template, 0
@@ -274,7 +274,9 @@ contract PlatformPrimaryArtist is IStreamArtistAttribution {
             view
             returns (StreamSaleTemplate.Selection memory selected)
         {
-            (selected,) = StreamPlatformSaleTemplate.resolve(resolver, 2, 0, mode, address(this));
+            selected = StreamPreparedNativeRightsProjection.collectionTemplateForPoster(
+                resolver, 2, mode, address(this)
+            );
         }
 
         function _policy(uint256 token, StreamSaleTemplate.Selection memory s)

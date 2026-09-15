@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "../mint/StreamSaleTemplate.sol";
 import "../mint/StreamPlatformSaleTemplate.sol";
 import "./StreamDefaultPrimaryProfile.sol";
+import "./StreamPlatformPrimaryProfile.sol";
 import { StreamDefaultSaleTemplate } from "../mint/StreamDefaultSaleTemplate.sol";
 import { StreamDynamicSaleTemplate } from "../mint/StreamDynamicSaleTemplate.sol";
 import { StreamConsentedSaleTemplate } from "../mint/StreamConsentedSaleTemplate.sol";
@@ -18,6 +19,10 @@ library StreamPreparedNativeRightsProjection {
         uint8 mode,
         address poster
     ) public view returns (StreamSaleTemplate.Selection memory s) {
+        if (mode == 10 || mode == 11) {
+            (s,) = StreamPlatformPrimaryProfile.resolve(resolver, collectionId, 0, mode, poster);
+            return s;
+        }
         if (mode == 8 || mode == 9) {
             (s,) = StreamPlatformSaleTemplate.resolve(resolver, collectionId, 0, mode, poster);
             return s;
@@ -41,6 +46,14 @@ library StreamPreparedNativeRightsProjection {
         uint8 mode,
         address poster
     ) public view returns (StreamSaleTemplate.Selection memory s, bytes32 policy, bytes32 witness) {
+        if (mode == 10 || mode == 11) {
+            if (tokenId == 0) {
+                revert IStreamPreparedNativeRightsPrimarySettlement.InvalidPreparedNativeRights();
+            }
+            (s, witness) =
+                StreamPlatformPrimaryProfile.resolve(resolver, collectionId, tokenId, mode, poster);
+            return (s, policyHash(resolver, collectionId, tokenId, s), witness);
+        }
         if (mode == 8 || mode == 9) {
             if (tokenId == 0) {
                 revert IStreamPreparedNativeRightsPrimarySettlement.InvalidPreparedNativeRights();

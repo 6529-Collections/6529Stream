@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "./StreamSettlementContext.sol";
 import "../../interfaces/stream/revenue/IStreamPlatformNativePrimarySettlement.sol";
+import "../../interfaces/stream/revenue/IStreamPlatformProfilePrimarySettlement.sol";
 import "./StreamERC20PrimaryRecording.sol";
 import "./StreamPreparedNativeRightsRecording.sol";
 import "./StreamNativeCustodyPrimaryRecording.sol";
@@ -45,6 +46,7 @@ contract StreamPrimarySaleSettlement is
     IStreamCustodyRightsSettlement,
     IStreamPreparedNativeRightsPrimarySettlement,
     IStreamPlatformNativePrimarySettlement,
+    IStreamPlatformProfilePrimarySettlement,
     StreamSettlementContext,
     ReentrancyGuard,
     ERC165
@@ -117,6 +119,10 @@ contract StreamPrimarySaleSettlement is
         return true;
     }
 
+    function isStreamPlatformProfilePrimarySettlement() external pure override returns (bool) {
+        return true;
+    }
+
     function isStreamPlatformNativePrimarySettlement() external pure override returns (bool) {
         return true;
     }
@@ -132,6 +138,7 @@ contract StreamPrimarySaleSettlement is
             || id == type(IStreamCustodyRightsSettlement).interfaceId
             || id == type(IStreamPreparedNativeRightsPrimarySettlement).interfaceId
             || id == type(IStreamPlatformNativePrimarySettlement).interfaceId
+            || id == type(IStreamPlatformProfilePrimarySettlement).interfaceId
             || id == type(IStreamNativeSupplementalSettlement).interfaceId
             || super.supportsInterface(id);
     }

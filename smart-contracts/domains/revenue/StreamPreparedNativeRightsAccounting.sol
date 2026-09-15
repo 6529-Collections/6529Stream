@@ -31,7 +31,7 @@ library StreamPreparedNativeRightsAccounting {
             StreamPreparedNativeRightsProjection.preparedTemplateForPoster(
                 x.resolver, facts.collectionId, facts.tokenId, original.original.mode, intent.poster
             );
-        if (original.original.mode == 8 || original.original.mode == 9) {
+        if (original.original.mode >= 8 && original.original.mode <= 11) {
             if (
                 !IERC165(facts.saleAdapter)
                         .supportsInterface(type(IStreamPlatformNativeRightsAuction).interfaceId)
