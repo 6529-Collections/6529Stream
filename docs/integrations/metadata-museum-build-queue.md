@@ -3,14 +3,16 @@
 Task-owned working queue, assigned by the integrator on 15 September 2026.
 The shared `ops/STREAM_FEATURE_STATUS.md` register and integrator
 own overall status. This note orders implementation and dependencies; it does
-not accept a release gate. Source starts from `57ac8d04` on
-`codex/collection-views`. The completed Owner museum capture handoff remains a
-separate immutable commit; its authored native and actual RPC capture are pending.
+not accept a release gate. CollectionViews is handed off as `734d63b1`; current
+producer work continues on
+`codex/static-renderer-routing`. The Owner museum capture recipe is integrated as
+`a0f6535a` with the integrator reproducing its ten Python cases; authored native
+execution and actual Owner RPC capture remain pending.
 
 | Order | Concrete batch | Dependency boundary | Current state |
 | --- | --- | --- | --- |
 | 1 | CollectionViews manifest host, actual source authority, retained bytes/history | Current Metadata DISPLAY grants, SchemaRegistry, selected module admission; no Core pointer invention or renderer adoption | Source and nine focused recipes; ABI checked, independent read requested |
-| 2 | Required selectable/versioned STATIC renderer interface and default/collection/token routes | Coordinate Core/Router pointer and Artist op17 admission with integrator and Artist lead; preserve actual current full-view/frozen profiles | Next design/source batch |
+| 2 | Required selectable/versioned STATIC renderer interface and default/collection/token routes | Coordinate Core/Router pointer and Artist op17 admission with integrator and Artist lead; preserve actual current full-view/frozen profiles | In progress: exact renderer interface, governed immutable version/evidence/read-set registry, pure STREAM_CONTEXT_V1 encoder; 14 authored cases ABI checked. Actual renderer/source/config route and Finality joins follow. |
 | 3 | Remaining preservation/finality scope producers and mode-evidence adapters | Actual Finality scope/host interfaces owned with integrator; real perceptual metric and qualified curated evidence, no DYNAMIC implementation | Required queue |
 | 4 | Owner/institutional condition/conservation source adapters and event mappings | Exact original receipt/schema/class/signature and source-qualified history; no name-derived authority | Required queue |
 | 5 | External authority reconciliation and geographic roles/history | Immutable source snapshots, match-kind/reviewer provenance, explicit uncertainty; no live-URL authority promotion | Required queue |
