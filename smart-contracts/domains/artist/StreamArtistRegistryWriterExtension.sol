@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
+import {
+    StreamArtistRepudiationTypes as RP
+} from "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
+
 import "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
 import {
     StreamArtistAttributionDisputeTypes as AD
@@ -732,5 +737,32 @@ contract StreamArtistRegistryWriterExtension {
     {
         return IStreamArtistAttributionDisputesCoordinator(operationCoordinator)
             .coordinateResolveAttributionDispute(msg.sender, p);
+    }
+
+    function revokeAttribution(AD.Filing calldata p, T.Authorization calldata a)
+        external
+        onlyHost
+        returns (bytes32)
+    {
+        return IStreamArtistRepudiationCoordinator(operationCoordinator)
+            .coordinateRevokeAttribution(msg.sender, p, a);
+    }
+
+    function vetoAttributionRepudiation(uint256 id, bytes32 expected, bytes32 reason)
+        external
+        onlyHost
+    {
+        IStreamArtistRepudiationCoordinator(operationCoordinator)
+            .coordinateVetoAttributionRepudiation(msg.sender, id, expected, reason);
+    }
+
+    function cancelAttributionRepudiation(uint256 id, bytes32 expected) external onlyHost {
+        IStreamArtistRepudiationCoordinator(operationCoordinator)
+            .coordinateCancelAttributionRepudiation(msg.sender, id, expected);
+    }
+
+    function executeAttributionRepudiation(uint256 id, bytes32 expected) external onlyHost {
+        IStreamArtistRepudiationCoordinator(operationCoordinator)
+            .coordinateExecuteAttributionRepudiation(msg.sender, id, expected);
     }
 }

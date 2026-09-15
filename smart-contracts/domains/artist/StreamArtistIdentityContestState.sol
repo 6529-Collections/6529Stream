@@ -164,7 +164,8 @@ library StreamArtistIdentityContestState {
             successor,
             successorRecord,
             empty,
-            none
+            none,
+            bytes32(0)
         );
     }
 
@@ -196,7 +197,44 @@ library StreamArtistIdentityContestState {
             successor,
             successorRecord,
             resolution,
-            judgment
+            judgment,
+            bytes32(0)
+        );
+    }
+
+    /// @dev Only the original op48 composition may supply an independently checked captured set.
+    function fileWithRepudiation(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        Contest.Request memory p,
+        Dismissal.ContestResolutionFacts memory resolution,
+        bytes32 capturedGuardians
+    ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        if (
+            c.operationId != 48 || capturedGuardians == 0
+                || !_member(rotations, capturedGuardians, c.actor)
+        ) revert T.Unauthorized(c.actor);
+        Contest.GovernanceWitness memory empty;
+        Dismissal.StandingJudgment memory none;
+        return _file(
+            s,
+            identity,
+            rotations,
+            replay,
+            o,
+            c,
+            p,
+            empty,
+            address(0),
+            address(0),
+            bytes32(0),
+            resolution,
+            none,
+            capturedGuardians
         );
     }
 
@@ -213,7 +251,8 @@ library StreamArtistIdentityContestState {
         address successor,
         bytes32 successorRecord,
         Dismissal.ContestResolutionFacts memory resolution,
-        Dismissal.StandingJudgment memory judgment
+        Dismissal.StandingJudgment memory judgment,
+        bytes32 repudiationGuardians
     ) private returns (StreamArtistIdentityState.Mutation memory m) {
         FileFacts memory f =
             _fileFacts(s, identity, rotations, o, p, successor, successorRecord, resolution);
@@ -237,12 +276,16 @@ library StreamArtistIdentityContestState {
                     && judgment.retirementHash == rotations.retirement[p.artistId][c.actor]
             ) revoked = true;
             if (
-                c.actor != successor && !_member(rotations, f.guardians, c.actor)
+                c.actor != successor && !_member(rotations, repudiationGuardians, c.actor)
+                    && !_member(rotations, f.guardians, c.actor)
                     && !_member(rotations, f.captured, c.actor)
                     && (rotations.retirement[p.artistId][c.actor] == bytes32(0) || revoked)
             ) {
                 revert T.Unauthorized(c.actor);
             }
+        }
+        if (repudiationGuardians != 0 && c.operationId != 48) {
+            revert T.InvalidOperation(c.operationId);
         }
         if (block.timestamp == 0 || block.timestamp > type(uint64).max) revert T.InvalidRecord();
         uint64 observed = uint64(block.timestamp);

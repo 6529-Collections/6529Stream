@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
+import {
+    StreamArtistRepudiationTypes as RP
+} from "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
+import "./StreamArtistRepudiationState.sol";
+
 import "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
 import {
     StreamArtistAttributionDisputeTypes as AD
@@ -736,6 +742,11 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         _check(c, op);
         AD.Mutation memory m =
             StreamArtistDisputeState.applyEncoded(_attestationStore(), _environment(), msg.data);
+        if (op == 44) {
+            bytes32 invalidated =
+                StreamArtistRepudiationState.invalidateByDispute(p.collectionId, m.record);
+            if (invalidated != 0) m.state = keccak256(abi.encode(m.state, invalidated));
+        }
         bytes32 consumed = _consume(
             (op == 44
                     ? keccak256("attribution_lifecycle.replay.dispute_key")
@@ -786,5 +797,76 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         );
         _commit(c, m.action, m.state, consumed, 0);
         return g.actionId;
+    }
+
+    function rawPendingRepudiation(uint256 id) external view returns (bytes32) {
+        _returnAttribution(StreamArtistRepudiationState.readEncoded(msg.data));
+    }
+
+    function attributionRepudiationRecord(bytes32 hash) external view returns (RP.Record memory) {
+        _returnAttribution(StreamArtistRepudiationState.readEncoded(msg.data));
+    }
+
+    function attributionRepudiationTerminal(bytes32 hash)
+        external
+        view
+        returns (RP.Terminal memory)
+    {
+        _returnAttribution(StreamArtistRepudiationState.readEncoded(msg.data));
+    }
+
+    function repudiationCount(bytes32 id, bytes32 cohort) external view returns (uint256) {
+        _returnAttribution(StreamArtistRepudiationState.readEncoded(msg.data));
+    }
+
+    function stageRepudiation(
+        T.ActionContext calldata c,
+        AD.Filing calldata p,
+        RP.Admission calldata admission,
+        uint256 nonce
+    ) external returns (bytes32) {
+        _check(c, 47);
+        RP.Mutation memory m = StreamArtistRepudiationState.stage(
+            _attestationStore(), _environment(), c, p, admission, nonce
+        );
+        _repudiationCommit(c, m, keccak256("attribution_lifecycle.replay.repudiation_key"));
+        _native(47, m.record, admission.binding_.artistId, p.collectionId);
+        return m.record;
+    }
+
+    function vetoRepudiation(
+        T.ActionContext calldata c,
+        RP.Record calldata record,
+        RP.GuardianProof calldata proof
+    ) external {
+        _check(c, 48);
+        RP.Mutation memory m = StreamArtistRepudiationState.veto(c, record, proof);
+        _repudiationCommit(c, m, keccak256("attribution_lifecycle.replay.repudiation_veto_key"));
+    }
+
+    function cancelRepudiation(T.ActionContext calldata c, RP.Record calldata record) external {
+        _check(c, 49);
+        RP.Mutation memory m = StreamArtistRepudiationState.cancel(c, record);
+        _repudiationCommit(
+            c, m, keccak256("attribution_lifecycle.replay.repudiation_cancellation_key")
+        );
+    }
+
+    function executeRepudiation(T.ActionContext calldata c, RP.Record calldata record) external {
+        _check(c, 50);
+        RP.Mutation memory m = StreamArtistRepudiationState.execute(_attestationStore(), c, record);
+        StreamArtistDisputeState.markRepudiated(
+            record.terms.collectionId, record.terms.bindingGeneration
+        );
+        _repudiationCommit(
+            c, m, keccak256("attribution_lifecycle.replay.repudiation_execution_key")
+        );
+    }
+
+    function _repudiationCommit(T.ActionContext calldata c, RP.Mutation memory m, bytes32 surface)
+        private
+    {
+        bytes32 key = _consume(surface, m.replayScope, m.replayCommitment);
+        _commit(c, m.action, m.state, key, m.record);
     }
 }

@@ -133,3 +133,7 @@ is awaiting the specific source-change approval requested after automatic review
 defines additive operation 59 for original terminal-freeze-governed sanction and
 economics grants while preserving the appointment, veto authority and permanent
 artist capability exclusions.
+
+[ADR 0048: Original repudiation Identity effects](0048-attribution-repudiation-identity-effects.md)
+records the necessary Identity writes for original 48/49, canonical contest/cause
+composition, authenticated cancellation activity and unchanged original domains.

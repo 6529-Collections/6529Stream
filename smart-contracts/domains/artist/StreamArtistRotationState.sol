@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
+import {
+    StreamArtistRepudiationTypes as RP
+} from "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
+
 import "./StreamArtistAuthorityCheckpoint.sol";
 import { StreamArtistRotationAcceptance } from "./StreamArtistRotationAcceptance.sol";
 import { StreamArtistAuthorityRecordEvents } from "./StreamArtistAuthorityRecordEvents.sol";
@@ -706,6 +711,8 @@ library StreamArtistRotationState {
                 || transition.artistId != p.artistId || priorAddress != p.revokedAddress
                 || transition.phase != 2 || transition.contestedAt != 0
                 || pendingTransition(s, p.artistId) != bytes32(0)
+                || IStreamArtistAttributionRepudiation(o.environment.registry)
+                        .activeRepudiationCount(p.artistId) != 0
                 || block.timestamp < uint256(transition.postWindowEndsAt) + tail
         ) {
             revert R.InvalidPriorStanding(p.revokedAddress);

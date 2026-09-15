@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "./StreamArtistEstateTiming.sol";
 import "./StreamArtistUnavailabilityState.sol";
 import "./StreamArtistDormancyTiming.sol";
+import "./StreamArtistRepudiationTiming.sol";
 
 /// @notice Fixed Identity window dispatch over its actual owner storage roots.
 library StreamArtistWindowConfiguration {
@@ -24,6 +25,9 @@ library StreamArtistWindowConfiguration {
         StreamArtistDormancyState.State storage dormancy,
         bytes32 parameter
     ) public view returns (uint64, uint64, uint64) {
+        if (parameter == keccak256("ARTIST_REPUDIATION_CONTEST_SECONDS")) {
+            return StreamArtistRepudiationTiming.info();
+        }
         if (StreamArtistDormancyTiming.supported(parameter)) {
             return StreamArtistDormancyTiming.info(dormancy, parameter);
         }
@@ -71,6 +75,10 @@ library StreamArtistWindowConfiguration {
         uint64 value,
         uint64 expectedRevision
     ) public {
+        if (parameter == keccak256("ARTIST_REPUDIATION_CONTEST_SECONDS")) {
+            StreamArtistRepudiationTiming.configure(executor, actor, value, expectedRevision);
+            return;
+        }
         if (StreamArtistDormancyTiming.supported(parameter)) {
             StreamArtistDormancyTiming.configure(
                 dormancy, executor, actor, parameter, value, expectedRevision

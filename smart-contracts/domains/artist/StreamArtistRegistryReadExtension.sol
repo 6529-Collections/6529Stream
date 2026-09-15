@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
+import {
+    StreamArtistRepudiationTypes as RP
+} from "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
+import "./StreamArtistRepudiationReadEncoding.sol";
+
 import "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
 import {
     StreamArtistAttributionDisputeTypes as AD
@@ -1190,6 +1196,56 @@ contract StreamArtistRegistryReadExtension {
     {
         _returnRegistryEncoded(
             StreamArtistDisputeReadEncoding.read(_host, operationCoordinator, msg.data)
+        );
+    }
+
+    function pendingRepudiation(uint256 id)
+        external
+        view
+        onlyHost
+        returns (uint64, uint64, bytes32)
+    {
+        _returnRegistryEncoded(
+            StreamArtistRepudiationReadEncoding.read(_host, operationCoordinator, msg.data)
+        );
+    }
+
+    function attributionRepudiationRecord(bytes32 hash)
+        external
+        view
+        onlyHost
+        returns (RP.Record memory)
+    {
+        _returnRegistryEncoded(
+            StreamArtistRepudiationReadEncoding.read(_host, operationCoordinator, msg.data)
+        );
+    }
+
+    function attributionRepudiationTerminal(bytes32 hash)
+        external
+        view
+        onlyHost
+        returns (RP.Terminal memory)
+    {
+        _returnRegistryEncoded(
+            StreamArtistRepudiationReadEncoding.read(_host, operationCoordinator, msg.data)
+        );
+    }
+
+    function activeRepudiationCount(bytes32 artistId) external view onlyHost returns (uint256) {
+        _returnRegistryEncoded(
+            StreamArtistRepudiationReadEncoding.read(_host, operationCoordinator, msg.data)
+        );
+    }
+
+    function attributionRepudiationDigest(AD.Filing calldata p, T.Authorization calldata a)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        _returnRegistryEncoded(
+            StreamArtistRepudiationReadEncoding.read(_host, operationCoordinator, msg.data)
         );
     }
 }

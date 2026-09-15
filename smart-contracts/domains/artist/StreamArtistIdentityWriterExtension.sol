@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
+import {
+    StreamArtistRepudiationTypes as RP
+} from "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
+import "./StreamArtistRepudiationIdentityMutation.sol";
+
 import "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
 import {
     StreamArtistAttributionDisputeTypes as AD
@@ -609,5 +615,64 @@ contract StreamArtistIdentityWriterExtension is
         }
         _commit(c, m.action, m.state, m.replay, m.record);
         return record;
+    }
+
+    function consumeRepudiation(
+        T.ActionContext calldata c,
+        AD.Filing calldata p,
+        RP.Admission calldata admission,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external onlyHost returns (bytes32) {
+        _check(c, 47);
+        (StreamArtistIdentityState.Mutation memory m, bytes32 record) = StreamArtistRepudiationIdentityMutation.consume(
+            _identity, _replay, _ownerContext(), msg.data[4:]
+        );
+        _noteLiving(_ownerContext(), _replay, admission.binding_.artistId, proof.signer, 47, m);
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return record;
+    }
+
+    function contestRepudiation(T.ActionContext calldata c, RP.GuardianProof calldata proof)
+        external
+        onlyHost
+        returns (bytes32)
+    {
+        _check(c, 48);
+        (StreamArtistIdentityState.Mutation memory m, bytes32 artistId) = StreamArtistRepudiationIdentityMutation.contest(
+            _identity,
+            _rotations,
+            _identityContests,
+            _resolutions,
+            _estate,
+            _identityRecovery,
+            _dormancy,
+            _replay,
+            _ownerContext(),
+            msg.data[4:]
+        );
+        _commit(c, m.action, m.state, m.replay, m.record);
+        _native(48, m.record, artistId, proof.collectionId);
+        _native(48, _resolutions.currentCause[artistId], artistId, proof.collectionId);
+        return m.record;
+    }
+
+    function noteRepudiationCancellation(T.ActionContext calldata c, RP.Record calldata record)
+        external
+        onlyHost
+    {
+        _check(c, 49);
+        StreamArtistRepudiationAdmission.cancellation(
+            StreamArtistRepudiationAdmission.suite(
+                _environment().registry, _ownerContext().coordinator
+            ),
+            c,
+            record
+        );
+        StreamArtistIdentityState.Mutation memory m;
+        m.action = keccak256(abi.encode(c.actor, record.recordHash));
+        m.state = keccak256(abi.encode(record.recordHash, uint8(3)));
+        _noteLiving(_ownerContext(), _replay, record.artistId, c.actor, 49, m);
+        _commit(c, m.action, m.state, m.replay, 0);
     }
 }

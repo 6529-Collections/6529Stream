@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
+import {
+    StreamArtistRepudiationTypes as RP
+} from "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
+import "./StreamArtistRepudiationOperations.sol";
+
 import "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
 import {
     StreamArtistAttributionDisputeTypes as AD
@@ -1080,5 +1086,36 @@ contract StreamArtistOnboardingCoordinator is
         returns (bytes32)
     {
         return StreamArtistDisputeOperations.resolve(_economicContext(), actor, p);
+    }
+
+    function coordinateRevokeAttribution(
+        address actor,
+        AD.Filing calldata p,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistRepudiationOperations.stage(_economicContext(), actor, p, a);
+    }
+
+    function coordinateVetoAttributionRepudiation(
+        address actor,
+        uint256 id,
+        bytes32 expected,
+        bytes32 reason
+    ) external operation {
+        StreamArtistRepudiationOperations.veto(_economicContext(), actor, id, expected, reason);
+    }
+
+    function coordinateCancelAttributionRepudiation(address actor, uint256 id, bytes32 expected)
+        external
+        operation
+    {
+        StreamArtistRepudiationOperations.cancel(_economicContext(), actor, id, expected);
+    }
+
+    function coordinateExecuteAttributionRepudiation(address actor, uint256 id, bytes32 expected)
+        external
+        operation
+    {
+        StreamArtistRepudiationOperations.execute(_economicContext(), actor, id, expected);
     }
 }
