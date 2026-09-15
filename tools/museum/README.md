@@ -222,3 +222,9 @@ real delayed governance and two-owner Safe calls on an owned loopback Anvil. It
 retains the actual PNG and recorded facts, reconstructs all four formats offline,
 and checks that missing publisher selection withholds LIDO only. It does not run
 a Solidity compiler or claim whole-product deployment or institutional acceptance.
+
+The additive [BagIt and OCFL transport](../../docs/museum-bagit-ocfl.md) packages
+explicit public dossier/export inputs with exact payload/tag fixity and immutable
+version history. It preserves nested v2 package evidence and qualifications.
+Fetch-dependent bags remain incomplete; source authority, full render inventory,
+genesis registration and institutional ingest are separate requirements.
