@@ -255,3 +255,12 @@ independent account links do not become grants. Canonical media subjects,
 explicit properties/relationships and all six use classes remain source-backed.
 Its offline derivative keeps both original evidence families and reports missing
 facts without inventing a current rights selection or detected file format.
+
+
+The [actual current preservation capture](../../docs/museum-current-preservation-capture.md)
+performs real local matching and failed SHA-256 comparisons plus a file copy,
+then publishes exact typed reports, agents, events and a canonical object through
+current foundation contracts and Safe calls. It exports and replays the event
+and object derivatives without compiling Solidity. Local execution and recorded
+account assertions remain distinct from independent historical proof or rights
+receipts; prior capture and package modes are unchanged.

@@ -161,11 +161,11 @@ class CurrentMuseumFixture(CurrentNativeFixture):
         require(actual == raw, "registered current document bytes differ")
         return schema_id(name)
 
-    def publish(self, raw, schema, canonical, nonce):
-        subject = (0, 1, 0, ZERO)
+    def publish(self, raw, schema, canonical, nonce, *, record_type=None, subject=None):
+        subject = (0, 1, 0, ZERO) if subject is None else subject
         sid, = self.call("StreamCollectionAttestations", "deriveSubject", (subject,))
         now = int(self.rpc("eth_getBlockByNumber", ["latest", False])["timestamp"], 16)
-        request = (self.attestor, 1, sid, schema_id("INDEPENDENT_SEMANTIC_ASSERTION"), schema, 1,
+        request = (self.attestor, 1, sid, record_type or schema_id("INDEPENDENT_SEMANTIC_ASSERTION"), schema, 1,
             hex_bytes(keccak256(raw)), canonical, "ipfs://public-current-media-capture", raw, now, nonce, now + 86400)
         receipt = self.transact("StreamCollectionAttestations", WRITE_SIGNATURE, (subject, request, b""), safe=self.attestor)
         host = self.addresses["StreamCollectionAttestations"]
@@ -175,6 +175,15 @@ class CurrentMuseumFixture(CurrentNativeFixture):
         definition, = self.call("StreamSchemaRegistry", "documentBytes", (schema,))
         require(saved[1] == self.attestor, "record is not attributed to actual Safe")
         return _selector(host, record_hash, record, saved, definition), sid
+
+    def after_media_publications(self):
+        """Additive local fixture hook; original capture publishes no extra evidence."""
+
+    def capture_lanes(self):
+        return [{"scopeKey": "1", "recordType": schema_id("INDEPENDENT_SEMANTIC_ASSERTION")}]
+
+    def extra_capture_evidence(self):
+        return {}
 
     def build_media(self):
         self.foundation()
@@ -194,20 +203,21 @@ class CurrentMuseumFixture(CurrentNativeFixture):
         for nonce, raw in enumerate(payloads(chain_id=31337, attestor=self.attestor, subject_id=sid,
                 profile_hash=profile.profile_hash, prior=prior, source_digest=keccak256(seed), created_at=stamp), 2):
             self.publish(raw, schema_id(NAMES[1]), JCS_ID, nonce)
+        self.after_media_publications()
         block = self.rpc("eth_getBlockByNumber", ["latest", False])
         evidence = dumps({"kind": "local_evm_fixture", "workflow": "actual_current_foundation_safe_recorded_media_v1",
             "nativeInputManifestSha256": hashlib.sha256(self.manifest_raw).hexdigest(), "artifacts": self.artifact_rows,
             "safeFixture": self.manifest["safeFixture"], "safeComponents": self.safe_components, "safeAccounts": self.safe_accounts,
             "transactions": self.receipts, "boundaries": [], "governanceRoot": self.governor, "attestor": self.attestor,
             "hostGovernanceAuthority": executor, "media": media_description(image_bytes()),
-            "qualification": "Real selected native Core/Executor/ModuleRegistry/Manifest/SchemaRegistry/attestation products and official Safe CALLs. Foundation plus collection/document/attestation workflow only; no whole-product graph, latest-source, institutional, consensus-finality or public-deployment claim."})
+            "qualification": "Real selected native Core/Executor/ModuleRegistry/Manifest/SchemaRegistry/attestation products and official Safe CALLs. Foundation plus collection/document/attestation workflow only; no whole-product graph, latest-source, institutional, consensus-finality or public-deployment claim."} | self.extra_capture_evidence())
         addresses = sorted(set([self.store, *self.addresses.values(), *self.safe_components.values(), *self.safe_accounts]))
         anchor = dumps({"profile": PROFILE, "chainId": "31337", "blockHash": block["hash"],
             "blockNumber": str(int(block["number"], 16)), "timestamp": str(int(block["timestamp"], 16)),
             "stateRoot": block["stateRoot"], "environment": "local_evm_fixture", "deploymentEvidenceHash": keccak256(evidence),
             "host": self.addresses["StreamCollectionAttestations"], "core": core, "schemas": self.schemas, "store": self.store,
             "codePins": [{"address": a, "runtimeHash": keccak256(hex_bytes(self.rpc("eth_getCode", [a, "latest"])))} for a in addresses],
-            "lanes": [{"scopeKey": "1", "recordType": schema_id("INDEPENDENT_SEMANTIC_ASSERTION")}]})
+            "lanes": self.capture_lanes()})
         return anchor, evidence
 
 
@@ -305,7 +315,9 @@ def export_media(source, output):
     return result.manifest_hash
 
 
-def main():
+def main(*, fixture_type=None, capture_function=None):
+    fixture_type = CurrentMuseumFixture if fixture_type is None else fixture_type
+    capture_function = capture if capture_function is None else capture_function
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--native-manifest", required=True, type=Path)
     parser.add_argument("--native-manifest-sha256", required=True)
@@ -329,17 +341,19 @@ def main():
         try:
             for _ in range(100):
                 try:
-                    fixture = CurrentMuseumFixture(args.native_manifest, endpoint, expected_manifest_sha256=args.native_manifest_sha256); break
+                    fixture = fixture_type(args.native_manifest, endpoint, expected_manifest_sha256=args.native_manifest_sha256); break
                 except OSError:
                     require(process.poll() is None, "current capture Anvil exited"); time.sleep(0.05)
             require(fixture is not None, "current capture Anvil did not start")
-            print(capture(fixture, args.output), flush=True)
+            print(capture_function(fixture, args.output), flush=True)
         finally:
-            if fixture is not None:
-                args.output.joinpath("execution-journal.json").write_bytes(dumps({"transactions": fixture.receipts, "artifacts": fixture.artifact_rows}))
-            process.terminate()
-            try: process.wait(timeout=10)
-            except subprocess.TimeoutExpired: process.kill(); process.wait(timeout=5)
+            try:
+                if fixture is not None:
+                    args.output.joinpath("execution-journal.json").write_bytes(dumps({"transactions": fixture.receipts, "artifacts": fixture.artifact_rows}))
+            finally:
+                process.terminate()
+                try: process.wait(timeout=10)
+                except subprocess.TimeoutExpired: process.kill(); process.wait(timeout=5)
 
 
 if __name__ == "__main__": main()
