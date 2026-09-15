@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistDormancyState } from "./StreamArtistDormancyState.sol";
+import { StreamArtistStewardSanctionState } from "./StreamArtistStewardSanctionState.sol";
 import { StreamArtistGuardianVestingAdmission } from "./StreamArtistGuardianVestingAdmission.sol";
 import {
     StreamArtistGuardianVestingTypes as V
@@ -48,6 +50,9 @@ abstract contract StreamArtistIdentityData {
     StreamArtistUnavailabilityState.State internal _unavailability;
     // Operation35 appends its own history/receipt roots after every existing Identity field.
     StreamArtistIdentityRecoveryState.State internal _identityRecovery;
+    // Dormancy and original op19 append roots after every accepted Identity field.
+    StreamArtistDormancyState.State internal _dormancy;
+    StreamArtistStewardSanctionState.State internal _stewardGrants;
 
     function _noteLiving(
         StreamArtistIdentityState.OwnerContext memory o,
@@ -63,11 +68,14 @@ abstract contract StreamArtistIdentityData {
         if (stateDelta != bytes32(0)) m.state = keccak256(abi.encode(m.state, stateDelta));
         if (replayDelta != bytes32(0)) m.replay = keccak256(abi.encode(m.replay, replayDelta));
         if (findingDelta != bytes32(0)) m.state = keccak256(abi.encode(m.state, findingDelta));
+        _noteDormancy(o, replay, artistId, signer, 1, m);
     }
 
     /// @dev Separate from the estate living-only predicate. The original callback must have
     ///      authenticated this current principal and rolls the delta back on any later failure.
     function _noteCurrentAuthority(
+        StreamArtistIdentityState.OwnerContext memory o,
+        mapping(bytes32 => T.ReplayCell) storage replay,
         bytes32 artistId,
         address signer,
         uint16 operation,
@@ -77,6 +85,7 @@ abstract contract StreamArtistIdentityData {
             _unavailability, _identity.identities[artistId], artistId, signer, operation
         );
         if (delta != bytes32(0)) m.state = keccak256(abi.encode(m.state, delta));
+        _noteDormancy(o, replay, artistId, signer, 1, m);
     }
 
     function _noteFindingActivity(
@@ -121,5 +130,20 @@ abstract contract StreamArtistIdentityData {
             _identityRecovery, _identity, _rotations, _estate, environment, input
         );
         mutation.state = keccak256(abi.encode(mutation.state, commitment));
+    }
+
+    function _noteDormancy(
+        StreamArtistIdentityState.OwnerContext memory o,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        bytes32 id,
+        address signer,
+        uint8 class_,
+        StreamArtistIdentityState.Mutation memory m
+    ) internal {
+        (bytes32 delta, bytes32 replayDelta) = StreamArtistDormancyState.activity(
+            _dormancy, _identity, replay, o, id, signer, class_
+        );
+        if (delta != 0) m.state = keccak256(abi.encode(m.state, delta));
+        if (replayDelta != 0) m.replay = keccak256(abi.encode(m.replay, replayDelta));
     }
 }

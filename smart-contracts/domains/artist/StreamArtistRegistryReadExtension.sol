@@ -1,5 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistDormancy.sol";
+import {
+    StreamArtistDormancyTypes as Dorm
+} from "../../interfaces/stream/artist/IStreamArtistDormancy.sol";
+import {
+    IStreamArtistStewardSanctionGrant as SG,
+    IStreamArtistStewardSanctionGrantCoordinator
+} from "../../interfaces/stream/artist/IStreamArtistStewardSanctionGrant.sol";
 import "./StreamArtistRegistryAuthorityEncoding.sol";
 import "./StreamArtistRegistryPresentationEncoding.sol";
 import "../../interfaces/stream/artist/IStreamArtistPlatformWorks.sol";
@@ -860,5 +868,89 @@ contract StreamArtistRegistryReadExtension {
 
     function _returnRegistryEncoded(bytes memory encoded) private pure {
         assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
+    }
+
+    function dormancyState(bytes32 id) external view onlyHost returns (uint8, uint64, uint64) {
+        _forwardDormancyRead();
+    }
+
+    function dormancyNotice(bytes32 id) external view onlyHost returns (bytes32, uint8, bytes32) {
+        _forwardDormancyRead();
+    }
+
+    function dormancyRecord(bytes32 hash)
+        external
+        view
+        onlyHost
+        returns (Dorm.Notice memory, uint8, Dorm.Terminal memory)
+    {
+        _forwardDormancyRead();
+    }
+
+    function dormancyInitiationContext(Dorm.Initiation calldata p)
+        external
+        view
+        onlyHost
+        returns (Dorm.Context memory)
+    {
+        _forwardDormancyRead();
+    }
+
+    function dormancyCompletionContext(Dorm.Completion calldata p)
+        external
+        view
+        onlyHost
+        returns (Dorm.Context memory, Dorm.Plan memory)
+    {
+        _forwardDormancyRead();
+    }
+
+    function dormancyCompletionEvidence(Dorm.Completion calldata p)
+        external
+        view
+        onlyHost
+        returns (bytes memory)
+    {
+        _forwardDormancyRead();
+    }
+
+    function stewardSanctionGrant(bytes32 id) external view onlyHost returns (bool, bytes32) {
+        _forwardDormancyRead();
+    }
+
+    function stewardSanctionGrantRecord(bytes32 hash)
+        external
+        view
+        onlyHost
+        returns (SG.GrantRecord memory)
+    {
+        _forwardDormancyRead();
+    }
+
+    function stewardSanctionGrantSignature(bytes32 hash)
+        external
+        view
+        onlyHost
+        returns (bytes memory)
+    {
+        _forwardDormancyRead();
+    }
+
+    function stewardSanctionGrantDigest(SG.Grant calldata p, T.Authorization calldata a)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        _forwardDormancyRead();
+    }
+
+    // Every public selector above is explicit; this private relay always targets the fixed Identity owner.
+    function _forwardDormancyRead() private view {
+        (bool ok, bytes memory raw) = _contentSuite().owners[2].staticcall(msg.data);
+        assembly ("memory-safe") {
+            if iszero(ok) { revert(add(raw, 32), mload(raw)) }
+            return(add(raw, 32), mload(raw))
+        }
     }
 }

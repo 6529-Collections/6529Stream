@@ -11,8 +11,11 @@ library StreamArtistAuthorityPolicy {
         pure
         returns (bool)
     {
-        return (authorityClass == 1 && status == 1) || (authorityClass == 3 && status == 3)
-            || (defensive && status == 4 && (authorityClass == 1 || authorityClass == 3));
+        return (authorityClass == 1 && (status == 1 || status == 2))
+            || ((authorityClass == 3 || authorityClass == 4) && status == 3)
+            || (defensive
+                && status == 4
+                && (authorityClass == 1 || authorityClass == 3 || authorityClass == 4));
     }
 
     function requireOperation(T.Identity memory principal, bytes32 artistId, uint16 operation)

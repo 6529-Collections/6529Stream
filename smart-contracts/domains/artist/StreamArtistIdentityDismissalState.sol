@@ -7,6 +7,8 @@ import "./StreamArtistSuccessionState.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 
 /// @notice Linked adjudication mechanics over the sole Identity owner's storage.
+import "./StreamArtistDormancyResolutionReads.sol";
+
 library StreamArtistIdentityDismissalState {
     event ArtistIdentityContestCauseCaptured(
         uint16 schemaVersion,
@@ -88,9 +90,10 @@ library StreamArtistIdentityDismissalState {
     ) public returns (bytes32 hash) {
         if (
             f.referenceHash == bytes32(0)
-                || !((f.priorStatus == 1 && f.authorityClass == 1)
-                    || (f.priorStatus == 3 && f.authorityClass == 3)) || f.incumbent == address(0)
-                || (f.kind != 1 && f.kind != 2) || f.actor == address(0) || block.timestamp == 0
+                || !(((f.priorStatus == 1 || f.priorStatus == 2) && f.authorityClass == 1)
+                    || (f.priorStatus == 3 && (f.authorityClass == 3 || f.authorityClass == 4)))
+                || f.incumbent == address(0) || (f.kind != 1 && f.kind != 2)
+                || f.actor == address(0) || block.timestamp == 0
                 || block.timestamp > type(uint64).max || f.enteredAt != block.timestamp
                 || f.previousCauseHash != s.currentCause[f.artistId]
                 || f.previousResolutionHash != s.latestResolution[f.artistId]
@@ -188,8 +191,10 @@ library StreamArtistIdentityDismissalState {
                 || cause.facts.referenceHash == bytes32(0) || cause.facts.actor == address(0)
                 || principal.status != 4 || principal.authorityAddress != cause.facts.incumbent
                 || principal.authorityClass != cause.facts.authorityClass
-                || !((cause.facts.priorStatus == 1 && cause.facts.authorityClass == 1)
-                    || (cause.facts.priorStatus == 3 && cause.facts.authorityClass == 3))
+                || !(((cause.facts.priorStatus == 1 || cause.facts.priorStatus == 2)
+                        && cause.facts.authorityClass == 1)
+                    || (cause.facts.priorStatus == 3
+                        && (cause.facts.authorityClass == 3 || cause.facts.authorityClass == 4)))
                 || p.expectedResolutionHash != s.latestResolution[p.artistId]
                 || cause.facts.previousResolutionHash != p.expectedResolutionHash
                 || p.evidenceHash == bytes32(0) || p.reasonHash == bytes32(0)
@@ -226,6 +231,8 @@ library StreamArtistIdentityDismissalState {
         x.cohortHash = keccak256(
             abi.encode(keccak256("6529STREAM_ARTIST_IDENTITY_DISMISSAL_COHORT_V1"), p.artistId, v)
         );
+        (bytes32 dormancyProof,) = StreamArtistDormancyResolutionReads.resolution(cause);
+        if (dormancyProof != 0) x.cohortHash = keccak256(abi.encode(x.cohortHash, dormancyProof));
         x.revisionContinuationHead = v.revisionContinuationHead;
         x.oldValueHash = keccak256(
             abi.encode(
@@ -285,7 +292,7 @@ library StreamArtistIdentityDismissalState {
         item.actionId = g.actionId;
         item.incumbent = cause.facts.incumbent;
         item.authorityClass = cause.facts.authorityClass;
-        item.restoredStatus = cause.facts.priorStatus;
+        (, item.restoredStatus) = StreamArtistDormancyResolutionReads.resolution(cause);
         item.dismissedAt = uint64(block.timestamp);
         item.cohortHash = x.cohortHash;
         item.governanceWitnessHash = keccak256(abi.encode(g));

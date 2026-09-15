@@ -1,5 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistDormancy.sol";
+import {
+    StreamArtistDormancyTypes as Dorm
+} from "../../interfaces/stream/artist/IStreamArtistDormancy.sol";
+import {
+    IStreamArtistStewardSanctionGrant as SG,
+    IStreamArtistStewardSanctionGrantCoordinator
+} from "../../interfaces/stream/artist/IStreamArtistStewardSanctionGrant.sol";
 import {
     StreamArtistAttestationTypes as Attest,
     IStreamArtistAttestationCoordinator
@@ -555,5 +563,37 @@ contract StreamArtistRegistryWriterExtension {
     {
         return IStreamArtistOnboardingCoordinator(operationCoordinator)
             .coordinateRecordContentRatification(msg.sender, p, a);
+    }
+
+    function initiateArtistDormancy(Dorm.Initiation calldata p)
+        external
+        onlyHost
+        returns (bytes32)
+    {
+        return IStreamArtistDormancyCoordinator(operationCoordinator)
+            .coordinateInitiateArtistDormancy(msg.sender, p);
+    }
+
+    function cancelArtistDormancy(bytes32 id, bytes32 expected, bytes32 grant) external onlyHost {
+        IStreamArtistDormancyCoordinator(operationCoordinator)
+            .coordinateCancelArtistDormancy(msg.sender, id, expected, grant);
+    }
+
+    function completeArtistDormancy(Dorm.Completion calldata p)
+        external
+        onlyHost
+        returns (bytes32)
+    {
+        return IStreamArtistDormancyCoordinator(operationCoordinator)
+            .coordinateCompleteArtistDormancy(msg.sender, p);
+    }
+
+    function recordStewardSanctionGrant(SG.Grant calldata p, T.Authorization calldata a)
+        external
+        onlyHost
+        returns (bytes32)
+    {
+        return IStreamArtistStewardSanctionGrantCoordinator(operationCoordinator)
+            .coordinateRecordStewardSanctionGrant(msg.sender, p, a);
     }
 }

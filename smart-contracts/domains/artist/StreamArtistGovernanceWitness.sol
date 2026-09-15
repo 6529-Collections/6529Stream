@@ -49,6 +49,33 @@ library StreamArtistGovernanceWitness {
         if (g.proposer == address(0)) revert Contest.InvalidContestGovernance();
     }
 
+    /// @notice The dormant lifecycle uses its own role and the original class-1 action evidence.
+    function readDormancy(
+        D.CoordinatorContext memory x,
+        address authority,
+        bytes32 evidenceHash,
+        bytes32 scope,
+        bytes32 oldHash,
+        bytes32 newHash
+    ) public view returns (Contest.GovernanceWitness memory g) {
+        g = readEstateAcceleration(authority, evidenceHash, scope, oldHash, newHash);
+        address roles =
+            abi.decode(_fixed(authority, abi.encodeWithSignature("roleRegistry()"), 32), (address));
+        if (roles != x.suite.roleRegistry) revert Contest.InvalidContestGovernance();
+        bytes32 role = keccak256("ROLE_ARTIST_DORMANCY_ADMIN");
+        if (!abi.decode(
+                _fixed(roles, abi.encodeCall(IStreamRoleRegistry.hasRole, (role, g.proposer)), 32),
+                (bool)
+            )) revert T.Unauthorized(g.proposer);
+        (g.roleMutationHash, g.roleRevision) = abi.decode(
+            _fixed(roles, abi.encodeCall(IStreamRoleRegistry.roleMutationState, (role)), 64),
+            (bytes32, uint64)
+        );
+        if (g.roleMutationHash == 0 || g.roleRevision == 0) {
+            revert Contest.InvalidContestGovernance();
+        }
+    }
+
     function read(
         D.CoordinatorContext memory x,
         address authority,

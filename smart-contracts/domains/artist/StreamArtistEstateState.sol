@@ -81,7 +81,7 @@ library StreamArtistEstateState {
     ) public returns (StreamArtistIdentityState.Mutation memory m) {
         T.Identity storage principal = identity.identities[p.artistId];
         if (
-            principal.status != 1 || principal.authorityClass != 1
+            (principal.status != 1 && principal.status != 2) || principal.authorityClass != 1
                 || principal.authorityAddress == address(0)
                 || identity.activeIdentity[principal.authorityAddress] != p.artistId
         ) {

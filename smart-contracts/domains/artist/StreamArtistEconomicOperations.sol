@@ -29,7 +29,7 @@ library StreamArtistEconomicOperations {
         T.Snapshot[7] memory before_ = _snapshots(x, 26);
         (address signer, uint8 class_, uint8 status,) =
             IStreamArtistIdentityOwner(x.suite.owners[2]).authorityState(p.artistId);
-        if (class_ != 1 || status != 1) revert T.InvalidIdentity(p.artistId);
+        if (class_ != 1 || (status != 1 && status != 2)) revert T.InvalidIdentity(p.artistId);
         T.SignerApproval memory proof = _verify(
             x,
             actor,

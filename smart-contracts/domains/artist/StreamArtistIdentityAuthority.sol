@@ -1,5 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+
+import "./StreamArtistDormancyReadEncoding.sol";
+import {
+    StreamArtistDormancyTypes as Dorm
+} from "../../interfaces/stream/artist/IStreamArtistDormancy.sol";
+import {
+    IStreamArtistStewardSanctionGrant as SG
+} from "../../interfaces/stream/artist/IStreamArtistStewardSanctionGrant.sol";
 import { StreamArtistExtensionAdmission } from "./StreamArtistExtensionAdmission.sol";
 import {
     StreamArtistGuardianSelectionTypes as GuardianSelectionTypes
@@ -244,7 +252,9 @@ contract StreamArtistIdentityAuthority is
         view
         returns (Estate.AuthorityCapabilities memory)
     {
-        _returnResolution(StreamArtistEstateReadEncoding.authority(_estate, _identity, artistId));
+        _returnResolution(
+            StreamArtistDormancyReadEncoding.authority(_dormancy, _estate, _identity, artistId)
+        );
     }
 
     function estateActivationDigest(Estate.Request calldata p, T.Authorization calldata a)
@@ -876,7 +886,9 @@ contract StreamArtistIdentityAuthority is
         returns (R.TransitionState memory)
     {
         _returnResolution(
-            StreamArtistIdentityResolutionReads.artistTransitionState(
+            _dormancy.transitions[record].recordHash != bytes32(0)
+                ? abi.encode(_dormancy.transitions[record])
+                : StreamArtistIdentityResolutionReads.artistTransitionState(
                     _rotations, _estate, _identityRecovery, record
                 )
         );
@@ -929,12 +941,15 @@ contract StreamArtistIdentityAuthority is
     }
 
     function artistWindowInfo(bytes32 parameter) external view returns (uint64, uint64, uint64) {
-        return StreamArtistWindowConfiguration.info(_rotations, _estate, _unavailability, parameter);
+        return StreamArtistWindowConfiguration.info(
+            _rotations, _estate, _unavailability, _dormancy, parameter
+        );
     }
 
     function artistWindowScope(bytes32 parameter) external view returns (bytes32) {
-        return
-            StreamArtistWindowConfiguration.scope(_rotations, _estate, _unavailability, parameter);
+        return StreamArtistWindowConfiguration.scope(
+            _rotations, _estate, _unavailability, _dormancy, parameter
+        );
     }
 
     function artistWindowStateHash(bytes32 parameter, uint64 value, uint64 revision)
@@ -943,7 +958,7 @@ contract StreamArtistIdentityAuthority is
         returns (bytes32)
     {
         return StreamArtistWindowConfiguration.stateHash(
-            _rotations, _estate, _unavailability, parameter, value, revision
+            _rotations, _estate, _unavailability, _dormancy, parameter, value, revision
         );
     }
 
@@ -959,6 +974,7 @@ contract StreamArtistIdentityAuthority is
             _rotations,
             _estate,
             _unavailability,
+            _dormancy,
             artistWindowAuthority,
             actor,
             parameter,
@@ -1292,5 +1308,146 @@ contract StreamArtistIdentityAuthority is
             if iszero(success) { revert(pointer, returndatasize()) }
             return(pointer, returndatasize())
         }
+    }
+
+    function initiateDormancy(
+        T.ActionContext calldata c,
+        Dorm.Initiation calldata p,
+        Contest.GovernanceWitness calldata g
+    ) external returns (bytes32) {
+        _forwardEstateWriter();
+    }
+
+    function cancelDormancy(T.ActionContext calldata c, bytes32 id, bytes32 expected, bytes32 grant)
+        external
+    {
+        _forwardEstateWriter();
+    }
+
+    function completeDormancy(
+        T.ActionContext calldata c,
+        Dorm.Completion calldata p,
+        Contest.GovernanceWitness calldata g
+    ) external returns (bytes32) {
+        _forwardEstateWriter();
+    }
+
+    function recordStewardSanctionGrant(
+        T.ActionContext calldata c,
+        SG.Grant calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external returns (bytes32) {
+        _forwardEstateWriter();
+    }
+
+    function dormancyState(bytes32 id) external view returns (uint8, uint64, uint64) {
+        _returnResolution(StreamArtistDormancyReadEncoding.state(_dormancy, _identity, id));
+    }
+
+    function dormancyNotice(bytes32 id) external view returns (bytes32, uint8, bytes32) {
+        _returnResolution(StreamArtistDormancyReadEncoding.notice(_dormancy, id));
+    }
+
+    function dormancyRecord(bytes32 n)
+        external
+        view
+        returns (Dorm.Notice memory, uint8, Dorm.Terminal memory)
+    {
+        _returnResolution(StreamArtistDormancyReadEncoding.record(_dormancy, n));
+    }
+
+    function dormancyInitiationContext(Dorm.Initiation calldata p)
+        external
+        view
+        returns (Dorm.Context memory)
+    {
+        _returnResolution(
+            StreamArtistDormancyReadEncoding.initiation(
+                _dormancy, _identity, _rotations, _estate, _resolutions, _environment(), p
+            )
+        );
+    }
+
+    function dormancyCompletionContext(Dorm.Completion calldata p)
+        external
+        view
+        returns (Dorm.Context memory, Dorm.Plan memory)
+    {
+        _returnResolution(
+            StreamArtistDormancyReadEncoding.completion(
+                _dormancy,
+                _stewardGrants,
+                _identity,
+                _rotations,
+                _estate,
+                _succession,
+                _resolutions,
+                _environment(),
+                p,
+                false
+            )
+        );
+    }
+
+    function dormancyCompletionEvidence(Dorm.Completion calldata p)
+        external
+        view
+        returns (bytes memory)
+    {
+        _returnResolution(
+            StreamArtistDormancyReadEncoding.completion(
+                _dormancy,
+                _stewardGrants,
+                _identity,
+                _rotations,
+                _estate,
+                _succession,
+                _resolutions,
+                _environment(),
+                p,
+                true
+            )
+        );
+    }
+
+    function dormancyTransitionStanding(bytes32 record)
+        external
+        view
+        returns (address, bytes32, uint64)
+    {
+        _returnResolution(StreamArtistDormancyReadEncoding.standing(_dormancy, record));
+    }
+
+    function dormancyResolutionState(bytes32 id, bytes32 cause)
+        external
+        view
+        returns (bytes32, uint8, bytes32)
+    {
+        _returnResolution(StreamArtistDormancyReadEncoding.resolution(_dormancy, id, cause));
+    }
+
+    function stewardSanctionGrant(bytes32 id) external view returns (bool, bytes32) {
+        return StreamArtistStewardSanctionState.current(_stewardGrants, _rotations, id);
+    }
+
+    function stewardSanctionGrantRecord(bytes32 hash)
+        external
+        view
+        returns (SG.GrantRecord memory)
+    {
+        return _stewardGrants.records[hash];
+    }
+
+    function stewardSanctionGrantSignature(bytes32 hash) external view returns (bytes memory) {
+        return _identity.signatures[hash];
+    }
+
+    function stewardSanctionGrantDigest(SG.Grant calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        return StreamArtistStewardSanctionState.digest(_environment(), p, a);
     }
 }

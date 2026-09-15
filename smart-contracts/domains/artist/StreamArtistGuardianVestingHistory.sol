@@ -39,8 +39,12 @@ library StreamArtistGuardianVestingHistory {
                 || item.oldAddress == address(0) || item.newAddress == address(0)
                 || item.oldAddress == item.newAddress
                 || !((item.operationId == 32
-                        && (item.authorityClass == 1 || item.authorityClass == 3))
+                        && (item.authorityClass == 1
+                            || item.authorityClass == 3
+                            || item.authorityClass == 4))
                     || (item.operationId == 40 && item.authorityClass == 3)
+                    || (item.operationId == 43
+                        && (item.authorityClass == 3 || item.authorityClass == 4))
                     || (item.operationId == 35
                         && (item.authorityClass == 1 || item.authorityClass == 3)))
                 || item.commitment != 0 || item.previousCommitment != 0

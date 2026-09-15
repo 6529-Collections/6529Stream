@@ -5,6 +5,8 @@ import "./StreamArtistRotationState.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityContest.sol";
 
 /// @notice Linked compromise mechanics over the sole Identity owner's append-only state.
+import "./StreamArtistDormancyResolutionReads.sol";
+
 library StreamArtistIdentityContestState {
     struct State {
         mapping(bytes32 => Contest.Record) records;
@@ -70,6 +72,11 @@ library StreamArtistIdentityContestState {
                 s.latest[p.artistId]
             )
         );
+        if (principal.status == 2) {
+            oldHash = keccak256(
+                abi.encode(oldHash, StreamArtistDormancyResolutionReads.pending(p.artistId))
+            );
+        }
         newHash = keccak256(
             abi.encode(keccak256("6529STREAM_ARTIST_IDENTITY_CONTEST_INTENT_V1"), scope, oldHash, p)
         );
@@ -436,8 +443,10 @@ library StreamArtistIdentityContestState {
         T.Identity storage principal = identity.identities[p.artistId];
         if (
             p.artistId == bytes32(0)
-                || !((principal.status == 1 && principal.authorityClass == 1)
-                    || (principal.status == 3 && principal.authorityClass == 3))
+                || !(((principal.status == 1 || principal.status == 2)
+                        && principal.authorityClass == 1)
+                    || (principal.status == 3
+                        && (principal.authorityClass == 3 || principal.authorityClass == 4)))
                 || principal.authorityAddress == address(0) || p.evidenceHash == bytes32(0)
                 || p.reasonHash == bytes32(0)
         ) {

@@ -98,7 +98,8 @@ library StreamArtistGuardianVestingAdmission {
                 || rotations.retirement[input.artistId][item.oldAddress]
                     != input.transitionRecordHash
                 || !((principal.authorityClass == 1 && principal.status == 1)
-                    || (principal.authorityClass == 3 && principal.status == 3))
+                    || ((principal.authorityClass == 3 || principal.authorityClass == 4)
+                        && principal.status == 3))
                 || (recovery.guardianRecordsSeen[input.artistId] == 0
                     && (rotations.stableGuardian[input.artistId] != 0
                         || rotations.provisionalGuardian[input.artistId] != 0))

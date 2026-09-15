@@ -10,6 +10,7 @@ import {
 import "../../interfaces/stream/artist/IStreamArtistEstateOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
 import "../../interfaces/stream/artist/IStreamArtistRotationOwner.sol";
+import "../../interfaces/stream/artist/IStreamArtistDormancy.sol";
 
 /// @notice Linked actual-transition reads; estate/recovery fallbacks are hardwired to the same Identity.
 library StreamArtistTransitionReads {
@@ -52,7 +53,14 @@ library StreamArtistTransitionReads {
             ok := staticcall(gas(), address(), add(data, 32), mload(data), add(result, 32), 96)
             size := returndatasize()
         }
-        if (!ok || size != 96) revert R.InvalidRotation(record);
+        if (!ok || size != 96) {
+            data = abi.encodeCall(IStreamArtistDormancyOwner.dormancyTransitionStanding, (record));
+            assembly ("memory-safe") {
+                ok := staticcall(gas(), address(), add(data, 32), mload(data), add(result, 32), 96)
+                size := returndatasize()
+            }
+            if (!ok || size != 96) revert R.InvalidRotation(record);
+        }
         (priorAddress, guardianRecord, standingTail) =
             abi.decode(result, (address, bytes32, uint64));
         if (priorAddress == address(0) || standingTail < 30 days) {

@@ -1,6 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistDelegatedMutation.sol";
+import "./StreamArtistDormancyCancellation.sol";
+import "./StreamArtistDormancyReadEncoding.sol";
+import { StreamArtistDormancyVestingAdmission } from "./StreamArtistDormancyVestingAdmission.sol";
+import {
+    StreamArtistDormancyTypes as Dorm
+} from "../../interfaces/stream/artist/IStreamArtistDormancy.sol";
+import {
+    IStreamArtistStewardSanctionGrant as SG
+} from "../../interfaces/stream/artist/IStreamArtistStewardSanctionGrant.sol";
 import { StreamArtistGuardianAdmissionMutation } from "./StreamArtistGuardianAdmissionMutation.sol";
 import {
     StreamArtistGuardianSupersession as GuardianSupersession
@@ -96,6 +105,7 @@ contract StreamArtistIdentityEstateExtension is
             _identity,
             _delegations,
             _unavailability,
+            _dormancy,
             _replay,
             _ownerContext(),
             c,
@@ -126,6 +136,7 @@ contract StreamArtistIdentityEstateExtension is
             _identity,
             _delegations,
             _unavailability,
+            _dormancy,
             _replay,
             _ownerContext(),
             c,
@@ -156,6 +167,7 @@ contract StreamArtistIdentityEstateExtension is
             _identity,
             _delegations,
             _unavailability,
+            _dormancy,
             _replay,
             _ownerContext(),
             c,
@@ -196,6 +208,16 @@ contract StreamArtistIdentityEstateExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32 record) {
         _check(c, 12);
+        StreamArtistDormancyReadEncoding.requireStewardCollection(
+            _dormancy,
+            _identity,
+            _ownerContext().environment.core,
+            b.artistId,
+            p.scopeType,
+            p.collectionId,
+            p.tokenId,
+            p.scopeId
+        );
         StreamArtistIdentityState.Mutation memory m;
         (m, record) = StreamArtistIdentityConsentState.sanction(
             _identity, _replay, _ownerContext(), c, b, p, a, proof
@@ -212,6 +234,16 @@ contract StreamArtistIdentityEstateExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32 record) {
         _check(c, 22);
+        StreamArtistDormancyReadEncoding.requireStewardCollection(
+            _dormancy,
+            _identity,
+            _ownerContext().environment.core,
+            b.artistId,
+            0,
+            p.collectionId,
+            0,
+            bytes32(0)
+        );
         StreamArtistIdentityState.Mutation memory m;
         (m, record) = StreamArtistIdentityRecoveryApprovalState.consume(
             _identity, _replay, _ownerContext(), c, b, p, a, proof
@@ -321,7 +353,7 @@ contract StreamArtistIdentityEstateExtension is
             expected,
             reasonHash
         );
-        _noteCurrentAuthority(artistId, c.actor, c.operationId, m);
+        _noteCurrentAuthority(_ownerContext(), _replay, artistId, c.actor, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
     }
 
@@ -399,6 +431,10 @@ contract StreamArtistIdentityEstateExtension is
             _currentIdentityClosure(p.artistId).dismissalRecordHash != bytes32(0)
         );
         if (recoveryState != bytes32(0)) m.state = keccak256(abi.encode(m.state, recoveryState));
+        bytes32 dormancyDelta = StreamArtistDormancyState.contest(
+            _dormancy, _resolutions, p.artistId, _rotations.latestExecution[p.artistId]
+        );
+        if (dormancyDelta != 0) m.state = keccak256(abi.encode(m.state, dormancyDelta));
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
@@ -418,6 +454,7 @@ contract StreamArtistIdentityEstateExtension is
         StreamArtistIdentityState.Mutation memory m = StreamArtistEstateState.request(
             _estate, _identity, _rotations, _replay, _ownerContext(), c, p, a, proof, facts
         );
+        _noteDormancy(_ownerContext(), _replay, p.artistId, proof.signer, 3, m);
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
@@ -430,7 +467,7 @@ contract StreamArtistIdentityEstateExtension is
         StreamArtistIdentityState.Mutation memory m = StreamArtistEstateState.cancel(
             _estate, _identity, _replay, _ownerContext(), c, artistId, expected
         );
-        _noteCurrentAuthority(artistId, c.actor, c.operationId, m);
+        _noteCurrentAuthority(_ownerContext(), _replay, artistId, c.actor, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
     }
 
@@ -489,5 +526,111 @@ contract StreamArtistIdentityEstateExtension is
         return StreamArtistIdentityState.OwnerContext(
             _environment(), operationCoordinator, archiveV2, domainId, _revision
         );
+    }
+
+    function initiateDormancy(
+        T.ActionContext calldata c,
+        Dorm.Initiation calldata p,
+        Contest.GovernanceWitness calldata g
+    ) external onlyHost returns (bytes32) {
+        _check(c, 41);
+        StreamArtistIdentityState.Mutation memory m = StreamArtistDormancyState.initiate(
+            _dormancy,
+            _identity,
+            _rotations,
+            _estate,
+            _resolutions,
+            _replay,
+            _ownerContext(),
+            c,
+            p,
+            g,
+            IStreamArtistIdentityContestOwner(address(this)).artistWindowAuthority()
+        );
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return m.record;
+    }
+
+    function cancelDormancy(T.ActionContext calldata c, bytes32 id, bytes32 expected, bytes32 grant)
+        external
+        onlyHost
+    {
+        _check(c, 42);
+        StreamArtistIdentityState.Mutation memory m = StreamArtistDormancyCancellation.cancel(
+            _dormancy,
+            _identity,
+            _rotations,
+            _succession,
+            _estate,
+            _delegations,
+            _replay,
+            _ownerContext(),
+            c,
+            id,
+            expected,
+            grant
+        );
+        _commit(c, m.action, m.state, m.replay, m.record);
+    }
+
+    function completeDormancy(
+        T.ActionContext calldata c,
+        Dorm.Completion calldata p,
+        Contest.GovernanceWitness calldata g
+    ) external onlyHost returns (bytes32) {
+        _check(c, 43);
+        bytes32 previous = _rotations.latestExecution[p.artistId];
+        StreamArtistIdentityState.Mutation memory m = StreamArtistDormancyState.complete(
+            _dormancy,
+            _stewardGrants,
+            _identity,
+            _rotations,
+            _estate,
+            _succession,
+            _resolutions,
+            _replay,
+            _ownerContext(),
+            c,
+            p,
+            g,
+            IStreamArtistIdentityContestOwner(address(this)).artistWindowAuthority()
+        );
+        bytes32 history = StreamArtistDormancyVestingAdmission.record(
+            _dormancy,
+            _identityRecovery,
+            _identity,
+            _rotations,
+            _estate,
+            _environment(),
+            V.Input(p.artistId, m.record, previous, _revision + 1, 43)
+        );
+        m.state = keccak256(abi.encode(m.state, history));
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return m.record;
+    }
+
+    function recordStewardSanctionGrant(
+        T.ActionContext calldata c,
+        SG.Grant calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external onlyHost returns (bytes32) {
+        _check(c, 19);
+        StreamArtistIdentityState.Mutation memory m =
+            StreamArtistStewardSanctionState.recordWithResolution(
+                _stewardGrants,
+                _identity,
+                _rotations,
+                _replay,
+                _ownerContext(),
+                c,
+                p,
+                a,
+                proof,
+                _currentIdentityClosure(p.artistId)
+            );
+        _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, 19, m);
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return m.record;
     }
 }

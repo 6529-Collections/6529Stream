@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "./StreamArtistEstateTiming.sol";
 import "./StreamArtistUnavailabilityState.sol";
+import "./StreamArtistDormancyTiming.sol";
 
 /// @notice Fixed Identity window dispatch over its actual owner storage roots.
 library StreamArtistWindowConfiguration {
@@ -20,8 +21,12 @@ library StreamArtistWindowConfiguration {
         StreamArtistRotationState.State storage rotations,
         StreamArtistEstateState.State storage estate,
         StreamArtistUnavailabilityState.State storage findings,
+        StreamArtistDormancyState.State storage dormancy,
         bytes32 parameter
     ) public view returns (uint64, uint64, uint64) {
+        if (StreamArtistDormancyTiming.supported(parameter)) {
+            return StreamArtistDormancyTiming.info(dormancy, parameter);
+        }
         if (parameter == keccak256("ARTIST_ESTATE_ACTIVATION_NOTICE_SECONDS")) {
             return StreamArtistEstateState.timing(estate);
         }
@@ -35,9 +40,10 @@ library StreamArtistWindowConfiguration {
         StreamArtistRotationState.State storage rotations,
         StreamArtistEstateState.State storage estate,
         StreamArtistUnavailabilityState.State storage findings,
+        StreamArtistDormancyState.State storage dormancy,
         bytes32 parameter
     ) public view returns (bytes32) {
-        info(rotations, estate, findings, parameter);
+        info(rotations, estate, findings, dormancy, parameter);
         return StreamArtistTimingState.scope(parameter);
     }
 
@@ -45,11 +51,12 @@ library StreamArtistWindowConfiguration {
         StreamArtistRotationState.State storage rotations,
         StreamArtistEstateState.State storage estate,
         StreamArtistUnavailabilityState.State storage findings,
+        StreamArtistDormancyState.State storage dormancy,
         bytes32 parameter,
         uint64 value,
         uint64 revision
     ) public view returns (bytes32) {
-        (, uint64 floor,) = info(rotations, estate, findings, parameter);
+        (, uint64 floor,) = info(rotations, estate, findings, dormancy, parameter);
         return StreamArtistTimingState.stateHash(parameter, value, floor, revision);
     }
 
@@ -57,12 +64,19 @@ library StreamArtistWindowConfiguration {
         StreamArtistRotationState.State storage rotations,
         StreamArtistEstateState.State storage estate,
         StreamArtistUnavailabilityState.State storage findings,
+        StreamArtistDormancyState.State storage dormancy,
         address executor,
         address actor,
         bytes32 parameter,
         uint64 value,
         uint64 expectedRevision
     ) public {
+        if (StreamArtistDormancyTiming.supported(parameter)) {
+            StreamArtistDormancyTiming.configure(
+                dormancy, executor, actor, parameter, value, expectedRevision
+            );
+            return;
+        }
         if (parameter == keccak256("ARTIST_ESTATE_ACTIVATION_NOTICE_SECONDS")) {
             StreamArtistEstateTiming.configure(estate, executor, actor, value, expectedRevision);
         } else if (parameter == keccak256("ARTIST_UNAVAILABILITY_RECOVERY_NOTICE_SECONDS")) {

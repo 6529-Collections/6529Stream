@@ -168,12 +168,13 @@ library StreamArtistRecordPublicationReads {
                 || keccak256(abi.encode(saved.publication)) != publicationHash
         ) revert T.InvalidRecord();
         if (e.authorityClass == 2) _requireDelegatePublication(suite, b, authority, e, saved);
-        if (authority.authorityClass == 3) {
+        if (authority.authorityClass == 3 || authority.authorityClass == 4) {
             Estate.AuthorityCapabilities memory caps =
                 IStreamArtistEstateOwner(suite.owners[2]).currentAuthorityCapabilities(b.artistId);
             if (
-                caps.authorityAddress != authority.authorityAddress || caps.authorityClass != 3
-                    || caps.status != 3 || caps.activationRecordHash == 0
+                caps.authorityAddress != authority.authorityAddress
+                    || caps.authorityClass != authority.authorityClass || caps.status != 3
+                    || caps.activationRecordHash == 0
                     || (caps.effectiveCapabilities & capability) != capability
             ) {
                 revert Estate.EstateCapabilityUnavailable(b.artistId, capability);
@@ -198,9 +199,10 @@ library StreamArtistRecordPublicationReads {
         (bool epoch,,) =
             IStreamArtistEstateOwner(suite.owners[2]).delegationEpochState(a.delegation);
         if (
-            authority.authorityClass != 1 || authority.status != 1 || !epoch || a.delegation == 0
-                || a.artistId != b.artistId || a.bindingHash != b.bindingHash
-                || a.generation != b.generation || a.fact.owner != saved.publication.metadataHost
+            authority.authorityClass != 1 || (authority.status != 1 && authority.status != 2)
+                || !epoch || a.delegation == 0 || a.artistId != b.artistId
+                || a.bindingHash != b.bindingHash || a.generation != b.generation
+                || a.fact.owner != saved.publication.metadataHost
                 || a.fact.ownerCodeHash != saved.metadataHostCodeHash
                 || a.fact.subjectId != saved.publication.subjectId
                 || a.fact.stateHash

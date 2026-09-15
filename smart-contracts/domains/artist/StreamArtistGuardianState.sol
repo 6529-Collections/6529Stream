@@ -61,7 +61,7 @@ library StreamArtistGuardianState {
         }
         bytes32 prior = StreamArtistRotationState.operativeGuardian(s, p.artistId);
         uint8 authorityClass = identity.identities[p.artistId].authorityClass;
-        if (authorityClass == 3) {
+        if (authorityClass == 3 || authorityClass == 4) {
             Estate.AuthorityCapabilities memory rights =
                 StreamArtistAuthorityPolicy.capabilities(p.artistId);
             if ((rights.effectiveCapabilities & 2048) == 0) {

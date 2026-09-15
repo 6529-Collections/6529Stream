@@ -178,7 +178,8 @@ library StreamArtistEstateReads {
     {
         T.Identity storage p = identity.identities[artistId];
         if (
-            p.authorityClass != 1 || p.status != 1 || p.authorityAddress == address(0)
+            p.authorityClass != 1 || (p.status != 1 && p.status != 2)
+                || p.authorityAddress == address(0)
                 || identity.activeIdentity[p.authorityAddress] != artistId
         ) revert T.InvalidIdentity(artistId);
     }

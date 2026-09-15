@@ -158,7 +158,8 @@ library StreamArtistRecoveryOriginalReads {
         if (
             r.recordHash != hash || r.artistId == 0 || r.bindingGeneration == 0
                 || r.bindingHash == 0 || r.signer == address(0)
-                || (r.authorityClass != 1 && r.authorityClass != 3) || s.collectionId == 0
+                || (r.authorityClass != 1 && r.authorityClass != 3 && r.authorityClass != 4)
+                || s.collectionId == 0 || (r.authorityClass == 4 && s.scopeType != 0)
                 || (s.scopeType == 0 && (s.tokenId != 0 || s.scopeId != 0))
                 || (s.scopeType == 1 && (s.tokenId == 0 || s.scopeId != 0))
                 || (s.scopeType > 1 && (s.tokenId != 0 || s.scopeId == 0))

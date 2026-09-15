@@ -1,5 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistDormancy.sol";
+import {
+    StreamArtistDormancyTypes as Dorm
+} from "../../interfaces/stream/artist/IStreamArtistDormancy.sol";
+import {
+    IStreamArtistStewardSanctionGrant as SG,
+    IStreamArtistStewardSanctionGrantCoordinator
+} from "../../interfaces/stream/artist/IStreamArtistStewardSanctionGrant.sol";
 import "../../interfaces/stream/artist/IStreamArtistPlatformWorks.sol";
 import "../../interfaces/stream/artist/IStreamArtistDisplayFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttestationWriter.sol";
@@ -52,6 +60,9 @@ import {
 ///      This subset does not advertise the full artist lifecycle or legacy nomination API.
 contract StreamArtistOnboardingRegistry is
     IStreamArtistOnboarding,
+    IStreamArtistDormancy,
+    IStreamArtistDormancyEvidence,
+    SG,
     IStreamArtistMintConsent,
     IStreamArtistAttribution,
     IStreamArtistContentRatification,
@@ -338,7 +349,10 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistSuccessionRecords).interfaceId
             || id == type(IStreamArtistSuccessionReads).interfaceId
             || id == type(IStreamArtistIdentityRecovery).interfaceId
-            || id == type(IStreamArtistWindows).interfaceId || super.supportsInterface(id);
+            || id == type(IStreamArtistWindows).interfaceId
+            || type(IStreamArtistDormancy).interfaceId == id
+            || type(IStreamArtistDormancyEvidence).interfaceId == id || type(SG).interfaceId == id
+            || super.supportsInterface(id);
     }
 
     function recordSaleConsent(Sale.Consent calldata p, T.Authorization calldata a)
@@ -1612,5 +1626,88 @@ contract StreamArtistOnboardingRegistry is
             if iszero(success) { revert(pointer, returndatasize()) }
             return(pointer, returndatasize())
         }
+    }
+
+    function initiateArtistDormancy(Dorm.Initiation calldata p) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function cancelArtistDormancy(bytes32 id, bytes32 expected, bytes32 grant) external {
+        _forwardRegistryWriter();
+    }
+
+    function completeArtistDormancy(Dorm.Completion calldata p) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function recordStewardSanctionGrant(SG.Grant calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function dormancyState(bytes32 id) external view returns (uint8, uint64, uint64) {
+        _forwardRegistryRead();
+    }
+
+    function dormancyNotice(bytes32 id) external view returns (bytes32, uint8, bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function dormancyRecord(bytes32 hash)
+        external
+        view
+        returns (Dorm.Notice memory, uint8, Dorm.Terminal memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function dormancyInitiationContext(Dorm.Initiation calldata p)
+        external
+        view
+        returns (Dorm.Context memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function dormancyCompletionContext(Dorm.Completion calldata p)
+        external
+        view
+        returns (Dorm.Context memory, Dorm.Plan memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function dormancyCompletionEvidence(Dorm.Completion calldata p)
+        external
+        view
+        returns (bytes memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function stewardSanctionGrant(bytes32 id) external view returns (bool, bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function stewardSanctionGrantRecord(bytes32 hash)
+        external
+        view
+        returns (SG.GrantRecord memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function stewardSanctionGrantSignature(bytes32 hash) external view returns (bytes memory) {
+        _forwardRegistryRead();
+    }
+
+    function stewardSanctionGrantDigest(SG.Grant calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
     }
 }

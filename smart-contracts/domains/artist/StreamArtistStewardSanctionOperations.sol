@@ -10,45 +10,20 @@ import {
 } from "../../interfaces/stream/artist/StreamArtistDelegationTypes.sol";
 import "../../interfaces/stream/parameters/IStreamGasParameterHost.sol";
 
-/// @notice Fixed typed succession recipes, executed in the authenticated locked Coordinator.
-library StreamArtistSuccessionOperations {
-    function designate(
-        D.CoordinatorContext memory x,
-        address actor,
-        Succ.Designation memory p,
-        T.Authorization memory submitted
-    ) public returns (bytes32 record) {
-        T.Snapshot[7] memory before_ = _snapshots(x);
-        address signer = _authority(x, p.artistId);
-        T.Authorization memory effective = _effective(actor, signer, submitted);
-        T.SignerApproval memory proof = _verify(
-            x,
-            actor,
-            signer,
-            StreamArtistSuccessionHashes.designationDigest(_environment(x), p, effective),
-            effective.signature
-        );
-        IStreamArtistSuccessionOwner owner = IStreamArtistSuccessionOwner(x.suite.owners[2]);
-        record = owner.recordSuccessorDesignation(
-            T.ActionContext(36, actor, before_[2]), p, effective, proof
-        );
-        _archive(
-            x,
-            36,
-            actor,
-            record,
-            before_,
-            abi.encode(p, submitted, effective, proof, owner.successorDesignationRecord(record))
-        );
-    }
+import "./StreamArtistStewardSanctionState.sol";
+import {
+    IStreamArtistStewardSanctionGrant as SG,
+    IStreamArtistStewardSanctionGrantOwner
+} from "../../interfaces/stream/artist/IStreamArtistStewardSanctionGrant.sol";
 
-    function directive(
+/// @notice Actual op19 proof verification, owner mutation and original Archive evidence recipe.
+library StreamArtistStewardSanctionOperations {
+    function record(
         D.CoordinatorContext memory x,
         address actor,
-        Succ.Directive memory p,
-        T.Authorization memory submitted,
-        Succ.PublicDocument memory document
-    ) public returns (bytes32 record) {
+        SG.Grant memory p,
+        T.Authorization memory submitted
+    ) public returns (bytes32 result) {
         T.Snapshot[7] memory before_ = _snapshots(x);
         address signer = _authority(x, p.artistId);
         T.Authorization memory effective = _effective(actor, signer, submitted);
@@ -56,27 +31,23 @@ library StreamArtistSuccessionOperations {
             x,
             actor,
             signer,
-            StreamArtistSuccessionHashes.directiveDigest(_environment(x), p, effective),
+            StreamArtistStewardSanctionState.digest(_environment(x), p, effective),
             effective.signature
         );
-        IStreamArtistSuccessionOwner owner = IStreamArtistSuccessionOwner(x.suite.owners[2]);
-        record = owner.recordEstateDirective(
-            T.ActionContext(37, actor, before_[2]), p, effective, proof, document
-        );
+        result = IStreamArtistStewardSanctionGrantOwner(x.suite.owners[2])
+            .recordStewardSanctionGrant(T.ActionContext(19, actor, before_[2]), p, effective, proof);
         _archive(
             x,
-            37,
+            19,
             actor,
-            record,
+            result,
             before_,
             abi.encode(
                 p,
                 submitted,
                 effective,
                 proof,
-                document,
-                owner.estateDirectiveRecord(record),
-                owner.estateDirectivePayload(record)
+                SG(x.suite.owners[2]).stewardSanctionGrantRecord(result)
             )
         );
     }

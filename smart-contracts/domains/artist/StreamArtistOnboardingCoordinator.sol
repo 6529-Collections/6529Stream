@@ -1,5 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistDormancy.sol";
+import {
+    StreamArtistDormancyTypes as Dorm
+} from "../../interfaces/stream/artist/IStreamArtistDormancy.sol";
+import {
+    IStreamArtistStewardSanctionGrant as SG,
+    IStreamArtistStewardSanctionGrantCoordinator
+} from "../../interfaces/stream/artist/IStreamArtistStewardSanctionGrant.sol";
+import "./StreamArtistDormancyOperations.sol";
+import "./StreamArtistStewardSanctionOperations.sol";
 import "./StreamArtistAttributionClaimOperations.sol";
 import "./StreamArtistPlatformOperations.sol";
 import {
@@ -858,5 +868,38 @@ contract StreamArtistOnboardingCoordinator is
         T.Authorization calldata a
     ) external operation returns (bytes32 record) {
         return StreamArtistOnboardingOperations.ratify(_economicContext(), actor, p, a);
+    }
+
+    function coordinateInitiateArtistDormancy(address actor, Dorm.Initiation calldata p)
+        external
+        operation
+        returns (bytes32)
+    {
+        return StreamArtistDormancyOperations.initiate(_economicContext(), actor, p);
+    }
+
+    function coordinateCancelArtistDormancy(
+        address actor,
+        bytes32 id,
+        bytes32 expected,
+        bytes32 grant
+    ) external operation {
+        StreamArtistDormancyOperations.cancel(_economicContext(), actor, id, expected, grant);
+    }
+
+    function coordinateCompleteArtistDormancy(address actor, Dorm.Completion calldata p)
+        external
+        operation
+        returns (bytes32)
+    {
+        return StreamArtistDormancyOperations.complete(_economicContext(), actor, p);
+    }
+
+    function coordinateRecordStewardSanctionGrant(
+        address actor,
+        SG.Grant calldata p,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistStewardSanctionOperations.record(_economicContext(), actor, p, a);
     }
 }

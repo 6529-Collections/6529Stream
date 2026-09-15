@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistEconomicsHashes.sol";
+import { StreamArtistDormancyState } from "./StreamArtistDormancyState.sol";
 import "./StreamArtistEstateState.sol";
 import "./StreamArtistUnavailabilityState.sol";
 
@@ -13,6 +14,7 @@ library StreamArtistDelegatedMutation {
         StreamArtistIdentityState.State storage identity,
         StreamArtistDelegationState.State storage delegations,
         StreamArtistUnavailabilityState.State storage findings,
+        StreamArtistDormancyState.State storage dormancy,
         mapping(bytes32 => T.ReplayCell) storage replay,
         StreamArtistIdentityState.OwnerContext memory o,
         T.ActionContext calldata c,
@@ -48,6 +50,12 @@ library StreamArtistDelegatedMutation {
             findings, b.artistId, proof.signer, 2, c.operationId
         );
         if (delta != 0) m.state = keccak256(abi.encode(m.state, delta));
+        (bytes32 liveDelta, bytes32 liveReplay) =
+            StreamArtistDormancyState.activity(
+                dormancy, identity, replay, o, b.artistId, proof.signer, 2
+            );
+        if (liveDelta != 0) m.state = keccak256(abi.encode(m.state, liveDelta));
+        if (liveReplay != 0) m.replay = keccak256(abi.encode(m.replay, liveReplay));
     }
 
     function consumeDelegatedRoyaltyFreeze(
@@ -57,6 +65,7 @@ library StreamArtistDelegatedMutation {
         StreamArtistIdentityState.State storage identity,
         StreamArtistDelegationState.State storage delegations,
         StreamArtistUnavailabilityState.State storage findings,
+        StreamArtistDormancyState.State storage dormancy,
         mapping(bytes32 => T.ReplayCell) storage replay,
         StreamArtistIdentityState.OwnerContext memory o,
         T.ActionContext calldata c,
@@ -77,6 +86,7 @@ library StreamArtistDelegatedMutation {
             identity,
             delegations,
             findings,
+            dormancy,
             replay,
             o,
             c,
@@ -98,6 +108,7 @@ library StreamArtistDelegatedMutation {
         StreamArtistIdentityState.State storage identity,
         StreamArtistDelegationState.State storage delegations,
         StreamArtistUnavailabilityState.State storage findings,
+        StreamArtistDormancyState.State storage dormancy,
         mapping(bytes32 => T.ReplayCell) storage replay,
         StreamArtistIdentityState.OwnerContext memory o,
         T.ActionContext calldata c,
@@ -120,6 +131,7 @@ library StreamArtistDelegatedMutation {
             identity,
             delegations,
             findings,
+            dormancy,
             replay,
             o,
             c,
@@ -141,6 +153,7 @@ library StreamArtistDelegatedMutation {
         StreamArtistIdentityState.State storage identity,
         StreamArtistDelegationState.State storage delegations,
         StreamArtistUnavailabilityState.State storage findings,
+        StreamArtistDormancyState.State storage dormancy,
         mapping(bytes32 => T.ReplayCell) storage replay,
         StreamArtistIdentityState.OwnerContext memory o,
         T.ActionContext calldata c,
@@ -163,6 +176,7 @@ library StreamArtistDelegatedMutation {
             identity,
             delegations,
             findings,
+            dormancy,
             replay,
             o,
             c,

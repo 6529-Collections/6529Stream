@@ -134,7 +134,7 @@ library StreamArtistSanctionConfirmationReads {
         if (
             r.recordHash != hash || r.artistId != b.artistId || r.bindingGeneration != b.generation
                 || r.bindingHash != b.bindingHash || r.signer == address(0)
-                || (r.authorityClass != 1 && r.authorityClass != 3)
+                || (r.authorityClass != 1 && r.authorityClass != 3 && r.authorityClass != 4)
                 || r.terms.collectionId != collectionId || r.terms.tokenId != 0
                 || r.terms.scopeId != 0
                 || StreamArtistSanctionHashes.record(
