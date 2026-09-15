@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistAuthorityRecordEvents } from "./StreamArtistAuthorityRecordEvents.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 import { StreamArtistAuthorityPreimages } from "./StreamArtistAuthorityPreimages.sol";
 import "./StreamArtistTransitionReads.sol";
@@ -727,6 +728,9 @@ library StreamArtistRotationState {
             principal.authorityClass,
             r.terms.reasonHash,
             expected
+        );
+        StreamArtistAuthorityRecordEvents.rotation(
+            o.environment, c.actor, r.transition, principal.authorityClass
         );
     }
 

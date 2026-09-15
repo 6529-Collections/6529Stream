@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistAuthorityRecordEvents } from "./StreamArtistAuthorityRecordEvents.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 import { StreamArtistAuthorityPreimages } from "./StreamArtistAuthorityPreimages.sol";
 
@@ -484,6 +485,9 @@ library StreamArtistEstateState {
             capabilities,
             item.terms.evidenceHash,
             governanceActionId
+        );
+        StreamArtistAuthorityRecordEvents.estate(
+            o.environment, c.actor, item.incumbent, t, s.executions[record]
         );
     }
 
