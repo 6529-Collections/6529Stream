@@ -3,6 +3,10 @@ pragma solidity ^0.8.19;
 import { StreamArtistRecoveryActionOperations } from "./StreamArtistRecoveryActionOperations.sol";
 import { StreamArtistAttestationOperations } from "./StreamArtistAttestationOperations.sol";
 import { StreamArtistIdentityOperations } from "./StreamArtistIdentityOperations.sol";
+import { StreamArtistSuccessionOperations } from "./StreamArtistSuccessionOperations.sol";
+import {
+    StreamArtistSuccessionTypes as Succ
+} from "../../interfaces/stream/artist/StreamArtistSuccessionTypes.sol";
 import {
     StreamArtistDelegationTypes as D
 } from "../../interfaces/stream/artist/StreamArtistDelegationTypes.sol";
@@ -20,7 +24,7 @@ import {
     StreamArtistIdentityRevisionTypes
 } from "../../interfaces/stream/artist/IStreamArtistIdentityRevision.sol";
 
-/// @notice Fixed decoders for three original variable-length Coordinator recipes.
+/// @notice Fixed decoders for original variable-length Coordinator recipes.
 library StreamArtistCoordinatorRecordTransport {
     function prepareRecovery(D.CoordinatorContext memory x, bytes calldata data)
         public
@@ -69,5 +73,27 @@ library StreamArtistCoordinatorRecordTransport {
             (address, StreamArtistIdentityRevisionTypes.Revision, T.Authorization, bytes, string)
         );
         return StreamArtistIdentityOperations.revise(x, actor, p, a, document, displayName);
+    }
+
+    function attestArtist(D.CoordinatorContext memory x, bytes calldata data)
+        public
+        returns (bytes32)
+    {
+        (address actor, T.Attestation memory p, T.Authorization memory a, bytes memory statement) =
+            abi.decode(data[4:], (address, T.Attestation, T.Authorization, bytes));
+        return StreamArtistIdentityOperations.attest(x, actor, p, a, statement);
+    }
+
+    function directive(D.CoordinatorContext memory x, bytes calldata data)
+        public
+        returns (bytes32)
+    {
+        (
+            address actor,
+            Succ.Directive memory p,
+            T.Authorization memory a,
+            Succ.PublicDocument memory document
+        ) = abi.decode(data[4:], (address, Succ.Directive, T.Authorization, Succ.PublicDocument));
+        return StreamArtistSuccessionOperations.directive(x, actor, p, a, document);
     }
 }

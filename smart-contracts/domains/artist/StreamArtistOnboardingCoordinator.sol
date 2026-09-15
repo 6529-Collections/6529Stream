@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistCoordinatorRecoveryRead } from "./StreamArtistCoordinatorRecoveryRead.sol";
 import {
     StreamArtistCoordinatorRecordTransport
 } from "./StreamArtistCoordinatorRecordTransport.sol";
@@ -407,7 +408,9 @@ contract StreamArtistOnboardingCoordinator is
         U.Target calldata target
     ) external view returns (U.Context memory) {
         _unavailabilityPins();
-        return StreamArtistRecoveryAdmission.prepare(_suite, finalityRegistry, p, target).context_;
+        bytes memory encoded =
+            StreamArtistCoordinatorRecoveryRead.prepareEncoded(_suite, finalityRegistry, msg.data);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function verifyRecoveryUnavailability(U.Target calldata target)
@@ -839,7 +842,7 @@ contract StreamArtistOnboardingCoordinator is
         T.Authorization calldata a,
         bytes calldata statement
     ) external operation returns (bytes32 record) {
-        return StreamArtistIdentityOperations.attest(_economicContext(), actor, p, a, statement);
+        return StreamArtistCoordinatorRecordTransport.attestArtist(_economicContext(), msg.data);
     }
 
     function coordinateRecordIdentityRevision(
@@ -866,7 +869,7 @@ contract StreamArtistOnboardingCoordinator is
         T.Authorization calldata a,
         Succ.PublicDocument calldata document
     ) external operation returns (bytes32) {
-        return StreamArtistSuccessionOperations.directive(_economicContext(), actor, p, a, document);
+        return StreamArtistCoordinatorRecordTransport.directive(_economicContext(), msg.data);
     }
 
     function coordinateRecordContentConsent(
