@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistNativeReceipts.sol";
 import { StreamArtistDormancyRecordEvents } from "./StreamArtistDormancyRecordEvents.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 import "./StreamArtistEstateState.sol";
@@ -497,6 +498,7 @@ library StreamArtistDormancyState {
             s.terminalForNotice[notice] = t.recordHash;
             s.phases[notice] = 2;
             if (i.status == 2) i.status = 1; // A genuine compromise remains contested until its own dismissal.
+            StreamArtistNativeReceipts.record(42, t.recordHash, id, 0);
             emit ArtistDormancyCancelled(1, id, notice, signer, class_, t.recordHash);
             StreamArtistDormancyRecordEvents.cancellation(o.environment, id, t, count);
         }

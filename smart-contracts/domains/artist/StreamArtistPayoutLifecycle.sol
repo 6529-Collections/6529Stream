@@ -273,6 +273,7 @@ contract StreamArtistPayoutLifecycle is StreamArtistOwner {
             keccak256(abi.encode(key, current.recordHash, record)),
             record
         );
+        _native(c.operationId, record, p.artistId, 0);
         emit ArtistPayoutDesignationRecorded(
             1,
             p.artistId,
@@ -353,6 +354,7 @@ contract StreamArtistPayoutLifecycle is StreamArtistOwner {
             keccak256(abi.encode(key, prior, record)),
             record
         );
+        _native(c.operationId, record, p.artistId, 0);
         emit ArtistPayoutDesignationRecorded(
             1, p.artistId, p.payoutAccount, signer, prior, 1, nonce, signedAt, record
         );

@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistHistoryState.sol";
+import {
+    StreamArtistHistoryTypes as H
+} from "../../interfaces/stream/artist/IStreamArtistHistory.sol";
 import { StreamArtistIdentityReadDispatch } from "./StreamArtistIdentityReadDispatch.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 import { StreamArtistIdentityPayloadReads } from "./StreamArtistIdentityPayloadReads.sol";
@@ -1411,6 +1415,190 @@ contract StreamArtistIdentityAuthority is
     {
         return (
             _stewardCapabilityGrants.head[appointment], _stewardCapabilityGrants.added[appointment]
+        );
+    }
+
+    function artistRecordChainHash(bytes32 id) external view returns (bytes32 tip) {
+        (tip,) = StreamArtistHistoryState.lane(1, id);
+    }
+
+    function collectionRecordChainHash(uint256 id) external view returns (bytes32 tip) {
+        (tip,) = StreamArtistHistoryState.lane(2, bytes32(id));
+    }
+
+    function artistHistoryLane(uint8 kind, bytes32 id) external view returns (bytes32, uint64) {
+        return StreamArtistHistoryState.lane(kind, id);
+    }
+
+    function artistHistoryRecordAt(uint8 kind, bytes32 id, uint64 index)
+        external
+        view
+        returns (bytes32, bytes32)
+    {
+        return StreamArtistHistoryState.at(
+            core, artistRegistry, kind, id, index, StreamArtistHistoryProof.cap(artistRegistry)
+        );
+    }
+
+    function artistHistoryContinuityCommitment() external view returns (bytes32) {
+        return StreamArtistHistoryState.commitment();
+    }
+
+    function artistHistorySourceCursor(address source) external view returns (uint256) {
+        return StreamArtistHistoryState.cursor(source);
+    }
+
+    function importedHistoryBindingCount() external view returns (uint256) {
+        return StreamArtistHistoryState.bindingCount();
+    }
+
+    function importedHistoryBinding(uint256 index)
+        external
+        view
+        returns (address, uint64, bytes32, bytes32)
+    {
+        H.Binding memory b = StreamArtistHistoryState.binding(index);
+        return (b.predecessorRegistry, b.snapshotBlock, b.importRoot, b.manifestHash);
+    }
+
+    function artistHistoryPredecessorBinding(address source)
+        external
+        view
+        returns (bool, bytes32, uint256)
+    {
+        return StreamArtistHistoryState.predecessorBinding(source);
+    }
+
+    function verifyImportedRecord(bytes32 root, H.Leaf calldata p, bytes32[] calldata proof)
+        external
+        view
+        returns (bool)
+    {
+        return StreamArtistHistoryState.verifyRecord(root, p, proof);
+    }
+
+    function importedLaneVerified(uint8 kind, bytes32 id)
+        external
+        view
+        returns (bool, bytes32, uint64)
+    {
+        return StreamArtistHistoryState.verified(kind, id);
+    }
+
+    function artistRegistryCutover() external view returns (bool, address, uint64) {
+        return StreamArtistHistoryState.cutover();
+    }
+
+    function artistHistoryImportContext(
+        address predecessor,
+        uint64 snapshot,
+        bytes32 root,
+        bytes32 manifest
+    ) external view returns (H.Context memory) {
+        return StreamArtistHistoryState.context(
+            artistRegistry, H.Binding(predecessor, snapshot, root, manifest)
+        );
+    }
+
+    function syncArtistNativeHistory(address source, uint256 first, H.Receipt[] calldata rows)
+        external
+    {
+        if (msg.sender != operationCoordinator) revert T.Unauthorized(msg.sender);
+        StreamArtistHistoryState.sync(
+            core, artistRegistry, source, first, rows, StreamArtistHistoryProof.cap(artistRegistry)
+        );
+    }
+
+    function applyArtistHistoryImport(
+        T.ActionContext calldata c,
+        H.Binding calldata p,
+        bytes32 actionId
+    ) external {
+        _check(c, 55);
+        if (c.actor != artistWindowAuthority || actionId == 0) revert T.Unauthorized(c.actor);
+        H.Context memory x = StreamArtistHistoryState.context(artistRegistry, p);
+        bytes memory raw = StreamArtistHistoryProof.fixedRead(
+            artistWindowAuthority,
+            abi.encodeWithSignature("currentAction()"),
+            192,
+            StreamArtistHistoryProof.cap(artistRegistry)
+        );
+        (bool executing, bytes32 id, uint8 cls, bytes32 scope, bytes32 oldHash, bytes32 newHash) =
+            abi.decode(raw, (bool, bytes32, uint8, bytes32, bytes32, bytes32));
+        if (
+            !executing || id != actionId || cls != 1 || scope != x.scopeHash
+                || oldHash != x.oldValueHash || newHash != x.newValueHash
+                || keccak256(raw)
+                    != keccak256(abi.encode(executing, id, cls, scope, oldHash, newHash))
+        ) revert T.InvalidRecord();
+        bytes32 a = _consume(
+            keccak256("identity_authority.replay.governance_action"),
+            keccak256(abi.encode(id, scope, oldHash, newHash)),
+            p.importRoot
+        );
+        bytes32 b = _consume(
+            keccak256("identity_authority.replay.import_binding_key"),
+            keccak256(abi.encode(p)),
+            p.importRoot
+        );
+        StreamArtistHistoryState.commit(
+            core, artistRegistry, p, actionId, StreamArtistHistoryProof.cap(artistRegistry)
+        );
+        _commit(
+            c,
+            keccak256(abi.encode(p, id)),
+            StreamArtistHistoryState.commitment(),
+            keccak256(abi.encode(a, b)),
+            bytes32(0)
+        );
+    }
+
+    function applyArtistHistoryLaneVerification(
+        T.ActionContext calldata c,
+        uint256 index,
+        H.Leaf calldata p,
+        bytes32[] calldata proof
+    ) external {
+        _check(c, 56);
+        H.Binding memory b = StreamArtistHistoryState.binding(index);
+        bytes32 a = _consume(
+            keccak256("identity_authority.replay.verified_lane_key"),
+            keccak256(abi.encode(p.laneKind, p.laneKey)),
+            p.recordChainHash
+        );
+        bytes32 bound = _consume(
+            keccak256("identity_authority.replay.import_binding"),
+            keccak256(abi.encode(index, p.laneKind, p.laneKey)),
+            b.importRoot
+        );
+        StreamArtistHistoryState.verifyTip(
+            core, artistRegistry, index, p, proof, StreamArtistHistoryProof.cap(artistRegistry)
+        );
+        _commit(
+            c,
+            keccak256(abi.encode(index, p, proof)),
+            StreamArtistHistoryState.commitment(),
+            keccak256(abi.encode(a, bound)),
+            bytes32(0)
+        );
+    }
+
+    function applyArtistRegistryCutover(T.ActionContext calldata c) external {
+        _check(c, 57);
+        bytes32 a = _consume(
+            keccak256("identity_authority.replay.one_way_cutover_latch"),
+            bytes32(0),
+            keccak256(abi.encode(block.number))
+        );
+        StreamArtistHistoryState.observe(
+            core, artistRegistry, StreamArtistHistoryProof.cap(artistRegistry)
+        );
+        _commit(
+            c,
+            keccak256(abi.encode(c.actor, block.number)),
+            StreamArtistHistoryState.commitment(),
+            a,
+            bytes32(0)
         );
     }
 }

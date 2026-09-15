@@ -203,6 +203,7 @@ contract StreamArtistIdentityEstateExtension is
             _unavailability, _replay, o, _identity.identities[p.terms.artistId], p
         );
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, p.terms.artistId, p.terms.collectionId);
         return m.record;
     }
 
@@ -288,6 +289,7 @@ contract StreamArtistIdentityEstateExtension is
             _identityRecovery, _rotations, _ownerContext(), p.artistId, m.record, m.state
         );
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, p.artistId, 0);
         return m.record;
     }
 
@@ -312,6 +314,7 @@ contract StreamArtistIdentityEstateExtension is
             msg.data[4:]
         );
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, p.artistId, 0);
         return m.record;
     }
 
@@ -380,6 +383,7 @@ contract StreamArtistIdentityEstateExtension is
         );
         _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, p.artistId, 0);
         return m.record;
     }
 
@@ -403,6 +407,7 @@ contract StreamArtistIdentityEstateExtension is
             msg.data[4:]
         );
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, p.artistId, 0);
         return m.record;
     }
 
@@ -426,6 +431,7 @@ contract StreamArtistIdentityEstateExtension is
             msg.data[4:]
         );
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, p.artistId, 0);
         return m.record;
     }
 
@@ -518,6 +524,7 @@ contract StreamArtistIdentityEstateExtension is
             IStreamArtistIdentityContestOwner(address(this)).artistWindowAuthority()
         );
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, p.artistId, 0);
         return m.record;
     }
 
@@ -564,6 +571,7 @@ contract StreamArtistIdentityEstateExtension is
                 msg.data[4:]
             );
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, p.artistId, 0);
         return m.record;
     }
 
@@ -589,6 +597,7 @@ contract StreamArtistIdentityEstateExtension is
             );
         _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, 19, m);
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, p.artistId, 0);
         return m.record;
     }
 
@@ -610,6 +619,7 @@ contract StreamArtistIdentityEstateExtension is
                 msg.data[4:]
             );
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, p.artistId, 0);
         return m.record;
     }
 }

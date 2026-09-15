@@ -275,6 +275,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             keccak256(abi.encode("PLATFORM_WORKS", c.operationId)), scope, hash
         );
         _commit(c, hash, keccak256(abi.encode(id, _platform.collections[id])), replay, primary);
+        _native(c.operationId, hash, bytes32(0), id);
     }
 
     function fileAttributionClaim(
@@ -310,6 +311,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             replay,
             record
         );
+        _native(c.operationId, record, bytes32(0), id);
     }
 
     function attributionClaims(uint256 id) external view returns (uint256, bytes32) {
@@ -547,6 +549,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             _attestationStore(), _environment(), b, p, signer, nonce, signedAt, statement
         );
         _commit(c, m.action, m.stateDelta, bytes32(0), m.record);
+        _native(c.operationId, m.record, b.artistId, p.collectionId);
         return m.record;
     }
 
@@ -573,6 +576,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             statement
         );
         _commit(c, m.action, m.stateDelta, bytes32(0), m.record);
+        _native(c.operationId, m.record, b.artistId, p.collectionId);
         return m.record;
     }
 
@@ -589,6 +593,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
                 _attestationStore(), _environment(), b, p, a, statement
             );
         _commit(c, m.action, m.stateDelta, bytes32(0), m.record);
+        _native(c.operationId, m.record, b.artistId, p.collectionId);
         return m.record;
     }
 
@@ -618,6 +623,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
                 statement
             );
         _commit(c, m.action, m.stateDelta, bytes32(0), m.record);
+        _native(c.operationId, m.record, b.artistId, p.collectionId);
         return m.record;
     }
 
@@ -645,6 +651,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
                 metadataHostCodeHash
             );
         _commit(c, m.action, m.stateDelta, bytes32(0), m.record);
+        _native(c.operationId, m.record, b.artistId, p.collectionId);
         return m.record;
     }
 

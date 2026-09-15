@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamArtistHistory,
+    IStreamArtistHistoryCoordinator,
+    StreamArtistHistoryTypes as H
+} from "../../interfaces/stream/artist/IStreamArtistHistory.sol";
 import "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
 import {
     StreamArtistStewardCapabilityTypes as SC
@@ -604,5 +609,30 @@ contract StreamArtistRegistryWriterExtension {
     function grantStewardCapabilities(SC.Grant calldata p) external onlyHost returns (bytes32) {
         return IStreamArtistStewardCapabilitiesCoordinator(operationCoordinator)
             .coordinateGrantStewardCapabilities(msg.sender, p);
+    }
+
+    function commitArtistHistoryImportRoot(
+        address predecessor,
+        uint64 snapshot,
+        bytes32 root,
+        bytes32 manifest
+    ) external onlyHost {
+        IStreamArtistHistoryCoordinator(operationCoordinator)
+            .coordinateCommitArtistHistoryImportRoot(
+                msg.sender, H.Binding(predecessor, snapshot, root, manifest)
+            );
+    }
+
+    function verifyImportedLaneTip(uint256 index, H.Leaf calldata p, bytes32[] calldata proof)
+        external
+        onlyHost
+    {
+        IStreamArtistHistoryCoordinator(operationCoordinator)
+            .coordinateVerifyImportedLaneTip(msg.sender, index, p, proof);
+    }
+
+    function observeRegistryCutover() external onlyHost {
+        IStreamArtistHistoryCoordinator(operationCoordinator)
+            .coordinateObserveRegistryCutover(msg.sender);
     }
 }

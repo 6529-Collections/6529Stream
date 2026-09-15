@@ -83,6 +83,7 @@ contract StreamArtistIdentityWriterExtension is
             _identity, _replay, _ownerContext(), artist, documentHash, uri, document, displayName
         );
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, m.record, 0);
         return m.record;
     }
 
@@ -99,6 +100,7 @@ contract StreamArtistIdentityWriterExtension is
         );
         _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, p.artistId, 0);
         return m.record;
     }
 
@@ -123,6 +125,7 @@ contract StreamArtistIdentityWriterExtension is
             executor
         );
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, p.artistId, 0);
         return m.record;
     }
 
@@ -143,6 +146,7 @@ contract StreamArtistIdentityWriterExtension is
         _estate.grantEpoch[m.record] = _estate.delegationEpoch[p.artistId];
         _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, p.artistId, 0);
         return m.record;
     }
 
@@ -168,6 +172,7 @@ contract StreamArtistIdentityWriterExtension is
             );
         _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, p.artistId, 0);
         return m.record;
     }
 
@@ -195,6 +200,7 @@ contract StreamArtistIdentityWriterExtension is
             );
         _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, p.artistId, 0);
         return m.record;
     }
 
@@ -233,6 +239,7 @@ contract StreamArtistIdentityWriterExtension is
             );
         _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, p.artistId, 0);
         return m.record;
     }
 
@@ -248,6 +255,7 @@ contract StreamArtistIdentityWriterExtension is
         );
         _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, p.artistId, 0);
         return m.record;
     }
 
@@ -293,6 +301,7 @@ contract StreamArtistIdentityWriterExtension is
             displayName
         );
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, m.record, 0);
         return m.record;
     }
 

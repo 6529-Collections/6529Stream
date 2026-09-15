@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamArtistHistory,
+    IStreamArtistHistoryCoordinator,
+    StreamArtistHistoryTypes as H
+} from "../../interfaces/stream/artist/IStreamArtistHistory.sol";
 import "../../interfaces/stream/artist/IStreamArtistReconstruction.sol";
 import "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
 import {
@@ -66,6 +71,7 @@ import {
 contract StreamArtistOnboardingRegistry is
     IStreamArtistOnboarding,
     IStreamArtistReconstruction,
+    IStreamArtistHistory,
     IStreamArtistDormancy,
     IStreamArtistStewardCapabilities,
     IStreamArtistDormancyEvidence,
@@ -337,7 +343,8 @@ contract StreamArtistOnboardingRegistry is
         override(StreamModuleBase, IERC165)
         returns (bool)
     {
-        return id == type(IStreamArtistRecoveryApproval).interfaceId
+        return id == type(IStreamArtistHistory).interfaceId
+            || id == type(IStreamArtistRecoveryApproval).interfaceId
             || id == type(IStreamArtistUnavailability).interfaceId
             || id == type(IStreamArtistMintConsent).interfaceId
             || id == type(IStreamArtistAttribution).interfaceId
@@ -1763,5 +1770,108 @@ contract StreamArtistOnboardingRegistry is
         returns (bytes32, uint32)
     {
         _forwardRegistryRead();
+    }
+
+    function artistRecordChainHash(bytes32 id) external view override returns (bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function collectionRecordChainHash(uint256 id) external view override returns (bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function artistHistoryLane(uint8 kind, bytes32 id)
+        external
+        view
+        override
+        returns (bytes32, uint64)
+    {
+        _forwardRegistryRead();
+    }
+
+    function artistHistoryRecordAt(uint8 kind, bytes32 id, uint64 index)
+        external
+        view
+        override
+        returns (bytes32, bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function artistHistoryContinuityCommitment() external view override returns (bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function importedHistoryBindingCount() external view override returns (uint256) {
+        _forwardRegistryRead();
+    }
+
+    function importedHistoryBinding(uint256 index)
+        external
+        view
+        override
+        returns (address, uint64, bytes32, bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function artistHistoryPredecessorBinding(address source)
+        external
+        view
+        override
+        returns (bool, bytes32, uint256)
+    {
+        _forwardRegistryRead();
+    }
+
+    function verifyImportedRecord(bytes32 root, H.Leaf calldata p, bytes32[] calldata proof)
+        external
+        view
+        override
+        returns (bool)
+    {
+        _forwardRegistryRead();
+    }
+
+    function importedLaneVerified(uint8 kind, bytes32 id)
+        external
+        view
+        override
+        returns (bool, bytes32, uint64)
+    {
+        _forwardRegistryRead();
+    }
+
+    function artistRegistryCutover() external view override returns (bool, address, uint64) {
+        _forwardRegistryRead();
+    }
+
+    function artistHistoryImportContext(
+        address predecessor,
+        uint64 snapshot,
+        bytes32 root,
+        bytes32 manifest
+    ) external view override returns (H.Context memory) {
+        _forwardRegistryRead();
+    }
+
+    function commitArtistHistoryImportRoot(
+        address predecessor,
+        uint64 snapshot,
+        bytes32 root,
+        bytes32 manifest
+    ) external override {
+        _forwardRegistryWriter();
+    }
+
+    function verifyImportedLaneTip(uint256 index, H.Leaf calldata p, bytes32[] calldata proof)
+        external
+        override
+    {
+        _forwardRegistryWriter();
+    }
+
+    function observeRegistryCutover() external override {
+        _forwardRegistryWriter();
     }
 }

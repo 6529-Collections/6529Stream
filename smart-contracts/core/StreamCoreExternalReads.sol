@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../interfaces/stream/artist/IStreamArtistHistory.sol";
 
 import "../vendor/openzeppelin/IERC165.sol";
 import "../interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol";
@@ -639,5 +640,31 @@ library StreamCoreExternalReads {
                 valid := 0
             }
         }
+    }
+
+    /// @notice Replacement only: exact current predecessor must be committed by the successor.
+    /// @dev Reuses the Core's existing bounded static-return convention; initial installation is unchanged.
+    function artistSuccessorAdmitted(address previous, bytes32 previousCode, address candidate)
+        public
+        view
+        returns (bool)
+    {
+        if (previous == address(0)) return true;
+        if (previous.codehash != previousCode || previousCode == 0) return false;
+        (bool ok, bytes memory raw) = _boundedStaticRead(
+            candidate,
+            abi.encodeCall(IStreamArtistHistory.artistHistoryPredecessorBinding, (previous)),
+            96
+        );
+        if (!ok || raw.length != 96) return false;
+        uint256 yes;
+        bytes32 hash;
+        uint256 count;
+        assembly ("memory-safe") {
+            yes := mload(add(raw, 32))
+            hash := mload(add(raw, 64))
+            count := mload(add(raw, 96))
+        }
+        return yes == 1 && hash == previousCode && count != 0;
     }
 }

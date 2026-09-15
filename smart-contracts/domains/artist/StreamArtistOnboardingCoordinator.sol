@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistHistoryOperations.sol";
+import {
+    StreamArtistHistoryTypes as H
+} from "../../interfaces/stream/artist/IStreamArtistHistory.sol";
 import { StreamArtistPayloadSync } from "./StreamArtistPayloadSync.sol";
 import "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
 import {
@@ -242,6 +246,7 @@ contract StreamArtistOnboardingCoordinator is
 
     function _endOperation() private {
         if (_entered != 1) revert T.InvalidRecord();
+        StreamArtistHistoryOperations.sync(_suite);
         StreamArtistPayloadSync.sync(_suite);
         _entered = 0;
     }
@@ -253,6 +258,11 @@ contract StreamArtistOnboardingCoordinator is
         for (uint256 i; i < 16; ++i) {
             if (_targets[i].codehash != _runtimeHashes[i]) revert T.ComponentChanged(_targets[i]);
         }
+        if (
+            msg.sig != this.coordinateCommitArtistHistoryImportRoot.selector
+                && msg.sig != this.coordinateVerifyImportedLaneTip.selector
+                && msg.sig != this.coordinateObserveRegistryCutover.selector
+        ) StreamArtistHistoryOperations.requireCurrent(_suite);
         _entered = 1;
     }
 
@@ -921,5 +931,25 @@ contract StreamArtistOnboardingCoordinator is
         returns (bytes32)
     {
         return StreamArtistStewardCapabilityOperations.grant(_economicContext(), actor, p);
+    }
+
+    function coordinateCommitArtistHistoryImportRoot(address actor, H.Binding calldata p)
+        external
+        operation
+    {
+        StreamArtistHistoryOperations.commit(_economicContext(), actor, p);
+    }
+
+    function coordinateVerifyImportedLaneTip(
+        address actor,
+        uint256 index,
+        H.Leaf calldata p,
+        bytes32[] calldata proof
+    ) external operation {
+        StreamArtistHistoryOperations.verify(_economicContext(), actor, index, p, proof);
+    }
+
+    function coordinateObserveRegistryCutover(address actor) external operation {
+        StreamArtistHistoryOperations.observe(_economicContext(), actor);
     }
 }

@@ -116,6 +116,7 @@ contract StreamArtistAcceptanceLifecycle is StreamArtistOwner {
             keccak256(abi.encode(key, record)),
             record
         );
+        _native(c.operationId, record, b.artistId, collectionId);
         emit ArtistBindingAccepted(
             1,
             collectionId,
@@ -196,6 +197,7 @@ contract StreamArtistAcceptanceLifecycle is StreamArtistOwner {
             keccak256(abi.encode(key, record)),
             record
         );
+        _native(c.operationId, record, artistId, p.collectionId);
         _emitCollaboratorAcceptance(
             p, CollaboratorEventContext(artistId, authorityClass, nonce, record)
         );

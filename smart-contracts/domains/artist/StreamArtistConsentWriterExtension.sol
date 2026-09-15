@@ -44,6 +44,7 @@ contract StreamArtistConsentWriterExtension is StreamArtistConsentStorage {
                 msg.data
             );
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, b.artistId, r.terms.collectionId);
         return m.record;
     }
 
@@ -79,6 +80,7 @@ contract StreamArtistConsentWriterExtension is StreamArtistConsentStorage {
             _sanctions, _replay, _consentContext(), msg.data
         );
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, b.artistId, r.terms.collectionId);
         return m.record;
     }
 
@@ -104,6 +106,7 @@ contract StreamArtistConsentWriterExtension is StreamArtistConsentStorage {
             nonce
         );
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, b.artistId, p.collectionId);
         return m.record;
     }
 
@@ -288,6 +291,7 @@ contract StreamArtistConsentWriterExtension is StreamArtistConsentStorage {
             _policies, _replay, _consentContext(), b, p, signer, authority.authorityClass, nonce
         );
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, b.artistId, p.collectionId);
         return m.record;
     }
 
@@ -334,6 +338,7 @@ contract StreamArtistConsentWriterExtension is StreamArtistConsentStorage {
                 grant
             );
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, b.artistId, p.collectionId);
         return m.record;
     }
 
@@ -360,6 +365,7 @@ contract StreamArtistConsentWriterExtension is StreamArtistConsentStorage {
                 nonce
             );
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, b.artistId, p.collectionId);
         return m.record;
     }
 
@@ -413,6 +419,7 @@ contract StreamArtistConsentWriterExtension is StreamArtistConsentStorage {
             keccak256(abi.encode(key, record)),
             record
         );
+        _native(c.operationId, record, b.artistId, p.collectionId);
         emit ArtistRoyaltyFreezeAuthorized(
             1,
             p.collectionId,
@@ -461,6 +468,7 @@ contract StreamArtistConsentWriterExtension is StreamArtistConsentStorage {
             keccak256(abi.encode(key, record)),
             record
         );
+        _native(c.operationId, record, b.artistId, p.collectionId);
         emit ArtistContentConsentRecorded(
             1,
             p.collectionId,
@@ -518,6 +526,7 @@ contract StreamArtistConsentWriterExtension is StreamArtistConsentStorage {
             keccak256(abi.encode(key, record)),
             record
         );
+        _native(c.operationId, record, b.artistId, p.collectionId);
         emit ArtistContentFreezeAuthorized(
             1,
             p.collectionId,

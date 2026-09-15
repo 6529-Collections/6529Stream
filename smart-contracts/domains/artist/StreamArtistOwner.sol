@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/artist/IStreamArtistOwner.sol";
 import "./StreamArtistHashes.sol";
+import "./StreamArtistNativeReceipts.sol";
 import {
     StreamArtistIdentityRecoveryReceipts as RecoveryReceipts
 } from "./StreamArtistIdentityRecoveryReceipts.sol";
@@ -228,6 +229,8 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
         e.tip = _recordChainTip;
         e.actor = context.actor;
         pair = RecoveryReceipts.append(receipts, e, fields, sortedRecords);
+        _native(35, pair.primaryHash, fields.artistId, 0);
+        _native(35, pair.secondaryHash, fields.artistId, 0);
         StateTransitionPreimage memory preimage;
         preimage.tag = keccak256("6529STREAM_ARTIST_OWNER_STATE_TRANSITION_V2");
         preimage.chainId = deploymentChainId;
@@ -256,5 +259,17 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
 
     function _environment() internal view returns (StreamArtistHashes.Environment memory) {
         return StreamArtistHashes.Environment(deploymentChainId, artistRegistry, core, mintManager);
+    }
+
+    function artistNativeReceiptCount() external view returns (uint256) {
+        return StreamArtistNativeReceipts.count();
+    }
+
+    function artistNativeReceiptAt(uint256 index) external view returns (H.Receipt memory) {
+        return StreamArtistNativeReceipts.at(index);
+    }
+
+    function _native(uint16 op, bytes32 record, bytes32 artistId, uint256 collectionId) internal {
+        StreamArtistNativeReceipts.record(op, record, artistId, collectionId);
     }
 }

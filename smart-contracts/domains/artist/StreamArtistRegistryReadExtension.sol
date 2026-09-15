@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamArtistHistory,
+    IStreamArtistHistoryCoordinator,
+    StreamArtistHistoryTypes as H
+} from "../../interfaces/stream/artist/IStreamArtistHistory.sol";
 import "../../interfaces/stream/artist/IStreamArtistReconstruction.sol";
 import "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
 import {
@@ -1001,5 +1006,91 @@ contract StreamArtistRegistryReadExtension {
         returns (bytes32, uint32)
     {
         _forwardDormancyRead();
+    }
+
+    function artistRecordChainHash(bytes32 id) external view onlyHost returns (bytes32) {
+        return IStreamArtistHistory(_contentSuite().owners[2]).artistRecordChainHash(id);
+    }
+
+    function collectionRecordChainHash(uint256 id) external view onlyHost returns (bytes32) {
+        return IStreamArtistHistory(_contentSuite().owners[2]).collectionRecordChainHash(id);
+    }
+
+    function artistHistoryLane(uint8 kind, bytes32 id)
+        external
+        view
+        onlyHost
+        returns (bytes32, uint64)
+    {
+        return IStreamArtistHistory(_contentSuite().owners[2]).artistHistoryLane(kind, id);
+    }
+
+    function artistHistoryRecordAt(uint8 kind, bytes32 id, uint64 index)
+        external
+        view
+        onlyHost
+        returns (bytes32, bytes32)
+    {
+        return IStreamArtistHistory(_contentSuite().owners[2])
+            .artistHistoryRecordAt(kind, id, index);
+    }
+
+    function artistHistoryContinuityCommitment() external view onlyHost returns (bytes32) {
+        return IStreamArtistHistory(_contentSuite().owners[2]).artistHistoryContinuityCommitment();
+    }
+
+    function importedHistoryBindingCount() external view onlyHost returns (uint256) {
+        return IStreamArtistHistory(_contentSuite().owners[2]).importedHistoryBindingCount();
+    }
+
+    function importedHistoryBinding(uint256 index)
+        external
+        view
+        onlyHost
+        returns (address, uint64, bytes32, bytes32)
+    {
+        return IStreamArtistHistory(_contentSuite().owners[2]).importedHistoryBinding(index);
+    }
+
+    function artistHistoryPredecessorBinding(address source)
+        external
+        view
+        onlyHost
+        returns (bool, bytes32, uint256)
+    {
+        return IStreamArtistHistory(_contentSuite().owners[2])
+            .artistHistoryPredecessorBinding(source);
+    }
+
+    function verifyImportedRecord(bytes32 root, H.Leaf calldata p, bytes32[] calldata proof)
+        external
+        view
+        onlyHost
+        returns (bool)
+    {
+        return IStreamArtistHistory(_contentSuite().owners[2]).verifyImportedRecord(root, p, proof);
+    }
+
+    function importedLaneVerified(uint8 kind, bytes32 id)
+        external
+        view
+        onlyHost
+        returns (bool, bytes32, uint64)
+    {
+        return IStreamArtistHistory(_contentSuite().owners[2]).importedLaneVerified(kind, id);
+    }
+
+    function artistRegistryCutover() external view onlyHost returns (bool, address, uint64) {
+        return IStreamArtistHistory(_contentSuite().owners[2]).artistRegistryCutover();
+    }
+
+    function artistHistoryImportContext(
+        address predecessor,
+        uint64 snapshot,
+        bytes32 root,
+        bytes32 manifest
+    ) external view onlyHost returns (H.Context memory) {
+        return IStreamArtistHistory(_contentSuite().owners[2])
+            .artistHistoryImportContext(predecessor, snapshot, root, manifest);
     }
 }

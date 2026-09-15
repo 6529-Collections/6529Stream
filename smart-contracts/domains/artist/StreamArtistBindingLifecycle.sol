@@ -127,6 +127,7 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
             keccak256(abi.encode(key, item.bindingHash)),
             item.bindingHash
         );
+        _native(c.operationId, item.bindingHash, artistId, collectionId);
         emit ArtistBindingProposed(
             1,
             collectionId,
@@ -288,6 +289,7 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
             keccak256(abi.encode(key, record)),
             record
         );
+        _native(c.operationId, record, b.artistId, p.collectionId);
     }
 
     function withdraw(T.ActionContext calldata c, L.Termination calldata p) external {
