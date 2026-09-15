@@ -63,14 +63,42 @@ validation-order regression are retained; the final run fixes both.
 
 Current graph admission and actual Safe/ARRNG transition recipes accompany the
 lifecycle. Saved provider/operator stages are integrated as `e627676b`; their
-five new actual foundation/Executor/Safe cases are in a frozen native run.
-The complete 1,681-source joined ABI/type check passes at `e627676b`.
-This establishes source composition; complete operator/runtime acceptance
-remains separate and is recorded in the batch checkpoint.
+five new cases and seven inherited cases all pass against the actual
+foundation/Executor/coordinator/Safe. Test-only correction `f08bb466` fixes the
+independent assertion of aggregate governance hashes. All 40 compiled production
+products remain byte-identical to the original operator capture and fit deployment
+limits. This capture precedes the later recovery-policy implementation. The
+complete 1,681-source joined ABI/type check passes at `e627676b`; it establishes
+that earlier source composition rather than latest full-system acceptance.
 Complete current-stack/Safe, stateful/fuzz campaigns, gas, all 37 genesis roles,
 CI and matching new testnet evidence remain required. Fresh entropy recovery,
 remaining interfaces/operator workflows and the separately blocked ERC-20 and
 inherited/global-freeze changes remain explicit. RC1 and Sepolia are unchanged.
+
+## Latest client and preservation additions
+
+Artist rotation/estate authority execution-event reconstruction is integrated
+as `217bdc8c`, with independent source review and five new authored cases.
+Recorded PREMIS fixity events, reports and agents are integrated as `8798bb7e`.
+All 14 new fixity cases pass on this integration checkout; the builder's broader
+40-check result includes existing profiles. Positive typed examples are synthetic;
+retained actual source covers missing evidence and offline package replay.
+
+Secondary inventory/delegated-claim/offer client helpers are integrated as
+`0904ec7c`. The combined package passes all 97 tests, generated-catalog checks,
+TypeScript build and negative type cases. It retains both the manifest and
+secondary exports and requires explicitly selected current compiled ABIs.
+Client RPC fixtures do not establish Solidity runtime or live deployment acceptance.
+
+Frozen fresh-recovery policy configuration is integrated as `ce713350` through
+an additive coordinator interface. Exact ordered hashes, class-1 governance,
+role references, replay rejection and permanent freeze pass nine new policy
+cases plus 27 provider/epoch/subject regressions. Three properties each pass 256
+inputs. All nine production products fit, including coordinator runtime 24,141
+bytes; all 162 prior ABI entries remain. This is the policy registry: pre-mint
+collection binding, incident/artist-consented fresh requests and late callback
+arbitration still need implementation. No fresh request is enabled by registration.
+The joined 1,688-source Solidity ABI/type check passes on this implementation.
 
 ## Earlier manifest and attestation batch
 

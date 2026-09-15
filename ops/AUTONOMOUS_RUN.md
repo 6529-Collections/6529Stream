@@ -37,10 +37,10 @@ pending checks. The immutable RC1 remains the released baseline.
 
 | Owner | Implementation batch |
 | --- | --- |
-| Integrator | Provider lifecycle committed with 41 focused passes and all eight sizes fitting; current operator integration, complete source composition, remaining fresh recovery/client/genesis and combined acceptance |
-| Artist builder | Authority preimages and dormancy/steward reconstruction integrated; remaining rotation/estate execution-event reconstruction; exact steward-origin living recovery approval pending |
-| Revenue builder | Inventory, delegated claims and delegate-signed offers integrated; saved entropy operator stages integrated; TypeScript helpers for inventory/delegated claims/offers |
-| Fourth engineer | Chunked snapshot, BagIt/OCFL and hydration integrated with 27 offline passes; typed recorded PREMIS events/agents/fixity profiles |
+| Integrator | Provider operator 12 passes; frozen recovery-policy registry 36 passes and all nine products fit; next pre-mint collection binding, actual fresh requests, shared genesis/operator and combined acceptance |
+| Artist builder | Authority execution-event reconstruction integrated; canonical Artist/collection record lanes and original history import/cutover operations 55-57, including Core successor admission; exact steward-living proposal remains unapplied |
+| Revenue builder | Secondary client integrated with combined 97-test pass; implementing fixed/Dutch/clearing/refund-window delegated claims and matching client calls, retaining original self-claim exits |
+| Fourth engineer | Recorded fixity event/report/agent profile integrated with 14 new integration passes; implementing all 13 adopted preservation event kinds, six outcomes and object/agent links |
 
 Comprehensive current-stack/Safe integration, fuzz and stateful campaigns, gas
 conformance, complete genesis inventory, CI and matching new testnet evidence
@@ -49,7 +49,7 @@ the background and validate only their recorded source. No new date or
 percentage is inferred from these assignments.
 
 Root owns the combined graph, shared operator/client work and the new candidate.
-The complete 1,681-source ABI/type check passes at `e627676b`.
+The complete 1,688-source ABI/type check passes at `ce713350`.
 The provider lifecycle at `3481e8fd` passes 41 focused native cases and three
 256-input fuzz properties, with all eight compiled products within deployment
 limits and every original ABI entry retained. Actual Safe/ARRNG governance and

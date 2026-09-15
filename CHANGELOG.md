@@ -254,6 +254,14 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Implement canonical ordered entropy recovery-policy configuration and permanent
+  freeze, with exact governance commitments and fixed-library deployment headroom.
+  Collection binding and fresh requests remain separate implementation work.
+
+- Add original Artist authority execution-event reconstruction, recorded PREMIS
+  fixity events/reports/agents, and explicit-ABI secondary inventory and delegated
+  claim/offer client workflows.
+
 
 - Fixed release checksum parsing for the pinned upstream license's Git whitespace
   diagnostic override while preserving its exact bytes and the existing LF policy.
