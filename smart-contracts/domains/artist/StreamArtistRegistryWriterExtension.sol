@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
+import {
+    StreamArtistAttributionDisputeTypes as AD
+} from "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
+
 import {
     StreamArtistEntropyUnavailabilityTypes as EU,
     IStreamArtistEntropyUnavailability,
@@ -700,5 +705,32 @@ contract StreamArtistRegistryWriterExtension {
     ) external onlyHost returns (bytes32) {
         return IStreamArtistEntropyFindingHydrationCoordinator(operationCoordinator)
             .coordinateHydrateArtistAuthorityWithEntropyFindings(msg.sender, p);
+    }
+
+    function openAttributionDispute(
+        AD.Filing calldata p,
+        AD.Standing calldata standing,
+        T.Authorization calldata a
+    ) external onlyHost returns (bytes32) {
+        return IStreamArtistAttributionDisputesCoordinator(operationCoordinator)
+            .coordinateOpenAttributionDispute(msg.sender, p, standing, a);
+    }
+
+    function recordCounterStatement(
+        AD.Filing calldata p,
+        AD.Standing calldata standing,
+        T.Authorization calldata a
+    ) external onlyHost returns (bytes32) {
+        return IStreamArtistAttributionDisputesCoordinator(operationCoordinator)
+            .coordinateRecordCounterStatement(msg.sender, p, standing, a);
+    }
+
+    function resolveAttributionDispute(AD.ResolutionRequest calldata p)
+        external
+        onlyHost
+        returns (bytes32)
+    {
+        return IStreamArtistAttributionDisputesCoordinator(operationCoordinator)
+            .coordinateResolveAttributionDispute(msg.sender, p);
     }
 }

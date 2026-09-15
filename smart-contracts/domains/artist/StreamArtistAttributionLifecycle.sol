@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
+import {
+    StreamArtistAttributionDisputeTypes as AD
+} from "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
+import "./StreamArtistDisputeState.sol";
+
 import {
     StreamArtistAttributionBindingTransport
 } from "./StreamArtistAttributionBindingTransport.sol";
@@ -697,5 +703,88 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             revert T.InvalidRecord();
         }
         _attributions[q.collectionId] = abi.decode(p.typedState, (AttrState.Attribution));
+    }
+
+    function attributionDispute(uint256 id, uint64 generation)
+        external
+        view
+        returns (AD.Head memory)
+    {
+        _returnAttribution(StreamArtistDisputeState.readEncoded(msg.data));
+    }
+
+    function attributionDisputeRecord(bytes32 hash) external view returns (AD.Record memory) {
+        _returnAttribution(StreamArtistDisputeState.readEncoded(msg.data));
+    }
+
+    function attributionDisputeResolution(bytes32 action)
+        external
+        view
+        returns (AD.Resolution memory)
+    {
+        _returnAttribution(StreamArtistDisputeState.readEncoded(msg.data));
+    }
+
+    function applyDispute(
+        T.ActionContext calldata c,
+        AD.Filing calldata p,
+        AD.Admission calldata a,
+        uint256 nonce,
+        Contest.GovernanceWitness calldata g
+    ) external returns (bytes32) {
+        uint16 op = p.disputeAction == 1 ? 44 : 45;
+        _check(c, op);
+        AD.Mutation memory m =
+            StreamArtistDisputeState.applyEncoded(_attestationStore(), _environment(), msg.data);
+        bytes32 consumed = _consume(
+            (op == 44
+                    ? keccak256("attribution_lifecycle.replay.dispute_key")
+                    : keccak256("attribution_lifecycle.replay.counter_statement_key")),
+            m.replayScope,
+            m.replayCommitment
+        );
+        if (g.actionId != 0) {
+            consumed = keccak256(
+                abi.encode(
+                    consumed,
+                    _consume(
+                        keccak256("attribution_lifecycle.replay.governance_action"),
+                        g.actionId,
+                        m.record
+                    )
+                )
+            );
+        }
+        _commit(c, m.action, m.state, consumed, m.record);
+        _native(op, m.record, a.binding_.artistId, p.collectionId);
+        return m.record;
+    }
+
+    function applyDisputeResolution(
+        T.ActionContext calldata c,
+        AD.ResolutionRequest calldata p,
+        T.Binding calldata b,
+        Contest.GovernanceWitness calldata g
+    ) external returns (bytes32) {
+        _check(c, 46);
+        AD.Mutation memory m =
+            StreamArtistDisputeState.resolveEncoded(_attestationStore(), msg.data);
+        bytes32 consumed = _consume(
+            keccak256("attribution_lifecycle.replay.dispute_resolution_key"),
+            m.replayScope,
+            m.replayCommitment
+        );
+        consumed = keccak256(
+            abi.encode(
+                consumed,
+                _consume(
+                    keccak256("attribution_lifecycle.replay.governance_action"),
+                    g.actionId,
+                    p.disputeRecordHash
+                )
+            )
+        );
+        _commit(c, m.action, m.state, consumed, 0);
+        return g.actionId;
     }
 }

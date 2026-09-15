@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
+import {
+    StreamArtistAttributionDisputeTypes as AD
+} from "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
+import "./StreamArtistDisputeIdentityMutation.sol";
+
 import "./StreamArtistIdentityConsentMutation.sol";
 import "../../interfaces/stream/artist/IStreamArtistUnavailability.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityEstateWriterHost.sol";
@@ -570,5 +576,38 @@ contract StreamArtistIdentityWriterExtension is
 
     function _signedAt(uint64 time) private view {
         if (time == 0 || time > block.timestamp) revert T.InvalidTimestamp(time);
+    }
+
+    function consumeAttributionDispute(
+        T.ActionContext calldata c,
+        AD.Filing calldata p,
+        T.Binding calldata b,
+        AD.Standing calldata standing,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external onlyHost returns (bytes32) {
+        _check(c, p.disputeAction == 1 ? 44 : 45);
+        (StreamArtistIdentityState.Mutation memory m, bytes32 record) = StreamArtistDisputeIdentityMutation.consume(
+            _identity,
+            _replay,
+            _estate,
+            _succession,
+            _rotations,
+            _delegations,
+            _unavailability,
+            _dormancy,
+            _ownerContext(),
+            c,
+            p,
+            b,
+            standing,
+            a,
+            proof
+        );
+        if (standing.delegation == 0) {
+            _noteLiving(_ownerContext(), _replay, standing.artistId, proof.signer, c.operationId, m);
+        }
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return record;
     }
 }

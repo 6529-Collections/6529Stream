@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
+import {
+    StreamArtistAttributionDisputeTypes as AD
+} from "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
+import "./StreamArtistDisputeOperations.sol";
+
 import "../../interfaces/stream/entropy/IStreamEntropyArtistUnavailability.sol";
 import {
     StreamArtistEntropyUnavailabilityTypes as EU,
@@ -1048,5 +1054,31 @@ contract StreamArtistOnboardingCoordinator is
         StreamArtistEntropyFindingHydrationTypes.Request calldata p
     ) external operation returns (bytes32) {
         return StreamArtistCoordinatorHydration.execute(_economicContext(), msg.data, 6);
+    }
+
+    function coordinateOpenAttributionDispute(
+        address actor,
+        AD.Filing calldata p,
+        AD.Standing calldata standing,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistDisputeOperations.file(_economicContext(), actor, p, standing, a, 44);
+    }
+
+    function coordinateRecordCounterStatement(
+        address actor,
+        AD.Filing calldata p,
+        AD.Standing calldata standing,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistDisputeOperations.file(_economicContext(), actor, p, standing, a, 45);
+    }
+
+    function coordinateResolveAttributionDispute(address actor, AD.ResolutionRequest calldata p)
+        external
+        operation
+        returns (bytes32)
+    {
+        return StreamArtistDisputeOperations.resolve(_economicContext(), actor, p);
     }
 }

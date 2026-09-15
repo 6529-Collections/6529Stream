@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
+import {
+    StreamArtistAttributionDisputeTypes as AD
+} from "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
+
 import {
     StreamArtistEntropyUnavailabilityTypes as EU,
     IStreamArtistEntropyUnavailability,
@@ -1601,5 +1606,16 @@ contract StreamArtistIdentityAuthority is
         _returnResolution(
             StreamArtistIdentitySupplementalReads.read(roots, _ownerContext(), msg.data)
         );
+    }
+
+    function consumeAttributionDispute(
+        T.ActionContext calldata c,
+        AD.Filing calldata p,
+        T.Binding calldata b,
+        AD.Standing calldata standing,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external returns (bytes32) {
+        _forwardIdentityWriter();
     }
 }

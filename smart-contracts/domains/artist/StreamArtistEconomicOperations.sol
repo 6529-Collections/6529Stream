@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistDisputeAdmission.sol";
 import "./StreamArtistAuthorizationState.sol";
 import "./StreamArtistCurrentAuthorityFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistCurrentConsentOwner.sol";
@@ -26,6 +27,7 @@ library StreamArtistEconomicOperations {
         D.Grant memory p,
         T.Authorization memory a
     ) public returns (bytes32 record) {
+        StreamArtistDisputeAdmission.requireGrant(x.suite, p);
         T.Snapshot[7] memory before_ = _snapshots(x, 26);
         (address signer, uint8 class_, uint8 status,) =
             IStreamArtistIdentityOwner(x.suite.owners[2]).authorityState(p.artistId);

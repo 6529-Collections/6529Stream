@@ -22,14 +22,17 @@ library StreamArtistAuthorityPolicy {
         internal
         view
     {
-        bool defensive = operation == 20 || operation == 21 || operation == 27 || operation == 54;
+        bool defensive = operation == 20 || operation == 21 || operation == 27 || operation == 54
+            || operation == 44 || operation == 45;
         if (
             principal.authorityAddress == address(0)
                 || !ordinary(principal.authorityClass, principal.status, defensive)
         ) revert T.InvalidIdentity(artistId);
         if (principal.authorityClass == 1) return;
         uint32 required;
-        if (operation == 12 || operation == 22) {
+        if (operation == 44 || operation == 45) {
+            required = 16;
+        } else if (operation == 12 || operation == 22) {
             required = 8;
         } else if (operation == 14) {
             required = 2;

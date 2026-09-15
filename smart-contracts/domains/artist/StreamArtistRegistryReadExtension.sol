@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
+import {
+    StreamArtistAttributionDisputeTypes as AD
+} from "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
+import "./StreamArtistDisputeReadEncoding.sol";
+
 import { StreamArtistRegistryDigestEncoding } from "./StreamArtistRegistryDigestEncoding.sol";
 import { StreamArtistRegistryHistoryEncoding } from "./StreamArtistRegistryHistoryEncoding.sol";
 import {
@@ -1118,6 +1124,72 @@ contract StreamArtistRegistryReadExtension {
     ) external view onlyHost returns (H.Context memory) {
         _returnRegistryEncoded(
             StreamArtistRegistryHistoryEncoding.read(_contentSuite().owners[2], msg.data)
+        );
+    }
+
+    function attributionDispute(uint256 id, uint64 generation)
+        external
+        view
+        onlyHost
+        returns (AD.Head memory)
+    {
+        _returnRegistryEncoded(
+            StreamArtistDisputeReadEncoding.read(_host, operationCoordinator, msg.data)
+        );
+    }
+
+    function attributionDisputeRecord(bytes32 record)
+        external
+        view
+        onlyHost
+        returns (AD.Record memory)
+    {
+        _returnRegistryEncoded(
+            StreamArtistDisputeReadEncoding.read(_host, operationCoordinator, msg.data)
+        );
+    }
+
+    function attributionDisputeResolution(bytes32 action)
+        external
+        view
+        onlyHost
+        returns (AD.Resolution memory)
+    {
+        _returnRegistryEncoded(
+            StreamArtistDisputeReadEncoding.read(_host, operationCoordinator, msg.data)
+        );
+    }
+
+    function attributionDisputeDigest(AD.Filing calldata p, T.Authorization calldata a)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        _returnRegistryEncoded(
+            StreamArtistDisputeReadEncoding.read(_host, operationCoordinator, msg.data)
+        );
+    }
+
+    function attributionDisputeOpeningContext(AD.Filing calldata p)
+        external
+        view
+        onlyHost
+        returns (AD.Context memory)
+    {
+        _returnRegistryEncoded(
+            StreamArtistDisputeReadEncoding.read(_host, operationCoordinator, msg.data)
+        );
+    }
+
+    function attributionDisputeResolutionContext(AD.ResolutionRequest calldata p)
+        external
+        view
+        onlyHost
+        returns (AD.Context memory)
+    {
+        _returnRegistryEncoded(
+            StreamArtistDisputeReadEncoding.read(_host, operationCoordinator, msg.data)
         );
     }
 }

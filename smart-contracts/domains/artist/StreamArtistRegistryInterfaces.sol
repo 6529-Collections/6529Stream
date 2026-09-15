@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
+import {
+    StreamArtistAttributionDisputeTypes as AD
+} from "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
+
 import {
     StreamArtistEntropyUnavailabilityTypes as EU,
     IStreamArtistEntropyUnavailability,
@@ -164,7 +169,8 @@ import {
 /// @notice Fixed original ERC-165 inventory; the facade retains base module handling.
 library StreamArtistRegistryInterfaces {
     function supportsArtistInterface(bytes4 id) public pure returns (bool) {
-        return id == type(IStreamArtistEntropyFindingHydration).interfaceId
+        return id == type(IStreamArtistAttributionDisputes).interfaceId
+            || id == type(IStreamArtistEntropyFindingHydration).interfaceId
             || id == type(IStreamArtistPublicationAuthorityHydration).interfaceId
             || id == type(IStreamArtistReadinessAuthorityHydration).interfaceId
             || id == type(IStreamArtistEconomicsAuthorityHydration).interfaceId

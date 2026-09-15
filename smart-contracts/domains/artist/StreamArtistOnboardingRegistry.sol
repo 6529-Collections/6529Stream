@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
+import {
+    StreamArtistAttributionDisputeTypes as AD
+} from "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
+
 import "../../interfaces/stream/entropy/IStreamEntropyArtistUnavailability.sol";
 import {
     StreamArtistEntropyUnavailabilityTypes as EU,
@@ -1920,5 +1925,69 @@ contract StreamArtistOnboardingRegistry is
         StreamArtistEntropyFindingHydrationTypes.Request calldata p
     ) external returns (bytes32) {
         _forwardRegistryWriter();
+    }
+
+    function openAttributionDispute(
+        AD.Filing calldata p,
+        AD.Standing calldata standing,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function recordCounterStatement(
+        AD.Filing calldata p,
+        AD.Standing calldata standing,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function resolveAttributionDispute(AD.ResolutionRequest calldata p) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function attributionDispute(uint256 id, uint64 generation)
+        external
+        view
+        returns (AD.Head memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function attributionDisputeRecord(bytes32 record) external view returns (AD.Record memory) {
+        _forwardRegistryRead();
+    }
+
+    function attributionDisputeResolution(bytes32 action)
+        external
+        view
+        returns (AD.Resolution memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function attributionDisputeDigest(AD.Filing calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function attributionDisputeOpeningContext(AD.Filing calldata p)
+        external
+        view
+        returns (AD.Context memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function attributionDisputeResolutionContext(AD.ResolutionRequest calldata p)
+        external
+        view
+        returns (AD.Context memory)
+    {
+        _forwardRegistryRead();
     }
 }
