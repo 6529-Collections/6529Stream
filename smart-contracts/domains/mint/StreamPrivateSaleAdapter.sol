@@ -6,6 +6,10 @@ import "./StreamPrivateSaleAccounting.sol";
 import "./StreamPrivateSaleCustody.sol";
 import "./StreamPrivateSaleHash.sol";
 import "./StreamNativeInventoryPayment.sol";
+import { StreamPrivateSaleOfferExecution } from "./StreamPrivateSaleOfferExecution.sol";
+import {
+    IStreamPrivateSaleDelegatedOffers
+} from "../../interfaces/stream/mint/IStreamPrivateSaleDelegatedOffers.sol";
 import { StreamPrivateSaleDelegatedClaims } from "./StreamPrivateSaleDelegatedClaims.sol";
 import { StreamNativeAuctionDelegation } from "../auctions/StreamNativeAuctionDelegation.sol";
 import {
@@ -23,6 +27,7 @@ import "../../vendor/openzeppelin/ERC165.sol";
 contract StreamPrivateSaleAdapter is
     IStreamPrivateSaleAdapter,
     IStreamPrivateSaleDelegatedClaims,
+    IStreamPrivateSaleDelegatedOffers,
     StreamGasParameterHost,
     Ownable,
     ReentrancyGuard,
@@ -157,7 +162,8 @@ contract StreamPrivateSaleAdapter is
     }
 
     function supportsInterface(bytes4 id) public view override(IERC165, ERC165) returns (bool) {
-        return (id == type(IStreamPrivateSaleDelegatedClaims).interfaceId
+        return ((id == type(IStreamPrivateSaleDelegatedClaims).interfaceId
+                    || id == type(IStreamPrivateSaleDelegatedOffers).interfaceId)
                 && delegateRegistry != address(0))
             || id == type(IStreamPrivateSaleAdapter).interfaceId
             || id == type(IStreamNativeInventorySale).interfaceId || super.supportsInterface(id);
@@ -358,23 +364,32 @@ contract StreamPrivateSaleAdapter is
         uint8 ownerKind,
         bytes calldata ownerSignature
     ) external payable nonReentrant {
-        Sale storage sale = _known(a.saleId);
-        if (sale.config.saleKind != 6 || sale.status != 1) {
-            revert PrivateSaleUnavailable(a.saleId);
-        }
-        _purchaseAdmission(a.saleId, sale);
-        uint256 signatureGas = gasParameter(_SIGNATURE_GAS);
-        bytes32 authDigest = StreamPrivateSaleSupport.authorizationProof(
-            sale.config, a, authorization, platformSigner, signatureGas
-        );
-        bytes32 buyerDigest =
-            StreamPrivateSaleSupport.offerProof(sale.config, core, offer, buyerProof, signatureGas);
-        _consume(a.saleId, authDigest, authorization.authorizer);
-        _consume(a.saleId, buyerDigest, buyerProof.authorizer);
-        _enterCustody(a.saleId, sale, grant, ownerKind, ownerSignature, signatureGas);
-        _settle(a.saleId, sale, authDigest);
-        emit OfferAccepted(
-            1, a.saleId, sale.config.buyer, buyerDigest, sale.config.price, address(0)
+        _executeOffer(false);
+    }
+
+    function acceptDelegatedOffer(
+        StreamPrivateSaleTypes.SaleAuthorization calldata,
+        Signature calldata,
+        StreamPrivateSaleTypes.SaleOffer calldata,
+        Signature calldata,
+        StreamPrivateSaleTypes.SaleCustodyGrant calldata,
+        uint8,
+        bytes calldata,
+        DelegationWitness calldata
+    ) external payable nonReentrant {
+        _executeOffer(true);
+    }
+
+    function _executeOffer(bool delegated) private {
+        StreamPrivateSaleOfferExecution.execute(
+            _sales,
+            _money,
+            digestConsumed,
+            _custodySale,
+            salePaused,
+            StreamPrivateSaleOfferExecution.Runtime(_context(), platformSigner, _delegation()),
+            delegated,
+            msg.data
         );
     }
 
