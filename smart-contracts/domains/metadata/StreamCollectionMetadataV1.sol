@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    IStreamStaticMetadataSource as StaticSource
+} from "../../interfaces/stream/metadata/IStreamStaticMetadataSource.sol";
+import {
     StreamMetadataArtistSelection as ArtistSelection
 } from "./StreamMetadataArtistSelection.sol";
 
@@ -119,6 +122,44 @@ contract StreamCollectionMetadataV1 is
     mapping(bytes32 => bool) public consumedArtistAuthorization;
     StreamCollectionManifests.State private _manifests;
 
+    /// @notice STATIC source entrypoints. Direct copies from the original owner storage only.
+    function staticScriptManifest(bytes32 hash)
+        external
+        view
+        returns (
+            M.ScriptManifest memory manifest,
+            bytes32 bundleId,
+            uint256 collectionId,
+            address router
+        )
+    {
+        StreamCollectionManifests.Entry storage e = _manifests.entries[hash];
+        if (hash == 0 || e.kind != 2) revert UnknownCollectionManifest(hash);
+        return
+            (_manifests.scripts[hash], _manifests.bundles.manifests[hash], e.collectionId, e.router);
+    }
+
+    function staticBundle(bytes32 id)
+        external
+        view
+        returns (B.Facts memory facts, B.RegistrySource memory source)
+    {
+        facts = _manifests.bundles.bundles[id].facts;
+        if (facts.chunkCount == 0) revert B.InvalidScriptBundle(id);
+        return (facts, _manifests.bundles.registrySources[id]);
+    }
+
+    function staticBundleChunk(bytes32 id, uint256 index)
+        external
+        view
+        returns (StaticSource.Chunk memory)
+    {
+        StreamScriptBundles.Bundle storage b = _manifests.bundles.bundles[id];
+        if (!b.facts.finalized || index >= b.chunks.length) revert B.InvalidScriptBundle(id);
+        StreamScriptBundles.Chunk storage c = b.chunks[index];
+        return StaticSource.Chunk(c.hash, c.length, c.first, c.tail);
+    }
+
     event ScriptBundleBegun(
         uint16 schemaVersion,
         bytes32 indexed bundleId,
@@ -197,7 +238,8 @@ contract StreamCollectionMetadataV1 is
         override(StreamModuleBase, IERC165)
         returns (bool)
     {
-        return id == type(IStreamCollectionManifestReads).interfaceId || id == type(B).interfaceId
+        return id == type(StaticSource).interfaceId
+            || id == type(IStreamCollectionManifestReads).interfaceId || id == type(B).interfaceId
             || id == type(IStreamCollectionManifestWriter).interfaceId
             || id == type(IStreamCollectionMetadataV1).interfaceId
             || id == type(IStreamCollectionRecordReceipts).interfaceId

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamMetadataStaticState as StaticState } from "./StreamMetadataStaticState.sol";
 import { StreamMetadataBundleRenderer } from "./StreamMetadataBundleRenderer.sol";
 
 import { StreamMetadataRouter } from "./StreamMetadataRouter.sol";
@@ -559,6 +560,7 @@ library StreamMetadataRouterContent {
         bytes32 familyId
     ) private view returns (bool supported, bytes32 currentStateHash) {
         _requireContentCollection(l, e, collectionId);
+        if (familyId == StaticState.FAMILY) return (true, StaticState.family(e.core, collectionId));
         if (familyId == CONTENT_ROOT) {
             return
                 (
@@ -687,12 +689,14 @@ library StreamMetadataRouterContent {
         }
         M.Selection memory script = _selectedManifests(l)[collectionId][2];
         M.Selection memory media = _selectedManifests(l)[collectionId][3];
-        if (script.manifestHash == 0 && media.manifestHash == 0) return serving;
-        return keccak256(
-            abi.encode(
-                keccak256("6529STREAM_ROUTER_CONTENT_WITH_MANIFESTS_V1"), serving, script, media
-            )
-        );
+        if (script.manifestHash != 0 || media.manifestHash != 0) {
+            serving = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ROUTER_CONTENT_WITH_MANIFESTS_V1"), serving, script, media
+                )
+            );
+        }
+        return StaticState.withContent(e.core, collectionId, serving);
     }
 
     function _scriptState(
@@ -821,7 +825,11 @@ library StreamMetadataRouterContent {
         if (!IStreamCore(e.core).collectionExists(collectionId)) {
             revert InvalidCollection(collectionId);
         }
-        if (IStreamCore(e.core).collectionFreezeStatus(collectionId)) {
+        if (
+            IStreamCore(e.core).collectionFreezeStatus(collectionId)
+                || (StaticState.activated(collectionId)
+                    && StaticState.resolved(collectionId, 0).config.frozen)
+        ) {
             revert CollectionFrozen(collectionId);
         }
     }

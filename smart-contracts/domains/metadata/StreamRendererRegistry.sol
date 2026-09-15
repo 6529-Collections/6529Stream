@@ -34,7 +34,7 @@ contract StreamRendererRegistry is V, StreamGasParameterHost {
     uint256 public constant MAX_TARGETS = 64;
     uint256 public constant MAX_READS = 128;
     uint256 public constant MAX_VECTORS = 16;
-    uint256 public constant MAX_OUTPUT_BYTES = 1048576;
+    uint256 public constant MAX_OUTPUT_BYTES = 16777216;
     bytes32 public immutable governanceAuthorityCodeHash;
     address public immutable schemaRegistry;
     bytes32 public immutable schemaRegistryCodeHash;
@@ -80,7 +80,7 @@ contract StreamRendererRegistry is V, StreamGasParameterHost {
         deploymentChainId = block.chainid;
     }
 
-    function supportsInterface(bytes4 id) external pure returns (bool) {
+    function supportsInterface(bytes4 id) public pure virtual returns (bool) {
         return id == type(V).interfaceId || id == 0x01ffc9a7;
     }
 

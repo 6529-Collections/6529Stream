@@ -8,6 +8,16 @@ import {
     IStreamScriptBundles as B,
     IStreamScriptBundleSelection
 } from "../../interfaces/stream/metadata/IStreamScriptBundles.sol";
+import {
+    IStreamStaticMetadataRouter as Static
+} from "../../interfaces/stream/metadata/IStreamStaticMetadataRouter.sol";
+import { IStreamRenderer as Renderer } from "../../interfaces/stream/metadata/IStreamRenderer.sol";
+import { StreamMetadataStaticRouting as StaticRouting } from "./StreamMetadataStaticRouting.sol";
+import { StreamMetadataStaticState as StaticState } from "./StreamMetadataStaticState.sol";
+import {
+    StreamMetadataStaticConfiguration as StaticConfiguration
+} from "./StreamMetadataStaticConfiguration.sol";
+import { StreamRendererCalls as StaticCalls } from "./StreamRendererCalls.sol";
 import { StreamMetadataRouterRendering } from "./StreamMetadataRouterRendering.sol";
 import { StreamMetadataBundleRenderer } from "./StreamMetadataBundleRenderer.sol";
 
@@ -93,6 +103,7 @@ contract StreamMetadataRouter is
         bytes32 consent;
         bytes32 ratification;
     }
+    uint256 private immutable _staticChainId = block.chainid;
     IStreamCore public immutable core;
     address public immutable authority;
     IStreamArtistAttribution public immutable artistRegistry;
@@ -290,7 +301,7 @@ contract StreamMetadataRouter is
         override(StreamModuleBase, IERC165)
         returns (bool)
     {
-        return id == type(IStreamGasParameterHost).interfaceId
+        return id == type(Static).interfaceId || id == type(IStreamGasParameterHost).interfaceId
             || id == type(IStreamMetadataRouter).interfaceId
             || id == type(IStreamMetadataRenderingProfile).interfaceId
             || id == type(IStreamMetadataHistoricalFullView).interfaceId
@@ -301,6 +312,150 @@ contract StreamMetadataRouter is
             || id == type(IStreamArtistContentFacts).interfaceId
             || id == type(IStreamArtistContentMutationFacts).interfaceId
             || id == type(IStreamMetadataScopeMembership).interfaceId || super.supportsInterface(id);
+    }
+
+    /// @notice Explicit static-profile activation; the original serving profile stays unselected otherwise.
+    function setDefaultMetadataConfig(Static.ConfigInput calldata input)
+        external
+        returns (bytes32)
+    {
+        return StaticConfiguration.set(_contentLayout(), _contentContext(), 0, 0, input);
+    }
+
+    function activateStaticMetadata(uint256 collectionId, bytes32 expectedDefaultRecord) external {
+        _requireContentCollection(collectionId);
+        StaticConfiguration.activate(
+            _contentLayout(), _contentContext(), collectionId, expectedDefaultRecord
+        );
+    }
+
+    function setCollectionMetadataConfig(uint256 collectionId, Static.ConfigInput calldata input)
+        external
+        returns (bytes32)
+    {
+        _requireContentCollection(collectionId);
+        return StaticConfiguration.set(_contentLayout(), _contentContext(), collectionId, 0, input);
+    }
+
+    function setTokenMetadataConfig(uint256 tokenId, Static.ConfigInput calldata input)
+        external
+        returns (bytes32)
+    {
+        uint256 id = _staticCollection(tokenId);
+        _requireContentCollection(id);
+        return StaticConfiguration.set(_contentLayout(), _contentContext(), id, tokenId, input);
+    }
+
+    function defaultMetadataConfig() external view returns (Static.ConfigRecord memory) {
+        StaticState.State storage s = StaticState.state();
+        return s.records[s.defaultHead];
+    }
+
+    function metadataConfigAuthorization(bytes32 hash)
+        external
+        view
+        returns (Static.Authorization memory)
+    {
+        return StaticState.state().authorizations[hash];
+    }
+
+    function metadataConfigRecord(bytes32 hash) external view returns (Static.ConfigRecord memory) {
+        return StaticState.state().records[hash];
+    }
+
+    function collectionMetadataConfig(uint256 id)
+        external
+        view
+        returns (Static.ConfigRecord memory)
+    {
+        return StaticState.resolved(id, 0);
+    }
+
+    function resolvedMetadataConfig(uint256 tokenId)
+        external
+        view
+        returns (Static.ConfigRecord memory)
+    {
+        return StaticState.resolved(_staticCollection(tokenId), tokenId);
+    }
+
+    function staticMetadataActivation(uint256 id) external view returns (bytes32, uint64, bytes32) {
+        StaticState.State storage s = StaticState.state();
+        StaticState.Collection storage c = s.collections[id];
+        Static.ConfigRecord storage record = s.records[c.activationDefault];
+        return (record.previous, record.defaultRevision, c.overridesHead);
+    }
+
+    function previewStaticMetadataConfig(
+        uint256 id,
+        uint256 token,
+        Static.ConfigInput calldata input
+    ) external view returns (bytes32) {
+        return StaticConfiguration.preview(_contentContext(), id, token, input);
+    }
+
+    function previewStaticMetadataActivation(uint256 id, bytes32 expected)
+        external
+        view
+        returns (bytes32)
+    {
+        return StaticConfiguration.previewActivation(_contentContext(), id, expected);
+    }
+
+    /// @notice Named raw Metadata companion read: no renderer or external linked library is called.
+    /// @dev Collection zero is the explicit empty golden-vector source, never a token route.
+    function staticRenderSource(uint256 id) external view returns (Static.RawSource memory) {
+        return _staticSource(id);
+    }
+
+    function staticRenderSourceForConfig(uint256 id, bytes32 hash)
+        external
+        view
+        returns (Static.RawSource memory source, Renderer.MetadataConfig memory config)
+    {
+        if (hash == 0) {
+            config.mode = Renderer.MetadataMode.ONCHAIN;
+            return (_staticSource(id), config);
+        }
+        Static.ConfigRecord storage r = StaticState.state().records[hash];
+        if (r.recordHash != hash || r.collectionId != id || r.level == 0) {
+            revert Static.InvalidStaticMetadataConfig();
+        }
+        config = r.config;
+        if (r.sourceSnapshotHash == 0) return (_staticSource(id), config);
+        source = StaticState.state().frozenSources[hash];
+        if (
+            keccak256(abi.encode(keccak256("6529STREAM_STATIC_SOURCE_SNAPSHOT_V1"), source))
+                != r.sourceSnapshotHash
+        ) revert Static.InvalidStaticMetadataConfig();
+    }
+
+    function _staticSource(uint256 id) private view returns (Static.RawSource memory source) {
+        CollectionMetadata storage m = _collections[id];
+        source = Static.RawSource(
+            _staticChainId,
+            m.configured,
+            m.name,
+            m.description,
+            m.image,
+            m.animationBaseURI,
+            m.animationScript,
+            _selectedManifests[id][2],
+            _selectedManifests[id][3]
+        );
+    }
+
+    function _staticCollection(uint256 token) private view returns (uint256 id) {
+        bytes memory raw = StaticCalls.read(
+            address(core),
+            abi.encodeCall(IStreamCoreIdentity.tokenCollectionIdentity, (token)),
+            128,
+            true,
+            StreamMetadataDisplayParameters.value(StreamMetadataDisplayParameters.READ_GAS)
+        );
+        bool exists;
+        (exists, id,,) = abi.decode(raw, (bool, uint256, uint256, bool));
+        if (!exists) revert InvalidToken(token);
     }
 
     function scopeCoversToken(StreamFinalityScope calldata, uint256)
@@ -477,6 +632,21 @@ contract StreamMetadataRouter is
             result.rendererCodeHash = result.renderer.codehash;
             result.dependenciesLocked = result.scriptLocked;
         }
+        if (StaticState.activated(collectionId)) {
+            Static.ConfigRecord memory selectedConfig = StaticState.resolved(collectionId, 0);
+            // Old finality providers must reject this distinct profile. They cannot infer
+            // a new renderer's output from an old linked-renderer source tuple.
+            result.presentationProfile = keccak256("6529STREAM_STATIC_METADATA_SELECTION_V1");
+            result.renderer = selectedConfig.selection.renderer;
+            result.rendererCodeHash = selectedConfig.selection.rendererCodeHash;
+            result.mode = selectedConfig.config.mode == Renderer.MetadataMode.ONCHAIN
+                ? keccak256("ONCHAIN")
+                : selectedConfig.config.mode == Renderer.MetadataMode.OFFCHAIN
+                    ? keccak256("OFFCHAIN")
+                    : keccak256("HYBRID");
+            result.dependenciesLocked = selectedConfig.config.frozen
+                || _artistContentLocks[collectionId][StaticState.FAMILY];
+        }
     }
 
     function collectionScriptBundle(uint256 collectionId)
@@ -529,7 +699,8 @@ contract StreamMetadataRouter is
         CollectionMetadata storage metadata = _collections[collectionId];
         if (
             !metadata.configured
-                || (bytes(metadata.animationScript).length == 0
+                || (!StaticState.activated(collectionId)
+                    && bytes(metadata.animationScript).length == 0
                     && _scriptBundle(collectionId).bundleId == 0)
         ) {
             revert UnconfiguredOnchainContent(collectionId);
@@ -563,8 +734,8 @@ contract StreamMetadataRouter is
                     || _artistContentLocks[collectionId][CONTENT_SCRIPT]
             );
         }
-        supported =
-            lockClass == CONTENT_SCRIPT || lockClass == CONTENT_MEDIA || lockClass == LOCK_BASE_URI;
+        supported = lockClass == StaticState.FAMILY || lockClass == CONTENT_SCRIPT
+            || lockClass == CONTENT_MEDIA || lockClass == LOCK_BASE_URI;
         return (supported, supported && _artistContentLocks[collectionId][lockClass]);
     }
 
@@ -785,6 +956,20 @@ contract StreamMetadataRouter is
         view
         returns (string memory)
     {
+        // Probe only dispatch identity. Unknown tokens retain the original legacy finality/
+        // identity error path; the strict new config reads still use _staticCollection.
+        bytes memory identity = StaticCalls.read(
+            address(core),
+            abi.encodeCall(IStreamCoreIdentity.tokenCollectionIdentity, (tokenId)),
+            128,
+            true,
+            StreamMetadataDisplayParameters.value(StreamMetadataDisplayParameters.READ_GAS)
+        );
+        (bool exists, uint256 staticCollection,,) =
+            abi.decode(identity, (bool, uint256, uint256, bool));
+        if (exists && StaticState.activated(staticCollection)) {
+            return StaticRouting.serve(address(core), tokenId, allowBurned, mode);
+        }
         return StreamMetadataRouterRendering.serve(
             _prepared,
             _collections,
