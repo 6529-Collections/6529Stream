@@ -27,9 +27,11 @@ mapping is used as an ancestry anchor.
 The current compromise must be the actual original operation-33 record naming
 this appointment and the requested evidence/reason. It must have been filed at
 or after the original post-vesting window. Waiting does not mature an earlier
-compromise. The profile has no prior recovery, intervening rotation, prior cause,
-resolution or closed appointment. It refuses enumerated supersession; the broader
-dormancy-origin adjudication and closure profiles remain separate unfinished work.
+compromise. The original unclosed profile has no prior recovery, intervening rotation, prior
+cause or resolution. The additive closed profile below authenticates admitted
+kind-1 dismissals. Both refuse enumerated supersession; dormancy-origin
+adjudication, standing-contest closures and intervening rotations remain separate
+unfinished work.
 
 ## Guardians, authority and execution
 
@@ -53,6 +55,32 @@ successor. AA-ROTATE requirement 7 defines recovery output classes 1 and 3; it
 does not define a new class-4 recovery recipe. Steward-origin recovery to a proved
 living artist or rightful estate is still a separate authority profile.
 
+## Dismissed appointments and a fresh compromise
+
+An actual operation-58 dismissal may close the original operation-43 window.
+Recovery then authenticates the full original Closure, canonical Dismissal.Record,
+saved kind-1 Cause and actual operation-33 Contest.Record. The original marker,
+window, class-3 incumbent and derived abandoned flag must agree. The first cause
+has no earlier cause or resolution in this profile. Historical evidence and
+reasons are authenticated as saved; they need not equal the new recovery request.
+
+The current latest dismissal and its saved cause are authenticated separately.
+Later independent dismissals may advance that head without changing the first
+closure. Original-dismissal <= latest-dismissal <= current-compromise chronology
+and exact current previous-cause/resolution pointers are required. These proofs
+are fixed-owner admitted history; they do not rerun historical governance against
+today's roles. Only the nonempty closed path adds tagged proof commitments. The
+original unclosed Facts and context hashes retain their prior bytes.
+
+An early abandoned closure releases the old window, allowing a fresh compromise
+before its former end. It never matures a provisional guardian, payout or document
+from that window. A post-expiry non-abandoned closure preserves legitimately
+mature guardian selection. Complete original history and lower-nonce lifetime
+veto continue to apply; ordinary dismissal supplies no supersession authority.
+The newly registered recovery still has its own original governance delay,
+acceptance, veto and replay checks. No prior recovery, intervening rotation,
+class-4 adjudication or kind-2 standing-contest episode is added by this profile.
+
 ## Validation
 
 Eight new authored cases use actual Artist owners, threshold Safe acceptance,
@@ -63,13 +91,21 @@ refusal after time advances, original plan corruption/restoration, Archive
 rollback and identical retry, and refused authority/supersession escalation.
 The source also inherits the twelve dormancy scenarios. All twenty typecheck;
 native runtime, consolidated product sizes and actual delayed-governance/current
-graph acceptance remain pending.
+graph acceptance remain pending. Six additional authored cases in
+`StreamArtistClosedDormancyRecoveryActual.t.sol` cover early abandonment with
+earlier living ancestry and exact Archive retry, a matured guardian, intervening
+dismissals, missing/substituted first closure, corrupted latest cause and lifetime
+Safe veto. They inherit the prior twenty scenarios; all twenty-six typecheck.
+No new runtime or size acceptance is claimed.
 
 Use the existing aggregate unit fixture profile after source stabilization:
 
 ```powershell
 python scripts/dev.py test --suite unit --via-ir --code-size-limit 2000000 --gas-limit 1000000000 --memory-limit 1073741824 --match-path test/unit/artist/StreamArtistDormancyRecoveryActual.t.sol
 ```
+
+For the closed profile use the same command with
+`--match-path test/unit/artist/StreamArtistClosedDormancyRecoveryActual.t.sol`.
 
 Include all reached fixture JSON data in frozen captures. The aggregate fixture's
 large gas/code limits do not establish deployable size or transaction capacity.

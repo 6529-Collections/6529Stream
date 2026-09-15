@@ -42,6 +42,9 @@ import {
 
 import "./StreamArtistDormancyState.sol";
 import {
+    StreamArtistRecoveryDormancyClosure as DormClosure
+} from "./StreamArtistRecoveryDormancyClosure.sol";
+import {
     StreamArtistRecoveryDormancyGuardians as DormGuardians
 } from "./StreamArtistRecoveryDormancyGuardians.sol";
 
@@ -92,7 +95,6 @@ library StreamArtistRecoveryDormancyPredecessor {
             )
         );
         hashTerminal.recordHash = originalRecordHash;
-        Dismissal.Closure memory empty;
         if (
             head == 0 || f.terminal.recordHash != head || terminalHash != head
                 || f.terminal.noticeHash == 0 || f.notice.recordHash != f.terminal.noticeHash
@@ -124,18 +126,14 @@ library StreamArtistRecoveryDormancyPredecessor {
                 || rotations.latestExecution[p.artistId] != head
                 || rotations.latestTransition[p.artistId] != head
                 || cause.facts.executedTransitionHash != head
-                || cause.facts.pendingTransitionHash != 0 || cause.facts.previousResolutionHash != 0
-                || cause.facts.previousCauseHash != 0 || p.expectedResolutionHash != 0
-                || keccak256(abi.encode(resolutions.closures[head])) != keccak256(abi.encode(empty))
-                || f.transition.artistId != p.artistId || f.transition.recordHash != head
-                || f.transition.phase != 2 || f.transition.stagedAt != f.notice.initiatedAt
+                || cause.facts.pendingTransitionHash != 0 || f.transition.artistId != p.artistId
+                || f.transition.recordHash != head || f.transition.phase != 2
+                || f.transition.stagedAt != f.notice.initiatedAt
                 || f.transition.contestEndsAt != f.notice.noticeEndsAt
                 || f.transition.executedAt != f.terminal.observedAt
                 || uint256(f.transition.postWindowEndsAt)
                     != uint256(f.terminal.observedAt) + f.terminal.plan.postSeconds
-                || cause.facts.enteredAt < f.transition.postWindowEndsAt
                 || block.timestamp < cause.facts.enteredAt
-                || f.transition.contestedAt != cause.facts.enteredAt
                 || recovery.vestingHistory.latest[p.artistId] != head
                 || f.vesting.artistId != p.artistId || f.vesting.transitionRecordHash != head
                 || f.vesting.operationId != 43 || f.vesting.authorityClass != 3
@@ -157,6 +155,7 @@ library StreamArtistRecoveryDormancyPredecessor {
         ) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         }
+        bytes32 closureProof = DormClosure.proof(resolutions, e, f.transition, cause);
         _previous(recovery, rotations, e, f);
         f.guardians = DormGuardians.prefix(
             recovery.guardianHistory,
@@ -217,6 +216,15 @@ library StreamArtistRecoveryDormancyPredecessor {
                 f
             )
         );
+        if (closureProof != 0) {
+            proof = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_RECOVERY_CLOSED_DORMANCY_FACTS_V1"),
+                    proof,
+                    closureProof
+                )
+            );
+        }
     }
 
     function _noticeHash(StreamArtistHashes.Environment memory e, Dorm.Notice memory n)

@@ -83,18 +83,18 @@ interface DormancyRecoveryStorageVm {
 
 /// @notice Actual designated op43→op33→registered op35 with Safe/Archive; typed Executor/Core only.
 contract StreamArtistDormancyRecoveryActualTest is StreamArtistDormancyLifecycleTest {
-    GovernanceAction private scheduled;
-    bytes32 private currentId;
-    bytes32 private origin;
-    bytes32 private noticeHash;
-    bytes32 private originalGuardian;
-    bytes32 private lowerGuardian;
-    bytes32 private selectedGuardian;
+    GovernanceAction internal scheduled;
+    bytes32 internal currentId;
+    bytes32 internal origin;
+    bytes32 internal noticeHash;
+    bytes32 internal originalGuardian;
+    bytes32 internal lowerGuardian;
+    bytes32 internal selectedGuardian;
     bytes32 private originalPlan;
     bytes32 private beforeHistory;
     bytes32 private livingRotation;
     address private living;
-    uint64 private windowEnd;
+    uint64 internal windowEnd;
     error LateRecoveryArchive();
 
     function _snapshot(bytes32 record) private view returns (V.Snapshot memory v) {
@@ -460,7 +460,7 @@ contract StreamArtistDormancyRecoveryActualTest is StreamArtistDormancyLifecycle
     }
 
     function _acceptance(IdentityRecovery.Request memory p)
-        private
+        internal
         returns (T.Authorization memory a)
     {
         a = T.Authorization(0, uint64(block.timestamp + 30 days), "");
@@ -502,7 +502,7 @@ contract StreamArtistDormancyRecoveryActualTest is StreamArtistDormancyLifecycle
     }
 
     function _schedule(bytes32 id, IdentityRecovery.Request memory p, T.Authorization memory a)
-        private
+        internal
         returns (GovernanceCall[] memory calls)
     {
         currentId = id;
@@ -545,7 +545,7 @@ contract StreamArtistDormancyRecoveryActualTest is StreamArtistDormancyLifecycle
         _publish();
     }
 
-    function _publish() private {
+    function _publish() internal {
         address authority = manager.governanceAuthority();
         avm.mockCall(
             authority,
