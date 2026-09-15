@@ -30,7 +30,8 @@ library StreamPlatformCustodyValidation {
         declaration =
             IStreamPlatformNativeRightsAuction(house).platformAuctionDeclaration(f.auction.saleId);
         if (
-            (original.mode != 10 && original.mode != 11) || original.templateId != 0
+            (original.mode < 8 || original.mode > 11)
+                || ((original.mode <= 9) != (original.templateId != 0))
                 || original.assignmentHash == 0 || declaration == 0 || f.auction.artistId != 0
                 || f.auction.bindingGeneration != 0 || f.auction.bindingHash != 0
                 || StreamPlatformSaleTemplate.declaration(resolver, f.auction.config.collectionId)
@@ -38,6 +39,19 @@ library StreamPlatformCustodyValidation {
         ) {
             revert IStreamNativeCustodyPrimarySettlement.InvalidNativeCustodySettlement();
         }
+    }
+
+    function selection(
+        IStreamRevenueResolver resolver,
+        uint256 collection,
+        uint256 token,
+        uint8 mode,
+        address poster
+    ) public view returns (StreamSaleTemplate.Selection memory, bytes32) {
+        if (mode == 8 || mode == 9) {
+            return StreamPlatformSaleTemplate.resolve(resolver, collection, token, mode, poster);
+        }
+        return StreamPlatformPrimaryProfile.resolve(resolver, collection, token, mode, poster);
     }
 
     function derive(
@@ -57,7 +71,7 @@ library StreamPlatformCustodyValidation {
         (bytes32 declaration, StreamPreparedNativeRightsTypes.OriginalPolicy memory original) =
             binding(x.resolver, house, f);
         IStreamNativeEnglishAuction.Auction memory a = f.auction;
-        (selected, beneficiaryHash) = StreamPlatformPrimaryProfile.resolve(
+        (selected, beneficiaryHash) = selection(
             x.resolver, a.config.collectionId, a.tokenId, original.mode, a.config.poster
         );
         c.saleAdapter = house;
@@ -100,7 +114,11 @@ library StreamPlatformCustodyValidation {
         // No current mint operation exists in this paid transfer. Original acquisition is
         // retained separately in f.origin; never alias it into these current-mint fields.
         c.rights = StreamPrimarySettlementTypes.PrimaryRights(
-            selected.profileId, selected.wallet, 0, selected.assignmentHash, selected.entriesHash
+            selected.profileId,
+            selected.wallet,
+            selected.templateId,
+            selected.assignmentHash,
+            selected.entriesHash
         );
         c.saleExecutionHash =
             StreamPlatformCustodyHash.facts(recorder, house, f, declaration, original);

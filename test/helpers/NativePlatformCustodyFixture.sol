@@ -115,7 +115,8 @@ abstract contract NativePlatformCustodyFixture is NativePlatformRightsFixture {
         p.config.mintPolicyHash = manager.phasePolicyHash(2, PLATFORM_CUSTODY_PHASE);
         p.artwork = bytes("platform custody original artwork");
         StreamSaleTemplate.Selection memory s = _selected(mode);
-        p.original = StreamPreparedNativeRightsTypes.OriginalPolicy(mode, s.assignmentHash, 0);
+        p.original =
+            StreamPreparedNativeRightsTypes.OriginalPolicy(mode, s.assignmentHash, s.templateId);
         (, bytes32 declaration,) = platform.platformWorksDeclaration(2);
         p.auth = IStreamPlatformCustodyAuction.PlatformCustodyAuthorization(
             house.platformRightsConfigurationHash(p.config, p.original, declaration),

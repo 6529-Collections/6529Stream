@@ -431,7 +431,7 @@ contract StreamNativeEnglishAuction is
         returns (uint256 tokenId, bytes32 settlementKey)
     {
         if (!_state.auctions[id].config.mintAtSettlement) {
-            if (_rights[id].mode == 10 || _rights[id].mode == 11) {
+            if (_rights[id].mode >= 8 && _rights[id].mode <= 11) {
                 return StreamPlatformCustodySettlement.settle(_state, _custody, _runtime(), id);
             }
             // Original no-bid poster return remains an ungated escape for either rights family.

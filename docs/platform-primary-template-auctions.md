@@ -123,10 +123,10 @@ separate scope. ERC-20 native-allowance and inherited/global freeze proposals
 remain untouched.
 
 
-## Prepared platform custody with fixed profiles
+## Prepared platform custody
 
 `IStreamPlatformCustodyAuction` adds an explicit unpaid prepared acquisition for
-families 10/11. The platform signs `PlatformPreparedCustodyAcquisition` under
+families 8/9 (static or SALE_POSTER templates) and 10/11 (fixed profiles). The platform signs `PlatformPreparedCustodyAcquisition` under
 `6529StreamPlatformPreparedCustodyAuction`, version 1, the actual house and chain.
 Its ordered fields are `configHash`, `declarationHash`, `tokenDataHash`,
 `expectedSaleNonce`, `expectedTokenId`, `expectedCollectionSerial`,
@@ -171,5 +171,30 @@ No-bid return, pre-bid cancellation, pending own NFT claims and deadline refund
 remain usable despite a later contest or accepted corrective Artist. These cases
 are authored and typechecked, not executed in this source handoff. Artist,
 governance and entropy retain the fixture's explicit typed boundaries.
-Collection/default TEMPLATE custody (8/9), token-specific platform rights and
-consignment remain separate follow-on workflows; this route does not admit them.
+Token-specific platform rights and consignment remain separate follow-on workflows;
+this route does not admit them.
+
+
+Template custody additionally requires the additive
+`IStreamPlatformTemplateCustodySettlement` marker. The initial custody interface
+ID and platform signing fields/preimages remain unchanged. Families 8/9 preserve
+the earlier platform template grammar: static recipients and symbolic
+`SALE_POSTER`, without Artist entries or collaborator assumptions. The actual
+resolved token must still select the signed collection/default source family.
+The current template may change under ALLOW_CURRENT, while the original template
+and assignment remain in the retained authorization and receipt. The full
+candidate records the current nonzero template ID and canonical actual-token
+primary policy.
+
+Acquisition previews the primary template but does not materialize primary
+revenue. Paid settlement resolves the original signed poster, materializes the
+exact current profile through Resolver/Factory, and funds its verified wallet or
+canonical template escrow before NFT delivery. Full declaration/source/profile
+witnesses are compared before and after funding. The five additional authored
+cases cover all collection/default and static/poster combinations, raw candidate
+and receipt hashes, actual profile creation/wallet deployment/escrow flush, a
+poster different from acquisition and settlement executors, older-recorder and
+actual override refusals, current template drift, and exact two-credit-call Safe
+rollback/retry. The prior seven fixed-profile cases remain included in the quick
+typecheck. No native execution or joined actual Artist authority is claimed by
+this source extension.

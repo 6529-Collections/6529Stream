@@ -4,7 +4,7 @@ import "./IStreamNativeEnglishAuction.sol";
 import "../revenue/StreamPreparedNativeRightsTypes.sol";
 import "../revenue/StreamNativeCustodySettlementTypes.sol";
 
-/// @notice Platform-only prepared acquisition, followed by an ALLOW_CURRENT fixed-profile transfer.
+/// @notice Platform-only prepared acquisition, followed by an ALLOW_CURRENT declared-rights transfer.
 interface IStreamPlatformCustodyAuction {
     struct PlatformCustodyAuthorization {
         bytes32 configHash;

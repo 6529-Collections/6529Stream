@@ -272,7 +272,7 @@ library StreamNativeEnglishAuctionRegistration {
             );
             StreamNativeCustodySettlementTypes.Origin memory origin =
                 IStreamNativeCustodyAuction(address(this)).custodyOrigin(id);
-            if (rightsMode == 10 || rightsMode == 11) {
+            if (rightsMode >= 8 && rightsMode <= 11) {
                 StreamNativeEnglishAuctionCustodyReads.requireCustody(x, a, origin);
                 StreamPlatformCustodyValidation.derive(
                     StreamPrimarySettlementRights.Context(

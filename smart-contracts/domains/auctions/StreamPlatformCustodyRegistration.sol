@@ -7,6 +7,7 @@ import "./StreamPlatformNativeAuctionRegistration.sol";
 import "../revenue/StreamPlatformCustodyHash.sol";
 import "../revenue/StreamPlatformCustodyValidation.sol";
 import "../../interfaces/stream/revenue/IStreamPlatformCustodyPrimarySettlement.sol";
+import "../../interfaces/stream/revenue/IStreamPlatformTemplateCustodySettlement.sol";
 import "../../interfaces/stream/revenue/IStreamNativeCustodyPrimarySettlement.sol";
 import "../../vendor/openzeppelin/IERC721Receiver.sol";
 import {
@@ -105,6 +106,18 @@ library StreamPlatformCustodyRegistration {
         ) {
             revert IStreamNativeCustodyAuction.InvalidNativeCustody();
         }
+        if (original.mode == 8 || original.mode == 9) {
+            if (
+                !IERC165(x.recorder)
+                        .supportsInterface(
+                            type(IStreamPlatformTemplateCustodySettlement).interfaceId
+                        )
+                    || !IStreamPlatformTemplateCustodySettlement(x.recorder)
+                        .isStreamPlatformTemplateCustodySettlement()
+            ) {
+                revert IStreamNativeCustodyAuction.InvalidNativeCustody();
+            }
+        }
         validate(s, support, c, auth, artwork, platformSignature, original);
         StreamNativeSettlementTypes.SaleLifecycleBinding memory lifecycle =
             StreamPreparedNativeSettlementAdmission.capture(x.registry, address(this));
@@ -188,7 +201,7 @@ library StreamPlatformCustodyRegistration {
         a.tokenId = tokens[0];
         requireToken(x.base.core, a, o);
         _requireOriginal(x.base.resolver, c, auth, original);
-        (StreamSaleTemplate.Selection memory current,) = StreamPlatformPrimaryProfile.resolve(
+        (StreamSaleTemplate.Selection memory current,) = StreamPlatformCustodyValidation.selection(
             x.base.resolver, c.collectionId, tokens[0], original.mode, c.poster
         );
         if (current.assignmentHash != original.assignmentHash) {
@@ -213,7 +226,7 @@ library StreamPlatformCustodyRegistration {
         }
         requireToken(x.base.core, a, o);
         _requireOriginal(x.base.resolver, c, auth, original);
-        (StreamSaleTemplate.Selection memory afterReveal,) = StreamPlatformPrimaryProfile.resolve(
+        (StreamSaleTemplate.Selection memory afterReveal,) = StreamPlatformCustodyValidation.selection(
             x.base.resolver, c.collectionId, tokens[0], original.mode, c.poster
         );
         if (keccak256(abi.encode(current)) != keccak256(abi.encode(afterReveal))) {
@@ -310,18 +323,20 @@ library StreamPlatformCustodyRegistration {
         StreamPreparedNativeRightsTypes.OriginalPolicy memory original
     ) private view {
         if (
-            (original.mode != 10 && original.mode != 11) || original.templateId != 0
+            (original.mode < 8 || original.mode > 11)
+                || ((original.mode <= 9) != (original.templateId != 0))
                 || original.assignmentHash == 0 || a.declarationHash == 0
                 || StreamPlatformSaleTemplate.declaration(resolver, c.collectionId)
                     != a.declarationHash
         ) {
             revert IStreamNativeCustodyAuction.InvalidNativeCustody();
         }
-        (StreamSaleTemplate.Selection memory selected,) = StreamPlatformPrimaryProfile.resolve(
+        (StreamSaleTemplate.Selection memory selected,) = StreamPlatformCustodyValidation.selection(
             resolver, c.collectionId, 0, original.mode, c.poster
         );
         if (
             selected.assignmentHash != original.assignmentHash
+                || selected.templateId != original.templateId
                 || StreamPreparedNativeRightsProjection.policyHash(
                         resolver, c.collectionId, 0, selected
                     ) != c.expectedPrimaryPolicyHash

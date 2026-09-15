@@ -10,6 +10,7 @@ import "./StreamNativeCustodyPrimaryRecording.sol";
 import "./StreamTokenProfileCustodyRecording.sol";
 import "./StreamCustodyRightsRecording.sol";
 import "./StreamPlatformCustodyRecording.sol";
+import "../../interfaces/stream/revenue/IStreamPlatformTemplateCustodySettlement.sol";
 import "./StreamNativeSupplementalExecution.sol";
 import "./StreamNativePrimaryExecution.sol";
 import "./StreamNativePrimaryRecording.sol";
@@ -46,6 +47,7 @@ contract StreamPrimarySaleSettlement is
     IStreamTokenProfileCustodySettlement,
     IStreamCustodyRightsSettlement,
     IStreamPlatformCustodyPrimarySettlement,
+    IStreamPlatformTemplateCustodySettlement,
     IStreamPreparedNativeRightsPrimarySettlement,
     IStreamPlatformNativePrimarySettlement,
     IStreamPlatformProfilePrimarySettlement,
@@ -139,6 +141,7 @@ contract StreamPrimarySaleSettlement is
             || id == type(IStreamTokenProfileCustodySettlement).interfaceId
             || id == type(IStreamCustodyRightsSettlement).interfaceId
             || id == type(IStreamPlatformCustodyPrimarySettlement).interfaceId
+            || id == type(IStreamPlatformTemplateCustodySettlement).interfaceId
             || id == type(IStreamPreparedNativeRightsPrimarySettlement).interfaceId
             || id == type(IStreamPlatformNativePrimarySettlement).interfaceId
             || id == type(IStreamPlatformProfilePrimarySettlement).interfaceId
@@ -473,6 +476,10 @@ contract StreamPrimarySaleSettlement is
             totalOfficialSettled,
             id
         );
+    }
+
+    function isStreamPlatformTemplateCustodySettlement() external pure override returns (bool) {
+        return true;
     }
 
     function isStreamPlatformCustodyPrimarySettlement() external pure override returns (bool) {
