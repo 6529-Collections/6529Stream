@@ -10,3 +10,4 @@ export * from "./current-artist.js";
 export * from "./current-custody.js";
 export * from "./current-native-sales.js";
 export * from "./current-manifests.js";
+export * from "./current-secondary.js";
