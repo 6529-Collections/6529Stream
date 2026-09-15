@@ -202,7 +202,7 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase, StreamCu
     }
 
     /// @dev Called after real role grant, Core pointer selection, content and economics configuration.
-    function _onboardFixtureArtist(address artist_) internal {
+    function _onboardFixtureArtist(address artist_) internal virtual {
         bytes memory document = bytes("current-stack artist identity");
         T.BindingProposal memory p;
         p.artistAddress = artist_;
