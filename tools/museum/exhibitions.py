@@ -58,7 +58,7 @@ PROFILE_BYTES = dumps({"id": "STREAM_MUSEUM_RECORDED_EXHIBITION_PROFILE_V1", "ve
     "qualification": QUALIFICATION, "claims": CLAIMS,
     "rules": {
         "authority": "Exact selected public class-5 independent receipt, original registered schema bytes and registered JCS; account authorship is separate from named institution identity.",
-        "identity": "Source-declared stable exhibition/institution/venue IRIs. Selected declaration reuse rejects; names, wallets and byte equality cannot merge entities.",
+        "identity": "Source-declared stable exhibition/institution/venue IRIs. Event IDs are unique. Institution/venue IDs may repeat only with the same kind and byte-identical whole declaration; matching names or wallets never merge different IDs.",
         "status": "Only completed source claims create an Activity. Planned/cancelled/unknown remain full nonperformed sidecars.",
         "institution": "Explicitly named exhibiting institution -> Group and participant (CRM P11), not organizer, legal owner or rights holder. Original address/DID/record identity stays a separately attributed source field.",
         "names": "Exact source text; language declarations stay in the complete sidecar without guessing authority language IRIs. TimeSpan display joins original opening and closing expressions with the fixed separator space/slash/space.",
@@ -111,7 +111,7 @@ def _date(value):
 def admit(source, selectors):
     """Source shape admission; production caller separately requires RecordedSemanticSource."""
     need(isinstance(selectors, list) and len(selectors) <= MAX_RECORDS, "selected record bound")
-    rows, seen, ids = [], set(), set()
+    rows, seen, ids = [], set(), {}
     for selector in selectors:
         record = source.record(selector)
         need(selector["pointer"] == "" and record.disclosure == "public"
@@ -128,10 +128,16 @@ def admit(source, selectors):
         need(cid > 0 and ((subject["kind"] == "collection" and tid == 0) or (subject["kind"] == "token" and tid > 0)), "subject scope shape")
         actual = subject_id(subject["kind"], source.anchor["chainId"], source.anchor["core"], subject["collectionId"], token_id=subject["tokenId"])
         need(actual == record.selector.subject_id, "canonical original subject differs")
-        for identifier in (value["exhibitionId"], value["institution"]["entityId"], value["venue"]["entityId"]):
+        declarations = ((value["exhibitionId"], "Activity", value),
+            (value["institution"]["entityId"], "Group", value["institution"]),
+            (value["venue"]["entityId"], "Place", value["venue"]))
+        for identifier, kind, declaration in declarations:
             _iri(identifier)
-            need(identifier not in ids and not identifier.casefold().startswith(("urn:6529stream:account:", "eip155:")), "ambiguous entity identity or account equivalence")
-            ids.add(identifier)
+            need(not identifier.casefold().startswith(("urn:6529stream:account:", "eip155:")), "account equivalence")
+            exact = (kind, dumps(declaration))
+            need(identifier not in ids or (kind != "Activity" and ids[identifier] == exact),
+                "conflicting entity identity declaration or repeated event")
+            ids[identifier] = exact
         identity = value["institution"]["identity"]
         if identity["kind"] == "address": need(len(hex_bytes(identity["value"], 20)) == 20 and any(hex_bytes(identity["value"])), "institution address missing")
         elif identity["kind"] == "record": need(identity["value"] != ZERO and len(hex_bytes(identity["value"], 32)) == 32, "institution record missing")
@@ -164,8 +170,13 @@ def render(rows, linked_art):
     def emit(value, row, rule, source_paths):
         raw = dumps(value); result = linked_art.validate_and_expand(raw)
         key = keccak256(value["id"].encode())[2:]; path = "exhibitions/resources/" + key + ".json"
-        files[path] = raw; files["exhibitions/expanded/" + key + ".json"] = result.expanded_bytes
-        resources.append({"id": value["id"], "type": value["type"], "path": path})
+        if path in files:
+            need(files[path] == raw, "conflicting shared resource output")
+        else:
+            files[path] = raw; files["exhibitions/expanded/" + key + ".json"] = result.expanded_bytes
+            resources.append({"id": value["id"], "type": value["type"], "path": path})
+        # Repeated exact declarations share one resource while retaining every
+        # independently selected record's provenance for each emitted field.
         for pointer, scalar in fields(value): provenance.append({"entity": value["id"], "path": pointer, "value": scalar,
             "source": row["selector"], "sourcePaths": source_paths, "rule": RULE + rule, "qualification": QUALIFICATION})
     def named(identifier, kind, name):

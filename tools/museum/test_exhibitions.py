@@ -183,8 +183,35 @@ class Exhibitions(unittest.TestCase):
         value=exhibition();value['institution']['entityId']='urn:6529stream:account:eip155:31337:'+A(9)
         with self.assertRaisesRegex(MuseumError,'account equivalence'): self.project(value)
         control=Control();value=exhibition();value['exhibitionId']='urn:test:other-exhibition'
+        value['institution']['name']['value']='Conflicting institution declaration'
         other=control.add(value)
         with self.assertRaisesRegex(MuseumError,'identity'): admit(control,[control.selector,other])
+
+    def test_two_events_share_only_exact_same_kind_declarations_with_both_provenances(self):
+        control=Control(); value=exhibition(); value['exhibitionId']='urn:test:second-exhibition'
+        second=control.add(value)
+        files=render(admit(control,[control.selector,second]),self.model)
+        resources=self.resources(files)
+        self.assertEqual(len(resources),4)
+        self.assertEqual(sum(r['type']=='Activity' for r in resources),2)
+        self.assertEqual(sum(r['type']=='Group' for r in resources),1)
+        self.assertEqual(sum(r['type']=='Place' for r in resources),1)
+        provenance=loads(files['exhibitions/provenance.json'],maximum=2097152)
+        for shared in ('urn:test:institution','urn:test:venue'):
+            rows=[r for r in provenance if r['entity']==shared]
+            self.assertEqual({r['source']['recordHash'] for r in rows},
+                {control.selector['recordHash'],second['recordHash']})
+        for mutate in (lambda v:v['venue']['location'].update(uri='https://example.invalid/conflict'),
+                lambda v:v['venue'].update(entityId='urn:test:institution'),
+                lambda v:v.update(exhibitionId='urn:test:institution'),
+                lambda v:v['title']['name'].update(value='Same event ID, different title')):
+            control=Control(); value=exhibition()
+            value['exhibitionId']='urn:test:second-exhibition'
+            mutate(value)
+            if value['title']['name']['value']=='Same event ID, different title': value['exhibitionId']='urn:test:exhibition'
+            second=control.add(value)
+            with self.assertRaisesRegex(MuseumError,'identity declaration|repeated event'):
+                admit(control,[control.selector,second])
 
     def test_collection_token_scope_and_institution_identity_variants(self):
         for kind,value in (('address',A(9)),('did','did:example:source-institution'),('record',H(12))):

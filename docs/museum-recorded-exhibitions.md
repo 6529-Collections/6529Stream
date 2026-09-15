@@ -41,8 +41,11 @@ declarations are retained without inventing authority-language identifiers.
 Every original scalar, null and empty collection has a source-pointer coverage
 row; the full original record remains in the sidecar and nested source package.
 Every emitted target value has its source selector, mapping rule and original
-field paths. Selected declaration collisions reject, including a new exhibition
-entity that would reuse a selected entity from the original graph. Unselected
+field paths. Event IDs remain unique. Repeated institution or venue IDs are accepted only
+for the same kind and byte-identical whole source declaration; one resource
+retains provenance from each selected record. Conflicting or cross-kind reuse
+rejects, including a new exhibition entity that would reuse a selected entity
+from the original graph. Unselected
 hostile declarations never choose or veto the new projection.
 
 ## Offline commands
