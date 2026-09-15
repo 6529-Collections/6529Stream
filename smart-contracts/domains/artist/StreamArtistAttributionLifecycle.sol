@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAttributionBindingMutation.sol";
+import "./StreamArtistAttributionReadEncoding.sol";
+import {
+    StreamArtistAttributionStateTypes as AttrState
+} from "./StreamArtistAttributionStateTypes.sol";
+import "./StreamArtistAttributionAttestations.sol";
 import "./StreamArtistPlatformState.sol";
 import {
     StreamArtistAttestationTypes as Attest
@@ -24,21 +30,12 @@ import {
 
 /// @notice Sole owner of collection attribution state and state-bound artist attestations.
 contract StreamArtistAttributionLifecycle is StreamArtistOwner {
-    struct AttestationContext {
-        bytes32 operativeIdentityHash;
-        address signer;
-        uint256 nonce;
-        uint64 signedAt;
-        uint8 authorityClass;
-        bytes32 verifiedSubjectHash;
-        bytes32 associationHash;
-    }
-
-    struct Attribution {
-        uint8 state;
-        uint64 generation;
-    }
-    mapping(uint256 => Attribution) private _attributions;
+    // Original errors still bubble from the fixed linked attestation worker.
+    error BoundExceeded(uint256 actual, uint256 maximum);
+    error UnsupportedProfile();
+    error InvalidSanctionConfirmation();
+    error InvalidAttribution(uint256 collectionId);
+    mapping(uint256 => AttrState.Attribution) private _attributions;
     mapping(bytes32 => T.AttestationRecord) private _attestations;
     mapping(bytes32 => T.AttestationRecord) private _records;
     mapping(bytes32 => bytes) private _statements;
@@ -61,7 +58,11 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         view
         returns (Attest.Association memory)
     {
-        return _attestationAssociations[record];
+        _returnAttribution(
+            StreamArtistAttributionReadEncoding.attestationAssociation(
+                _attestationStore(), core, record
+            )
+        );
     }
 
     /// @notice Additional context reconstructing a refusal's exact normative record from events.
@@ -129,35 +130,10 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         uint8 savedAuthorityClass
     ) external {
         _check(c, 13);
-        Attribution storage a = _attributions[p.collectionId];
-        if (
-            !b.accepted || b.artistId == 0 || b.bindingHash == 0 || p.collectionId == 0
-                || p.artistId != b.artistId || p.bindingGeneration != b.generation || a.state != 2
-                || p.priorAttributionState != a.state || a.generation != b.generation
-                || p.sanctionRecordHash == 0 || p.finalityRecordHash == 0
-                || savedSigner == address(0)
-                || (savedAuthorityClass != 1 && savedAuthorityClass != 3)
-        ) revert Confirmation.InvalidSanctionConfirmation();
-        a.state = 3;
-        _commit(
-            c,
-            keccak256(abi.encode(b, p, savedSigner, savedAuthorityClass)),
-            keccak256(abi.encode(p.collectionId, a)),
-            bytes32(0),
-            bytes32(0)
+        AttrState.Mutation memory m = StreamArtistAttributionAttestations.confirmSanctionFinalized(
+            _attestationStore(), c, b, p, savedSigner, savedAuthorityClass
         );
-        emit ArtistAttributionStateChanged(
-            1,
-            p.collectionId,
-            3,
-            b.generation,
-            2,
-            c.actor,
-            savedAuthorityClass,
-            p.sanctionRecordHash,
-            p.finalityRecordHash,
-            ""
-        );
+        _commit(c, m.action, m.stateDelta, 0, 0);
     }
 
     function platformWorksAdmission(uint256 collectionId)
@@ -165,25 +141,35 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         view
         returns (PW.Admission memory)
     {
-        PW.State storage p = _platform.collections[collectionId];
-        return PW.Admission(
-            p.declaration.recordHash,
-            p.contestState,
-            p.correction.correctiveGeneration,
-            p.correction.accepted
+        _returnAttribution(
+            StreamArtistAttributionReadEncoding.platformWorksAdmission(
+                _attestationStore(), core, collectionId
+            )
         );
     }
 
     function platformWorksState(uint256 collectionId) external view returns (PW.State memory) {
-        return _platform.collections[collectionId];
+        _returnAttribution(
+            StreamArtistAttributionReadEncoding.platformWorksState(
+                _attestationStore(), core, collectionId
+            )
+        );
     }
 
     function platformWorksClaimRecord(bytes32 hash) external view returns (PW.Claim memory) {
-        return _platform.claims[hash];
+        _returnAttribution(
+            StreamArtistAttributionReadEncoding.platformWorksClaimRecord(
+                _attestationStore(), core, hash
+            )
+        );
     }
 
     function platformWorksContestRecord(bytes32 hash) external view returns (PW.Contest memory) {
-        return _platform.contests[hash];
+        _returnAttribution(
+            StreamArtistAttributionReadEncoding.platformWorksContestRecord(
+                _attestationStore(), core, hash
+            )
+        );
     }
 
     function declarePlatformWorks(
@@ -314,11 +300,9 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
     }
 
     function attributionClaims(uint256 id) external view returns (uint256, bytes32) {
-        PW.State storage p = _platform.collections[id];
-        uint256 artistClaims = _attributionClaims.counts[id];
-        // Original Platform-only histories predate this additive display pointer.
-        if (artistClaims == 0) return (p.claimCount, p.latestClaim);
-        return (p.claimCount + artistClaims, _latestDisplayClaim[id]);
+        _returnAttribution(
+            StreamArtistAttributionReadEncoding.attributionClaims(_attestationStore(), core, id)
+        );
     }
 
     function attributionClaimRecord(bytes32 hash)
@@ -326,18 +310,19 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         view
         returns (StreamArtistAttributionClaimTypes.Claim memory)
     {
-        return _attributionClaims.records[hash];
+        _returnAttribution(
+            StreamArtistAttributionReadEncoding.attributionClaimRecord(
+                _attestationStore(), core, hash
+            )
+        );
     }
 
     function attestationAuthorityClass(bytes32 hash) public view returns (uint8) {
-        if (hash == 0 || _records[hash].recordHash != hash) return 0;
-        uint8 class_ = _attestationClasses[hash];
-        if (class_ != 0) return class_;
-        // Existing publication history has an exact saved class; other old records remain unknown.
-        if (_publications[hash].evidence.attestationRecordHash == hash) {
-            return _publications[hash].evidence.authorityClass;
-        }
-        return 0;
+        _returnAttribution(
+            StreamArtistAttributionReadEncoding.attestationAuthorityClass(
+                _attestationStore(), core, hash
+            )
+        );
     }
 
     function artistAttestationStatus(uint256 id, uint8 kind, bytes32 subjectId, bytes32 currentHash)
@@ -345,34 +330,25 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         view
         returns (uint8 status, bytes32 record, bytes32 attested, uint8 class_, uint64 signedAt)
     {
-        T.AttestationRecord storage item = _attestations[keccak256(abi.encode(id, kind, subjectId))];
-        if (item.recordHash == 0) return (0, 0, 0, 0, 0);
-        Attribution storage attr = _attributions[id];
-        status = attr.state == 4
-            ? 3
-            : attr.generation != item.generation
-                || !StreamArtistAttributionPolicy.acceptedOrSanctioned(attr.state)
-                || (kind != 8 && item.subjectStateHash != currentHash)
-                ? 2
-                : 1;
-        return (
-            status,
-            item.recordHash,
-            item.subjectStateHash,
-            attestationAuthorityClass(item.recordHash),
-            item.signedAt
-        );
+        _returnAttribution(
+                StreamArtistAttributionReadEncoding.artistAttestationStatus(
+                    _attestationStore(), core, id, kind, subjectId, currentHash
+                )
+            );
     }
 
     function deploymentAttestation(uint256 id) external view returns (bytes32, uint8, uint64) {
-        T.AttestationRecord storage item =
-            _attestations[keccak256(abi.encode(id, uint8(9), bytes32(uint256(uint160(core)))))];
-        return (item.recordHash, attestationAuthorityClass(item.recordHash), item.signedAt);
+        _returnAttribution(
+            StreamArtistAttributionReadEncoding.deploymentAttestation(_attestationStore(), core, id)
+        );
     }
 
     function attributionState(uint256 collectionId) external view returns (uint8, uint64) {
-        Attribution storage a = _attributions[collectionId];
-        return (a.state, a.generation);
+        _returnAttribution(
+            StreamArtistAttributionReadEncoding.attributionState(
+                _attestationStore(), core, collectionId
+            )
+        );
     }
 
     function attestation(uint256 collectionId, uint8 kind, bytes32 subjectId)
@@ -380,15 +356,23 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         view
         returns (T.AttestationRecord memory)
     {
-        return _attestations[keccak256(abi.encode(collectionId, kind, subjectId))];
+        _returnAttribution(
+            StreamArtistAttributionReadEncoding.attestation(
+                _attestationStore(), core, collectionId, kind, subjectId
+            )
+        );
     }
 
     function attestationRecord(bytes32 record) external view returns (T.AttestationRecord memory) {
-        return _records[record];
+        _returnAttribution(
+            StreamArtistAttributionReadEncoding.attestationRecord(_attestationStore(), core, record)
+        );
     }
 
     function statementBytes(bytes32 hash) external view returns (bytes memory) {
-        return _statements[hash];
+        _returnAttribution(
+            StreamArtistAttributionReadEncoding.statementBytes(_attestationStore(), core, hash)
+        );
     }
 
     function publicationAttestation(bytes32 recordHash)
@@ -396,7 +380,11 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         view
         returns (IStreamArtistRecordPublicationOwner.Record memory)
     {
-        return _publications[recordHash];
+        _returnAttribution(
+            StreamArtistAttributionReadEncoding.publicationAttestation(
+                _attestationStore(), core, recordHash
+            )
+        );
     }
 
     function claim(
@@ -407,32 +395,10 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         string calldata reasonURI
     ) external {
         _check(c, 1);
-        Attribution memory prior = _attributions[collectionId];
-        if (
-            (prior.state != 0 && prior.state != 5) || b.generation != prior.generation + 1
-                || b.bindingHash == bytes32(0)
-        ) revert T.InvalidAttribution(collectionId);
-        StreamArtistPlatformState.consumeBinding(_platform, collectionId, b);
-        _attributions[collectionId] = Attribution(1, b.generation);
-        _commit(
-            c,
-            keccak256(abi.encode(collectionId, b, reasonHash, reasonURI)),
-            keccak256(abi.encode(collectionId, uint8(1), b.generation)),
-            bytes32(0),
-            bytes32(0)
+        AttrState.Mutation memory m = StreamArtistAttributionBindingMutation.claim(
+            _attestationStore(), c, collectionId, b, reasonHash, reasonURI
         );
-        emit ArtistAttributionStateChanged(
-            1,
-            collectionId,
-            1,
-            b.generation,
-            prior.state,
-            c.actor,
-            0,
-            b.bindingHash,
-            reasonHash,
-            reasonURI
-        );
+        _commit(c, m.action, m.stateDelta, 0, 0);
     }
 
     function recordRefusal(
@@ -482,42 +448,10 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         uint256 nonce,
         bytes32 recordReference
     ) private {
-        Attribution storage item = _attributions[p.collectionId];
-        if (
-            item.state != 1 || item.generation != b.generation || b.accepted
-                || p.generation != b.generation || p.bindingHash != b.bindingHash
-        ) revert T.InvalidAttribution(p.collectionId);
-        item.state = 5;
-        _commit(
-            c,
-            keccak256(abi.encode(b, p, signer, authority, nonce, recordReference)),
-            keccak256(abi.encode(p.collectionId, item)),
-            bytes32(0),
-            bytes32(0)
+        AttrState.Mutation memory m = StreamArtistAttributionBindingMutation.terminate(
+            _attestationStore(), c, b, p, signer, authority, nonce, recordReference
         );
-        emit ArtistAttributionStateChanged(
-            1,
-            p.collectionId,
-            5,
-            b.generation,
-            1,
-            c.actor,
-            authority,
-            recordReference,
-            p.reasonHash,
-            p.reasonURI
-        );
-        emit ArtistBindingTerminationContext(
-            1,
-            p.collectionId,
-            b.generation,
-            recordReference,
-            b.bindingHash,
-            b.artistId,
-            signer,
-            nonce,
-            _now()
-        );
+        _commit(c, m.action, m.stateDelta, 0, 0);
     }
 
     function accept(
@@ -579,22 +513,11 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         address signer,
         uint8 authorityClass
     ) private {
-        Attribution storage a = _attributions[collectionId];
-        if (a.state != 1 || a.generation != b.generation || record == bytes32(0)) {
-            revert T.InvalidAttribution(collectionId);
-        }
-        StreamArtistPlatformState.acceptBinding(_platform, collectionId, b.generation);
-        a.state = 2;
-        _commit(
-            c,
-            keccak256(abi.encode(collectionId, b, record)),
-            keccak256(abi.encode(collectionId, a)),
-            bytes32(0),
-            bytes32(0)
-        );
-        emit ArtistAttributionStateChanged(
-            1, collectionId, 2, b.generation, 1, signer, authorityClass, record, bytes32(0), ""
-        );
+        AttrState.Mutation memory m =
+            StreamArtistAttributionBindingMutation.complete(
+                _attestationStore(), c, collectionId, b, record, signer, authorityClass
+            );
+        _commit(c, m.action, m.stateDelta, 0, 0);
     }
 
     function recordAttestation(
@@ -607,15 +530,11 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes calldata statement
     ) external returns (bytes32 record) {
         _check(c, 24);
-        // The old callback has no operative Identity fact. Only deployment uses it.
-        if (p.subjectKind != 9) revert T.UnsupportedProfile();
-        if (signer != b.artistAddress) revert T.InvalidAttribution(p.collectionId);
-        AttestationContext memory x;
-        x.signer = signer;
-        x.nonce = nonce;
-        x.signedAt = signedAt;
-        x.authorityClass = 1;
-        return _recordAttestation(c, b, p, statement, x);
+        AttrState.Mutation memory m = StreamArtistAttributionAttestations.recordAttestation(
+            _attestationStore(), _environment(), b, p, signer, nonce, signedAt, statement
+        );
+        _commit(c, m.action, m.stateDelta, bytes32(0), m.record);
+        return m.record;
     }
 
     function recordIdentityAttestation(
@@ -629,15 +548,19 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes calldata statement
     ) external returns (bytes32) {
         _check(c, 24);
-        if (p.subjectKind != 10 || operativeIdentityHash == bytes32(0)) revert T.InvalidRecord();
-        if (signer != b.artistAddress) revert T.InvalidAttribution(p.collectionId);
-        AttestationContext memory x;
-        x.operativeIdentityHash = operativeIdentityHash;
-        x.signer = signer;
-        x.nonce = nonce;
-        x.signedAt = signedAt;
-        x.authorityClass = 1;
-        return _recordAttestation(c, b, p, statement, x);
+        AttrState.Mutation memory m = StreamArtistAttributionAttestations.recordIdentityAttestation(
+            _attestationStore(),
+            _environment(),
+            b,
+            p,
+            operativeIdentityHash,
+            signer,
+            nonce,
+            signedAt,
+            statement
+        );
+        _commit(c, m.action, m.stateDelta, bytes32(0), m.record);
+        return m.record;
     }
 
     function recordAuthenticatedAttestation(
@@ -648,63 +571,12 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes calldata statement
     ) external returns (bytes32 record) {
         _check(c, 24);
-        StreamArtistCurrentAuthorityFacts.requireAccepted(
-            b, a.authority.authorityAddress, a.authority, false
-        );
-        uint8 class_ = a.authority.authorityClass;
-        if (a.delegation != 0) {
-            if (class_ != 1 || a.signer == address(0)) revert T.InvalidRecord();
-            class_ = 2;
-        } else if (a.signer != a.authority.authorityAddress) {
-            revert T.InvalidRecord();
-        }
-        if (
-            a.signedAt == 0 || a.signedAt > block.timestamp || a.fact.owner.code.length == 0
-                || a.fact.ownerCodeHash != a.fact.owner.codehash || a.fact.subjectId != p.subjectId
-                || a.fact.stateHash != p.subjectStateHash
-        ) revert T.InvalidRecord();
-        record = StreamArtistHashes.attestationRecordForAuthority(
-            _environment(), p, b.artistId, a.signer, class_, a.nonce, a.signedAt
-        );
-        Attest.Association memory association =
-            Attest.Association(b.artistId, b.bindingHash, b.generation, a.delegation, a.fact);
-        _attestationAssociations[record] = association;
-        bytes32 associationHash = keccak256(abi.encode(association));
-        if (p.subjectKind == 7 || p.subjectKind == 8) {
-            Attribution storage attr = _attributions[p.collectionId];
-            if (
-                !StreamArtistAttributionPolicy.acceptedOrSanctioned(attr.state)
-                    || attr.generation != b.generation
-            ) revert T.InvalidAttribution(p.collectionId);
-            StreamArtistRecordPublicationState.Input memory input_;
-            input_.environment = _environment();
-            input_.binding_ = b;
-            input_.terms = p;
-            input_.authority = R.AuthorityFact(b.artistId, a.signer, class_, a.authority.status);
-            input_.nonce = a.nonce;
-            input_.signedAt = a.signedAt;
-            input_.statement = statement;
-            input_.metadataHostCodeHash = a.fact.ownerCodeHash;
-            (bytes32 actual, bytes32 action, bytes32 stateDelta) = StreamArtistRecordPublicationState.record(
-                _records, _attestations, _statements, _publications, input_
+        AttrState.Mutation memory m =
+            StreamArtistAttributionAttestations.recordAuthenticatedAttestation(
+                _attestationStore(), _environment(), b, p, a, statement
             );
-            if (actual != record) revert T.InvalidRecord();
-            _attestationClasses[record] = class_;
-            _commit(c, action, keccak256(abi.encode(stateDelta, associationHash)), 0, record);
-        } else {
-            AttestationContext memory x;
-            x.operativeIdentityHash = a.operativeIdentity;
-            x.signer = a.signer;
-            x.nonce = a.nonce;
-            x.signedAt = a.signedAt;
-            x.authorityClass = class_;
-            x.verifiedSubjectHash = a.fact.stateHash;
-            x.associationHash = associationHash;
-            if (_recordAttestation(c, b, p, statement, x) != record) revert T.InvalidRecord();
-        }
-        if (a.delegation != 0) {
-            emit ArtistAttestationDelegation(1, record, a.delegation, b.artistId, a.signer);
-        }
+        _commit(c, m.action, m.stateDelta, bytes32(0), m.record);
+        return m.record;
     }
 
     function recordAttestationWithAuthority(
@@ -719,18 +591,21 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes calldata statement
     ) external returns (bytes32) {
         _check(c, 24);
-        StreamArtistCurrentAuthorityFacts.requireAccepted(b, signer, authority, false);
-        if (
-            (p.subjectKind == 10 && operativeIdentityHash == bytes32(0))
-                || (p.subjectKind == 9 && operativeIdentityHash != bytes32(0))
-        ) revert T.InvalidRecord();
-        AttestationContext memory x;
-        x.operativeIdentityHash = operativeIdentityHash;
-        x.signer = signer;
-        x.nonce = nonce;
-        x.signedAt = signedAt;
-        x.authorityClass = authority.authorityClass;
-        return _recordAttestation(c, b, p, statement, x);
+        AttrState.Mutation memory m =
+            StreamArtistAttributionAttestations.recordAttestationWithAuthority(
+                _attestationStore(),
+                _environment(),
+                b,
+                p,
+                operativeIdentityHash,
+                authority,
+                signer,
+                nonce,
+                signedAt,
+                statement
+            );
+        _commit(c, m.action, m.stateDelta, bytes32(0), m.record);
+        return m.record;
     }
 
     function recordPublicationAttestation(
@@ -744,136 +619,28 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes32 metadataHostCodeHash
     ) external returns (bytes32) {
         _check(c, 24);
-        StreamArtistCurrentAuthorityFacts.requireAccepted(
-            b, authority.authorityAddress, authority, false
-        );
-        if ((p.subjectKind != 7 && p.subjectKind != 8) || metadataHostCodeHash == 0) {
-            revert T.InvalidRecord();
-        }
-        Attribution storage attr = _attributions[p.collectionId];
-        if (
-            !StreamArtistAttributionPolicy.acceptedOrSanctioned(attr.state)
-                || attr.generation != b.generation
-        ) {
-            revert T.InvalidAttribution(p.collectionId);
-        }
-        StreamArtistRecordPublicationState.Input memory input_;
-        input_.environment = _environment();
-        input_.binding_ = b;
-        input_.terms = p;
-        input_.authority = authority;
-        input_.nonce = nonce;
-        input_.signedAt = signedAt;
-        input_.statement = statement;
-        input_.metadataHostCodeHash = metadataHostCodeHash;
-        (bytes32 record, bytes32 action, bytes32 stateDelta) = StreamArtistRecordPublicationState.record(
-            _records, _attestations, _statements, _publications, input_
-        );
-        _attestationClasses[record] = authority.authorityClass;
-        _commit(c, action, stateDelta, bytes32(0), record);
-        return record;
+        AttrState.Mutation memory m =
+            StreamArtistAttributionAttestations.recordPublicationAttestation(
+                _attestationStore(),
+                _environment(),
+                b,
+                p,
+                authority,
+                nonce,
+                signedAt,
+                statement,
+                metadataHostCodeHash
+            );
+        _commit(c, m.action, m.stateDelta, bytes32(0), m.record);
+        return m.record;
     }
 
-    function _recordAttestation(
-        T.ActionContext calldata c,
-        T.Binding calldata b,
-        T.Attestation calldata p,
-        bytes calldata statement,
-        AttestationContext memory x
-    ) private returns (bytes32 record) {
-        Attribution storage attr = _attributions[p.collectionId];
-        if (
-            !StreamArtistAttributionPolicy.acceptedOrSanctioned(attr.state)
-                || attr.generation != b.generation
-        ) {
-            revert T.InvalidAttribution(p.collectionId);
-        }
-        if (
-            statement.length == 0 || p.statementHash == bytes32(0)
-                || keccak256(statement) != p.statementHash
-        ) revert T.InvalidRecord();
-        if (statement.length > 8192) revert T.BoundExceeded(statement.length, 8192);
-        if (bytes(p.statementURI).length > 2048) {
-            revert T.BoundExceeded(bytes(p.statementURI).length, 2048);
-        }
-        if (p.subjectKind == 9) {
-            if (
-                p.subjectId != bytes32(uint256(uint160(core)))
-                    || p.subjectStateHash
-                        != StreamArtistHashes.deploymentFacts(_environment(), p.collectionId, b)
-                    || p.schemaId != keccak256("6529STREAM_ARTIST_DEPLOYMENT_ATTESTATION_V1")
-            ) revert T.InvalidRecord();
-        } else if (p.subjectKind == 10) {
-            if (
-                p.subjectId != b.artistId || p.subjectStateHash != x.operativeIdentityHash
-                    || (p.schemaId != keccak256("6529STREAM_ARTIST_PERSONHOOD_WAIVER_V1")
-                        && p.schemaId != keccak256("6529STREAM_ARTIST_PERSONHOOD_EVIDENCE_V1"))
-            ) revert T.InvalidRecord();
-        } else if (p.subjectKind >= 1 && p.subjectKind <= 6) {
-            if (
-                x.verifiedSubjectHash == 0 || x.verifiedSubjectHash != p.subjectStateHash
-                    || p.schemaId == 0
-            ) revert T.InvalidRecord();
-        } else {
-            revert T.UnsupportedProfile();
-        }
-        record = StreamArtistHashes.attestationRecordForAuthority(
-            _environment(), p, b.artistId, x.signer, x.authorityClass, x.nonce, x.signedAt
-        );
-        if (_records[record].recordHash != bytes32(0)) revert T.InvalidRecord();
-        T.AttestationRecord memory item = T.AttestationRecord(
-            record,
-            p.subjectStateHash,
-            p.schemaId,
-            p.statementHash,
-            b.generation,
-            x.signedAt,
-            x.signer
-        );
-        _records[record] = item;
-        _attestationClasses[record] = x.authorityClass;
-        _attestations[keccak256(abi.encode(p.collectionId, p.subjectKind, p.subjectId))] = item;
-        if (_statements[p.statementHash].length == 0) _statements[p.statementHash] = statement;
-        _commit(
-            c,
-            p.subjectKind == 10
-                ? keccak256(
-                    abi.encode(
-                        b,
-                        p,
-                        x.signer,
-                        x.nonce,
-                        x.signedAt,
-                        keccak256(statement),
-                        x.operativeIdentityHash
-                    )
-                )
-                : keccak256(abi.encode(b, p, x.signer, x.nonce, x.signedAt, keccak256(statement))),
-            x.associationHash == 0
-                ? keccak256(abi.encode(p.collectionId, p.subjectKind, p.subjectId, item))
-                : keccak256(
-                    abi.encode(
-                        keccak256(abi.encode(p.collectionId, p.subjectKind, p.subjectId, item)),
-                        x.associationHash
-                    )
-                ),
-            bytes32(0),
-            record
-        );
-        emit ArtistAttestationRecorded(
-            1,
-            p.collectionId,
-            p.subjectKind,
-            x.signer,
-            p.subjectId,
-            p.subjectStateHash,
-            p.schemaId,
-            p.statementHash,
-            keccak256(bytes(p.statementURI)),
-            x.authorityClass,
-            x.nonce,
-            x.signedAt,
-            record
-        );
+    /// @dev Exact declared storage root, not a computed or caller-supplied location.
+    function _attestationStore() private pure returns (AttrState.State storage s) {
+        assembly ("memory-safe") { s.slot := _attributions.slot }
+    }
+
+    function _returnAttribution(bytes memory encoded) private pure {
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 }

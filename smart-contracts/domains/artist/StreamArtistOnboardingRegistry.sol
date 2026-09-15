@@ -730,7 +730,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bytes32)
     {
-        return StreamArtistRotationHashes.guardianDigest(_environment(), p, a);
+        _forwardRegistryRead();
     }
 
     function rotationDigest(R.Rotation calldata p, T.Authorization calldata a)
@@ -738,7 +738,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bytes32)
     {
-        return StreamArtistRotationHashes.rotationDigest(_environment(), p, a);
+        _forwardRegistryRead();
     }
 
     function rotationAcceptanceDigest(R.Rotation calldata p, T.Authorization calldata a)
@@ -746,7 +746,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bytes32)
     {
-        return StreamArtistRotationHashes.acceptanceDigest(_environment(), p, a);
+        _forwardRegistryRead();
     }
 
     function standingRevocationDigest(R.StandingRevocation calldata p, T.Authorization calldata a)
@@ -754,7 +754,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bytes32)
     {
-        return StreamArtistRotationHashes.standingDigest(_environment(), p, a);
+        _forwardRegistryRead();
     }
 
     function _rotationOwner() private view returns (IStreamArtistRotationOwner) {
@@ -869,7 +869,7 @@ contract StreamArtistOnboardingRegistry is
         StreamArtistIdentityRevisionTypes.Revision calldata p,
         T.Authorization calldata a
     ) external view returns (bytes32) {
-        return StreamArtistIdentityRevisionState.digest(_environment(), p, a);
+        _forwardRegistryRead();
     }
 
     function _identityOwner() private view returns (IStreamArtistIdentityRevisionOwner) {
@@ -913,7 +913,7 @@ contract StreamArtistOnboardingRegistry is
         StreamArtistAuthorizationTypes.Revocation calldata p,
         T.Authorization calldata a
     ) external view returns (bytes32) {
-        return StreamArtistAuthorizationState.digest(_environment(), p, a);
+        _forwardRegistryRead();
     }
 
     function artistAuthorizationState(bytes32 artistId, bytes32 digest, uint256 nonce)
@@ -1137,7 +1137,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bytes32)
     {
-        return StreamArtistBindingOperations.refusalDigest(_environment(), p, a);
+        _forwardRegistryRead();
     }
 
     function bindingTermination(uint256 collectionId, uint64 generation)
@@ -1555,7 +1555,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bytes32)
     {
-        return StreamArtistHashes.payoutDigest(_environment(), p, a);
+        _forwardRegistryRead();
     }
 
     function attestationDigest(T.Attestation calldata p, T.Authorization calldata a)
@@ -1563,7 +1563,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bytes32)
     {
-        return StreamArtistHashes.attestationDigest(_environment(), p, a);
+        _forwardRegistryRead();
     }
 
     function contentRatificationDigest(T.Ratification calldata p, T.Authorization calldata a)
@@ -1571,16 +1571,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bytes32)
     {
-        return StreamArtistHashes.ratificationDigest(_environment(), p, a);
-    }
-
-    function _environment() private view returns (StreamArtistHashes.Environment memory) {
-        return StreamArtistHashes.Environment(
-            StreamArtistOnboardingCoordinator(operationCoordinator).deploymentChainId(),
-            address(this),
-            core,
-            mintManager
-        );
+        _forwardRegistryRead();
     }
 
     function _reads() private view returns (StreamArtistOnboardingReads) {

@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistRegistryAuthorityEncoding.sol";
+import "./StreamArtistRegistryPresentationEncoding.sol";
 import "../../interfaces/stream/artist/IStreamArtistPlatformWorks.sol";
 import "../../interfaces/stream/artist/IStreamArtistDisplayFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionClaims.sol";
@@ -30,6 +32,7 @@ import {
 /// @dev Static calls originate from the bound facade; these selected reads never consume caller authority.
 contract StreamArtistRegistryReadExtension {
     error ExtensionWrongHost(address actual);
+    error InvalidAttribution(uint256 collectionId);
     address private immutable _host;
     address private immutable operationCoordinator;
 
@@ -53,8 +56,10 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (P.Evidence memory)
     {
-        return StreamArtistRecordPublicationReads.requirePublication(
-            _contentSuite(), recordHash, publication
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.requireRecordPublication(
+                _host, operationCoordinator, recordHash, publication
+            )
         );
     }
 
@@ -73,7 +78,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (address, uint64, bytes32)
     {
-        return IStreamArtistEstateOwner(_contentSuite().owners[2]).estateActivationState(artistId);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.estateActivationState(
+                _host, operationCoordinator, artistId
+            )
+        );
     }
 
     function estateActivationRecord(bytes32 record)
@@ -82,7 +91,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (Estate.RequestRecord memory, uint8, Estate.ExecutionFacts memory)
     {
-        return IStreamArtistEstateOwner(_contentSuite().owners[2]).estateActivationRecord(record);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.estateActivationRecord(
+                _host, operationCoordinator, record
+            )
+        );
     }
 
     function estateActivationNonceHint(bytes32 artistId, address successor)
@@ -91,8 +104,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (uint256)
     {
-        return IStreamArtistEstateOwner(_contentSuite().owners[2])
-            .estateActivationNonceHint(artistId, successor);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.estateActivationNonceHint(
+                _host, operationCoordinator, artistId, successor
+            )
+        );
     }
 
     function currentAuthorityCapabilities(bytes32 artistId)
@@ -101,8 +117,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (Estate.AuthorityCapabilities memory)
     {
-        return IStreamArtistEstateOwner(_contentSuite().owners[2])
-            .currentAuthorityCapabilities(artistId);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.currentAuthorityCapabilities(
+                _host, operationCoordinator, artistId
+            )
+        );
     }
 
     function estateAccelerationContext(Estate.Execution calldata p)
@@ -111,8 +130,10 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (Estate.AccelerationContext memory)
     {
-        return StreamArtistEstateOperations.acceleration(
-            D.CoordinatorContext(_contentSuite(), address(0), bytes32(0)), p
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.estateAccelerationContext(
+                _host, operationCoordinator, p
+            )
         );
     }
 
@@ -122,30 +143,19 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (bytes32, uint64, bytes32, address, uint8, uint8, uint32)
     {
-        T.SuiteConfiguration memory s = _contentSuite();
-        (uint8 state, uint64 generation, bytes32 artistId,, bytes32 hash) =
-            StreamArtistSaleOperations.attributionState(s, collectionId);
-        T.Binding memory b = IStreamArtistBindingOwner(s.owners[0]).binding(collectionId);
-        if (
-            !StreamArtistAttributionPolicy.acceptedOrSanctioned(state) || !b.accepted
-                || artistId == bytes32(0) || hash == bytes32(0) || generation != b.generation
-                || hash != b.bindingHash || artistId != b.artistId
-        ) revert T.InvalidAttribution(collectionId);
-        Estate.AuthorityCapabilities memory f =
-            IStreamArtistEstateOwner(s.owners[2]).currentAuthorityCapabilities(artistId);
-        return (
-            artistId,
-            generation,
-            hash,
-            f.authorityAddress,
-            f.authorityClass,
-            f.status,
-            f.effectiveCapabilities
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.collectionArtistAuthority(
+                _host, operationCoordinator, collectionId
+            )
         );
     }
 
     function platformWorksState(uint256 id) external view onlyHost returns (PW.State memory) {
-        return _platformOwner().platformWorksState(id);
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.platformWorksState(
+                _host, operationCoordinator, id
+            )
+        );
     }
 
     function platformWorksDeclaration(uint256 id)
@@ -154,17 +164,25 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (bool, bytes32, uint64)
     {
-        PW.State memory p = _platformOwner().platformWorksState(id);
-        return (p.declaration.recordHash != 0, p.declaration.recordHash, p.declaration.declaredAt);
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.platformWorksDeclaration(
+                _host, operationCoordinator, id
+            )
+        );
     }
 
     function platformWorksContest(uint256 id) external view onlyHost returns (uint8, bytes32) {
-        PW.State memory p = _platformOwner().platformWorksState(id);
-        return (p.contestState, p.contestClaim);
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.platformWorksContest(
+                _host, operationCoordinator, id
+            )
+        );
     }
 
     function displayBinding(uint256 id) external view onlyHost returns (T.Binding memory) {
-        return IStreamArtistBindingOwner(_contentSuite().owners[0]).binding(id);
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.displayBinding(_host, operationCoordinator, id)
+        );
     }
 
     function artistAttestationStatus(uint256 id, uint8 kind, bytes32 subjectId, bytes32 currentHash)
@@ -173,8 +191,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (uint8, bytes32, bytes32, uint8, uint64)
     {
-        return IStreamArtistDisplayFacts(_contentSuite().owners[4])
-            .artistAttestationStatus(id, kind, subjectId, currentHash);
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.artistAttestationStatus(
+                _host, operationCoordinator, id, kind, subjectId, currentHash
+            )
+        );
     }
 
     function displaySanction(StreamFinalityScope calldata scope)
@@ -183,11 +204,19 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (S.Record memory)
     {
-        return StreamArtistSanctionReads.currentRecord(_contentSuite(), scope);
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.displaySanction(
+                _host, operationCoordinator, scope
+            )
+        );
     }
 
     function attributionClaims(uint256 id) external view onlyHost returns (uint256, bytes32) {
-        return IStreamArtistDisplayFacts(_contentSuite().owners[4]).attributionClaims(id);
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.attributionClaims(
+                _host, operationCoordinator, id
+            )
+        );
     }
 
     function deploymentAttestation(uint256 id)
@@ -196,12 +225,19 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (bytes32, uint8, uint64)
     {
-        return IStreamArtistDisplayFacts(_contentSuite().owners[4]).deploymentAttestation(id);
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.deploymentAttestation(
+                _host, operationCoordinator, id
+            )
+        );
     }
 
     function attestationAuthorityClass(bytes32 record) external view onlyHost returns (uint8) {
-        return
-            IStreamArtistDisplayFacts(_contentSuite().owners[4]).attestationAuthorityClass(record);
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.attestationAuthorityClass(
+                _host, operationCoordinator, record
+            )
+        );
     }
 
     function attributionClaimRecord(bytes32 record)
@@ -210,18 +246,27 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (StreamArtistAttributionClaimTypes.Claim memory)
     {
-        return IStreamArtistAttributionClaimsOwner(_contentSuite().owners[4])
-            .attributionClaimRecord(record);
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.attributionClaimRecord(
+                _host, operationCoordinator, record
+            )
+        );
     }
 
     function platformWorksClaims(uint256 id) external view onlyHost returns (uint256, bytes32) {
-        PW.State memory p = _platformOwner().platformWorksState(id);
-        return (p.claimCount, p.latestClaim);
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.platformWorksClaims(
+                _host, operationCoordinator, id
+            )
+        );
     }
 
     function platformWorksCorrection(uint256 id) external view onlyHost returns (uint64, bytes32) {
-        PW.State memory p = _platformOwner().platformWorksState(id);
-        return (p.correction.correctiveGeneration, p.correction.approvalActionId);
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.platformWorksCorrection(
+                _host, operationCoordinator, id
+            )
+        );
     }
 
     function platformWorksClaimRecord(bytes32 hash)
@@ -230,7 +275,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (PW.Claim memory)
     {
-        return _platformOwner().platformWorksClaimRecord(hash);
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.platformWorksClaimRecord(
+                _host, operationCoordinator, hash
+            )
+        );
     }
 
     function platformWorksContestRecord(bytes32 hash)
@@ -239,7 +288,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (PW.Contest memory)
     {
-        return _platformOwner().platformWorksContestRecord(hash);
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.platformWorksContestRecord(
+                _host, operationCoordinator, hash
+            )
+        );
     }
 
     function platformWorksContext(
@@ -250,8 +303,11 @@ contract StreamArtistRegistryReadExtension {
         bytes32 reason,
         bool correction
     ) external view onlyHost returns (PW.Context memory) {
-        return IStreamArtistPlatformCoordinator(operationCoordinator)
-            .platformWorksContext(id, state, claim_, evidence, reason, correction);
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.platformWorksContext(
+                _host, operationCoordinator, id, state, claim_, evidence, reason, correction
+            )
+        );
     }
 
     function _platformOwner() private view returns (IStreamArtistPlatformOwner) {
@@ -276,15 +332,27 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (address, uint8, uint32, bytes32, bytes32, uint256)
     {
-        return _successionOwner().successorDesignation(artistId);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.successorDesignation(
+                _host, operationCoordinator, artistId
+            )
+        );
     }
 
     function operativeSuccessorRecord(bytes32 artistId) external view onlyHost returns (bytes32) {
-        return _successionOwner().operativeSuccessorRecord(artistId);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.operativeSuccessorRecord(
+                _host, operationCoordinator, artistId
+            )
+        );
     }
 
     function operativeEstateDirective(bytes32 artistId) external view onlyHost returns (bytes32) {
-        return _successionOwner().operativeEstateDirective(artistId);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.operativeEstateDirective(
+                _host, operationCoordinator, artistId
+            )
+        );
     }
 
     function successorDesignationRecord(bytes32 record)
@@ -293,7 +361,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (Succ.DesignationRecord memory)
     {
-        return _successionOwner().successorDesignationRecord(record);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.successorDesignationRecord(
+                _host, operationCoordinator, record
+            )
+        );
     }
 
     function estateDirectiveRecord(bytes32 record)
@@ -302,11 +374,19 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (Succ.DirectiveRecord memory)
     {
-        return _successionOwner().estateDirectiveRecord(record);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.estateDirectiveRecord(
+                _host, operationCoordinator, record
+            )
+        );
     }
 
     function estateDirectivePayload(bytes32 record) external view onlyHost returns (bytes memory) {
-        return _successionOwner().estateDirectivePayload(record);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.estateDirectivePayload(
+                _host, operationCoordinator, record
+            )
+        );
     }
 
     function successorDesignationDigest(Succ.Designation calldata p, T.Authorization calldata a)
@@ -347,8 +427,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (Dismissal.Context memory)
     {
-        return IStreamArtistIdentityDismissalOwner(_contentSuite().owners[2])
-            .identityContestDismissalContext(p);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.identityContestDismissalContext(
+                _host, operationCoordinator, p
+            )
+        );
     }
 
     function currentIdentityContestCause(bytes32 artistId)
@@ -357,8 +440,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (Dismissal.Cause memory)
     {
-        return IStreamArtistIdentityDismissalOwner(_contentSuite().owners[2])
-            .currentIdentityContestCause(artistId);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.currentIdentityContestCause(
+                _host, operationCoordinator, artistId
+            )
+        );
     }
 
     function identityContestCause(bytes32 causeHash)
@@ -367,8 +453,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (Dismissal.Cause memory)
     {
-        return IStreamArtistIdentityDismissalOwner(_contentSuite().owners[2])
-            .identityContestCause(causeHash);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.identityContestCause(
+                _host, operationCoordinator, causeHash
+            )
+        );
     }
 
     function identityContestDismissalRecord(bytes32 recordHash)
@@ -377,8 +466,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (Dismissal.Record memory)
     {
-        return IStreamArtistIdentityDismissalOwner(_contentSuite().owners[2])
-            .identityContestDismissalRecord(recordHash);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.identityContestDismissalRecord(
+                _host, operationCoordinator, recordHash
+            )
+        );
     }
 
     function latestIdentityContestDismissal(bytes32 artistId)
@@ -387,8 +479,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (bytes32)
     {
-        return IStreamArtistIdentityDismissalOwner(_contentSuite().owners[2])
-            .latestIdentityContestDismissal(artistId);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.latestIdentityContestDismissal(
+                _host, operationCoordinator, artistId
+            )
+        );
     }
 
     function identityTransitionClosure(bytes32 artistId, bytes32 transitionRecordHash)
@@ -397,8 +492,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (Dismissal.Closure memory)
     {
-        return IStreamArtistIdentityDismissalOwner(_contentSuite().owners[2])
-            .identityTransitionClosure(artistId, transitionRecordHash);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.identityTransitionClosure(
+                _host, operationCoordinator, artistId, transitionRecordHash
+            )
+        );
     }
 
     function identityRevisionContinuation(bytes32 continuationHash)
@@ -407,8 +505,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (Dismissal.RevisionContinuation memory)
     {
-        return IStreamArtistIdentityDismissalOwner(_contentSuite().owners[2])
-            .identityRevisionContinuation(continuationHash);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.identityRevisionContinuation(
+                _host, operationCoordinator, continuationHash
+            )
+        );
     }
 
     function identityContestRecord(bytes32 record)
@@ -417,13 +518,19 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (Contest.Record memory)
     {
-        return IStreamArtistIdentityContestOwner(_contentSuite().owners[2])
-            .identityContestRecord(record);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.identityContestRecord(
+                _host, operationCoordinator, record
+            )
+        );
     }
 
     function latestIdentityContest(bytes32 artistId) external view onlyHost returns (bytes32) {
-        return IStreamArtistIdentityContestOwner(_contentSuite().owners[2])
-            .latestIdentityContest(artistId);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.latestIdentityContest(
+                _host, operationCoordinator, artistId
+            )
+        );
     }
 
     function identityContestGovernanceContext(
@@ -432,10 +539,16 @@ contract StreamArtistRegistryReadExtension {
         bytes32 evidenceHash,
         bytes32 reasonHash
     ) external view onlyHost returns (bytes32, bytes32, bytes32) {
-        return IStreamArtistIdentityContestOwner(_contentSuite().owners[2])
-            .identityContestContext(
-                Contest.Request(artistId, subjectRecordHash, evidenceHash, reasonHash)
-            );
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.identityContestGovernanceContext(
+                    _host,
+                    operationCoordinator,
+                    artistId,
+                    subjectRecordHash,
+                    evidenceHash,
+                    reasonHash
+                )
+        );
     }
 
     function guardianSetRecord(bytes32 record)
@@ -444,7 +557,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (R.GuardianRecord memory)
     {
-        return _rotationOwner().guardianSetRecord(record);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.guardianSetRecord(
+                _host, operationCoordinator, record
+            )
+        );
     }
 
     function rotationRecord(bytes32 record)
@@ -453,7 +570,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (R.RotationRecord memory)
     {
-        return _rotationOwner().rotationRecord(record);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.rotationRecord(
+                _host, operationCoordinator, record
+            )
+        );
     }
 
     function standingRevocationRecord(bytes32 record)
@@ -462,7 +583,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (R.StandingRecord memory)
     {
-        return _rotationOwner().standingRevocationRecord(record);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.standingRevocationRecord(
+                _host, operationCoordinator, record
+            )
+        );
     }
 
     function _identityOwner() private view returns (IStreamArtistIdentityRevisionOwner) {
@@ -472,11 +597,19 @@ contract StreamArtistRegistryReadExtension {
     }
 
     function identityRecordBytes(bytes32 artistId) external view onlyHost returns (bytes memory) {
-        return _identityOwner().identityRecordBytes(artistId);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.identityRecordBytes(
+                _host, operationCoordinator, artistId
+            )
+        );
     }
 
     function identityDocumentBytes(bytes32 hash) external view onlyHost returns (bytes memory) {
-        return _identityOwner().identityDocumentBytes(hash);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.identityDocumentBytes(
+                _host, operationCoordinator, hash
+            )
+        );
     }
 
     function artistDisplayName(bytes32 artistId)
@@ -485,7 +618,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (string memory, bytes32)
     {
-        return _identityOwner().artistDisplayName(artistId);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.artistDisplayName(
+                _host, operationCoordinator, artistId
+            )
+        );
     }
 
     function identityRevisionRecord(bytes32 record)
@@ -494,7 +631,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (StreamArtistIdentityRevisionTypes.Record memory)
     {
-        return _identityOwner().identityRevisionRecord(record);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.identityRevisionRecord(
+                _host, operationCoordinator, record
+            )
+        );
     }
 
     function artistAuthorizationState(bytes32 artistId, bytes32 digest, uint256 nonce)
@@ -503,10 +644,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (StreamArtistAuthorizationTypes.State memory)
     {
-        T.SuiteConfiguration memory s =
-            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
-        return IStreamArtistAuthorizationOwner(s.owners[2])
-            .artistAuthorizationState(artistId, digest, nonce);
+        _returnRegistryEncoded(
+            StreamArtistRegistryAuthorityEncoding.artistAuthorizationState(
+                _host, operationCoordinator, artistId, digest, nonce
+            )
+        );
     }
 
     function collaboratorIdentityProposal(address account, bytes32 identityRecordHash)
@@ -515,10 +657,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (C.IdentityProposalState memory)
     {
-        T.SuiteConfiguration memory s =
-            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
-        return IStreamArtistCollaboratorRecordsOwner(s.owners[1])
-            .identityProposal(account, identityRecordHash);
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.collaboratorIdentityProposal(
+                _host, operationCoordinator, account, identityRecordHash
+            )
+        );
     }
 
     function collaboratorAt(uint256 collectionId, uint64 generation, uint256 index)
@@ -527,13 +670,19 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (C.Row memory)
     {
-        return _reads().collaboratorAt(collectionId, generation, index);
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.collaboratorAt(
+                _host, operationCoordinator, collectionId, generation, index
+            )
+        );
     }
 
     function delegationRecord(bytes32 grant) public view onlyHost returns (D.Record memory) {
-        T.SuiteConfiguration memory s =
-            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
-        return IStreamArtistDelegationOwner(s.owners[2]).delegationRecord(grant);
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.delegationRecord(
+                _host, operationCoordinator, grant
+            )
+        );
     }
 
     function delegationState(bytes32 grant)
@@ -542,24 +691,10 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (bool, address, uint256, uint32, uint64, uint64, uint64)
     {
-        D.Record memory item = delegationRecord(grant);
-        T.SuiteConfiguration memory suite =
-            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
-        (bool currentEpoch,,) =
-            IStreamArtistEstateOwner(suite.owners[2]).delegationEpochState(grant);
-        uint64 remaining = item.grantor == address(0)
-            ? 0
-            : item.grant.maxUses == 0
-                ? type(uint64).max
-                : uint64(uint256(item.grant.maxUses) - item.uses);
-        return (
-            currentEpoch && StreamArtistDelegationState.active(item),
-            item.grant.delegate,
-            item.grant.collectionId,
-            item.grant.capabilities,
-            item.grant.notBefore,
-            item.grant.expiresAt,
-            currentEpoch ? remaining : 0
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.delegationState(
+                _host, operationCoordinator, grant
+            )
         );
     }
 
@@ -569,10 +704,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (L.Terminal memory)
     {
-        T.SuiteConfiguration memory s =
-            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
-        return IStreamArtistBindingTerminationOwner(s.owners[0])
-            .bindingTermination(collectionId, generation);
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.bindingTermination(
+                _host, operationCoordinator, collectionId, generation
+            )
+        );
     }
 
     function _reads() private view returns (StreamArtistOnboardingReads) {
@@ -585,11 +721,11 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (bool, bytes32, bytes32)
     {
-        T.SuiteConfiguration memory s =
-            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
-        T.RatificationRecord memory r =
-            IStreamArtistConsentOwner(s.owners[6]).firstReleaseRatification(collectionId);
-        return (r.recordHash != bytes32(0), r.contentStateHash, r.recordHash);
+        _returnRegistryEncoded(
+            StreamArtistRegistryPresentationEncoding.firstReleaseRatification(
+                _host, operationCoordinator, collectionId
+            )
+        );
     }
 
     function acceptanceDigest(uint256 collectionId, T.Authorization calldata a)
@@ -634,5 +770,95 @@ contract StreamArtistRegistryReadExtension {
             s.core,
             s.mintManager
         );
+    }
+
+    function guardianSetDigest(R.GuardianSet calldata p, T.Authorization calldata a)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        return StreamArtistRotationHashes.guardianDigest(_environment(), p, a);
+    }
+
+    function rotationDigest(R.Rotation calldata p, T.Authorization calldata a)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        return StreamArtistRotationHashes.rotationDigest(_environment(), p, a);
+    }
+
+    function rotationAcceptanceDigest(R.Rotation calldata p, T.Authorization calldata a)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        return StreamArtistRotationHashes.acceptanceDigest(_environment(), p, a);
+    }
+
+    function standingRevocationDigest(R.StandingRevocation calldata p, T.Authorization calldata a)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        return StreamArtistRotationHashes.standingDigest(_environment(), p, a);
+    }
+
+    function identityRevisionDigest(
+        StreamArtistIdentityRevisionTypes.Revision calldata p,
+        T.Authorization calldata a
+    ) external view onlyHost returns (bytes32) {
+        return StreamArtistIdentityRevisionState.digest(_environment(), p, a);
+    }
+
+    function authorizationRevocationDigest(
+        StreamArtistAuthorizationTypes.Revocation calldata p,
+        T.Authorization calldata a
+    ) external view onlyHost returns (bytes32) {
+        return StreamArtistAuthorizationState.digest(_environment(), p, a);
+    }
+
+    function bindingRefusalDigest(L.Termination calldata p, T.Authorization calldata a)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        return StreamArtistBindingOperations.refusalDigest(_environment(), p, a);
+    }
+
+    function payoutDesignationDigest(T.PayoutDesignation calldata p, T.Authorization calldata a)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        return StreamArtistHashes.payoutDigest(_environment(), p, a);
+    }
+
+    function attestationDigest(T.Attestation calldata p, T.Authorization calldata a)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        return StreamArtistHashes.attestationDigest(_environment(), p, a);
+    }
+
+    function contentRatificationDigest(T.Ratification calldata p, T.Authorization calldata a)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        return StreamArtistHashes.ratificationDigest(_environment(), p, a);
+    }
+
+    function _returnRegistryEncoded(bytes memory encoded) private pure {
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 }

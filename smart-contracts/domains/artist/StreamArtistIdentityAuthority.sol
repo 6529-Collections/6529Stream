@@ -839,15 +839,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (address, address, uint64, uint32, bytes32)
     {
-        bytes32 record = _rotations.pending[artistId];
-        R.RotationRecord storage r = _rotations.rotations[record];
-        return (
-            r.terms.oldAddress,
-            r.terms.newAddress,
-            r.transition.contestEndsAt,
-            r.guardianApprovals,
-            record
-        );
+        _returnResolution(StreamArtistIdentityResolutionReads.pendingRotation(_rotations, artistId));
     }
 
     function priorAddressStandingRevoked(bytes32 artistId, address account)
@@ -873,7 +865,9 @@ contract StreamArtistIdentityAuthority is
         view
         returns (R.StandingRecord memory)
     {
-        return _rotations.standingRecords[record];
+        _returnResolution(
+            StreamArtistIdentityResolutionReads.standingRevocationRecord(_rotations, record)
+        );
     }
 
     function artistTransitionState(bytes32 record)
@@ -881,26 +875,11 @@ contract StreamArtistIdentityAuthority is
         view
         returns (R.TransitionState memory)
     {
-        if (record == bytes32(0)) {
-            R.TransitionState memory empty;
-            return empty;
-        }
-        bool rotation = _rotations.rotations[record].recordHash == record;
-        bool estate = _estate.requests[record].recordHash == record;
-        bool recovered = _identityRecovery.records[record].recordHash == record;
-        if ((rotation ? 1 : 0) + (estate ? 1 : 0) + (recovered ? 1 : 0) != 1) {
-            revert R.InvalidRotation(record);
-        }
-        R.TransitionState memory t = rotation
-            ? _rotations.rotations[record].transition
-            : estate ? _estate.transitions[record] : _identityRecovery.transitions[record];
-        if (recovered && t.artistId != _identityRecovery.records[record].fields.artistId) {
-            revert R.InvalidRotation(record);
-        }
-        if (t.recordHash != record || t.artistId == bytes32(0) || t.phase == 0) {
-            revert R.InvalidRotation(record);
-        }
-        return t;
+        _returnResolution(
+            StreamArtistIdentityResolutionReads.artistTransitionState(
+                    _rotations, _estate, _identityRecovery, record
+                )
+        );
     }
 
     function lastArtistTransition(bytes32 artistId) external view returns (bytes32) {

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistDelegatedMutation.sol";
 import { StreamArtistGuardianAdmissionMutation } from "./StreamArtistGuardianAdmissionMutation.sol";
 import {
     StreamArtistGuardianSupersession as GuardianSupersession
@@ -46,8 +47,11 @@ contract StreamArtistIdentityEstateExtension is
     IStreamArtistUnavailabilityEvents
 {
     error ExtensionWrongHost(address actual);
+    error ExpiredAuthorization(uint64 deadline);
+    error InvalidRecord();
     /// @dev Retained ABI entry for the error bubbled by the linked execution mutation.
     error InvalidEstateAcceleration();
+    error DelegationUnavailable(bytes32 recordHash);
     address private immutable _host;
 
     constructor(
@@ -85,23 +89,24 @@ contract StreamArtistIdentityEstateExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32 record) {
         _check(c, 24);
-        if (a.time == 0 || a.time > block.timestamp || p.subjectKind == 0 || p.subjectKind > 10) {
-            revert T.InvalidRecord();
-        }
-        record = StreamArtistHashes.attestationRecordForAuthority(
-            _environment(), p, b.artistId, proof.signer, 2, a.nonce, a.time
-        );
-        _authorizeDelegate(
+        (StreamArtistIdentityState.Mutation memory m, bytes32 outputRecord) = StreamArtistDelegatedMutation.consumeDelegatedAttestation(
+            _estate,
+            _succession,
+            _rotations,
+            _identity,
+            _delegations,
+            _unavailability,
+            _replay,
+            _ownerContext(),
             c,
             b,
-            p.collectionId,
-            p.subjectKind == 7 ? D.INTENT : D.ATTEST,
+            p,
             grant,
             a,
-            proof,
-            StreamArtistHashes.attestationDigest(_environment(), p, a),
-            record
+            proof
         );
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return outputRecord;
     }
 
     function consumeDelegatedEconomics(
@@ -114,22 +119,25 @@ contract StreamArtistIdentityEstateExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32 record) {
         _check(c, 15);
-        _deadline(a.time);
-        if (designation == bytes32(0)) revert T.InvalidRecord();
-        record = StreamArtistEconomicsHashes.economicsRecordForAuthority(
-            _environment(), p, designation, b.artistId, proof.signer, 2, a.nonce, _now()
-        );
-        _authorizeDelegate(
+        (StreamArtistIdentityState.Mutation memory m, bytes32 outputRecord) = StreamArtistDelegatedMutation.consumeDelegatedEconomics(
+            _estate,
+            _succession,
+            _rotations,
+            _identity,
+            _delegations,
+            _unavailability,
+            _replay,
+            _ownerContext(),
             c,
             b,
-            p.collectionId,
-            D.ECONOMICS,
+            p,
+            designation,
             grant,
             a,
-            proof,
-            StreamArtistEconomicsHashes.economicsDigest(_environment(), p, a.nonce, a.time),
-            record
+            proof
         );
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return outputRecord;
     }
 
     function consumeDelegatedRoyaltyFreeze(
@@ -141,55 +149,24 @@ contract StreamArtistIdentityEstateExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32 record) {
         _check(c, 20);
-        _deadline(a.time);
-        record = StreamArtistEconomicsHashes.royaltyFreezeRecordForAuthority(
-            _environment(), p, b.artistId, proof.signer, 2, a.nonce, _now()
-        );
-        _authorizeDelegate(
-            c,
-            b,
-            p.collectionId,
-            D.ROYALTY_FREEZE,
-            grant,
-            a,
-            proof,
-            StreamArtistEconomicsHashes.royaltyFreezeDigest(_environment(), p, a.nonce, a.time),
-            record
-        );
-    }
-
-    function _authorizeDelegate(
-        T.ActionContext calldata c,
-        T.Binding calldata b,
-        uint256 collectionId,
-        uint32 capability,
-        bytes32 grant,
-        T.Authorization calldata a,
-        T.SignerApproval calldata proof,
-        bytes32 digest,
-        bytes32 record
-    ) private {
-        if (_estate.grantEpoch[grant] != _estate.delegationEpoch[b.artistId]) {
-            revert D.DelegationUnavailable(grant);
-        }
-        StreamArtistSuccessionState.requireAllowed(_succession, _rotations, b.artistId, capability);
-        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityState.authorizeDelegate(
+        (StreamArtistIdentityState.Mutation memory m, bytes32 outputRecord) = StreamArtistDelegatedMutation.consumeDelegatedRoyaltyFreeze(
+            _estate,
+            _succession,
+            _rotations,
             _identity,
-            _replay,
             _delegations,
+            _unavailability,
+            _replay,
             _ownerContext(),
             c,
             b,
-            collectionId,
-            capability,
+            p,
             grant,
             a,
-            proof,
-            digest,
-            record
+            proof
         );
-        _noteFindingActivity(b.artistId, proof.signer, 2, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
+        return outputRecord;
     }
 
     function recordUnavailability(T.ActionContext calldata c, U.Input calldata p)

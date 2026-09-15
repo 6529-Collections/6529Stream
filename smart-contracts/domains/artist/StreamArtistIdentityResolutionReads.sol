@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistIdentityRecoveryState } from "./StreamArtistIdentityRecoveryState.sol";
+import { StreamArtistEstateState } from "./StreamArtistEstateState.sol";
 import "./StreamArtistIdentityDismissalState.sol";
 
 /// @notice Explicit compiler-linked view encoding over the Identity owner's storage.
@@ -104,5 +106,56 @@ library StreamArtistIdentityResolutionReads {
         returns (bytes memory)
     {
         return abi.encode(s.continuations[hash]);
+    }
+
+    function pendingRotation(StreamArtistRotationState.State storage rotations, bytes32 artistId)
+        public
+        view
+        returns (bytes memory)
+    {
+        bytes32 record = rotations.pending[artistId];
+        R.RotationRecord storage r = rotations.rotations[record];
+        return abi.encode(
+            r.terms.oldAddress,
+            r.terms.newAddress,
+            r.transition.contestEndsAt,
+            r.guardianApprovals,
+            record
+        );
+    }
+
+    function standingRevocationRecord(
+        StreamArtistRotationState.State storage rotations,
+        bytes32 record
+    ) public view returns (bytes memory) {
+        return abi.encode(rotations.standingRecords[record]);
+    }
+
+    function artistTransitionState(
+        StreamArtistRotationState.State storage rotations,
+        StreamArtistEstateState.State storage estate_,
+        StreamArtistIdentityRecoveryState.State storage recovery,
+        bytes32 record
+    ) public view returns (bytes memory) {
+        if (record == bytes32(0)) {
+            R.TransitionState memory empty;
+            return abi.encode(empty);
+        }
+        bool rotation = rotations.rotations[record].recordHash == record;
+        bool estate = estate_.requests[record].recordHash == record;
+        bool recovered = recovery.records[record].recordHash == record;
+        if ((rotation ? 1 : 0) + (estate ? 1 : 0) + (recovered ? 1 : 0) != 1) {
+            revert R.InvalidRotation(record);
+        }
+        R.TransitionState memory t = rotation
+            ? rotations.rotations[record].transition
+            : estate ? estate_.transitions[record] : recovery.transitions[record];
+        if (recovered && t.artistId != recovery.records[record].fields.artistId) {
+            revert R.InvalidRotation(record);
+        }
+        if (t.recordHash != record || t.artistId == bytes32(0) || t.phase == 0) {
+            revert R.InvalidRotation(record);
+        }
+        return abi.encode(t);
     }
 }
