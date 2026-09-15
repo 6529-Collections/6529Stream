@@ -19,9 +19,9 @@ import "../../vendor/openzeppelin/ReentrancyGuard.sol";
 import "../modules/StreamModuleBase.sol";
 import "../parameters/StreamTimeParameterHost.sol";
 import "../../interfaces/stream/parameters/IStreamGasParameterHost.sol";
-import "./StreamEntropyIncidentParameters.sol";
-import "./StreamEntropyIncidentEvidence.sol";
-import "./StreamEntropyCoordinatorReads.sol";
+import { StreamEntropyIncidentParameters } from "./StreamEntropyIncidentParameters.sol";
+import { StreamEntropyIncidentEvidence } from "./StreamEntropyIncidentEvidence.sol";
+import { StreamEntropyCoordinatorReads } from "./StreamEntropyCoordinatorReads.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyIncidents.sol";
 
 /// @notice Core-bound asynchronous entropy with immutable request inputs and no ordinary reroll.
