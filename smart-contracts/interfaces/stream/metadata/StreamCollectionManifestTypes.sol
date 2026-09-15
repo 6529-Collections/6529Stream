@@ -27,6 +27,18 @@ library StreamCollectionManifestTypes {
         bool executable;
     }
 
+    /// @notice Canonical selected library payload. Registry provenance is separately pinned in RegistrySource.
+    struct DependencyManifest {
+        bytes32 dependencyId;
+        bytes32 dependencyHash;
+        PayloadSourceType sourceType;
+        string dependencyURI;
+        string sourcePointer;
+        string version;
+        string mimeType;
+        bool useDependencyRegistry;
+    }
+
     struct MediaManifest {
         PayloadSourceType imageSourceType;
         string imageURI;

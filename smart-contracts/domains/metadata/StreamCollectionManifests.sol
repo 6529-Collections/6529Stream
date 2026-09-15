@@ -10,6 +10,7 @@ import {
     IStreamMetadataServingFacts as F
 } from "../../interfaces/stream/metadata/IStreamMetadataServingFacts.sol";
 import "./StreamMetadataRenderer.sol";
+import { StreamScriptBundles } from "./StreamScriptBundles.sol";
 
 /// @notice Typed current-router manifest profile, independent from generic record families.
 library StreamCollectionManifests {
@@ -24,6 +25,7 @@ library StreamCollectionManifests {
         mapping(bytes32 => Entry) entries;
         mapping(bytes32 => M.ScriptManifest) scripts;
         mapping(bytes32 => M.MediaManifest) media;
+        StreamScriptBundles.State bundles;
     }
 
     function script(

@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamScriptBundles as B
+} from "../../interfaces/stream/metadata/IStreamScriptBundles.sol";
 
 import { StreamCollectionMetadataV1 } from "./StreamCollectionMetadataV1.sol";
 import { StreamMetadataGovernance } from "./StreamMetadataGovernance.sol";
 import { StreamRecordFamilies } from "../records/StreamRecordFamilies.sol";
+import { StreamScriptBundles } from "./StreamScriptBundles.sol";
 import { StreamCollectionManifests } from "./StreamCollectionManifests.sol";
 import { StreamSchemaDocumentStore } from "./StreamSchemaDocumentStore.sol";
 import { StreamRecordDocumentReads } from "../records/StreamRecordDocumentReads.sol";
@@ -151,12 +155,16 @@ library StreamCollectionManifestExecution {
         if (selector == W.previewScriptManifest.selector) {
             (uint256 id, M.ScriptManifest memory value) =
                 abi.decode(data[4:], (uint256, M.ScriptManifest));
-            return abi.encode(previewScriptManifest(x, id, value));
+            return abi.encode(previewScriptManifest(_manifests, x, id, value));
         }
         if (selector == W.previewMediaManifest.selector) {
             (uint256 id, M.MediaManifest memory value) =
                 abi.decode(data[4:], (uint256, M.MediaManifest));
             return abi.encode(previewMediaManifest(x, id, value));
+        }
+        if (selector == B.scriptChunkCount.selector) {
+            uint256 id = abi.decode(data[4:], (uint256));
+            return abi.encode(scriptManifest(_manifests, x, id).chunkCount);
         }
         if (selector == R.scriptManifestHash.selector) {
             uint256 id = abi.decode(data[4:], (uint256));
@@ -186,7 +194,7 @@ library StreamCollectionManifestExecution {
             bytes32 hash = abi.decode(data[4:], (bytes32));
             return abi.encode(recordedMediaManifest(_manifests, hash));
         }
-        revert W.InvalidCollectionManifest();
+        return StreamScriptBundles.read(_manifests.bundles, data);
     }
 
     function write(
@@ -205,15 +213,22 @@ library StreamCollectionManifestExecution {
                 abi.decode(data[4:], (uint256, M.MediaManifest));
             return abi.encode(storeMediaManifest(_manifests, x, id, value));
         }
-        revert W.InvalidCollectionManifest();
+        return StreamScriptBundles.write(_manifests.bundles, data);
     }
 
     function previewScriptManifest(
+        StreamCollectionManifests.State storage _manifests,
         Context memory x,
         uint256 collectionId,
         M.ScriptManifest memory value
     ) private view returns (bytes32 hash) {
         address router = _manifestRouter(x, collectionId);
+        if (value.rendererCompatibility == StreamScriptBundles.PROFILE) {
+            (hash,) = StreamScriptBundles.manifest(
+                _manifests.bundles, x.core, router, collectionId, value
+            );
+            return hash;
+        }
         (hash,) = StreamCollectionManifests.script(
             x.core, router, collectionId, value, _manifestSource(x, router, collectionId)
         );
@@ -238,6 +253,20 @@ library StreamCollectionManifestExecution {
     ) private returns (bytes32 hash) {
         address router = _manifestRouter(x, collectionId);
         if (msg.sender != router) revert V.MetadataAuthorityRequired();
+        if (value.rendererCompatibility == StreamScriptBundles.PROFILE) {
+            bytes32 bundle;
+            (hash, bundle) = StreamScriptBundles.manifest(
+                _manifests.bundles, x.core, router, collectionId, value
+            );
+            if (_manifests.entries[hash].router == address(0)) {
+                _manifests.scripts[hash] = value;
+                _manifests.bundles.manifests[hash] = bundle;
+                _manifests.entries[hash] =
+                    StreamCollectionManifests.Entry(collectionId, router, value.scriptHash, 2);
+                emit CollectionManifestStored(1, collectionId, 2, hash, router, value.scriptHash);
+            }
+            return hash;
+        }
         IStreamMetadataServingFacts.ServingSource memory source =
             _manifestSource(x, router, collectionId);
         bytes32 sourceHash;
@@ -311,7 +340,10 @@ library StreamCollectionManifestExecution {
         uint256 index
     ) private view returns (bytes memory) {
         bytes32 hash = _selectedManifest(_manifests, x, collectionId, 2);
-        if (hash == 0 || index != 0) revert W.UnknownCollectionManifest(hash);
+        if (hash == 0) revert W.UnknownCollectionManifest(hash);
+        bytes32 bundle = _manifests.bundles.manifests[hash];
+        if (bundle != 0) return StreamScriptBundles.chunk(_manifests.bundles, bundle, index);
+        if (index != 0) revert W.UnknownCollectionManifest(hash);
         return _chunk(x, _manifests.scripts[hash].scriptHash);
     }
 

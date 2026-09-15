@@ -1,5 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamScriptBundles as B,
+    IStreamScriptBundleSelection
+} from "../../interfaces/stream/metadata/IStreamScriptBundles.sol";
+import {
+    StreamMetadataDisplayParameters as BundleGas
+} from "./StreamMetadataDisplayParameters.sol";
+import { StreamMetadataBundleRenderer } from "./StreamMetadataBundleRenderer.sol";
+import { StreamMetadataTokenRenderer } from "./StreamMetadataTokenRenderer.sol";
 
 import "./StreamMetadataRecoveryRoutes.sol";
 import "../finality/StreamFinalityEntropyServing.sol";
@@ -23,6 +32,7 @@ library StreamMetadataFinalityServing {
         address renderer;
         IStreamMetadataServingFacts.ServingSource metadata;
         bytes artist;
+        B.Selection bundle;
     }
     error MetadataFrozenProfileUnsupported(address target);
     error MetadataFrozenBytesInvalid(address target);
@@ -48,14 +58,34 @@ library StreamMetadataFinalityServing {
         );
         if (!active) return (false, "");
         Sources memory s = _sources(c, true);
-        return (true, _render(c, serial, s, asURI));
+        return (true, _render(c, serial, s, asURI ? 1 : 0));
+    }
+
+    function fullToken(
+        mapping(uint256 => IStreamMetadataServingFacts.ArtistPresentation) storage presentations,
+        mapping(uint256 => StreamMetadataRecoveryRoutes.OriginalAnchor) storage anchors,
+        StreamMetadataRecoveryRoutes.Environment memory e,
+        StreamMetadataRecoveryRoutes.OriginalAnchor memory durable,
+        uint256 id,
+        bool asHTML
+    ) public view returns (bool frozen, string memory result) {
+        (uint256 collection, uint256 serial) = _identity(e.core, id, true);
+        (StreamMetadataRecoveryRoutes.Context memory c, bool active) = StreamMetadataRecoveryRoutes.context(
+            e,
+            presentations[collection].locked,
+            anchors[collection],
+            durable,
+            StreamFinalityScope(StreamFinalityScopeType.TOKEN, collection, id, 0)
+        );
+        if (!active) return (false, "");
+        return (true, _render(c, serial, _sources(c, true), asHTML ? 3 : 2));
     }
 
     function _render(
         StreamMetadataRecoveryRoutes.Context memory c,
         uint256 serial,
         Sources memory s,
-        bool asURI
+        uint8 mode
     ) private view returns (string memory result) {
         uint256 id = c.scope.tokenId;
         (address entropy, address entropyAdapter) = StreamMetadataRecoveryRoutes.hostWithAdapter(
@@ -73,11 +103,55 @@ library StreamMetadataFinalityServing {
         StreamMetadataRenderTypes.Token memory input = StreamMetadataRenderTypes.Token(
             id, c.scope.collectionId, serial, seed, true, "final", data, true
         );
-        bytes memory callData = abi.encodeCall(
-            IStreamMetadataTokenRendering.renderForFinality,
-            (asURI, abi.encode(input, s.metadata, s.artist))
-        );
-        bytes memory raw = _dynamic(s.renderer, callData, 65536, RENDER_GAS);
+        if (mode >= 2) {
+            (,,, bool burned) = abi.decode(
+                StreamMetadataRecoveryRoutes.read(
+                    c.core,
+                    abi.encodeCall(IStreamCoreIdentity.tokenCollectionIdentity, (id)),
+                    128,
+                    150000
+                ),
+                (bool, uint256, uint256, bool)
+            );
+            if (burned) input.state = "burned";
+        }
+        // Keep the legacy default call and its exact bytes untouched. Full views and
+        // bundle views use separate, explicit selectors and larger bounded output envelopes.
+        bytes memory callData;
+        if (s.bundle.bundleId != 0) {
+            callData = abi.encodeWithSignature(
+                "renderBundleForFinality(uint8,bytes)",
+                mode,
+                abi.encode(
+                    input,
+                    s.metadata,
+                    s.artist,
+                    s.bundle,
+                    address(this),
+                    block.chainid,
+                    BundleGas.value(BundleGas.BUNDLE_READ_GAS)
+                )
+            );
+        } else if (mode >= 2) {
+            callData = abi.encodeWithSignature(
+                "fullViewForFinality(bool,bytes)",
+                mode == 3,
+                abi.encode(input, s.metadata, s.artist)
+            );
+        } else {
+            callData = abi.encodeCall(
+                IStreamMetadataTokenRendering.renderForFinality,
+                (mode == 1, abi.encode(input, s.metadata, s.artist))
+            );
+        }
+        bytes memory raw = mode >= 2
+            ? _fullDynamic(s.renderer, callData, BundleGas.value(BundleGas.FULL_VIEW_GAS))
+            : _dynamic(
+                s.renderer,
+                callData,
+                65536,
+                s.bundle.bundleId != 0 ? BundleGas.value(BundleGas.BUNDLE_RENDER_GAS) : RENDER_GAS
+            );
         result = abi.decode(raw, (string));
         if (keccak256(raw) != keccak256(abi.encode(result))) {
             revert MetadataFrozenBytesInvalid(s.renderer);
@@ -137,7 +211,14 @@ library StreamMetadataFinalityServing {
         if (!tokenView) return s;
         s.renderer = _renderer(c, id);
         if (display.mode == keccak256("ONCHAIN")) {
-            s.metadata.script = _script(c, id, s.renderer);
+            address scriptHost =
+                StreamMetadataRecoveryRoutes.host(c, StreamFinalityDomains.COMPONENT_SCRIPT_SOURCE);
+            if (_facts(scriptHost, id).presentationProfile == StreamMetadataBundleRenderer.PROFILE)
+            {
+                s.bundle = _bundle(c, id, scriptHost, s.renderer);
+            } else {
+                s.metadata.script = _script(c, id, s.renderer);
+            }
         } else if (display.mode != keccak256("OFFCHAIN")) {
             revert MetadataFrozenProfileUnsupported(s.display);
         }
@@ -174,11 +255,76 @@ library StreamMetadataFinalityServing {
         if (renderer.code.length == 0 || rendering.rendererCodeHash != renderer.codehash) {
             revert MetadataFrozenProfileUnsupported(rendererHost);
         }
+        if (rendering.presentationProfile == StreamMetadataBundleRenderer.PROFILE) {
+            address context = StreamMetadataRecoveryRoutes.host(
+                c, StreamFinalityDomains.COMPONENT_RENDER_CONTEXT
+            );
+            if (_facts(context, id).presentationProfile != StreamMetadataBundleRenderer.PROFILE) {
+                revert MetadataFrozenProfileUnsupported(context);
+            }
+            bytes memory actual = StreamMetadataRecoveryRoutes.read(
+                renderer, abi.encodeWithSignature("renderingProfile()"), 96, 150000
+            );
+            (bytes32 p, bytes32 h, bytes32 d) = StreamMetadataBundleRenderer.renderingProfile();
+            if (keccak256(actual) != keccak256(abi.encode(p, h, d))) {
+                revert MetadataFrozenProfileUnsupported(renderer);
+            }
+            return renderer;
+        }
         (bytes32 contextHash,) = _profile(renderer);
         address contextHost =
             StreamMetadataRecoveryRoutes.host(c, StreamFinalityDomains.COMPONENT_RENDER_CONTEXT);
         (bytes32 selectedContext,) = _profile(contextHost);
         if (selectedContext != contextHash) revert MetadataFrozenProfileUnsupported(contextHost);
+    }
+
+    function _bundle(
+        StreamMetadataRecoveryRoutes.Context memory c,
+        uint256 id,
+        address scriptHost,
+        address renderer
+    ) private view returns (B.Selection memory selection) {
+        IStreamMetadataServingFacts.ServingFacts memory f = _facts(scriptHost, id);
+        if (!f.scriptLocked || !f.dependenciesLocked) {
+            revert MetadataFrozenProfileUnsupported(scriptHost);
+        }
+        selection = abi.decode(
+            StreamMetadataRecoveryRoutes.read(
+                scriptHost,
+                abi.encodeCall(IStreamScriptBundleSelection.collectionScriptBundle, (id)),
+                128,
+                SOURCE_GAS
+            ),
+            (B.Selection)
+        );
+        B.Facts memory b = StreamMetadataBundleRenderer.facts(selection);
+        if (b.payloadHash != f.scriptHash || b.totalBytes != f.scriptBytes) {
+            revert MetadataFrozenBytesInvalid(scriptHost);
+        }
+        address dependencyHost =
+            StreamMetadataRecoveryRoutes.host(c, StreamFinalityDomains.COMPONENT_DEPENDENCY_SOURCE);
+        IStreamMetadataServingFacts.ServingFacts memory dependencies = _facts(dependencyHost, id);
+        B.Selection memory dep = abi.decode(
+            StreamMetadataRecoveryRoutes.read(
+                dependencyHost,
+                abi.encodeCall(IStreamScriptBundleSelection.collectionScriptBundle, (id)),
+                128,
+                SOURCE_GAS
+            ),
+            (B.Selection)
+        );
+        B.Facts memory df = StreamMetadataBundleRenderer.facts(dep);
+        if (
+            !dependencies.dependenciesLocked || dep.host != selection.host
+                || dep.codeHash != selection.codeHash || df.libraryBundle != b.libraryBundle
+        ) revert MetadataFrozenProfileUnsupported(dependencyHost);
+        bytes memory actual = StreamMetadataRecoveryRoutes.read(
+            renderer, abi.encodeWithSignature("renderingProfile()"), 96, 150000
+        );
+        (bytes32 p, bytes32 h, bytes32 d) = StreamMetadataBundleRenderer.renderingProfile();
+        if (keccak256(actual) != keccak256(abi.encode(p, h, d))) {
+            revert MetadataFrozenProfileUnsupported(renderer);
+        }
     }
 
     function _script(StreamMetadataRecoveryRoutes.Context memory c, uint256 id, address renderer)
@@ -241,7 +387,11 @@ library StreamMetadataFinalityServing {
             ),
             (IStreamMetadataServingFacts.ServingFacts)
         );
-        if (f.presentationProfile != PROFILE || !f.configured) {
+        if (
+            (f.presentationProfile != PROFILE
+                    && f.presentationProfile != StreamMetadataBundleRenderer.PROFILE)
+                || !f.configured
+        ) {
             revert MetadataFrozenProfileUnsupported(host);
         }
     }
@@ -290,6 +440,27 @@ library StreamMetadataFinalityServing {
             !exists || cid == 0 || serial == 0 || (burned && !allowBurned)
                 || (burned ? lifecycle != 3 : lifecycle != 2)
         ) revert InvalidToken(id);
+    }
+
+    function _fullDynamic(address target, bytes memory input, uint256 cap)
+        private
+        view
+        returns (bytes memory output)
+    {
+        uint256 required = cap + cap / 63 + 1000000;
+        if (gasleft() <= required) {
+            revert StreamMetadataRecoveryRoutes.MetadataRecoveryParentGas(gasleft(), required);
+        }
+        bool ok;
+        uint256 length;
+        assembly ("memory-safe") {
+            ok := staticcall(cap, target, add(input, 32), mload(input), 0, 0)
+            length := returndatasize()
+        }
+        // Do not allocate the maximum envelope for a small full view.
+        if (!ok || length < 64 || length > 6000000) revert MetadataFrozenBytesInvalid(target);
+        output = new bytes(length);
+        assembly ("memory-safe") { returndatacopy(add(output, 32), 0, length) }
     }
 
     function _dynamic(address target, bytes memory input, uint256 limit, uint256 cap)

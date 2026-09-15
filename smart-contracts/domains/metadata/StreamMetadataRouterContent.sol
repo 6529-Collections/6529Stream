@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamMetadataBundleRenderer } from "./StreamMetadataBundleRenderer.sol";
 
 import { StreamMetadataRouter } from "./StreamMetadataRouter.sol";
 import { StreamMetadataContentRoot } from "./StreamMetadataContentRoot.sol";
@@ -356,7 +357,9 @@ library StreamMetadataRouterContent {
         bytes32 ratification;
         if (
             keccak256(bytes(_collections(l)[collectionId].animationScript))
-                != keccak256(bytes(script))
+                    != keccak256(bytes(script))
+                || StreamMetadataBundleRenderer.selection(_selectedManifests(l)[collectionId][2])
+                    .bundleId != 0
         ) {
             _requireContentUnlocked(l, e, collectionId, CONTENT_SCRIPT);
             (consent, ratification) = _authorizeContentWrite(
@@ -521,7 +524,9 @@ library StreamMetadataRouterContent {
         bytes32 result = _scriptState(l, e, collectionId, script);
         if (
             keccak256(bytes(script))
-                == keccak256(bytes(_collections(l)[collectionId].animationScript))
+                    == keccak256(bytes(_collections(l)[collectionId].animationScript))
+                && StreamMetadataBundleRenderer.selection(_selectedManifests(l)[collectionId][2])
+                    .bundleId == 0
         ) {
             return _withManifest(result, _selectedManifests(l)[collectionId][2]);
         }

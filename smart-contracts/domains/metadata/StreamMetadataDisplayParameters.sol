@@ -17,6 +17,10 @@ library StreamMetadataDisplayParameters {
         keccak256("6529STREAM_GGP_ROUTER_LIVE_ATTRIBUTION_MEMBERSHIP_GAS");
     bytes32 internal constant RETURN_GAS =
         keccak256("6529STREAM_GGP_ROUTER_LIVE_ATTRIBUTION_RETURN_GAS");
+    bytes32 internal constant BUNDLE_READ_GAS = keccak256("6529STREAM_GGP_ROUTER_BUNDLE_READ_GAS");
+    bytes32 internal constant BUNDLE_RENDER_GAS =
+        keccak256("6529STREAM_GGP_ROUTER_BUNDLE_RENDER_GAS");
+    bytes32 internal constant FULL_VIEW_GAS = keccak256("6529STREAM_GGP_ROUTER_FULL_VIEW_GAS");
     bytes32 private constant SLOT =
         keccak256("6529STREAM_METADATA_ROUTER_DISPLAY_PARAMETERS_STORAGE_V1");
     bytes32 private constant SCOPE =
@@ -66,6 +70,9 @@ library StreamMetadataDisplayParameters {
         _register(s, READ_GAS, "ROUTER_LIVE_ATTRIBUTION_READ_GAS", 250000, 1);
         _register(s, MEMBERSHIP_GAS, "ROUTER_LIVE_ATTRIBUTION_MEMBERSHIP_GAS", 2000000, 1);
         _register(s, RETURN_GAS, "ROUTER_LIVE_ATTRIBUTION_RETURN_GAS", 2000000, 3);
+        _register(s, BUNDLE_READ_GAS, "ROUTER_BUNDLE_READ_GAS", 2000000, 2);
+        _register(s, BUNDLE_RENDER_GAS, "ROUTER_BUNDLE_RENDER_GAS", 8000000, 2);
+        _register(s, FULL_VIEW_GAS, "ROUTER_FULL_VIEW_GAS", 60000000, 2);
     }
 
     function _register(
@@ -81,11 +88,14 @@ library StreamMetadataDisplayParameters {
     }
 
     function ids() internal pure returns (bytes32[] memory result) {
-        result = new bytes32[](4);
+        result = new bytes32[](7);
         result[0] = OUTER_GAS;
         result[1] = READ_GAS;
         result[2] = MEMBERSHIP_GAS;
         result[3] = RETURN_GAS;
+        result[4] = BUNDLE_READ_GAS;
+        result[5] = BUNDLE_RENDER_GAS;
+        result[6] = FULL_VIEW_GAS;
     }
 
     function info(bytes32 id) internal view returns (uint256, uint256, uint8, uint64) {

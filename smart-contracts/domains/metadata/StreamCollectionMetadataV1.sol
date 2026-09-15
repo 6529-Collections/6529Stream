@@ -18,6 +18,10 @@ import "./StreamMetadataSubjects.sol";
 import "./StreamMetadataRenderer.sol";
 import "./StreamMetadataGovernance.sol";
 import { StreamCollectionManifestExecution } from "./StreamCollectionManifestExecution.sol";
+import { StreamScriptBundles } from "./StreamScriptBundles.sol";
+import {
+    IStreamScriptBundles as B
+} from "../../interfaces/stream/metadata/IStreamScriptBundles.sol";
 import { StreamCollectionManifests } from "./StreamCollectionManifests.sol";
 import {
     IStreamCollectionManifestReads
@@ -111,6 +115,27 @@ contract StreamCollectionMetadataV1 is
     mapping(bytes32 => bool) public consumedArtistAuthorization;
     StreamCollectionManifests.State private _manifests;
 
+    event ScriptBundleBegun(
+        uint16 schemaVersion,
+        bytes32 indexed bundleId,
+        bytes32 payloadHash,
+        bytes32 libraryBundle,
+        uint32 totalBytes,
+        uint8 chunks,
+        bool libraryOnly
+    );
+    event ScriptBundleChunkStored(
+        uint16 schemaVersion,
+        bytes32 indexed bundleId,
+        uint256 indexed index,
+        bytes32 payloadHash,
+        address first,
+        address tail
+    );
+    event ScriptBundleFinalized(
+        uint16 schemaVersion, bytes32 indexed bundleId, bytes32 payloadHash
+    );
+
     constructor(Configuration memory c)
         StreamModuleBase(
             keccak256("6529stream.collection-metadata.full-bytes.v1"),
@@ -168,12 +193,67 @@ contract StreamCollectionMetadataV1 is
         override(StreamModuleBase, IERC165)
         returns (bool)
     {
-        return id == type(IStreamCollectionManifestReads).interfaceId
+        return id == type(IStreamCollectionManifestReads).interfaceId || id == type(B).interfaceId
             || id == type(IStreamCollectionManifestWriter).interfaceId
             || id == type(IStreamCollectionMetadataV1).interfaceId
             || id == type(IStreamCollectionRecordReceipts).interfaceId
             || id == type(IStreamArtistRecordPublicationHost).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId || super.supportsInterface(id);
+    }
+
+    function beginScriptBundle(B.Plan calldata plan) external returns (bytes32) {
+        _manifestWrite();
+    }
+
+    function beginRegistryLibrary(B.Plan calldata plan, B.RegistrySource calldata source)
+        external
+        returns (bytes32)
+    {
+        _manifestWrite();
+    }
+
+    function appendScriptBundle(bytes32 id, uint256 index, bytes calldata payload) external {
+        _manifestWrite();
+    }
+
+    function finalizeScriptBundle(bytes32 id) external {
+        _manifestWrite();
+    }
+
+    function scriptChunkCount(uint256 collectionId) external view returns (uint256) {
+        _manifestRead();
+    }
+
+    function scriptBundle(bytes32 id) external view returns (B.Facts memory) {
+        _manifestRead();
+    }
+
+    function scriptBundleRegistry(bytes32 id) external view returns (B.RegistrySource memory) {
+        _manifestRead();
+    }
+
+    function scriptBundleChunk(bytes32 id, uint256 index) external view returns (bytes memory) {
+        _manifestRead();
+    }
+
+    function dependencyManifest(bytes32 id) external view returns (M.DependencyManifest memory) {
+        _manifestRead();
+    }
+
+    function dependencyChunk(bytes32 id, uint256 index) external view returns (bytes memory) {
+        _manifestRead();
+    }
+
+    function scriptBundleChunks(bytes32 id, uint256 start, uint256 count)
+        external
+        view
+        returns (bytes[] memory)
+    {
+        _manifestRead();
+    }
+
+    function recordedScriptBundle(bytes32 hash) external view returns (bytes32) {
+        _manifestRead();
     }
 
     function previewScriptManifest(uint256 collectionId, M.ScriptManifest calldata value)

@@ -82,6 +82,9 @@ contract DisplayCanonicalGasHost is StreamGasParameterHost {
         _registerGasParameter(
             GasParameterConfig("ROUTER_LIVE_ATTRIBUTION_RETURN_GAS", 2000000, 2000000, 3)
         );
+        _registerGasParameter(GasParameterConfig("ROUTER_BUNDLE_READ_GAS", 2000000, 2000000, 2));
+        _registerGasParameter(GasParameterConfig("ROUTER_BUNDLE_RENDER_GAS", 8000000, 8000000, 2));
+        _registerGasParameter(GasParameterConfig("ROUTER_FULL_VIEW_GAS", 60000000, 60000000, 2));
     }
 }
 
@@ -139,7 +142,7 @@ contract StreamDisplayGasParametersTest is CharacterizationTestBase {
     function testRouterInventoryAndTransitionMatchCanonicalHost() public view {
         bytes32[] memory ids = router.gasParameterIds();
         require(
-            ids.length == 4
+            ids.length == 7
                 && keccak256(abi.encode(ids))
                     == keccak256(abi.encode(referenceHost.gasParameterIds()))
         );

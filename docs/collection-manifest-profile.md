@@ -8,14 +8,14 @@ manifest commitments. They are different from a raw script digest, a Router
 family commitment, and a referenced external media manifest digest.
 
 The source model follows the [manifest home](collection-metadata-contract.md).
-The current executable profile binds the Router's actual nonempty UTF-8 script,
+The original small executable profile binds the Router's actual nonempty UTF-8 script,
 up to its existing 8,192-byte limit, with one logical inline chunk, the existing
 stable renderer compatibility ID, `application/javascript`, and no independently
 loaded library or alternate source pointer. The metadata owner preserves those
 exact bytes in its existing write-once blob store. `scriptChunk(collectionId,0)`
-reconstructs and verifies them. Source archives, larger chunked scripts and
-other execution profiles return `UnsupportedCollectionManifest`; this batch
-does not pretend they were run by the current renderer.
+reconstructs and verifies them. The additive [chunk-backed profile](chunked-script-profile.md) now provides
+larger scripts, pinned libraries and full views. Source archives and unsupported
+execution profiles still fail explicitly.
 
 Media descriptors bind the actual shared image URI. Asset entries support
 explicit IPFS, Arweave and HTTPS source types, nonempty MIME types and optional
@@ -62,16 +62,17 @@ kind, collection and Router. `recordedScriptManifest` and
 `recordedMediaManifest` retain earlier records after selection changes. Their
 existence is not a claim that they remain the current selection.
 
-Eight focused source cases cover independent full-hash/event oracles, script
+The original nine-case cohort covers independent full-hash/event oracles, script
 byte reconstruction, media binding, no-op and raw invalidation, wrong
 collection/family authority, direct-host rejection, content/Core locks, missing
-facts, exact absent-hash round trips, pointer drift and a real threshold Safe's identical signed retry after
+facts, exact absent-hash round trips, mirror URI validation, pointer drift and a real threshold Safe's identical signed retry after
 missing Artist approval. Core, Artist authority and Executor in these cases
-are explicitly typed fixtures. ABI-only checks are separate from deferred
-native runtime, bytecode sizes, full current-stack transactions and finality
-artifact/export integration. The existing large-script and broader media
-rendering requirements remain outstanding; no full manifest conformance is
-claimed here.
+are explicitly typed fixtures. That original cohort passed native execution at
+source `42a65b60`, alongside four governed-budget parity cases. Subsequent
+chunk-backed source changes have their own pending runtime boundary; this
+retained result is separate from full current-stack transactions and finality
+artifact/export integration. Broader media rendering, integrated finality exports and full conformance
+remain separate from the implemented chunk-backed source profile.
 
 The Router delegates content configuration, manifest selection and related
 previews to the fixed linked `StreamMetadataRouterContent` library. Its
@@ -80,3 +81,6 @@ execution retains the actual caller, Router address, Renderer identity and
 all existing commitment domains; it does not introduce a replaceable target
 or a second authorization entry point. Selected-product size checks are
 separate from the pending joined runtime and deployment validation.
+
+The additive chunk-backed profile has a separate manifest domain and preserves
+this original one-chunk path; see its [publication and serving guide](chunked-script-profile.md).

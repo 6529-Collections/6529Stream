@@ -132,6 +132,70 @@ library StreamMetadataTokenRenderer {
         );
     }
 
+    function fullJSON(
+        StreamMetadataRenderTypes.Token memory token,
+        IStreamMetadataServingFacts.ServingSource memory metadata,
+        bytes memory artist
+    ) public pure returns (string memory) {
+        bytes memory json = bytes(render(token, metadata, artist));
+        assembly ("memory-safe") { mstore(json, sub(mload(json), 1)) }
+        // The stable offchain branch already carries token_data_base64.
+        bytes memory tokenDataField = token.finalized && bytes(metadata.script).length != 0
+            ? abi.encodePacked(',"token_data_base64":"', Base64.encode(token.tokenData), '"')
+            : bytes("");
+        return string(
+            bytes.concat(
+                json,
+                tokenDataField,
+                abi.encodePacked(',"properties":{"stream":{"render_state":"', token.state, '"}}}')
+            )
+        );
+    }
+
+    function html(
+        StreamMetadataRenderTypes.Token memory token,
+        IStreamMetadataServingFacts.ServingSource memory metadata
+    ) public pure returns (string memory) {
+        if (!token.finalized || bytes(metadata.script).length == 0) {
+            revert NoncanonicalFinalityRenderInput();
+        }
+        return string(
+            abi.encodePacked(
+                "<html data-stream-render-state=\"",
+                token.state,
+                "\"><head></head><body><script>",
+                "const tokenId=",
+                token.tokenId.toString(),
+                ";const tokenHash='",
+                uint256(token.seed).toHexString(32),
+                "';const tokenDataBase64='",
+                Base64.encode(token.tokenData),
+                "';",
+                metadata.script,
+                "</script></body></html>"
+            )
+        );
+    }
+
+    function fullViewForFinality(bool asHTML, bytes memory input)
+        public
+        pure
+        returns (string memory)
+    {
+        (
+            StreamMetadataRenderTypes.Token memory token,
+            IStreamMetadataServingFacts.ServingSource memory metadata,
+            bytes memory artist
+        ) = abi.decode(
+            input,
+            (StreamMetadataRenderTypes.Token, IStreamMetadataServingFacts.ServingSource, bytes)
+        );
+        if (keccak256(input) != keccak256(abi.encode(token, metadata, artist))) {
+            revert NoncanonicalFinalityRenderInput();
+        }
+        return asHTML ? html(token, metadata) : fullJSON(token, metadata, artist);
+    }
+
     function _animation(
         IStreamMetadataServingFacts.ServingSource memory metadata,
         StreamMetadataRenderTypes.Token memory token
