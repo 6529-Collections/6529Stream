@@ -5,6 +5,7 @@ import "./StreamPrivateSaleSupport.sol";
 import "./StreamPrivateSaleAccounting.sol";
 import "./StreamPrivateSaleCustody.sol";
 import "./StreamPrivateSaleHash.sol";
+import "./StreamNativeInventoryPayment.sol";
 import "../../interfaces/stream/mint/IStreamPrivateSaleAdapter.sol";
 import "../parameters/StreamGasParameterHost.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
@@ -57,6 +58,7 @@ contract StreamPrivateSaleAdapter is
     mapping(bytes32 => bool) public digestRevoked;
     // Association only; full grant presentation still authenticates every revocation.
     mapping(bytes32 => bytes32) private _custodySale;
+    StreamNativeInventoryState.State private _inventory;
 
     constructor(DeploymentConfig memory d) StreamGasParameterHost(d.governanceAuthority) {
         if (
@@ -109,7 +111,8 @@ contract StreamPrivateSaleAdapter is
     }
 
     function supportsInterface(bytes4 id) public view override(IERC165, ERC165) returns (bool) {
-        return id == type(IStreamPrivateSaleAdapter).interfaceId || super.supportsInterface(id);
+        return id == type(IStreamPrivateSaleAdapter).interfaceId
+            || id == type(IStreamNativeInventorySale).interfaceId || super.supportsInterface(id);
     }
 
     function streamModuleType() external pure override returns (bytes32) {
@@ -200,6 +203,19 @@ contract StreamPrivateSaleAdapter is
         override
         returns (uint8, uint256, bytes32, address, bytes32, bytes32, uint8, uint8)
     {
+        IStreamNativeInventorySale.Inventory storage inventory = _inventory.inventories[id];
+        if (inventory.saleNonce != 0) {
+            return (
+                14,
+                inventory.config.collectionId,
+                0,
+                address(0),
+                inventory.configHash,
+                0,
+                0,
+                inventory.status
+            );
+        }
         Sale storage sale = _sales[id];
         return (
             sale.config.saleKind,
@@ -214,10 +230,15 @@ contract StreamPrivateSaleAdapter is
     }
 
     function saleDetails(bytes32 id) external view override returns (Sale memory) {
-        return _sales[id];
+        bytes memory out = StreamNativeInventorySale.encodedPrivateSale(_sales[id]);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
     function custodySaleLifecycle(bytes32 id) external view override returns (uint64, uint64) {
+        if (_inventory.inventories[id].saleNonce != 0) {
+            return
+                (_inventory.inventories[id].createdAt, _inventory.inventories[id].registryRevision);
+        }
         return (_sales[id].createdAt, _sales[id].registryRevision);
     }
 
@@ -422,6 +443,9 @@ contract StreamPrivateSaleAdapter is
             signature,
             gasParameter(_SIGNATURE_GAS)
         );
+        if (_inventory.grantSale[digest] != 0) {
+            StreamNativeInventorySale.revoke(_inventory, grant, digest);
+        }
         bytes32 id = _custodySale[digest];
         if (id != 0) {
             Sale storage sale = _sales[id];
@@ -441,6 +465,10 @@ contract StreamPrivateSaleAdapter is
     }
 
     function expireSale(bytes32 id) external nonReentrant {
+        if (_inventory.inventories[id].saleNonce != 0) {
+            StreamNativeInventorySale.close(_inventory, id, true, owner());
+            return;
+        }
         Sale storage sale = _known(id);
         if ((sale.status != 1 && sale.status != 2) || block.timestamp <= sale.config.deadline) {
             revert PrivateSaleUnavailable(id);
@@ -449,6 +477,10 @@ contract StreamPrivateSaleAdapter is
     }
 
     function cancelSale(bytes32 id) external nonReentrant {
+        if (_inventory.inventories[id].saleNonce != 0) {
+            StreamNativeInventorySale.close(_inventory, id, false, owner());
+            return;
+        }
         Sale storage sale = _known(id);
         if (msg.sender != owner() && msg.sender != sale.config.consignor) {
             revert PrivateSaleAuthorityInvalid(msg.sender);
@@ -518,7 +550,7 @@ contract StreamPrivateSaleAdapter is
     }
 
     function pauseSale(bytes32 id, bytes32 reason) external nonReentrant {
-        _known(id);
+        if (_inventory.inventories[id].saleNonce == 0) _known(id);
         _role(keccak256("ROLE_PAUSE_GUARDIAN"));
         if (salePaused[id]) revert PrivateSalePaused(id);
         salePaused[id] = true;
@@ -526,7 +558,7 @@ contract StreamPrivateSaleAdapter is
     }
 
     function unpauseSale(bytes32 id, bytes32 reason) external nonReentrant {
-        _known(id);
+        if (_inventory.inventories[id].saleNonce == 0) _known(id);
         _role(keccak256("ROLE_UNPAUSE"));
         if (!salePaused[id]) revert InvalidPrivateSale();
         salePaused[id] = false;
@@ -535,6 +567,97 @@ contract StreamPrivateSaleAdapter is
 
     function renounceOwnership() public override onlyOwner nonReentrant {
         super.renounceOwnership();
+    }
+
+    function registerInventory(
+        IStreamNativeInventorySale.Config calldata config,
+        uint256[] calldata tokenIds
+    ) external onlyOwner nonReentrant returns (bytes32) {
+        if (paused) revert PrivateSalePaused(0);
+        return StreamNativeInventorySale.registerEncoded(
+            _inventory, _context(), collectionSigner, platformSigner, nextSaleNonce++, msg.data
+        );
+    }
+
+    function inventoryDetails(bytes32 id)
+        external
+        view
+        returns (IStreamNativeInventorySale.Inventory memory)
+    {
+        bytes memory out = StreamNativeInventorySale.encodedRead(_inventory, msg.data);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
+    }
+
+    function inventoryToken(bytes32 id, uint256 tokenId) external view returns (Sale memory) {
+        bytes memory out = StreamNativeInventorySale.encodedRead(_inventory, msg.data);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
+    }
+
+    function inventoryBuyerPurchases(bytes32 id, address buyer) external view returns (uint256) {
+        return _inventory.purchases[id][buyer];
+    }
+
+    function depositInventoryCustody(
+        bytes32 id,
+        StreamPrivateSaleTypes.SaleCustodyGrant calldata grant,
+        uint8 ownerKind,
+        bytes calldata signature
+    ) external nonReentrant {
+        _requireUnpaused(id);
+        StreamNativeInventorySale.depositEncoded(
+            _inventory, _context(), digestConsumed, gasParameter(_SIGNATURE_GAS), msg.data
+        );
+    }
+
+    function openInventory(bytes32 id) external nonReentrant {
+        _requireUnpaused(id);
+        StreamNativeInventorySale.open(_inventory, _context(), id, owner());
+    }
+
+    function purchaseInventory(bytes32 id, uint256 tokenId, bytes32 expectedConfigHash)
+        external
+        payable
+        nonReentrant
+    {
+        _requireUnpaused(id);
+        StreamNativeInventoryPayment.purchase(
+            _inventory, _money, _context(), id, tokenId, expectedConfigHash
+        );
+        _requireUnpaused(id);
+    }
+
+    function inventoryRoyaltyQuote(bytes32 id, uint256 tokenId)
+        external
+        view
+        returns (address, uint256, bool, bool)
+    {
+        return StreamNativeInventoryPayment.quote(_inventory, _context(), id, tokenId);
+    }
+
+    function claimInventoryNft(bytes32 id, uint256 tokenId, address receiver)
+        external
+        nonReentrant
+        returns (bool)
+    {
+        return StreamNativeInventorySale.claimEncoded(
+            _inventory, _context(), digestRevoked, gasParameter(_NFT_GAS), msg.data
+        );
+    }
+
+    function retryInventoryNft(bytes32 id, uint256 tokenId) external nonReentrant returns (bool) {
+        return StreamNativeInventorySale.claimEncoded(
+            _inventory, _context(), digestRevoked, gasParameter(_NFT_GAS), msg.data
+        );
+    }
+
+    function retryInventoryRoyalty(bytes32 id, address receiver)
+        external
+        nonReentrant
+        returns (bool)
+    {
+        return StreamNativeInventoryPayment.retryRoyalty(
+            _inventory, _money, id, receiver, gasParameter(_ROYALTY_GAS)
+        );
     }
 
     function _enterCustody(
