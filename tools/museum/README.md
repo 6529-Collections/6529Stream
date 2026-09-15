@@ -288,3 +288,10 @@ participants, venues and explicit dates; planned/cancelled/unknown records,
 full document commitments and unsupported facts remain sidecars. Original
 recorded packages replay unchanged, with no loan, custody or display permission
 inferred. Run `python -m unittest tools.museum.test_exhibitions -v`.
+
+The [owner loan dossier adapter](../../docs/museum-recorded-loans.md) verifies
+original token-owner receipt/signature/payload evidence, retains linked
+valuation and outbound/return condition records, and exports completed loan
+documentation as generic activities with distinct participant roles. Missing
+evidence remains explicit; custody, title and countersignature are not inferred.
+Run `python -m unittest tools.museum.test_loans -v` for the focused offline cases.

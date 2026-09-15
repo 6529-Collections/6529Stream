@@ -224,6 +224,9 @@ def verify_package(directory, expected_manifest_hash):
     if isinstance(value, dict) and value.get("mode") == "recorded_account_fixity_resource_package":
         from .fixity_package import verify_fixity_package
         return verify_fixity_package(directory, expected_manifest_hash)
+    if isinstance(value, dict) and value.get("mode") == "recorded_owner_loan_dossier_package":
+        from .loan_package import verify_loan_package
+        return verify_loan_package(directory, expected_manifest_hash)
     if isinstance(value, dict) and value.get("mode") == "recorded_independent_exhibition_package":
         from .exhibition_package import verify_exhibition_package
         return verify_exhibition_package(directory, expected_manifest_hash)
