@@ -8,6 +8,7 @@ import {
 } from "../../interfaces/stream/artist/IStreamArtistEntropyUnavailability.sol";
 
 import "../../interfaces/stream/artist/IStreamArtistPublicationAuthorityHydration.sol";
+import "../../interfaces/stream/artist/IStreamArtistEntropyFindingHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistReadinessAuthorityHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistEconomicsAuthorityHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistPayoutAuthorityHydration.sol";
@@ -692,5 +693,12 @@ contract StreamArtistRegistryWriterExtension {
     ) external onlyHost returns (bytes32) {
         return IStreamArtistPublicationAuthorityHydrationCoordinator(operationCoordinator)
             .coordinateHydrateArtistAuthorityWithPublications(msg.sender, p);
+    }
+
+    function hydrateArtistAuthorityWithEntropyFindings(
+        StreamArtistEntropyFindingHydrationTypes.Request calldata p
+    ) external onlyHost returns (bytes32) {
+        return IStreamArtistEntropyFindingHydrationCoordinator(operationCoordinator)
+            .coordinateHydrateArtistAuthorityWithEntropyFindings(msg.sender, p);
     }
 }

@@ -1042,4 +1042,11 @@ contract StreamArtistOnboardingCoordinator is
     ) external operation returns (bytes32) {
         return StreamArtistCoordinatorHydration.execute(_economicContext(), msg.data, 5);
     }
+
+    function coordinateHydrateArtistAuthorityWithEntropyFindings(
+        address actor,
+        StreamArtistEntropyFindingHydrationTypes.Request calldata p
+    ) external operation returns (bytes32) {
+        return StreamArtistCoordinatorHydration.execute(_economicContext(), msg.data, 6);
+    }
 }

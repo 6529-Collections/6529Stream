@@ -9,6 +9,7 @@ import {
 } from "../../interfaces/stream/artist/IStreamArtistEntropyUnavailability.sol";
 
 import "../../interfaces/stream/artist/IStreamArtistPublicationAuthorityHydration.sol";
+import "../../interfaces/stream/artist/IStreamArtistEntropyFindingHydration.sol";
 import { StreamArtistRegistryInterfaces } from "./StreamArtistRegistryInterfaces.sol";
 import "../../interfaces/stream/artist/IStreamArtistReadinessAuthorityHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistEconomicsAuthorityHydration.sol";
@@ -1911,6 +1912,12 @@ contract StreamArtistOnboardingRegistry is
 
     function hydrateArtistAuthorityWithPublications(
         StreamArtistReadinessHydrationTypes.Request calldata p
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function hydrateArtistAuthorityWithEntropyFindings(
+        StreamArtistEntropyFindingHydrationTypes.Request calldata p
     ) external returns (bytes32) {
         _forwardRegistryWriter();
     }

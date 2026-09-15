@@ -8,6 +8,7 @@ import {
 } from "../../interfaces/stream/artist/IStreamArtistEntropyUnavailability.sol";
 
 import "../../interfaces/stream/artist/IStreamArtistPublicationAuthorityHydration.sol";
+import "../../interfaces/stream/artist/IStreamArtistEntropyFindingHydration.sol";
 import {
     IStreamArtistReadinessAuthorityHydration
 } from "../../interfaces/stream/artist/IStreamArtistReadinessAuthorityHydration.sol";
@@ -163,7 +164,8 @@ import {
 /// @notice Fixed original ERC-165 inventory; the facade retains base module handling.
 library StreamArtistRegistryInterfaces {
     function supportsArtistInterface(bytes4 id) public pure returns (bool) {
-        return id == type(IStreamArtistPublicationAuthorityHydration).interfaceId
+        return id == type(IStreamArtistEntropyFindingHydration).interfaceId
+            || id == type(IStreamArtistPublicationAuthorityHydration).interfaceId
             || id == type(IStreamArtistReadinessAuthorityHydration).interfaceId
             || id == type(IStreamArtistEconomicsAuthorityHydration).interfaceId
             || id == type(IStreamArtistPayoutAuthorityHydration).interfaceId

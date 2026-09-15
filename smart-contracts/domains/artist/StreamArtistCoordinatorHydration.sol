@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistAuthorityHydrationOperations.sol";
+import "./StreamArtistEntropyFindingHydrationOperations.sol";
 
 /// @notice Fixed original operation60 transport decoder; explicit host routes retain their operation lock.
 library StreamArtistCoordinatorHydration {
@@ -25,6 +26,10 @@ library StreamArtistCoordinatorHydration {
         if (profile == 5) {
             (address actor, RH.Request memory p) = abi.decode(data[4:], (address, RH.Request));
             return StreamArtistAuthorityHydrationOperations.hydrateWithPublications(x, actor, p);
+        }
+        if (profile == 6) {
+            (address actor, FH.Request memory p) = abi.decode(data[4:], (address, FH.Request));
+            return StreamArtistEntropyFindingHydrationOperations.hydrate(x, actor, p);
         }
         revert T.UnsupportedProfile();
     }

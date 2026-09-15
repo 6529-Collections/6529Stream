@@ -4,6 +4,7 @@ import "./StreamArtistIdentityState.sol";
 import "./StreamArtistEstateState.sol";
 import "./StreamArtistDormancyState.sol";
 import "./StreamArtistUnavailabilityState.sol";
+import "./StreamArtistEntropyFindingHydration.sol";
 import {
     StreamArtistAuthorityHydrationTypes as AH
 } from "../../interfaces/stream/artist/IStreamArtistAuthorityHydration.sol";
@@ -97,6 +98,19 @@ library StreamArtistIdentityHydration {
         return exportState(s, estate, dorm, finding, q);
     }
 
+    function exportFindingEncoded(
+        StreamArtistIdentityState.State storage s,
+        StreamArtistEstateState.State storage estate,
+        StreamArtistDormancyState.State storage dorm,
+        StreamArtistUnavailabilityState.State storage finding,
+        bytes calldata encoded
+    ) public view returns (bytes memory) {
+        AH.Query memory q = abi.decode(encoded, (AH.Query));
+        return StreamArtistEntropyFindingHydration.exportState(
+            finding, q, exportState(s, estate, dorm, finding, q)
+        );
+    }
+
     function importEncoded(
         StreamArtistIdentityState.State storage s,
         StreamArtistEstateState.State storage estate,
@@ -106,6 +120,13 @@ library StreamArtistIdentityHydration {
     ) public {
         (, AH.Query memory q, AH.OwnerData memory data,) =
             abi.decode(encoded, (T.ActionContext, AH.Query, AH.OwnerData, bytes32));
-        importState(s, estate, dorm, finding, q, data);
+        if (StreamArtistEntropyFindingHydration.isState(data.typedState)) {
+            FH.Bundle memory b = StreamArtistEntropyFindingHydration.decode(data.typedState);
+            data.typedState = b.identityState;
+            importState(s, estate, dorm, finding, q, data);
+            StreamArtistEntropyFindingHydration.importState(finding, q, b);
+        } else {
+            importState(s, estate, dorm, finding, q, data);
+        }
     }
 }

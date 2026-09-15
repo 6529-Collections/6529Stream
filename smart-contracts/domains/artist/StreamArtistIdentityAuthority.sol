@@ -1553,6 +1553,21 @@ contract StreamArtistIdentityAuthority is
         );
     }
 
+    function authorityEntropyFindingHydrationState(AH.Query calldata q)
+        external
+        view
+        returns (bytes memory)
+    {
+        _baselineTiming();
+        return StreamArtistIdentityHydration.exportFindingEncoded(
+            _identity, _estate, _dormancy, _unavailability, msg.data[4:]
+        );
+    }
+
+    function entropyUnavailabilityFindingOrigin(bytes32 hash) external view returns (address) {
+        _forwardIdentityRead();
+    }
+
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
         _baselineTiming();
         StreamArtistIdentityHydration.importEncoded(

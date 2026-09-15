@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistEntropyUnavailabilityState.sol";
+import "../../interfaces/stream/artist/IStreamArtistEntropyFindingHydration.sol";
 import {
     StreamArtistEntropyUnavailabilityTypes as EU,
     IStreamArtistEntropyUnavailability,
@@ -98,6 +99,20 @@ library StreamArtistIdentityReadDispatch {
         bytes calldata call_
     ) public view returns (bytes memory) {
         bytes4 selector = bytes4(call_[:4]);
+        if (
+            selector
+                == IStreamArtistEntropyFindingHydrationOwner.entropyUnavailabilityFindingOrigin
+                .selector
+        ) {
+            bytes32 hash = abi.decode(call_[4:], (bytes32));
+            if (
+                _unavailability.records[hash].recordHash == 0
+                    || StreamArtistEntropyUnavailabilityStore.state().admissions[hash].target
+                        .coordinator == address(0)
+            ) return abi.encode(address(0));
+            address origin = StreamArtistEntropyUnavailabilityStore.state().origins[hash];
+            return abi.encode(origin == address(0) ? o.environment.registry : origin);
+        }
         if (
             selector
                 == IStreamArtistEntropyUnavailabilityOwner.entropyUnavailabilityFindingRecord

@@ -76,14 +76,15 @@ and Safe state atomically; a repaired identical retry remains possible.
 
 ## History import boundary
 
-Current operation-60 hydration profiles do not import entropy finding supplemental
-admissions or the shared live finding/activity state required to use them on a
-successor registry. The unchanged ten-word record and native lane receipt alone
-are insufficient. A complete later profile must import and authenticate the
-original manifest/admission, binding and activity epoch, latest-head/terminal
-dependencies and original replay guards together. Existing completeness gates
-reject this unsupported history; this batch does not activate successor use or
-claim complete imported unavailability history.
+The explicit operation-60 [entropy finding hydration profile](../guides/artist-entropy-finding-hydration.md)
+carries complete original finding and supplemental admission history within its
+stated living source profile. The unchanged ten-word record and native lane
+receipt alone remain insufficient. Complete typed import authenticates the
+original manifest/admission, binding, activity epoch, latest head and both replay
+guards under the seven-owner completion proof. The same entropy host retains its
+consumed-evidence, provider and journal state. Earlier hydration selectors still
+reject these findings; mixed or advanced histories outside the explicit profile
+remain unsupported.
 
 ## Source and validation boundary
 

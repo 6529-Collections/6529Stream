@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 import "../../interfaces/stream/entropy/IStreamEntropyArtistUnavailability.sol";
 import "./StreamArtistRecoveryAdmission.sol";
 import "./StreamArtistRecoveryHashes.sol";
+import "../../interfaces/stream/artist/IStreamArtistEntropyFindingHydration.sol";
 import {
     StreamArtistEntropyUnavailabilityTypes as EU,
     IStreamArtistEntropyUnavailabilityOwner
@@ -72,9 +73,13 @@ library StreamArtistEntropyUnavailabilityAdmission {
                 suite.owners[2]
             ).entropyUnavailabilityFindingRecord(hash);
         noticeEndsAt = record.noticeEndsAt;
-        StreamArtistHashes.Environment memory env = StreamArtistHashes.Environment(
-            block.chainid, suite.registry, suite.core, suite.mintManager
-        );
+        // The fixed owner installs a nonlocal origin only through the complete atomic op60
+        // profile. Current binding/activity and the actual live entropy host are still checked.
+        address origin = IStreamArtistEntropyFindingHydrationOwner(suite.owners[2])
+            .entropyUnavailabilityFindingOrigin(hash);
+        if (origin == address(0)) return (false, hash, artistId, noticeEndsAt);
+        StreamArtistHashes.Environment memory env =
+            StreamArtistHashes.Environment(block.chainid, origin, suite.core, suite.mintManager);
         valid = a.target.coordinator == coordinator && a.coordinatorCodeHash == coordinator.codehash
             && a.target.intentHash == expectedIntent
             && expectedIntent == EU.intentHash(coordinator, suite.core, current)
@@ -88,9 +93,8 @@ library StreamArtistEntropyUnavailabilityAdmission {
             && uint256(record.noticeEndsAt) == uint256(record.recordedAt) + record.noticeSeconds
             && StreamArtistRecoveryHashes.findingRecord(env, record) == hash
             && record.terms.evidenceHash
-                == EU.evidenceHash(
-                    suite.registry, suite.core, a.target, a.intent, a.coordinatorCodeHash
-                ) && owner.unavailabilityFindingLive(hash, binding_);
+                == EU.evidenceHash(origin, suite.core, a.target, a.intent, a.coordinatorCodeHash)
+            && owner.unavailabilityFindingLive(hash, binding_);
     }
 
     function intent(

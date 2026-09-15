@@ -30,7 +30,13 @@ import {
 } from "../../interfaces/stream/artist/IStreamArtistAuthorityCheckpoint.sol";
 
 import "./StreamArtistHydrationPrepared.sol";
+import "./StreamArtistHydrationSourceState.sol";
+import "./StreamArtistHydrationSourceInventory.sol";
 import "./StreamArtistHydrationSourceGuards.sol";
+import "../../interfaces/stream/artist/IStreamArtistEntropyFindingHydration.sol";
+import {
+    StreamArtistEntropyFindingHydrationTypes as FH
+} from "../../interfaces/stream/artist/IStreamArtistEntropyFindingHydration.sol";
 
 /// @notice Collects the complete immutable source profile before any destination mutation.
 library StreamArtistHydrationSource {
@@ -50,7 +56,7 @@ library StreamArtistHydrationSource {
         T.EconomicsConsent[] memory economics,
         RH.AttestationInput[] memory attestations
     ) public view returns (StreamArtistHydrationPrepared.Bundle memory) {
-        return _prepare(x, p, includePayout, economics, attestations, false);
+        return _prepare(x, p, includePayout, economics, attestations, false, false);
     }
 
     function prepareWithPublications(
@@ -59,7 +65,17 @@ library StreamArtistHydrationSource {
         T.EconomicsConsent[] memory economics,
         RH.AttestationInput[] memory attestations
     ) public view returns (StreamArtistHydrationPrepared.Bundle memory) {
-        return _prepare(x, p, true, economics, attestations, true);
+        return _prepare(x, p, true, economics, attestations, true, false);
+    }
+
+    function prepareWithEntropyFindings(D.CoordinatorContext memory x, FH.Request memory p)
+        public
+        view
+        returns (StreamArtistHydrationPrepared.Bundle memory)
+    {
+        return _prepare(
+            x, p.authority, p.includePayout, p.economics, p.attestations, p.publications, true
+        );
     }
 
     function _prepare(
@@ -68,16 +84,19 @@ library StreamArtistHydrationSource {
         bool includePayout,
         T.EconomicsConsent[] memory economics,
         RH.AttestationInput[] memory attestations,
-        bool publications
+        bool publications,
+        bool findings
     ) private view returns (StreamArtistHydrationPrepared.Bundle memory) {
         bool readiness = attestations.length != 0;
-        bytes32 profile = publications
-            ? keccak256("6529STREAM_ARTIST_LIVING_PUBLICATION_HYDRATION_V1")
-            : readiness
-                ? READINESS_PROFILE
-                : economics.length != 0
-                    ? ECONOMICS_PROFILE
-                    : includePayout ? PAYOUT_PROFILE : PROFILE;
+        bytes32 profile = findings
+            ? FH.PROFILE
+            : publications
+                ? keccak256("6529STREAM_ARTIST_LIVING_PUBLICATION_HYDRATION_V1")
+                : readiness
+                    ? READINESS_PROFILE
+                    : economics.length != 0
+                        ? ECONOMICS_PROFILE
+                        : includePayout ? PAYOUT_PROFILE : PROFILE;
         if (
             p.artistId == 0 || p.collectionId == 0 || p.bindingIndex != 0 || p.policies.length > 128
         ) revert T.UnsupportedProfile();
@@ -104,115 +123,18 @@ library StreamArtistHydrationSource {
         T.SuiteConfiguration memory source =
             IStreamArtistAuthorityHydrationCoordinator(sourceCoordinator).authorityHydrationSuite();
         StreamArtistHydrationSourceGuards._suite(x.suite, source, prior, sourceCoordinator);
-        AH.Query memory q;
-        q.artistId = p.artistId;
-        q.collectionId = p.collectionId;
-        q.policies = p.policies;
+        (
+            AH.Query memory q,
+            T.Snapshot[7] memory before_,
+            uint256 artistCount,
+            uint256 collectionCount
+        ) = StreamArtistHydrationSourceInventory.collect(
+            x.suite, source, p, includePayout, economics.length, attestations.length, findings
+        );
         AH.OwnerData[7] memory data;
-        T.Snapshot[7] memory before_;
-        uint256 total;
-        uint256 revocations;
-        uint256 payoutCount;
-        uint256 contentCount;
-        for (uint256 i; i < 7; ++i) {
-            before_[i] = IStreamArtistOwner(x.suite.owners[i]).ownerStateSnapshotV2();
-            if (
-                before_[i].revision != (i == 2 ? 3 : 0)
-                    || IStreamArtistNativeReceipts(x.suite.owners[i]).artistNativeReceiptCount()
-                        != 0
-                    || IStreamArtistAuthorityHydrationOwner(x.suite.owners[i])
-                            .authorityHydrationCommitment() != 0
-            ) revert T.InvalidRecord();
-            StreamArtistHydrationSourceGuards._header(source.owners[i], p.expectedSource[i]);
-            uint256 count = IStreamArtistNativeReceipts(source.owners[i]).artistNativeReceiptCount();
-            if (count > 128) revert T.UnsupportedProfile();
-            total += count;
-            if (i == 0) {
-                if (count != 1) revert T.UnsupportedProfile();
-                q.bindingHash =
-                IStreamArtistNativeReceipts(source.owners[i]).artistNativeReceiptAt(0).recordHash;
-            } else if (i == 2) {
-                if (count == 0) revert T.UnsupportedProfile();
-                revocations = count - 1;
-            } else if (i == 3) {
-                if (count != 1) revert T.UnsupportedProfile();
-            } else if (i == 4 && readiness) {
-                if (count != attestations.length) revert T.InvalidRecord();
-            } else if (i == 5 && includePayout) {
-                if (count == 0) revert T.UnsupportedProfile();
-                payoutCount = count;
-            } else if (i == 6) {
-                if (readiness) {
-                    if (count <= p.policies.length + economics.length) revert T.InvalidRecord();
-                    contentCount = count - p.policies.length - economics.length;
-                } else if (count != p.policies.length + economics.length) {
-                    revert T.InvalidRecord();
-                }
-            } else if (count != 0) {
-                revert T.UnsupportedProfile();
-            }
-        }
-        q.records = new bytes32[](total);
-        uint256 used;
-        uint256 artistCount;
-        uint256 collectionCount;
-        for (uint256 i; i < 7; ++i) {
-            uint256 count = IStreamArtistNativeReceipts(source.owners[i]).artistNativeReceiptCount();
-            for (uint256 j; j < count; ++j) {
-                H.Receipt memory r =
-                    IStreamArtistNativeReceipts(source.owners[i]).artistNativeReceiptAt(j);
-                uint16 op = i == 0 ? 1 : i == 2 ? (j == 0 ? 1 : 54) : i == 3 ? 2 : i == 5 ? 18 : 14;
-                if (i == 6 && economics.length != 0 && r.operation == 15) op = 15;
-                if (readiness && i == 4) op = 24;
-                if (readiness && i == 6 && (r.operation == 52 || r.operation == 17)) {
-                    op = r.operation;
-                }
-                if (
-                    r.operation != op || r.artistId != p.artistId
-                        || r.collectionId != (i == 2 || i == 5 ? 0 : p.collectionId)
-                        || r.recordHash == 0 || (i == 2 && j == 0 && r.recordHash != p.artistId)
-                ) revert T.UnsupportedProfile();
-                q.records[used++] = r.recordHash;
-                ++artistCount;
-                if (r.collectionId != 0) ++collectionCount;
-            }
-            uint64 expectedRevision = i == 0
-                ? 2
-                : i == 2
-                    ? uint64(
-                        3 + p.policies.length + economics.length + revocations + payoutCount
-                            + contentCount + attestations.length
-                    )
-                    : i == 3
-                        ? 1
-                        : i == 4
-                            ? uint64(2 + attestations.length)
-                            : i == 5
-                                ? uint64(payoutCount)
-                                : i == 6
-                                    ? uint64(p.policies.length + economics.length + contentCount)
-                                    : 0;
-            if (p.expectedSource[i].ownerState.revision != expectedRevision) {
-                revert T.UnsupportedProfile();
-            }
-        }
-        for (uint256 i; i < 7; ++i) {
-            data[i] = StreamArtistHydrationSourceGuards._guards(source, sourceCoordinator, i, p);
-            data[i].typedState = publications && i == 4
-                ? IStreamArtistPublicationHydrationOwner(source.owners[i])
-                    .authorityPublicationHydrationState(q, attestations)
-                : readiness && i == 4
-                    ? IStreamArtistReadinessAttributionOwner(source.owners[i])
-                        .authorityAttestationHydrationState(q, attestations)
-                    : readiness && i == 6
-                        ? IStreamArtistReadinessConsentOwner(source.owners[i])
-                            .authorityReadinessHydrationState(q, economics)
-                        : i == 6 && economics.length != 0
-                            ? IStreamArtistEconomicsAuthorityHydrationOwner(source.owners[i])
-                                .authorityEconomicsHydrationState(q, economics)
-                            : IStreamArtistAuthorityHydrationOwner(source.owners[i])
-                                .authorityHydrationState(q);
-        }
+        data = StreamArtistHydrationSourceState.collect(
+            source, sourceCoordinator, p, q, economics, attestations, publications, findings
+        );
         (, uint64 ac) = IStreamArtistHistory(prior).artistHistoryLane(1, p.artistId);
         (, uint64 cc) = IStreamArtistHistory(prior).artistHistoryLane(2, bytes32(p.collectionId));
         if (ac != artistCount || cc != collectionCount) revert T.InvalidRecord();

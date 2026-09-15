@@ -120,3 +120,19 @@ payload, receipt and consumed-authorization state; none is reset by Artist
 hydration. Fresh successor writes use the existing successor signature domain.
 The [publication importer guide](../guides/artist-publication-authority-hydration.md)
 states historical/current consumer boundaries and the source-only test scope.
+
+
+## Entropy finding profile
+
+The additive `hydrateArtistAuthorityWithEntropyFindings` transport selects
+`6529STREAM_ARTIST_ENTROPY_FINDING_HYDRATION_V1` under the unchanged operation 60
+and mask `0x7f`. It composes complete existing living profiles with every original
+op23 entropy finding, the complete supplemental admission and exact latest/activity
+state. Both original replay keys are carried through the existing complete source
+guard import. A tagged fixed-owner state wrapper retains the original Registry
+domain for the unchanged ten-word record and full entropy manifest; current
+successor binding/activity/host intent still control use. No receipt-only authority
+or cross-profile finality reinterpretation is admitted. The default-timing,
+single-Artist/collection, first-predecessor and finite Archive bounds remain.
+See [the caller guide](../guides/artist-entropy-finding-hydration.md) for the exact
+request, retained state, unsupported histories and source/runtime distinction.

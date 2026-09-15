@@ -11,6 +11,7 @@ library StreamArtistEntropyUnavailabilityStore {
 
     struct State {
         mapping(bytes32 => EU.Admission) admissions;
+        mapping(bytes32 => address) origins;
     }
 
     function state() internal pure returns (State storage s) {
