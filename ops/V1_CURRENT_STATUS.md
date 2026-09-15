@@ -40,10 +40,15 @@ at 23,668, Consent writer at 22,668, rotation state at 22,611 and Resolver at
 deployment. Identity/hydration/Estate extraction is integrated as 5ed14ff9:
 Identity measures 21,032 bytes, Estate 21,226, and its deployment helper 23,237.
 Every originally oversized product has a corrected individual measurement.
-The complete 1,767-source ABI/type check passes at 5ed14ff9. The exact 737-source
-eight-suite capture passes a combined size preflight: all 50 changed or
-near-limit production products fit, with no compiler errors. Its native run
-is now compiling. This capture predates the later Metadata bridge below.
+The complete 1,767-source ABI/type check passes at 5ed14ff9. Its frozen
+737-source, eight-suite native run now completes: 32 cases pass and eight fail;
+all 446 nonempty production products fit. Seven failures reach a fresh
+post-migration revenue read that still expects the original Artist Registry.
+The remaining failure is an empty history read returning an array panic after
+the forged import was correctly rejected. Explicit bounds and regression cases
+are integrated as 3f80697f; their native rerun is pending. Both revenue resolver
+families are being updated to consume the authenticated completed successor.
+This frozen capture predates the later Metadata and publication work below.
 
 The integrator reran the existing owner accumulator suite: all five cases pass,
 including 256 fuzz inputs, original flat-word state/record hash oracles, actual
@@ -58,24 +63,42 @@ new scenarios remain native-pending. Recorded PREMIS activity graph export
 (bb17874a) passes all 32 graph/event tests on integration, and its retained
 actual package independently verifies offline with the original manifest hash.
 
-The Metadata successor-consumption bridge is integrated as f6d66d8b. It retains
-the original Metadata authorization-use map and requires current selection,
-sealed immediate lineage and matching complete seven-owner hydration. Review
-corrected a Router/collection-record-host conflation before integration. Eight
-authored cases include the actual Artist publication candidate read at its
-original 400,000-gas budget. The first frozen run passes 22 of 23 cases, including
-all 15 originals, a 256-input property and Safe rollback/retry. The new callback
-case fails even with warm state: repeated lineage reads exhaust the existing
-budget before the downstream document read. Metadata host runtime is also
-24,846 bytes, 270 above the deployment limit. Both are open repairs; cold-call
-acceptance is required, and no gas limit has been raised.
+The Metadata successor-consumption bridge (f6d66d8b, repaired in 0e523bb2)
+retains the original authorization-use map and authenticates the completed
+successor against its sealed lineage, exact constructor configuration and all
+seven owner completion commitments. Its final focused run passes all 23 cases,
+including the 15 originals, 256 fuzz inputs and Safe failure/retry. The actual
+Artist publication candidate callback succeeds cold in 207,951 gas within the
+unchanged 400,000 budget. All 43 measured production products fit; Metadata
+runtime is 24,239 bytes. The earlier 22/23 failure and oversized capture remain
+historical evidence. The real Artist migration and same-Metadata fresh
+publication join remains a separate test in progress, with typed Core and
+governance boundaries explicit.
+
+Complete original publication-attestation hydration is integrated as d7bfd3be.
+The explicit operation-60 profile preserves original evidence, signatures,
+publication records, nonce guards and seven-owner activation. Earlier selectors
+remain strict, and existing Metadata consumption records remain authoritative.
+Independent source review is clear; seven authored cases remain native-pending.
+The combined 1,776-source ABI/type check passes at 3f80697f. All 13 selected
+publication/history production products fit in the exact 448-source size
+capture; Attribution runtime is 23,968 bytes, Coordinator 23,100 and Registry
+23,898. Combined behavioral execution remains pending.
+
+The Artist fixture now loads exact linked creation artifacts and executes
+normal CREATE (64f27fde), preserving constructors, caller, nonce order and
+production admission checks. The bounded prototype passes an actual Archive
+constructor/storage probe and one unchanged Artist checkpoint case. Test
+creation size decreased in the recorded captures, but those captures differ;
+a matched-source compile-speed improvement has not yet been measured.
 
 The independently reviewed resumable Safe inventory-opening client workflow
 is integrated as 0f80e00a. All 150 client tests, generation, build and negative
 type checks pass, including 13 new workflow cases. The complete 1,769-source
-Solidity ABI/type check also passes at 0f80e00a. Builders continue original
-publication-attestation hydration and a bounded improvement to Artist test
-compilation time. The immutable RC1 and Sepolia instance remain unchanged.
+Solidity ABI/type check also passes at 0f80e00a. Builders continue the revenue
+successor repair and joined Artist/Metadata behavior while the next frozen
+acceptance cohort is prepared. The immutable RC1 and Sepolia instance remain
+unchanged.
 
 ## History, credit export and actual rights capture
 

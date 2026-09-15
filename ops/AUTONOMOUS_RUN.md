@@ -18,7 +18,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Integrated through 0f80e00a: content/readiness hydration, native surplus operator and museum activity export; fixed Artist/Resolver size repairs. The first combined Artist run failed setup on oversized deployment, with zero selected behavior cases executed. Owner accumulator five-case/256-input checks and museum 32-case/offline replay checks pass. All original oversizes have corrected individual measurements; the complete 1,767-source type check passes at 5ed14ff9. The frozen 737-source size preflight passes all 50 selected products and its Artist native run is active. Metadata native passes 22/23; callback gas and a 270-byte host oversize remain open. Immutable RC1 remains 569bf87f1fa808787d324f6e1582924b5ccf1d40. |
+| Source checkpoint | Integrated through 3f80697f: repaired Metadata callback, complete publication hydration, exact-artifact Artist fixture and explicit history bounds. Frozen Artist native run completes with 32 passes / eight failures and all 446 production products fitting. Seven failures share the pending revenue successor-selection repair; the history bounds fix is integrated, native-pending. Final Metadata focused run passes all 23 cases including cold callback at the original cap, and all 43 measured products fit. Complete 1,776-source ABI/type check passes. Immutable RC1 remains 569bf87f1fa808787d324f6e1582924b5ccf1d40. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -37,10 +37,10 @@ pending checks. The immutable RC1 remains the released baseline.
 
 | Owner | Implementation batch |
 | --- | --- |
-| Integrator | Shared Artist/Registry/Coordinator size repairs integrated; owner accumulator five cases plus 256 fuzz inputs pass. Complete 1,767-source type check passes; 737-source size preflight passes all 50 selected products and the eight-suite Artist native run is active. |
-| Artist builder | Readiness hydration and final size split integrated. Building complete original publication-attestation history hydration while root validates the frozen Artist capture. |
-| Revenue builder | Attribution/Consent size repairs integrated. Resumable inventory-opening client recipe integrated and independently reviewed; all 150 client tests pass, including 13 new cases. Prototyping exact-artifact test deployment to reduce repeated Artist creation-bytecode compilation. |
-| Fourth engineer | Museum activity graph integrated, 32 root tests and actual package replay pass. Metadata successor-consumption bridge integrated after Router correction; 22/23 focused cases pass; repairing the actual 400k callback budget failure and host oversize, with cold-call acceptance pending. |
+| Integrator | Reviewed and integrated the four new batches; complete 1,776-source type check passes. All 13 selected publication/history production products fit; preparing the next combined native capture. |
+| Artist builder | Publication hydration and history bounds integrated; independently reviewing the revenue successor repair and its consumer paths. |
+| Revenue builder | Inventory-opening recipe and exact-artifact fixture integrated. Repairing both Primary and Royalty resolvers to use the authenticated completed Artist successor throughout live reads and mutations. |
+| Fourth engineer | Metadata callback gas and host size repaired; all 23 focused cases pass. Building the actual Artist migration plus same-Metadata fresh-publication test, with Core/governance boundaries explicit. |
 
 Comprehensive current-stack/Safe integration, fuzz and stateful campaigns, gas
 conformance, complete genesis inventory, CI and matching new testnet evidence
