@@ -72,3 +72,11 @@ native runtime, bytecode sizes, full current-stack transactions and finality
 artifact/export integration. The existing large-script and broader media
 rendering requirements remain outstanding; no full manifest conformance is
 claimed here.
+
+The Router delegates content configuration, manifest selection and related
+previews to the fixed linked `StreamMetadataRouterContent` library. Its
+storage roots come from the Router compiler's original layout. Delegate
+execution retains the actual caller, Router address, Renderer identity and
+all existing commitment domains; it does not introduce a replaceable target
+or a second authorization entry point. Selected-product size checks are
+separate from the pending joined runtime and deployment validation.
