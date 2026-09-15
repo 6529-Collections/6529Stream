@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamMetadataRecoveryRoutes.sol";
+import { StreamMetadataDisplayParameters } from "./StreamMetadataDisplayParameters.sol";
 import "../../interfaces/stream/metadata/IStreamMetadataServingFacts.sol";
 import "../../interfaces/stream/finality/IStreamFinalityRouterEvidenceBinding.sol";
 import "../../interfaces/stream/finality/IStreamFinalityScopeMembership.sol";
@@ -11,8 +12,6 @@ import "../../interfaces/stream/metadata/IStreamMetadataScopeMembership.sol";
 /// @notice Router reads the same immutable scope universe as its original finality provider.
 /// @dev No current provider selection, evidence-host liveness or content-authorization transition.
 library StreamMetadataScopeMembership {
-    uint256 private constant PIN_GAS = 150000;
-    uint256 private constant MEMBERSHIP_GAS = 2000000;
     error MetadataScopeBindingInvalid(address target);
 
     function read(
@@ -46,7 +45,15 @@ library StreamMetadataScopeMembership {
             ? abi.encodeCall(IStreamFinalityScopeMembership.scopeTokenAt, (scope, value))
             : abi.encodeCall(IStreamFinalityScopeMembership.scopeCoversToken, (scope, value));
         result = abi.decode(
-            StreamMetadataRecoveryRoutes.read(membership, input, 32, MEMBERSHIP_GAS), (uint256)
+            StreamMetadataRecoveryRoutes.read(
+                membership,
+                input,
+                32,
+                StreamMetadataDisplayParameters.value(
+                    StreamMetadataDisplayParameters.MEMBERSHIP_GAS
+                )
+            ),
+            (uint256)
         );
         if (!indexedRead && result > 1) revert MetadataScopeBindingInvalid(membership);
     }
@@ -124,7 +131,15 @@ library StreamMetadataScopeMembership {
     }
 
     function _word(address target, bytes memory input) private view returns (bytes32) {
-        return abi.decode(StreamMetadataRecoveryRoutes.read(target, input, 32, PIN_GAS), (bytes32));
+        return abi.decode(
+            StreamMetadataRecoveryRoutes.read(
+                target,
+                input,
+                32,
+                StreamMetadataDisplayParameters.value(StreamMetadataDisplayParameters.READ_GAS)
+            ),
+            (bytes32)
+        );
     }
 
     function _address(address target, bytes memory input) private view returns (address value) {

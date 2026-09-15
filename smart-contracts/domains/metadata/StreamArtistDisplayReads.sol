@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistDisplayJSON.sol";
+import { StreamMetadataDisplayParameters } from "./StreamMetadataDisplayParameters.sol";
 import {
     StreamFinalityNativeProviderReads
 } from "../finality/StreamFinalityNativeProviderReads.sol";
@@ -20,7 +21,6 @@ import "../../interfaces/stream/finality/IStreamFinalityTokenScopeInventory.sol"
 
 /// @notice Bounded live facts only. The caller catches this whole frame for AA-DISPLAY fallback.
 library StreamArtistDisplayReads {
-    uint256 internal constant READ_GAS = 250000;
     uint256 internal constant MAX_SCOPES = 64;
 
     struct State {
@@ -176,7 +176,7 @@ library StreamArtistDisplayReads {
             artist,
             abi.encodeCall(IStreamArtistIdentityRevisionReads.artistDisplayName, (id)),
             352,
-            READ_GAS
+            StreamMetadataDisplayParameters.value(StreamMetadataDisplayParameters.READ_GAS)
         );
         (value, record) = abi.decode(raw, (string, bytes32));
         if (
@@ -387,7 +387,9 @@ library StreamArtistDisplayReads {
                     membership,
                     abi.encodeCall(IStreamFinalityTokenScopeInventory.tokenScopeAt, (token, i)),
                     160,
-                    2000000
+                    StreamMetadataDisplayParameters.value(
+                        StreamMetadataDisplayParameters.MEMBERSHIP_GAS
+                    )
                 ),
                 (StreamFinalityScope, bool)
             );
@@ -402,7 +404,9 @@ library StreamArtistDisplayReads {
                                     IStreamFinalityScopeMembership.scopeCoversToken, (scope, token)
                                 ),
                                 32,
-                                2000000
+                                StreamMetadataDisplayParameters.value(
+                                    StreamMetadataDisplayParameters.MEMBERSHIP_GAS
+                                )
                             ),
                             (uint256)
                         ) != 1
@@ -475,7 +479,12 @@ library StreamArtistDisplayReads {
         view
         returns (bytes memory raw)
     {
-        raw = _bounded(target, input, length, READ_GAS);
+        raw = _bounded(
+            target,
+            input,
+            length,
+            StreamMetadataDisplayParameters.value(StreamMetadataDisplayParameters.READ_GAS)
+        );
         if (raw.length != length) _fail();
     }
 
@@ -484,7 +493,10 @@ library StreamArtistDisplayReads {
         view
         returns (bytes memory raw)
     {
-        if (target.code.length == 0 || gasleft() < cap + cap / 63 + 10000) _fail();
+        uint256 available = gasleft();
+        if (target.code.length == 0 || available <= 10000) _fail();
+        available -= 10000;
+        if (cap > available || available - cap < cap / 63) _fail();
         bool ok;
         uint256 size;
         assembly ("memory-safe") {

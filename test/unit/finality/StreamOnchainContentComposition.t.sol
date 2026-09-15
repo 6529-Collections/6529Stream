@@ -2,6 +2,9 @@
 pragma solidity ^0.8.19;
 
 import "./StreamCollectionTokenInventory.t.sol";
+import {
+    MetadataRecoveryOriginalBoundary
+} from "../../helpers/MetadataRecoveryServingBoundaries.sol";
 import "../../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
 import "../../../smart-contracts/domains/finality/StreamOnchainContentCheckpoint.sol";
 import "../../../smart-contracts/interfaces/stream/artist/IStreamArtistMintConsent.sol";
@@ -28,10 +31,16 @@ contract CheckpointCompositionEntropyBoundary is PermanentTargetEntropyCoordinat
 /// @dev Explicit artist-read/authorization boundary. This does not prove artist consent issuance.
 contract CheckpointCompositionArtistBoundary {
     address public immutable core;
+    address public immutable finalityRegistry;
+    bytes32 public immutable finalityRegistryCodeHash;
     StreamArtistContentTypes.FreezeRecord private _freeze;
 
     constructor(address core_) {
         core = core_;
+        // Original finality remains an explicit boundary; the Core/Router/checkpoint are actual.
+        finalityRegistry =
+            address(new MetadataRecoveryOriginalBoundary(core_, address(this), msg.sender));
+        finalityRegistryCodeHash = finalityRegistry.codehash;
     }
 
     function supportsInterface(bytes4 id) external pure returns (bool) {
@@ -494,6 +503,7 @@ contract StreamOnchainContentCompositionTest is CharacterizationTestBase, Offici
             _MODULE_MANIFEST,
             IStreamArtistAttribution(address(_artist))
         );
+        _router.initializeOriginalFinalityAnchor();
         _installPointer(
             _POINTER_MINT_MANAGER,
             address(_manager),

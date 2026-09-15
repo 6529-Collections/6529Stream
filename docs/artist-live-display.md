@@ -19,10 +19,15 @@ The snapshot record hash is a different value. An actual absent selected
 snapshot produces attestation `none`; an unavailable owning host produces the
 degraded object. This read path does not itself create a kind-1 approval.
 
-All required Artist reads run inside one 8,000,000-gas self-call, with an
-EIP-150 forwarding check and 300,000 gas retained by the caller. Individual
-fixed reads allow 250,000 gas; authenticated membership reads allow up to
-2,000,000 gas. Names are bounded to 256 UTF-8 bytes, accepted collaborators to
+All required Artist reads run inside one self-call with live Router-owned GGPs.
+The constructor registers `ROUTER_LIVE_ATTRIBUTION_GAS` at 8,000,000,
+`ROUTER_LIVE_ATTRIBUTION_READ_GAS` at 250,000,
+`ROUTER_LIVE_ATTRIBUTION_MEMBERSHIP_GAS` at 2,000,000, and
+`ROUTER_LIVE_ATTRIBUTION_RETURN_GAS` at 2,000,000. Each initial value is its
+floor; the return reserve is a minimum-gas gate and the other three are
+forwarding caps. The EIP-150 parent check retains that live reserve and uses
+subtraction to avoid overflow. Core's separate outer metadata-call GGP must
+also accommodate the selected budgets. Names are bounded to 256 UTF-8 bytes, accepted collaborators to
 32 rows, reverse scope candidates to 64, and the attribution object to 32 KiB.
 Malformed, oversized, missing-code, reverted or insufficient-budget reads yield
 exactly `{"state":"attribution_unavailable"}`. No substitute name, authority
@@ -62,3 +67,16 @@ full native runtime/size acceptance are deferred to combined integration.
 The read boundaries in the new display tests are explicitly typed fixtures.
 Broader attestation writers and stored C2PA-authorship reduction remain separate
 work; this batch is not a full institutional or renderer conformance claim.
+
+The Router exposes the standard GGP inventory/info/value/raise surface and
+`gasParameterTransition` for exact tooling previews. Values occupy a dedicated
+Router storage namespace; existing anchor and collection slots remain intact.
+Only the original Router authority, with its pinned code and actual canonical
+Governance-V2 marker/context, can execute an exact delayed class-1 raise. The
+original V2 scope/state preimages, monotonic at-most-2x bound, revision and
+per-action replay checks are retained. The current operator catalog admits the
+raise selector. Test-only or legacy authorities without that canonical context
+can serve initialized values but cannot perform a raise. No provider's unrelated
+parameter supplies a budget. Focused source cases compare this storage adapter
+with the original shared GGP host; native execution and measured floors remain
+part of subsequent integration validation.

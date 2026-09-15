@@ -29,6 +29,10 @@ import "./StreamMetadataContentAuthorization.sol";
 import "./StreamMetadataFinalityServing.sol";
 import "./StreamMetadataRouterCollectionReads.sol";
 import "./StreamMetadataScopeMembership.sol";
+import { StreamMetadataDisplayParameters } from "./StreamMetadataDisplayParameters.sol";
+import {
+    IStreamGasParameterHost
+} from "../../interfaces/stream/parameters/IStreamGasParameterHost.sol";
 import { StreamArtistDisplayReads } from "./StreamArtistDisplayReads.sol";
 import { StreamArtistDisplayJSON } from "./StreamArtistDisplayJSON.sol";
 import {
@@ -107,7 +111,9 @@ contract StreamMetadataRouter is
     );
     error OriginalFinalityAnchorAlreadyInitialized();
     error OriginalFinalityAnchorUninitialized();
-    event OriginalFinalityAnchorInitialized(address indexed registry, bytes32 codeHash);
+    event OriginalFinalityAnchorInitialized(
+        uint16 schemaVersion, address indexed registry, bytes32 codeHash
+    );
 
     /// @notice Admit the fixed facade's original finality after the cyclic graph is complete.
     function initializeOriginalFinalityAnchor() external {
@@ -127,11 +133,42 @@ contract StreamMetadataRouter is
             );
         servingOriginalFinalityAnchor = a;
         _originalFinalityAnchorInitialized = true;
-        emit OriginalFinalityAnchorInitialized(a.registry, a.codeHash);
+        emit OriginalFinalityAnchorInitialized(1, a.registry, a.codeHash);
     }
 
     bytes32 public constant LIVE_ATTRIBUTION_PROFILE = StreamArtistDisplayTypes.PROFILE;
-    uint256 public constant LIVE_ATTRIBUTION_GAS = 8000000;
+
+    function LIVE_ATTRIBUTION_GAS() external view returns (uint256) {
+        return StreamMetadataDisplayParameters.value(StreamMetadataDisplayParameters.OUTER_GAS);
+    }
+
+    function governanceAuthority() external view returns (address) {
+        return authority;
+    }
+
+    function gasParameter(bytes32 id) external view returns (uint256) {
+        return StreamMetadataDisplayParameters.value(id);
+    }
+
+    function gasParameterInfo(bytes32 id) external view returns (uint256, uint256, uint8, uint64) {
+        return StreamMetadataDisplayParameters.info(id);
+    }
+
+    function gasParameterIds() external pure returns (bytes32[] memory) {
+        return StreamMetadataDisplayParameters.ids();
+    }
+
+    function gasParameterTransition(bytes32 id, uint256 next)
+        external
+        view
+        returns (bytes32, bytes32, bytes32)
+    {
+        return StreamMetadataDisplayParameters.transition(id, next);
+    }
+
+    function raiseGasParameter(bytes32 id, uint256 next) external {
+        StreamMetadataDisplayParameters.raise(authority, id, next);
+    }
     uint256 public constant LIVE_ATTRIBUTION_MAX_BYTES = 32768;
 
     bytes32 public constant CONTENT_SCRIPT = keccak256("SCRIPT");
@@ -208,6 +245,7 @@ contract StreamMetadataRouter is
         }
         core = IStreamCore(core_);
         authority = authority_;
+        StreamMetadataDisplayParameters.initialize(authority_);
         if (
             address(artistRegistry_).code.length == 0 || artistRegistry_.core() != core_
                 || !IERC165(address(artistRegistry_))
@@ -238,7 +276,8 @@ contract StreamMetadataRouter is
         override(StreamModuleBase, IERC165)
         returns (bool)
     {
-        return id == type(IStreamMetadataRouter).interfaceId
+        return id == type(IStreamGasParameterHost).interfaceId
+            || id == type(IStreamMetadataRouter).interfaceId
             || id == type(IStreamMetadataRenderingProfile).interfaceId
             || id == type(IStreamContentRootPublication).interfaceId
             || id == type(IStreamMetadataServingFacts).interfaceId
@@ -1069,8 +1108,16 @@ contract StreamMetadataRouter is
         view
         returns (bytes memory)
     {
-        uint256 cap = LIVE_ATTRIBUTION_GAS;
-        if (gasleft() < cap + cap / 63 + 300000) return StreamArtistDisplayJSON.unavailable();
+        uint256 cap =
+            StreamMetadataDisplayParameters.value(StreamMetadataDisplayParameters.OUTER_GAS);
+        uint256 reserve =
+            StreamMetadataDisplayParameters.value(StreamMetadataDisplayParameters.RETURN_GAS);
+        uint256 available = gasleft();
+        if (available <= reserve) return StreamArtistDisplayJSON.unavailable();
+        available -= reserve;
+        if (cap > available || available - cap < cap / 63) {
+            return StreamArtistDisplayJSON.unavailable();
+        }
         bytes memory input = abi.encodeCall(this.liveAttributionObject, (collectionId, tokenId));
         bool ok;
         uint256 size;
