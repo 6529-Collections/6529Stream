@@ -6,17 +6,17 @@ import "./StreamArtistDormancyRecoveryActual.t.sol";
 /// @notice Actual designated op43 -> class3 op32 history -> op33 -> registered op35.
 /// @dev Real Artist owners, Archive and threshold Safes; Core and governance remain typed unit boundaries.
 contract StreamArtistDormancyRotationRecoveryActualTest is StreamArtistDormancyRecoveryActualTest {
-    bytes32 private drTerminal;
-    bytes32[] private drRotations;
-    bytes32 private drCandidate;
-    bytes32 private drSelected;
-    bytes32 private drHistory;
-    uint64 private drWindow;
-    uint32 private drCaps;
-    OfficialSafe private drLiving;
-    uint256[] private drLivingKeys;
-    OfficialSafe private drSuccessor;
-    uint256[] private drSuccessorKeys;
+    bytes32 internal drTerminal;
+    bytes32[] internal drRotations;
+    bytes32 internal drCandidate;
+    bytes32 internal drSelected;
+    bytes32 internal drHistory;
+    uint64 internal drWindow;
+    uint32 internal drCaps;
+    OfficialSafe internal drLiving;
+    uint256[] internal drLivingKeys;
+    OfficialSafe internal drSuccessor;
+    uint256[] internal drSuccessorKeys;
 
     modifier drSelf() {
         require(msg.sender == address(this), "self only");
@@ -248,12 +248,12 @@ contract StreamArtistDormancyRotationRecoveryActualTest is StreamArtistDormancyR
         drHistory = _drHistory();
     }
 
-    function _drSnapshot(bytes32 record) private view returns (V.Snapshot memory) {
+    function _drSnapshot(bytes32 record) internal view returns (V.Snapshot memory) {
         return IStreamArtistGuardianVestingHistory(suite.owners[2])
             .guardianVestingSnapshot(artistId, record);
     }
 
-    function _drHistory() private view returns (bytes32 h) {
+    function _drHistory() internal view returns (bytes32 h) {
         (Dorm.Notice memory n, uint8 phase, Dorm.Terminal memory t) =
             _dorm().dormancyRecord(noticeHash);
         h = keccak256(
@@ -289,7 +289,7 @@ contract StreamArtistDormancyRotationRecoveryActualTest is StreamArtistDormancyR
     }
 
     function _drAssert(bytes32 record, IdentityRecovery.Request memory p, T.Authorization memory a)
-        private
+        internal
         view
     {
         Estate.AuthorityCapabilities memory caps = ingress.currentAuthorityCapabilities(artistId);
@@ -310,14 +310,14 @@ contract StreamArtistDormancyRotationRecoveryActualTest is StreamArtistDormancyR
         );
     }
 
-    function _drStart(bool prior) private {
+    function _drStart(bool prior) internal {
         this.rotatedDormancySetup(prior);
         this.rotatedDormancyAt(drWindow);
         this.rotatedDormancyStage(98001, false, false);
     }
 
     function _drRequest()
-        private
+        internal
         returns (IdentityRecovery.Request memory p, T.Authorization memory a)
     {
         (p, a) = this.rotatedDormancyTerms();

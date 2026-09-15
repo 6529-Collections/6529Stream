@@ -1748,3 +1748,23 @@ Both context and preparation consume the same new tagged proof; original
 unrotated fact bytes and all operations 1–60 are unchanged. No class-4 or
 supersession authority is introduced. The [caller guide](../guides/artist-dormancy-recovery.md)
 states the admitted profile and the remaining closed-origin/prior-recovery work.
+
+### Original designated-dormancy closure before successor rotations
+
+The designated-dormancy rotation profile additionally admits an actual original
+operation-43 closure before executed class-3 rotations. Its original appointed
+principal, first canonical operation-58/Cause and kind-1 contest or kind-2
+standing/pending-closure facts are authenticated independently of the terminal
+incumbent. The first cause has no prior episode; prior-standing removal and
+original window/abandonment terms remain exact. The immutable original closure
+cannot be replaced by a later dismissal or a terminal rotation closure.
+
+Existing admitted vesting lineage, original designation/directive and capability
+origin, full guardian prefixes, native provisional eligibility, lifetime veto,
+new-side acceptance and atomic recovery/Archive rules remain. A new tagged proof
+is included only for this closed-origin branch; the unclosed branch and original
+operation catalog/domains are unchanged. Prior recovery, supersession and class-4
+adjudication remain separate profiles. Five authored actual Artist/Archive/Safe
+cases and the changed historical context control are described in the
+[caller guide](../guides/artist-dormancy-recovery.md); native and current-Core
+acceptance are not inferred from their source/type checks.

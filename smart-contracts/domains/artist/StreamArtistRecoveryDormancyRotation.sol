@@ -49,10 +49,14 @@ import {
     StreamArtistRecoveryEstateRotationHistory as RotationHistory
 } from "./StreamArtistRecoveryEstateRotationHistory.sol";
 
+import {
+    StreamArtistRecoveryDormancyRotationOrigin as RotationOrigin
+} from "./StreamArtistRecoveryDormancyRotationOrigin.sol";
+
 /// @notice Designated op43 authority followed by admitted class3 rotations and first recovery.
 /// @dev Original appointment remains the capability origin; terminal op32 supplies current authority.
-/// The original op43 window is unclosed. Closed intermediate/terminal rotation windows are admitted
-/// through their canonical immutable dismissal/cause records, never historical reauthorization.
+/// Original op43 and intermediate/terminal op32 closures use their respective original principals
+/// and canonical immutable dismissal/cause records, never historical reauthorization.
 /// @dev Consumes admitted notice/action/vesting records; never reauthorizes historical governance.
 library StreamArtistRecoveryDormancyRotation {
     struct Facts {
@@ -158,13 +162,15 @@ library StreamArtistRecoveryDormancyRotation {
         ) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         }
-        Dismissal.Closure memory empty;
-        if (
-            keccak256(abi.encode(resolutions.closures[head])) != keccak256(abi.encode(empty))
-                || f.transition.contestedAt != 0
-        ) {
-            revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
-        }
+        bytes32 originProof = RotationOrigin.proof(
+            rotations,
+            resolutions,
+            contests,
+            e,
+            f.transition,
+            f.terminal.plan.authority,
+            rotations.rotations[terminal].transition.stagedAt
+        );
         bytes32 closureProof = Closed.proof(
             rotations, resolutions, contests, e, cause, rotations.rotations[terminal].transition
         );
@@ -249,6 +255,15 @@ library StreamArtistRecoveryDormancyRotation {
                     keccak256("6529STREAM_ARTIST_RECOVERY_CLOSED_ROTATED_DORMANCY_FACTS_V1"),
                     proof,
                     closureProof
+                )
+            );
+        }
+        if (originProof != 0) {
+            proof = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_RECOVERY_CLOSED_ORIGIN_ROTATED_DORMANCY_FACTS_V1"),
+                    proof,
+                    originProof
                 )
             );
         }

@@ -139,8 +139,9 @@ intermediate historical witness or use mutable old retirement entries as ancestr
 anchors. A legitimately returning address is supported. The terminal retirement
 entry is still checked against the actual latest execution.
 
-This profile requires the original operation-43 window to be unclosed and
-uncontested. Intermediate and terminal rotation windows may instead have actual
+The original operation-43 window may be unclosed and uncontested, or have the
+complete original closure described below. Intermediate and terminal rotation
+windows may have actual
 operation-58 closures: kind-1 compromise or kind-2 standing veto, including an
 abandoned pending attempt before the next executed rotation. The immutable first
 closure, its original dismissal/cause, and the current latest dismissal are
@@ -165,10 +166,8 @@ continuity, three recovery receipts and atomic Archive composition are retained.
 No operation ID, facade selector or storage field is added. Operations 1–60 keep
 their original domains and recipes.
 
-An operation-43 closure preceding the first rotation remains a separate missing
-profile, including the existing standing-history rejection control. Prior
-operation-35 recovery, enumerated supersession and class-4 authority transitions
-are outside this rotated-dormancy increment.
+Prior operation-35 recovery, enumerated supersession and class-4 authority
+transitions remain outside this rotated-dormancy profile.
 
 Nine authored cases in `StreamArtistDormancyRotationRecoveryActual.t.sol` cover
 earlier living ancestry, original receipts and replay, repeated rotations with
@@ -181,6 +180,47 @@ Core/governance remain explicit typed unit boundaries. The new suite and retaine
 standing-history suite pass a 752-source ABI/storage type check. These new cases
 have not executed; consolidated native, product-size and current-Core/Executor
 acceptance remain separate.
+
+## Original dormancy closure before executed rotations
+
+An original designated operation-43 appointment may have been dismissed before
+the first later executed class-3 rotation. The reader now authenticates that
+original closure against its original appointed principal, independently of the
+current terminal incumbent. It checks the canonical first operation-58 record,
+saved Cause, original kind-1 contest or kind-2 standing-veto/pending closure,
+window marker and derived abandonment. The first cause must have no earlier
+cause or resolution; exact prior-standing removal terms remain bound. The first
+dismissal must precede the terminal rotation's actual staging time.
+
+The terminal and immediate parent still use the complete existing rotation
+proof. Longer ancestry relies on the fixed owner's admitted latest-head vesting
+chain under the unchanged operation-43 origin, rather than reconstructing each
+historical governance witness. Later original-principal dismissals do not replace
+the immutable first closure. Current terminal dismissals are checked against
+their own incumbent and cannot substitute for the original appointment closure.
+
+An early abandoned original window never matures its provisional guardian
+records, even after rotations and elapsed time. A fresh eligible set may be used
+operationally, while the complete lifetime prefix retains its veto. Original
+designation/directives, capability mask, epoch, new-side acceptance, action
+election, replay and all three recovery receipts remain unchanged. Only the
+closed-origin branch adds a tagged proof; unclosed-origin fact hashes retain
+their preceding bytes. No selector, operation, storage field or authority class
+is introduced.
+
+Five new cases in
+`StreamArtistDormancyClosedOriginRotationRecoveryActual.t.sol` cover original
+early abandonment with prior living ancestry and byte-identical Archive retry;
+zero-reason standing closure followed by repeated rotations and address return;
+distinct first/later original dismissals; missing or substituted original versus
+terminal closure with exact restoration; and a lower-nonce lifetime Safe veto
+after an abandoned original candidate. They retain real Artist owners, Archive
+and threshold Safes with explicit typed Core/governance boundaries. The previous
+standing-history executed-rotation refusal is now an admitted-context control;
+all nine preceding rotation test bodies are unchanged. The combined sources
+pass a 754-source ABI/storage type check. These new bodies have not executed;
+native runtime, changed-product size and actual-current governance acceptance
+remain pending.
 
 ## Validation
 
@@ -202,7 +242,8 @@ zero-reason standing with prior living ancestry, late Archive rollback and exact
 retry, repeated standing and later kind-1 resolutions, fresh guardian selection,
 a standing episode after early kind-1 closure, both missing/substituted closures,
 historical cause drift/restoration, lower-nonce
-lifetime Safe veto, and refusal after an actual executed rotation. They use the
+lifetime Safe veto, and a context control after an actual executed rotation
+(admitted by the later closed-origin increment above). They use the
 existing real Artist/Archive/Safe fixture with typed Core/governance boundaries.
 The new and retained closed-dormancy sources pass a 739-source ABI/type check.
 These authored standing cases have not executed; no new runtime, size or current

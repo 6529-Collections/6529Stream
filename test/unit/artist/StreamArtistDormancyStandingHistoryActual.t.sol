@@ -512,21 +512,24 @@ contract StreamArtistDormancyStandingHistoryActualTest is StreamArtistDormancyRe
         this.standingDormancyRecordCause(dsLast);
     }
 
-    function testDormancyStandingDoesNotAdmitExecutedInterveningRotation() public {
+    function testDormancyStandingExecutedInterveningRotationHasAdmittedRecoveryContext() public {
         this.standingDormancySetup(false);
         this.standingDormancyAt(windowEnd, 97001, bytes32(0), false);
         this.standingDormancyDismiss();
         this.standingDormancyStage(97002);
         this.standingDormancyExecuteRotation();
         (IdentityRecovery.Request memory p, T.Authorization memory a) = this.standingDormancyTerms();
-        avm.expectPartialRevert(IdentityRecovery.UnsupportedIdentityRecoveryProfile.selector);
-        ingress.identityRecoveryContext(p, a);
+        IdentityRecovery.Context memory context = ingress.identityRecoveryContext(p, a);
+        require(
+            context.incumbent == address(artist) && context.causeHash == p.expectedCauseHash,
+            "admitted original closed appointment with current executed rotation"
+        );
         require(
             ingress.latestIdentityRecovery(artistId) == 0
                 && IStreamArtistGuardianVestingHistory(suite.owners[2])
                 .guardianVestingSnapshot(artistId, dsLast)
                 .operationId == 32,
-            "actual later vesting remains a distinct unsupported profile"
+            "actual later vesting is retained by the separate rotated profile"
         );
     }
 }
