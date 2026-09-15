@@ -42,3 +42,5 @@ authority and registration locks, rollback, token and scope callbacks, and
 bounded fuzzing of repeated revisions. They use the actual coordinator/provider
 with a typed Core fixture. Whole-system activation, Safe composition and release
 acceptance remain part of consolidated validation.
+
+For evidence-bearing terminal declarations, see [entropy incidents](entropy-incidents.md).

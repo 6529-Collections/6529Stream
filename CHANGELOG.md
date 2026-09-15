@@ -5,6 +5,12 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add role-authorized token/scope entropy incidents with immutable evidence and a
+  bounded provider-result probe; no fresh redraw or provider migration is enabled.
+- Add Artist dormancy, steward grants and designated dormancy-origin recovery.
+- Add declared platform primary auctions and prepared custody PROFILE/template sales.
+- Add complete chunk-backed scripts/libraries and burn-stable artwork checkpoints.
+
 - Add live nested Artist provenance, typed script/media manifests and governed
   display budgets, preserving original finality routes and optional external hashes.
 - Add state-bound and delegated Artist attestations and declared platform-work
