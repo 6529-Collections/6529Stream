@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistAuthorityCheckpoint.sol";
+import { StreamArtistRotationAcceptance } from "./StreamArtistRotationAcceptance.sol";
 import { StreamArtistAuthorityRecordEvents } from "./StreamArtistAuthorityRecordEvents.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 import { StreamArtistAuthorityPreimages } from "./StreamArtistAuthorityPreimages.sol";
@@ -20,7 +21,11 @@ import {
 library StreamArtistRotationState {
     error InvalidGuardianSet();
     error EstateCapabilityUnavailable(bytes32 artistId, uint32 requiredCapabilities);
-    using StreamArtistNonceAvailability for StreamArtistNonceAvailability.Index;
+    // Retain original error ABI entries now raised by the fixed acceptance worker.
+    error BoundExceeded(uint256 actual, uint256 maximum);
+    error InvalidSignature();
+    error NonceAvailabilityAlreadyUsed(uint256 nonce);
+    error NonceAvailabilityInconsistent(uint8 level, uint256 prefix);
 
     struct State {
         mapping(bytes32 => bytes32) latestTransition;
@@ -444,13 +449,9 @@ library StreamArtistRotationState {
         address newAddress,
         uint256 nonce
     ) public view returns (bool used, uint256 nextNonce) {
-        bytes32 lane = _acceptanceLane(artistId, newAddress);
-        used = replay[_key(
-                    o,
-                    keccak256("identity_authority.replay.nonce_allocator"),
-                    _acceptanceScope(artistId, newAddress, nonce)
-                )].status != 0;
-        nextNonce = s.acceptanceHint[lane];
+        return StreamArtistRotationAcceptance.nonceState(
+                s.acceptanceHint, replay, o, artistId, newAddress, nonce
+            );
     }
 
     /// @dev Operation35 shares the original acceptance digest, replay key and nonce index.
@@ -480,61 +481,9 @@ library StreamArtistRotationState {
         T.SignerApproval memory proof,
         bytes32 record
     ) private returns (bytes32) {
-        bytes32 digest = StreamArtistRotationHashes.acceptanceDigest(o.environment, p, a);
-        bytes32 lane = _acceptanceLane(p.artistId, p.newAddress);
-        if (
-            proof.signer != p.newAddress || proof.digest != digest
-                || (proof.direct && (c.actor != proof.signer || a.signature.length != 0))
-                || (!proof.direct && a.signature.length == 0 && proof.signer.code.length == 0)
-        ) {
-            revert T.InvalidSignature();
-        }
-        if (proof.direct && a.nonce != s.acceptanceHint[lane]) revert T.InvalidRecord();
-        if (a.signature.length > 4096) revert T.BoundExceeded(a.signature.length, 4096);
-        bytes32 deny = _key(
-            o,
-            keccak256("identity_authority.replay.digest_revocation"),
-            keccak256(abi.encode(p.artistId, digest))
+        return StreamArtistRotationAcceptance.accept(
+            s.acceptanceNonces, s.acceptanceHint, replay, o, c, p, a, proof, record
         );
-        if (replay[deny].status != 0) revert T.Replay(deny);
-        bytes32 observation = _key(
-            o,
-            keccak256("identity_authority.replay.authorization_consumed_digest"),
-            keccak256(abi.encode(p.artistId, digest))
-        );
-        if (replay[observation].status == 0) {
-            replay[observation] = T.ReplayCell(digest, o.revision + 1, 1, 2);
-            StreamArtistAuthorityCheckpoint.noteReplay(observation, replay[observation]);
-        }
-        bytes32 key = _consume(
-            replay,
-            o,
-            keccak256("identity_authority.replay.nonce_allocator"),
-            _acceptanceScope(p.artistId, p.newAddress, a.nonce),
-            digest
-        );
-        bytes32 delta = s.acceptanceNonces[lane].consumeTagged(a.nonce, 4, lane);
-        StreamArtistPayloadStore.store(keccak256("ARTIST_SIGNATURE_BUNDLE"), a.signature);
-        if (a.nonce == s.acceptanceHint[lane]) {
-            (, s.acceptanceHint[lane]) = s.acceptanceNonces[lane].firstUnused();
-        }
-        return keccak256(
-            abi.encode(
-                key, digest, delta, observation, replay[observation], s.acceptanceHint[lane], record
-            )
-        );
-    }
-
-    function _acceptanceLane(bytes32 artistId, address account) private pure returns (bytes32) {
-        return keccak256(abi.encode(keccak256("rotation_acceptance"), artistId, account));
-    }
-
-    function _acceptanceScope(bytes32 artistId, address account, uint256 nonce)
-        private
-        pure
-        returns (bytes32)
-    {
-        return keccak256(abi.encode(keccak256("rotation_acceptance"), artistId, account, nonce));
     }
 
     function approve(
