@@ -350,6 +350,7 @@ contract StreamArtistIdentityEstateExtension is
         );
         _noteCurrentAuthority(_ownerContext(), _replay, artistId, c.actor, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, _resolutions.currentCause[artistId], artistId, 0);
     }
 
     function executeRotation(T.ActionContext calldata c, bytes32 artistId, bytes32 expected)
@@ -408,6 +409,7 @@ contract StreamArtistIdentityEstateExtension is
         );
         _commit(c, m.action, m.state, m.replay, m.record);
         _native(c.operationId, m.record, p.artistId, 0);
+        _native(c.operationId, _resolutions.currentCause[p.artistId], p.artistId, 0);
         return m.record;
     }
 

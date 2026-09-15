@@ -16,7 +16,11 @@ recorded rotation/estate request does not create a second record. Recovery's
 two original records remain two entries, including a repeated empty
 supersession-set hash in a later valid recovery. Dormancy cancellation records
 created by authenticated liveness are included even when the surrounding
-operation creates another record.
+operation creates another record. The immutable Cause captured by a standing veto
+(op31) is its own record; a compromise (op33) appends its original Contest
+followed by the distinct Cause. These receipts preserve the old owner commit
+record parameter and reference hashes; they do not invent a second Contest or
+duplicate an execution request.
 
 At the end of each atomic Coordinator operation, fixed owner-index order and
 each owner's local receipt order define the canonical append order. This is
