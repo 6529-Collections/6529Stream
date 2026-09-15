@@ -46,13 +46,15 @@ all 446 nonempty production products fit. Seven failures reach a fresh
 post-migration revenue read that still expects the original Artist Registry.
 The remaining failure is an empty history read returning an array panic after
 the forged import was correctly rejected. Explicit bounds and regression cases
-are integrated as 3f80697f; their native rerun is pending. Both revenue resolver
-families now consume the authenticated completed successor (b60ae515), including
+are integrated as 3f80697f; all seven HistoryImport cases now pass in the
+next frozen b60ae515 run. Both revenue resolver families consume the
+authenticated completed successor (b60ae515), including
 live collection/template/snapshot consent paths. Independent source review is
 clear, original host ABIs/storage are preserved, and all five measured products
-fit; the Primary resolver is 23,356 runtime bytes. Eight new regression cases
-remain native-pending. This frozen capture predates those repairs and the later
-Metadata and publication work below.
+fit; the Primary resolver is 23,356 runtime bytes. All twelve ResolverSuccessor
+cases now pass at b60ae515, including the eight new scenarios and four retained
+economics cases. The earlier 737-source capture predates those repairs and the
+later Metadata and publication work below.
 
 The integrator reran the existing owner accumulator suite: all five cases pass,
 including 256 fuzz inputs, original flat-word state/record hash oracles, actual
@@ -80,9 +82,15 @@ publication join is integrated as 76f1ef26, with three new cases and all seven
 original publication tests preserved. Independent source review is clear;
 Core/governance/router boundaries remain explicit. These cases and the new
 Resolver cases are included in the single frozen eleven-suite, 749-source native
-run at b60ae515. It is compiling; the complete 1,780-source ABI/type check passes
-at that source. The run predates the new Artist/entropy join, fixture
-optimization and dormancy increment below; it has not been restarted.
+run at b60ae515. That run completes in 2,882 seconds: 47 cases pass and 16 fail;
+all 453 nonempty production products fit. All eight unaffected suites pass. The
+six readiness, seven publication and three Metadata-join failures share an
+unadmitted source replacement inside their test setup. The actual resolvers
+correctly retain their initial Artist-suite pins. The test-only repair c5e34514
+applies each compact URI at initial onboarding and retains those pins; both
+independent review and focused typecheck are clear, while runtime rerun remains
+pending. No production selection guard changed. This capture predates the new
+Artist/entropy and current-Core commerce cases and subsequent fixture changes.
 
 Complete original publication-attestation hydration is integrated as d7bfd3be.
 The explicit operation-60 profile preserves original evidence, signatures,
@@ -133,15 +141,54 @@ exhibition capture or full museum conformance.
 
 The complete 1,783-source ABI/type check passes at 38461fb1. Source integration
 and these focused Python results do not replace the pending contract execution.
-Builders are implementing the explicit Artist-unavailability route for entropy,
-typed current revenue/Safe workflows and the owner-record loan dossier adapter.
+The current revenue/Safe client is integrated as a8a9e122. All 163 client tests,
+generation, build and type checks pass on integration. Its owner setup and Artist
+approval remain separate calls; configured-zero/default snapshots and original
+poster/collaborator template identities remain explicit. The existing revenue,
+secondary and inventory negative-type cases now run in the standard test command
+(d1c79232), and that expanded type check passes.
+
+Owner-record loan dossiers are integrated as 70ce4e7b with independent source
+review clear. All 29 loan/exhibition cases and deterministic loan definitions
+pass on integration. Original historical owner receipts, signature bundles,
+selected valuation/condition references and complete offline reconstruction are
+retained. Positive wire/transcript controls are synthetic; actual retained source
+covers missing owner evidence. This does not establish custody, title,
+countersignatures or operative valuation.
+
+Five actual current-Core/Artist/Safe dynamic commerce cases are integrated as
+de7b5166. They join configured-zero/default snapshots, symbolic primary terms,
+actual prepared mint, escrow/wallet funding and secondary resale of the same NFT.
+Independent fixture/test-oracle source review is clear; execution remains pending.
+The shared current-stack fixture now also loads 17 unchanged constructor calls
+from exact compiled artifacts (88608fc7). Independent mechanical review preserves
+all arguments, order, caller, value and intervening initialization; its native
+acceptance and compile-time effect remain pending.
+
+Explicit entropy Artist-unavailability is integrated as ee0f0159. Original
+operation-23 findings now bind the complete entropy recovery intent and use the
+existing notice, authority-activity cancellation and replay lifecycle. Ten actual
+Artist/Archive/Entropy/Safe cases are authored; independent source review is
+clear. The selected size captures fit, with EntropyCoordinator at 24,419 runtime
+bytes. All 1,009 prior ABI entries and storage layouts are preserved. Supplemental
+finding history and operation-60 hydration remain a separate implementation
+obligation; original receipts alone do not establish successor authorization.
+
+One frozen 28-suite native run is now active at ee0f0159, covering the repaired
+Artist setup, new recovery and dynamic commerce cases, retained entropy tests,
+and current-Core/Safe suites. All 1,056 selected source units pass ABI/type
+compilation. Runtime, production-size and fuzz results remain pending; the
+larger test-contract size allowance does not relax production deployment limits.
+
+Builders continue supplemental entropy-finding hydration, actual-token primary
+custody-rights composition and typed valuation evidence export.
 
 The independently reviewed resumable Safe inventory-opening client workflow
 is integrated as 0f80e00a. All 150 client tests, generation, build and negative
 type checks pass, including 13 new workflow cases. The complete 1,769-source
 Solidity ABI/type check also passes at 0f80e00a. The current revenue client
-batch builds on the integrated resolver repair; the frozen acceptance cohort
-continues separately. The immutable RC1 and Sepolia instance remain unchanged.
+batch now passes as described above; contract acceptance remains separately
+scoped. The immutable RC1 and Sepolia instance remain unchanged.
 
 ## History, credit export and actual rights capture
 
