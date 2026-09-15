@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "./StreamNativeCommerceDeployment.sol";
 import "./StreamNativeCommerceGovernancePlan.sol";
+import "./StreamRevenueRuntimePlan.sol";
 
 interface NativeCommerceDeploymentVm {
     function envAddress(string calldata key) external view returns (address);
@@ -40,6 +41,7 @@ contract DeployNativeCommerce {
         view
         returns (GenesisBatch memory batch, GovernanceActionPolicyEntry[] memory intents)
     {
+        _requireRuntime(products);
         return (
             StreamNativeCommerceDeployment.admission(products),
             StreamNativeCommerceDeployment.policies(products)
@@ -52,12 +54,14 @@ contract DeployNativeCommerce {
         view
         returns (GenesisBatch memory)
     {
+        _requireRuntime(products);
         return StreamNativeCommerceGovernancePlan.custodyBinding(products);
     }
 
     function prepareGovernedManagerBinding(
         StreamNativeCommerceDeployment.Products calldata products
     ) external view returns (GenesisBatch memory) {
+        _requireRuntime(products);
         return StreamNativeCommerceGovernancePlan.managerBinding(products);
     }
 
@@ -73,6 +77,14 @@ contract DeployNativeCommerce {
         view
         returns (address target, bytes memory data)
     {
+        _requireRuntime(products);
         return StreamNativeCommerceDeployment.managerBinding(products);
+    }
+
+    function _requireRuntime(StreamNativeCommerceDeployment.Products memory products) private view {
+        StreamNativeCommerceDeployment.validate(products);
+        StreamRevenueRuntimePlan.requireActivated(
+            address(products.recorder.splitFactory()), address(products.recorder.revenueEscrow())
+        );
     }
 }

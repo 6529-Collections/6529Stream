@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import { StreamRevenueRuntimeBinding as RuntimeBinding } from "./StreamRevenueRuntimeBinding.sol";
+
 import "../../interfaces/stream/revenue/IStreamRoyaltyResolver.sol";
 import "../../interfaces/stream/core/IStreamCore.sol";
 import "../../interfaces/stream/core/IStreamCorePointers.sol";
@@ -618,6 +620,7 @@ contract StreamRoyaltyResolver is
         }
         address wallet;
         if (royaltyBps != 0) {
+            RuntimeBinding.requireActive(address(splitFactory));
             if (!splitFactory.splitWalletExists(profileId)) {
                 revert InvalidRoyaltySplitProfile(profileId);
             }

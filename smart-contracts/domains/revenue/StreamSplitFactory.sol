@@ -3,10 +3,16 @@ pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
 import "./StreamSplitWalletDeployment.sol";
+import { StreamRevenueRuntimeBinding as RuntimeBinding } from "./StreamRevenueRuntimeBinding.sol";
+import "../../interfaces/stream/revenue/IStreamRevenueRuntimeBinding.sol";
 import "../parameters/StreamGasParameterHost.sol";
 
 /// @notice Registers immutable split profiles and deploys their deterministic split wallets.
-contract StreamSplitFactory is IStreamSplitFactory, StreamGasParameterHost {
+contract StreamSplitFactory is
+    IStreamSplitFactory,
+    StreamGasParameterHost,
+    IStreamRevenueRuntimeBinding
+{
     uint8 private constant _ASSET_STATUS_ACTIVE = 1;
 
     /// @notice Domain separator label for v1 split profile identifiers.
@@ -81,6 +87,44 @@ contract StreamSplitFactory is IStreamSplitFactory, StreamGasParameterHost {
         emit AssetPolicyRegistryPinned(address(assetPolicyRegistry_));
     }
 
+    /// @notice Exact additive lifecycle capability; old factory interface entries remain unchanged.
+    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
+        return interfaceId == 0x01ffc9a7
+            || interfaceId == type(IStreamRevenueRuntimeBinding).interfaceId
+            || interfaceId == type(IStreamSplitFactory).interfaceId;
+    }
+
+    function revenueRuntimeRegistry() external view override returns (address registry) {
+        (registry,) = RuntimeBinding.current();
+    }
+
+    function revenueRuntimeRegistryCodeHash() external view override returns (bytes32 codeHash) {
+        (, codeHash) = RuntimeBinding.current();
+    }
+
+    function revenueRuntimeBindingTransitionHashes(address registry)
+        external
+        view
+        override
+        returns (bytes32, bytes32, bytes32)
+    {
+        return RuntimeBinding.transition(
+            RuntimeBinding.Context(
+                address(this), governanceAuthority, address(assetPolicyRegistry), bytes32(0)
+            ),
+            registry
+        );
+    }
+
+    function initializeRevenueRuntimeRegistry(address registry) external override {
+        RuntimeBinding.initialize(
+            RuntimeBinding.Context(
+                address(this), governanceAuthority, address(assetPolicyRegistry), bytes32(0)
+            ),
+            registry
+        );
+    }
+
     /// @notice Immutable constructor floor for a registered wallet-line gas budget.
     function gasParameterFloor(bytes32 parameterId) external view override returns (uint256) {
         gasParameter(parameterId);
@@ -120,6 +164,7 @@ contract StreamSplitFactory is IStreamSplitFactory, StreamGasParameterHost {
         IStreamSplitWallet.SplitEntry[] calldata entries,
         bytes32 metadataURIHash
     ) private returns (bytes32 profileId) {
+        RuntimeBinding.requireActive(address(this));
         (
             IStreamSplitWallet.SplitEntry[] memory canonicalEntries,
             address[] memory accounts,

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import { StreamRevenueRuntimeBinding as RuntimeBinding } from "./StreamRevenueRuntimeBinding.sol";
+
 import "../../interfaces/stream/revenue/IStreamRevenueResolver.sol";
 import "./StreamPrimaryAssignmentHash.sol";
 import { StreamPrimaryIdentityReads } from "./StreamPrimaryIdentityReads.sol";
@@ -473,6 +475,7 @@ contract StreamRevenueResolver is
     ) private view returns (StreamArtistOnboardingTypes.AssignmentFact memory) {
         _requireArtistScopeIdentity(collectionId, scope, scopeId);
         if (policyHash != bytes32(0)) revert InvalidPrimaryPolicyHash();
+        RuntimeBinding.requireActive(address(splitFactoryContract));
         if (
             profileHash == bytes32(0) || !splitFactoryContract.profileExists(profileHash)
                 || !splitFactoryContract.splitWalletExists(profileHash)
@@ -779,9 +782,11 @@ contract StreamRevenueResolver is
         private
         returns (bytes32 profileId, address wallet, bytes32 entriesHash)
     {
+        RuntimeBinding.requireActive(address(splitFactoryContract));
         (profileId, wallet, entriesHash, context.beneficiaryHash) = TemplateRuntime.materialize(
             _templates, _templateContext(context.collectionId != 0), templateId, context
         );
+        RuntimeBinding.requireActive(address(splitFactoryContract));
     }
 
     function materializeDynamicCollectionPrimaryProfile(
@@ -826,6 +831,7 @@ contract StreamRevenueResolver is
         return TemplateRuntime.preview(
             _templates, _templateContext(context.collectionId != 0), templateId, context
         );
+        RuntimeBinding.requireActive(address(splitFactoryContract));
     }
 
     /// @notice Same concrete derivation as materialization, without registration or deployment.
@@ -843,6 +849,7 @@ contract StreamRevenueResolver is
         (profileId, wallet, entriesHash,) = TemplateRuntime.preview(
             _templates, _templateContext(context.collectionId != 0), templateId, context
         );
+        RuntimeBinding.requireActive(address(splitFactoryContract));
     }
 
     function _templateContext(bool collectionBound)
@@ -1047,6 +1054,7 @@ contract StreamRevenueResolver is
             revert InvalidPrimaryPolicyHash();
         }
         _requireSelectedArtistRegistry();
+        RuntimeBinding.requireActive(address(splitFactoryContract));
     }
 
     /// @dev Consent precedes writes. Template clear/freeze require the explicit mutation capability;

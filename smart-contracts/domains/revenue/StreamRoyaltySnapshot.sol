@@ -19,6 +19,8 @@ import { StreamRoyaltyPlatformAdmission } from "./StreamRoyaltyPlatformAdmission
 
 import { StreamRevenueArtistSelection } from "./StreamRevenueArtistSelection.sol";
 
+import { StreamRevenueRuntimeBinding } from "./StreamRevenueRuntimeBinding.sol";
+
 /// @notice Fixed linked mode election and snapshot worker in the actual Resolver storage context.
 library StreamRoyaltySnapshot {
     struct Election {
@@ -260,6 +262,11 @@ library StreamRoyaltySnapshot {
                     || keccak256(abi.encode(tokens[h.tokenId])) != keccak256(abi.encode(emptyToken))
             ) {
                 revert IStreamRoyaltySnapshot.InvalidRoyaltySnapshot();
+            }
+            // A new positive snapshot is a new wallet assignment. Historical snapshot
+            // reads and an exact already-written replay retain their original independence.
+            if (token.royaltyBps != 0) {
+                StreamRevenueRuntimeBinding.requireActive(address(x.factory));
             }
             tokens[h.tokenId] = token;
             state.snapshots[h.tokenId] = next;
