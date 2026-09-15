@@ -1,6 +1,9 @@
 # Full-v1 current delivery status
 
-Updated 15 September 2026. This is the current reporting entry point.
+Updated 15 September 2026. The [feature status checklist](STREAM_FEATURE_STATUS.md)
+records every feature family with separate build, testing and integration status.
+Use it for the common delivery scope and remaining work. This file retains the
+current narrative and historical evidence boundaries.
 The [delivery ledger](V1_DELIVERY.md) retains implementation checkpoints and the
 requirement index. Historical statements there do not override the newer state
 below. These workstreams are not a feature-count or percentage denominator.

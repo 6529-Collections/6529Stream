@@ -1,5 +1,8 @@
 # Stream delivery state
 
+For the shared feature-by-feature scope and status, read
+[STREAM_FEATURE_STATUS.md](STREAM_FEATURE_STATUS.md).
+
 For current progress and the next acceptance targets, read
 [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md). Historical checkpoints below retain
 their original scope and are not a current completion score.

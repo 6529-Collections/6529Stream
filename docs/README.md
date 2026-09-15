@@ -36,6 +36,7 @@ their own scope and must not be read as a list of installed features.
 | Normative target and precedence | [Specification policy](spec-policy.md), [launch architecture](launch-v1-target-architecture.md) |
 | Museum records, authority mappings and archival exports | [Museum semantic specification](museum-semantic-mapping.md), [delivery and evidence](../ops/MUSEUM_DELIVERY.md) |
 | Decisions and unresolved design work | [ADRs](adr/README.md), [open questions](spec-open-questions.md) |
+| Shared feature-by-feature delivery status | [Build, testing, integration and remaining work](../ops/STREAM_FEATURE_STATUS.md) |
 | Full-v1 conformance and implementation gaps | [Conformance matrix](launch-conformance-matrix.md), [roadmap](../ops/ROADMAP.md), [backlog](../ops/EXECUTION_BACKLOG.md) |
 | Audit scope and reporting | [Audit package](audit-package.md), [threat model](threat-model.md), [SECURITY.md](../SECURITY.md) |
 | Release decision | [Readiness](release-readiness.md), [known blockers](known-blockers.md), [external evidence](non-local-release-evidence.md) |
