@@ -207,7 +207,7 @@ contract StreamArtistPublicationAuthorityHydrationTest is ArtistPublicationHydra
             keccak256("ARTIST_INTENT"),
             keccak256("STREAM_ARTIST_INTENT_V1"),
             payload,
-            "urn:original:published"
+            "https://example.test/original/published"
         );
         (T.Attestation memory p, bytes memory statement) = _canonicalAttestation(pub, record.uri);
         bytes32 authorization = _recordPublication(pub, p, statement);

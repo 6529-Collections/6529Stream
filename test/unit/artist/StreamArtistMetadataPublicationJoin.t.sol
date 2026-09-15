@@ -67,7 +67,8 @@ contract StreamArtistMetadataPublicationJoinTest is ArtistPublicationHydrationFi
             j.payload[k] = k == 0
                 ? bytes("original actual intent bytes")
                 : bytes("original actual statement bytes");
-            (j.original[k], j.publication[k]) = _terms(j, k, j.payload[k], "urn:join:original");
+            (j.original[k], j.publication[k]) =
+                _terms(j, k, j.payload[k], "https://example.test/join/original");
             (T.Attestation memory p, bytes memory statement) =
                 _canonicalAttestation(j.publication[k], j.original[k].uri);
             j.authorization[k] = _recordPublication(j.publication[k], p, statement);
@@ -242,7 +243,7 @@ contract StreamArtistMetadataPublicationJoinTest is ArtistPublicationHydrationFi
                 ? bytes("fresh successor intent bytes")
                 : bytes("fresh successor statement bytes");
             (IStreamPreservationRecords.CollectionRecord memory r, P.Publication memory pub) =
-                _terms(j, k, payload, "urn:join:successor");
+                _terms(j, k, payload, "https://example.test/join/successor");
             _coolJoin(j, n, payload);
             require(
                 probe.read(s, pub) == address(j.host).codehash,
@@ -295,7 +296,7 @@ contract StreamArtistMetadataPublicationJoinTest is ArtistPublicationHydrationFi
         Joined memory j = _joinedSource();
         Next memory n = _cutover(true, true);
         (IStreamPreservationRecords.CollectionRecord memory r, P.Publication memory pub) =
-            _terms(j, 0, bytes("new domain candidate"), "urn:join:domain");
+            _terms(j, 0, bytes("new domain candidate"), "https://example.test/join/domain");
         vm.expectRevert(
             abi.encodeWithSelector(IStreamCollectionMetadataV1.MetadataHostNotSelected.selector)
         );
@@ -343,7 +344,7 @@ contract StreamArtistMetadataPublicationJoinTest is ArtistPublicationHydrationFi
         _hydrateJoin(n);
         bytes memory payload = bytes("full exact Safe retry payload");
         (IStreamPreservationRecords.CollectionRecord memory r, P.Publication memory pub) =
-            _terms(j, 1, payload, "urn:join:retry");
+            _terms(j, 1, payload, "https://example.test/join/retry");
         (
             T.Attestation memory p,
             T.Authorization memory a,

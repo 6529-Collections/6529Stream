@@ -702,7 +702,7 @@ contract StreamArtistEntropyUnavailabilityJoinTest is ArtistOnboardingFixture {
         _assertFinding(hash, request, target);
     }
 
-    function testFailedAuthenticatedActivityDoesNotCancelEntropyFinding() external {
+    function testRejectedAuthenticatedActivityDoesNotCancelEntropyFinding() external {
         _deployFinding();
         (, bytes32 old) = _failedScope();
         (Recovery.FindingRequest memory request, EU.Target memory target) =

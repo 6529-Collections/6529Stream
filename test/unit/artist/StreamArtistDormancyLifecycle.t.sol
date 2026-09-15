@@ -230,7 +230,7 @@ contract StreamArtistDormancyLifecycleTest is ArtistOnboardingFixture {
     function testOperativeSuccessorSafeCancelsNoticeWithOriginalDesignation() public {
         _accept();
         _newRotationSafe(9301);
-        bytes32 designation = _successionRecord(_successorTerms(address(rotationSafe), 1));
+        bytes32 designation = _successionRecord(_successorTerms(address(rotationSafe), 2));
         bytes32 notice = this.beginDormancyNotice();
         _safeCancel(rotationSafe, rotationKeys, notice, 0);
         _assertCancelled(notice, 3);
@@ -485,7 +485,9 @@ contract StreamArtistDormancyLifecycleTest is ArtistOnboardingFixture {
     function testDesignationCompletionVestsExactClass3CapabilitiesAndHistory() public {
         _accept();
         _newRotationSafe(9306);
-        bytes32 designation = _successionRecord(_successorTerms(address(rotationSafe), 1));
+        Succ.Designation memory plan = _successorTerms(address(rotationSafe), 2);
+        plan.grantedCapabilities = 1;
+        bytes32 designation = _successionRecord(plan);
         bytes32 notice = this.beginDormancyNotice();
         bytes32 record = this.completeDormancyNotice(notice);
         Estate.AuthorityCapabilities memory caps = ingress.currentAuthorityCapabilities(artistId);

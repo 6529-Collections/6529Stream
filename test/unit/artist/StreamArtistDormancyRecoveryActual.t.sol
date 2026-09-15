@@ -269,16 +269,61 @@ contract StreamArtistDormancyRecoveryActualTest is StreamArtistDormancyLifecycle
                 && v.previousCommitment == _snapshot(origin).commitment,
             "new recovery custody link"
         );
-        (bytes32 primary, bytes32 occurrence, bytes32 secondary) =
-            IStreamArtistIdentityRecoveryOwner(suite.owners[2]).identityRecoveryReceipts(record);
-        require(
-            primary == record && occurrence != 0 && secondary != 0 && secondary != primary,
-            "original three recovery receipts"
-        );
+        _assertOriginalRecoveryReceipts(record);
         require(
             _operationPayload(35, manager.governanceAuthority(), record).length != 0
                 && _originals() == beforeHistory,
             "actual Archive and immutable appointment history"
+        );
+    }
+
+    /// @dev Independent thirteen-word receipt oracle. The original owner prefix packs
+    /// revision and record sequence in slot0; the public snapshot independently checks revision.
+    /// These assertions run immediately after recovery, before any later owner mutation.
+    function _assertOriginalRecoveryReceipts(bytes32 record) internal view {
+        IStreamArtistOwner owner = IStreamArtistOwner(suite.owners[2]);
+        T.Snapshot memory snapshot = owner.ownerStateSnapshotV2();
+        uint256 prefix = uint256(vm.load(address(owner), bytes32(0)));
+        uint64 sequence = uint64(prefix >> 64);
+        require(uint64(prefix) == snapshot.revision && sequence >= 2, "actual owner receipt cursor");
+        IdentityRecovery.Record memory saved = ingress.identityRecoveryRecord(record);
+        require(saved.recordHash == record && record != 0, "actual immutable recovery record");
+        bytes32 primaryDomain = 0x459749364fd07c3a8f1998b82d893d33ef0942c30d94666b42dac1e37ba5feff;
+        bytes32 secondaryDomain = 0x0c8573762967a1af597f2a7afc4b655a87b3e22d2b11fbab6cf13c6f7b1396ae;
+        bytes32[13] memory words;
+        words[0] = 0x2524f38d4b0732cdfa0810161b89161cfa6da3e7cc1b6cab90fd8b71fbfbd861;
+        words[1] = bytes32(uint256(2));
+        words[2] = bytes32(block.chainid);
+        words[3] = bytes32(uint256(uint160(address(ingress))));
+        words[4] = bytes32(uint256(uint160(address(coordinator))));
+        words[5] = bytes32(uint256(uint160(suite.archive)));
+        words[6] = bytes32(uint256(uint160(address(owner))));
+        words[7] = 0x6579e41542b1bfc6684ea87b09373c4f4690857bd046eb4faf0f92a42bc88adb;
+        words[8] = bytes32(uint256(snapshot.revision));
+        words[9] = bytes32(uint256(sequence - 1));
+        words[10] = bytes32(uint256(uint160(manager.governanceAuthority())));
+        words[11] = primaryDomain;
+        words[12] = record;
+        bytes32 expectedPrimary = keccak256(abi.encode(words));
+        words[9] = bytes32(uint256(sequence));
+        words[11] = secondaryDomain;
+        words[12] = saved.fields.supersededRecordsHash;
+        bytes32 expectedSecondary = keccak256(abi.encode(words));
+        bytes32 expectedOccurrence = keccak256(
+            abi.encode(
+                bytes32(0x05c1b33dc3307a69a2b02b1fdcc96323c6c2dcb072805ca38ec6462ded34ce09),
+                uint16(2),
+                record,
+                secondaryDomain,
+                saved.fields.supersededRecordsHash
+            )
+        );
+        (bytes32 primary, bytes32 occurrence, bytes32 secondary) =
+            IStreamArtistIdentityRecoveryOwner(address(owner)).identityRecoveryReceipts(record);
+        require(
+            primary == expectedPrimary && occurrence == expectedOccurrence
+                && secondary == expectedSecondary && primary != record && secondary != primary,
+            "exact two typed receipt commitments and secondary occurrence"
         );
     }
 
@@ -529,24 +574,26 @@ contract StreamArtistDormancyRecoveryActualTest is StreamArtistDormancyLifecycle
         authority.configureContestReads(
             suite.roleRegistry, address(artist), p.reasonHash, scheduled.reasonURI
         );
-        bytes32[29] memory bootstrap;
-        bootstrap[0] = bytes32(uint256(1));
-        bootstrap[1] = bytes32(uint256(1));
-        avm.mockCall(
-            address(authority),
-            abi.encodeWithSelector(IStreamGovernanceReads.systemManifestBootstrapState.selector),
-            abi.encode(bootstrap)
-        );
-        avm.mockCall(
-            address(authority),
-            abi.encodeCall(IStreamGovernanceReads.minimumDelay, (uint8(2))),
-            abi.encode(uint64(72 hours))
-        );
         _publish();
     }
 
     function _publish() internal {
         address authority = manager.governanceAuthority();
+        // clearMockedCalls also removes these typed Executor prerequisites. Restore the
+        // same sealed/delay facts along with the saved action before an identical retry.
+        bytes32[29] memory bootstrap;
+        bootstrap[0] = bytes32(uint256(1));
+        bootstrap[1] = bytes32(uint256(1));
+        avm.mockCall(
+            authority,
+            abi.encodeWithSelector(IStreamGovernanceReads.systemManifestBootstrapState.selector),
+            abi.encode(bootstrap)
+        );
+        avm.mockCall(
+            authority,
+            abi.encodeCall(IStreamGovernanceReads.minimumDelay, (uint8(2))),
+            abi.encode(uint64(72 hours))
+        );
         avm.mockCall(
             authority,
             abi.encodeCall(IStreamGovernanceReads.governanceAction, (currentId)),
