@@ -21,6 +21,11 @@ import { StreamRevenueArtistSelection } from "./StreamRevenueArtistSelection.sol
 
 import { StreamRevenueRuntimeBinding } from "./StreamRevenueRuntimeBinding.sol";
 
+import { StreamRoyaltyContinuityState as Continuity } from "./StreamRoyaltyContinuityState.sol";
+import {
+    StreamRoyaltyContinuityTypes as C
+} from "../../interfaces/stream/revenue/IStreamRoyaltyEconomicContinuity.sol";
+
 /// @notice Fixed linked mode election and snapshot worker in the actual Resolver storage context.
 library StreamRoyaltySnapshot {
     struct Election {
@@ -69,6 +74,7 @@ library StreamRoyaltySnapshot {
     );
 
     function elect(State storage state, Context memory x, uint256 collectionId, uint8 mode) public {
+        Continuity.writable();
         if (state.elections[collectionId].mode != 0) {
             revert IStreamRoyaltySnapshot.RoyaltyModeAlreadyElected(collectionId);
         }
@@ -89,6 +95,8 @@ library StreamRoyaltySnapshot {
         );
         state.elections[collectionId] = Election(mode, hash);
         emit CollectionRoyaltyModeElected(1, collectionId, hash, msg.sender, address(x.core), mode);
+        Continuity.noteMutation();
+        Continuity.recordElection(C.Election(collectionId, mode, hash, address(this)));
     }
 
     function modeHash(Context memory x, uint256 collectionId, bytes32 election, bytes32 original)
@@ -101,7 +109,7 @@ library StreamRoyaltySnapshot {
             abi.encode(
                 keccak256("6529STREAM_SNAPSHOT_ROYALTY_ASSIGNMENT_V1"),
                 block.chainid,
-                address(this),
+                Continuity.electionOrigin(collectionId),
                 address(x.core),
                 collectionId,
                 election,
@@ -187,6 +195,7 @@ library StreamRoyaltySnapshot {
         Context memory x,
         Hook memory h
     ) public returns (bytes32) {
+        Continuity.writable();
         if (
             state.entered || h.revenueClass != keccak256("ROYALTY_ERC2981")
                 || h.expectedSourcePolicy == 0
@@ -278,6 +287,20 @@ library StreamRoyaltySnapshot {
                 h.collectionId,
                 h.revenueClass,
                 next.tokenRoyaltyPolicyHash
+            );
+            Continuity.noteMutation();
+            Continuity.recordRoute(
+                address(x.core),
+                C.Route(
+                    2,
+                    h.tokenId,
+                    h.collectionId,
+                    address(this),
+                    token,
+                    next.tokenAssignmentHash,
+                    next.tokenRoyaltyPolicyHash,
+                    next
+                )
             );
         }
         state.entered = false;
