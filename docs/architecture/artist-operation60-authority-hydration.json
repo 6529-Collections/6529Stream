@@ -107,6 +107,39 @@
         "later imported generations"
       ],
       "validation": "six authored actual source/successor/Safe/Archive cases; ABI only, native/size/capacity/current-Core pending"
+    },
+    {
+      "profile": "6529STREAM_ARTIST_LIVING_PUBLICATION_HYDRATION_V1",
+      "write": "hydrateArtistAuthorityWithPublications",
+      "coordinator": "coordinateHydrateArtistAuthorityWithPublications",
+      "typedInterface": "smart-contracts/interfaces/stream/artist/IStreamArtistPublicationAuthorityHydration.sol",
+      "additionalOriginalOperations": [
+        18,
+        15,
+        52,
+        17,
+        24
+      ],
+      "attestationKinds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "consumer": "complete readiness plus original detached kind7/8 evidence; original Metadata payload/receipt/consumed guard remains authoritative; current facade validation unchanged",
+      "exclusions": [
+        "collaborators/delegations/corrections",
+        "authority transitions",
+        "provisional payouts",
+        "later imported generations"
+      ],
+      "validation": "seven authored actual Artist/Safe/Archive cases, including one actual original Metadata publication; ABI only, native/size/gas/capacity/current-Core pending"
     }
   ]
 }

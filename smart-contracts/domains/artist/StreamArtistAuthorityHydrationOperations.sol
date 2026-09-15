@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistHydrationSource.sol";
+import "./StreamArtistPublicationHydrationFacts.sol";
 import "./StreamArtistHydrationRecordFacts.sol";
 import "./StreamArtistHydrationCommit.sol";
 import "./StreamArtistReadinessHydrationFacts.sol";
@@ -91,6 +92,25 @@ library StreamArtistAuthorityHydrationOperations {
         ) revert T.UnsupportedProfile();
         return
             _hydrate(x, actor, p.economics.authority, true, p.economics.economics, p.attestations);
+    }
+
+    function hydrateWithPublications(
+        D.CoordinatorContext memory x,
+        address actor,
+        RH.Request memory p
+    ) public returns (bytes32) {
+        if (
+            p.attestations.length == 0 || p.attestations.length > 128
+                || p.economics.economics.length == 0 || p.economics.economics.length > 128
+        ) revert T.UnsupportedProfile();
+        StreamArtistHydrationPrepared.Bundle memory h =
+            StreamArtistHydrationSource.prepareWithPublications(
+                x, p.economics.authority, p.economics.economics, p.attestations
+            );
+        StreamArtistPublicationHydrationFacts.check(
+            h.q, h.data, h.source, p.economics.economics, p.attestations
+        );
+        return StreamArtistHydrationCommit.execute(x, actor, p.economics.authority, h);
     }
 
     function _hydrate(

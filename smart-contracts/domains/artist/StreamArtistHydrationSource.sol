@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistReadinessHydrationFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistPublicationAuthorityHydration.sol";
 import {
     StreamArtistReadinessHydrationTypes as RH
 } from "../../interfaces/stream/artist/IStreamArtistReadinessAuthorityHydration.sol";
@@ -49,10 +50,34 @@ library StreamArtistHydrationSource {
         T.EconomicsConsent[] memory economics,
         RH.AttestationInput[] memory attestations
     ) public view returns (StreamArtistHydrationPrepared.Bundle memory) {
+        return _prepare(x, p, includePayout, economics, attestations, false);
+    }
+
+    function prepareWithPublications(
+        D.CoordinatorContext memory x,
+        AH.Request memory p,
+        T.EconomicsConsent[] memory economics,
+        RH.AttestationInput[] memory attestations
+    ) public view returns (StreamArtistHydrationPrepared.Bundle memory) {
+        return _prepare(x, p, true, economics, attestations, true);
+    }
+
+    function _prepare(
+        D.CoordinatorContext memory x,
+        AH.Request memory p,
+        bool includePayout,
+        T.EconomicsConsent[] memory economics,
+        RH.AttestationInput[] memory attestations,
+        bool publications
+    ) private view returns (StreamArtistHydrationPrepared.Bundle memory) {
         bool readiness = attestations.length != 0;
-        bytes32 profile = readiness
-            ? READINESS_PROFILE
-            : economics.length != 0 ? ECONOMICS_PROFILE : includePayout ? PAYOUT_PROFILE : PROFILE;
+        bytes32 profile = publications
+            ? keccak256("6529STREAM_ARTIST_LIVING_PUBLICATION_HYDRATION_V1")
+            : readiness
+                ? READINESS_PROFILE
+                : economics.length != 0
+                    ? ECONOMICS_PROFILE
+                    : includePayout ? PAYOUT_PROFILE : PROFILE;
         if (
             p.artistId == 0 || p.collectionId == 0 || p.bindingIndex != 0 || p.policies.length > 128
         ) revert T.UnsupportedProfile();
@@ -173,17 +198,20 @@ library StreamArtistHydrationSource {
         }
         for (uint256 i; i < 7; ++i) {
             data[i] = StreamArtistHydrationSourceGuards._guards(source, sourceCoordinator, i, p);
-            data[i].typedState = readiness && i == 4
-                ? IStreamArtistReadinessAttributionOwner(source.owners[i])
-                    .authorityAttestationHydrationState(q, attestations)
-                : readiness && i == 6
-                    ? IStreamArtistReadinessConsentOwner(source.owners[i])
-                        .authorityReadinessHydrationState(q, economics)
-                    : i == 6 && economics.length != 0
-                        ? IStreamArtistEconomicsAuthorityHydrationOwner(source.owners[i])
-                            .authorityEconomicsHydrationState(q, economics)
-                        : IStreamArtistAuthorityHydrationOwner(source.owners[i])
-                            .authorityHydrationState(q);
+            data[i].typedState = publications && i == 4
+                ? IStreamArtistPublicationHydrationOwner(source.owners[i])
+                    .authorityPublicationHydrationState(q, attestations)
+                : readiness && i == 4
+                    ? IStreamArtistReadinessAttributionOwner(source.owners[i])
+                        .authorityAttestationHydrationState(q, attestations)
+                    : readiness && i == 6
+                        ? IStreamArtistReadinessConsentOwner(source.owners[i])
+                            .authorityReadinessHydrationState(q, economics)
+                        : i == 6 && economics.length != 0
+                            ? IStreamArtistEconomicsAuthorityHydrationOwner(source.owners[i])
+                                .authorityEconomicsHydrationState(q, economics)
+                            : IStreamArtistAuthorityHydrationOwner(source.owners[i])
+                                .authorityHydrationState(q);
         }
         (, uint64 ac) = IStreamArtistHistory(prior).artistHistoryLane(1, p.artistId);
         (, uint64 cc) = IStreamArtistHistory(prior).artistHistoryLane(2, bytes32(p.collectionId));

@@ -107,3 +107,16 @@ mutation or deployment approval is inferred merely from a lane proof. Detached
 publication, collaborator and advanced authority profiles remain distinct.
 See the [readiness profile guide](../guides/artist-readiness-authority-hydration.md)
 for exact source boundaries and pending runtime/capacity validation.
+
+## Direct publication history profile
+
+`hydrateArtistAuthorityWithPublications` selects the separate
+`6529STREAM_ARTIST_LIVING_PUBLICATION_HYDRATION_V1` operation-60 profile. It extends
+the complete living readiness dependency set to original kinds 7/8 while keeping
+the old readiness selector strict. Original signed statement bytes, record hash,
+signer/class, historical association and full detached publication evidence are
+reconstructed and carried together. The actual Metadata owner retains its own
+payload, receipt and consumed-authorization state; none is reset by Artist
+hydration. Fresh successor writes use the existing successor signature domain.
+The [publication importer guide](../guides/artist-publication-authority-hydration.md)
+states historical/current consumer boundaries and the source-only test scope.

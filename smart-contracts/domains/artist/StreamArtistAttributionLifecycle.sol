@@ -6,6 +6,7 @@ import {
 import { StreamArtistAttributionCommitEncoding } from "./StreamArtistAttributionCommitEncoding.sol";
 import { StreamArtistAttestationTransport } from "./StreamArtistAttestationTransport.sol";
 import "./StreamArtistAttestationHydration.sol";
+import "./StreamArtistPublicationHydration.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 import "./StreamArtistAttributionBindingMutation.sol";
 import "./StreamArtistAttributionReadEncoding.sol";
@@ -668,7 +669,23 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         );
     }
 
+    function authorityPublicationHydrationState(
+        AH.Query calldata q,
+        StreamArtistReadinessHydrationTypes.AttestationInput[] calldata inputs
+    ) external view returns (bytes memory) {
+        return StreamArtistPublicationHydration.exportState(
+            _attestationStore(), _environment(), q, inputs
+        );
+    }
+
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
+        if (StreamArtistPublicationHydration.isState(p.typedState)) {
+            if (p.nonces.length != 0) revert T.InvalidRecord();
+            StreamArtistPublicationHydration.importState(
+                _attestationStore(), _environment(), q, p.typedState
+            );
+            return;
+        }
         if (StreamArtistAttestationHydration.isState(p.typedState)) {
             if (p.nonces.length != 0) revert T.InvalidRecord();
             StreamArtistAttestationHydration.importState(

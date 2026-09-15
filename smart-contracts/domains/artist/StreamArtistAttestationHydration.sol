@@ -55,7 +55,7 @@ library StreamArtistAttestationHydration {
                 s.attestationAssociations[n.recordHash],
                 s.statements[r.statementHash]
             );
-            _shape(e, q, rows[j]);
+            shape(e, q, rows[j], false);
             if (
                 r.recordHash != n.recordHash
                     || s.publications[n.recordHash].evidence.attestationRecordHash != 0
@@ -88,7 +88,7 @@ library StreamArtistAttestationHydration {
         s.attributions[q.collectionId] = AS.Attribution(b.state, b.generation);
         for (uint256 j; j < b.records.length; ++j) {
             RH.AttestationRow memory r = b.records[j];
-            _shape(e, q, r);
+            shape(e, q, r, false);
             bytes32 record = r.record.recordHash;
             if (s.records[record].recordHash != 0) revert T.InvalidRecord();
             s.records[record] = r.record;
@@ -106,19 +106,20 @@ library StreamArtistAttestationHydration {
         return keccak256(abi.encode(collectionId, p.subjectKind, p.subjectId));
     }
 
-    function _shape(
+    function shape(
         StreamArtistHashes.Environment memory e,
         AH.Query memory q,
-        RH.AttestationRow memory r
-    ) private pure {
+        RH.AttestationRow memory r,
+        bool publication
+    ) public pure {
         T.Attestation memory p = r.input.terms;
         T.AttestationRecord memory record = r.record;
         Attest.Association memory a = r.association;
         if (
             p.collectionId != q.collectionId || p.subjectKind == 0 || p.subjectKind > 10
-                || p.subjectKind == 7 || p.subjectKind == 8 || r.authorityClass != 1
-                || record.generation != 1 || record.signer == address(0) || record.signedAt == 0
-                || r.statement.length == 0 || r.statement.length > 8192
+                || ((p.subjectKind == 7 || p.subjectKind == 8) && !publication)
+                || r.authorityClass != 1 || record.generation != 1 || record.signer == address(0)
+                || record.signedAt == 0 || r.statement.length == 0 || r.statement.length > 8192
                 || bytes(p.statementURI).length > 2048 || p.statementHash != keccak256(r.statement)
                 || record.statementHash != p.statementHash || record.schemaId != p.schemaId
                 || record.subjectStateHash != p.subjectStateHash
@@ -130,7 +131,9 @@ library StreamArtistAttestationHydration {
         if (a.artistId == 0) {
             Attest.Association memory empty;
             if (
-                (p.subjectKind != 9 && p.subjectKind != 10)
+                (p.subjectKind != 9
+                        && p.subjectKind != 10
+                        && !(publication && (p.subjectKind == 7 || p.subjectKind == 8)))
                     || keccak256(abi.encode(a)) != keccak256(abi.encode(empty))
             ) revert T.InvalidRecord();
         } else if (

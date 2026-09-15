@@ -40,8 +40,8 @@ receipt order, and retains statement bytes in the original payload catalog.
 It checks source head reads after reconstruction. Historical owner facts remain
 historical; the importer does not pretend that a past provider runtime or subject
 hash is current. Detached publication attestations of kinds 7/8 are excluded:
-their predecessor-registry publication admission needs a separate consumer
-bridge. Collaborator, delegated, corrected and transitioned authority histories
+the [explicit publication-history profile](artist-publication-authority-hydration.md)
+carries their complete detached evidence and keeps this selector strict. Collaborator, delegated, corrected and transitioned authority histories
 also remain explicit additional completeness profiles.
 
 An old deployment attestation approves the old registry's deployment hash. It

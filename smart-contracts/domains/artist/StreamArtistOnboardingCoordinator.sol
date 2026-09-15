@@ -994,4 +994,11 @@ contract StreamArtistOnboardingCoordinator is
     ) external operation returns (bytes32) {
         return StreamArtistCoordinatorHydration.execute(_economicContext(), msg.data, 4);
     }
+
+    function coordinateHydrateArtistAuthorityWithPublications(
+        address actor,
+        StreamArtistReadinessHydrationTypes.Request calldata p
+    ) external operation returns (bytes32) {
+        return StreamArtistCoordinatorHydration.execute(_economicContext(), msg.data, 5);
+    }
 }

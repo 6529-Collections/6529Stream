@@ -22,6 +22,10 @@ library StreamArtistCoordinatorHydration {
             (address actor, RH.Request memory p) = abi.decode(data[4:], (address, RH.Request));
             return StreamArtistAuthorityHydrationOperations.hydrateWithReadiness(x, actor, p);
         }
+        if (profile == 5) {
+            (address actor, RH.Request memory p) = abi.decode(data[4:], (address, RH.Request));
+            return StreamArtistAuthorityHydrationOperations.hydrateWithPublications(x, actor, p);
+        }
         revert T.UnsupportedProfile();
     }
 }
