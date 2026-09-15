@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistAttestationTypes as Attest,
+    IStreamArtistAttestationCoordinator
+} from "../../interfaces/stream/artist/IStreamArtistAttestationWriter.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionClaims.sol";
 import "../../interfaces/stream/artist/IStreamArtistPlatformWorks.sol";
 import {
@@ -481,6 +485,40 @@ contract StreamArtistRegistryWriterExtension {
     {
         return IStreamArtistEconomicsCoordinator(operationCoordinator)
             .coordinateAuthorizeArtistRoyaltyFreeze(msg.sender, p, a);
+    }
+
+    function recordArtistScopedAttestation(
+        T.Attestation calldata p,
+        Attest.Subject calldata subject,
+        T.Authorization calldata a,
+        bytes calldata statement
+    ) external onlyHost returns (bytes32) {
+        return IStreamArtistAttestationCoordinator(operationCoordinator)
+            .coordinateSubjectAttestation(msg.sender, p, subject, true, 0, a, statement);
+    }
+
+    function recordDelegatedArtistAttestation(
+        T.Attestation calldata p,
+        bytes32 grant,
+        T.Authorization calldata a,
+        bytes calldata statement
+    ) external onlyHost returns (bytes32) {
+        if (grant == 0) revert T.InvalidRecord();
+        Attest.Subject memory subject;
+        return IStreamArtistAttestationCoordinator(operationCoordinator)
+            .coordinateSubjectAttestation(msg.sender, p, subject, false, grant, a, statement);
+    }
+
+    function recordDelegatedArtistScopedAttestation(
+        T.Attestation calldata p,
+        Attest.Subject calldata subject,
+        bytes32 grant,
+        T.Authorization calldata a,
+        bytes calldata statement
+    ) external onlyHost returns (bytes32) {
+        if (grant == 0) revert T.InvalidRecord();
+        return IStreamArtistAttestationCoordinator(operationCoordinator)
+            .coordinateSubjectAttestation(msg.sender, p, subject, true, grant, a, statement);
     }
 
     function recordArtistAttestation(

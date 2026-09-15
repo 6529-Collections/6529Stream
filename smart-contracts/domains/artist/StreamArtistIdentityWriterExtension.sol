@@ -438,6 +438,17 @@ contract StreamArtistIdentityWriterExtension is
         _commit(c, m.action, m.state, m.replay, m.record);
     }
 
+    function consumeDelegatedAttestation(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.Attestation calldata p,
+        bytes32 grant,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external onlyHost returns (bytes32 record) {
+        _forwardEstateWriterCompatibility();
+    }
+
     function consumeAttestation(
         T.ActionContext calldata c,
         T.Binding calldata b,

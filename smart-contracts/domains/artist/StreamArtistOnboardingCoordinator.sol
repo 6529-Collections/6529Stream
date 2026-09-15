@@ -784,6 +784,20 @@ contract StreamArtistOnboardingCoordinator is
         return StreamArtistOnboardingOperations.payout(_economicContext(), actor, p, a);
     }
 
+    function coordinateSubjectAttestation(
+        address actor,
+        T.Attestation calldata p,
+        Attest.Subject calldata subject,
+        bool scoped,
+        bytes32 grant,
+        T.Authorization calldata a,
+        bytes calldata statement
+    ) external operation returns (bytes32) {
+        return StreamArtistAttestationOperations.attest(
+            _economicContext(), actor, p, subject, scoped, grant, a, statement
+        );
+    }
+
     function coordinateRecordArtistAttestation(
         address actor,
         T.Attestation calldata p,

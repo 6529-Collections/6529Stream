@@ -3,8 +3,10 @@ pragma solidity ^0.8.19;
 
 import { StreamArtistOnboardingTypes as T } from "./StreamArtistOnboardingTypes.sol";
 
-/// @notice Typed scoped delegation records; only economics and royalty-freeze capabilities are supported.
+/// @notice Typed scoped delegation records for attestation, intent, economics and royalty-freeze authority.
 library StreamArtistDelegationTypes {
+    uint32 internal constant ATTEST = 1;
+    uint32 internal constant INTENT = 64;
     uint32 internal constant ECONOMICS = 4;
     uint32 internal constant ROYALTY_FREEZE = 32;
 

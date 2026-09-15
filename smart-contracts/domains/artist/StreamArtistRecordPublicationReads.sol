@@ -1,6 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamArtistSuccessionReads
+} from "../../interfaces/stream/artist/IStreamArtistSuccessionRecords.sol";
 import "./StreamArtistAttributionPolicy.sol";
+import {
+    StreamArtistAttestationTypes as Attest,
+    IStreamArtistAuthenticatedAttestationOwner
+} from "../../interfaces/stream/artist/IStreamArtistAttestationWriter.sol";
+import {
+    IStreamArtistDelegationOwner
+} from "../../interfaces/stream/artist/IStreamArtistDelegationOwner.sol";
+import {
+    StreamArtistDelegationTypes as Delegation
+} from "../../interfaces/stream/artist/StreamArtistDelegationTypes.sol";
 
 import "./StreamArtistRecordPublicationRules.sol";
 import "./StreamArtistCurrentAuthorityFacts.sol";
@@ -147,11 +160,14 @@ library StreamArtistRecordPublicationReads {
         if (
             record == 0 || e.attestationRecordHash != record || e.artistId != b.artistId
                 || e.bindingHash != b.bindingHash || e.bindingGeneration != b.generation
-                || e.signer != publication.recorder || e.signer != authority.authorityAddress
-                || e.authorityClass != authority.authorityClass
+                || e.signer != publication.recorder
+                || (e.authorityClass != 2
+                    && (e.signer != authority.authorityAddress
+                        || e.authorityClass != authority.authorityClass))
                 || e.requiredCapability != capability || e.publicationHash != publicationHash
                 || keccak256(abi.encode(saved.publication)) != publicationHash
         ) revert T.InvalidRecord();
+        if (e.authorityClass == 2) _requireDelegatePublication(suite, b, authority, e, saved);
         if (authority.authorityClass == 3) {
             Estate.AuthorityCapabilities memory caps =
                 IStreamArtistEstateOwner(suite.owners[2]).currentAuthorityCapabilities(b.artistId);
@@ -165,6 +181,46 @@ library StreamArtistRecordPublicationReads {
         }
         if (candidate(suite, publication) != saved.metadataHostCodeHash) {
             revert T.ComponentChanged(publication.metadataHost);
+        }
+    }
+
+    function _requireDelegatePublication(
+        T.SuiteConfiguration memory suite,
+        T.Binding memory b,
+        R.AuthorityFact memory authority,
+        P.Evidence memory e,
+        IStreamArtistRecordPublicationOwner.Record memory saved
+    ) private view {
+        Attest.Association memory a = IStreamArtistAuthenticatedAttestationOwner(suite.owners[4])
+            .attestationAssociation(e.attestationRecordHash);
+        Delegation.Record memory d =
+            IStreamArtistDelegationOwner(suite.owners[2]).delegationRecord(a.delegation);
+        (bool epoch,,) =
+            IStreamArtistEstateOwner(suite.owners[2]).delegationEpochState(a.delegation);
+        if (
+            authority.authorityClass != 1 || authority.status != 1 || !epoch || a.delegation == 0
+                || a.artistId != b.artistId || a.bindingHash != b.bindingHash
+                || a.generation != b.generation || a.fact.owner != saved.publication.metadataHost
+                || a.fact.ownerCodeHash != saved.metadataHostCodeHash
+                || a.fact.subjectId != saved.publication.subjectId
+                || a.fact.stateHash
+                    != (e.requiredCapability == 64
+                            ? saved.publication.candidateRecordHash
+                            : bytes32(0)) || d.grantor == address(0) || d.revoked || d.uses == 0
+                || d.grant.artistId != b.artistId || d.grant.delegate != e.signer
+                || (d.grant.collectionId != 0
+                    && d.grant.collectionId != saved.publication.collectionId)
+                || block.timestamp < d.grant.notBefore || block.timestamp >= d.grant.expiresAt
+                || (d.grant.capabilities & e.requiredCapability) != e.requiredCapability
+        ) revert T.InvalidRecord();
+        // The use was consumed by op24. Exhausting maxUses must not invalidate that admitted use.
+        IStreamArtistSuccessionReads succession = IStreamArtistSuccessionReads(suite.owners[2]);
+        bytes32 directive = succession.operativeEstateDirective(b.artistId);
+        if (
+            succession.estateDirectiveRecord(directive).terms.forbiddenCapabilities
+                    & e.requiredCapability != 0
+        ) {
+            revert T.InvalidRecord();
         }
     }
 

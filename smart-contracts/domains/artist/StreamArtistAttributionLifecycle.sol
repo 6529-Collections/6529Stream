@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistPlatformState.sol";
+import {
+    StreamArtistAttestationTypes as Attest
+} from "../../interfaces/stream/artist/IStreamArtistAttestationWriter.sol";
 import "./StreamArtistAttributionClaimState.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionClaims.sol";
 import "../../interfaces/stream/artist/IStreamArtistDisplayFacts.sol";
@@ -27,6 +30,8 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         uint256 nonce;
         uint64 signedAt;
         uint8 authorityClass;
+        bytes32 verifiedSubjectHash;
+        bytes32 associationHash;
     }
 
     struct Attribution {
@@ -42,6 +47,23 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
     mapping(bytes32 => uint8) private _attestationClasses;
     StreamArtistAttributionClaimState.Store private _attributionClaims;
     mapping(uint256 => bytes32) private _latestDisplayClaim;
+    mapping(bytes32 => Attest.Association) private _attestationAssociations;
+    event ArtistAttestationDelegation(
+        uint16 schemaVersion,
+        bytes32 indexed recordHash,
+        bytes32 indexed delegationRecordHash,
+        bytes32 indexed artistId,
+        address signer
+    );
+
+    function attestationAssociation(bytes32 record)
+        external
+        view
+        returns (Attest.Association memory)
+    {
+        return _attestationAssociations[record];
+    }
+
     /// @notice Additional context reconstructing a refusal's exact normative record from events.
     event ArtistBindingTerminationContext(
         uint16 schemaVersion,
@@ -618,6 +640,73 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         return _recordAttestation(c, b, p, statement, x);
     }
 
+    function recordAuthenticatedAttestation(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.Attestation calldata p,
+        Attest.Admission calldata a,
+        bytes calldata statement
+    ) external returns (bytes32 record) {
+        _check(c, 24);
+        StreamArtistCurrentAuthorityFacts.requireAccepted(
+            b, a.authority.authorityAddress, a.authority, false
+        );
+        uint8 class_ = a.authority.authorityClass;
+        if (a.delegation != 0) {
+            if (class_ != 1 || a.signer == address(0)) revert T.InvalidRecord();
+            class_ = 2;
+        } else if (a.signer != a.authority.authorityAddress) {
+            revert T.InvalidRecord();
+        }
+        if (
+            a.signedAt == 0 || a.signedAt > block.timestamp || a.fact.owner.code.length == 0
+                || a.fact.ownerCodeHash != a.fact.owner.codehash || a.fact.subjectId != p.subjectId
+                || a.fact.stateHash != p.subjectStateHash
+        ) revert T.InvalidRecord();
+        record = StreamArtistHashes.attestationRecordForAuthority(
+            _environment(), p, b.artistId, a.signer, class_, a.nonce, a.signedAt
+        );
+        Attest.Association memory association =
+            Attest.Association(b.artistId, b.bindingHash, b.generation, a.delegation, a.fact);
+        _attestationAssociations[record] = association;
+        bytes32 associationHash = keccak256(abi.encode(association));
+        if (p.subjectKind == 7 || p.subjectKind == 8) {
+            Attribution storage attr = _attributions[p.collectionId];
+            if (
+                !StreamArtistAttributionPolicy.acceptedOrSanctioned(attr.state)
+                    || attr.generation != b.generation
+            ) revert T.InvalidAttribution(p.collectionId);
+            StreamArtistRecordPublicationState.Input memory input_;
+            input_.environment = _environment();
+            input_.binding_ = b;
+            input_.terms = p;
+            input_.authority = R.AuthorityFact(b.artistId, a.signer, class_, a.authority.status);
+            input_.nonce = a.nonce;
+            input_.signedAt = a.signedAt;
+            input_.statement = statement;
+            input_.metadataHostCodeHash = a.fact.ownerCodeHash;
+            (bytes32 actual, bytes32 action, bytes32 stateDelta) = StreamArtistRecordPublicationState.record(
+                _records, _attestations, _statements, _publications, input_
+            );
+            if (actual != record) revert T.InvalidRecord();
+            _attestationClasses[record] = class_;
+            _commit(c, action, keccak256(abi.encode(stateDelta, associationHash)), 0, record);
+        } else {
+            AttestationContext memory x;
+            x.operativeIdentityHash = a.operativeIdentity;
+            x.signer = a.signer;
+            x.nonce = a.nonce;
+            x.signedAt = a.signedAt;
+            x.authorityClass = class_;
+            x.verifiedSubjectHash = a.fact.stateHash;
+            x.associationHash = associationHash;
+            if (_recordAttestation(c, b, p, statement, x) != record) revert T.InvalidRecord();
+        }
+        if (a.delegation != 0) {
+            emit ArtistAttestationDelegation(1, record, a.delegation, b.artistId, a.signer);
+        }
+    }
+
     function recordAttestationWithAuthority(
         T.ActionContext calldata c,
         T.Binding calldata b,
@@ -720,6 +809,11 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
                     || (p.schemaId != keccak256("6529STREAM_ARTIST_PERSONHOOD_WAIVER_V1")
                         && p.schemaId != keccak256("6529STREAM_ARTIST_PERSONHOOD_EVIDENCE_V1"))
             ) revert T.InvalidRecord();
+        } else if (p.subjectKind >= 1 && p.subjectKind <= 6) {
+            if (
+                x.verifiedSubjectHash == 0 || x.verifiedSubjectHash != p.subjectStateHash
+                    || p.schemaId == 0
+            ) revert T.InvalidRecord();
         } else {
             revert T.UnsupportedProfile();
         }
@@ -755,7 +849,14 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
                     )
                 )
                 : keccak256(abi.encode(b, p, x.signer, x.nonce, x.signedAt, keccak256(statement))),
-            keccak256(abi.encode(p.collectionId, p.subjectKind, p.subjectId, item)),
+            x.associationHash == 0
+                ? keccak256(abi.encode(p.collectionId, p.subjectKind, p.subjectId, item))
+                : keccak256(
+                    abi.encode(
+                        keccak256(abi.encode(p.collectionId, p.subjectKind, p.subjectId, item)),
+                        x.associationHash
+                    )
+                ),
             bytes32(0),
             record
         );

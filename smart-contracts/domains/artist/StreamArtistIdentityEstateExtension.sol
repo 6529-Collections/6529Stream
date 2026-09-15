@@ -76,6 +76,34 @@ contract StreamArtistIdentityEstateExtension is
         _;
     }
 
+    function consumeDelegatedAttestation(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.Attestation calldata p,
+        bytes32 grant,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external onlyHost returns (bytes32 record) {
+        _check(c, 24);
+        if (a.time == 0 || a.time > block.timestamp || p.subjectKind == 0 || p.subjectKind > 10) {
+            revert T.InvalidRecord();
+        }
+        record = StreamArtistHashes.attestationRecordForAuthority(
+            _environment(), p, b.artistId, proof.signer, 2, a.nonce, a.time
+        );
+        _authorizeDelegate(
+            c,
+            b,
+            p.collectionId,
+            p.subjectKind == 7 ? D.INTENT : D.ATTEST,
+            grant,
+            a,
+            proof,
+            StreamArtistHashes.attestationDigest(_environment(), p, a),
+            record
+        );
+    }
+
     function consumeDelegatedEconomics(
         T.ActionContext calldata c,
         T.Binding calldata b,

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 import "../../interfaces/stream/artist/IStreamArtistPlatformWorks.sol";
 import "../../interfaces/stream/artist/IStreamArtistDisplayFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistAttestationWriter.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionClaims.sol";
 import { StreamArtistExtensionAdmission } from "./StreamArtistExtensionAdmission.sol";
 import {
@@ -307,6 +308,7 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistTemplateMutationAuthority).interfaceId
             || id == type(IStreamArtistPlatformWorks).interfaceId
             || id == type(IStreamArtistDisplayFacts).interfaceId
+            || id == type(IStreamArtistAttestationWriter).interfaceId
             || id == type(IStreamArtistAttributionClaims).interfaceId
             || id == type(IStreamArtistDelegation).interfaceId
             || id == type(IStreamArtistBindingLifecycle).interfaceId
@@ -1086,7 +1088,12 @@ contract StreamArtistOnboardingRegistry is
     function recordDelegation(bytes32 record) external view returns (bytes32) {
         T.SuiteConfiguration memory s =
             StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
-        return IStreamArtistDelegatedConsentOwner(s.owners[6]).recordDelegation(record);
+        bytes32 grant = IStreamArtistDelegatedConsentOwner(s.owners[6]).recordDelegation(record);
+        return grant != 0
+            ? grant
+            : IStreamArtistAuthenticatedAttestationOwner(s.owners[4])
+            .attestationAssociation(record)
+            .delegation;
     }
 
     function proposeArtistBinding(
@@ -1324,6 +1331,45 @@ contract StreamArtistOnboardingRegistry is
         returns (bytes32)
     {
         _forwardRegistryRead();
+    }
+
+    function attestationAssociation(bytes32 record)
+        external
+        view
+        returns (Attest.Association memory)
+    {
+        T.SuiteConfiguration memory s =
+            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
+        return
+            IStreamArtistAuthenticatedAttestationOwner(s.owners[4]).attestationAssociation(record);
+    }
+
+    function recordArtistScopedAttestation(
+        T.Attestation calldata p,
+        Attest.Subject calldata subject,
+        T.Authorization calldata a,
+        bytes calldata statement
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function recordDelegatedArtistAttestation(
+        T.Attestation calldata p,
+        bytes32 grant,
+        T.Authorization calldata a,
+        bytes calldata statement
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function recordDelegatedArtistScopedAttestation(
+        T.Attestation calldata p,
+        Attest.Subject calldata subject,
+        bytes32 grant,
+        T.Authorization calldata a,
+        bytes calldata statement
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
     }
 
     function recordArtistAttestation(

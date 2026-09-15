@@ -1210,6 +1210,17 @@ contract StreamArtistIdentityAuthority is
         _forwardIdentityWriter();
     }
 
+    function consumeDelegatedAttestation(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.Attestation calldata p,
+        bytes32 grant,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external returns (bytes32 record) {
+        _forwardIdentityWriter();
+    }
+
     function consumeAttestation(
         T.ActionContext calldata c,
         T.Binding calldata b,

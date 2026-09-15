@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamArtistEconomicOperations.sol";
+import "./StreamArtistAttestationOperations.sol";
 import "./StreamArtistIdentityRevisionState.sol";
 import "./StreamArtistRecordPublicationReads.sol";
 import "../../interfaces/stream/artist/IStreamArtistCurrentBindingOwner.sol";
@@ -73,6 +74,12 @@ library StreamArtistIdentityOperations {
         T.Authorization memory submitted,
         bytes memory statement
     ) public returns (bytes32 record) {
+        if (p.subjectKind >= 1 && p.subjectKind <= 6) {
+            Attest.Subject memory subject;
+            return StreamArtistAttestationOperations.attest(
+                x, actor, p, subject, false, 0, submitted, statement
+            );
+        }
         if (p.subjectKind == 7 || p.subjectKind == 8) {
             return _publicationAttestation(x, actor, p, submitted, statement);
         }
