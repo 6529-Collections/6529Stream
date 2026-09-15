@@ -231,3 +231,11 @@ Fetch-dependent bags remain incomplete until the separate
 complete locally supplied missing set against the original commitments. Original
 fetch instructions remain inert provenance. Source authority, full render
 inventory, genesis registration and institutional ingest stay separate.
+
+
+The [recorded PREMIS performed-check profile](../../docs/museum-recorded-fixity.md)
+adds explicitly selected typed event/report/agent records and local observation
+comparison without changing file-only PREMIS meaning. Its distinct derivative
+package retains the original recorded package literally and regenerates offline.
+Historical execution, time and named-agent identity remain recorded claims.
+Run `python -m unittest tools.museum.test_recorded_fixity -v` for focused checks.

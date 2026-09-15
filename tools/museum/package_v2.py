@@ -221,6 +221,9 @@ def verify_package(directory, expected_manifest_hash):
     if isinstance(value, dict) and value.get("mode") in ("recorded_account_resource_package", "recorded_account_premis_resource_package", "recorded_account_iiif_resource_package", "recorded_account_lido_resource_package"):
         from .package_recorded import verify_recorded_package
         return verify_recorded_package(directory, expected_manifest_hash)
+    if isinstance(value, dict) and value.get("mode") == "recorded_account_fixity_resource_package":
+        from .fixity_package import verify_fixity_package
+        return verify_fixity_package(directory, expected_manifest_hash)
     return verify_fixture_package(directory, expected_manifest_hash)
 
 
