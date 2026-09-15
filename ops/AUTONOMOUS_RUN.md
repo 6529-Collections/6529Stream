@@ -37,10 +37,10 @@ pending checks. The immutable RC1 remains the released baseline.
 
 | Owner | Implementation batch |
 | --- | --- |
-| Integrator | Source integration; manifest client passes 83 cases and focused metadata cohort passes 13; remaining entropy/operator/genesis and combined acceptance |
-| Artist builder | Actual operations 19/41/42/43 dormancy/steward lifecycle, then explicit later steward grants; state-bound/delegated attestations and size remedies integrated |
-| Revenue builder | Declared PLATFORM_WORKS primary-template deferred auctions; ERC-20 and inherited/global-freeze writes remain separately blocked |
-| Fourth engineer | Full-size chunk-backed scripts/libraries with live, burned-token and finality rendering; small typed manifests and governed display budgets integrated |
+| Integrator | Integrated lifecycle/platform/chunked-artwork batches; entropy incidents pass 30 focused native cases and joined ABI passes 1,632 sources; remaining entropy/operator/genesis and combined acceptance |
+| Artist builder | State-carried authority preimages and enumerable payload discovery, then remaining recovery profiles; current Artist size check alongside source work |
+| Revenue builder | Known-token platform activation completed and under independent review; next actual remaining commerce/consignment flow; blocked ERC-20 and inherited/global-freeze variants remain excluded |
+| Fourth engineer | Versioned complete chunked snapshots and offline reconstruction/export; independently review the known-token commerce batch |
 
 Comprehensive current-stack/Safe integration, fuzz and stateful campaigns, gas
 conformance, complete genesis inventory, CI and matching new testnet evidence
@@ -49,7 +49,11 @@ the background and validate only their recorded source. No new date or
 percentage is inferred from these assignments.
 
 Root owns the combined graph, shared operator/client work and the new candidate.
-The latest source batch passes the 1,572-source ABI/type check. Metadata's
+The latest source batch passes the 1,632-source ABI/type check (`f3a95d67`).
+The independently reviewed entropy incident implementation passes 30 focused
+native cases with two 256-input properties and all five selected products fit.
+Other new Artist/commerce/chunked-profile native acceptance remains pending.
+Earlier evidence below retains its recorded source scope. Metadata's
 focused 13-case native result covers actual Router/metadata/blob/Safe calls with
 typed Core/Artist/governance boundaries; all 67 compiled production products fit.
 The original failures and exact source qualification are retained in the

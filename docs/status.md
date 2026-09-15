@@ -28,10 +28,13 @@ system has not been frozen or demonstrated on testnet. Application developers
 can use the explicitly versioned current client helpers and compiler-selected
 interfaces described in the [client guide](integrations/typescript-client.md).
 
-Remaining work includes complete dormancy/steward paths, larger script profiles,
-remaining commerce and entropy behavior, full genesis/operator activation,
-combined Safe and hostile testing, transaction gas conformance, and matching
-candidate evidence. The current delivery report owns changing test and feature
+Dormancy/steward appointment and grants, designated recovery, platform primary
+auctions/custody, complete chunk-backed scripts and archival checkpoints are now
+source-integrated. Evidence-bearing entropy incidents have focused runtime
+coverage. Remaining work includes further recovery and reconstruction profiles,
+complete chunked snapshot/export composition, remaining commerce and entropy
+behavior, full genesis/operator activation, combined Safe and hostile testing,
+transaction gas conformance, and matching candidate evidence. The current delivery report owns changing test and feature
 counts so this public overview does not repeat stale implementation checkpoints.
 The released supported RC1 and its Sepolia evidence remain unchanged.
 

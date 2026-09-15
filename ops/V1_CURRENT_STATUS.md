@@ -24,6 +24,50 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## Latest feature batch
 
+Source through `f3a95d67` integrates actual Artist dormancy and steward appointment
+(`d8e80cdc`), explicit operation-59 steward grants (`af59ec92`), and designated
+dormancy-origin recovery, including dismissed/reopened histories (`438e1fb9`,
+`2e1ef8c8`). Historical operations 1-58 retain their identities. Independent
+source reviews are clear; these new Artist lifecycle cases still need native
+and complete actual-governance acceptance. Payload reconstruction, further
+recovery profiles and current Artist deployment sizing remain active work.
+
+Declared PLATFORM_WORKS collection/default PROFILE and static/SALE_POSTER
+TEMPLATE auctions are integrated (`bf3e7938`, `5d2211ff`), including prepared
+custody acquisition and later transfer of the same NFT (`fdac400e`, `b90b93e8`).
+Original poster, declaration, actual-token policy, replay and acquisition
+snapshots remain explicit. Source review and selected worker sizes pass;
+these new workflows have authored regressions but no native acceptance yet.
+Known-token platform activation is the next completed source batch under review.
+
+Complete chunk-backed script/library storage and full HTML/JSON views are
+integrated (`3613ffaf`), with component evidence and explicit full-artwork
+checkpoints (`ca691cc0`). Historical full JSON keeps archival content roots
+stable across burns. Source reviews and selected sizes pass. New profile runtime,
+full-size gas behavior and versioned complete snapshot/export composition remain.
+
+Token/scope entropy incident declarations are integrated (`cf588705`, import-only
+correction `f3a95d67`). They require the live incident role, original request state,
+timeout or revocation, an exact bounded negative provider report and evidence.
+They close the original request without authorizing a fresh draw. All 30 focused
+native cases pass, including actual Safe calls and two 256-input fuzz properties;
+Core, role/provider and delayed-executor boundaries are explicit typed fixtures.
+The coordinator measures 23,874 runtime bytes; all five selected production
+products fit. Earlier fixture failures and the initial 27,939-byte oversized
+coordinator are retained. Fixed read workers preserve original epoch/seed tests.
+The final import correction produces identical runtime and creation bytecode and
+identical unordered ABI entries to the passing frozen products.
+
+The complete 1,632-source integrated ABI/type check passes at `f3a95d67`.
+This is source composition evidence, not a full-system runtime result. Complete
+current-stack/Safe, stateful/fuzz campaigns, gas, all 37 genesis roles, CI and
+matching new testnet evidence remain required. Fresh entropy recovery/provider
+lifecycle, operator/client completion and the separately blocked ERC-20 and
+inherited/global-freeze changes remain explicit. RC1 and Sepolia evidence are
+unchanged.
+
+## Earlier manifest and attestation batch
+
 The integrated source now includes PLATFORM_WORKS royalty admission (`0385044d`),
 live nested Artist attribution with an original-finality anchor (`ed2dc08d`),
 full typed script/media manifest records (`bf828769`, `a9d7e7ec`), and state-bound
@@ -54,12 +98,9 @@ Earlier entropy epoch implementation `c3c22d4a` retains its separate 16 passing
 native cases and 256-input property; its accepted policy still excludes fresh
 recovery and post-mint provider migration.
 
-The next parallel feature batches are actual Artist dormancy/steward lifecycle,
-declared PLATFORM_WORKS primary-template deferred auctions, and full-size
-chunk-backed scripts/libraries with rendering and finality integration. Later
-explicit steward capability grants remain required by the existing specification.
-The ERC-20 and inherited/global-freeze approval restrictions remain as stated
-above. No released RC1 source, tag or Sepolia evidence changed.
+The later integrated lifecycle, platform-commerce and chunked-artwork batches
+are described above. The ERC-20 and inherited/global-freeze approval restrictions
+remain as stated above. No released RC1 source, tag or Sepolia evidence changed.
 
 ## Delivery sequencing
 
