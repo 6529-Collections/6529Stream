@@ -60,6 +60,18 @@ callers must not substitute the election-bound consent hash for that source
 policy hash. The [Artist guide](../artist-snapshot-royalty-consent.md) describes
 the exact preview, payload and signing sequence.
 
+## Declared platform collections
+
+For a current `PLATFORM_WORKS` collection, RSR-ARTIST-ECONOMICS.1 and
+AA-CONSENT.5 require no synthetic Artist operation-15 approval. The original
+Resolver owner remains the source mutation authority. The additive
+[platform snapshot consumer](../platform-royalty-snapshots.md) authenticates the
+actual selected Artist registry, declaration and current uncontested state.
+It retains every original source/mode/token hash and prepared proof. Open or
+sustained contests and incomplete corrective generations block this path;
+accepted correction returns to the original exact Artist economics approval.
+A historical declaration finality record is never current mint authority.
+
 ## Prepared mint boundary
 
 A fresh phase registers its exact Resolver address and runtime hash, election,

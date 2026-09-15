@@ -16,6 +16,7 @@ import "../../vendor/openzeppelin/ERC165.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
 import { StreamRoyaltyAssignmentHash } from "./StreamRoyaltyAssignmentHash.sol";
 import { StreamRoyaltySnapshot } from "./StreamRoyaltySnapshot.sol";
+import { StreamRoyaltyPlatformAdmission } from "./StreamRoyaltyPlatformAdmission.sol";
 import { IStreamRoyaltySnapshot } from "../../interfaces/stream/revenue/IStreamRoyaltySnapshot.sol";
 import {
     IStreamArtistSnapshotRoyaltyFacts
@@ -332,6 +333,11 @@ contract StreamRoyaltyResolver is
             IStreamRoyaltySnapshot.Source memory source = StreamRoyaltySnapshot.source(
                 _snapshots, candidate, _snapshotContext(), collectionId, false
             );
+            if (
+                StreamRoyaltyPlatformAdmission.requireCurrent(
+                    address(boundCore), artistRegistry, artistRegistryCodeHash, collectionId
+                )
+            ) return;
             if (artistRegistry.attribution(collectionId).nominationHash == bytes32(0)) {
                 revert ArtistEconomicsAuthorizationRequired(collectionId);
             }

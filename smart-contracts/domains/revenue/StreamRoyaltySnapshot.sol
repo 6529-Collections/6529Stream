@@ -15,6 +15,7 @@ import { IStreamSplitFactory } from "../../interfaces/stream/revenue/IStreamSpli
 import { IERC165 } from "../../vendor/openzeppelin/IERC165.sol";
 import { StreamRoyaltyAssignmentHash } from "./StreamRoyaltyAssignmentHash.sol";
 import { StreamRoyaltyPreparedProof } from "./StreamRoyaltyPreparedProof.sol";
+import { StreamRoyaltyPlatformAdmission } from "./StreamRoyaltyPlatformAdmission.sol";
 
 /// @notice Fixed linked mode election and snapshot worker in the actual Resolver storage context.
 library StreamRoyaltySnapshot {
@@ -284,6 +285,11 @@ library StreamRoyaltySnapshot {
     }
 
     function _consent(Context memory x, uint256 collectionId, bytes32 hash) private view {
+        if (
+            StreamRoyaltyPlatformAdmission.requireCurrent(
+                address(x.core), x.artist, x.artistRuntimeHash, collectionId
+            )
+        ) return;
         (address selected, bytes32 runtime,,,,,,,,) =
             IStreamCorePointers(address(x.core)).getSatellitePointer(keccak256("ARTIST_REGISTRY"));
         if (
