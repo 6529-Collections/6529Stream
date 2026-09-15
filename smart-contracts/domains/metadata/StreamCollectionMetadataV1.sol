@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamMetadataArtistSelection as ArtistSelection
+} from "./StreamMetadataArtistSelection.sol";
 
 import "../../interfaces/stream/metadata/IStreamCollectionMetadataV1.sol";
 import "../../interfaces/stream/metadata/IStreamCollectionRecordReceipts.sol";
@@ -491,7 +494,7 @@ contract StreamCollectionMetadataV1 is
         if (consumedArtistAuthorization[authorization]) {
             revert MetadataAuthorizationConsumed(authorization);
         }
-        _requireArtistSelected();
+        ArtistSelection.Selected memory selected = _requireArtistSelected();
         _zeroSignature(record);
         if (
             record.contentHash.digest.length != 32
@@ -503,7 +506,7 @@ contract StreamCollectionMetadataV1 is
         _candidate(p);
         P.Evidence memory evidence = abi.decode(
             _read(
-                artistRegistry,
+                selected.registry,
                 abi.encodeCall(
                     IStreamArtistRecordPublication.requireRecordPublication, (authorization, p)
                 ),
@@ -520,6 +523,10 @@ contract StreamCollectionMetadataV1 is
         ) revert MetadataAuthorityRequired();
         consumedArtistAuthorization[authorization] = true;
         hash = _append(recorder, collectionId, record, payload, 1, authorization);
+        ArtistSelection.Selected memory after_ = _requireArtistSelected();
+        if (after_.registry != selected.registry || after_.runtimeHash != selected.runtimeHash) {
+            revert MetadataHostNotSelected();
+        }
         emit ArtistRecordAuthorizationConsumed(authorization, hash, recorder, msg.sender);
     }
 
@@ -830,9 +837,17 @@ contract StreamCollectionMetadataV1 is
         ) revert InvalidMetadataRecord();
     }
 
-    function _requireArtistSelected() private view {
+    function _requireArtistSelected() private view returns (ArtistSelection.Selected memory) {
         _requireSelected(_TYPE, address(this), address(this).codehash);
-        _requireSelected(keccak256("ARTIST_REGISTRY"), artistRegistry, artistRegistryCodeHash);
+        return ArtistSelection.selected(
+            ArtistSelection.Context(
+                core,
+                coreCodeHash,
+                artistRegistry,
+                artistRegistryCodeHash,
+                _gasParameterValue(DEPENDENCY_READ_GAS)
+            )
+        );
     }
 
     function _requireSelected(bytes32 pointerType, address expected, bytes32 expectedCodeHash)

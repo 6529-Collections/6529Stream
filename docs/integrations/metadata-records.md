@@ -52,6 +52,11 @@ The direct profile uses zero signature fields because the transaction is the
 authorizing call. A declared schema identity is retained; arbitrary payload
 meaning is not validated onchain by this generic API.
 
+The original Artist remains a saved birth anchor. After an explicitly sealed
+cutover, the same record host can consume consent through one completely hydrated
+current successor under the [successor selection rules](metadata-artist-successor.md).
+The host's existing consumed-authorization map and historical domains remain intact.
+
 For an artist record, use the separate
 [publication interface](../../smart-contracts/interfaces/stream/artist/IStreamArtistRecordPublication.sol)
 to obtain authorization for the complete typed candidate, then submit

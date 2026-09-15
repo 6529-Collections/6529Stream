@@ -252,7 +252,7 @@ abstract contract CollectionMetadataV1Fixture is CharacterizationTestBase, Offic
         vm.warp(1000);
         core = new MetadataCoreBoundary();
         executor = new MetadataExecutorBoundary();
-        artist = new MetadataArtistBoundary(address(core));
+        artist = _newArtist(address(core));
         schemas = new StreamSchemaRegistry(address(executor));
         store = StreamSchemaDocumentStore(schemas.chunkStore());
         _register(
@@ -296,6 +296,10 @@ abstract contract CollectionMetadataV1Fixture is CharacterizationTestBase, Offic
         _grant(1, StreamRecordFamilies.CURATOR, 3, address(this), true);
         _admit(RIGHTS, StreamRecordFamilies.RIGHTS, 128);
         _admit(ARTIST, StreamRecordFamilies.ARTIST, 2);
+    }
+
+    function _newArtist(address c) internal virtual returns (MetadataArtistBoundary) {
+        return new MetadataArtistBoundary(c);
     }
 
     function _record(bytes32 kind, bytes memory payload)
