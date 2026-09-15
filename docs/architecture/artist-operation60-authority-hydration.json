@@ -44,5 +44,19 @@
   "event": "ArtistAuthorityHydrated",
   "eventSchemaVersion": 1,
   "archive": "normal original operation evidence V1 with all seven before/after snapshots, source headers and complete typed profile, followed by original transaction-end history/payload sync",
-  "validationState": "source/type and authored actual two-registry/Safe/Archive scenarios; native behavior, sizes and current-stack acceptance pending"
+  "validationState": "source/type and authored actual two-registry/Safe/Archive scenarios; native behavior, sizes and current-stack acceptance pending",
+  "additionalProfiles": [
+    {
+      "profile": "6529STREAM_ARTIST_LIVING_PAYOUT_HYDRATION_V1",
+      "write": "hydrateArtistAuthorityWithPayout",
+      "coordinator": "coordinateHydrateArtistAuthorityWithPayout",
+      "typedInterface": "smart-contracts/interfaces/stream/artist/IStreamArtistPayoutAuthorityHydration.sol",
+      "additionalOriginalOperations": [
+        18
+      ],
+      "source": "complete linear unprovisional class1 payout history, exact original current head and mutable chain cell; all original baseline completeness checks remain",
+      "exclusions": "pending/provisional/abandoned/rotated payouts and other advanced authority dependencies",
+      "validation": "four authored actual two-registry/Safe/Archive source cases; ABI only"
+    }
+  ]
 }

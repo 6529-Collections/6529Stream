@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistPayoutHydration.sol";
 import "./StreamArtistAuthorityCheckpoint.sol";
 
 import "./StreamArtistOwner.sol";
@@ -361,5 +362,21 @@ contract StreamArtistPayoutLifecycle is StreamArtistOwner {
         emit ArtistPayoutDesignationRecorded(
             1, p.artistId, p.payoutAccount, signer, prior, 1, nonce, signedAt, record
         );
+    }
+
+    function authorityHydrationState(AH.Query calldata q)
+        external
+        view
+        override
+        returns (bytes memory)
+    {
+        return StreamArtistPayoutHydration.exportState(
+            _payouts, _records, _pending, _associations, _abandonedUnder, q.artistId
+        );
+    }
+
+    function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
+        if (p.nonces.length != 0) revert T.InvalidRecord();
+        StreamArtistPayoutHydration.importState(_payouts, _records, q.artistId, p.typedState);
     }
 }

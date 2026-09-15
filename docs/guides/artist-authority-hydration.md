@@ -55,3 +55,10 @@ native execution, deployed product sizes and actual current-stack cutover
 remain pending consolidated validation. Multi-identity, collaborator,
 economics/content, historical authority and subsequent-import profiles remain
 explicit full-v1 obligations. No lane proof alone activates them.
+
+## Additional explicit profile
+
+[Living-Artist payout history](artist-payout-authority-hydration.md) is available
+through a separate additive entrypoint. The original baseline selector and
+request ABI remain unchanged. This extension does not relax provisional or
+historical-authority dependency requirements.

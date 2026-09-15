@@ -67,3 +67,14 @@ payout/economics/content records, attestations, grants, guardians, rotations,
 estate/dormancy/recovery histories and their complete conditional dependencies
 need explicit typed profiles. They remain full-v1 work. This baseline neither
 authorizes unsupported histories nor changes any recovery or freeze eligibility.
+
+## Explicit payout-history profile
+
+The additive `hydrateArtistAuthorityWithPayout` capability selects the separate
+`6529STREAM_ARTIST_LIVING_PAYOUT_HYDRATION_V1` profile. It adds only complete
+original unprovisional living-Artist operation-18 designation histories and the
+actual current head/mutable chain cell. All seven-owner completion, source seal,
+old-domain, nonce/replay and atomic Archive requirements remain. The original
+baseline selector still rejects payout history. The
+[payout importer guide](../guides/artist-payout-authority-hydration.md) specifies
+the typed joins, authored cases and remaining authority-history exclusions.

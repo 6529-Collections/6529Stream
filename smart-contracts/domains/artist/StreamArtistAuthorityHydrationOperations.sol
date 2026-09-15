@@ -1,5 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistPayoutTransitionOwner.sol";
+import "../../interfaces/stream/artist/IStreamArtistPayoutOwner.sol";
+import {
+    StreamArtistRotationTypes as HydrationRotation
+} from "../../interfaces/stream/artist/StreamArtistRotationTypes.sol";
+import "../../interfaces/stream/artist/IStreamArtistPayoutAuthorityHydration.sol";
+import {
+    StreamArtistPayoutHydrationTypes as PH
+} from "../../interfaces/stream/artist/IStreamArtistPayoutAuthorityHydration.sol";
 import "./StreamArtistHistoryOperations.sol";
 import "../../interfaces/stream/artist/IStreamArtistAuthorityHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistIngressBinding.sol";
@@ -15,6 +24,8 @@ import {
 ///      are source history commitments, not recomputed from current cells.
 library StreamArtistAuthorityHydrationOperations {
     bytes32 private constant PROFILE = keccak256("6529STREAM_ARTIST_LIVING_BASELINE_HYDRATION_V1");
+    bytes32 private constant PAYOUT_PROFILE =
+        keccak256("6529STREAM_ARTIST_LIVING_PAYOUT_HYDRATION_V1");
     bytes32 private constant CHECKPOINT = keccak256("6529STREAM_ARTIST_GUARD_CHECKPOINT_V1");
     event ArtistAuthorityHydrated(
         uint16 schemaVersion,
@@ -29,6 +40,23 @@ library StreamArtistAuthorityHydrationOperations {
         public
         returns (bytes32 value)
     {
+        return _hydrate(x, actor, p, false);
+    }
+
+    function hydrateWithPayout(D.CoordinatorContext memory x, address actor, AH.Request memory p)
+        public
+        returns (bytes32)
+    {
+        return _hydrate(x, actor, p, true);
+    }
+
+    function _hydrate(
+        D.CoordinatorContext memory x,
+        address actor,
+        AH.Request memory p,
+        bool includePayout
+    ) private returns (bytes32 value) {
+        bytes32 profile = includePayout ? PAYOUT_PROFILE : PROFILE;
         if (
             p.artistId == 0 || p.collectionId == 0 || p.bindingIndex != 0 || p.policies.length > 128
         ) revert T.UnsupportedProfile();
@@ -63,6 +91,7 @@ library StreamArtistAuthorityHydrationOperations {
         T.Snapshot[7] memory before_;
         uint256 total;
         uint256 revocations;
+        uint256 payoutCount;
         for (uint256 i; i < 7; ++i) {
             before_[i] = IStreamArtistOwner(x.suite.owners[i]).ownerStateSnapshotV2();
             if (
@@ -85,6 +114,9 @@ library StreamArtistAuthorityHydrationOperations {
                 revocations = count - 1;
             } else if (i == 3) {
                 if (count != 1) revert T.UnsupportedProfile();
+            } else if (i == 5 && includePayout) {
+                if (count == 0) revert T.UnsupportedProfile();
+                payoutCount = count;
             } else if (i == 6) {
                 if (count != p.policies.length) revert T.InvalidRecord();
             } else if (count != 0) {
@@ -100,11 +132,11 @@ library StreamArtistAuthorityHydrationOperations {
             for (uint256 j; j < count; ++j) {
                 H.Receipt memory r =
                     IStreamArtistNativeReceipts(source.owners[i]).artistNativeReceiptAt(j);
-                uint16 op = i == 0 ? 1 : i == 2 ? (j == 0 ? 1 : 54) : i == 3 ? 2 : 14;
+                uint16 op = i == 0 ? 1 : i == 2 ? (j == 0 ? 1 : 54) : i == 3 ? 2 : i == 5 ? 18 : 14;
                 if (
                     r.operation != op || r.artistId != p.artistId
-                        || r.collectionId != (i == 2 ? 0 : p.collectionId) || r.recordHash == 0
-                        || (i == 2 && j == 0 && r.recordHash != p.artistId)
+                        || r.collectionId != (i == 2 || i == 5 ? 0 : p.collectionId)
+                        || r.recordHash == 0 || (i == 2 && j == 0 && r.recordHash != p.artistId)
                 ) revert T.UnsupportedProfile();
                 q.records[used++] = r.recordHash;
                 ++artistCount;
@@ -113,8 +145,12 @@ library StreamArtistAuthorityHydrationOperations {
             uint64 expectedRevision = i == 0
                 ? 2
                 : i == 2
-                    ? uint64(3 + p.policies.length + revocations)
-                    : i == 3 ? 1 : i == 4 ? 2 : i == 6 ? uint64(p.policies.length) : 0;
+                    ? uint64(3 + p.policies.length + revocations + payoutCount)
+                    : i == 3
+                        ? 1
+                        : i == 4
+                            ? 2
+                            : i == 5 ? uint64(payoutCount) : i == 6 ? uint64(p.policies.length) : 0;
             if (p.expectedSource[i].ownerState.revision != expectedRevision) {
                 revert T.UnsupportedProfile();
             }
@@ -128,9 +164,10 @@ library StreamArtistAuthorityHydrationOperations {
         (, uint64 cc) = IStreamArtistHistory(prior).artistHistoryLane(2, bytes32(p.collectionId));
         if (ac != artistCount || cc != collectionCount) revert T.InvalidRecord();
         _facts(q, data, source);
+        if (includePayout) _payoutFacts(q, data, source);
         value = keccak256(
             abi.encode(
-                PROFILE,
+                profile,
                 block.chainid,
                 x.suite.registry,
                 address(this),
@@ -144,7 +181,7 @@ library StreamArtistAuthorityHydrationOperations {
         // Request fields are losslessly reconstructible from the fixed profile (index0),
         // source headers, query and each owner's original surface/scope list.
         bytes memory profileBytes =
-            abi.encode(PROFILE, prior, sourceCoordinator, p.expectedSource, q, data);
+            abi.encode(profile, prior, sourceCoordinator, p.expectedSource, q, data);
         // Original Archive has a finite SSTORE2 carrier. Reject an overlarge baseline
         // before mutation; larger profiles need a distinct paged evidence recipe.
         bytes memory sizeProbe = abi.encode(
@@ -200,7 +237,54 @@ library StreamArtistAuthorityHydrationOperations {
         (bytes32 hash,, bool added) =
             IStreamArtistArchiveV2(x.suite.archive).appendArtistEvidenceV2(id, 1, evidence);
         if (!added || hash != keccak256(evidence)) revert T.InvalidRecord();
-        emit ArtistAuthorityHydrated(1, p.artistId, p.collectionId, prior, PROFILE, value);
+        emit ArtistAuthorityHydrated(1, p.artistId, p.collectionId, prior, profile, value);
+    }
+
+    function _payoutFacts(
+        AH.Query memory q,
+        AH.OwnerData[7] memory data,
+        T.SuiteConfiguration memory source
+    ) private view {
+        PH.Bundle memory p = abi.decode(data[5].typedState, (PH.Bundle));
+        if (
+            p.records.length
+                    != IStreamArtistNativeReceipts(source.owners[5]).artistNativeReceiptCount()
+                || data[5].cells.length != 1
+                || data[5].origins[0].surface
+                    != keccak256("payout_lifecycle.replay.designation_chain")
+                || data[5].origins[0].scope != keccak256(abi.encode(q.artistId))
+                || data[5].cells[0].commitment != p.current.recordHash || data[5].cells[0].kind != 3
+                || data[5].cells[0].status != 1
+        ) revert T.InvalidRecord();
+        (
+            T.Payout memory stable,
+            T.Payout memory candidate,
+            HydrationRotation.ProvisionalAssociation memory association
+        ) = IStreamArtistPayoutTransitionOwner(source.owners[5]).payoutCandidates(q.artistId);
+        if (
+            keccak256(abi.encode(stable)) != keccak256(abi.encode(p.current))
+                || candidate.recordHash != 0 || candidate.account != address(0)
+                || association.transitionRecordHash != 0 || association.windowEndsAt != 0
+        ) revert T.InvalidRecord();
+        for (uint256 j; j < p.records.length; ++j) {
+            bytes32 record = p.records[j].recordHash;
+            if (
+                record
+                        != IStreamArtistNativeReceipts(source.owners[5])
+                        .artistNativeReceiptAt(j)
+                        .recordHash
+                    || keccak256(abi.encode(p.records[j].terms))
+                        != keccak256(
+                            abi.encode(
+                                IStreamArtistPayoutOwner(source.owners[5]).designationRecord(record)
+                            )
+                        )
+            ) revert T.InvalidRecord();
+            HydrationRotation.ProvisionalAssociation memory a =
+                IStreamArtistPayoutTransitionOwner(source.owners[5])
+                    .payoutDesignationProvisionalAssociation(record);
+            if (a.transitionRecordHash != 0 || a.windowEndsAt != 0) revert T.UnsupportedProfile();
+        }
     }
 
     function _lane(IStreamArtistHistory h, address prior, uint8 kind, bytes32 key) private view {

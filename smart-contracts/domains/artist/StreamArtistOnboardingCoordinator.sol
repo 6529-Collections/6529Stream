@@ -969,4 +969,13 @@ contract StreamArtistOnboardingCoordinator is
         }
         return _suite;
     }
+
+    function coordinateHydrateArtistAuthorityWithPayout(address actor, AH.Request calldata p)
+        external
+        operation
+        returns (bytes32)
+    {
+        return
+            StreamArtistAuthorityHydrationOperations.hydrateWithPayout(_economicContext(), actor, p);
+    }
 }
