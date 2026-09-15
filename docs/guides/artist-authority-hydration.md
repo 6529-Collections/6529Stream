@@ -66,3 +66,7 @@ historical-authority dependency requirements.
 The [explicit direct economics profile](artist-economics-authority-hydration.md)
 adds complete op15 associations and their payout dependencies while preserving
 this baseline selector. It has separate source-only validation.
+
+The [collection readiness profile](artist-readiness-authority-hydration.md)
+adds complete original ratification/content and direct attestation histories;
+old deployment approval remains historical and the successor needs a fresh op24.

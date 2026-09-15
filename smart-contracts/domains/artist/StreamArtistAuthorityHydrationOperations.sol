@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistReadinessHydrationFacts.sol";
+import {
+    StreamArtistReadinessHydrationTypes as RH
+} from "../../interfaces/stream/artist/IStreamArtistReadinessAuthorityHydration.sol";
 import "./StreamArtistEconomicsHydration.sol";
 import {
     StreamArtistEconomicsHydrationTypes as EH
@@ -33,6 +37,8 @@ library StreamArtistAuthorityHydrationOperations {
         keccak256("6529STREAM_ARTIST_LIVING_PAYOUT_HYDRATION_V1");
     bytes32 private constant ECONOMICS_PROFILE =
         keccak256("6529STREAM_ARTIST_LIVING_ECONOMICS_HYDRATION_V1");
+    bytes32 private constant READINESS_PROFILE =
+        keccak256("6529STREAM_ARTIST_LIVING_READINESS_HYDRATION_V1");
     bytes32 private constant CHECKPOINT = keccak256("6529STREAM_ARTIST_GUARD_CHECKPOINT_V1");
     event ArtistAuthorityHydrated(
         uint16 schemaVersion,
@@ -47,14 +53,17 @@ library StreamArtistAuthorityHydrationOperations {
         public
         returns (bytes32 value)
     {
-        return _hydrate(x, actor, p, false, new T.EconomicsConsent[](0));
+        return _hydrate(
+            x, actor, p, false, new T.EconomicsConsent[](0), new RH.AttestationInput[](0)
+        );
     }
 
     function hydrateWithPayout(D.CoordinatorContext memory x, address actor, AH.Request memory p)
         public
         returns (bytes32)
     {
-        return _hydrate(x, actor, p, true, new T.EconomicsConsent[](0));
+        return
+            _hydrate(x, actor, p, true, new T.EconomicsConsent[](0), new RH.AttestationInput[](0));
     }
 
     function hydrateWithEconomics(D.CoordinatorContext memory x, address actor, EH.Request memory p)
@@ -62,7 +71,20 @@ library StreamArtistAuthorityHydrationOperations {
         returns (bytes32)
     {
         if (p.economics.length == 0 || p.economics.length > 128) revert T.UnsupportedProfile();
-        return _hydrate(x, actor, p.authority, true, p.economics);
+        return _hydrate(x, actor, p.authority, true, p.economics, new RH.AttestationInput[](0));
+    }
+
+    function hydrateWithReadiness(D.CoordinatorContext memory x, address actor, RH.Request memory p)
+        public
+        returns (bytes32)
+    {
+        if (
+            p.attestations.length == 0 || p.attestations.length > 128
+                || p.economics.economics.length == 0 || p.economics.economics.length > 128
+        ) revert T.UnsupportedProfile();
+        return _hydrate(
+            x, actor, p.economics.authority, true, p.economics.economics, p.attestations
+        );
     }
 
     function _hydrate(
@@ -70,11 +92,13 @@ library StreamArtistAuthorityHydrationOperations {
         address actor,
         AH.Request memory p,
         bool includePayout,
-        T.EconomicsConsent[] memory economics
+        T.EconomicsConsent[] memory economics,
+        RH.AttestationInput[] memory attestations
     ) private returns (bytes32 value) {
-        bytes32 profile = economics.length != 0
-            ? ECONOMICS_PROFILE
-            : includePayout ? PAYOUT_PROFILE : PROFILE;
+        bool readiness = attestations.length != 0;
+        bytes32 profile = readiness
+            ? READINESS_PROFILE
+            : economics.length != 0 ? ECONOMICS_PROFILE : includePayout ? PAYOUT_PROFILE : PROFILE;
         if (
             p.artistId == 0 || p.collectionId == 0 || p.bindingIndex != 0 || p.policies.length > 128
         ) revert T.UnsupportedProfile();
@@ -110,6 +134,7 @@ library StreamArtistAuthorityHydrationOperations {
         uint256 total;
         uint256 revocations;
         uint256 payoutCount;
+        uint256 contentCount;
         for (uint256 i; i < 7; ++i) {
             before_[i] = IStreamArtistOwner(x.suite.owners[i]).ownerStateSnapshotV2();
             if (
@@ -132,11 +157,18 @@ library StreamArtistAuthorityHydrationOperations {
                 revocations = count - 1;
             } else if (i == 3) {
                 if (count != 1) revert T.UnsupportedProfile();
+            } else if (i == 4 && readiness) {
+                if (count != attestations.length) revert T.InvalidRecord();
             } else if (i == 5 && includePayout) {
                 if (count == 0) revert T.UnsupportedProfile();
                 payoutCount = count;
             } else if (i == 6) {
-                if (count != p.policies.length + economics.length) revert T.InvalidRecord();
+                if (readiness) {
+                    if (count <= p.policies.length + economics.length) revert T.InvalidRecord();
+                    contentCount = count - p.policies.length - economics.length;
+                } else if (count != p.policies.length + economics.length) {
+                    revert T.InvalidRecord();
+                }
             } else if (count != 0) {
                 revert T.UnsupportedProfile();
             }
@@ -152,6 +184,9 @@ library StreamArtistAuthorityHydrationOperations {
                     IStreamArtistNativeReceipts(source.owners[i]).artistNativeReceiptAt(j);
                 uint16 op = i == 0 ? 1 : i == 2 ? (j == 0 ? 1 : 54) : i == 3 ? 2 : i == 5 ? 18 : 14;
                 if (i == 6 && economics.length != 0 && r.operation == 15) op = 15;
+                if (readiness && i == 4) op = 24;
+                if (readiness && i == 6 && (r.operation == 52 || r.operation == 17)) op =
+                r.operation;
                 if (
                     r.operation != op || r.artistId != p.artistId
                         || r.collectionId != (i == 2 || i == 5 ? 0 : p.collectionId)
@@ -164,33 +199,51 @@ library StreamArtistAuthorityHydrationOperations {
             uint64 expectedRevision = i == 0
                 ? 2
                 : i == 2
-                    ? uint64(3 + p.policies.length + economics.length + revocations + payoutCount)
+                    ? uint64(
+                        3 + p.policies.length + economics.length + revocations + payoutCount
+                            + contentCount + attestations.length
+                    )
                     : i == 3
                         ? 1
                         : i == 4
-                            ? 2
+                            ? uint64(2 + attestations.length)
                             : i == 5
                                 ? uint64(payoutCount)
-                                : i == 6 ? uint64(p.policies.length + economics.length) : 0;
+                                : i == 6
+                                    ? uint64(p.policies.length + economics.length + contentCount)
+                                    : 0;
             if (p.expectedSource[i].ownerState.revision != expectedRevision) {
                 revert T.UnsupportedProfile();
             }
         }
         for (uint256 i; i < 7; ++i) {
             data[i] = _guards(source, sourceCoordinator, i, p);
-            data[i].typedState = i == 6 && economics.length != 0
-                ? IStreamArtistEconomicsAuthorityHydrationOwner(source.owners[i])
-                    .authorityEconomicsHydrationState(q, economics)
-                : IStreamArtistAuthorityHydrationOwner(source.owners[i]).authorityHydrationState(q);
+            data[i].typedState = readiness && i == 4
+                ? IStreamArtistReadinessAttributionOwner(source.owners[i])
+                    .authorityAttestationHydrationState(q, attestations)
+                : readiness && i == 6
+                    ? IStreamArtistReadinessConsentOwner(source.owners[i])
+                        .authorityReadinessHydrationState(q, economics)
+                    : i == 6 && economics.length != 0
+                        ? IStreamArtistEconomicsAuthorityHydrationOwner(source.owners[i])
+                            .authorityEconomicsHydrationState(q, economics)
+                        : IStreamArtistAuthorityHydrationOwner(source.owners[i])
+                            .authorityHydrationState(q);
         }
         (, uint64 ac) = IStreamArtistHistory(prior).artistHistoryLane(1, p.artistId);
         (, uint64 cc) = IStreamArtistHistory(prior).artistHistoryLane(2, bytes32(p.collectionId));
         if (ac != artistCount || cc != collectionCount) revert T.InvalidRecord();
+        bytes memory economicsRaw = readiness
+            ? StreamArtistContentHydration.decode(data[6].typedState).economics
+            : data[6].typedState;
         bytes32[] memory policyRecords = economics.length == 0
             ? abi.decode(data[6].typedState, (bytes32[]))
-            : StreamArtistEconomicsHydration.decode(data[6].typedState).policies;
+            : StreamArtistEconomicsHydration.decode(economicsRaw).policies;
         _facts(q, data, source, policyRecords);
-        if (economics.length != 0) _economicsFacts(q, data, source, economics);
+        if (economics.length != 0) {
+            _economicsFacts(q, data, source, economics, economicsRaw, readiness);
+        }
+        if (readiness) StreamArtistReadinessHydrationFacts.check(q, data, source, attestations);
         if (includePayout) _payoutFacts(q, data, source);
         value = keccak256(
             abi.encode(
@@ -459,9 +512,11 @@ library StreamArtistAuthorityHydrationOperations {
         AH.Query memory q,
         AH.OwnerData[7] memory data,
         T.SuiteConfiguration memory source,
-        T.EconomicsConsent[] memory terms
+        T.EconomicsConsent[] memory terms,
+        bytes memory economicsRaw,
+        bool readiness
     ) private view {
-        EH.Bundle memory b = StreamArtistEconomicsHydration.decode(data[6].typedState);
+        EH.Bundle memory b = StreamArtistEconomicsHydration.decode(economicsRaw);
         if (b.records.length != terms.length) revert T.InvalidRecord();
         uint256 index;
         uint256 policyCount;
@@ -473,6 +528,7 @@ library StreamArtistAuthorityHydrationOperations {
                 ++policyCount;
                 continue;
             }
+            if (readiness && (native_.operation == 52 || native_.operation == 17)) continue;
             if (native_.operation != 15 || index >= terms.length) revert T.InvalidRecord();
             EH.Row memory r = b.records[index];
             T.EconomicsConsent memory p = terms[index++];

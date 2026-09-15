@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAttestationHydration.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 import "./StreamArtistAttributionBindingMutation.sol";
 import "./StreamArtistAttributionReadEncoding.sol";
@@ -675,7 +676,24 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         return abi.encode(a);
     }
 
+    function authorityAttestationHydrationState(
+        AH.Query calldata q,
+        StreamArtistReadinessHydrationTypes.AttestationInput[] calldata inputs
+    ) external view returns (bytes memory) {
+        return
+            StreamArtistAttestationHydration.exportState(
+                _attestationStore(), _environment(), q, inputs
+            );
+    }
+
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
+        if (StreamArtistAttestationHydration.isState(p.typedState)) {
+            if (p.nonces.length != 0) revert T.InvalidRecord();
+            StreamArtistAttestationHydration.importState(
+                _attestationStore(), _environment(), q, p.typedState
+            );
+            return;
+        }
         if (_attributions[q.collectionId].generation != 0 || p.nonces.length != 0) {
             revert T.InvalidRecord();
         }

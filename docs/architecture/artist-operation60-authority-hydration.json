@@ -75,6 +75,38 @@
         "later imported generations"
       ],
       "validation": "source/ABI only; native, sizes and capacity pending"
+    },
+    {
+      "profile": "6529STREAM_ARTIST_LIVING_READINESS_HYDRATION_V1",
+      "write": "hydrateArtistAuthorityWithReadiness",
+      "coordinator": "coordinateHydrateArtistAuthorityWithReadiness",
+      "typedInterface": "smart-contracts/interfaces/stream/artist/IStreamArtistReadinessAuthorityHydration.sol",
+      "additionalOriginalOperations": [
+        18,
+        15,
+        52,
+        17,
+        24
+      ],
+      "attestationKinds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        9,
+        10
+      ],
+      "consumer": "complete original direct content/ratification/attestation records and latest heads; old deployment approval stays historical; fresh successor op24 then original mint-consent read",
+      "exclusions": [
+        "detached publication7/8",
+        "collaborators/delegations/corrections",
+        "authority transitions",
+        "provisional payouts",
+        "later imported generations"
+      ],
+      "validation": "six authored actual source/successor/Safe/Archive cases; ABI only, native/size/capacity/current-Core pending"
     }
   ]
 }

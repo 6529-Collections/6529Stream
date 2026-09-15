@@ -91,3 +91,19 @@ keep the baseline and payout-only selectors unchanged. Delegated/corrected and
 authority-transition histories remain separate completeness obligations. See the
 [economics profile guide](../guides/artist-economics-authority-hydration.md) for
 consumer semantics and source-only validation limits.
+
+## Collection readiness profile
+
+`hydrateArtistAuthorityWithReadiness` extends the complete direct living economics
+profile with original operation-52 ratifications, operation-17 content consents
+and direct operation-24 attestations for kinds 1–6/9/10. Fixed workers preserve
+all retained records/bytes/classes/associations and rebuild latest maps in source
+receipt order. Original attestation terms and nonce must independently reproduce
+the actual source-domain record hash. The original registry remains part of old
+deployment evidence; the successor still requires a fresh original op24 approval
+of its own deployment before the full mint-consent read succeeds. Source content
+hosts retain their original one-use consumption guards. No authority, content
+mutation or deployment approval is inferred merely from a lane proof. Detached
+publication, collaborator and advanced authority profiles remain distinct.
+See the [readiness profile guide](../guides/artist-readiness-authority-hydration.md)
+for exact source boundaries and pending runtime/capacity validation.

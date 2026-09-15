@@ -983,8 +983,17 @@ contract StreamArtistOnboardingCoordinator is
         address actor,
         StreamArtistEconomicsHydrationTypes.Request calldata p
     ) external operation returns (bytes32) {
+        return StreamArtistAuthorityHydrationOperations.hydrateWithEconomics(
+            _economicContext(), actor, p
+        );
+    }
+
+    function coordinateHydrateArtistAuthorityWithReadiness(
+        address actor,
+        StreamArtistReadinessHydrationTypes.Request calldata p
+    ) external operation returns (bytes32) {
         return
-            StreamArtistAuthorityHydrationOperations.hydrateWithEconomics(
+            StreamArtistAuthorityHydrationOperations.hydrateWithReadiness(
                 _economicContext(), actor, p
             );
     }

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistContentHydration.sol";
 import "./StreamArtistEconomicsHydration.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 
@@ -494,7 +495,41 @@ contract StreamArtistConsentFinalityLifecycle is
         );
     }
 
+    function authorityReadinessHydrationState(
+        AH.Query calldata q,
+        T.EconomicsConsent[] calldata economics
+    ) external view returns (bytes memory) {
+        bytes memory inner =
+            StreamArtistEconomicsHydration.exportState(
+                _policies,
+                _economics,
+                _associatedEconomicsRecords,
+                _economicsAssociations,
+                _recordDelegation,
+                q,
+                economics
+            );
+        return StreamArtistContentHydration.exportState(
+            _ratifications, _ratificationRecords, _contentConsents, _latestContentConsent, q, inner
+        );
+    }
+
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
+        if (StreamArtistContentHydration.isState(p.typedState)) {
+            if (p.nonces.length != 0) revert T.InvalidRecord();
+            bytes memory inner = StreamArtistContentHydration.importState(
+                _ratifications,
+                _ratificationRecords,
+                _contentConsents,
+                _latestContentConsent,
+                q,
+                p.typedState
+            );
+            StreamArtistEconomicsHydration.importState(
+                _policies, _economics, _associatedEconomicsRecords, _economicsAssociations, q, inner
+            );
+            return;
+        }
         if (StreamArtistEconomicsHydration.isState(p.typedState)) {
             if (p.nonces.length != 0) revert T.InvalidRecord();
             StreamArtistEconomicsHydration.importState(
