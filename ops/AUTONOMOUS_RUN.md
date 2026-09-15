@@ -18,7 +18,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Latest integrated 6f31d497: Artist history and typed living/payout/economics hydration, native surplus/credit export, actual museum preservation/RIGHTS capture. Fresh entropy passes 100 cases; complete 1,735-source ABI/type check passes. Combined Artist native acceptance is pending. Immutable RC1 remains 569bf87f1fa808787d324f6e1582924b5ccf1d40. |
+| Source checkpoint | Integrated through 0f80e00a: content/readiness hydration, native surplus operator and museum activity export; fixed Artist/Resolver size repairs. The first combined Artist run failed setup on oversized deployment, with zero selected behavior cases executed. Owner accumulator five-case/256-input checks and museum 32-case/offline replay checks pass. All original oversizes have corrected individual measurements; the complete 1,767-source type check passes at 5ed14ff9. The frozen 737-source size preflight passes all 50 selected products and its Artist native run is active. Metadata native passes 22/23; callback gas and a 270-byte host oversize remain open. Immutable RC1 remains 569bf87f1fa808787d324f6e1582924b5ccf1d40. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -37,10 +37,10 @@ pending checks. The immutable RC1 remains the released baseline.
 
 | Owner | Implementation batch |
 | --- | --- |
-| Integrator | Fresh entropy: 100 passes, eight 256-input properties, all 15 products fit. Combined Artist native run active; entropy client/Safe helpers pass within 137 client tests. Next entropy finding/historical-host seams and shared genesis/operator acceptance. |
-| Artist builder | History/checkpoints and complete living/payout/economics hydration integrated and source-reviewed. Building content/attestation hydration while the frozen native cohort runs. |
-| Revenue builder | Six-host surplus and complete credit export integrated and reviewed. Building the saved delayed-governance surplus operator workflow; native acceptance remains pending. |
-| Fourth engineer | Actual preservation and RIGHTS capture integrated; 21 root capture tests and offline rights replay pass. Building Linked Art preservation activities over PREMIS evidence. |
+| Integrator | Shared Artist/Registry/Coordinator size repairs integrated; owner accumulator five cases plus 256 fuzz inputs pass. Complete 1,767-source type check passes; 737-source size preflight passes all 50 selected products and the eight-suite Artist native run is active. |
+| Artist builder | Readiness hydration and final size split integrated. Building complete original publication-attestation history hydration while root validates the frozen Artist capture. |
+| Revenue builder | Attribution/Consent size repairs integrated. Resumable inventory-opening client recipe integrated and independently reviewed; all 150 client tests pass, including 13 new cases. Prototyping exact-artifact test deployment to reduce repeated Artist creation-bytecode compilation. |
+| Fourth engineer | Museum activity graph integrated, 32 root tests and actual package replay pass. Metadata successor-consumption bridge integrated after Router correction; 22/23 focused cases pass; repairing the actual 400k callback budget failure and host oversize, with cold-call acceptance pending. |
 
 Comprehensive current-stack/Safe integration, fuzz and stateful campaigns, gas
 conformance, complete genesis inventory, CI and matching new testnet evidence
@@ -520,8 +520,8 @@ not complete that join.
 
 | Owner | Next deliverable |
 | --- | --- |
-| Integrator | Fresh entropy: 100 passes, eight 256-input properties, all 15 products fit. Combined Artist native run active; entropy client/Safe helpers pass within 137 client tests. Next entropy finding/historical-host seams and shared genesis/operator acceptance. |
-| Artist builder | History/checkpoints and complete living/payout/economics hydration integrated and source-reviewed. Building content/attestation hydration while the frozen native cohort runs. |
+| Integrator | Shared Artist/Registry/Coordinator size repairs integrated; owner accumulator five cases plus 256 fuzz inputs pass. Complete 1,767-source type check passes; 737-source size preflight passes all 50 selected products and the eight-suite Artist native run is active. |
+| Artist builder | Readiness hydration and final size split integrated. Building complete original publication-attestation history hydration while root validates the frozen Artist capture. |
 | Preservation builder | External bulk archives, runnable reference render, original publication and current finality consumption |
 | Independent reviewer | Challenge exact implementations, real-contract composition and integration evidence |
 
@@ -697,7 +697,7 @@ contract call, including owner actions, payments, NFT custody and reads.
 
 | Lane | Branch | Current deliverable |
 | --- | --- | --- |
-| Integrator | Fresh entropy: 100 passes, eight 256-input properties, all 15 products fit. Combined Artist native run active; entropy client/Safe helpers pass within 137 client tests. Next entropy finding/historical-host seams and shared genesis/operator acceptance. |
+| Integrator | Shared Artist/Registry/Coordinator size repairs integrated; owner accumulator five cases plus 256 fuzz inputs pass. Complete 1,767-source type check passes; 737-source size preflight passes all 50 selected products and the eight-suite Artist native run is active. |
 | Artist | `codex/v1-artist-authority` | Confirmation303 and separate default4 integrated; actual finality and recovery operations 22/23 |
 | Revenue | `codex/v1-revenue` | Museum LIDO202 integrated; actual local-EVM chain-source adapter, remaining formats and institutional acceptance |
 | Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |

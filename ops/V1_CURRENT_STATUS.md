@@ -22,6 +22,61 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 | Developer client and operator | RC1 client remains usable. Compiler-selected typed clients are integrated as `e409c134`, with 52 passing tests, independent review and exact generation/typechecking against accepted native output. Earlier local graph deployment completed 530 transactions within the deployment ceiling. | Four explicit current native auction/bid/custody signing helpers are integrated (`db3fca94`), with 59 client tests and independently reproduced actual-getter encoding vectors. Complete workflow examples and latest graph activation remain. The deployment rehearsal records `productsActivated=false`; it is not a full product launch. |
 | Candidate and testnet | Immutable supported RC1 and its Sepolia evidence are complete. | Expanded full-v1 implementation, complete Safe call inventory, required fuzz/stateful campaigns, all 37 genesis roles, gas conformance, full CI, new source freeze and matching testnet evidence remain. |
 
+## Artist deployment repairs and continuing feature work
+
+The first combined Artist run exposed deployment-size failures before behavior
+could run. The original capture is retained. Fixed helpers now carry the
+existing Registry encodings, Coordinator previews and common owner accumulators
+(89bbf57f, 48ce2057), Attribution/Consent transports (f81d3107), rotation
+acceptance (1e16a461) and Resolver identity reads (42cf2620). Public host
+selectors, storage and authorization semantics are preserved. Independent
+source review is clear for the completed batches; combined runtime validation
+is still required.
+
+Selected measurements put the Coordinator at 22,944 runtime bytes, Registry at
+23,914, Registry reader at 22,648, its deployment helper at 24,136, Attribution
+at 23,668, Consent writer at 22,668, rotation state at 22,611 and Resolver at
+23,248. These are individual compiler captures, not a completed latest-graph
+deployment. Identity/hydration/Estate extraction is integrated as 5ed14ff9:
+Identity measures 21,032 bytes, Estate 21,226, and its deployment helper 23,237.
+Every originally oversized product has a corrected individual measurement.
+The complete 1,767-source ABI/type check passes at 5ed14ff9. The exact 737-source
+eight-suite capture passes a combined size preflight: all 50 changed or
+near-limit production products fit, with no compiler errors. Its native run
+is now compiling. This capture predates the later Metadata bridge below.
+
+The integrator reran the existing owner accumulator suite: all five cases pass,
+including 256 fuzz inputs, original flat-word state/record hash oracles, actual
+collaborator acceptance events and replay rejection. All 522 original ABI
+entries across Owner, Coordinator, Registry and Registry reader remain exact,
+as do their recursive storage layouts. This focused result does not replace
+the pending history, hydration, recovery and joined current-Core tests.
+
+The source batch also includes complete content/readiness attestation hydration
+(85980f21) and the saved native-surplus governance workflow (d0d460e9); their
+new scenarios remain native-pending. Recorded PREMIS activity graph export
+(bb17874a) passes all 32 graph/event tests on integration, and its retained
+actual package independently verifies offline with the original manifest hash.
+
+The Metadata successor-consumption bridge is integrated as f6d66d8b. It retains
+the original Metadata authorization-use map and requires current selection,
+sealed immediate lineage and matching complete seven-owner hydration. Review
+corrected a Router/collection-record-host conflation before integration. Eight
+authored cases include the actual Artist publication candidate read at its
+original 400,000-gas budget. The first frozen run passes 22 of 23 cases, including
+all 15 originals, a 256-input property and Safe rollback/retry. The new callback
+case fails even with warm state: repeated lineage reads exhaust the existing
+budget before the downstream document read. Metadata host runtime is also
+24,846 bytes, 270 above the deployment limit. Both are open repairs; cold-call
+acceptance is required, and no gas limit has been raised.
+
+The independently reviewed resumable Safe inventory-opening client workflow
+is integrated as 0f80e00a. All 150 client tests, generation, build and negative
+type checks pass, including 13 new workflow cases. The complete 1,769-source
+Solidity ABI/type check also passes at 0f80e00a. Builders continue original
+publication-attestation hydration and a bounded improvement to Artist test
+compilation time. The immutable RC1 and Sepolia instance remain unchanged.
+
 ## History, credit export and actual rights capture
 
 Ordered fresh entropy recovery is integrated as c5a7d0c4, with explicit import
@@ -41,10 +96,12 @@ operation 60 adds complete original-living hydration (d0664b91), payout history
 (5d84075f) and direct economics history (7439f723). Independent source reviews
 are clear. These exact profiles preserve source records, complete replay/nonce
 guards and atomic seven-owner activation. They do not accept other histories
-implicitly. The combined 708-source Artist native cohort is frozen and running:
-15 hydration cases plus history, Cause, checkpoint and entropy-consent
-regressions. Native behavior, sizes, capacity and actual current-Core cutover
-remain unaccepted. Content/attestation and other full-v1 histories continue.
+implicitly. The combined 708-source Artist native cohort completed compilation
+but all seven suites failed during setup: the fixed extension factory rejected
+an oversized Registry reader. No selected behavior test executed. Fourteen
+production products exceeded deployment limits in that source capture.
+The size repairs below precede the next combined run; actual current-Core
+cutover and complete history-profile acceptance remain outstanding.
 
 Six-host governed native surplus recovery is integrated as 85fa1d8b, followed
 by complete credit discovery/export in 4c7887a4. Original locked liabilities,
