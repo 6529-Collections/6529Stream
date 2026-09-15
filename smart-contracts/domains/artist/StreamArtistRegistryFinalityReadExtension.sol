@@ -1,5 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/entropy/IStreamEntropyArtistUnavailability.sol";
+import {
+    StreamArtistEntropyUnavailabilityTypes as EU,
+    IStreamArtistEntropyUnavailability,
+    IStreamArtistEntropyUnavailabilityOwner,
+    IStreamArtistEntropyUnavailabilityCoordinator
+} from "../../interfaces/stream/artist/IStreamArtistEntropyUnavailability.sol";
+
 import {
     IStreamArtistRecoveryActionOwner,
     IStreamArtistRecoveryActionCoordinator
@@ -59,6 +67,34 @@ contract StreamArtistRegistryFinalityReadExtension {
     {
         return IStreamArtistRecoveryActionOwner(_contentSuite().owners[2])
             .identityRecoveryActionState(artistId, actionId);
+    }
+
+    function entropyUnavailabilityFindingRecord(bytes32 hash)
+        external
+        view
+        onlyHost
+        returns (Recovery.FindingRecord memory, EU.Admission memory)
+    {
+        return IStreamArtistEntropyUnavailabilityOwner(_contentSuite().owners[2])
+            .entropyUnavailabilityFindingRecord(hash);
+    }
+
+    function entropyUnavailabilityFindingContext(
+        Recovery.FindingRequest calldata request,
+        EU.Target calldata target
+    ) external view onlyHost returns (U.Context memory) {
+        return IStreamArtistEntropyUnavailabilityCoordinator(operationCoordinator)
+            .prepareEntropyUnavailabilityFinding(request, target);
+    }
+
+    function verifyEntropyRecoveryUnavailability(
+        address coordinator,
+        IStreamEntropyFreshRecovery.RecoveryInput calldata input,
+        bytes32 intentHash,
+        bytes32 expectedFinding
+    ) external view onlyHost returns (bool, bytes32, bytes32, uint64) {
+        return IStreamArtistEntropyUnavailabilityCoordinator(operationCoordinator)
+            .verifyEntropyRecoveryUnavailability(coordinator, input, intentHash, expectedFinding);
     }
 
     function unavailabilityFindingRecord(bytes32 hash)

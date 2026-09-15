@@ -57,8 +57,10 @@ contract's proposed content-state hash. Nonempty signatures remain opaque EOA
 or ERC-1271 bytes. Integer fields use `bigint`, including nonces and native value.
 
 For a scope incident use `{ kind: "scope", scopeId }`. Declaration alone never
-authorizes another random draw. The unavailability-finding alternative remains
-a separate pending contract feature.
+authorizes another random draw. The existing client helpers do not construct the
+[explicit finding profile](artist-entropy-unavailability.md); follow its separate
+operator sequence. Its new contract source and runtime validation are qualified
+in that guide.
 
 The offline `packages/stream-client/examples/current-entropy-recovery.mjs`
 example takes explicit JSON, with integer values represented as decimal strings,

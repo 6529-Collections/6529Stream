@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistEntropyUnavailabilityTypes as EU,
+    IStreamArtistEntropyUnavailability,
+    IStreamArtistEntropyUnavailabilityOwner,
+    IStreamArtistEntropyUnavailabilityCoordinator
+} from "../../interfaces/stream/artist/IStreamArtistEntropyUnavailability.sol";
+
 import "./StreamArtistIdentitySupplementalReads.sol";
 import "./StreamArtistIdentityHistoryMutation.sol";
 import "./StreamArtistIdentityHydration.sol";
@@ -128,6 +135,29 @@ contract StreamArtistIdentityAuthority is
 
     function storedPayloadAt(uint256 index) external view returns (address, bytes32, bytes32) {
         _forwardSupplementalRead();
+    }
+
+    function recordEntropyUnavailability(T.ActionContext calldata c, EU.Input calldata input)
+        external
+        returns (bytes32)
+    {
+        _forwardEstateWriter();
+    }
+
+    function entropyUnavailabilityFindingContext(EU.Input calldata input)
+        external
+        view
+        returns (U.Context memory)
+    {
+        _forwardIdentityRead();
+    }
+
+    function entropyUnavailabilityFindingRecord(bytes32 hash)
+        external
+        view
+        returns (Recovery.FindingRecord memory, EU.Admission memory)
+    {
+        _forwardIdentityRead();
     }
 
     function recordUnavailability(T.ActionContext calldata c, U.Input calldata p)

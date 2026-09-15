@@ -1,5 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/entropy/IStreamEntropyArtistUnavailability.sol";
+import {
+    StreamArtistEntropyUnavailabilityTypes as EU,
+    IStreamArtistEntropyUnavailability,
+    IStreamArtistEntropyUnavailabilityOwner,
+    IStreamArtistEntropyUnavailabilityCoordinator
+} from "../../interfaces/stream/artist/IStreamArtistEntropyUnavailability.sol";
+
 import "../../interfaces/stream/artist/IStreamArtistPublicationAuthorityHydration.sol";
 import { StreamArtistRegistryInterfaces } from "./StreamArtistRegistryInterfaces.sol";
 import "../../interfaces/stream/artist/IStreamArtistReadinessAuthorityHydration.sol";
@@ -131,6 +139,37 @@ contract StreamArtistOnboardingRegistry is
     address public immutable override archivalCoverage;
     bytes32 public immutable override archivalCoverageCodeHash;
     bytes32 public immutable override archivalCoverageConfigurationHash;
+
+    function recordEntropyUnavailabilityFinding(
+        Recovery.FindingRequest calldata request,
+        EU.Target calldata target
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function entropyUnavailabilityFindingContext(
+        Recovery.FindingRequest calldata request,
+        EU.Target calldata target
+    ) external view returns (U.Context memory) {
+        _forwardFinalityRead();
+    }
+
+    function entropyUnavailabilityFindingRecord(bytes32 hash)
+        external
+        view
+        returns (Recovery.FindingRecord memory, EU.Admission memory)
+    {
+        _forwardFinalityRead();
+    }
+
+    function verifyEntropyRecoveryUnavailability(
+        address coordinator,
+        IStreamEntropyFreshRecovery.RecoveryInput calldata input,
+        bytes32 intentHash,
+        bytes32 expectedFinding
+    ) external view returns (bool, bytes32, bytes32, uint64) {
+        _forwardFinalityRead();
+    }
 
     function recordUnavailabilityFinding(
         Recovery.FindingRequest calldata p,

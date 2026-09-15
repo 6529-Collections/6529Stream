@@ -42,8 +42,9 @@ The selected Artist registry and its runtime/Core binding are checked directly.
 A missing or failed attribution read is not an unbound collection. Only an
 explicit all-zero unbound attribution bypasses Artist consent. Other states
 require exact original host/content evidence, consumed once in the entropy
-host. The unavailability-finding alternative still needs its entropy-specific
-intent integration and remains unavailable in this implementation.
+host. The additive [Artist-unavailability profile](artist-entropy-unavailability.md)
+uses its own exact entropy intent, original finding and notice; its source and
+validation state are reported separately from this consent cohort.
 
 ## State and evidence
 
@@ -93,8 +94,8 @@ provider output discovered after an incident, fee ownership, rollback and retry,
 ordered attempts, maximum attempts, ancestor arbitration, actual threshold Safe
 execution and finalized-seed fuzzing. The cohort uses explicit typed Core,
 Artist, role and provider fixtures with the actual coordinator and fixed workers.
-Actual joined Artist/Executor composition, the unavailability finding branch,
-maximum-depth gas, complete current-stack validation and new testnet evidence
+Actual joined Artist/Executor composition, runtime validation of the new
+unavailability profile, maximum-depth gas, complete current-stack validation and new testnet evidence
 remain required. Runtime and size results are recorded with their source batch.
 
 The final focused run passes all 100 cases across ten suites, including the
@@ -105,7 +106,7 @@ All 15 production products fit deployment limits; coordinator runtime is
 24,522 bytes. Eight properties each pass 256 inputs with seed `0x6529`. The first
 run passed 70 cases but exceeded the coordinator runtime limit; the fixed
 callback worker and quote encoder resolve that size failure. Complete current
-Artist/Executor integration and the pending finding branch remain separate.
+Artist/Executor integration and the new finding-profile validation remain separate.
 
 The complete 1,719-source ABI/type check found transitive import aliases in the
 new worker boundary. Explicit named imports resolve them. A separate selected

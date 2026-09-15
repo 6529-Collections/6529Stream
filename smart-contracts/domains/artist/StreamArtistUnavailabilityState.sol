@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistAuthorityCheckpoint.sol";
+import "./StreamArtistEntropyUnavailabilityStore.sol";
 
 import "./StreamArtistRecoveryHashes.sol";
 import {
@@ -230,7 +231,9 @@ library StreamArtistUnavailabilityState {
         Recovery.FindingRecord storage r = s.records[hash];
         return r.recordHash != bytes32(0) && b.accepted && b.artistId == r.terms.artistId
             && b.generation == r.bindingGeneration && b.bindingHash == r.bindingHash
-            && s.admissions[hash].activityEpoch == s.activityEpoch[b.artistId];
+            && StreamArtistEntropyUnavailabilityStore.activityEpoch(
+                hash, s.admissions[hash].activityEpoch
+            ) == s.activityEpoch[b.artistId];
     }
 
     /// @notice Called only after a successfully authenticated CURRENT artist-authority action.

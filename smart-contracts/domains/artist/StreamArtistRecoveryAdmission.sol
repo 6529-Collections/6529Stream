@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/entropy/IStreamEntropyArtistUnavailability.sol";
 
 import "../../interfaces/stream/artist/IStreamArtistUnavailability.sol";
+import {
+    StreamArtistEntropyUnavailabilityTypes as EU,
+    IStreamArtistEntropyUnavailabilityOwner
+} from "../../interfaces/stream/artist/IStreamArtistEntropyUnavailability.sol";
 import {
     StreamArtistRecoveryApprovalTypes as Approval
 } from "../../interfaces/stream/artist/StreamArtistRecoveryApprovalTypes.sol";
@@ -63,19 +68,8 @@ library StreamArtistRecoveryAdmission {
         p.input.recoveryExpiresAfter = uint64(_word(action, 11));
         // The target and selector in governanceAction index only the first batch call.
         // Actual use must match this action's executing per-call context in the companion.
-        bytes32 head = IStreamArtistUnavailabilityOwner(suite.owners[2])
-            .latestUnavailabilityFinding(request.artistId, request.collectionId);
-        if (head != 0) {
-            (, U.Admission memory previous) =
-                IStreamArtistUnavailabilityOwner(suite.owners[2]).unavailabilityFindingRecord(head);
-            bytes memory oldAction =
-                _action(p.executor, previous.target.recoveryActionId, p.readGas);
-            uint256 status = _word(oldAction, 1);
-            p.input.priorRecoveryTerminal = status == uint256(GovernanceActionStatus.CANCELLED)
-                || status == uint256(GovernanceActionStatus.EXECUTED)
-                || status == uint256(GovernanceActionStatus.EXPIRED)
-                || status == uint256(GovernanceActionStatus.VETOED);
-        }
+        p.input.priorRecoveryTerminal =
+            priorTerminal(suite, p.input.binding_, request.collectionId, p.executor, p.readGas);
         p.context_ =
             IStreamArtistUnavailabilityOwner(suite.owners[2]).unavailabilityFindingContext(p.input);
         uint256 noticeEnd = block.timestamp + p.context_.noticeSeconds;
@@ -90,26 +84,43 @@ library StreamArtistRecoveryAdmission {
         view
         returns (Contest.GovernanceWitness memory g)
     {
-        _roles(suite, p.executor, p.readGas);
-        bytes memory current = _fixed(
-            p.executor, abi.encodeCall(IStreamGovernanceReads.currentAction, ()), 192, p.readGas
+        return findingGovernance(
+            suite,
+            p.executor,
+            p.readGas,
+            p.input.terms.reasonHash,
+            p.context_,
+            p.input.target.recoveryActionId
         );
+    }
+
+    /// @notice Shared original class2 Arbiter witness; entropy has no separate governance recovery action.
+    function findingGovernance(
+        T.SuiteConfiguration memory suite,
+        address executor,
+        uint256 cap,
+        bytes32 reasonHash,
+        U.Context memory context_,
+        bytes32 excludedAction
+    ) public view returns (Contest.GovernanceWitness memory g) {
+        _roles(suite, executor, cap);
+        bytes memory current =
+            _fixed(executor, abi.encodeCall(IStreamGovernanceReads.currentAction, ()), 192, cap);
         if (
             _word(current, 0) != 1 || _word(current, 1) == 0 || _word(current, 2) != 2
-                || bytes32(_word(current, 3)) != p.context_.scopeHash
-                || bytes32(_word(current, 4)) != p.context_.oldValueHash
-                || bytes32(_word(current, 5)) != p.context_.newValueHash
+                || bytes32(_word(current, 3)) != context_.scopeHash
+                || bytes32(_word(current, 4)) != context_.oldValueHash
+                || bytes32(_word(current, 5)) != context_.newValueHash
         ) revert Recovery.InvalidUnavailabilityFinding();
         g.actionId = bytes32(_word(current, 1));
         g.actionClass = 2;
-        g.scopeHash = p.context_.scopeHash;
-        g.oldValueHash = p.context_.oldValueHash;
-        g.newValueHash = p.context_.newValueHash;
-        bytes memory saved = _action(p.executor, g.actionId, p.readGas);
+        g.scopeHash = context_.scopeHash;
+        g.oldValueHash = context_.oldValueHash;
+        g.newValueHash = context_.newValueHash;
+        bytes memory saved = _action(executor, g.actionId, cap);
         if (
             _word(saved, 1) != uint256(GovernanceActionStatus.EXECUTED) || _word(saved, 2) != 2
-                || bytes32(_word(saved, 16)) != p.input.terms.reasonHash
-                || g.actionId == p.input.target.recoveryActionId
+                || bytes32(_word(saved, 16)) != reasonHash || g.actionId == excludedAction
         ) revert Recovery.InvalidUnavailabilityFinding();
         g.proposer = address(uint160(_word(saved, 12)));
         bytes32 role = keccak256("ROLE_ATTRIBUTION_ARBITER");
@@ -120,7 +131,7 @@ library StreamArtistRecoveryAdmission {
                             suite.roleRegistry,
                             abi.encodeCall(IStreamRoleRegistry.hasRole, (role, g.proposer)),
                             32,
-                            p.readGas
+                            cap
                         ),
                         0
                     ) != 1
@@ -129,7 +140,7 @@ library StreamArtistRecoveryAdmission {
             suite.roleRegistry,
             abi.encodeCall(IStreamRoleRegistry.roleMutationState, (role)),
             64,
-            p.readGas
+            cap
         );
         if (
             _word(mutation, 0) == 0 || _word(mutation, 1) == 0
@@ -139,6 +150,61 @@ library StreamArtistRecoveryAdmission {
         }
         g.roleMutationHash = bytes32(_word(mutation, 0));
         g.roleRevision = uint64(_word(mutation, 1));
+    }
+
+    function readCap(address registry) public view returns (uint256) {
+        return _cap(registry);
+    }
+
+    /// @notice Both profiles share the original latest/activity gate. Terminality belongs to the
+    /// actual target producer; a cancelled epoch never requires trusting a stale entropy host.
+    function priorTerminal(
+        T.SuiteConfiguration memory suite,
+        T.Binding memory binding_,
+        uint256 collectionId,
+        address executor,
+        uint256 cap
+    ) public view returns (bool) {
+        IStreamArtistUnavailabilityOwner owner = IStreamArtistUnavailabilityOwner(suite.owners[2]);
+        bytes32 head = owner.latestUnavailabilityFinding(binding_.artistId, collectionId);
+        return priorTerminalAt(suite, binding_, executor, cap, head);
+    }
+
+    function priorTerminalAt(
+        T.SuiteConfiguration memory suite,
+        T.Binding memory binding_,
+        address executor,
+        uint256 cap,
+        bytes32 head
+    ) public view returns (bool) {
+        if (head == 0) return false;
+        (, EU.Admission memory entropy) = IStreamArtistEntropyUnavailabilityOwner(suite.owners[2])
+            .entropyUnavailabilityFindingRecord(head);
+        if (entropy.target.coordinator != address(0)) {
+            if (!IStreamArtistUnavailabilityOwner(suite.owners[2])
+                    .unavailabilityFindingLive(head, binding_)) return false;
+            if (entropy.target.coordinator.codehash != entropy.coordinatorCodeHash) return false;
+            bytes memory raw = _fixed(
+                entropy.target.coordinator,
+                abi.encodeCall(
+                    IStreamEntropyArtistUnavailability.entropyRecoveryIntentTerminal,
+                    (entropy.target.recovery.oldRequestKey)
+                ),
+                32,
+                cap
+            );
+            uint256 terminal = _word(raw, 0);
+            if (terminal > 1) revert Recovery.InvalidUnavailabilityFinding();
+            return terminal == 1;
+        }
+        (, U.Admission memory previous) =
+            IStreamArtistUnavailabilityOwner(suite.owners[2]).unavailabilityFindingRecord(head);
+        bytes memory oldAction = _action(executor, previous.target.recoveryActionId, cap);
+        uint256 status = _word(oldAction, 1);
+        return status == uint256(GovernanceActionStatus.CANCELLED)
+            || status == uint256(GovernanceActionStatus.EXECUTED)
+            || status == uint256(GovernanceActionStatus.EXPIRED)
+            || status == uint256(GovernanceActionStatus.VETOED);
     }
 
     function verify(

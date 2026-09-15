@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamEntropyTerminalAdmission } from "./StreamEntropyTerminalAdmission.sol";
+import { StreamEntropySubjectReads } from "./StreamEntropySubjectReads.sol";
+import {
+    IStreamEntropyArtistUnavailability as EntropyU
+} from "../../interfaces/stream/entropy/IStreamEntropyArtistUnavailability.sol";
 
 import "../../interfaces/stream/core/IStreamCore.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyCoordinator.sol";
@@ -293,6 +298,7 @@ contract StreamEntropyCoordinator is
             || id == type(IStreamEntropyEpochs).interfaceId
             || id == type(IStreamEntropyIncidents).interfaceId
             || id == type(IStreamEntropyFreshRecovery).interfaceId
+            || id == type(EntropyU).interfaceId
             || id == type(IStreamEntropyCollectionRecovery).interfaceId
             || id == type(IStreamEntropyRecoveryPolicies).interfaceId
             || id == type(IStreamEntropyProviderLifecycle).interfaceId
@@ -392,7 +398,7 @@ contract StreamEntropyCoordinator is
         view
         returns (IStreamRevealFeeEscrow.CollectionRevealPolicy memory)
     {
-        return _revealPolicies[collectionId];
+        _subjectRead();
     }
 
     /// @inheritdoc IStreamEntropyFinalityPolicy
@@ -408,13 +414,14 @@ contract StreamEntropyCoordinator is
             bytes32 collectionSaltCommitment
         )
     {
-        return StreamEntropyCoordinatorReads.policy(
+        bytes memory encoded = StreamEntropyCoordinatorReads.policyEncoded(
             core,
             collectionId,
             collectionEntropyConfig[collectionId],
             _revealPolicies[collectionId],
             collectionProviderEpoch[collectionId]
         );
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function configureCollectionRevealPolicy(
@@ -786,15 +793,53 @@ contract StreamEntropyCoordinator is
         nonReentrant
         returns (bytes32 requestKey, uint256 providerRequestId)
     {
+        return _requestFreshWithEvidence(input, bytes32(0));
+    }
+
+    function requestFreshEntropyWithUnavailability(
+        RecoveryInput calldata input,
+        bytes32 findingRecordHash
+    ) external payable nonReentrant returns (bytes32 requestKey, uint256 providerRequestId) {
+        if (findingRecordHash == 0) revert FreshRecoveryArtistEvidenceUnavailable();
+        return _requestFreshWithEvidence(input, findingRecordHash);
+    }
+
+    function _requestFreshWithEvidence(RecoveryInput calldata input, bytes32 findingRecordHash)
+        private
+        returns (bytes32 requestKey, uint256 providerRequestId)
+    {
         if (!_hasRole(keccak256("ROLE_ENTROPY_INCIDENT_DECLARER"), msg.sender)) {
             revert Unauthorized(msg.sender);
         }
-        StreamEntropyRequestPlan.Plan memory p = StreamEntropyFreshRecovery.admit(
-            _recoveryEnvironment(), _subjects, requests, _requestPolicies, input
+        StreamEntropyRequestPlan.Plan memory p = StreamEntropyFreshRecovery.admitSelected(
+            _recoveryEnvironment(), _subjects, requests, _requestPolicies, input, findingRecordHash
         );
         Request storage old = requests[input.oldRequestKey];
         if (old.tokenId != 0) ++nonterminalTokenCount[_subjects[old.subjectKey].collectionId];
         return _submitRequest(old.subjectKey, old.tokenId, old.scopeId, p);
+    }
+
+    function artistEntropyRecoveryIntent(RecoveryInput calldata input)
+        external
+        view
+        returns (EntropyU.Intent memory)
+    {
+        bytes memory encoded = StreamEntropyFreshRecovery.intentEncoded(
+            _recoveryEnvironment(), _subjects, requests, _requestPolicies, msg.data[4:]
+        );
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
+    }
+
+    function entropyRecoveryIntentTerminal(bytes32 oldRequestKey) external view returns (bool) {
+        return StreamEntropyFreshRecovery.terminal(core, _subjects, requests, oldRequestKey);
+    }
+
+    function entropyUnavailabilityEvidence(bytes32 requestKey)
+        external
+        view
+        returns (bytes32, bytes32, uint64)
+    {
+        return StreamEntropyFreshRecovery.findingEvidence(requestKey);
     }
 
     function freshRecoveryTransition(RecoveryInput calldata input)
@@ -978,16 +1023,7 @@ contract StreamEntropyCoordinator is
     function markRequestStale(bytes32 requestKey) external onlyAuthority nonReentrant {
         Request storage request = requests[requestKey];
         Subject storage subject = _subjects[request.subjectKey];
-        if (subject.requestKey != requestKey) revert InvalidSubject(request.subjectKey);
-        if (subject.status != StreamEntropyStatus.REQUESTED) revert InvalidStatus(subject.status);
-        if (
-            block.number <= request.requestedAtBlock
-                || block.number - request.requestedAtBlock
-                    <= effectiveRequestTimeoutBlocks(subject.collectionId)
-        ) revert RequestNotExpired();
-        (, bytes32 boundKey,, bool received,) =
-            IStreamEntropyProvider(request.provider).providerResultStatus(request.providerRequestId);
-        if (boundKey != requestKey || received) revert ProviderOutputAlreadyReceived();
+        StreamEntropyTerminalAdmission.stale(request, subject, requestKey);
         _terminal(requestKey, subject, StreamEntropyStatus.STALE);
     }
 
@@ -995,14 +1031,7 @@ contract StreamEntropyCoordinator is
     function markRequestFailed(bytes32 requestKey) external onlyAuthority nonReentrant {
         Request storage request = requests[requestKey];
         Subject storage subject = _subjects[request.subjectKey];
-        if (subject.requestKey != requestKey) revert InvalidSubject(request.subjectKey);
-        if (subject.status != StreamEntropyStatus.REQUESTED) revert InvalidStatus(subject.status);
-        (StreamProviderResultStatus status, bytes32 boundKey,, bool received,) =
-            IStreamEntropyProvider(request.provider).providerResultStatus(request.providerRequestId);
-        if (
-            boundKey != requestKey || received
-                || status != StreamProviderResultStatus.TERMINAL_FAILED
-        ) revert ProviderFailureUnproven();
+        StreamEntropyTerminalAdmission.failed(request, subject, requestKey);
         _terminal(requestKey, subject, StreamEntropyStatus.FAILED);
     }
 
@@ -1033,8 +1062,7 @@ contract StreamEntropyCoordinator is
         override
         returns (bytes32 seed, bool finalized)
     {
-        Subject storage subject = _subjects[_tokenKey(tokenId)];
-        return (subject.seed, subject.status == StreamEntropyStatus.FINALIZED);
+        _subjectRead();
     }
 
     function tokenEntropyStatus(uint256 tokenId)
@@ -1061,31 +1089,7 @@ contract StreamEntropyCoordinator is
             uint16 requestAttempt
         )
     {
-        Subject storage subject = _subjects[_tokenKey(tokenId)];
-        if (subject.requestKey != 0) {
-            RequestPolicySnapshot storage policy = _requestPolicies[subject.requestKey];
-            return (
-                subject.status,
-                subject.seed,
-                policy.provider,
-                policy.providerEpoch,
-                policy.providerConfigHash,
-                subject.requestKey,
-                requests[subject.requestKey].providerRequestId,
-                policy.requestAttempt
-            );
-        }
-        CollectionConfig storage config = collectionEntropyConfig[subject.collectionId];
-        return (
-            subject.status,
-            subject.seed,
-            config.provider,
-            collectionProviderEpoch[subject.collectionId],
-            config.providerConfigHash,
-            bytes32(0),
-            0,
-            0
-        );
+        _subjectRead();
     }
 
     /// @inheritdoc IStreamEntropyEpochs
@@ -1095,16 +1099,29 @@ contract StreamEntropyCoordinator is
         override
         returns (RequestPolicySnapshot memory)
     {
-        return _requestPolicies[requestKey];
+        _subjectRead();
     }
 
     function scopeSeed(bytes32 scopeId) external view returns (bytes32 seed, bool finalized) {
-        Subject storage subject = _subjects[scopeId];
-        return (subject.seed, subject.status == StreamEntropyStatus.FINALIZED);
+        _subjectRead();
     }
 
     function scopeEntropy(bytes32 scopeId) external view returns (Subject memory) {
-        return _subjects[scopeId];
+        _subjectRead();
+    }
+
+    /// @dev Used only by the six external stored-read selectors, preserving their exact ABI.
+    function _subjectRead() private view {
+        bytes memory encoded = StreamEntropySubjectReads.read(
+            collectionEntropyConfig,
+            collectionProviderEpoch,
+            _subjects,
+            requests,
+            _requestPolicies,
+            _revealPolicies,
+            msg.data
+        );
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     /// @dev Only terminal read entrypoints use this fixed decoder. No mutation/guard cleanup is bypassed.

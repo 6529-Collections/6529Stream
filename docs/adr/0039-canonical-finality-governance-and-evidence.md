@@ -1693,3 +1693,37 @@ adjudication remain outside this bounded designated-successor increment.
 The [dormancy recovery guide](../guides/artist-dormancy-recovery.md) describes the
 eight authored regression cases and typecheck evidence. Native execution and
 integrated current-Core/Executor acceptance remain separate.
+## Explicit entropy unavailability intent profile
+
+On 15 September 2026 the integrator adopted an explicit entropy profile of
+original operation 23 for the AA-RECOVERY alternative required by EC-INCIDENT.
+The original Finality `Target`, authority, ten-word finding preimage, events,
+operation catalog and Finality consumer remain unchanged. No entropy request
+is described as a Finality record or a separately scheduled recovery action.
+
+The new Target names the actual current `ENTROPY_COORDINATOR`, complete original
+RecoveryInput, canonical host Intent hash and separate inability-evidence hash.
+The original FindingRequest evidence word must equal the versioned manifest
+commitment to chain, Artist registry, Core, entire Target/Intent and captured
+coordinator runtime. Thus the permanent original finding commits all new
+scope/journal/policy/provider/reason facts without a hash cycle. The supplemental
+Identity-owned namespace is never sufficient to retarget an old record.
+
+The existing class-2 Arbiter action records this exact finding context. Admission
+first requires the actual entropy incident and recovery block delay to have
+elapsed, then starts the ordinary immutable timestamp notice (default 90 days,
+floor 30 days). This conservative ordering makes the two clocks explicit; it
+does not pretend that entropy has a future scheduled governance recovery action.
+The original current-authority activity epoch and live association head govern
+both finding profiles, including post-notice and same-block cancellation.
+Original producer terminality, rather than a caller assertion, permits a new
+finding after successful recovery; every new intent receives its own full notice.
+
+The explicit entropy consumer rebuilds all host facts and current Artist proof,
+checks the notice and consumes the finding in the original entropy evidence-use
+map. Normal op17 consent and original Finality verification cannot accept this
+profile. Existing entropy evidence/receipt/request/fee/callback domains remain;
+a separate schema-1 evidence companion identifies the finding, intent and notice.
+Fixed workers retain the existing host and Identity layouts. The full caller
+recipe and source/runtime boundary are in
+[the integration guide](../integrations/artist-entropy-unavailability.md).

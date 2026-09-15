@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamEntropyUnavailabilityEvidence.sol";
+import {
+    StreamArtistEntropyUnavailabilityTypes as EU
+} from "../../interfaces/stream/artist/IStreamArtistEntropyUnavailability.sol";
+import {
+    IStreamEntropyArtistUnavailability as EntropyU
+} from "../../interfaces/stream/entropy/IStreamEntropyArtistUnavailability.sol";
 import "../../interfaces/stream/core/IStreamCore.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyEpochs.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyProvider.sol";
@@ -22,11 +29,18 @@ library StreamEntropyFreshRecovery {
     bytes32 private constant FAMILY = keccak256("6529STREAM_ENTROPY_RECOVERY_V1");
     bytes32 private constant ARTIST_GAS = keccak256("6529STREAM_GGP_ARTIST_FINALITY_READ_GAS");
 
+    struct FindingEvidence {
+        bytes32 finding;
+        bytes32 intentHash;
+        uint64 noticeEndsAt;
+    }
+
     struct Store {
         mapping(uint256 => bytes32) heads;
         mapping(bytes32 => IStreamEntropyFreshRecovery.RecoveryReceipt) receipts;
         mapping(bytes32 => bytes32) successor;
         mapping(bytes32 => bool) consumedArtistEvidence;
+        mapping(bytes32 => FindingEvidence) findingEvidence;
     }
 
     struct Environment {
@@ -65,6 +79,19 @@ library StreamEntropyFreshRecovery {
         bytes32 contentStateHash,
         bytes32 journalHead
     );
+
+    event EntropyUnavailabilityEvidence(
+        uint16 schemaVersion,
+        bytes32 indexed requestKey,
+        bytes32 indexed findingRecordHash,
+        bytes32 intentHash,
+        uint64 noticeEndsAt
+    );
+
+    function findingEvidence(bytes32 key) public view returns (bytes32, bytes32, uint64) {
+        FindingEvidence storage f = store().findingEvidence[key];
+        return (f.finding, f.intentHash, f.noticeEndsAt);
+    }
 
     function store() private pure returns (Store storage s) {
         bytes32 slot = SLOT;
@@ -232,6 +259,62 @@ library StreamEntropyFreshRecovery {
         return (p.plan.key, p.contentState, p.plan.fee);
     }
 
+    function intentEncoded(
+        Environment memory env,
+        mapping(bytes32 => StreamEntropyCoordinator.Subject) storage subjects,
+        mapping(bytes32 => StreamEntropyCoordinator.Request) storage requests,
+        mapping(bytes32 => IStreamEntropyEpochs.RequestPolicySnapshot) storage policies,
+        bytes calldata encoded
+    ) public view returns (bytes memory) {
+        IStreamEntropyFreshRecovery.RecoveryInput memory input =
+            abi.decode(encoded, (IStreamEntropyFreshRecovery.RecoveryInput));
+        Preview memory p = preview(env, subjects, requests, policies, input);
+        StreamEntropyCoordinator.Request storage old = requests[input.oldRequestKey];
+        return abi.encode(_intent(env.core, subjects[old.subjectKey].collectionId, old, input, p));
+    }
+
+    function terminal(
+        IStreamCore core,
+        mapping(bytes32 => StreamEntropyCoordinator.Subject) storage subjects,
+        mapping(
+            bytes32 => StreamEntropyCoordinator.Request
+        ) storage requests,
+        bytes32 key
+    ) public view returns (bool) {
+        StreamEntropyCoordinator.Request storage old = requests[key];
+        if (key == 0 || old.provider == address(0)) return false;
+        StreamEntropyCoordinator.Subject storage subject = subjects[old.subjectKey];
+        return old.rawRandomness != 0 || subject.seed != 0
+            || subject.status == StreamEntropyStatus.FINALIZED || subject.requestKey != key
+            || store().successor[key] != 0
+            || (old.tokenId != 0
+                && core.tokenLifecycle(old.tokenId) == uint8(StreamTokenLifecycle.BURNED));
+    }
+
+    function _intent(
+        IStreamCore core,
+        uint256 collectionId,
+        StreamEntropyCoordinator.Request storage old,
+        IStreamEntropyFreshRecovery.RecoveryInput memory input,
+        Preview memory p
+    ) private view returns (EntropyU.Intent memory i) {
+        i = EntropyU.Intent(
+            collectionId,
+            old.tokenId,
+            old.scopeId,
+            input.oldRequestKey,
+            p.plan.key,
+            store().heads[collectionId],
+            p.head,
+            _state(core, collectionId, store().heads[collectionId]),
+            p.contentState,
+            keccak256(abi.encode(p.plan.policy)),
+            p.incidentEvidence,
+            input.providerEvidenceHash,
+            keccak256(bytes(input.reasonURI))
+        );
+    }
+
     function _negative(
         bytes32 key,
         StreamEntropyCoordinator.Request storage request,
@@ -253,10 +336,59 @@ library StreamEntropyFreshRecovery {
         mapping(bytes32 => IStreamEntropyEpochs.RequestPolicySnapshot) storage policies,
         IStreamEntropyFreshRecovery.RecoveryInput memory input
     ) public returns (StreamEntropyRequestPlan.Plan memory) {
+        return _admit(env, subjects, requests, policies, input, bytes32(0));
+    }
+
+    function admitWithUnavailability(
+        Environment memory env,
+        mapping(bytes32 => StreamEntropyCoordinator.Subject) storage subjects,
+        mapping(bytes32 => StreamEntropyCoordinator.Request) storage requests,
+        mapping(bytes32 => IStreamEntropyEpochs.RequestPolicySnapshot) storage policies,
+        IStreamEntropyFreshRecovery.RecoveryInput memory input,
+        bytes32 finding
+    ) public returns (StreamEntropyRequestPlan.Plan memory) {
+        if (finding == 0) {
+            revert IStreamEntropyFreshRecovery.FreshRecoveryArtistEvidenceUnavailable();
+        }
+        return _admit(env, subjects, requests, policies, input, finding);
+    }
+
+    /// @dev Host-selected evidence: the original entry supplies zero; the explicit finding
+    /// entry rejects zero before reaching this shared unchanged submission recipe.
+    function admitSelected(
+        Environment memory env,
+        mapping(bytes32 => StreamEntropyCoordinator.Subject) storage subjects,
+        mapping(bytes32 => StreamEntropyCoordinator.Request) storage requests,
+        mapping(bytes32 => IStreamEntropyEpochs.RequestPolicySnapshot) storage policies,
+        IStreamEntropyFreshRecovery.RecoveryInput memory input,
+        bytes32 finding
+    ) public returns (StreamEntropyRequestPlan.Plan memory) {
+        return _admit(env, subjects, requests, policies, input, finding);
+    }
+
+    function _admit(
+        Environment memory env,
+        mapping(bytes32 => StreamEntropyCoordinator.Subject) storage subjects,
+        mapping(bytes32 => StreamEntropyCoordinator.Request) storage requests,
+        mapping(bytes32 => IStreamEntropyEpochs.RequestPolicySnapshot) storage policies,
+        IStreamEntropyFreshRecovery.RecoveryInput memory input,
+        bytes32 finding
+    ) private returns (StreamEntropyRequestPlan.Plan memory) {
         Preview memory p = preview(env, subjects, requests, policies, input);
         StreamEntropyCoordinator.Request storage old = requests[input.oldRequestKey];
         uint256 id = subjects[old.subjectKey].collectionId;
-        bytes32 artist = _artistEvidence(env.core, id, p.contentState);
+        bytes32 artist;
+        if (finding == 0) {
+            artist = _artistEvidence(env.core, id, p.contentState);
+        } else {
+            EntropyU.Intent memory intent = _intent(env.core, id, old, input, p);
+            bytes32 intentHash = EU.intentHash(address(this), address(env.core), intent);
+            uint64 noticeEndsAt = StreamEntropyUnavailabilityEvidence.requireFinding(
+                env.core, input, intentHash, finding
+            );
+            store().findingEvidence[p.plan.key] = FindingEvidence(finding, intentHash, noticeEndsAt);
+            artist = finding;
+        }
         Store storage s = store();
         if (artist != 0) {
             if (s.consumedArtistEvidence[artist]) {
@@ -312,6 +444,10 @@ library StreamEntropyFreshRecovery {
             p.contentState,
             p.head
         );
+        if (finding != 0) {
+            FindingEvidence storage f = s.findingEvidence[p.plan.key];
+            emit EntropyUnavailabilityEvidence(1, p.plan.key, finding, f.intentHash, f.noticeEndsAt);
+        }
         return p.plan;
     }
 

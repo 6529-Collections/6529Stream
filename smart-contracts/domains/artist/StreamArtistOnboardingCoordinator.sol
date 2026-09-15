@@ -1,5 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/entropy/IStreamEntropyArtistUnavailability.sol";
+import {
+    StreamArtistEntropyUnavailabilityTypes as EU,
+    IStreamArtistEntropyUnavailability,
+    IStreamArtistEntropyUnavailabilityOwner,
+    IStreamArtistEntropyUnavailabilityCoordinator
+} from "../../interfaces/stream/artist/IStreamArtistEntropyUnavailability.sol";
+
 import { StreamArtistCoordinatorRecoveryRead } from "./StreamArtistCoordinatorRecoveryRead.sol";
 import {
     StreamArtistCoordinatorRecordTransport
@@ -41,6 +49,7 @@ import "./StreamArtistIdentityDismissalOperations.sol";
 import "./StreamArtistIdentityRecoveryOperations.sol";
 import { StreamArtistRecoveryActionOperations } from "./StreamArtistRecoveryActionOperations.sol";
 import "./StreamArtistUnavailabilityOperations.sol";
+import "./StreamArtistEntropyUnavailabilityOperations.sol";
 import "./StreamArtistRecoveryApprovalOperations.sol";
 import "../../interfaces/stream/artist/IStreamArtistRecoveryApproval.sol";
 import "./StreamArtistOnboardingReadDeployment.sol";
@@ -390,6 +399,38 @@ contract StreamArtistOnboardingCoordinator is
         return StreamArtistRecoveryOriginalReads.Pins(
             finalityRegistry, finalityRegistryCodeHash, _runtimeHashes[9], _runtimeHashes[7], cap
         );
+    }
+
+    function coordinateRecordEntropyUnavailabilityFinding(
+        address actor,
+        Recovery.FindingRequest calldata request,
+        EU.Target calldata target
+    ) external operation returns (bytes32) {
+        _unavailabilityPins();
+        return
+            StreamArtistEntropyUnavailabilityOperations.recordEncoded(_economicContext(), msg.data);
+    }
+
+    function prepareEntropyUnavailabilityFinding(
+        Recovery.FindingRequest calldata request,
+        EU.Target calldata target
+    ) external view returns (U.Context memory) {
+        _unavailabilityPins();
+        bytes memory encoded =
+            StreamArtistEntropyUnavailabilityOperations.prepareEncoded(_suite, msg.data);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
+    }
+
+    function verifyEntropyRecoveryUnavailability(
+        address coordinator,
+        IStreamEntropyFreshRecovery.RecoveryInput calldata input,
+        bytes32 intentHash,
+        bytes32 expectedFinding
+    ) external view returns (bool, bytes32, bytes32, uint64) {
+        _unavailabilityPins();
+        bytes memory encoded =
+            StreamArtistEntropyUnavailabilityOperations.verifyEncoded(_suite, msg.data);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function coordinateRecordUnavailabilityFinding(

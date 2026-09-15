@@ -1,5 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistEntropyUnavailabilityState.sol";
+import {
+    StreamArtistEntropyUnavailabilityTypes as EU,
+    IStreamArtistEntropyUnavailability,
+    IStreamArtistEntropyUnavailabilityOwner,
+    IStreamArtistEntropyUnavailabilityCoordinator
+} from "../../interfaces/stream/artist/IStreamArtistEntropyUnavailability.sol";
+
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 import { StreamArtistIdentityPayloadReads } from "./StreamArtistIdentityPayloadReads.sol";
 import { StreamArtistDormancyRecovery } from "./StreamArtistDormancyRecovery.sol";
@@ -90,6 +98,28 @@ library StreamArtistIdentityReadDispatch {
         bytes calldata call_
     ) public view returns (bytes memory) {
         bytes4 selector = bytes4(call_[:4]);
+        if (
+            selector
+                == IStreamArtistEntropyUnavailabilityOwner.entropyUnavailabilityFindingRecord
+                .selector
+        ) {
+            bytes32 hash = abi.decode(call_[4:], (bytes32));
+            return StreamArtistEntropyUnavailabilityState.recordRead(_unavailability, hash);
+        }
+        if (
+            selector
+                == IStreamArtistEntropyUnavailabilityOwner.entropyUnavailabilityFindingContext
+                .selector
+        ) {
+            return StreamArtistEntropyUnavailabilityState.contextEncoded(
+                _unavailability,
+                _identity,
+                StreamArtistUnavailabilityState.OwnerContext(
+                    o.environment, o.coordinator, o.archive, o.domain, o.revision
+                ),
+                call_[4:]
+            );
+        }
         if (selector == bytes4(keccak256("unavailabilityFindingRecord(bytes32)"))) {
             (bytes32 hash) = abi.decode(call_[4:], (bytes32));
             return StreamArtistUnavailabilityState.recordEncodedRead(_unavailability, hash);

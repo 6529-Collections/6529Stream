@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistEntropyUnavailabilityTypes as EU,
+    IStreamArtistEntropyUnavailability,
+    IStreamArtistEntropyUnavailabilityOwner,
+    IStreamArtistEntropyUnavailabilityCoordinator
+} from "../../interfaces/stream/artist/IStreamArtistEntropyUnavailability.sol";
+
 import "../../interfaces/stream/artist/IStreamArtistPublicationAuthorityHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistReadinessAuthorityHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistEconomicsAuthorityHydration.sol";
@@ -131,6 +138,14 @@ contract StreamArtistRegistryWriterExtension {
     ) external onlyHost returns (bytes32) {
         return IStreamArtistPlatformCoordinator(operationCoordinator)
             .coordinateApprovePlatformWorksCorrection(msg.sender, id, claim_, evidence, reason);
+    }
+
+    function recordEntropyUnavailabilityFinding(
+        Recovery.FindingRequest calldata request,
+        EU.Target calldata target
+    ) external onlyHost returns (bytes32) {
+        return IStreamArtistEntropyUnavailabilityCoordinator(operationCoordinator)
+            .coordinateRecordEntropyUnavailabilityFinding(msg.sender, request, target);
     }
 
     function recordUnavailabilityFinding(

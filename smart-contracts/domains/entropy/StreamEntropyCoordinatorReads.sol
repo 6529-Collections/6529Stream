@@ -20,6 +20,19 @@ import "../../vendor/openzeppelin/IERC165.sol";
 
 /// @notice Fixed read/admission worker; preserves the coordinator's original storage, domains and caller context.
 library StreamEntropyCoordinatorReads {
+    /// @notice Original five-value policy encoded in the fixed worker for the terminal host read.
+    function policyEncoded(
+        IStreamCore core,
+        uint256 collectionId,
+        StreamEntropyCoordinator.CollectionConfig storage config,
+        IStreamRevealFeeEscrow.CollectionRevealPolicy storage reveal,
+        uint32 providerEpoch
+    ) public view returns (bytes memory) {
+        (bool frozen, bytes32 manifest, address provider, uint32 epoch, bytes32 salt) =
+            policy(core, collectionId, config, reveal, providerEpoch);
+        return abi.encode(frozen, manifest, provider, epoch, salt);
+    }
+
     function policy(
         IStreamCore core,
         uint256 collectionId,

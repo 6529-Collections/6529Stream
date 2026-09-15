@@ -1,5 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistEntropyUnavailabilityState.sol";
+import {
+    StreamArtistEntropyUnavailabilityTypes as EU,
+    IStreamArtistEntropyUnavailability,
+    IStreamArtistEntropyUnavailabilityOwner,
+    IStreamArtistEntropyUnavailabilityCoordinator
+} from "../../interfaces/stream/artist/IStreamArtistEntropyUnavailability.sol";
+
 import "./StreamArtistEstateEntryMutation.sol";
 import { StreamArtistEstateOwnerMutation } from "./StreamArtistEstateOwnerMutation.sol";
 import "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
@@ -175,6 +183,30 @@ contract StreamArtistIdentityEstateExtension is
         );
         _commit(c, m.action, m.state, m.replay, m.record);
         return outputRecord;
+    }
+
+    function recordEntropyUnavailability(T.ActionContext calldata c, EU.Input calldata input)
+        external
+        onlyHost
+        returns (bytes32)
+    {
+        _check(c, 23);
+        address executor = IStreamArtistIdentityContestOwner(address(this)).artistWindowAuthority();
+        if (c.actor != executor) revert T.Unauthorized(c.actor);
+        StreamArtistUnavailabilityState.OwnerContext memory o =
+            StreamArtistUnavailabilityState.OwnerContext(
+                _environment(), operationCoordinator, archiveV2, domainId, _revision
+            );
+        (
+            StreamArtistUnavailabilityState.Mutation memory m,
+            bytes32 artistId,
+            uint256 collectionId
+        ) = StreamArtistEntropyUnavailabilityState.recordEncoded(
+            _unavailability, _identity, _replay, o, msg.data[4:]
+        );
+        _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, artistId, collectionId);
+        return m.record;
     }
 
     function recordUnavailability(T.ActionContext calldata c, U.Input calldata p)

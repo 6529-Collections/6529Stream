@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistEntropyUnavailabilityTypes as EU,
+    IStreamArtistEntropyUnavailability,
+    IStreamArtistEntropyUnavailabilityOwner,
+    IStreamArtistEntropyUnavailabilityCoordinator
+} from "../../interfaces/stream/artist/IStreamArtistEntropyUnavailability.sol";
+
 import "../../interfaces/stream/artist/IStreamArtistPublicationAuthorityHydration.sol";
 import {
     IStreamArtistReadinessAuthorityHydration
@@ -163,6 +170,7 @@ library StreamArtistRegistryInterfaces {
             || id == type(IStreamArtistAuthorityHydration).interfaceId
             || id == type(IStreamArtistHistory).interfaceId
             || id == type(IStreamArtistRecoveryApproval).interfaceId
+            || id == type(IStreamArtistEntropyUnavailability).interfaceId
             || id == type(IStreamArtistUnavailability).interfaceId
             || id == type(IStreamArtistMintConsent).interfaceId
             || id == type(IStreamArtistAttribution).interfaceId
