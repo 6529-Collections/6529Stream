@@ -2,6 +2,8 @@
 pragma solidity ^0.8.19;
 import "./StreamNativeEnglishAuctionRightsRegistration.sol";
 import "./StreamPlatformNativeAuctionRegistration.sol";
+import "./StreamPlatformCustodyRegistration.sol";
+import "./StreamPlatformCustodySettlement.sol";
 import "../../interfaces/stream/auctions/IStreamPlatformNativeRightsAuction.sol";
 import "./StreamNativeEnglishAuctionTerminal.sol";
 import "./StreamNativeEnglishAuctionRightsSettlement.sol";
@@ -47,6 +49,7 @@ contract StreamNativeEnglishAuction is
     IStreamCustodyRightsAuction,
     IStreamNativeRightsAuction,
     IStreamPlatformNativeRightsAuction,
+    IStreamPlatformCustodyAuction,
     IStreamNativeAuctionDelegatedDelivery,
     IStreamArtistSaleFacts,
     StreamSettlementContext,
@@ -203,6 +206,7 @@ contract StreamNativeEnglishAuction is
             || id == type(IStreamCustodyRightsAuction).interfaceId
             || id == type(IStreamNativeRightsAuction).interfaceId
             || id == type(IStreamPlatformNativeRightsAuction).interfaceId
+            || id == type(IStreamPlatformCustodyAuction).interfaceId
             || id == type(IStreamPreparedNativeRightsSaleBinding).interfaceId
             || id == type(IStreamPreparedNativeContentSale).interfaceId
             || id == type(IStreamPreparedNativeSaleBinding).interfaceId
@@ -427,6 +431,9 @@ contract StreamNativeEnglishAuction is
         returns (uint256 tokenId, bytes32 settlementKey)
     {
         if (!_state.auctions[id].config.mintAtSettlement) {
+            if (_rights[id].mode == 10 || _rights[id].mode == 11) {
+                return StreamPlatformCustodySettlement.settle(_state, _custody, _runtime(), id);
+            }
             // Original no-bid poster return remains an ungated escape for either rights family.
             if (_state.auctions[id].winner.amount != 0) _requireLegacyCustodyEntry(id);
             return
@@ -708,6 +715,27 @@ contract StreamNativeEnglishAuction is
     {
         bytes memory encoded = _encodedRead(9, id);
         assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
+    }
+
+    function platformCustodyAcquisitionDigest(PlatformCustodyAuthorization calldata authorization)
+        external
+        view
+        override
+        returns (bytes32)
+    {
+        return StreamPlatformCustodyHash.acquisitionFromCalldata(msg.data);
+    }
+
+    function registerPlatformCustodyAuction(
+        Configuration calldata,
+        StreamPreparedNativeRightsTypes.OriginalPolicy calldata,
+        bytes calldata,
+        PlatformCustodyAuthorization calldata,
+        bytes calldata
+    ) external payable override nonReentrant returns (bytes32) {
+        return StreamPlatformCustodyRegistration.registerCalldata(
+            _state, _custody, _rights, _platformDeclarations, _runtime(), msg.data
+        );
     }
 
     function platformRightsConfigurationHash(

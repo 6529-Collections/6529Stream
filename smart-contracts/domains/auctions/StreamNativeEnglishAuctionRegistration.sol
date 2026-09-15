@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../revenue/StreamPlatformCustodyValidation.sol";
 import "./StreamNativeEnglishAuctionRuntime.sol";
 import "./StreamNativeEnglishAuctionCustodyReads.sol";
 import "../revenue/StreamTokenProfileCustodyValidation.sol";
@@ -269,9 +270,21 @@ library StreamNativeEnglishAuctionRegistration {
                     false
                 )
             );
-            StreamNativeEnglishAuctionCustodyReads.requireCurrent(
-                x, a, IStreamNativeCustodyAuction(address(this)).custodyOrigin(id)
-            );
+            StreamNativeCustodySettlementTypes.Origin memory origin =
+                IStreamNativeCustodyAuction(address(this)).custodyOrigin(id);
+            if (rightsMode == 10 || rightsMode == 11) {
+                StreamNativeEnglishAuctionCustodyReads.requireCustody(x, a, origin);
+                StreamPlatformCustodyValidation.derive(
+                    StreamPrimarySettlementRights.Context(
+                        x.base.resolver, x.factory, x.factory.splitWalletRuntimeCodeHash()
+                    ),
+                    StreamNativeCustodySettlementTypes.Facts(id, a, origin),
+                    address(this),
+                    x.recorder
+                );
+            } else {
+                StreamNativeEnglishAuctionCustodyReads.requireCurrent(x, a, origin);
+            }
             StreamPreparedNativeSettlementAdmission.capture(x.registry, address(this));
             return 0;
         }

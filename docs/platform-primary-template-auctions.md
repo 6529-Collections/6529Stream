@@ -121,3 +121,55 @@ by this fixture. Token-TEMPLATE platform custody, primary allocation-time
 snapshots, other sale products and transaction-capacity acceptance remain
 separate scope. ERC-20 native-allowance and inherited/global freeze proposals
 remain untouched.
+
+
+## Prepared platform custody with fixed profiles
+
+`IStreamPlatformCustodyAuction` adds an explicit unpaid prepared acquisition for
+families 10/11. The platform signs `PlatformPreparedCustodyAcquisition` under
+`6529StreamPlatformPreparedCustodyAuction`, version 1, the actual house and chain.
+Its ordered fields are `configHash`, `declarationHash`, `tokenDataHash`,
+`expectedSaleNonce`, `expectedTokenId`, `expectedCollectionSerial`,
+`expectedOperationNonce`, `contextHash`, `executor`, `revealFeeDeposit`, `nonce`
+and `deadline`. Configuration uses the existing declaration-bound platform
+configuration hash, with `mintAtSettlement=false` and the expected token ID.
+The original Artist custody selectors, domains and signatures are unchanged.
+
+The signed executor calls `registerPlatformCustodyAuction`, supplies exactly the
+signed reveal deposit, and owns any excess native pull credit. The original
+poster is separately committed in the configuration. Registration requires the
+new `IStreamPlatformCustodyPrimarySettlement` marker, canonical recorder/house
+binding, current admissible declaration, exact opening profile/source policy,
+verified wallet, expected token/serial/operation coordinates and the original
+mint phase commitment. It consumes the platform's existing shared creator nonce.
+There is no synthetic Artist signature, accepted binding or op15 approval.
+
+The existing prepared Manager operation acquires one token into house custody.
+Its snapshot hook runs before completion when the phase requires royalty
+snapshots; the retained origin records the actual root, operation, authorization,
+manager, artwork, serial and funding account. Source/declaration and actual token
+precedence are rechecked after mint completion and reveal funding. The schema-1
+`PlatformCustodyAcquired` event preserves the complete signed authorization and
+origin. No primary-sale revenue is recorded during acquisition.
+
+Use the existing bid and settlement selectors afterward. The bid contains sale
+payment only: reveal funding belongs to the original acquisition. Payment may
+follow current owner-authorized profile changes within the signed scope/family,
+but cannot skip token or collection overrides. The explicit platform recorder
+entry uses canonical actual-token PRIMARY_POLICY_V1, original acquisition facts,
+declaration, original rights and the current profile witness. It shares the
+canonical sale/settlement replay, result and accounting storage, and emits the
+complete schema-1 `PlatformCustodyRevenueRecorded` receipt. The original recorder
+entry rejects platform custody rather than issuing its older token-0 receipt.
+The paid transfer performs no new mint, counter allocation, reveal or snapshot.
+
+The seven new source regressions include actual Core/Manager/royalty snapshots,
+collection/default payment and full receipt reconstruction, capability/signature
+refusal, current source precedence, creator-nonce positive controls, operator
+refunds and exact two-call Safe rollback/retry at late reveal and wallet funding.
+No-bid return, pre-bid cancellation, pending own NFT claims and deadline refund
+remain usable despite a later contest or accepted corrective Artist. These cases
+are authored and typechecked, not executed in this source handoff. Artist,
+governance and entropy retain the fixture's explicit typed boundaries.
+Collection/default TEMPLATE custody (8/9), token-specific platform rights and
+consignment remain separate follow-on workflows; this route does not admit them.
