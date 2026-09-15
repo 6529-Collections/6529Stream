@@ -1660,3 +1660,36 @@ unchanged. This consumes trusted fixed-owner history, not reconstructed current
 authorization of historical actions. The six new source regression recipes are
 ABI/type checked; consolidated native execution, links, sizes and gas remain
 required before claiming runtime acceptance. All57 operations plus58 remain.
+
+
+## Designated-dormancy standing closure
+
+The first class-3 operation-43 recovery reader now admits closed unexecuted
+same-class rotation attempts under the existing AA-ROTATE/AA-GUARD dismissal
+semantics. The original dormancy notice, terminal, plan, activation capability
+origin, delegation epoch and operation-43 vesting remain exact. Latest execution
+must still name that appointment; only latest transition may name an original
+phase-3 standing-vetoed operation-29 record.
+
+The fixed reader reuses the existing canonical class-3 closure proof for separate
+original executed-window, latest pending-veto and current latest-dismissal facts.
+It retains the dormancy first-cause previous-pointer boundary and original
+retirement/removal joins. A kind-2 standing Cause has zero evidence and may have
+zero reason; its actual pending rotation and abandoned Closure authenticate it.
+The original operation-43 non-abandoned closure has no fabricated contest marker
+and must follow its post-window. Later kind-1 or kind-2 dismissals remain separate
+from that first immutable closure. The current recovery remains a fresh kind-1
+compromise of the same appointed successor.
+
+No operation, signed payload, storage field, old event or permanent record domain
+changes. Operations 1–60 retain their original recipes. The old no-rotation
+dormancy Facts and closure path keep their original bytes; the new branch adds
+`6529STREAM_ARTIST_ADMITTED_DORMANCY_STANDING_V1` around the complete historical
+proof. Full retained guardian history and lifetime veto, abandoned association
+ineligibility, original recovery acceptance/replay and atomic Archive are kept.
+Intervening executed rotations, prior recovery, supersession and steward-origin
+adjudication remain outside this bounded designated-successor increment.
+
+The [dormancy recovery guide](../guides/artist-dormancy-recovery.md) describes the
+eight authored regression cases and typecheck evidence. Native execution and
+integrated current-Core/Executor acceptance remain separate.

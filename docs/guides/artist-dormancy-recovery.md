@@ -29,8 +29,9 @@ this appointment and the requested evidence/reason. It must have been filed at
 or after the original post-vesting window. Waiting does not mature an earlier
 compromise. The original unclosed profile has no prior recovery, intervening rotation, prior
 cause or resolution. The additive closed profile below authenticates admitted
-kind-1 dismissals. Both refuse enumerated supersession; dormancy-origin
-adjudication, standing-contest closures and intervening rotations remain separate
+kind-1 dismissals. The standing-history profile below additionally admits
+closed, unexecuted rotation attempts. All profiles refuse enumerated supersession;
+dormancy-origin adjudication and intervening executed rotations remain separate
 unfinished work.
 
 ## Guardians, authority and execution
@@ -81,6 +82,41 @@ The newly registered recovery still has its own original governance delay,
 acceptance, veto and replay checks. No prior recovery, intervening rotation,
 class-4 adjudication or kind-2 standing-contest episode is added by this profile.
 
+## Standing-contest closure after designated dormancy
+
+The standing profile admits an actual same-class operation-29 rotation attempt
+after the designated appointment, its original standing veto (operation 31),
+governed dismissal (58), and a fresh operation-33 compromise before elected
+recovery (35). The latest executed transition and vesting must still be the
+original operation 43. A phase-3 unexecuted rotation may be the latest transition;
+its old/new acceptance, saved timing and canonical record remain immutable.
+
+The reader authenticates three independent historical selections: the original
+operation-43 Closure and first dismissal, the latest vetoed rotation's abandoned
+pending Closure and its own dismissal, and today's latest dismissal and cause.
+The first cause retains the original no-previous-cause/resolution boundary.
+Later standing vetoes and kind-1 compromise dismissals can advance the latest
+head without replacing either original closure. Full canonical hashes, current
+previous pointers, chronological order, saved actor/retirement and removal terms
+are checked. These are admitted fixed-owner records; governance witnesses are
+not reauthorized against current roles.
+
+Kind-2 causes bind the actual original pending rotation, use zero evidence, and
+permit zero reason. They do not invent an operation-33 record or mark the executed
+operation-43 transition contested. That original non-abandoned window must have
+expired; its closure and the separate abandoned pending closure are both required.
+The current recovery cause remains kind 1 with its own exact evidence and reason.
+The earlier kind-1 first-closure case is also admitted when a later standing
+episode follows that valid closure.
+
+No pending transition, intervening executed rotation, prior recovery or changed
+designation/directive/capability/epoch is admitted. Abandoned provisional guardian
+records stay ineligible while retaining lifetime veto; a fresh eligible record
+after closure can become operational. The full original prefix, elected action,
+new-side Safe acceptance, replay guards, receipts and Archive atomicity remain.
+The old no-rotation branch and original Facts hash bytes are unchanged. Only the
+new nonempty standing proof uses an additional domain-tagged commitment.
+
 ## Validation
 
 Eight new authored cases use actual Artist owners, threshold Safe acceptance,
@@ -96,7 +132,16 @@ graph acceptance remain pending. Six additional authored cases in
 earlier living ancestry and exact Archive retry, a matured guardian, intervening
 dismissals, missing/substituted first closure, corrupted latest cause and lifetime
 Safe veto. They inherit the prior twenty scenarios; all twenty-six typecheck.
-No new runtime or size acceptance is claimed.
+Eight further cases in `StreamArtistDormancyStandingHistoryActual.t.sol` cover
+zero-reason standing with prior living ancestry, late Archive rollback and exact
+retry, repeated standing and later kind-1 resolutions, fresh guardian selection,
+a standing episode after early kind-1 closure, both missing/substituted closures,
+historical cause drift/restoration, lower-nonce
+lifetime Safe veto, and refusal after an actual executed rotation. They use the
+existing real Artist/Archive/Safe fixture with typed Core/governance boundaries.
+The new and retained closed-dormancy sources pass a 739-source ABI/type check.
+These authored standing cases have not executed; no new runtime, size or current
+Core/Executor acceptance is claimed.
 
 Use the existing aggregate unit fixture profile after source stabilization:
 
@@ -106,6 +151,9 @@ python scripts/dev.py test --suite unit --via-ir --code-size-limit 2000000 --gas
 
 For the closed profile use the same command with
 `--match-path test/unit/artist/StreamArtistClosedDormancyRecoveryActual.t.sol`.
+
+For standing history use
+`--match-path test/unit/artist/StreamArtistDormancyStandingHistoryActual.t.sol`.
 
 Include all reached fixture JSON data in frozen captures. The aggregate fixture's
 large gas/code limits do not establish deployable size or transaction capacity.

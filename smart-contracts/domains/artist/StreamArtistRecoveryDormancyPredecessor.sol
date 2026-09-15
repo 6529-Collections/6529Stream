@@ -48,6 +48,10 @@ import {
     StreamArtistRecoveryDormancyGuardians as DormGuardians
 } from "./StreamArtistRecoveryDormancyGuardians.sol";
 
+import {
+    StreamArtistRecoveryDormancyStanding as DormStanding
+} from "./StreamArtistRecoveryDormancyStanding.sol";
+
 /// @notice Immutable designated op43 origin for the first elected class3 recovery.
 /// @dev Consumes admitted notice/action/vesting records; never reauthorizes historical governance.
 library StreamArtistRecoveryDormancyPredecessor {
@@ -124,7 +128,6 @@ library StreamArtistRecoveryDormancyPredecessor {
                 || estate.authorityActivation[p.artistId] != 0 || estate.pending[p.artistId] != 0
                 || recovery.latest[p.artistId] != 0 || rotations.pending[p.artistId] != 0
                 || rotations.latestExecution[p.artistId] != head
-                || rotations.latestTransition[p.artistId] != head
                 || cause.facts.executedTransitionHash != head
                 || cause.facts.pendingTransitionHash != 0 || f.transition.artistId != p.artistId
                 || f.transition.recordHash != head || f.transition.phase != 2
@@ -155,7 +158,9 @@ library StreamArtistRecoveryDormancyPredecessor {
         ) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         }
-        bytes32 closureProof = DormClosure.proof(resolutions, e, f.transition, cause);
+        bytes32 closureProof = rotations.latestTransition[p.artistId] == head
+            ? DormClosure.proof(resolutions, e, f.transition, cause)
+            : DormStanding.proof(rotations, resolutions, contests, e, f.transition, cause);
         _previous(recovery, rotations, e, f);
         f.guardians = DormGuardians.prefix(
             recovery.guardianHistory,
