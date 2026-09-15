@@ -138,6 +138,29 @@ library StreamCollectionManifestExecution {
     }
 
     /// @dev This type-only host dependency preserves the original storage struct definition.
+    function receipt(StreamCollectionMetadataV1.StoredRecord storage s)
+        public
+        view
+        returns (bytes memory)
+    {
+        return abi.encode(s.receipt);
+    }
+
+    function payload(
+        StreamCollectionMetadataV1.StoredRecord storage s,
+        address store,
+        bytes32 storeCodeHash,
+        uint256 cap
+    ) public view returns (address pointer, bytes memory value) {
+        bytes32 contentHash = bytes32(s.record.contentHash.digest);
+        (pointer,) = StreamSchemaDocumentStore(store).chunk(contentHash);
+        // Preserve original pointer lookup before the original code/read guard.
+        if (store.code.length == 0 || store.codehash != storeCodeHash) {
+            revert V.MetadataDependencyChanged(store);
+        }
+        value = StreamRecordDocumentReads.chunk(store, contentHash, cap);
+    }
+
     function record(StreamCollectionMetadataV1.StoredRecord storage s)
         public
         view

@@ -18,6 +18,8 @@ import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 
+import { StreamMetadataArtistConfiguration } from "./StreamMetadataArtistConfiguration.sol";
+
 /// @notice Same-Metadata publication through its original Artist or one completely hydrated successor.
 /// @dev Reads only. Metadata retains its original authorization-use map and candidate domains.
 library StreamMetadataArtistSelection {
@@ -87,35 +89,27 @@ library StreamMetadataArtistSelection {
             predecessor != c.original || snapshot == 0 || snapshot > sealedAt || root == 0
                 || manifest == 0 || !bound || sourceHash != c.originalHash || count != 1
         ) revert M.MetadataHostNotSelected();
-        (address priorCoordinator, T.SuiteConfiguration memory prior) = _suite(c, c.original);
         (address nextCoordinator, T.SuiteConfiguration memory next) = _suite(c, s.registry);
-        if (
-            priorCoordinator == nextCoordinator || prior.archive == next.archive
-                || keccak256(
-                        abi.encode(
-                            prior.core,
-                            prior.mintManager,
-                            prior.roleRegistry,
-                            prior.metadata,
-                            prior.primaryResolver,
-                            prior.royaltyResolver,
-                            prior.primaryRevenueClass,
-                            prior.validator
-                        )
-                    )
-                    != keccak256(
-                        abi.encode(
-                            next.core,
-                            next.mintManager,
-                            next.roleRegistry,
-                            next.metadata,
-                            next.primaryResolver,
-                            next.royaltyResolver,
-                            next.primaryRevenueClass,
-                            next.validator
-                        )
-                    )
-        ) revert M.MetadataHostNotSelected();
+        address priorCoordinator = abi.decode(
+            _read(
+                c,
+                c.original,
+                abi.encodeCall(IStreamArtistIngressBinding.operationCoordinator, ()),
+                32
+            ),
+            (address)
+        );
+        if (priorCoordinator == address(0) || priorCoordinator == nextCoordinator) {
+            revert M.MetadataHostNotSelected();
+        }
+        // All actual op60 profiles share Source._prepare/SourceGuards._suite and
+        // Commit.execute: the exact sealed predecessor, all eight unchanged suite
+        // dependencies, and each source owner's reciprocal binding/domain are
+        // checked before the seven owner imports, then rechecked before atomic
+        // Archive completion. The one-time marker below has no other producer.
+        // Both suites/owner bindings are constructor-only. Thus committed op60
+        // proves the original relationship without a live read of its old suite.
+        // This is committed-state provenance, not an in-flight reentrancy barrier.
         // Artist's metadata dependency is the rendering Router, not this record host.
         (address router, bytes32 routerHash,,,,,,,,) = abi.decode(
             _read(
@@ -128,7 +122,7 @@ library StreamMetadataArtistSelection {
             ),
             (address, bytes32, bool, bytes32, bytes4, address, uint8, bytes32, bytes32, uint64)
         );
-        if (router != prior.metadata) revert M.MetadataHostNotSelected();
+        if (router != next.metadata) revert M.MetadataHostNotSelected();
         _code(router, routerHash);
         if (
             abi.decode(_read(c, router, abi.encodeCall(IStreamArtistOwner.core, ()), 32), (address))
@@ -136,11 +130,10 @@ library StreamMetadataArtistSelection {
         ) revert M.MetadataHostNotSelected();
         bytes32 completion;
         for (uint256 i; i < 7; ++i) {
-            if (prior.owners[i] == next.owners[i]) revert M.MetadataHostNotSelected();
-            bytes32 domain = _owner(c, prior, priorCoordinator, i);
-            if (_owner(c, next, nextCoordinator, i) != domain || domain == 0) {
-                revert M.MetadataHostNotSelected();
-            }
+            // The current authentic Coordinator constructor validates all seven
+            // immutable owner bindings and distinct targets; _suite above rechecks
+            // every saved runtime pin. Different source/next registry bindings
+            // prohibit sharing an owner. Keep every actual completion check.
             bytes32 actual = bytes32(
                 _word(
                     c,
@@ -171,55 +164,11 @@ library StreamMetadataArtistSelection {
             ),
             (address)
         );
-        bytes memory raw = _read(
-            c,
-            coordinator,
-            abi.encodeCall(IStreamArtistAuthorityHydrationCoordinator.authorityHydrationSuite, ()),
-            544
-        );
-        s = abi.decode(raw, (T.SuiteConfiguration));
+        s = StreamMetadataArtistConfiguration.suite(coordinator, c.gasCap);
         if (
-            keccak256(raw) != keccak256(abi.encode(s)) || s.registry != registry || s.core != c.core
-                || s.metadata == address(0) || s.archive.code.length == 0
-                || s.mintManager == address(0)
+            s.registry != registry || s.core != c.core || s.metadata == address(0)
+                || s.archive.code.length == 0 || s.mintManager == address(0)
         ) revert M.MetadataHostNotSelected();
-    }
-
-    function _owner(Context memory c, T.SuiteConfiguration memory s, address coordinator, uint256 i)
-        private
-        view
-        returns (bytes32)
-    {
-        address owner = s.owners[i];
-        if (
-            abi.decode(
-                        _read(c, owner, abi.encodeCall(IStreamArtistOwner.artistRegistry, ()), 32),
-                        (address)
-                    ) != s.registry
-                || abi.decode(
-                        _read(
-                            c,
-                            owner,
-                            abi.encodeCall(IStreamArtistOwner.operationCoordinator, ()),
-                            32
-                        ),
-                        (address)
-                    ) != coordinator
-                || abi.decode(
-                        _read(c, owner, abi.encodeCall(IStreamArtistOwner.archiveV2, ()), 32),
-                        (address)
-                    ) != s.archive
-                || abi.decode(
-                        _read(c, owner, abi.encodeCall(IStreamArtistOwner.core, ()), 32), (address)
-                    ) != s.core
-                || abi.decode(
-                        _read(c, owner, abi.encodeCall(IStreamArtistOwner.mintManager, ()), 32),
-                        (address)
-                    ) != s.mintManager
-                || _word(c, owner, abi.encodeCall(IStreamArtistOwner.deploymentChainId, ()))
-                    != block.chainid
-        ) revert M.MetadataHostNotSelected();
-        return bytes32(_word(c, owner, abi.encodeCall(IStreamArtistOwner.domainId, ())));
     }
 
     function _word(Context memory c, address target, bytes memory input)

@@ -3,6 +3,12 @@ pragma solidity ^0.8.19;
 
 import "./StreamCollectionMetadataV1.t.sol";
 import {
+    StreamMetadataArtistConfiguration
+} from "../../../smart-contracts/domains/metadata/StreamMetadataArtistConfiguration.sol";
+import {
+    StreamMetadataArtistSelection
+} from "../../../smart-contracts/domains/metadata/StreamMetadataArtistSelection.sol";
+import {
     StreamArtistRecordPublicationReads
 } from "../../../smart-contracts/domains/artist/StreamArtistRecordPublicationReads.sol";
 
@@ -45,12 +51,130 @@ import {
 // these controls do not claim execution of Artist operations55–57/60 or signature admission.
 contract MetadataHydrationCoordinatorBoundary {
     T.SuiteConfiguration private suite;
+    address[16] private targets;
+    bytes32[16] private runtimeHashes;
+    uint256 public immutable deploymentChainId = block.chainid;
+    bytes32 public configurationHash;
+    address public finalityRegistry;
+    address public finalityEvidenceProvider;
 
+    function suiteConfiguration() external view returns (T.SuiteConfiguration memory) {
+        return suite;
+    }
+
+    // Reproduces the actual Coordinator constructor's owner binding invariant and
+    // authorityHydrationSuite's saved-storage/runtime read cost. Registry/Archive
+    // construction and operation60 execution remain explicitly typed boundaries.
     function configure(T.SuiteConfiguration memory s) external {
+        for (uint256 i; i < 7; ++i) {
+            MetadataHydratedOwnerBoundary owner = MetadataHydratedOwnerBoundary(s.owners[i]);
+            require(
+                owner.artistRegistry() == s.registry
+                    && owner.operationCoordinator() == address(this)
+                    && owner.archiveV2() == s.archive && owner.core() == s.core
+                    && owner.mintManager() == s.mintManager
+                    && owner.deploymentChainId() == block.chainid
+                    && owner.domainId() == keccak256(abi.encode("fixture owner", i)),
+                "constructor owner binding"
+            );
+            targets[i] = s.owners[i];
+        }
         suite = s;
+        targets[7] = s.registry;
+        targets[8] = s.archive;
+        targets[9] = s.core;
+        targets[10] = s.mintManager;
+        targets[11] = s.roleRegistry;
+        targets[12] = s.metadata;
+        targets[13] = s.primaryResolver;
+        targets[14] = s.royaltyResolver;
+        targets[15] = s.validator;
+        for (uint256 i; i < 16; ++i) {
+            require(targets[i].code.length != 0 && targets[i] != address(this), "target");
+            for (uint256 j; j < i; ++j) {
+                require(targets[j] != targets[i], "duplicate target");
+            }
+            runtimeHashes[i] = targets[i].codehash;
+        }
+        address finalityRegistry_ = s.archive;
+        address provider = s.validator;
+        bytes32 providerCodeHash = provider.codehash;
+        finalityRegistry = finalityRegistry_;
+        finalityEvidenceProvider = provider;
+        configurationHash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ONBOARDING_CONFIGURATION_V1"),
+                block.chainid,
+                address(this),
+                s,
+                runtimeHashes,
+                finalityRegistry_,
+                finalityRegistry_.codehash,
+                provider,
+                providerCodeHash,
+                uint16(1),
+                uint16(2),
+                uint16(3),
+                uint16(4),
+                uint16(5),
+                uint16(6),
+                uint16(7),
+                uint16(12),
+                uint16(13),
+                uint16(14),
+                uint16(15),
+                uint16(16),
+                uint16(17),
+                uint16(18),
+                uint16(20),
+                uint16(21),
+                uint16(22),
+                uint16(23),
+                uint16(24),
+                uint16(25),
+                uint16(26),
+                uint16(27),
+                uint16(28),
+                uint16(29),
+                uint16(30),
+                uint16(31),
+                uint16(32),
+                uint16(33),
+                uint16(34),
+                uint16(35),
+                uint16(36),
+                uint16(37),
+                uint16(38),
+                uint16(39),
+                uint16(40),
+                uint16(51),
+                uint16(52),
+                uint16(54),
+                uint16(58),
+                uint16(65534),
+                keccak256("6529STREAM_ARTIST_RECOVERY_PREPARATION_PROFILE_V1"),
+                keccak256("6529STREAM_ARTIST_RECOVERY_GUARDIAN_HISTORY_PROFILE_V1"),
+                keccak256("6529STREAM_ARTIST_RECOVERY_FIRST_ROTATION_PROFILE_V1"),
+                keccak256("6529STREAM_ARTIST_RECOVERY_HISTORICAL_ROTATION_PROFILE_V1"),
+                keccak256("6529STREAM_ARTIST_GUARDIAN_VESTING_PROFILE_V1"),
+                keccak256("6529STREAM_ARTIST_GUARDIAN_SUPERSESSION_PROFILE_V1"),
+                keccak256("6529STREAM_ARTIST_GUARDIAN_HEAD_SELECTION_PROFILE_V1"),
+                keccak256("6529STREAM_ARTIST_GUARDIAN_ROOT_APPEAL_PROFILE_V1"),
+                keccak256("6529STREAM_ARTIST_FIRST_ESTATE_RECOVERY_PROFILE_V1"),
+                keccak256("6529STREAM_ARTIST_ESTATE_SUCCESSOR_GUARDIAN_RECOVERY_PROFILE_V1")
+            )
+        );
+    }
+
+    function corruptSuiteForNegative(T.SuiteConfiguration memory s) external {
+        suite = s; // Explicit injected storage corruption, not an actual Coordinator setter.
     }
 
     function authorityHydrationSuite() external view returns (T.SuiteConfiguration memory) {
+        require(block.chainid == deploymentChainId, "chain");
+        for (uint256 j; j < 16; ++j) {
+            require(targets[j].codehash == runtimeHashes[j], "target runtime");
+        }
         return suite;
     }
 }
@@ -177,7 +301,7 @@ contract StreamMetadataArtistSuccessorTest is CollectionMetadataV1Fixture {
         nextCoordinator = new MetadataHydrationCoordinatorBoundary();
         T.SuiteConfiguration memory s;
         s.registry = address(artist);
-        s.archive = address(priorCoordinator);
+        s.archive = address(new MetadataRouterForSuccessorBoundary(address(core)));
         s.core = address(core);
         s.metadata = address(new MetadataRouterForSuccessorBoundary(address(core)));
         core.setPointer(keccak256("METADATA_ROUTER"), s.metadata);
@@ -185,10 +309,10 @@ contract StreamMetadataArtistSuccessorTest is CollectionMetadataV1Fixture {
             keccak256("MODULE_REGISTRY"),
             address(new MetadataPublicationModulesBoundary(address(metadata)))
         );
-        s.mintManager = address(core);
+        s.mintManager = address(new MetadataRouterForSuccessorBoundary(address(core)));
         s.roleRegistry = address(executor);
-        s.primaryResolver = address(core);
-        s.royaltyResolver = address(core);
+        s.primaryResolver = address(new MetadataRouterForSuccessorBoundary(address(core)));
+        s.royaltyResolver = address(new MetadataRouterForSuccessorBoundary(address(core)));
         s.primaryRevenueClass = keccak256("PRIMARY");
         s.validator = address(schemas);
         for (uint256 i; i < 7; ++i) {
@@ -199,7 +323,7 @@ contract StreamMetadataArtistSuccessorTest is CollectionMetadataV1Fixture {
         MetadataSuccessorArtistBoundary(address(artist))
             .configure(address(priorCoordinator), address(0));
         s.registry = address(next);
-        s.archive = address(nextCoordinator);
+        s.archive = address(new MetadataRouterForSuccessorBoundary(address(core)));
         for (uint256 i; i < 7; ++i) {
             s.owners[i] = address(
                 new MetadataHydratedOwnerBoundary(s, address(nextCoordinator), i, COMPLETION)
@@ -273,13 +397,47 @@ contract StreamMetadataArtistSuccessorTest is CollectionMetadataV1Fixture {
         bytes memory payload = bytes("bounded original Artist worker");
         store.publishChunk(payload);
         (, P.Publication memory p) = _terms(address(0xa11ce), payload);
-        bytes32 hash = new MetadataPublicationBudgetProbe().candidate(nextSuite, p);
+        MetadataPublicationBudgetProbe probe = new MetadataPublicationBudgetProbe();
+        bytes32 hash = probe.candidate(nextSuite, p);
         require(hash == address(metadata).codehash, "actual fixed candidate worker at original cap");
+        T.SuiteConfiguration memory prior = priorCoordinator.authorityHydrationSuite();
+        T.SuiteConfiguration memory current = nextSuite;
+        (address payloadPointer,) = store.chunk(keccak256(payload));
+        _coolSuite(prior);
+        _coolSuite(current);
+        safeVm.cool(address(priorCoordinator));
+        safeVm.cool(address(nextCoordinator));
+        safeVm.cool(address(metadata));
+        safeVm.cool(address(store));
+        safeVm.cool(address(StreamMetadataArtistSelection));
+        safeVm.cool(address(StreamMetadataArtistConfiguration));
+        safeVm.cool(address(StreamRecordDocumentReads));
+        safeVm.cool(address(StreamMetadataPublicationEncoding));
+        safeVm.cool(address(StreamCollectionRecordHashes));
+        safeVm.cool(payloadPointer);
+        safeVm.cool(address(StreamArtistRecordPublicationReads));
+        hash = probe.candidate(current, p);
+        require(hash == address(metadata).codehash, "cold original400k callback");
         core.setPointer(
             keccak256("METADATA_ROUTER"),
             address(new MetadataRouterForSuccessorBoundary(address(core)))
         );
         _candidateFailure(p);
+    }
+
+    function _coolSuite(T.SuiteConfiguration memory s) private {
+        for (uint256 i; i < 7; ++i) {
+            safeVm.cool(s.owners[i]);
+        }
+        safeVm.cool(s.registry);
+        safeVm.cool(s.archive);
+        safeVm.cool(s.core);
+        safeVm.cool(s.mintManager);
+        safeVm.cool(s.roleRegistry);
+        safeVm.cool(s.metadata);
+        safeVm.cool(s.primaryResolver);
+        safeVm.cool(s.royaltyResolver);
+        safeVm.cool(s.validator);
     }
 
     function testEveryOwnerMustHaveMatchingNonzeroCompletionAndCorrectDomain() public {
@@ -295,8 +453,13 @@ contract StreamMetadataArtistSuccessorTest is CollectionMetadataV1Fixture {
             _candidateFailure(p);
             owner.setCompletion(COMPLETION);
             owner.setDomain(keccak256("wrong owner domain"));
-            _candidateFailure(p);
+            vm.expectRevert(abi.encodeWithSignature("Error(string)", "constructor owner binding"));
+            nextCoordinator.configure(nextSuite);
             owner.setDomain(keccak256(abi.encode("fixture owner", i)));
+            bytes memory runtime = address(owner).code;
+            vm.etch(address(owner), hex"00");
+            _candidateFailure(p);
+            vm.etch(address(owner), runtime);
         }
         (bytes32 hash, uint8 kind) = metadata.requireArtistRecordCandidate(p);
         require(hash == p.candidateRecordHash && kind == 8, "all seven restored");
@@ -333,19 +496,20 @@ contract StreamMetadataArtistSuccessorTest is CollectionMetadataV1Fixture {
         (, P.Publication memory p) = _terms(address(0xa11ce), payload);
         T.SuiteConfiguration memory s = nextSuite;
         s.metadata = address(0xbeef);
-        nextCoordinator.configure(s);
+        nextCoordinator.corruptSuiteForNegative(s);
         _candidateFailure(p);
         s = nextSuite;
         s.core = address(0xbeef);
-        nextCoordinator.configure(s);
+        nextCoordinator.corruptSuiteForNegative(s);
         _candidateFailure(p);
         s = nextSuite;
         s.primaryResolver = address(0xbeef);
-        nextCoordinator.configure(s);
+        nextCoordinator.corruptSuiteForNegative(s);
         _candidateFailure(p);
         nextCoordinator.configure(nextSuite);
         MetadataHydratedOwnerBoundary(nextSuite.owners[3]).setCore(address(0xbeef));
-        _candidateFailure(p);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "constructor owner binding"));
+        nextCoordinator.configure(nextSuite);
         MetadataHydratedOwnerBoundary(nextSuite.owners[3]).setCore(address(core));
         (bytes32 hash,) = metadata.requireArtistRecordCandidate(p);
         require(hash == p.candidateRecordHash, "bindings restored");

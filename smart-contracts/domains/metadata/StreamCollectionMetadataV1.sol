@@ -14,6 +14,7 @@ import "../../interfaces/stream/artist/IStreamArtistRecordPublicationHost.sol";
 import "../modules/StreamModuleBase.sol";
 import "../parameters/StreamGasParameterHost.sol";
 import "../records/StreamCollectionRecordHashes.sol";
+import { StreamMetadataPublicationEncoding } from "./StreamMetadataPublicationEncoding.sol";
 import "../records/StreamRecordFamilies.sol";
 import "../records/StreamRecordDocumentReads.sol";
 import "./StreamSchemaDocumentStore.sol";
@@ -542,24 +543,19 @@ contract StreamCollectionMetadataV1 is
     function _candidate(P.Publication memory p) private view returns (bytes32 hash, uint8 kind) {
         _requireArtistSelected();
         _requireSubject(p.collectionId, p.subjectId);
-        RecordPolicy memory policy = _policies[p.recordType];
-        if (
-            p.metadataHost != address(this) || p.recorder == address(0) || p.payloadAlgorithm != 1
-                || p.effectiveAt == 0 || !policy.admitted
-                || (policy.authorizationMask & StreamRecordFamilies.bit(1)) == 0
-                || (policy.family != StreamRecordFamilies.ARTIST
-                    && !(policy.family == StreamRecordFamilies.CURATOR
-                        && p.recordType == keccak256("WORK_DESCRIPTION")))
-        ) revert InvalidMetadataRecord();
-        _schema(p.schemaId, p.canonicalizationId);
-        bytes memory payload = _chunk(p.payloadHash);
-        if (
-            payload.length == 0 || payload.length > MAX_RECORD_PAYLOAD_BYTES
-                || keccak256(payload) != p.payloadHash
-        ) revert InvalidMetadataRecord();
-        kind = _artistSubjectKind(p.recordType, p.schemaId);
-        hash = StreamCollectionRecordHashes.publicationHash(core, p);
-        if (hash != p.candidateRecordHash) revert InvalidMetadataRecord();
+        return StreamMetadataPublicationEncoding.candidate(
+            StreamMetadataPublicationEncoding.CandidateContext(
+                core,
+                schemaRegistry,
+                schemaRegistryCodeHash,
+                chunkStore,
+                chunkStoreCodeHash,
+                _gasParameterValue(DEPENDENCY_READ_GAS),
+                MAX_RECORD_PAYLOAD_BYTES
+            ),
+            p,
+            _policies[p.recordType]
+        );
     }
 
     function collectionRecord(bytes32 hash)
@@ -590,7 +586,8 @@ contract StreamCollectionMetadataV1 is
         override
         returns (RecordReceipt memory)
     {
-        return _knownRecord(hash).receipt;
+        bytes memory result = StreamCollectionManifestExecution.receipt(_knownRecord(hash));
+        assembly ("memory-safe") { return(add(result, 32), mload(result)) }
     }
 
     function collectionRecordPayload(uint256 collectionId, bytes32 recordType, bytes32 subjectId)
@@ -610,10 +607,12 @@ contract StreamCollectionMetadataV1 is
         override
         returns (address pointer, bytes memory payload)
     {
-        StoredRecord storage s = _knownRecord(hash);
-        bytes32 contentHash = bytes32(s.record.contentHash.digest);
-        (pointer,) = StreamSchemaDocumentStore(chunkStore).chunk(contentHash);
-        payload = _chunk(contentHash);
+        return StreamCollectionManifestExecution.payload(
+            _knownRecord(hash),
+            chunkStore,
+            chunkStoreCodeHash,
+            _gasParameterValue(DEPENDENCY_READ_GAS)
+        );
     }
 
     function recordChainHash(uint256 collectionId, bytes32 recordType)
@@ -759,39 +758,8 @@ contract StreamCollectionMetadataV1 is
         address recorder,
         uint256 collectionId,
         IStreamPreservationRecords.CollectionRecord calldata record
-    ) private view returns (P.Publication memory p) {
-        p.metadataHost = address(this);
-        p.recorder = recorder;
-        p.collectionId = collectionId;
-        p.subjectId = record.subjectId;
-        p.recordType = record.recordType;
-        p.schemaId = record.schemaId;
-        p.canonicalizationId = record.contentHash.canonicalizationId;
-        p.payloadAlgorithm = record.contentHash.algorithm;
-        p.payloadHash = bytes32(record.contentHash.digest);
-        p.uriHash = keccak256(bytes(record.uri));
-        p.effectiveAt = record.effectiveAt;
-        p.candidateRecordHash =
-            StreamCollectionRecordHashes.recordHash(core, recorder, collectionId, record);
-    }
-
-    function _artistSubjectKind(bytes32 recordType, bytes32 schemaId) private pure returns (uint8) {
-        if (
-            (recordType == keccak256("ARTIST_INTENT")
-                    && schemaId == keccak256("STREAM_ARTIST_INTENT_V1"))
-                || (recordType == keccak256("ARTIST_INTENT_WAIVER")
-                    && schemaId == keccak256("STREAM_ARTIST_INTENT_WAIVER_V1"))
-        ) return 7;
-        if (
-            (recordType == keccak256("ARTIST_STATEMENT")
-                    && (schemaId == keccak256("STREAM_ARTIST_INTERVIEW_V1")
-                        || schemaId == keccak256("STREAM_ARTIST_STATEMENT_V1")))
-                || (recordType == keccak256("ARTIST_SEMANTIC_ASSERTION")
-                    && schemaId == keccak256("STREAM_SEMANTIC_ASSERTION_V1"))
-                || (recordType == keccak256("WORK_DESCRIPTION")
-                    && schemaId == keccak256("STREAM_WORK_DESCRIPTION_V1"))
-        ) return 8;
-        revert InvalidMetadataRecord();
+    ) private view returns (P.Publication memory) {
+        return StreamMetadataPublicationEncoding.publication(core, recorder, collectionId, record);
     }
 
     function _schema(bytes32 schemaId, bytes32 canonId) private view returns (bytes32, bytes32) {
@@ -802,23 +770,11 @@ contract StreamCollectionMetadataV1 is
         );
     }
 
-    function _chunk(bytes32 hash) private view returns (bytes memory) {
-        _requireCode(chunkStore, chunkStoreCodeHash);
-        return StreamRecordDocumentReads.chunk(
-            chunkStore, hash, _gasParameterValue(DEPENDENCY_READ_GAS)
-        );
-    }
-
     function _requireSubject(uint256 collectionId, bytes32 subjectId) private view {
         _requireCollection(collectionId);
-        bytes32 collectionSubject = StreamMetadataSubjects.scopeSubject(
-            block.chainid,
-            core,
-            StreamFinalityScope(StreamFinalityScopeType.COLLECTION, collectionId, 0, 0)
+        StreamMetadataPublicationEncoding.requireSubject(
+            core, collectionId, subjectId, _subjects[subjectId].collectionId
         );
-        if (subjectId != collectionSubject && _subjects[subjectId].collectionId != collectionId) {
-            revert UnknownMetadataSubject(subjectId);
-        }
     }
 
     function _requireCollection(uint256 collectionId) private view {
