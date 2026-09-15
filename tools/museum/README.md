@@ -270,3 +270,13 @@ publishes test-fixture class-7/8 statements through the original governed
 Metadata writer and builds a replayable rights derivative. It retains the
 genuine constructor dependency scope and unfulfilled Coordinator reservation
 explicitly; it does not claim complete Artist initialization or legal authority.
+
+The [recorded preservation activity graph](../../docs/museum-preservation-graph.md)
+adds a separate offline Linked Art derivative of the verified recorded PREMIS
+package. Completed reported events become Activities; explicit people and
+organizations retain their names, while software and opaque roles stay exact
+sidecar facts. A correspondence index links every event to the complete retained
+PREMIS document and source selectors. Noncompleted or unsupported events never
+become performed activities. Run
+`python -m unittest tools.museum.test_preservation_graph -v`; old profile and
+package bytes remain unchanged, with no network or institutional claim.
