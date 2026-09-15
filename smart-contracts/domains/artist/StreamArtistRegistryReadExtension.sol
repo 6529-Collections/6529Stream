@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRegistryDigestEncoding } from "./StreamArtistRegistryDigestEncoding.sol";
+import { StreamArtistRegistryHistoryEncoding } from "./StreamArtistRegistryHistoryEncoding.sol";
 import {
     IStreamArtistHistory,
     IStreamArtistHistoryCoordinator,
@@ -780,14 +782,7 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (bytes32)
     {
-        T.SuiteConfiguration memory s =
-            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
-        return StreamArtistHashes.acceptanceDigest(
-            StreamArtistHashes.Environment(block.chainid, _host, s.core, s.mintManager),
-            collectionId,
-            IStreamArtistBindingOwner(s.owners[0]).binding(collectionId),
-            a
-        );
+        return StreamArtistRegistryDigestEncoding.digest(_host, operationCoordinator, msg.data, 1);
     }
 
     function royaltyFreezeDigest(T.RoyaltyFreeze calldata p, T.Authorization calldata a)
@@ -824,7 +819,7 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (bytes32)
     {
-        return StreamArtistRotationHashes.guardianDigest(_environment(), p, a);
+        return StreamArtistRegistryDigestEncoding.digest(_host, operationCoordinator, msg.data, 2);
     }
 
     function rotationDigest(R.Rotation calldata p, T.Authorization calldata a)
@@ -892,7 +887,7 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (bytes32)
     {
-        return StreamArtistHashes.attestationDigest(_environment(), p, a);
+        return StreamArtistRegistryDigestEncoding.digest(_host, operationCoordinator, msg.data, 3);
     }
 
     function contentRatificationDigest(T.Ratification calldata p, T.Authorization calldata a)
@@ -1020,11 +1015,15 @@ contract StreamArtistRegistryReadExtension {
     }
 
     function artistRecordChainHash(bytes32 id) external view onlyHost returns (bytes32) {
-        return IStreamArtistHistory(_contentSuite().owners[2]).artistRecordChainHash(id);
+        _returnRegistryEncoded(
+            StreamArtistRegistryHistoryEncoding.read(_contentSuite().owners[2], msg.data)
+        );
     }
 
     function collectionRecordChainHash(uint256 id) external view onlyHost returns (bytes32) {
-        return IStreamArtistHistory(_contentSuite().owners[2]).collectionRecordChainHash(id);
+        _returnRegistryEncoded(
+            StreamArtistRegistryHistoryEncoding.read(_contentSuite().owners[2], msg.data)
+        );
     }
 
     function artistHistoryLane(uint8 kind, bytes32 id)
@@ -1033,7 +1032,9 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (bytes32, uint64)
     {
-        return IStreamArtistHistory(_contentSuite().owners[2]).artistHistoryLane(kind, id);
+        _returnRegistryEncoded(
+            StreamArtistRegistryHistoryEncoding.read(_contentSuite().owners[2], msg.data)
+        );
     }
 
     function artistHistoryRecordAt(uint8 kind, bytes32 id, uint64 index)
@@ -1042,16 +1043,21 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (bytes32, bytes32)
     {
-        return IStreamArtistHistory(_contentSuite().owners[2])
-            .artistHistoryRecordAt(kind, id, index);
+        _returnRegistryEncoded(
+            StreamArtistRegistryHistoryEncoding.read(_contentSuite().owners[2], msg.data)
+        );
     }
 
     function artistHistoryContinuityCommitment() external view onlyHost returns (bytes32) {
-        return IStreamArtistHistory(_contentSuite().owners[2]).artistHistoryContinuityCommitment();
+        _returnRegistryEncoded(
+            StreamArtistRegistryHistoryEncoding.read(_contentSuite().owners[2], msg.data)
+        );
     }
 
     function importedHistoryBindingCount() external view onlyHost returns (uint256) {
-        return IStreamArtistHistory(_contentSuite().owners[2]).importedHistoryBindingCount();
+        _returnRegistryEncoded(
+            StreamArtistRegistryHistoryEncoding.read(_contentSuite().owners[2], msg.data)
+        );
     }
 
     function importedHistoryBinding(uint256 index)
@@ -1060,7 +1066,9 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (address, uint64, bytes32, bytes32)
     {
-        return IStreamArtistHistory(_contentSuite().owners[2]).importedHistoryBinding(index);
+        _returnRegistryEncoded(
+            StreamArtistRegistryHistoryEncoding.read(_contentSuite().owners[2], msg.data)
+        );
     }
 
     function artistHistoryPredecessorBinding(address source)
@@ -1069,8 +1077,9 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (bool, bytes32, uint256)
     {
-        return IStreamArtistHistory(_contentSuite().owners[2])
-            .artistHistoryPredecessorBinding(source);
+        _returnRegistryEncoded(
+            StreamArtistRegistryHistoryEncoding.read(_contentSuite().owners[2], msg.data)
+        );
     }
 
     function verifyImportedRecord(bytes32 root, H.Leaf calldata p, bytes32[] calldata proof)
@@ -1079,7 +1088,9 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (bool)
     {
-        return IStreamArtistHistory(_contentSuite().owners[2]).verifyImportedRecord(root, p, proof);
+        _returnRegistryEncoded(
+            StreamArtistRegistryHistoryEncoding.read(_contentSuite().owners[2], msg.data)
+        );
     }
 
     function importedLaneVerified(uint8 kind, bytes32 id)
@@ -1088,11 +1099,15 @@ contract StreamArtistRegistryReadExtension {
         onlyHost
         returns (bool, bytes32, uint64)
     {
-        return IStreamArtistHistory(_contentSuite().owners[2]).importedLaneVerified(kind, id);
+        _returnRegistryEncoded(
+            StreamArtistRegistryHistoryEncoding.read(_contentSuite().owners[2], msg.data)
+        );
     }
 
     function artistRegistryCutover() external view onlyHost returns (bool, address, uint64) {
-        return IStreamArtistHistory(_contentSuite().owners[2]).artistRegistryCutover();
+        _returnRegistryEncoded(
+            StreamArtistRegistryHistoryEncoding.read(_contentSuite().owners[2], msg.data)
+        );
     }
 
     function artistHistoryImportContext(
@@ -1101,7 +1116,8 @@ contract StreamArtistRegistryReadExtension {
         bytes32 root,
         bytes32 manifest
     ) external view onlyHost returns (H.Context memory) {
-        return IStreamArtistHistory(_contentSuite().owners[2])
-            .artistHistoryImportContext(predecessor, snapshot, root, manifest);
+        _returnRegistryEncoded(
+            StreamArtistRegistryHistoryEncoding.read(_contentSuite().owners[2], msg.data)
+        );
     }
 }

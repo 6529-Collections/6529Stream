@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRegistryInterfaces } from "./StreamArtistRegistryInterfaces.sol";
 import "../../interfaces/stream/artist/IStreamArtistReadinessAuthorityHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistEconomicsAuthorityHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistPayoutAuthorityHydration.sol";
@@ -352,58 +353,8 @@ contract StreamArtistOnboardingRegistry is
         override(StreamModuleBase, IERC165)
         returns (bool)
     {
-        return id == type(IStreamArtistReadinessAuthorityHydration).interfaceId
-            || id == type(IStreamArtistEconomicsAuthorityHydration).interfaceId
-            || id == type(IStreamArtistPayoutAuthorityHydration).interfaceId
-            || id == type(IStreamArtistAuthorityHydration).interfaceId
-            || id == type(IStreamArtistHistory).interfaceId
-            || id == type(IStreamArtistRecoveryApproval).interfaceId
-            || id == type(IStreamArtistUnavailability).interfaceId
-            || id == type(IStreamArtistMintConsent).interfaceId
-            || id == type(IStreamArtistAttribution).interfaceId
-            || id == type(IStreamArtistOnboarding).interfaceId
-            || id == type(IStreamArtistContentRatification).interfaceId
-            || id == type(IStreamArtistEconomicsAuthority).interfaceId
-            || id == type(IStreamArtistTemplateEconomicsAuthority).interfaceId
-            || id == type(IStreamArtistTemplateMutationAuthority).interfaceId
-            || id == type(IStreamArtistPlatformWorks).interfaceId
-            || id == type(IStreamArtistDisplayFacts).interfaceId
-            || id == type(IStreamArtistAttestationWriter).interfaceId
-            || id == type(IStreamArtistAttributionClaims).interfaceId
-            || id == type(IStreamArtistDelegation).interfaceId
-            || id == type(IStreamArtistBindingLifecycle).interfaceId
-            || id == type(IStreamArtistBeneficiaryFacts).interfaceId
-            || id == type(IStreamArtistCollaboratorLifecycle).interfaceId
-            || id == type(IStreamArtistAuthorizationRevocation).interfaceId
-            || id == type(IStreamArtistContentAuthority).interfaceId
-            || id == type(IStreamArtistContentHostEvidence).interfaceId
-            || id == type(IStreamArtistIdentityRevision).interfaceId
-            || id == type(IStreamArtistIdentityRevisionReads).interfaceId
-            || id == type(IStreamArtistRotation).interfaceId
-            || id == type(IStreamArtistRotationReads).interfaceId
-            || id == type(IStreamArtistSaleAuthority).interfaceId
-            || id == type(IStreamArtistAttributionState).interfaceId
-            || id == type(IStreamArtistIdentityContest).interfaceId
-            || id == type(IStreamArtistIdentityDismissal).interfaceId
-            || id == type(IStreamArtistEstateActivation).interfaceId
-            || id == type(IStreamArtistEstateBinding).interfaceId
-            || id == type(IStreamArtistCommercialAuthority).interfaceId
-            || id == type(IStreamArtistRecordPublication).interfaceId
-            || id == type(IStreamArtistFinalityBinding).interfaceId
-            || id == type(IStreamArtistSanction).interfaceId
-            || id == type(IStreamArtistSanctionConfirmation).interfaceId
-            || id == type(IStreamFinalitySanctionReads).interfaceId
-            || id == type(IStreamArtistSanctionArchiveFacts).interfaceId
-            || id == type(IStreamArtworkFinalityComponent).interfaceId
-            || id == type(IStreamArtworkScopedFinalityComponent).interfaceId
-            || id == type(IStreamArtistSuccessionRecords).interfaceId
-            || id == type(IStreamArtistSuccessionReads).interfaceId
-            || id == type(IStreamArtistIdentityRecovery).interfaceId
-            || id == type(IStreamArtistWindows).interfaceId
-            || type(IStreamArtistDormancy).interfaceId == id
-            || type(IStreamArtistDormancyEvidence).interfaceId == id || type(SG).interfaceId == id
-            || id == type(IStreamArtistStewardCapabilities).interfaceId
-            || id == type(IStreamArtistReconstruction).interfaceId || super.supportsInterface(id);
+        return StreamArtistRegistryInterfaces.supportsArtistInterface(id)
+            || super.supportsInterface(id);
     }
 
     function recordSaleConsent(Sale.Consent calldata p, T.Authorization calldata a)

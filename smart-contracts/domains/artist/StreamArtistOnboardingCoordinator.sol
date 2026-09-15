@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistCoordinatorRecordTransport
+} from "./StreamArtistCoordinatorRecordTransport.sol";
+import { StreamArtistCoordinatorSanctionRead } from "./StreamArtistCoordinatorSanctionRead.sol";
+import { StreamArtistCoordinatorHydration } from "./StreamArtistCoordinatorHydration.sol";
 import "./StreamArtistAuthorityHydrationOperations.sol";
 import "./StreamArtistHistoryOperations.sol";
 import {
@@ -454,13 +459,14 @@ contract StreamArtistOnboardingCoordinator is
                 || _suite.registry.codehash != _runtimeHashes[7]
                 || block.chainid != deploymentChainId
         ) revert T.InvalidBinding();
-        return StreamArtistSanctionCandidate.prepare(
+        bytes memory encoded = StreamArtistCoordinatorSanctionRead.prepareEncoded(
             StreamArtistHashes.Environment(
                 block.chainid, _suite.registry, _suite.core, _suite.mintManager
             ),
             _sanctionPins(),
-            p
+            msg.data
         );
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function _sanctionPins() private view returns (StreamArtistSanctionCandidate.Pins memory) {
@@ -491,9 +497,7 @@ contract StreamArtistOnboardingCoordinator is
         IdentityRecovery.Request calldata p,
         T.Authorization calldata a
     ) external operation returns (bytes32) {
-        return StreamArtistRecoveryActionOperations.prepare(
-            _economicContext(), actor, actionId, calls, p, a
-        );
+        return StreamArtistCoordinatorRecordTransport.prepareRecovery(_economicContext(), msg.data);
     }
 
     function coordinateVetoIdentityRecovery(address actor, bytes32 artistId, bytes32 reasonHash)
@@ -826,9 +830,7 @@ contract StreamArtistOnboardingCoordinator is
         T.Authorization calldata a,
         bytes calldata statement
     ) external operation returns (bytes32) {
-        return StreamArtistAttestationOperations.attest(
-            _economicContext(), actor, p, subject, scoped, grant, a, statement
-        );
+        return StreamArtistCoordinatorRecordTransport.attest(_economicContext(), msg.data);
     }
 
     function coordinateRecordArtistAttestation(
@@ -847,9 +849,7 @@ contract StreamArtistOnboardingCoordinator is
         bytes calldata document,
         string calldata displayName
     ) external operation returns (bytes32) {
-        return StreamArtistIdentityOperations.revise(
-            _economicContext(), actor, p, a, document, displayName
-        );
+        return StreamArtistCoordinatorRecordTransport.revise(_economicContext(), msg.data);
     }
 
     function coordinateRecordSuccessorDesignation(
@@ -959,7 +959,7 @@ contract StreamArtistOnboardingCoordinator is
         operation
         returns (bytes32)
     {
-        return StreamArtistAuthorityHydrationOperations.hydrate(_economicContext(), actor, p);
+        return StreamArtistCoordinatorHydration.execute(_economicContext(), msg.data, 1);
     }
 
     function authorityHydrationSuite() external view returns (T.SuiteConfiguration memory) {
@@ -975,26 +975,20 @@ contract StreamArtistOnboardingCoordinator is
         operation
         returns (bytes32)
     {
-        return
-            StreamArtistAuthorityHydrationOperations.hydrateWithPayout(_economicContext(), actor, p);
+        return StreamArtistCoordinatorHydration.execute(_economicContext(), msg.data, 2);
     }
 
     function coordinateHydrateArtistAuthorityWithEconomics(
         address actor,
         StreamArtistEconomicsHydrationTypes.Request calldata p
     ) external operation returns (bytes32) {
-        return StreamArtistAuthorityHydrationOperations.hydrateWithEconomics(
-            _economicContext(), actor, p
-        );
+        return StreamArtistCoordinatorHydration.execute(_economicContext(), msg.data, 3);
     }
 
     function coordinateHydrateArtistAuthorityWithReadiness(
         address actor,
         StreamArtistReadinessHydrationTypes.Request calldata p
     ) external operation returns (bytes32) {
-        return
-            StreamArtistAuthorityHydrationOperations.hydrateWithReadiness(
-                _economicContext(), actor, p
-            );
+        return StreamArtistCoordinatorHydration.execute(_economicContext(), msg.data, 4);
     }
 }

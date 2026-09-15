@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistOwnerCommit } from "./StreamArtistOwnerCommit.sol";
 import "./StreamArtistHydrationGuards.sol";
+import { StreamArtistOwnerHydration } from "./StreamArtistOwnerHydration.sol";
 import "./StreamArtistAuthorityCheckpoint.sol";
 import {
     IStreamArtistAuthorityCheckpoint
@@ -165,11 +167,15 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
         if (StreamArtistNativeReceipts.count() != 0) {
             revert StreamArtistOnboardingTypes.InvalidRecord();
         }
-        bytes32 delta = StreamArtistHydrationGuards.applyGuards(
-            _replay, p, artistRegistry, operationCoordinator, archiveV2, domainId, value
+        (bytes32 delta, bytes32 nextState) = StreamArtistOwnerHydration.applyEncoded(
+            _replay,
+            StreamArtistOwnerHydration.Binding(
+                artistRegistry, operationCoordinator, archiveV2, domainId
+            ),
+            msg.data
         );
         _hydrateAuthority(q, p);
-        _commit(c, value, keccak256(abi.encode(q, p, value)), delta, bytes32(0));
+        _commit(c, value, nextState, delta, bytes32(0));
     }
 
     function _hydrateAuthority(AH.Query calldata, AH.OwnerData calldata p) internal virtual {
@@ -251,44 +257,16 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
         bytes32 replayDelta,
         bytes32 record
     ) internal {
-        uint64 nextRevision = _revision + 1;
-        bytes32 recordDelta = keccak256(abi.encode(record));
-        StateTransitionPreimage memory preimage;
-        preimage.tag = keccak256("6529STREAM_ARTIST_OWNER_STATE_TRANSITION_V2");
-        preimage.chainId = deploymentChainId;
-        preimage.registry = artistRegistry;
-        preimage.coordinator = operationCoordinator;
-        preimage.archive = archiveV2;
-        preimage.owner = address(this);
-        preimage.domain = domainId;
-        preimage.previousRevision = _revision;
-        preimage.nextRevision = nextRevision;
-        preimage.previousState = _stateRoot;
-        preimage.action = keccak256(abi.encode(context.operationId, context.actor, action));
-        preimage.nextState = nextState;
-        preimage.replayDelta = replayDelta;
-        preimage.recordDelta = recordDelta;
-        _stateRoot = keccak256(abi.encode(preimage));
-        if (record != bytes32(0)) {
-            uint64 nextSequence = _recordSequence + 1;
-            _recordChainTip = keccak256(
-                abi.encode(
-                    keccak256("6529STREAM_ARTIST_OWNER_RECORD_TRANSITION_V2"),
-                    deploymentChainId,
-                    artistRegistry,
-                    operationCoordinator,
-                    archiveV2,
-                    address(this),
-                    domainId,
-                    _recordSequence,
-                    nextSequence,
-                    _recordChainTip,
-                    record
-                )
-            );
-            _recordSequence = nextSequence;
-        }
-        _revision = nextRevision;
+        StreamArtistOwnerCommit.commit(
+            _commitPrefix(),
+            _commitEnvironment(),
+            context.operationId,
+            context.actor,
+            action,
+            nextState,
+            replayDelta,
+            record
+        );
     }
 
     /// @dev Additive operation35 path only. Existing one-record commits retain their old history.
@@ -317,25 +295,33 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
         pair = RecoveryReceipts.append(receipts, e, fields, sortedRecords);
         _native(35, pair.primaryHash, fields.artistId, 0);
         _native(35, pair.secondaryHash, fields.artistId, 0);
-        StateTransitionPreimage memory preimage;
-        preimage.tag = keccak256("6529STREAM_ARTIST_OWNER_STATE_TRANSITION_V2");
-        preimage.chainId = deploymentChainId;
-        preimage.registry = artistRegistry;
-        preimage.coordinator = operationCoordinator;
-        preimage.archive = archiveV2;
-        preimage.owner = address(this);
-        preimage.domain = domainId;
-        preimage.previousRevision = _revision;
-        preimage.nextRevision = _revision + 1;
-        preimage.previousState = _stateRoot;
-        preimage.action = keccak256(abi.encode(context.operationId, context.actor, action));
-        preimage.nextState = nextState;
-        preimage.replayDelta = replayDelta;
-        preimage.recordDelta = pair.recordDelta;
-        _stateRoot = keccak256(abi.encode(preimage));
-        _recordSequence = pair.nextSequence;
-        _recordChainTip = pair.nextTip;
-        _revision = preimage.nextRevision;
+        StreamArtistOwnerCommit.commitBatch(
+            _commitPrefix(),
+            _commitEnvironment(),
+            context.operationId,
+            context.actor,
+            action,
+            nextState,
+            replayDelta,
+            pair.recordDelta,
+            pair.nextSequence,
+            pair.nextTip
+        );
+    }
+
+    /// @dev These four original declarations form the unchanged owner storage prefix.
+    function _commitPrefix() private pure returns (StreamArtistOwnerCommit.Prefix storage s) {
+        assembly ("memory-safe") { s.slot := _revision.slot }
+    }
+
+    function _commitEnvironment()
+        private
+        view
+        returns (StreamArtistOwnerCommit.Environment memory)
+    {
+        return StreamArtistOwnerCommit.Environment(
+            deploymentChainId, artistRegistry, operationCoordinator, archiveV2, domainId
+        );
     }
 
     function _now() internal view returns (uint64) {
