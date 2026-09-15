@@ -270,7 +270,7 @@ contract StreamRevenueEscrowRecoveryTest is RevenueV1TestBase, OfficialSafeFixtu
         );
         // A relayed Safe-message signature restores consent without consuming the Safe transaction nonce.
         _safeConsent(id, bytes32(uint256(2)));
-        _savedSafe(callData, signed);
+        require(_savedSafe(callData, signed), "saved Safe CALL");
         require(
             account.nonce() == nonce + 1 && escrow.totalOwed(address(0)) == 0,
             "byte-identical signed retry"
@@ -409,7 +409,7 @@ contract StreamRevenueEscrowRecoveryTest is RevenueV1TestBase, OfficialSafeFixtu
             "exact original credit restored"
         );
         token.configure(0, 0);
-        _savedSafe(data, signature);
+        require(_savedSafe(data, signature), "saved Safe CALL");
         require(
             token.rawBalance(d.successorWallet) == 1000 && escrow.totalOwed(address(token)) == 0,
             "identical Safe retry exact token movement"
@@ -572,7 +572,7 @@ contract StreamRevenueEscrowRecoveryTest is RevenueV1TestBase, OfficialSafeFixtu
             "Safe and original ledger rollback"
         );
         token.configureCallback(address(0), bytes(""), 0);
-        _savedSafe(data, signature);
+        require(_savedSafe(data, signature), "saved Safe CALL");
         require(
             token.rawBalance(d.successorWallet) == 1000 && escrow.totalOwed(address(token)) == 0,
             "exact original signed transaction after callback repair"
@@ -925,12 +925,11 @@ contract StreamRevenueEscrowRecoveryTest is RevenueV1TestBase, OfficialSafeFixtu
         );
     }
 
-    function _savedSafe(bytes memory data, bytes memory signature) private {
-        require(
-            account.execTransaction(
-                address(escrow), 0, data, 0, 0, 0, 0, address(0), payable(address(0)), signature
-            ),
-            "saved Safe CALL"
+    // expectRevert consumes the exact failed Safe call and supplies a dummy return value.
+    // Assert the returned success only on the later byte-identical successful retry.
+    function _savedSafe(bytes memory data, bytes memory signature) private returns (bool) {
+        return account.execTransaction(
+            address(escrow), 0, data, 0, 0, 0, 0, address(0), payable(address(0)), signature
         );
     }
 }
