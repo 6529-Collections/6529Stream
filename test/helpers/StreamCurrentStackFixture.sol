@@ -28,6 +28,7 @@ import {
     StreamMetadataRouter
 } from "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
 import "../../script/current/StreamCurrentStackPlan.sol";
+import { StreamEntropyLifecyclePlan } from "../../script/current/StreamEntropyLifecyclePlan.sol";
 import "../../script/current/StreamArtistActivationPlan.sol";
 import "../../script/current/StreamRevealActivationPlan.sol";
 import "../../script/current/StreamGenesisManifestPlan.sol";
@@ -549,18 +550,22 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
         batches[0].actionClass = 1;
         (GovernanceCall[] memory registrations, bytes[] memory registrationData) =
             StreamCurrentStackPlan.registrationCalls(registry, records);
-        batches[0].calls = new GovernanceCall[](records.length + 1);
-        batches[0].callDatas = new bytes[](records.length + 1);
+        batches[0].calls = new GovernanceCall[](records.length + 2);
+        batches[0].callDatas = new bytes[](records.length + 2);
         for (uint256 i; i < records.length; ++i) {
             batches[0].calls[i] = registrations[i];
             batches[0].callDatas[i] = registrationData[i];
         }
+        (batches[0].calls[records.length], batches[0].callDatas[records.length]) =
+            StreamEntropyLifecyclePlan.activate(
+                entropy, address(provider), "urn:stream:genesis:entropy-provider"
+            );
         bytes memory data = abi.encodeCall(
             entropy.configureCollection,
             (1, address(provider), keccak256("collection salt"), true, uint64(100))
         );
-        batches[0].callDatas[records.length] = data;
-        batches[0].calls[records.length] = _configurationCall(address(entropy), data);
+        batches[0].callDatas[records.length + 1] = data;
+        batches[0].calls[records.length + 1] = _configurationCall(address(entropy), data);
         batches[2].actionClass = 1;
         address[] memory extraProducers = _additionalEscrowProducers();
         batches[2].calls = new GovernanceCall[](7 + extraProducers.length);
@@ -622,6 +627,16 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
         batches[1].callDatas = pointerData;
         _executeInitialBatch(batches[1]);
         _executeInitialBatch(batches[2]);
+        _executeInitialBatch(
+            StreamEntropyLifecyclePlan.admitTightening(
+                executor, address(entropy), entropy.deprecateEntropyProvider.selector
+            )
+        );
+        _executeInitialBatch(
+            StreamEntropyLifecyclePlan.admitTightening(
+                executor, address(entropy), entropy.revokeEntropyProvider.selector
+            )
+        );
     }
 
     function _escrowProducerCall(address producer)
@@ -974,7 +989,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
 
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {
         GovernanceActionPolicyEntry[] memory additional = _additionalOperatingPolicies();
-        rows = new GovernanceActionPolicyEntry[](70 + additional.length);
+        rows = new GovernanceActionPolicyEntry[](73 + additional.length);
         rows[0] = _operatingPolicy(address(manager), manager.configurePhase.selector);
         rows[1] = _operatingPolicy(address(manager), manager.setPhaseExecutor.selector);
         rows[2] = _operatingPolicy(address(manager), manager.setPhasePaused.selector);
@@ -1081,6 +1096,9 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
         rows[i++] = _operatingPolicy(address(router), router.setCollectionScriptManifest.selector);
         rows[i++] = _operatingPolicy(address(router), router.setCollectionMediaManifest.selector);
         rows[i++] = _operatingPolicy(address(router), router.raiseGasParameter.selector);
+        rows[i++] = _operatingPolicy(address(entropy), entropy.activateEntropyProvider.selector);
+        rows[i++] = _operatingPolicy(0, address(entropy), entropy.deprecateEntropyProvider.selector);
+        rows[i++] = _operatingPolicy(0, address(entropy), entropy.revokeEntropyProvider.selector);
         // Metadata, economics and entropy configuration are also collected from genesis.
         for (uint256 j; j < additional.length; ++j) {
             rows[i++] = additional[j];

@@ -130,6 +130,7 @@ contract StreamEntropyMetadataTest is
         );
         router.initializeOriginalFinalityAnchor();
         provider = new MockStreamEntropyProvider(address(entropy));
+        _admitEntropyProvider(address(entropy), address(provider));
         _install(MANAGER, address(this), type(IStreamMintManager).interfaceId);
         _install(ENTROPY, address(entropy), type(IStreamEntropyCoordinator).interfaceId);
         _install(ROUTER, address(router), type(IStreamMetadataRouter).interfaceId);
@@ -627,14 +628,14 @@ contract StreamEntropyMetadataTest is
     function testRevokedProviderRetainsOutputAndCanDeliverSameResultAfterRestore() public {
         uint256 id = _mint();
         (bytes32 key, uint256 requestId) = entropy.requestEntropy(id);
-        entropy.setProviderRevoked(address(provider), true);
+        _setEntropyProviderRevoked(address(entropy), address(provider), true);
         require(provider.fulfill(requestId, bytes32(uint256(7))) == 5, "revocation outcome");
         vm.roll(block.number + 11);
         vm.expectRevert(
             abi.encodeWithSelector(StreamEntropyCoordinator.ProviderOutputAlreadyReceived.selector)
         );
         entropy.markRequestStale(key);
-        entropy.setProviderRevoked(address(provider), false);
+        _setEntropyProviderRevoked(address(entropy), address(provider), false);
         provider.retryCoordinatorFulfillment(requestId);
         _assertState(id, "final");
     }
@@ -947,6 +948,7 @@ contract StreamEntropyMetadataTest is
             "ipfs://local-vrf",
             MANIFEST
         );
+        _admitEntropyProvider(address(entropy), address(vrf));
         entropy.configureCollection(1, address(vrf), keccak256("collection-salt"), true, 10);
         uint256 tokenId = _mint();
         entropy.requestEntropy(tokenId);
@@ -1015,6 +1017,7 @@ contract StreamEntropyMetadataTest is
             )
         );
         MockStreamEntropyProvider nextProvider = new MockStreamEntropyProvider(address(next));
+        _admitEntropyProvider(address(next), address(nextProvider));
         next.configureCollection(
             1, address(nextProvider), keccak256("distinct policy salt"), true, 10
         );

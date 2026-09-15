@@ -37,6 +37,7 @@ contract StreamEntropyEpochsTest is CharacterizationTestBase, EntropyTimeAuthori
         );
         core.setCoordinator(entropy);
         provider = new MockStreamEntropyProvider(address(entropy));
+        _admitEntropyProvider(address(entropy), address(provider));
         entropy.configureCollection(1, address(provider), SALT, true, 10);
         entropy.configureCollectionRevealPolicy(1, 0, keccak256("ROLE_ENTROPY_REVEAL_OWNER"), 10, 0);
     }
@@ -67,6 +68,7 @@ contract StreamEntropyEpochsTest is CharacterizationTestBase, EntropyTimeAuthori
 
     function testProviderReplacementReturnAndOtherCollectionsHaveDistinctEpochs() public {
         MockStreamEntropyProvider replacement = new MockStreamEntropyProvider(address(entropy));
+        _admitEntropyProvider(address(entropy), address(replacement));
         vm.recordLogs();
         entropy.configureCollection(1, address(replacement), SALT, true, 10);
         Vm.Log[] memory logs = vm.getRecordedLogs();
@@ -74,13 +76,17 @@ contract StreamEntropyEpochsTest is CharacterizationTestBase, EntropyTimeAuthori
         require(logs[1].emitter == address(entropy));
         require(
             logs[1].topics[0]
-                == keccak256("CollectionEntropyEpochConfigured(uint16,uint256,address,uint32,bytes32)")
+                == keccak256(
+                    "CollectionEntropyEpochConfigured(uint16,uint256,address,uint32,bytes32)"
+                )
         );
         require(logs[1].topics[1] == bytes32(uint256(1)));
         require(logs[1].topics[2] == bytes32(uint256(uint160(address(replacement)))));
         require(
             keccak256(logs[1].data)
-                == keccak256(abi.encode(uint16(1), uint32(2), replacement.streamEntropyProviderConfigHash()))
+                == keccak256(
+                    abi.encode(uint16(1), uint32(2), replacement.streamEntropyProviderConfigHash())
+                )
         );
         _assertPolicy(2, false);
         entropy.configureCollection(1, address(provider), SALT, true, 10);

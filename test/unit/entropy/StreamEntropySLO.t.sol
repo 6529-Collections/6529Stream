@@ -42,6 +42,7 @@ contract StreamEntropySLOTest is
         );
         core.setCoordinator(entropy);
         provider = new MockStreamEntropyProvider(address(entropy));
+        _admitEntropyProvider(address(entropy), address(provider));
         provider.setFee(100);
         entropy.configureCollection(1, address(provider), MANIFEST, false, 10);
         entropy.configureCollectionRevealPolicy(1, 1, OWNER_ROLE, 10, 100);
@@ -313,6 +314,7 @@ contract StreamEntropySLOTest is
         );
         core.setCoordinator(entropy);
         provider = new MockStreamEntropyProvider(address(entropy));
+        _admitEntropyProvider(address(entropy), address(provider));
         provider.setFee(100);
         entropy.configureCollection(1, address(provider), MANIFEST, false, 10);
         entropy.configureCollectionRevealPolicy(1, 1, OWNER_ROLE, 10, 100);

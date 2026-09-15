@@ -22,6 +22,13 @@ import "../../interfaces/stream/parameters/IStreamGasParameterHost.sol";
 import { StreamEntropyIncidentParameters } from "./StreamEntropyIncidentParameters.sol";
 import { StreamEntropyIncidentEvidence } from "./StreamEntropyIncidentEvidence.sol";
 import { StreamEntropyCoordinatorReads } from "./StreamEntropyCoordinatorReads.sol";
+import { StreamEntropyProviderLifecycle } from "./StreamEntropyProviderLifecycle.sol";
+import { StreamEntropyIncidentTransition } from "./StreamEntropyIncidentTransition.sol";
+import { StreamEntropyAuxiliaryReads } from "./StreamEntropyAuxiliaryReads.sol";
+import {
+    IStreamEntropyProviderLifecycle,
+    EntropyProviderState
+} from "../../interfaces/stream/entropy/IStreamEntropyProviderLifecycle.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyIncidents.sol";
 
 /// @notice Core-bound asynchronous entropy with immutable request inputs and no ordinary reroll.
@@ -37,7 +44,8 @@ contract StreamEntropyCoordinator is
     IStreamEntropyTiming,
     IStreamEntropyFinalityPolicy,
     IStreamEntropyEpochs,
-    IStreamEntropyIncidents
+    IStreamEntropyIncidents,
+    IStreamEntropyProviderLifecycle
 {
     bytes32 public constant GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS =
         keccak256("6529STREAM_GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS");
@@ -227,6 +235,7 @@ contract StreamEntropyCoordinator is
         roleRegistry = IStreamRoleRegistry(config.roleRegistry);
         roleRegistryCodeHash = config.roleRegistry.codehash;
         StreamEntropyIncidentParameters.initialize(config.authority);
+        StreamEntropyProviderLifecycle.initialize(config.authority);
         bytes32[3] memory expected = [
             GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS,
             GTP_ENTROPY_REVEAL_SLO_BLOCKS,
@@ -270,6 +279,7 @@ contract StreamEntropyCoordinator is
             || id == type(IStreamEntropyFinalityPolicy).interfaceId
             || id == type(IStreamEntropyEpochs).interfaceId
             || id == type(IStreamEntropyIncidents).interfaceId
+            || id == type(IStreamEntropyProviderLifecycle).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId || super.supportsInterface(id);
     }
 
@@ -289,6 +299,7 @@ contract StreamEntropyCoordinator is
         ) revert PolicyLocked(collectionId);
         bytes32 configHash =
             StreamEntropyCoordinatorReads.providerConfiguration(provider, timeoutBlocks);
+        StreamEntropyProviderLifecycle.requireActive(provider);
         CollectionConfig storage prior = collectionEntropyConfig[collectionId];
         uint32 epoch = collectionProviderEpoch[collectionId];
         if (prior.provider != provider || prior.providerConfigHash != configHash) {
@@ -422,32 +433,7 @@ contract StreamEntropyCoordinator is
     }
 
     function _validateRevealFee(uint256 collectionId, uint256 fee) private view {
-        CollectionConfig storage config = collectionEntropyConfig[collectionId];
-        address provider = config.provider;
-        if (
-            provider.code.length == 0 || provider.codehash != config.providerCodeHash
-                || IStreamEntropyProvider(provider).streamEntropyProviderConfigHash()
-                    != config.providerConfigHash
-        ) {
-            revert ProviderConfigurationChanged(provider);
-        }
-        if (!IERC165(provider).supportsInterface(type(IStreamEntropyProviderFeeQuote).interfaceId))
-        {
-            revert RevealFeeQuoteUnavailable(provider);
-        }
-        bytes memory data =
-            abi.encodeCall(IStreamEntropyProviderFeeQuote.contextIndependentRequestFee, ());
-        bool success;
-        uint256 size;
-        uint256 quote;
-        assembly ("memory-safe") {
-            let result := mload(0x40)
-            success := staticcall(gas(), provider, add(data, 32), mload(data), result, 32)
-            size := returndatasize()
-            quote := mload(result)
-        }
-        if (!success || size != 32) revert RevealFeeQuoteUnavailable(provider);
-        if (fee < quote) revert RevealFeeBelowQuote(fee, quote);
+        StreamEntropyCoordinatorReads.validateRevealFee(collectionEntropyConfig[collectionId], fee);
     }
 
     function _requireEntropyAdmin() private view {
@@ -466,7 +452,87 @@ contract StreamEntropyCoordinator is
         emit EntropyRequesterUpdated(requester, allowed);
     }
 
+    /// @notice Compatibility transition, bound to its original delayed catalog class.
     function setProviderRevoked(address provider, bool revoked) external onlyAuthority {
+        _updateProvider(
+            provider,
+            revoked ? EntropyProviderState.INCIDENT_REVOKED : EntropyProviderState.ACTIVE,
+            StreamEntropyProviderLifecycle.LEGACY_REASON,
+            true
+        );
+    }
+
+    function entropyProviderRecord(address provider)
+        external
+        view
+        override
+        returns (ProviderRecord memory)
+    {
+        _auxiliaryRead();
+    }
+
+    function entropyProviderCount() external view override returns (uint256) {
+        _auxiliaryRead();
+    }
+
+    function entropyProviderAt(uint256 index) external view override returns (address) {
+        _auxiliaryRead();
+    }
+
+    function entropyProviderTransition(
+        address provider,
+        EntropyProviderState next,
+        string calldata reasonURI
+    )
+        external
+        view
+        override
+        returns (bytes32 scope, bytes32 oldHash, bytes32 newHash, uint8 actionClass)
+    {
+        _auxiliaryRead();
+    }
+
+    function providerRevocationTransition(address provider, bool revoked)
+        external
+        view
+        override
+        returns (bytes32 scope, bytes32 oldHash, bytes32 newHash)
+    {
+        _auxiliaryRead();
+    }
+
+    function activateEntropyProvider(address provider, string calldata reasonURI)
+        external
+        override
+        onlyAuthority
+    {
+        _updateProvider(provider, EntropyProviderState.ACTIVE, reasonURI, false);
+    }
+
+    function deprecateEntropyProvider(address provider, string calldata reasonURI)
+        external
+        override
+        onlyAuthority
+    {
+        _updateProvider(provider, EntropyProviderState.DEPRECATED, reasonURI, false);
+    }
+
+    function revokeEntropyProvider(address provider, string calldata reasonURI)
+        external
+        override
+        onlyAuthority
+    {
+        _updateProvider(provider, EntropyProviderState.INCIDENT_REVOKED, reasonURI, false);
+    }
+
+    function _updateProvider(
+        address provider,
+        EntropyProviderState next,
+        string memory reasonURI,
+        bool legacy
+    ) private {
+        StreamEntropyProviderLifecycle.update(authority, provider, next, reasonURI, legacy);
+        bool revoked = next == EntropyProviderState.INCIDENT_REVOKED;
         providerRevoked[provider] = revoked;
         emit ProviderRevocationUpdated(provider, revoked);
     }
@@ -606,9 +672,10 @@ contract StreamEntropyCoordinator is
         if (block.number > type(uint64).max) revert EntropyBlockNumberOverflow();
         CollectionConfig storage config = collectionEntropyConfig[subject.collectionId];
         address provider = config.provider;
+        StreamEntropyProviderLifecycle.requireActive(provider);
         uint32 providerEpoch = collectionProviderEpoch[subject.collectionId];
         if (
-            providerRevoked[provider] || provider.codehash != config.providerCodeHash
+            provider.codehash != config.providerCodeHash
                 || IStreamEntropyProvider(provider).streamEntropyProviderConfigHash()
                     != config.providerConfigHash
         ) revert ProviderConfigurationChanged(provider);
@@ -716,7 +783,9 @@ contract StreamEntropyCoordinator is
         if (msg.sender != request.provider) revert Unauthorized(msg.sender);
         Subject storage subject = _subjects[request.subjectKey];
         if (subject.status == StreamEntropyStatus.FINALIZED) return _reject(requestKey, 3);
-        if (providerRevoked[msg.sender]) return _reject(requestKey, 5);
+        if (!StreamEntropyProviderLifecycle.canFulfill(
+                msg.sender, _requestPolicies[requestKey].providerCodeHash
+            )) return _reject(requestKey, 5);
         if (subject.status == StreamEntropyStatus.STALE) return _reject(requestKey, 1);
         if (subject.status != StreamEntropyStatus.REQUESTED || subject.requestKey != requestKey) {
             return _reject(requestKey, 2);
@@ -772,11 +841,11 @@ contract StreamEntropyCoordinator is
         keccak256("6529STREAM_GGP_ENTROPY_RESULT_PROBE_GAS_LIMIT");
 
     function gasParameter(bytes32 id) external view returns (uint256) {
-        return StreamEntropyIncidentParameters.value(id);
+        _auxiliaryRead();
     }
 
     function gasParameterInfo(bytes32 id) external view returns (uint256, uint256, uint8, uint64) {
-        return StreamEntropyIncidentParameters.info(id);
+        _auxiliaryRead();
     }
 
     function gasParameterIds() external pure returns (bytes32[] memory) {
@@ -788,7 +857,7 @@ contract StreamEntropyCoordinator is
         view
         returns (bytes32, bytes32, bytes32)
     {
-        return StreamEntropyIncidentParameters.transition(id, next);
+        _auxiliaryRead();
     }
 
     function raiseGasParameter(bytes32 id, uint256 next) external {
@@ -796,7 +865,7 @@ contract StreamEntropyCoordinator is
     }
 
     function entropyIncident(bytes32 key) external view override returns (Incident memory) {
-        return StreamEntropyIncidentEvidence.incident(key);
+        _auxiliaryRead();
     }
 
     function markEntropyRequestUnrecoverable(
@@ -828,59 +897,27 @@ contract StreamEntropyCoordinator is
             revert Unauthorized(msg.sender);
         }
         Subject storage subject = _subjects[subjectKey];
-        if (subject.status != StreamEntropyStatus.REQUESTED) revert InvalidStatus(subject.status);
         bytes32 key = subject.requestKey;
         Request storage request = requests[key];
         RequestPolicySnapshot storage policy = _requestPolicies[key];
-        if (
-            key == 0 || subject.seed != 0 || request.subjectKey != subjectKey
-                || request.tokenId != tokenId || request.scopeId != scopeId
-                || request.provider != policy.provider || policy.inputsHash != subject.inputsHash
-                || request.rawRandomness != 0
-        ) revert IncidentRequestMismatch();
-        if (
-            !providerRevoked[request.provider]
-                && (block.number <= request.requestedAtBlock
-                    || block.number - request.requestedAtBlock
-                        <= effectiveRequestTimeoutBlocks(subject.collectionId))
-        ) {
-            revert RequestNotExpired();
-        }
-        StreamEntropyIncidentEvidence.record(
-            key,
-            request.provider,
-            policy.providerCodeHash,
-            request.providerRequestId,
+        StreamEntropyIncidentTransition.record(
+            subject,
+            request,
+            policy,
+            subjectKey,
+            tokenId,
+            scopeId,
+            providerRevoked[request.provider],
+            collectionEntropyConfig[subject.collectionId],
+            _timeParameterValue(GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS),
             StreamEntropyIncidentParameters.value(GGP_ENTROPY_RESULT_PROBE_GAS_LIMIT),
             reasonURI,
             evidenceHash
         );
         _terminal(key, subject, StreamEntropyStatus.FAILED);
-        if (tokenId != 0) {
-            emit EntropyRequestFailed(
-                1,
-                subject.collectionId,
-                tokenId,
-                request.provider,
-                key,
-                policy.providerEpoch,
-                policy.requestAttempt,
-                reasonURI,
-                evidenceHash
-            );
-        } else {
-            emit EntropyScopeRequestFailed(
-                1,
-                subject.collectionId,
-                scopeId,
-                request.provider,
-                key,
-                policy.providerEpoch,
-                policy.requestAttempt,
-                reasonURI,
-                evidenceHash
-            );
-        }
+        StreamEntropyIncidentTransition.emitFailure(
+            subject, request, policy, tokenId, scopeId, reasonURI, evidenceHash
+        );
     }
 
     /// @notice Marks a timed-out request terminal without authorizing a fresh random draw.
@@ -1012,6 +1049,12 @@ contract StreamEntropyCoordinator is
 
     function scopeEntropy(bytes32 scopeId) external view returns (Subject memory) {
         return _subjects[scopeId];
+    }
+
+    /// @dev Only terminal read entrypoints use this fixed decoder. No mutation/guard cleanup is bypassed.
+    function _auxiliaryRead() private view {
+        bytes memory result = StreamEntropyAuxiliaryReads.read(msg.data);
+        assembly ("memory-safe") { return(add(result, 32), mload(result)) }
     }
 
     function _tokenKey(uint256 tokenId) private pure returns (bytes32) {

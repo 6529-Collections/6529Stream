@@ -34,6 +34,7 @@ import {
     StreamMetadataRouter
 } from "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
 import "./StreamCurrentStackPlan.sol";
+import { StreamEntropyLifecyclePlan } from "./StreamEntropyLifecyclePlan.sol";
 import "./StreamGenesisManifestPlan.sol";
 import "./DevelopmentEntropyProvider.sol";
 import "../../smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol";
@@ -636,6 +637,17 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
         (batch.calls[8], batch.callDatas[8]) = _escrowProducerCall(address(auction));
         batch.callDatas[9] = abi.encodeCall(router.initializeOriginalFinalityAnchor, ());
         batch.calls[9] = _configurationCall(address(router), batch.callDatas[9]);
+        GovernanceCall[] memory withAdmission = new GovernanceCall[](11);
+        bytes[] memory admissionData = new bytes[](11);
+        (withAdmission[0], admissionData[0]) = StreamEntropyLifecyclePlan.activate(
+            entropy, address(provider), "urn:stream:genesis:entropy-provider"
+        );
+        for (uint256 i; i < 10; ++i) {
+            withAdmission[i + 1] = batch.calls[i];
+            admissionData[i + 1] = batch.callDatas[i];
+        }
+        batch.calls = withAdmission;
+        batch.callDatas = admissionData;
     }
 
     function _escrowProducerCall(address producer)
@@ -754,7 +766,7 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
     }
 
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {
-        rows = new GovernanceActionPolicyEntry[](localDevelopment ? 81 : 82);
+        rows = new GovernanceActionPolicyEntry[](localDevelopment ? 84 : 85);
         rows[0] = _operatingPolicy(address(manager), manager.configurePhase.selector);
         rows[1] = _operatingPolicy(address(manager), manager.setPhaseExecutor.selector);
         rows[2] = _operatingPolicy(address(manager), manager.setPhasePaused.selector);
@@ -779,6 +791,10 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
         rows[20] = _operatingPolicy(address(royalty), royalty.freezeCollectionRoyalty.selector);
         rows[20].actionClass = 2;
         uint256 i = 21;
+        rows[i++] = _operatingPolicy(address(entropy), entropy.activateEntropyProvider.selector);
+        rows[i++] = _operatingPolicy(0, address(entropy), entropy.deprecateEntropyProvider.selector);
+        rows[i++] = _operatingPolicy(0, address(entropy), entropy.revokeEntropyProvider.selector);
+
         rows[i++] = _operatingPolicy(3, address(executor), executor.rotateGovernanceRoot.selector);
         rows[i++] = _operatingPolicy(0, address(executor), executor.registerProposer.selector);
         rows[i++] = _operatingPolicy(1, address(executor), executor.registerProposer.selector);

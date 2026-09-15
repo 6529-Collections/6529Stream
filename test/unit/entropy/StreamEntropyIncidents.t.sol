@@ -104,6 +104,7 @@ contract StreamEntropyIncidentsTest is
         );
         core.setCoordinator(entropy);
         provider = new MockStreamEntropyProvider(address(entropy));
+        _admitEntropyProvider(address(entropy), address(provider));
         entropy.configureCollection(1, address(provider), EVIDENCE, true, 10);
         entropy.configureCollectionRevealPolicy(1, 0, keccak256("ROLE_ENTROPY_REVEAL_OWNER"), 10, 0);
         roleRegistry.setHolder(ROLE, address(this));
@@ -215,7 +216,7 @@ contract StreamEntropyIncidentsTest is
         vm.roll(110);
         _fail(StreamEntropyCoordinator.RequestNotExpired.selector);
         _assertPending(key);
-        entropy.setProviderRevoked(address(provider), true);
+        _setEntropyProviderRevoked(address(entropy), address(provider), true);
         entropy.markEntropyRequestUnrecoverable(1, REASON, EVIDENCE);
         require(entropy.tokenEntropyStatus(1) == StreamEntropyStatus.FAILED);
     }
@@ -297,7 +298,7 @@ contract StreamEntropyIncidentsTest is
 
     function testReceivedOutputBlocksEvenAfterProviderRevocation() public {
         (bytes32 key, uint256 id) = _request();
-        entropy.setProviderRevoked(address(provider), true);
+        _setEntropyProviderRevoked(address(entropy), address(provider), true);
         require(provider.fulfill(id, 0) != 0);
         _fail(IStreamEntropyIncidents.IncidentProviderProbeFailed.selector);
         _assertPending(key);
@@ -353,6 +354,7 @@ contract StreamEntropyIncidentsTest is
 
     function testRealProbeOutOfGasRevertAndReturnBombRollBackAndPermitRetry() public {
         IncidentProbeProvider adversary = new IncidentProbeProvider(address(entropy));
+        _admitEntropyProvider(address(entropy), address(adversary));
         entropy.configureCollection(1, address(adversary), EVIDENCE, true, 10);
         (bytes32 key,) = _request();
         _expire();

@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamEntropyProviderFeeQuote
+} from "../../interfaces/stream/entropy/IStreamEntropyProviderFeeQuote.sol";
 import "./StreamEntropyCoordinator.sol";
 import "../../interfaces/stream/core/IStreamCore.sol";
 import "../../interfaces/stream/entropy/IStreamRevealFeeEscrow.sol";
@@ -153,5 +156,39 @@ library StreamEntropyCoordinatorReads {
         if (configHash == 0 || !IStreamEntropyProvider(provider).isStreamEntropyProvider()) {
             revert StreamEntropyCoordinator.InvalidDependency(provider);
         }
+    }
+
+    /// @notice Original exact fee-quote validation; no custody or payment mutation.
+    function validateRevealFee(
+        StreamEntropyCoordinator.CollectionConfig storage config,
+        uint256 fee
+    ) public view {
+        address provider = config.provider;
+        if (
+            provider.code.length == 0 || provider.codehash != config.providerCodeHash
+                || IStreamEntropyProvider(provider).streamEntropyProviderConfigHash()
+                    != config.providerConfigHash
+        ) {
+            revert StreamEntropyCoordinator.ProviderConfigurationChanged(provider);
+        }
+        if (!IERC165(provider).supportsInterface(type(IStreamEntropyProviderFeeQuote).interfaceId))
+        {
+            revert StreamEntropyCoordinator.RevealFeeQuoteUnavailable(provider);
+        }
+        bytes memory data =
+            abi.encodeCall(IStreamEntropyProviderFeeQuote.contextIndependentRequestFee, ());
+        bool success;
+        uint256 size;
+        uint256 quote;
+        assembly ("memory-safe") {
+            let result := mload(0x40)
+            success := staticcall(gas(), provider, add(data, 32), mload(data), result, 32)
+            size := returndatasize()
+            quote := mload(result)
+        }
+        if (!success || size != 32) {
+            revert StreamEntropyCoordinator.RevealFeeQuoteUnavailable(provider);
+        }
+        if (fee < quote) revert StreamEntropyCoordinator.RevealFeeBelowQuote(fee, quote);
     }
 }

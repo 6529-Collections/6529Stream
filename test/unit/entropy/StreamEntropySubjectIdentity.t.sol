@@ -127,17 +127,20 @@ contract StreamEntropySubjectIdentityTest is CharacterizationTestBase, EntropyTi
         core = new EntropySubjectCoreFixture();
         roleRegistry = new MockEntropyRoleRegistry(address(this));
         core.setModuleRegistry(address(new MockEntropyModuleRegistry(address(this))));
-        entropy = new StreamEntropyCoordinator(StreamEntropyCoordinator.DeploymentConfig(
-            address(core),
-            address(this),
-            address(roleRegistry),
-            EntropyTimeTestConfigs.parameters(),
-            MANIFEST,
-            "urn:test:subject-identity",
-            MANIFEST
-        ));
+        entropy = new StreamEntropyCoordinator(
+            StreamEntropyCoordinator.DeploymentConfig(
+                address(core),
+                address(this),
+                address(roleRegistry),
+                EntropyTimeTestConfigs.parameters(),
+                MANIFEST,
+                "urn:test:subject-identity",
+                MANIFEST
+            )
+        );
         core.setCoordinator(entropy);
         provider = new MockStreamEntropyProvider(address(entropy));
+        _admitEntropyProvider(address(entropy), address(provider));
         entropy.configureCollection(1, address(provider), keccak256("collection salt"), true, 10);
         entropy.configureCollectionRevealPolicy(1, 0, keccak256("ROLE_ENTROPY_REVEAL_OWNER"), 10, 0);
         entropy.setRequester(REQUESTER, true);

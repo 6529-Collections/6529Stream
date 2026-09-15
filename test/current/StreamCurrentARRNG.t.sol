@@ -279,6 +279,20 @@ contract StreamCurrentARRNGTest is StreamCurrentStackFixture, OfficialSafeFixtur
     }
 
     function _configureAdditionalProducts() internal override {
+        (GovernanceCall memory admission, bytes memory admissionData) = StreamEntropyLifecyclePlan.activate(
+            entropy, address(arrng), "urn:stream:test:arrng-admission"
+        );
+        GovernanceActionRequest memory admissionRequest = _request(address(entropy), admissionData);
+        admissionRequest.scopeHash = admission.scopeHash;
+        admissionRequest.oldValueHash = admission.oldValueHash;
+        admissionRequest.newValueHash = admission.newValueHash;
+        bytes memory admissionResult = governanceRoot.execute(
+            address(executor),
+            0,
+            abi.encodeCall(executor.scheduleGovernanceAction, (admissionRequest))
+        );
+        vm.warp(admissionRequest.notBefore);
+        executor.executeGovernanceAction(abi.decode(admissionResult, (bytes32)), admissionData);
         bytes memory data = abi.encodeCall(
             entropy.configureCollection, (1, address(arrng), SALT, true, uint64(100))
         );
@@ -294,47 +308,78 @@ contract StreamCurrentARRNGTest is StreamCurrentStackFixture, OfficialSafeFixtur
         bytes memory restrictRequests = abi.encodeCall(
             entropy.configureCollection, (1, address(arrng), SALT, false, uint64(100))
         );
-        _safeGovern(address(entropy), restrictRequests, keccak256("restricted reveal fixture"),
-            keccak256("public requests"), keccak256("restricted requests"));
+        _safeGovern(
+            address(entropy),
+            restrictRequests,
+            keccak256("restricted reveal fixture"),
+            keccak256("public requests"),
+            keccak256("restricted requests")
+        );
         uint256 token = _buy();
         uint256 registered = entropy.registeredAtBlock(token);
-        require(executeSafe(buyerSafe, keys, address(entropy), 100,
-            abi.encodeCall(entropy.fundRevealFeeEscrow, (1)), 0), "actual Safe reveal funding");
+        require(
+            executeSafe(
+                buyerSafe,
+                keys,
+                address(entropy),
+                100,
+                abi.encodeCall(entropy.fundRevealFeeEscrow, (1)),
+                0
+            ),
+            "actual Safe reveal funding"
+        );
         bytes32 parameter = entropy.GTP_ENTROPY_REVEAL_SLO_BLOCKS();
-        (uint256 value, uint256 floor, uint64 wall, uint64 revision) = entropy.timeParameterInfo(parameter);
-        require(value == 100 && floor == 100 && wall == 1200 && revision == 1, "explicit genesis timing");
-        bytes32 scope = keccak256(abi.encode(
-            bytes32(0xd14cc3d71aa1ccb50b6f723d516042b10a7ef31958f86ccb049a09dbcfefff24),
-            block.chainid, address(entropy), parameter));
+        (uint256 value, uint256 floor, uint64 wall, uint64 revision) =
+            entropy.timeParameterInfo(parameter);
+        require(
+            value == 100 && floor == 100 && wall == 1200 && revision == 1, "explicit genesis timing"
+        );
+        bytes32 scope = keccak256(
+            abi.encode(
+                bytes32(0xd14cc3d71aa1ccb50b6f723d516042b10a7ef31958f86ccb049a09dbcfefff24),
+                block.chainid,
+                address(entropy),
+                parameter
+            )
+        );
         bytes32 domain = 0x26290762a61f3dda3fad05a62e5a95dcb1c59db2eaf506cb363c2aa2ab7b8384;
         bytes32 oldState = keccak256(abi.encode(domain, scope, value, floor, wall, revision));
-        bytes32 newState = keccak256(abi.encode(domain, scope, uint256(200), floor, wall, revision + 1));
+        bytes32 newState =
+            keccak256(abi.encode(domain, scope, uint256(200), floor, wall, revision + 1));
         bytes memory raise = abi.encodeCall(entropy.raiseTimeParameter, (parameter, uint256(200)));
         vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
         this.attemptDirectEntropyTimeAsSafe(raise);
         _safeGovern(address(entropy), raise, scope, oldState, newState);
-        require(entropy.effectiveRevealSLOBlocks(1) == 200
-            && entropy.collectionRevealPolicy(1).requestSLOBlocks == 100
-            && entropy.registeredAtBlock(token) == registered, "real governed raise retains frozen promise");
-        OfficialSafe keeper = createOfficialSafe(
-            deploySafeComponents("1.4.1"), safeOwnerAddresses(keys), 2, 163
+        require(
+            entropy.effectiveRevealSLOBlocks(1) == 200
+                && entropy.collectionRevealPolicy(1).requestSLOBlocks == 100
+                && entropy.registeredAtBlock(token) == registered,
+            "real governed raise retains frozen promise"
         );
-        require(!roles.hasRole(keccak256("ROLE_ENTROPY_ADMIN"), address(keeper))
-            && !roles.hasRole(keccak256("ROLE_ENTROPY_REVEAL_OWNER"), address(keeper)),
-            "keeper has no operational authority");
+        OfficialSafe keeper =
+            createOfficialSafe(deploySafeComponents("1.4.1"), safeOwnerAddresses(keys), 2, 163);
+        require(
+            !roles.hasRole(keccak256("ROLE_ENTROPY_ADMIN"), address(keeper))
+                && !roles.hasRole(keccak256("ROLE_ENTROPY_REVEAL_OWNER"), address(keeper)),
+            "keeper has no operational authority"
+        );
         vm.roll(registered + 200);
         vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
         this.requestThroughPublicSafe(keeper, token);
         uint256 oracleBefore = address(artistSafe).balance;
         vm.roll(registered + 201);
         this.requestThroughPublicSafe(keeper, token);
-        require(entropy.revealFeeEscrow(1) == 0 && address(artistSafe).balance == oracleBefore + 100
-            && entropy.entropyFeeCredit(address(keeper)) == 0 && address(keeper).balance == 0,
-            "unprivileged Safe pays no value while actual provider receives exact escrow fee");
+        require(
+            entropy.revealFeeEscrow(1) == 0 && address(artistSafe).balance == oracleBefore + 100
+                && entropy.entropyFeeCredit(address(keeper)) == 0 && address(keeper).balance == 0,
+            "unprivileged Safe pays no value while actual provider receives exact escrow fee"
+        );
         _deliverAsSafe(1, 9876, 0);
         _assertSeed(token, 1, 9876);
-        require(core.ownerOf(token) == address(buyerSafe) && entropy.nonterminalTokenCount(1) == 0,
-            "actual mint/reveal lineage and custody remain unchanged");
+        require(
+            core.ownerOf(token) == address(buyerSafe) && entropy.nonterminalTokenCount(1) == 0,
+            "actual mint/reveal lineage and custody remain unchanged"
+        );
     }
 
     function attemptDirectEntropyTimeAsSafe(bytes calldata data) external {
@@ -344,8 +389,17 @@ contract StreamCurrentARRNGTest is StreamCurrentStackFixture, OfficialSafeFixtur
 
     function requestThroughPublicSafe(OfficialSafe keeper, uint256 token) external {
         require(msg.sender == address(this), "fixture only");
-        require(executeSafe(keeper, keys, address(entropy), 0,
-            abi.encodeCall(entropy.requestEntropy, (token)), 0), "public Safe request");
+        require(
+            executeSafe(
+                keeper,
+                keys,
+                address(entropy),
+                0,
+                abi.encodeCall(entropy.requestEntropy, (token)),
+                0
+            ),
+            "public Safe request"
+        );
     }
 
     function testSafeARRNGMintRevealAndGovernedTreasuryWithdrawal() public {
@@ -377,13 +431,7 @@ contract StreamCurrentARRNGTest is StreamCurrentStackFixture, OfficialSafeFixtur
     {
         uint256 token = _buy();
         _requestAsSafe(token, 100);
-        _safeGovern(
-            address(entropy),
-            abi.encodeCall(entropy.setProviderRevoked, (address(arrng), true)),
-            0,
-            0,
-            0
-        );
+        _safeProviderRevoked(true);
         _deliverAsSafe(1, 42, 0);
         (StreamProviderResultStatus status,, bytes32 hash, bool received, bool delivered) =
             arrng.providerResultStatus(1);
@@ -405,13 +453,7 @@ contract StreamCurrentARRNGTest is StreamCurrentStackFixture, OfficialSafeFixtur
             "conflict cannot become a fresh draw"
         );
         _raiseDeliveryCap();
-        _safeGovern(
-            address(entropy),
-            abi.encodeCall(entropy.setProviderRevoked, (address(arrng), false)),
-            0,
-            0,
-            0
-        );
+        _safeProviderRevoked(false);
         require(
             executeSafe(
                 buyerSafe,
@@ -696,6 +738,66 @@ contract StreamCurrentARRNGTest is StreamCurrentStackFixture, OfficialSafeFixtur
         );
     }
 
+    function _safeProviderRevoked(bool revoked) private {
+        (bytes32 scope, bytes32 oldHash, bytes32 newHash) =
+            entropy.providerRevocationTransition(address(arrng), revoked);
+        _safeGovern(
+            address(entropy),
+            abi.encodeCall(entropy.setProviderRevoked, (address(arrng), revoked)),
+            scope,
+            oldHash,
+            newHash
+        );
+    }
+
+    function _safeProviderState(EntropyProviderState state) private {
+        string memory reason = "urn:stream:test:provider-lifecycle";
+        (bytes32 scope, bytes32 oldHash, bytes32 newHash, uint8 cls) =
+            entropy.entropyProviderTransition(address(arrng), state, reason);
+        bytes memory data = state == EntropyProviderState.ACTIVE
+            ? abi.encodeCall(entropy.activateEntropyProvider, (address(arrng), reason))
+            : state == EntropyProviderState.DEPRECATED
+                ? abi.encodeCall(entropy.deprecateEntropyProvider, (address(arrng), reason))
+                : abi.encodeCall(entropy.revokeEntropyProvider, (address(arrng), reason));
+        _safeGovernClass(address(entropy), data, scope, oldHash, newHash, cls);
+    }
+
+    function testSafeGovernedProviderDeprecationKeepsPendingCallbackAndRestoration() public {
+        uint256 token = _buy();
+        _requestAsSafe(token, 100);
+        _safeProviderState(EntropyProviderState.DEPRECATED);
+        require(
+            entropy.entropyProviderRecord(address(arrng)).state == EntropyProviderState.DEPRECATED
+        );
+        _deliverAsSafe(1, 42, 0);
+        _assertSeed(token, 1, 42);
+        _safeProviderState(EntropyProviderState.ACTIVE);
+        require(entropy.entropyProviderRecord(address(arrng)).state == EntropyProviderState.ACTIVE);
+    }
+
+    function testSafeGovernedIncidentBlocksCallbackUntilDelayedExactRestoration() public {
+        uint256 token = _buy();
+        _requestAsSafe(token, 100);
+        _safeProviderState(EntropyProviderState.INCIDENT_REVOKED);
+        _deliverAsSafe(1, 42, 0);
+        require(
+            entropy.pendingRequestCount() == 1
+                && entropy.tokenEntropyStatus(token) == StreamEntropyStatus.REQUESTED
+        );
+        _safeProviderState(EntropyProviderState.ACTIVE);
+        require(
+            executeSafe(
+                buyerSafe,
+                keys,
+                address(arrng),
+                0,
+                abi.encodeCall(arrng.retryCoordinatorFulfillment, (1)),
+                0
+            )
+        );
+        _assertSeed(token, 1, 42);
+    }
+
     function _safeGovern(
         address target,
         bytes memory data,
@@ -703,7 +805,20 @@ contract StreamCurrentARRNGTest is StreamCurrentStackFixture, OfficialSafeFixtur
         bytes32 old_,
         bytes32 next_
     ) private {
+        _safeGovernClass(target, data, scope, old_, next_, 1);
+    }
+
+    function _safeGovernClass(
+        address target,
+        bytes memory data,
+        bytes32 scope,
+        bytes32 old_,
+        bytes32 next_,
+        uint8 cls
+    ) private {
         GovernanceActionRequest memory request = _request(target, data);
+        request.actionClass = cls;
+        if (cls == 0) request.notBefore = uint64(block.timestamp);
         request.scopeHash = scope;
         request.oldValueHash = old_;
         request.newValueHash = next_;
@@ -734,14 +849,16 @@ contract StreamCurrentARRNGTest is StreamCurrentStackFixture, OfficialSafeFixtur
             }
         }
         require(actionId != 0, "actual scheduled action observed");
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamGovernanceExecutor.GovernanceActionNotExecutable.selector,
-                actionId,
-                request.notBefore
-            )
-        );
-        executor.executeGovernanceAction(actionId, data);
+        if (cls != 0) {
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    IStreamGovernanceExecutor.GovernanceActionNotExecutable.selector,
+                    actionId,
+                    request.notBefore
+                )
+            );
+            executor.executeGovernanceAction(actionId, data);
+        }
         vm.warp(request.notBefore);
         require(
             executeSafe(

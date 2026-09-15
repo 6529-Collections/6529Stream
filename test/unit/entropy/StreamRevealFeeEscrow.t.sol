@@ -41,7 +41,11 @@ contract ProviderWithMalformedCollectionFee is MockStreamEntropyProvider {
 }
 
 /// @notice Escrow behavior with real Safe callers and explicit Core/role/provider domain doubles.
-contract StreamRevealFeeEscrowTest is CharacterizationTestBase, OfficialSafeFixture, EntropyTimeAuthorityFixture {
+contract StreamRevealFeeEscrowTest is
+    CharacterizationTestBase,
+    OfficialSafeFixture,
+    EntropyTimeAuthorityFixture
+{
     bytes32 private constant MANIFEST = keccak256("reveal fee fixture");
     bytes32 private constant REVEAL_OWNER = keccak256("ROLE_ENTROPY_REVEAL_OWNER");
     bytes32 private constant ADMIN = keccak256("ROLE_ENTROPY_ADMIN");
@@ -62,19 +66,23 @@ contract StreamRevealFeeEscrowTest is CharacterizationTestBase, OfficialSafeFixt
         core.setModuleRegistry(address(new MockEntropyModuleRegistry(address(this))));
         roleRegistry = new MockEntropyRoleRegistry(address(this));
         roleRegistry.setHolder(TREASURY, address(safe));
-        entropy = new StreamEntropyCoordinator(StreamEntropyCoordinator.DeploymentConfig(
-            address(core),
-            address(this),
-            address(roleRegistry),
-            EntropyTimeTestConfigs.parameters(),
-            MANIFEST,
-            "urn:stream:fixture:reveal",
-            MANIFEST
-        ));
+        entropy = new StreamEntropyCoordinator(
+            StreamEntropyCoordinator.DeploymentConfig(
+                address(core),
+                address(this),
+                address(roleRegistry),
+                EntropyTimeTestConfigs.parameters(),
+                MANIFEST,
+                "urn:stream:fixture:reveal",
+                MANIFEST
+            )
+        );
         core.setCoordinator(entropy);
         provider = new MockStreamEntropyProvider(address(entropy));
+        _admitEntropyProvider(address(entropy), address(provider));
         provider.setFee(100);
         otherProvider = new MockStreamEntropyProvider(address(entropy));
+        _admitEntropyProvider(address(entropy), address(otherProvider));
         entropy.configureCollection(1, address(provider), keccak256("one"), true, 10);
         entropy.configureCollection(2, address(otherProvider), keccak256("two"), true, 10);
         entropy.configureCollectionRevealPolicy(1, 0, REVEAL_OWNER, 10, 100);
@@ -136,6 +144,7 @@ contract StreamRevealFeeEscrowTest is CharacterizationTestBase, OfficialSafeFixt
     function testPolicyRequiresTypedExactQuoteAndRechecksChangedProvider() public {
         MockStreamEntropyProvider absent =
             new ProviderWithoutCollectionFeeCapability(address(entropy));
+        _admitEntropyProvider(address(entropy), address(absent));
         entropy.configureCollection(2, address(absent), 0, true, 10);
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -145,6 +154,7 @@ contract StreamRevealFeeEscrowTest is CharacterizationTestBase, OfficialSafeFixt
         entropy.configureCollectionRevealPolicy(2, 0, REVEAL_OWNER, 10, 0);
         MockStreamEntropyProvider malformed =
             new ProviderWithMalformedCollectionFee(address(entropy));
+        _admitEntropyProvider(address(entropy), address(malformed));
         entropy.configureCollection(2, address(malformed), 0, true, 10);
         vm.expectRevert(
             abi.encodeWithSelector(

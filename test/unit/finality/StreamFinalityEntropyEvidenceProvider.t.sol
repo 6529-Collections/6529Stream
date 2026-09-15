@@ -51,6 +51,7 @@ contract StreamFinalityEntropyEvidenceProviderTest is
         );
         core.setCoordinator(entropy);
         random = new MockStreamEntropyProvider(address(entropy));
+        _admitEntropyProvider(address(entropy), address(random));
         entropy.configureCollection(1, address(random), SALT, true, 10);
         entropy.configureCollectionRevealPolicy(1, 0, OWNER, 10, 0);
         metadata = new EntropyFinalityMetadataBoundary(address(core));
@@ -179,11 +180,11 @@ contract StreamFinalityEntropyEvidenceProviderTest is
         bytes32 stateBefore = evidence.finalityComponentFacts(FAMILY, _scope()).dataHash;
         entropy.updateRevealFeePerToken(1, 100);
         entropy.setRequester(address(0x1234), true);
-        entropy.setProviderRevoked(address(random), true);
+        _setEntropyProviderRevoked(address(entropy), address(random), true);
         _raise(entropy.GTP_ENTROPY_REVEAL_SLO_BLOCKS(), 20);
         require(entropy.effectiveRevealSLOBlocks(1) == 20 && _policy() == before);
         require(evidence.finalityComponentFacts(FAMILY, _scope()).dataHash == stateBefore);
-        entropy.setProviderRevoked(address(random), false);
+        _setEntropyProviderRevoked(address(entropy), address(random), false);
         (, uint256 requestId) = entropy.requestEntropy(1);
         require(random.fulfill(requestId, bytes32(uint256(77))) == 0);
         require(entropy.tokenEntropyStatus(1) == StreamEntropyStatus.FINALIZED);
