@@ -24,6 +24,10 @@ import { StreamEntropyIncidentEvidence } from "./StreamEntropyIncidentEvidence.s
 import { StreamEntropyCoordinatorReads } from "./StreamEntropyCoordinatorReads.sol";
 import { StreamEntropyProviderLifecycle } from "./StreamEntropyProviderLifecycle.sol";
 import { StreamEntropyIncidentTransition } from "./StreamEntropyIncidentTransition.sol";
+import "./StreamEntropyFreshRecovery.sol";
+import "./StreamEntropyFulfillment.sol";
+import "./StreamEntropyRequestPlan.sol";
+import "../../interfaces/stream/entropy/IStreamEntropyFreshRecovery.sol";
 import { StreamEntropyCollectionRecovery } from "./StreamEntropyCollectionRecovery.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyCollectionRecovery.sol";
 import { StreamEntropyCollectionConfiguration } from "./StreamEntropyCollectionConfiguration.sol";
@@ -37,8 +41,8 @@ import {
 import "../../interfaces/stream/entropy/IStreamEntropyIncidents.sol";
 
 /// @notice Core-bound asynchronous entropy with immutable request inputs and no ordinary reroll.
-/// @dev A collection's initial policy locks on its first token or scope registration. Fresh
-///      randomness recovery and provider migration require a separate explicit implementation.
+/// @dev Policy locks on first token/scope registration. Fresh requests require a prebound frozen
+///      policy, an evidenced incident and exact Artist consent where attribution is bound.
 contract StreamEntropyCoordinator is
     StreamModuleBase,
     ReentrancyGuard,
@@ -52,7 +56,8 @@ contract StreamEntropyCoordinator is
     IStreamEntropyIncidents,
     IStreamEntropyProviderLifecycle,
     IStreamEntropyRecoveryPolicies,
-    IStreamEntropyCollectionRecovery
+    IStreamEntropyCollectionRecovery,
+    IStreamEntropyFreshRecovery
 {
     bytes32 public constant GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS =
         keccak256("6529STREAM_GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS");
@@ -287,6 +292,7 @@ contract StreamEntropyCoordinator is
             || id == type(IStreamEntropyFinalityPolicy).interfaceId
             || id == type(IStreamEntropyEpochs).interfaceId
             || id == type(IStreamEntropyIncidents).interfaceId
+            || id == type(IStreamEntropyFreshRecovery).interfaceId
             || id == type(IStreamEntropyCollectionRecovery).interfaceId
             || id == type(IStreamEntropyRecoveryPolicies).interfaceId
             || id == type(IStreamEntropyProviderLifecycle).interfaceId
@@ -724,84 +730,95 @@ contract StreamEntropyCoordinator is
         returns (bytes32 requestKey, uint256 providerRequestId)
     {
         Subject storage subject = _subjects[subjectKey];
-        if (subject.status != StreamEntropyStatus.REGISTERED) revert InvalidStatus(subject.status);
-        if (block.number > type(uint64).max) revert EntropyBlockNumberOverflow();
-        CollectionConfig storage config = collectionEntropyConfig[subject.collectionId];
-        address provider = config.provider;
-        StreamEntropyProviderLifecycle.requireActive(provider);
-        uint32 providerEpoch = collectionProviderEpoch[subject.collectionId];
-        if (
-            provider.codehash != config.providerCodeHash
-                || IStreamEntropyProvider(provider).streamEntropyProviderConfigHash()
-                    != config.providerConfigHash
-        ) revert ProviderConfigurationChanged(provider);
-        bytes memory context = abi.encode(
-            uint16(scopeId == 0 ? 1 : 2),
-            address(core),
-            subject.collectionId,
+        StreamEntropyRequestPlan.Plan memory p = StreamEntropyRequestPlan.initial(
+            core,
+            subject,
+            collectionEntropyConfig[subject.collectionId],
+            collectionProviderEpoch[subject.collectionId],
             tokenId,
-            scopeId,
-            providerEpoch,
-            config.providerConfigHash,
-            uint16(1),
-            subject.inputsHash
+            scopeId
         );
-        if (scopeId == 0) {
-            requestKey = keccak256(
-                abi.encode(
-                    REQUEST_DOMAIN,
-                    block.chainid,
-                    address(this),
-                    address(core),
-                    subject.collectionId,
-                    tokenId,
-                    provider,
-                    providerEpoch,
-                    config.providerConfigHash,
-                    uint16(1)
-                )
-            );
-        } else {
-            requestKey = keccak256(
-                abi.encode(
-                    SCOPE_REQUEST_DOMAIN,
-                    block.chainid,
-                    address(this),
-                    address(core),
-                    subject.collectionId,
-                    scopeId,
-                    provider,
-                    providerEpoch,
-                    config.providerConfigHash,
-                    subject.inputsHash,
-                    uint16(1)
-                )
-            );
-        }
-        uint256 fee = IStreamEntropyProvider(provider).quoteRequest(context);
-        _fundRequest(subject.collectionId, tokenId, fee);
+        return _submitRequest(subjectKey, tokenId, scopeId, p);
+    }
+
+    function _submitRequest(
+        bytes32 subjectKey,
+        uint256 tokenId,
+        bytes32 scopeId,
+        StreamEntropyRequestPlan.Plan memory p
+    ) private returns (bytes32 requestKey, uint256 providerRequestId) {
+        Subject storage subject = _subjects[subjectKey];
+        _fundRequest(subject.collectionId, tokenId, p.fee);
+        requestKey = p.key;
+        address provider = p.policy.provider;
         subject.requestKey = requestKey;
         subject.status = StreamEntropyStatus.REQUESTED;
         requests[requestKey] =
             Request(subjectKey, tokenId, scopeId, provider, uint64(block.number), 0, 0);
-        _requestPolicies[requestKey] = RequestPolicySnapshot({
-            provider: provider,
-            providerCodeHash: config.providerCodeHash,
-            providerEpoch: providerEpoch,
-            providerConfigHash: config.providerConfigHash,
-            collectionSalt: config.collectionSalt,
-            inputsHash: subject.inputsHash,
-            requestAttempt: 1
-        });
+        _requestPolicies[requestKey] = p.policy;
         ++pendingRequestCount;
         providerRequestId =
-            IStreamEntropyProvider(provider).requestEntropy{ value: fee }(requestKey, context);
+            IStreamEntropyProvider(provider).requestEntropy{ value: p.fee }(requestKey, p.context);
         if (providerRequestKeys[provider][providerRequestId] != 0) {
             revert ProviderRequestCollision(provider, providerRequestId);
         }
         providerRequestKeys[provider][providerRequestId] = requestKey;
         requests[requestKey].providerRequestId = providerRequestId;
         emit EntropyRequested(requestKey, tokenId, scopeId, provider, providerRequestId);
+    }
+
+    function _recoveryEnvironment()
+        private
+        view
+        returns (StreamEntropyFreshRecovery.Environment memory)
+    {
+        return StreamEntropyFreshRecovery.Environment(
+            core,
+            _timeParameterValue(GTP_ENTROPY_RECOVERY_STEP_DELAY_BLOCKS),
+            StreamEntropyIncidentParameters.value(GGP_ENTROPY_RESULT_PROBE_GAS_LIMIT)
+        );
+    }
+
+    function requestFreshEntropy(RecoveryInput calldata input)
+        external
+        payable
+        override
+        nonReentrant
+        returns (bytes32 requestKey, uint256 providerRequestId)
+    {
+        if (!_hasRole(keccak256("ROLE_ENTROPY_INCIDENT_DECLARER"), msg.sender)) {
+            revert Unauthorized(msg.sender);
+        }
+        StreamEntropyRequestPlan.Plan memory p = StreamEntropyFreshRecovery.admit(
+            _recoveryEnvironment(), _subjects, requests, _requestPolicies, input
+        );
+        Request storage old = requests[input.oldRequestKey];
+        if (old.tokenId != 0) ++nonterminalTokenCount[_subjects[old.subjectKey].collectionId];
+        return _submitRequest(old.subjectKey, old.tokenId, old.scopeId, p);
+    }
+
+    function freshRecoveryTransition(RecoveryInput calldata input)
+        external
+        view
+        override
+        returns (bytes32 requestKey, bytes32 contentStateHash, uint256 providerFee)
+    {
+        return StreamEntropyFreshRecovery.transition(
+            _recoveryEnvironment(), _subjects, requests, _requestPolicies, input
+        );
+    }
+
+    function freshRecoveryReceipt(bytes32) external view override returns (RecoveryReceipt memory) {
+        _auxiliaryRead();
+    }
+
+    function artistContentFamilyState(uint256, bytes32)
+        external
+        view
+        override
+        returns (bool, bytes32)
+    {
+        _auxiliaryRead();
     }
 
     function _fundRequest(uint256 collectionId, uint256 tokenId, uint256 fee) private {
@@ -835,37 +852,18 @@ contract StreamEntropyCoordinator is
         returns (uint8 outcome)
     {
         Request storage request = requests[requestKey];
-        if (request.provider == address(0)) return _reject(requestKey, 4);
-        if (msg.sender != request.provider) revert Unauthorized(msg.sender);
         Subject storage subject = _subjects[request.subjectKey];
-        if (subject.status == StreamEntropyStatus.FINALIZED) return _reject(requestKey, 3);
-        if (!StreamEntropyProviderLifecycle.canFulfill(
-                msg.sender, _requestPolicies[requestKey].providerCodeHash
-            )) return _reject(requestKey, 5);
-        if (subject.status == StreamEntropyStatus.STALE) return _reject(requestKey, 1);
-        if (subject.status != StreamEntropyStatus.REQUESTED || subject.requestKey != requestKey) {
-            return _reject(requestKey, 2);
-        }
-        bytes32 seed = _deriveSeed(requestKey, request, subject, rawRandomness);
-        request.rawRandomness = rawRandomness;
-        subject.seed = seed;
-        subject.status = StreamEntropyStatus.FINALIZED;
+        outcome = StreamEntropyFulfillment.finalize(
+            core, request, subject, _requestPolicies[requestKey], requestKey, rawRandomness
+        );
+        if (outcome != 0) return _reject(requestKey, outcome);
         --pendingRequestCount;
         if (request.tokenId != 0) --nonterminalTokenCount[subject.collectionId];
-        emit EntropyFinalized(requestKey, request.tokenId, request.scopeId, seed, rawRandomness);
+        emit EntropyFinalized(
+            requestKey, request.tokenId, request.scopeId, subject.seed, rawRandomness
+        );
         if (request.tokenId != 0) _notify(request.tokenId, requestKey);
         return 0;
-    }
-
-    function _deriveSeed(
-        bytes32 requestKey,
-        Request storage request,
-        Subject storage subject,
-        bytes32 rawRandomness
-    ) private view returns (bytes32) {
-        return StreamEntropyCoordinatorReads.deriveSeed(
-            core, requestKey, request, subject, _requestPolicies[requestKey], rawRandomness
-        );
     }
 
     function _reject(bytes32 requestKey, uint8 outcome) private returns (uint8) {
@@ -980,6 +978,7 @@ contract StreamEntropyCoordinator is
     function markRequestStale(bytes32 requestKey) external onlyAuthority nonReentrant {
         Request storage request = requests[requestKey];
         Subject storage subject = _subjects[request.subjectKey];
+        if (subject.requestKey != requestKey) revert InvalidSubject(request.subjectKey);
         if (subject.status != StreamEntropyStatus.REQUESTED) revert InvalidStatus(subject.status);
         if (
             block.number <= request.requestedAtBlock
@@ -996,6 +995,7 @@ contract StreamEntropyCoordinator is
     function markRequestFailed(bytes32 requestKey) external onlyAuthority nonReentrant {
         Request storage request = requests[requestKey];
         Subject storage subject = _subjects[request.subjectKey];
+        if (subject.requestKey != requestKey) revert InvalidSubject(request.subjectKey);
         if (subject.status != StreamEntropyStatus.REQUESTED) revert InvalidStatus(subject.status);
         (StreamProviderResultStatus status, bytes32 boundKey,, bool received,) =
             IStreamEntropyProvider(request.provider).providerResultStatus(request.providerRequestId);

@@ -60,10 +60,12 @@ migrate an existing request or change a finalized seed.
 
 ## Execution and validation boundary
 
-Ordered fresh-request execution remains separate implementation work: live
-timing/provider checks, token and scope incident linkage, Artist redraw
-consent/finding, and late-original callback arbitration. Configuration alone
-does not establish acceptance of that state machine.
+The additive [fresh-request implementation](entropy-fresh-recovery.md) now
+covers ordered token/scope requests, live timing/provider checks, incident
+linkage, original Artist consent and late-original callback arbitration.
+Its focused runtime acceptance is tracked separately. The entropy-specific
+unavailability finding and complete current-stack composition remain required.
+Configuration alone does not establish acceptance of that state machine.
 
 The focused unit suite passes eight collection-binding cases, nine policy
 cases and 27 original provider/epoch/subject cases: 44 total. Three properties

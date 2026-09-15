@@ -36,6 +36,23 @@ library StreamEntropyIncidentEvidence {
         if (key == 0 || _store().records[key].declarer != address(0)) {
             revert IStreamEntropyIncidents.IncidentRequestMismatch();
         }
+        requireNegative(key, provider, pinnedCodeHash, requestId, cap);
+        if (block.number > type(uint64).max) {
+            revert IStreamEntropyIncidents.InvalidIncidentEvidence();
+        }
+        _store().records[key] = IStreamEntropyIncidents.Incident(
+            msg.sender, uint64(block.number), evidenceHash, reasonURI
+        );
+    }
+
+    /// @notice Repeat the identical bounded negative-result proof without creating an incident.
+    function requireNegative(
+        bytes32 key,
+        address provider,
+        bytes32 pinnedCodeHash,
+        uint256 requestId,
+        uint256 cap
+    ) public view {
         if (provider.code.length == 0 || provider.codehash != pinnedCodeHash) {
             revert IStreamEntropyIncidents.IncidentProviderProbeFailed();
         }
@@ -60,11 +77,5 @@ library StreamEntropyIncidentEvidence {
         ) {
             revert IStreamEntropyIncidents.IncidentProviderProbeFailed();
         }
-        if (block.number > type(uint64).max) {
-            revert IStreamEntropyIncidents.InvalidIncidentEvidence();
-        }
-        _store().records[key] = IStreamEntropyIncidents.Incident(
-            msg.sender, uint64(block.number), evidenceHash, reasonURI
-        );
     }
 }

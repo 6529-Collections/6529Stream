@@ -105,6 +105,15 @@ library StreamEntropyAuxiliaryReads {
             );
             return abi.encode(scope, oldHash, newHash);
         }
+        if (selector == IStreamEntropyFreshRecovery.freshRecoveryReceipt.selector) {
+            return abi.encode(StreamEntropyFreshRecovery.receipt(abi.decode(data[4:], (bytes32))));
+        }
+        if (selector == IStreamEntropyFreshRecovery.artistContentFamilyState.selector) {
+            (uint256 id, bytes32 family) = abi.decode(data[4:], (uint256, bytes32));
+            (bool supported, bytes32 state) =
+                StreamEntropyFreshRecovery.familyState(core, id, family);
+            return abi.encode(supported, state);
+        }
         revert UnknownEntropyRead(selector);
     }
 }
