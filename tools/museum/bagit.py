@@ -51,13 +51,19 @@ def _path(name):
 
 
 def _paths(names):
-    folded = set()
+    folded, prefixes = set(), {}
     for name in names:
         _path(name)
         key = name.casefold()
         if key in folded:
             raise MuseumError("duplicate packaging path")
         folded.add(key)
+        parts = name.split("/")
+        for index in range(1, len(parts)):
+            spelling = "/".join(parts[:index]); canonical = spelling.casefold()
+            if canonical in prefixes and prefixes[canonical] != spelling:
+                raise MuseumError("inconsistent shared-directory casing")
+            prefixes[canonical] = spelling
     for name in folded:
         if any("/".join(name.split("/")[:i]) in folded for i in range(1, len(name.split("/")))):
             raise MuseumError("packaging file/directory collision")
@@ -227,6 +233,9 @@ def verify_bag_files(files, expected_manifest_hash):
     value = loads(raw, maximum=MAX_MANIFEST, canonical=True)
     if not isinstance(value, dict) or "input" not in value:
         raise MuseumError("bag manifest missing input")
+    if value.get("mode") == "stream_bagit_hydrated_package":
+        from .hydration import verify_hydrated_bag_files
+        return verify_hydrated_bag_files(files, expected_manifest_hash)
     rebuilt = build_bag(dumps(value["input"]), {name[5:]: content for name, content in files.items() if name.startswith("data/")})
     if dict(rebuilt.files) != files or rebuilt.manifest != raw:
         raise MuseumError("noncanonical, missing or altered bag content/tags")

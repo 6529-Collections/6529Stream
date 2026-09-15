@@ -226,5 +226,8 @@ a Solidity compiler or claim whole-product deployment or institutional acceptanc
 The additive [BagIt and OCFL transport](../../docs/museum-bagit-ocfl.md) packages
 explicit public dossier/export inputs with exact payload/tag fixity and immutable
 version history. It preserves nested v2 package evidence and qualifications.
-Fetch-dependent bags remain incomplete; source authority, full render inventory,
-genesis registration and institutional ingest are separate requirements.
+Fetch-dependent bags remain incomplete until the separate
+[offline hydration derivative](../../docs/museum-bagit-hydration.md) verifies the
+complete locally supplied missing set against the original commitments. Original
+fetch instructions remain inert provenance. Source authority, full render
+inventory, genesis registration and institutional ingest stay separate.

@@ -59,8 +59,9 @@ An Arweave transaction ID is never treated as the payload digest. Evidence-file
 fixity is checked; receipt authority and dual-family availability remain outside
 this transport verifier. No URL is fetched. Such a bag reports
 `fetch_dependent` and is incomplete under BagIt until the missing payloads are
-supplied; it is never reported as a complete valid bag. Offline hydration is
-not implemented by this batch. Complete all-embedded inputs are supported.
+supplied; it is never reported as a complete valid bag. Complete all-embedded
+inputs are supported. The separate [offline hydration derivative](museum-bagit-hydration.md)
+fulfills the exact missing bytes without changing this original profile.
 Absent optional STATE_EXPORT token-data bytes do not create a fetch dependency.
 
 A declared nested museum v2 package must be wholly embedded, including its
@@ -96,8 +97,9 @@ The verifier checks every historical inventory/sidecar, complete physical and
 logical inventories, content digests, exact retained bags, citation/family,
 predecessor and chronology. It rejects rewritten old state, missing/orphan files,
 future-version references and corrupted content. OCFL ingestion currently
-requires all-embedded complete bags; incomplete fetch-dependent bags return an
-explicit error. The object verifier establishes byte/version correctness, while
+requires complete bags: original all-embedded bags or the explicit verified
+hydration derivative. Incomplete fetch-dependent bags return an explicit error.
+The object verifier establishes byte/version correctness, while
 the BagIt CLI's build/verification path also runs any nested semantic replay.
 No OCFL storage-root layout, repository API, concurrent writer coordination or
 named-repository ingest is implied.
@@ -131,7 +133,7 @@ critical embedding, optional STATE_EXPORT bytes, CLI/no-overwrite behavior,
 literal nested-package semantic replay and synthetic-to-recorded rejection,
 two-version deduplication, chronology/identity/predecessor rejection, and rehashed
 historical-state corruption. Full dossier schemas, actual record admission,
-archival availability, hydration, genesis registration and named institutional
+archival availability, genesis registration and named institutional
 repository ingest remain separate work.
 
 The byte layout follows [RFC 8493](https://www.rfc-editor.org/rfc/rfc8493.html)
