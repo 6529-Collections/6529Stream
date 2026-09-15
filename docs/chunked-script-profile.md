@@ -141,3 +141,7 @@ boundaries. ABI/type checking and selected-product bytecode sizing do not claim
 these test bodies passed. Focused native runtime and combined current-stack
 validation remain pending, as do the broader snapshot/export, diagnostic status,
 renderer-vector and gas-conformance requirements.
+
+The separate [chunked collection snapshot profile](integrations/chunked-collection-snapshots.md)
+embeds complete ordered script/library bytes and provides an offline validator/exporter.
+It preserves the original inline snapshot format and does not treat compact view links as complete exports.

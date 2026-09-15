@@ -143,22 +143,14 @@ contract StreamCollectionSnapshots is IStreamCollectionSnapshots, StreamGasParam
         r.manifestBytes = uint32(canonical.length);
         r.recordedAt = uint64(block.timestamp);
         hash = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_NATIVE_SNAPSHOT_RECORD_V1"),
-                deploymentChainId,
-                address(this),
-                core,
-                metadataHost,
-                p,
-                r
-            )
+            abi.encode(_recordDomain(), deploymentChainId, address(this), core, metadataHost, p, r)
         );
         r.recordHash = hash;
         bytes32 priorChain =
             p.expectedHead == 0 ? bytes32(0) : _receipts[p.expectedHead].recordChainHash;
         r.recordChainHash = keccak256(
             abi.encode(
-                keccak256("6529STREAM_NATIVE_SNAPSHOT_CHAIN_V1"),
+                _chainDomain(),
                 deploymentChainId,
                 address(this),
                 core,
@@ -168,7 +160,9 @@ contract StreamCollectionSnapshots is IStreamCollectionSnapshots, StreamGasParam
                 hash
             )
         );
-        StreamSnapshotManifestBytes.retain(_manifests[hash], chunkStore, canonical);
+        StreamSnapshotManifestBytes.retainBounded(
+            _manifests[hash], chunkStore, canonical, _manifestLimit()
+        );
         _publications[hash] = p;
         _receipts[hash] = r;
         _ids[p.collectionId][p.snapshotId] = hash;
@@ -215,7 +209,7 @@ contract StreamCollectionSnapshots is IStreamCollectionSnapshots, StreamGasParam
 
     function snapshotManifestBytes(bytes32 hash) external view override returns (bytes memory) {
         _known(hash);
-        return StreamSnapshotManifestBytes.read(_manifests[hash]);
+        return StreamSnapshotManifestBytes.readBounded(_manifests[hash], _manifestLimit());
     }
 
     function snapshotManifestPointer(uint256 cid, bytes32 id)
@@ -268,7 +262,9 @@ contract StreamCollectionSnapshots is IStreamCollectionSnapshots, StreamGasParam
         // Revalidate every live source and retained byte without serializing those same values again.
         if (
             _sourceHash(d, native, entropy) != r.sourceHash
-                || StreamSnapshotManifestBytes.requireIntact(_manifests[hash]) != r.manifestHash
+                || StreamSnapshotManifestBytes.requireIntactBounded(
+                        _manifests[hash], _manifestLimit()
+                    ) != r.manifestHash
         ) {
             revert StreamSnapshotTypes.SnapshotSource();
         }
@@ -413,8 +409,9 @@ contract StreamCollectionSnapshots is IStreamCollectionSnapshots, StreamGasParam
     }
 
     function _receipt(StreamSnapshotTypes.Publication memory p, address publisher)
-        private
+        internal
         view
+        virtual
         returns (StreamSnapshotTypes.Receipt memory r)
     {
         r.collectionId = p.collectionId;
@@ -463,7 +460,7 @@ contract StreamCollectionSnapshots is IStreamCollectionSnapshots, StreamGasParam
     function _assemble(
         StreamSnapshotTypes.Publication memory p,
         StreamSnapshotTypes.Receipt memory r
-    ) private view returns (bytes32 sourceHash, bytes memory canonical) {
+    ) internal view virtual returns (bytes32 sourceHash, bytes memory canonical) {
         StreamSnapshotTypes.Dependencies memory d = dependencies();
         (
             StreamSnapshotTypes.NativeFacts memory native,
@@ -477,7 +474,7 @@ contract StreamCollectionSnapshots is IStreamCollectionSnapshots, StreamGasParam
         StreamSnapshotTypes.Dependencies memory d,
         StreamSnapshotTypes.Publication memory p
     )
-        private
+        internal
         view
         returns (
             StreamSnapshotTypes.NativeFacts memory native,
@@ -485,7 +482,7 @@ contract StreamCollectionSnapshots is IStreamCollectionSnapshots, StreamGasParam
         )
     {
         _definitions(d);
-        native = StreamSnapshotSourceReads.requireCurrent(d, p.collectionId);
+        native = _nativeSources(d, p.collectionId);
         if (d.readGas > type(uint32).max || d.inventoryGas > type(uint32).max) {
             revert StreamSnapshotTypes.SnapshotConfiguration();
         }
@@ -512,7 +509,7 @@ contract StreamCollectionSnapshots is IStreamCollectionSnapshots, StreamGasParam
         StreamSnapshotTypes.Dependencies memory d,
         StreamSnapshotTypes.NativeFacts memory native,
         StreamFinalityCoordinatorPolicyEvidence memory entropy
-    ) private view returns (bytes32) {
+    ) internal view virtual returns (bytes32) {
         return keccak256(
             abi.encode(
                 keccak256("6529STREAM_NATIVE_SNAPSHOT_SOURCES_V1"),
@@ -526,7 +523,7 @@ contract StreamCollectionSnapshots is IStreamCollectionSnapshots, StreamGasParam
         );
     }
 
-    function _definitions(StreamSnapshotTypes.Dependencies memory d) private view {
+    function _definitions(StreamSnapshotTypes.Dependencies memory d) internal view virtual {
         StreamWorkRecordContext.Dependencies memory defs;
         for (uint256 i; i < 4; ++i) {
             defs.targets[i] = d.targets[i];
@@ -561,6 +558,28 @@ contract StreamCollectionSnapshots is IStreamCollectionSnapshots, StreamGasParam
             keccak256("RAW_BYTES"),
             true
         );
+    }
+
+    // Fixed profile implementations override only interpretation; publication authority and lineage stay here.
+    function _nativeSources(StreamSnapshotTypes.Dependencies memory d, uint256 cid)
+        internal
+        view
+        virtual
+        returns (StreamSnapshotTypes.NativeFacts memory)
+    {
+        return StreamSnapshotSourceReads.requireCurrent(d, cid);
+    }
+
+    function _recordDomain() internal pure virtual returns (bytes32) {
+        return keccak256("6529STREAM_NATIVE_SNAPSHOT_RECORD_V1");
+    }
+
+    function _chainDomain() internal pure virtual returns (bytes32) {
+        return keccak256("6529STREAM_NATIVE_SNAPSHOT_CHAIN_V1");
+    }
+
+    function _manifestLimit() internal pure virtual returns (uint256) {
+        return 524288;
     }
 
     function _head(uint256 cid) private view returns (bytes32) {

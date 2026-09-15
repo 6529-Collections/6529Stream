@@ -41,7 +41,7 @@ interface SnapshotVm {
 }
 
 contract SnapshotFixedConsumer {
-    StreamFinalitySnapshotReads.Dependencies private dependencies;
+    StreamFinalitySnapshotReads.Dependencies internal dependencies;
 
     constructor(StreamFinalitySnapshotReads.Dependencies memory d) {
         dependencies = d;
@@ -65,7 +65,7 @@ contract SnapshotFixedConsumer {
 }
 
 contract SnapshotManifestHarness {
-    StreamSnapshotManifestBytes.Manifest private saved;
+    StreamSnapshotManifestBytes.Manifest internal saved;
 
     function retain(address store, bytes memory raw) external {
         StreamSnapshotManifestBytes.retain(saved, store, raw);
@@ -85,8 +85,8 @@ contract SnapshotManifestHarness {
 contract SnapshotArchiveBoundary {
     address public immutable core;
     address public immutable schemaRegistry;
-    F.Coverage private row;
-    address private pointer;
+    F.Coverage internal row;
+    address internal pointer;
     bool public current = true;
 
     constructor(address c, address s) {
@@ -143,29 +143,29 @@ contract SnapshotArchiveBoundary {
 ///      native Coordinator policies, checkpoint and complete stored leaf-manifest verification.
 /// @dev Core/Executor, artist authorization, seed production and archive-family receipts are
 ///      explicit boundaries. Safe publication uses real upstream threshold signatures.
-contract StreamCollectionSnapshotsTest is
+abstract contract CollectionSnapshotsFixture is
     ContentRootPublicationFixture,
     EntropyTimeAuthorityFixture
 {
     event log_named_uint(string key, uint256 value);
-    SnapshotVm private constant cheat =
+    SnapshotVm internal constant cheat =
         SnapshotVm(address(uint160(uint256(keccak256("hevm cheat code")))));
-    StreamCollectionSnapshots private snapshots;
-    StreamCollectionTokenInventory private inventory;
-    StreamFinalityScopeMembership private membership;
-    StreamFinalityCoordinatorInventory private coordinators;
-    StreamOnchainContentCheckpoint private checkpoint;
-    StreamContentLeafManifest private leaves;
-    SnapshotArchiveBoundary private archive;
-    StreamEntropyCoordinator private first;
-    StreamEntropyCoordinator private second;
+    StreamCollectionSnapshots internal snapshots;
+    StreamCollectionTokenInventory internal inventory;
+    StreamFinalityScopeMembership internal membership;
+    StreamFinalityCoordinatorInventory internal coordinators;
+    StreamOnchainContentCheckpoint internal checkpoint;
+    StreamContentLeafManifest internal leaves;
+    SnapshotArchiveBoundary internal archive;
+    StreamEntropyCoordinator internal first;
+    StreamEntropyCoordinator internal second;
     MockEntropyRoleRegistry public roleRegistry;
-    bytes32 private inventoryPlan;
-    bytes32 private rootRecord;
-    bool private maximum;
-    bytes private imageBytes;
+    bytes32 internal inventoryPlan;
+    bytes32 internal rootRecord;
+    bool internal maximum;
+    bytes internal imageBytes;
 
-    function setUp() public override {
+    function setUp() public virtual override {
         super.setUp();
         if (maximum) {
             core.setMinted(0);
@@ -183,6 +183,7 @@ contract StreamCollectionSnapshotsTest is
             );
             router.setCollectionScript(1, _repeat(8192));
         }
+        _profileSetup();
         // Accepted-at and registry eligibility are explicit fixture additions, not production edits.
         IStreamCollectionArtistRegistry.Attribution memory a = artist.attribution(1);
         a.acceptedAt = 999;
@@ -262,10 +263,7 @@ contract StreamCollectionSnapshotsTest is
         inventoryPlan = coordinators.beginInventory(_scope());
         coordinators.appendInventory(inventoryPlan, 2);
         router.lockDisplayMetadata(1);
-        bytes32[] memory locks = new bytes32[](3);
-        locks[0] = keccak256("SCRIPT");
-        locks[1] = keccak256("MEDIA_MANIFEST");
-        locks[2] = keccak256("BASE_URI");
+        bytes32[] memory locks = _profileLocks();
         for (uint256 i; i < locks.length; ++i) {
             for (uint256 j = i + 1; j < locks.length; ++j) {
                 if (locks[j] < locks[i]) (locks[i], locks[j]) = (locks[j], locks[i]);
@@ -279,7 +277,7 @@ contract StreamCollectionSnapshotsTest is
             address(inventory),
             address(executor),
             _gas("CONTENT_CHECKPOINT_READ_GAS", 500000, 1),
-            _gas("CONTENT_CHECKPOINT_RENDER_GAS", 3000000, 1)
+            _gas("CONTENT_CHECKPOINT_RENDER_GAS", _checkpointRenderGas(), 1)
         );
         archive = new SnapshotArchiveBoundary(address(core), address(schemas));
         leaves = new StreamContentLeafManifest(
@@ -323,10 +321,10 @@ contract StreamCollectionSnapshotsTest is
             );
         }
         _root();
-        snapshots = new StreamCollectionSnapshots(_dependencies(), address(executor), _configs());
+        snapshots = _createSnapshotHost();
     }
 
-    function _native() private returns (StreamEntropyCoordinator c) {
+    function _native() internal returns (StreamEntropyCoordinator c) {
         if (address(roleRegistry) == address(0)) {
             roleRegistry = new MockEntropyRoleRegistry(address(this));
         }
@@ -351,21 +349,13 @@ contract StreamCollectionSnapshotsTest is
         c.registerEntropyScope(1, 1, keccak256("scope"));
     }
 
-    function _root() private {
-        bytes32 cp = checkpoint.beginCollectionCheckpoint(1);
+    function _root() internal {
+        bytes32 cp = _beginCheckpoint();
         IStreamOnchainContentCheckpoint.TokenPayload[] memory payloads =
             new IStreamOnchainContentCheckpoint.TokenPayload[](2);
         for (uint256 i; i < 2; ++i) {
             uint256 id = i + 1;
-            bytes memory html = abi.encodePacked(
-                "<html><head></head><body><script>const tokenId=",
-                Strings.toString(id),
-                ";const tokenHash='",
-                Strings.toHexString(uint256(77), 32),
-                "';const tokenDataBase64='AP8=';",
-                maximum ? _repeat(8192) : "draw();",
-                "</script></body></html>"
-            );
+            bytes memory html = _checkpointHTML(id);
             payloads[i] = IStreamOnchainContentCheckpoint.TokenPayload(id, imageBytes, html);
         }
         checkpoint.appendCheckpointTokens(cp, payloads);
@@ -396,12 +386,12 @@ contract StreamCollectionSnapshotsTest is
         rootRecord = router.publishVerifiedTokenContentRoot(p);
     }
 
-    function _scope() private pure returns (StreamFinalityScope memory) {
+    function _scope() internal pure returns (StreamFinalityScope memory) {
         return StreamFinalityScope(StreamFinalityScopeType.COLLECTION, 1, 0, 0);
     }
 
     function _gas(string memory name, uint256 cap, uint8 failure)
-        private
+        internal
         pure
         returns (IStreamGasParameterHost.GasParameterConfig memory)
     {
@@ -409,7 +399,7 @@ contract StreamCollectionSnapshotsTest is
     }
 
     function _configs()
-        private
+        internal
         pure
         returns (IStreamGasParameterHost.GasParameterConfig[4] memory c)
     {
@@ -419,7 +409,7 @@ contract StreamCollectionSnapshotsTest is
         c[3] = _gas("SNAPSHOT_INVENTORY_GAS", 3000000, 1);
     }
 
-    function _dependencies() private view returns (StreamSnapshotTypes.Dependencies memory d) {
+    function _dependencies() internal view returns (StreamSnapshotTypes.Dependencies memory d) {
         d.targets = [
             address(core),
             address(metadata),
@@ -445,7 +435,7 @@ contract StreamCollectionSnapshotsTest is
         string memory name,
         IStreamSchemaRegistry.DocumentKind kind,
         bytes memory raw
-    ) private {
+    ) internal {
         bytes32[] memory chunks = _upload(raw);
         IStreamSchemaRegistry.DocumentSpec memory spec = IStreamSchemaRegistry.DocumentSpec(
             name, kind, keccak256(raw), schemas.RAW_BYTES(), 0, "", uint32(raw.length)
@@ -456,7 +446,7 @@ contract StreamCollectionSnapshotsTest is
         );
     }
 
-    function _upload(bytes memory raw) private returns (bytes32[] memory chunks) {
+    function _upload(bytes memory raw) internal returns (bytes32[] memory chunks) {
         chunks = new bytes32[]((raw.length + 8191) / 8192);
         for (uint256 i; i < chunks.length; ++i) {
             uint256 length = raw.length - i * 8192;
@@ -469,7 +459,7 @@ contract StreamCollectionSnapshotsTest is
         }
     }
 
-    function _displayGrant(address account, bool enabled) private {
+    function _displayGrant(address account, bool enabled) internal {
         (bytes32 s, bytes32 o, bytes32 n) =
             metadata.familyWriterTransition(1, StreamRecordFamilies.IDENTITY, 7, account, enabled);
         executor.execute(
@@ -483,7 +473,7 @@ contract StreamCollectionSnapshotsTest is
         );
     }
 
-    function _p() private view returns (StreamSnapshotTypes.Publication memory p) {
+    function _p() internal view returns (StreamSnapshotTypes.Publication memory p) {
         StreamSnapshotTypes.Receipt memory r = snapshots.currentSnapshot(1);
         p = StreamSnapshotTypes.Publication(
             1,
@@ -498,7 +488,7 @@ contract StreamCollectionSnapshotsTest is
         );
     }
 
-    function _repeat(uint256 count) private pure returns (string memory) {
+    function _repeat(uint256 count) internal pure returns (string memory) {
         bytes memory out = new bytes(count);
         for (uint256 i; i < count; ++i) {
             out[i] = "x";
@@ -506,7 +496,7 @@ contract StreamCollectionSnapshotsTest is
         return string(out);
     }
 
-    function _consumer() private returns (SnapshotFixedConsumer) {
+    function _consumer() internal returns (SnapshotFixedConsumer) {
         return new SnapshotFixedConsumer(
             StreamFinalitySnapshotReads.Dependencies(
                 address(core),
@@ -522,7 +512,7 @@ contract StreamCollectionSnapshotsTest is
         );
     }
 
-    function _lock(bytes32 lockId) private {
+    function _lock(bytes32 lockId) internal {
         (bytes32 s, bytes32 o, bytes32 n) = snapshots.lockTransition(1, lockId);
         cheat.mockCall(
             address(executor),
@@ -533,7 +523,7 @@ contract StreamCollectionSnapshotsTest is
         snapshots.lockSnapshots(1, lockId);
     }
 
-    function _cool() private {
+    function _cool() internal {
         StreamSnapshotTypes.Dependencies memory d = _dependencies();
         for (uint256 i; i < 9; ++i) {
             safeVm.cool(d.targets[i]);
@@ -547,7 +537,7 @@ contract StreamCollectionSnapshotsTest is
         safeVm.cool(address(StreamFinalitySnapshotReads));
     }
 
-    function _publish(address publisher) private returns (bytes32 hash, bytes memory canonical) {
+    function _publish(address publisher) internal returns (bytes32 hash, bytes memory canonical) {
         StreamSnapshotTypes.Publication memory p = _p();
         (p.expectedSourceHash, canonical) = snapshots.previewSnapshot(p, publisher);
         _upload(canonical);
@@ -555,6 +545,42 @@ contract StreamCollectionSnapshotsTest is
         hash = snapshots.publishSnapshot(p);
     }
 
+    function _profileSetup() internal virtual { }
+
+    function _profileLocks() internal pure virtual returns (bytes32[] memory locks) {
+        locks = new bytes32[](3);
+        locks[0] = keccak256("SCRIPT");
+        locks[1] = keccak256("MEDIA_MANIFEST");
+        locks[2] = keccak256("BASE_URI");
+    }
+
+    function _checkpointRenderGas() internal pure virtual returns (uint256) {
+        return 3000000;
+    }
+
+    function _beginCheckpoint() internal virtual returns (bytes32) {
+        return checkpoint.beginCollectionCheckpoint(1);
+    }
+
+    function _createSnapshotHost() internal virtual returns (StreamCollectionSnapshots) {
+        return new StreamCollectionSnapshots(_dependencies(), address(executor), _configs());
+    }
+
+    function _checkpointHTML(uint256 id) internal view virtual returns (bytes memory) {
+        bytes memory html = abi.encodePacked(
+            "<html><head></head><body><script>const tokenId=",
+            Strings.toString(id),
+            ";const tokenHash='",
+            Strings.toHexString(uint256(77), 32),
+            "';const tokenDataBase64='AP8=';",
+            maximum ? _repeat(8192) : "draw();",
+            "</script></body></html>"
+        );
+        return html;
+    }
+}
+
+contract StreamCollectionSnapshotsTest is CollectionSnapshotsFixture {
     function testActualPublicationReconstructsManifestAndOriginalReceipt() public {
         (bytes32 hash, bytes memory raw) = _publish(address(this));
         StreamSnapshotTypes.Receipt memory r = snapshots.requireCurrent(1, hash, 1);

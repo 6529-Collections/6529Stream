@@ -25,8 +25,17 @@ library StreamSnapshotManifestBytes {
         public
         returns (bytes32 hash)
     {
+        return retainBounded(saved, store, canonical, MAX_MANIFEST_BYTES);
+    }
+
+    function retainBounded(
+        Manifest storage saved,
+        address store,
+        bytes memory canonical,
+        uint256 maximum
+    ) public returns (bytes32 hash) {
         uint256 length = canonical.length;
-        if (saved.byteLength != 0 || length == 0 || length > MAX_MANIFEST_BYTES) {
+        if (saved.byteLength != 0 || maximum > 3000000 || length == 0 || length > maximum) {
             revert InvalidSnapshotManifest();
         }
         hash = keccak256(canonical);
@@ -51,10 +60,18 @@ library StreamSnapshotManifestBytes {
     }
 
     function read(Manifest storage saved) public view returns (bytes memory payload) {
+        return readBounded(saved, MAX_MANIFEST_BYTES);
+    }
+
+    function readBounded(Manifest storage saved, uint256 maximum)
+        public
+        view
+        returns (bytes memory payload)
+    {
         uint256 length = saved.byteLength;
         uint256 count = saved.pointers.length;
         if (
-            length == 0 || length > MAX_MANIFEST_BYTES || count != (length + 8191) / 8192
+            maximum > 3000000 || length == 0 || length > maximum || count != (length + 8191) / 8192
                 || saved.chunkHashes.length != count
         ) revert InvalidSnapshotManifest();
         payload = new bytes(length);
@@ -73,6 +90,14 @@ library StreamSnapshotManifestBytes {
 
     function requireIntact(Manifest storage saved) public view returns (bytes32) {
         return keccak256(read(saved));
+    }
+
+    function requireIntactBounded(Manifest storage saved, uint256 maximum)
+        public
+        view
+        returns (bytes32)
+    {
+        return keccak256(readBounded(saved, maximum));
     }
 
     function _chunk(address pointer, bytes32 hash, uint256 length) private view {

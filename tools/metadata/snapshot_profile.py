@@ -115,12 +115,31 @@ def validate(raw):
             if int(row[name], 16) == 0:
                 raise ValueError(f"required nonzero source field: {name}")
 
-    chain_id = number(value["chainId"])
-    collection_id = number(value["collectionId"], nonzero=True)
     script = value["script"]
     length = text_bound(script["content"], 8192, True)
     if number(script["byteLength"], 8192, True) != length or digest(script["content"].encode()) != script["contentHash"]:
         raise ValueError("exact script bytes")
+    return validate_common(value)
+
+
+def validate_common(value):
+    """Shared source/authority/inventory checks after a profile-specific closed schema check."""
+    def number(text, maximum=(1 << 256) - 1, nonzero=False):
+        if not re.fullmatch(r"0|[1-9][0-9]*", text) or int(text) > maximum or (nonzero and int(text) == 0):
+            raise ValueError("exact unsigned quantity")
+        return int(text)
+    def text_bound(text, maximum, nonempty=False):
+        length = len(text.encode("utf8"))
+        if length > maximum or (nonempty and length == 0):
+            raise ValueError("source text byte bound")
+        return length
+    def nonzero_fields(row, names):
+        for name in names.split():
+            if int(row[name], 16) == 0:
+                raise ValueError(f"required nonzero source field: {name}")
+
+    chain_id = number(value["chainId"])
+    collection_id = number(value["collectionId"], nonzero=True)
     metadata = value["metadata"]
     for key, cap in (("name", 256), ("description", 2048), ("imageURI", 2048), ("animationBaseURI", 2048)):
         text_bound(metadata[key], cap)

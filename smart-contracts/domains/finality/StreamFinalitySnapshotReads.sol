@@ -5,6 +5,9 @@ import "../../interfaces/stream/finality/StreamFinalitySnapshotTypes.sol";
 import "../../interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol";
 import "../../interfaces/stream/metadata/IStreamCollectionSnapshots.sol";
 import "../records/StreamSnapshotDefinitions.sol";
+import {
+    StreamChunkedSnapshotDefinitions as ChunkedDefinitions
+} from "../records/StreamChunkedSnapshotDefinitions.sol";
 import "./StreamFinalityRouterEvidence.sol";
 
 /// @notice Current native snapshot evidence from a fixed actual authenticated producer.
@@ -30,6 +33,35 @@ library StreamFinalitySnapshotReads {
         bytes32 recordHash,
         uint64 revision
     ) public view returns (StreamFinalitySnapshotEvidence memory e) {
+        return _current(d, scope, recordHash, revision, false);
+    }
+
+    function requireCurrentChunked(
+        Dependencies memory d,
+        StreamFinalityScope memory scope,
+        bytes32 recordHash,
+        uint64 revision
+    ) public view returns (StreamFinalitySnapshotEvidence memory) {
+        return _current(d, scope, recordHash, revision, true);
+    }
+
+    function requireLockedChunked(
+        Dependencies memory d,
+        StreamFinalityScope memory scope,
+        bytes32 recordHash,
+        uint64 revision
+    ) public view returns (StreamFinalitySnapshotEvidence memory e) {
+        e = _current(d, scope, recordHash, revision, true);
+        if (!e.locked) revert InvalidSnapshotEvidence();
+    }
+
+    function _current(
+        Dependencies memory d,
+        StreamFinalityScope memory scope,
+        bytes32 recordHash,
+        uint64 revision,
+        bool chunked
+    ) private view returns (StreamFinalitySnapshotEvidence memory e) {
         if (
             d.chainId != block.chainid || d.readGas < 50000 || d.validationGas < d.readGas
                 || scope.scopeType != StreamFinalityScopeType.COLLECTION || scope.collectionId == 0
@@ -57,7 +89,7 @@ library StreamFinalitySnapshotReads {
         (StreamSnapshotTypes.Publication memory p, StreamSnapshotTypes.Receipt memory r) =
             abi.decode(raw, (StreamSnapshotTypes.Publication, StreamSnapshotTypes.Receipt));
         _canonical(raw, abi.encode(p, r));
-        _original(d, scope, p, r, recordHash, revision);
+        _original(d, scope, p, r, recordHash, revision, chunked);
         raw = StreamFinalityRouterEvidence.read(
             d.snapshots,
             abi.encodeCall(
@@ -90,7 +122,9 @@ library StreamFinalitySnapshotReads {
         );
         e.inputHash = keccak256(
             abi.encode(
-                keccak256("6529STREAM_FINALITY_NATIVE_SNAPSHOT_INPUT_V1"),
+                chunked
+                    ? keccak256("6529STREAM_FINALITY_CHUNKED_SNAPSHOT_INPUT_V1")
+                    : keccak256("6529STREAM_FINALITY_NATIVE_SNAPSHOT_INPUT_V1"),
                 d.chainId,
                 d.core,
                 d.metadata,
@@ -118,15 +152,16 @@ library StreamFinalitySnapshotReads {
         StreamSnapshotTypes.Publication memory p,
         StreamSnapshotTypes.Receipt memory r,
         bytes32 recordHash,
-        uint64 revision
+        uint64 revision,
+        bool chunked
     ) private pure {
         if (
             r.recordHash != recordHash || r.collectionId != scope.collectionId
                 || p.collectionId != r.collectionId || r.revision != revision
                 || r.revision != p.expectedRevision + 1 || r.predecessor != p.expectedHead
                 || r.snapshotId == 0 || r.snapshotId != p.snapshotId || r.manifestHash == 0
-                || r.manifestBytes == 0 || r.manifestBytes > 524288 || r.sourceHash == 0
-                || r.sourceHash != p.expectedSourceHash || r.inventoryPlan == 0
+                || r.manifestBytes == 0 || r.manifestBytes > (chunked ? 3000000 : 524288)
+                || r.sourceHash == 0 || r.sourceHash != p.expectedSourceHash || r.inventoryPlan == 0
                 || r.inventoryPlan != p.inventoryPlan || r.publisher == address(0)
                 || (r.authorizationClass != 7 && r.authorizationClass != 8)
                 || (r.displayAuthorizationClass != 7 && r.displayAuthorizationClass != 8)
@@ -134,9 +169,18 @@ library StreamFinalitySnapshotReads {
                 || r.effectiveAt == 0 || r.effectiveAt != p.effectiveAt
                 || r.effectiveAt > r.recordedAt || r.reasonHash == 0 || r.reasonHash != p.reasonHash
                 || r.recordChainHash == 0 || bytes(p.manifestURI).length > 2048
-                || r.schemaDefinitionHash != StreamSnapshotDefinitions.SCHEMA_HASH
-                || r.profileDefinitionHash != StreamSnapshotDefinitions.PROFILE_HASH
-                || r.canonicalizationDefinitionHash != StreamSnapshotDefinitions.CANON_HASH
+                || r.schemaDefinitionHash
+                    != (chunked
+                            ? ChunkedDefinitions.SCHEMA_HASH
+                            : StreamSnapshotDefinitions.SCHEMA_HASH)
+                || r.profileDefinitionHash
+                    != (chunked
+                            ? ChunkedDefinitions.PROFILE_HASH
+                            : StreamSnapshotDefinitions.PROFILE_HASH)
+                || r.canonicalizationDefinitionHash
+                    != (chunked
+                            ? ChunkedDefinitions.CANON_HASH
+                            : StreamSnapshotDefinitions.CANON_HASH)
         ) {
             revert InvalidSnapshotEvidence();
         }
@@ -146,7 +190,9 @@ library StreamFinalitySnapshotReads {
         r.recordChainHash = 0;
         bytes32 computed = keccak256(
             abi.encode(
-                keccak256("6529STREAM_NATIVE_SNAPSHOT_RECORD_V1"),
+                chunked
+                    ? keccak256("6529STREAM_CHUNKED_SNAPSHOT_RECORD_V1")
+                    : keccak256("6529STREAM_NATIVE_SNAPSHOT_RECORD_V1"),
                 d.chainId,
                 d.snapshots,
                 d.core,

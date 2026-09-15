@@ -12,6 +12,11 @@ import "../metadata/StreamMetadataSubjects.sol";
 import "../finality/StreamFinalityRouterEvidence.sol";
 import "../finality/StreamContentRootSchemas.sol";
 
+import { StreamChunkedContentEvidence } from "../finality/StreamChunkedContentEvidence.sol";
+import {
+    IStreamChunkedContentCheckpoint
+} from "../../interfaces/stream/finality/IStreamChunkedContentCheckpoint.sol";
+
 /// @notice Reconstructs the native source side of an assembled snapshot from fixed actual hosts.
 /// @dev Exact configured script bytes are retained. The renderer's contract read-set profile
 ///      is not proof that arbitrary JavaScript has no web or execution-environment dependencies.
@@ -20,6 +25,22 @@ library StreamSnapshotSourceReads {
 
     function requireCurrent(StreamSnapshotTypes.Dependencies memory d, uint256 collectionId)
         public
+        view
+        returns (StreamSnapshotTypes.NativeFacts memory f)
+    {
+        return _current(d, collectionId, false);
+    }
+
+    function requireCurrentChunked(StreamSnapshotTypes.Dependencies memory d, uint256 collectionId)
+        public
+        view
+        returns (StreamSnapshotTypes.NativeFacts memory f)
+    {
+        return _current(d, collectionId, true);
+    }
+
+    function _current(StreamSnapshotTypes.Dependencies memory d, uint256 collectionId, bool chunked)
+        private
         view
         returns (StreamSnapshotTypes.NativeFacts memory f)
     {
@@ -52,7 +73,10 @@ library StreamSnapshotSourceReads {
             bytes(f.source.name).length > 256 || bytes(f.source.description).length > 2048
                 || bytes(f.source.imageURI).length > 2048
                 || bytes(f.source.animationBaseURI).length > 2048
-                || bytes(f.source.script).length == 0 || bytes(f.source.script).length > 8192
+                || (chunked
+                        ? bytes(f.source.script).length != 0
+                        : (bytes(f.source.script).length == 0
+                            || bytes(f.source.script).length > 8192))
         ) {
             revert StreamSnapshotTypes.SnapshotSource();
         }
@@ -65,13 +89,16 @@ library StreamSnapshotSourceReads {
         f.serving = abi.decode(raw, (IStreamMetadataServingFacts.ServingFacts));
         _canonical(d.targets[4], raw, abi.encode(f.serving));
         if (
-            !f.serving.configured || f.serving.presentationProfile != PRESENTATION
+            !f.serving.configured
+                || f.serving.presentationProfile
+                    != (chunked ? StreamChunkedContentEvidence.PROFILE : PRESENTATION)
                 || f.serving.mode != keccak256("ONCHAIN") || !f.serving.scriptLocked
                 || !f.serving.mediaLocked || !f.serving.baseURILocked
                 || !f.serving.dependenciesLocked || !f.serving.artistIdentityLocked
                 || !f.serving.displayMetadataLocked
-                || f.serving.scriptHash != keccak256(bytes(f.source.script))
-                || f.serving.scriptBytes != bytes(f.source.script).length
+                || (!chunked
+                    && (f.serving.scriptHash != keccak256(bytes(f.source.script))
+                        || f.serving.scriptBytes != bytes(f.source.script).length))
                 || f.serving.imageURIHash != keccak256(bytes(f.source.imageURI))
                 || f.serving.animationBaseURIHash != keccak256(bytes(f.source.animationBaseURI))
         ) {
@@ -96,26 +123,49 @@ library StreamSnapshotSourceReads {
         ) {
             revert StreamSnapshotTypes.SnapshotSource();
         }
-        (f.presentationProfile, f.rendererContext, f.dependencyProfile) = abi.decode(
-            _read(
-                d.targets[4],
-                abi.encodeCall(IStreamMetadataRenderingProfile.renderingProfile, ()),
-                96,
-                d.readGas
-            ),
-            (bytes32, bytes32, bytes32)
-        );
-        if (
-            f.presentationProfile != PRESENTATION
-                || f.rendererContext != keccak256("6529STREAM_METADATA_TOKEN_RENDER_CONTEXT_V1")
-                || f.dependencyProfile
-                    != keccak256("6529STREAM_METADATA_RENDER_NO_EXTERNAL_READS_V1")
-        ) {
-            revert StreamSnapshotTypes.SnapshotSource();
+        if (chunked) {
+            StreamChunkedContentEvidence.Evidence memory e = StreamChunkedContentEvidence.source(
+                d.targets[0], d.targets[4], d.chainId, collectionId, f.serving, d.sourceGas, true
+            );
+            if (e.selection.host != d.targets[1] || e.selection.codeHash != d.codeHashes[1]) {
+                revert StreamSnapshotTypes.SnapshotSource();
+            }
+            f.presentationProfile = StreamChunkedContentEvidence.PROFILE;
+            (f.rendererContext, f.dependencyProfile) =
+                StreamChunkedContentEvidence.renderer(f.serving, d.readGas);
+        } else {
+            (f.presentationProfile, f.rendererContext, f.dependencyProfile) = abi.decode(
+                _read(
+                    d.targets[4],
+                    abi.encodeCall(IStreamMetadataRenderingProfile.renderingProfile, ()),
+                    96,
+                    d.readGas
+                ),
+                (bytes32, bytes32, bytes32)
+            );
+            if (
+                f.presentationProfile != PRESENTATION
+                    || f.rendererContext != keccak256("6529STREAM_METADATA_TOKEN_RENDER_CONTEXT_V1")
+                    || f.dependencyProfile
+                        != keccak256("6529STREAM_METADATA_RENDER_NO_EXTERNAL_READS_V1")
+            ) {
+                revert StreamSnapshotTypes.SnapshotSource();
+            }
         }
         (f.routerVersion, f.routerManifestHash) =
             StreamFinalityRouterEvidence.moduleIdentity(d.targets[4], d.sourceGas);
         _content(d, f);
+        if (
+            chunked
+                && _word(
+                        d,
+                        d.targets[6],
+                        abi.encodeCall(
+                            IStreamChunkedContentCheckpoint.checkpointProfile,
+                            (f.leafManifest.checkpointHash)
+                        )
+                    ) != keccak256("6529STREAM_CONTENT_CHUNKED_ONCHAIN_V1")
+        ) revert StreamSnapshotTypes.SnapshotSource();
     }
 
     function bindings(StreamSnapshotTypes.Dependencies memory d) public view {

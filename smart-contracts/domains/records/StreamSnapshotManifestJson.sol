@@ -59,7 +59,7 @@ library StreamSnapshotManifestJson {
     function _publication(
         StreamSnapshotTypes.Publication memory p,
         StreamSnapshotTypes.Receipt memory r
-    ) private pure returns (string memory) {
+    ) internal pure returns (string memory) {
         string memory out = string.concat(
             '{"authorizationClass":',
             StreamRecordJson.unsigned(r.authorizationClass),
@@ -95,7 +95,7 @@ library StreamSnapshotManifestJson {
     }
 
     function _metadata(StreamSnapshotTypes.NativeFacts memory n)
-        private
+        internal
         pure
         returns (string memory)
     {
@@ -171,7 +171,7 @@ library StreamSnapshotManifestJson {
     }
 
     function _renderer(StreamSnapshotTypes.NativeFacts memory n)
-        private
+        internal
         pure
         returns (string memory)
     {
@@ -196,7 +196,7 @@ library StreamSnapshotManifestJson {
         return out;
     }
 
-    function _root(StreamSnapshotTypes.NativeFacts memory n) private pure returns (string memory) {
+    function _root(StreamSnapshotTypes.NativeFacts memory n) internal pure returns (string memory) {
         IStreamContentRootPublication.Record memory r = n.contentRoot;
         string memory out = string.concat(
             '{"artistConsent":',
@@ -288,7 +288,7 @@ library StreamSnapshotManifestJson {
     }
 
     function _sources(StreamSnapshotTypes.Dependencies memory d)
-        private
+        internal
         pure
         returns (string memory out)
     {
@@ -310,7 +310,7 @@ library StreamSnapshotManifestJson {
     }
 
     function _entropy(StreamFinalityCoordinatorPolicyEvidence memory e)
-        private
+        internal
         pure
         returns (string memory)
     {
@@ -388,11 +388,11 @@ library StreamSnapshotManifestJson {
         return _account(value);
     }
 
-    function _hash(bytes32 value) private pure returns (string memory) {
+    function _hash(bytes32 value) internal pure returns (string memory) {
         return _quotedHex(value, 32);
     }
 
-    function _account(address value) private pure returns (string memory) {
+    function _account(address value) internal pure returns (string memory) {
         if (value == address(0)) revert StreamRecordJson.InvalidJsonWitness();
         return _quotedHex(bytes32(uint256(uint160(value)) << 96), 20);
     }
