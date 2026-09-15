@@ -22,6 +22,8 @@ import {
     IStreamArtistSnapshotRoyaltyFacts
 } from "../../interfaces/stream/artist/IStreamArtistSnapshotRoyaltyFacts.sol";
 
+import { StreamRevenueArtistSelection } from "./StreamRevenueArtistSelection.sol";
+
 /// @notice Governance-owned live royalties and explicitly elected prepared collection snapshots.
 /// @dev Default/collection terms are independent of primary-sale profiles. ERC-2981 discloses royalties;
 ///      it does not restrict transfers or require a marketplace to pay them.
@@ -329,22 +331,21 @@ contract StreamRoyaltyResolver is
         private
         view
     {
+        IStreamArtistAttribution currentArtist = _requireSelectedArtistRegistry();
         if (_snapshots.elections[collectionId].mode == 2) {
             IStreamRoyaltySnapshot.Source memory source = StreamRoyaltySnapshot.source(
                 _snapshots, candidate, _snapshotContext(), collectionId, false
             );
-            if (
-                StreamRoyaltyPlatformAdmission.requireCurrent(
-                    address(boundCore), artistRegistry, artistRegistryCodeHash, collectionId
-                )
-            ) return;
-            if (artistRegistry.attribution(collectionId).nominationHash == bytes32(0)) {
+            if (StreamRoyaltyPlatformAdmission.requireCurrent(
+                    address(boundCore), currentArtist, address(currentArtist).codehash, collectionId
+                )) return;
+            if (currentArtist.attribution(collectionId).nominationHash == bytes32(0)) {
                 revert ArtistEconomicsAuthorizationRequired(collectionId);
             }
             _requireBoundArtistEconomicsHash(
                 collectionId, 1, collectionId, source.modeAssignmentHash
             );
-        } else if (artistRegistry.attribution(collectionId).nominationHash != bytes32(0)) {
+        } else if (currentArtist.attribution(collectionId).nominationHash != bytes32(0)) {
             _requireBoundArtistEconomicsHash(
                 collectionId, 1, collectionId, _assignmentHash(candidate, 1, collectionId)
             );
@@ -357,7 +358,8 @@ contract StreamRoyaltyResolver is
         uint256 scopeId,
         bytes32 assignmentHash
     ) private view {
-        if (artistRegistry.attribution(collectionId).nominationHash != bytes32(0)) {
+        IStreamArtistAttribution currentArtist = _requireSelectedArtistRegistry();
+        if (currentArtist.attribution(collectionId).nominationHash != bytes32(0)) {
             _requireBoundArtistEconomicsHash(collectionId, scope, scopeId, assignmentHash);
         }
     }
@@ -368,11 +370,12 @@ contract StreamRoyaltyResolver is
         uint256 scopeId,
         bytes32 assignmentHash
     ) private view {
-        if (!IERC165(address(artistRegistry))
+        IStreamArtistAttribution currentArtist = _requireSelectedArtistRegistry();
+        if (!IERC165(address(currentArtist))
                 .supportsInterface(type(IStreamArtistEconomicsAuthority).interfaceId)) {
             revert ArtistEconomicsAuthorizationRequired(collectionId);
         }
-        IStreamArtistEconomicsAuthority(address(artistRegistry))
+        IStreamArtistEconomicsAuthority(address(currentArtist))
             .requireEconomicsConsent(
                 collectionId, keccak256("ROYALTY_ERC2981"), scope, scopeId, assignmentHash
             );
@@ -507,15 +510,29 @@ contract StreamRoyaltyResolver is
         );
     }
 
-    function _requireSelectedArtistRegistry() private view {
+    function _requireSelectedArtistRegistry() private view returns (IStreamArtistAttribution) {
         (address selected, bytes32 codeHash,,,,,,,,) = IStreamCorePointers(address(boundCore))
             .getSatellitePointer(keccak256("ARTIST_REGISTRY"));
-        if (
-            selected != address(artistRegistry) || selected.code.length == 0
-                || codeHash != artistRegistryCodeHash || selected.codehash != artistRegistryCodeHash
+        if (selected != address(artistRegistry)) {
+            selected = StreamRevenueArtistSelection.successor(
+                StreamRevenueArtistSelection.Context(
+                    address(boundCore),
+                    address(artistRegistry),
+                    artistRegistryCodeHash,
+                    selected,
+                    codeHash,
+                    false,
+                    abi.encodeWithSelector(InvalidArtistRegistryBinding.selector, selected),
+                    0
+                )
+            );
+        } else if (
+            selected.code.length == 0 || codeHash != artistRegistryCodeHash
+                || selected.codehash != artistRegistryCodeHash
         ) {
             revert InvalidArtistRegistryBinding(selected);
         }
+        return IStreamArtistAttribution(selected);
     }
 
     function freezeDefaultRoyalty() external override onlyOwner {
@@ -546,7 +563,7 @@ contract StreamRoyaltyResolver is
     {
         _requireCollection(collectionId);
         _requireLiveRoyaltyMutation(collectionId);
-        _requireSelectedArtistRegistry();
+        IStreamArtistAttribution currentArtist = _requireSelectedArtistRegistry();
         RoyaltyConfig storage item = _collectionRoyalties[collectionId];
         bytes32 currentHash = item.configured ? _assignmentHash(item, 1, collectionId) : bytes32(0);
         if (expectedAssignmentHash == bytes32(0) || expectedAssignmentHash != currentHash) {
@@ -554,9 +571,9 @@ contract StreamRoyaltyResolver is
         }
         if (item.frozen) revert RoyaltyConfigurationFrozen(collectionId);
         if (
-            !IERC165(address(artistRegistry))
+            !IERC165(address(currentArtist))
                     .supportsInterface(type(IStreamArtistEconomicsAuthority).interfaceId)
-                || !IStreamArtistEconomicsAuthority(address(artistRegistry))
+                || !IStreamArtistEconomicsAuthority(address(currentArtist))
                     .isRoyaltyFreezeAuthorized(collectionId, currentHash)
         ) revert ArtistRoyaltyFreezeNotAuthorized(collectionId, currentHash);
         _freeze(item, collectionId);

@@ -17,6 +17,8 @@ import { StreamRoyaltyAssignmentHash } from "./StreamRoyaltyAssignmentHash.sol";
 import { StreamRoyaltyPreparedProof } from "./StreamRoyaltyPreparedProof.sol";
 import { StreamRoyaltyPlatformAdmission } from "./StreamRoyaltyPlatformAdmission.sol";
 
+import { StreamRevenueArtistSelection } from "./StreamRevenueArtistSelection.sol";
+
 /// @notice Fixed linked mode election and snapshot worker in the actual Resolver storage context.
 library StreamRoyaltySnapshot {
     struct Election {
@@ -285,17 +287,35 @@ library StreamRoyaltySnapshot {
     }
 
     function _consent(Context memory x, uint256 collectionId, bytes32 hash) private view {
-        if (
-            StreamRoyaltyPlatformAdmission.requireCurrent(
-                address(x.core), x.artist, x.artistRuntimeHash, collectionId
-            )
-        ) return;
+        (address current, bytes32 currentHash,,,,,,,,) =
+            IStreamCorePointers(address(x.core)).getSatellitePointer(keccak256("ARTIST_REGISTRY"));
+        if (current != address(x.artist)) {
+            current = StreamRevenueArtistSelection.successor(
+                StreamRevenueArtistSelection.Context(
+                    address(x.core),
+                    address(x.artist),
+                    x.artistRuntimeHash,
+                    current,
+                    currentHash,
+                    false,
+                    abi.encodeWithSelector(IStreamRoyaltySnapshot.InvalidRoyaltySnapshot.selector),
+                    0
+                )
+            );
+        } else if (currentHash != x.artistRuntimeHash || current.codehash != x.artistRuntimeHash) {
+            revert IStreamRoyaltySnapshot.InvalidRoyaltySnapshot();
+        }
+
+        if (StreamRoyaltyPlatformAdmission.requireCurrent(
+                address(x.core), IStreamArtistAttribution(current), currentHash, collectionId
+            )) return;
         (address selected, bytes32 runtime,,,,,,,,) =
             IStreamCorePointers(address(x.core)).getSatellitePointer(keccak256("ARTIST_REGISTRY"));
         if (
-            selected != address(x.artist) || runtime != x.artistRuntimeHash
-                || selected.codehash != runtime || runtime == 0
-                || x.artist.attribution(collectionId).nominationHash == 0
+            selected != current || runtime != currentHash || selected.codehash != runtime
+                || runtime == 0
+                || (current == address(x.artist) && currentHash != x.artistRuntimeHash)
+                || IStreamArtistAttribution(current).attribution(collectionId).nominationHash == 0
                 || !IERC165(selected)
                     .supportsInterface(type(IStreamArtistEconomicsAuthority).interfaceId)
         ) {

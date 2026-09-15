@@ -327,7 +327,7 @@ contract StreamRevenueResolver is
         )
     {
         return TemplateRuntime.dynamicFacts(
-            _templates, _templateContext(), collectionId, templateId
+            _templates, _templateContext(true), collectionId, templateId
         );
     }
 
@@ -683,7 +683,7 @@ contract StreamRevenueResolver is
         returns (ResolvedPrimaryAssignment memory resolved)
     {
         _requireRevenueClass(revenueClass);
-        _requireSelectedArtistRegistry();
+        address currentArtist = _requireSelectedArtistRegistry();
         collectionId = _resolveCollectionIdentity(collectionId, tokenId);
         if (tokenId != 0) {
             resolved = _resolvedAt(revenueClass, SCOPE_TOKEN, tokenId);
@@ -694,7 +694,7 @@ contract StreamRevenueResolver is
         if (!resolved.exists) resolved = _resolvedAt(revenueClass, SCOPE_DEFAULT, 0);
         if (
             collectionId != 0
-                && IStreamArtistAttribution(artistRegistry).attribution(collectionId).nominationHash
+                && IStreamArtistAttribution(currentArtist).attribution(collectionId).nominationHash
                     != bytes32(0)
         ) {
             if (!resolved.exists) {
@@ -720,7 +720,7 @@ contract StreamRevenueResolver is
                 }
                 if (templateConsentRequired) {
                     // Old Artist implementations retain the initial unsupported-template error.
-                    if (!IERC165(artistRegistry)
+                    if (!IERC165(currentArtist)
                             .supportsInterface(
                                 type(IStreamArtistTemplateEconomicsAuthority).interfaceId
                             )) {
@@ -779,8 +779,9 @@ contract StreamRevenueResolver is
         private
         returns (bytes32 profileId, address wallet, bytes32 entriesHash)
     {
-        (profileId, wallet, entriesHash, context.beneficiaryHash) =
-            TemplateRuntime.materialize(_templates, _templateContext(), templateId, context);
+        (profileId, wallet, entriesHash, context.beneficiaryHash) = TemplateRuntime.materialize(
+            _templates, _templateContext(context.collectionId != 0), templateId, context
+        );
     }
 
     function materializeDynamicCollectionPrimaryProfile(
@@ -822,7 +823,9 @@ contract StreamRevenueResolver is
         context.collectionId = collectionId;
         context.salePoster = salePoster;
         context.dynamicTemplate = true;
-        return TemplateRuntime.preview(_templates, _templateContext(), templateId, context);
+        return TemplateRuntime.preview(
+            _templates, _templateContext(context.collectionId != 0), templateId, context
+        );
     }
 
     /// @notice Same concrete derivation as materialization, without registration or deployment.
@@ -837,12 +840,20 @@ contract StreamRevenueResolver is
         TemplateRuntime.MaterializationContext memory context;
         context.collectionId = collectionId;
         context.salePoster = salePoster;
-        (profileId, wallet, entriesHash,) =
-            TemplateRuntime.preview(_templates, _templateContext(), templateId, context);
+        (profileId, wallet, entriesHash,) = TemplateRuntime.preview(
+            _templates, _templateContext(context.collectionId != 0), templateId, context
+        );
     }
 
-    function _templateContext() private view returns (TemplateRuntime.Context memory) {
-        return TemplateRuntime.Context(splitFactoryContract, artistRegistry);
+    function _templateContext(bool collectionBound)
+        private
+        view
+        returns (TemplateRuntime.Context memory)
+    {
+        return TemplateRuntime.Context(
+            splitFactoryContract,
+            collectionBound ? _requireSelectedArtistRegistry() : artistRegistry
+        );
     }
 
     /// @notice Returns deterministic template metadata.
@@ -1047,24 +1058,25 @@ contract StreamRevenueResolver is
         uint8 assignmentType,
         bytes32 assignmentHash
     ) private view {
+        address currentArtist = _requireSelectedArtistRegistry();
         if (scope == SCOPE_DEFAULT) return;
         uint256 collectionId = scope == SCOPE_COLLECTION
             ? _resolveCollectionIdentity(scopeId, 0)
             : _resolveCollectionIdentity(0, scopeId);
         if (
-            IStreamArtistAttribution(artistRegistry).attribution(collectionId).nominationHash
+            IStreamArtistAttribution(currentArtist).attribution(collectionId).nominationHash
                 == bytes32(0)
         ) return;
         if (
             (assignmentType != ASSIGNMENT_TYPE_PROFILE
                     && assignmentType != ASSIGNMENT_TYPE_TEMPLATE)
                 || revenueClass != keccak256("PRIMARY_SALE")
-                || !IERC165(artistRegistry)
+                || !IERC165(currentArtist)
                     .supportsInterface(type(IStreamArtistEconomicsAuthority).interfaceId)
         ) revert PrimaryArtistConsentRequired(collectionId);
         if (
             assignmentType == ASSIGNMENT_TYPE_TEMPLATE
-                && !IERC165(artistRegistry)
+                && !IERC165(currentArtist)
                     .supportsInterface(type(IStreamArtistTemplateMutationAuthority).interfaceId)
         ) revert PrimaryArtistConsentRequired(collectionId);
         _requireConsent(collectionId, revenueClass, scope, scopeId, assignmentHash);
@@ -1078,12 +1090,13 @@ contract StreamRevenueResolver is
         bytes32 templateId,
         bytes32 assignmentHash
     ) private view {
+        address currentArtist = _requireSelectedArtistRegistry();
         if (scope == SCOPE_DEFAULT) return;
         uint256 collectionId = scope == SCOPE_COLLECTION
             ? _resolveCollectionIdentity(scopeId, 0)
             : _resolveCollectionIdentity(0, scopeId);
         if (
-            IStreamArtistAttribution(artistRegistry).attribution(collectionId).nominationHash
+            IStreamArtistAttribution(currentArtist).attribution(collectionId).nominationHash
                 == bytes32(0)
         ) return;
         if (
@@ -1102,10 +1115,11 @@ contract StreamRevenueResolver is
     }
 
     function _requireTemplateConsentCapability(uint256 collectionId) private view {
+        address currentArtist = _requireSelectedArtistRegistry();
         if (
-            !IERC165(artistRegistry)
+            !IERC165(currentArtist)
                     .supportsInterface(type(IStreamArtistTemplateEconomicsAuthority).interfaceId)
-                || !IERC165(artistRegistry)
+                || !IERC165(currentArtist)
                     .supportsInterface(type(IStreamArtistEconomicsAuthority).interfaceId)
         ) {
             revert PrimaryArtistConsentRequired(collectionId);
@@ -1119,24 +1133,25 @@ contract StreamRevenueResolver is
         uint256 scopeId,
         bytes32 assignmentHash
     ) private view {
-        IStreamArtistEconomicsAuthority(artistRegistry)
+        address currentArtist = _requireSelectedArtistRegistry();
+        IStreamArtistEconomicsAuthority(currentArtist)
             .requireEconomicsConsent(collectionId, revenueClass, scope, scopeId, assignmentHash);
     }
 
-    function _requireSelectedArtistRegistry() private view {
-        StreamPrimaryIdentityReads.requireSelectedArtistRegistry(
+    function _requireSelectedArtistRegistry() private view returns (address) {
+        return StreamPrimaryIdentityReads.requireSelectedArtistRegistry(
             core, coreCodeHash, artistRegistry, artistRegistryCodeHash
         );
     }
 
     function _requireMutableArtistScope(uint8 scope, uint256 scopeId) private view {
-        _requireSelectedArtistRegistry();
+        address currentArtist = _requireSelectedArtistRegistry();
         if (scope == SCOPE_DEFAULT) return;
         uint256 collectionId = scope == SCOPE_COLLECTION
             ? _resolveCollectionIdentity(scopeId, 0)
             : _resolveCollectionIdentity(0, scopeId);
         if (
-            IStreamArtistAttribution(artistRegistry).attribution(collectionId).nominationHash
+            IStreamArtistAttribution(currentArtist).attribution(collectionId).nominationHash
                 != bytes32(0)
         ) {
             revert PrimaryArtistConsentRequired(collectionId);

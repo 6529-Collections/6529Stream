@@ -9,6 +9,8 @@ import {
     IStreamRevenueResolver as R
 } from "../../interfaces/stream/revenue/IStreamRevenueResolver.sol";
 
+import { StreamRevenueArtistSelection } from "./StreamRevenueArtistSelection.sol";
+
 /// @notice Fixed identity reads in the actual Resolver delegatecall context.
 /// @dev Every graph coordinate and runtime pin is supplied only from host immutables.
 library StreamPrimaryIdentityReads {
@@ -17,17 +19,32 @@ library StreamPrimaryIdentityReads {
         bytes32 coreCodeHash,
         address artistRegistry,
         bytes32 artistRegistryCodeHash
-    ) public view {
+    ) public view returns (address) {
         if (core.codehash != coreCodeHash) {
             revert R.InvalidPrimaryResolverConfiguration();
         }
         (address selected, bytes32 selectedCodeHash,,,,,,,,) =
             IStreamCore(core).getSatellitePointer(keccak256("ARTIST_REGISTRY"));
+        if (selected != artistRegistry) {
+            return StreamRevenueArtistSelection.successor(
+                StreamRevenueArtistSelection.Context(
+                    core,
+                    artistRegistry,
+                    artistRegistryCodeHash,
+                    selected,
+                    selectedCodeHash,
+                    true,
+                    abi.encodeWithSelector(R.InvalidPrimaryArtistRegistry.selector, selected),
+                    0
+                )
+            );
+        }
         if (
-            selected != artistRegistry || selected.codehash != artistRegistryCodeHash
+            selected.codehash != artistRegistryCodeHash
                 || selectedCodeHash != artistRegistryCodeHash
                 || IStreamArtistAttribution(selected).core() != core
         ) revert R.InvalidPrimaryArtistRegistry(selected);
+        return selected;
     }
 
     function resolveCollectionIdentity(address core, uint256 suppliedCollectionId, uint256 tokenId)
