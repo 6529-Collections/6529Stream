@@ -25,6 +25,24 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 | Developer client and operator | RC1 client remains usable. Compiler-selected typed clients are integrated as `e409c134`, with 52 passing tests, independent review and exact generation/typechecking against accepted native output. Earlier local graph deployment completed 530 transactions within the deployment ceiling. | Four explicit current native auction/bid/custody signing helpers are integrated (`db3fca94`), with 59 client tests and independently reproduced actual-getter encoding vectors. Complete workflow examples and latest graph activation remain. The deployment rehearsal records `productsActivated=false`; it is not a full product launch. |
 | Candidate and testnet | Immutable supported RC1 and its Sepolia evidence are complete. | Expanded full-v1 implementation, complete Safe call inventory, required fuzz/stateful campaigns, all 37 genesis roles, gas conformance, full CI, new source freeze and matching testnet evidence remain. |
 
+## Recovery, client and owner-capture source batch
+
+Integrated through `a0f6535a`: designated-dormancy recovery after executed
+rotations (`43b1d56e`), original closed-dormancy history (`5ff709dc`), the typed
+entropy finding/hydration client (`50c553c9`) and actual-current OwnerRecords
+capture recipe (`a0f6535a`). All1,808 sources pass ABI/type checking in14.422s.
+All175 client tests plus generation/build/type checks pass on integration;
+all10 OwnerRecords capture Python tests and deterministic fixtures pass.
+Fourteen new Artist cases and three OwnerRecords contract cases are authored
+and source-reviewed but remain native-pending. The existing frozen native4
+compilation is unchanged and excludes this batch.
+
+The shared checklist now explicitly separates missing multi-party collaborator
+policy and ARTIST_DELEGATED consent from basic collaborator/delegation support.
+The initial consent-mode wording was corrected against the actual binding
+admission and normative modes; it did not represent implemented mode2 behavior.
+Builders continue disputes, incident escrow/runtime lifecycle and CollectionViews.
+
 ## Artist deployment repairs and continuing feature work
 
 The first combined Artist run exposed deployment-size failures before behavior

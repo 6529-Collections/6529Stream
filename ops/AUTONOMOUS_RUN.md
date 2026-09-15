@@ -21,11 +21,66 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Integrated through 7209675b: entropy-finding hydration, seven actual-token custody cases and typed valuation dossiers. Whole-repository 1,803-source ABI/type check and 36 valuation/loan tests pass. One frozen 28-suite native run at ee0f0159 continues and excludes these newer increments. Immutable RC1 remains 569bf87f1fa808787d324f6e1582924b5ccf1d40. |
+| Source checkpoint | a0f6535a: both dormancy/rotation recovery batches, typed entropy-authority client and actual-current OwnerRecords capture recipe integrated. All 1,808 sources pass ABI/type checking; 175 client and 10 owner-capture Python tests pass. New native acceptance remains pending in addition to the unchanged frozen native4 run. Immutable RC1 remains 569bf87f1fa808787d324f6e1582924b5ccf1d40. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
 | Last updated | `2026-09-15 UTC` |
+
+## Autonomous feature-group leads
+
+The owner requested parallel ownership of whole feature groups on 15 September.
+Three implementation leads work alongside the root integrator. The current
+session has four concurrent agent slots; leads continue coding themselves.
+They own their queues and move to the next coherent batch without waiting for
+the integrator to assign each small task.
+
+| Lead | Owned feature group and next queue | Shared boundaries |
+| --- | --- | --- |
+| Artist authority | Disputes44–46, remaining47–50/withdrawal; collaborator approval policies; delegated mint-policy/sale consent; remaining succession/recovery; complete hydration; C2PA and Artist ceremony clients. Current scope: ART01–ART42. | Own Artist contracts/interfaces/tests/guides. Publish exact dependency needs to commerce and metadata leads before changing shared consumers. |
+| Commerce and revenue | Common factory/runtime lifecycle and incident escrow recovery; frozen economic Resolver continuity; token/PLATFORM and exact-template clients; full distribution; remaining supported sale/settlement behavior. | Own revenue, sales and commerce clients. Core mint policy/ledger, concrete mint gates and burn programs remain with root. Earlier denied artifacts remain unapplied. |
+| Metadata, records and museum | CollectionViews; mandatory selectable/versioned STATIC rendering; preservation/finality evidence producers; remaining record/authority/geography mappings; complete museum schema/profile and semantic authoring. | Own metadata/records/preservation/museum implementation. Coordinate Core, Artist and finality Registry interfaces with their owners; DYNAMIC implementation remains excluded. |
+| Root integrator | Core mint engine, standard/vault gates, shared counters/continuity and burn programs; entropy/governance/operator and finality Registry closure; integrate all feature batches and own candidate acceptance. | Own final architecture decisions, shared interfaces, root fixtures, combined tests, release and testnet. |
+
+Each lead owns requirements through source, tests and usable public entrypoints.
+Interfaces/readers alone do not complete a feature whose write path cannot admit
+it. Each handoff records the coherent commit, behavior added, focused test/ABI
+results and actual remaining acceptance. Task-owned queue notes can be local to
+the lead until its next implementation commit; this file owns shared assignments.
+
+Independent source review runs at useful batch boundaries. Integration happens
+frequently and does not wait for a full release-evidence cycle. The existing
+frozen native compilation remains isolated; no lead starts a duplicate compiler.
+After the implementation batch stabilizes, root owns complete current-stack/Safe,
+fuzz/stateful, gas/capacity and final release/testnet acceptance. Build, test and
+runtime integration statuses stay separate in the shared feature checklist.
+
+### Model routing
+
+The owner requested a mix of models to optimize quality, speed and cost. Root
+chooses models at new task or coherent batch boundaries; productive existing
+work is not interrupted merely to change models. The three current leads retain
+their inherited models. Four total agent slots include root, so additional
+management layers do not create more concurrent builder capacity.
+
+| Work | Preferred model or executor |
+| --- | --- |
+| Feature leadership, architecture, shared interfaces, difficult Solidity, semantic test design and independent final review | GPT-6 Astra |
+| Bounded implementation against settled interfaces and acceptance criteria, ordinary clients and adapters | GPT-5.6 Sol or Terra, selected for the task |
+| Straightforward documentation transformations, inventories and repetitive fixture updates with an explicit expected result | GPT-5.6 Luna |
+| Compilation, test execution, formatting, deterministic generation and link checks | Existing repository tools |
+
+This is a routing policy, not a claim that cheaper models have already been
+launched or benchmarked on Stream. Use the lowest reasoning effort that meets
+the task, escalating for ambiguity, difficult semantics or repeated failure.
+Judge the allocation by time and cost per accepted feature, including review
+and rework. Payment, authorization, replay and cross-contract semantic changes
+retain strong independent review regardless of the author model. A different
+reviewer model alone is not evidence of correctness.
+
+The model role guidance follows [official OpenAI documentation](https://learn.chatgpt.com/docs/models).
+Actual Stream throughput and rework determine whether a cheaper assignment is
+useful; no numerical speed or cost saving is assumed.
 
 ## Active work
 
@@ -41,9 +96,9 @@ pending checks. The immutable RC1 remains the released baseline.
 | Owner | Implementation batch |
 | --- | --- |
 | Integrator | Running the frozen 28-suite Artist/entropy/current-Core/Safe batch at ee0f0159 while integrating subsequent features. Owns actual integration, native results and candidate closure. |
-| Artist builder | Building designated-dormancy recovery after actual executed same-class successor rotations; complete entropy-finding hydration delivered. |
-| Revenue builder | Building typed entropy finding/hydration Safe client workflows; actual-token custody composition delivered. |
-| Fourth engineer | Building an actual current OwnerRecords loan/valuation capture recipe and offline dossier replay; typed valuation export delivered. |
+| Artist builder | Building attribution dispute operations44–46. Both designated-dormancy rotation recovery batches are source-integrated; multi-party policy and delegated consent gaps are explicit in the feature checklist. |
+| Revenue builder | Building common runtime/factory lifecycle and incident escrow recovery. Entropy-authority client is integrated and all175 client tests pass. |
+| Fourth engineer | Building the current CollectionViews host. OwnerRecords capture recipe is integrated;10 Python tests pass,3 native recipes and genuine positive capture remain pending. |
 
 Comprehensive current-stack/Safe integration, fuzz and stateful campaigns, gas
 conformance, complete genesis inventory, CI and matching new testnet evidence
@@ -51,7 +106,8 @@ follow the integrated implementation batch. Existing frozen runs continue in
 the background and validate only their recorded source. No new date or
 percentage is inferred from these assignments.
 
-Root owns the combined graph, shared operator/client work and the new candidate.
+Root owns the combined graph, shared operator work and the new candidate;
+commerce and Artist clients follow their feature-group lead ownership above.
 The complete 1,735-source ABI/type check passes at 6f31d497.
 The provider lifecycle at `3481e8fd` passes 41 focused native cases and three
 256-input fuzz properties, with all eight compiled products within deployment
@@ -524,7 +580,7 @@ not complete that join.
 | Owner | Next deliverable |
 | --- | --- |
 | Integrator | Shared Artist/Registry/Coordinator size repairs integrated; owner accumulator five cases plus 256 fuzz inputs pass. Complete 1,767-source type check passes; 737-source size preflight passes all 50 selected products and the eight-suite Artist native run is active. |
-| Artist builder | Building designated-dormancy recovery after actual executed same-class successor rotations; complete entropy-finding hydration delivered. |
+| Artist builder | Building attribution dispute operations44–46. Both designated-dormancy rotation recovery batches are source-integrated; multi-party policy and delegated consent gaps are explicit in the feature checklist. |
 | Preservation builder | External bulk archives, runnable reference render, original publication and current finality consumption |
 | Independent reviewer | Challenge exact implementations, real-contract composition and integration evidence |
 
