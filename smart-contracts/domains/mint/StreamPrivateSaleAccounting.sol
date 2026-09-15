@@ -63,17 +63,25 @@ library StreamPrivateSaleAccounting {
     }
 
     function claim(State storage self, bytes32 id, address receiver) public {
+        claimAccount(self, id, msg.sender, receiver);
+    }
+
+    /// @dev Only guarded host code supplies account after authenticating original claim ownership.
+    function claimAccount(State storage self, bytes32 id, address account, address receiver)
+        public
+        returns (uint256 amount)
+    {
         if (receiver == address(0)) revert P.PrivateSaleClaimUnavailable();
-        uint256 amount = balance(self, id, msg.sender);
+        amount = balance(self, id, account);
         if (amount == 0) revert P.PrivateSaleClaimUnavailable();
-        delete self.credits[id][msg.sender];
+        delete self.credits[id][account];
         self.totalLiabilities -= amount;
         uint256 beforeBalance = address(this).balance;
         bool ok;
         assembly ("memory-safe") { ok := call(gas(), receiver, amount, 0, 0, 0, 0) }
         if (!ok) revert P.PrivateSaleClaimFailed();
         if (address(this).balance != beforeBalance - amount) revert P.PrivateSaleBalanceMismatch();
-        emit PrivateSaleCreditClaimed(1, id, msg.sender, receiver, address(0), amount);
+        emit PrivateSaleCreditClaimed(1, id, account, receiver, address(0), amount);
     }
 
     function retryRoyalty(State storage self, P.Sale storage sale, bytes32 id, uint256 cap)

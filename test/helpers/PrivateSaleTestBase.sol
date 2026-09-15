@@ -206,7 +206,11 @@ abstract contract PrivateSaleTestBase is CharacterizationTestBase {
                 configOwner,
                 address(authority),
                 address(roles),
-                gasConfigs
+                gasConfigs,
+                address(0),
+                0,
+                bytes32(0),
+                IStreamGasParameterHost.GasParameterConfig("", 0, 0, 0)
             )
         );
     }

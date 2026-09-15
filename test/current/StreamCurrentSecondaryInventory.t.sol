@@ -60,18 +60,18 @@ contract InventoryBuyerReceiver {
 ///      governance action context remain explicit typed fixture boundaries. Every token first
 ///      completes a paid platform primary sale and is delivered to its collector Safe.
 contract StreamCurrentSecondaryInventoryTest is NativePlatformCustodyFixture {
-    InventoryTestCalls private constant calls =
+    InventoryTestCalls internal constant calls =
         InventoryTestCalls(address(uint160(uint256(keccak256("hevm cheat code")))));
-    StreamPrivateSaleAdapter private inventory;
-    OfficialSafe private collector;
-    OfficialSafe private customer;
-    uint256[] private collectorKeys;
-    uint256[] private customerKeys;
-    uint256 private grantNonce;
-    bytes32 private primaryProfile;
-    address private primaryWallet;
+    StreamPrivateSaleAdapter internal inventory;
+    OfficialSafe internal collector;
+    OfficialSafe internal customer;
+    uint256[] internal collectorKeys;
+    uint256[] internal customerKeys;
+    uint256 internal grantNonce;
+    bytes32 internal primaryProfile;
+    address internal primaryWallet;
 
-    function setUp() public override {
+    function setUp() public virtual override {
         super.setUp();
         SafeComponents memory c = deploySafeComponents("1.4.1");
         collectorKeys = new uint256[](2);
@@ -93,7 +93,7 @@ contract StreamCurrentSecondaryInventoryTest is NativePlatformCustodyFixture {
         rows[2] = IStreamGasParameterHost.GasParameterConfig(
             "SALE_ROYALTY_DELIVERY_GAS_LIMIT", 100000, 30000, 2
         );
-        inventory = new StreamPrivateSaleAdapter(
+        StreamPrivateSaleAdapter.DeploymentConfig memory deployment =
             StreamPrivateSaleAdapter.DeploymentConfig(
                 address(core),
                 address(registry),
@@ -101,9 +101,14 @@ contract StreamCurrentSecondaryInventoryTest is NativePlatformCustodyFixture {
                 address(this),
                 address(revenueAuthority),
                 address(auctionRoles),
-                rows
-            )
-        );
+                rows,
+                address(0),
+                0,
+                bytes32(0),
+                IStreamGasParameterHost.GasParameterConfig("", 0, 0, 0)
+            );
+        _prepareInventoryDeployment(deployment);
+        inventory = new StreamPrivateSaleAdapter(deployment);
         _register(
             address(inventory),
             keccak256("PRIVATE_SALE_ADAPTER"),
@@ -126,7 +131,11 @@ contract StreamCurrentSecondaryInventoryTest is NativePlatformCustodyFixture {
         (primaryProfile, primaryWallet) = _fixed(10, address(0xFD551));
     }
 
-    function _delivered(uint256 count) private returns (uint256[] memory ids) {
+    function _prepareInventoryDeployment(StreamPrivateSaleAdapter.DeploymentConfig memory)
+        internal
+        virtual { }
+
+    function _delivered(uint256 count) internal returns (uint256[] memory ids) {
         ids = new uint256[](count);
         for (uint256 i; i < count; ++i) {
             Plan memory plan = _plan(10, address(this), 100);
@@ -152,7 +161,7 @@ contract StreamCurrentSecondaryInventoryTest is NativePlatformCustodyFixture {
         }
     }
 
-    function _inventoryConfig(uint32 cap) private view returns (Inventory.Config memory c) {
+    function _inventoryConfig(uint32 cap) internal view returns (Inventory.Config memory c) {
         c.collectionId = 2;
         c.consignor = address(collector);
         c.unitPrice = 1000;
@@ -165,7 +174,7 @@ contract StreamCurrentSecondaryInventoryTest is NativePlatformCustodyFixture {
         c.secondaryConsignment = true;
     }
 
-    function _grant(bytes32 id, uint256 token) private returns (PT.SaleCustodyGrant memory g) {
+    function _grant(bytes32 id, uint256 token) internal returns (PT.SaleCustodyGrant memory g) {
         g = PT.SaleCustodyGrant(
             block.chainid,
             address(inventory),
@@ -178,7 +187,7 @@ contract StreamCurrentSecondaryInventoryTest is NativePlatformCustodyFixture {
         );
     }
 
-    function _digest(PT.SaleCustodyGrant memory g) private view returns (bytes32) {
+    function _digest(PT.SaleCustodyGrant memory g) internal view returns (bytes32) {
         bytes32 domain = keccak256(
             abi.encode(
                 keccak256(
@@ -206,12 +215,12 @@ contract StreamCurrentSecondaryInventoryTest is NativePlatformCustodyFixture {
         );
     }
 
-    function _wrapped(bytes32 digest) private returns (bytes memory) {
+    function _wrapped(bytes32 digest) internal returns (bytes memory) {
         return
             safeThresholdSignature(collectorKeys, safeMessageDigest(collector, abi.encode(digest)));
     }
 
-    function _deposit(bytes32 id, uint256 token) private returns (PT.SaleCustodyGrant memory g) {
+    function _deposit(bytes32 id, uint256 token) internal returns (PT.SaleCustodyGrant memory g) {
         g = _grant(id, token);
         bytes32 digest = _digest(g);
         require(
@@ -224,7 +233,10 @@ contract StreamCurrentSecondaryInventoryTest is NativePlatformCustodyFixture {
         );
     }
 
-    function _opened(uint256 count, uint32 cap) private returns (bytes32 id, uint256[] memory ids) {
+    function _opened(uint256 count, uint32 cap)
+        internal
+        returns (bytes32 id, uint256[] memory ids)
+    {
         ids = _delivered(count);
         id = inventory.registerInventory(_inventoryConfig(cap), ids);
         for (uint256 i; i < ids.length; ++i) {
@@ -233,7 +245,7 @@ contract StreamCurrentSecondaryInventoryTest is NativePlatformCustodyFixture {
         inventory.openInventory(id);
     }
 
-    function _buy(bytes32 id, uint256 token, uint256 value) private {
+    function _buy(bytes32 id, uint256 token, uint256 value) internal {
         bytes32 configHash = inventory.inventoryDetails(id).configHash;
         require(
             executeSafe(
@@ -247,7 +259,7 @@ contract StreamCurrentSecondaryInventoryTest is NativePlatformCustodyFixture {
         );
     }
 
-    function _revoke(PT.SaleCustodyGrant memory g) private {
+    function _revoke(PT.SaleCustodyGrant memory g) internal {
         bytes32 domain = keccak256(
             abi.encode(
                 keccak256(
@@ -512,7 +524,7 @@ contract StreamCurrentSecondaryInventoryTest is NativePlatformCustodyFixture {
         _revoke(g);
     }
 
-    function _one(uint256 token) private pure returns (uint256[] memory a) {
+    function _one(uint256 token) internal pure returns (uint256[] memory a) {
         a = new uint256[](1);
         a[0] = token;
     }

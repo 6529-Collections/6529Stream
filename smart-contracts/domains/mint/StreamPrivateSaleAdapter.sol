@@ -6,6 +6,11 @@ import "./StreamPrivateSaleAccounting.sol";
 import "./StreamPrivateSaleCustody.sol";
 import "./StreamPrivateSaleHash.sol";
 import "./StreamNativeInventoryPayment.sol";
+import { StreamPrivateSaleDelegatedClaims } from "./StreamPrivateSaleDelegatedClaims.sol";
+import { StreamNativeAuctionDelegation } from "../auctions/StreamNativeAuctionDelegation.sol";
+import {
+    IStreamPrivateSaleDelegatedClaims
+} from "../../interfaces/stream/mint/IStreamPrivateSaleDelegatedClaims.sol";
 import "../../interfaces/stream/mint/IStreamPrivateSaleAdapter.sol";
 import "../parameters/StreamGasParameterHost.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
@@ -17,6 +22,7 @@ import "../../vendor/openzeppelin/ERC165.sol";
 ///      consignor proceeds and buyer excess are separate perpetual claims. No primary mint occurs.
 contract StreamPrivateSaleAdapter is
     IStreamPrivateSaleAdapter,
+    IStreamPrivateSaleDelegatedClaims,
     StreamGasParameterHost,
     Ownable,
     ReentrancyGuard,
@@ -32,6 +38,10 @@ contract StreamPrivateSaleAdapter is
         address governanceAuthority;
         address roleRegistry;
         GasParameterConfig[3] parameters;
+        address delegateRegistry;
+        uint256 delegationUsecase;
+        bytes32 baseModuleManifestHash;
+        GasParameterConfig delegationGas;
     }
 
     bytes32 private constant _SIGNATURE_GAS = keccak256("6529STREAM_GGP_SALE_ERC1271_GAS_LIMIT");
@@ -48,6 +58,11 @@ contract StreamPrivateSaleAdapter is
     bytes32 public immutable registryCodeHash;
     address public immutable roleRegistry;
     bytes32 public immutable roleRegistryCodeHash;
+    address public immutable override delegateRegistry;
+    bytes32 public immutable override delegateRegistryCodeHash;
+    uint256 public immutable override delegationUsecase;
+    bytes32 private immutable _baseModuleManifestHash;
+    uint256 private immutable _delegationChainId;
     bool public paused;
     mapping(bytes32 => bool) public salePaused;
     uint256 public nextSaleNonce = 1;
@@ -107,11 +122,44 @@ contract StreamPrivateSaleAdapter is
             _registerGasParameter(d.parameters[i]);
         }
         if (gasParameter(_ROYALTY_GAS) < 2300) revert InvalidPrivateSale();
+        if (d.delegateRegistry != address(0)) {
+            if (
+                keccak256(bytes(d.delegationGas.name)) != keccak256("DELEGATE_REGISTRY_GAS_LIMIT")
+                    || d.delegationGas.failureClass != FAILURE_CLASS_FAIL_CLOSED_PRECHECK
+            ) revert InvalidPrivateSale();
+            StreamNativeAuctionDelegation.validateConfiguration(
+                StreamNativeAuctionDelegation.Configuration(
+                    block.chainid,
+                    d.core,
+                    d.delegateRegistry,
+                    d.delegateRegistry.codehash,
+                    d.delegationUsecase,
+                    d.baseModuleManifestHash,
+                    d.moduleRegistry,
+                    d.moduleRegistry.codehash
+                )
+            );
+            _registerGasParameter(d.delegationGas);
+        } else if (
+            d.delegationUsecase != 0 || d.baseModuleManifestHash != 0
+                || bytes(d.delegationGas.name).length != 0 || d.delegationGas.genesisValue != 0
+                || d.delegationGas.floor != 0 || d.delegationGas.failureClass != 0
+        ) {
+            revert InvalidPrivateSale();
+        }
+        delegateRegistry = d.delegateRegistry;
+        delegateRegistryCodeHash =
+            d.delegateRegistry == address(0) ? bytes32(0) : d.delegateRegistry.codehash;
+        delegationUsecase = d.delegationUsecase;
+        _baseModuleManifestHash = d.baseModuleManifestHash;
+        _delegationChainId = block.chainid;
         _transferOwnership(d.configurationOwner);
     }
 
     function supportsInterface(bytes4 id) public view override(IERC165, ERC165) returns (bool) {
-        return id == type(IStreamPrivateSaleAdapter).interfaceId
+        return (id == type(IStreamPrivateSaleDelegatedClaims).interfaceId
+                && delegateRegistry != address(0))
+            || id == type(IStreamPrivateSaleAdapter).interfaceId
             || id == type(IStreamNativeInventorySale).interfaceId || super.supportsInterface(id);
     }
 
@@ -168,6 +216,7 @@ contract StreamPrivateSaleAdapter is
         nonReentrant
         returns (bytes32 id)
     {
+        _requireDelegationManifest();
         CollectionSigner memory signer = collectionSigner[config.collectionId];
         StreamPrivateSaleSupport.validateConfig(config, signer);
         StreamPrivateSaleSupport.Context memory context = _context();
@@ -176,24 +225,8 @@ contract StreamPrivateSaleAdapter is
         if (context.ownerOf(config.tokenId) != config.consignor) revert CustodyGrantInvalid();
         uint256 nonce = nextSaleNonce++;
         id = saleIdFor(config.saleKind, config.collectionId, nonce);
-        Sale storage sale = _sales[id];
-        sale.config = config;
-        sale.configHash = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_NATIVE_CONSIGNMENT_CONFIG_V1"),
-                block.chainid,
-                address(this),
-                nonce,
-                platformSigner,
-                config
-            )
-        );
-        sale.saleNonce = nonce;
-        sale.createdAt = uint64(block.timestamp);
-        sale.registryRevision = revision;
-        sale.status = 1;
-        emit SaleConfigured(
-            1, id, config.collectionId, 0, config.saleKind, address(0), sale.configHash, 0, 0
+        StreamPrivateSaleDelegatedClaims.recordSale(
+            _sales[id], id, nonce, revision, platformSigner, msg.data
         );
     }
 
@@ -203,30 +236,9 @@ contract StreamPrivateSaleAdapter is
         override
         returns (uint8, uint256, bytes32, address, bytes32, bytes32, uint8, uint8)
     {
-        IStreamNativeInventorySale.Inventory storage inventory = _inventory.inventories[id];
-        if (inventory.saleNonce != 0) {
-            return (
-                14,
-                inventory.config.collectionId,
-                0,
-                address(0),
-                inventory.configHash,
-                0,
-                0,
-                inventory.status
-            );
-        }
-        Sale storage sale = _sales[id];
-        return (
-            sale.config.saleKind,
-            sale.config.collectionId,
-            0,
-            address(0),
-            sale.configHash,
-            sale.config.expectedPrimaryPolicyHash,
-            0,
-            sale.status
-        );
+        bytes memory out =
+            StreamPrivateSaleDelegatedClaims.read(_sales, _inventory, _context(), msg.data);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
     function saleDetails(bytes32 id) external view override returns (Sale memory) {
@@ -235,11 +247,9 @@ contract StreamPrivateSaleAdapter is
     }
 
     function custodySaleLifecycle(bytes32 id) external view override returns (uint64, uint64) {
-        if (_inventory.inventories[id].saleNonce != 0) {
-            return
-                (_inventory.inventories[id].createdAt, _inventory.inventories[id].registryRevision);
-        }
-        return (_sales[id].createdAt, _sales[id].registryRevision);
+        bytes memory out =
+            StreamPrivateSaleDelegatedClaims.read(_sales, _inventory, _context(), msg.data);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
     function royaltyQuote(bytes32 id)
@@ -253,10 +263,10 @@ contract StreamPrivateSaleAdapter is
             bool externalRoyaltiesDisclosureOnly
         )
     {
-        Sale storage sale = _known(id);
-        if (sale.status == 3) return (sale.royaltyReceiver, sale.royaltyAmount, true, true);
-        (receiver, amount) = _context().royalty(sale.config.tokenId, sale.config.price);
-        return (receiver, amount, true, true);
+        bytes memory out = StreamPrivateSaleDelegatedClaims.read(
+            _sales, _inventory, _context(), msg.data
+        );
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
     function authorizationDigest(StreamPrivateSaleTypes.SaleAuthorization calldata a)
@@ -296,15 +306,10 @@ contract StreamPrivateSaleAdapter is
             uint256[] memory extensions
         )
     {
-        return (
-            0x0f,
-            "6529Stream Sales",
-            "1",
-            block.chainid,
-            address(this),
-            bytes32(0),
-            new uint256[](0)
+        bytes memory out = StreamPrivateSaleDelegatedClaims.read(
+            _sales, _inventory, _context(), msg.data
         );
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
     function depositCustody(
@@ -574,6 +579,7 @@ contract StreamPrivateSaleAdapter is
         uint256[] calldata tokenIds
     ) external onlyOwner nonReentrant returns (bytes32) {
         if (paused) revert PrivateSalePaused(0);
+        _requireDelegationManifest();
         return StreamNativeInventorySale.registerEncoded(
             _inventory, _context(), collectionSigner, platformSigner, nextSaleNonce++, msg.data
         );
@@ -751,6 +757,68 @@ contract StreamPrivateSaleAdapter is
         ) {
             revert CustodyGrantInvalid();
         }
+    }
+
+    function delegationManifest() external view returns (bytes memory) {
+        if (delegateRegistry == address(0)) {
+            revert StreamNativeAuctionDelegation.DelegationConfigurationInvalid();
+        }
+        return StreamNativeAuctionDelegation.manifestBytes(_delegation());
+    }
+
+    function claimRefundFor(bytes32, address, DelegationWitness calldata)
+        external
+        nonReentrant
+        returns (uint256)
+    {
+        return _delegatedClaim();
+    }
+
+    function claimNftFor(bytes32, address, DelegationWitness calldata)
+        external
+        nonReentrant
+        returns (bool)
+    {
+        return _delegatedClaim() != 0;
+    }
+
+    function claimInventoryNftFor(bytes32, uint256, address, DelegationWitness calldata)
+        external
+        nonReentrant
+        returns (bool)
+    {
+        return _delegatedClaim() != 0;
+    }
+
+    function _delegatedClaim() private returns (uint256) {
+        return StreamPrivateSaleDelegatedClaims.claim(
+            _money, _sales, _inventory, digestRevoked, _context(), _delegation(), msg.data
+        );
+    }
+
+    function _requireDelegationManifest() private view {
+        if (delegateRegistry != address(0)) {
+            StreamNativeAuctionDelegation.requireManifest(
+                _delegation(), gasParameter(StreamNativeAuctionDelegation.GAS_PARAMETER)
+            );
+        }
+    }
+
+    function _delegation()
+        private
+        view
+        returns (StreamNativeAuctionDelegation.Configuration memory)
+    {
+        return StreamNativeAuctionDelegation.Configuration(
+                _delegationChainId,
+                core,
+                delegateRegistry,
+                delegateRegistryCodeHash,
+                delegationUsecase,
+                _baseModuleManifestHash,
+                moduleRegistry,
+                registryCodeHash
+            );
     }
 
     function _saleRef(bytes32 id, Sale storage sale) private view returns (bytes32) {
