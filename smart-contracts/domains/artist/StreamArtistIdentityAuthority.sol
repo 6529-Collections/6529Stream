@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistIdentityHydration.sol";
 import "./StreamArtistHistoryState.sol";
 import {
     StreamArtistHistoryTypes as H
@@ -1623,6 +1624,36 @@ contract StreamArtistIdentityAuthority is
             StreamArtistHistoryState.commitment(),
             a,
             bytes32(0)
+        );
+    }
+
+    function _baselineTiming() private view {
+        if (
+            _rotations.timingRevision != 0 || _estate.noticeRevision != 0
+                || _dormancy.timingRevision != 0 || _unavailability.timingRevision != 0
+        ) revert T.UnsupportedProfile();
+    }
+
+    function authorityHydrationState(AH.Query calldata q)
+        external
+        view
+        override
+        returns (bytes memory)
+    {
+        _baselineTiming();
+        return
+            StreamArtistIdentityHydration.exportState(
+                _identity, _estate, _dormancy, _unavailability, q
+            );
+    }
+
+    function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
+        _baselineTiming();
+        StreamArtistIdentityHydration.importState(
+            _identity, _estate, _dormancy, _unavailability, q, p
+        );
+        StreamArtistHistoryState.activate(
+            q.artistId, q.collectionId, StreamArtistHydrationGuards.commitment()
         );
     }
 }

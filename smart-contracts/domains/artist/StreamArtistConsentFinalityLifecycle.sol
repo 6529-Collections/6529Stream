@@ -459,4 +459,34 @@ contract StreamArtistConsentFinalityLifecycle is
             return(pointer, returndatasize())
         }
     }
+
+    function authorityHydrationState(AH.Query calldata q)
+        external
+        view
+        override
+        returns (bytes memory)
+    {
+        bytes32[] memory records = new bytes32[](q.policies.length);
+        for (uint256 j; j < records.length; ++j) {
+            records[j] = _policies[
+                keccak256(
+                    abi.encode(q.collectionId, q.policies[j].phaseId, q.policies[j].policyHash)
+                )
+            ];
+            if (records[j] == 0) revert T.InvalidRecord();
+        }
+        return abi.encode(records);
+    }
+
+    function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
+        bytes32[] memory records = abi.decode(p.typedState, (bytes32[]));
+        if (records.length != q.policies.length || p.nonces.length != 0) revert T.InvalidRecord();
+        for (uint256 j; j < records.length; ++j) {
+            bytes32 key = keccak256(
+                abi.encode(q.collectionId, q.policies[j].phaseId, q.policies[j].policyHash)
+            );
+            if (_policies[key] != 0 || records[j] == 0) revert T.InvalidRecord();
+            _policies[key] = records[j];
+        }
+    }
 }

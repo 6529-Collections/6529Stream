@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "kind": "normative typed operation extension",
+  "operationId": 60,
+  "write": "hydrateArtistAuthority",
+  "preservedOperations": {
+    "historicalPrefix": [
+      1,
+      57
+    ],
+    "adoptedIdentityDismissal": 58,
+    "adoptedStewardGrant": 59
+  },
+  "recipeId": "6529stream.artist.operation-recipe.v2.60.hydrateArtistAuthority",
+  "coordinator": "coordinateHydrateArtistAuthority",
+  "typedInterface": "smart-contracts/interfaces/stream/artist/IStreamArtistAuthorityHydration.sol",
+  "authority": "permissionless submission of complete typed fixed-predecessor facts; no caller-created authority",
+  "signerTypehash": null,
+  "snapshotOwnerMask": "0x7f",
+  "readOwnerMask": "0x7f",
+  "writeOwnerMask": "0x7f",
+  "owners": [
+    "binding_lifecycle",
+    "collaborator_lifecycle",
+    "identity_authority",
+    "acceptance_lifecycle",
+    "attribution_lifecycle",
+    "payout_lifecycle",
+    "consent_finality"
+  ],
+  "producerIds": [
+    "operation_60.binding_lifecycle.apply",
+    "operation_60.collaborator_lifecycle.apply",
+    "operation_60.identity_authority.apply",
+    "operation_60.acceptance_lifecycle.apply",
+    "operation_60.attribution_lifecycle.apply",
+    "operation_60.payout_lifecycle.apply",
+    "operation_60.consent_finality.apply"
+  ],
+  "ownerCallback": "applyArtistAuthorityHydration",
+  "profile": "6529STREAM_ARTIST_LIVING_BASELINE_HYDRATION_V1",
+  "requiredSource": "exact original direct predecessor; completed operation57 seal to successor; latched Artist and collection lanes; all seven complete producer headers and native journals",
+  "replay": "one hydration commitment per owner; every source replay cell retained by original key; logical authority guards rekeyed under unchanged successor owner domain; source-instance operation57 latch remains historical only",
+  "event": "ArtistAuthorityHydrated",
+  "eventSchemaVersion": 1,
+  "archive": "normal original operation evidence V1 with all seven before/after snapshots, source headers and complete typed profile, followed by original transaction-end history/payload sync",
+  "validationState": "source/type and authored actual two-registry/Safe/Archive scenarios; native behavior, sizes and current-stack acceptance pending"
+}

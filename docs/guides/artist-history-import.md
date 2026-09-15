@@ -142,3 +142,11 @@ python scripts/dev.py test --suite unit --match-path test/unit/artist/StreamArti
 The large limits permit the aggregate fixture's CREATEs and multiple operations;
 they are not transaction-capacity evidence. No native run is claimed for this
 source batch.
+
+## Additive complete baseline
+
+[Operation60 authority hydration](artist-authority-hydration.md) now supplies the
+complete original living/no-collaborator baseline and forward-lane consumer.
+The original proof/checkpoint-only behavior above remains the unhydrated gate.
+Other typed history profiles remain implementation obligations; native and
+current-stack validation are separate from this source addition.

@@ -46,3 +46,11 @@ replay cells at stable indices, independent delegate/rotation nonce namespaces,
 and whole-checkpoint rollback followed by byte-identical Safe retry. ABI/type
 checks are source evidence; native execution, linked product size and current
 graph import validation remain pending.
+
+## Additive complete baseline
+
+[Operation60 authority hydration](artist-authority-hydration.md) now supplies the
+complete original living/no-collaborator baseline and forward-lane consumer.
+The original proof/checkpoint-only behavior above remains the unhydrated gate.
+Other typed history profiles remain implementation obligations; native and
+current-stack validation are separate from this source addition.

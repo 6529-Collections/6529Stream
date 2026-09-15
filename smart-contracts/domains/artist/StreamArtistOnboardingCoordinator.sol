@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAuthorityHydrationOperations.sol";
 import "./StreamArtistHistoryOperations.sol";
 import {
     StreamArtistHistoryTypes as H
@@ -951,5 +952,21 @@ contract StreamArtistOnboardingCoordinator is
 
     function coordinateObserveRegistryCutover(address actor) external operation {
         StreamArtistHistoryOperations.observe(_economicContext(), actor);
+    }
+
+    function coordinateHydrateArtistAuthority(address actor, AH.Request calldata p)
+        external
+        operation
+        returns (bytes32)
+    {
+        return StreamArtistAuthorityHydrationOperations.hydrate(_economicContext(), actor, p);
+    }
+
+    function authorityHydrationSuite() external view returns (T.SuiteConfiguration memory) {
+        if (block.chainid != deploymentChainId) revert T.InvalidBinding();
+        for (uint256 j; j < 16; ++j) {
+            if (_targets[j].codehash != _runtimeHashes[j]) revert T.ComponentChanged(_targets[j]);
+        }
+        return _suite;
     }
 }

@@ -663,4 +663,22 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
     function _returnAttribution(bytes memory encoded) private pure {
         assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
+
+    function authorityHydrationState(AH.Query calldata q)
+        external
+        view
+        override
+        returns (bytes memory)
+    {
+        AttrState.Attribution memory a = _attributions[q.collectionId];
+        if (a.state != 2 || a.generation != 1) revert T.UnsupportedProfile();
+        return abi.encode(a);
+    }
+
+    function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
+        if (_attributions[q.collectionId].generation != 0 || p.nonces.length != 0) {
+            revert T.InvalidRecord();
+        }
+        _attributions[q.collectionId] = abi.decode(p.typedState, (AttrState.Attribution));
+    }
 }

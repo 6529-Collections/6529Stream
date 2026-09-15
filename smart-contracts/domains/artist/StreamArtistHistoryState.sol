@@ -36,6 +36,7 @@ library StreamArtistHistoryState {
         address successor;
         uint64 cutoverBlock;
         bytes32 commitment;
+        mapping(bytes32 => bytes32) hydrated;
     }
     error InvalidArtistHistory();
     error ArtistHistoryImportedAuthorityUnavailable(uint8 kind, bytes32 key);
@@ -88,14 +89,11 @@ library StreamArtistHistoryState {
     }
 
     function lane(uint8 kind, bytes32 id) public view returns (bytes32 tip, uint64 count) {
-        Row[] storage rows = state().lanes[key(kind, id)];
-        count = uint64(rows.length);
-        if (count != 0) {
-            tip = rows[count - 1].chain;
-        } else {
-            Verified storage v = state().verified[key(kind, id)];
-            if (v.done) return (v.tip, v.count);
-        }
+        bytes32 k = key(kind, id);
+        Row[] storage rows = state().lanes[k];
+        Verified storage v = state().verified[k];
+        count = uint64(rows.length) + (v.done ? v.count : 0);
+        tip = rows.length != 0 ? rows[rows.length - 1].chain : v.tip;
     }
 
     function at(
@@ -108,11 +106,12 @@ library StreamArtistHistoryState {
     ) public view returns (bytes32, bytes32) {
         State storage s = state();
         bytes32 laneKey = key(kind, id);
-        if (s.lanes[laneKey].length != 0) {
-            Row storage row = s.lanes[laneKey][index];
+        Verified storage v = s.verified[laneKey];
+        uint64 prefix = v.done ? v.count : 0;
+        if (index >= prefix) {
+            Row storage row = s.lanes[laneKey][index - prefix];
             return (row.record, row.chain);
         }
-        Verified storage v = s.verified[laneKey];
         if (!v.done || index >= v.count) revert InvalidArtistHistory();
         address prior = s.bindings[v.bindingIndex].predecessorRegistry;
         StreamArtistHistoryProof.predecessor(
@@ -176,8 +175,11 @@ library StreamArtistHistoryState {
         State storage s = state();
         bytes32 laneKey = key(kind, id);
         // No native writer may silently replace an unhydrated predecessor lane.
-        if (s.verified[laneKey].done) revert ArtistHistoryImportedAuthorityUnavailable(kind, id);
-        if (s.bindings.length != 0) {
+        Verified storage v = s.verified[laneKey];
+        if (v.done && s.hydrated[laneKey] == 0) {
+            revert ArtistHistoryImportedAuthorityUnavailable(kind, id);
+        }
+        if (!v.done && s.bindings.length != 0) {
             address prior = s.bindings[0].predecessorRegistry;
             StreamArtistHistoryProof.predecessor(
                 core, registry, prior, s.predecessorCode[prior], gasCap
@@ -186,11 +188,30 @@ library StreamArtistHistoryState {
             if (count != 0) revert ArtistHistoryImportedAuthorityUnavailable(kind, id);
         }
         Row[] storage rows = s.lanes[laneKey];
-        if (rows.length == type(uint64).max) revert InvalidArtistHistory();
-        bytes32 previous = rows.length == 0 ? bytes32(0) : rows[rows.length - 1].chain;
+        uint64 prefix = v.done ? v.count : 0;
+        if (rows.length >= type(uint64).max - prefix) revert InvalidArtistHistory();
+        bytes32 previous = rows.length == 0 ? v.tip : rows[rows.length - 1].chain;
         bytes32 next = keccak256(abi.encode(CHAIN, previous, record));
         rows.push(Row(record, next));
-        emit ArtistRecordChainAdvanced(1, kind, id, uint64(rows.length - 1), record, previous, next);
+        emit ArtistRecordChainAdvanced(
+            1, kind, id, prefix + uint64(rows.length - 1), record, previous, next
+        );
+    }
+
+    function activate(bytes32 artistId, uint256 collectionId, bytes32 value) public {
+        State storage s = state();
+        bytes32 a = key(1, artistId);
+        bytes32 c = key(2, bytes32(collectionId));
+        if (
+            value == 0 || !s.verified[a].done || !s.verified[c].done || s.hydrated[a] != 0
+                || s.hydrated[c] != 0 || s.cutover || s.lanes[a].length != 0
+                || s.lanes[c].length != 0
+        ) revert InvalidArtistHistory();
+        s.hydrated[a] = value;
+        s.hydrated[c] = value;
+        s.commitment = keccak256(
+            abi.encode(s.commitment, uint16(60), artistId, collectionId, value)
+        );
     }
 
     function bindingCount() public view returns (uint256) {

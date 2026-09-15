@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistHydrationGuards.sol";
 import "./StreamArtistAuthorityCheckpoint.sol";
 import {
     IStreamArtistAuthorityCheckpoint
@@ -131,6 +132,50 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
         returns (uint256, uint256[32] memory, bool)
     {
         revert StreamArtistAuthorityCheckpoint.InvalidAuthorityCheckpoint();
+    }
+
+    function importedAuthorityReplayCell(bytes32 key)
+        external
+        view
+        returns (StreamArtistOnboardingTypes.ReplayCell memory)
+    {
+        return StreamArtistHydrationGuards.sourceCell(key);
+    }
+
+    function authorityHydrationCommitment() external view returns (bytes32) {
+        return StreamArtistHydrationGuards.commitment();
+    }
+
+    function authorityHydrationState(AH.Query calldata)
+        external
+        view
+        virtual
+        returns (bytes memory)
+    {
+        return bytes("");
+    }
+
+    function applyArtistAuthorityHydration(
+        StreamArtistOnboardingTypes.ActionContext calldata c,
+        AH.Query calldata q,
+        AH.OwnerData calldata p,
+        bytes32 value
+    ) external {
+        _check(c, 60);
+        if (StreamArtistNativeReceipts.count() != 0) {
+            revert StreamArtistOnboardingTypes.InvalidRecord();
+        }
+        bytes32 delta = StreamArtistHydrationGuards.applyGuards(
+            _replay, p, artistRegistry, operationCoordinator, archiveV2, domainId, value
+        );
+        _hydrateAuthority(q, p);
+        _commit(c, value, keccak256(abi.encode(q, p, value)), delta, bytes32(0));
+    }
+
+    function _hydrateAuthority(AH.Query calldata, AH.OwnerData calldata p) internal virtual {
+        if (p.typedState.length != 0 || p.nonces.length != 0) {
+            revert StreamArtistOnboardingTypes.InvalidRecord();
+        }
     }
 
     function ownerStateSnapshotV2()

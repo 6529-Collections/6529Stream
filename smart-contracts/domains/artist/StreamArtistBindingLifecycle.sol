@@ -325,4 +325,30 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
             revert T.BoundExceeded(bytes(p.reasonURI).length, 2048);
         }
     }
+
+    function authorityHydrationState(AH.Query calldata q)
+        external
+        view
+        override
+        returns (bytes memory)
+    {
+        T.Binding memory b = _bindings[q.collectionId];
+        C.BindingTerms memory terms = _terms[q.collectionId][b.generation];
+        if (
+            b.artistId != q.artistId || b.bindingHash != q.bindingHash || b.generation != 1
+                || !b.accepted || b.consentMode != 1 || terms.count != 0 || terms.mode != 0
+                || terms.threshold != 0 || _terminals[q.collectionId][1].kind != 0
+        ) revert T.UnsupportedProfile();
+        return abi.encode(AH.Binding(b, terms));
+    }
+
+    function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
+        AH.Binding memory b = abi.decode(p.typedState, (AH.Binding));
+        if (_bindings[q.collectionId].generation != 0 || p.nonces.length != 0) {
+            revert T.InvalidRecord();
+        }
+        _bindings[q.collectionId] = b.item;
+        _history[q.collectionId][b.item.generation] = b.item;
+        _terms[q.collectionId][b.item.generation] = b.terms;
+    }
 }

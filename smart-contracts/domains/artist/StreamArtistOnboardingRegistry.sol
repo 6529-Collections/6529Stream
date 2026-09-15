@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistAuthorityHydration.sol";
+import {
+    StreamArtistAuthorityHydrationTypes as AH
+} from "../../interfaces/stream/artist/IStreamArtistAuthorityHydration.sol";
 import {
     IStreamArtistHistory,
     IStreamArtistHistoryCoordinator,
@@ -345,7 +349,8 @@ contract StreamArtistOnboardingRegistry is
         override(StreamModuleBase, IERC165)
         returns (bool)
     {
-        return id == type(IStreamArtistHistory).interfaceId
+        return id == type(IStreamArtistAuthorityHydration).interfaceId
+            || id == type(IStreamArtistHistory).interfaceId
             || id == type(IStreamArtistRecoveryApproval).interfaceId
             || id == type(IStreamArtistUnavailability).interfaceId
             || id == type(IStreamArtistMintConsent).interfaceId
@@ -1884,6 +1889,10 @@ contract StreamArtistOnboardingRegistry is
     }
 
     function observeRegistryCutover() external override {
+        _forwardRegistryWriter();
+    }
+
+    function hydrateArtistAuthority(AH.Request calldata p) external returns (bytes32) {
         _forwardRegistryWriter();
     }
 }

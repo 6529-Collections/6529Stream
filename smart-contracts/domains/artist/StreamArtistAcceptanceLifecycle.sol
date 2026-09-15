@@ -222,4 +222,23 @@ contract StreamArtistAcceptanceLifecycle is StreamArtistOwner {
             p.bindingHash
         );
     }
+
+    function authorityHydrationState(AH.Query calldata q)
+        external
+        view
+        override
+        returns (bytes memory)
+    {
+        if (acceptanceRecord[q.bindingHash] == 0 || acceptedAt[q.bindingHash] == 0) {
+            revert T.InvalidRecord();
+        }
+        return abi.encode(AH.Acceptance(acceptanceRecord[q.bindingHash], acceptedAt[q.bindingHash]));
+    }
+
+    function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
+        AH.Acceptance memory a = abi.decode(p.typedState, (AH.Acceptance));
+        if (acceptanceRecord[q.bindingHash] != 0 || p.nonces.length != 0) revert T.InvalidRecord();
+        acceptanceRecord[q.bindingHash] = a.record;
+        acceptedAt[q.bindingHash] = a.acceptedAt;
+    }
 }

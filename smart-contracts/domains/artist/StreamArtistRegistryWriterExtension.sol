@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistAuthorityHydration.sol";
+import {
+    StreamArtistAuthorityHydrationTypes as AH
+} from "../../interfaces/stream/artist/IStreamArtistAuthorityHydration.sol";
 import {
     IStreamArtistHistory,
     IStreamArtistHistoryCoordinator,
@@ -634,5 +638,10 @@ contract StreamArtistRegistryWriterExtension {
     function observeRegistryCutover() external onlyHost {
         IStreamArtistHistoryCoordinator(operationCoordinator)
             .coordinateObserveRegistryCutover(msg.sender);
+    }
+
+    function hydrateArtistAuthority(AH.Request calldata p) external onlyHost returns (bytes32) {
+        return IStreamArtistAuthorityHydrationCoordinator(operationCoordinator)
+            .coordinateHydrateArtistAuthority(msg.sender, p);
     }
 }
