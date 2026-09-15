@@ -58,7 +58,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   if (!configPath || !abiPath || !process.env.STREAM_RPC_URL) throw Error("Provide CONFIG.json SELECTED_ABI.json and STREAM_RPC_URL");
   const config = revenueRecipeInput(JSON.parse(await readFile(configPath, "utf8")));
   const { abis } = JSON.parse(await readFile(abiPath, "utf8"));
-  const provider = new JsonRpcProvider(process.env.STREAM_RPC_URL);
+  const provider = new JsonRpcProvider(process.env.STREAM_RPC_URL, undefined, { cacheTimeout: -1 });
   try {
     const client = new CurrentRevenueClient(config.chainId, config.addresses, abis);
     const session = await prepareRevenueApproval(client, provider, config.caller, config.intent, config.authorization);

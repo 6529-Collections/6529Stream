@@ -21,7 +21,7 @@ The checked fixture records its compiler inputs, source hashes and original prei
 
 The exact-key readback proves that assignment's installed hash; it does not prove every token's effective precedence or a subsequent sale. The actual commerce entrypoints retain current consent, payout, policy and callback checks. Changed state requires a new reviewed quote. A failed unchanged Safe call can retry the original authorization and byte-identical call after the failing prerequisite is repaired; a successful nonce must never be reused. `assertFresh` compares the original caller, current Artist, code, election and complete prior key and refuses to silently regenerate terms.
 
-The runnable read-only recipe is `packages/stream-client/examples/current-revenue-safe.mjs`. Its exported preparation/retry/confirmation functions retain the immutable plan in an application session. The CLI prints a proposal and requires a fresh preparation before submission; it is not a durable resumable journal. After restarting an application, quote again and review any revision/hash changes instead of treating parsed JSON as an authenticated plan.
+The runnable read-only recipe is `packages/stream-client/examples/current-revenue-safe.mjs`. Its RPC provider disables caching so repeated preparation and retry reads request fresh observations. Its exported preparation/retry/confirmation functions retain the immutable plan in an application session. The CLI prints a proposal and requires a fresh preparation before submission; it is not a durable resumable journal. After restarting an application, quote again and review any revision/hash changes instead of treating parsed JSON as an authenticated plan.
 
 ```powershell
 $env:STREAM_RPC_URL = '<your read-only RPC URL>'
