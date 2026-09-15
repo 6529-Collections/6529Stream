@@ -302,3 +302,9 @@ countersignature references. The distinct offline derivative can join a loan's
 exact insurance reference to a bounded complete valuation lane and original
 receipt order. It does not infer legal operativeness or professional assent.
 See [recorded valuation dossiers](../../docs/museum-recorded-valuations.md).
+
+The [current owner capture recipe](../../docs/museum-current-owner-capture.md) adds
+an actual-current mint/Safe/OwnerRecords test and local publication/read-only capture
+helpers for typed loan and valuation dossiers. It retains the original four formats
+literally and verifies cross-family receipt ordering offline. The new native recipe
+and positive RPC capture remain pending; ten focused Python controls are separate.
