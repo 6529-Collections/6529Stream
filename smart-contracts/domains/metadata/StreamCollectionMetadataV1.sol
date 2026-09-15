@@ -17,6 +17,7 @@ import "./StreamSchemaDocumentStore.sol";
 import "./StreamMetadataSubjects.sol";
 import "./StreamMetadataRenderer.sol";
 import "./StreamMetadataGovernance.sol";
+import { StreamCollectionManifestExecution } from "./StreamCollectionManifestExecution.sol";
 import { StreamCollectionManifests } from "./StreamCollectionManifests.sol";
 import {
     IStreamCollectionManifestReads
@@ -181,10 +182,7 @@ contract StreamCollectionMetadataV1 is
         override
         returns (bytes32 hash)
     {
-        address router = _manifestRouter(collectionId);
-        (hash,) = StreamCollectionManifests.script(
-            core, router, collectionId, value, _manifestSource(router, collectionId)
-        );
+        _manifestRead();
     }
 
     function previewMediaManifest(uint256 collectionId, M.MediaManifest calldata value)
@@ -193,10 +191,7 @@ contract StreamCollectionMetadataV1 is
         override
         returns (bytes32 hash)
     {
-        address router = _manifestRouter(collectionId);
-        (hash,) = StreamCollectionManifests.media(
-            core, router, collectionId, value, _manifestSource(router, collectionId)
-        );
+        _manifestRead();
     }
 
     function storeScriptManifest(uint256 collectionId, M.ScriptManifest calldata value)
@@ -204,20 +199,7 @@ contract StreamCollectionMetadataV1 is
         override
         returns (bytes32 hash)
     {
-        address router = _manifestRouter(collectionId);
-        if (msg.sender != router) revert MetadataAuthorityRequired();
-        IStreamMetadataServingFacts.ServingSource memory source =
-            _manifestSource(router, collectionId);
-        bytes32 sourceHash;
-        (hash, sourceHash) =
-            StreamCollectionManifests.script(core, router, collectionId, value, source);
-        if (_manifests.entries[hash].router == address(0)) {
-            StreamSchemaDocumentStore(chunkStore).publishChunk(bytes(source.script));
-            _manifests.scripts[hash] = value;
-            _manifests.entries[hash] =
-                StreamCollectionManifests.Entry(collectionId, router, sourceHash, 2);
-            emit CollectionManifestStored(1, collectionId, 2, hash, router, sourceHash);
-        }
+        _manifestWrite();
     }
 
     function storeMediaManifest(uint256 collectionId, M.MediaManifest calldata value)
@@ -225,26 +207,15 @@ contract StreamCollectionMetadataV1 is
         override
         returns (bytes32 hash)
     {
-        address router = _manifestRouter(collectionId);
-        if (msg.sender != router) revert MetadataAuthorityRequired();
-        bytes32 sourceHash;
-        (hash, sourceHash) = StreamCollectionManifests.media(
-            core, router, collectionId, value, _manifestSource(router, collectionId)
-        );
-        if (_manifests.entries[hash].router == address(0)) {
-            _manifests.media[hash] = value;
-            _manifests.entries[hash] =
-                StreamCollectionManifests.Entry(collectionId, router, sourceHash, 3);
-            emit CollectionManifestStored(1, collectionId, 3, hash, router, sourceHash);
-        }
+        _manifestWrite();
     }
 
     function scriptManifestHash(uint256 collectionId) external view override returns (bytes32) {
-        return _selectedManifest(collectionId, 2);
+        _manifestRead();
     }
 
     function mediaManifestHash(uint256 collectionId) external view override returns (bytes32) {
-        return _selectedManifest(collectionId, 3);
+        _manifestRead();
     }
 
     function scriptManifest(uint256 collectionId)
@@ -253,7 +224,7 @@ contract StreamCollectionMetadataV1 is
         override
         returns (M.ScriptManifest memory)
     {
-        return _manifests.scripts[_selectedManifest(collectionId, 2)];
+        _manifestRead();
     }
 
     function mediaManifest(uint256 collectionId)
@@ -262,7 +233,7 @@ contract StreamCollectionMetadataV1 is
         override
         returns (M.MediaManifest memory)
     {
-        return _manifests.media[_selectedManifest(collectionId, 3)];
+        _manifestRead();
     }
 
     function scriptChunk(uint256 collectionId, uint256 index)
@@ -271,112 +242,38 @@ contract StreamCollectionMetadataV1 is
         override
         returns (bytes memory)
     {
-        bytes32 hash = _selectedManifest(collectionId, 2);
-        if (hash == 0 || index != 0) revert UnknownCollectionManifest(hash);
-        return _chunk(_manifests.scripts[hash].scriptHash);
+        _manifestRead();
     }
 
     function recordedScriptManifest(bytes32 hash) external view returns (M.ScriptManifest memory) {
-        if (_manifests.entries[hash].kind != 2) revert UnknownCollectionManifest(hash);
-        return _manifests.scripts[hash];
+        _manifestRead();
     }
 
     function recordedMediaManifest(bytes32 hash) external view returns (M.MediaManifest memory) {
-        if (_manifests.entries[hash].kind != 3) revert UnknownCollectionManifest(hash);
-        return _manifests.media[hash];
+        _manifestRead();
     }
 
-    function _selectedManifest(uint256 collectionId, uint8 kind)
+    /// @dev Fixed workers retain host storage, caller and the original calldata/return ABI.
+    function _manifestRead() private view {
+        bytes memory result =
+            StreamCollectionManifestExecution.read(_manifests, _manifestContext(), msg.data);
+        assembly ("memory-safe") { return(add(result, 32), mload(result)) }
+    }
+
+    function _manifestWrite() private {
+        bytes memory result =
+            StreamCollectionManifestExecution.write(_manifests, _manifestContext(), msg.data);
+        assembly ("memory-safe") { return(add(result, 32), mload(result)) }
+    }
+
+    function _manifestContext()
         private
         view
-        returns (bytes32 hash)
+        returns (StreamCollectionManifestExecution.Context memory)
     {
-        address router = _manifestRouter(collectionId);
-        M.Selection memory selected = abi.decode(
-            _read(
-                router,
-                abi.encodeCall(
-                    IStreamMetadataManifestSelection.selectedCollectionManifest,
-                    (collectionId, kind)
-                ),
-                96,
-                false
-            ),
-            (M.Selection)
+        return StreamCollectionManifestExecution.Context(
+            core, coreCodeHash, chunkStore, chunkStoreCodeHash
         );
-        hash = selected.manifestHash;
-        if (hash == 0) {
-            if (selected.host != address(0) || selected.codeHash != 0) {
-                revert InvalidCollectionManifest();
-            }
-            return 0;
-        }
-        if (
-            selected.host != address(this) || selected.codeHash != address(this).codehash
-                || _manifests.entries[hash].collectionId != collectionId
-                || _manifests.entries[hash].router != router
-                || _manifests.entries[hash].kind != kind
-        ) {
-            revert InvalidCollectionManifest();
-        }
-    }
-
-    function _manifestRouter(uint256 collectionId) private view returns (address target) {
-        _requireCollection(collectionId);
-        _requireSelected(_TYPE, address(this), address(this).codehash);
-        bytes32 hash;
-        uint8 status;
-        uint64 revision;
-        (target, hash,,,,, status,,, revision) = abi.decode(
-            _read(
-                core,
-                abi.encodeCall(
-                    IStreamCorePointers.getSatellitePointer, (keccak256("METADATA_ROUTER"))
-                ),
-                320,
-                false
-            ),
-            (address, bytes32, bool, bytes32, bytes4, address, uint8, bytes32, bytes32, uint64)
-        );
-        _requireCode(target, hash);
-        if (
-            status != 1 || revision == 0
-                || abi.decode(
-                        _read(target, abi.encodeWithSignature("core()"), 32, false), (address)
-                    ) != core
-        ) {
-            revert MetadataHostNotSelected();
-        }
-    }
-
-    function _manifestSource(address router, uint256 collectionId)
-        private
-        view
-        returns (IStreamMetadataServingFacts.ServingSource memory source)
-    {
-        _requireCode(chunkStore, chunkStoreCodeHash);
-        bytes memory profile =
-            _read(router, abi.encodeWithSignature("renderingProfile()"), 96, false);
-        if (
-            keccak256(profile)
-                != keccak256(
-                    abi.encode(
-                        keccak256("6529STREAM_ROUTER_STABLE_PRESENTATION_V1"),
-                        keccak256("6529STREAM_METADATA_TOKEN_RENDER_CONTEXT_V1"),
-                        keccak256("6529STREAM_METADATA_RENDER_NO_EXTERNAL_READS_V1")
-                    )
-                )
-        ) {
-            revert UnsupportedCollectionManifest();
-        }
-        bytes memory raw = _read(
-            router,
-            abi.encodeCall(IStreamMetadataServingFacts.collectionServingSource, (collectionId)),
-            16384,
-            false
-        );
-        source = abi.decode(raw, (IStreamMetadataServingFacts.ServingSource));
-        if (keccak256(raw) != keccak256(abi.encode(source))) revert InvalidCollectionManifest();
     }
 
     function recordPolicy(bytes32 recordType) external view override returns (RecordPolicy memory) {
@@ -397,25 +294,9 @@ contract StreamCollectionMetadataV1 is
         override
         returns (bytes32 scope, bytes32 oldHash, bytes32 newHash)
     {
-        uint16 allowed = family.allowed();
-        // WORK_DESCRIPTION shares curatorial storage, with a separate artist op-24 path.
-        if (recordType == keccak256("WORK_DESCRIPTION") && family == StreamRecordFamilies.CURATOR) {
-            allowed |= StreamRecordFamilies.bit(1);
-        }
-        if (
-            recordType == 0 || _policies[recordType].admitted || mask == 0 || allowed == 0
-                || (mask & ~allowed) != 0
-                || (recordType == keccak256("WORK_DESCRIPTION")
-                    && family != StreamRecordFamilies.CURATOR)
-        ) revert InvalidMetadataRecord();
-        // These families have dedicated permanent hosts or typed intersection rules.
-        if (
-            family == StreamRecordFamilies.SNAPSHOT || family == StreamRecordFamilies.INDEPENDENT
-                || family == StreamRecordFamilies.OWNER
-        ) revert InvalidMetadataRecord();
-        scope = _configurationScope(recordType);
-        oldHash = keccak256(abi.encode(false));
-        newHash = keccak256(abi.encode(RecordPolicy(family, mask, true)));
+        return StreamCollectionManifestExecution.recordTypeTransition(
+            _policies, governanceAuthority, executorCodeHash, recordType, family, mask
+        );
     }
 
     function admitRecordType(bytes32 recordType, bytes32 family, uint16 mask) external override {
@@ -444,17 +325,17 @@ contract StreamCollectionMetadataV1 is
         address account,
         bool enabled
     ) public view override returns (bytes32 scope, bytes32 oldHash, bytes32 newHash) {
-        if (
-            account == address(0) || authClass < 3 || authClass > 8 || authClass == 5
-                || (family.allowed() & StreamRecordFamilies.bit(authClass)) == 0
-        ) revert MetadataAuthorityRequired();
-        if (collectionId != 0) _requireCollection(collectionId);
-        bytes32 key = _grantKey(collectionId, family, authClass, account);
-        Grant memory g = _grants[key];
-        if (g.enabled == enabled || g.revision == type(uint64).max) revert InvalidMetadataRecord();
-        scope = _configurationScope(key);
-        oldHash = keccak256(abi.encode(g));
-        newHash = keccak256(abi.encode(Grant(enabled, g.revision + 1)));
+        return StreamCollectionManifestExecution.familyWriterTransition(
+            _grants,
+            _manifestContext(),
+            governanceAuthority,
+            executorCodeHash,
+            collectionId,
+            family,
+            authClass,
+            account,
+            enabled
+        );
     }
 
     function setFamilyWriter(
@@ -603,8 +484,8 @@ contract StreamCollectionMetadataV1 is
             RecordReceipt memory receipt
         )
     {
-        StoredRecord storage s = _knownRecord(hash);
-        return (s.record, s.receipt);
+        bytes memory result = StreamCollectionManifestExecution.record(_knownRecord(hash));
+        assembly ("memory-safe") { return(add(result, 32), mload(result)) }
     }
 
     function latestCollectionRecordHashFor(
