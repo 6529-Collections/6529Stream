@@ -1,6 +1,6 @@
 # Full-v1 current delivery status
 
-Updated 14 September 2026. This is the current reporting entry point.
+Updated 15 September 2026. This is the current reporting entry point.
 The [delivery ledger](V1_DELIVERY.md) retains implementation checkpoints and the
 requirement index. Historical statements there do not override the newer state
 below. These workstreams are not a feature-count or percentage denominator.
@@ -11,7 +11,7 @@ complete. No new funding is required. Automatic approval review has blocked
 local inherited/global primary-freeze implementation pending a more specific
 owner approval. The separate ERC-20 payable reveal-fee implementation is also
 blocked by automatic review even after the owner explicitly approved that local
-implementation. The exact patch is being prepared for review; other work continues.
+implementation. The exact unapplied patch is prepared and an artifact-specific approval is pending; other work continues.
 
 | Workflow | Demonstrated or integrated | Next acceptance / remaining implementation |
 | --- | --- | --- |
@@ -21,6 +21,25 @@ implementation. The exact patch is being prepared for review; other work continu
 | Preservation, museum records and finality | An earlier graph passes one complete preservation/finality ceremony; the supported collection bundle and museum export increments have separate evidence. | Remaining scope variants, recovery/cutover, reconstruction, museum conformance and latest-system composition remain. One collection ceremony does not establish every finality or genesis profile. |
 | Developer client and operator | RC1 client remains usable. Compiler-selected typed clients are integrated as `e409c134`, with 52 passing tests, independent review and exact generation/typechecking against accepted native output. Earlier local graph deployment completed 530 transactions within the deployment ceiling. | Four explicit current native auction/bid/custody signing helpers are integrated (`db3fca94`), with 59 client tests and independently reproduced actual-getter encoding vectors. Complete workflow examples and latest graph activation remain. The deployment rehearsal records `productsActivated=false`; it is not a full product launch. |
 | Candidate and testnet | Immutable supported RC1 and its Sepolia evidence are complete. | Expanded full-v1 implementation, complete Safe call inventory, required fuzz/stateful campaigns, all 37 genesis roles, gas conformance, full CI, new source freeze and matching testnet evidence remain. |
+
+## Latest feature batch
+
+Entropy provider epochs and immutable request policy records are integrated as
+`c3c22d4a`; the [caller guide](../docs/entropy-epochs.md) explains their scope.
+All 16 focused native tests pass, including a 256-input revision property. The
+coordinator runtime is 23,244 bytes. Its 124 original ABI entries and 20-field
+recursive storage prefix are preserved. All 44 tested source files remain exact
+in the integration checkout. This does not add post-mint provider migration or
+fresh recovery.
+
+Artist display facts and permissionless attribution claims are integrated as
+`4725e13f`, after independent source review, with nine new authored scenarios.
+The combined 1,542-source repository ABI/type check passes. Live renderer
+composition and native Artist tests/sizes remain pending. The next Artist batch
+adds content-attestation writers and delegated submission; metadata continues
+live nested display and the authenticated original-finality anchor. Revenue
+continues artist-less PLATFORM_WORKS royalty snapshots while the exact ERC-20
+patch remains unapplied. These increments do not change the released RC1.
 
 ## Delivery sequencing
 

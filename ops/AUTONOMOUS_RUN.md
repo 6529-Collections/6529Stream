@@ -4,7 +4,7 @@ For current progress and the next acceptance targets, read
 [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md). Historical checkpoints below retain
 their original scope and are not a current completion score.
 
-Updated 14 September 2026. The owner authorizes autonomous completion of the
+Updated 15 September 2026. The owner authorizes autonomous completion of the
 remaining full v1 features, independent adversarial review and matching testnet
 delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
@@ -22,7 +22,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-09-14 UTC` |
+| Last updated | `2026-09-15 UTC` |
 
 ## Active work
 
@@ -37,9 +37,9 @@ pending checks. The immutable RC1 remains the released baseline.
 
 | Owner | Implementation batch |
 | --- | --- |
-| Integrator | Immediate native sales/client integrated; operator/genesis and combined acceptance |
-| Artist builder | Artist attestation/claim reads for complete attribution display; closed repeated-recovery histories integrated |
-| Revenue builder | Exact ERC-20 reveal-fee patch proposal after automatic review rejected the approved write; inherited/global freezes remain separately blocked |
+| Integrator | Entropy epochs integrated with 16 native tests and 256 fuzz inputs; operator/genesis and combined acceptance |
+| Artist builder | Content-attestation writers and delegated submission; display facts/claims integrated as `4725e13f` |
+| Revenue builder | PLATFORM_WORKS royalty snapshots; exact ERC-20 patch is prepared but unapplied pending artifact-specific approval; inherited/global freezes separately blocked |
 | Fourth engineer | Nested attribution projection and renderer integration; actual-current complete-media capture integrated and offline replayed |
 
 Comprehensive current-stack/Safe integration, fuzz and stateful campaigns, gas
@@ -49,7 +49,8 @@ the background and validate only their recorded source. No new date or
 percentage is inferred from these assignments.
 
 Root owns the combined graph, shared operator/client work and the new candidate.
-The combined feature source passes an 888-source ABI/type check.
+The combined repository source passes a 1,542-source ABI/type check. Entropy
+epochs retain the original ABI/storage prefix and pass their focused native cohort.
 The [current report](V1_CURRENT_STATUS.md#source-batch-integrated-before-comprehensive-testing)
 records the newest recovery, TEMPLATE, recorded-format and reveal changes. Client tests
 pass 78 cases and the four-format museum package passes 11; recorded-account
