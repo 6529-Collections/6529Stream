@@ -68,6 +68,17 @@ contract StreamArtistRegistryReadExtension {
         _;
     }
 
+    function contentConsentEvidenceForHost(
+        uint256 collectionId,
+        address contentHost,
+        bytes32 familyId,
+        bytes32 newStateHash
+    ) external view onlyHost returns (bytes32) {
+        return StreamArtistContentOperations.consentEvidenceForHost(
+            _contentSuite(), collectionId, contentHost, familyId, newStateHash
+        );
+    }
+
     function recordPreimageBytes(bytes32 hash) external view onlyHost returns (bytes memory) {
         return IStreamArtistReconstruction(_contentSuite().archive).recordPreimageBytes(hash);
     }

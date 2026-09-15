@@ -22,6 +22,8 @@ import "../../interfaces/stream/parameters/IStreamGasParameterHost.sol";
 /// @notice Stateless content recipes and read composition over the immutable artist owners and host.
 /// @dev No readiness state. Executed-finality provider admission remains an explicit integration seam.
 library StreamArtistContentOperations {
+    bytes32 private constant ENTROPY_RECOVERY = keccak256("6529STREAM_ENTROPY_RECOVERY_V1");
+
     function consent(
         StreamArtistDelegationTypes.CoordinatorContext memory x,
         address actor,
@@ -33,9 +35,8 @@ library StreamArtistContentOperations {
         R.AuthorityFact memory authority =
             StreamArtistCurrentAuthorityFacts.read(x.suite.owners[2], b.artistId, false);
         StreamArtistContentHashes.validateConsent(p);
-        _host(x.suite, p.metadataContract);
-        (bool supported, bytes32 current) = IStreamArtistContentMutationFacts(p.metadataContract)
-            .artistContentFamilyState(p.collectionId, p.familyId);
+        _consentHost(x.suite, p.metadataContract, p.familyId);
+        (bool supported, bytes32 current) = _familyState(x.suite, p);
         if (!supported || current == bytes32(0) || current == p.newStateHash) {
             revert T.InvalidRecord();
         }
@@ -109,6 +110,34 @@ library StreamArtistContentOperations {
         (bool supported,) = IStreamArtistContentMutationFacts(suite.metadata)
             .artistContentFamilyState(collectionId, familyId);
         if (!supported) revert T.UnsupportedProfile();
+        return _consentRecord(suite, b, p);
+    }
+
+    function consentEvidenceForHost(
+        T.SuiteConfiguration memory suite,
+        uint256 collectionId,
+        address contentHost,
+        bytes32 familyId,
+        bytes32 newStateHash
+    ) public view returns (bytes32) {
+        if (contentHost == suite.metadata) {
+            return consentEvidence(suite, collectionId, familyId, newStateHash);
+        }
+        T.Binding memory b = _binding(suite, collectionId, false);
+        Content.Consent memory p =
+            Content.Consent(collectionId, contentHost, familyId, newStateHash);
+        StreamArtistContentHashes.validateConsent(p);
+        _consentHost(suite, contentHost, familyId);
+        (bool supported, bytes32 current) = _familyState(suite, p);
+        if (!supported || current == 0) revert T.UnsupportedProfile();
+        return _consentRecord(suite, b, p);
+    }
+
+    function _consentRecord(
+        T.SuiteConfiguration memory suite,
+        T.Binding memory b,
+        Content.Consent memory p
+    ) private view returns (bytes32) {
         IStreamArtistContentRecordsOwner.ConsentRecord memory record =
             IStreamArtistContentRecordsOwner(suite.owners[6]).contentConsentAt(p, b.generation);
         if (
@@ -177,6 +206,83 @@ library StreamArtistContentOperations {
         ) {
             revert T.InvalidAttribution(collectionId);
         }
+    }
+
+    function _consentHost(T.SuiteConfiguration memory suite, address supplied, bytes32 family)
+        private
+        view
+    {
+        if (supplied == suite.metadata) {
+            _host(suite, supplied);
+            return;
+        }
+        if (family != ENTROPY_RECOVERY) revert T.ComponentChanged(supplied);
+        _selected(suite.core, keccak256("ENTROPY_COORDINATOR"), supplied);
+        bytes memory raw = _entropyRead(suite, supplied, abi.encodeWithSignature("core()"), 32);
+        uint256 value;
+        assembly ("memory-safe") { value := mload(add(raw, 32)) }
+        if (value != uint256(uint160(suite.core))) revert T.ComponentChanged(supplied);
+    }
+
+    function _familyState(T.SuiteConfiguration memory suite, Content.Consent memory p)
+        private
+        view
+        returns (bool supported, bytes32 current)
+    {
+        if (p.metadataContract == suite.metadata) {
+            return IStreamArtistContentMutationFacts(p.metadataContract)
+                .artistContentFamilyState(p.collectionId, p.familyId);
+        }
+        bytes memory raw = _entropyRead(
+            suite,
+            p.metadataContract,
+            abi.encodeCall(
+                IStreamArtistContentMutationFacts.artistContentFamilyState,
+                (p.collectionId, p.familyId)
+            ),
+            64
+        );
+        uint256 flag;
+        assembly ("memory-safe") {
+            flag := mload(add(raw, 32))
+            current := mload(add(raw, 64))
+        }
+        if (flag > 1) revert T.ComponentChanged(p.metadataContract);
+        supported = flag == 1;
+    }
+
+    /// @dev New host reads are exact-size and bounded by the original Artist read GGP.
+    /// Buffers exist before measuring gas; setup allowance preserves the retained reserve.
+    function _entropyRead(
+        T.SuiteConfiguration memory suite,
+        address target,
+        bytes memory input,
+        uint256 length
+    ) private view returns (bytes memory output) {
+        (uint256 cap,, uint8 failure, uint64 revision) = IStreamGasParameterHost(suite.registry)
+            .gasParameterInfo(keccak256("6529STREAM_GGP_ARTIST_FINALITY_READ_GAS"));
+        if (cap == 0 || cap == type(uint256).max || failure != 2 || revision == 0) {
+            revert T.ComponentChanged(target);
+        }
+        output = new bytes(length);
+        uint256 available = gasleft();
+        if (available <= 105000) revert T.ComponentChanged(target);
+        uint256 forwarded = available - 105000;
+        if (forwarded > cap) forwarded = cap;
+        bool ok;
+        uint256 size;
+        assembly ("memory-safe") {
+            ok := staticcall(
+                forwarded,
+                target,
+                add(input, 32),
+                mload(input),
+                add(output, 32),
+                length
+            )
+            size := returndatasize()
+        }
+        if (!ok || size != length) revert T.ComponentChanged(target);
     }
 
     function _host(T.SuiteConfiguration memory suite, address supplied) private view {

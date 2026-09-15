@@ -6,6 +6,7 @@ import {
     StreamArtistHistoryTypes as H
 } from "../../interfaces/stream/artist/IStreamArtistHistory.sol";
 import "../../interfaces/stream/artist/IStreamArtistReconstruction.sol";
+import "../../interfaces/stream/artist/IStreamArtistContentHostEvidence.sol";
 import "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
 import {
     StreamArtistStewardCapabilityTypes as SC
@@ -88,6 +89,7 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistCollaboratorLifecycle,
     IStreamArtistAuthorizationRevocation,
     IStreamArtistContentAuthority,
+    IStreamArtistContentHostEvidence,
     IStreamArtistIdentityRevision,
     IStreamArtistRotation,
     IStreamArtistWindows,
@@ -363,6 +365,7 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistCollaboratorLifecycle).interfaceId
             || id == type(IStreamArtistAuthorizationRevocation).interfaceId
             || id == type(IStreamArtistContentAuthority).interfaceId
+            || id == type(IStreamArtistContentHostEvidence).interfaceId
             || id == type(IStreamArtistIdentityRevision).interfaceId
             || id == type(IStreamArtistIdentityRevisionReads).interfaceId
             || id == type(IStreamArtistRotation).interfaceId
@@ -1478,6 +1481,15 @@ contract StreamArtistOnboardingRegistry is
         return StreamArtistContentOperations.consentEvidence(
             _contentSuite(), collectionId, familyId, newStateHash
         );
+    }
+
+    function contentConsentEvidenceForHost(
+        uint256 collectionId,
+        address contentHost,
+        bytes32 familyId,
+        bytes32 newStateHash
+    ) external view returns (bytes32) {
+        _forwardRegistryRead();
     }
 
     function isContentFreezeAuthorized(uint256 collectionId, bytes32 lockClass)
