@@ -280,3 +280,11 @@ PREMIS document and source selectors. Noncompleted or unsupported events never
 become performed activities. Run
 `python -m unittest tools.museum.test_preservation_graph -v`; old profile and
 package bytes remain unchanged, with no network or institutional claim.
+
+The [recorded exhibition adapter](../../docs/museum-recorded-exhibitions.md)
+adds exact class-5 `INDEPENDENT_EXHIBITION` source admission and a distinct
+offline graph/package. Completed source claims retain named institution
+participants, venues and explicit dates; planned/cancelled/unknown records,
+full document commitments and unsupported facts remain sidecars. Original
+recorded packages replay unchanged, with no loan, custody or display permission
+inferred. Run `python -m unittest tools.museum.test_exhibitions -v`.
