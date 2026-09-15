@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamNativeSurplusHost, StreamNativeSurplus, IStreamNativeSurplus } from "../mint/StreamNativeSurplusHost.sol";
 import "./StreamNativeEnglishAuctionRightsRegistration.sol";
 import "./StreamPlatformNativeAuctionRegistration.sol";
 import "./StreamPlatformCustodyRegistration.sol";
@@ -44,6 +45,7 @@ import "../../vendor/openzeppelin/IERC721Receiver.sol";
 /// no current sale or pause gate; delegated claims require the original registry's live grant.
 /// Other declared v1 profiles remain separate work.
 contract StreamNativeEnglishAuction is
+    StreamNativeSurplusHost,
     IStreamNativeEnglishAuction,
     IStreamNativeCuratedAuction,
     IStreamNativeCustodyAuction,
@@ -201,7 +203,7 @@ contract StreamNativeEnglishAuction is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return (id == type(IStreamNativeAuctionDelegatedDelivery).interfaceId
+        return id == type(IStreamNativeSurplus).interfaceId || (id == type(IStreamNativeAuctionDelegatedDelivery).interfaceId
                 && delegateRegistry != address(0))
             || id == type(IStreamNativeEnglishAuction).interfaceId
             || id == type(IStreamNativeCuratedAuction).interfaceId
@@ -1077,4 +1079,11 @@ contract StreamNativeEnglishAuction is
             key
         );
     }
+
+    function sweepNativeSurplus(uint256 amount, bytes32 reasonHash)
+        external override nonReentrant returns (uint256)
+    {
+        return _sweepNativeSurplus(amount, reasonHash);
+    }
+    function _nativeSurplusOwed() internal view override returns (uint256) { return _state.liabilities; }
 }

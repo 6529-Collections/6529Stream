@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamNativeSurplusHost, StreamNativeSurplus, IStreamNativeSurplus } from "./StreamNativeSurplusHost.sol";
 import "./StreamNativeRefundDelegation.sol";
 
 import "./StreamDutchSaleSupport.sol";
@@ -15,6 +16,7 @@ import "../../vendor/openzeppelin/ERC165.sol";
 /// @notice Signed standard native Dutch mints with per-sale excess pull credits.
 /// @dev Positive price uses the official native recorder; declared zero never settles revenue.
 contract StreamNativeDutchSale is
+    StreamNativeSurplusHost,
     IStreamNativeDutchSale,
     StreamSettlementContext,
     StreamGasParameterHost,
@@ -143,7 +145,7 @@ contract StreamNativeDutchSale is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return _refundDelegationSupported(id) || id == type(IStreamNativeDutchSale).interfaceId
+        return id == type(IStreamNativeSurplus).interfaceId || _refundDelegationSupported(id) || id == type(IStreamNativeDutchSale).interfaceId
             || id == type(IStreamArtistSaleFacts).interfaceId
             || id == type(IStreamNativeSaleBinding).interfaceId || super.supportsInterface(id);
     }
@@ -510,4 +512,11 @@ contract StreamNativeDutchSale is
     function renounceOwnership() public override onlyOwner nonReentrant {
         super.renounceOwnership();
     }
+
+    function sweepNativeSurplus(uint256 amount, bytes32 reasonHash)
+        external override nonReentrant returns (uint256)
+    {
+        return _sweepNativeSurplus(amount, reasonHash);
+    }
+    function _nativeSurplusOwed() internal view override returns (uint256) { return refundLiability; }
 }

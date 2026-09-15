@@ -180,6 +180,7 @@ contract StreamCurrentRefundWindowTest is StreamCurrentSafeGovernanceFixture {
     function _additionalOperatingPolicies()
         internal
         view
+        virtual
         override
         returns (GovernanceActionPolicyEntry[] memory rows)
     {

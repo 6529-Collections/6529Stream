@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamNativeSurplusHost, StreamNativeSurplus, IStreamNativeSurplus } from "./StreamNativeSurplusHost.sol";
 
 import "./StreamPrivateSaleSupport.sol";
 import "./StreamPrivateSaleAccounting.sol";
@@ -25,6 +26,7 @@ import "../../vendor/openzeppelin/ERC165.sol";
 /// @dev The owner explicitly configures each collection's singleton signer set. Royalty credits,
 ///      consignor proceeds and buyer excess are separate perpetual claims. No primary mint occurs.
 contract StreamPrivateSaleAdapter is
+    StreamNativeSurplusHost,
     IStreamPrivateSaleAdapter,
     IStreamPrivateSaleDelegatedClaims,
     IStreamPrivateSaleDelegatedOffers,
@@ -162,7 +164,7 @@ contract StreamPrivateSaleAdapter is
     }
 
     function supportsInterface(bytes4 id) public view override(IERC165, ERC165) returns (bool) {
-        return ((id == type(IStreamPrivateSaleDelegatedClaims).interfaceId
+        return id == type(IStreamNativeSurplus).interfaceId || ((id == type(IStreamPrivateSaleDelegatedClaims).interfaceId
                     || id == type(IStreamPrivateSaleDelegatedOffers).interfaceId)
                 && delegateRegistry != address(0))
             || id == type(IStreamPrivateSaleAdapter).interfaceId
@@ -875,4 +877,12 @@ contract StreamPrivateSaleAdapter is
         return
             StreamPrivateSaleSupport.Context(core, moduleRegistry, coreCodeHash, registryCodeHash);
     }
+
+    function sweepNativeSurplus(uint256 amount, bytes32 reasonHash)
+        external override nonReentrant returns (uint256)
+    {
+        return _sweepNativeSurplus(amount, reasonHash);
+    }
+    function _nativeSurplusPrivateRegistry() internal pure override returns (bool) { return true; }
+    function _nativeSurplusOwed() internal view override returns (uint256) { return _money.totalLiabilities; }
 }

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamNativeSurplusHost, StreamNativeSurplus, IStreamNativeSurplus } from "./StreamNativeSurplusHost.sol";
 import "./StreamNativeRefundDelegation.sol";
 
 import "./StreamRefundWindowBook.sol";
@@ -18,6 +19,7 @@ import "../../vendor/openzeppelin/ERC165.sol";
 /// @notice Signed native purchases held as buyer liabilities until refund or official mint.
 /// @dev New deferred schema only. Refund credit and deadline escape never read mutable providers.
 contract StreamNativeRefundWindowSale is
+    StreamNativeSurplusHost,
     StreamRefundWindowBook,
     StreamSettlementContext,
     StreamGasParameterHost,
@@ -149,7 +151,7 @@ contract StreamNativeRefundWindowSale is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return _refundDelegationSupported(id)
+        return id == type(IStreamNativeSurplus).interfaceId || _refundDelegationSupported(id)
             || id == type(IStreamNativeRefundWindowSale).interfaceId
             || id == type(IStreamDeferredNativeSaleBinding).interfaceId
             || id == type(IStreamArtistSaleFacts).interfaceId || super.supportsInterface(id);
@@ -471,4 +473,11 @@ contract StreamNativeRefundWindowSale is
     function renounceOwnership() public override onlyOwner nonReentrant {
         super.renounceOwnership();
     }
+
+    function sweepNativeSurplus(uint256 amount, bytes32 reasonHash)
+        external override nonReentrant returns (uint256)
+    {
+        return _sweepNativeSurplus(amount, reasonHash);
+    }
+    function _nativeSurplusOwed() internal view override returns (uint256) { return _book.totalBuyerLiabilities; }
 }

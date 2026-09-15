@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamNativeSurplusHost, StreamNativeSurplus, IStreamNativeSurplus } from "./StreamNativeSurplusHost.sol";
 import "./StreamNativeRefundDelegation.sol";
 
 import "./StreamClearingSaleExecution.sol";
@@ -18,6 +19,7 @@ import "../../vendor/openzeppelin/ERC165.sol";
 /// @notice Signed Dutch floor mints with immutable clearing, permanent rebates and typed financial legs.
 /// @dev The shared guard covers every consumer mutation; governance gas raises retain their host authority.
 contract StreamNativeClearingSale is
+    StreamNativeSurplusHost,
     IStreamNativeClearingSale,
     StreamSettlementContext,
     StreamGasParameterHost,
@@ -127,7 +129,7 @@ contract StreamNativeClearingSale is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return _refundDelegationSupported(id) || id == type(IStreamNativeClearingSale).interfaceId
+        return id == type(IStreamNativeSurplus).interfaceId || _refundDelegationSupported(id) || id == type(IStreamNativeClearingSale).interfaceId
             || id == type(IStreamArtistSaleFacts).interfaceId
             || id == type(IStreamNativeSaleBinding).interfaceId
             || id == type(IStreamNativeClearingSaleBinding).interfaceId
@@ -558,4 +560,11 @@ contract StreamNativeClearingSale is
     function renounceOwnership() public override onlyOwner nonReentrant {
         super.renounceOwnership();
     }
+
+    function sweepNativeSurplus(uint256 amount, bytes32 reasonHash)
+        external override nonReentrant returns (uint256)
+    {
+        return _sweepNativeSurplus(amount, reasonHash);
+    }
+    function _nativeSurplusOwed() internal view override returns (uint256) { return _state.financial.totalBuyerLiability; }
 }

@@ -111,6 +111,7 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
     function _additionalOperatingPolicies()
         internal
         view
+        virtual
         override
         returns (GovernanceActionPolicyEntry[] memory rows)
     {

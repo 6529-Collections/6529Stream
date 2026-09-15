@@ -213,4 +213,35 @@ library StreamNativeImmediateSaleWorker {
             lifecycle.saleAdapterRegistryRevision
         );
     }
+    error InvalidSettlementContext(address target);
+
+    /// @dev Original host immutable getters, fixed self-read only. External dependency checks
+    /// retain the original Registry -> Resolver -> Factory -> Recorder -> Manager order.
+    function requireContext() public view {
+        StreamSettlementAdmission.requireRegistry(
+            address(uint160(_contextWord("core()"))), bytes32(_contextWord("coreCodeHash()")),
+            address(uint160(_contextWord("moduleRegistry()"))), bytes32(_contextWord("moduleRegistryCodeHash()"))
+        );
+        _requireCode("revenueResolver()", "resolverCodeHash()");
+        _requireCode("splitFactory()", "factoryCodeHash()");
+        _requireCode("primarySaleSettlement()", "settlementCodeHash()");
+        _requireCode("mintManager()", "mintManagerCodeHash()");
+    }
+    function _requireCode(string memory getter, string memory hashGetter) private view {
+        address target = address(uint160(_contextWord(getter)));
+        if (target.codehash != bytes32(_contextWord(hashGetter))) revert InvalidSettlementContext(target);
+    }
+    function _contextWord(string memory getter) private view returns (uint256 word) {
+        bytes memory data = abi.encodeWithSelector(bytes4(keccak256(bytes(getter))));
+        bool ok;
+        uint256 size;
+        address host = address(this);
+        assembly ("memory-safe") {
+            let p := mload(0x40)
+            ok := staticcall(gas(), host, add(data, 32), mload(data), p, 32)
+            size := returndatasize()
+            word := mload(p)
+        }
+        if (!ok || size != 32) revert InvalidSettlementContext(host);
+    }
 }

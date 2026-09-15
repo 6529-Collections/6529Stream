@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamNativeSurplusHost, StreamNativeSurplus, IStreamNativeSurplus } from "./StreamNativeSurplusHost.sol";
 import { StreamNativeImmediateSaleWorker } from "./StreamNativeImmediateSaleWorker.sol";
 import "./StreamNativeRefundDelegation.sol";
 
@@ -28,6 +29,7 @@ import "../../vendor/openzeppelin/ERC165.sol";
 /// @notice Typed native paid mints through the shared official recorder.
 /// @dev Sale revenue excludes reveal fees; unused fee allowance is a payer-owned pull credit.
 contract StreamNativeFixedPriceSaleAdapter is
+    StreamNativeSurplusHost,
     IStreamNativeFixedPriceSaleAdapter,
     IStreamNativePricePrograms,
     IStreamNativePriceProgramDomain,
@@ -41,6 +43,9 @@ contract StreamNativeFixedPriceSaleAdapter is
     ReentrancyGuard,
     ERC165
 {
+    // Retain the original public error after its emitting check moved to the fixed worker.
+    error SettlementBindingInvalid(address target);
+
     bytes32 public constant SALE_AUTHORIZATION_TYPEHASH = keccak256(
         "NativeSaleAuthorization(bytes32 saleId,bytes32 saleConfigHash,address payer,address executor,address recipient,address artist,bytes32 tokenDataHash,bytes32 mintCommitment,uint256 executionNonce,bytes32 nonce,uint64 deadline,bytes32 expectedPrimaryPolicyHash)"
     );
@@ -113,7 +118,7 @@ contract StreamNativeFixedPriceSaleAdapter is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return _refundDelegationSupported(id) || id == type(IStreamImmediateSaleReveal).interfaceId
+        return id == type(IStreamNativeSurplus).interfaceId || _refundDelegationSupported(id) || id == type(IStreamImmediateSaleReveal).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId
             || id == type(IStreamNativeFixedPriceSaleAdapter).interfaceId
             || id == type(IStreamNativePricePrograms).interfaceId
@@ -655,21 +660,7 @@ contract StreamNativeFixedPriceSaleAdapter is
     }
 
     function _requireSaleContext() private view {
-        StreamSettlementAdmission.requireRegistry(
-            core, coreCodeHash, moduleRegistry, moduleRegistryCodeHash
-        );
-        if (address(revenueResolver).codehash != resolverCodeHash) {
-            revert InvalidSettlementContext(address(revenueResolver));
-        }
-        if (address(splitFactory).codehash != factoryCodeHash) {
-            revert InvalidSettlementContext(address(splitFactory));
-        }
-        if (primarySaleSettlement.codehash != settlementCodeHash) {
-            revert InvalidSettlementContext(primarySaleSettlement);
-        }
-        if (address(mintManager).codehash != mintManagerCodeHash) {
-            revert InvalidSettlementContext(address(mintManager));
-        }
+        StreamNativeImmediateSaleWorker.requireContext();
     }
 
     function _settle(StreamNativeSettlementTypes.NativeSettlementCandidate memory c)
@@ -678,4 +669,11 @@ contract StreamNativeFixedPriceSaleAdapter is
     {
         return StreamNativePriceProgram.settle(primarySaleSettlement, c);
     }
+
+    function sweepNativeSurplus(uint256 amount, bytes32 reasonHash)
+        external override nonReentrant returns (uint256)
+    {
+        return _sweepNativeSurplus(amount, reasonHash);
+    }
+    function _nativeSurplusOwed() internal view override returns (uint256) { return refundLiability; }
 }
