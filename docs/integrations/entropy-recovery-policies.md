@@ -26,21 +26,52 @@ The incident authority is the original `ROLE_ENTROPY_INCIDENT_DECLARER` role
 identifier. A holder address is never frozen into a policy. Actual holder
 resolution belongs to incident/recovery execution.
 
-Policy registration is implemented independently of collection binding and fresh
-requests. Current collection policies still expose the existing no-fresh-recovery
-profile. Creating or freezing a policy cannot alter them, migrate a provider,
-request randomness or change a finalized seed. Remaining implementation includes
-pre-mint collection binding and its finality commitment, ordered recovery
-execution with live timing/provider checks, token and scope incident linkage,
-artist redraw consent/finding, and late-original callback arbitration. Policy
-configuration alone does not establish acceptance of that remaining state machine.
+## Bind a collection before minting
 
-The focused unit suite passes all nine policy cases plus 27 original provider,
-epoch and subject cases, including three 256-input properties with seed
-`0x6529`. The native run captures 59 exact source units; all nine production
-products fit, with coordinator runtime 24,141 bytes and creation 28,501 bytes.
-The unchanged collection-configuration path now uses a fixed worker to retain
-deployment headroom. All original 162 ABI entries are retained.
+`IStreamEntropyCollectionRecovery` adds the collection binding without changing
+original collection storage or the existing `configureCollection` signature.
+First configure a collection and freeze a recovery policy, then obtain
+`collectionFreshRecoveryTransition(collectionId, attempts, policyId)` and
+schedule its exact class-1 governance call to
+`configureCollectionFreshRecovery`. Use the ordinary batch planner for a batch
+rather than treating the call-level hashes as aggregate governance hashes.
+
+A positive attempt count cannot exceed the frozen policy's maximum or step
+count. Selected fallback epochs must be strictly increasing and greater than
+the collection epoch after the binding update. Each selected provider must be
+active with its pinned runtime at binding time. Execution must check live
+provider eligibility again. Changing the binding increments the collection
+provider epoch, stores the frozen hash and authorizing action, and emits both
+binding and original epoch events. `collectionFreshRecovery` returns the full
+binding, revision and last action ID.
+
+Before minting, an exact governed `(attempts = 0, policyId = 0)` call can detach
+a binding. No-op changes and reused collection/action pairs fail. The first
+token or entropy-scope registration locks the configuration; a Core collection
+freeze also blocks binding changes. Ordinary pre-mint provider changes cannot
+overtake a selected fallback epoch.
+
+Unbound collections retain their original finality-policy commitment exactly.
+A positive binding uses the `6529STREAM_ENTROPY_FINALITY_FRESH_POLICY_V1` domain
+and commits to the original provider/reveal policies plus the frozen policy ID,
+hash and maximum attempts. It therefore discloses the configured fallback to
+finality consumers. Registration, freeze and binding do not request randomness,
+migrate an existing request or change a finalized seed.
+
+## Execution and validation boundary
+
+Ordered fresh-request execution remains separate implementation work: live
+timing/provider checks, token and scope incident linkage, Artist redraw
+consent/finding, and late-original callback arbitration. Configuration alone
+does not establish acceptance of that state machine.
+
+The focused unit suite passes eight collection-binding cases, nine policy
+cases and 27 original provider/epoch/subject cases: 44 total. Three properties
+each pass 256 inputs with seed `0x6529`. The native run captures 62 exact source
+units; all ten production products fit, with coordinator runtime 24,553 bytes
+and creation 28,934 bytes. Moving the new transition's encoding into the fixed
+read worker resolves the first run's 24,739-byte runtime while retaining all
+prior coordinator ABI entries and original collection storage.
 
 The unit suite uses the actual coordinator and policy worker with
 explicit Core/provider/governance-context fixtures, including actual threshold

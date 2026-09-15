@@ -24,6 +24,8 @@ import { StreamEntropyIncidentEvidence } from "./StreamEntropyIncidentEvidence.s
 import { StreamEntropyCoordinatorReads } from "./StreamEntropyCoordinatorReads.sol";
 import { StreamEntropyProviderLifecycle } from "./StreamEntropyProviderLifecycle.sol";
 import { StreamEntropyIncidentTransition } from "./StreamEntropyIncidentTransition.sol";
+import { StreamEntropyCollectionRecovery } from "./StreamEntropyCollectionRecovery.sol";
+import "../../interfaces/stream/entropy/IStreamEntropyCollectionRecovery.sol";
 import { StreamEntropyCollectionConfiguration } from "./StreamEntropyCollectionConfiguration.sol";
 import { StreamEntropyRecoveryPolicies } from "./StreamEntropyRecoveryPolicies.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyRecoveryPolicies.sol";
@@ -49,7 +51,8 @@ contract StreamEntropyCoordinator is
     IStreamEntropyEpochs,
     IStreamEntropyIncidents,
     IStreamEntropyProviderLifecycle,
-    IStreamEntropyRecoveryPolicies
+    IStreamEntropyRecoveryPolicies,
+    IStreamEntropyCollectionRecovery
 {
     bytes32 public constant GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS =
         keccak256("6529STREAM_GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS");
@@ -284,6 +287,7 @@ contract StreamEntropyCoordinator is
             || id == type(IStreamEntropyFinalityPolicy).interfaceId
             || id == type(IStreamEntropyEpochs).interfaceId
             || id == type(IStreamEntropyIncidents).interfaceId
+            || id == type(IStreamEntropyCollectionRecovery).interfaceId
             || id == type(IStreamEntropyRecoveryPolicies).interfaceId
             || id == type(IStreamEntropyProviderLifecycle).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId || super.supportsInterface(id);
@@ -314,6 +318,40 @@ contract StreamEntropyCoordinator is
     }
 
     function freshRecoveryPolicyTransition(bytes32, bytes32, bool)
+        external
+        view
+        override
+        returns (bytes32, bytes32, bytes32)
+    {
+        _auxiliaryRead();
+    }
+
+    function configureCollectionFreshRecovery(
+        uint256 collectionId,
+        uint16 maxFreshRecoveryAttempts,
+        bytes32 policyId
+    ) external override {
+        StreamEntropyCollectionRecovery.configure(
+            authority,
+            core,
+            collectionEntropyConfig,
+            collectionProviderEpoch,
+            collectionId,
+            maxFreshRecoveryAttempts,
+            policyId
+        );
+    }
+
+    function collectionFreshRecovery(uint256)
+        external
+        view
+        override
+        returns (CollectionRecovery memory)
+    {
+        _auxiliaryRead();
+    }
+
+    function collectionFreshRecoveryTransition(uint256 id, uint16 attempts, bytes32 policyId)
         external
         view
         override
@@ -1071,7 +1109,9 @@ contract StreamEntropyCoordinator is
 
     /// @dev Only terminal read entrypoints use this fixed decoder. No mutation/guard cleanup is bypassed.
     function _auxiliaryRead() private view {
-        bytes memory result = StreamEntropyAuxiliaryReads.read(msg.data);
+        bytes memory result = StreamEntropyAuxiliaryReads.read(
+            core, collectionEntropyConfig, collectionProviderEpoch, msg.data
+        );
         assembly ("memory-safe") { return(add(result, 32), mload(result)) }
     }
 

@@ -5,6 +5,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add frozen ordered entropy recovery policies and exact governed pre-mint
+  collection bindings, with original configuration locks and explicit finality
+  commitments; fresh-request execution remains separate implementation work.
+
 - Add governed provider admission, deprecation and incident revocation with
   original-request callback retention, current graph plans and focused lifecycle tests.
 - Add native secondary inventory, account-directed delegated claims and

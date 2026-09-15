@@ -4,6 +4,10 @@ import {
     IStreamEntropyProviderFeeQuote
 } from "../../interfaces/stream/entropy/IStreamEntropyProviderFeeQuote.sol";
 import "./StreamEntropyCoordinator.sol";
+import { StreamEntropyCollectionRecovery } from "./StreamEntropyCollectionRecovery.sol";
+import {
+    IStreamEntropyCollectionRecovery as C
+} from "../../interfaces/stream/entropy/IStreamEntropyCollectionRecovery.sol";
 import "../../interfaces/stream/core/IStreamCore.sol";
 import "../../interfaces/stream/entropy/IStreamRevealFeeEscrow.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyEpochs.sol";
@@ -46,8 +50,8 @@ library StreamEntropyCoordinatorReads {
                 config.collectionSalt
             )
         );
-        // Retain the original epoch-one commitment exactly. Reconfigured pre-mint
-        // collections use a distinct profile; neither profile permits fresh recovery.
+        // Retain both original no-recovery commitments when no policy is bound.
+        // A positive binding below commits to its complete frozen recovery policy.
         bytes32 providerPolicy = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ENTROPY_SINGLE_PROVIDER_POLICY_V1"),
@@ -82,6 +86,23 @@ library StreamEntropyCoordinatorReads {
                 revealPolicy
             )
         );
+        C.CollectionRecovery memory recovery = StreamEntropyCollectionRecovery.record(collectionId);
+        if (recovery.maxFreshRecoveryAttempts != 0) {
+            policyManifestHash = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ENTROPY_FINALITY_FRESH_POLICY_V1"),
+                    block.chainid,
+                    address(this),
+                    address(core),
+                    collectionId,
+                    providerPolicy,
+                    revealPolicy,
+                    recovery.policyId,
+                    recovery.policyHash,
+                    recovery.maxFreshRecoveryAttempts
+                )
+            );
+        }
         return (
             config.locked,
             policyManifestHash,

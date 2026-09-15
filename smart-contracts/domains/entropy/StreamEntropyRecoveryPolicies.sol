@@ -179,14 +179,25 @@ library StreamEntropyRecoveryPolicies {
         private
         returns (bytes32 actionId)
     {
+        (bytes32 scope, bytes32 oldHash, bytes32 newHash) = transition(id, hash, freezing);
+        actionId = requireAction(authority, scope, oldHash, newHash);
         Store storage s = store();
+        if (s.consumed[id][actionId]) revert R.FreshRecoveryPolicyReplay(id, actionId);
+        s.consumed[id][actionId] = true;
+    }
+
+    /// @notice Exact ordinary call context for this fixed coordinator's policy workers.
+    function requireAction(address authority, bytes32 scope, bytes32 oldHash, bytes32 newHash)
+        public
+        view
+        returns (bytes32 actionId)
+    {
         if (
             msg.sender != authority || authority.code.length == 0
-                || authority.codehash != s.authorityCodeHash
+                || authority.codehash != store().authorityCodeHash
         ) {
             revert R.FreshRecoveryPolicyUnauthorized(msg.sender);
         }
-        (bytes32 scope, bytes32 oldHash, bytes32 newHash) = transition(id, hash, freezing);
         bytes memory input = abi.encodeCall(A.currentAction, ());
         bytes memory result = new bytes(192);
         bool ok;
@@ -211,7 +222,5 @@ library StreamEntropyRecoveryPolicies {
             revert R.FreshRecoveryPolicyInvalidContext();
         }
         actionId = currentId;
-        if (s.consumed[id][actionId]) revert R.FreshRecoveryPolicyReplay(id, actionId);
-        s.consumed[id][actionId] = true;
     }
 }

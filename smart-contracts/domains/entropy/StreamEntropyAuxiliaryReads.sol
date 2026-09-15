@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamEntropyCoordinator.sol";
+import "../../interfaces/stream/core/IStreamCore.sol";
+import { StreamEntropyCollectionRecovery } from "./StreamEntropyCollectionRecovery.sol";
+import {
+    IStreamEntropyCollectionRecovery as C
+} from "../../interfaces/stream/entropy/IStreamEntropyCollectionRecovery.sol";
 import { StreamEntropyRecoveryPolicies } from "./StreamEntropyRecoveryPolicies.sol";
 import {
     IStreamEntropyRecoveryPolicies as R
@@ -22,7 +28,12 @@ import {
 library StreamEntropyAuxiliaryReads {
     error UnknownEntropyRead(bytes4 selector);
 
-    function read(bytes calldata data) public view returns (bytes memory) {
+    function read(
+        IStreamCore core,
+        mapping(uint256 => StreamEntropyCoordinator.CollectionConfig) storage configs,
+        mapping(uint256 => uint32) storage epochs,
+        bytes calldata data
+    ) public view returns (bytes memory) {
         bytes4 selector = bytes4(data[:4]);
         if (selector == L.entropyProviderRecord.selector) {
             return
@@ -80,6 +91,18 @@ library StreamEntropyAuxiliaryReads {
                 abi.decode(data[4:], (bytes32, bytes32, bool));
             (bytes32 scope, bytes32 oldHash, bytes32 newHash) =
                 StreamEntropyRecoveryPolicies.transition(id, hash, freezing);
+            return abi.encode(scope, oldHash, newHash);
+        }
+        if (selector == C.collectionFreshRecovery.selector) {
+            return
+                abi.encode(StreamEntropyCollectionRecovery.record(abi.decode(data[4:], (uint256))));
+        }
+        if (selector == C.collectionFreshRecoveryTransition.selector) {
+            (uint256 id, uint16 attempts, bytes32 policyId) =
+                abi.decode(data[4:], (uint256, uint16, bytes32));
+            (bytes32 scope, bytes32 oldHash, bytes32 newHash) = StreamEntropyCollectionRecovery.transition(
+                core, configs[id], epochs[id], id, attempts, policyId
+            );
             return abi.encode(scope, oldHash, newHash);
         }
         revert UnknownEntropyRead(selector);

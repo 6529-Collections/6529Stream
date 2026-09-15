@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamEntropyCoordinator.sol";
+import { StreamEntropyCollectionRecovery } from "./StreamEntropyCollectionRecovery.sol";
 import "../../interfaces/stream/core/IStreamCore.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyEpochs.sol";
 import "../../interfaces/stream/entropy/IStreamRevealFeeEscrow.sol";
@@ -57,6 +58,7 @@ library StreamEntropyCollectionConfiguration {
             }
             collectionProviderEpoch[collectionId] = ++epoch;
         }
+        StreamEntropyCollectionRecovery.validateEpoch(collectionId, epoch);
         collectionEntropyConfig[collectionId] = StreamEntropyCoordinator.CollectionConfig(
             provider,
             publicRequests,
