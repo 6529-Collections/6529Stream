@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamEntropyRecoveryPolicies } from "./StreamEntropyRecoveryPolicies.sol";
+import {
+    IStreamEntropyRecoveryPolicies as R
+} from "../../interfaces/stream/entropy/IStreamEntropyRecoveryPolicies.sol";
 import { StreamEntropyProviderLifecycle } from "./StreamEntropyProviderLifecycle.sol";
 import { StreamEntropyIncidentParameters } from "./StreamEntropyIncidentParameters.sol";
 import { StreamEntropyIncidentEvidence } from "./StreamEntropyIncidentEvidence.sol";
@@ -65,6 +69,18 @@ library StreamEntropyAuxiliaryReads {
         if (selector == IStreamEntropyIncidents.entropyIncident.selector) {
             return
                 abi.encode(StreamEntropyIncidentEvidence.incident(abi.decode(data[4:], (bytes32))));
+        }
+        if (selector == R.freshRecoveryPolicy.selector) {
+            (R.FreshRecoveryPolicy memory policy, bytes32 hash, uint64 revision, bytes32 actionId) =
+                StreamEntropyRecoveryPolicies.record(abi.decode(data[4:], (bytes32)));
+            return abi.encode(policy, hash, revision, actionId);
+        }
+        if (selector == R.freshRecoveryPolicyTransition.selector) {
+            (bytes32 id, bytes32 hash, bool freezing) =
+                abi.decode(data[4:], (bytes32, bytes32, bool));
+            (bytes32 scope, bytes32 oldHash, bytes32 newHash) =
+                StreamEntropyRecoveryPolicies.transition(id, hash, freezing);
+            return abi.encode(scope, oldHash, newHash);
         }
         revert UnknownEntropyRead(selector);
     }

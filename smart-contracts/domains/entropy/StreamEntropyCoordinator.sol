@@ -24,6 +24,9 @@ import { StreamEntropyIncidentEvidence } from "./StreamEntropyIncidentEvidence.s
 import { StreamEntropyCoordinatorReads } from "./StreamEntropyCoordinatorReads.sol";
 import { StreamEntropyProviderLifecycle } from "./StreamEntropyProviderLifecycle.sol";
 import { StreamEntropyIncidentTransition } from "./StreamEntropyIncidentTransition.sol";
+import { StreamEntropyCollectionConfiguration } from "./StreamEntropyCollectionConfiguration.sol";
+import { StreamEntropyRecoveryPolicies } from "./StreamEntropyRecoveryPolicies.sol";
+import "../../interfaces/stream/entropy/IStreamEntropyRecoveryPolicies.sol";
 import { StreamEntropyAuxiliaryReads } from "./StreamEntropyAuxiliaryReads.sol";
 import {
     IStreamEntropyProviderLifecycle,
@@ -45,7 +48,8 @@ contract StreamEntropyCoordinator is
     IStreamEntropyFinalityPolicy,
     IStreamEntropyEpochs,
     IStreamEntropyIncidents,
-    IStreamEntropyProviderLifecycle
+    IStreamEntropyProviderLifecycle,
+    IStreamEntropyRecoveryPolicies
 {
     bytes32 public constant GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS =
         keccak256("6529STREAM_GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS");
@@ -236,6 +240,7 @@ contract StreamEntropyCoordinator is
         roleRegistryCodeHash = config.roleRegistry.codehash;
         StreamEntropyIncidentParameters.initialize(config.authority);
         StreamEntropyProviderLifecycle.initialize(config.authority);
+        StreamEntropyRecoveryPolicies.initialize(config.authority);
         bytes32[3] memory expected = [
             GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS,
             GTP_ENTROPY_REVEAL_SLO_BLOCKS,
@@ -279,8 +284,42 @@ contract StreamEntropyCoordinator is
             || id == type(IStreamEntropyFinalityPolicy).interfaceId
             || id == type(IStreamEntropyEpochs).interfaceId
             || id == type(IStreamEntropyIncidents).interfaceId
+            || id == type(IStreamEntropyRecoveryPolicies).interfaceId
             || id == type(IStreamEntropyProviderLifecycle).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId || super.supportsInterface(id);
+    }
+
+    function configureFreshRecoveryPolicy(
+        bytes32 policyId,
+        uint16 maxFreshRecoveryAttempts,
+        bytes32 incidentDeclarerRole,
+        bytes32 reasonSchemaHash,
+        bytes32 policyManifestHash,
+        FreshRecoveryStep[] calldata steps
+    ) external override {
+        StreamEntropyRecoveryPolicies.configureCall(authority, msg.data[4:]);
+    }
+
+    function freezeFreshRecoveryPolicy(bytes32 policyId) external override {
+        StreamEntropyRecoveryPolicies.freeze(authority, policyId);
+    }
+
+    function freshRecoveryPolicy(bytes32)
+        external
+        view
+        override
+        returns (FreshRecoveryPolicy memory, bytes32, uint64, bytes32)
+    {
+        _auxiliaryRead();
+    }
+
+    function freshRecoveryPolicyTransition(bytes32, bytes32, bool)
+        external
+        view
+        override
+        returns (bytes32, bytes32, bytes32)
+    {
+        _auxiliaryRead();
     }
 
     function configureCollection(
@@ -290,38 +329,17 @@ contract StreamEntropyCoordinator is
         bool publicRequests,
         uint64 timeoutBlocks
     ) external onlyAuthority {
-        if (!core.collectionExists(collectionId)) {
-            revert InvalidCollection(collectionId);
-        }
-        if (
-            collectionEntropyConfig[collectionId].locked
-                || core.collectionFreezeStatus(collectionId)
-        ) revert PolicyLocked(collectionId);
-        bytes32 configHash =
-            StreamEntropyCoordinatorReads.providerConfiguration(provider, timeoutBlocks);
-        StreamEntropyProviderLifecycle.requireActive(provider);
-        CollectionConfig storage prior = collectionEntropyConfig[collectionId];
-        uint32 epoch = collectionProviderEpoch[collectionId];
-        if (prior.provider != provider || prior.providerConfigHash != configHash) {
-            if (epoch == type(uint32).max) revert ProviderEpochOverflow(collectionId);
-            collectionProviderEpoch[collectionId] = ++epoch;
-        }
-        collectionEntropyConfig[collectionId] = CollectionConfig(
+        StreamEntropyCollectionConfiguration.configure(
+            core,
+            collectionEntropyConfig,
+            collectionProviderEpoch,
+            _revealPolicies,
+            collectionId,
             provider,
+            collectionSalt,
             publicRequests,
-            false,
-            timeoutBlocks,
-            configHash,
-            provider.codehash,
-            collectionSalt
+            timeoutBlocks
         );
-        if (_revealPolicies[collectionId].declared) {
-            _validateRevealFee(collectionId, _revealPolicies[collectionId].revealFeePerTokenWei);
-        }
-        emit CollectionEntropyConfigured(
-            collectionId, provider, configHash, collectionSalt, publicRequests, timeoutBlocks
-        );
-        emit CollectionEntropyEpochConfigured(1, collectionId, provider, epoch, configHash);
     }
 
     /// @notice Explicit declared-zero policies remain distinguishable from absent configuration.
