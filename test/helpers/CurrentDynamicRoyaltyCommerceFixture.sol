@@ -2,7 +2,6 @@
 pragma solidity ^0.8.19;
 
 import "./StreamCurrentSafeGovernanceFixture.sol";
-import "./ArtistArtifactCreate.sol";
 import {
     StreamDynamicPrimaryBeneficiaries as DB
 } from "../../smart-contracts/domains/revenue/StreamDynamicPrimaryBeneficiaries.sol";
@@ -46,10 +45,7 @@ import {
 } from "../../smart-contracts/interfaces/stream/mint/IStreamMintRoyaltyPolicy.sol";
 
 /// @dev Real current graph and real Safe/Artist identities. Only the external entropy service is a double.
-abstract contract CurrentDynamicRoyaltyCommerceFixture is
-    StreamCurrentSafeGovernanceFixture,
-    ArtistArtifactCreate
-{
+abstract contract CurrentDynamicRoyaltyCommerceFixture is StreamCurrentSafeGovernanceFixture {
     bytes32 internal constant ROYALTY_CLASS = keccak256("ROYALTY_ERC2981");
     bytes32 internal constant JOINED_PHASE = keccak256("actual dynamic royalty commerce phase");
     bytes32 internal constant COLLAB_LABEL = keccak256("composer-share");

@@ -77,3 +77,22 @@ passes. Native behavior and a matched-source timing comparison remain pending.
 The active eleven-suite migration capture contains the earlier fixture version;
 its source and compiler process are preserved. Run the expanded fixtures in the
 next capture after that result is collected.
+
+## Current-stack fixture extension
+
+The current-stack fixture now uses the same artifact-CREATE helper for its 17
+ordinary constructor expressions: 16 production deployments (including three
+GovernanceActors) and the existing external entropy-provider test double. All
+array allocations are unchanged. The original constructor arguments, zero
+value, fixture caller, CREATE order, intervening initialization and failure
+propagation remain intact. Logical source:contract artifact keys resolve the
+current compiled products; production imports and factory/size checks remain.
+
+The shared fixture inherits the helper directly. The isolated dynamic royalty
+commerce fixture removes only its redundant helper import and base; it obtains
+the same helper through the shared fixture. Its test and deployment recipes do
+not change. Reversing each substitution reconstructs the prior fixture token
+stream. The 1,132-source ABI check covering current-stack descendants passes
+in 6.41 seconds; native behavior
+and a matched-source compilation-time comparison for this extension remain
+pending the next integrator-owned capture. No speedup is inferred here.

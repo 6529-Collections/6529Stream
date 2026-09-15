@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamArtistSuiteFixture.sol";
+import "./ArtistArtifactCreate.sol";
 import {
     IStreamCollectionMetadataV1
 } from "../../smart-contracts/interfaces/stream/metadata/IStreamCollectionMetadataV1.sol";
@@ -36,7 +37,7 @@ import "../../script/current/StreamGovernanceGenesisPlan.sol";
 import "../mocks/MockStreamEntropyProvider.sol";
 
 /// @notice One real current-stack topology. Only the external entropy service is a test double.
-abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
+abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistArtifactCreate {
     uint256 internal constant ARTIST_KEY = 0xA47157;
     uint256 internal constant PLATFORM_KEY = 0x6529;
     address internal constant BUYER = address(0xB0B);
@@ -72,33 +73,99 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
 
     function _deployCurrentStack(address artist_, address platform) internal {
         artist = artist_;
-        executor = new StreamGovernanceExecutor(address(this));
-        governanceRoot = new StreamGovernanceActor(address(this));
+        executor = StreamGovernanceExecutor(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/governance/StreamGovernanceExecutor.sol:StreamGovernanceExecutor",
+                    abi.encode(address(this))
+                ))
+        );
+        governanceRoot = StreamGovernanceActor(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/governance/StreamGovernanceActor.sol:StreamGovernanceActor",
+                    abi.encode(address(this))
+                ))
+        );
         guardians = new address[](2);
-        guardians[0] = address(new StreamGovernanceActor(address(this)));
-        guardians[1] = address(new StreamGovernanceActor(address(this)));
+        guardians[0] = address(
+            StreamGovernanceActor(
+                payable(_artistArtifactCreate(
+                        "smart-contracts/domains/governance/StreamGovernanceActor.sol:StreamGovernanceActor",
+                        abi.encode(address(this))
+                    ))
+            )
+        );
+        guardians[1] = address(
+            StreamGovernanceActor(
+                payable(_artistArtifactCreate(
+                        "smart-contracts/domains/governance/StreamGovernanceActor.sol:StreamGovernanceActor",
+                        abi.encode(address(this))
+                    ))
+            )
+        );
         if (guardians[0] > guardians[1]) {
             (guardians[0], guardians[1]) = (guardians[1], guardians[0]);
         }
-        roles = new StreamRoleRegistry(address(executor));
-        registry =
-            new StreamModuleRegistry(executor, REGISTRY_HASH, "urn:6529stream:fixture:registry");
-        core = new StreamCore(
-            "6529 Stream",
-            "STREAM",
-            address(executor),
-            StreamCore.GenesisModuleRegistryConfig(
-                address(registry), address(registry).codehash, REGISTRY_HASH, DEPLOYMENT_HASH
-            ),
-            StreamCurrentStackPlan.gasParameters()
+        roles = StreamRoleRegistry(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/governance/StreamRoleRegistry.sol:StreamRoleRegistry",
+                    abi.encode(address(executor))
+                ))
         );
-        manifest = new StreamSystemManifest(address(core), address(executor));
+        registry = StreamModuleRegistry(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/modules/StreamModuleRegistry.sol:StreamModuleRegistry",
+                    abi.encode(executor, REGISTRY_HASH, "urn:6529stream:fixture:registry")
+                ))
+        );
+        core = StreamCore(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/core/StreamCore.sol:StreamCore",
+                    abi.encode(
+                        "6529 Stream",
+                        "STREAM",
+                        address(executor),
+                        StreamCore.GenesisModuleRegistryConfig(
+                            address(registry),
+                            address(registry).codehash,
+                            REGISTRY_HASH,
+                            DEPLOYMENT_HASH
+                        ),
+                        StreamCurrentStackPlan.gasParameters()
+                    )
+                ))
+        );
+        manifest = StreamSystemManifest(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/governance/StreamSystemManifest.sol:StreamSystemManifest",
+                    abi.encode(address(core), address(executor))
+                ))
+        );
         _initializeGovernanceFoundation();
-        ledger = new StreamMintLedger();
-        manager = new StreamMintManager(core, ledger, IERC165(address(registry)));
+        ledger = StreamMintLedger(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/mint/StreamMintLedger.sol:StreamMintLedger",
+                    abi.encode()
+                ))
+        );
+        manager = StreamMintManager(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/mint/StreamMintManager.sol:StreamMintManager",
+                    abi.encode(core, ledger, IERC165(address(registry)))
+                ))
+        );
         ledger.setLedgerWriter(address(manager), true);
-        assetPolicy = new StreamAssetPolicyRegistry(address(executor));
-        factory = new StreamSplitFactory(assetPolicy, address(executor), _walletGasConfigs());
+        assetPolicy = StreamAssetPolicyRegistry(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry",
+                    abi.encode(address(executor))
+                ))
+        );
+        factory = StreamSplitFactory(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/revenue/StreamSplitFactory.sol:StreamSplitFactory",
+                    abi.encode(assetPolicy, address(executor), _walletGasConfigs())
+                ))
+        );
         _deployArtistSuite(
             address(core),
             address(manager),
@@ -108,29 +175,52 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
             DEPLOYMENT_HASH
         );
         IStreamArtistAttribution attribution = IStreamArtistAttribution(address(artists));
-        revenueEscrow = new StreamRevenueEscrow(
-            factory,
-            address(executor),
-            IStreamGasParameterHost.GasParameterConfig("FLUSH_GAS_FLOOR", 12_000_000, 12_000_000, 3)
+        revenueEscrow = StreamRevenueEscrow(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/revenue/StreamRevenueEscrow.sol:StreamRevenueEscrow",
+                    abi.encode(
+                        factory,
+                        address(executor),
+                        IStreamGasParameterHost.GasParameterConfig(
+                            "FLUSH_GAS_FLOOR", 12_000_000, 12_000_000, 3
+                        )
+                    )
+                ))
         );
-        sale = new StreamFixedPriceSaleAdapter(
-            manager, primaryResolver, platform, attribution, revenueEscrow
+        sale = StreamFixedPriceSaleAdapter(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol:StreamFixedPriceSaleAdapter",
+                    abi.encode(manager, primaryResolver, platform, attribution, revenueEscrow)
+                ))
         );
-        auction = new StreamEnglishAuctionHouse(
-            core, manager, primaryResolver, platform, attribution, revenueEscrow
+        auction = StreamEnglishAuctionHouse(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol:StreamEnglishAuctionHouse",
+                    abi.encode(core, manager, primaryResolver, platform, attribution, revenueEscrow)
+                ))
         );
-        entropy = new StreamEntropyCoordinator(
-            StreamEntropyCoordinator.DeploymentConfig(
-                address(core),
-                address(executor),
-                address(roles),
-                StreamCurrentStackPlan.entropyTimeParameters(),
-                DEPLOYMENT_HASH,
-                "urn:6529stream:fixture:entropy",
-                keccak256("fixture entropy module")
-            )
+        entropy = StreamEntropyCoordinator(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol:StreamEntropyCoordinator",
+                    abi.encode(
+                        StreamEntropyCoordinator.DeploymentConfig(
+                            address(core),
+                            address(executor),
+                            address(roles),
+                            StreamCurrentStackPlan.entropyTimeParameters(),
+                            DEPLOYMENT_HASH,
+                            "urn:6529stream:fixture:entropy",
+                            keccak256("fixture entropy module")
+                        )
+                    )
+                ))
         );
-        provider = new MockStreamEntropyProvider(address(entropy));
+        provider = MockStreamEntropyProvider(
+            payable(_artistArtifactCreate(
+                    "test/mocks/MockStreamEntropyProvider.sol:MockStreamEntropyProvider",
+                    abi.encode(address(entropy))
+                ))
+        );
         IStreamSplitWallet.SplitEntry[] memory entries = new IStreamSplitWallet.SplitEntry[](2);
         entries[0] = IStreamSplitWallet.SplitEntry(artist, 900_000, keccak256("artist"));
         entries[1] = IStreamSplitWallet.SplitEntry(PROTOCOL, 100_000, keccak256("protocol"));
