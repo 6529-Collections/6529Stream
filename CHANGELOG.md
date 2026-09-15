@@ -5,6 +5,16 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add governed provider admission, deprecation and incident revocation with
+  original-request callback retention, current graph plans and focused lifecycle tests.
+- Add native secondary inventory, account-directed delegated claims and
+  delegate-signed offers while retaining principal payment and shared replay.
+- Add discoverable Artist authority preimages, typed dormancy/steward execution
+  records and independent event reconstruction cases.
+- Add complete chunked snapshots and offline museum BagIt/OCFL packaging with
+  exact-byte hydration and portable path validation.
+
+
 - Add role-authorized token/scope entropy incidents with immutable evidence and a
   bounded provider-result probe; no fresh redraw or provider migration is enabled.
 - Add Artist dormancy, steward grants and designated dormancy-origin recovery.

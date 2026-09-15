@@ -24,54 +24,53 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## Latest feature batch
 
-Source through `8e43cdf5` integrates actual Artist dormancy and steward appointment
-(`d8e80cdc`), explicit operation-59 steward grants (`af59ec92`), and designated
-dormancy-origin recovery, including dismissed/reopened histories (`438e1fb9`,
-`2e1ef8c8`). Historical operations 1-58 retain their identities. Independent
-source reviews are clear; these new Artist lifecycle cases still need native
-and complete actual-governance acceptance. Payload reconstruction and further recovery profiles remain active work.
-Selected code generation found five oversized Artist products at `e014986c`:
-IdentityAuthority (27,339 bytes), IdentityEstateExtension (27,058),
-EstateExtensionDeployment (28,996), IdentityExtensionDeployment (27,067), and
-OnboardingReadDeployment (25,032). Fixed-worker extraction is assigned to the
-Artist builder; these source-integrated components are not deployable yet.
+Reviewed source now includes native secondary inventory sales (`5f950745`),
+account-directed delegated private/offer/inventory claims (`764ee2a4`), and
+live delegate-signed offers (`9e6b3562`). Original principal payment, owner grants,
+royalties, replay and pull claims remain shared with the existing paths.
+Selected final offer products all fit; the adapter measures 23,610 runtime bytes.
+These new commerce tests are authored; their native and combined acceptance remain pending.
 
-Declared PLATFORM_WORKS collection/default PROFILE and static/SALE_POSTER
-TEMPLATE auctions are integrated (`bf3e7938`, `5d2211ff`), including prepared
-custody acquisition and later transfer of the same NFT (`fdac400e`, `b90b93e8`).
-Original poster, declaration, actual-token policy, replay and acquisition
-snapshots remain explicit. Source review and selected worker sizes pass;
-these new workflows have authored regressions but no native acceptance yet.
-Known-token platform PROFILE/TEMPLATE activation (families 12/13) is also
-integrated as `8e43cdf5`, with complete bounded source review and seven authored
-regressions. Its selected house measures 23,883 bytes and all 17 selected
-products fit; current-stack execution remains pending.
+Artist authority preimages and enumerable payload discovery are integrated
+(`af6f1be0`). Fixed workers address the five previously measured Artist size
+failures at the reviewed reconstruction snapshot; later full-graph size and
+execution remain unaccepted. Full typed dormancy/steward event companions and
+an independent reconstruction harness are integrated (`f79b5294`); five new
+cases remain authored rather than runtime-accepted. Existing operations 1-58
+and adopted operation 59 remain in scope. Further recovery histories and event
+reconstruction continue. A separate steward-to-living-artist recovery proposal
+remains unapplied after automatic review requested explicit owner approval of
+that specific authority transition.
 
-Complete chunk-backed script/library storage and full HTML/JSON views are
-integrated (`3613ffaf`), with component evidence and explicit full-artwork
-checkpoints (`ca691cc0`). Historical full JSON keeps archival content roots
-stable across burns. Source reviews and selected sizes pass. New profile runtime,
-full-size gas behavior and versioned complete snapshot/export composition remain.
+Complete chunked artwork snapshots and strict offline reconstruction/export
+are integrated (`4d4b0c7f`). Museum BagIt/OCFL packaging and offline byte hydration
+are integrated (`692236f6`, `ae80f67b`). All 27 packaging/hydration tests pass on
+the integration checkout. Independent review found a shared-directory casing
+bug; the integrated fix rejects inconsistent spellings before writes. These
+formats preserve source qualifications and exact original evidence. Full-size
+snapshot execution, broader PREMIS profiles and institutional conformance remain.
 
-Token/scope entropy incident declarations are integrated (`cf588705`, import-only
-correction `f3a95d67`). They require the live incident role, original request state,
-timeout or revocation, an exact bounded negative provider report and evidence.
-They close the original request without authorizing a fresh draw. All 30 focused
-native cases pass, including actual Safe calls and two 256-input fuzz properties;
-Core, role/provider and delayed-executor boundaries are explicit typed fixtures.
-The coordinator measures 23,874 runtime bytes; all five selected production
-products fit. Earlier fixture failures and the initial 27,939-byte oversized
-coordinator are retained. Fixed read workers preserve original epoch/seed tests.
-The final import correction produces identical runtime and creation bytecode and
-identical unordered ABI entries to the passing frozen products.
+Governed entropy provider lifecycle is integrated as `3481e8fd`. Admission and
+restoration require exact delayed actions; deprecation and incident revocation
+use the tightening class. Deprecation preserves pending callbacks; revocation
+blocks them until explicit restoration, preserving the original request/output.
+All 41 focused native cases pass, including three 256-input fuzz properties and
+actual Safe calls with explicit Core/provider/governance context boundaries.
+All eight compiled production products fit: coordinator runtime 24,525 bytes,
+creation 28,835. All 144 original ABI entries are retained, and all 58 captured
+sources match the current checkout. Earlier oversize builds and one extracted
+validation-order regression are retained; the final run fixes both.
 
-The complete 1,644-source integrated ABI/type check passes at `8e43cdf5`.
-This is source composition evidence, not a full-system runtime result. Complete
-current-stack/Safe, stateful/fuzz campaigns, gas, all 37 genesis roles, CI and
-matching new testnet evidence remain required. Fresh entropy recovery/provider
-lifecycle, operator/client completion and the separately blocked ERC-20 and
-inherited/global-freeze changes remain explicit. RC1 and Sepolia evidence are
-unchanged.
+Current graph admission and actual Safe/ARRNG transition recipes accompany the
+lifecycle. Saved provider/operator stages are integrated as `e627676b`; their
+five new actual foundation/Executor/Safe cases are in a frozen native run.
+The complete 1,681-source joined ABI/type check passes at `e627676b`.
+This establishes source composition; complete operator/runtime acceptance
+remains separate and is recorded in the batch checkpoint.
+Complete current-stack/Safe, stateful/fuzz campaigns, gas, all 37 genesis roles,
+CI and matching new testnet evidence remain required. Fresh entropy recovery,
+remaining interfaces/operator workflows and the separately blocked ERC-20 and
+inherited/global-freeze changes remain explicit. RC1 and Sepolia are unchanged.
 
 ## Earlier manifest and attestation batch
 

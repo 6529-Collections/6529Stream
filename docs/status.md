@@ -28,15 +28,16 @@ system has not been frozen or demonstrated on testnet. Application developers
 can use the explicitly versioned current client helpers and compiler-selected
 interfaces described in the [client guide](integrations/typescript-client.md).
 
-Dormancy/steward appointment and grants, designated recovery, platform primary
-auctions/custody, complete chunk-backed scripts and archival checkpoints are now
-source-integrated. Evidence-bearing entropy incidents have focused runtime
-coverage. Remaining work includes further recovery and reconstruction profiles,
-complete chunked snapshot/export composition, remaining commerce and entropy
-behavior, full genesis/operator activation, combined Safe and hostile testing,
-transaction gas conformance, and matching candidate evidence. The current delivery report owns changing test and feature
-counts so this public overview does not repeat stale implementation checkpoints.
-The released supported RC1 and its Sepolia evidence remain unchanged.
+Dormancy/steward history, authority payload discovery, native secondary
+inventory and delegated offer/claim paths, complete chunked snapshots and
+museum BagIt/OCFL packaging are source-integrated. Entropy provider lifecycle
+has focused runtime coverage; museum packaging and local byte hydration have
+offline execution coverage. Remaining work includes further recovery and
+reconstruction profiles, broader preservation exports, full genesis/operator
+activation, combined Safe and hostile testing, transaction gas conformance and
+matching candidate evidence. The current delivery report owns changing test
+counts and exact source boundaries. The released supported RC1 and its Sepolia
+evidence remain unchanged.
 
 The historical Gate A regression/evidence baseline records:
 

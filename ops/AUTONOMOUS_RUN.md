@@ -37,10 +37,10 @@ pending checks. The immutable RC1 remains the released baseline.
 
 | Owner | Implementation batch |
 | --- | --- |
-| Integrator | Integrated lifecycle/platform/chunked-artwork batches; entropy incidents pass 30 focused native cases and joined ABI passes 1,644 sources; remaining entropy/operator/genesis and combined acceptance |
-| Artist builder | State-carried authority preimages and enumerable payload discovery; fixed-worker extraction for five measured Artist size blockers; remaining recovery profiles |
-| Revenue builder | Known-token platform activation integrated; native secondary inventory14 on the existing consignment rail; blocked ERC-20 and inherited/global-freeze variants remain excluded |
-| Fourth engineer | Versioned complete chunked snapshots and offline reconstruction/export; known-token commerce review complete |
+| Integrator | Provider lifecycle committed with 41 focused passes and all eight sizes fitting; current operator integration, complete source composition, remaining fresh recovery/client/genesis and combined acceptance |
+| Artist builder | Authority preimages and dormancy/steward reconstruction integrated; remaining rotation/estate execution-event reconstruction; exact steward-origin living recovery approval pending |
+| Revenue builder | Inventory, delegated claims and delegate-signed offers integrated; saved entropy operator stages integrated; TypeScript helpers for inventory/delegated claims/offers |
+| Fourth engineer | Chunked snapshot, BagIt/OCFL and hydration integrated with 27 offline passes; typed recorded PREMIS events/agents/fixity profiles |
 
 Comprehensive current-stack/Safe integration, fuzz and stateful campaigns, gas
 conformance, complete genesis inventory, CI and matching new testnet evidence
@@ -49,19 +49,15 @@ the background and validate only their recorded source. No new date or
 percentage is inferred from these assignments.
 
 Root owns the combined graph, shared operator/client work and the new candidate.
-The latest source batch passes the 1,644-source ABI/type check (`8e43cdf5`).
-The independently reviewed entropy incident implementation passes 30 focused
-native cases with two 256-input properties and all five selected products fit.
-Other new Artist/commerce/chunked-profile native acceptance remains pending.
-Earlier evidence below retains its recorded source scope. Metadata's
-focused 13-case native result covers actual Router/metadata/blob/Safe calls with
-typed Core/Artist/governance boundaries; all 67 compiled production products fit.
-The original failures and exact source qualification are retained in the
-[current report](V1_CURRENT_STATUS.md#latest-feature-batch). The client passes
-83 cases. Selected Artist size remedies preserve original interfaces/storage;
-their comprehensive runtime and full graph acceptance remain pending. Earlier
-entropy, commerce and museum evidence keeps its recorded scope. No duplicate
-native build or per-increment release regeneration is needed.
+The complete 1,681-source ABI/type check passes at `e627676b`.
+The provider lifecycle at `3481e8fd` passes 41 focused native cases and three
+256-input fuzz properties, with all eight compiled products within deployment
+limits and every original ABI entry retained. Actual Safe/ARRNG governance and
+operator recipes are authored separately. Reviewed commerce and Artist event
+batches have explicit pending native acceptance. The integration checkout also
+passes all 27 museum BagIt/OCFL and hydration cases. The [current report](V1_CURRENT_STATUS.md#latest-feature-batch)
+owns current source/evidence boundaries; older checkpoints keep their original
+scope. Continue implementation in parallel with frozen acceptance work.
 
 The following paragraphs retain earlier implementation checkpoints.
 
