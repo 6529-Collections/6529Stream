@@ -37,10 +37,10 @@ pending checks. The immutable RC1 remains the released baseline.
 
 | Owner | Implementation batch |
 | --- | --- |
-| Integrator | Entropy epochs integrated with 16 native tests and 256 fuzz inputs; operator/genesis and combined acceptance |
-| Artist builder | Content-attestation writers and delegated submission; display facts/claims integrated as `4725e13f` |
-| Revenue builder | PLATFORM_WORKS royalty snapshots; exact ERC-20 patch is prepared but unapplied pending artifact-specific approval; inherited/global freezes separately blocked |
-| Fourth engineer | Nested attribution projection and renderer integration; actual-current complete-media capture integrated and offline replayed |
+| Integrator | Source integration; manifest client passes 83 cases and focused metadata cohort passes 13; remaining entropy/operator/genesis and combined acceptance |
+| Artist builder | Actual operations 19/41/42/43 dormancy/steward lifecycle, then explicit later steward grants; state-bound/delegated attestations and size remedies integrated |
+| Revenue builder | Declared PLATFORM_WORKS primary-template deferred auctions; ERC-20 and inherited/global-freeze writes remain separately blocked |
+| Fourth engineer | Full-size chunk-backed scripts/libraries with live, burned-token and finality rendering; small typed manifests and governed display budgets integrated |
 
 Comprehensive current-stack/Safe integration, fuzz and stateful campaigns, gas
 conformance, complete genesis inventory, CI and matching new testnet evidence
@@ -49,18 +49,15 @@ the background and validate only their recorded source. No new date or
 percentage is inferred from these assignments.
 
 Root owns the combined graph, shared operator/client work and the new candidate.
-The combined repository source passes a 1,542-source ABI/type check. Entropy
-epochs retain the original ABI/storage prefix and pass their focused native cohort.
-The [current report](V1_CURRENT_STATUS.md#source-batch-integrated-before-comprehensive-testing)
-records the newest recovery, TEMPLATE, recorded-format and reveal changes. Client tests
-pass 78 cases and the four-format museum package passes 11; recorded-account
-packaging and replay pass 30. The earlier estate
-rotation snapshot passes 28 actual Artist/Safe/Archive cases with typed
-Core/governance. The earlier custody snapshot stopped after native compilation
-because its auction house is 386 bytes over the runtime size limit; no test-body
-acceptance follows from that build. The fixed read worker is now integrated;
-final size remains unmeasured while the engineers continue implementation. No duplicate native
-build or per-increment release regeneration is needed.
+The latest source batch passes the 1,572-source ABI/type check. Metadata's
+focused 13-case native result covers actual Router/metadata/blob/Safe calls with
+typed Core/Artist/governance boundaries; all 67 compiled production products fit.
+The original failures and exact source qualification are retained in the
+[current report](V1_CURRENT_STATUS.md#latest-feature-batch). The client passes
+83 cases. Selected Artist size remedies preserve original interfaces/storage;
+their comprehensive runtime and full graph acceptance remain pending. Earlier
+entropy, commerce and museum evidence keeps its recorded scope. No duplicate
+native build or per-increment release regeneration is needed.
 
 The following paragraphs retain earlier implementation checkpoints.
 

@@ -24,22 +24,42 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## Latest feature batch
 
-Entropy provider epochs and immutable request policy records are integrated as
-`c3c22d4a`; the [caller guide](../docs/entropy-epochs.md) explains their scope.
-All 16 focused native tests pass, including a 256-input revision property. The
-coordinator runtime is 23,244 bytes. Its 124 original ABI entries and 20-field
-recursive storage prefix are preserved. All 44 tested source files remain exact
-in the integration checkout. This does not add post-mint provider migration or
-fresh recovery.
+The integrated source now includes PLATFORM_WORKS royalty admission (`0385044d`),
+live nested Artist attribution with an original-finality anchor (`ed2dc08d`),
+full typed script/media manifest records (`bf828769`, `a9d7e7ec`), and state-bound
+and delegated Artist attestations (`40c6169a`). Independent source reviews are
+complete. Broad current-stack and Artist runtime acceptance remain pending.
 
-Artist display facts and permissionless attribution claims are integrated as
-`4725e13f`, after independent source review, with nine new authored scenarios.
-The combined 1,542-source repository ABI/type check passes. Live renderer
-composition and native Artist tests/sizes remain pending. The next Artist batch
-adds content-attestation writers and delegated submission; metadata continues
-live nested display and the authenticated original-finality anchor. Revenue
-continues artist-less PLATFORM_WORKS royalty snapshots while the exact ERC-20
-patch remains unapplied. These increments do not change the released RC1.
+The expanded Artist and metadata owners exceeded the runtime size limit.
+Fixed linked workers restore size headroom while preserving existing public
+interfaces and owner storage (`59a07181`, `8f63f71c`, `756b0b80`). Selected Artist
+code generation checks all 16 affected hosts, workers and deployment libraries;
+the latest full graph and transaction-capacity checks remain separate.
+
+The joined 1,572-source ABI/type check passes at `756b0b80`. The metadata native
+cohort then exposed an unsupported fixture URI and an overly restrictive
+optional script-mirror validator. Correction `42a65b60` admits bounded content
+references without executing them. All 13 focused cases now pass: nine actual
+Router/metadata/blob/Safe manifest cases and four governed-budget parity cases.
+Core, Artist and governance boundaries in that cohort are explicit typed
+fixtures. All 67 captured production products fit the bytecode limits. The
+captured production is exact in integration; one test differs only by formatting.
+Initial failures remain retained. These results do not establish full-system
+behavior or transaction gas conformance.
+
+Manifest preview, original Artist content-consent signing and Safe CALL helpers
+are integrated as `3c1915a2`, with independent source review and all 83 client
+tests passing. They preserve absent external hashes and full-width integers.
+Earlier entropy epoch implementation `c3c22d4a` retains its separate 16 passing
+native cases and 256-input property; its accepted policy still excludes fresh
+recovery and post-mint provider migration.
+
+The next parallel feature batches are actual Artist dormancy/steward lifecycle,
+declared PLATFORM_WORKS primary-template deferred auctions, and full-size
+chunk-backed scripts/libraries with rendering and finality integration. Later
+explicit steward capability grants remain required by the existing specification.
+The ERC-20 and inherited/global-freeze approval restrictions remain as stated
+above. No released RC1 source, tag or Sepolia evidence changed.
 
 ## Delivery sequencing
 
