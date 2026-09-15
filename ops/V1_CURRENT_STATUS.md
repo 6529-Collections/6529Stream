@@ -84,6 +84,13 @@ All 14 new fixity cases pass on this integration checkout; the builder's broader
 40-check result includes existing profiles. Positive typed examples are synthetic;
 retained actual source covers missing evidence and offline package replay.
 
+The broader preservation-event profile is integrated as `b690e5ee`: twelve
+generic event kinds and six outcomes, existing strict fixity composition,
+multiple object/agent links, noncompleted source states and offline replay.
+All 24 generic/fixity module cases pass on integration after independent review.
+Positive event examples remain synthetic; actual source supports qualified
+missing-evidence and replay cases. Canonical object/rights adapters are next.
+
 Secondary inventory/delegated-claim/offer client helpers are integrated as
 `0904ec7c`. The combined package passes all 97 tests, generated-catalog checks,
 TypeScript build and negative type cases. It retains both the manifest and

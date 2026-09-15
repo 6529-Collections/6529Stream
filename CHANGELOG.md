@@ -254,6 +254,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Export typed recorded preservation events with explicit outcomes, multiple
+  file/agent links, noncompleted source states and reproducible offline packages.
+
 - Implement canonical ordered entropy recovery-policy configuration and permanent
   freeze, with exact governance commitments and fixed-library deployment headroom.
   Collection binding and fresh requests remain separate implementation work.

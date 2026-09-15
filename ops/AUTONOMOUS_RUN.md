@@ -40,7 +40,7 @@ pending checks. The immutable RC1 remains the released baseline.
 | Integrator | Provider operator 12 passes; frozen recovery-policy registry 36 passes and all nine products fit; next pre-mint collection binding, actual fresh requests, shared genesis/operator and combined acceptance |
 | Artist builder | Authority execution-event reconstruction integrated; canonical Artist/collection record lanes and original history import/cutover operations 55-57, including Core successor admission; exact steward-living proposal remains unapplied |
 | Revenue builder | Secondary client integrated with combined 97-test pass; implementing fixed/Dutch/clearing/refund-window delegated claims and matching client calls, retaining original self-claim exits |
-| Fourth engineer | Recorded fixity event/report/agent profile integrated with 14 new integration passes; implementing all 13 adopted preservation event kinds, six outcomes and object/agent links |
+| Fourth engineer | Recorded preservation events and multi-object/agent links integrated with 24 generic/fixity passes; implementing canonical preservation objects and actual Metadata RIGHTS receipt/rights serialization |
 
 Comprehensive current-stack/Safe integration, fuzz and stateful campaigns, gas
 conformance, complete genesis inventory, CI and matching new testnet evidence
