@@ -134,7 +134,7 @@ contract StreamCollectionManifestsTest is CharacterizationTestBase, OfficialSafe
         c.artistRegistry = address(artist);
         c.deploymentManifestHash = keccak256("deployment");
         c.manifestHash = keccak256("manifest");
-        c.manifestURI = "urn:metadata";
+        c.manifestURI = "ipfs://metadata";
         c.dependencyReadGas = IStreamGasParameterHost.GasParameterConfig(
             "METADATA_DEPENDENCY_READ_GAS", 1000000, 100000, 2
         );
@@ -379,6 +379,27 @@ contract StreamCollectionManifestsTest is CharacterizationTestBase, OfficialSafe
         );
         router.previewArtistMediaManifestState(1, media);
         require(metadata.scriptManifestHash(1) == 0 && metadata.mediaManifestHash(1) == 0);
+    }
+
+    function testOptionalScriptMirrorUsesContentURIsWithoutExecutingThem() public {
+        M.ScriptManifest memory m = _script();
+        string[4] memory allowed =
+            ["", "ipfs://mirror", "ar://mirror", "https://example.test/mirror.js"];
+        for (uint256 i; i < allowed.length; ++i) {
+            m.scriptURI = allowed[i];
+            require(router.previewArtistScriptManifestState(1, m) != 0);
+        }
+        string[4] memory rejected = [
+            "javascript:alert(1)",
+            "data:text/javascript,alert(1)",
+            "http://example.test/script",
+            "https://"
+        ];
+        for (uint256 i; i < rejected.length; ++i) {
+            m.scriptURI = rejected[i];
+            vm.expectRevert(abi.encodeWithSelector(bytes4(keccak256("UnsafeMetadataURI()"))));
+            router.previewArtistScriptManifestState(1, m);
+        }
     }
 
     function testAbsentExternalHashesRoundTripWithoutClaimingVerifiedBytes() public {

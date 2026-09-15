@@ -45,7 +45,7 @@ library StreamCollectionManifests {
         ) revert W.UnsupportedCollectionManifest();
         sourceHash = keccak256(bytes(source.script));
         if (m.scriptHash != sourceHash) revert W.InvalidCollectionManifest();
-        StreamMetadataRenderer.requireValidUtf8ScriptUri("scriptURI", m.scriptURI, 2048, true);
+        StreamMetadataRenderer.requireValidUtf8ContentUri("scriptURI", m.scriptURI, 2048, true);
         hash = keccak256(
             abi.encode(
                 keccak256("6529STREAM_CURRENT_SCRIPT_MANIFEST_V1"),
