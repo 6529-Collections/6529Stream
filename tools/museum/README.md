@@ -295,3 +295,10 @@ valuation and outbound/return condition records, and exports completed loan
 documentation as generic activities with distinct participant roles. Missing
 evidence remains explicit; custody, title and countersignature are not inferred.
 Run `python -m unittest tools.museum.test_loans -v` for the focused offline cases.
+
+Typed historical owner valuations preserve appraisal/book-value/insurance bases,
+exact monetary strings, confidential instrument commitments and unverified
+countersignature references. The distinct offline derivative can join a loan's
+exact insurance reference to a bounded complete valuation lane and original
+receipt order. It does not infer legal operativeness or professional assent.
+See [recorded valuation dossiers](../../docs/museum-recorded-valuations.md).
