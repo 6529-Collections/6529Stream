@@ -109,6 +109,7 @@ library StreamArtistHistoryState {
         Verified storage v = s.verified[laneKey];
         uint64 prefix = v.done ? v.count : 0;
         if (index >= prefix) {
+            if (index - prefix >= s.lanes[laneKey].length) revert InvalidArtistHistory();
             Row storage row = s.lanes[laneKey][index - prefix];
             return (row.record, row.chain);
         }

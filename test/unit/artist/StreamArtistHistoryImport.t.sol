@@ -60,6 +60,39 @@ contract StreamArtistHistoryImportTest is ArtistOnboardingFixture {
         require(h.artistHistoryContinuityCommitment() != 0, "separate continuity state");
     }
 
+    function testHistoryReadBoundsRejectEmptyAndOutOfRangeNativeLanes() external {
+        History h = History(address(ingress));
+        bytes32 roots = _historyRoots(coordinator);
+        uint256 safeNonce = artist.nonce();
+        bytes32 emptyArtist = keccak256("absent history artist");
+        (bytes32 tip, uint64 count) = h.artistHistoryLane(1, emptyArtist);
+        require(tip == 0 && count == 0, "empty artist lane");
+        (tip, count) = h.artistHistoryLane(2, bytes32(uint256(2)));
+        require(tip == 0 && count == 0, "empty collection lane");
+        _assertHistoryReadBounds(h, 1, emptyArtist);
+        _assertHistoryReadBounds(h, 2, bytes32(uint256(2)));
+        _assertHistoryReadBounds(h, 1, artistId);
+        _assertHistoryReadBounds(h, 2, bytes32(uint256(1)));
+        require(
+            _historyRoots(coordinator) == roots && artist.nonce() == safeNonce,
+            "failed and valid reads preserve owner roots and Safe nonce"
+        );
+    }
+
+    function _assertHistoryReadBounds(History h, uint8 kind, bytes32 laneKey) private {
+        (bytes32 tip, uint64 count) = h.artistHistoryLane(kind, laneKey);
+        avm.expectRevert(StreamArtistHistoryState.InvalidArtistHistory.selector);
+        h.artistHistoryRecordAt(kind, laneKey, count);
+        avm.expectRevert(StreamArtistHistoryState.InvalidArtistHistory.selector);
+        h.artistHistoryRecordAt(kind, laneKey, type(uint64).max);
+        if (count != 0) {
+            (bytes32 record, bytes32 chain) = h.artistHistoryRecordAt(kind, laneKey, count - 1);
+            require(record != 0 && chain == tip, "last admitted record stays readable");
+        }
+        (bytes32 afterTip, uint64 afterCount) = h.artistHistoryLane(kind, laneKey);
+        require(afterTip == tip && afterCount == count, "history bounds do not change the lane");
+    }
+
     function testNativeLaneAndSafeNonceRollbackThenIdenticalArchiveRetry() external {
         History h = History(address(ingress));
         bytes32 before_ = h.artistRecordChainHash(artistId);
@@ -159,6 +192,8 @@ contract StreamArtistHistoryImportTest is ArtistOnboardingFixture {
             (bytes32 c, bytes32 d) = next.artistHistoryRecordAt(1, artistId, i);
             require(a == c && b == d, "exact read-through history, no rederived identity");
         }
+        _assertHistoryReadBounds(next, 1, artistId);
+        _assertHistoryReadBounds(next, 2, bytes32(uint256(1)));
         bytes32 oldTip = previous.artistRecordChainHash(artistId);
         T.PolicyConsent memory write = T.PolicyConsent(1, PHASE, POLICY);
         T.Authorization memory auth = T.Authorization(55, uint64(block.timestamp + 1 days), "");
