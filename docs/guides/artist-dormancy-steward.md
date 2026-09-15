@@ -58,8 +58,15 @@ The appointment block is recorded from the executing transaction. Policy and
 economics consent are excluded; sanction is added only by an operative original
 artist-signed operation 19 grant. A directive may pre-grant guardian displacement;
 its forbidden mask overrides every included permission. The separate later
-TERMINAL_FREEZE grant recipe is the next additive operation 59 batch, not an
-implicit power of operation 19 or 43.
+TERMINAL_FREEZE grant recipe is additive operation 59, described in
+[ADR 0046](../adr/0046-explicit-steward-capability-grants.md). It grants only
+previously absent, non-forbidden sanction/economics bits and is never an implicit
+power of operation 19 or 43. Read `stewardCapabilityGrantContext` with the exact
+current appointment, steward, directive, grant head and mask before staging.
+`stewardCapabilityGrantState` and `stewardCapabilityGrantRecord` retain that
+separate append-only history. The registry selector must be admitted to the
+actual Executor as class-2 terminal freeze with its independent veto guardian
+configuration; an ordinary class-1 dormancy action cannot execute it.
 
 Completion records the actual operation-43 guardian vesting snapshot, complete
 history prefix, prior address and immutable transition. It advances the delegation
@@ -80,7 +87,8 @@ other scoped steward sanctions remain prohibited.
 The new lifecycle file contains twelve actual Artist, Safe and Archive scenarios,
 with explicit typed governance/role and unit Core boundaries. The six original
 grant-state scenarios exercise actual Identity nonce/signature and Rotation state
-with a typed Coordinator verdict. Both files typecheck. These tests have not yet
+with a typed Coordinator verdict. The later capability file adds eight grant-specific cases and retains the twelve
+lifecycle cases. All three files typecheck. These tests have not yet
 run in this feature batch; current product sizes, full graph composition and
 transaction capacity also remain pending consolidated validation.
 
@@ -89,6 +97,7 @@ After the feature source stabilizes, run the focused aggregate fixture profile:
 ```powershell
 python scripts/dev.py test --suite unit --via-ir --code-size-limit 2000000 --gas-limit 1000000000 --memory-limit 1073741824 --match-path test/unit/artist/StreamArtistDormancyLifecycle.t.sol
 python scripts/dev.py test --suite unit --via-ir --code-size-limit 2000000 --gas-limit 1000000000 --memory-limit 1073741824 --match-path test/unit/artist/StreamArtistStewardSanctionState.t.sol
+python scripts/dev.py test --suite unit --via-ir --code-size-limit 2000000 --gas-limit 1000000000 --memory-limit 1073741824 --match-path test/unit/artist/StreamArtistStewardCapabilities.t.sol
 ```
 
 The monolithic unit fixture relies on aggregate CREATE ordering. Copy all reached

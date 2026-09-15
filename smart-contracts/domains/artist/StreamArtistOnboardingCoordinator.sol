@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
+import {
+    StreamArtistStewardCapabilityTypes as SC
+} from "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
+import "./StreamArtistStewardCapabilityOperations.sol";
 import "../../interfaces/stream/artist/IStreamArtistDormancy.sol";
 import {
     StreamArtistDormancyTypes as Dorm
@@ -901,5 +906,13 @@ contract StreamArtistOnboardingCoordinator is
         T.Authorization calldata a
     ) external operation returns (bytes32) {
         return StreamArtistStewardSanctionOperations.record(_economicContext(), actor, p, a);
+    }
+
+    function coordinateGrantStewardCapabilities(address actor, SC.Grant calldata p)
+        external
+        operation
+        returns (bytes32)
+    {
+        return StreamArtistStewardCapabilityOperations.grant(_economicContext(), actor, p);
     }
 }

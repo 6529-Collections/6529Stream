@@ -119,6 +119,7 @@ authorization for catalog admission and family grants.
 resolves first-bid anti-snipe timing, buyer-signed expiry during pause tolling,
 and deferred no-bid completion for the new versioned native auction.
 
+<<<<<<< HEAD
 [ADR 0044: Artist consent for prepared royalty snapshots](0044-prepared-royalty-snapshot-consent.md)
 defines the additive current mode election, original operation-15 source consent,
 authenticated token derivation and unchanged canonical policy hashes. Joined
@@ -128,3 +129,10 @@ current-system execution and complete royalty profiles remain separate work.
 defines the executor-funded ETH allowance independently of token-denominated
 payment limits, with excess refunded to the native funder. Implementation
 is awaiting the specific source-change approval requested after automatic review.
+=======
+[ADR 0046: Explicit steward capability grants](0046-explicit-steward-capability-grants.md)
+
+defines additive operation 59 for original terminal-freeze-governed sanction and
+economics grants while preserving the appointment, veto authority and permanent
+artist capability exclusions.
+>>>>>>> 0fab3d5f (Add explicit terminal-freeze steward capability grants)

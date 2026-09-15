@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
+import {
+    StreamArtistStewardCapabilityTypes as SC
+} from "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
 import "./StreamArtistDelegatedMutation.sol";
 import "./StreamArtistDormancyCancellation.sol";
 import "./StreamArtistDormancyReadEncoding.sol";
@@ -630,6 +634,29 @@ contract StreamArtistIdentityEstateExtension is
                 _currentIdentityClosure(p.artistId)
             );
         _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, 19, m);
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return m.record;
+    }
+
+    function grantStewardCapabilities(
+        T.ActionContext calldata c,
+        SC.Grant calldata p,
+        SC.Witness calldata w
+    ) external onlyHost returns (bytes32) {
+        _check(c, 59);
+        StreamArtistIdentityState.Mutation memory m = StreamArtistStewardCapabilityState.grant(
+            _stewardCapabilityGrants,
+            _dormancy,
+            _identity,
+            _rotations,
+            _succession,
+            _replay,
+            _ownerContext(),
+            c,
+            p,
+            w,
+            IStreamArtistIdentityContestOwner(address(this)).artistWindowAuthority()
+        );
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }

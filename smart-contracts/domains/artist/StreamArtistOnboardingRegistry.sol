@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
+import {
+    StreamArtistStewardCapabilityTypes as SC
+} from "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
 import "../../interfaces/stream/artist/IStreamArtistDormancy.sol";
 import {
     StreamArtistDormancyTypes as Dorm
@@ -61,6 +65,7 @@ import {
 contract StreamArtistOnboardingRegistry is
     IStreamArtistOnboarding,
     IStreamArtistDormancy,
+    IStreamArtistStewardCapabilities,
     IStreamArtistDormancyEvidence,
     SG,
     IStreamArtistMintConsent,
@@ -352,6 +357,7 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistWindows).interfaceId
             || type(IStreamArtistDormancy).interfaceId == id
             || type(IStreamArtistDormancyEvidence).interfaceId == id || type(SG).interfaceId == id
+            || id == type(IStreamArtistStewardCapabilities).interfaceId
             || super.supportsInterface(id);
     }
 
@@ -1707,6 +1713,30 @@ contract StreamArtistOnboardingRegistry is
         external
         view
         returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function grantStewardCapabilities(SC.Grant calldata p) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function stewardCapabilityGrantContext(SC.Grant calldata p)
+        external
+        view
+        returns (SC.Context memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function stewardCapabilityGrantRecord(bytes32 hash) external view returns (SC.Record memory) {
+        _forwardRegistryRead();
+    }
+
+    function stewardCapabilityGrantState(bytes32 appointment)
+        external
+        view
+        returns (bytes32, uint32)
     {
         _forwardRegistryRead();
     }

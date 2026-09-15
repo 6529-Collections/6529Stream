@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
+import {
+    StreamArtistStewardCapabilityTypes as SC
+} from "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
 
 import "./StreamArtistDormancyReadEncoding.sol";
 import {
@@ -253,7 +257,9 @@ contract StreamArtistIdentityAuthority is
         returns (Estate.AuthorityCapabilities memory)
     {
         _returnResolution(
-            StreamArtistDormancyReadEncoding.authority(_dormancy, _estate, _identity, artistId)
+            StreamArtistDormancyReadEncoding.authority(
+                _dormancy, _stewardCapabilityGrants, _estate, _identity, artistId
+            )
         );
     }
 
@@ -1449,5 +1455,47 @@ contract StreamArtistIdentityAuthority is
         returns (bytes32)
     {
         return StreamArtistStewardSanctionState.digest(_environment(), p, a);
+    }
+
+    function grantStewardCapabilities(
+        T.ActionContext calldata c,
+        SC.Grant calldata p,
+        SC.Witness calldata w
+    ) external returns (bytes32) {
+        _forwardEstateWriter();
+    }
+
+    function stewardCapabilityGrantContext(SC.Grant calldata p)
+        external
+        view
+        returns (SC.Context memory)
+    {
+        _returnResolution(
+            StreamArtistStewardCapabilityState.contextEncoded(
+                _stewardCapabilityGrants,
+                _dormancy,
+                _identity,
+                _rotations,
+                _succession,
+                _environment(),
+                p
+            )
+        );
+    }
+
+    function stewardCapabilityGrantRecord(bytes32 hash) external view returns (SC.Record memory) {
+        _returnResolution(
+            StreamArtistStewardCapabilityState.recordEncoded(_stewardCapabilityGrants, hash)
+        );
+    }
+
+    function stewardCapabilityGrantState(bytes32 appointment)
+        external
+        view
+        returns (bytes32, uint32)
+    {
+        return (
+            _stewardCapabilityGrants.head[appointment], _stewardCapabilityGrants.added[appointment]
+        );
     }
 }

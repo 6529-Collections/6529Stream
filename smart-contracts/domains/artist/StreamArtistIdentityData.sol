@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistStewardCapabilityState.sol";
 import { StreamArtistDormancyState } from "./StreamArtistDormancyState.sol";
 import { StreamArtistStewardSanctionState } from "./StreamArtistStewardSanctionState.sol";
 import { StreamArtistGuardianVestingAdmission } from "./StreamArtistGuardianVestingAdmission.sol";
@@ -53,6 +54,8 @@ abstract contract StreamArtistIdentityData {
     // Dormancy and original op19 append roots after every accepted Identity field.
     StreamArtistDormancyState.State internal _dormancy;
     StreamArtistStewardSanctionState.State internal _stewardGrants;
+    // Explicit additive operation59; original appointment records and prior roots stay fixed.
+    StreamArtistStewardCapabilityState.State internal _stewardCapabilityGrants;
 
     function _noteLiving(
         StreamArtistIdentityState.OwnerContext memory o,

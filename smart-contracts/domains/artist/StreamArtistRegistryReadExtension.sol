@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
+import {
+    StreamArtistStewardCapabilityTypes as SC
+} from "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
 import "../../interfaces/stream/artist/IStreamArtistDormancy.sol";
 import {
     StreamArtistDormancyTypes as Dorm
@@ -952,5 +956,32 @@ contract StreamArtistRegistryReadExtension {
             if iszero(ok) { revert(add(raw, 32), mload(raw)) }
             return(add(raw, 32), mload(raw))
         }
+    }
+
+    function stewardCapabilityGrantContext(SC.Grant calldata p)
+        external
+        view
+        onlyHost
+        returns (SC.Context memory)
+    {
+        _forwardDormancyRead();
+    }
+
+    function stewardCapabilityGrantRecord(bytes32 hash)
+        external
+        view
+        onlyHost
+        returns (SC.Record memory)
+    {
+        _forwardDormancyRead();
+    }
+
+    function stewardCapabilityGrantState(bytes32 appointment)
+        external
+        view
+        onlyHost
+        returns (bytes32, uint32)
+    {
+        _forwardDormancyRead();
     }
 }

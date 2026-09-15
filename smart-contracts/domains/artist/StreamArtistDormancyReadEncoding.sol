@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 import "./StreamArtistDormancyState.sol";
 import "./StreamArtistEstateReads.sol";
+import "./StreamArtistStewardCapabilityState.sol";
 import "../../interfaces/stream/core/IStreamCoreBurn.sol";
 
 /// @notice Fixed Identity-local reads of actual dormant notices, closures and authority origins.
@@ -72,6 +73,7 @@ library StreamArtistDormancyReadEncoding {
 
     function authority(
         StreamArtistDormancyState.State storage s,
+        StreamArtistStewardCapabilityState.State storage grants,
         StreamArtistEstateState.State storage estate,
         StreamArtistIdentityState.State storage identity,
         bytes32 id
@@ -106,7 +108,11 @@ library StreamArtistDormancyReadEncoding {
                 principal.authorityAddress,
                 principal.authorityClass,
                 principal.status,
-                t.plan.capabilities,
+                principal.authorityClass == 4
+                    ? StreamArtistStewardCapabilityState.effective(
+                        grants, origin, t.plan.capabilities
+                    )
+                    : t.plan.capabilities,
                 origin
             )
         );
