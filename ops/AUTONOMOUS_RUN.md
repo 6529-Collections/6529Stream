@@ -18,7 +18,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Dynamic templates `217c996a`, standing/living-estate history `4b52f2c0`, seven-scenario repair `7fa610bd`, portable graph preparation `c5428e68`. Original `a65f7f3e` graph plus repair passes the full 21-case cohort and separate isolated cold case. Latest production composition remains open; immutable RC1: `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
+| Source checkpoint | Latest integrated 6f31d497: Artist history and typed living/payout/economics hydration, native surplus/credit export, actual museum preservation/RIGHTS capture. Fresh entropy passes 100 cases; complete 1,735-source ABI/type check passes. Combined Artist native acceptance is pending. Immutable RC1 remains 569bf87f1fa808787d324f6e1582924b5ccf1d40. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -37,10 +37,10 @@ pending checks. The immutable RC1 remains the released baseline.
 
 | Owner | Implementation batch |
 | --- | --- |
-| Integrator | Collection recovery binding `7323d1d3`: 44 passes, three 256-input properties, all ten products fit; next actual fresh requests, shared genesis/operator and combined acceptance |
-| Artist builder | Canonical Artist/collection lanes and original history operations 55-57 and the Cause receipt correction are source-reviewed and await integration; entropy content-consent prerequisite is source-reviewed; typed imported-authority hydration follows |
-| Revenue builder | Four native delegated-refund hosts integrated with combined 107 client passes; implementing native surplus recovery with preserved liabilities and live emergency-recipient authority |
-| Fourth engineer | Object/rights adapters integrated with 14 root passes; completing an actual local Safe preservation-operation capture and offline replay |
+| Integrator | Fresh entropy: 100 passes, eight 256-input properties, all 15 products fit. Combined Artist native run active; entropy client/Safe helpers pass within 137 client tests. Next entropy finding/historical-host seams and shared genesis/operator acceptance. |
+| Artist builder | History/checkpoints and complete living/payout/economics hydration integrated and source-reviewed. Building content/attestation hydration while the frozen native cohort runs. |
+| Revenue builder | Six-host surplus and complete credit export integrated and reviewed. Building the saved delayed-governance surplus operator workflow; native acceptance remains pending. |
+| Fourth engineer | Actual preservation and RIGHTS capture integrated; 21 root capture tests and offline rights replay pass. Building Linked Art preservation activities over PREMIS evidence. |
 
 Comprehensive current-stack/Safe integration, fuzz and stateful campaigns, gas
 conformance, complete genesis inventory, CI and matching new testnet evidence
@@ -49,7 +49,7 @@ the background and validate only their recorded source. No new date or
 percentage is inferred from these assignments.
 
 Root owns the combined graph, shared operator/client work and the new candidate.
-The complete 1,688-source ABI/type check passes at `ce713350`.
+The complete 1,735-source ABI/type check passes at 6f31d497.
 The provider lifecycle at `3481e8fd` passes 41 focused native cases and three
 256-input fuzz properties, with all eight compiled products within deployment
 limits and every original ABI entry retained. Actual Safe/ARRNG governance and
@@ -520,8 +520,8 @@ not complete that join.
 
 | Owner | Next deliverable |
 | --- | --- |
-| Integrator | Complete typed metadata/finality provider, original-coordinator discovery and current deployment assembly; shared tests, CI and release |
-| Artist builder | Transition-time history needed for nonempty supersession, then remaining appeal and estate recovery |
+| Integrator | Fresh entropy: 100 passes, eight 256-input properties, all 15 products fit. Combined Artist native run active; entropy client/Safe helpers pass within 137 client tests. Next entropy finding/historical-host seams and shared genesis/operator acceptance. |
+| Artist builder | History/checkpoints and complete living/payout/economics hydration integrated and source-reviewed. Building content/attestation hydration while the frozen native cohort runs. |
 | Preservation builder | External bulk archives, runnable reference render, original publication and current finality consumption |
 | Independent reviewer | Challenge exact implementations, real-contract composition and integration evidence |
 
@@ -697,7 +697,7 @@ contract call, including owner actions, payments, NFT custody and reads.
 
 | Lane | Branch | Current deliverable |
 | --- | --- | --- |
-| Integrator | `codex/v1-integration` | Actual metadata/finality producers and discovery, staged product/operator activation, whole-current compiler diagnostic, client and release |
+| Integrator | Fresh entropy: 100 passes, eight 256-input properties, all 15 products fit. Combined Artist native run active; entropy client/Safe helpers pass within 137 client tests. Next entropy finding/historical-host seams and shared genesis/operator acceptance. |
 | Artist | `codex/v1-artist-authority` | Confirmation303 and separate default4 integrated; actual finality and recovery operations 22/23 |
 | Revenue | `codex/v1-revenue` | Museum LIDO202 integrated; actual local-EVM chain-source adapter, remaining formats and institutional acceptance |
 | Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |

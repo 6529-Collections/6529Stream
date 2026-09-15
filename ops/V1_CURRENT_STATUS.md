@@ -22,6 +22,55 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 | Developer client and operator | RC1 client remains usable. Compiler-selected typed clients are integrated as `e409c134`, with 52 passing tests, independent review and exact generation/typechecking against accepted native output. Earlier local graph deployment completed 530 transactions within the deployment ceiling. | Four explicit current native auction/bid/custody signing helpers are integrated (`db3fca94`), with 59 client tests and independently reproduced actual-getter encoding vectors. Complete workflow examples and latest graph activation remain. The deployment rehearsal records `productsActivated=false`; it is not a full product launch. |
 | Candidate and testnet | Immutable supported RC1 and its Sepolia evidence are complete. | Expanded full-v1 implementation, complete Safe call inventory, required fuzz/stateful campaigns, all 37 genesis roles, gas conformance, full CI, new source freeze and matching testnet evidence remain. |
 
+## History, credit export and actual rights capture
+
+Ordered fresh entropy recovery is integrated as c5a7d0c4, with explicit import
+boundaries in bbff6342. Original token/scope inputs, exact Artist evidence,
+provider proof, fee ownership and frozen late-reply arbitration pass all 100
+focused cases across ten suites. Eight properties each pass 256 inputs. All 15
+measured products fit; coordinator runtime is 24,522 bytes. The 79-source native
+capture precedes two import-only edits: all 15 executable creation/runtime
+programs and complete ABI entries remain identical after those edits. Actual
+joined Artist/Executor recovery, the unavailability alternative, historical
+entropy-host admission and maximum-depth gas remain required.
+
+Canonical Artist/collection lanes and original operations 55-57 are integrated
+as 6dabede5, with Cause completeness in 93dcd817, entropy content evidence in
+76e52ce4 and complete producer guard/nonce inventories in 4892adc6. Distinct
+operation 60 adds complete original-living hydration (d0664b91), payout history
+(5d84075f) and direct economics history (7439f723). Independent source reviews
+are clear. These exact profiles preserve source records, complete replay/nonce
+guards and atomic seven-owner activation. They do not accept other histories
+implicitly. The combined 708-source Artist native cohort is frozen and running:
+15 hydration cases plus history, Cause, checkpoint and entropy-consent
+regressions. Native behavior, sizes, capacity and actual current-Core cutover
+remain unaccepted. Content/attestation and other full-v1 histories continue.
+
+Six-host governed native surplus recovery is integrated as 85fa1d8b, followed
+by complete credit discovery/export in 4c7887a4. Original locked liabilities,
+claimable balances and zeroed historical accounts remain enumerable, including
+retired hosts discovered through the Registry. The client records one pinned
+block and reproduces original credit leaves and the ordered tree offline.
+Both source reviews are clear and selected products fit. Eight credit-export
+and nine surplus Solidity cases remain authored rather than runtime-accepted.
+
+Actual preservation capture (81522bd3) executed 317 local transactions and
+captured three preservation events plus one object. Metadata RIGHTS capture
+(6f31d497) executed 535 local transactions, including three deliberate Safe
+denials, and captured both class-7/8 receipts plus 22 independent records.
+Root reproduced all 21 combined capture tests and independently verified the
+RIGHTS package: 435 payload files plus its manifest. Genuine retained native
+products use the documented unfulfilled, unselected Artist Coordinator
+boundary. This demonstrates independent publication paths, not a complete
+initialized Artist graph or institutional conformance.
+
+The complete 1,735-source ABI/type check passes at 6f31d497. The current client
+passes all 137 tests, generation checks and TypeScript validation, including
+six new entropy incident/quote/recovery/Artist-consent/credit cases. Its original
+operation-17 transport and Safe value are preserved; client encoding tests do
+not replace contract runtime acceptance. The immutable RC1 and Sepolia evidence
+remain unchanged.
+
 ## Latest feature batch
 
 Reviewed source now includes native secondary inventory sales (`5f950745`),
@@ -71,7 +120,7 @@ limits. This capture precedes the later recovery-policy implementation. The
 complete 1,681-source joined ABI/type check passes at `e627676b`; it establishes
 that earlier source composition rather than latest full-system acceptance.
 Complete current-stack/Safe, stateful/fuzz campaigns, gas, all 37 genesis roles,
-CI and matching new testnet evidence remain required. Fresh entropy recovery,
+CI and matching new testnet evidence remain required. Entropy unavailability recovery,
 remaining interfaces/operator workflows and the separately blocked ERC-20 and
 inherited/global-freeze changes remain explicit. RC1 and Sepolia are unchanged.
 
@@ -104,8 +153,8 @@ role references, replay rejection and permanent freeze pass nine new policy
 cases plus 27 provider/epoch/subject regressions. Three properties each pass 256
 inputs. All nine production products fit, including coordinator runtime 24,141
 bytes; all 162 prior ABI entries remain. This is the policy-registry checkpoint. The later collection binding is described
-below; incident/artist-consented fresh requests and late callback arbitration
-still need implementation. No fresh request is enabled by registration.
+below; actual fresh requests and late arbitration are recorded in the newer
+batch above. No fresh request is enabled by policy registration alone.
 The joined 1,688-source Solidity ABI/type check passes on this implementation.
 
 ## Collection binding, delegated refunds and object/rights batch
@@ -120,7 +169,8 @@ production products fit; coordinator runtime is 24,553 bytes. All 62 captured
 sources match integration and all 175 prior ABI entries remain. Independent
 source review is clear. The first oversize run is retained; moving the new
 transition encoding into the fixed read worker resolves it. Actual fresh
-requests, Artist evidence consumption and late callbacks remain required.
+requests, Artist evidence consumption and late callbacks are integrated in the
+newer batch above; this binding capture alone does not validate them.
 
 Native fixed/price-program, Dutch, clearing and refund-window delegated claims
 are integrated as `91847ee9`. The original account remains the destination, and
@@ -134,8 +184,7 @@ integrated as `c112d4ce`. The independent review's record-scoped licensor-ID
 collision fix is included. All 14 object/rights tests pass on integration; the
 builder's combined object/event/fixity suite passes 38. Positive receipt fixtures
 remain synthetic, while retained actual source supports missing-evidence and
-offline replay cases. A new real local preservation-operation capture is being
-completed separately; institutional conformance and latest-system acceptance
+offline replay cases. The newer actual preservation and RIGHTS captures are described above; institutional conformance and latest-system acceptance
 remain open.
 
 ## Earlier manifest and attestation batch
