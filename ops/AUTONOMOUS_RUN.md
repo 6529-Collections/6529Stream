@@ -37,10 +37,10 @@ pending checks. The immutable RC1 remains the released baseline.
 
 | Owner | Implementation batch |
 | --- | --- |
-| Integrator | Provider operator 12 passes; frozen recovery-policy registry 36 passes and all nine products fit; next pre-mint collection binding, actual fresh requests, shared genesis/operator and combined acceptance |
-| Artist builder | Authority execution-event reconstruction integrated; canonical Artist/collection record lanes and original history import/cutover operations 55-57, including Core successor admission; exact steward-living proposal remains unapplied |
-| Revenue builder | Secondary client integrated with combined 97-test pass; implementing fixed/Dutch/clearing/refund-window delegated claims and matching client calls, retaining original self-claim exits |
-| Fourth engineer | Recorded preservation events and multi-object/agent links integrated with 24 generic/fixity passes; implementing canonical preservation objects and actual Metadata RIGHTS receipt/rights serialization |
+| Integrator | Collection recovery binding `7323d1d3`: 44 passes, three 256-input properties, all ten products fit; next actual fresh requests, shared genesis/operator and combined acceptance |
+| Artist builder | Canonical Artist/collection lanes and original history operations 55-57 and the Cause receipt correction are source-reviewed and await integration; entropy content-consent prerequisite is source-reviewed; typed imported-authority hydration follows |
+| Revenue builder | Four native delegated-refund hosts integrated with combined 107 client passes; implementing native surplus recovery with preserved liabilities and live emergency-recipient authority |
+| Fourth engineer | Object/rights adapters integrated with 14 root passes; completing an actual local Safe preservation-operation capture and offline replay |
 
 Comprehensive current-stack/Safe integration, fuzz and stateful campaigns, gas
 conformance, complete genesis inventory, CI and matching new testnet evidence

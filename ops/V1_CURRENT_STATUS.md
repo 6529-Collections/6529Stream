@@ -88,8 +88,9 @@ The broader preservation-event profile is integrated as `b690e5ee`: twelve
 generic event kinds and six outcomes, existing strict fixity composition,
 multiple object/agent links, noncompleted source states and offline replay.
 All 24 generic/fixity module cases pass on integration after independent review.
-Positive event examples remain synthetic; actual source supports qualified
-missing-evidence and replay cases. Canonical object/rights adapters are next.
+Positive event examples in that profile are synthetic; its actual source supports
+qualified missing-evidence and replay cases. The object/rights batch below adds
+their canonical serializers.
 
 Secondary inventory/delegated-claim/offer client helpers are integrated as
 `0904ec7c`. The combined package passes all 97 tests, generated-catalog checks,
@@ -102,10 +103,40 @@ an additive coordinator interface. Exact ordered hashes, class-1 governance,
 role references, replay rejection and permanent freeze pass nine new policy
 cases plus 27 provider/epoch/subject regressions. Three properties each pass 256
 inputs. All nine production products fit, including coordinator runtime 24,141
-bytes; all 162 prior ABI entries remain. This is the policy registry: pre-mint
-collection binding, incident/artist-consented fresh requests and late callback
-arbitration still need implementation. No fresh request is enabled by registration.
+bytes; all 162 prior ABI entries remain. This is the policy-registry checkpoint. The later collection binding is described
+below; incident/artist-consented fresh requests and late callback arbitration
+still need implementation. No fresh request is enabled by registration.
 The joined 1,688-source Solidity ABI/type check passes on this implementation.
+
+## Collection binding, delegated refunds and object/rights batch
+
+Pre-mint frozen recovery-policy binding is integrated as `7323d1d3`. It requires
+exact class-1 governance, selected active provider pins and ordered future
+epochs; binding changes advance the original collection epoch. First token or
+scope registration and Core freeze lock the binding. Finality reads retain the
+original unbound commitments and disclose positive frozen recovery policies.
+All 44 focused native cases pass, including three 256-input properties. All ten
+production products fit; coordinator runtime is 24,553 bytes. All 62 captured
+sources match integration and all 175 prior ABI entries remain. Independent
+source review is clear. The first oversize run is retained; moving the new
+transition encoding into the fixed read worker resolves it. Actual fresh
+requests, Artist evidence consumption and late callbacks remain required.
+
+Native fixed/price-program, Dutch, clearing and refund-window delegated claims
+are integrated as `91847ee9`. The original account remains the destination, and
+self-claims retain their existing exits. Optional delegation is checked through
+its declared module and exact live relationship. Thirteen new current/Safe cases
+are authored, with native acceptance pending. The combined client passes all
+107 tests, generation checks and TypeScript validation on integration.
+
+Canonical preservation objects and actual Metadata RIGHTS receipt adapters are
+integrated as `c112d4ce`. The independent review's record-scoped licensor-ID
+collision fix is included. All 14 object/rights tests pass on integration; the
+builder's combined object/event/fixity suite passes 38. Positive receipt fixtures
+remain synthetic, while retained actual source supports missing-evidence and
+offline replay cases. A new real local preservation-operation capture is being
+completed separately; institutional conformance and latest-system acceptance
+remain open.
 
 ## Earlier manifest and attestation batch
 
