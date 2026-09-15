@@ -62,3 +62,7 @@ explicit full-v1 obligations. No lane proof alone activates them.
 through a separate additive entrypoint. The original baseline selector and
 request ABI remain unchanged. This extension does not relax provisional or
 historical-authority dependency requirements.
+
+The [explicit direct economics profile](artist-economics-authority-hydration.md)
+adds complete op15 associations and their payout dependencies while preserving
+this baseline selector. It has separate source-only validation.

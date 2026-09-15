@@ -78,3 +78,16 @@ old-domain, nonce/replay and atomic Archive requirements remain. The original
 baseline selector still rejects payout history. The
 [payout importer guide](../guides/artist-payout-authority-hydration.md) specifies
 the typed joins, authored cases and remaining authority-history exclusions.
+
+## Direct economics history profile
+
+The explicit `hydrateArtistAuthorityWithEconomics` capability adds complete direct
+operation-15 history to the living payout profile. It imports the original payload
+and exact generation-1 binding association maps, with all original consent-key,
+nonce and revocation guards. Original op14/op15 receipt order is retained even
+when the two families interleave. No Resolver mutation or renewed authorization
+occurs during hydration. Tagged state encoding and a distinct profile commitment
+keep the baseline and payout-only selectors unchanged. Delegated/corrected and
+authority-transition histories remain separate completeness obligations. See the
+[economics profile guide](../guides/artist-economics-authority-hydration.md) for
+consumer semantics and source-only validation limits.

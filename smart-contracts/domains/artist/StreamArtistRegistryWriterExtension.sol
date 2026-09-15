@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistEconomicsAuthorityHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistPayoutAuthorityHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistAuthorityHydration.sol";
 import {
@@ -653,5 +654,12 @@ contract StreamArtistRegistryWriterExtension {
     {
         return IStreamArtistPayoutAuthorityHydrationCoordinator(operationCoordinator)
             .coordinateHydrateArtistAuthorityWithPayout(msg.sender, p);
+    }
+
+    function hydrateArtistAuthorityWithEconomics(
+        StreamArtistEconomicsHydrationTypes.Request calldata p
+    ) external onlyHost returns (bytes32) {
+        return IStreamArtistEconomicsAuthorityHydrationCoordinator(operationCoordinator)
+            .coordinateHydrateArtistAuthorityWithEconomics(msg.sender, p);
     }
 }

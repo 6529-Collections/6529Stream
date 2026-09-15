@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistEconomicsHydration.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 
 import "./StreamArtistEconomicsHashes.sol";
@@ -478,7 +479,34 @@ contract StreamArtistConsentFinalityLifecycle is
         return abi.encode(records);
     }
 
+    function authorityEconomicsHydrationState(
+        AH.Query calldata q,
+        T.EconomicsConsent[] calldata terms
+    ) external view returns (bytes memory) {
+        return StreamArtistEconomicsHydration.exportState(
+            _policies,
+            _economics,
+            _associatedEconomicsRecords,
+            _economicsAssociations,
+            _recordDelegation,
+            q,
+            terms
+        );
+    }
+
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
+        if (StreamArtistEconomicsHydration.isState(p.typedState)) {
+            if (p.nonces.length != 0) revert T.InvalidRecord();
+            StreamArtistEconomicsHydration.importState(
+                _policies,
+                _economics,
+                _associatedEconomicsRecords,
+                _economicsAssociations,
+                q,
+                p.typedState
+            );
+            return;
+        }
         bytes32[] memory records = abi.decode(p.typedState, (bytes32[]));
         if (records.length != q.policies.length || p.nonces.length != 0) revert T.InvalidRecord();
         for (uint256 j; j < records.length; ++j) {

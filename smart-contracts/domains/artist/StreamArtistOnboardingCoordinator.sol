@@ -978,4 +978,14 @@ contract StreamArtistOnboardingCoordinator is
         return
             StreamArtistAuthorityHydrationOperations.hydrateWithPayout(_economicContext(), actor, p);
     }
+
+    function coordinateHydrateArtistAuthorityWithEconomics(
+        address actor,
+        StreamArtistEconomicsHydrationTypes.Request calldata p
+    ) external operation returns (bytes32) {
+        return
+            StreamArtistAuthorityHydrationOperations.hydrateWithEconomics(
+                _economicContext(), actor, p
+            );
+    }
 }

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistEconomicsAuthorityHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistPayoutAuthorityHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistAuthorityHydration.sol";
 import {
@@ -350,7 +351,8 @@ contract StreamArtistOnboardingRegistry is
         override(StreamModuleBase, IERC165)
         returns (bool)
     {
-        return id == type(IStreamArtistPayoutAuthorityHydration).interfaceId
+        return id == type(IStreamArtistEconomicsAuthorityHydration).interfaceId
+            || id == type(IStreamArtistPayoutAuthorityHydration).interfaceId
             || id == type(IStreamArtistAuthorityHydration).interfaceId
             || id == type(IStreamArtistHistory).interfaceId
             || id == type(IStreamArtistRecoveryApproval).interfaceId
@@ -1899,6 +1901,12 @@ contract StreamArtistOnboardingRegistry is
     }
 
     function hydrateArtistAuthorityWithPayout(AH.Request calldata p) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function hydrateArtistAuthorityWithEconomics(
+        StreamArtistEconomicsHydrationTypes.Request calldata p
+    ) external returns (bytes32) {
         _forwardRegistryWriter();
     }
 }

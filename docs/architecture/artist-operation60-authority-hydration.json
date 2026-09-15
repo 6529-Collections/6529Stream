@@ -57,6 +57,24 @@
       "source": "complete linear unprovisional class1 payout history, exact original current head and mutable chain cell; all original baseline completeness checks remain",
       "exclusions": "pending/provisional/abandoned/rotated payouts and other advanced authority dependencies",
       "validation": "four authored actual two-registry/Safe/Archive source cases; ABI only"
+    },
+    {
+      "profile": "6529STREAM_ARTIST_LIVING_ECONOMICS_HYDRATION_V1",
+      "write": "hydrateArtistAuthorityWithEconomics((Request authority,EconomicsConsent[] economics))",
+      "coordinator": "coordinateHydrateArtistAuthorityWithEconomics(address actor,Request request)",
+      "interface": "IStreamArtistEconomicsAuthorityHydration",
+      "additionalOriginalOperations": [
+        18,
+        15
+      ],
+      "consumer": "complete original direct economics payload/association lookups and payout history, with original guards",
+      "exclusions": [
+        "delegated or corrected bindings",
+        "authority transitions",
+        "provisional payouts",
+        "later imported generations"
+      ],
+      "validation": "source/ABI only; native, sizes and capacity pending"
     }
   ]
 }
