@@ -85,13 +85,17 @@ export async function readManifestContentState(provider: Pick<Provider, "call">,
   if (state === ZeroHash) throw new Error("Missing content state");
   return state as Hex;
 }
+export interface ArtistContentConsentTarget {
+  readonly collectionId: bigint; readonly contract: Address; readonly familyId: Hex;
+}
 /** Original operation 17. Empty signature requires the actual Artist Safe to execute this CALL. */
-export function prepareManifestContentConsent(chainId: bigint, registry: Address, core: Address, prepared: PreparedCollectionManifest,
+export function prepareArtistContentConsent(chainId: bigint, registry: Address, core: Address, target: ArtistContentConsentTarget,
   newStateHash: Hex, auth: { readonly nonce: bigint; readonly deadline: bigint; readonly signature: Hex }): PreparedCurrentArtistOperation<ManifestContentConsent> {
+  if (uint(target.collectionId, 256) === 0n || !isHexString(target.familyId, 32) || target.familyId === ZeroHash) throw new Error("Expected collection and content family");
   if (!isHexString(newStateHash, 32) || newStateHash === ZeroHash) throw new Error("Expected nonzero content state");
   if (!auth || typeof auth.signature !== "string" || !isHexString(auth.signature, true)) throw new Error("Expected complete signature bytes");
-  const message: ManifestContentConsent = { core: address(core), metadataContract: address(prepared.call.to), collectionId: prepared.collectionId,
-    familyId: prepared.familyId, newStateHash, nonce: auth.nonce, deadline: auth.deadline };
+  const message: ManifestContentConsent = { core: address(core), metadataContract: address(target.contract), collectionId: target.collectionId,
+    familyId: target.familyId, newStateHash, nonce: auth.nonce, deadline: auth.deadline };
   const fields = "address core,address metadataContract,uint256 collectionId,bytes32 familyId,bytes32 newStateHash,uint256 nonce,uint64 deadline"
     .split(",").map(f => { const [type, name] = f.split(" "); return { type: type!, name: name! }; });
   const payload = buildSigningPayload(chainId, address(registry), "6529StreamArtistRegistry", "StreamArtistContentConsent", fields, message);
@@ -99,4 +103,11 @@ export function prepareManifestContentConsent(chainId: bigint, registry: Address
   return Object.freeze({ payload, method: "recordContentConsent", digestMethod: "contentConsentDigest",
     call: call(registry, "recordContentConsent", [p, [auth.nonce, auth.deadline, auth.signature]]),
     digestCall: call(registry, "contentConsentDigest", [p, [auth.nonce, auth.deadline, "0x"]]) });
+}
+
+/** Original manifest helper retained with its original signing domain and transport. */
+export function prepareManifestContentConsent(chainId: bigint, registry: Address, core: Address, prepared: PreparedCollectionManifest,
+  newStateHash: Hex, auth: { readonly nonce: bigint; readonly deadline: bigint; readonly signature: Hex }): PreparedCurrentArtistOperation<ManifestContentConsent> {
+  return prepareArtistContentConsent(chainId, registry, core,
+    { collectionId: prepared.collectionId, contract: prepared.call.to, familyId: prepared.familyId }, newStateHash, auth);
 }

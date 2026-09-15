@@ -12,3 +12,4 @@ export * from "./current-native-sales.js";
 export * from "./current-manifests.js";
 export * from "./current-secondary.js";
 export * from "./current-native-sale-credits.js";
+export * from "./current-entropy.js";

@@ -5,17 +5,25 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add complete typed Artist authority hydration for original living, payout
+  and direct-economics histories, preserving source records and replay guards.
+- Add historical native sale-credit enumeration and pinned offline export for
+  six hosts, including locked liabilities and zeroed historical accounts.
+- Add actual Safe Metadata RIGHTS publication capture and offline museum replay.
+- Add entropy incident, fresh-recovery, original Artist content-consent and
+  executor-credit client helpers with ordinary Safe CALL examples.
+
 - Add ordered incident recovery for registered token/scope entropy, original
   Artist content-consent evidence, atomic fee/refund handling and frozen
   late-callback arbitration; unavailability findings remain an integration gap.
 - Add canonical Artist history lanes, successor admission and typed owner guard
-  checkpoints, retaining original operations and explicitly pending hydration.
+  checkpoints, retaining original operations; typed hydration profiles follow.
 - Add governed native surplus recovery across six sale hosts and actual local
   preservation-operation capture with independently replayable museum exports.
 
 - Add frozen ordered entropy recovery policies and exact governed pre-mint
   collection bindings, with original configuration locks and explicit finality
-  commitments; fresh-request execution remains separate implementation work.
+  commitments; the later fresh-request implementation uses those frozen policies.
 
 - Add governed provider admission, deprecation and incident revocation with
   original-request callback retention, current graph plans and focused lifecycle tests.
@@ -28,7 +36,7 @@ the release policy in `docs/release-policy.md`.
 
 
 - Add role-authorized token/scope entropy incidents with immutable evidence and a
-  bounded provider-result probe; no fresh redraw or provider migration is enabled.
+  bounded provider-result probe; declaration alone does not enable a fresh draw.
 - Add Artist dormancy, steward grants and designated dormancy-origin recovery.
 - Add declared platform primary auctions, prepared custody PROFILE/template sales,
   and explicit known-token platform rights activation.

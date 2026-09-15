@@ -6,6 +6,8 @@ submission/custody path as the original request. First requests remain attempt
 1; each successful recovery consumes the next frozen policy step and advances
 the subject's request attempt. The collection's original policy remains fixed.
 
+The [client guide](entropy-recovery-client.md) provides typed quote, consent and Safe CALL helpers.
+
 ## Prepare and execute
 
 1. Before registration, configure and freeze an ordered policy and attach it
