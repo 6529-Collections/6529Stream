@@ -17,6 +17,20 @@ import "./StreamSchemaDocumentStore.sol";
 import "./StreamMetadataSubjects.sol";
 import "./StreamMetadataRenderer.sol";
 import "./StreamMetadataGovernance.sol";
+import { StreamCollectionManifests } from "./StreamCollectionManifests.sol";
+import {
+    IStreamCollectionManifestReads
+} from "../../interfaces/stream/metadata/IStreamCollectionManifestReads.sol";
+import {
+    IStreamCollectionManifestWriter,
+    IStreamMetadataManifestSelection
+} from "../../interfaces/stream/metadata/IStreamCollectionManifestWriter.sol";
+import {
+    IStreamMetadataServingFacts
+} from "../../interfaces/stream/metadata/IStreamMetadataServingFacts.sol";
+import {
+    StreamCollectionManifestTypes as M
+} from "../../interfaces/stream/metadata/StreamCollectionManifestTypes.sol";
 
 /// @notice Full-byte collection records with direct or detached artist authorization.
 /// @dev Catalog and operator grants use exact delayed Executor transitions. Generic records
@@ -26,7 +40,9 @@ contract StreamCollectionMetadataV1 is
     StreamGasParameterHost,
     IStreamCollectionMetadataV1,
     IStreamArtistRecordPublicationHost,
-    IStreamCollectionRecordReceipts
+    IStreamCollectionRecordReceipts,
+    IStreamCollectionManifestReads,
+    IStreamCollectionManifestWriter
 {
     using StreamRecordFamilies for bytes32;
 
@@ -63,7 +79,10 @@ contract StreamCollectionMetadataV1 is
         uint256 tokenId;
     }
 
-    address public immutable override core;
+    address
+        public
+        immutable
+        override(IStreamCollectionMetadataV1, IStreamCollectionManifestReads) core;
     address public immutable override schemaRegistry;
     address public immutable override chunkStore;
     address public immutable artistRegistry;
@@ -89,6 +108,7 @@ contract StreamCollectionMetadataV1 is
     mapping(uint256 => Pointer[]) private _pointers;
     mapping(uint256 => mapping(bytes32 => bool)) private _pointerSeen;
     mapping(bytes32 => bool) public consumedArtistAuthorization;
+    StreamCollectionManifests.State private _manifests;
 
     constructor(Configuration memory c)
         StreamModuleBase(
@@ -147,10 +167,216 @@ contract StreamCollectionMetadataV1 is
         override(StreamModuleBase, IERC165)
         returns (bool)
     {
-        return id == type(IStreamCollectionMetadataV1).interfaceId
+        return id == type(IStreamCollectionManifestReads).interfaceId
+            || id == type(IStreamCollectionManifestWriter).interfaceId
+            || id == type(IStreamCollectionMetadataV1).interfaceId
             || id == type(IStreamCollectionRecordReceipts).interfaceId
             || id == type(IStreamArtistRecordPublicationHost).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId || super.supportsInterface(id);
+    }
+
+    function previewScriptManifest(uint256 collectionId, M.ScriptManifest calldata value)
+        external
+        view
+        override
+        returns (bytes32 hash)
+    {
+        address router = _manifestRouter(collectionId);
+        (hash,) = StreamCollectionManifests.script(
+            core, router, collectionId, value, _manifestSource(router, collectionId)
+        );
+    }
+
+    function previewMediaManifest(uint256 collectionId, M.MediaManifest calldata value)
+        external
+        view
+        override
+        returns (bytes32 hash)
+    {
+        address router = _manifestRouter(collectionId);
+        (hash,) = StreamCollectionManifests.media(
+            core, router, collectionId, value, _manifestSource(router, collectionId)
+        );
+    }
+
+    function storeScriptManifest(uint256 collectionId, M.ScriptManifest calldata value)
+        external
+        override
+        returns (bytes32 hash)
+    {
+        address router = _manifestRouter(collectionId);
+        if (msg.sender != router) revert MetadataAuthorityRequired();
+        IStreamMetadataServingFacts.ServingSource memory source =
+            _manifestSource(router, collectionId);
+        bytes32 sourceHash;
+        (hash, sourceHash) =
+            StreamCollectionManifests.script(core, router, collectionId, value, source);
+        if (_manifests.entries[hash].router == address(0)) {
+            StreamSchemaDocumentStore(chunkStore).publishChunk(bytes(source.script));
+            _manifests.scripts[hash] = value;
+            _manifests.entries[hash] =
+                StreamCollectionManifests.Entry(collectionId, router, sourceHash, 2);
+            emit CollectionManifestStored(1, collectionId, 2, hash, router, sourceHash);
+        }
+    }
+
+    function storeMediaManifest(uint256 collectionId, M.MediaManifest calldata value)
+        external
+        override
+        returns (bytes32 hash)
+    {
+        address router = _manifestRouter(collectionId);
+        if (msg.sender != router) revert MetadataAuthorityRequired();
+        bytes32 sourceHash;
+        (hash, sourceHash) = StreamCollectionManifests.media(
+            core, router, collectionId, value, _manifestSource(router, collectionId)
+        );
+        if (_manifests.entries[hash].router == address(0)) {
+            _manifests.media[hash] = value;
+            _manifests.entries[hash] =
+                StreamCollectionManifests.Entry(collectionId, router, sourceHash, 3);
+            emit CollectionManifestStored(1, collectionId, 3, hash, router, sourceHash);
+        }
+    }
+
+    function scriptManifestHash(uint256 collectionId) external view override returns (bytes32) {
+        return _selectedManifest(collectionId, 2);
+    }
+
+    function mediaManifestHash(uint256 collectionId) external view override returns (bytes32) {
+        return _selectedManifest(collectionId, 3);
+    }
+
+    function scriptManifest(uint256 collectionId)
+        external
+        view
+        override
+        returns (M.ScriptManifest memory)
+    {
+        return _manifests.scripts[_selectedManifest(collectionId, 2)];
+    }
+
+    function mediaManifest(uint256 collectionId)
+        external
+        view
+        override
+        returns (M.MediaManifest memory)
+    {
+        return _manifests.media[_selectedManifest(collectionId, 3)];
+    }
+
+    function scriptChunk(uint256 collectionId, uint256 index)
+        external
+        view
+        override
+        returns (bytes memory)
+    {
+        bytes32 hash = _selectedManifest(collectionId, 2);
+        if (hash == 0 || index != 0) revert UnknownCollectionManifest(hash);
+        return _chunk(_manifests.scripts[hash].scriptHash);
+    }
+
+    function recordedScriptManifest(bytes32 hash) external view returns (M.ScriptManifest memory) {
+        if (_manifests.entries[hash].kind != 2) revert UnknownCollectionManifest(hash);
+        return _manifests.scripts[hash];
+    }
+
+    function recordedMediaManifest(bytes32 hash) external view returns (M.MediaManifest memory) {
+        if (_manifests.entries[hash].kind != 3) revert UnknownCollectionManifest(hash);
+        return _manifests.media[hash];
+    }
+
+    function _selectedManifest(uint256 collectionId, uint8 kind)
+        private
+        view
+        returns (bytes32 hash)
+    {
+        address router = _manifestRouter(collectionId);
+        M.Selection memory selected = abi.decode(
+            _read(
+                router,
+                abi.encodeCall(
+                    IStreamMetadataManifestSelection.selectedCollectionManifest,
+                    (collectionId, kind)
+                ),
+                96,
+                false
+            ),
+            (M.Selection)
+        );
+        hash = selected.manifestHash;
+        if (hash == 0) {
+            if (selected.host != address(0) || selected.codeHash != 0) {
+                revert InvalidCollectionManifest();
+            }
+            return 0;
+        }
+        if (
+            selected.host != address(this) || selected.codeHash != address(this).codehash
+                || _manifests.entries[hash].collectionId != collectionId
+                || _manifests.entries[hash].router != router
+                || _manifests.entries[hash].kind != kind
+        ) {
+            revert InvalidCollectionManifest();
+        }
+    }
+
+    function _manifestRouter(uint256 collectionId) private view returns (address target) {
+        _requireCollection(collectionId);
+        _requireSelected(_TYPE, address(this), address(this).codehash);
+        bytes32 hash;
+        uint8 status;
+        uint64 revision;
+        (target, hash,,,,, status,,, revision) = abi.decode(
+            _read(
+                core,
+                abi.encodeCall(
+                    IStreamCorePointers.getSatellitePointer, (keccak256("METADATA_ROUTER"))
+                ),
+                320,
+                false
+            ),
+            (address, bytes32, bool, bytes32, bytes4, address, uint8, bytes32, bytes32, uint64)
+        );
+        _requireCode(target, hash);
+        if (
+            status != 1 || revision == 0
+                || abi.decode(
+                        _read(target, abi.encodeWithSignature("core()"), 32, false), (address)
+                    ) != core
+        ) {
+            revert MetadataHostNotSelected();
+        }
+    }
+
+    function _manifestSource(address router, uint256 collectionId)
+        private
+        view
+        returns (IStreamMetadataServingFacts.ServingSource memory source)
+    {
+        _requireCode(chunkStore, chunkStoreCodeHash);
+        bytes memory profile =
+            _read(router, abi.encodeWithSignature("renderingProfile()"), 96, false);
+        if (
+            keccak256(profile)
+                != keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_ROUTER_STABLE_PRESENTATION_V1"),
+                        keccak256("6529STREAM_METADATA_TOKEN_RENDER_CONTEXT_V1"),
+                        keccak256("6529STREAM_METADATA_RENDER_NO_EXTERNAL_READS_V1")
+                    )
+                )
+        ) {
+            revert UnsupportedCollectionManifest();
+        }
+        bytes memory raw = _read(
+            router,
+            abi.encodeCall(IStreamMetadataServingFacts.collectionServingSource, (collectionId)),
+            16384,
+            false
+        );
+        source = abi.decode(raw, (IStreamMetadataServingFacts.ServingSource));
+        if (keccak256(raw) != keccak256(abi.encode(source))) revert InvalidCollectionManifest();
     }
 
     function recordPolicy(bytes32 recordType) external view override returns (RecordPolicy memory) {

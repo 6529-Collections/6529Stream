@@ -754,7 +754,7 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
     }
 
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {
-        rows = new GovernanceActionPolicyEntry[](localDevelopment ? 78 : 79);
+        rows = new GovernanceActionPolicyEntry[](localDevelopment ? 80 : 81);
         rows[0] = _operatingPolicy(address(manager), manager.configurePhase.selector);
         rows[1] = _operatingPolicy(address(manager), manager.setPhaseExecutor.selector);
         rows[2] = _operatingPolicy(address(manager), manager.setPhasePaused.selector);
@@ -884,6 +884,8 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
             _operatingPolicy(address(archivalCoverage), archivalCoverage.admitFamily.selector);
         rows[i++] =
             _operatingPolicy(address(archivalCoverage), archivalCoverage.setFamilyStatus.selector);
+        rows[i++] = _operatingPolicy(address(router), router.setCollectionScriptManifest.selector);
+        rows[i++] = _operatingPolicy(address(router), router.setCollectionMediaManifest.selector);
         // Metadata/entropy configuration selectors come from the configuration prototypes.
         assert(i == rows.length);
     }

@@ -974,7 +974,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
 
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {
         GovernanceActionPolicyEntry[] memory additional = _additionalOperatingPolicies();
-        rows = new GovernanceActionPolicyEntry[](67 + additional.length);
+        rows = new GovernanceActionPolicyEntry[](69 + additional.length);
         rows[0] = _operatingPolicy(address(manager), manager.configurePhase.selector);
         rows[1] = _operatingPolicy(address(manager), manager.setPhaseExecutor.selector);
         rows[2] = _operatingPolicy(address(manager), manager.setPhasePaused.selector);
@@ -1078,6 +1078,8 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
             address(artists),
             IStreamArtistIdentityDismissal.dismissArtistIdentityContest.selector
         );
+        rows[i++] = _operatingPolicy(address(router), router.setCollectionScriptManifest.selector);
+        rows[i++] = _operatingPolicy(address(router), router.setCollectionMediaManifest.selector);
         // Metadata, economics and entropy configuration are also collected from genesis.
         for (uint256 j; j < additional.length; ++j) {
             rows[i++] = additional[j];

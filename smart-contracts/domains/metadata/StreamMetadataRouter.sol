@@ -37,6 +37,13 @@ import {
 import "../../interfaces/stream/metadata/IStreamMetadataScopeMembership.sol";
 import "../../interfaces/stream/metadata/IStreamMetadataRenderingProfile.sol";
 import {
+    IStreamCollectionManifestWriter,
+    IStreamMetadataManifestSelection
+} from "../../interfaces/stream/metadata/IStreamCollectionManifestWriter.sol";
+import {
+    StreamCollectionManifestTypes as M
+} from "../../interfaces/stream/metadata/StreamCollectionManifestTypes.sol";
+import {
     IStreamContentRootPublication
 } from "../../interfaces/stream/metadata/IStreamContentRootPublication.sol";
 
@@ -89,6 +96,15 @@ contract StreamMetadataRouter is
 
     StreamMetadataRecoveryRoutes.OriginalAnchor public servingOriginalFinalityAnchor;
     bool private _originalFinalityAnchorInitialized;
+    mapping(uint256 => mapping(uint8 => M.Selection)) private _selectedManifests;
+    event CollectionManifestSelected(
+        uint16 schemaVersion,
+        uint256 indexed collectionId,
+        uint8 indexed kind,
+        bytes32 indexed manifestHash,
+        address host,
+        bytes32 hostCodeHash
+    );
     error OriginalFinalityAnchorAlreadyInitialized();
     error OriginalFinalityAnchorUninitialized();
     event OriginalFinalityAnchorInitialized(address indexed registry, bytes32 codeHash);
@@ -287,6 +303,13 @@ contract StreamMetadataRouter is
         );
         ContentApplication memory application =
             _authorizeMediaWrite(collectionId, image, animationBaseURI);
+        if (
+            keccak256(bytes(_collections[collectionId].image)) != keccak256(bytes(image))
+                || keccak256(bytes(_collections[collectionId].animationBaseURI))
+                    != keccak256(bytes(animationBaseURI))
+        ) {
+            _clearManifest(collectionId, 3);
+        }
         _prepareCollectionMetadata(collectionId, name, description, image, animationBaseURI);
         CollectionMetadata storage metadata = _collections[collectionId];
         metadata.name = name;
@@ -316,11 +339,177 @@ contract StreamMetadataRouter is
             (consent, ratification) = _authorizeContentWrite(
                 collectionId, CONTENT_SCRIPT, _scriptState(collectionId, script)
             );
+            _clearManifest(collectionId, 2);
         }
         _collections[collectionId].animationScript = script;
         _prepared[collectionId].animationScript = StreamMetadataTokenRenderer.prepareScript(script);
         emit CollectionScriptConfigured(collectionId, keccak256(bytes(script)));
         _recordContentApplication(collectionId, CONTENT_SCRIPT, consent, ratification);
+    }
+
+    /// @notice Select full typed facts about the actual current script after original content authority.
+    function setCollectionScriptManifest(uint256 collectionId, M.ScriptManifest calldata value)
+        external
+    {
+        _requireMutable(collectionId);
+        _requireContentCollection(collectionId);
+        _requireContentUnlocked(collectionId, CONTENT_SCRIPT);
+        address host = _manifestHost();
+        bytes32 hash =
+            IStreamCollectionManifestWriter(host).previewScriptManifest(collectionId, value);
+        M.Selection memory selection = M.Selection(host, host.codehash, hash);
+        if (
+            keccak256(abi.encode(selection))
+                == keccak256(abi.encode(_selectedManifests[collectionId][2]))
+        ) return;
+        (bytes32 consent, bytes32 ratification) = _authorizeContentWrite(
+            collectionId,
+            CONTENT_SCRIPT,
+            _withManifest(
+                _scriptState(collectionId, _collections[collectionId].animationScript), selection
+            )
+        );
+        if (
+            IStreamCollectionManifestWriter(host).storeScriptManifest(collectionId, value) != hash
+                || _manifestHost() != host
+        ) {
+            revert IStreamCollectionManifestWriter.InvalidCollectionManifest();
+        }
+        _selectedManifests[collectionId][2] = selection;
+        emit CollectionManifestSelected(1, collectionId, 2, hash, host, selection.codeHash);
+        _recordContentApplication(collectionId, CONTENT_SCRIPT, consent, ratification);
+    }
+
+    function setCollectionMediaManifest(uint256 collectionId, M.MediaManifest calldata value)
+        external
+    {
+        _requireMutable(collectionId);
+        _requireContentCollection(collectionId);
+        _requireContentUnlocked(collectionId, CONTENT_MEDIA);
+        address host = _manifestHost();
+        bytes32 hash =
+            IStreamCollectionManifestWriter(host).previewMediaManifest(collectionId, value);
+        M.Selection memory selection = M.Selection(host, host.codehash, hash);
+        if (
+            keccak256(abi.encode(selection))
+                == keccak256(abi.encode(_selectedManifests[collectionId][3]))
+        ) return;
+        (bytes32 consent, bytes32 ratification) = _authorizeContentWrite(
+            collectionId,
+            CONTENT_MEDIA,
+            _withManifest(
+                _mediaState(
+                    collectionId,
+                    _collections[collectionId].image,
+                    _collections[collectionId].animationBaseURI
+                ),
+                selection
+            )
+        );
+        if (
+            IStreamCollectionManifestWriter(host).storeMediaManifest(collectionId, value) != hash
+                || _manifestHost() != host
+        ) {
+            revert IStreamCollectionManifestWriter.InvalidCollectionManifest();
+        }
+        _selectedManifests[collectionId][3] = selection;
+        emit CollectionManifestSelected(1, collectionId, 3, hash, host, selection.codeHash);
+        _recordContentApplication(collectionId, CONTENT_MEDIA, consent, ratification);
+    }
+
+    function previewArtistScriptManifestState(uint256 collectionId, M.ScriptManifest calldata value)
+        external
+        view
+        returns (bytes32)
+    {
+        _requireContentCollection(collectionId);
+        address host = _manifestHost();
+        bytes32 hash =
+            IStreamCollectionManifestWriter(host).previewScriptManifest(collectionId, value);
+        return _withManifest(
+            _scriptState(collectionId, _collections[collectionId].animationScript),
+            M.Selection(host, host.codehash, hash)
+        );
+    }
+
+    function previewArtistMediaManifestState(uint256 collectionId, M.MediaManifest calldata value)
+        external
+        view
+        returns (bytes32)
+    {
+        _requireContentCollection(collectionId);
+        address host = _manifestHost();
+        bytes32 hash =
+            IStreamCollectionManifestWriter(host).previewMediaManifest(collectionId, value);
+        return _withManifest(
+            _mediaState(
+                collectionId,
+                _collections[collectionId].image,
+                _collections[collectionId].animationBaseURI
+            ),
+            M.Selection(host, host.codehash, hash)
+        );
+    }
+
+    function selectedCollectionManifest(uint256 collectionId, uint8 kind)
+        external
+        view
+        returns (M.Selection memory)
+    {
+        if (kind != 2 && kind != 3) {
+            revert IStreamCollectionManifestWriter.UnsupportedCollectionManifest();
+        }
+        M.Selection memory selected = _selectedManifests[collectionId][kind];
+        if (
+            selected.manifestHash != 0
+                && (_manifestHost() != selected.host || selected.host.codehash != selected.codeHash)
+        ) {
+            revert IStreamCollectionManifestWriter.InvalidCollectionManifest();
+        }
+        return selected;
+    }
+
+    function _withManifest(bytes32 rawState, M.Selection memory selection)
+        private
+        pure
+        returns (bytes32)
+    {
+        if (selection.manifestHash == 0) return rawState;
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ROUTER_CONTENT_FAMILY_WITH_MANIFEST_V1"), rawState, selection
+            )
+        );
+    }
+
+    function _clearManifest(uint256 collectionId, uint8 kind) private {
+        if (_selectedManifests[collectionId][kind].manifestHash == 0) return;
+        delete _selectedManifests[collectionId][kind];
+        emit CollectionManifestSelected(1, collectionId, kind, 0, address(0), 0);
+    }
+
+    function _manifestHost() private view returns (address host) {
+        bytes32 hash;
+        uint8 status;
+        uint64 revision;
+        (
+            address selectedRouter,
+            bytes32 routerHash,,,,,
+            uint8 routerStatus,,,
+            uint64 routerRevision
+        ) = IStreamCorePointers(address(core)).getSatellitePointer(keccak256("METADATA_ROUTER"));
+        if (
+            selectedRouter != address(this) || routerHash != address(this).codehash
+                || routerStatus != 1 || routerRevision == 0
+        ) {
+            revert IStreamCollectionManifestWriter.InvalidCollectionManifest();
+        }
+        (host, hash,,,,, status,,, revision) = IStreamCorePointers(address(core))
+            .getSatellitePointer(keccak256("COLLECTION_METADATA"));
+        if (
+            host.code.length == 0 || host.codehash != hash || status != 1 || revision == 0
+                || IStreamCollectionMetadataV1(host).core() != address(core)
+        ) revert IStreamCollectionManifestWriter.InvalidCollectionManifest();
     }
 
     function setContractMetadataURI(string calldata uri) external {
@@ -449,10 +638,22 @@ contract StreamMetadataRouter is
         }
         CollectionMetadata storage metadata = _collections[collectionId];
         if (familyId == CONTENT_SCRIPT) {
-            return (true, _scriptState(collectionId, metadata.animationScript));
+            return (
+                true,
+                _withManifest(
+                    _scriptState(collectionId, metadata.animationScript),
+                    _selectedManifests[collectionId][2]
+                )
+            );
         }
         if (familyId == CONTENT_MEDIA) {
-            return (true, _mediaState(collectionId, metadata.image, metadata.animationBaseURI));
+            return (
+                true,
+                _withManifest(
+                    _mediaState(collectionId, metadata.image, metadata.animationBaseURI),
+                    _selectedManifests[collectionId][3]
+                )
+            );
         }
         return (false, bytes32(0));
     }
@@ -498,7 +699,13 @@ contract StreamMetadataRouter is
         returns (bytes32)
     {
         _requireContentCollection(collectionId);
-        return _scriptState(collectionId, script);
+        bytes32 result = _scriptState(collectionId, script);
+        if (
+            keccak256(bytes(script)) == keccak256(bytes(_collections[collectionId].animationScript))
+        ) {
+            return _withManifest(result, _selectedManifests[collectionId][2]);
+        }
+        return result;
     }
 
     /// @notice MEDIA_MANIFEST binds both render-affecting fields changed by setCollectionMetadata.
@@ -508,7 +715,15 @@ contract StreamMetadataRouter is
         string calldata animationBaseURI
     ) external view returns (bytes32) {
         _requireContentCollection(collectionId);
-        return _mediaState(collectionId, image, animationBaseURI);
+        bytes32 result = _mediaState(collectionId, image, animationBaseURI);
+        if (
+            keccak256(bytes(image)) == keccak256(bytes(_collections[collectionId].image))
+                && keccak256(bytes(animationBaseURI))
+                    == keccak256(bytes(_collections[collectionId].animationBaseURI))
+        ) {
+            return _withManifest(result, _selectedManifests[collectionId][3]);
+        }
+        return result;
     }
 
     function _requireContentCollection(uint256 collectionId) private view {
@@ -542,12 +757,21 @@ contract StreamMetadataRouter is
             )
         );
         bytes32 rootHead = _contentRoots.heads[collectionId];
-        if (rootHead == 0) return serving;
+        if (rootHead != 0) {
+            serving = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ROUTER_CONTENT_WITH_ROOT_V1"),
+                    serving,
+                    _contentRoots.records[rootHead].stateHash
+                )
+            );
+        }
+        M.Selection memory script = _selectedManifests[collectionId][2];
+        M.Selection memory media = _selectedManifests[collectionId][3];
+        if (script.manifestHash == 0 && media.manifestHash == 0) return serving;
         return keccak256(
             abi.encode(
-                keccak256("6529STREAM_ROUTER_CONTENT_WITH_ROOT_V1"),
-                serving,
-                _contentRoots.records[rootHead].stateHash
+                keccak256("6529STREAM_ROUTER_CONTENT_WITH_MANIFESTS_V1"), serving, script, media
             )
         );
     }
