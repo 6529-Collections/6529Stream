@@ -118,19 +118,22 @@ class CurrentMuseumFixture(CurrentNativeFixture):
         self.transact("StreamGovernanceExecutor", "executeGovernanceBatch", (action, calls, datas), safe=self.governor)
         return action
 
-    def publication(self, pointer, digest):
+    def publication(self, pointer, digest, *, collection_metadata=None):
         name = "StreamSystemManifest"
         current = self.call(name, "streamSystemManifest")
         old_pointer, = self.call(name, "streamSystemManifestPointer")
         address = self.addresses[name]
         scope = h(("bytes32", "uint256", "address"), ("0xf73b4d7b4d260fce0823707f836fdf29a1767a2a2a9cfbce14ec8c5e49e47841", 31337, address))
         modules_hash, discovery_hash = h(("address",) * 11, current[2:13]), h(("bytes32",) * 7, current[13:20])
-        def state(hash_, uri, carrier, revision):
+        next_modules = list(current[2:13])
+        if collection_metadata is not None: next_modules[2] = collection_metadata
+        next_modules_hash = h(("address",) * 11, next_modules)
+        def state(hash_, uri, carrier, revision, module_hash):
             return h(("bytes32", "bytes32", "bytes32", "bytes32", "address", "bytes32", "bytes32", "uint64"),
-                ("0x3764ccb415d0aac07f1bddb8d4841ad6d4c2f9b2fe7ce7d221c586bc056aaf60", scope, hash_, keccak256(uri.encode()), carrier, modules_hash, discovery_hash, revision))
+                ("0x3764ccb415d0aac07f1bddb8d4841ad6d4c2f9b2fe7ce7d221c586bc056aaf60", scope, hash_, keccak256(uri.encode()), carrier, module_hash, discovery_hash, revision))
         uri = "urn:stream:current-media:schema-admission"
         data = self.data(name, "publishStreamSystemManifest", (pointer, (digest, uri, *current[13:20])))
-        transition = (scope, state(current[0], current[1], old_pointer, current[20]), state(digest, uri, pointer, current[20] + 1))
+        transition = (scope, state(current[0], current[1], old_pointer, current[20], modules_hash), state(digest, uri, pointer, current[20] + 1, next_modules_hash))
         return self.operation(address, data, transition), hex_bytes(data)
 
     def admit_schema(self):
@@ -185,6 +188,9 @@ class CurrentMuseumFixture(CurrentNativeFixture):
     def extra_capture_evidence(self):
         return {}
 
+    def capture_code_addresses(self):
+        return sorted(set([self.store, *self.addresses.values(), *self.safe_components.values(), *self.safe_accounts]))
+
     def build_media(self):
         self.foundation()
         self.register_document("RAW_BYTES", 1, RAW_DEFINITION)
@@ -211,7 +217,7 @@ class CurrentMuseumFixture(CurrentNativeFixture):
             "transactions": self.receipts, "boundaries": [], "governanceRoot": self.governor, "attestor": self.attestor,
             "hostGovernanceAuthority": executor, "media": media_description(image_bytes()),
             "qualification": "Real selected native Core/Executor/ModuleRegistry/Manifest/SchemaRegistry/attestation products and official Safe CALLs. Foundation plus collection/document/attestation workflow only; no whole-product graph, latest-source, institutional, consensus-finality or public-deployment claim."} | self.extra_capture_evidence())
-        addresses = sorted(set([self.store, *self.addresses.values(), *self.safe_components.values(), *self.safe_accounts]))
+        addresses = self.capture_code_addresses()
         anchor = dumps({"profile": PROFILE, "chainId": "31337", "blockHash": block["hash"],
             "blockNumber": str(int(block["number"], 16)), "timestamp": str(int(block["timestamp"], 16)),
             "stateRoot": block["stateRoot"], "environment": "local_evm_fixture", "deploymentEvidenceHash": keccak256(evidence),

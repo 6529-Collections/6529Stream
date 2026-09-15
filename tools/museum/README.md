@@ -264,3 +264,9 @@ current foundation contracts and Safe calls. It exports and replays the event
 and object derivatives without compiling Solidity. Local execution and recorded
 account assertions remain distinct from independent historical proof or rights
 receipts; prior capture and package modes are unchanged.
+
+The [actual local Metadata RIGHTS capture](../../docs/museum-current-rights-capture.md)
+publishes test-fixture class-7/8 statements through the original governed
+Metadata writer and builds a replayable rights derivative. It retains the
+genuine constructor dependency scope and unfulfilled Coordinator reservation
+explicitly; it does not claim complete Artist initialization or legal authority.

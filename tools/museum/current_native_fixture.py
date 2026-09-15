@@ -17,6 +17,10 @@ def abi_kind(row):
     kind = row["type"]
     if kind.endswith("[]"):
         return Array(abi_kind(row | {"type": kind[:-2]}), 4096)
+    if kind.endswith("]"):
+        base, size = kind[:-1].rsplit("[", 1)
+        require(size.isdecimal() and 0 < int(size) <= 64, "native fixed array bound")
+        return (abi_kind(row | {"type": base}),) * int(size)
     if kind == "tuple": return tuple(abi_kind(c) for c in row["components"])
     require(kind == "address" or kind in ("bool", "bytes", "string") or kind.startswith(("uint", "bytes")), "unsupported capture ABI type")
     return kind
@@ -24,7 +28,9 @@ def abi_kind(row):
 
 def abi_name(row):
     kind = row["type"]
-    if kind.endswith("[]"): return abi_name(row | {"type": kind[:-2]}) + "[]"
+    if kind.endswith("]"):
+        base, size = kind[:-1].rsplit("[", 1)
+        return abi_name(row | {"type": base}) + "[" + size + "]"
     return "(" + ",".join(abi_name(c) for c in row["components"]) + ")" if kind == "tuple" else kind
 
 
