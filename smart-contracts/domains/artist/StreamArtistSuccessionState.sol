@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 
 import "./StreamArtistIdentityState.sol";
 import "./StreamArtistRotationState.sol";
@@ -293,6 +294,7 @@ library StreamArtistSuccessionState {
             Succ.DirectiveRecord(record, p, proof.signer, 1, a.nonce, a.time, association_);
         s.directives[record] = item;
         s.payloads[record] = payload;
+        StreamArtistPayloadStore.store(keccak256("ARTIST_DIRECTIVE_PAYLOAD"), payload);
         if (association_.transitionRecordHash == bytes32(0)) {
             s.stableDirective[p.artistId] =
                 base == bytes32(0) || a.nonce > s.directives[base].nonce ? record : base;

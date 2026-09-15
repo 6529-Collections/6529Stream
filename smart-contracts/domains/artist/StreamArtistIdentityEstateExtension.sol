@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistEstateOwnerMutation } from "./StreamArtistEstateOwnerMutation.sol";
 import "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
 import {
     StreamArtistStewardCapabilityTypes as SC
@@ -64,6 +65,7 @@ contract StreamArtistIdentityEstateExtension is
     error InvalidRecord();
     /// @dev Retained ABI entry for the error bubbled by the linked execution mutation.
     error InvalidEstateAcceleration();
+    error InvalidEstateCoverage(bytes32 coverageRecordHash);
     error DelegationUnavailable(bytes32 recordHash);
     address private immutable _host;
 
@@ -298,31 +300,17 @@ contract StreamArtistIdentityEstateExtension is
         T.SignerApproval calldata newProof
     ) external onlyHost returns (bytes32) {
         _check(c, 29);
-        // This authenticated living transition supersedes a pending estate request.
-        // Any later old/new proof or archive failure rolls the cancellation back.
-        StreamArtistIdentityState.Mutation memory cancellation;
-        _noteLiving(
-            _ownerContext(), _replay, p.artistId, oldProof.signer, c.operationId, cancellation
-        );
-        StreamArtistIdentityState.Mutation memory m = StreamArtistRotationState.stageWithResolution(
-            _rotations,
+        StreamArtistIdentityState.Mutation memory m = StreamArtistEstateOwnerMutation.stageRotation(
             _identity,
+            _rotations,
+            _resolutions,
+            _estate,
+            _unavailability,
+            _dormancy,
             _replay,
             _ownerContext(),
-            c,
-            p,
-            oldAuthorization,
-            newAuthorization,
-            oldProof,
-            newProof,
-            _currentIdentityClosure(p.artistId)
+            msg.data[4:]
         );
-        if (cancellation.state != bytes32(0)) {
-            m.state = keccak256(abi.encode(m.state, cancellation.state));
-        }
-        if (cancellation.replay != bytes32(0)) {
-            m.replay = keccak256(abi.encode(m.replay, cancellation.replay));
-        }
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
@@ -401,44 +389,19 @@ contract StreamArtistIdentityEstateExtension is
         Contest.GovernanceWitness calldata governance
     ) external onlyHost returns (bytes32) {
         _check(c, 33);
-        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityCauseState.file(
-            _resolutions,
+        StreamArtistIdentityState.Mutation memory m = StreamArtistEstateOwnerMutation.contestIdentity(
             _identity,
             _rotations,
             _identityContests,
             _succession,
-            _replay,
-            _ownerContext(),
-            c,
-            p,
-            governance,
-            IStreamArtistIdentityContestOwner(address(this)).artistWindowAuthority()
-        );
-        (bytes32 estateState, bytes32 estateReplay) = StreamArtistEstateState.contest(
+            _resolutions,
             _estate,
+            _identityRecovery,
+            _dormancy,
             _replay,
             _ownerContext(),
-            p.artistId,
-            p.subjectRecordHash,
-            _rotations.latestExecution[p.artistId],
-            _resolutions.closures[p.subjectRecordHash].dismissalRecordHash != bytes32(0),
-            _currentIdentityClosure(p.artistId).dismissalRecordHash != bytes32(0)
+            msg.data[4:]
         );
-        if (estateState != bytes32(0)) m.state = keccak256(abi.encode(m.state, estateState));
-        if (estateReplay != bytes32(0)) m.replay = keccak256(abi.encode(m.replay, estateReplay));
-        bytes32 recoveryState = StreamArtistIdentityRecoveryState.contest(
-            _identityRecovery,
-            p.artistId,
-            p.subjectRecordHash,
-            _rotations.latestExecution[p.artistId],
-            _resolutions.closures[p.subjectRecordHash].dismissalRecordHash != bytes32(0),
-            _currentIdentityClosure(p.artistId).dismissalRecordHash != bytes32(0)
-        );
-        if (recoveryState != bytes32(0)) m.state = keccak256(abi.encode(m.state, recoveryState));
-        bytes32 dormancyDelta = StreamArtistDormancyState.contest(
-            _dormancy, _resolutions, p.artistId, _rotations.latestExecution[p.artistId]
-        );
-        if (dormancyDelta != 0) m.state = keccak256(abi.encode(m.state, dormancyDelta));
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
@@ -451,14 +414,17 @@ contract StreamArtistIdentityEstateExtension is
         StreamArchivalTypes.CoverageFacts calldata coverage
     ) external onlyHost returns (bytes32) {
         _check(c, 38);
-        _coverage(coverage, p.selectedCoverageHash, p.artistId, p.evidenceHash);
-        Estate.RequestFacts memory facts = StreamArtistEstateReads.requestFacts(
-            _estate, _identity, _rotations, _succession, _resolutions, p, coverage.envelopeHash
+        StreamArtistIdentityState.Mutation memory m = StreamArtistEstateOwnerMutation.requestEstate(
+            _identity,
+            _rotations,
+            _succession,
+            _resolutions,
+            _estate,
+            _dormancy,
+            _replay,
+            _ownerContext(),
+            msg.data[4:]
         );
-        StreamArtistIdentityState.Mutation memory m = StreamArtistEstateState.request(
-            _estate, _identity, _rotations, _replay, _ownerContext(), c, p, a, proof, facts
-        );
-        _noteDormancy(_ownerContext(), _replay, p.artistId, proof.signer, 3, m);
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
@@ -583,32 +549,20 @@ contract StreamArtistIdentityEstateExtension is
         Contest.GovernanceWitness calldata g
     ) external onlyHost returns (bytes32) {
         _check(c, 43);
-        bytes32 previous = _rotations.latestExecution[p.artistId];
-        StreamArtistIdentityState.Mutation memory m = StreamArtistDormancyState.complete(
-            _dormancy,
-            _stewardGrants,
-            _identity,
-            _rotations,
-            _estate,
-            _succession,
-            _resolutions,
-            _replay,
-            _ownerContext(),
-            c,
-            p,
-            g,
-            IStreamArtistIdentityContestOwner(address(this)).artistWindowAuthority()
-        );
-        bytes32 history = StreamArtistDormancyVestingAdmission.record(
-            _dormancy,
-            _identityRecovery,
-            _identity,
-            _rotations,
-            _estate,
-            _environment(),
-            V.Input(p.artistId, m.record, previous, _revision + 1, 43)
-        );
-        m.state = keccak256(abi.encode(m.state, history));
+        StreamArtistIdentityState.Mutation memory m =
+            StreamArtistEstateOwnerMutation.completeDormancy(
+                _identity,
+                _rotations,
+                _succession,
+                _resolutions,
+                _estate,
+                _identityRecovery,
+                _dormancy,
+                _stewardGrants,
+                _replay,
+                _ownerContext(),
+                msg.data[4:]
+            );
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
@@ -644,19 +598,17 @@ contract StreamArtistIdentityEstateExtension is
         SC.Witness calldata w
     ) external onlyHost returns (bytes32) {
         _check(c, 59);
-        StreamArtistIdentityState.Mutation memory m = StreamArtistStewardCapabilityState.grant(
-            _stewardCapabilityGrants,
-            _dormancy,
-            _identity,
-            _rotations,
-            _succession,
-            _replay,
-            _ownerContext(),
-            c,
-            p,
-            w,
-            IStreamArtistIdentityContestOwner(address(this)).artistWindowAuthority()
-        );
+        StreamArtistIdentityState.Mutation memory m =
+            StreamArtistEstateOwnerMutation.grantStewardCapabilities(
+                _identity,
+                _rotations,
+                _succession,
+                _dormancy,
+                _stewardCapabilityGrants,
+                _replay,
+                _ownerContext(),
+                msg.data[4:]
+            );
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPayloadSync } from "./StreamArtistPayloadSync.sol";
 import "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
 import {
     StreamArtistStewardCapabilityTypes as SC
@@ -236,6 +237,12 @@ contract StreamArtistOnboardingCoordinator is
     modifier operation() {
         _beginOperation();
         _;
+        _endOperation();
+    }
+
+    function _endOperation() private {
+        if (_entered != 1) revert T.InvalidRecord();
+        StreamArtistPayloadSync.sync(_suite);
         _entered = 0;
     }
 

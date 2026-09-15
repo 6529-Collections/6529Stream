@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 import "./StreamArtistAttributionBindingMutation.sol";
 import "./StreamArtistAttributionReadEncoding.sol";
 import {
@@ -52,6 +53,18 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes32 indexed artistId,
         address signer
     );
+
+    function recordPreimageBytes(bytes32 hash) external view returns (bytes memory) {
+        return StreamArtistPayloadStore.recordBytes(hash);
+    }
+
+    function storedPayloadCount() external view returns (uint256) {
+        return StreamArtistPayloadStore.count();
+    }
+
+    function storedPayloadAt(uint256 index) external view returns (address, bytes32, bytes32) {
+        return StreamArtistPayloadStore.at(index);
+    }
 
     function attestationAssociation(bytes32 record)
         external

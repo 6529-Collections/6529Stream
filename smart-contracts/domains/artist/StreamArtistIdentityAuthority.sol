@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistIdentityReadDispatch } from "./StreamArtistIdentityReadDispatch.sol";
+import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
+import { StreamArtistIdentityPayloadReads } from "./StreamArtistIdentityPayloadReads.sol";
 import { StreamArtistDormancyRecovery } from "./StreamArtistDormancyRecovery.sol";
 import "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
 import {
@@ -97,6 +100,18 @@ contract StreamArtistIdentityAuthority is
     address public immutable identityEstateExtension;
     address public immutable identityRecoveryExtension;
 
+    function recordPreimageBytes(bytes32 hash) external view returns (bytes memory) {
+        return StreamArtistPayloadStore.recordBytes(hash);
+    }
+
+    function storedPayloadCount() external view returns (uint256) {
+        return StreamArtistPayloadStore.count();
+    }
+
+    function storedPayloadAt(uint256 index) external view returns (address, bytes32, bytes32) {
+        return StreamArtistPayloadStore.at(index);
+    }
+
     function recordUnavailability(T.ActionContext calldata c, U.Input calldata p)
         external
         returns (bytes32)
@@ -109,7 +124,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (Recovery.FindingRecord memory, U.Admission memory)
     {
-        _returnResolution(StreamArtistUnavailabilityState.recordEncodedRead(_unavailability, hash));
+        _forwardIdentityRead();
     }
 
     function latestUnavailabilityFinding(bytes32 artistId, uint256 collectionId)
@@ -127,11 +142,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (U.Context memory)
     {
-        _returnResolution(
-            StreamArtistUnavailabilityState.contextEncodedRead(
-                _unavailability, _unavailabilityContext(), _identity.identities[p.terms.artistId], p
-            )
-        );
+        _forwardIdentityRead();
     }
 
     function unavailabilityFindingLive(bytes32 hash, T.Binding calldata b)
@@ -200,11 +211,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (Estate.RequestFacts memory)
     {
-        _returnResolution(
-            StreamArtistEstateReadEncoding.request(
-                _estate, _identity, _rotations, _succession, _resolutions, p, envelopeHash
-            )
-        );
+        _forwardIdentityRead();
     }
 
     function estateExecutionFacts(Estate.Execution calldata p, bytes32 envelopeHash)
@@ -212,18 +219,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (uint32, Estate.AccelerationContext memory)
     {
-        _returnResolution(
-            StreamArtistEstateReadEncoding.execution(
-                _estate,
-                _identity,
-                _rotations,
-                _succession,
-                _resolutions,
-                _environment(),
-                p,
-                envelopeHash
-            )
-        );
+        _forwardIdentityRead();
     }
 
     function estateActivationState(bytes32 artistId)
@@ -241,7 +237,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (Estate.RequestRecord memory, uint8, Estate.ExecutionFacts memory)
     {
-        _returnResolution(StreamArtistEstateReadEncoding.record(_estate, record));
+        _forwardIdentityRead();
     }
 
     function estateActivationNonceHint(bytes32 artistId, address successor)
@@ -257,11 +253,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (Estate.AuthorityCapabilities memory)
     {
-        _returnResolution(
-            StreamArtistDormancyReadEncoding.authority(
-                _dormancy, _stewardCapabilityGrants, _estate, _identity, artistId
-            )
-        );
+        _forwardIdentityRead();
     }
 
     function estateActivationDigest(Estate.Request calldata p, T.Authorization calldata a)
@@ -357,7 +349,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (Succ.DesignationRecord memory)
     {
-        _returnResolution(StreamArtistEstateReadEncoding.designation(_succession, record));
+        _forwardIdentityRead();
     }
 
     function estateDirectiveRecord(bytes32 record)
@@ -365,11 +357,11 @@ contract StreamArtistIdentityAuthority is
         view
         returns (Succ.DirectiveRecord memory)
     {
-        _returnResolution(StreamArtistEstateReadEncoding.directive(_succession, record));
+        _forwardIdentityRead();
     }
 
     function estateDirectivePayload(bytes32 record) external view returns (bytes memory) {
-        return _succession.payloads[record];
+        _forwardIdentityRead();
     }
 
     event ArtistIdentityContested(
@@ -388,9 +380,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (GuardianSupersessionTypes.Status memory)
     {
-        _returnResolution(
-            StreamArtistRecoveryOwnerReads.guardianSupersession(_identityRecovery, recordHash)
-        );
+        _forwardIdentityRead();
     }
 
     function guardianRecoverySelection(bytes32 actionId)
@@ -398,7 +388,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (GuardianSelectionTypes.Result memory, R.GuardianRecord memory)
     {
-        _returnResolution(StreamArtistRecoveryOwnerReads.selection(_identityRecovery, actionId));
+        _forwardIdentityRead();
     }
 
     function guardianRecoveryAuthorityRole(bytes32 artistId, bytes32[] calldata records)
@@ -406,15 +396,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bytes32)
     {
-        if (
-            artistId == 0 || _identity.identities[artistId].authorityAddress == address(0)
-                || _identity.identities[artistId].status != 4
-        ) revert T.InvalidIdentity(artistId);
-        _returnResolution(
-            StreamArtistRecoveryOwnerReads.authorityRole(
-                _identityRecovery, _rotations, artistId, records
-            )
-        );
+        _forwardIdentityRead();
     }
 
     function guardianVestingSnapshot(bytes32 artistId, bytes32 recordHash)
@@ -422,11 +404,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (V.Snapshot memory)
     {
-        _returnResolution(
-            StreamArtistGuardianVestingHistory.encoded(
-                _identityRecovery.vestingHistory, artistId, recordHash
-            )
-        );
+        _forwardIdentityRead();
     }
 
     function guardianHistoryState(bytes32 artistId, uint64 index, address actor, bytes32 actionId)
@@ -434,11 +412,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (GH.Head memory, GH.Entry memory, GH.Snapshot memory, uint64)
     {
-        _returnResolution(
-            StreamArtistRecoveryOwnerReads.history(
-                _identityRecovery, artistId, index, actor, actionId
-            )
-        );
+        _forwardIdentityRead();
     }
 
     function recoveryExecutorBinding() external view returns (address, bytes32) {
@@ -450,9 +424,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (RecoveryAction.Association memory, RecoveryAction.Veto memory, bytes32, uint64)
     {
-        _returnResolution(
-            StreamArtistRecoveryOwnerReads.action(_identityRecovery, artistId, actionId)
-        );
+        _forwardIdentityRead();
     }
 
     function prepareIdentityRecoveryAction(
@@ -490,19 +462,7 @@ contract StreamArtistIdentityAuthority is
         IdentityRecovery.Request calldata p,
         T.Authorization calldata a
     ) external view returns (IdentityRecovery.Context memory) {
-        return StreamArtistDormancyRecovery.context(
-            _identityRecovery,
-            _identity,
-            _rotations,
-            _resolutions,
-            _estate,
-            _dormancy,
-            _succession,
-            _identityContests,
-            _ownerContext(),
-            p,
-            a
-        );
+        _forwardIdentityRead();
     }
 
     function identityRecoveryRecord(bytes32 record)
@@ -510,7 +470,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (IdentityRecovery.Record memory)
     {
-        _returnResolution(StreamArtistRecoveryOwnerReads.record(_identityRecovery, record));
+        _forwardIdentityRead();
     }
 
     function latestIdentityRecovery(bytes32 artistId) external view returns (bytes32) {
@@ -547,17 +507,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (Dismissal.Context memory)
     {
-        _returnResolution(
-            StreamArtistIdentityResolutionReads.context(
-                _resolutions,
-                _identity,
-                _rotations,
-                _identityRevisions,
-                _succession,
-                _environment(),
-                p
-            )
-        );
+        _forwardIdentityRead();
     }
 
     function currentIdentityContestCause(bytes32 artistId)
@@ -565,11 +515,11 @@ contract StreamArtistIdentityAuthority is
         view
         returns (Dismissal.Cause memory)
     {
-        _returnResolution(StreamArtistIdentityResolutionReads.currentCause(_resolutions, artistId));
+        _forwardIdentityRead();
     }
 
     function identityContestCause(bytes32 hash) external view returns (Dismissal.Cause memory) {
-        _returnResolution(StreamArtistIdentityResolutionReads.cause(_resolutions, hash));
+        _forwardIdentityRead();
     }
 
     function identityContestDismissalRecord(bytes32 hash)
@@ -577,11 +527,11 @@ contract StreamArtistIdentityAuthority is
         view
         returns (Dismissal.Record memory)
     {
-        _returnResolution(StreamArtistIdentityResolutionReads.record(_resolutions, hash));
+        _forwardIdentityRead();
     }
 
     function latestIdentityContestDismissal(bytes32 artistId) external view returns (bytes32) {
-        _returnResolution(StreamArtistIdentityResolutionReads.latest(_resolutions, artistId));
+        _forwardIdentityRead();
     }
 
     function identityTransitionClosure(bytes32 artistId, bytes32 transition)
@@ -589,9 +539,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (Dismissal.Closure memory item)
     {
-        _returnResolution(
-            StreamArtistIdentityResolutionReads.closure(_resolutions, artistId, transition)
-        );
+        _forwardIdentityRead();
     }
 
     function identityRevisionContinuation(bytes32 hash)
@@ -599,7 +547,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (Dismissal.RevisionContinuation memory)
     {
-        _returnResolution(StreamArtistIdentityResolutionReads.continuation(_resolutions, hash));
+        _forwardIdentityRead();
     }
 
     function contestIdentity(
@@ -611,7 +559,7 @@ contract StreamArtistIdentityAuthority is
     }
 
     function identityContestRecord(bytes32 record) external view returns (Contest.Record memory) {
-        _returnResolution(StreamArtistRecoveryOwnerReads.contest(_identityContests, record));
+        _forwardIdentityRead();
     }
 
     function latestIdentityContest(bytes32 artistId) external view returns (bytes32) {
@@ -667,7 +615,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (StreamArtistIdentityRevisionTypes.Record memory)
     {
-        return _identityRevisions.records[record];
+        _forwardIdentityRead();
     }
 
     function operativeIdentityMetadata(bytes32 artistId)
@@ -675,9 +623,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bytes32, string memory, string memory)
     {
-        return StreamArtistIdentityRevisionState.metadata(
-            _identityRevisions, _identity, _rotations, artistId
-        );
+        _forwardIdentityRead();
     }
 
     function artistDisplayName(bytes32 artistId)
@@ -685,9 +631,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (string memory name, bytes32 hash)
     {
-        (hash,, name) = StreamArtistIdentityRevisionState.metadata(
-            _identityRevisions, _identity, _rotations, artistId
-        );
+        _forwardIdentityRead();
     }
 
     event ArtistAuthorizationRevoked(
@@ -714,9 +658,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (StreamArtistAuthorizationTypes.State memory)
     {
-        return StreamArtistAuthorizationState.authorizationState(
-            _identity, _replay, _ownerContext(), artistId, digest, nonce
-        );
+        _forwardIdentityRead();
     }
 
     event ArtistDelegationGranted(
@@ -847,9 +789,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (address[] memory, uint32, uint64, bytes32)
     {
-        _returnResolution(
-            StreamArtistRecoveryOwnerReads.guardianSet(_identityRecovery, _rotations, artistId)
-        );
+        _forwardIdentityRead();
     }
 
     function pendingRotation(bytes32 artistId)
@@ -857,7 +797,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (address, address, uint64, uint32, bytes32)
     {
-        _returnResolution(StreamArtistIdentityResolutionReads.pendingRotation(_rotations, artistId));
+        _forwardIdentityRead();
     }
 
     function priorAddressStandingRevoked(bytes32 artistId, address account)
@@ -871,11 +811,11 @@ contract StreamArtistIdentityAuthority is
     }
 
     function guardianSetRecord(bytes32 record) external view returns (R.GuardianRecord memory) {
-        _returnResolution(StreamArtistIdentityResolutionReads.guardian(_rotations, record));
+        _forwardIdentityRead();
     }
 
     function rotationRecord(bytes32 record) external view returns (R.RotationRecord memory) {
-        _returnResolution(StreamArtistIdentityResolutionReads.rotation(_rotations, record));
+        _forwardIdentityRead();
     }
 
     function standingRevocationRecord(bytes32 record)
@@ -883,9 +823,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (R.StandingRecord memory)
     {
-        _returnResolution(
-            StreamArtistIdentityResolutionReads.standingRevocationRecord(_rotations, record)
-        );
+        _forwardIdentityRead();
     }
 
     function artistTransitionState(bytes32 record)
@@ -893,13 +831,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (R.TransitionState memory)
     {
-        _returnResolution(
-            _dormancy.transitions[record].recordHash != bytes32(0)
-                ? abi.encode(_dormancy.transitions[record])
-                : StreamArtistIdentityResolutionReads.artistTransitionState(
-                    _rotations, _estate, _identityRecovery, record
-                )
-        );
+        _forwardIdentityRead();
     }
 
     function lastArtistTransition(bytes32 artistId) external view returns (bytes32) {
@@ -911,7 +843,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (R.ProvisionalAssociation memory)
     {
-        return _identityRevisions.associations[record];
+        _forwardIdentityRead();
     }
 
     function activeAuthorityWindow(bytes32 artistId) external view returns (bytes32, uint64, bool) {
@@ -1006,7 +938,7 @@ contract StreamArtistIdentityAuthority is
     }
 
     function identity(bytes32 artistId) external view returns (T.Identity memory) {
-        _returnResolution(StreamArtistIdentityResolutionReads.identity(_identity, artistId));
+        _forwardIdentityRead();
     }
 
     /// @notice Fixed-size authority facts with the immutable registration hash, not the operative document.
@@ -1025,11 +957,11 @@ contract StreamArtistIdentityAuthority is
     }
 
     function identityDocumentBytes(bytes32 documentHash) external view returns (bytes memory) {
-        return _identity.documents[documentHash];
+        _forwardIdentityRead();
     }
 
     function signatureBundle(bytes32 recordHash) external view returns (bytes memory) {
-        return _identity.signatures[recordHash];
+        _forwardIdentityRead();
     }
 
     function nonceUsed(bytes32 artistId, uint256 nonce) public view returns (bool) {
@@ -1040,7 +972,7 @@ contract StreamArtistIdentityAuthority is
     }
 
     function delegationRecord(bytes32 grant) external view returns (D.Record memory) {
-        _returnResolution(StreamArtistIdentityResolutionReads.delegation(_delegations, grant));
+        _forwardIdentityRead();
     }
 
     /// @notice Automatic estate revocation is separate from the immutable grant and its explicit revoke record.
@@ -1278,6 +1210,29 @@ contract StreamArtistIdentityAuthority is
         if (block.timestamp > deadline) revert T.ExpiredAuthorization(deadline);
     }
 
+    function _forwardIdentityRead() private view {
+        _returnResolution(
+            StreamArtistIdentityReadDispatch.read(
+                _identity,
+                _delegations,
+                _identityRevisions,
+                _rotations,
+                _identityContests,
+                _succession,
+                _resolutions,
+                _estate,
+                _unavailability,
+                _identityRecovery,
+                _dormancy,
+                _stewardGrants,
+                _stewardCapabilityGrants,
+                _replay,
+                _ownerContext(),
+                msg.data
+            )
+        );
+    }
+
     function _returnResolution(bytes memory encoded) private pure {
         assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
@@ -1350,11 +1305,11 @@ contract StreamArtistIdentityAuthority is
     }
 
     function dormancyState(bytes32 id) external view returns (uint8, uint64, uint64) {
-        _returnResolution(StreamArtistDormancyReadEncoding.state(_dormancy, _identity, id));
+        _forwardIdentityRead();
     }
 
     function dormancyNotice(bytes32 id) external view returns (bytes32, uint8, bytes32) {
-        _returnResolution(StreamArtistDormancyReadEncoding.notice(_dormancy, id));
+        _forwardIdentityRead();
     }
 
     function dormancyRecord(bytes32 n)
@@ -1362,7 +1317,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (Dorm.Notice memory, uint8, Dorm.Terminal memory)
     {
-        _returnResolution(StreamArtistDormancyReadEncoding.record(_dormancy, n));
+        _forwardIdentityRead();
     }
 
     function dormancyInitiationContext(Dorm.Initiation calldata p)
@@ -1370,11 +1325,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (Dorm.Context memory)
     {
-        _returnResolution(
-            StreamArtistDormancyReadEncoding.initiation(
-                _dormancy, _identity, _rotations, _estate, _resolutions, _environment(), p
-            )
-        );
+        _forwardIdentityRead();
     }
 
     function dormancyCompletionContext(Dorm.Completion calldata p)
@@ -1382,20 +1333,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (Dorm.Context memory, Dorm.Plan memory)
     {
-        _returnResolution(
-            StreamArtistDormancyReadEncoding.completion(
-                _dormancy,
-                _stewardGrants,
-                _identity,
-                _rotations,
-                _estate,
-                _succession,
-                _resolutions,
-                _environment(),
-                p,
-                false
-            )
-        );
+        _forwardIdentityRead();
     }
 
     function dormancyCompletionEvidence(Dorm.Completion calldata p)
@@ -1403,20 +1341,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bytes memory)
     {
-        _returnResolution(
-            StreamArtistDormancyReadEncoding.completion(
-                _dormancy,
-                _stewardGrants,
-                _identity,
-                _rotations,
-                _estate,
-                _succession,
-                _resolutions,
-                _environment(),
-                p,
-                true
-            )
-        );
+        _forwardIdentityRead();
     }
 
     function dormancyTransitionStanding(bytes32 record)
@@ -1424,7 +1349,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (address, bytes32, uint64)
     {
-        _returnResolution(StreamArtistDormancyReadEncoding.standing(_dormancy, record));
+        _forwardIdentityRead();
     }
 
     function dormancyResolutionState(bytes32 id, bytes32 cause)
@@ -1432,7 +1357,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bytes32, uint8, bytes32)
     {
-        _returnResolution(StreamArtistDormancyReadEncoding.resolution(_dormancy, id, cause));
+        _forwardIdentityRead();
     }
 
     function stewardSanctionGrant(bytes32 id) external view returns (bool, bytes32) {
@@ -1444,7 +1369,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (SG.GrantRecord memory)
     {
-        return _stewardGrants.records[hash];
+        _forwardIdentityRead();
     }
 
     function stewardSanctionGrantSignature(bytes32 hash) external view returns (bytes memory) {
@@ -1472,23 +1397,11 @@ contract StreamArtistIdentityAuthority is
         view
         returns (SC.Context memory)
     {
-        _returnResolution(
-            StreamArtistStewardCapabilityState.contextEncoded(
-                _stewardCapabilityGrants,
-                _dormancy,
-                _identity,
-                _rotations,
-                _succession,
-                _environment(),
-                p
-            )
-        );
+        _forwardIdentityRead();
     }
 
     function stewardCapabilityGrantRecord(bytes32 hash) external view returns (SC.Record memory) {
-        _returnResolution(
-            StreamArtistStewardCapabilityState.recordEncoded(_stewardCapabilityGrants, hash)
-        );
+        _forwardIdentityRead();
     }
 
     function stewardCapabilityGrantState(bytes32 appointment)

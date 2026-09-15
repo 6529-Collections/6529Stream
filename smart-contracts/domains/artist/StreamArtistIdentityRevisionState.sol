@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 
 import "./StreamArtistIdentityState.sol";
 import "./StreamArtistRotationState.sol";
@@ -256,6 +257,7 @@ library StreamArtistIdentityRevisionState {
         }
         if (identity.documents[p.revisedRecordHash].length == 0) {
             identity.documents[p.revisedRecordHash] = document;
+            StreamArtistPayloadStore.store(keccak256("ARTIST_IDENTITY_DOCUMENT"), document);
         }
         replay[chainKey] = T.ReplayCell(record, o.revision + 1, 1, 2);
         m.record = record;

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 
 import "./StreamArtistDelegationState.sol";
 import "./StreamArtistAuthorityPolicy.sol";
@@ -229,6 +230,7 @@ library StreamArtistIdentityState {
             T.Identity(artist, 1, 1, now_, now_, documentHash, uri, displayName, 0);
         state.activeIdentity[artist] = artistId;
         if (state.documents[documentHash].length == 0) state.documents[documentHash] = document;
+        StreamArtistPayloadStore.store(keccak256("ARTIST_IDENTITY_DOCUMENT"), document);
         // Zero identity namespaces registration allocation; actual artist IDs are nonzero.
         if (artistId == bytes32(0)) revert T.InvalidIdentity(artistId);
         bytes32 key = _consume(
@@ -342,6 +344,7 @@ library StreamArtistIdentityState {
             (, item.nonceHint) = state.nonceAvailability[artistId].firstUnused();
         }
         state.signatures[record] = a.signature;
+        StreamArtistPayloadStore.store(keccak256("ARTIST_SIGNATURE_BUNDLE"), a.signature);
         bytes32 replayDelta = keccak256(
             abi.encode(
                 nonceKey,
@@ -409,6 +412,7 @@ library StreamArtistIdentityState {
             delegations, grant, b.artistId, collectionId, capability, a, proof, c.actor, digest
         );
         state.signatures[record] = a.signature;
+        StreamArtistPayloadStore.store(keccak256("ARTIST_SIGNATURE_BUNDLE"), a.signature);
         return Mutation(
             bytes32(0),
             keccak256(abi.encode(b, grant, a, proof, record)),

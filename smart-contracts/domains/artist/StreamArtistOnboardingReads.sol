@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistProfilePayoutReads } from "./StreamArtistProfilePayoutReads.sol";
 import "./StreamArtistPlatformReads.sol";
 import "./StreamArtistAttributionPolicy.sol";
 import "./StreamArtistHashes.sol";
@@ -81,19 +82,7 @@ contract StreamArtistOnboardingReads {
 
     /// @notice Canonical payout selection composes Payout records with actual Identity transition facts.
     function artistPayoutAccount(bytes32 artistId) public view returns (address, bytes32) {
-        (
-            T.Payout memory stable,
-            T.Payout memory candidate,
-            R.ProvisionalAssociation memory association
-        ) = IStreamArtistPayoutTransitionOwner(_suite.owners[5]).payoutCandidates(artistId);
-        if (
-            candidate.recordHash != bytes32(0)
-                && IStreamArtistRotationOwner(_suite.owners[2])
-                    .provisionalRecordEligible(artistId, association)
-        ) {
-            return (candidate.account, candidate.recordHash);
-        }
-        return (stable.account, stable.recordHash);
+        return StreamArtistProfilePayoutReads.artistPayoutAccount(_suite, artistId);
     }
 
     function collectionArtistBeneficiary(uint256 collectionId)
@@ -115,20 +104,8 @@ contract StreamArtistOnboardingReads {
         view
         returns (C.Row memory)
     {
-        T.Binding memory b =
-            IStreamArtistBindingOwner(_suite.owners[0]).bindingAt(collectionId, generation);
-        T.CollaboratorRecord memory p = IStreamArtistCollaboratorBindingOwner(_suite.owners[0])
-            .collaboratorTerm(collectionId, generation, index);
-        C.Join memory j = IStreamArtistCollaboratorRecordsOwner(_suite.owners[1])
-            .acceptedRow(b.bindingHash, p.account, p.role, p.shareLabelId);
-        return C.Row(
-            p.account,
-            p.role,
-            p.shareLabelId,
-            j.artistId,
-            j.acceptanceRecordHash,
-            j.artistId != bytes32(0)
-        );
+        return
+            StreamArtistProfilePayoutReads.collaboratorAt(_suite, collectionId, generation, index);
     }
 
     function collaboratorPayoutAccount(bytes32 artistId, address account)
@@ -136,9 +113,7 @@ contract StreamArtistOnboardingReads {
         view
         returns (address, bytes32)
     {
-        if (!IStreamArtistCollaboratorRecordsOwner(_suite.owners[1])
-                .identityLinked(artistId, account)) return (address(0), bytes32(0));
-        return artistPayoutAccount(artistId);
+        return StreamArtistProfilePayoutReads.collaboratorPayoutAccount(_suite, artistId, account);
     }
 
     function consentMode(uint256 collectionId) external view returns (uint8) {
@@ -756,49 +731,9 @@ contract StreamArtistOnboardingReads {
         bytes32 profileId,
         address payout
     ) private view {
-        if (payout == address(0)) {
-            revert T.MissingMintPrerequisite(keccak256("payout"));
-        }
-        IStreamSplitFactory splits = IStreamSplitFactory(factory);
-        uint256 count = splits.profileEntryCount(profileId);
-        if (count == 0 || count > 64 || !splits.splitWalletExists(profileId)) {
-            revert T.InvalidRecord();
-        }
-        uint256 artistShare;
-        for (uint256 i; i < count; ++i) {
-            (address account, uint32 share, bytes32 label) = splits.profileEntry(profileId, i);
-            if (label == keccak256("artist")) {
-                if (account != payout) revert T.InvalidRecord();
-                artistShare += share;
-            }
-        }
-        if (artistShare == 0 || (resolver == _suite.primaryResolver && artistShare < 500_000)) {
-            revert T.InvalidRecord();
-        }
-        T.Binding memory b = IStreamArtistBindingOwner(_suite.owners[0]).binding(collectionId);
-        uint32 required =
-            IStreamArtistCollaboratorBindingOwner(_suite.owners[0])
-        .bindingTerms(collectionId, b.generation)
-        .count;
-        for (uint256 i; i < required; ++i) {
-            C.Row memory row = collaboratorAt(collectionId, b.generation, i);
-            if (!row.accepted) revert T.InvalidAttribution(collectionId);
-            if (row.shareLabelId == bytes32(0)) continue;
-            (address collaboratorPayout, bytes32 designation) =
-                collaboratorPayoutAccount(row.collaboratorArtistId, row.account);
-            if (collaboratorPayout == address(0) || designation == bytes32(0)) {
-                revert T.MissingMintPrerequisite(keccak256("collaborator_payout"));
-            }
-            uint256 collaboratorShare;
-            for (uint256 j; j < count; ++j) {
-                (address account, uint32 share, bytes32 label) = splits.profileEntry(profileId, j);
-                if (label == row.shareLabelId) {
-                    if (account != collaboratorPayout) revert T.InvalidRecord();
-                    collaboratorShare += share;
-                }
-            }
-            if (collaboratorShare == 0) revert T.InvalidRecord();
-        }
+        StreamArtistProfilePayoutReads._requireProfilePayout(
+            _suite, collectionId, resolver, factory, profileId, payout
+        );
     }
 
     function _requireEconomics(T.Binding memory b, uint256 collectionId, T.AssignmentFact memory a)

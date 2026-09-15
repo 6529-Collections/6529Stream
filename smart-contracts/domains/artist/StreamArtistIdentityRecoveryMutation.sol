@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistAuthorityPreimages } from "./StreamArtistAuthorityPreimages.sol";
 import {
     StreamArtistRecoveryEstateGuardians as EstateGuardians
 } from "./StreamArtistRecoveryEstateGuardians.sol";
@@ -170,6 +171,9 @@ library StreamArtistIdentityRecoveryMutation {
         }
         item.delegationEpoch = ++estate.delegationEpoch[i.request.artistId];
         s.records[item.recordHash] = item;
+        StreamArtistAuthorityPreimages.recovery(
+            i.owner.environment.chainId, i.owner.environment.registry, item.recordHash, item.fields
+        );
         s.latest[i.request.artistId] = item.recordHash;
         s.transitions[item.recordHash] = R.TransitionState(
             i.request.artistId, item.recordHash, now_, now_, now_, postEnds, 0, 2

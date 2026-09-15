@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 
 import "./StreamArtistHashes.sol";
 import "./StreamArtistRecordPublicationRules.sol";
@@ -79,6 +80,7 @@ library StreamArtistRecordPublicationState {
         records[recordHash] = item;
         latest[keccak256(abi.encode(p.collectionId, p.subjectKind, p.subjectId))] = item;
         if (statements[p.statementHash].length == 0) statements[p.statementHash] = x.statement;
+        StreamArtistPayloadStore.store(keccak256("ARTIST_PUBLICATION_STATEMENT"), x.statement);
         publications[recordHash] = IStreamArtistRecordPublicationOwner.Record(
             publication,
             P.Evidence(

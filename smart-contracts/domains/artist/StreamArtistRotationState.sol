@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
+import { StreamArtistAuthorityPreimages } from "./StreamArtistAuthorityPreimages.sol";
 import "./StreamArtistTransitionReads.sol";
 import "./StreamArtistGuardianState.sol";
 
@@ -408,6 +410,9 @@ library StreamArtistRotationState {
         s.latestTransition[p.artistId] = record;
         identity.signatures[record] =
             abi.encode(oldAuthorization.signature, newAuthorization.signature);
+        StreamArtistPayloadStore.store(
+            keccak256("ARTIST_SIGNATURE_BUNDLE"), identity.signatures[record]
+        );
         m.record = record;
         m.action = keccak256(abi.encode(p, oldAuthorization, newAuthorization, oldProof, newProof));
         m.state = keccak256(abi.encode(m.state, item, newReplay));
@@ -506,6 +511,7 @@ library StreamArtistRotationState {
             digest
         );
         bytes32 delta = s.acceptanceNonces[lane].consume(a.nonce);
+        StreamArtistPayloadStore.store(keccak256("ARTIST_SIGNATURE_BUNDLE"), a.signature);
         if (a.nonce == s.acceptanceHint[lane]) {
             (, s.acceptanceHint[lane]) = s.acceptanceNonces[lane].firstUnused();
         }
@@ -698,6 +704,7 @@ library StreamArtistRotationState {
         r.transition.postWindowEndsAt = _windowEnd(observed, r.effectiveWindow);
         r.transition.phase = 2;
         s.latestExecution[artistId] = expected;
+        StreamArtistAuthorityPreimages.rotation(o.environment.chainId, o.environment.registry, r);
         s.retirement[artistId][r.terms.oldAddress] = expected;
         delete s.pending[artistId];
         delete identity.activeIdentity[r.terms.oldAddress];

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 import "./StreamArtistEstateState.sol";
 import { StreamArtistStewardSanctionState } from "./StreamArtistStewardSanctionState.sol";
 import "./StreamArtistIdentityResolutionState.sol";
@@ -376,18 +377,17 @@ library StreamArtistDormancyState {
             keccak256(abi.encode(g)),
             epoch
         );
-        t.recordHash = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_ARTIST_DORMANCY_COMPLETION_V1"),
-                o.environment.chainId,
-                o.environment.registry,
-                address(this),
-                t
-            )
+        bytes memory preimage = abi.encode(
+            keccak256("6529STREAM_ARTIST_DORMANCY_COMPLETION_V1"),
+            o.environment.chainId,
+            o.environment.registry,
+            address(this),
+            t
         );
+        t.recordHash = keccak256(preimage);
+        StreamArtistPayloadStore.preimage(t.recordHash, preimage);
         bytes32 key = _consume(replay, o, "dormancy_execution", p.expectedNoticeHash, t.recordHash);
-        bytes32 action =
-            _consume(
+        bytes32 action = _consume(
             replay, o, "second_governance", keccak256(abi.encode(g.actionId, x)), t.recordHash
         );
         s.terminals[t.recordHash] = t;

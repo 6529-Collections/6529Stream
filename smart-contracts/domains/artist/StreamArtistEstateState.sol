@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
+import { StreamArtistAuthorityPreimages } from "./StreamArtistAuthorityPreimages.sol";
 
 import "./StreamArtistIdentityState.sol";
 import "./StreamArtistEstateHashes.sol";
@@ -116,6 +118,7 @@ library StreamArtistEstateState {
         item.recordHash = record;
         item.terms = p;
         item.authorization = a;
+        StreamArtistPayloadStore.store(keccak256("ARTIST_SIGNATURE_BUNDLE"), a.signature);
         item.incumbent = principal.authorityAddress;
         item.designationRecordHash = facts.designationRecordHash;
         item.pairedDirectiveRecordHash = facts.pairedDirectiveRecordHash;
@@ -441,6 +444,7 @@ library StreamArtistEstateState {
         s.phases[record] = 2;
         delete s.pending[p.artistId];
         s.authorityActivation[p.artistId] = record;
+        StreamArtistAuthorityPreimages.estate(o.environment.chainId, o.environment.registry, item);
         rotations.latestExecution[p.artistId] = record;
         uint64 epoch = ++s.delegationEpoch[p.artistId];
         s.executions[record] = Estate.ExecutionFacts(

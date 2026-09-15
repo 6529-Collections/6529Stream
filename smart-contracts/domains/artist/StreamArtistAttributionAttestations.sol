@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 import "../../interfaces/stream/artist/StreamArtistSanctionConfirmationTypes.sol";
 import "./StreamArtistPlatformState.sol";
 import {
@@ -295,6 +296,7 @@ library StreamArtistAttributionAttestations {
         s.attestationClasses[m.record] = x.authorityClass;
         s.attestations[keccak256(abi.encode(p.collectionId, p.subjectKind, p.subjectId))] = item;
         if (s.statements[p.statementHash].length == 0) s.statements[p.statementHash] = statement;
+        StreamArtistPayloadStore.store(keccak256("ARTIST_PUBLICATION_STATEMENT"), statement);
         m.action = p.subjectKind == 10
             ? keccak256(
                 abi.encode(

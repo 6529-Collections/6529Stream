@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistReconstruction.sol";
 import "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
 import {
     StreamArtistStewardCapabilityTypes as SC
@@ -64,6 +65,7 @@ import {
 ///      This subset does not advertise the full artist lifecycle or legacy nomination API.
 contract StreamArtistOnboardingRegistry is
     IStreamArtistOnboarding,
+    IStreamArtistReconstruction,
     IStreamArtistDormancy,
     IStreamArtistStewardCapabilities,
     IStreamArtistDormancyEvidence,
@@ -312,7 +314,29 @@ contract StreamArtistOnboardingRegistry is
         return type(IStreamArtistMintConsent).interfaceId;
     }
 
-    function supportsInterface(bytes4 id) public view override returns (bool) {
+    function recordPreimageBytes(bytes32 hash) external view override returns (bytes memory) {
+        _forwardRegistryRead();
+    }
+
+    function storedPayloadCount() external view override returns (uint256) {
+        _forwardRegistryRead();
+    }
+
+    function storedPayloadAt(uint256 index)
+        external
+        view
+        override
+        returns (address, bytes32, bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function supportsInterface(bytes4 id)
+        public
+        view
+        override(StreamModuleBase, IERC165)
+        returns (bool)
+    {
         return id == type(IStreamArtistRecoveryApproval).interfaceId
             || id == type(IStreamArtistUnavailability).interfaceId
             || id == type(IStreamArtistMintConsent).interfaceId
@@ -358,7 +382,7 @@ contract StreamArtistOnboardingRegistry is
             || type(IStreamArtistDormancy).interfaceId == id
             || type(IStreamArtistDormancyEvidence).interfaceId == id || type(SG).interfaceId == id
             || id == type(IStreamArtistStewardCapabilities).interfaceId
-            || super.supportsInterface(id);
+            || id == type(IStreamArtistReconstruction).interfaceId || super.supportsInterface(id);
     }
 
     function recordSaleConsent(Sale.Consent calldata p, T.Authorization calldata a)

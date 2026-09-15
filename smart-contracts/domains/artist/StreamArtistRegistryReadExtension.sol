@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistReconstruction.sol";
 import "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
 import {
     StreamArtistStewardCapabilityTypes as SC
@@ -60,6 +61,23 @@ contract StreamArtistRegistryReadExtension {
     modifier onlyHost() {
         if (msg.sender != _host) revert ExtensionWrongHost(msg.sender);
         _;
+    }
+
+    function recordPreimageBytes(bytes32 hash) external view onlyHost returns (bytes memory) {
+        return IStreamArtistReconstruction(_contentSuite().archive).recordPreimageBytes(hash);
+    }
+
+    function storedPayloadCount() external view onlyHost returns (uint256) {
+        return IStreamArtistReconstruction(_contentSuite().archive).storedPayloadCount();
+    }
+
+    function storedPayloadAt(uint256 index)
+        external
+        view
+        onlyHost
+        returns (address, bytes32, bytes32)
+    {
+        return IStreamArtistReconstruction(_contentSuite().archive).storedPayloadAt(index);
     }
 
     function requireRecordPublication(bytes32 recordHash, P.Publication calldata publication)

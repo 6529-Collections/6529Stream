@@ -69,6 +69,36 @@ library StreamArtistDormancyRecovery {
         );
     }
 
+    function contextEncoded(
+        RecoveryState.State storage s,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        StreamArtistIdentityResolutionState.State storage resolutions,
+        StreamArtistEstateState.State storage estate,
+        StreamArtistDormancyState.State storage dormancy,
+        StreamArtistSuccessionState.State storage succession,
+        StreamArtistIdentityContestState.State storage contests,
+        StreamArtistIdentityState.OwnerContext memory o,
+        Recovery.Request memory p,
+        T.Authorization memory acceptance
+    ) public view returns (bytes memory) {
+        return abi.encode(
+            context(
+                s,
+                identity,
+                rotations,
+                resolutions,
+                estate,
+                dormancy,
+                succession,
+                contests,
+                o,
+                p,
+                acceptance
+            )
+        );
+    }
+
     function recover(
         RecoveryState.State storage s,
         StreamArtistIdentityState.State storage identity,

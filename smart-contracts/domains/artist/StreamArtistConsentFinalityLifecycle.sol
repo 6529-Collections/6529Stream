@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 
 import "./StreamArtistEconomicsHashes.sol";
 import "./StreamArtistConsentState.sol";
@@ -35,6 +36,18 @@ contract StreamArtistConsentFinalityLifecycle is
     error StaleOwnerSnapshot(bytes32 domainId);
     error Unauthorized(address caller);
     address public immutable consentWriterExtension;
+
+    function recordPreimageBytes(bytes32 hash) external view returns (bytes memory) {
+        return StreamArtistPayloadStore.recordBytes(hash);
+    }
+
+    function storedPayloadCount() external view returns (uint256) {
+        return StreamArtistPayloadStore.count();
+    }
+
+    function storedPayloadAt(uint256 index) external view returns (address, bytes32, bytes32) {
+        return StreamArtistPayloadStore.at(index);
+    }
 
     function recordRecoveryApproval(
         T.ActionContext calldata c,

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 
 import "./StreamArtistConsentState.sol";
 import "./StreamArtistSanctionHashes.sol";
@@ -133,6 +134,7 @@ library StreamArtistSanctionState {
         state.records[r.recordHash] = r;
         state.latest[scopeKey] = r.recordHash;
         state.archives[r.recordHash] = archive;
+        StreamArtistPayloadStore.store(keccak256("ARTIST_SANCTION_ARCHIVE"), archive);
         IStreamArtistSanctionArchiveFacts.Facts memory facts =
             IStreamArtistSanctionArchiveFacts.Facts(
                 r.recordHash,
