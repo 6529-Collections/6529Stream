@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistDormancyRecordEvents } from "./StreamArtistDormancyRecordEvents.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 import "./StreamArtistEstateState.sol";
 import { StreamArtistStewardSanctionState } from "./StreamArtistStewardSanctionState.sol";
@@ -242,6 +243,7 @@ library StreamArtistDormancyState {
         emit ArtistDormancyInitiated(
             1, p.artistId, hash, end, p.evidenceHash, p.reasonURI, g.actionId
         );
+        StreamArtistDormancyRecordEvents.notice(o.environment, s.notices[hash], c.actor);
     }
 
     function plan(
@@ -433,6 +435,7 @@ library StreamArtistDormancyState {
             t.recordHash,
             g.actionId
         );
+        StreamArtistDormancyRecordEvents.completion(o.environment, p.artistId, t);
     }
 
     /// @dev Called only after an actual owning writer authenticates the named signer.
@@ -495,6 +498,7 @@ library StreamArtistDormancyState {
             s.phases[notice] = 2;
             if (i.status == 2) i.status = 1; // A genuine compromise remains contested until its own dismissal.
             emit ArtistDormancyCancelled(1, id, notice, signer, class_, t.recordHash);
+            StreamArtistDormancyRecordEvents.cancellation(o.environment, id, t, count);
         }
         stateDelta = keccak256(
             abi.encode(

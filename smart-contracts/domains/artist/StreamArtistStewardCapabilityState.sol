@@ -116,9 +116,8 @@ library StreamArtistStewardCapabilityState {
         address executor
     ) public returns (StreamArtistIdentityState.Mutation memory m) {
         if (c.operationId != 59) revert T.InvalidOperation(c.operationId);
-        SC.Context memory x = context(
-            s, dormancy, identity, rotations, succession, o.environment, p
-        );
+        SC.Context memory x =
+            context(s, dormancy, identity, rotations, succession, o.environment, p);
         if (
             c.actor != executor || executor == address(0) || w.actionId == 0
                 || w.proposer == address(0) || w.executionCaller == address(0)
@@ -182,6 +181,7 @@ library StreamArtistStewardCapabilityState {
             w.actionId,
             p.expectedGrantHead
         );
+        StreamArtistDormancyRecordEvents.grant(o.environment, saved);
     }
 
     function contextEncoded(
