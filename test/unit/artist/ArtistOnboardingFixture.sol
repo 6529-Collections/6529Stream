@@ -15,7 +15,7 @@ import "./ArtistIdentityReadEncodingFixture.sol";
 import "./ArtistRecoveryIntentFixture.sol";
 import "../../../smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol";
 import "../../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
-import "../../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
+import { StreamRevenueEscrow } from "../../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
 import "../../../smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol";
 import "../../../smart-contracts/domains/artist/StreamArtistArchiveV2.sol";
 import "../../../smart-contracts/domains/artist/StreamArtistBindingLifecycle.sol";

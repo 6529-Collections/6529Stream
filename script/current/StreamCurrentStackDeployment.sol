@@ -15,7 +15,7 @@ import "./StreamArtistActivationPlan.sol";
 import "./StreamGovernanceGenesisPlan.sol";
 import "./StreamDeploymentPlan.sol";
 import "./StreamRevealActivationPlan.sol";
-import "../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
+import { StreamRevenueEscrow } from "../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
 import "../../smart-contracts/domains/governance/StreamGovernanceExecutor.sol";
 import "../../smart-contracts/domains/governance/StreamGovernanceActor.sol";
 import "../../smart-contracts/domains/governance/StreamRoleRegistry.sol";

@@ -23,7 +23,7 @@ import "./OfficialSafeFixture.sol";
 import "../../script/current/StreamGovernanceGenesisPlan.sol";
 import "../../script/current/StreamRevealActivationPlan.sol";
 import "../../smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol";
-import "../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
+import { StreamRevenueEscrow } from "../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
 import "../../smart-contracts/domains/entropy/StreamEntropyCoordinator.sol";
 import "../mocks/MockStreamEntropyProvider.sol";
 import {

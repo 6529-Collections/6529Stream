@@ -22,7 +22,7 @@ import "../../smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol";
 import "../../smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol";
 import "../../smart-contracts/domains/revenue/StreamSplitFactory.sol";
 import "../../smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol";
-import "../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
+import { StreamRevenueEscrow } from "../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
 import "../../smart-contracts/domains/revenue/StreamRoyaltyResolver.sol";
 import "../../smart-contracts/domains/entropy/StreamEntropyCoordinator.sol";
 import {
