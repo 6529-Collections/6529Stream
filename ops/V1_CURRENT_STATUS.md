@@ -170,9 +170,9 @@ operation-23 findings now bind the complete entropy recovery intent and use the
 existing notice, authority-activity cancellation and replay lifecycle. Ten actual
 Artist/Archive/Entropy/Safe cases are authored; independent source review is
 clear. The selected size captures fit, with EntropyCoordinator at 24,419 runtime
-bytes. All 1,009 prior ABI entries and storage layouts are preserved. Supplemental
-finding history and operation-60 hydration remain a separate implementation
-obligation; original receipts alone do not establish successor authorization.
+bytes. All 1,009 prior ABI entries and storage layouts are preserved. The
+supplemental finding-history implementation is now integrated as described below;
+its runtime acceptance remains separate from original receipt reconstruction.
 
 One frozen 28-suite native run is now active at ee0f0159, covering the repaired
 Artist setup, new recovery and dynamic commerce cases, retained entropy tests,
@@ -180,8 +180,37 @@ and current-Core/Safe suites. All 1,056 selected source units pass ABI/type
 compilation. Runtime, production-size and fuzz results remain pending; the
 larger test-contract size allowance does not relax production deployment limits.
 
-Builders continue supplemental entropy-finding hydration, actual-token primary
-custody-rights composition and typed valuation evidence export.
+Complete entropy-finding hydration is integrated as 7209675b. Its explicit
+operation-60 profile carries original record domains, supplemental target/intent,
+current finding head, authority activity and both original replay dependencies
+through the sealed seven-owner migration. It composes with the supported living
+payout/economics/readiness/publication profiles; first-predecessor and default
+timing limits remain explicit. All 717 prior ABI entries and eleven ordinary
+storage layouts are preserved. Fifteen selected products fit after extracting
+fixed source-inventory workers; Source runtime is 17,252 bytes and Identity is
+21,465. Independent production and test-oracle reviews are clear, including two
+repaired test-memory aliases. Nine authored cases await native execution.
+
+Actual-token primary custody-rights composition is integrated as f0e651ef.
+Seven authored cases use the actual Core, Artist, delayed Governor and threshold
+Safes: original prepared acquisition, separately approved token PROFILE/TEMPLATE
+terms, activation, paid delivery of the same NFT, exact rollback/retry and no-bid
+return. Original mint and frozen royalty receipts remain unchanged. Independent
+source/oracle review is clear; native execution and gas remain pending.
+
+Typed valuation dossiers are integrated as fd5601d3. All 36 valuation and
+retained loan tests pass on integration, and schema/profile generation checks
+pass. Appraisal, book-value and insurance statements retain literal amounts,
+dates, named roles and confidential-instrument references. Optional complete
+valuation lanes and original receipt order qualify the exact loan-selected
+reference, including same-block order and explicit supersession. They do not
+establish legal operativeness or professional countersignatures. Positive wire
+controls are synthetic; actual positive record capture is the next work item.
+
+The whole-repository 1,803-source ABI/type check passes at 7209675b. These three
+increments postdate the still-running ee0f0159 native capture. Builders continue
+dormancy recovery after executed successor rotations, typed entropy-authority
+Safe client workflows and an actual OwnerRecords museum capture recipe.
 
 The independently reviewed resumable Safe inventory-opening client workflow
 is integrated as 0f80e00a. All 150 client tests, generation, build and negative

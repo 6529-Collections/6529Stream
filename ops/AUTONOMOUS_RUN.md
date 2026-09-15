@@ -18,7 +18,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Integrated through ee0f0159: explicit entropy Artist-unavailability, current revenue/Safe client (163 tests pass), owner loan export (29 loan/exhibition tests pass), five actual current-Core dynamic commerce cases, compact-source setup repair and 17 current-stack artifact-CREATE substitutions. Frozen b60ae515 native completed 47 pass/16 fail; all 453 production products fit. Failures share the now-repaired test-only source mismatch; One frozen 28-suite run is active at ee0f0159 after its 1,056-source ABI check passed; runtime remains pending. Immutable RC1 remains 569bf87f1fa808787d324f6e1582924b5ccf1d40. |
+| Source checkpoint | Integrated through 7209675b: entropy-finding hydration, seven actual-token custody cases and typed valuation dossiers. Whole-repository 1,803-source ABI/type check and 36 valuation/loan tests pass. One frozen 28-suite native run at ee0f0159 continues and excludes these newer increments. Immutable RC1 remains 569bf87f1fa808787d324f6e1582924b5ccf1d40. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -38,9 +38,9 @@ pending checks. The immutable RC1 remains the released baseline.
 | Owner | Implementation batch |
 | --- | --- |
 | Integrator | Running the frozen 28-suite Artist/entropy/current-Core/Safe batch at ee0f0159 while integrating subsequent features. Owns actual integration, native results and candidate closure. |
-| Artist builder | Implementing supplemental entropy-finding history and operation-60 hydration; explicit entropy recovery intent and Artist-unavailability route delivered. |
-| Revenue builder | Building actual-token primary custody-rights acquisition/activation; current revenue client and deferred-mint/dynamic-secondary joined cases delivered. Reviewing entropy extraction deltas at handoff. |
-| Fourth engineer | Building typed valuation export and explicit publication-order evidence for loan references; loan export and compact-source test repair delivered. |
+| Artist builder | Building designated-dormancy recovery after actual executed same-class successor rotations; complete entropy-finding hydration delivered. |
+| Revenue builder | Building typed entropy finding/hydration Safe client workflows; actual-token custody composition delivered. |
+| Fourth engineer | Building an actual current OwnerRecords loan/valuation capture recipe and offline dossier replay; typed valuation export delivered. |
 
 Comprehensive current-stack/Safe integration, fuzz and stateful campaigns, gas
 conformance, complete genesis inventory, CI and matching new testnet evidence
@@ -521,7 +521,7 @@ not complete that join.
 | Owner | Next deliverable |
 | --- | --- |
 | Integrator | Shared Artist/Registry/Coordinator size repairs integrated; owner accumulator five cases plus 256 fuzz inputs pass. Complete 1,767-source type check passes; 737-source size preflight passes all 50 selected products and the eight-suite Artist native run is active. |
-| Artist builder | Readiness hydration and final size split integrated. Building complete original publication-attestation history hydration while root validates the frozen Artist capture. |
+| Artist builder | Building designated-dormancy recovery after actual executed same-class successor rotations; complete entropy-finding hydration delivered. |
 | Preservation builder | External bulk archives, runnable reference render, original publication and current finality consumption |
 | Independent reviewer | Challenge exact implementations, real-contract composition and integration evidence |
 
