@@ -148,23 +148,25 @@ contract StreamArtistReadinessAuthorityHydrationTest is ArtistOnboardingFixture 
     Content.Consent private pendingContent;
     bytes32 private pendingContentRecord;
 
-    /// @dev Fresh actual source branch with a short lawful identity URI. The shared
-    /// fixture's 2048-byte URI is a read-gas stress case, not this bounded inline Archive profile.
-    function _compactSource() private {
-        Next memory source = _next();
-        core.set(POINTER, address(source.registry), false);
-        ingress = source.registry;
-        archive = source.archive;
-        coordinator = source.coordinator;
-        suite = coordinator.suiteConfiguration();
-        nextNonce = 0;
-        T.BindingProposal memory proposal = _proposal(0);
+    /// @dev Initialize the original suite already pinned by the actual resolvers.
+    /// This bounded inline Archive profile does not replace the selected source registry.
+    function _initialBindingProposal()
+        internal
+        view
+        override
+        returns (T.BindingProposal memory proposal)
+    {
+        proposal = super._initialBindingProposal();
         proposal.identityRecordURI = "urn:readiness-source:identity";
-        (artistId,) = ingress.proposeArtistBinding(
-            1, proposal, bytes("unit identity document"), "Artist Safe"
+    }
+
+    /// @dev Regression guard: preparing history must retain both actual resolver pins.
+    function _compactSource() private view {
+        require(
+            primary.artistRegistry() == address(ingress)
+                && address(royalty.artistRegistry()) == address(ingress),
+            "compact source is the original resolver-bound suite"
         );
-        metadata.configureArtist(address(ingress));
-        POLICY = _prospective(false);
     }
 
     function _readinessHistory() private {

@@ -3073,9 +3073,20 @@ abstract contract ArtistOnboardingFixture is
         vm.prank(governance);
         royalty.configureCollectionRoyalty(1, royaltyProfile, 500);
         (artistId,) = ingress.proposeArtistBinding(
-            1, _proposal(bytes32(0)), bytes("unit identity document"), "Artist Safe"
+            1, _initialBindingProposal(), bytes("unit identity document"), "Artist Safe"
         );
         POLICY = _prospective(false);
+    }
+
+    /// @dev Override only the initial document reference for bounded import profiles.
+    /// The default preserves the maximum-URI source used by capped-read scenarios.
+    function _initialBindingProposal()
+        internal
+        view
+        virtual
+        returns (T.BindingProposal memory)
+    {
+        return _proposal(bytes32(0));
     }
 
     function _proposal(bytes32 id) internal view returns (T.BindingProposal memory p) {
