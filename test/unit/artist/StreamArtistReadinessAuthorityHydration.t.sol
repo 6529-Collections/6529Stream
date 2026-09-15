@@ -160,8 +160,7 @@ contract StreamArtistReadinessAuthorityHydrationTest is ArtistOnboardingFixture 
         nextNonce = 0;
         T.BindingProposal memory proposal = _proposal(0);
         proposal.identityRecordURI = "urn:readiness-source:identity";
-        (artistId,) =
-            ingress.proposeArtistBinding(
+        (artistId,) = ingress.proposeArtistBinding(
             1, proposal, bytes("unit identity document"), "Artist Safe"
         );
         metadata.configureArtist(address(ingress));
@@ -230,8 +229,7 @@ contract StreamArtistReadinessAuthorityHydrationTest is ArtistOnboardingFixture 
         bytes32 schema
     ) private {
         bytes memory statement = abi.encode(kind, subject, state, schema);
-        T.Attestation memory p =
-            T.Attestation(
+        T.Attestation memory p = T.Attestation(
             1, kind, subject, state, schema, keccak256(statement), "urn:retained:source"
         );
         T.Authorization memory a = _authorization(true);
@@ -355,7 +353,7 @@ contract StreamArtistReadinessAuthorityHydrationTest is ArtistOnboardingFixture 
         n.registry.requireMintConsent(1, PHASE, POLICY);
         require(
             n.registry
-                .contentConsentEvidence(1, pendingContent.familyId, pendingContent.newStateHash)
+                    .contentConsentEvidence(1, pendingContent.familyId, pendingContent.newStateHash)
                 == pendingContentRecord,
             "original pending content approval still readable"
         );
@@ -854,60 +852,93 @@ contract StreamArtistReadinessAuthorityHydrationTest is ArtistOnboardingFixture 
                 i + 1, [identity_, registry_, coordinator_, archive_, s.core, s.mintManager]
             );
         }
-        n.registry = new StreamArtistOnboardingRegistry(
-            s.core,
-            s.mintManager,
-            coordinator_,
-            governance,
-            address(estateCoverageProvider),
-            keccak256("successor deployment"),
-            "urn:successor",
-            keccak256("successor manifest"),
-            address(artistExtensionFactory),
-            facade
+        n.registry = StreamArtistOnboardingRegistry(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol:StreamArtistOnboardingRegistry",
+                    abi.encode(
+                        s.core,
+                        s.mintManager,
+                        coordinator_,
+                        governance,
+                        address(estateCoverageProvider),
+                        keccak256("successor deployment"),
+                        "urn:successor",
+                        keccak256("successor manifest"),
+                        address(artistExtensionFactory),
+                        facade
+                    )
+                ))
         );
-        n.archive = new StreamArtistArchiveV2(registry_, coordinator_);
+        n.archive = StreamArtistArchiveV2(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/artist/StreamArtistArchiveV2.sol:StreamArtistArchiveV2",
+                    abi.encode(registry_, coordinator_)
+                ))
+        );
         s.registry = registry_;
         s.archive = archive_;
         s.owners[0] = address(
-            new StreamArtistBindingLifecycle(
-                registry_, coordinator_, archive_, s.core, s.mintManager
+            StreamArtistBindingLifecycle(
+                payable(_artistArtifactCreate(
+                        "smart-contracts/domains/artist/StreamArtistBindingLifecycle.sol:StreamArtistBindingLifecycle",
+                        abi.encode(registry_, coordinator_, archive_, s.core, s.mintManager)
+                    ))
             )
         );
         s.owners[1] = address(
-            new StreamArtistCollaboratorLifecycle(
-                registry_, coordinator_, archive_, s.core, s.mintManager
+            StreamArtistCollaboratorLifecycle(
+                payable(_artistArtifactCreate(
+                        "smart-contracts/domains/artist/StreamArtistCollaboratorLifecycle.sol:StreamArtistCollaboratorLifecycle",
+                        abi.encode(registry_, coordinator_, archive_, s.core, s.mintManager)
+                    ))
             )
         );
         s.owners[2] = address(
-            new StreamArtistIdentityAuthority(
-                registry_,
-                coordinator_,
-                archive_,
-                s.core,
-                s.mintManager,
-                address(artistExtensionFactory),
-                identity
+            StreamArtistIdentityAuthority(
+                payable(_artistArtifactCreate(
+                        "smart-contracts/domains/artist/StreamArtistIdentityAuthority.sol:StreamArtistIdentityAuthority",
+                        abi.encode(
+                            registry_,
+                            coordinator_,
+                            archive_,
+                            s.core,
+                            s.mintManager,
+                            address(artistExtensionFactory),
+                            identity
+                        )
+                    ))
             )
         );
         s.owners[3] = address(
-            new StreamArtistAcceptanceLifecycle(
-                registry_, coordinator_, archive_, s.core, s.mintManager
+            StreamArtistAcceptanceLifecycle(
+                payable(_artistArtifactCreate(
+                        "smart-contracts/domains/artist/StreamArtistAcceptanceLifecycle.sol:StreamArtistAcceptanceLifecycle",
+                        abi.encode(registry_, coordinator_, archive_, s.core, s.mintManager)
+                    ))
             )
         );
         s.owners[4] = address(
-            new StreamArtistAttributionLifecycle(
-                registry_, coordinator_, archive_, s.core, s.mintManager
+            StreamArtistAttributionLifecycle(
+                payable(_artistArtifactCreate(
+                        "smart-contracts/domains/artist/StreamArtistAttributionLifecycle.sol:StreamArtistAttributionLifecycle",
+                        abi.encode(registry_, coordinator_, archive_, s.core, s.mintManager)
+                    ))
             )
         );
         s.owners[5] = address(
-            new StreamArtistPayoutLifecycle(
-                registry_, coordinator_, archive_, s.core, s.mintManager
+            StreamArtistPayoutLifecycle(
+                payable(_artistArtifactCreate(
+                        "smart-contracts/domains/artist/StreamArtistPayoutLifecycle.sol:StreamArtistPayoutLifecycle",
+                        abi.encode(registry_, coordinator_, archive_, s.core, s.mintManager)
+                    ))
             )
         );
         s.owners[6] = address(
-            new StreamArtistConsentFinalityLifecycle(
-                registry_, coordinator_, archive_, s.core, s.mintManager
+            StreamArtistConsentFinalityLifecycle(
+                payable(_artistArtifactCreate(
+                        "smart-contracts/domains/artist/StreamArtistConsentFinalityLifecycle.sol:StreamArtistConsentFinalityLifecycle",
+                        abi.encode(registry_, coordinator_, archive_, s.core, s.mintManager)
+                    ))
             )
         );
         ArtistUnitGovernance(governance)
@@ -915,7 +946,12 @@ contract StreamArtistReadinessAuthorityHydrationTest is ArtistOnboardingFixture 
                 s.roleRegistry, address(artist), keccak256("successor finality"), "urn:successor"
             );
         address finality = finalityFixture.deploy(s.core, s.metadata, registry_, governance);
-        n.coordinator = new StreamArtistOnboardingCoordinator(s, finality);
+        n.coordinator = StreamArtistOnboardingCoordinator(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/artist/StreamArtistOnboardingCoordinator.sol:StreamArtistOnboardingCoordinator",
+                    abi.encode(s, finality)
+                ))
+        );
         n.identity = s.owners[2];
         require(
             address(n.registry) == registry_ && address(n.archive) == archive_

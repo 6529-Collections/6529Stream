@@ -61,3 +61,19 @@ The final helper has only a whitespace-formatting difference from its measured
 copy. Reversing the 23 constructor substitutions restores the original fixture
 token-for-token, including constructor arguments, comments and strings. No
 production Solidity or checkpoint test body changed.
+
+## Migration fixture extension
+
+The next test-only batch also replaces 60 direct production constructors in
+six migration fixtures: authority, payout, economics and readiness hydration,
+history import, and the shared publication hydration fixture. Each replacement
+uses the same helper with the original constructor arguments and evaluation
+order. Every pre-format source is exactly reconstructed by reversing only its
+ten substitutions. Production contracts, factory checks, predicted addresses
+and assertions are unchanged.
+
+The combined 782-source ABI/type check, including the new Artist/entropy join,
+passes. Native behavior and a matched-source timing comparison remain pending.
+The active eleven-suite migration capture contains the earlier fixture version;
+its source and compiler process are preserved. Run the expanded fixtures in the
+next capture after that result is collected.
