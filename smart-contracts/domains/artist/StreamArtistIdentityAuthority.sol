@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistIdentitySupplementalReads.sol";
+import "./StreamArtistIdentityHistoryMutation.sol";
 import "./StreamArtistIdentityHydration.sol";
 import "./StreamArtistHistoryState.sol";
 import {
@@ -87,6 +89,8 @@ contract StreamArtistIdentityAuthority is
 {
     // Retain the owner ABI for errors propagated by the linked mechanics.
     error InvalidPriorStanding(address priorAddress);
+    error InvalidAuthorityCheckpoint();
+    error InvalidRotation(bytes32 rotationRecordHash);
     error NonceAvailabilityAlreadyUsed(uint256 nonce);
     error NonceAvailabilityInconsistent(uint8 level, uint256 prefix);
     error BoundExceeded(uint256 actual, uint256 maximum);
@@ -111,34 +115,19 @@ contract StreamArtistIdentityAuthority is
         override
         returns (uint256 prefix, uint256[32] memory words, bool exhausted)
     {
-        prefix = StreamArtistAuthorityCheckpoint.noncePrefixAt(kind, key, index);
-        if (kind == 1) {
-            (words, exhausted) = _identity.nonceAvailability[key].checkpointWords(prefix);
-        } else if (kind == 2) {
-            (words, exhausted) = _delegations.availability[key].checkpointWords(prefix);
-        } else if (kind == 3 && uint256(key) >> 160 == 0) {
-            (words, exhausted) = _collaboratorAccounts.available[address(
-                    uint160(uint256(key))
-                )].checkpointWords(prefix);
-        } else if (kind == 4) {
-            (words, exhausted) = _rotations.acceptanceNonces[key].checkpointWords(prefix);
-        } else if (kind == 5) {
-            (words, exhausted) = _estate.nonceAvailability[key].checkpointWords(prefix);
-        } else {
-            revert StreamArtistAuthorityCheckpoint.InvalidAuthorityCheckpoint();
-        }
+        _forwardSupplementalRead();
     }
 
     function recordPreimageBytes(bytes32 hash) external view returns (bytes memory) {
-        return StreamArtistPayloadStore.recordBytes(hash);
+        _forwardSupplementalRead();
     }
 
     function storedPayloadCount() external view returns (uint256) {
-        return StreamArtistPayloadStore.count();
+        _forwardSupplementalRead();
     }
 
     function storedPayloadAt(uint256 index) external view returns (address, bytes32, bytes32) {
-        return StreamArtistPayloadStore.at(index);
+        _forwardSupplementalRead();
     }
 
     function recordUnavailability(T.ActionContext calldata c, U.Input calldata p)
@@ -161,9 +150,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bytes32)
     {
-        return _unavailability.latest[
-            StreamArtistUnavailabilityState.associationKey(artistId, collectionId)
-        ];
+        _forwardSupplementalRead();
     }
 
     function unavailabilityFindingContext(U.Input calldata p)
@@ -179,7 +166,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bool)
     {
-        return StreamArtistUnavailabilityState.live(_unavailability, hash, b);
+        _forwardSupplementalRead();
     }
 
     function _unavailabilityContext()
@@ -256,9 +243,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (address, uint64, bytes32)
     {
-        bytes32 hash = _estate.pending[artistId];
-        Estate.RequestRecord storage item = _estate.requests[hash];
-        return (item.terms.successor, item.noticeEndsAt, hash);
+        _forwardSupplementalRead();
     }
 
     function estateActivationRecord(bytes32 record)
@@ -274,7 +259,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (uint256)
     {
-        return _estate.nonceHints[StreamArtistEstateState.nonceLane(artistId, successor)];
+        _forwardSupplementalRead();
     }
 
     function currentAuthorityCapabilities(bytes32 artistId)
@@ -290,7 +275,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bytes32)
     {
-        return StreamArtistEstateHashes.digest(_environment(), p, a);
+        _forwardSupplementalRead();
     }
 
     function estateTransitionStanding(bytes32 record)
@@ -298,12 +283,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (address, bytes32, uint64)
     {
-        Estate.RequestRecord storage item = _estate.requests[record];
-        if (record == bytes32(0) || item.recordHash != record || item.terms.artistId == bytes32(0))
-        {
-            revert R.InvalidRotation(record);
-        }
-        return (item.incumbent, item.guardianRecordHash, item.standingTailSeconds);
+        _forwardSupplementalRead();
     }
 
     event ArtistSuccessorDesignated(
@@ -353,7 +333,7 @@ contract StreamArtistIdentityAuthority is
     }
 
     function operativeEstateDirective(bytes32 artistId) external view returns (bytes32) {
-        return StreamArtistSuccessionState.operativeDirective(_succession, _rotations, artistId);
+        _forwardSupplementalRead();
     }
 
     function successorDesignation(bytes32 artistId)
@@ -361,16 +341,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (address, uint8, uint32, bytes32, bytes32, uint256)
     {
-        Succ.DesignationRecord storage r =
-            _succession.designations[operativeSuccessorRecord(artistId)];
-        return (
-            r.terms.successor,
-            r.terms.successorKind,
-            r.terms.grantedCapabilities,
-            r.terms.conditionsHash,
-            r.terms.directiveHash,
-            r.nonce
-        );
+        _forwardSupplementalRead();
     }
 
     function successorDesignationRecord(bytes32 record)
@@ -503,7 +474,7 @@ contract StreamArtistIdentityAuthority is
     }
 
     function latestIdentityRecovery(bytes32 artistId) external view returns (bytes32) {
-        return _identityRecovery.latest[artistId];
+        _forwardSupplementalRead();
     }
 
     function identityRecoveryReceipts(bytes32 record)
@@ -511,7 +482,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bytes32, bytes32, bytes32)
     {
-        return StreamArtistIdentityRecoveryState.receiptCommitments(_identityRecovery, record);
+        _forwardSupplementalRead();
     }
 
     function recoveryTransitionStanding(bytes32 record)
@@ -519,8 +490,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (address, bytes32, uint64)
     {
-        return
-            StreamArtistRecoveryOwnerReads.standing(_identityRecovery, _rotations, _estate, record);
+        _forwardSupplementalRead();
     }
 
     function dismissIdentityContest(
@@ -592,7 +562,7 @@ contract StreamArtistIdentityAuthority is
     }
 
     function latestIdentityContest(bytes32 artistId) external view returns (bytes32) {
-        return _identityContests.latest[artistId];
+        _forwardSupplementalRead();
     }
 
     function identityContestContext(Contest.Request calldata p)
@@ -600,9 +570,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bytes32, bytes32, bytes32)
     {
-        return StreamArtistIdentityCauseState.context(
-            _resolutions, _identity, _rotations, _identityContests, _succession, _ownerContext(), p
-        );
+        _forwardSupplementalRead();
     }
 
     event ArtistIdentityRevisionRecorded(
@@ -636,7 +604,7 @@ contract StreamArtistIdentityAuthority is
     }
 
     function identityRecordBytes(bytes32 artistId) external view returns (bytes memory) {
-        return _identity.documents[operativeIdentityRecord(artistId)];
+        _forwardSupplementalRead();
     }
 
     function identityRevisionRecord(bytes32 record)
@@ -834,9 +802,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bool, bytes32)
     {
-        return StreamArtistIdentityDismissalState.standingRevoked(
-            _resolutions, _rotations, artistId, account
-        );
+        _forwardSupplementalRead();
     }
 
     function guardianSetRecord(bytes32 record) external view returns (R.GuardianRecord memory) {
@@ -864,7 +830,7 @@ contract StreamArtistIdentityAuthority is
     }
 
     function lastArtistTransition(bytes32 artistId) external view returns (bytes32) {
-        return _rotations.latestTransition[artistId];
+        _forwardSupplementalRead();
     }
 
     function identityRevisionProvisionalAssociation(bytes32 record)
@@ -876,9 +842,7 @@ contract StreamArtistIdentityAuthority is
     }
 
     function activeAuthorityWindow(bytes32 artistId) external view returns (bytes32, uint64, bool) {
-        return StreamArtistRotationState.activeWindowWithResolution(
-            _rotations, artistId, _currentIdentityClosure(artistId)
-        );
+        _forwardSupplementalRead();
     }
 
     function rotationAcceptanceNonceState(bytes32 artistId, address account, uint256 nonce)
@@ -886,9 +850,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bool, uint256)
     {
-        return StreamArtistRotationState.acceptanceNonceState(
-            _rotations, _replay, _ownerContext(), artistId, account, nonce
-        );
+        _forwardSupplementalRead();
     }
 
     function provisionalAssociation(bytes32 artistId)
@@ -896,9 +858,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (R.ProvisionalAssociation memory)
     {
-        return StreamArtistRotationState.associationWithResolution(
-            _rotations, artistId, _currentIdentityClosure(artistId)
-        );
+        _forwardSupplementalRead();
     }
 
     function provisionalRecordEligible(bytes32 artistId, R.ProvisionalAssociation calldata a)
@@ -906,19 +866,15 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bool)
     {
-        return StreamArtistRotationState.eligible(_rotations, artistId, a);
+        _forwardSupplementalRead();
     }
 
     function artistWindowInfo(bytes32 parameter) external view returns (uint64, uint64, uint64) {
-        return StreamArtistWindowConfiguration.info(
-            _rotations, _estate, _unavailability, _dormancy, parameter
-        );
+        _forwardSupplementalRead();
     }
 
     function artistWindowScope(bytes32 parameter) external view returns (bytes32) {
-        return StreamArtistWindowConfiguration.scope(
-            _rotations, _estate, _unavailability, _dormancy, parameter
-        );
+        _forwardSupplementalRead();
     }
 
     function artistWindowStateHash(bytes32 parameter, uint64 value, uint64 revision)
@@ -926,9 +882,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bytes32)
     {
-        return StreamArtistWindowConfiguration.stateHash(
-            _rotations, _estate, _unavailability, _dormancy, parameter, value, revision
-        );
+        _forwardSupplementalRead();
     }
 
     function configureArtistWindow(
@@ -953,11 +907,11 @@ contract StreamArtistIdentityAuthority is
     }
 
     function nextRegistrationNonce() external view returns (uint256) {
-        return _identity.nextRegistrationNonce;
+        _forwardSupplementalRead();
     }
 
     function activeIdentity(address account) external view returns (bytes32) {
-        return _identity.activeIdentity[account];
+        _forwardSupplementalRead();
     }
 
     function _ownerContext() private view returns (StreamArtistIdentityState.OwnerContext memory) {
@@ -981,8 +935,7 @@ contract StreamArtistIdentityAuthority is
             bytes32 identityRecordHash
         )
     {
-        T.Identity storage item = _identity.identities[artistId];
-        return (item.authorityAddress, item.authorityClass, item.status, item.identityRecordHash);
+        _forwardSupplementalRead();
     }
 
     function identityDocumentBytes(bytes32 documentHash) external view returns (bytes memory) {
@@ -1010,10 +963,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bool valid, uint64 recorded, uint64 current)
     {
-        D.Record storage item = _delegations.records[grant];
-        recorded = _estate.grantEpoch[grant];
-        current = _estate.delegationEpoch[item.grant.artistId];
-        valid = item.grantor != address(0) && recorded == current;
+        _forwardSupplementalRead();
     }
 
     function collaboratorRegistrationNonceState(address account, uint256 nonce)
@@ -1021,9 +971,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bool, uint256)
     {
-        return StreamArtistCollaboratorIdentityState.nonceState(
-            _collaboratorAccounts, _replay, _ownerContext(), account, nonce
-        );
+        _forwardSupplementalRead();
     }
 
     function registerCollaboratorIdentity(
@@ -1052,14 +1000,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bool, uint256)
     {
-        bytes32 lane = StreamArtistDelegationState.lane(artistId, delegate);
-        return (
-            _replay[_replayKey(
-                        keccak256("identity_authority.replay.delegated_nonce"),
-                        keccak256(abi.encode(lane, nonce))
-                    )].status != 0,
-            _delegations.hints[lane]
-        );
+        _forwardSupplementalRead();
     }
 
     function grantDelegation(
@@ -1390,7 +1331,7 @@ contract StreamArtistIdentityAuthority is
     }
 
     function stewardSanctionGrant(bytes32 id) external view returns (bool, bytes32) {
-        return StreamArtistStewardSanctionState.current(_stewardGrants, _rotations, id);
+        _forwardSupplementalRead();
     }
 
     function stewardSanctionGrantRecord(bytes32 hash)
@@ -1402,7 +1343,7 @@ contract StreamArtistIdentityAuthority is
     }
 
     function stewardSanctionGrantSignature(bytes32 hash) external view returns (bytes memory) {
-        return _identity.signatures[hash];
+        _forwardSupplementalRead();
     }
 
     function stewardSanctionGrantDigest(SG.Grant calldata p, T.Authorization calldata a)
@@ -1410,7 +1351,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bytes32)
     {
-        return StreamArtistStewardSanctionState.digest(_environment(), p, a);
+        _forwardSupplementalRead();
     }
 
     function grantStewardCapabilities(
@@ -1438,21 +1379,19 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bytes32, uint32)
     {
-        return (
-            _stewardCapabilityGrants.head[appointment], _stewardCapabilityGrants.added[appointment]
-        );
+        _forwardSupplementalRead();
     }
 
     function artistRecordChainHash(bytes32 id) external view returns (bytes32 tip) {
-        (tip,) = StreamArtistHistoryState.lane(1, id);
+        _forwardSupplementalRead();
     }
 
     function collectionRecordChainHash(uint256 id) external view returns (bytes32 tip) {
-        (tip,) = StreamArtistHistoryState.lane(2, bytes32(id));
+        _forwardSupplementalRead();
     }
 
     function artistHistoryLane(uint8 kind, bytes32 id) external view returns (bytes32, uint64) {
-        return StreamArtistHistoryState.lane(kind, id);
+        _forwardSupplementalRead();
     }
 
     function artistHistoryRecordAt(uint8 kind, bytes32 id, uint64 index)
@@ -1460,21 +1399,19 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bytes32, bytes32)
     {
-        return StreamArtistHistoryState.at(
-            core, artistRegistry, kind, id, index, StreamArtistHistoryProof.cap(artistRegistry)
-        );
+        _forwardSupplementalRead();
     }
 
     function artistHistoryContinuityCommitment() external view returns (bytes32) {
-        return StreamArtistHistoryState.commitment();
+        _forwardSupplementalRead();
     }
 
     function artistHistorySourceCursor(address source) external view returns (uint256) {
-        return StreamArtistHistoryState.cursor(source);
+        _forwardSupplementalRead();
     }
 
     function importedHistoryBindingCount() external view returns (uint256) {
-        return StreamArtistHistoryState.bindingCount();
+        _forwardSupplementalRead();
     }
 
     function importedHistoryBinding(uint256 index)
@@ -1482,8 +1419,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (address, uint64, bytes32, bytes32)
     {
-        H.Binding memory b = StreamArtistHistoryState.binding(index);
-        return (b.predecessorRegistry, b.snapshotBlock, b.importRoot, b.manifestHash);
+        _forwardSupplementalRead();
     }
 
     function artistHistoryPredecessorBinding(address source)
@@ -1491,7 +1427,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bool, bytes32, uint256)
     {
-        return StreamArtistHistoryState.predecessorBinding(source);
+        _forwardSupplementalRead();
     }
 
     function verifyImportedRecord(bytes32 root, H.Leaf calldata p, bytes32[] calldata proof)
@@ -1499,7 +1435,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bool)
     {
-        return StreamArtistHistoryState.verifyRecord(root, p, proof);
+        _forwardSupplementalRead();
     }
 
     function importedLaneVerified(uint8 kind, bytes32 id)
@@ -1507,11 +1443,11 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bool, bytes32, uint64)
     {
-        return StreamArtistHistoryState.verified(kind, id);
+        _forwardSupplementalRead();
     }
 
     function artistRegistryCutover() external view returns (bool, address, uint64) {
-        return StreamArtistHistoryState.cutover();
+        _forwardSupplementalRead();
     }
 
     function artistHistoryImportContext(
@@ -1520,9 +1456,7 @@ contract StreamArtistIdentityAuthority is
         bytes32 root,
         bytes32 manifest
     ) external view returns (H.Context memory) {
-        return StreamArtistHistoryState.context(
-            artistRegistry, H.Binding(predecessor, snapshot, root, manifest)
-        );
+        _forwardSupplementalRead();
     }
 
     function syncArtistNativeHistory(address source, uint256 first, H.Receipt[] calldata rows)
@@ -1540,42 +1474,11 @@ contract StreamArtistIdentityAuthority is
         bytes32 actionId
     ) external {
         _check(c, 55);
-        if (c.actor != artistWindowAuthority || actionId == 0) revert T.Unauthorized(c.actor);
-        H.Context memory x = StreamArtistHistoryState.context(artistRegistry, p);
-        bytes memory raw = StreamArtistHistoryProof.fixedRead(
-            artistWindowAuthority,
-            abi.encodeWithSignature("currentAction()"),
-            192,
-            StreamArtistHistoryProof.cap(artistRegistry)
-        );
-        (bool executing, bytes32 id, uint8 cls, bytes32 scope, bytes32 oldHash, bytes32 newHash) =
-            abi.decode(raw, (bool, bytes32, uint8, bytes32, bytes32, bytes32));
-        if (
-            !executing || id != actionId || cls != 1 || scope != x.scopeHash
-                || oldHash != x.oldValueHash || newHash != x.newValueHash
-                || keccak256(raw)
-                    != keccak256(abi.encode(executing, id, cls, scope, oldHash, newHash))
-        ) revert T.InvalidRecord();
-        bytes32 a = _consume(
-            keccak256("identity_authority.replay.governance_action"),
-            keccak256(abi.encode(id, scope, oldHash, newHash)),
-            p.importRoot
-        );
-        bytes32 b = _consume(
-            keccak256("identity_authority.replay.import_binding_key"),
-            keccak256(abi.encode(p)),
-            p.importRoot
-        );
-        StreamArtistHistoryState.commit(
-            core, artistRegistry, p, actionId, StreamArtistHistoryProof.cap(artistRegistry)
-        );
-        _commit(
-            c,
-            keccak256(abi.encode(p, id)),
-            StreamArtistHistoryState.commitment(),
-            keccak256(abi.encode(a, b)),
-            bytes32(0)
-        );
+        StreamArtistIdentityState.Mutation memory m =
+            StreamArtistIdentityHistoryMutation.applyArtistHistoryImport(
+                _replay, _ownerContext(), artistWindowAuthority, c, p, actionId
+            );
+        _commit(c, m.action, m.state, m.replay, m.record);
     }
 
     function applyArtistHistoryLaneVerification(
@@ -1585,46 +1488,20 @@ contract StreamArtistIdentityAuthority is
         bytes32[] calldata proof
     ) external {
         _check(c, 56);
-        H.Binding memory b = StreamArtistHistoryState.binding(index);
-        bytes32 a = _consume(
-            keccak256("identity_authority.replay.verified_lane_key"),
-            keccak256(abi.encode(p.laneKind, p.laneKey)),
-            p.recordChainHash
-        );
-        bytes32 bound = _consume(
-            keccak256("identity_authority.replay.import_binding"),
-            keccak256(abi.encode(index, p.laneKind, p.laneKey)),
-            b.importRoot
-        );
-        StreamArtistHistoryState.verifyTip(
-            core, artistRegistry, index, p, proof, StreamArtistHistoryProof.cap(artistRegistry)
-        );
-        _commit(
-            c,
-            keccak256(abi.encode(index, p, proof)),
-            StreamArtistHistoryState.commitment(),
-            keccak256(abi.encode(a, bound)),
-            bytes32(0)
-        );
+        StreamArtistIdentityState.Mutation memory m =
+            StreamArtistIdentityHistoryMutation.applyArtistHistoryLaneVerification(
+                _replay, _ownerContext(), artistWindowAuthority, c, index, p, proof
+            );
+        _commit(c, m.action, m.state, m.replay, m.record);
     }
 
     function applyArtistRegistryCutover(T.ActionContext calldata c) external {
         _check(c, 57);
-        bytes32 a = _consume(
-            keccak256("identity_authority.replay.one_way_cutover_latch"),
-            bytes32(0),
-            keccak256(abi.encode(block.number))
-        );
-        StreamArtistHistoryState.observe(
-            core, artistRegistry, StreamArtistHistoryProof.cap(artistRegistry)
-        );
-        _commit(
-            c,
-            keccak256(abi.encode(c.actor, block.number)),
-            StreamArtistHistoryState.commitment(),
-            a,
-            bytes32(0)
-        );
+        StreamArtistIdentityState.Mutation memory m =
+            StreamArtistIdentityHistoryMutation.applyArtistRegistryCutover(
+                _replay, _ownerContext(), artistWindowAuthority, c
+            );
+        _commit(c, m.action, m.state, m.replay, m.record);
     }
 
     function _baselineTiming() private view {
@@ -1641,19 +1518,43 @@ contract StreamArtistIdentityAuthority is
         returns (bytes memory)
     {
         _baselineTiming();
-        return
-            StreamArtistIdentityHydration.exportState(
-                _identity, _estate, _dormancy, _unavailability, q
-            );
+        return StreamArtistIdentityHydration.exportEncoded(
+            _identity, _estate, _dormancy, _unavailability, msg.data[4:]
+        );
     }
 
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
         _baselineTiming();
-        StreamArtistIdentityHydration.importState(
-            _identity, _estate, _dormancy, _unavailability, q, p
+        StreamArtistIdentityHydration.importEncoded(
+            _identity, _estate, _dormancy, _unavailability, msg.data[4:]
         );
         StreamArtistHistoryState.activate(
             q.artistId, q.collectionId, StreamArtistHydrationGuards.commitment()
+        );
+    }
+
+    function _forwardSupplementalRead() private view {
+        // Exact declared roots, not offsets inferred from another contract's layout.
+        uint256[15] memory roots;
+        assembly ("memory-safe") {
+            mstore(roots, _identity.slot)
+            mstore(add(roots, 32), _collaboratorAccounts.slot)
+            mstore(add(roots, 64), _delegations.slot)
+            mstore(add(roots, 96), _identityRevisions.slot)
+            mstore(add(roots, 128), _rotations.slot)
+            mstore(add(roots, 160), _identityContests.slot)
+            mstore(add(roots, 192), _succession.slot)
+            mstore(add(roots, 224), _resolutions.slot)
+            mstore(add(roots, 256), _estate.slot)
+            mstore(add(roots, 288), _unavailability.slot)
+            mstore(add(roots, 320), _identityRecovery.slot)
+            mstore(add(roots, 352), _dormancy.slot)
+            mstore(add(roots, 384), _stewardGrants.slot)
+            mstore(add(roots, 416), _stewardCapabilityGrants.slot)
+            mstore(add(roots, 448), _replay.slot)
+        }
+        _returnResolution(
+            StreamArtistIdentitySupplementalReads.read(roots, _ownerContext(), msg.data)
         );
     }
 }

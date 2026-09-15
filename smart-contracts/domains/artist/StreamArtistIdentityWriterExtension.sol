@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistIdentityConsentMutation.sol";
 import "../../interfaces/stream/artist/IStreamArtistUnavailability.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityEstateWriterHost.sol";
 
@@ -360,8 +361,8 @@ contract StreamArtistIdentityWriterExtension is
     ) external onlyHost returns (bytes32 record) {
         _check(c, 2);
         StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentState.acceptance(
-            _identity, _replay, _ownerContext(), c, collectionId, b, a, proof
+        (m, record) = StreamArtistIdentityConsentMutation.consume(
+            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
         );
         _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
@@ -376,8 +377,8 @@ contract StreamArtistIdentityWriterExtension is
     ) external onlyHost returns (bytes32 record) {
         _check(c, 3);
         StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentState.refusal(
-            _identity, _replay, _ownerContext(), c, b, p, a, proof
+        (m, record) = StreamArtistIdentityConsentMutation.consume(
+            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
         );
         _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
@@ -392,8 +393,8 @@ contract StreamArtistIdentityWriterExtension is
     ) external onlyHost returns (bytes32 record) {
         _check(c, 16);
         StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentState.saleConsent(
-            _identity, _replay, _ownerContext(), c, b, p, a, proof
+        (m, record) = StreamArtistIdentityConsentMutation.consume(
+            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
         );
         _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
@@ -408,8 +409,8 @@ contract StreamArtistIdentityWriterExtension is
     ) external onlyHost returns (bytes32 record) {
         _check(c, 14);
         StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentState.policy(
-            _identity, _replay, _ownerContext(), c, b, p, a, proof
+        (m, record) = StreamArtistIdentityConsentMutation.consume(
+            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
         );
         _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
@@ -425,8 +426,8 @@ contract StreamArtistIdentityWriterExtension is
     ) external onlyHost returns (bytes32 record) {
         _check(c, 15);
         StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentState.economics(
-            _identity, _replay, _ownerContext(), c, b, p, designation, a, proof
+        (m, record) = StreamArtistIdentityConsentMutation.consume(
+            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
         );
         _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
@@ -440,8 +441,8 @@ contract StreamArtistIdentityWriterExtension is
     ) external onlyHost returns (bytes32 record) {
         _check(c, 18);
         StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentState.payout(
-            _identity, _replay, _ownerContext(), c, p, a, proof
+        (m, record) = StreamArtistIdentityConsentMutation.consume(
+            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
         );
         _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
@@ -467,8 +468,8 @@ contract StreamArtistIdentityWriterExtension is
     ) external onlyHost returns (bytes32 record) {
         _check(c, 24);
         StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentState.attestation(
-            _identity, _replay, _ownerContext(), c, b, p, a, proof
+        (m, record) = StreamArtistIdentityConsentMutation.consume(
+            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
         );
         _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
@@ -483,8 +484,8 @@ contract StreamArtistIdentityWriterExtension is
     ) external onlyHost returns (bytes32 record) {
         _check(c, 52);
         StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentState.ratification(
-            _identity, _replay, _ownerContext(), c, b, p, a, proof
+        (m, record) = StreamArtistIdentityConsentMutation.consume(
+            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
         );
         _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
@@ -499,8 +500,8 @@ contract StreamArtistIdentityWriterExtension is
     ) external onlyHost returns (bytes32 record) {
         _check(c, 20);
         StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentState.royaltyFreeze(
-            _identity, _replay, _ownerContext(), c, b, p, a, proof
+        (m, record) = StreamArtistIdentityConsentMutation.consume(
+            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
         );
         _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
@@ -515,8 +516,8 @@ contract StreamArtistIdentityWriterExtension is
     ) external onlyHost returns (bytes32 record) {
         _check(c, 17);
         StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentState.contentConsent(
-            _identity, _replay, _ownerContext(), c, b, p, a, proof
+        (m, record) = StreamArtistIdentityConsentMutation.consume(
+            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
         );
         _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
@@ -531,8 +532,8 @@ contract StreamArtistIdentityWriterExtension is
     ) external onlyHost returns (bytes32 record) {
         _check(c, 21);
         StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentState.contentFreeze(
-            _identity, _replay, _ownerContext(), c, b, p, a, proof
+        (m, record) = StreamArtistIdentityConsentMutation.consume(
+            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
         );
         _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);

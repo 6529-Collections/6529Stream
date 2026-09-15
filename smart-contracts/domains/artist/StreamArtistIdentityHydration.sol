@@ -84,4 +84,28 @@ library StreamArtistIdentityHydration {
             StreamArtistNonceAvailability.firstUnused(s.nonceAvailability[q.artistId]);
         if (!available || hint != p.item.nonceHint) revert T.InvalidRecord();
     }
+
+    /// @dev Decode original owner calldata in the fixed worker, avoiding owner-side nested re-encoding.
+    function exportEncoded(
+        StreamArtistIdentityState.State storage s,
+        StreamArtistEstateState.State storage estate,
+        StreamArtistDormancyState.State storage dorm,
+        StreamArtistUnavailabilityState.State storage finding,
+        bytes calldata encoded
+    ) public view returns (bytes memory) {
+        AH.Query memory q = abi.decode(encoded, (AH.Query));
+        return exportState(s, estate, dorm, finding, q);
+    }
+
+    function importEncoded(
+        StreamArtistIdentityState.State storage s,
+        StreamArtistEstateState.State storage estate,
+        StreamArtistDormancyState.State storage dorm,
+        StreamArtistUnavailabilityState.State storage finding,
+        bytes calldata encoded
+    ) public {
+        (, AH.Query memory q, AH.OwnerData memory data,) =
+            abi.decode(encoded, (T.ActionContext, AH.Query, AH.OwnerData, bytes32));
+        importState(s, estate, dorm, finding, q, data);
+    }
 }
