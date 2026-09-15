@@ -247,3 +247,11 @@ reports retain source evidence without becoming performed PREMIS events. Its
 versioned offline derivative rebuilds the literal recorded source package and
 all outputs. Run `python -m unittest tools.museum.test_preservation_events -v`;
 positive typed controls remain distinct from actual recorded evidence.
+
+The [canonical object and historical rights adapter](../../docs/museum-preservation-resources.md)
+exports full PreservationObjectRef facts and exact STREAM_RIGHTS_V1 grants.
+A separate pinned Metadata receipt reader preserves class-7/8 RIGHTS authority;
+independent account links do not become grants. Canonical media subjects,
+explicit properties/relationships and all six use classes remain source-backed.
+Its offline derivative keeps both original evidence families and reports missing
+facts without inventing a current rights selection or detected file format.
