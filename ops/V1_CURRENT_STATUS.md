@@ -24,13 +24,17 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## Latest feature batch
 
-Source through `f3a95d67` integrates actual Artist dormancy and steward appointment
+Source through `8e43cdf5` integrates actual Artist dormancy and steward appointment
 (`d8e80cdc`), explicit operation-59 steward grants (`af59ec92`), and designated
 dormancy-origin recovery, including dismissed/reopened histories (`438e1fb9`,
 `2e1ef8c8`). Historical operations 1-58 retain their identities. Independent
 source reviews are clear; these new Artist lifecycle cases still need native
-and complete actual-governance acceptance. Payload reconstruction, further
-recovery profiles and current Artist deployment sizing remain active work.
+and complete actual-governance acceptance. Payload reconstruction and further recovery profiles remain active work.
+Selected code generation found five oversized Artist products at `e014986c`:
+IdentityAuthority (27,339 bytes), IdentityEstateExtension (27,058),
+EstateExtensionDeployment (28,996), IdentityExtensionDeployment (27,067), and
+OnboardingReadDeployment (25,032). Fixed-worker extraction is assigned to the
+Artist builder; these source-integrated components are not deployable yet.
 
 Declared PLATFORM_WORKS collection/default PROFILE and static/SALE_POSTER
 TEMPLATE auctions are integrated (`bf3e7938`, `5d2211ff`), including prepared
@@ -38,7 +42,10 @@ custody acquisition and later transfer of the same NFT (`fdac400e`, `b90b93e8`).
 Original poster, declaration, actual-token policy, replay and acquisition
 snapshots remain explicit. Source review and selected worker sizes pass;
 these new workflows have authored regressions but no native acceptance yet.
-Known-token platform activation is the next completed source batch under review.
+Known-token platform PROFILE/TEMPLATE activation (families 12/13) is also
+integrated as `8e43cdf5`, with complete bounded source review and seven authored
+regressions. Its selected house measures 23,883 bytes and all 17 selected
+products fit; current-stack execution remains pending.
 
 Complete chunk-backed script/library storage and full HTML/JSON views are
 integrated (`3613ffaf`), with component evidence and explicit full-artwork
@@ -58,7 +65,7 @@ coordinator are retained. Fixed read workers preserve original epoch/seed tests.
 The final import correction produces identical runtime and creation bytecode and
 identical unordered ABI entries to the passing frozen products.
 
-The complete 1,632-source integrated ABI/type check passes at `f3a95d67`.
+The complete 1,644-source integrated ABI/type check passes at `8e43cdf5`.
 This is source composition evidence, not a full-system runtime result. Complete
 current-stack/Safe, stateful/fuzz campaigns, gas, all 37 genesis roles, CI and
 matching new testnet evidence remain required. Fresh entropy recovery/provider
