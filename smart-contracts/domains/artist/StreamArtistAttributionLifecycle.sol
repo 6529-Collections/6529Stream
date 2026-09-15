@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistAttributionBindingTransport
+} from "./StreamArtistAttributionBindingTransport.sol";
+import { StreamArtistAttributionCommitEncoding } from "./StreamArtistAttributionCommitEncoding.sol";
+import { StreamArtistAttestationTransport } from "./StreamArtistAttestationTransport.sol";
 import "./StreamArtistAttestationHydration.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 import "./StreamArtistAttributionBindingMutation.sol";
@@ -144,8 +149,8 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         uint8 savedAuthorityClass
     ) external {
         _check(c, 13);
-        AttrState.Mutation memory m = StreamArtistAttributionAttestations.confirmSanctionFinalized(
-            _attestationStore(), c, b, p, savedSigner, savedAuthorityClass
+        AttrState.Mutation memory m = StreamArtistAttestationTransport.confirmSanctionFinalized(
+            _attestationStore(), msg.data
         );
         _commit(c, m.action, m.stateDelta, 0, 0);
     }
@@ -275,7 +280,13 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes32 replay = _consume(
             keccak256(abi.encode("PLATFORM_WORKS", c.operationId)), scope, hash
         );
-        _commit(c, hash, keccak256(abi.encode(id, _platform.collections[id])), replay, primary);
+        _commit(
+            c,
+            hash,
+            StreamArtistAttributionCommitEncoding.platformState(_platform, id),
+            replay,
+            primary
+        );
         _native(c.operationId, hash, bytes32(0), id);
     }
 
@@ -308,7 +319,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         _commit(
             c,
             keccak256(abi.encode(id, c.actor, evidence, reason, uri, proposedArtist)),
-            keccak256(abi.encode(_attributionClaims.records[record])),
+            StreamArtistAttributionCommitEncoding.claimState(_attributionClaims, record),
             replay,
             record
         );
@@ -411,9 +422,8 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         string calldata reasonURI
     ) external {
         _check(c, 1);
-        AttrState.Mutation memory m = StreamArtistAttributionBindingMutation.claim(
-            _attestationStore(), c, collectionId, b, reasonHash, reasonURI
-        );
+        AttrState.Mutation memory m =
+            StreamArtistAttributionBindingTransport.claimEncoded(_attestationStore(), msg.data);
         _commit(c, m.action, m.stateDelta, 0, 0);
     }
 
@@ -464,9 +474,10 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         uint256 nonce,
         bytes32 recordReference
     ) private {
-        AttrState.Mutation memory m = StreamArtistAttributionBindingMutation.terminate(
-            _attestationStore(), c, b, p, signer, authority, nonce, recordReference
-        );
+        AttrState.Mutation memory m =
+            StreamArtistAttributionBindingTransport.terminateEncoded(
+                _attestationStore(), msg.data, signer, authority, nonce, recordReference
+            );
         _commit(c, m.action, m.stateDelta, 0, 0);
     }
 
@@ -530,8 +541,8 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         uint8 authorityClass
     ) private {
         AttrState.Mutation memory m =
-            StreamArtistAttributionBindingMutation.complete(
-                _attestationStore(), c, collectionId, b, record, signer, authorityClass
+            StreamArtistAttributionBindingTransport.completeEncoded(
+                _attestationStore(), msg.data, signer, authorityClass
             );
         _commit(c, m.action, m.stateDelta, 0, 0);
     }
@@ -546,8 +557,8 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes calldata statement
     ) external returns (bytes32 record) {
         _check(c, 24);
-        AttrState.Mutation memory m = StreamArtistAttributionAttestations.recordAttestation(
-            _attestationStore(), _environment(), b, p, signer, nonce, signedAt, statement
+        AttrState.Mutation memory m = StreamArtistAttestationTransport.recordAttestation(
+            _attestationStore(), _environment(), msg.data
         );
         _commit(c, m.action, m.stateDelta, bytes32(0), m.record);
         _native(c.operationId, m.record, b.artistId, p.collectionId);
@@ -565,16 +576,8 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes calldata statement
     ) external returns (bytes32) {
         _check(c, 24);
-        AttrState.Mutation memory m = StreamArtistAttributionAttestations.recordIdentityAttestation(
-            _attestationStore(),
-            _environment(),
-            b,
-            p,
-            operativeIdentityHash,
-            signer,
-            nonce,
-            signedAt,
-            statement
+        AttrState.Mutation memory m = StreamArtistAttestationTransport.recordIdentityAttestation(
+            _attestationStore(), _environment(), msg.data
         );
         _commit(c, m.action, m.stateDelta, bytes32(0), m.record);
         _native(c.operationId, m.record, b.artistId, p.collectionId);
@@ -589,10 +592,9 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes calldata statement
     ) external returns (bytes32 record) {
         _check(c, 24);
-        AttrState.Mutation memory m =
-            StreamArtistAttributionAttestations.recordAuthenticatedAttestation(
-                _attestationStore(), _environment(), b, p, a, statement
-            );
+        AttrState.Mutation memory m = StreamArtistAttestationTransport.recordAuthenticatedAttestation(
+            _attestationStore(), _environment(), msg.data
+        );
         _commit(c, m.action, m.stateDelta, bytes32(0), m.record);
         _native(c.operationId, m.record, b.artistId, p.collectionId);
         return m.record;
@@ -610,19 +612,9 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes calldata statement
     ) external returns (bytes32) {
         _check(c, 24);
-        AttrState.Mutation memory m =
-            StreamArtistAttributionAttestations.recordAttestationWithAuthority(
-                _attestationStore(),
-                _environment(),
-                b,
-                p,
-                operativeIdentityHash,
-                authority,
-                signer,
-                nonce,
-                signedAt,
-                statement
-            );
+        AttrState.Mutation memory m = StreamArtistAttestationTransport.recordAttestationWithAuthority(
+            _attestationStore(), _environment(), msg.data
+        );
         _commit(c, m.action, m.stateDelta, bytes32(0), m.record);
         _native(c.operationId, m.record, b.artistId, p.collectionId);
         return m.record;
@@ -639,18 +631,9 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes32 metadataHostCodeHash
     ) external returns (bytes32) {
         _check(c, 24);
-        AttrState.Mutation memory m =
-            StreamArtistAttributionAttestations.recordPublicationAttestation(
-                _attestationStore(),
-                _environment(),
-                b,
-                p,
-                authority,
-                nonce,
-                signedAt,
-                statement,
-                metadataHostCodeHash
-            );
+        AttrState.Mutation memory m = StreamArtistAttestationTransport.recordPublicationAttestation(
+            _attestationStore(), _environment(), msg.data
+        );
         _commit(c, m.action, m.stateDelta, bytes32(0), m.record);
         _native(c.operationId, m.record, b.artistId, p.collectionId);
         return m.record;
@@ -680,10 +663,9 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         AH.Query calldata q,
         StreamArtistReadinessHydrationTypes.AttestationInput[] calldata inputs
     ) external view returns (bytes memory) {
-        return
-            StreamArtistAttestationHydration.exportState(
-                _attestationStore(), _environment(), q, inputs
-            );
+        return StreamArtistAttestationHydration.exportState(
+            _attestationStore(), _environment(), q, inputs
+        );
     }
 
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {

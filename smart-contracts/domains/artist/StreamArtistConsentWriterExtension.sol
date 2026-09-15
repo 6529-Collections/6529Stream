@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistConsentTransport } from "./StreamArtistConsentTransport.sol";
 import "../../interfaces/stream/artist/IStreamArtistSanctionConfirmation.sol";
 import "./StreamArtistConsentStorage.sol";
 import "./StreamArtistSanctionConfirmationState.sol";
@@ -94,16 +95,13 @@ contract StreamArtistConsentWriterExtension is StreamArtistConsentStorage {
     ) external onlyHost returns (bytes32 record) {
         _check(c, 16);
         StreamArtistCurrentAuthorityFacts.requireAccepted(b, signer, authority, false);
-        StreamArtistConsentState.Mutation memory m = StreamArtistConsentState.saleConsentForAuthority(
+        StreamArtistConsentState.Mutation memory m = StreamArtistConsentTransport.saleEncoded(
             _saleRecords,
             _latestSaleConsents,
             _replay,
             _consentContext(),
-            b,
-            p,
-            signer,
-            authority.authorityClass,
-            nonce
+            msg.data,
+            authority.authorityClass
         );
         _commit(c, m.action, m.state, m.replay, m.record);
         _native(c.operationId, m.record, b.artistId, p.collectionId);
@@ -287,8 +285,8 @@ contract StreamArtistConsentWriterExtension is StreamArtistConsentStorage {
     ) private returns (bytes32 record) {
         _check(c, 14);
         StreamArtistCurrentAuthorityFacts.requireAccepted(b, signer, authority, false);
-        StreamArtistConsentState.Mutation memory m = StreamArtistConsentState.policyForAuthority(
-            _policies, _replay, _consentContext(), b, p, signer, authority.authorityClass, nonce
+        StreamArtistConsentState.Mutation memory m = StreamArtistConsentTransport.policyEncoded(
+            _policies, _replay, _consentContext(), msg.data, authority.authorityClass
         );
         _commit(c, m.action, m.state, m.replay, m.record);
         _native(c.operationId, m.record, b.artistId, p.collectionId);
@@ -322,19 +320,15 @@ contract StreamArtistConsentWriterExtension is StreamArtistConsentStorage {
         uint8 principalClass
     ) private returns (bytes32 record) {
         StreamArtistConsentState.Mutation memory m =
-            StreamArtistConsentState.economicsAssociatedForAuthority(
+            StreamArtistConsentTransport.economicsEncoded(
                 _economics,
                 _recordDelegation,
                 _replay,
                 _economicsAssociations,
                 _associatedEconomicsRecords,
                 _consentContext(),
-                b,
-                p,
-                designation,
-                signer,
+                msg.data,
                 principalClass,
-                nonce,
                 grant
             );
         _commit(c, m.action, m.state, m.replay, m.record);
@@ -352,18 +346,14 @@ contract StreamArtistConsentWriterExtension is StreamArtistConsentStorage {
     ) private returns (bytes32 record) {
         _check(c, 52);
         StreamArtistCurrentAuthorityFacts.requireAccepted(b, signer, authority, false);
-        StreamArtistConsentState.Mutation memory m =
-            StreamArtistConsentState.ratificationForAuthority(
-                _ratifications,
-                _ratificationRecords,
-                _replay,
-                _consentContext(),
-                b,
-                p,
-                signer,
-                authority.authorityClass,
-                nonce
-            );
+        StreamArtistConsentState.Mutation memory m = StreamArtistConsentTransport.ratificationEncoded(
+            _ratifications,
+            _ratificationRecords,
+            _replay,
+            _consentContext(),
+            msg.data,
+            authority.authorityClass
+        );
         _commit(c, m.action, m.state, m.replay, m.record);
         _native(c.operationId, m.record, b.artistId, p.collectionId);
         return m.record;
@@ -446,41 +436,21 @@ contract StreamArtistConsentWriterExtension is StreamArtistConsentStorage {
         _check(c, 17);
         StreamArtistCurrentAuthorityFacts.requireAccepted(b, signer, authority, false);
         StreamArtistContentHashes.validateConsent(p);
-        record = StreamArtistContentHashes.consentRecord(
-            _environment(), p, b.artistId, signer, authority.authorityClass, nonce, _now()
-        );
-        bytes32 scope = keccak256(abi.encode(p, b.generation));
-        bytes32 key = _consume(
-            keccak256("consent_finality.replay.content_consent_key"),
-            keccak256(abi.encode(scope, record)),
-            record
-        );
-        IStreamArtistContentRecordsOwner.ConsentRecord memory item =
-            IStreamArtistContentRecordsOwner.ConsentRecord(
-                record, b.artistId, b.generation, p, authority.authorityClass
+        StreamArtistConsentState.Mutation memory m =
+            StreamArtistConsentTransport.contentConsentEncoded(
+                _contentConsents,
+                _latestContentConsent,
+                _replay,
+                _consentContext(),
+                msg.data,
+                authority.authorityClass
             );
-        _contentConsents[record] = item;
-        _latestContentConsent[scope] = record;
-        _commit(
-            c,
-            keccak256(abi.encode(b, p, signer, nonce)),
-            keccak256(abi.encode(scope, item)),
-            keccak256(abi.encode(key, record)),
-            record
-        );
+        record = m.record;
+        _commit(c, m.action, m.state, m.replay, record);
         _native(c.operationId, record, b.artistId, p.collectionId);
-        emit ArtistContentConsentRecorded(
-            1,
-            p.collectionId,
-            p.familyId,
-            signer,
-            p.newStateHash,
-            authority.authorityClass,
-            nonce,
-            _now(),
-            record
+        StreamArtistConsentTransport.emitContentConsentEncoded(
+            msg.data, record, authority.authorityClass, _now()
         );
-        emit ArtistContentRecordContext(1, record, p.metadataContract, b.artistId);
     }
 
     function _currentAuthorizeContentFreeze(
@@ -494,51 +464,21 @@ contract StreamArtistConsentWriterExtension is StreamArtistConsentStorage {
         _check(c, 21);
         StreamArtistCurrentAuthorityFacts.requireAccepted(b, signer, authority, true);
         StreamArtistContentHashes.validateFreeze(p);
-        record = StreamArtistContentHashes.freezeRecord(
-            _environment(), p, b.artistId, signer, authority.authorityClass, nonce, _now()
-        );
-        bytes32 key = _consume(
-            keccak256("consent_finality.replay.freeze_key"),
-            keccak256(abi.encode(keccak256("CONTENT"), p.collectionId, b.generation, record)),
-            record
-        );
-        Content.FreezeRecord memory item = Content.FreezeRecord(
-            record,
-            b.artistId,
-            b.generation,
-            p.metadataContract,
-            p.lockClasses,
-            p.expectedStateHash,
-            authority.authorityClass
-        );
-        _contentFreezes[record] = item;
-        for (uint256 i; i < p.lockClasses.length; ++i) {
-            _latestContentFreeze[
-                keccak256(
-                    abi.encode(p.collectionId, b.generation, p.metadataContract, p.lockClasses[i])
-                )
-            ] = record;
-        }
-        _commit(
-            c,
-            keccak256(abi.encode(b, p, signer, nonce)),
-            keccak256(abi.encode(p.collectionId, item)),
-            keccak256(abi.encode(key, record)),
-            record
-        );
+        StreamArtistConsentState.Mutation memory m =
+            StreamArtistConsentTransport.contentFreezeEncoded(
+                _contentFreezes,
+                _latestContentFreeze,
+                _replay,
+                _consentContext(),
+                msg.data,
+                authority.authorityClass
+            );
+        record = m.record;
+        _commit(c, m.action, m.state, m.replay, record);
         _native(c.operationId, record, b.artistId, p.collectionId);
-        emit ArtistContentFreezeAuthorized(
-            1,
-            p.collectionId,
-            signer,
-            p.lockClasses,
-            p.expectedStateHash,
-            authority.authorityClass,
-            nonce,
-            _now(),
-            record
+        StreamArtistConsentTransport.emitContentFreezeEncoded(
+            msg.data, record, authority.authorityClass, _now()
         );
-        emit ArtistContentRecordContext(1, record, p.metadataContract, b.artistId);
     }
 
     function _consentContext() private view returns (StreamArtistConsentState.Context memory) {
