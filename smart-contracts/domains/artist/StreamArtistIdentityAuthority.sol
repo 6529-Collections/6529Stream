@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistDormancyRecovery } from "./StreamArtistDormancyRecovery.sol";
 import "../../interfaces/stream/artist/IStreamArtistStewardCapabilities.sol";
 import {
     StreamArtistStewardCapabilityTypes as SC
@@ -489,12 +490,13 @@ contract StreamArtistIdentityAuthority is
         IdentityRecovery.Request calldata p,
         T.Authorization calldata a
     ) external view returns (IdentityRecovery.Context memory) {
-        return StreamArtistIdentityRecoveryState.contextWithEstate(
+        return StreamArtistDormancyRecovery.context(
             _identityRecovery,
             _identity,
             _rotations,
             _resolutions,
             _estate,
+            _dormancy,
             _succession,
             _identityContests,
             _ownerContext(),

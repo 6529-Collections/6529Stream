@@ -274,6 +274,18 @@ library StreamArtistIdentityRecoveryMutation {
         } else {
             guardian = _guardian(s, rotations, i.owner, i.request.artistId, c.incumbent);
         }
+        return prepareWithGuardian(s, rotations, replay, i, c, guardian);
+    }
+
+    /// @dev Fixed callers derive this guardian from the same authenticated context; not an external owner admission.
+    function prepareWithGuardian(
+        RecoveryState.State storage s,
+        StreamArtistRotationState.State storage rotations,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        RecoveryState.PrepareInput memory i,
+        Recovery.Context memory c,
+        R.GuardianRecord memory guardian
+    ) public returns (StreamArtistIdentityState.Mutation memory m, bytes32 associationHash) {
         A.Witness memory w = i.witness;
         _requireAppealWitness(
             s, rotations, i.owner, i.request, w.proposer, w.roleMutationHash, w.roleRevision

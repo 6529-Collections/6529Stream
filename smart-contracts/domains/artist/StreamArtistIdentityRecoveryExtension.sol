@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistDormancyRecovery } from "./StreamArtistDormancyRecovery.sol";
 import { StreamArtistGuardianAppealDeployment } from "./StreamArtistGuardianAppealDeployment.sol";
 import {
     StreamArtistGuardianSelectionDeployment
@@ -92,12 +93,13 @@ contract StreamArtistIdentityRecoveryExtension is
                 || witness.executorCodeHash != _recoveryExecutorCodeHash
         ) revert T.InvalidBinding();
         StreamArtistIdentityState.Mutation memory m;
-        (m, association) = StreamArtistIdentityRecoveryState.prepareWithEstate(
+        (m, association) = StreamArtistDormancyRecovery.prepare(
             _identityRecovery,
             _identity,
             _rotations,
             _resolutions,
             _estate,
+            _dormancy,
             _succession,
             _identityContests,
             _replay,
@@ -149,26 +151,26 @@ contract StreamArtistIdentityRecoveryExtension is
     ) external onlyHost returns (bytes32 record) {
         _check(c, 35);
         bytes32 previousVesting = _rotations.latestExecution[p.artistId];
-        StreamArtistIdentityState.Mutation memory m =
-            StreamArtistIdentityRecoveryState.recoverWithEstate(
-                _identityRecovery,
-                _identity,
-                _rotations,
-                _resolutions,
-                _estate,
-                _succession,
-                _identityContests,
-                _replay,
-                StreamArtistIdentityRecoveryState.Input(
-                    _ownerContext(),
-                    c,
-                    p,
-                    a,
-                    proof,
-                    governance,
-                    IStreamArtistIdentityContestOwner(address(this)).artistWindowAuthority()
-                )
-            );
+        StreamArtistIdentityState.Mutation memory m = StreamArtistDormancyRecovery.recover(
+            _identityRecovery,
+            _identity,
+            _rotations,
+            _resolutions,
+            _estate,
+            _dormancy,
+            _succession,
+            _identityContests,
+            _replay,
+            StreamArtistIdentityRecoveryState.Input(
+                _ownerContext(),
+                c,
+                p,
+                a,
+                proof,
+                governance,
+                IStreamArtistIdentityContestOwner(address(this)).artistWindowAuthority()
+            )
+        );
         _noteGuardianVesting(
             _environment(), V.Input(p.artistId, m.record, previousVesting, _revision + 1, 35), m
         );

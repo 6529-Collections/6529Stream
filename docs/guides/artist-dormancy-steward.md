@@ -105,7 +105,7 @@ fixture JSON files, including the original Arweave fixtures, into any frozen
 capture at preparation time. Do not interpret the large unit harness gas/code
 limits as deployable product or transaction-capacity evidence.
 
-The earlier recovery-history consumers retain their documented estate/op35
-profiles; this batch does not add dormancy-origin elected recovery or guardian
-supersession histories. Those follow-ups must authenticate the new admitted
-operation-43 origin explicitly.
+The subsequent [designated dormancy recovery](artist-dormancy-recovery.md)
+reader authenticates the new admitted operation-43 origin for its first class-3
+elected recovery. Dormancy-origin closed/intervening histories, guardian
+supersession and steward-origin adjudication remain explicit follow-up profiles.
