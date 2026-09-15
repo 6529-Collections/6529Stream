@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | a0f6535a: both dormancy/rotation recovery batches, typed entropy-authority client and actual-current OwnerRecords capture recipe integrated. All 1,808 sources pass ABI/type checking; 175 client and 10 owner-capture Python tests pass. New native acceptance remains pending in addition to the unchanged frozen native4 run. Immutable RC1 remains 569bf87f1fa808787d324f6e1582924b5ccf1d40. |
+| Source checkpoint | `0be87be5`: CollectionViews, disputes 44–46, runtime/escrow recovery and burn redemption integrated.1,841-source ABI/type check passes at preceding 0d7c1b57; 17 burn,9 Views and 17 corrected escrow focused tests pass. Older native4 completed 167 passed /39 failed; repairs assigned. Immutable RC1 remains 569bf87f1fa808787d324f6e1582924b5ccf1d40. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -49,8 +49,10 @@ results and actual remaining acceptance. Task-owned queue notes can be local to
 the lead until its next implementation commit; this file owns shared assignments.
 
 Independent source review runs at useful batch boundaries. Integration happens
-frequently and does not wait for a full release-evidence cycle. The existing
-frozen native compilation remains isolated; no lead starts a duplicate compiler.
+frequently and does not wait for a full release-evidence cycle. Native captures
+remain isolated; root coordinates compiler scope and consumes
+completed results before assigning affected reruns. The earlier native4 run has
+completed and its failures have explicit owners.
 After the implementation batch stabilizes, root owns complete current-stack/Safe,
 fuzz/stateful, gas/capacity and final release/testnet acceptance. Build, test and
 runtime integration statuses stay separate in the shared feature checklist.
@@ -95,10 +97,10 @@ pending checks. The immutable RC1 remains the released baseline.
 
 | Owner | Implementation batch |
 | --- | --- |
-| Integrator | Running the frozen 28-suite Artist/entropy/current-Core/Safe batch at ee0f0159 while integrating subsequent features. Owns actual integration, native results and candidate closure. |
-| Artist builder | Building attribution dispute operations44–46. Both designated-dormancy rotation recovery batches are source-integrated; multi-party policy and delegated consent gaps are explicit in the feature checklist. |
-| Revenue builder | Building common runtime/factory lifecycle and incident escrow recovery. Entropy-authority client is integrated and all175 client tests pass. |
-| Fourth engineer | Building the current CollectionViews host. OwnerRecords capture recipe is integrated;10 Python tests pass,3 native recipes and genuine positive capture remain pending. |
+| Integrator | Native4 completed 167 passed /39 failed. Own entropy dependency diagnosis and canonical current-graph harness preparation; burn redemption passes 17 focused tests. Continue missing burn-to-mint/gates/counters and integrate reviewed feature handoffs. |
+| Artist builder | Disputes44–46 integrated; reviewed 47–50 handoff d95e8aaa awaits integration. Repair native4 authority/hydration/URI and recovery fixture failures, then continue withdrawal, multi-party policy, delegated consent and remaining Artist queue. |
+| Revenue builder | Runtime/factory lifecycle and incident escrow recovery integrated; 17 corrected focused tests pass. Build frozen economic Resolver continuity, then remaining commerce/client/distribution queue. Actual-governance and complete paid-flow acceptance remain. |
+| Fourth engineer | CollectionViews integrated with 9 focused tests passing. Build actual selectable STATIC route and transitive raw-source reads; renderer prerequisite c0369e0b awaits review/integration. Continue preservation/museum queue. |
 
 Comprehensive current-stack/Safe integration, fuzz and stateful campaigns, gas
 conformance, complete genesis inventory, CI and matching new testnet evidence

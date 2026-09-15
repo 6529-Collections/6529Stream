@@ -25,6 +25,33 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 | Developer client and operator | RC1 client remains usable. Compiler-selected typed clients are integrated as `e409c134`, with 52 passing tests, independent review and exact generation/typechecking against accepted native output. Earlier local graph deployment completed 530 transactions within the deployment ceiling. | Four explicit current native auction/bid/custody signing helpers are integrated (`db3fca94`), with 59 client tests and independently reproduced actual-getter encoding vectors. Complete workflow examples and latest graph activation remain. The deployment rehearsal records `productsActivated=false`; it is not a full product launch. |
 | Candidate and testnet | Immutable supported RC1 and its Sepolia evidence are complete. | Expanded full-v1 implementation, complete Safe call inventory, required fuzz/stateful campaigns, all 37 genesis roles, gas conformance, full CI, new source freeze and matching testnet evidence remain. |
 
+## Disputes, views, recovery and redemption batch
+
+Integrated source `0be87be5` adds CollectionViews (`63e3236b`), Artist disputes 44–46
+(`6c8bb4ea`), shared revenue runtime lifecycle and incident escrow recovery
+(`663aa5e6`) and burn-to-redeem (`c7f18a83`). Four explicit imports (`0d7c1b57`)
+resolve a combined-tree alias collision; all 1,841 sources pass ABI/type checking.
+The subsequent escrow helper correction changes only expected-revert handling.
+
+Root focused runs pass all 17 burn-redemption tests (including 256 fuzz inputs
+and a threshold Safe), all 9 CollectionViews tests, and all 17 escrow recovery
+tests. The original escrow capture had3 failing Safe retry oracles; the exact
+GS013 and complete rollback checks remain after their test-only correction.
+All production products measured in these separate captures fit. Actual current
+Core/governance/operator joins and the full paid-sale recovery flow remain.
+
+The older frozen native4 run has completed: 167 tests pass and 39 fail; all 647
+production products fit. Artist fixture/preimage/URI/recipe failures are assigned
+to the Artist lead; root owns the five entropy-dependency failures and three
+current-graph artifact harness failures. The failed capture is retained.
+These results do not cover newer source or establish full-v1 acceptance.
+
+Reviewed repudiation 47–50 handoff `d95e8aaa` awaits integration/native execution.
+The metadata lead is building mandatory selectable STATIC rendering; the revenue
+lead is building frozen economic Resolver continuity. Root continues the missing
+mint/gate/counter/burn-to-mint features and owns combined delivery. The shared
+feature checklist records build, execution and runtime integration separately.
+
 ## Recovery, client and owner-capture source batch
 
 Integrated through `a0f6535a`: designated-dormancy recovery after executed
@@ -34,14 +61,15 @@ capture recipe (`a0f6535a`). All1,808 sources pass ABI/type checking in14.422s.
 All175 client tests plus generation/build/type checks pass on integration;
 all10 OwnerRecords capture Python tests and deterministic fixtures pass.
 Fourteen new Artist cases and three OwnerRecords contract cases are authored
-and source-reviewed but remain native-pending. The existing frozen native4
-compilation is unchanged and excludes this batch.
+and source-reviewed but remain native-pending. The native4 source excludes this
+batch; its subsequently completed result is recorded above.
 
 The shared checklist now explicitly separates missing multi-party collaborator
 policy and ARTIST_DELEGATED consent from basic collaborator/delegation support.
 The initial consent-mode wording was corrected against the actual binding
 admission and normative modes; it did not represent implemented mode2 behavior.
-Builders continue disputes, incident escrow/runtime lifecycle and CollectionViews.
+Those three feature batches are now integrated as recorded above; their broader
+acceptance and the remaining feature queues continue.
 
 ## Artist deployment repairs and continuing feature work
 

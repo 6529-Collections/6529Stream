@@ -21,6 +21,10 @@ their own scope and must not be read as a list of installed features.
 | Inventory native artwork dependencies and prove their archival coverage | [Render-critical inventory and archive bundles](guides/preservation-inventory.md) |
 | Validate retained Linked Art documents offline | [Museum tooling](../tools/museum/README.md), [validation boundary](museum-linked-art-validation.md) |
 | Declare platform works, file attribution claims and inspect corrective binding | [Platform works](guides/artist-platform-works.md) |
+| File and answer Artist attribution disputes | [Attribution disputes](artist-attribution-disputes.md) |
+| Publish complete independent collection views | [CollectionViews](integrations/collection-views.md) |
+| Burn a Stream token and retain a redemption receipt | [Burn redemption](integrations/burn-redemption.md) |
+| Recover incident escrow and manage factory/runtime status | [Runtime and escrow recovery](guides/revenue-runtime-escrow-recovery.md) |
 | Fund native-sale reveals and claim unused ETH | [Immediate sale payments](native-immediate-reveal.md) |
 | Publish test-image records through actual contracts and export four museum formats | [Current media capture](museum-current-media-capture.md) |
 | Run a second artist through sales and auctions | [Product scenarios](integrations/product-demo.md) |
