@@ -47,8 +47,12 @@ post-migration revenue read that still expects the original Artist Registry.
 The remaining failure is an empty history read returning an array panic after
 the forged import was correctly rejected. Explicit bounds and regression cases
 are integrated as 3f80697f; their native rerun is pending. Both revenue resolver
-families are being updated to consume the authenticated completed successor.
-This frozen capture predates the later Metadata and publication work below.
+families now consume the authenticated completed successor (b60ae515), including
+live collection/template/snapshot consent paths. Independent source review is
+clear, original host ABIs/storage are preserved, and all five measured products
+fit; the Primary resolver is 23,356 runtime bytes. Eight new regression cases
+remain native-pending. This frozen capture predates those repairs and the later
+Metadata and publication work below.
 
 The integrator reran the existing owner accumulator suite: all five cases pass,
 including 256 fuzz inputs, original flat-word state/record hash oracles, actual
@@ -72,8 +76,13 @@ Artist publication candidate callback succeeds cold in 207,951 gas within the
 unchanged 400,000 budget. All 43 measured production products fit; Metadata
 runtime is 24,239 bytes. The earlier 22/23 failure and oversized capture remain
 historical evidence. The real Artist migration and same-Metadata fresh
-publication join remains a separate test in progress, with typed Core and
-governance boundaries explicit.
+publication join is integrated as 76f1ef26, with three new cases and all seven
+original publication tests preserved. Independent source review is clear;
+Core/governance/router boundaries remain explicit. These cases and the new
+Resolver cases are included in the single frozen eleven-suite, 749-source native
+run at b60ae515. It is compiling; the complete 1,780-source ABI/type check passes
+at that source. The run predates the new Artist/entropy join, fixture
+optimization and dormancy increment below; it has not been restarted.
 
 Complete original publication-attestation hydration is integrated as d7bfd3be.
 The explicit operation-60 profile preserves original evidence, signatures,
@@ -90,15 +99,49 @@ normal CREATE (64f27fde), preserving constructors, caller, nonce order and
 production admission checks. The bounded prototype passes an actual Archive
 constructor/storage probe and one unchanged Artist checkpoint case. Test
 creation size decreased in the recorded captures, but those captures differ;
-a matched-source compile-speed improvement has not yet been measured.
+a matched-source compile-speed improvement has not yet been measured. The
+same artifact-CREATE approach now replaces 60 further constructor embeddings
+across six hydration/history fixtures (02afb088). Independent review confirms
+unchanged constructor arguments, CREATE order/caller/value and test assertions.
+Native execution of this extension remains pending.
+
+Five actual Artist/Safe/Archive plus EntropyCoordinator recovery cases are
+integrated as 6556d8b1. They cover exact operation-17 consent evidence, scope and
+journal binding, changed inputs, provider callback rollback, executor fee credit,
+Archive failure/retry and a fresh consent for a later recovery step. Core,
+governance execution context, roles and the upstream provider remain explicit
+typed boundaries. Independent source/oracle review is clear; these cases have
+not executed and do not prove the actual mint/Executor/provider join.
+
+Designated-dormancy recovery after closed standing-veto attempts is integrated
+as 5602d753. It retains the original operation-43 appointment and separately
+authenticates its closure, the vetoed pending rotation's closure and the latest
+dismissal. Eight actual Artist/Safe/Archive cases are authored, with independent
+production review clear. They include repeated standing dismissals, later
+compromise dismissals, original history preservation and rollback/retry; native
+execution and current-Core composition remain pending.
+
+Recorded exhibition export is integrated as cd3e9b98 and 38461fb1. The exact
+public independent receipt, registered schema, original subject and offline
+source package determine its input. Repeated identical institution/venue
+declarations share resources while retaining every record's provenance;
+conflicting declarations reject. All 22 focused exhibition and existing
+preservation-graph tests pass on integration, and deterministic schema/profile
+checks pass. Positive exhibition controls are synthetic; the retained actual
+package proves replay with no selected exhibition record, not a positive
+exhibition capture or full museum conformance.
+
+The complete 1,783-source ABI/type check passes at 38461fb1. Source integration
+and these focused Python results do not replace the pending contract execution.
+Builders are implementing the explicit Artist-unavailability route for entropy,
+typed current revenue/Safe workflows and the owner-record loan dossier adapter.
 
 The independently reviewed resumable Safe inventory-opening client workflow
 is integrated as 0f80e00a. All 150 client tests, generation, build and negative
 type checks pass, including 13 new workflow cases. The complete 1,769-source
-Solidity ABI/type check also passes at 0f80e00a. Builders continue the revenue
-successor repair and joined Artist/Metadata behavior while the next frozen
-acceptance cohort is prepared. The immutable RC1 and Sepolia instance remain
-unchanged.
+Solidity ABI/type check also passes at 0f80e00a. The current revenue client
+batch builds on the integrated resolver repair; the frozen acceptance cohort
+continues separately. The immutable RC1 and Sepolia instance remain unchanged.
 
 ## History, credit export and actual rights capture
 

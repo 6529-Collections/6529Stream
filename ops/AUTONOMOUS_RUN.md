@@ -18,7 +18,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Integrated through 3f80697f: repaired Metadata callback, complete publication hydration, exact-artifact Artist fixture and explicit history bounds. Frozen Artist native run completes with 32 passes / eight failures and all 446 production products fitting. Seven failures share the pending revenue successor-selection repair; the history bounds fix is integrated, native-pending. Final Metadata focused run passes all 23 cases including cold callback at the original cap, and all 43 measured products fit. Complete 1,776-source ABI/type check passes. Immutable RC1 remains 569bf87f1fa808787d324f6e1582924b5ccf1d40. |
+| Source checkpoint | Integrated through 38461fb1: both revenue successor consumers, actual Artist/Metadata and Artist/entropy joined cases, further artifact-CREATE fixture reuse, designated-dormancy standing history and recorded exhibition export. Full 1,783-source ABI/type check passes; all 22 focused exhibition/preservation tests and schema checks pass. The existing eleven-suite, 749-source native run remains frozen at b60ae515 and is compiling. Later contract cases remain native-pending. Immutable RC1 remains 569bf87f1fa808787d324f6e1582924b5ccf1d40. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -37,10 +37,10 @@ pending checks. The immutable RC1 remains the released baseline.
 
 | Owner | Implementation batch |
 | --- | --- |
-| Integrator | Reviewed and integrated the four new batches; complete 1,776-source type check passes. All 13 selected publication/history production products fit; preparing the next combined native capture. |
-| Artist builder | Publication hydration and history bounds integrated; independently reviewing the revenue successor repair and its consumer paths. |
-| Revenue builder | Inventory-opening recipe and exact-artifact fixture integrated. Repairing both Primary and Royalty resolvers to use the authenticated completed Artist successor throughout live reads and mutations. |
-| Fourth engineer | Metadata callback gas and host size repaired; all 23 focused cases pass. Building the actual Artist migration plus same-Metadata fresh-publication test, with Core/governance boundaries explicit. |
+| Integrator | Integrated the completed revenue, publication, entropy-join, dormancy and exhibition batches. Preserving the single frozen native capture while verifying and publishing the new source; owns combined actual Core/Executor/Safe acceptance. |
+| Artist builder | Implementing the explicit entropy recovery intent and Artist-unavailability route through the actual existing activity/notice lifecycle; dormancy standing increment delivered. |
+| Revenue builder | Building typed current revenue/Safe workflows for overrides, configured-zero/default royalty snapshots and static/dynamic templates. |
+| Fourth engineer | Building owner-record loan capture/replay and dossier export; exhibition increment delivered and independently reviewed. Reviewing the revenue client batch at handoff. |
 
 Comprehensive current-stack/Safe integration, fuzz and stateful campaigns, gas
 conformance, complete genesis inventory, CI and matching new testnet evidence
