@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "../../helpers/ImmediateRevealFixture.sol";
+import "../../helpers/ArtistArtifactCreate.sol";
 import { StreamArtistExtensionFactory } from "../../../smart-contracts/domains/artist/StreamArtistExtensionFactory.sol";
 
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
@@ -523,7 +524,7 @@ contract ArtistRotationContestHarness is StreamArtistIdentityAuthority {
 }
 
 abstract contract ArtistOnboardingFixture is
-    CharacterizationTestBase,
+    ArtistArtifactCreate, CharacterizationTestBase,
     ArtistEstateArchivalFixture,
     ArtistSaleRegistryFixture
 {
@@ -854,15 +855,15 @@ abstract contract ArtistOnboardingFixture is
         _attestations();
         (bool configured, bytes memory reason) = address(manager).call(_configureData());
         if (!configured) assembly ("memory-safe") { revert(add(reason, 32), mload(reason)) }
-        StreamRevenueEscrow escrow = new StreamRevenueEscrow(
+        StreamRevenueEscrow escrow = StreamRevenueEscrow(payable(_artistArtifactCreate("smart-contracts/domains/revenue/StreamRevenueEscrow.sol:StreamRevenueEscrow", abi.encode(
             factory,
             factory.governanceAuthority(),
             IStreamGasParameterHost.GasParameterConfig("FLUSH_GAS_FLOOR", 12_000_000, 12_000_000, 3)
-        );
+        ))));
         StreamPrimarySaleSettlement recorder =
-            new StreamPrimarySaleSettlement(primary, address(saleModules), escrow);
+            StreamPrimarySaleSettlement(payable(_artistArtifactCreate("smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement", abi.encode(primary, address(saleModules), escrow))));
         nativeSale =
-            new StreamNativeFixedPriceSaleAdapter(
+            StreamNativeFixedPriceSaleAdapter(payable(_artistArtifactCreate("smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol:StreamNativeFixedPriceSaleAdapter", abi.encode(
                 manager,
                 recorder,
                 address(artist),
@@ -871,7 +872,7 @@ abstract contract ArtistOnboardingFixture is
             IStreamNativeRefundDelegatedClaims.DelegationDeployment(
                 address(0), 0, bytes32(0), IStreamGasParameterHost.GasParameterConfig("", 0, 0, 0)
             )
-            );
+            ))));
         _saleRegister(
             saleModules,
             factory.governanceAuthority(),
@@ -2882,19 +2883,19 @@ abstract contract ArtistOnboardingFixture is
         address governance = address(new ArtistUnitGovernance());
         address modules;
         if (actualSaleRegistryFixture) {
-            saleModules = new StreamModuleRegistry(
+            saleModules = StreamModuleRegistry(payable(_artistArtifactCreate("smart-contracts/domains/modules/StreamModuleRegistry.sol:StreamModuleRegistry", abi.encode(
                 IStreamGovernanceExecutor(governance),
                 keccak256("artist sale registry"),
                 "urn:artist-sale-registry"
-            );
+            ))));
             modules = address(saleModules);
         } else {
             modules = address(new ArtistUnitModuleRegistry(governance));
         }
         core.set(keccak256("MODULE_REGISTRY"), modules, false);
-        ledger = new StreamMintLedger();
+        ledger = StreamMintLedger(payable(_artistArtifactCreate("smart-contracts/domains/mint/StreamMintLedger.sol:StreamMintLedger", abi.encode())));
         manager =
-            new StreamMintManager(IStreamCore(address(core)), ledger, IERC165(address(modules)));
+            StreamMintManager(payable(_artistArtifactCreate("smart-contracts/domains/mint/StreamMintManager.sol:StreamMintManager", abi.encode(IStreamCore(address(core)), ledger, IERC165(address(modules))))));
         // Match the integrated live-provider profile; the real delayed Executor
         // raise is integration-owned. This fixture exercises the actual host checks.
         ArtistUnitGovernance(governance)
@@ -2904,13 +2905,13 @@ abstract contract ArtistOnboardingFixture is
         suite.mintManager = address(manager);
         suite.roleRegistry = address(new ArtistUnitRoles(address(this)));
         ArtistUnitRoles(suite.roleRegistry).configureOwner(governance);
-        suite.validator = address(new StreamArtistRegistryValidatorBase());
+        suite.validator = address(StreamArtistRegistryValidatorBase(payable(_artistArtifactCreate("smart-contracts/domains/artist/StreamArtistRegistryValidatorBase.sol:StreamArtistRegistryValidatorBase", abi.encode()))));
         metadata = new ArtistUnitMetadata();
         metadata.configureCore(address(core));
         suite.metadata = address(metadata);
-        factory = new StreamSplitFactory(
-            new StreamAssetPolicyRegistry(governance), governance, _walletGasConfigs()
-        );
+        factory = StreamSplitFactory(payable(_artistArtifactCreate("smart-contracts/domains/revenue/StreamSplitFactory.sol:StreamSplitFactory", abi.encode(
+            StreamAssetPolicyRegistry(payable(_artistArtifactCreate("smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry", abi.encode(governance)))), governance, _walletGasConfigs()
+        ))));
         IStreamSplitWallet.SplitEntry[] memory entries = new IStreamSplitWallet.SplitEntry[](2);
         entries[0] = IStreamSplitWallet.SplitEntry(address(artist), 900_000, keccak256("artist"));
         entries[1] = IStreamSplitWallet.SplitEntry(address(0xFEE), 100_000, keccak256("protocol"));
@@ -2919,7 +2920,7 @@ abstract contract ArtistOnboardingFixture is
         suite.primaryRevenueClass = PRIMARY;
         _deployEstateArchival(address(core), governance);
         sanctionFixture = new ArtistSanctionFinalityFixture();
-        artistExtensionFactory = new StreamArtistExtensionFactory();
+        artistExtensionFactory = StreamArtistExtensionFactory(payable(_artistArtifactCreate("smart-contracts/domains/artist/StreamArtistExtensionFactory.sol:StreamArtistExtensionFactory", abi.encode())));
         uint256 nonce = avm.getNonce(address(this));
         address predictedRegistry = avm.computeCreateAddress(address(this), nonce);
         address predictedArchive = avm.computeCreateAddress(address(this), nonce + 1);
@@ -2931,7 +2932,7 @@ abstract contract ArtistOnboardingFixture is
         for (uint8 i; i < 3; ++i) facadeChildren[i] = artistExtensionFactory.deployRegistry(i + 4, predictedRegistry, predictedCoordinator);
         for (uint8 i; i < 3; ++i) identityChildren[i] = artistExtensionFactory.deployIdentity(i + 1, [predictedIdentity,predictedRegistry,predictedCoordinator,predictedArchive,suite.core,suite.mintManager]);
 
-        ingress = new StreamArtistOnboardingRegistry(
+        ingress = StreamArtistOnboardingRegistry(payable(_artistArtifactCreate("smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol:StreamArtistOnboardingRegistry", abi.encode(
             suite.core,
             suite.mintManager,
             predictedCoordinator,
@@ -2942,27 +2943,27 @@ abstract contract ArtistOnboardingFixture is
             keccak256("unit manifest"),
             address(artistExtensionFactory),
             facadeChildren
-        );
-        archive = new StreamArtistArchiveV2(address(ingress), predictedCoordinator);
+        ))));
+        archive = StreamArtistArchiveV2(payable(_artistArtifactCreate("smart-contracts/domains/artist/StreamArtistArchiveV2.sol:StreamArtistArchiveV2", abi.encode(address(ingress), predictedCoordinator))));
         suite.registry = address(ingress);
         suite.archive = address(archive);
         suite.owners[0] = address(
-            new StreamArtistBindingLifecycle(
+            StreamArtistBindingLifecycle(payable(_artistArtifactCreate("smart-contracts/domains/artist/StreamArtistBindingLifecycle.sol:StreamArtistBindingLifecycle", abi.encode(
                 predictedRegistry,
                 predictedCoordinator,
                 predictedArchive,
                 suite.core,
                 suite.mintManager
-            )
+            ))))
         );
         suite.owners[1] = address(
-            new StreamArtistCollaboratorLifecycle(
+            StreamArtistCollaboratorLifecycle(payable(_artistArtifactCreate("smart-contracts/domains/artist/StreamArtistCollaboratorLifecycle.sol:StreamArtistCollaboratorLifecycle", abi.encode(
                 predictedRegistry,
                 predictedCoordinator,
                 predictedArchive,
                 suite.core,
                 suite.mintManager
-            )
+            ))))
         );
         if (rotationContestFixture) {
             suite.owners[2] = address(
@@ -2978,7 +2979,7 @@ abstract contract ArtistOnboardingFixture is
             );
         } else {
             suite.owners[2] = address(
-                new StreamArtistIdentityAuthority(
+                StreamArtistIdentityAuthority(payable(_artistArtifactCreate("smart-contracts/domains/artist/StreamArtistIdentityAuthority.sol:StreamArtistIdentityAuthority", abi.encode(
                     predictedRegistry,
                     predictedCoordinator,
                     predictedArchive,
@@ -2986,46 +2987,46 @@ abstract contract ArtistOnboardingFixture is
                     suite.mintManager,
                     address(artistExtensionFactory),
                     identityChildren
-                )
+                ))))
             );
         }
         suite.owners[3] = address(
-            new StreamArtistAcceptanceLifecycle(
+            StreamArtistAcceptanceLifecycle(payable(_artistArtifactCreate("smart-contracts/domains/artist/StreamArtistAcceptanceLifecycle.sol:StreamArtistAcceptanceLifecycle", abi.encode(
                 predictedRegistry,
                 predictedCoordinator,
                 predictedArchive,
                 suite.core,
                 suite.mintManager
-            )
+            ))))
         );
         suite.owners[4] = address(
-            new StreamArtistAttributionLifecycle(
+            StreamArtistAttributionLifecycle(payable(_artistArtifactCreate("smart-contracts/domains/artist/StreamArtistAttributionLifecycle.sol:StreamArtistAttributionLifecycle", abi.encode(
                 predictedRegistry,
                 predictedCoordinator,
                 predictedArchive,
                 suite.core,
                 suite.mintManager
-            )
+            ))))
         );
         suite.owners[5] = address(
-            new StreamArtistPayoutLifecycle(
+            StreamArtistPayoutLifecycle(payable(_artistArtifactCreate("smart-contracts/domains/artist/StreamArtistPayoutLifecycle.sol:StreamArtistPayoutLifecycle", abi.encode(
                 predictedRegistry,
                 predictedCoordinator,
                 predictedArchive,
                 suite.core,
                 suite.mintManager
-            )
+            ))))
         );
         suite.owners[6] = address(
-            new StreamArtistConsentFinalityLifecycle(
+            StreamArtistConsentFinalityLifecycle(payable(_artistArtifactCreate("smart-contracts/domains/artist/StreamArtistConsentFinalityLifecycle.sol:StreamArtistConsentFinalityLifecycle", abi.encode(
                 predictedRegistry,
                 predictedCoordinator,
                 predictedArchive,
                 suite.core,
                 suite.mintManager
-            )
+            ))))
         );
-        primary = new StreamRevenueResolver(
+        primary = StreamRevenueResolver(payable(_artistArtifactCreate("smart-contracts/domains/revenue/StreamRevenueResolver.sol:StreamRevenueResolver", abi.encode(
             IStreamCore(address(core)),
             factory,
             governance,
@@ -3033,16 +3034,16 @@ abstract contract ArtistOnboardingFixture is
             IStreamGasParameterHost.GasParameterConfig(
                 "ARTIST_BENEFICIARY_READ_GAS", 200_000, 50_000, 2
             )
-        );
+        ))));
         // Separate real factory/profile proves royalty payout reads cannot substitute
         // the primary resolver's factory, even when both profiles name the same artist.
-        StreamSplitFactory royaltyFactory = new StreamSplitFactory(
+        StreamSplitFactory royaltyFactory = StreamSplitFactory(payable(_artistArtifactCreate("smart-contracts/domains/revenue/StreamSplitFactory.sol:StreamSplitFactory", abi.encode(
             factory.assetPolicyRegistry(), governance, _walletGasConfigs()
-        );
+        ))));
         (profile, wallet) = royaltyFactory.createProfile(entries, keccak256("royalty unit split"));
-        royalty = new StreamRoyaltyResolver(
+        royalty = StreamRoyaltyResolver(payable(_artistArtifactCreate("smart-contracts/domains/revenue/StreamRoyaltyResolver.sol:StreamRoyaltyResolver", abi.encode(
             IStreamCore(address(core)), royaltyFactory, governance, ingress
-        );
+        ))));
         bytes32 royaltyProfile = profile;
         suite.primaryResolver = address(primary);
         suite.royaltyResolver = address(royalty);
@@ -3052,7 +3053,7 @@ abstract contract ArtistOnboardingFixture is
             );
         address finality =
             sanctionFixture.deploy(address(core), address(metadata), address(ingress), governance);
-        coordinator = new StreamArtistOnboardingCoordinator(suite, finality);
+        coordinator = StreamArtistOnboardingCoordinator(payable(_artistArtifactCreate("smart-contracts/domains/artist/StreamArtistOnboardingCoordinator.sol:StreamArtistOnboardingCoordinator", abi.encode(suite, finality))));
         ArtistUnitGovernance(governance)
             .configureContestReads(
                 address(estateFixityRoles),
