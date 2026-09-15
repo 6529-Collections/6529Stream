@@ -1,0 +1,5637 @@
+{
+  "schemaVersion": 1,
+  "qualification": "Explicit current compiler ABI/source fixture; no deployment or onchain execution claim",
+  "inputSha256": "4da9681e5ba511f4adf28e1a3ba2725ef00b27be3a51a2f4cbad7c7fa7477780",
+  "outputSha256": "d9215b59d14d2f80df49e58fc4b869dedfad653ff80f58f9d6c0350ee67ec8e8",
+  "sources": {
+    "smart-contracts/domains/revenue/StreamRevenueResolver.sol": "4b8bc496d2d882c0f62d9098842698d11a9f31a44e020db36eac4d732a88c350",
+    "smart-contracts/domains/revenue/StreamRoyaltyResolver.sol": "73eb1d6d66e2ef33e354b16a6f654883e8f72c18ce274b04c59850fcce1605e8",
+    "smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol": "2d491f9bc231bb25b684b8843c9c793759194ad7976476c324f206dda9f913bc",
+    "smart-contracts/domains/mint/StreamMintManager.sol": "65235456763df6dda98b5fa6f9ddf8765fb363a4de75be812c1557a18d1bc19b",
+    "smart-contracts/interfaces/stream/core/IStreamCorePointers.sol": "d3971717024317891effbb623d6ee4351427d7ba7e6ceed0f79630b5565d3a55",
+    "smart-contracts/domains/revenue/StreamDynamicPrimaryTemplateRules.sol": "986c6da0acffd5843bc58805533b39deeed0f8be17510a4062db72460a39c464",
+    "smart-contracts/domains/revenue/StreamRoyaltySnapshot.sol": "564cf01a5f68b31e9c26768f6181e4fb08adfd6da7ed7bd9d20a8503fcf5480f",
+    "smart-contracts/domains/artist/StreamArtistHashes.sol": "362361bbc9865b3fea6c9b1d3992bf4fb93e180420941070995c9fefb5b863a5",
+    "smart-contracts/domains/revenue/StreamPrimaryTemplateRuntime.sol": "12d4ce193725ca63c2bf7247c566bf86707dc83d5837b833d62b4e262f8472e5"
+  },
+  "preimages": {
+    "collaboratorSource": "6529STREAM_PRIMARY_COLLABORATOR_SOURCE_V1",
+    "snapshotMode": "6529STREAM_SNAPSHOT_ROYALTY_ASSIGNMENT_V1",
+    "economics": "StreamArtistEconomicsConsent(address core,address resolver,bytes32 revenueClass,uint8 scope,uint256 scopeId,bytes32 assignmentHash,uint256 nonce,uint64 deadline)",
+    "primaryTemplate": "6529STREAM_PRIMARY_TEMPLATE_V1"
+  },
+  "abis": {
+    "primary": [
+      {
+        "inputs": [
+          {
+            "internalType": "contract IStreamCore",
+            "name": "core_",
+            "type": "address"
+          },
+          {
+            "internalType": "contract IStreamSplitFactory",
+            "name": "splitFactory_",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "governanceExecutor_",
+            "type": "address"
+          },
+          {
+            "internalType": "contract IStreamArtistAttribution",
+            "name": "artistRegistry_",
+            "type": "address"
+          },
+          {
+            "components": [
+              {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "internalType": "uint256",
+                "name": "genesisValue",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "floor",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint8",
+                "name": "failureClass",
+                "type": "uint8"
+              }
+            ],
+            "internalType": "struct IStreamGasParameterHost.GasParameterConfig",
+            "name": "beneficiaryReadGas",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "parameterId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "actionId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "GasParameterActionAlreadyApplied",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint8",
+            "name": "expectedClass",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint8",
+            "name": "actualClass",
+            "type": "uint8"
+          }
+        ],
+        "name": "GasParameterActionClassMismatch",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "GasParameterActionContextInvalid",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "GasParameterActionIdZero",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "GasParameterActionNotExecuting",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "parameterId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "GasParameterAlreadyRegistered",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "authority",
+            "type": "address"
+          }
+        ],
+        "name": "GasParameterInvalidAuthority",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "parameterId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "GasParameterInvalidConfig",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "expectedHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "actualHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "GasParameterNewStateHashMismatch",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "parameterId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "currentValue",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "newValue",
+            "type": "uint256"
+          }
+        ],
+        "name": "GasParameterNotARaise",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "caller",
+            "type": "address"
+          }
+        ],
+        "name": "GasParameterNotAuthority",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "expectedHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "actualHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "GasParameterOldStateHashMismatch",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "parameterId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "currentValue",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "newValue",
+            "type": "uint256"
+          }
+        ],
+        "name": "GasParameterRaiseBoundExceeded",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "parameterId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "GasParameterRevisionOverflow",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "expectedHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "actualHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "GasParameterScopeHashMismatch",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "parameterId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "GasParameterUnknown",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "requiredCap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "available",
+            "type": "uint256"
+          }
+        ],
+        "name": "InsufficientArtistBeneficiaryGas",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          }
+        ],
+        "name": "InvalidAssignmentScope",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint8",
+            "name": "assignmentType",
+            "type": "uint8"
+          }
+        ],
+        "name": "InvalidAssignmentType",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "InvalidDynamicPrimaryTemplate",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "accountSource",
+            "type": "bytes32"
+          }
+        ],
+        "name": "InvalidMaterializedAccount",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "selected",
+            "type": "address"
+          }
+        ],
+        "name": "InvalidPrimaryArtistRegistry",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "InvalidPrimaryCollection",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "InvalidPrimaryPolicyHash",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "InvalidPrimaryResolverConfiguration",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "index",
+            "type": "uint256"
+          }
+        ],
+        "name": "InvalidPrimaryTemplateEntry",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "totalSharePpm",
+            "type": "uint256"
+          }
+        ],
+        "name": "InvalidPrimaryTemplateTotal",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "suppliedCollectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "InvalidPrimaryTokenIdentity",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "revenueClass",
+            "type": "bytes32"
+          }
+        ],
+        "name": "InvalidRevenueClass",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "splitFactory",
+            "type": "address"
+          }
+        ],
+        "name": "InvalidSplitFactory",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "MissingArtistMaterializationContext",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "PrimaryArtistConsentRequired",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "revenueClass",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          }
+        ],
+        "name": "PrimaryAssignmentFrozen",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "revenueClass",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          }
+        ],
+        "name": "PrimaryAssignmentMissing",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "UnknownPrimaryTemplate",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "UnresolvableArtistBeneficiary",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "accountSource",
+            "type": "bytes32"
+          }
+        ],
+        "name": "UnsupportedAccountSource",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "UnsupportedArtistPrimaryAssignment",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "UnsupportedArtistPrimaryTemplate",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "profileId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "UnverifiedSplitProfile",
+        "type": "error"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "profileId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "artistId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "payoutAccount",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "designationRecordHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "wallet",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "entriesHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bool",
+            "name": "walletDeployed",
+            "type": "bool"
+          }
+        ],
+        "name": "CollectionTemplateMaterialized",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "profileId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "beneficiaryHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "salePoster",
+            "type": "address"
+          }
+        ],
+        "name": "DynamicCollectionTemplateMaterialized",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "parameterId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "genesisValue",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "floor",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint8",
+            "name": "failureClass",
+            "type": "uint8"
+          }
+        ],
+        "name": "GasParameterRegistered",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "parameterId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "host",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "actionId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "oldValue",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "newValue",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "floor",
+            "type": "uint256"
+          }
+        ],
+        "name": "GasParameterUpdated",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "previousOwner",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "newOwner",
+            "type": "address"
+          }
+        ],
+        "name": "OwnershipTransferred",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "revenueClass",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "previousAssignmentHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "admin",
+            "type": "address"
+          }
+        ],
+        "name": "PrimaryAssignmentCleared",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "revenueClass",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "previousAssignmentHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "frozenAssignmentHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "admin",
+            "type": "address"
+          }
+        ],
+        "name": "PrimaryAssignmentFrozenEvent",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "revenueClass",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint8",
+            "name": "assignmentType",
+            "type": "uint8"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "profileId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "policyHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "assignmentHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "admin",
+            "type": "address"
+          }
+        ],
+        "name": "PrimaryAssignmentSet",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "entriesHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "metadataURIHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "templateVersion",
+            "type": "uint16"
+          }
+        ],
+        "name": "PrimaryTemplateCreated",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint16",
+            "name": "index",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "accountSource",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint32",
+            "name": "sharePpm",
+            "type": "uint32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "labelId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "PrimaryTemplateEntryRecorded",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "profileId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "wallet",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "entriesHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "metadataURIHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "salePoster",
+            "type": "address"
+          }
+        ],
+        "name": "PrimaryTemplateMaterialized",
+        "type": "event"
+      },
+      {
+        "inputs": [],
+        "name": "ACCOUNT_SOURCE_COLLECTION_ARTIST",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "ACCOUNT_SOURCE_SALE_POSTER",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "ARTIST_BENEFICIARY_READ_GAS",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "ARTIST_LABEL",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "ASSIGNMENT_TYPE_PROFILE",
+        "outputs": [
+          {
+            "internalType": "uint8",
+            "name": "",
+            "type": "uint8"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "ASSIGNMENT_TYPE_TEMPLATE",
+        "outputs": [
+          {
+            "internalType": "uint8",
+            "name": "",
+            "type": "uint8"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "FAILURE_CLASS_FAIL_CLOSED_PRECHECK",
+        "outputs": [
+          {
+            "internalType": "uint8",
+            "name": "",
+            "type": "uint8"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "FAILURE_CLASS_FORWARDING_CAP",
+        "outputs": [
+          {
+            "internalType": "uint8",
+            "name": "",
+            "type": "uint8"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "FAILURE_CLASS_MIN_GAS_GATE",
+        "outputs": [
+          {
+            "internalType": "uint8",
+            "name": "",
+            "type": "uint8"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "FAILURE_CLASS_NONE",
+        "outputs": [
+          {
+            "internalType": "uint8",
+            "name": "",
+            "type": "uint8"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "GAS_PARAMETER_SCHEMA_VERSION",
+        "outputs": [
+          {
+            "internalType": "uint16",
+            "name": "",
+            "type": "uint16"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "MAX_DYNAMIC_ACCOUNT_SOURCES",
+        "outputs": [
+          {
+            "internalType": "uint16",
+            "name": "",
+            "type": "uint16"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "MAX_TEMPLATE_ENTRIES",
+        "outputs": [
+          {
+            "internalType": "uint16",
+            "name": "",
+            "type": "uint16"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "SCHEMA_VERSION",
+        "outputs": [
+          {
+            "internalType": "uint16",
+            "name": "",
+            "type": "uint16"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "SCOPE_COLLECTION",
+        "outputs": [
+          {
+            "internalType": "uint8",
+            "name": "",
+            "type": "uint8"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "SCOPE_DEFAULT",
+        "outputs": [
+          {
+            "internalType": "uint8",
+            "name": "",
+            "type": "uint8"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "SCOPE_TOKEN",
+        "outputs": [
+          {
+            "internalType": "uint8",
+            "name": "",
+            "type": "uint8"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "SHARE_DENOMINATOR_PPM",
+        "outputs": [
+          {
+            "internalType": "uint32",
+            "name": "",
+            "type": "uint32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "TEMPLATE_VERSION",
+        "outputs": [
+          {
+            "internalType": "uint16",
+            "name": "",
+            "type": "uint16"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "artistRegistry",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "artistRegistryCodeHash",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "revenueClass",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          }
+        ],
+        "name": "clearPrimaryAssignment",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "role",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "shareLabelId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamDynamicPrimaryTemplates.CollaboratorReference",
+            "name": "reference_",
+            "type": "tuple"
+          }
+        ],
+        "name": "collaboratorAccountSource",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "pure",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "core",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "coreCodeHash",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "accountSource",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint32",
+                "name": "sharePpm",
+                "type": "uint32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "labelId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamRevenueResolver.PrimaryTemplateEntry[]",
+            "name": "entries",
+            "type": "tuple[]"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "metadataURIHash",
+            "type": "bytes32"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "role",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "shareLabelId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamDynamicPrimaryTemplates.CollaboratorReference[]",
+            "name": "references",
+            "type": "tuple[]"
+          }
+        ],
+        "name": "createDynamicPrimaryTemplate",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "accountSource",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint32",
+                "name": "sharePpm",
+                "type": "uint32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "labelId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamRevenueResolver.PrimaryTemplateEntry[]",
+            "name": "entries",
+            "type": "tuple[]"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "metadataURIHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "createPrimaryTemplate",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "dynamicPrimaryTemplateFacts",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "entriesHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "metadataURIHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "artistSharePpm",
+            "type": "uint32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "beneficiaryHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "revenueClass",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          }
+        ],
+        "name": "freezePrimaryAssignment",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "frozenAssignmentHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "parameterId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "gasParameter",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "value",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "gasParameterIds",
+        "outputs": [
+          {
+            "internalType": "bytes32[]",
+            "name": "",
+            "type": "bytes32[]"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "parameterId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "gasParameterInfo",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "value",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "floor",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint8",
+            "name": "failureClass",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint64",
+            "name": "revision",
+            "type": "uint64"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "governanceAuthority",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "isDynamicPrimaryTemplate",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "isStreamRevenueResolver",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "pure",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "salePoster",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "deployWallet",
+            "type": "bool"
+          }
+        ],
+        "name": "materializeCollectionPrimaryProfile",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "profileId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "wallet",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "entriesHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "salePoster",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "deployWallet",
+            "type": "bool"
+          }
+        ],
+        "name": "materializeDynamicCollectionPrimaryProfile",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "profileId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "wallet",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "entriesHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "beneficiaryHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "salePoster",
+            "type": "address"
+          }
+        ],
+        "name": "materializePrimaryProfile",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "profileId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "wallet",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "entriesHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "policyHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bool",
+            "name": "frozen",
+            "type": "bool"
+          }
+        ],
+        "name": "previewArtistDefaultPrimaryTemplateAssignment",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.AssignmentFact",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "policyHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bool",
+            "name": "frozen",
+            "type": "bool"
+          }
+        ],
+        "name": "previewArtistDynamicPrimaryTemplateAssignment",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.AssignmentFact",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "profileHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "policyHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bool",
+            "name": "frozen",
+            "type": "bool"
+          }
+        ],
+        "name": "previewArtistPrimaryAssignment",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.AssignmentFact",
+            "name": "fact",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "profileHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "policyHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bool",
+            "name": "frozen",
+            "type": "bool"
+          }
+        ],
+        "name": "previewArtistPrimaryAssignmentForScope",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.AssignmentFact",
+            "name": "fact",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          }
+        ],
+        "name": "previewArtistPrimaryClear",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.AssignmentFact",
+            "name": "fact",
+            "type": "tuple"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "previousHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "policyHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bool",
+            "name": "frozen",
+            "type": "bool"
+          }
+        ],
+        "name": "previewArtistPrimaryTemplateAssignment",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.AssignmentFact",
+            "name": "fact",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "policyHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bool",
+            "name": "frozen",
+            "type": "bool"
+          }
+        ],
+        "name": "previewArtistPrimaryTemplateConsentAssignment",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.AssignmentFact",
+            "name": "fact",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "policyHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bool",
+            "name": "frozen",
+            "type": "bool"
+          }
+        ],
+        "name": "previewArtistScopedPrimaryTemplateAssignment",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.AssignmentFact",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "salePoster",
+            "type": "address"
+          }
+        ],
+        "name": "previewCollectionPrimaryProfile",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "profileId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "wallet",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "entriesHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "salePoster",
+            "type": "address"
+          }
+        ],
+        "name": "previewDynamicCollectionPrimaryProfile",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "profileId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "wallet",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "entriesHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "beneficiaryHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "revenueClass",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint8",
+            "name": "assignmentType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "profileId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "policyHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bool",
+            "name": "frozen",
+            "type": "bool"
+          }
+        ],
+        "name": "primaryAssignmentHash",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          }
+        ],
+        "name": "primaryEconomicsFacts",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bool",
+                "name": "exists",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint8",
+                "name": "assignmentType",
+                "type": "uint8"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "profileId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "templateId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "policyHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bool",
+                "name": "frozen",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct IStreamRevenueResolver.ResolvedPrimaryAssignment",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "primaryTemplate",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "exists",
+            "type": "bool"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "entriesHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "metadataURIHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "primaryTemplateConsentFacts",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "entriesHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "metadataURIHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "artistSharePpm",
+            "type": "uint32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "primaryTemplateEconomicsFacts",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "entriesHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "metadataURIHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "artistSharePpm",
+            "type": "uint32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "index",
+            "type": "uint256"
+          }
+        ],
+        "name": "primaryTemplateEntry",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "accountSource",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "sharePpm",
+            "type": "uint32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "labelId",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "primaryTemplateEntryCount",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "parameterId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "newValue",
+            "type": "uint256"
+          }
+        ],
+        "name": "raiseGasParameter",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "renounceOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "revenueClass",
+            "type": "bytes32"
+          }
+        ],
+        "name": "resolvePrimaryAssignment",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bool",
+                "name": "exists",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint8",
+                "name": "assignmentType",
+                "type": "uint8"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "profileId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "templateId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "policyHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bool",
+                "name": "frozen",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct IStreamRevenueResolver.ResolvedPrimaryAssignment",
+            "name": "resolved",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "revenueClass",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "profileId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "policyHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "setPrimaryProfileAssignment",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "assignmentHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "revenueClass",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "policyHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "setPrimaryTemplateAssignment",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "assignmentHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "splitFactory",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "splitFactoryContract",
+        "outputs": [
+          {
+            "internalType": "contract IStreamSplitFactory",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes4",
+            "name": "id",
+            "type": "bytes4"
+          }
+        ],
+        "name": "supportsInterface",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "newOwner",
+            "type": "address"
+          }
+        ],
+        "name": "transferOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ],
+    "royalty": [
+      {
+        "inputs": [
+          {
+            "internalType": "contract IStreamCore",
+            "name": "core_",
+            "type": "address"
+          },
+          {
+            "internalType": "contract IStreamSplitFactory",
+            "name": "splitFactory_",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "governanceExecutor_",
+            "type": "address"
+          },
+          {
+            "internalType": "contract IStreamArtistAttribution",
+            "name": "artistRegistry_",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "ArtistEconomicsAuthorizationRequired",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "expected",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "actual",
+            "type": "bytes32"
+          }
+        ],
+        "name": "ArtistRoyaltyAssignmentChanged",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "assignmentHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "ArtistRoyaltyFreezeNotAuthorized",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "selected",
+            "type": "address"
+          }
+        ],
+        "name": "InvalidArtistRegistryBinding",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "InvalidRoyaltyCollection",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "InvalidRoyaltyConfiguration",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          }
+        ],
+        "name": "InvalidRoyaltyScope",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "InvalidRoyaltySnapshot",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "profileId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "InvalidRoyaltySplitProfile",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          }
+        ],
+        "name": "InvalidRoyaltyToken",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          }
+        ],
+        "name": "RoyaltyAssignmentFrozen",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          }
+        ],
+        "name": "RoyaltyAssignmentMissing",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "RoyaltyConfigurationFrozen",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "RoyaltyModeAlreadyElected",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "RoyaltySnapshotModeRequired",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "RoyaltySnapshotMutationClosed",
+        "type": "error"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "electionHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "executor",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "core",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint8",
+            "name": "mode",
+            "type": "uint8"
+          }
+        ],
+        "name": "CollectionRoyaltyModeElected",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "previousOwner",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "newOwner",
+            "type": "address"
+          }
+        ],
+        "name": "OwnershipTransferred",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "revenueClass",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "actor",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "previousProfileOrTemplateId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "previousWallet",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "previousRoyaltyBps",
+            "type": "uint16"
+          },
+          {
+            "indexed": false,
+            "internalType": "bool",
+            "name": "wasTemplate",
+            "type": "bool"
+          }
+        ],
+        "name": "RevenueAssignmentCleared",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "revenueClass",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": false,
+            "internalType": "bool",
+            "name": "permanent",
+            "type": "bool"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint8",
+            "name": "freezeMode",
+            "type": "uint8"
+          }
+        ],
+        "name": "RevenueAssignmentFrozen",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "revenueClass",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "actor",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "previousProfileOrTemplateId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "previousWallet",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "previousRoyaltyBps",
+            "type": "uint16"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "profileOrTemplateId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "wallet",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "royaltyBps",
+            "type": "uint16"
+          },
+          {
+            "indexed": false,
+            "internalType": "bool",
+            "name": "isTemplate",
+            "type": "bool"
+          },
+          {
+            "indexed": false,
+            "internalType": "bool",
+            "name": "looseningAdvertised",
+            "type": "bool"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "looseningTermsHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "RevenueAssignmentSet",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "assignmentHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "previousAssignmentHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "royaltyPolicyHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "actor",
+            "type": "address"
+          }
+        ],
+        "name": "RoyaltyAssignmentContext",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "profileId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "wallet",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "royaltyBps",
+            "type": "uint16"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint64",
+            "name": "revision",
+            "type": "uint64"
+          }
+        ],
+        "name": "RoyaltyConfigured",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "profileId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "wallet",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "royaltyBps",
+            "type": "uint16"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint64",
+            "name": "revision",
+            "type": "uint64"
+          }
+        ],
+        "name": "RoyaltyFrozen",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "operationId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "operationRoot",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "revenueClass",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "tokenRoyaltyAssignmentHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "TokenRoyaltySnapshotted",
+        "type": "event"
+      },
+      {
+        "inputs": [],
+        "name": "MAX_ROYALTY_BPS",
+        "outputs": [
+          {
+            "internalType": "uint16",
+            "name": "",
+            "type": "uint16"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "expectedAssignmentHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "applyArtistRoyaltyFreeze",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "artistRegistry",
+        "outputs": [
+          {
+            "internalType": "contract IStreamArtistAttribution",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "artistRegistryCodeHash",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "boundCore",
+        "outputs": [
+          {
+            "internalType": "contract IStreamCore",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "boundCoreCodeHash",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "clearCollectionRoyalty",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          }
+        ],
+        "name": "clearTokenRoyalty",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionRoyalty",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "wallet",
+                "type": "address"
+              },
+              {
+                "internalType": "uint16",
+                "name": "royaltyBps",
+                "type": "uint16"
+              },
+              {
+                "internalType": "bool",
+                "name": "configured",
+                "type": "bool"
+              },
+              {
+                "internalType": "bool",
+                "name": "frozen",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint64",
+                "name": "revision",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "profileId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamRoyaltyResolver.RoyaltyConfig",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionRoyaltyMode",
+        "outputs": [
+          {
+            "internalType": "uint8",
+            "name": "mode",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "electionHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "profileId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint16",
+            "name": "royaltyBps",
+            "type": "uint16"
+          }
+        ],
+        "name": "configureCollectionRoyalty",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "profileId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint16",
+            "name": "royaltyBps",
+            "type": "uint16"
+          }
+        ],
+        "name": "configureDefaultRoyalty",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "profileId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint16",
+            "name": "royaltyBps",
+            "type": "uint16"
+          }
+        ],
+        "name": "configureTokenRoyalty",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "currentArtistRoyaltyAssignment",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.AssignmentFact",
+            "name": "fact",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "currentArtistSnapshotRoyaltyAssignment",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.AssignmentFact",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "currentRoyaltySnapshotSource",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "electionHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "sourceAssignmentHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "modeAssignmentHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "sourceRoyaltyPolicyHash",
+                "type": "bytes32"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "address",
+                    "name": "wallet",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "uint16",
+                    "name": "royaltyBps",
+                    "type": "uint16"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "configured",
+                    "type": "bool"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "frozen",
+                    "type": "bool"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "revision",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "profileId",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct IStreamRoyaltyResolver.RoyaltyConfig",
+                "name": "config",
+                "type": "tuple"
+              }
+            ],
+            "internalType": "struct IStreamRoyaltySnapshot.Source",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "defaultRoyalty",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "wallet",
+                "type": "address"
+              },
+              {
+                "internalType": "uint16",
+                "name": "royaltyBps",
+                "type": "uint16"
+              },
+              {
+                "internalType": "bool",
+                "name": "configured",
+                "type": "bool"
+              },
+              {
+                "internalType": "bool",
+                "name": "frozen",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint64",
+                "name": "revision",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "profileId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamRoyaltyResolver.RoyaltyConfig",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint8",
+            "name": "mode",
+            "type": "uint8"
+          }
+        ],
+        "name": "electCollectionRoyaltyMode",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "freezeCollectionRoyalty",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "freezeDefaultRoyalty",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          }
+        ],
+        "name": "freezeTokenRoyalty",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "profileHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint16",
+            "name": "royaltyBps",
+            "type": "uint16"
+          },
+          {
+            "internalType": "bool",
+            "name": "frozen",
+            "type": "bool"
+          }
+        ],
+        "name": "previewArtistRoyaltyAssignment",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.AssignmentFact",
+            "name": "fact",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "profileHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint16",
+            "name": "royaltyBps",
+            "type": "uint16"
+          },
+          {
+            "internalType": "bool",
+            "name": "frozen",
+            "type": "bool"
+          }
+        ],
+        "name": "previewArtistRoyaltyAssignmentForScope",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.AssignmentFact",
+            "name": "fact",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          }
+        ],
+        "name": "previewArtistRoyaltyClear",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.AssignmentFact",
+            "name": "fact",
+            "type": "tuple"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "previousAssignmentHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "profileHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint16",
+            "name": "royaltyBps",
+            "type": "uint16"
+          },
+          {
+            "internalType": "bool",
+            "name": "frozen",
+            "type": "bool"
+          }
+        ],
+        "name": "previewArtistSnapshotRoyaltyAssignment",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.AssignmentFact",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "renounceOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          }
+        ],
+        "name": "resolveRoyaltyAssignment",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.AssignmentFact",
+            "name": "fact",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "wallet",
+                "type": "address"
+              },
+              {
+                "internalType": "uint16",
+                "name": "royaltyBps",
+                "type": "uint16"
+              },
+              {
+                "internalType": "bool",
+                "name": "configured",
+                "type": "bool"
+              },
+              {
+                "internalType": "bool",
+                "name": "frozen",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint64",
+                "name": "revision",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "profileId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamRoyaltyResolver.RoyaltyConfig",
+            "name": "config",
+            "type": "tuple"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "royaltyPolicyHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          }
+        ],
+        "name": "royaltyEconomicsFacts",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.AssignmentFact",
+            "name": "fact",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "wallet",
+                "type": "address"
+              },
+              {
+                "internalType": "uint16",
+                "name": "royaltyBps",
+                "type": "uint16"
+              },
+              {
+                "internalType": "bool",
+                "name": "configured",
+                "type": "bool"
+              },
+              {
+                "internalType": "bool",
+                "name": "frozen",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint64",
+                "name": "revision",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "profileId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamRoyaltyResolver.RoyaltyConfig",
+            "name": "config",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "core_",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "mappedCollectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "hasMappedCollection",
+            "type": "bool"
+          }
+        ],
+        "name": "royaltyReceiverAndBps",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "receiver",
+            "type": "address"
+          },
+          {
+            "internalType": "uint16",
+            "name": "royaltyBps",
+            "type": "uint16"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          }
+        ],
+        "name": "royaltySnapshot",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bool",
+                "name": "exists",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "manager",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "operationRoot",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "operationId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "preparedProofHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "electionHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "sourceAssignmentHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "modeAssignmentHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "sourceRoyaltyPolicyHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "tokenAssignmentHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "tokenRoyaltyPolicyHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "tokenConfigHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamRoyaltySnapshot.Snapshot",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "operationRoot",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "operationId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "revenueClass",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "expectedRoyaltyAssignmentHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "snapshotTokenRoyaltyAtMint",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "splitFactory",
+        "outputs": [
+          {
+            "internalType": "contract IStreamSplitFactory",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes4",
+            "name": "id",
+            "type": "bytes4"
+          }
+        ],
+        "name": "supportsInterface",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          }
+        ],
+        "name": "tokenRoyalty",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "wallet",
+                "type": "address"
+              },
+              {
+                "internalType": "uint16",
+                "name": "royaltyBps",
+                "type": "uint16"
+              },
+              {
+                "internalType": "bool",
+                "name": "configured",
+                "type": "bool"
+              },
+              {
+                "internalType": "bool",
+                "name": "frozen",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint64",
+                "name": "revision",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "profileId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamRoyaltyResolver.RoyaltyConfig",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "newOwner",
+            "type": "address"
+          }
+        ],
+        "name": "transferOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ],
+    "artist": [
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "acceptedArtist",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "core",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.EconomicsConsent",
+            "name": "p",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "time",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes",
+                "name": "signature",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.Authorization",
+            "name": "a",
+            "type": "tuple"
+          }
+        ],
+        "name": "economicsConsentDigest",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.EconomicsConsent",
+            "name": "p",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "time",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes",
+                "name": "signature",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.Authorization",
+            "name": "a",
+            "type": "tuple"
+          }
+        ],
+        "name": "recordEconomicsConsent",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.EconomicsConsent",
+            "name": "p",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "profileHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "policyHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint16",
+                "name": "royaltyBps",
+                "type": "uint16"
+              },
+              {
+                "internalType": "bool",
+                "name": "frozen",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.FixedEconomicsCandidate",
+            "name": "candidate",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "time",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes",
+                "name": "signature",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.Authorization",
+            "name": "a",
+            "type": "tuple"
+          }
+        ],
+        "name": "recordProspectiveEconomicsConsent",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.EconomicsConsent",
+            "name": "p",
+            "type": "tuple"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "templateId",
+            "type": "bytes32"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "time",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes",
+                "name": "signature",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.Authorization",
+            "name": "a",
+            "type": "tuple"
+          }
+        ],
+        "name": "recordProspectiveTemplateEconomicsConsent",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "revenueClass",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "assignmentHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "requireEconomicsConsent",
+        "outputs": [],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    "manager": [
+      {
+        "inputs": [],
+        "name": "core",
+        "outputs": [
+          {
+            "internalType": "contract IStreamCore",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "phaseId",
+            "type": "bytes32"
+          },
+          {
+            "components": [
+              {
+                "internalType": "bool",
+                "name": "configured",
+                "type": "bool"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "applicationConfigHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "resolverRuntimeHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "electionHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "expectedModeAssignmentHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "expectedSourceRoyaltyPolicyHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamMintRoyaltyPolicy.Policy",
+            "name": "policy",
+            "type": "tuple"
+          }
+        ],
+        "name": "phaseRoyaltyConfigHash",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "phaseId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "phaseRoyaltyPolicy",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bool",
+                "name": "configured",
+                "type": "bool"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "applicationConfigHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "resolverRuntimeHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "electionHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "expectedModeAssignmentHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "expectedSourceRoyaltyPolicyHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamMintRoyaltyPolicy.Policy",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "phaseId",
+            "type": "bytes32"
+          },
+          {
+            "components": [
+              {
+                "internalType": "bool",
+                "name": "configured",
+                "type": "bool"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "applicationConfigHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "resolverRuntimeHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "electionHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "expectedModeAssignmentHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "expectedSourceRoyaltyPolicyHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamMintRoyaltyPolicy.Policy",
+            "name": "policy",
+            "type": "tuple"
+          }
+        ],
+        "name": "registerPhaseRoyaltyPolicy",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ],
+    "core": [
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "pointerType",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "actionId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "target",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "manifestHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "CoreSatellitePointerFrozen",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "pointerType",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "actionId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "newTarget",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "oldTarget",
+            "type": "address"
+          }
+        ],
+        "name": "CoreSatellitePointerUpdated",
+        "type": "event"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "pointerType",
+            "type": "bytes32"
+          }
+        ],
+        "name": "freezeSatellitePointer",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "pointerType",
+            "type": "bytes32"
+          }
+        ],
+        "name": "getSatellitePointer",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "target",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "codeHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bool",
+            "name": "frozen",
+            "type": "bool"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "moduleType",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes4",
+            "name": "interfaceId",
+            "type": "bytes4"
+          },
+          {
+            "internalType": "address",
+            "name": "registry",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "registryStatus",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "moduleManifestHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "deploymentManifestHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint64",
+            "name": "revision",
+            "type": "uint64"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "pointerType",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "newTarget",
+            "type": "address"
+          }
+        ],
+        "name": "updateSatellitePointer",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ]
+  }
+}
