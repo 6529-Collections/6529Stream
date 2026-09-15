@@ -36,6 +36,17 @@ library StreamPreparedNativeRightsRecording {
         address poster
     );
 
+    event PlatformPreparedPrimaryBound(
+        uint16 schemaVersion,
+        bytes32 indexed settlementKey,
+        bytes32 indexed saleKey,
+        bytes32 indexed declarationHash,
+        uint8 mode,
+        bytes32 beneficiaryHash,
+        address poster,
+        bytes32 currentPrimaryPolicyHash
+    );
+
     function execute(
         Context memory x,
         mapping(bytes32 => bool) storage saleConsumed,
@@ -83,7 +94,7 @@ library StreamPreparedNativeRightsRecording {
         saleConsumed[saleKey] = true;
         settlementConsumed[key] = true;
         bool escrowed;
-        if (original.original.mode >= 5 && original.original.mode <= 7) {
+        if (original.original.mode >= 5 && original.original.mode <= 9) {
             escrowed = StreamScopedNativePrimaryExecution.fund(
                 x.funding,
                 c.sale.collectionId,
@@ -154,7 +165,20 @@ library StreamPreparedNativeRightsRecording {
         StreamPrimarySettlementEmission.emitSettlement(
             c, result, address(0), intent.originalPrimaryPolicyHash
         );
-        if (beneficiaryHash != 0) {
+        if (original.original.mode == 8 || original.original.mode == 9) {
+            emit PlatformPreparedPrimaryBound(
+                1,
+                key,
+                saleKey,
+                StreamPlatformSaleTemplate.declaration(
+                    x.funding.rights.resolver, c.sale.collectionId
+                ),
+                original.original.mode,
+                beneficiaryHash,
+                intent.poster,
+                c.sale.expectedPrimaryPolicyHash
+            );
+        } else if (beneficiaryHash != 0) {
             emit DynamicPreparedPrimaryBeneficiariesBound(
                 1, key, selected.templateId, beneficiaryHash, intent.poster
             );

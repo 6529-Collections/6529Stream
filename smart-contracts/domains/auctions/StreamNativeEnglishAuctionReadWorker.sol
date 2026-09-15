@@ -72,6 +72,21 @@ library StreamNativeEnglishAuctionReadWorker {
         if (kind == 9) {
             return abi.encode(_curated[key]);
         }
+        if (kind == 10) {
+            IStreamNativeEnglishAuction.Auction storage a =
+                StreamNativeEnglishAuctionState.requireAuction(_state, key);
+            (uint64 end,,,) = StreamNativeEnglishAuctionState.deadlines(_state, key);
+            return abi.encode(
+                a.config.minIncrementBps,
+                a.config.incrementFloorWaived,
+                a.config.clock.hardClose,
+                a.config.clock.antiSnipeWindow,
+                a.config.clock.antiSnipeExtension,
+                a.config.clock.maxTotalExtension,
+                uint32(a.clock.nominalEnd - a.clock.originalEnd),
+                end
+            );
+        }
         revert IStreamNativeEnglishAuction.InvalidNativeAuction();
     }
 }

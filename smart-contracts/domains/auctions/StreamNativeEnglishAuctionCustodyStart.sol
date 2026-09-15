@@ -141,6 +141,40 @@ library StreamNativeEnglishAuctionCustodyStart {
             );
     }
 
+    /// @dev Decodes either unchanged custody entry in the actual house/caller/value context.
+    function registerCalldata(
+        StreamNativeEnglishAuctionState.State storage s,
+        StreamNativeEnglishAuctionCustodyState.State storage custody,
+        StreamNativeEnglishAuctionRuntime.Context memory x,
+        bytes calldata input
+    ) public returns (bytes32) {
+        bytes4 selector = bytes4(input[:4]);
+        bool prepared =
+            selector == IStreamPreparedNativeCustodyAuction.registerPreparedCustodyAuction.selector;
+        if (!prepared && selector != IStreamNativeCustodyAuction.registerCustodyAuction.selector) {
+            revert IStreamNativeCustodyAuction.InvalidNativeCustody();
+        }
+        (
+            IStreamNativeEnglishAuction.Configuration memory c,
+            IStreamNativeCustodyAuction.Acquisition memory auth,
+            bytes memory artwork,
+            bytes memory platformSignature,
+            bytes memory artistSignature
+        ) = abi.decode(
+            input[4:],
+            (
+                IStreamNativeEnglishAuction.Configuration,
+                IStreamNativeCustodyAuction.Acquisition,
+                bytes,
+                bytes,
+                bytes
+            )
+        );
+        return StreamNativeEnglishAuctionCustodyRegistration.registerAuction(
+            s, custody, x, c, auth, artwork, platformSignature, artistSignature, prepared
+        );
+    }
+
     function onReceived(
         StreamNativeEnglishAuctionCustodyState.State storage custody,
         StreamNativeEnglishAuctionRuntime.Context memory x,

@@ -4,6 +4,9 @@ pragma solidity ^0.8.19;
 import "./StreamPreparedNativeRightsValidation.sol";
 import "./StreamPreparedNativeRightsProjection.sol";
 import "./StreamPrimarySettlementRights.sol";
+import {
+    IStreamPlatformNativeRightsAuction
+} from "../../interfaces/stream/auctions/IStreamPlatformNativeRightsAuction.sol";
 
 /// @notice Current collection TEMPLATE accounting with the actual prepared token policy coordinate.
 library StreamPreparedNativeRightsAccounting {
@@ -28,6 +31,17 @@ library StreamPreparedNativeRightsAccounting {
             StreamPreparedNativeRightsProjection.preparedTemplateForPoster(
                 x.resolver, facts.collectionId, facts.tokenId, original.original.mode, intent.poster
             );
+        if (original.original.mode == 8 || original.original.mode == 9) {
+            if (
+                !IERC165(facts.saleAdapter)
+                        .supportsInterface(type(IStreamPlatformNativeRightsAuction).interfaceId)
+                    || IStreamPlatformNativeRightsAuction(facts.saleAdapter)
+                            .platformAuctionDeclaration(intent.saleId)
+                        != StreamPlatformSaleTemplate.declaration(x.resolver, facts.collectionId)
+            ) {
+                revert IStreamPreparedNativeRightsPrimarySettlement.InvalidPreparedNativeRights();
+            }
+        }
         // A template preview can name a profile not yet materialized. The fixed funding
         // worker verifies Factory registration and wallet identity after actual materialization.
         c.saleAdapter = facts.saleAdapter;

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../mint/StreamSaleTemplate.sol";
+import "../mint/StreamPlatformSaleTemplate.sol";
 import "./StreamDefaultPrimaryProfile.sol";
 import { StreamDefaultSaleTemplate } from "../mint/StreamDefaultSaleTemplate.sol";
 import { StreamDynamicSaleTemplate } from "../mint/StreamDynamicSaleTemplate.sol";
@@ -17,6 +18,10 @@ library StreamPreparedNativeRightsProjection {
         uint8 mode,
         address poster
     ) public view returns (StreamSaleTemplate.Selection memory s) {
+        if (mode == 8 || mode == 9) {
+            (s,) = StreamPlatformSaleTemplate.resolve(resolver, collectionId, 0, mode, poster);
+            return s;
+        }
         if (mode >= 5 && mode <= 7) {
             (s,) = StreamDefaultSaleTemplate.resolve(resolver, collectionId, 0, mode, poster);
             return s;
@@ -36,6 +41,14 @@ library StreamPreparedNativeRightsProjection {
         uint8 mode,
         address poster
     ) public view returns (StreamSaleTemplate.Selection memory s, bytes32 policy, bytes32 witness) {
+        if (mode == 8 || mode == 9) {
+            if (tokenId == 0) {
+                revert IStreamPreparedNativeRightsPrimarySettlement.InvalidPreparedNativeRights();
+            }
+            (s, witness) =
+                StreamPlatformSaleTemplate.resolve(resolver, collectionId, tokenId, mode, poster);
+            return (s, policyHash(resolver, collectionId, tokenId, s), witness);
+        }
         if (mode >= 5 && mode <= 7) {
             if (tokenId == 0) {
                 revert IStreamPreparedNativeRightsPrimarySettlement.InvalidPreparedNativeRights();
@@ -96,8 +109,9 @@ library StreamPreparedNativeRightsProjection {
             if (tokenId == 0) {
                 revert IStreamPreparedNativeRightsPrimarySettlement.InvalidPreparedNativeRights();
             }
-            (selected,) =
-                StreamDefaultSaleTemplate.resolve(resolver, collectionId, tokenId, mode, address(0));
+            (selected,) = StreamDefaultSaleTemplate.resolve(
+                resolver, collectionId, tokenId, mode, address(0)
+            );
             return (selected, policyHash(resolver, collectionId, tokenId, selected));
         }
         if (mode == StreamPreparedNativeRightsTypes.DEFAULT_PROFILE) {

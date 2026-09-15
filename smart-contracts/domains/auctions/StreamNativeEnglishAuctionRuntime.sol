@@ -5,6 +5,10 @@ import "./StreamNativeEnglishAuctionSupport.sol";
 import "./StreamNativeAuctionDelegation.sol";
 import "../revenue/StreamPreparedNativeSettlementValidation.sol";
 import "../revenue/StreamSettlementContext.sol";
+import "../mint/StreamPlatformSaleTemplate.sol";
+import {
+    IStreamPlatformNativeRightsAuction
+} from "../../interfaces/stream/auctions/IStreamPlatformNativeRightsAuction.sol";
 
 /// @notice Immutable house context and original-phase current reads for fixed execution libraries.
 library StreamNativeEnglishAuctionRuntime {
@@ -97,6 +101,21 @@ library StreamNativeEnglishAuctionRuntime {
         StreamPreparedNativeSettlementAdmission.requireAdmission(
             x.registry, address(this), a.saleId
         );
+        if (a.artistId == 0) {
+            bytes32 declaration = IStreamPlatformNativeRightsAuction(address(this))
+                .platformAuctionDeclaration(a.saleId);
+            if (declaration != 0) {
+                if (
+                    a.bindingGeneration != 0 || a.bindingHash != 0
+                        || StreamPlatformSaleTemplate.declaration(
+                                x.base.resolver, a.config.collectionId
+                            ) != declaration
+                ) {
+                    revert IStreamNativeEnglishAuction.InvalidNativeAuction();
+                }
+                return;
+            }
+        }
         StreamRefundWindowSupport.requireSaleConsent(
             support(x), a.config.collectionId, a.saleId, a.configHash
         );

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamNativeEnglishAuctionRightsRegistration.sol";
+import "./StreamPlatformNativeAuctionRegistration.sol";
+import "../../interfaces/stream/auctions/IStreamPlatformNativeRightsAuction.sol";
 import "./StreamNativeEnglishAuctionTerminal.sol";
 import "./StreamNativeEnglishAuctionRightsSettlement.sol";
 
@@ -44,6 +46,7 @@ contract StreamNativeEnglishAuction is
     IStreamTokenProfileCustodyAuction,
     IStreamCustodyRightsAuction,
     IStreamNativeRightsAuction,
+    IStreamPlatformNativeRightsAuction,
     IStreamNativeAuctionDelegatedDelivery,
     IStreamArtistSaleFacts,
     StreamSettlementContext,
@@ -102,6 +105,7 @@ contract StreamNativeEnglishAuction is
     mapping(bytes32 => StreamPreparedNativeRightsTypes.OriginalPolicy) private _rights;
     StreamTokenProfileCustodyState.State private _tokenProfileCustody;
     StreamCustodyRightsState.State private _custodyRights;
+    mapping(bytes32 => bytes32) private _platformDeclarations;
 
     constructor(DeploymentConfig memory d)
         StreamSettlementContext(d.recorder.revenueResolver(), d.recorder.moduleRegistry())
@@ -198,6 +202,7 @@ contract StreamNativeEnglishAuction is
             || id == type(IStreamTokenProfileCustodyAuction).interfaceId
             || id == type(IStreamCustodyRightsAuction).interfaceId
             || id == type(IStreamNativeRightsAuction).interfaceId
+            || id == type(IStreamPlatformNativeRightsAuction).interfaceId
             || id == type(IStreamPreparedNativeRightsSaleBinding).interfaceId
             || id == type(IStreamPreparedNativeContentSale).interfaceId
             || id == type(IStreamPreparedNativeSaleBinding).interfaceId
@@ -278,18 +283,8 @@ contract StreamNativeEnglishAuction is
         override
         returns (uint16, bool, bool, uint32, uint32, uint32, uint32, uint64)
     {
-        Auction storage a = StreamNativeEnglishAuctionState.requireAuction(_state, id);
-        (uint64 end,,,) = auctionDeadlines(id);
-        return (
-            a.config.minIncrementBps,
-            a.config.incrementFloorWaived,
-            a.config.clock.hardClose,
-            a.config.clock.antiSnipeWindow,
-            a.config.clock.antiSnipeExtension,
-            a.config.clock.maxTotalExtension,
-            uint32(a.clock.nominalEnd - a.clock.originalEnd),
-            end
-        );
+        bytes memory encoded = _encodedRead(10, id);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function saleConsentFacts(bytes32 saleId) external view override returns (uint256, bytes32) {
@@ -543,15 +538,8 @@ contract StreamNativeEnglishAuction is
         bytes calldata platformSignature,
         bytes calldata artistSignature
     ) external payable override nonReentrant returns (bytes32) {
-        return StreamNativeEnglishAuctionCustodyStart.registerAuction(
-                _state,
-                _custody,
-                _runtime(),
-                c,
-                authorization,
-                artwork,
-                platformSignature,
-                artistSignature
+        return StreamNativeEnglishAuctionCustodyStart.registerCalldata(
+                _state, _custody, _runtime(), msg.data
             );
     }
 
@@ -571,15 +559,8 @@ contract StreamNativeEnglishAuction is
         bytes calldata platformSignature,
         bytes calldata artistSignature
     ) external payable override nonReentrant returns (bytes32) {
-        return StreamNativeEnglishAuctionCustodyStart.registerPreparedAuction(
-                _state,
-                _custody,
-                _runtime(),
-                c,
-                authorization,
-                artwork,
-                platformSignature,
-                artistSignature
+        return StreamNativeEnglishAuctionCustodyStart.registerCalldata(
+                _state, _custody, _runtime(), msg.data
             );
     }
 
@@ -727,6 +708,39 @@ contract StreamNativeEnglishAuction is
     {
         bytes memory encoded = _encodedRead(9, id);
         assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
+    }
+
+    function platformRightsConfigurationHash(
+        Configuration calldata config,
+        StreamPreparedNativeRightsTypes.OriginalPolicy calldata original,
+        bytes32 declarationHash
+    ) external view override returns (bytes32) {
+        return StreamPlatformNativeAuctionRegistration.configHashFromCalldata(msg.data);
+    }
+
+    function platformRightsCreationDigest(PlatformCreationAuthorization calldata authorization)
+        external
+        view
+        override
+        returns (bytes32)
+    {
+        return StreamPlatformNativeAuctionRegistration.creationDigest(authorization);
+    }
+
+    function platformAuctionDeclaration(bytes32 saleId) external view override returns (bytes32) {
+        return _platformDeclarations[saleId];
+    }
+
+    function registerPlatformRightsAuction(
+        Configuration calldata config,
+        StreamPreparedNativeRightsTypes.OriginalPolicy calldata original,
+        bytes calldata tokenData,
+        PlatformCreationAuthorization calldata authorization,
+        bytes calldata platformSignature
+    ) external override nonReentrant returns (bytes32) {
+        return StreamPlatformNativeAuctionRegistration.registerCalldata(
+            _state, _rights, _platformDeclarations, _runtime(), msg.data
+        );
     }
 
     function rightsConfigurationHash(

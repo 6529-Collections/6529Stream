@@ -15,6 +15,8 @@ library StreamPreparedNativeRightsTypes {
     uint8 internal constant DEFAULT_TEMPLATE = 5;
     uint8 internal constant CONSENTED_DEFAULT_TEMPLATE = 6;
     uint8 internal constant DYNAMIC_DEFAULT_TEMPLATE = 7;
+    uint8 internal constant PLATFORM_COLLECTION_TEMPLATE = 8;
+    uint8 internal constant PLATFORM_DEFAULT_TEMPLATE = 9;
 
     /// @dev Signed at auction opening, before any sequential token identity exists.
     /// ALLOW_CURRENT retains this evidence without requiring the current assignment to equal it.

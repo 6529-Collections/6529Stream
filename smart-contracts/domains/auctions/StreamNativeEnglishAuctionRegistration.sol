@@ -291,6 +291,8 @@ library StreamNativeEnglishAuctionRegistration {
                 || rightsMode == StreamPreparedNativeRightsTypes.DEFAULT_TEMPLATE
                 || rightsMode == StreamPreparedNativeRightsTypes.CONSENTED_DEFAULT_TEMPLATE
                 || rightsMode == StreamPreparedNativeRightsTypes.DYNAMIC_DEFAULT_TEMPLATE
+                || rightsMode == StreamPreparedNativeRightsTypes.PLATFORM_COLLECTION_TEMPLATE
+                || rightsMode == StreamPreparedNativeRightsTypes.PLATFORM_DEFAULT_TEMPLATE
         ) {
             StreamPreparedNativeRightsProjection.collectionTemplateForPoster(
                 x.base.resolver, a.config.collectionId, rightsMode, a.config.poster
