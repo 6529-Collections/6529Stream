@@ -377,10 +377,53 @@ contract StreamCurrentEntropyLifecyclePlanTest is StreamCurrentGovernanceStagePl
         GovernanceCall memory call_ = plan.batch.calls[0];
         require(
             call_.target == address(lifecycle) && call_.scopeHash == scope
-                && call_.oldValueHash == oldHash && call_.newValueHash == newHash
-                && plan.scopeHash == scope && plan.oldValueHash == oldHash
-                && plan.newValueHash == newHash,
+                && call_.oldValueHash == oldHash && call_.newValueHash == newHash,
             "original actual provider commitments"
+        );
+        // Batch commitments include the calls hash and ordered arrays even for one call.
+        // Keep this encoding independent of the planner's aggregation helper.
+        bytes32 callsHash = keccak256(
+            abi.encode(
+                bytes32(0x10f09566fb70f7947b61639c2a53b3aec872069a8b46edd08ba14eb2b5942b70),
+                plan.batch.calls
+            )
+        );
+        bytes32[] memory values = new bytes32[](1);
+        values[0] = scope;
+        require(
+            plan.scopeHash
+                == keccak256(
+                    abi.encode(
+                        bytes32(0x6cfd5dfd67f064adac45602c05057edddda810734779c0ebe11b447e6985e31c),
+                        callsHash,
+                        values
+                    )
+                ),
+            "canonical aggregate scope"
+        );
+        values[0] = oldHash;
+        require(
+            plan.oldValueHash
+                == keccak256(
+                    abi.encode(
+                        bytes32(0xc5029f937b44065c2ad92d9253e07f06117567480206189fcc1409d5509222b7),
+                        callsHash,
+                        values
+                    )
+                ),
+            "canonical aggregate old state"
+        );
+        values[0] = newHash;
+        require(
+            plan.newValueHash
+                == keccak256(
+                    abi.encode(
+                        bytes32(0xce958009248d20d9574439fa374bc00c142940af2b496896b5bdbc00b882e98b),
+                        callsHash,
+                        values
+                    )
+                ),
+            "canonical aggregate new state"
         );
         bytes memory data = next == EntropyProviderState.ACTIVE
             ? abi.encodeCall(lifecycle.activateEntropyProvider, (address(adapter), REASON))
