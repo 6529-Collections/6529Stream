@@ -371,7 +371,7 @@ contract StreamCollectionManifestsTest is CharacterizationTestBase, OfficialSafe
         );
         router.previewArtistScriptManifestState(1, m);
         M.MediaManifest memory media = _media();
-        media.imageHash = 0;
+        media.imageSourceType = M.PayloadSourceType.NONE;
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamCollectionManifestWriter.InvalidCollectionManifest.selector
@@ -379,6 +379,32 @@ contract StreamCollectionManifestsTest is CharacterizationTestBase, OfficialSafe
         );
         router.previewArtistMediaManifestState(1, media);
         require(metadata.scriptManifestHash(1) == 0 && metadata.mediaManifestHash(1) == 0);
+    }
+
+    function testAbsentExternalHashesRoundTripWithoutClaimingVerifiedBytes() public {
+        M.MediaManifest memory m = _media();
+        m.imageHash = 0;
+        m.manifestHash = 0;
+        m.alternatesURI = "https://example.test/alternates.json";
+        artist.approve(
+            1,
+            MEDIA,
+            router.previewArtistMediaManifestState(1, m),
+            keccak256("explicit absent hashes")
+        );
+        router.setCollectionMediaManifest(1, m);
+        require(metadata.mediaManifestHash(1) != 0);
+        M.MediaManifest memory got = metadata.mediaManifest(1);
+        require(keccak256(abi.encode(got)) == keccak256(abi.encode(m)));
+        require(got.imageHash == 0 && got.manifestHash == 0 && got.alternatesHash == 0);
+        m.alternatesURI = "";
+        m.alternatesHash = keccak256("orphan digest");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamCollectionManifestWriter.InvalidCollectionManifest.selector
+            )
+        );
+        router.previewArtistMediaManifestState(1, m);
     }
 
     function testSelectedOwnerDriftFailsClosedAndRestorationRetainsManifest() public {

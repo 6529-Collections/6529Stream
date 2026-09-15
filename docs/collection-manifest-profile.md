@@ -18,9 +18,10 @@ other execution profiles return `UnsupportedCollectionManifest`; this batch
 does not pretend they were run by the current renderer.
 
 Media descriptors bind the actual shared image URI. Asset entries support
-explicit IPFS, Arweave and HTTPS source types, nonempty MIME types and nonzero
-hash commitments; NONE has no URI, MIME or hash. Reference manifests and
-alternates likewise require both a URI and its declared hash. These are signed
+explicit IPFS, Arweave and HTTPS source types, nonempty MIME types and optional
+hash commitments; NONE has no URI, MIME or hash. A zero external asset or
+reference hash explicitly means no commitment is available. A nonzero hash
+without its corresponding URI is rejected, including references and alternates. These are signed
 content commitments, not claims that the contract downloaded or verified
 external file bytes. Content and optional animation descriptors are retained
 facts; they do not automatically add new fields to the current token renderer.
@@ -61,10 +62,10 @@ kind, collection and Router. `recordedScriptManifest` and
 `recordedMediaManifest` retain earlier records after selection changes. Their
 existence is not a claim that they remain the current selection.
 
-Seven focused source cases cover independent full-hash/event oracles, script
+Eight focused source cases cover independent full-hash/event oracles, script
 byte reconstruction, media binding, no-op and raw invalidation, wrong
 collection/family authority, direct-host rejection, content/Core locks, missing
-facts, pointer drift and a real threshold Safe's identical signed retry after
+facts, exact absent-hash round trips, pointer drift and a real threshold Safe's identical signed retry after
 missing Artist approval. Core, Artist authority and Executor in these cases
 are explicitly typed fixtures. ABI-only checks are separate from deferred
 native runtime, bytecode sizes, full current-stack transactions and finality

@@ -104,7 +104,7 @@ library StreamCollectionManifests {
             }
             return;
         }
-        if (digest == 0 || bytes(mime).length == 0) revert W.InvalidCollectionManifest();
+        if (bytes(mime).length == 0) revert W.InvalidCollectionManifest();
         StreamMetadataRenderer.requireValidUtf8Bytes("mimeType", mime, 128);
         StreamMetadataRenderer.requireValidUtf8ContentUri("assetURI", uri, 2048, false);
         bool valid = kind == M.PayloadSourceType.IPFS && _starts(uri, "ipfs://")
@@ -117,7 +117,6 @@ library StreamCollectionManifests {
         if (bytes(uri).length == 0) {
             if (digest != 0) revert W.InvalidCollectionManifest();
         } else {
-            if (digest == 0) revert W.InvalidCollectionManifest();
             StreamMetadataRenderer.requireValidUtf8ContentUri("manifestReference", uri, 2048, false);
         }
     }
