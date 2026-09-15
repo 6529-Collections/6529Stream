@@ -4,6 +4,61 @@ pragma solidity ^0.8.19;
 import "../../helpers/ScopeMembershipPublicationFixture.sol";
 
 contract StreamScopeMembershipPublicationTest is ScopeMembershipPublicationFixture {
+    function testReverseIndexTracksValidatedPrefixAndOnlyReportsCompleteAfterSeal() public {
+        uint256[] memory ids = _tokens(257);
+        _index(ids, 0, 256);
+        bytes32 record = _publish(_manifest(2, ids), "ipfs://reverse-index");
+        StreamFinalityScope memory scope = membership.beginScopeMembership(record);
+        require(membership.tokenScopeCount(ids[0]) == 0, "begin admits no token");
+        membership.continueScopeMembership(scope, 1);
+        (StreamFinalityScope memory selected, bool complete) = membership.tokenScopeAt(ids[0], 0);
+        require(
+            !complete && keccak256(abi.encode(selected)) == keccak256(abi.encode(scope)),
+            "actual pending prefix"
+        );
+        require(membership.tokenScopeCount(ids[256]) == 0, "unvalidated token absent");
+        vm.expectRevert();
+        membership.continueScopeMembership(scope, 1);
+        require(
+            membership.tokenScopeCount(ids[0]) == 1 && membership.tokenScopeCount(ids[256]) == 0,
+            "failed part creates no reverse entries"
+        );
+        _index(ids, 256, 257);
+        membership.continueScopeMembership(scope, 1);
+        (, complete) = membership.tokenScopeAt(ids[0], 0);
+        require(complete && membership.scopeCoversToken(scope, ids[0]), "sealed original coverage");
+        (, complete) = membership.tokenScopeAt(ids[256], 0);
+        require(complete && membership.tokenScopeCount(ids[256]) == 1, "last part sealed");
+        membership.beginScopeMembership(record);
+        require(membership.tokenScopeCount(ids[0]) == 1, "repeated admission is idempotent");
+    }
+
+    function testReverseIndexKeepsEveryDistinctPublishedScopeAndOriginalInterface() public {
+        uint256[] memory ids = _tokens(2);
+        _index(ids, 0, 2);
+        for (uint8 kind = 2; kind <= 4; ++kind) {
+            StreamFinalityScope memory scope = _seal(kind, ids, "ipfs://reverse-family");
+            (StreamFinalityScope memory selected, bool complete) =
+                membership.tokenScopeAt(ids[1], kind - 2);
+            require(
+                complete && keccak256(abi.encode(scope)) == keccak256(abi.encode(selected)),
+                "exact scope identity"
+            );
+        }
+        require(
+            membership.tokenScopeCount(ids[0]) == 3 && membership.tokenScopeCount(999) == 0,
+            "all applicable scopes"
+        );
+        require(
+            membership.supportsInterface(type(IStreamFinalityScopeMembership).interfaceId),
+            "original interface retained"
+        );
+        require(
+            membership.supportsInterface(type(IStreamFinalityTokenScopeInventory).interfaceId),
+            "additive inventory capability"
+        );
+    }
+
     function testActualPublishedRecordAllFamiliesExactFactsAndEvents() public {
         uint256[] memory ids = _tokens(3);
         _index(ids, 0, 3);

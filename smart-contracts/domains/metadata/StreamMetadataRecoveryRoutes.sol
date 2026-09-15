@@ -104,22 +104,35 @@ library StreamMetadataRecoveryRoutes {
         }
     }
 
+    /// @notice Absence/corruption never causes the saved original to be rediscovered.
+    function servingOriginal(
+        address core,
+        bool locked,
+        OriginalAnchor memory saved,
+        OriginalAnchor memory durable
+    ) public view returns (OriginalAnchor memory) {
+        _original(core, durable);
+        if (locked) {
+            _original(core, saved);
+            if (saved.registry != durable.registry || saved.codeHash != durable.codeHash) {
+                revert MetadataRecoveryBindingInvalid(saved.registry);
+            }
+            return saved;
+        }
+        if (saved.registry != address(0) || saved.codeHash != 0) {
+            revert MetadataRecoveryBindingInvalid(saved.registry);
+        }
+        return durable;
+    }
+
     function context(
         Environment memory e,
         bool locked,
         OriginalAnchor memory saved,
+        OriginalAnchor memory durable,
         StreamFinalityScope memory scope
     ) public view returns (Context memory c, bool frozen) {
-        // A locked collection must retain its entire one-time binding. Missing or partial
-        // saved data is corruption, never permission to consult a newer facade or registry.
-        if (locked) {
-            _original(e.core, saved);
-        } else {
-            if (saved.registry != address(0) || saved.codeHash != 0) {
-                revert MetadataRecoveryBindingInvalid(saved.registry);
-            }
-            saved = captureOriginal(e);
-        }
+        saved = servingOriginal(e.core, locked, saved, durable);
         address core = e.core;
         address original = saved.registry;
         c = Context(core, address(0), scope);

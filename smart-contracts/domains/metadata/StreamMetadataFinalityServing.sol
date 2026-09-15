@@ -33,6 +33,7 @@ library StreamMetadataFinalityServing {
         mapping(uint256 => IStreamMetadataServingFacts.ArtistPresentation) storage presentations,
         mapping(uint256 => StreamMetadataRecoveryRoutes.OriginalAnchor) storage anchors,
         StreamMetadataRecoveryRoutes.Environment memory e,
+        StreamMetadataRecoveryRoutes.OriginalAnchor memory durable,
         uint256 id,
         bool allowBurned,
         bool asURI
@@ -42,6 +43,7 @@ library StreamMetadataFinalityServing {
             e,
             presentations[collection].locked,
             anchors[collection],
+            durable,
             StreamFinalityScope(StreamFinalityScopeType.TOKEN, collection, id, 0)
         );
         if (!active) return (false, "");
@@ -87,12 +89,14 @@ library StreamMetadataFinalityServing {
         mapping(uint256 => IStreamMetadataServingFacts.ArtistPresentation) storage presentations,
         mapping(uint256 => StreamMetadataRecoveryRoutes.OriginalAnchor) storage anchors,
         StreamMetadataRecoveryRoutes.Environment memory e,
+        StreamMetadataRecoveryRoutes.OriginalAnchor memory durable,
         uint256 id
     ) public view returns (bool frozen, string memory result) {
         (StreamMetadataRecoveryRoutes.Context memory c, bool active) = StreamMetadataRecoveryRoutes.context(
             e,
             presentations[id].locked,
             anchors[id],
+            durable,
             StreamFinalityScope(StreamFinalityScopeType.COLLECTION, id, 0, 0)
         );
         if (!active) return (false, "");

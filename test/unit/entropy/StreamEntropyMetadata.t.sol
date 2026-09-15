@@ -47,7 +47,11 @@ contract NativeMetadataEncodingHarness is StreamMetadataRouter {
 
 /// @notice Real Core, entropy and rendering with explicit governance and artist read boundaries.
 /// @dev Direct Core minting isolates entropy/metadata; current-stack tests prove artist eligibility.
-contract StreamEntropyMetadataTest is CharacterizationTestBase, OfficialSafeFixture, EntropyTimeAuthorityFixture {
+contract StreamEntropyMetadataTest is
+    CharacterizationTestBase,
+    OfficialSafeFixture,
+    EntropyTimeAuthorityFixture
+{
     event NativeVRFCallbackGasMeasured(uint256 gasUsed);
     event log_named_uint(string key, uint256 value);
     bytes32 private constant MANAGER =
@@ -109,19 +113,22 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase, OfficialSafeFixt
         registry.setRecord(
             address(registry), REGISTRY, type(IStreamModuleRegistry).interfaceId, MANIFEST, MANIFEST
         );
-        entropy = new StreamEntropyCoordinator(StreamEntropyCoordinator.DeploymentConfig(
-            address(core),
-            address(this),
-            address(roleRegistry),
-            EntropyTimeTestConfigs.parameters(),
-            MANIFEST,
-            "ipfs://local-test",
-            MANIFEST
-        ));
+        entropy = new StreamEntropyCoordinator(
+            StreamEntropyCoordinator.DeploymentConfig(
+                address(core),
+                address(this),
+                address(roleRegistry),
+                EntropyTimeTestConfigs.parameters(),
+                MANIFEST,
+                "ipfs://local-test",
+                MANIFEST
+            )
+        );
         artistRegistry = new StreamMetadataArtistBoundary(address(core), address(this), RECIPIENT);
         router = new NativeMetadataEncodingHarness(
             address(core), address(this), MANIFEST, artistRegistry
         );
+        router.initializeOriginalFinalityAnchor();
         provider = new MockStreamEntropyProvider(address(entropy));
         _install(MANAGER, address(this), type(IStreamMintManager).interfaceId);
         _install(ENTROPY, address(entropy), type(IStreamEntropyCoordinator).interfaceId);
@@ -440,6 +447,7 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase, OfficialSafeFixt
             address(core), address(admin), MANIFEST, "ipfs://local-test", MANIFEST, artistRegistry
         );
         _install(ROUTER, address(router), type(IStreamMetadataRouter).interfaceId);
+        _safeContentCall(admin, keys, abi.encodeCall(router.initializeOriginalFinalityAnchor, ()));
         _safeContentCall(
             admin,
             keys,
@@ -634,10 +642,17 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase, OfficialSafeFixt
     function testRouterUsesCoordinatorAtMintAfterPointerReplacementAndBurnKeepsSeed() public {
         uint256 id = _mint();
         (, uint256 requestId) = entropy.requestEntropy(id);
-        StreamEntropyCoordinator next = new StreamEntropyCoordinator(StreamEntropyCoordinator.DeploymentConfig(
-            address(core), address(this), address(roleRegistry), EntropyTimeTestConfigs.parameters(),
-            MANIFEST, "ipfs://next", MANIFEST
-        ));
+        StreamEntropyCoordinator next = new StreamEntropyCoordinator(
+            StreamEntropyCoordinator.DeploymentConfig(
+                address(core),
+                address(this),
+                address(roleRegistry),
+                EntropyTimeTestConfigs.parameters(),
+                MANIFEST,
+                "ipfs://next",
+                MANIFEST
+            )
+        );
         _install(ENTROPY, address(next), type(IStreamEntropyCoordinator).interfaceId);
         provider.fulfill(requestId, bytes32(uint256(12)));
         _assertState(id, "final");
@@ -725,8 +740,21 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase, OfficialSafeFixt
     }
 
     function testMetadataExposesAcceptedArtistEvidence() public {
+        // This boundary has only the historical profile; live read failure is explicit.
         uint256 id = _mint();
-        string memory json = router.tokenMetadataJSON(address(core), id);
+        string memory live = router.tokenMetadataJSON(address(core), id);
+        require(
+            keccak256(
+                bytes(
+                    abi.decode(
+                        vm.parseJson(live, ".properties.provenance.attribution.state"), (string)
+                    )
+                )
+            ) == keccak256("attribution_unavailable"),
+            "missing live profile is explicit"
+        );
+        router.lockArtistIdentity(1);
+        string memory json = router.historicalTokenMetadataJSON(address(core), id);
         require(
             abi.decode(vm.parseJson(json, ".artist"), (address)) == RECIPIENT,
             "accepted artist address"
@@ -975,12 +1003,21 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase, OfficialSafeFixt
     function testActualCoreRetainsDifferentOriginalPoliciesAcrossCoordinatorReplacement() public {
         uint256 first = _mint();
         (, bytes32 originalPolicy,,,) = entropy.entropyPolicyFrozen(1);
-        StreamEntropyCoordinator next = new StreamEntropyCoordinator(StreamEntropyCoordinator.DeploymentConfig(
-            address(core), address(this), address(roleRegistry), EntropyTimeTestConfigs.parameters(),
-            MANIFEST, "ipfs://next-policy", MANIFEST
-        ));
+        StreamEntropyCoordinator next = new StreamEntropyCoordinator(
+            StreamEntropyCoordinator.DeploymentConfig(
+                address(core),
+                address(this),
+                address(roleRegistry),
+                EntropyTimeTestConfigs.parameters(),
+                MANIFEST,
+                "ipfs://next-policy",
+                MANIFEST
+            )
+        );
         MockStreamEntropyProvider nextProvider = new MockStreamEntropyProvider(address(next));
-        next.configureCollection(1, address(nextProvider), keccak256("distinct policy salt"), true, 10);
+        next.configureCollection(
+            1, address(nextProvider), keccak256("distinct policy salt"), true, 10
+        );
         next.configureCollectionRevealPolicy(1, 0, keccak256("ROLE_ENTROPY_REVEAL_OWNER"), 10, 0);
         _install(ENTROPY, address(next), type(IStreamEntropyCoordinator).interfaceId);
         uint256 second = _mint();
@@ -988,7 +1025,9 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase, OfficialSafeFixt
         require(core.coordinatorAtMint(second) == address(next));
         (bool frozen, bytes32 nextPolicy,,,) = next.entropyPolicyFrozen(1);
         (, bytes32 oldPolicy,,,) = entropy.entropyPolicyFrozen(1);
-        require(frozen && nextPolicy != 0 && nextPolicy != originalPolicy && oldPolicy == originalPolicy);
+        require(
+            frozen && nextPolicy != 0 && nextPolicy != originalPolicy && oldPolicy == originalPolicy
+        );
         (, uint256 requestId) = entropy.requestEntropy(first);
         require(provider.fulfill(requestId, bytes32(uint256(66))) == 0);
         _assertState(first, "final");

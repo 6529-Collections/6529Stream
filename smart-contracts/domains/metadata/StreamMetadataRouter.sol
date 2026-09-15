@@ -29,6 +29,11 @@ import "./StreamMetadataContentAuthorization.sol";
 import "./StreamMetadataFinalityServing.sol";
 import "./StreamMetadataRouterCollectionReads.sol";
 import "./StreamMetadataScopeMembership.sol";
+import { StreamArtistDisplayReads } from "./StreamArtistDisplayReads.sol";
+import { StreamArtistDisplayJSON } from "./StreamArtistDisplayJSON.sol";
+import {
+    StreamArtistDisplayTypes
+} from "../../interfaces/stream/metadata/StreamArtistDisplayTypes.sol";
 import "../../interfaces/stream/metadata/IStreamMetadataScopeMembership.sol";
 import "../../interfaces/stream/metadata/IStreamMetadataRenderingProfile.sol";
 import {
@@ -81,6 +86,37 @@ contract StreamMetadataRouter is
     mapping(uint256 => bool) private _displayMetadataLocked;
     StreamMetadataContentRoot.State private _contentRoots;
     mapping(uint256 => StreamMetadataRecoveryRoutes.OriginalAnchor) public originalFinalityAnchor;
+
+    StreamMetadataRecoveryRoutes.OriginalAnchor public servingOriginalFinalityAnchor;
+    bool private _originalFinalityAnchorInitialized;
+    error OriginalFinalityAnchorAlreadyInitialized();
+    error OriginalFinalityAnchorUninitialized();
+    event OriginalFinalityAnchorInitialized(address indexed registry, bytes32 codeHash);
+
+    /// @notice Admit the fixed facade's original finality after the cyclic graph is complete.
+    function initializeOriginalFinalityAnchor() external {
+        if (msg.sender != authority) revert Unauthorized(msg.sender);
+        if (
+            _originalFinalityAnchorInitialized
+                || servingOriginalFinalityAnchor.registry != address(0)
+                || servingOriginalFinalityAnchor.codeHash != 0
+        ) {
+            revert OriginalFinalityAnchorAlreadyInitialized();
+        }
+        StreamMetadataRecoveryRoutes.OriginalAnchor memory a =
+            StreamMetadataRecoveryRoutes.captureOriginal(
+                StreamMetadataRecoveryRoutes.Environment(
+                    address(core), address(artistRegistry), _artistRegistryCodeHash
+                )
+            );
+        servingOriginalFinalityAnchor = a;
+        _originalFinalityAnchorInitialized = true;
+        emit OriginalFinalityAnchorInitialized(a.registry, a.codeHash);
+    }
+
+    bytes32 public constant LIVE_ATTRIBUTION_PROFILE = StreamArtistDisplayTypes.PROFILE;
+    uint256 public constant LIVE_ATTRIBUTION_GAS = 8000000;
+    uint256 public constant LIVE_ATTRIBUTION_MAX_BYTES = 32768;
 
     bytes32 public constant CONTENT_SCRIPT = keccak256("SCRIPT");
     bytes32 public constant CONTENT_MEDIA = keccak256("MEDIA_MANIFEST");
@@ -192,8 +228,7 @@ contract StreamMetadataRouter is
             || id == type(IStreamMetadataServingFacts).interfaceId
             || id == type(IStreamArtistContentFacts).interfaceId
             || id == type(IStreamArtistContentMutationFacts).interfaceId
-            || id == type(IStreamMetadataScopeMembership).interfaceId
-            || super.supportsInterface(id);
+            || id == type(IStreamMetadataScopeMembership).interfaceId || super.supportsInterface(id);
     }
 
     function scopeCoversToken(StreamFinalityScope calldata, uint256)
@@ -221,9 +256,13 @@ contract StreamMetadataRouter is
             StreamMetadataRecoveryRoutes.Environment(
                 address(core), address(artistRegistry), _artistRegistryCodeHash
             ),
+            _servingAnchor(),
             msg.data
         );
-        assembly ("memory-safe") { mstore(0, result) return(0, 32) }
+        assembly ("memory-safe") {
+            mstore(0, result)
+            return(0, 32)
+        }
     }
 
     function setCollectionMetadata(
@@ -721,6 +760,7 @@ contract StreamMetadataRouter is
             StreamMetadataRecoveryRoutes.Environment(
                 address(core), address(artistRegistry), _artistRegistryCodeHash
             ),
+            _servingAnchor(),
             tokenId,
             allowBurned,
             asURI
@@ -728,14 +768,14 @@ contract StreamMetadataRouter is
         if (frozen) return resolved;
         StreamMetadataTokenReads.TokenFacts memory facts = _tokenFacts(tokenId, allowBurned);
         if (allowBurned && !facts.finalized) revert TokenEntropyNotFinalized(tokenId);
-        return _renderToken(facts, asURI);
+        return _renderToken(facts, asURI, allowBurned);
     }
 
-    function _renderToken(StreamMetadataTokenReads.TokenFacts memory facts, bool asURI)
-        private
-        view
-        returns (string memory)
-    {
+    function _renderToken(
+        StreamMetadataTokenReads.TokenFacts memory facts,
+        bool asURI,
+        bool historical
+    ) private view returns (string memory) {
         PreparedMetadata storage prepared = _prepared[facts.collectionId];
         ServingSource memory metadata = ServingSource(
             prepared.name,
@@ -754,7 +794,9 @@ contract StreamMetadataRouter is
             core.tokenData(facts.tokenId),
             _collections[facts.collectionId].configured
         );
-        bytes memory artist = _artistJSON(facts.collectionId);
+        bytes memory artist = historical && _artistPresentation[facts.collectionId].locked
+            ? _artistJSON(facts.collectionId)
+            : StreamArtistDisplayJSON.nested(_liveAttribution(facts.collectionId, facts.tokenId));
         // Local typed values already have their exact ABI shape. The independently selected
         // finality path still uses renderForFinality to validate its serialized input.
         return asURI
@@ -768,6 +810,70 @@ contract StreamMetadataRouter is
         returns (StreamMetadataTokenReads.TokenFacts memory facts)
     {
         return StreamMetadataTokenReads.facts(address(core), tokenId, allowBurned);
+    }
+
+    /// @dev A self-only bounded frame isolates all optional live attribution dependencies.
+    function liveAttributionObject(uint256 collectionId, uint256 tokenId)
+        external
+        view
+        returns (bytes memory)
+    {
+        if (msg.sender != address(this)) revert Unauthorized(msg.sender);
+        StreamMetadataRecoveryRoutes.OriginalAnchor memory a = _servingAnchor();
+        return StreamArtistDisplayReads.object(
+            address(core),
+            address(artistRegistry),
+            _artistRegistryCodeHash,
+            a.registry,
+            a.codeHash,
+            collectionId,
+            tokenId
+        );
+    }
+
+    function _servingAnchor()
+        private
+        view
+        returns (StreamMetadataRecoveryRoutes.OriginalAnchor memory)
+    {
+        if (!_originalFinalityAnchorInitialized) revert OriginalFinalityAnchorUninitialized();
+        return servingOriginalFinalityAnchor;
+    }
+
+    function _liveAttribution(uint256 collectionId, uint256 tokenId)
+        private
+        view
+        returns (bytes memory)
+    {
+        uint256 cap = LIVE_ATTRIBUTION_GAS;
+        if (gasleft() < cap + cap / 63 + 300000) return StreamArtistDisplayJSON.unavailable();
+        bytes memory input = abi.encodeCall(this.liveAttributionObject, (collectionId, tokenId));
+        bool ok;
+        uint256 size;
+        assembly ("memory-safe") {
+            ok := staticcall(cap, address(), add(input, 32), mload(input), 0, 0)
+            size := returndatasize()
+        }
+        if (!ok || size < 64 || size > LIVE_ATTRIBUTION_MAX_BYTES + 64) {
+            return StreamArtistDisplayJSON.unavailable();
+        }
+        bytes memory raw = new bytes(size);
+        assembly ("memory-safe") { returndatacopy(add(raw, 32), 0, size) }
+        uint256 offset;
+        uint256 length;
+        assembly ("memory-safe") {
+            offset := mload(add(raw, 32))
+            length := mload(add(raw, 64))
+        }
+        if (
+            offset != 32 || length > LIVE_ATTRIBUTION_MAX_BYTES
+                || size != 64 + ((length + 31) / 32) * 32
+        ) return StreamArtistDisplayJSON.unavailable();
+        bytes memory value = abi.decode(raw, (bytes));
+        if (keccak256(raw) != keccak256(abi.encode(value))) {
+            return StreamArtistDisplayJSON.unavailable();
+        }
+        return value;
     }
 
     function _artistJSON(uint256 collectionId) private view returns (bytes memory) {
@@ -796,12 +902,25 @@ contract StreamMetadataRouter is
             StreamMetadataRecoveryRoutes.Environment(
                 address(core), address(artistRegistry), _artistRegistryCodeHash
             ),
+            _servingAnchor(),
             collectionId
         );
         if (frozen) return resolved;
         PreparedMetadata storage metadata = _prepared[collectionId];
-        return StreamMetadataRenderPreparation.collectionURI(
-            metadata.name, metadata.description, metadata.image
+        return _dataURI(
+            string(
+                abi.encodePacked(
+                    '{"name":"',
+                    metadata.name,
+                    '","description":"',
+                    metadata.description,
+                    '","image":"',
+                    metadata.image,
+                    '"',
+                    StreamArtistDisplayJSON.nested(_liveAttribution(collectionId, 0)),
+                    "}"
+                )
+            )
         );
     }
 

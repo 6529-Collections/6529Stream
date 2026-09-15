@@ -366,6 +366,9 @@ contract MetadataRecoveryServingHarness {
             presentations,
             anchors,
             StreamMetadataRecoveryRoutes.Environment(c, a, artistCodeHash),
+            StreamMetadataRecoveryRoutes.captureOriginal(
+                StreamMetadataRecoveryRoutes.Environment(c, a, artistCodeHash)
+            ),
             9,
             burned,
             uri
@@ -377,6 +380,9 @@ contract MetadataRecoveryServingHarness {
             presentations,
             anchors,
             StreamMetadataRecoveryRoutes.Environment(c, a, artistCodeHash),
+            StreamMetadataRecoveryRoutes.captureOriginal(
+                StreamMetadataRecoveryRoutes.Environment(c, a, artistCodeHash)
+            ),
             1
         );
     }

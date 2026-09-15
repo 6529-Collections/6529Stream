@@ -223,6 +223,7 @@ contract StreamFinalityRouterEvidenceProviderTest is CharacterizationTestBase, O
         router = _router("urn:actual-router");
         provider = _provider(router);
         original.bind(address(artist), address(provider), address(metadata));
+        router.initializeOriginalFinalityAnchor();
         _install();
         router.setCollectionMetadata(
             1, "Name", "Description", "ipfs://image", "https://example.test/"

@@ -96,6 +96,7 @@ abstract contract RouterScopeMembershipFixture is ScopeMembershipPublicationFixt
             address(core), address(metadata), address(realProvider)
         );
         routerArtist.bind(address(originalBoundary));
+        scopeRouter.initializeOriginalFinalityAnchor();
         core.setPointer(keccak256("ARTIST_REGISTRY"), address(routerArtist));
         core.setPointer(keccak256("ARTWORK_FINALITY_REGISTRY"), address(originalBoundary));
         if (lock) scopeRouter.lockArtistIdentity(1);

@@ -377,14 +377,14 @@ abstract contract ContentRootPublicationFixture is CharacterizationTestBase, Off
         address cp = address(new RootCheckpointBoundary(address(core), address(router)));
         address artifacts = address(new RootArtifactsBoundary(address(schemas)));
         manifest = new RootManifestBoundary(address(core), cp, artifacts);
-        provider =
-            address(
+        provider = address(
             new RootProviderBoundary(address(metadata), address(schemas), address(manifest))
         );
         finality = new RootFinalityBoundary(
             address(core), address(artist), address(metadata), provider, artifacts
         );
         artist.configure(address(router), address(finality));
+        router.initializeOriginalFinalityAnchor();
         core.setPointer(keccak256("ARTWORK_FINALITY_REGISTRY"), address(finality));
         _grant(1, 7, address(this), true);
     }

@@ -120,6 +120,7 @@ contract StreamRouterCurrentCoreServingTest is RecoveryGovernanceIntegrationFixt
             keccak256("current Router manifest"),
             IStreamArtistAttribution(fixture.artistTarget())
         );
+        router.initializeOriginalFinalityAnchor();
         manager = new RouterCoreMintBoundary();
         entropy = new RouterCoreEntropyBoundary(address(configuration.core));
         StreamModuleRegistration[] memory registrations = new StreamModuleRegistration[](3);

@@ -563,8 +563,8 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
         batches[0].calls[records.length] = _configurationCall(address(entropy), data);
         batches[2].actionClass = 1;
         address[] memory extraProducers = _additionalEscrowProducers();
-        batches[2].calls = new GovernanceCall[](6 + extraProducers.length);
-        batches[2].callDatas = new bytes[](6 + extraProducers.length);
+        batches[2].calls = new GovernanceCall[](7 + extraProducers.length);
+        batches[2].callDatas = new bytes[](7 + extraProducers.length);
         data = abi.encodeCall(
             router.setCollectionMetadata,
             (
@@ -596,6 +596,10 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
             (batches[2].calls[6 + i], batches[2].callDatas[6 + i]) =
                 _escrowProducerCall(extraProducers[i]);
         }
+
+        data = abi.encodeCall(router.initializeOriginalFinalityAnchor, ());
+        batches[2].callDatas[6 + extraProducers.length] = data;
+        batches[2].calls[6 + extraProducers.length] = _configurationCall(address(router), data);
 
         bytes32[] memory installTypes = new bytes32[](records.length);
         for (uint256 i; i < records.length; ++i) {

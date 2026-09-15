@@ -601,8 +601,8 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
     ///      collect selectors at deployment; their transition state is not a saved future plan.
     function _initialConfigurationBatch() internal view returns (GenesisBatch memory batch) {
         batch.actionClass = 1;
-        batch.calls = new GovernanceCall[](9);
-        batch.callDatas = new bytes[](9);
+        batch.calls = new GovernanceCall[](10);
+        batch.callDatas = new bytes[](10);
         batch.callDatas[0] = abi.encodeCall(ledger.setLedgerWriter, (address(manager), true));
         batch.callDatas[1] = abi.encodeCall(
             entropy.configureCollection,
@@ -634,6 +634,8 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
         (batch.calls[6], batch.callDatas[6]) = _escrowProducerCall(address(sale));
         (batch.calls[7], batch.callDatas[7]) = _escrowProducerCall(address(erc20Sale));
         (batch.calls[8], batch.callDatas[8]) = _escrowProducerCall(address(auction));
+        batch.callDatas[9] = abi.encodeCall(router.initializeOriginalFinalityAnchor, ());
+        batch.calls[9] = _configurationCall(address(router), batch.callDatas[9]);
     }
 
     function _escrowProducerCall(address producer)

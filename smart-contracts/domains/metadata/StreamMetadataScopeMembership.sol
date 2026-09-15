@@ -19,6 +19,7 @@ library StreamMetadataScopeMembership {
         mapping(uint256 => IStreamMetadataServingFacts.ArtistPresentation) storage presentation,
         mapping(uint256 => StreamMetadataRecoveryRoutes.OriginalAnchor) storage anchors,
         StreamMetadataRecoveryRoutes.Environment memory e,
+        StreamMetadataRecoveryRoutes.OriginalAnchor memory durable,
         bytes calldata callData
     ) public view returns (uint256 result) {
         if (callData.length != 164) {
@@ -33,18 +34,30 @@ library StreamMetadataScopeMembership {
         }
         (StreamFinalityScope memory scope, uint256 value) =
             abi.decode(callData[4:], (StreamFinalityScope, uint256));
-        StreamMetadataRecoveryRoutes.OriginalAnchor memory a = anchors[scope.collectionId];
-        if (presentation[scope.collectionId].locked) {
-            _pin(a.registry, a.codeHash);
-            _equal(
-                a.registry, abi.encodeCall(IStreamFinalityDeploymentBindings.coreReads, ()), e.core
+        StreamMetadataRecoveryRoutes.OriginalAnchor memory a =
+            StreamMetadataRecoveryRoutes.servingOriginal(
+                e.core,
+                presentation[scope.collectionId].locked,
+                anchors[scope.collectionId],
+                durable
             );
-        } else {
-            if (a.registry != address(0) || a.codeHash != 0) {
-                revert MetadataScopeBindingInvalid(a.registry);
-            }
-            a = StreamMetadataRecoveryRoutes.captureOriginal(e);
-        }
+        address membership = host(e.core, address(this), a);
+        bytes memory input = indexedRead
+            ? abi.encodeCall(IStreamFinalityScopeMembership.scopeTokenAt, (scope, value))
+            : abi.encodeCall(IStreamFinalityScopeMembership.scopeCoversToken, (scope, value));
+        result = abi.decode(
+            StreamMetadataRecoveryRoutes.read(membership, input, 32, MEMBERSHIP_GAS), (uint256)
+        );
+        if (!indexedRead && result > 1) revert MetadataScopeBindingInvalid(membership);
+    }
+
+    function host(
+        address core,
+        address router,
+        StreamMetadataRecoveryRoutes.OriginalAnchor memory a
+    ) public view returns (address membership) {
+        _pin(a.registry, a.codeHash);
+        _equal(a.registry, abi.encodeCall(IStreamFinalityDeploymentBindings.coreReads, ()), core);
         address provider = _address(
             a.registry, abi.encodeCall(IStreamFinalityDeploymentBindings.scopeEvidenceProvider, ())
         );
@@ -55,18 +68,18 @@ library StreamMetadataScopeMembership {
                 abi.encodeCall(IStreamFinalityDeploymentBindings.scopeEvidenceProviderCodeHash, ())
             )
         );
-        _equal(provider, abi.encodeWithSignature("core()"), e.core);
+        _equal(provider, abi.encodeWithSignature("core()"), core);
         _pin(
-            e.core,
+            core,
             _word(provider, abi.encodeCall(IStreamFinalityRouterEvidenceBinding.coreCodeHash, ()))
         );
         _equal(
             provider,
             abi.encodeCall(IStreamFinalityRouterEvidenceBinding.metadataRouter, ()),
-            address(this)
+            router
         );
         _pin(
-            address(this),
+            router,
             _word(
                 provider,
                 abi.encodeCall(IStreamFinalityRouterEvidenceBinding.metadataRouterCodeHash, ())
@@ -87,7 +100,7 @@ library StreamMetadataScopeMembership {
                 abi.encodeCall(IStreamFinalityRouterEvidenceBinding.metadataHostCodeHash, ())
             )
         );
-        address membership = _address(
+        membership = _address(
             provider, abi.encodeCall(IStreamFinalityRouterEvidenceBinding.scopeMembershipHost, ())
         );
         _pin(
@@ -97,17 +110,10 @@ library StreamMetadataScopeMembership {
                 abi.encodeCall(IStreamFinalityRouterEvidenceBinding.scopeMembershipHostCodeHash, ())
             )
         );
-        _equal(membership, abi.encodeCall(IStreamFinalityScopeMembership.core, ()), e.core);
+        _equal(membership, abi.encodeCall(IStreamFinalityScopeMembership.core, ()), core);
         _equal(
             membership, abi.encodeCall(IStreamFinalityScopeMembership.metadataHost, ()), metadata
         );
-        bytes memory input = indexedRead
-            ? abi.encodeCall(IStreamFinalityScopeMembership.scopeTokenAt, (scope, value))
-            : abi.encodeCall(IStreamFinalityScopeMembership.scopeCoversToken, (scope, value));
-        result = abi.decode(
-            StreamMetadataRecoveryRoutes.read(membership, input, 32, MEMBERSHIP_GAS), (uint256)
-        );
-        if (!indexedRead && result > 1) revert MetadataScopeBindingInvalid(membership);
     }
 
     function _pin(address target, bytes32 codeHash) private view {

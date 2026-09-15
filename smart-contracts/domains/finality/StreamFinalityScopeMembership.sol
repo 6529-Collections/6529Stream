@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamScopeMembershipReads.sol";
+import "../../interfaces/stream/finality/IStreamFinalityTokenScopeInventory.sol";
 import "../../interfaces/stream/finality/IStreamCollectionTokenInventory.sol";
 import "../../interfaces/stream/core/IStreamCoreIdentity.sol";
 import "../../interfaces/stream/core/IStreamCoreCollectionView.sol";
@@ -9,7 +10,11 @@ import "../parameters/StreamGasParameterHost.sol";
 
 /// @notice Immutable published scope subsets, authenticated against Metadata and actual Core inventory.
 /// @dev Incremental indexing creates no artist sanction, view-content approval or finality readiness.
-contract StreamFinalityScopeMembership is IStreamFinalityScopeMembership, StreamGasParameterHost {
+contract StreamFinalityScopeMembership is
+    IStreamFinalityScopeMembership,
+    IStreamFinalityTokenScopeInventory,
+    StreamGasParameterHost
+{
     bytes32 public constant DEPENDENCY_READ_GAS =
         keccak256("6529STREAM_GGP_SCOPE_MEMBERSHIP_READ_GAS");
     address public immutable override core;
@@ -31,6 +36,7 @@ contract StreamFinalityScopeMembership is IStreamFinalityScopeMembership, Stream
         uint256[] tokens;
     }
     mapping(bytes32 => ScopeState) private _scopes;
+    mapping(uint256 => bytes32[]) private _tokenScopes;
 
     constructor(
         address core_,
@@ -93,6 +99,7 @@ contract StreamFinalityScopeMembership is IStreamFinalityScopeMembership, Stream
         return id == type(IERC165).interfaceId
             || id == type(IStreamFinalityScopeMembership).interfaceId
             || id == type(IStreamFinalityRecoveryScopeEvidence).interfaceId
+            || id == type(IStreamFinalityTokenScopeInventory).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId;
     }
 
@@ -175,6 +182,7 @@ contract StreamFinalityScopeMembership is IStreamFinalityScopeMembership, Stream
                             ) != tokenId
                 ) revert ScopeMembershipTokenInvalid(tokenId);
                 s.tokens.push(tokenId);
+                _tokenScopes[tokenId].push(scope.scopeId);
             }
         }
         s.nextPart = end;
@@ -190,6 +198,25 @@ contract StreamFinalityScopeMembership is IStreamFinalityScopeMembership, Stream
             StreamScopeMembershipFacts memory f = _scopedFacts(s);
             emit ScopeMembershipSealed(scope.scopeId, f.membershipHash, s.tokens.length);
         }
+    }
+
+    /// @dev Pending validated prefixes are visible but never reported as complete memberships.
+    function tokenScopeCount(uint256 tokenId) external view override returns (uint256) {
+        _pins();
+        return _tokenScopes[tokenId].length;
+    }
+
+    function tokenScopeAt(uint256 tokenId, uint256 index)
+        external
+        view
+        override
+        returns (StreamFinalityScope memory scope, bool complete)
+    {
+        _pins();
+        if (index >= _tokenScopes[tokenId].length) revert ScopeMembershipIndexOutOfBounds(index);
+        ScopeState storage s = _scopes[_tokenScopes[tokenId][index]];
+        if (s.complete) _sourcePins(s);
+        return (s.scope, s.complete);
     }
 
     function scopeMembershipProgress(StreamFinalityScope calldata scope)

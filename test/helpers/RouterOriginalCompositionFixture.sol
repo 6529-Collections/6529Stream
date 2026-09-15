@@ -90,6 +90,7 @@ contract RouterOriginalCompositionFixture is RecoveryCompanionBoundaryFixture {
             IStreamArtistFinalityBinding.finalityRegistryCodeHash.selector,
             uint256(address(original).codehash)
         );
+        router.initializeOriginalFinalityAnchor();
         _address(
             coordinator,
             IStreamArtistRecoveryDeployment.finalityRegistry.selector,
