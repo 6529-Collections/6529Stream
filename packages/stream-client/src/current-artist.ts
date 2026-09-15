@@ -119,6 +119,7 @@ const ratification = "(uint256 collectionId,address metadataContract,bytes32 con
 const policy = "(uint256 collectionId,bytes32 phaseId,bytes32 policyHash)";
 const collaborator = "(uint256 collectionId,uint64 generation,bytes32 bindingHash,address account,bytes32 role,bytes32 shareLabelId)";
 const operations = new Interface([
+  "function contentConsentDigest((uint256 collectionId,address metadataContract,bytes32 familyId,bytes32 newStateHash),(uint256 nonce,uint64 time,bytes signature)) view returns (bytes32)",
   "function acceptArtistBinding(uint256," + authorization + ") returns (bytes32)",
   "function acceptanceDigest(uint256," + authorization + ") view returns (bytes32)",
   ...[["recordPolicyConsent", "policyConsentDigest", policy], ["recordEconomicsConsent", "economicsConsentDigest", economics],

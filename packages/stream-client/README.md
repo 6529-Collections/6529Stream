@@ -290,3 +290,46 @@ for retry; adapter pause does not prevent withdrawal. The new six client tests
 compare compiler-selected interfaces and independent Solidity type preimages;
 actual current getter/runtime acceptance remains part of the combined contract
 validation. See the [native immediate-sale guide](../../docs/native-immediate-reveal.md).
+
+## Prepare current script and media manifests
+
+`prepareScriptManifest` and `prepareMediaManifest` accept the complete typed
+records and return the Router write plus its exact content-state preview call.
+Integer fields use `bigint`; source types retain the Solidity enum values 0–8.
+An external hash of zero remains an absent commitment. These helpers do not
+fetch media or infer hashes from URIs, and encoding a descriptor does not mean
+the current contract supports its execution profile.
+
+```typescript
+const manifest = prepareScriptManifest(router, collectionId, scriptManifest);
+const newStateHash = await readManifestContentState(provider, manifest);
+const approval = prepareManifestContentConsent(
+  chainId, artistRegistry, core, manifest, newStateHash,
+  { nonce, deadline, signature: "0x" },
+);
+await assertCurrentArtistDigest(provider, approval);
+const artistTransaction = toSafeCall(approval.call);
+// Confirm this transaction from the actual Artist authority Safe first.
+const metadataTransaction = toSafeCall(manifest.call);
+// Submit through the Router's authorized caller, which may be a different Safe.
+```
+
+The Artist approves the Router's previewed content-family state, not the raw
+script hash or the manifest record hash. `prepareManifestContentConsent` keeps
+the original operation-17 signing domain and includes Core, Router, collection,
+family, state, nonce and deadline. Empty signature selects direct Artist
+execution; relayers supply the Artist's EOA or ERC-1271 signature bytes. Use
+`assertCurrentArtistDigest` before signing and simulate each call from its actual
+sender. A successful encoding or digest comparison does not reserve a nonce,
+prove authority, or permit bypassing content locks. Both prepared transactions
+use zero-value Safe CALL, and `requireSafeExecution` checks the corresponding
+Safe result after submission.
+
+The caller supplies the verified deployment and chain. Preview reads accept an
+optional `blockTag`; refresh state if it changed before consent or execution.
+Five client cases compare the six actual compiler-generated call interfaces,
+the original Solidity content-consent preimage, full-width integers, absent
+hashes and direct/relayed Safe preparation. These are client encoding checks;
+full current-stack workflow acceptance remains separate. See the
+[manifest profile](../../docs/collection-manifest-profile.md) for implemented
+contract profiles and outstanding larger-script work.

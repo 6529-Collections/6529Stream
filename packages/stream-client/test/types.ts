@@ -20,3 +20,11 @@ nativeAuctionBidTypedData(31337n, "0x1", nativeBid);
 nativeAuctionBidTypedData(31337n, "0x1", { ...nativeBid, amount: 1 });
 // @ts-expect-error current bid fields cannot be replaced by a creation authorization
 nativeAuctionBidTypedData(31337n, "0x1", { configHash: "0x1", artist: "0x1", nonce: "0x1", deadline: 1n });
+
+import { prepareScriptManifest, type CurrentScriptManifest } from "../src/index.js";
+declare const scriptManifest: CurrentScriptManifest;
+prepareScriptManifest("0x1", 1n, scriptManifest);
+// @ts-expect-error collection IDs use exact bigint values
+prepareScriptManifest("0x1", 1, scriptManifest);
+// @ts-expect-error source type is the closed Solidity enum
+prepareScriptManifest("0x1", 1n, { ...scriptManifest, sourceType: 9n });

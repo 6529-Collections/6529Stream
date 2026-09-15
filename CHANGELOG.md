@@ -5,6 +5,15 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add live nested Artist provenance, typed script/media manifests and governed
+  display budgets, preserving original finality routes and optional external hashes.
+- Add state-bound and delegated Artist attestations and declared platform-work
+  royalty admission; complete current-stack acceptance remains pending.
+- Extract fixed Artist and metadata workers to restore contract-size headroom
+  while preserving public interfaces and existing owner storage.
+- Add typed manifest previews, original Artist content-consent signing and
+  zero-value Safe CALL preparation to the current client.
+
 - Track pre-mint entropy provider revisions and immutable request policy inputs,
   preserving epoch-one commitments and the existing policy lock after registration.
 - Add Artist display facts and permissionless attribution claims with original

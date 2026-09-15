@@ -378,3 +378,11 @@ instead of relabeling its anchor. The CLI never uploads, signs, schedules or
 publishes. Hosting a package or publishing its hash does not turn it into a full
 archival export or independently audited state. See the
 [publisher guide](state-exports.md) for challenges, supersession and lineage.
+
+## Current script and media manifests
+
+Use the [manifest client workflow](../../packages/stream-client/README.md#prepare-current-script-and-media-manifests)
+to prepare complete descriptors, read the Router's exact preview, and obtain
+original Artist content consent before the authorized Router call. Artist and
+metadata authority may use different Safes. External zero hashes stay explicit
+absences; these helpers perform no upload, wallet signing or transaction.
