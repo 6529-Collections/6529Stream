@@ -24,9 +24,9 @@ import { StreamEntropyIncidentEvidence } from "./StreamEntropyIncidentEvidence.s
 import { StreamEntropyCoordinatorReads } from "./StreamEntropyCoordinatorReads.sol";
 import { StreamEntropyProviderLifecycle } from "./StreamEntropyProviderLifecycle.sol";
 import { StreamEntropyIncidentTransition } from "./StreamEntropyIncidentTransition.sol";
-import "./StreamEntropyFreshRecovery.sol";
-import "./StreamEntropyFulfillment.sol";
-import "./StreamEntropyRequestPlan.sol";
+import { StreamEntropyFreshRecovery } from "./StreamEntropyFreshRecovery.sol";
+import { StreamEntropyFulfillment } from "./StreamEntropyFulfillment.sol";
+import { StreamEntropyRequestPlan } from "./StreamEntropyRequestPlan.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyFreshRecovery.sol";
 import { StreamEntropyCollectionRecovery } from "./StreamEntropyCollectionRecovery.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyCollectionRecovery.sol";

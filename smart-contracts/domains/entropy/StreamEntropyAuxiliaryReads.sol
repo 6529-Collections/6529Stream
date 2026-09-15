@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamEntropyFreshRecovery } from "./StreamEntropyFreshRecovery.sol";
+import { IStreamEntropyFreshRecovery } from "../../interfaces/stream/entropy/IStreamEntropyFreshRecovery.sol";
 import "./StreamEntropyCoordinator.sol";
 import "../../interfaces/stream/core/IStreamCore.sol";
 import { StreamEntropyCollectionRecovery } from "./StreamEntropyCollectionRecovery.sol";

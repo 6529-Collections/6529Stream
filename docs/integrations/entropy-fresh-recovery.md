@@ -97,9 +97,17 @@ remain required. Runtime and size results are recorded with their source batch.
 
 The final focused run passes all 100 cases across ten suites, including the
 12 new recovery cases and the existing incident, policy, provider, epoch,
-subject, reveal-fee, quote and SLO regressions. All 79 captured sources match
-the integration checkout and every one of the 181 prior coordinator ABI
-entries remains. All 15 production products fit deployment limits. The first
+subject, reveal-fee, quote and SLO regressions. The native capture contains 79
+source units and preserves every one of the 181 prior coordinator ABI entries.
+All 15 production products fit deployment limits; coordinator runtime is
+24,522 bytes. Eight properties each pass 256 inputs with seed `0x6529`. The first
 run passed 70 cases but exceeded the coordinator runtime limit; the fixed
 callback worker and quote encoder resolve that size failure. Complete current
 Artist/Executor integration and the pending finding branch remain separate.
+
+The complete 1,719-source ABI/type check found transitive import aliases in the
+new worker boundary. Explicit named imports resolve them. A separate selected
+code-generation check proves identical executable creation/runtime code and
+complete ABI entries for all 15 tested production products after that correction;
+compiler metadata and ABI array ordering are compared separately. This bridge
+avoids treating a new deployment-script compile as a whole-system runtime test.
