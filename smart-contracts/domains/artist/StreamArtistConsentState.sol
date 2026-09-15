@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAuthorityCheckpoint.sol";
 import "./StreamArtistEconomicsAssociation.sol";
 import {
     IStreamArtistEconomicsEvidence as EconomicsEvidence
@@ -477,5 +478,6 @@ library StreamArtistConsentState {
         );
         if (replay[key].status != 0) revert T.Replay(key);
         replay[key] = T.ReplayCell(record, o.revision + 1, 1, 2);
+        StreamArtistAuthorityCheckpoint.noteReplay(key, replay[key]);
     }
 }

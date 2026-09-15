@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAuthorityCheckpoint.sol";
 
 import "./StreamArtistCurrentAuthorityFacts.sol";
 import "./StreamArtistRecoveryHashes.sol";
@@ -122,6 +123,7 @@ library StreamArtistRecoveryApprovalState {
             revert Recovery.InvalidRecoveryApproval();
         }
         replay[key] = T.ReplayCell(r.recordHash, o.revision + 1, 1, 2);
+        StreamArtistAuthorityCheckpoint.noteReplay(key, replay[key]);
         state.records[r.recordHash] = r;
         state.admissions[r.recordHash] = x.admission;
         state.associationRecords[scope] = r.recordHash;

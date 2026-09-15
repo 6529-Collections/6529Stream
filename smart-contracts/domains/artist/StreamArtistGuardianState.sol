@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAuthorityCheckpoint.sol";
 import "./StreamArtistRotationState.sol";
 import "./StreamArtistIdentityState.sol";
 import "./StreamArtistAuthorityPolicy.sol";
@@ -179,5 +180,6 @@ library StreamArtistGuardianState {
         key = _key(o, surface, scope);
         if (replay[key].status != 0) revert T.Replay(key);
         replay[key] = T.ReplayCell(record, o.revision + 1, 1, 2);
+        StreamArtistAuthorityCheckpoint.noteReplay(key, replay[key]);
     }
 }

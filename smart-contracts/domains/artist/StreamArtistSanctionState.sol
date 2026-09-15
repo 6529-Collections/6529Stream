@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAuthorityCheckpoint.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 
 import "./StreamArtistConsentState.sol";
@@ -130,6 +131,7 @@ library StreamArtistSanctionState {
         if (replay[replayKey].status != 0) revert T.Replay(replayKey);
         if (state.records[r.recordHash].recordHash != 0) revert S.InvalidSanction();
         replay[replayKey] = T.ReplayCell(r.recordHash, o.revision + 1, 1, 2);
+        StreamArtistAuthorityCheckpoint.noteReplay(replayKey, replay[replayKey]);
         bytes32 previous = state.latest[scopeKey];
         state.records[r.recordHash] = r;
         state.latest[scopeKey] = r.recordHash;

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAuthorityCheckpoint.sol";
 
 import "./StreamArtistOwner.sol";
 import "./StreamArtistCurrentAuthorityFacts.sol";
@@ -233,6 +234,7 @@ contract StreamArtistPayoutLifecycle is StreamArtistOwner {
             keccak256(abi.encode(p.artistId))
         );
         _replay[key] = T.ReplayCell(record, _revision + 1, 3, 1);
+        StreamArtistAuthorityCheckpoint.noteReplay(key, _replay[key]);
         _commit(
             c,
             modern
@@ -347,6 +349,7 @@ contract StreamArtistPayoutLifecycle is StreamArtistOwner {
         _payouts[p.artistId] = T.Payout(p.payoutAccount, record);
         _records[record] = p;
         _replay[key] = T.ReplayCell(record, _revision + 1, 3, 1);
+        StreamArtistAuthorityCheckpoint.noteReplay(key, _replay[key]);
         _commit(
             c,
             keccak256(abi.encode(p, signer, nonce, signedAt)),

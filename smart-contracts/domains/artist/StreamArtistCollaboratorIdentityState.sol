@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAuthorityCheckpoint.sol";
 import "./StreamArtistIdentityState.sol";
 import "./StreamArtistCollaboratorHashes.sol";
 
@@ -61,8 +62,12 @@ library StreamArtistCollaboratorIdentityState {
         if (replay[nonceKey].status != 0) revert T.Replay(nonceKey);
         if (replay[digestKey].status != 0) revert T.Replay(digestKey);
         replay[nonceKey] = T.ReplayCell(digest, o.revision + 1, 1, 2);
+        StreamArtistAuthorityCheckpoint.noteReplay(nonceKey, replay[nonceKey]);
         replay[digestKey] = T.ReplayCell(digest, o.revision + 1, 1, 2);
-        bytes32 accountDelta = accounts.available[p.account].consume(a.nonce);
+        StreamArtistAuthorityCheckpoint.noteReplay(digestKey, replay[digestKey]);
+        bytes32 accountDelta = accounts.available[p.account].consumeTagged(
+            a.nonce, 3, bytes32(uint256(uint160(p.account)))
+        );
         StreamArtistIdentityState.Mutation memory registration = StreamArtistIdentityState.register(
             identity,
             replay,
@@ -83,6 +88,7 @@ library StreamArtistCollaboratorIdentityState {
         bytes32 uniqueKey = _key(o, keccak256("identity_authority.replay.identity_uniqueness"), id);
         if (replay[uniqueKey].status != 0) revert T.Replay(uniqueKey);
         replay[uniqueKey] = T.ReplayCell(id, o.revision + 1, 1, 2);
+        StreamArtistAuthorityCheckpoint.noteReplay(uniqueKey, replay[uniqueKey]);
         m = StreamArtistIdentityState.Mutation(
             id,
             keccak256(abi.encode(registration.action, authorization.action, p)),

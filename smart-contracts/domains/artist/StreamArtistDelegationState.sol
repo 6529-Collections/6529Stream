@@ -205,7 +205,7 @@ library StreamArtistDelegationState {
         bool direct
     ) private returns (bytes32 delta) {
         if (direct && nonce != s.hints[replayLane]) revert T.InvalidRecord();
-        bytes32 availabilityDelta = s.availability[replayLane].consume(nonce);
+        bytes32 availabilityDelta = s.availability[replayLane].consumeTagged(nonce, 2, replayLane);
         if (nonce == s.hints[replayLane]) {
             (, s.hints[replayLane]) = s.availability[replayLane].firstUnused();
         }

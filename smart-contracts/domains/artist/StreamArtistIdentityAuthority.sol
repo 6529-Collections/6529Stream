@@ -104,6 +104,30 @@ contract StreamArtistIdentityAuthority is
     address public immutable identityEstateExtension;
     address public immutable identityRecoveryExtension;
 
+    function authorityNonceWordAt(uint8 kind, bytes32 key, uint256 index)
+        external
+        view
+        override
+        returns (uint256 prefix, uint256[32] memory words, bool exhausted)
+    {
+        prefix = StreamArtistAuthorityCheckpoint.noncePrefixAt(kind, key, index);
+        if (kind == 1) {
+            (words, exhausted) = _identity.nonceAvailability[key].checkpointWords(prefix);
+        } else if (kind == 2) {
+            (words, exhausted) = _delegations.availability[key].checkpointWords(prefix);
+        } else if (kind == 3 && uint256(key) >> 160 == 0) {
+            (words, exhausted) = _collaboratorAccounts.available[address(
+                    uint160(uint256(key))
+                )].checkpointWords(prefix);
+        } else if (kind == 4) {
+            (words, exhausted) = _rotations.acceptanceNonces[key].checkpointWords(prefix);
+        } else if (kind == 5) {
+            (words, exhausted) = _estate.nonceAvailability[key].checkpointWords(prefix);
+        } else {
+            revert StreamArtistAuthorityCheckpoint.InvalidAuthorityCheckpoint();
+        }
+    }
+
     function recordPreimageBytes(bytes32 hash) external view returns (bytes memory) {
         return StreamArtistPayloadStore.recordBytes(hash);
     }

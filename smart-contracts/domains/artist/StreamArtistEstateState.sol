@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAuthorityCheckpoint.sol";
 import { StreamArtistAuthorityRecordEvents } from "./StreamArtistAuthorityRecordEvents.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 import { StreamArtistAuthorityPreimages } from "./StreamArtistAuthorityPreimages.sol";
@@ -195,8 +196,9 @@ library StreamArtistEstateState {
         );
         if (replay[observed].status == 0) {
             replay[observed] = T.ReplayCell(digest, o.revision + 1, 1, 2);
+            StreamArtistAuthorityCheckpoint.noteReplay(observed, replay[observed]);
         }
-        bytes32 indexDelta = s.nonceAvailability[lane].consume(a.nonce);
+        bytes32 indexDelta = s.nonceAvailability[lane].consumeTagged(a.nonce, 5, lane);
         if (a.nonce == s.nonceHints[lane]) {
             (, s.nonceHints[lane]) = s.nonceAvailability[lane].firstUnused();
         }
@@ -545,5 +547,6 @@ library StreamArtistEstateState {
         key = _key(o, surface, scope);
         if (replay[key].status != 0) revert T.Replay(key);
         replay[key] = T.ReplayCell(commitment, o.revision + 1, 1, 2);
+        StreamArtistAuthorityCheckpoint.noteReplay(key, replay[key]);
     }
 }

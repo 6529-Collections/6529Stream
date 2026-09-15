@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAuthorityCheckpoint.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 
 import "./StreamArtistIdentityState.sol";
@@ -260,6 +261,7 @@ library StreamArtistIdentityRevisionState {
             StreamArtistPayloadStore.store(keccak256("ARTIST_IDENTITY_DOCUMENT"), document);
         }
         replay[chainKey] = T.ReplayCell(record, o.revision + 1, 1, 2);
+        StreamArtistAuthorityCheckpoint.noteReplay(chainKey, replay[chainKey]);
         m.record = record;
         m.action = keccak256(abi.encode(p, a, proof, keccak256(document), displayName));
         m.state = keccak256(

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAuthorityCheckpoint.sol";
 
 /// @notice Bounded auxiliary index for locating an unused uint256 artist nonce.
 /// @dev Replay cells remain authoritative. Level zero stores individual nonce bits;
@@ -37,6 +38,27 @@ library StreamArtistNonceAvailability {
             bit = prefix & 255;
             prefix >>= 8;
         }
+    }
+
+    /// @notice Original consumption plus an auxiliary producer-owned typed prefix inventory.
+    function consumeTagged(Index storage index, uint256 nonce, uint8 kind, bytes32 key)
+        internal
+        returns (bytes32 delta)
+    {
+        delta = consume(index, nonce);
+        StreamArtistAuthorityCheckpoint.noteNonce(kind, key, nonce >> 8, delta);
+    }
+
+    function checkpointWords(Index storage index, uint256 prefix)
+        internal
+        view
+        returns (uint256[32] memory words, bool exhausted)
+    {
+        for (uint8 level; level < 32; ++level) {
+            words[level] = index.full[level][prefix];
+            prefix >>= 8;
+        }
+        return (words, index.exhausted);
     }
 
     /// @notice Returns the lowest unused value, or no value if all 2**256 values were consumed.

@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAuthorityCheckpoint.sol";
+import {
+    IStreamArtistAuthorityCheckpoint
+} from "../../interfaces/stream/artist/IStreamArtistAuthorityCheckpoint.sol";
 
 import "../../interfaces/stream/artist/IStreamArtistOwner.sol";
 import "./StreamArtistHashes.sol";
@@ -62,6 +66,7 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
                 || archive_ == address(this) || domain_ == bytes32(0) || core_ == address(0)
                 || manager_ == address(0) || core_ == manager_
         ) revert StreamArtistOnboardingTypes.InvalidBinding();
+        StreamArtistAuthorityCheckpoint.initialize();
         artistRegistry = registry_;
         operationCoordinator = coordinator_;
         archiveV2 = archive_;
@@ -91,6 +96,41 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
                 domain_
             )
         );
+    }
+
+    function authorityCheckpoint()
+        external
+        view
+        returns (IStreamArtistAuthorityCheckpoint.Checkpoint memory result)
+    {
+        result = StreamArtistAuthorityCheckpoint.checkpoint();
+        result.ownerState = ownerStateSnapshotV2();
+    }
+
+    function authorityReplayAt(uint256 index)
+        external
+        view
+        returns (bytes32 key, StreamArtistOnboardingTypes.ReplayCell memory cell)
+    {
+        key = StreamArtistAuthorityCheckpoint.replayKeyAt(index);
+        cell = _replay[key];
+    }
+
+    function authorityNonceIndexAt(uint256 index)
+        external
+        view
+        returns (IStreamArtistAuthorityCheckpoint.NonceIndex memory)
+    {
+        return StreamArtistAuthorityCheckpoint.nonceIndexAt(index);
+    }
+
+    function authorityNonceWordAt(uint8, bytes32, uint256)
+        external
+        view
+        virtual
+        returns (uint256, uint256[32] memory, bool)
+    {
+        revert StreamArtistAuthorityCheckpoint.InvalidAuthorityCheckpoint();
     }
 
     function ownerStateSnapshotV2()
@@ -156,6 +196,7 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
         key = _replayKey(surface, scope);
         if (_replay[key].status != 0) revert StreamArtistOnboardingTypes.Replay(key);
         _replay[key] = StreamArtistOnboardingTypes.ReplayCell(commitment, _revision + 1, 1, 2);
+        StreamArtistAuthorityCheckpoint.noteReplay(key, _replay[key]);
     }
 
     function _commit(

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAuthorityCheckpoint.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 
 import "./StreamArtistDelegationState.sol";
@@ -326,7 +327,8 @@ library StreamArtistIdentityState {
             keccak256(abi.encode(artistId, a.nonce)),
             digest
         );
-        bytes32 availabilityDelta = state.nonceAvailability[artistId].consume(a.nonce);
+        bytes32 availabilityDelta =
+            state.nonceAvailability[artistId].consumeTagged(a.nonce, 1, artistId);
         bytes32 attestationKey;
         if (c.operationId == 24) {
             attestationKey = _consume(
@@ -434,7 +436,10 @@ library StreamArtistIdentityState {
             keccak256("identity_authority.replay.authorization_consumed_digest"),
             keccak256(abi.encode(artistId, digest))
         );
-        if (replay[key].status == 0) replay[key] = T.ReplayCell(digest, o.revision + 1, 1, 2);
+        if (replay[key].status == 0) {
+            replay[key] = T.ReplayCell(digest, o.revision + 1, 1, 2);
+            StreamArtistAuthorityCheckpoint.noteReplay(key, replay[key]);
+        }
         return keccak256(abi.encode(key, replay[key]));
     }
 
@@ -468,6 +473,7 @@ library StreamArtistIdentityState {
         key = _key(o, surface, scope);
         if (replay[key].status != 0) revert T.Replay(key);
         replay[key] = T.ReplayCell(commitment, o.revision + 1, 1, 2);
+        StreamArtistAuthorityCheckpoint.noteReplay(key, replay[key]);
     }
 
     function _now() private view returns (uint64) {

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAuthorityCheckpoint.sol";
 
 import "./StreamArtistSanctionState.sol";
 import "../../interfaces/stream/artist/IStreamArtistSanctionConfirmation.sol";
@@ -46,6 +47,7 @@ library StreamArtistSanctionConfirmationState {
         );
         if (replay[replayKey].status != 0) revert T.Replay(replayKey);
         replay[replayKey] = T.ReplayCell(p.sanctionRecordHash, o.revision + 1, 1, 2);
+        StreamArtistAuthorityCheckpoint.noteReplay(replayKey, replay[replayKey]);
         m.action = keccak256(abi.encode(b, p));
         m.state = keccak256(abi.encode(p, replayKey));
         m.replay = keccak256(abi.encode(replayKey, p.sanctionRecordHash));

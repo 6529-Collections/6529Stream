@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAuthorityCheckpoint.sol";
 
 import "./StreamArtistIdentityState.sol";
 import "../../interfaces/stream/artist/IStreamArtistAuthorizationRevocation.sol";
@@ -135,10 +136,13 @@ library StreamArtistAuthorizationState {
             identity.identities[p.artistId].authorityAddress
         );
         replay[denyKey] = T.ReplayCell(record, o.revision + 1, 1, 2);
+        StreamArtistAuthorityCheckpoint.noteReplay(denyKey, replay[denyKey]);
         replay[target] = T.ReplayCell(record, o.revision + 1, 1, 2);
+        StreamArtistAuthorityCheckpoint.noteReplay(target, replay[target]);
         bytes32 availability;
         if (p.revokedDigest == bytes32(0)) {
-            availability = identity.nonceAvailability[p.artistId].consume(p.revokedNonce);
+            availability =
+                identity.nonceAvailability[p.artistId].consumeTagged(p.revokedNonce, 1, p.artistId);
             if (identity.identities[p.artistId].nonceHint == p.revokedNonce) {
                 (, identity.identities[p.artistId].nonceHint) =
                     identity.nonceAvailability[p.artistId].firstUnused();

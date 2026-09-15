@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAuthorityCheckpoint.sol";
 import "./StreamArtistNativeReceipts.sol";
 import { StreamArtistDormancyRecordEvents } from "./StreamArtistDormancyRecordEvents.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
@@ -604,5 +605,6 @@ library StreamArtistDormancyState {
         );
         if (replay[key].status != 0) revert T.Replay(key);
         replay[key] = T.ReplayCell(value, o.revision + 1, 1, 2);
+        StreamArtistAuthorityCheckpoint.noteReplay(key, replay[key]);
     }
 }

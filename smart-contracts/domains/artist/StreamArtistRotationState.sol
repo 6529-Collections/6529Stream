@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAuthorityCheckpoint.sol";
 import { StreamArtistAuthorityRecordEvents } from "./StreamArtistAuthorityRecordEvents.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 import { StreamArtistAuthorityPreimages } from "./StreamArtistAuthorityPreimages.sol";
@@ -503,6 +504,7 @@ library StreamArtistRotationState {
         );
         if (replay[observation].status == 0) {
             replay[observation] = T.ReplayCell(digest, o.revision + 1, 1, 2);
+            StreamArtistAuthorityCheckpoint.noteReplay(observation, replay[observation]);
         }
         bytes32 key = _consume(
             replay,
@@ -511,7 +513,7 @@ library StreamArtistRotationState {
             _acceptanceScope(p.artistId, p.newAddress, a.nonce),
             digest
         );
-        bytes32 delta = s.acceptanceNonces[lane].consume(a.nonce);
+        bytes32 delta = s.acceptanceNonces[lane].consumeTagged(a.nonce, 4, lane);
         StreamArtistPayloadStore.store(keccak256("ARTIST_SIGNATURE_BUNDLE"), a.signature);
         if (a.nonce == s.acceptanceHint[lane]) {
             (, s.acceptanceHint[lane]) = s.acceptanceNonces[lane].firstUnused();
@@ -875,5 +877,6 @@ library StreamArtistRotationState {
         key = _key(o, surface, scope);
         if (replay[key].status != 0) revert T.Replay(key);
         replay[key] = T.ReplayCell(record, o.revision + 1, 1, 2);
+        StreamArtistAuthorityCheckpoint.noteReplay(key, replay[key]);
     }
 }
