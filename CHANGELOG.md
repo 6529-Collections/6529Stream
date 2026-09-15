@@ -5,6 +5,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Track pre-mint entropy provider revisions and immutable request policy inputs,
+  preserving epoch-one commitments and the existing policy lock after registration.
+- Add Artist display facts and permissionless attribution claims with original
+  authority records and append-only history; full renderer acceptance remains pending.
+
 - Support recovery after a dismissed and reopened prior-recovery interval,
   preserving original closure, guardian and accepted recovery history.
 - Add a reproducible actual-contract/Safe museum media capture with all four
