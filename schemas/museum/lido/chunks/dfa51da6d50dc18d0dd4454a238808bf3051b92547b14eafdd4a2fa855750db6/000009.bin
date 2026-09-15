@@ -1,0 +1,187 @@
+ id="legalBodyWeblink">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A text element providing an URL reference to a web resource of the <em>person</em> or <em>group of persons</em>
+							referred to as legal body.</tei:ab>
+						<tei:ab type="label">Legal Body Weblink</tei:ab>
+						<tei:ab type="dataValues">Free text</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="lido" type="lido:lidoComplexType" id="lido">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">A wrapper for the metadata of an object/work. Used as root
+					for OAI-PMH content.</tei:ab>
+				<tei:ab type="note">Use this element as root for the delivery of content through OAI-PMH.</tei:ab>
+				<tei:ab type="label">Wrapper for an object record</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="lidoComplexType" id="lidoComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines the metadata of an object/work.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="lidoRecID" type="lido:identifierComplexType" maxOccurs="unbounded" id="lidoRecID">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A unique LIDO record identification preferably
+							composed of an identifier for the contributor, possibly taken from ISIL
+							or a similar registry, and a record identification in the (local) system
+							of the contributor. The identifier may or may not be persistent.<br/>
+							For unique published and persistent identification of the object use
+							<tei:ref target="#objectPublishedID">Published Object Identifier</tei:ref>.<br/>
+							Use <tei:ref target="#recordMetadataDate">Record Metadata Date</tei:ref> for
+							versioning. </tei:ab>
+						<tei:ab type="label">LIDO Metadata Record Identifier</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="objectPublishedID" type="lido:identifierComplexType" minOccurs="0" maxOccurs="unbounded" id="objectPublishedID">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A published identifier of the object or work in focus.
+							It is strongly recommended to provide a dereferenceable URI.<br/>
+							Repeated for identifiers from different authority files or other sources.
+							If there are multiple published identifiers use the <tei:ref target="#pref">preference</tei:ref> attribute to mark the one preferred by the provider of the LIDO record.
+						</tei:ab>
+						<tei:ab type="label">Published Object Identifier</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="category" type="lido:conceptComplexType" minOccurs="0" id="category">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for the broad category
+							the object/work in focus belongs to.<br/>
+							Examples may include <em>human-made object</em> or <em>natural object</em>.</tei:ab>
+						<tei:ab type="label">Category</tei:ab>
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">LIDO Terminology for
+							<tei:ref target="../../documents/terminology-recommendation.html#category">Category</tei:ref></tei:ab>
+					</xs:documentation>
+
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:category">
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="applicationProfile" type="lido:identifierComplexType" minOccurs="0" id="applicationProfile">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A unique identification of the application
+							profile used to create the LIDO record.</tei:ab>
+						<tei:ab type="label">Application Profile</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="lido:descriptiveMetadata" maxOccurs="unbounded"/>
+			<xs:element ref="lido:administrativeMetadata" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute ref="lido:relatedencoding"/>
+	</xs:complexType>
+	<xs:element name="lidoWrap" id="lidoWrap">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">The LIDO root element for the whole document, holding one or multiple
+					object/work records.</tei:ab>
+				<tei:ab type="label">Wrapper for the whole document</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="lido" maxOccurs="unbounded" id="lido_lidoWrap">
+					<xs:complexType>
+						<xs:complexContent>
+							<xs:extension base="lido:lidoComplexType">
+								<xs:attribute ref="lido:sortorder"/>
+							</xs:extension>
+						</xs:complexContent>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute ref="lido:relatedencoding"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="materialsTechComplexType" id="materialsTechComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines information about materials and techniques.
+					Includes index elements, and possibly information about the extent and source.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="termMaterialsTech" minOccurs="0" maxOccurs="unbounded" id="termMaterialsTech">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for materials and techniques
+							detected in an object/work.</tei:ab>
+						<tei:ab type="label">Term Materials/Techniques</tei:ab>
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						
+						
+						<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#termMaterialsTech">Term Materials/Techniques</tei:ref></tei:ab>
+					</xs:documentation>
+
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:termMaterialsTech">
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:conceptComplexType">
+							<xs:attribute ref="lido:type" id="termMaterialsTech_type">
+								<xs:annotation>
+									<xs:documentation>
+										<tei:ab type="description">An attribute further qualifying the
+											kind of materials or techniques used to
+											create or modify an object/work.<br/>
+											Examples may include <em>implement</em>, <em>medium</em>, or <em>watermark</em>.</tei:ab>
+										<tei:ab type="dataValues">Controlled terminology</tei:ab>
+										<tei:ab type="recommendation">LIDO Terminology for
+											<tei:ref target="../../documents/terminology-recommendation.html#termMaterialsTech_type">Type of Term Materials/Techniques</tei:ref></tei:ab>
+									</xs:documentation>
+								</xs:annotation>
+							</xs:attribute>
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="extentMaterialsTech" type="lido:conceptMixedComplexType" minOccurs="0" maxOccurs="unbounded" id="extentMaterialsTech">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element specifying the part of the
+							object/work to which the materials or techniques in focus apply.</tei:ab>
+						<tei:ab type="label">Extent Materials/Techniques</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#extentMaterialsTech">Extent Materials/Techniques</tei:ref></tei:ab>
+					</xs:documentation>
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:extentMaterialsTech">
+								<sch:extends rule="sch_MixedContent"/>
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		

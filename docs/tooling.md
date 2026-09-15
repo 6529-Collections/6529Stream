@@ -8,6 +8,7 @@ a different build. Start with the [setup guide](first-30-minutes.md).
 | --- | --- |
 | `python scripts/dev.py doctor` | Check Python, Foundry and compiler configuration |
 | `python scripts/dev.py build` | Build the current product profile |
+| `python scripts/dev.py prepare-graph` | Prepare graph test inputs from the completed native build |
 | `python scripts/dev.py test` | Run the current whole-stack tests |
 | `python scripts/dev.py campaign --mode quick --seed 0x6529` | Reproducible input fuzzing and handler invariant sequences |
 | `python scripts/dev.py check` | Current build/tests and focused interface/layout checks |
@@ -27,7 +28,96 @@ once, then `npm --prefix packages/stream-client test`. Its independent CI job
 checks retained ABI freshness, TypeScript types, signing payloads and snapshots
 without recompiling Solidity. Solidity development does not require Node.js.
 
+The [museum tooling](../tools/museum/README.md) has its own pinned Python
+dependencies and independent Windows/Linux CI workflow. Its tests and
+deterministic schema/fixture checks run without compiling Solidity. Use the
+documented isolated environment; the general tools lock does not include the
+JSON-LD dependencies. These tests cover the implemented offline tools and do
+not establish complete museum conformance.
+
+The [typed record tools](../tools/metadata/README.md) share that isolated Python
+environment for independent JSON Schema and canonical-byte tests. Run
+`python -m unittest tools.metadata.test_rights_profile -v` and
+`python -m tools.metadata.rights_profile --check` for the rights profile.
+Both commands are included in museum CI; they do not register anything onchain.
+
+Release checksum validation accepts the exact Git diagnostic override
+`whitespace=-blank-at-eol` used by the preserved W3C license notice. This does not
+change its inherited text/LF policy or remove trailing spaces from the upstream
+bytes. The complete `.gitattributes` file remains part of the checksum inputs;
+other unsupported attributes still fail validation.
+
+Draft pull requests retain their running CI job when new commits arrive. GitHub
+keeps the newest pending run for that pull request, so repeated integration
+pushes do not keep discarding an unfinished compiler run. Ready pull requests
+still cancel superseded runs. Always associate a result with its tested commit;
+a completed earlier run does not validate the pending revision. This uses
+[GitHub's workflow concurrency behavior](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency).
+
+## Current graph fixture preparation
+
+After a current native build, prepare its compact graph inputs before running
+current tests or a campaign:
+
+```text
+python scripts/dev.py build
+python scripts/dev.py prepare-graph
+python scripts/dev.py test
+```
+
+The command selects the actual cached literal creation library, whose compiler
+context owns the embedded creation bytes and immutable references for the 55
+required products. Each selected graph or campaign test host is authenticated
+against its own cache-selected native compiler output. Unrelated test changes
+can therefore reuse an unchanged creation library without forcing a full build.
+The selected helpers and their transitive imports must still match current source
+bytes; stale dependencies, ambiguous cache entries or changed executables fail.
+
+For a custom cache, use `python -m tools.build.prepare_current_graph --out
+<output-directory> --cache-path <cache-directory>`; the paths must identify the
+same completed Forge build/cache pair. Campaigns bind both executed fuzz/invariant
+hosts. Complete exports remain under ignored `artifacts/current-graph/native`,
+with each compiler context recorded separately; original Forge outputs stay
+unchanged. CRLF-to-LF compiler transport is recorded explicitly. Preparation
+never substitutes an unadopted dependency emission for the cached creation owner.
+
+This requires no machine-specific snapshot directory. Re-run preparation after
+rebuilding changed contracts or graph fixtures. Its command lock protects the
+projection write; finish other builds before preparing or testing the same
+output directory. The current profile's large aggregate fixture limits cover
+many deployments and calls. Native product checks still enforce the 24,576-byte
+runtime limit, and the fixture checks constructor and deployed products; these
+local allowances do not establish a shipping transaction's gas capacity.
+
 ## Pick the relevant tests
+
+The new [artist operation extension](architecture/artist-operation-extension-v1.md)
+has a separate design check: `python -m tools.protocol.check_artist_operation_extension`
+and `python -m tools.protocol.test_artist_operation_extension`. It preserves the
+historical 57-operation packets and derives the additive 58-row inventory.
+Its implementation gate remains closed until matching source and execution
+evidence exist; it is not a substitute for the current test suite.
+
+The adopted recovery continuity extension has its own current check:
+`python -m tools.protocol.check_artist_owner_record_continuity_extension` and
+`python -m tools.protocol.test_artist_owner_record_continuity_extension`. It pins
+the four historical packet/schema/checker/test files and verifies the current
+operation-35 occurrence and owner vectors. These checks do not accept a release.
+
+The three frozen artist-57 design gates use the accepted RC1 Git tree
+`569bf87f1fa808787d324f6e1582924b5ccf1d40`. Run them with
+`python -m tools.protocol.run_frozen_artist_checks matrix`, `reconstruction`,
+or `continuity`. The runner first verifies that the frozen packets, schemas,
+checkers and tests in this checkout still match that baseline. It then runs
+the historical tests and checker in a temporary Git archive and removes it.
+This preserves historical evidence while allowing the current specification
+to evolve. A missing baseline Git object is an error; use a full clone or fetch
+the published `testnet/current-rc-1` tag before running these gates.
+
+Make, both aggregate shell wrappers and CI label these checks as historical.
+Current contracts, the effective 58-operation design, source layout, ABI,
+admission, provenance and release checks continue to use the active checkout.
+A historical pass provides no current implementation or release acceptance.
 
 ```text
 python scripts/dev.py test --match-contract StreamCurrentStackTest
@@ -73,8 +163,13 @@ execution also fail it. These budgets are not correctness or security claims.
 Ordinary current/default tests use the quick invariant limits in `foundry.toml`.
 The campaign overrides runtime fuzz settings without changing compiler inputs.
 Each preset/seed normally uses its own `out/campaigns/` and `cache/campaigns/`
-pair, protected by an exclusive campaign lock. Different seeds or presets can
-run concurrently when resources permit. `--reuse-current` saves a cold build by
+pair. Before execution, the command compiles/lists the exact two campaign hosts
+and prepares their graph inputs from that cache. `compile.log` and
+`prepare-graph.log` retain those steps; a failed preparation executes no properties.
+The report binds the resulting projection manifest and checks it again afterward.
+A checkout-wide campaign lock protects the shared graph fixture paths, so run
+parallel campaigns in separate worktrees. Do not rebuild or prepare graph inputs
+in a checkout while its campaign is running. `--reuse-current` saves a cold build by
 using `out/current` and `cache/current`; use it only when no other build, exporter
 or campaign accesses those paths. The CLI lock coordinates campaigns, not
 independently launched Forge processes.
@@ -123,6 +218,14 @@ production readiness or replace the [release gates](release-readiness.md). Strea
 remains pre-audit and not production-ready.
 
 ## Maintainer references
+
+After adding or removing Solidity files, run
+`python -m tools.build.refresh_solidity_source_inventory`, then
+`python -m tools.build.check_solidity_source_layout`. The refresh changes only
+the active path inventory after validating the layout and imports. It preserves
+the original migration manifest, historical receipts and frozen evidence.
+Use `--check` to detect a stale inventory without writing files. Moves involving
+historical destinations still require an explicit reviewed relocation entry.
 
 | Task | Detailed reference |
 | --- | --- |

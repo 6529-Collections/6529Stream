@@ -38,6 +38,7 @@ compilation_restrictions = [
 fs_permissions = [
     { access = "read", path = "./test/fixtures" },
     { access = "read", path = "./deployments" },
+    { access = "read", path = "./docs/schemas/finality" },
 ]
 
 [profile.current]
@@ -47,6 +48,21 @@ out = "out/current"
 cache_path = "cache/current"
 via_ir = true
 build_info = true
+ast = true
+# Aggregate local graph fixtures deploy many individually size-checked products.
+# These test limits are not transaction gas or production contract-size allowances.
+code_size_limit = 2000000
+gas_limit = 10000000000
+memory_limit = 1073741824
+fs_permissions = [
+    { access = "read", path = "./test/fixtures" },
+    { access = "read", path = "./deployments" },
+    { access = "read", path = "./schemas" },
+    { access = "read", path = "./docs/schemas/finality" },
+    { access = "read", path = "./out/current" },
+    { access = "read", path = "./artifacts/current-graph" },
+    { access = "read-write", path = "./artifacts/native-assembly" },
+]
 
 # Keep ordinary test invocations bounded. scripts/dev.py campaign supplies an
 # explicit seed and may override these runtime-only limits for extended runs.

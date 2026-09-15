@@ -1,0 +1,95 @@
+ss="st">&quot;http://terminology.lido-schema.org/lido00169&quot;</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="ot">        xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        Leonardo da Vinci</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:appellationValue</span>&gt;</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:nameActorSet</span>&gt;</span></code></pre></div>
+            <h4 data-number="4.3.2.2" id="display-elements"><span
+            class="header-section-number">4.3.2.2</span> Display
+            elements</h4>
+            <p><strong>Note:</strong> In the <a
+            href="https://lido-schema.org/schema/latest/lido.html">LIDO
+            Schema Documentation</a>, an element is introduced as “A
+            display element …” if it contains a human-readable rendering
+            of what is stated in the associated index element. For an
+            account of LIDO display elements and more detailed
+            information see section <a
+            href="#display-and-index-elements"><em>4.3.3 Display and
+            index elements</em></a>.</p>
+            <p><strong>Features:</strong> Defined by <a
+            href="https://lido-schema.org/schema/latest/lido.html#textComplexType"><em>textComplexType</em></a>,
+            a display element can have attributes, is repeatable only
+            for different languages, and has free text (xs:string) as
+            its data value.</p>
+            <p><strong>Example:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#displayMaterialsTech">lido:displayMaterialsTech</a>&gt;
+            is a textual description of the associated index terms in
+            &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#termMaterialsTech">lido:termMaterialsTech</a>&gt;
+            contained, e.g., by the &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectMaterialsTechSet">lido:objectMaterialsTechSet</a>&gt;
+            element.</p>
+            <blockquote>
+            <p><strong>Materials/Techniques:</strong> Oil on poplar
+            panel</p>
+            </blockquote>
+            <div class="sourceCode" id="cb14"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:objectMaterialsTechSet</span>&gt;</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:displayMaterialsTech</span><span class="ot"> xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        Oil on poplar panel</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:displayMaterialsTech</span>&gt;</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:objectMaterialsTechSet</span>&gt;</span></code></pre></div>
+            <h4 data-number="4.3.2.3" id="index-elements"><span
+            class="header-section-number">4.3.2.3</span> Index
+            elements</h4>
+            <p><strong>Note:</strong> In the <a
+            href="https://lido-schema.org/schema/latest/lido.html">LIDO
+            Schema Documentation</a>, an element is introduced as “An
+            index element …” if it refers to general concepts for
+            indexing and retrieval. Index elements provide sub-elements
+            for information on the indexing concept, including its URI
+            or local identifier, and the natural language term or terms.
+            For more information on display and index elements see
+            section <a href="#display-and-index-elements"><em>4.4.3
+            Display and index elements</em></a> below.</p>
+            <p><strong>Features:</strong> Defined by <a
+            href="https://lido-schema.org/schema/latest/lido.html#conceptComplexType"><em>conceptComplexType</em></a>,
+            an index element can have attributes, may be repeatable, and
+            is populated with elements containing controlled data
+            values.</p>
+            <p><strong>Example:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#termMaterialsTech">lido:termMaterialsTech</a>&gt;
+            is an index element to provide descriptors for materials,
+            e.g., medium or support, and techniques, from controlled
+            vocabularies.</p>
+            <blockquote>
+            <p><strong>Materials/Techniques:</strong> Oil paint
+            <strong><em>Type:</em></strong> Medium
+            <strong><em>Preference:</em></strong> Display</p>
+            </blockquote>
+            <div class="sourceCode" id="cb15"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Medium --&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:termMaterialsTech</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00513&quot;</span>&gt;</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">skos:Concept</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="ot">        rdf:about=</span><span class="st">&quot;http://vocab.getty.edu/aat/300015050&quot;</span>&gt;</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">skos:prefLabel</span><span class="ot"> xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>            oil paint (paint)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">&lt;!-- Display label --&gt;</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:term</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00526&quot;</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="ot">        xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>        oil paint</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:term</span>&gt;</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:termMaterialsTech</span>&gt;</span></code></pre></div>
+            <h4 data-number="4.3.2.4" id="identifier-elements"><span
+            class="header-section-number">4.3.2.4</span> Identifier
+            elements</h4>
+            <p><strong>Note:</strong> In the <a
+            href="https://lido-schema.org/schema/latest/lido.html">LIDO
+            Schema Documentation</a>, an element is introduced as “An
+            identifier …” if it is intended to hold values for IRIs,
+            URIs, or local identifiers. There are <a
+            href="https://lido-schema.org/schema/latest/lido.html#identifierComplexType">thirteen
+            ident

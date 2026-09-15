@@ -1,0 +1,288 @@
+{
+  "qualification": "Compiler-selected encoding fixture; not deployed-state or runtime acceptance.",
+  "sources": {
+    "smart-contracts/interfaces/stream/entropy/IStreamEntropyFreshRecovery.sol": "a677e6fe4b2cc18b483ecb6121aa3e3548f44af44142a032efe27361d789737d",
+    "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol": "dc26ca564ea058260e3ae413930fa29fa52b5d7ffc83569f73e3369d766a9bbd",
+    "smart-contracts/interfaces/stream/artist/IStreamArtistContentAuthority.sol": "41486593ab21b14741ecc1d5838ec3c8c5df09265a17a392fe9b4762a8874188"
+  },
+  "abis": {
+    "recovery": [
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "oldRequestKey",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "reasonURI",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "providerEvidenceHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamEntropyFreshRecovery.RecoveryInput",
+            "name": "input",
+            "type": "tuple"
+          }
+        ],
+        "name": "freshRecoveryTransition",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "requestKey",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "contentStateHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "providerFee",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "oldRequestKey",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "reasonURI",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "providerEvidenceHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamEntropyFreshRecovery.RecoveryInput",
+            "name": "input",
+            "type": "tuple"
+          }
+        ],
+        "name": "requestFreshEntropy",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "requestKey",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "providerRequestId",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "payable",
+        "type": "function"
+      }
+    ],
+    "coordinator": [
+      {
+        "inputs": [
+          {
+            "internalType": "address payable",
+            "name": "destination",
+            "type": "address"
+          }
+        ],
+        "name": "claimEntropyFeeCredit",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "reasonURI",
+            "type": "string"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "evidenceHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "markEntropyRequestUnrecoverable",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "scopeId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "string",
+            "name": "reasonURI",
+            "type": "string"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "evidenceHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "markEntropyScopeRequestUnrecoverable",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ],
+    "artist": [
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "metadataContract",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "familyId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "newStateHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistContentTypes.Consent",
+            "name": "p",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "time",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes",
+                "name": "signature",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.Authorization",
+            "name": "a",
+            "type": "tuple"
+          }
+        ],
+        "name": "contentConsentDigest",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "metadataContract",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "familyId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "newStateHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistContentTypes.Consent",
+            "name": "p",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "time",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes",
+                "name": "signature",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.Authorization",
+            "name": "a",
+            "type": "tuple"
+          }
+        ],
+        "name": "recordContentConsent",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ]
+  }
+}

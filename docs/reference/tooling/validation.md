@@ -4,6 +4,17 @@ This is detailed maintainer reference. Start everyday work with the
 [developer commands](../../tooling.md); run aggregate release validation only when
 preparing the corresponding evidence. Commands below run from the repository root.
 
+The three historical artist-57 gates run through
+`python -m tools.protocol.run_frozen_artist_checks` with `matrix`, `reconstruction`
+or `continuity`. They validate frozen active inputs and execute against the exact
+RC1 Git baseline; see [the isolation rules](../../tooling.md#pick-the-relevant-tests).
+The effective artist extension and all current contract, layout, ABI and release
+checks continue to use the active checkout. The adopted recovery continuity
+extension runs separately with
+`python -m tools.protocol.test_artist_owner_record_continuity_extension` and
+`python -m tools.protocol.check_artist_owner_record_continuity_extension`; passing
+the historical runner cannot hide changes to that current packet.
+
 ## Local Checks
 
 For the supported current stack, run `make current-stack-check`, or on Windows:
@@ -20,6 +31,26 @@ formatting, source layout and the permanent Core ABI. Outputs remain under
 ignored `out/current` and `cache/current`. The default profile and full release
 checks retain their historical scope. This focused command does not regenerate
 release evidence or replace the broader domain and release validation.
+
+### Settlement test boundaries
+
+`test/unit/revenue/StreamUniversalSettlement*.t.sol`, `StreamUniversalPermits.t.sol`
+and `StreamUniversalSafe.t.sol` exercise the new official recorder and ERC-20
+payer adapter with the actual module registry, wallet, escrow, and pinned
+Permit2/Safe implementations. Their Core, mint manager and artist boundaries
+are explicit domain fixtures. Current-stack tests must independently prove
+composition with the actual selected Core and artist owners.
+
+`StreamRevenueAssignments.t.sol` keeps resolver precedence, frozen assignments,
+clear fallthrough, wallet runtime validation and the legacy public SALE_POSTER
+materialization primitive independent of settlement construction. The former
+`StreamPrimarySaleSettlement.t.sol` exercised an uninstalled foundation API with
+an owner allowlist and direct payer pulls by the recorder. Those APIs are removed.
+Its still-supported accounting, transfer-failure, replay and event guarantees are
+covered by the universal suites; its resolver guarantees are preserved separately.
+Native recorder settlement, SALE_POSTER sale admission, token-scoped settlement
+and ALLOW_CURRENT success are not implied by that migration. The first universal
+consumer accepts strict collection PROFILE, signed, single-step ERC-20 minting.
 
 Fresh contributors should start with
 [`first-30-minutes.md`](../../first-30-minutes.md). That checked guide explains the

@@ -1,0 +1,79 @@
+  <em>Mona Lisa</em>. The reference to the painting is
+            provided by the &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventSet">lido:eventSet</a>&gt;
+            element with the Event Type “<a
+            href="http://terminology.lido-schema.org/lido00007">Production</a>”.
+            The place type “city” is expressed by the attribute <em><a
+            href="https://lido-schema.org/schema/latest/lido.html#politicalEntity">lido:politicalEntity</a></em>,
+            and the URI for “city” is taken from Wikidata.</p>
+            <blockquote>
+            <p><strong>Event Place:</strong> Florence between 1502/1506
+            <strong><em>Political Entity:</em></strong> City<br />
+            <strong>Name Place:</strong> Florence
+            <strong><em>Preference:</em></strong> Preferred<br />
+            <strong>Coordinates:</strong> 43.771389, 11.254167</p>
+            </blockquote>
+            <div class="sourceCode" id="cb32"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:eventPlace</span>&gt;</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:displayPlace</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="ot">        xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>        Possibly Florence, between 1502/1506</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:displayPlace</span>&gt;</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">&lt;!-- City --&gt;</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:place</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:politicalEntity=</span><span class="st">&quot;http://www.wikidata.org/entity/Q515&quot;</span>&gt;</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:placeID</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="ot">            lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00099&quot;</span>&gt;</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>            http://www.wikidata.org/entity/Q2044</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:placeID</span>&gt;</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:namePlaceSet</span>&gt;</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>            <span class="co">&lt;!-- Preferred label --&gt;</span></span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:appellationValue</span></span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a><span class="ot">                lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00169&quot;</span></span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a><span class="ot">                xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>                Florence</span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:appellationValue</span>&gt;</span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:namePlaceSet</span>&gt;</span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:gml</span>&gt;</span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">gml:Point</span>&gt;</span>
+<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">gml:pos</span>&gt;43.771389, 11.254167&lt;/<span class="kw">gml:pos</span>&gt;</span>
+<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">gml:Point</span>&gt;</span>
+<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:gml</span>&gt;</span>
+<span id="cb32-26"><a href="#cb32-26" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:place</span>&gt;</span>
+<span id="cb32-27"><a href="#cb32-27" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:eventPlace</span>&gt;</span></code></pre></div>
+            <h4 data-number="5.2.5.4" id="event-date"><span
+            class="header-section-number">5.2.5.4</span> Event Date</h4>
+            <p><strong>Element name:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventDate">lido:eventDate</a>&gt;</p>
+            <p><strong>Note:</strong> Event Date contains information
+            about the date or timespan when the event took place. The
+            dates are expressed in the elements &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#earliestDate">lido:earliestDate</a>&gt;
+            and &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#latestDate">lido:latestDate</a>&gt;,
+            both of which are required. If earliest and latest date
+            concur, the date is given twice. <strong>Example:</strong>
+            The following example describes the estimated timespan for
+            the production of the <em>Mona Lisa</em>. The reference to
+            the painting is provided by the parent element &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventSet">lido:eventSet</a>&gt;
+            with the Event Type “<a
+            href="http://terminology.lido-schema.org/lido00007">Production</a>”.</p>
+            <blockquote>
+            <p><strong>Event Date:</strong> Between 1506/1519<br />
+            <strong>Earliest Date:</strong> 1506
+            <strong><em>Type:</em></strong> Estimated date<br />
+            <strong>Latest Date:</strong> 1519
+            <strong><em>Type:</em></strong> Estimated date</p>
+            </blockquote>
+            <div class="sourceCode" id="cb33"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:eventDate</span>&gt;</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:displayDate</span><span class="ot"> xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>        Between 1506/1519</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:displayDate</span>&gt;</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:date</span>&gt;</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>        <span class="co">&lt;!-- Estimated date --&gt;</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:earliestDate</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="ot">            lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00529&quot;</span>&gt;</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>            1503</span>
+<span id="cb33-10"><a href="#cb33-10" aria-h

@@ -1,0 +1,187 @@
+ei:ab>
+							
+							
+						</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:complexContent>
+							<xs:extension base="lido:eventSetComplexType">
+								<xs:attribute ref="lido:sortorder"/>
+								<xs:attribute ref="lido:mostNotableEvent"/>
+							</xs:extension>
+						</xs:complexContent>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute ref="lido:mostNotableEvent"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:attribute name="geographicalEntity" type="xs:string" id="geographicalEntity">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">An attribute for the kind of place as a physical entity, 
+					such as natural and cultural landscapes.<br/>
+					Note that the kind of physical place can be indexed in more detail in the 
+					<tei:ref target="#placeClassification">Place Classification</tei:ref> element.
+				</tei:ab>
+				<tei:ab type="equivalents"/>
+				<tei:ab type="dataValues">Controlled</tei:ab>
+				
+				
+				<tei:ab type="recommendation">Linked open vocabulary for
+					<tei:ref target="../../documents/terminology-recommendation.html#geographicalEntity">geographical entity</tei:ref></tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+	</xs:attribute>
+	<xs:complexType name="gmlComplexType" id="gmlComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines the GML instantiation for georeferences.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element ref="gml:Point" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="gml:LineString" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="gml:Polygon" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="identifierComplexType" id="identifierComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines information about the identifier used, including its type, source, or label.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute ref="lido:pref"/>
+				<xs:attribute ref="lido:type" use="required" id="identifier_type">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">An attribute for the particular kind of identifier used,
+								whether it is an <em>IRI</em>, a <em>URI</em>, or a <em>Local identifier</em>.</tei:ab>
+							<tei:ab type="dataValues">Controlled terminology</tei:ab>
+							<tei:ab type="recommendation">LIDO Terminology for
+								<tei:ref target="../../documents/terminology-recommendation.html#identifier_type">Type of Identifier</tei:ref></tei:ab>
+						</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute ref="lido:source"/>
+				<xs:attribute ref="lido:encodinganalog"/>
+				<xs:attribute ref="lido:label"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:element name="inscriptionsWrap" id="inscriptionsWrap">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">A wrapper for information about inscriptions and other
+					markings.</tei:ab>
+				<tei:ab type="label">Inscriptions/Marks Wrapper</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="inscriptions" minOccurs="0" maxOccurs="unbounded" id="inscriptions">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">A set of the textual transcription or description of any
+								distinguishing or identifying physical lettering, annotations,
+								texts, markings, or labels that are affixed, applied, stamped,
+								written, inscribed, or attached to the object/work, excluding any
+								mark or text inherent in the materials of which it is made.</tei:ab>
+							<tei:ab type="label">Inscriptions/Marks</tei:ab>
+							
+							
+						</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="inscriptionTranscription" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="inscriptionTranscription">
+								<xs:annotation>
+									<xs:documentation>
+										<tei:ab type="description">A text element for the transcription of the inscription.<br/>
+											Repeated for language variants only.</tei:ab>
+										<tei:ab type="label">Inscription Transcription</tei:ab>
+										
+										
+									</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="inscriptionDescription" type="lido:descriptiveNoteComplexType" minOccurs="0" maxOccurs="unbounded" id="inscriptionDescription">
+								<xs:annotation>
+									<xs:documentation>
+										<tei:ab type="description">A text element for a description of an
+											inscription, including description identifier,
+											descriptive note of the inscription and
+											sources.<br/>
+											Repeated if there is more than one descriptive note.</tei:ab>
+										<tei:ab type="label">Inscription Description</tei:ab>
+										<tei:ab type="dataValues">Free text</tei:ab>
+										
+										
+									</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+						<xs:attribute ref="lido:type" id="inscriptions_type">
+							<xs:annotation>
+								<xs:documentation>
+									<tei:ab type="description">An attribute for the particular kind of
+										inscription, stamp, marking, or text written on or applied
+										to the work.<br/>
+										Note that this type attribute is primarily intended for use in application profiles.</tei:ab>
+									<tei:ab type="dataValues">Controlled terminology</tei:ab>
+									<tei:ab type="recommendation">To be determined by application profiles.</tei:ab>
+								</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+						<xs:attribute ref="lido:sortorder"/>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:attribute name="label" type="xs:string" id="label">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">An attribute indicating the original data element from
+					which the data were migrated; refers to the external label of a data field at
+					the visible user interface.</tei:ab>
+				<tei:ab type="dataValues">Free text</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+	</xs:attribute>
+	<xs:complexType name="legalBodyRefComplexType" id="legalBodyRefComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines reference information to a legal body.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="legalBodyID" type="lido:identifierComplexType" minOccurs="0" maxOccurs="unbounded" id="legalBodyID">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An identifier for a <em>person</em> or a <em>group of persons</em>,
+							such as a <em>family</em> or an <em>organization</em> like a corporate body, a government agency, or a firm.<br/>
+							Repeatable for identifiers from different authority files or other sources. The recommended method, however, is to reference equivalent resources using the 
+							<tei:ref target="https://www.w3.org/TR/owl-ref/#sameAs-def">owl:sameAs</tei:ref> property, 
+							stating that two or more URIs identify the same individual entity.</tei:ab>
+						<tei:ab type="label">Legal Body Identifier</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:any minOccurs="0" maxOccurs="unbounded" processContents="skip" namespace="http://www.w3.org/2002/07/owl#"/>
+			<xs:element name="legalBodyName" type="lido:appellationComplexType" minOccurs="0" maxOccurs="unbounded" id="legalBodyName">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A text element for an appellation of the individual <em>person</em> or <em>group
+							of persons</em> referred to as legal body.</tei:ab>
+						<tei:ab type="label">Legal Body Name</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="legalBodyWeblink" type="lido:webResourceComplexType" minOccurs="0" maxOccurs="unbounded"

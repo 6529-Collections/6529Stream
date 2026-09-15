@@ -1,0 +1,86 @@
+Jesus
+            Cathedral</a> the subject category might be “religion”.
+            Drawings of plants may be categorized by theme “botanics”.
+            These different aspects of categorization can be
+            distinguished by using the <em>lido:type</em> attribute for
+            &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#classification">lido:classification</a>&gt;,
+            for instance, “<a
+            href="http://terminology.lido-schema.org/lido00853">Object
+            genre</a>” or “<a
+            href="http://terminology.lido-schema.org/lido00932">Subject
+            category</a>”, provided by the LIDO <a
+            href="http://terminology.lido-schema.org/lido00088">Classification
+            Type-Vocabulary</a>. The usage of classification for natural
+            objects or for special collection domains is subject to
+            further development.</p>
+            <p>While suitable schemes for broad classification are
+            widely used in the library community, none of these has yet
+            been released as an open data resource as demanded the FAIR
+            principles. This also applies to classification schemes
+            proposed for the museum community. As long as an overarching
+            classification system that is appropriate for cross-domain
+            metadata aggregations is lacking, the LIDO classification
+            element should be used according to the recommendations
+            given in the <a
+            href="https://www.getty.edu/research/publications/electronic_publications/cdwa/2classification.html">CDWA</a>
+            guidelines.</p>
+            <p><strong>Example:</strong> The following example refers to
+            the <em>Mona Lisa</em> painting. In this particular case,
+            classification is not very illuminating because there are no
+            different aspects to consider. Nevertheless, it serves to
+            illustrate the usage of different vocabularies for the
+            different types of classification. The French term
+            “peinture” is added here corresponding to the term being
+            indexed and displayed displayed as “Category” in the <a
+            href="https://collections.louvre.fr/en/ark:/53355/cl010062370">Louvre
+            record</a>. The term “<a
+            href="https://collections.louvre.fr/en/recherche?nCategory%5B0%5D=40">peinture</a>”
+            is used there to link to the search results for this index
+            term in the “Louvre collections”. Note that the URI for the
+            Dewey Class in the following XML code snippet does not
+            resolve. </p>
+            <blockquote>
+            <p><strong>Classification:</strong> paintings (visual works)
+            <strong><em>Type:</em></strong> Object genre
+            <strong><em>Preference:</em></strong> Display<br />
+            <strong>Classification:</strong> Painting and paintings
+            <strong><em>Type:</em></strong> Subject category
+            <strong><em>Preference:</em></strong> Preferred |
+            <strong>Notation:</strong> 750</p>
+            </blockquote>
+            <div class="sourceCode" id="cb27"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:classificationWrap</span>&gt;</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">&lt;!-- Object genre --&gt;</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:classification</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00853&quot;</span>&gt;</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">skos:Concept</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="ot">            rdf:about=</span><span class="st">&quot;http://vocab.getty.edu/aat/300033618&quot;</span>&gt;</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="ot">                xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>                paintings (visual works)</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a><span class="ot">                xml:lang=</span><span class="st">&quot;de&quot;</span>&gt;</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>                Gemälde</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a><span class="ot">                xml:lang=</span><span class="st">&quot;fr&quot;</span>&gt;</span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>                peintures (oeuvres visuelles)</span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:term</span></span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a><span class="ot">            lido:addedSearchTerm=</span><span class="st">&quot;yes&quot;</span></span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a><span class="ot">            xml:lang=</span><span class="st">&quot;fr&quot;</span>&gt;</span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a>            peinture</span>
+<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:term</span>&gt;</span>
+<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a>        <span class="co">&lt;!-- Display label --&gt;</span></span>
+<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:term</span></span>
+<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a><span class="ot">            lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00526&quot;</span></span>
+<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a><span class="ot">            xml:lang=</span><span class="st">&quot;fr&quot;</span>&gt;</span>
+<span id="cb27-29"><a href="#cb27-29" aria-hidden="true" tabindex="-1"></a>            peinture</span>
+<span id="cb27-30"><a href="#cb27-30" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:term</span>&gt;</span>
+<span id="cb27-31"><a href="#cb27-31" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:classification</span>&gt;</span>
+<span id="cb27-32"><a href="#cb27-32" aria-hidden="true" tabindex="-1"></a>    <span class="co">&lt;!-- Subject category --&gt;</span></span>
+<span id="cb27-33"><a href="#cb27-33" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:classification</span></span>
+<span i

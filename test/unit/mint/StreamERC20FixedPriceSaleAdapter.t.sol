@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
+import "../../helpers/RevenueV1TestBase.sol";
+import "../../helpers/RevenueResolverTestMocks.sol";
+import "../../helpers/SaleFundingTestMocks.sol";
+import "../../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
 import "../../../smart-contracts/domains/mint/StreamERC20FixedPriceSaleAdapter.sol";
 import "../../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
 import "../../../smart-contracts/domains/revenue/StreamSplitFactory.sol";
@@ -58,36 +61,78 @@ contract ERC20SaleManagerBoundary {
     }
 }
 
+/// @dev Exact attribution/economics read seam for adapter failures; not an artist authorization implementation.
 contract ERC20SaleArtistBoundary {
     address public immutable core;
     address public artist;
+    address private _consentedResolver;
+    bytes32 private _consentedAssignment;
 
-    constructor(address core_, address artist_) {
+    constructor(address core_) {
         core = core_;
-        artist = artist_;
     }
 
     function setArtist(address value) external {
         artist = value;
     }
 
-    function supportsInterface(bytes4 id) external pure returns (bool) {
-        return
-            id == type(IStreamCollectionArtistRegistry).interfaceId
-                || id == type(IERC165).interfaceId;
+    /// @dev This domain fixture explicitly elects NONE; the separate legacy guard suite
+    /// exercises REQUIRED, malformed reads and callback changes at this authority boundary.
+    function saleConsentScope(uint256 collectionId) external pure returns (uint8) {
+        require(collectionId == 1, "unknown collection");
+        return 0;
     }
 
-    function requireArtist(uint256, address candidate) external view {
-        require(candidate == artist, "artist not approved");
+    function approveAssignmentRead(address resolver, bytes32 assignment) external {
+        _consentedResolver = resolver;
+        _consentedAssignment = assignment;
+    }
+
+    function supportsInterface(bytes4 id) external pure returns (bool) {
+        return id == type(IStreamArtistAttribution).interfaceId
+            || id == type(IStreamArtistEconomicsAuthority).interfaceId
+            || id == type(IERC165).interfaceId;
+    }
+
+    function acceptedArtist(uint256 collectionId) external view returns (address) {
+        return collectionId == 1 ? artist : address(0);
+    }
+
+    function attribution(uint256 collectionId)
+        external
+        view
+        returns (IStreamCollectionArtistRegistry.Attribution memory a)
+    {
+        if (collectionId != 1) return a;
+        a.artist = artist;
+        if (artist != address(0)) {
+            a.nominationHash = keccak256("adapter domain nomination");
+            a.acceptanceHash = keccak256("adapter domain acceptance");
+        }
+    }
+
+    function requireEconomicsConsent(
+        uint256 collection,
+        bytes32 revenueClass,
+        uint8 scope,
+        uint256 scopeId,
+        bytes32 assignment
+    ) external view {
+        require(
+            msg.sender == _consentedResolver && collection == 1 && scope == 1 && scopeId == 1
+                && revenueClass == keccak256("PRIMARY_SALE") && assignment == _consentedAssignment
+                && assignment != bytes32(0),
+            "exact economics read only"
+        );
     }
 }
 
-contract StreamERC20FixedPriceSaleAdapterTest is CharacterizationTestBase {
+contract StreamERC20FixedPriceSaleAdapterTest is RevenueV1TestBase {
     uint256 private constant PAYER_KEY = 0xA11CE;
     uint256 private constant PLATFORM_KEY = 0xB0B;
     uint256 private constant ARTIST_KEY = 0xCAFE;
     bytes32 private constant PHASE = keccak256("erc20 phase");
-    bytes32 private constant REVENUE = keccak256("primary sale");
+    bytes32 private constant REVENUE = keccak256("PRIMARY_SALE");
     bytes private constant DATA = "erc20 artwork";
     address private payer;
     address private artist;
@@ -95,6 +140,9 @@ contract StreamERC20FixedPriceSaleAdapterTest is CharacterizationTestBase {
     StreamAssetPolicyRegistry private assets;
     StreamSplitFactory private factory;
     StreamRevenueResolver private resolver;
+    StreamRevenueEscrow private escrow;
+    RevenueResolverCoreMock private core;
+    SaleFundingFaultVm private constant faultVm = SaleFundingFaultVm(address(vm));
     ERC20SaleManagerBoundary private manager;
     ERC20SaleArtistBoundary private artists;
     MockStreamPaymentToken private token;
@@ -105,25 +153,48 @@ contract StreamERC20FixedPriceSaleAdapterTest is CharacterizationTestBase {
     function setUp() public {
         payer = vm.addr(PAYER_KEY);
         artist = vm.addr(ARTIST_KEY);
-        manager = new ERC20SaleManagerBoundary(address(0xC0E));
-        artists = new ERC20SaleArtistBoundary(manager.core(), artist);
-        assets = new StreamAssetPolicyRegistry();
-        factory = new StreamSplitFactory(assets);
-        resolver = new StreamRevenueResolver(factory);
+        core = new RevenueResolverCoreMock();
+        manager = new ERC20SaleManagerBoundary(address(core));
+        artists = new ERC20SaleArtistBoundary(address(core));
+        core.selectArtist(address(artists), address(artists).codehash);
+        assets = new StreamAssetPolicyRegistry(address(_revenueAuthority()));
+        IStreamGasParameterHost.GasParameterConfig[3] memory configs = _walletGasConfigs();
+        configs[2].genesisValue = 300_000;
+        factory = new StreamSplitFactory(assets, address(revenueAuthority), configs);
+        resolver = new StreamRevenueResolver(
+            IStreamCore(address(core)),
+            factory,
+            address(revenueAuthority),
+            IStreamArtistAttribution(address(artists)),
+            IStreamGasParameterHost.GasParameterConfig(
+                "ARTIST_BENEFICIARY_READ_GAS", 200_000, 50_000, 2
+            )
+        );
+        vm.prank(address(revenueAuthority));
+        resolver.transferOwnership(address(this));
+        escrow = new StreamRevenueEscrow(
+            factory,
+            address(revenueAuthority),
+            IStreamGasParameterHost.GasParameterConfig("FLUSH_GAS_FLOOR", 12_000_000, 12_000_000, 3)
+        );
         IStreamSplitWallet.SplitEntry[] memory entries = new IStreamSplitWallet.SplitEntry[](2);
         entries[0] = IStreamSplitWallet.SplitEntry(artist, 900_000, keccak256("artist"));
         entries[1] = IStreamSplitWallet.SplitEntry(address(0xFEE), 100_000, keccak256("protocol"));
         (profile, wallet) = factory.createProfile(entries, keccak256("metadata"));
-        resolver.setPrimaryProfileAssignment(REVENUE, 0, 0, profile, keccak256("assignment policy"));
+        resolver.setPrimaryProfileAssignment(REVENUE, 0, 0, profile, bytes32(0));
+        resolver.setPrimaryProfileAssignment(REVENUE, 1, 1, profile, bytes32(0));
+        artists.setArtist(artist);
         token = new MockStreamPaymentToken();
         token.mint(payer, 10_000);
-        assets.setAssetStatus(address(token), 1, keccak256("standard token"));
+        _setAssetPolicy(assets, address(token), 1, keccak256("standard token"), 0);
         sale = new StreamERC20FixedPriceSaleAdapter(
             IStreamMintManager(address(manager)),
             resolver,
             vm.addr(PLATFORM_KEY),
-            IStreamCollectionArtistRegistry(address(artists))
+            IStreamArtistAttribution(address(artists)),
+            escrow
         );
+        _admitSale();
         vm.prank(payer);
         token.approve(address(sale), 10_000);
         saleId = sale.registerSale(_config());
@@ -218,7 +289,10 @@ contract StreamERC20FixedPriceSaleAdapterTest is CharacterizationTestBase {
     function testFrozenAssignmentInvalidatesStrictPolicyBeforeTokenCalls() public {
         bytes memory callData = _buyData(_authorization(1), true);
         bytes32 expected = sale.saleRecord(saleId).config.expectedPrimaryPolicyHash;
-        resolver.freezePrimaryAssignment(REVENUE, 0, 0);
+        bytes32 frozenHash =
+            resolver.primaryAssignmentHash(REVENUE, 1, 1, 1, profile, bytes32(0), bytes32(0), true);
+        artists.approveAssignmentRead(address(resolver), frozenHash);
+        resolver.freezePrimaryAssignment(REVENUE, 1, 1);
         (bytes32 actual,,) = sale.primaryPolicy(1, REVENUE);
         (bool ok, bytes memory result) = address(sale).call(callData);
         require(
@@ -260,35 +334,35 @@ contract StreamERC20FixedPriceSaleAdapterTest is CharacterizationTestBase {
         require(
             !ok
                 && keccak256(result)
-                    == keccak256(abi.encodeWithSignature("Error(string)", "artist not approved")),
+                    == keccak256(
+                        abi.encodeWithSelector(
+                            IStreamCollectionArtistRegistry.ArtistRegistryArtistMismatch.selector,
+                            uint256(1),
+                            address(0xBAD),
+                            artist
+                        )
+                    ),
             "artist attribution ignored"
         );
         _assertUnchanged();
     }
 
-    function testCollectionAssignmentOverridesDefaultAndTemplatesAreExplicitlyUnsupported() public {
+    function testCollectionAssignmentOverridesDefaultAndDefaultOnlySalesAreRejected() public {
         bytes32 beforeHash = _config().expectedPrimaryPolicyHash;
-        resolver.setPrimaryProfileAssignment(REVENUE, 1, 1, profile, keccak256("collection policy"));
-        (bytes32 afterHash,,) = sale.primaryPolicy(1, REVENUE);
-        require(beforeHash != afterHash, "collection scope commitment");
-        bytes memory callData = _buyData(_authorization(1), true);
-        (bool ok,) = address(sale).call(callData);
-        require(!ok, "stale collection policy accepted");
-        IStreamRevenueResolver.PrimaryTemplateEntry[] memory entries =
-            new IStreamRevenueResolver.PrimaryTemplateEntry[](1);
-        entries[0] = IStreamRevenueResolver.PrimaryTemplateEntry(
-            artist, bytes32(0), 1_000_000, keccak256("artist")
-        );
-        bytes32 templateId = resolver.createPrimaryTemplate(entries, keccak256("template"));
-        resolver.setPrimaryTemplateAssignment(
-            REVENUE, 1, 1, templateId, keccak256("template policy")
-        );
+        // Unbound collection 2 inherits the default for resolver reads, but commerce requires its own assignment.
+        require(resolver.resolvePrimaryAssignment(2, 0, REVENUE).scope == 0, "inherited default");
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamERC20FixedPriceSaleAdapter.UnsupportedPrimaryAssignment.selector
             )
         );
-        sale.primaryPolicy(1, REVENUE);
+        sale.primaryPolicy(2, REVENUE);
+        require(resolver.resolvePrimaryAssignment(1, 0, REVENUE).scope == 1, "collection wins");
+        resolver.setPrimaryProfileAssignment(REVENUE, 0, 0, profile, bytes32(0));
+        (bytes32 afterHash,,) = sale.primaryPolicy(1, REVENUE);
+        require(beforeHash == afterHash, "default mutation changed explicit collection");
+        _buy(_authorization(1), true);
+        require(manager.minted() == 1, "original collection terms remain valid");
     }
 
     function testNonstandardTokenAndBothTransferLegFailuresRollbackEverything() public {
@@ -296,8 +370,15 @@ contract StreamERC20FixedPriceSaleAdapterTest is CharacterizationTestBase {
         for (uint8 leg = 1; leg <= 2; ++leg) {
             for (uint8 mode = 1; mode <= 9; ++mode) {
                 token.configure(mode, leg);
-                (bool ok,) = address(sale).call(callData);
-                require(!ok, "nonstandard token accepted");
+                (bool ok, bytes memory errorData) = address(sale).call(callData);
+                bytes4 expected = mode >= 7
+                    ? IStreamSaleFunding.SaleFundingTokenReadFailed.selector
+                    : (mode == 2 || mode == 3 || mode == 4)
+                        ? IStreamSaleFunding.SaleFundingAmountMismatch.selector
+                        : IStreamSaleFunding.SaleFundingTokenCallFailed.selector;
+                bytes4 observed;
+                assembly { observed := mload(add(errorData, 32)) }
+                require(!ok && observed == expected, "wrong nonstandard token failure");
                 _assertUnchanged();
             }
         }
@@ -307,7 +388,7 @@ contract StreamERC20FixedPriceSaleAdapterTest is CharacterizationTestBase {
     }
 
     function testInactiveAssetRejectsBeforePull() public {
-        assets.setAssetStatus(address(token), 2, keccak256("inactive"));
+        _setAssetPolicy(assets, address(token), 2, keccak256("inactive"), 0);
         bytes memory callData = _buyData(_authorization(1), true);
         (bool ok,) = address(sale).call(callData);
         require(!ok, "inactive asset");
@@ -318,10 +399,71 @@ contract StreamERC20FixedPriceSaleAdapterTest is CharacterizationTestBase {
         bytes memory callData = _buyData(_authorization(1), true);
         for (uint256 mode = 1; mode <= 4; ++mode) {
             manager.setMode(mode);
-            (bool ok,) = address(sale).call(callData);
-            require(!ok, "bad mint result accepted");
+            (bool ok, bytes memory errorData) = address(sale).call(callData);
+            bytes memory expected = mode == 1
+                ? abi.encodeWithSignature("Error(string)", "mint failed")
+                : abi.encodeWithSelector(
+                    IStreamERC20FixedPriceSaleAdapter.SaleMintResultInvalid.selector
+                );
+            require(!ok && keccak256(errorData) == keccak256(expected), "wrong mint result failure");
             _assertUnchanged();
         }
+    }
+
+    function testRevertedPayerPullIsAtomicAndSameIntentCanRetry() public {
+        bytes memory callData = _buyData(_authorization(1), true);
+        faultVm.mockCallRevert(
+            address(token),
+            0,
+            abi.encodeWithSelector(
+                IERC20.transferFrom.selector, payer, address(sale), uint256(100)
+            ),
+            abi.encodeWithSignature("Error(string)", "payer pull refused")
+        );
+        (bool ok, bytes memory errorData) = address(sale).call(callData);
+        require(
+            !ok
+                && keccak256(errorData)
+                    == keccak256(
+                        abi.encodeWithSelector(
+                            IStreamSaleFunding.SaleFundingTokenCallFailed.selector,
+                            address(token),
+                            IERC20.transferFrom.selector
+                        )
+                    ),
+            "payer pull must fail"
+        );
+        _assertUnchanged();
+        faultVm.clearMockedCalls();
+        (ok,) = address(sale).call(callData);
+        require(
+            ok && manager.minted() == 1 && token.rawBalance(wallet) == 100, "same calldata retry"
+        );
+    }
+
+    function testRevertedWalletTransferRetainsExactEscrowCreditAndLaterFlushes() public {
+        faultVm.mockCallRevert(
+            address(token),
+            0,
+            abi.encodeWithSelector(IERC20.transfer.selector, wallet, uint256(100)),
+            abi.encodeWithSignature("Error(string)", "wallet transfer refused")
+        );
+        _buy(_authorization(1), true);
+        require(
+            manager.minted() == 1 && token.rawBalance(payer) == 9_900
+                && token.rawBalance(wallet) == 0 && token.rawBalance(address(sale)) == 0
+                && token.rawBalance(address(escrow)) == 100
+                && escrow.escrowOwed(REVENUE, profile, wallet, address(token)) == 100
+                && sale.totalProceeds(address(token)) == 100
+                && token.allowance(address(sale), address(escrow)) == 0,
+            "retained exact escrow rights"
+        );
+        faultVm.clearMockedCalls();
+        escrow.flushToVerifiedWalletBestEffort(REVENUE, profile, wallet, address(token));
+        require(
+            token.rawBalance(wallet) == 100 && escrow.totalOwed(address(token)) == 0,
+            "actual later flush"
+        );
     }
 
     function testTokenCallbacksCannotReenterPurchaseOrRevokeConsumedIntent() public {
@@ -455,6 +597,17 @@ contract StreamERC20FixedPriceSaleAdapterTest is CharacterizationTestBase {
                 && !sale.authorizationUsed(artist, bytes32(uint256(1))),
             "accounting or replay leaked"
         );
+    }
+
+    function _admitSale() private {
+        (bytes32 scope, bytes32 oldState, bytes32 newState) =
+            escrow.creditProducerTransitionHashes(address(sale), true);
+        revenueAuthority.setCurrentAction(
+            true, keccak256("admit ERC20 domain adapter"), 1, scope, oldState, newState
+        );
+        vm.prank(address(revenueAuthority));
+        escrow.setCreditProducer(address(sale), true);
+        revenueAuthority.setCurrentAction(false, bytes32(0), 0, bytes32(0), bytes32(0), bytes32(0));
     }
 
     function _sign(uint256 key, bytes32 digest) private returns (bytes memory) {

@@ -1,0 +1,70 @@
+ongitude. For Latitude, the XML attribute direction can take the values "N" or "S", meaning North or South of the equator. For Longitude, direction can take the values "E" or "W", meaning East or West of the prime meridian. This element can also be used for other angles. In that case, the direction can take the values "+" or "-" (of SignType), in the specified rotational direction from a specified reference direction.</documentation>
+		</annotation>
+		<simpleContent>
+			<extension base="gml:DegreeValueType">
+				<attribute name="direction">
+					<simpleType>
+						<union>
+							<simpleType>
+								<restriction base="string">
+									<enumeration value="N"/>
+									<enumeration value="E"/>
+									<enumeration value="S"/>
+									<enumeration value="W"/>
+								</restriction>
+							</simpleType>
+							<simpleType>
+								<restriction base="gml:SignType"/>
+							</simpleType>
+						</union>
+					</simpleType>
+				</attribute>
+			</extension>
+		</simpleContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<simpleType name="DegreeValueType">
+		<annotation>
+			<documentation>Integer number of degrees in a degree-minute-second or degree-minute angular value, without indication of direction.</documentation>
+		</annotation>
+		<restriction base="nonNegativeInteger">
+			<maxInclusive value="359"/>
+		</restriction>
+	</simpleType>
+	<!-- =========================================================== -->
+	<element name="decimalMinutes" type="gml:DecimalMinutesType"/>
+	<!-- =========================================================== -->
+	<simpleType name="DecimalMinutesType">
+		<annotation>
+			<documentation>Decimal number of arc-minutes in a degree-minute angular value.</documentation>
+		</annotation>
+		<restriction base="decimal">
+			<minInclusive value="0.00"/>
+			<maxExclusive value="60.00"/>
+		</restriction>
+	</simpleType>
+	<!-- =========================================================== -->
+	<element name="minutes" type="gml:ArcMinutesType"/>
+	<!-- =========================================================== -->
+	<simpleType name="ArcMinutesType">
+		<annotation>
+			<documentation>Integer number of arc-minutes in a degree-minute-second angular value.</documentation>
+		</annotation>
+		<restriction base="nonNegativeInteger">
+			<maxInclusive value="59"/>
+		</restriction>
+	</simpleType>
+	<!-- =========================================================== -->
+	<element name="seconds" type="gml:ArcSecondsType"/>
+	<!-- =========================================================== -->
+	<simpleType name="ArcSecondsType">
+		<annotation>
+			<documentation>Number of arc-seconds in a degree-minute-second angular value.</documentation>
+		</annotation>
+		<restriction base="decimal">
+			<minInclusive value="0.00"/>
+			<maxExclusive value="60.00"/>
+		</restriction>
+	</simpleType>
+	<!-- =========================================================== -->
+</schema>

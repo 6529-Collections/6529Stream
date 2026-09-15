@@ -1,0 +1,101 @@
+est-comparison')">
+        <h3><a>Manifest Comparison</a></h3>
+      </li>
+      
+    </ul>
+  </div>
+</nav>
+
+    <div class="container">
+  
+  <div id="version-3" class="content-tab">
+    <h2 id="use-case">Use Case</h2>
+
+<p>The simplest viable manifest for audio content. This pattern presents a single audio file in a IIIF Presentation resource.</p>
+
+<h2 id="implementation-notes">Implementation Notes</h2>
+
+<p>The implementation is identical to the <a href="https://iiif.io/api/cookbook/recipe/0001-mvm-image/" title="Simplest Manifest - Image">image example</a>, except that the content is audio and the canvas has the <code>duration</code> property instead of the <code>height</code> and <code>width</code> properties. The value of the <code>duration</code> property <a href="https://iiif.io/api/presentation/3.0/#duration">must be a floating point number</a>. If the duration value you have is an integer, it therefore needs to be written with at least a decimal point and a trailing zero: <code>1985.0</code> rather than <code>1985</code>.</p>
+
+<h2 id="example">Example</h2>
+
+<p>This example shows a Manifest with a single Canvas that lasts for 1985.024 seconds. It has a single audio file which is associated with it. The mp4 also has a duration of 1985.024 seconds.</p>
+
+<p><a href="manifest.json">JSON-LD</a> | 
+<a href="https://uv-v4.netlify.app/#?manifest=https://iiif.io/api/cookbook/recipe/0002-mvm-audio/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0002-mvm-audio/manifest.json" target="_blank">View in Universal Viewer</a>
+| 
+<a href="https://projectmirador.org/embed/?iiif-content=https://iiif.io/api/cookbook/recipe/0002-mvm-audio/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0002-mvm-audio/manifest.json" target="_blank">View in Mirador</a>
+| 
+<a href="https://samvera-labs.github.io/clover-iiif/docs/viewer/demo?iiif-content=https://iiif.io/api/cookbook/recipe/0002-mvm-audio/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0002-mvm-audio/manifest.json" target="_blank">View in Clover</a>
+| 
+<a href="https://ramp.avalonmediasystem.org/?iiif-content=https://iiif.io/api/cookbook/recipe/0002-mvm-audio/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0002-mvm-audio/manifest.json" target="_blank">View in Ramp</a>
+| 
+<a href="https://iiif.aviaryplatform.com/player?manifest=https://iiif.io/api/cookbook/recipe/0002-mvm-audio/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0002-mvm-audio/manifest.json" target="_blank">View in Aviary</a>
+| 
+<a href="https://theseusviewer.org/?iiif-content=https://iiif.io/api/cookbook/recipe/0002-mvm-audio/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0002-mvm-audio/manifest.json" target="_blank">View in Theseus</a>
+| 
+<a href="https://demo.viewer.glycerine.io/viewer?iiif-content=https://iiif.io/api/cookbook/recipe/0002-mvm-audio/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0002-mvm-audio/manifest.json" target="_blank">View in Glycerine Viewer</a></p>
+
+<p>Code samples: <a href="https://iiif-prezi.github.io/iiif-prezi3/recipes/0002-mvm-audio/" target="_blank">Python: iiif-prezi3</a></p>
+
+<pre class="line-numbers data-download-link" data-download-link-label="Download me" data-src="manifest.json"></pre>
+
+<h2 id="related-recipes">Related Recipes</h2>
+
+<ul>
+  <li><a href="https://iiif.io/api/cookbook/recipe/0001-mvm-image/" title="Simplest Manifest - Image">Simplest Manifest - Image</a> for the most minimal image Manifest</li>
+  <li><a href="https://iiif.io/api/cookbook/recipe/0003-mvm-video/" title="Simplest Manifest - Video">Simplest Manifest - Video</a> for the most minimal video Manifest</li>
+</ul>
+
+<!-- acronyms.md as placeholder for API equivalent -->
+
+
+  </div>
+  
+  <div id="version-4" class="content-tab" style="display:none;">
+    <h2 id="use-case">Use Case</h2>
+
+<p>The simplest viable manifest for audio content. This pattern presents a single audio file in a IIIF Presentation resource.</p>
+
+<h2 id="implementation-notes">Implementation Notes</h2>
+
+<p>This illustrates the mandatory structure and properties of a manifest, with the simplest possible audio content.</p>
+
+<p>Audio resources are contained inside a <a href="https://iiif.io/api/presentation/4.0/#timeline">Timeline</a>, which is required to have a <code>duration</code> property with the time, in seconds, of the audio resource to be included in the timeline. The value of the <code>duration</code> property <a href="https://iiif.io/api/presentation/4.0/model/#duration">must be a floating point number</a>. If the duration value you have is an integer, it needs to be written with at least a decimal point and a trailing zero: <code>1985.0</code> rather than <code>1985</code>.</p>
+
+<p>The <code>items</code> property of the Canvas is a list of annotation pages. In this case there is only one. The <code>items</code> property of the annotation page is a list of annotations. Again, in this case there is only one. This annotation links the audio resource and the timeline. The <code>body</code> of the annotation is an audio file, the url of which is the <code>id</code> property of the body. The duration of the audio file, in seconds, is given and here matches the timeline’s <code>duration</code> property exactly. Matching is not required, but mismatches will change how much of the audio is heard and may change what happens after the audio finishes playing. The <code>target</code> property tells us both that the audio file is associated with the entirety of the container and that the container is a timeline, and the <code>motivation</code> property of “painting” tells us that the audio file is the content of the container.</p>
+
+<p>The <code>type</code> of the resource is “Audio” but viewers should accept “Sound” as a synonym for Audio to improve compatibility with previous versions. For more details see the <a href="https://iiif.io/api/presentation/4.0/model/#type">type definition</a>.</p>
+
+<h2 id="example">Example</h2>
+
+<p>This example shows a Manifest with a single Timeline that lasts for 1985.024 seconds. It has a single audio file associated with it. The mp4 also has a duration of 1985.024 seconds.</p>
+
+<p><a href="v4/manifest.json">JSON-LD</a> | 
+<a href="https://uv-v4.netlify.app/#?manifest=https://iiif.io/api/cookbook/recipe/0002-mvm-audio/v4/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0002-mvm-audio/v4/manifest.json" target="_blank">View in Universal Viewer</a>
+| 
+<a href="https://theseusviewer.org/?iiif-content=https://iiif.io/api/cookbook/recipe/0002-mvm-audio/v4/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0002-mvm-audio/v4/manifest.json" target="_blank">View in Theseus</a>
+| 
+<a href="https://iiif.aviaryplatform.com/player?manifest=https://iiif.io/api/cookbook/recipe/0002-mvm-audio/v4/manifest.json" class="" data-iiif-content="https://iiif.io/api/cookbook/recipe/0002-mvm-audio/v4/manifest.json" target="_blank">View in Aviary</a></p>
+
+<pre class="line-numbers data-download-link" data-download-link-label="Download me" data-src="v4/manifest.json" data-line="13"></pre>
+
+<h2 id="related-recipes">Related Recipes</h2>
+
+<ul>
+  <li><a href="https://iiif.io/api/cookbook/recipe/0001-mvm-image/#version-4" title="Simplest Manifest - Image">Simplest Manifest - Image</a> for a minimal image Manifest</li>
+  <li><a href="https://iiif.io/api/cookbook/recipe/0003-mvm-video/#version-4" title="Simplest Manifest - Video">Simplest Manifest - Video</a> for a minimal video Manifest</li>
+  <li><a href="https://iiif.io/api/cookbook/recipe/0608-mvm-3d/#version-4" title="Simplest Manifest - 3D model">Simplest Manifest - 3D</a> for a minimal 3D object Manifest</li>
+</ul>
+
+<!-- acronyms.md as placeholder for API equivalent -->
+
+
+  </div>
+  
+  <div id="manifest-comparison" class="content-tab" style="display:none;">
+    
+<h2>Manifest Comparison</h2>
+<p>Below is an auto generated diff showing the changes between IIIF Presentation API version 3 and version 4 of the recipe Manifest. </p>
+
+<div id="diff-p

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import { StreamMintRoyaltyPolicy } from "./StreamMintRoyaltyPolicy.sol";
+
 import "../../interfaces/stream/core/IStreamCore.sol";
 import "../../interfaces/stream/mint/IStreamMintManager.sol";
 
@@ -107,6 +109,11 @@ library StreamMintCoreExecutor {
             batch, tokenIndex, operationRoot, operationId, tokenId, tokenDataHash
         );
         fact.collectionSerial = collectionSerial;
+        StreamMintRoyaltyPolicy.Context memory royaltyContext =
+            StreamMintRoyaltyPolicy.context(address(core));
+        StreamMintRoyaltyPolicy.snapshot(
+            royaltyContext, batch.collectionId, batch.phaseId, tokenId, operationRoot, operationId
+        );
         emit PreparedMintStarted(
             schemaVersion,
             fact.operationId,
@@ -120,6 +127,9 @@ library StreamMintCoreExecutor {
         );
         core.completePreparedMintFromManager(
             tokenId, fact.initialRecipient, operationId, fact.mintCommitment
+        );
+        StreamMintRoyaltyPolicy.completed(
+            royaltyContext, batch.collectionId, batch.phaseId, tokenId, operationRoot, operationId
         );
         emit PreparedMintCompleted(
             schemaVersion,

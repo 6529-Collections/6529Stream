@@ -43,3 +43,7 @@ export.sarif.sarifexplorer
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Generated current graph test projections and native exports
+/artifacts/current-graph/
+/artifacts/native-assembly/

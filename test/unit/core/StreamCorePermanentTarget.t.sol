@@ -70,6 +70,11 @@ contract PermanentTargetGovernanceExecutor {
 
 contract PermanentTargetModuleRegistry {
     mapping(address => StreamModuleRecord) private _records;
+    address public governanceExecutor;
+
+    function setGovernanceExecutor(address executor) external {
+        governanceExecutor = executor;
+    }
 
     function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
         return interfaceId == type(IStreamModuleRegistry).interfaceId || interfaceId == 0x01ffc9a7;

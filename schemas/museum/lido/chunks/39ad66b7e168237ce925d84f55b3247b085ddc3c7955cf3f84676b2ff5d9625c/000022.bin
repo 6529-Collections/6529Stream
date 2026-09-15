@@ -1,0 +1,115 @@
+x="-1"></a>            &lt;/<span class="kw">lido:titleWrap</span>&gt;</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:objectIdentificationWrap</span>&gt;</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:descriptiveMetadata</span>&gt;</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:administrativeMetadata</span><span class="ot"> xml:lang=</span><span class="st">&quot;xxx&quot;</span>&gt;</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:recordWrap</span>&gt;</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:recordID</span><span class="ot"> lido:type=</span><span class="st">&quot;xxx&quot;</span>&gt;&lt;/<span class="kw">lido:recordID</span>&gt;</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:recordType</span>&gt;&lt;/<span class="kw">lido:recordType</span>&gt;</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:recordSource</span>&gt;&lt;/<span class="kw">lido:recordSource</span>&gt;</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:recordWrap</span>&gt;</span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:administrativeMetadata</span>&gt;</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:lido</span>&gt;</span></code></pre></div>
+            <p>Note that more elements can become mandatory, depending
+            on the use of a super-element (a <em>parent element</em> in
+            XML terminology) or a sub-element (<em>child element</em> in
+            XML), respectively. For example, &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventType">lido:eventType</a>&gt;
+            is mandatory if the super-element &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#event">lido:event</a>&gt;
+            is used; &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#titleWrap">lido:titleWrap</a>&gt;
+            is mandatory if the sub-element &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#titleSet">lido:titleSet</a>&gt;
+            is used.</p>
+            <p><strong>List of elements that are mandatory when the
+            super-element (parent-element in XML) is used, listed in
+            alphabetical order:</strong></p>
+            <ul>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#actor">lido:actor</a>&gt;
+            if &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#actorInRole">lido:actorInRole</a>&gt;
+            is used</li>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#appellationValue">lido:appellationValue</a>&gt;
+            if a named entity or a title is described</li>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventType">lido:eventType</a>&gt;
+            if &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#event">lido:event</a>&gt;
+            is used</li>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#linkResource">lido:linkResource</a>&gt;
+            if &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#resourceRepresentation">lido:resourceRepresentation</a>&gt;
+            is used</li>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#measurementType">lido:measurementType</a>&gt;
+            if &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#measurementsSet">lido:measurementsSet</a>&gt;
+            or &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#resourceMeasurementsSet">lido:resourceMeasurementsSet</a>&gt;
+            is used</li>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#measurementUnit">lido:measurementUnit</a>&gt;
+            if &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#measurementsSet">lido:measurementsSet</a>&gt;
+            or &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#resourceMeasurementsSet">lido:resourceMeasurementsSet</a>&gt;
+            is used</li>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#measurementValue">lido:measurementValue</a>&gt;
+            if &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#measurementsSet">lido:measurementsSet</a>&gt;
+            or &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#resourceMeasurementsSet">lido:resourceMeasurementsSet</a>&gt;
+            is used</li>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#nameActorSet">lido:nameActorSet</a>&gt;
+            if &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#actor">lido:actor</a>&gt;
+            is used</li>
+            </ul>
+            <p><strong>List of elements that are mandatory depending on
+            the use of a sub-element (child-element in XML), listed in
+            alphabetical order:</strong></p>
+            <ul>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#classificationWrap">lido:classificationWrap</a>&gt;
+            if &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#classification">lido:classification</a>&gt;
+            is used</li>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#displayStateEditionWrap">lido:displayStateEditionWrap</a>&gt;
+            if one of the sub-elements is used</li>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventWrap">lido:eventWrap</a>&gt;
+            if &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventSet">lido:eventSet</a>&gt;
+            is used</li>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#inscriptionsWrap">lido:inscriptionsWrap</a>&gt;
+            if &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#inscriptions">lido:inscriptions</a>&gt;
+            is used</li>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectDescriptionWrap">lido:objectDescriptionWrap</a>&gt;
+            if &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectDescriptionSet">lido:objectDescriptionSet</a>&gt;
+            is used</li>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectMaterialsTechWrap">lido:objectMaterialsTechWrap</a>&gt;
+            if &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectMaterialsTechSet">lido:objectMaterialsTechSet</a>&gt;
+            is used</li>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectMeasurementsWrap">lido:objectMeasurementsWrap</a>&gt;
+            if &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectMeasurementsSet">lido:objectMeasurementsSet</a>&gt;
+            is used</li>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectRelationWrap">lido:objectRelationWrap</a>&gt;
+            if &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectSet">lido:subjectSet</a>&gt;
+            and/or &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#relatedWorkSet">lido:relatedWor

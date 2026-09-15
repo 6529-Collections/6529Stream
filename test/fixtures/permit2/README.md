@@ -1,0 +1,7 @@
+# Official Permit2 test fixture
+
+This fixture compiles the unmodified [Uniswap Permit2 source](https://github.com/Uniswap/permit2/tree/cc56ad0f3439c502c246fc5cfcc3db92bb8b7219) at commit `cc56ad0f3439c502c246fc5cfcc3db92bb8b7219`, with its pinned [Solmate dependency](https://github.com/transmissions11/solmate/tree/8d910d876f51c3b2585c9109409d601f600e68e1). Both licenses are retained here.
+
+`compiler-input.json` contains the 14 exact Git source blobs and explicit settings: Solidity 0.8.17, London, via IR, optimizer 1,000,000 runs and no bytecode metadata hash. This is an isolated third-party fixture compiler; Stream production remains Solidity 0.8.19. The file retains Foundry's complete compiler input object; for direct Solidity 0.8.17 standard JSON, select only its `language`, `sources` and `settings` keys (exclude Foundry's transport/version/path fields), then select `src/Permit2.sol:Permit2` from the output. `permit2.json` records the complete creation/runtime bytes, ABI, source hashes and two immutable locations from the matching compiler output. It does not assert equality to a mainnet deployment.
+
+`OfficialPermit2Fixture` deploys the actual creation bytecode and checks the entire deployed runtime after replacing only the cached chain ID and domain separator at their recorded constructor immutable locations. Tests use the real SignatureTransfer implementation, nonce bitmap and ERC-1271 path. The Stream adapter governs the whole Permit2 call budget; Permit2 controls its inner Safe call.

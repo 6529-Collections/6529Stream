@@ -1,0 +1,206 @@
+            "items": {
+                        "$ref": "#/definitions/AttributeAssignment"
+                    }
+                }
+            },
+            "required": [
+                "type",
+                "value",
+                "unit"
+            ],
+            "additionalProperties": false
+        },
+        "MonetaryAmount": {
+            "title": "crm:E97_Monetary_Amount",
+            "description": "An amount of money, with a value and a currency\nSee: [API](https://linked.art/api/1.0/shared/money/) | [Model](https://linked.art/model/provenance/acquisition.html#payments)",
+            "type": "object",
+            "properties": {
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "MonetaryAmount"
+                        }
+                    ]
+                },
+                "identified_by": {
+                    "$ref": "#/definitions/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/definitions/classified_asProp"
+                },
+                "value": {
+                    "$ref": "#/definitions/valueProp"
+                },
+                "lower_value_limit": {
+                    "$ref": "#/definitions/lower_value_limitProp"
+                },
+                "upper_value_limit": {
+                    "$ref": "#/definitions/upper_value_limitProp"
+                },
+                "currency": {
+                    "$ref": "#/definitions/CurrencyRef"
+                }
+            },
+            "required": [
+                "type",
+                "value",
+                "currency"
+            ],
+            "additionalProperties": false
+        },
+        "Right": {
+            "title": "crm:E30_Right",
+            "description": "A legal right that can be held by some party over some entity",
+            "type": "object",
+            "properties": {
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "Right"
+                        }
+                    ]
+                },
+                "identified_by": {
+                    "$ref": "#/definitions/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/definitions/classified_asProp"
+                },
+                "referred_to_by": {
+                    "$ref": "#/definitions/referred_to_byProp"
+                },
+                "created_by": {
+                    "title": "crm:P94i_was_created_by", "$ref": "#/definitions/Creation"
+                },
+                "possessed_by": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/PersonRefOrGroupRef"
+                    }
+                }
+            },
+            "required": [
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "Creation": {
+            "title": "crm:E65_Creation",
+            "description": "The creation of the intellectual/conceptual entity",
+            "type": "object",
+            "properties": {
+                "type": {"allOf": [{"title": "General", "$ref": "core.json#/definitions/typeProp"}, 
+                    {"title": "Specific", "type": "string", "const": "Creation"}]},
+                "_label": {"$ref": "core.json#/definitions/labelProp"},
+                "identified_by": {"$ref": "core.json#/definitions/identified_byProp"},
+                "classified_as": {"$ref": "core.json#/definitions/classified_asProp"},
+                "referred_to_by": {"$ref": "core.json#/definitions/referred_to_byProp"},
+                "took_place_at": {"$ref": "core.json#/definitions/took_place_atProp"},
+                "timespan": {"$ref": "core.json#/definitions/timespanProp"},
+                "caused_by": {"$ref": "core.json#/definitions/caused_byProp"},
+                "carried_out_by": {"$ref": "core.json#/definitions/carried_out_byProp"},
+                "used_specific_object": {"$ref": "core.json#/definitions/used_specific_objectProp"},
+                "influenced_by": {"$ref": "core.json#/definitions/influenced_byProp"},
+                "technique": {"$ref": "core.json#/definitions/techniqueProp"},
+                "part_of": {"title": "crm:P9i_forms_part_of", "description": "An identified event or activity which this creation is part of", "$ref": "core.json#/definitions/EventRefOrActivityRef"}
+            }
+        },
+        "Concept": {
+            "title": "crm:E55_Type",
+            "description": "A concept or 'Type' in the taxonomic sense\nSee: [API](https://linked.art/api/1.0/shared/type/) | [Model](https://linked.art/model/base/#types-and-classifications)",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/idProp"
+                },
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "Type"
+                        }
+                    ]
+                },
+                "identified_by": {
+                    "$ref": "#/definitions/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/definitions/classified_asProp"
+                }
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "Activity": {
+            "title": "crm:E7_Activity",
+            "description": "An activity carried out by some person or group",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "Activity"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                },
+                "identified_by": {
+                    "$ref": "#/definitions/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/definitions/classified_asProp"
+                },
+                "referred_to_by": {
+                    "$ref": "#/definitions/referred_to_byProp"
+                },
+                "took_place_at": {
+                    "$ref": "#/definitions/took_place_atProp"
+                },
+                "timespan": {
+                    "$ref": "#/definitions/timespanProp"
+                },
+                "caused_by": {
+                    "$ref": "#/definitions/caused_byProp"
+                },
+                "carried_out_by": {
+                    "$ref": "#/definitions/carried_out_byProp"
+                },
+                "used_specific_object": {
+                    "$ref": "#/definit

@@ -1,0 +1,136 @@
+  <li>[GVP] Getty Vocabulary Program. Getty Resarch Institute.
+            <a
+            href="https://www.getty.edu/research/tools/vocabularies/">Website</a></li>
+            <li>[GVP 2014–] Training Materials. <a
+            href="https://www.getty.edu/research/tools/vocabularies/training.html">Website</a></li>
+            <li>[GVP 2020] CONA and Subject Access for Art Works.
+            Overview of the CONA Depicted Subject. Patricia Harpring
+            (2020). <a
+            href="https://www.getty.edu/research/tools/vocabularies/cona_and_subject_access.pdf">PDF</a></li>
+            <li>[GVP 2022] Cataloging Works at Museums and Special
+            Collections: Documentation, Indexing, Access with CDWA, CCO,
+            and the Getty Vocabularies. Patricia Harpring (Revised
+            February 2022). <a
+            href="https://www.getty.edu/research/tools/vocabularies/cco_cdwa_for_museums.pdf">PDF</a></li>
+            <li>[GVP 2022] Utilizing Getty Vocabularies for Research and
+            Retrieval. Patricia Harpring et al. (May 2022). <a
+            href="https://www.getty.edu/research/tools/vocabularies/vocabs_in_the_field.pdf">PDF</a>
+            (9 MB, 71pp)</li>
+            <li>[GVP 2022] Introduction and Application: Getty
+            Vocabularies, CDWA, and CCO. Workshop (June 2022). <a
+            href="https://www.getty.edu/research/tools/vocabularies/cdwa_vocab_workshop.pdf">PDF</a>
+            (13 MB, 166pp)</li>
+            </ul>
+            <h2 data-number="7.5" id="value-vocabularies"><span
+            class="header-section-number">7.5</span> Value
+            vocabularies</h2>
+            <ul>
+            <li>[AAT] Art &amp; Architecture Thesaurus® Online. J. Paul
+            Getty Trust, Getty Research Institutes, made available under
+            the ODC Attribution License. <a
+            href="https://www.getty.edu/research/tools/vocabularies/aat/index.html">Website</a></li>
+            <li>[GeoNames] GeoNames – open source geographical database.
+            <a href="https://www.geonames.org/">Website</a></li>
+            <li>[GND] Gemeinsame Normdatei (Integrated Authority File).
+            Deutsche Nationalbibliothek. <a
+            href="https://www.dnb.de/EN/Professionell/Standardisierung/GND/gnd_node.html">Website</a>.
+            Access via <a href="https://lobid.org/gnd">lobid.gnd</a>
+            (German)</li>
+            <li>[Iconclass] Iconclass. Third version of the online
+            Iconclass browser. <a
+            href="https://iconclass.org/">Website</a></li>
+            <li>[LCSH] LOC Library of Congress Subject Headings. <a
+            href="https://id.loc.gov/authorities/subjects.html">Website</a></li>
+            <li>[TGN] Getty Thesaurus of Geographic Names® Online. J.
+            Paul Getty Trust, Getty Research Institutes, made available
+            under the ODC Attribution License. <a
+            href="https://www.getty.edu/research/tools/vocabularies/tgn/index.html">Website</a></li>
+            <li>[ULAN] Union List of Artist Names® Online. J. Paul Getty
+            Trust, Getty Research Institutes, made available under the
+            ODC Attribution License. <a
+            href="https://www.getty.edu/research/tools/vocabularies/ulan/">Website</a></li>
+            <li>[VIAF] VIAF: Virtual International Authority File.
+            Hosted by OCLC. <a href="https://viaf.org/">Website</a></li>
+            <li>[Wikidata] Wikimedia Foundation. Wikidata – the free
+            knowledge base. <a
+            href="https://www.wikidata.org/wiki/Wikidata:Main_Page">Website</a></li>
+            </ul>
+            <h2 data-number="7.6"
+            id="linked-data-and-semantic-web"><span
+            class="header-section-number">7.6</span> Linked Data and
+            Semantic Web</h2>
+            <ul>
+            <li>Heath, Tom; Bizer, Christian [2011]. Linked Data:
+            Evolving the Web into a Global Data Space. <a
+            href="http://linkeddatabook.com/editions/1.0/">Online
+            Edition 1.0.</a></li>
+            <li>European Commission (2013). Einführung in Linked Data.
+            Open Data Support. <a
+            href="https://data.europa.eu/sites/default/files/d2.1.2_training_module_1.2_introduction_to_linked_data_de_edp.pdf">PDF</a>
+            (in German)</li>
+            <li>Europeana (2017). Linked Open Data. <a
+            href="https://pro.europeana.eu/page/linked-open-data">Website</a></li>
+            <li>FAIR Princples (2016). GO FAIR Initiative. <a
+            href="https://www.go-fair.org/fair-principles/">Website</a></li>
+            <li>UCLA Library [2022]. Semantic Web and Linked Data. (Last
+            Updated Dec 12, 2022). <a
+            href="https://guides.library.ucla.edu/semantic-web">Home</a></li>
+            <li>W3C (2014). Linked Data Platform Best Practices and
+            Guidelines. <a
+            href="https://www.w3.org/TR/ldp-bp/">Website</a></li>
+            <li>W3C (2015–). Semantic Web. <a
+            href="https://www.w3.org/standards/semanticweb/">Website</a></li>
+            </ul>
+            <h2 data-number="7.7" id="application-profiles-1"><span
+            class="header-section-number">7.7</span> Application
+            profiles</h2>
+            <ul>
+            <li>Dublin Core Metadata Initiative (2009). Guidelines for
+            Dublin Core™ Application Profiles. <a
+            href="https://www.dublincore.org/specifications/dublin-core/profile-guidelines/">Website</a></li>
+            <li>LOC Program for Cooperative Cataloging (2019). PCC Task
+            Group on Metadata Application Profiles. <a
+            href="https://www.loc.gov/aba/pcc/taskgroup/Metadata-Application-Profiles.html">Website</a></li>
+            <li>UCLA Library [2022]. Best Practices, Standards, and
+            Metadata Application Profiles (MAPs). (Last Updated Dec 12,
+            2022). <a
+            href="https://guides.library.ucla.edu/semantic-web/bestpractices">Website
+            section</a></li>
+            </ul>
+            <h2 data-number="7.8"
+            id="formal-languages-and-specifications"><span
+            class="header-section-number">7.8</span> Formal languages
+            and specifications</h2>
+            <p><strong>XML and associated technologies</strong></p>
+            <ul>
+            <li>The Extensible Markup Language (XML) Version 1.0, W3C
+            Recommendation 26 November 2008. <a
+            href="https://www.w3.org/TR/xml/">Website</a></li>
+            <li>The W3C XML Schema Definition Language (XSD) Version 1.1
+            Part 1: Structures. W3C Recommendation 5 April 2012. <a
+            href="https://www.w3.org/TR/xmlschema11-1/">Website</a></li>
+            <li>The XML Path Language (XPath) Version 3.1, W3C
+            Recommendation 21 March 2017. <a
+            href="https://www.w3.org/TR/xpath-31/">Website</a></li>
+            <li>XSL Transformations (XSLT) Version 3.0, W3C
+            Recommendation 8 June 2017. <a
+            href="https://www.w3.org/TR/xslt-30/">Website</a></li>
+            <li>The Schematron language website by Rick Jelliffe,
+            1999–2021. <a
+            href="https://www.schematron.com/">Website</a></li>
+            </ul>
+            <p><strong>RDF and associated technologies</strong></p>
+            <ul>
+            <li>The Resource Desciption Framework (RDF) Version 1.1
+            Concepts and Abstract Syntax. W3C Recommendation 25 February
+            2014. <a
+            href="https://www.w3.org/TR/rdf11-concepts/">Website</a></li>
+            <li>RDF Schema (RDFS) Version 1.1. W3C Recommendation 25
+            February 2014. <a
+            href="https://www.w3.org/TR/rdf-schema/">Website</a></li>
+            <li>The OWL 2 Web Ontology Language Document Overview
+            (Second Edition). W3C Recommendation 11 December 2012. <a
+            href="https://www.w3.org/TR/owl2-overview/">Website</a></li>
+            <li>The SPARQL Query Language for RDF Version 1.1 Overview,
+            W3C Recommendation 21 March 2013. <a
+          

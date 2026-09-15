@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "kind": "normative typed operation extension",
+  "operationId": 60,
+  "write": "hydrateArtistAuthority",
+  "preservedOperations": {
+    "historicalPrefix": [
+      1,
+      57
+    ],
+    "adoptedIdentityDismissal": 58,
+    "adoptedStewardGrant": 59
+  },
+  "recipeId": "6529stream.artist.operation-recipe.v2.60.hydrateArtistAuthority",
+  "coordinator": "coordinateHydrateArtistAuthority",
+  "typedInterface": "smart-contracts/interfaces/stream/artist/IStreamArtistAuthorityHydration.sol",
+  "authority": "permissionless submission of complete typed fixed-predecessor facts; no caller-created authority",
+  "signerTypehash": null,
+  "snapshotOwnerMask": "0x7f",
+  "readOwnerMask": "0x7f",
+  "writeOwnerMask": "0x7f",
+  "owners": [
+    "binding_lifecycle",
+    "collaborator_lifecycle",
+    "identity_authority",
+    "acceptance_lifecycle",
+    "attribution_lifecycle",
+    "payout_lifecycle",
+    "consent_finality"
+  ],
+  "producerIds": [
+    "operation_60.binding_lifecycle.apply",
+    "operation_60.collaborator_lifecycle.apply",
+    "operation_60.identity_authority.apply",
+    "operation_60.acceptance_lifecycle.apply",
+    "operation_60.attribution_lifecycle.apply",
+    "operation_60.payout_lifecycle.apply",
+    "operation_60.consent_finality.apply"
+  ],
+  "ownerCallback": "applyArtistAuthorityHydration",
+  "profile": "6529STREAM_ARTIST_LIVING_BASELINE_HYDRATION_V1",
+  "requiredSource": "exact original direct predecessor; completed operation57 seal to successor; latched Artist and collection lanes; all seven complete producer headers and native journals",
+  "replay": "one hydration commitment per owner; every source replay cell retained by original key; logical authority guards rekeyed under unchanged successor owner domain; source-instance operation57 latch remains historical only",
+  "event": "ArtistAuthorityHydrated",
+  "eventSchemaVersion": 1,
+  "archive": "normal original operation evidence V1 with all seven before/after snapshots, source headers and complete typed profile, followed by original transaction-end history/payload sync",
+  "validationState": "source/type and authored actual two-registry/Safe/Archive scenarios; native behavior, sizes and current-stack acceptance pending",
+  "additionalProfiles": [
+    {
+      "profile": "6529STREAM_ARTIST_LIVING_PAYOUT_HYDRATION_V1",
+      "write": "hydrateArtistAuthorityWithPayout",
+      "coordinator": "coordinateHydrateArtistAuthorityWithPayout",
+      "typedInterface": "smart-contracts/interfaces/stream/artist/IStreamArtistPayoutAuthorityHydration.sol",
+      "additionalOriginalOperations": [
+        18
+      ],
+      "source": "complete linear unprovisional class1 payout history, exact original current head and mutable chain cell; all original baseline completeness checks remain",
+      "exclusions": "pending/provisional/abandoned/rotated payouts and other advanced authority dependencies",
+      "validation": "four authored actual two-registry/Safe/Archive source cases; ABI only"
+    },
+    {
+      "profile": "6529STREAM_ARTIST_LIVING_ECONOMICS_HYDRATION_V1",
+      "write": "hydrateArtistAuthorityWithEconomics((Request authority,EconomicsConsent[] economics))",
+      "coordinator": "coordinateHydrateArtistAuthorityWithEconomics(address actor,Request request)",
+      "interface": "IStreamArtistEconomicsAuthorityHydration",
+      "additionalOriginalOperations": [
+        18,
+        15
+      ],
+      "consumer": "complete original direct economics payload/association lookups and payout history, with original guards",
+      "exclusions": [
+        "delegated or corrected bindings",
+        "authority transitions",
+        "provisional payouts",
+        "later imported generations"
+      ],
+      "validation": "source/ABI only; native, sizes and capacity pending"
+    },
+    {
+      "profile": "6529STREAM_ARTIST_LIVING_READINESS_HYDRATION_V1",
+      "write": "hydrateArtistAuthorityWithReadiness",
+      "coordinator": "coordinateHydrateArtistAuthorityWithReadiness",
+      "typedInterface": "smart-contracts/interfaces/stream/artist/IStreamArtistReadinessAuthorityHydration.sol",
+      "additionalOriginalOperations": [
+        18,
+        15,
+        52,
+        17,
+        24
+      ],
+      "attestationKinds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        9,
+        10
+      ],
+      "consumer": "complete original direct content/ratification/attestation records and latest heads; old deployment approval stays historical; fresh successor op24 then original mint-consent read",
+      "exclusions": [
+        "detached publication7/8",
+        "collaborators/delegations/corrections",
+        "authority transitions",
+        "provisional payouts",
+        "later imported generations"
+      ],
+      "validation": "six authored actual source/successor/Safe/Archive cases; ABI only, native/size/capacity/current-Core pending"
+    },
+    {
+      "profile": "6529STREAM_ARTIST_LIVING_PUBLICATION_HYDRATION_V1",
+      "write": "hydrateArtistAuthorityWithPublications",
+      "coordinator": "coordinateHydrateArtistAuthorityWithPublications",
+      "typedInterface": "smart-contracts/interfaces/stream/artist/IStreamArtistPublicationAuthorityHydration.sol",
+      "additionalOriginalOperations": [
+        18,
+        15,
+        52,
+        17,
+        24
+      ],
+      "attestationKinds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "consumer": "complete readiness plus original detached kind7/8 evidence; original Metadata payload/receipt/consumed guard remains authoritative; current facade validation unchanged",
+      "exclusions": [
+        "collaborators/delegations/corrections",
+        "authority transitions",
+        "provisional payouts",
+        "later imported generations"
+      ],
+      "validation": "seven authored actual Artist/Safe/Archive cases, including one actual original Metadata publication; ABI only, native/size/gas/capacity/current-Core pending"
+    }
+  ]
+}

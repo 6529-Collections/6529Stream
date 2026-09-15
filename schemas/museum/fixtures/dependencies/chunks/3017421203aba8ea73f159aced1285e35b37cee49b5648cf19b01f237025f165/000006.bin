@@ -1,0 +1,341 @@
+_custodian": {
+      "@id": "crm:P50_has_current_keeper",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "current_custodian_of": {
+      "@id": "crm:P50i_is_current_keeper_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "former_or_current_owner": {
+      "@id": "crm:P51_has_former_or_current_owner",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "former_or_current_owner_of": {
+      "@id": "crm:P51i_is_former_or_current_owner_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "current_owner": {
+      "@id": "crm:P52_has_current_owner",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "current_owner_of": {
+      "@id": "crm:P52i_is_current_owner_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "former_or_current_location": {
+      "@id": "crm:P53_has_former_or_current_location",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "former_or_current_location_of": {
+      "@id": "crm:P53i_is_former_or_current_location_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "current_permanent_location": {
+      "@id": "crm:P54_has_current_permanent_location",
+      "@type": "@id"
+    },
+    "current_permanent_location_of": {
+      "@id": "crm:P54i_is_current_permanent_location_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "current_location": {
+      "@id": "crm:P55_has_current_location",
+      "@type": "@id"
+    },
+    "currently_holds": {
+      "@id": "crm:P55i_currently_holds",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "bears": {
+      "@id": "crm:P56_bears_feature",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "found_on": {
+      "@id": "crm:P56i_is_found_on",
+      "@type": "@id"
+    },
+    "number_of_parts": {
+      "@id": "crm:P57_has_number_of_parts"
+    },
+    "section": {
+      "@id": "crm:P59_has_section",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "located_on_or_within": {
+      "@id": "crm:P59i_is_located_on_or_within",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "depicts": {
+      "@id": "crm:P62_depicts",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "depicted_by": {
+      "@id": "crm:P62i_is_depicted_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "shows": {
+      "@id": "crm:P65_shows_visual_item",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "shown_by": {
+      "@id": "crm:P65i_is_shown_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "refers_to": {
+      "@id": "crm:P67_refers_to",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "referred_to_by": {
+      "@id": "crm:P67i_is_referred_to_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "foresees_use_of": {
+      "@id": "crm:P68_foresees_use_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "use_foreseen_by": {
+      "@id": "crm:P68i_use_foreseen_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "associated_with": {
+      "@id": "crm:P69_is_associated_with",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "documents": {
+      "@id": "crm:P70_documents",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "documented_in": {
+      "@id": "crm:P70i_is_documented_in",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "lists": {
+      "@id": "crm:P71_lists",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "listed_in": {
+      "@id": "crm:P71i_is_listed_in",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "language": {
+      "@id": "crm:P72_has_language",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "language_of": {
+      "@id": "crm:P72i_is_language_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "translation": {
+      "@id": "crm:P73_has_translation",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "translation_of": {
+      "@id": "crm:P73i_is_translation_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "residence": {
+      "@id": "crm:P74_has_current_or_former_residence",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "current_or_former_residence_of": {
+      "@id": "crm:P74i_is_current_or_former_residence_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "possesses": {
+      "@id": "crm:P75_possesses",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "possessed_by": {
+      "@id": "crm:P75i_is_possessed_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "contact_point": {
+      "@id": "crm:P76_has_contact_point",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "provides_access_to": {
+      "@id": "crm:P76i_provides_access_to",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "beginning_is_qualified_by": {
+      "@id": "crm:P79_beginning_is_qualified_by"
+    },
+    "end_is_qualified_by": {
+      "@id": "crm:P80_end_is_qualified_by"
+    },
+    "ongoing_throughout": {
+      "@id": "crm:P81_ongoing_throughout"
+    },
+    "at_some_time_within": {
+      "@id": "crm:P82_at_some_time_within"
+    },
+    "value": {
+      "@id": "crm:P90_has_value"
+    },
+    "unit": {
+      "@id": "crm:P91_has_unit",
+      "@type": "@id"
+    },
+    "unit_of": {
+      "@id": "crm:P91i_is_unit_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "brought_into_existence": {
+      "@id": "crm:P92_brought_into_existence",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "brought_into_existence_by": {
+      "@id": "crm:P92i_was_brought_into_existence_by",
+      "@type": "@id"
+    },
+    "took_out_of_existence": {
+      "@id": "crm:P93_took_out_of_existence",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "taken_out_of_existence_by": {
+      "@id": "crm:P93i_was_taken_out_of_existence_by",
+      "@type": "@id"
+    },
+    "created": {
+      "@id": "crm:P94_has_created",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "created_by": {
+      "@id": "crm:P94i_was_created_by",
+      "@type": "@id"
+    },
+    "formed": {
+      "@id": "crm:P95_has_formed",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "formed_by": {
+      "@id": "crm:P95i_was_formed_by",
+      "@type": "@id"
+    },
+    "by_mother": {
+      "@id": "crm:P96_by_mother",
+      "@type": "@id"
+    },
+    "gave_birth": {
+      "@id": "crm:P96i_gave_birth",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "from_father": {
+      "@id": "crm:P97_from_father",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "father_for": {
+      "@id": "crm:P97i_was_father_for",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "brought_into_life": {
+      "@id": "crm:P98_brought_into_life",
+      "@type": "@id"
+    },
+    "born": {
+      "@id": "crm:P98i_was_born",
+      "@type": "@id"
+    },
+    "dissolved": {
+      "@id": "crm:P99_dissolved",
+      "@type": "@id"
+    },
+    "dissolved_by": {
+      "@id": "crm:P99i_was_dissolved_by",
+      "@type": "@id"
+    },
+    "death_of": {
+      "@id": "crm:P100_was_death_of",
+      "@type": "@id"
+    },
+    "died": {
+      "@id": "crm:P100i_died_in",
+      "@type": "@id"
+    },
+    "general_use": {
+      "@id": "crm:P101_had_as_general_use",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "use_of": {
+      "@id": "crm:P101i_was_use_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "title": {
+      "@id": "crm:P102_has_title",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "title_of": {
+      "@id": "crm:P102i_is_title_of",
+      "@type": "@id"
+    },
+    "intended_for": {
+      "@id": "crm:P103_was_intended_for",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "intention_of": {
+      "@id": "crm:P103i_was_intention_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "subject_to": {
+      "@id": "crm:P104_is_subject_to",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "applies_to": {
+      "@id": "crm:P104i_applies_to",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "right_held_by": {
+      "@id": "crm:P105_right_held_by",
+      "@type": "@id",
+      "@container": "@set"

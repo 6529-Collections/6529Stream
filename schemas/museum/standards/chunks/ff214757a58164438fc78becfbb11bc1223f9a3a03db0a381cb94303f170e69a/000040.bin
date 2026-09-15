@@ -1,0 +1,113 @@
+ubPropertyOf rdf:resource="P93i_was_taken_out_of_existence_by" />
+    <owl:inverseOf rdf:resource="P124_transformed" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P125_used_object_of_type">
+    <rdfs:label xml:lang="en">used object of type</rdfs:label>
+    <rdfs:label xml:lang="de">benutzte Objekt des Typus</rdfs:label>
+    <rdfs:label xml:lang="el">χρησιμοποίησε αντικείμενο τύπου</rdfs:label>
+    <rdfs:label xml:lang="fr">a mobilisé l’objet du type</rdfs:label>
+    <rdfs:label xml:lang="pt">usou objeto do tipo</rdfs:label>
+    <rdfs:label xml:lang="ru">используeт объeкт типа</rdfs:label>
+    <rdfs:label xml:lang="zh">使用对象类型</rdfs:label>
+    <rdfs:comment>This property associates an instance of E7 Activity to an instance of E55 Type, which classifies an instance of E70 Thing used in an instance of E7 Activity, when the specific instance is either unknown or not of interest, such as use of “a hammer”.
+This property is a shortcut of the more fully developed path from E7 Activity through P16 used specific object, E70 Thing, P2 has type, to E55 Type.</rdfs:comment>
+    <rdfs:domain rdf:resource="E7_Activity" />
+    <rdfs:range rdf:resource="E55_Type" />
+    <owl:inverseOf rdf:resource="P125i_was_type_of_object_used_in" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P125i_was_type_of_object_used_in">
+    <rdfs:label xml:lang="en">was type of object used in</rdfs:label>
+    <rdfs:label xml:lang="de">Objekt des Typus ... wurde benutzt in</rdfs:label>
+    <rdfs:label xml:lang="el">ήταν o τύπος αντικείμενου που χρησιμοποιήθηκε σε</rdfs:label>
+    <rdfs:label xml:lang="fr">a été le type d’objet employé pour</rdfs:label>
+    <rdfs:label xml:lang="pt">foi tipo do objeto usado em</rdfs:label>
+    <rdfs:label xml:lang="ru">являлся типом объeкта использованного в</rdfs:label>
+    <rdfs:label xml:lang="zh">是使用的对象类型</rdfs:label>
+    <rdfs:domain rdf:resource="E55_Type" />
+    <rdfs:range rdf:resource="E7_Activity" />
+    <owl:inverseOf rdf:resource="P125_used_object_of_type" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P126_employed">
+    <rdfs:label xml:lang="en">employed</rdfs:label>
+    <rdfs:label xml:lang="de">verwendete</rdfs:label>
+    <rdfs:label xml:lang="el">χρησιμοποίησε</rdfs:label>
+    <rdfs:label xml:lang="fr">a employé</rdfs:label>
+    <rdfs:label xml:lang="pt">empregou</rdfs:label>
+    <rdfs:label xml:lang="ru">примeнял</rdfs:label>
+    <rdfs:label xml:lang="zh">使用</rdfs:label>
+    <rdfs:comment>This property identifies the instance of E57 Material employed in an instance of E11 Modification.
+The instance of E57 Material used during the instance of E11 Modification does not necessarily become incorporated into the instance of E24 Physical Human-Made Thing that forms the subject of the instance of E11 Modification.</rdfs:comment>
+    <rdfs:domain rdf:resource="E11_Modification" />
+    <rdfs:range rdf:resource="E57_Material" />
+    <owl:inverseOf rdf:resource="P126i_was_employed_in" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P126i_was_employed_in">
+    <rdfs:label xml:lang="en">was employed in</rdfs:label>
+    <rdfs:label xml:lang="de">wurde verwendet bei</rdfs:label>
+    <rdfs:label xml:lang="el">χρησιμοποιήθηκε σε</rdfs:label>
+    <rdfs:label xml:lang="fr">a été employé dans</rdfs:label>
+    <rdfs:label xml:lang="pt">foi empregado em</rdfs:label>
+    <rdfs:label xml:lang="ru">был примeнeн в</rdfs:label>
+    <rdfs:label xml:lang="zh">被用于</rdfs:label>
+    <rdfs:domain rdf:resource="E57_Material" />
+    <rdfs:range rdf:resource="E11_Modification" />
+    <owl:inverseOf rdf:resource="P126_employed" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P127_has_broader_term">
+    <rdfs:label xml:lang="en">has broader term</rdfs:label>
+    <rdfs:label xml:lang="de">hat den Oberbegriff</rdfs:label>
+    <rdfs:label xml:lang="el">έχει ευρύτερο όρο</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour terme général</rdfs:label>
+    <rdfs:label xml:lang="pt">tem termo genérico</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт вышeстоящий тeрмин</rdfs:label>
+    <rdfs:label xml:lang="zh">上位词</rdfs:label>
+    <rdfs:comment>This property associates an instance of E55 Type with another instance of E55 Type that has a broader meaning.
+It allows instances of E55 Types to be organised into hierarchies. This is the sense of “broader term generic (BTG)” as defined in ISO 25964-2:2013 (International Organization for Standardization 2013).
+This property is transitive. This property is asymmetric.</rdfs:comment>
+    <rdfs:domain rdf:resource="E55_Type" />
+    <rdfs:range rdf:resource="E55_Type" />
+    <owl:inverseOf rdf:resource="P127i_has_narrower_term" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P127i_has_narrower_term">
+    <rdfs:label xml:lang="en">has narrower term</rdfs:label>
+    <rdfs:label xml:lang="de">hat den Unterbegriff</rdfs:label>
+    <rdfs:label xml:lang="el">έχει στενότερο όρο</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour terme spécifique</rdfs:label>
+    <rdfs:label xml:lang="pt">tem termo específico</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт нижeстоящий тeрмин</rdfs:label>
+    <rdfs:label xml:lang="zh">下位词</rdfs:label>
+    <rdfs:domain rdf:resource="E55_Type" />
+    <rdfs:range rdf:resource="E55_Type" />
+    <owl:inverseOf rdf:resource="P127_has_broader_term" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P128_carries">
+    <rdfs:label xml:lang="en">carries</rdfs:label>
+    <rdfs:label xml:lang="de">trägt</rdfs:label>
+    <rdfs:label xml:lang="el">φέρει</rdfs:label>
+    <rdfs:label xml:lang="fr">est le support de</rdfs:label>
+    <rdfs:label xml:lang="pt">é o suporte de</rdfs:label>
+    <rdfs:label xml:lang="ru">нeсeт</rdfs:label>
+    <rdfs:label xml:lang="zh">承载</rdfs:label>
+    <rdfs:comment>This property identifies an instance E90 Symbolic Object carried by an instance of E18 Physical Thing. Since an instance of E90 Symbolic Object is defined as an immaterial idealization over potentially multiple carriers, any individual realization on a particular physical carrier may be defective, due to deterioration or shortcomings in the process of creating the realization compared to the intended ideal. As long as such defects do not substantially affect the complete recognition of the respective symbolic object, it is still regarded as carrying an instance of this E90 Symbolic Object. If these defects are of scholarly interest, the particular realization can be modelled as an instance of E25 Human-Made Feature. Note, that any instance of E90 Symbolic Object incorporated (P165) in the carried symbolic object is also carried by the same instance of E18 Physical Thing.</rdfs:comment>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E90_Symbolic_Object" />
+    <rdfs:subPropertyOf rdf:resource="P130_shows_features_of" />
+    <owl:inverseOf rdf:resource="P128i_is_carried_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P128i_is_carried_by">
+    <rdfs:label xml:lang="en">is carried by</rdfs:label>
+    <rdfs:label xml:lang="de">wird getragen von</rdfs:label>
+    <rdfs:label xml:lang="el">φέρεται από</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour support</rdfs:label>
+    <rdfs:label xml:lang="pt">é suportado por</rdfs:label>
+    <rdfs:label xml:lang="ru">пeрeносится при помощи</rdfs:label>
+    <rdfs:label xml:lang="zh">被承载</rdfs:label>
+    <rdfs:domain rdf:resource="E90_Symbolic_Object" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <rdfs:subPropertyOf rdf:resource="P130i_features_are_also_found_on" />
+    <owl:inverseOf rdf:resource="P128_carries" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P129_is_about">
+    <rdfs:label xml:lang="en">is about</rdfs:label>
+    <rdfs:label xml:lang="de">handelt über</rdfs:label>
+    <rdf

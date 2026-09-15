@@ -1,9 +1,13 @@
 # Use the TypeScript client
 
 The [client package](../../packages/stream-client/README.md) gives applications
-typed calls and EIP-712 payloads for the current native sale, ERC-20 sale, artist
-acceptance and auction contracts. It uses the exact retained current ABIs. Full
-Artist V2, universal settlement and finality recovery are outside this package.
+typed calls and EIP-712 payloads for the retained testnet RC1 native sale, ERC-20
+sale, artist acceptance and auction contracts. Its generated ABIs and signing
+payloads are pinned to that export. The ongoing v1 implementation changes these
+interfaces; use an explicitly selected compiler catalog for their current calls.
+Four separately versioned current native-auction signing helpers are available
+below. Complete Artist V2 and finality-recovery workflows remain outside the
+package’s supplied examples.
 
 ## Build and connect
 
@@ -48,6 +52,48 @@ Chain checking prevents accidental use of another chain. It does not prove that
 the supplied addresses are the correct deployment, that their code matches the
 export, or that an RPC server is honest. Verify the deployment through its
 retained bytecode/source evidence before configuring an application.
+
+## Current native auction signing
+
+For the ongoing v1 system, first generate a separate client from its exact
+compiler build-info and selected interfaces using the
+[current catalog workflow](../../packages/stream-client/README.md#use-a-newer-compiler-catalog).
+Configure its `nativeAuction` address as the actual current house. A
+`preparedCustody` interface alias refers to that same house address.
+
+| Current helper | Domain / primary type | Canonical digest getter |
+| --- | --- | --- |
+| `nativeAuctionCreationTypedData` | `6529StreamNativeEnglishAuction` / `NativeAuctionCreation` | `creationAuthorizationDigest` |
+| `nativeAuctionBidTypedData` | `6529StreamNativeEnglishAuction` / `NativeAuctionBid` | `bidAuthorizationDigest` |
+| `nativeCustodyAcquisitionTypedData` | `6529StreamNativeCustodyAuction` / `NativeCustodyAcquisition` | `custodyAcquisitionDigest` |
+| `preparedNativeCustodyAcquisitionTypedData` | `6529StreamPreparedNativeCustodyAuction` / `PreparedNativeCustodyAcquisition` | `preparedCustodyAcquisitionDigest` |
+
+Each uses version `1`, the selected chain ID and the actual house as
+`verifyingContract`. Check the appropriate configuration hash on that house,
+then compare the resulting payload with its digest getter before requesting
+platform, artist or payer approval. The executable
+[ordinary creation example](../../packages/stream-client/examples/current-auction-signing.mjs)
+performs both checks and returns an immutable payload without requesting a
+signature or sending a transaction. Curated and rights configurations need their
+own configuration-hash getter.
+
+Use `currentTypedDataFromJSON` for these four kinds and canonical decimal-string
+uints. The retained RC1 JSON parser and `auctionTypedData` retain their original
+domains. The two custody authorizations contain the same twelve fields but
+have distinct signing domains; they cannot substitute for each other.
+
+A custody acquisition commits the expected sale, token, collection serial and
+Manager operation nonces, artwork hash, executor and reveal deposit. Read
+current coordinates and preserve the exact approved bytes for simulation and
+retry. A bid separately commits payer, executor, delivery address, amount,
+reveal-fee cap and settlement deadline. Its actual transaction value uses the
+current required fee, not automatically the fee cap.
+
+Use the existing `walletTypedData`, `toSafeCall`, sender-aware simulation and
+Safe receipt checks with the current client. ERC-1271 approval still comes from
+the Safe’s own signing integration. Four native-getter encoding vectors verify
+these helpers; they do not establish a complete current SDK lifecycle or Safe
+call-inventory acceptance.
 
 ## Build and sign exact payloads
 
@@ -98,9 +144,9 @@ separate artist/payer nonce spaces. `saleRef` is the canonical `saleId`, not the
 config hash or authorization digest. The payer approves the **adapter** as token
 spender separately; the client never sends an unlimited token approval.
 
-Artist acceptance is immutable and must happen before the first mint or
-collection freeze. A relayer can pay gas without becoming the artist. Nomination
-alone does not authorize a sale. The current registry does not implement signer
+In the retained RC1 registry, artist acceptance is immutable and must happen
+before the first mint or collection freeze. A relayer can pay gas without becoming
+the artist. Nomination alone does not authorize a sale. The retained registry does not implement signer
 rotation, collaborators or estate recovery.
 
 For ERC-1271 wallets, use the wallet's actual signing integration and simulate
@@ -108,6 +154,47 @@ its opaque signature bytes. EOA recovery is not a contract-wallet validity test.
 The general `prepare` API accepts those bytes; the examples require a compatible
 caller-supplied ethers Signer abstraction. The contract's actual signature gas
 budget remains authoritative.
+
+## Submit through a Safe
+
+Prepare each operation for the Safe address that actually owns the permission,
+funds, refund or NFT. The same CALL conversion works for purchases, token
+approvals, withdrawals, artist operations and governance calls, provided their
+calldata is encoded from the matching deployed contract ABI. A token approval
+must name the spender used by that deployment.
+
+```typescript
+import { toSafeCall, requireSafeExecution } from "@6529/stream-client";
+
+const safeCall = toSafeCall(call);
+// Give safeCall to your Safe integration for review, threshold signing and execution.
+// Keep the expected Safe transaction hash computed from the reviewed transaction.
+requireSafeExecution(receipt, safeAddress, expectedSafeTxHash);
+// Then verify the expected Stream event, identifiers, amount and resulting state.
+```
+
+`toSafeCall` returns the exact target, calldata, decimal native value and operation
+`0` (CALL). It neither signs nor submits. Simulate the intended direct call using
+the Safe as sender, then simulate the complete signed Safe transaction through
+your Safe integration to check its signature, nonce and gas settings.
+
+The outer receipt can succeed even when a Safe target call fails.
+`requireSafeExecution` requires exactly one successful execution from the expected
+Safe for an independently verified Safe transaction hash. Do not substitute the
+outer Ethereum transaction hash. It rejects failed executions, missing or duplicate
+matches, and malformed events. The helper accepts the unindexed hash in
+[Safe 1.3.0](https://github.com/safe-fndn/safe-smart-account/blob/186a21a74b327f17fc41217a927dea7064f74604/contracts/GnosisSafe.sol)
+and the indexed hash in
+[Safe 1.4.1](https://github.com/safe-fndn/safe-smart-account/blob/bf943f80fec5ac647159d26161446ac5d716a294/contracts/Safe.sol)
+and [1.5.0](https://github.com/safe-fndn/safe-smart-account/blob/dc437e8fba8b4805d76bcbd1c668c9fd3d1e83be/contracts/Safe.sol).
+Tests execute both successful and failed calls through all three pinned upstream
+versions with actual threshold signatures.
+
+This receipt check covers `execTransaction`. Module execution needs its own
+verification, and batches need checks for their intended inner operations and
+application state. Transaction execution and ERC-1271 message signing are separate:
+use the Safe's signing integration for opaque contract signatures, including any
+required message wrapping or onchain approval.
 
 ## Read receipts and continue a flow
 
@@ -291,3 +378,11 @@ instead of relabeling its anchor. The CLI never uploads, signs, schedules or
 publishes. Hosting a package or publishing its hash does not turn it into a full
 archival export or independently audited state. See the
 [publisher guide](state-exports.md) for challenges, supersession and lineage.
+
+## Current script and media manifests
+
+Use the [manifest client workflow](../../packages/stream-client/README.md#prepare-current-script-and-media-manifests)
+to prepare complete descriptors, read the Router's exact preview, and obtain
+original Artist content consent before the authorized Router call. Artist and
+metadata authority may use different Safes. External zero hashes stay explicit
+absences; these helpers perform no upload, wallet signing or transaction.

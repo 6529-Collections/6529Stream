@@ -1,0 +1,93 @@
+>skos:Concept</span></span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a><span class="ot">                rdf:about=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00007&quot;</span>&gt;</span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a><span class="ot">                    xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>                    Production</span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb53-13"><a href="#cb53-13" aria-hidden="true" tabindex="-1"></a><span class="ot">                    xml:lang=</span><span class="st">&quot;de&quot;</span>&gt;</span>
+<span id="cb53-14"><a href="#cb53-14" aria-hidden="true" tabindex="-1"></a>                    Herstellung</span>
+<span id="cb53-15"><a href="#cb53-15" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb53-16"><a href="#cb53-16" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb53-17"><a href="#cb53-17" aria-hidden="true" tabindex="-1"></a>         &lt;/<span class="kw">lido:eventType</span>&gt;</span>
+<span id="cb53-18"><a href="#cb53-18" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:event</span>&gt;</span>
+<span id="cb53-19"><a href="#cb53-19" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:eventSet</span>&gt;</span></code></pre></div>
+            <h3 data-number="5.4.10" id="politicalentity"><span
+            class="header-section-number">5.4.10</span> <span
+            class="citation"
+            data-cites="politicalEntity">@politicalEntity</span></h3>
+            <p><strong>Attribute name:</strong> <a
+            href="http://lido-schema.org/schema/latest/lido.html#politicalEntity">lido:politicalEntity</a></p>
+            <p><strong>Note:</strong> Attribute for &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#partOfPlace">lido:partOfPlace</a>&gt;,
+            &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#place">lido:place</a>&gt;,
+            &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#repositoryLocation">lido:repositoryLocation</a>&gt;,
+            and &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#vitalPlaceActor">lido:vitalPlaceActor</a>&gt;
+            to indicate the kind of place as an administrative,
+            political entity. This attribute was intended in LIDO v1.0
+            to qualify the type of the given place entity according to
+            political structures, including values such as
+            <em>country</em> or <em>city</em>. In LIDO v1.1 these values
+            can be expressed in greater detail through &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#placeClassification">lido:placeClassification</a>&gt;.
+            Note that Place Classification in LIDO corresponds to ‘<a
+            href="https://www.getty.edu/research/tools/vocabularies/guidelines/tgn_3_6_place_types.html">Place
+            Type</a>’ in the <a
+            href="https://www.getty.edu/research/tools/vocabularies/tgn/index.html">Getty
+            Thesaurus of Geographic Names</a>. It is recommended to use
+            a URI to refer to the kind of political entity.</p>
+            <p><strong>Example:</strong> The following XML code snippet
+            shows the index entry for “<a
+            href="http://www.wikidata.org/entity/Q142">France</a>”,
+            qualified as a “<a
+            href="http://www.wikidata.org/entity/Q6256">country</a>” by
+            the value for the political entity attribute.</p>
+            <div class="sourceCode" id="cb54"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:partOfPlace</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="ot">   lido:politicalEntity=</span><span class="st">&quot;http://www.wikidata.org/entity/Q6256&quot;</span>&gt;</span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>   &lt;<span class="kw">lido:placeID</span></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a><span class="ot">       lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00099&quot;</span>&gt;</span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>       http://www.wikidata.org/entity/Q20861</span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>   &lt;/<span class="kw">lido:placeID</span>&gt;</span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:partOfPlace</span>&gt;</span></code></pre></div>
+            <blockquote>
+            <p>For more information, see the note for ‘<a
+            href="http://lido-schema.org/documents/terminology-recommendation.html#politicalEntity">politicalEntity</a>’
+            in the LIDO Terminology Recommendation.</p>
+            </blockquote>
+            <h3 data-number="5.4.11" id="pref"><span
+            class="header-section-number">5.4.11</span> <span
+            class="citation" data-cites="pref">@pref</span></h3>
+            <p><strong>Attribute name:</strong> <a
+            href="http://lido-schema.org/schema/latest/lido.html#pref">lido:pref</a></p>
+            <p><strong>Note:</strong> Attribute for text elements like
+            &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#term">lido:term</a>&gt;
+            or appellations, as well as identifier elements, to indicate
+            whether, e.g., the value is a preferred or an alternative
+            one, or should be used as a search entry only. The <a
+            href="http://terminology.lido-schema.org/pref">LIDO
+            Preference Vocabulary</a> contains a value list for the pref
+            attribute. For concept terms and names of individual
+            entities a “<a
+            href="http://terminology.lido-schema.org/lido00169">Preferred
+            label</a>” (one and only one per language), always has to be
+            provided. If only one value is supplied, this will be chosen
+            as the preferred one. To determine how a value should be
+            displayed in a portal, the preference role “<a
+            href="http://terminology.lido-schema.org/lido00526">Display
+            label</a>” may be used.</p>
+            <p><strong>Example:</strong> The following XML code snippet
+            represents the concept with indexing terms as defined in the
+            SKOS namespace. In order to predefine a label for display,
+            the value “Display label” is used for the ‘lido:pref’
+            attribute.</p>
+            <div class="sourceCode" id="cb55"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:roleActor</span>&gt;</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>   &lt;<span class="kw">skos:Concept</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a><span class="ot">       rdf:about=</span><span class="st">&quot;http://vocab.getty.edu/aat/300025136&quot;</span>&gt;</span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>       &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb

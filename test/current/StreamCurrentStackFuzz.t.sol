@@ -153,6 +153,7 @@ contract StreamCurrentStackFuzzTest is StreamCurrentStackFixture {
             recipient: BUYER,
             artist: artist,
             profileId: profile,
+            expectedPrimaryPolicyHash: _nativePrimaryPolicyHash(),
             tokenDataHash: keccak256(TOKEN_DATA),
             mintCommitment: keccak256("input fuzz artwork"),
             mintPolicyHash: manager.phasePolicyHash(1, PHASE),

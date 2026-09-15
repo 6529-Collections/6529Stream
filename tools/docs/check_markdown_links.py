@@ -20,6 +20,7 @@ DEFAULT_INCLUDED_ROOTS = [
     Path(".github"),
     Path("docs"),
     Path("ops"),
+    Path("smart-contracts"),
     Path("release-artifacts"),
 ]
 

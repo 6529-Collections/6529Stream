@@ -1,0 +1,190 @@
+ web environment, usually a stable
+										URI/URL.</tei:ab>
+									<tei:ab type="label">Link Resource</tei:ab>
+									<tei:ab type="dataValues">Free text</tei:ab>
+								</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:simpleContent>
+									<xs:extension base="lido:webResourceComplexType">
+										<xs:attribute name="codecResource" type="xs:string" id="codecResource">
+											<xs:annotation>
+												<xs:documentation>
+												  <tei:ab type="description">An attribute indicating the codec required for rendering
+												  	the resource.</tei:ab>
+												   <tei:ab type="dataValues">Free text</tei:ab>
+												   <tei:ab type="recommendation">General recommendations for
+														<tei:ref target="../../documents/terminology-recommendation.html#codecResource">codec resource</tei:ref></tei:ab>
+
+												</xs:documentation>
+											</xs:annotation>
+										</xs:attribute>
+									</xs:extension>
+								</xs:simpleContent>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="resourceMeasurementsSet" type="lido:measurementsSetComplexType" minOccurs="0" maxOccurs="unbounded" id="resourceMeasurementsSet">
+							<xs:annotation>
+								<xs:documentation>
+									<tei:ab type="description">A set about any technical measurement information
+										needed for online presentation of the resource.</tei:ab>
+									<tei:ab type="label">Resource Measurements Set</tei:ab>
+								</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute ref="lido:type" id="resourceRepresentation_type">
+						<xs:annotation>
+							<xs:documentation>
+								<tei:ab type="description">An attribute for the kind of
+									representation of a resource.<br/>
+									Examples include <em>placeholder</em>, <em>preview text</em>, or <em>provided image</em>.</tei:ab>
+								<tei:ab type="dataValues">Controlled terminology</tei:ab>
+								<tei:ab type="recommendation">LIDO Terminology for
+									<tei:ref target="../../documents/terminology-recommendation.html#resourceRepresentation_type">Type of Resource Representation</tei:ref></tei:ab>
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="resourceType" type="lido:conceptComplexType" minOccurs="0" id="resourceType">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for the generic kind of the resource that serves as a surrogate of the object/work in focus. Examples may include photographs, digital images, or video recordings.</tei:ab>
+						<tei:ab type="label">Resource Type</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#resourceType">Resource Type</tei:ref>
+						</tei:ab>
+					</xs:documentation>
+
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:resourceType">
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="resourceRelType" type="lido:conceptComplexType" minOccurs="0" maxOccurs="unbounded" id="resourceRelType">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">The relationship of the resource to the
+							object/work being described.</tei:ab>
+						<tei:ab type="label">Resource Relationship Type</tei:ab>
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						
+						
+						<!-- Überarbeiten -->
+						<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#resourceType">Resource Type</tei:ref>
+						</tei:ab>
+					</xs:documentation>
+
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:resourceRelType">
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="resourcePerspective" type="lido:conceptComplexType" minOccurs="0" maxOccurs="unbounded" id="resourcePerspective">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element that characterizes the view in
+							terms of vantage point, perspective, or lighting effects.</tei:ab>
+						<tei:ab type="label">Resource Perspective</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#resourcePerspective">Resource Perspective</tei:ref></tei:ab>
+					</xs:documentation>
+
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:resourcePerspective">
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="resourceDescription" minOccurs="0" maxOccurs="unbounded" id="resourceDescription">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A text element for the description of the spatial,
+							chronological, or contextual aspects of the object/work as captured in
+							the resource in focus.</tei:ab>
+						<tei:ab type="label">Resource Description</tei:ab>
+						<tei:ab type="dataValues">Free text</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="lido:textComplexType">
+							<xs:attribute ref="lido:type" id="resourceDescription_type">
+								<xs:annotation>
+									<xs:documentation>
+										<tei:ab type="description">An attribute for the kind of
+											description of a resource.<br/>
+											Note that this type attribute is primarily intended for use in application profiles.</tei:ab>
+										<tei:ab type="dataValues">Controlled terminology</tei:ab>
+										<tei:ab type="recommendation">To be determined by application profiles.</tei:ab>
+									</xs:documentation>
+								</xs:annotation>
+							</xs:attribute>
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="resourceDateTaken" type="lido:dateSetComplexType" minOccurs="0" id="resourceDateTaken">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A wrapper for a date or range of dates associated with the
+							creation or production of the original resource, for instance an image
+							or a recording.<br/>
+							Note that this date is not necessarily the same as the
+							date of production of the digital resource.</tei:ab>
+						<tei:ab type="note">This is not necessarily the same as the date of
+							production of the digital resource (e.g. a digitization of a negative is
+							usually made years after the image was captured on film). Format will
+							vary depending upon implementation.</tei:ab>
+						<tei:ab type="label">Resource Date Taken</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="resourceSource" minOccurs="0" maxOccurs="unbounded" id="resourceSource">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A set of elements identifying the actor from which the image or other resource was obtained.<br/>
+							Used when the source differs from the source named in <tei:ref target="#recordSource">Record Source</tei:ref>.</tei:ab>
+						<tei:ab type="label">Resource Source</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						</xs:documentation>
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:resourceSource">
+								<sch:extends rule="sch_OWL"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:legalBodyRefComplexType">
+							<xs:attribute ref="lido:type" id="resourceSource_type">
+								<xs:annotation>
+									<xs

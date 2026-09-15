@@ -1,0 +1,80 @@
+b36-23" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:term</span></span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a><span class="ot">                lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00526&quot;</span></span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a><span class="ot">                xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a>                landscape</span>
+<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:term</span>&gt;</span>
+<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:subjectConcept</span>&gt;</span>
+<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:subject</span>&gt;</span>
+<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:subjectSet</span>&gt;</span></code></pre></div>
+            <p><strong>Example for “Interpretation”:</strong> The
+            following is an example for subject type “Interpretation”.
+            Even though in this example the smile of the depicted person
+            is immediately evident, a statement about a facial
+            expression is still a subjective judgement and thus an
+            interpretation.</p>
+            <blockquote>
+            <p><strong>Subject Concept:</strong> smile
+            <strong><em>Preference:</em></strong> Display<br />
+            <strong><em>Subject Type:</em></strong> Interpretation</p>
+            </blockquote>
+            <div class="sourceCode" id="cb37"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:subjectSet</span>&gt;</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">&lt;!-- Interpretation --&gt;</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:subject</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00524&quot;</span>&gt;</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:subjectConcept</span>&gt;</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">skos:Concept</span></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a><span class="ot">                rdf:about=</span><span class="st">&quot;http://vocab.getty.edu/aat/300417502&quot;</span>&gt;</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a><span class="ot">                    xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>                    smiling</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>            <span class="co">&lt;!-- Display label--&gt;</span></span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:term</span></span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a><span class="ot">                lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00526&quot;</span></span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a><span class="ot">                xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a>                smile</span>
+<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:term</span>&gt;</span>
+<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:subjectConcept</span>&gt;</span>
+<span id="cb37-20"><a href="#cb37-20" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:subject</span>&gt;</span>
+<span id="cb37-21"><a href="#cb37-21" aria-hidden="true" tabindex="-1"></a> &lt;/<span class="kw">lido:subjectSet</span>&gt;</span></code></pre></div>
+            <h4 data-number="5.2.7.3" id="subject-actor"><span
+            class="header-section-number">5.2.7.3</span> Subject
+            Actor</h4>
+            <p><strong>Element name:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectActor">lido:subjectActor</a>&gt;</p>
+            <p><strong>Note:</strong> Subject Actor contains information
+            about a person or a group of persons, depicted in or
+            addressed by an object. Fictitious actors are indexed as
+            &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectObject">lido:subjectObject</a>&gt;.</p>
+            <p><strong>Example:</strong> The following example describes
+            Lisa del Giocondo as the person portrayed in Leonardo’s
+            <em>Mona Lisa</em>. Here, the attributes “<a
+            href="http://terminology.lido-schema.org/lido00961">Index
+            label</a>” and “<a
+            href="http://terminology.lido-schema.org/lido00526">Display
+            label</a>” from the LIDO <a
+            href="http://terminology.lido-schema.org/pref">Preference
+            Vocabulary</a> for &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#term">lido:term</a>&gt;
+            are used to govern how the labels are to be processed. The
+            subject type is “<a
+            href="http://terminology.lido-schema.org/lido00136">Identification</a>”.</p>
+            <blockquote>
+            <p><strong>Subject Actor:</strong> Sitter: Lisa del Giocondo
+            (1479–1542) <strong><em>Type:</em></strong> Person<br />
+            <strong><em>Subject Type:</em></strong> Identification<br />
+            <strong>Name Actor:</strong> Del Giocondo, Lisa
+            <strong><em>Preference:</em></strong> Index<br /> • Lisa del
+            Giocondo <strong><em>Preference:</em></strong> Display</p>
+            </blockquote>
+            <div class="sourceCode" id="cb38"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:subjectSet</span>&gt;</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">&lt;!-- Identification --&gt;</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:subject</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00136&quot;</span>&gt;</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:subjectActor</span>&gt;</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:displayActor</span></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a><span class="ot">                xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</sp

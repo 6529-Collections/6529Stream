@@ -1,0 +1,475 @@
+{
+  "sourceHead": "756b0b80c20a6ef4e5e561227a591fa7bbba42ff",
+  "compilerOutputSHA256": "ee2685f97b9a2d7e9bb6d414d0e73a038454514ad630b70e13701390a3c5ee92",
+  "contentConsentTypePreimage": "StreamArtistContentConsent(address core,address metadataContract,uint256 collectionId,bytes32 familyId,bytes32 newStateHash,uint256 nonce,uint64 deadline)",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "internalType": "enum StreamCollectionManifestTypes.PayloadSourceType",
+              "name": "imageSourceType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "string",
+              "name": "imageURI",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "imageHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "imageMimeType",
+              "type": "string"
+            },
+            {
+              "internalType": "enum StreamCollectionManifestTypes.PayloadSourceType",
+              "name": "animationSourceType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "string",
+              "name": "animationURI",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "animationHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "animationMimeType",
+              "type": "string"
+            },
+            {
+              "internalType": "enum StreamCollectionManifestTypes.PayloadSourceType",
+              "name": "contentSourceType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "string",
+              "name": "contentURI",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "contentHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "contentMimeType",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "manifestURI",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "alternatesURI",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "alternatesHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct StreamCollectionManifestTypes.MediaManifest",
+          "name": "value",
+          "type": "tuple"
+        }
+      ],
+      "name": "previewArtistMediaManifestState",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "scriptHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "rendererCompatibility",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "enum StreamCollectionManifestTypes.PayloadSourceType",
+              "name": "sourceType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "string",
+              "name": "libraryURI",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "scriptURI",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "sourcePointer",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "mimeType",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "chunkCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "executable",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct StreamCollectionManifestTypes.ScriptManifest",
+          "name": "value",
+          "type": "tuple"
+        }
+      ],
+      "name": "previewArtistScriptManifestState",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "internalType": "enum StreamCollectionManifestTypes.PayloadSourceType",
+              "name": "imageSourceType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "string",
+              "name": "imageURI",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "imageHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "imageMimeType",
+              "type": "string"
+            },
+            {
+              "internalType": "enum StreamCollectionManifestTypes.PayloadSourceType",
+              "name": "animationSourceType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "string",
+              "name": "animationURI",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "animationHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "animationMimeType",
+              "type": "string"
+            },
+            {
+              "internalType": "enum StreamCollectionManifestTypes.PayloadSourceType",
+              "name": "contentSourceType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "string",
+              "name": "contentURI",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "contentHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "contentMimeType",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "manifestURI",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "alternatesURI",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "alternatesHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct StreamCollectionManifestTypes.MediaManifest",
+          "name": "value",
+          "type": "tuple"
+        }
+      ],
+      "name": "setCollectionMediaManifest",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "scriptHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "rendererCompatibility",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "enum StreamCollectionManifestTypes.PayloadSourceType",
+              "name": "sourceType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "string",
+              "name": "libraryURI",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "scriptURI",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "sourcePointer",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "mimeType",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "chunkCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "executable",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct StreamCollectionManifestTypes.ScriptManifest",
+          "name": "value",
+          "type": "tuple"
+        }
+      ],
+      "name": "setCollectionScriptManifest",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "metadataContract",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "familyId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "newStateHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct StreamArtistContentTypes.Consent",
+          "name": "p",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint64",
+              "name": "time",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes",
+              "name": "signature",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct StreamArtistOnboardingTypes.Authorization",
+          "name": "a",
+          "type": "tuple"
+        }
+      ],
+      "name": "contentConsentDigest",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "metadataContract",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "familyId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "newStateHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct StreamArtistContentTypes.Consent",
+          "name": "p",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint64",
+              "name": "time",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes",
+              "name": "signature",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct StreamArtistOnboardingTypes.Authorization",
+          "name": "a",
+          "type": "tuple"
+        }
+      ],
+      "name": "recordContentConsent",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ]
+}

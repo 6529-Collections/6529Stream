@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistReconstruction.sol";
 
 import "../../interfaces/stream/artist/IStreamArtistArchiveV2.sol";
 import "../../libraries/SSTORE2.sol";
+import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 
 /// @notice Append-only evidence archive for the proposed artist-authority successor.
 /// @dev This contract owns no semantic record or decision. It never authenticates an artist,
 ///      consumes replay, answers current/latest state, calls a semantic owner, or exposes a
 ///      mutable binding. Exact evidence must be joined to authoritative owner state elsewhere.
-contract StreamArtistArchiveV2 is IStreamArtistArchiveV2 {
+contract StreamArtistArchiveV2 is IStreamArtistArchiveV2, IStreamArtistPayloadArchive {
     bytes32 private constant _MARKER = keccak256("6529STREAM_ARTIST_ARCHIVE_V2");
     bytes32 private constant _BINDING_DOMAIN = keccak256("6529STREAM_ARTIST_ARCHIVE_BINDING_V2");
     uint16 private constant _SCHEMA_VERSION = 2;
@@ -47,8 +49,10 @@ contract StreamArtistArchiveV2 is IStreamArtistArchiveV2 {
         );
     }
 
-    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
+    function supportsInterface(bytes4 interfaceId) external pure override(IERC165) returns (bool) {
         return interfaceId == type(IStreamArtistArchiveV2).interfaceId
+            || interfaceId == type(IStreamArtistPayloadArchive).interfaceId
+            || interfaceId == type(IStreamArtistReconstruction).interfaceId
             || interfaceId == type(IERC165).interfaceId;
     }
 
@@ -104,6 +108,9 @@ contract StreamArtistArchiveV2 is IStreamArtistArchiveV2 {
         // forge-lint: disable-next-line(unsafe-typecast)
         record.appendedAtBlock = uint64(block.number);
         record.contentHash = contentHash;
+        StreamArtistPayloadStore.registerPointer(
+            pointer, keccak256("ARTIST_OPERATION_EVIDENCE"), contentHash
+        );
         emit ArtistArchiveEvidenceAppendedV2(
             evidenceId, evidenceVersion, contentHash, pointer, payloadSize
         );
@@ -140,6 +147,33 @@ contract StreamArtistArchiveV2 is IStreamArtistArchiveV2 {
                 evidenceId, evidenceVersion, record.contentHash, observedHash
             );
         }
+    }
+
+    function registerArtistStoredPayload(address pointer, bytes32 kind, bytes32 hash)
+        external
+        override
+    {
+        if (msg.sender != operationCoordinator) {
+            revert ArtistArchiveUnauthorizedWriter(msg.sender);
+        }
+        StreamArtistPayloadStore.registerPointer(pointer, kind, hash);
+    }
+
+    function recordPreimageBytes(bytes32 hash) external view override returns (bytes memory) {
+        return StreamArtistPayloadStore.recordBytes(hash);
+    }
+
+    function storedPayloadCount() external view override returns (uint256) {
+        return StreamArtistPayloadStore.count();
+    }
+
+    function storedPayloadAt(uint256 index)
+        external
+        view
+        override
+        returns (address, bytes32, bytes32)
+    {
+        return StreamArtistPayloadStore.at(index);
     }
 
     function _requireValidKey(bytes32 evidenceId, uint64 evidenceVersion) private pure {

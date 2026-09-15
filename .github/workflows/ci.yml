@@ -20,13 +20,15 @@ env:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  # Let a draft's long compiler run finish; only its newest pending revision waits.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' && !github.event.pull_request.draft }}
 
 jobs:
   current-stack:
     name: Current stack integration
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    # A cold via-IR graph build exceeds 90 minutes; retain its checked cache for successors.
+    timeout-minutes: 240
 
     steps:
       - name: Checkout
@@ -72,6 +74,13 @@ jobs:
         run: |
           python -m pip install --disable-pip-version-check --require-hashes --only-binary=:all: -r requirements-tools.lock
           python -m pip check
+
+      - name: Check native fixture tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m tools.build.test_native_artifact_storage
+          python -m tools.build.test_prepare_current_graph
 
       - name: Identify current compiler inputs
         id: current_compiler_inputs
@@ -796,21 +805,37 @@ jobs:
           python -m pip check
           python -m playwright install --with-deps chromium
 
-      - name: Artist record/event reconstruction correction gate
+      - name: Current artist extension design and historical runner isolation
         shell: bash
         run: |
           set -o pipefail
           mkdir -p ci-logs
-          python3 -m tools.protocol.test_artist_record_event_reconstruction_correction 2>&1 | tee ci-logs/artist-record-event-reconstruction-correction-tests.log
-          python3 -m tools.protocol.check_artist_record_event_reconstruction_correction 2>&1 | tee ci-logs/artist-record-event-reconstruction-correction-check.log
+          python3 -m tools.protocol.test_frozen_artist_checks 2>&1 | tee ci-logs/frozen-artist-runner-tests.log
+          python3 -m tools.protocol.test_artist_operation_extension 2>&1 | tee ci-logs/artist-extension-tests.log
+          python3 -m tools.protocol.test_artist_owner_record_continuity_extension 2>&1 | tee ci-logs/artist-continuity-extension-tests.log
+          python3 -m tools.protocol.check_artist_operation_extension 2>&1 | tee ci-logs/artist-extension-check.log
+          python3 -m tools.protocol.check_artist_owner_record_continuity_extension 2>&1 | tee ci-logs/artist-continuity-extension-check.log
 
-      - name: Artist owner-record continuity gate
+      - name: Historical artist-57 semantic owner matrix
         shell: bash
         run: |
           set -o pipefail
           mkdir -p ci-logs
-          python3 -m tools.protocol.test_artist_owner_record_continuity 2>&1 | tee ci-logs/artist-owner-record-continuity-tests.log
-          python3 -m tools.protocol.check_artist_owner_record_continuity 2>&1 | tee ci-logs/artist-owner-record-continuity-check.log
+          python3 -m tools.protocol.run_frozen_artist_checks matrix 2>&1 | tee ci-logs/historical-artist-matrix.log
+
+      - name: Historical artist-57 record/event reconstruction
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 -m tools.protocol.run_frozen_artist_checks reconstruction 2>&1 | tee ci-logs/historical-artist-reconstruction.log
+
+      - name: Historical artist-57 owner-record continuity
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 -m tools.protocol.run_frozen_artist_checks continuity 2>&1 | tee ci-logs/historical-artist-continuity.log
 
       - name: PowerShell syntax and wrapper runtime
         shell: pwsh

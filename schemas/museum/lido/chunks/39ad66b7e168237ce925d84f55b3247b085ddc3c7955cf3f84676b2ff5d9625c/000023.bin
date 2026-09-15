@@ -1,0 +1,120 @@
+kSet</a>&gt;
+            is used</li>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#relatedWorksWrap">lido:relatedWorksWrap</a>&gt;
+            if &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#relatedWorkSet">lido:relatedWorkSet</a>&gt;
+            is used</li>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#repositoryWrap">lido:repositoryWrap</a>&gt;
+            if &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#repositorySet">lido:repositorySet</a>&gt;
+            is used</li>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#resourceWrap">lido:resourceWrap</a>&gt;
+            if &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#resourceSet">lido:resourceSet</a>&gt;
+            is used</li>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#rightsWorkWrap">lido:rightsWorkWrap</a>&gt;
+            if &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#rightsWorkSet">lido:rightsWorkSet</a>&gt;
+            is used</li>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectWrap">lido:subjectWrap</a>&gt;
+            if &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectSet">lido:subjectSet</a>&gt;
+            is used</li>
+            <li>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#titleWrap">lido:titleWrap</a>&gt;
+            if &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#titleSet">lido:titleSet</a>&gt;
+            is used</li>
+            </ul>
+            <h3 data-number="5.1.2"
+            id="lido-metadata-record-identifier-1"><span
+            class="header-section-number">5.1.2</span> LIDO Metadata
+            Record Identifier</h3>
+            <p><strong>Element name:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#lidoRecID">lido:lidoRecID</a>&gt;</p>
+            <p><strong>Note:</strong> This mandatory element serves to
+            distinguish an individual LIDO record from any other record
+            that may occur in a database, data repository, or any other
+            aggregation of machine-processable records. The LIDO
+            Metadata Record Identifier is preferably composed of an
+            identifier for the contributor and a record identification
+            in the (local) system of the contributor. It is not required
+            to be persistent. For more detailed information and examples
+            see section <a
+            href="#lido-metadata-record-identifier"><em>4.2.1 LIDO
+            Metadata Record Identifier</em></a>.</p>
+            <h3 data-number="5.1.3" id="objectwork-type"><span
+            class="header-section-number">5.1.3</span> Object/Work
+            Type</h3>
+            <p><strong>Element name:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectWorkType">lido:objectWorkType</a>&gt;</p>
+            <p><strong>Note:</strong> The designation
+            <strong>object/work</strong> dates from the CDWA Lite
+            category <a
+            href="https://www.getty.edu/research/publications/electronic_publications/cdwa/1object.html">Object/Work</a>,
+            calling attention to the fact that the element embraces not
+            only works of art, but, e.g., human-made everyday objects
+            and natural specimens as well. This element captures the
+            particular kind of an object, what the thing is in itself,
+            considering its form and other intrinsic or defining
+            characteristics. These generic properties are referred to as
+            the <strong><em>isness</em></strong> of an object. Hence, a
+            good descriptor for the object’s type conveys essential
+            features of the object as required for reliable indexing and
+            retrieval. The type of object at hand should always be
+            indexed using the most specific descriptor available from
+            the indexing vocabulary. Doing so is essential for ensuring
+            a satisfactory level of precision in search results. In
+            addition, there are more advantages when following the
+            principle of the most specific and appropriate index entry
+            (Cutter’s rule) if relying on a well-structured knowledge
+            organization system. Specific descriptors for
+            &lt;lido:objectWorkType&gt; may be found in the <a
+            href="http://vocab.getty.edu/hier/aat/300264092">Objects
+            Facet</a> hierarchy of the Art &amp; Architecture
+            Thesaurus.</p>
+            <p><strong>Example:</strong> In the following example the
+            most specific concept from the Art &amp; Architecture
+            Thesaurus (AAT), “<a
+            href="http://vocab.getty.edu/page/aat/300033799">oil
+            painting</a>”, is used to describe the work type of the
+            <em>Mona Lisa</em> by Leonardo da Vinci. This statement is
+            further qualified by the value for the type attribute, “<a
+            href="http://terminology.lido-schema.org/lido00789">Object
+            by material or technique</a>”, taken from the LIDO
+            Terminology and corresponding to the equivalent “<a
+            href="http://vocab.getty.edu/page/aat/300033701">guide
+            term</a>” in the AAT hierarchy. The values for &lt;<a
+            href="http://www.w3.org/2004/02/skos/core#prefLabel">skos:prefLabel</a>&gt;
+            and &lt;<a
+            href="http://www.w3.org/2004/02/skos/core#altLabel">skos:altLabel</a>&gt;
+            are supposed to be automatically taken from the AAT concept.
+            In the case where the labels provided by the authority
+            vocabulary are not well suited for display purposes, a
+            &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#term">lido:term</a>&gt;
+            with preference “<a
+            href="http://terminology.lido-schema.org/lido00526">Display
+            label</a>” may be added to control how the term will be
+            presented. Terms for the <em>lido:type</em> attribute of
+            Object/Work Type are provided by the LIDO <a
+            href="http://terminology.lido-schema.org/objectWorkType_type">Object/Work
+            Type Type-Vocabulary</a>.</p>
+            <blockquote>
+            <p><strong>Object/Work Type:</strong> Oil painting
+            <strong><em>Preference:</em></strong> Display</p>
+            </blockquote>
+            <div class="sourceCode" id="cb21"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!--Object by material or technique--&gt;</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:objectWorkType</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00789&quot;</span>&gt;</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">skos:Concept</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="ot">        rdf:about=</span><span class="st">&quot;http://vocab.getty.edu/aat/300033799&quot;</span>&gt;</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">skos:prefLabel</span><span class="ot"> xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>            oil paintings (visual works)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">skos:prefLabel<

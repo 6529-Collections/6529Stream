@@ -1,0 +1,83 @@
+verview-annotationcollection" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>An ordered list of Annotation Pages. Annotation Collections allow higher level groupings of Annotations to be recorded. For example, all of the English translation Annotations of a medieval French document could be kept separate from the transcription or an edition in modern French, or the director’s commentary on a film can be separated from the script.</p>
+      <h2 id="3-resource-properties">
+        
+        
+          3. Resource Properties <a href="#3-resource-properties" class="anchorClass"></a>
+        
+        
+      </h2>
+    
+
+<p>Most of the properties defined by this specification may be associated with any of the resource types described above, and may have more than one value. Properties relate to the resource with which they are associated, so the <code class="language-plaintext highlighter-rouge">label</code> property on a Manifest is the human readable label of the Manifest, whereas the same <code class="language-plaintext highlighter-rouge">label</code> property on a Canvas is the human readable label for that particular view.</p>
+
+<p>The requirements for which classes have which properties are summarized in <a href="/api/presentation/3.0/#a-summary-of-property-requirements">Appendix A</a>.</p>
+
+<p>Other properties are allowed, either via local extensions or those endorsed by the <abbr title="International Image Interoperability Framework">IIIF</abbr> community. If a client discovers properties that it does not understand, then it <em class="rfc">must</em> ignore them. See the <a href="/api/presentation/3.0/#46-linked-data-context-and-extensions" title="Linked Data Context and Extensions">Linked Data Context and Extensions</a> section for more information about extensions.</p>
+
+<p>This section also defines processing requirements for clients for each of the combinations of class and property.  These requirements are for general purpose client implementations that are intended to be used to render the entire resource to the user, and not necessarily for consuming applications with specialized use or individual component implementations that might be used to construct a client. The inclusion of these requirements gives publishers a baseline expectation for how they can expect implementations advertised as compliant with this specification to behave when processing their content.</p>
+      <h3 id="31-descriptive-properties">
+        
+        
+          3.1. Descriptive Properties <a href="#31-descriptive-properties" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>These properties describe or represent the resource they are associated with, and are typically rendered to the user.</p>
+      <h5 id="label">
+        
+        
+          label <a href="#label" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>A human readable label, name or title. The <code class="language-plaintext highlighter-rouge">label</code> property is intended to be displayed as a short, textual surrogate for the resource if a human needs to make a distinction between it and similar resources, for example between objects, pages, or options for a choice of images to display. The <code class="language-plaintext highlighter-rouge">label</code> property can be fully internationalized, and each language can have multiple values.  This pattern is described in more detail in the <a href="/api/presentation/3.0/#language-of-property-values" title="Language of Property Values">languages</a> section.</p>
+
+<p>The value of the property <em class="rfc">must</em> be a <abbr title="JavaScript Object Notation">JSON</abbr> object, as described in the <a href="/api/presentation/3.0/#language-of-property-values" title="Language of Property Values">languages</a> section.</p>
+
+<ul>
+  <li>A Collection <em class="rfc">must</em> have the <code class="language-plaintext highlighter-rouge">label</code> property with at least one entry.<br />
+Clients <em class="rfc">must</em> render <code class="language-plaintext highlighter-rouge">label</code> on a Collection.</li>
+  <li>A Manifest <em class="rfc">must</em> have the <code class="language-plaintext highlighter-rouge">label</code> property with at least one entry.<br />
+Clients <em class="rfc">must</em> render <code class="language-plaintext highlighter-rouge">label</code> on a Manifest.</li>
+  <li>A Canvas <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">label</code> property with at least one entry.<br />
+Clients <em class="rfc">must</em> render <code class="language-plaintext highlighter-rouge">label</code> on a Canvas, and <em class="rfc">should</em> generate a <code class="language-plaintext highlighter-rouge">label</code> for Canvases that do not have them.</li>
+  <li>A content resource <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">label</code> property with at least one entry. If there is a Choice of content resource for the same Canvas, then they <em class="rfc">should</em> each have at least the <code class="language-plaintext highlighter-rouge">label</code> property with at least one entry.<br />
+Clients <em class="rfc">may</em> render <code class="language-plaintext highlighter-rouge">label</code> on content resources, and <em class="rfc">should</em> render them when part of a Choice.</li>
+  <li>A Range <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">label</code> property with at least one entry. <br />
+Clients <em class="rfc">must</em> render <code class="language-plaintext highlighter-rouge">label</code> on a Range.</li>
+  <li>An Annotation Collection <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">label</code> property with at least one entry.<br />
+Clients <em class="rfc">should</em> render <code class="language-plaintext highlighter-rouge">label</code> on an Annotation Collection.</li>
+  <li>Other types of resource <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">label</code> property with at least one entry.<br />
+Clients <em class="rfc">may</em> render <code class="language-plaintext highlighter-rouge">label</code> on other types of resource.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Example Object Title"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="metadata">
+        
+        
+          metadata <a href="#metadata" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>An ordered list of descriptions to be displayed to the user when they interact with the resource, given as pairs of human readable <code class="language-plaintext highlighter-rouge">label</code> and <code class="language-plaintext highlighter-rouge">value</code> entries. The content of these entries is intended for presentation only; descriptive semantics <em class="rfc">should not</em> be inferred. An entry might be used to convey information about the creation of the object, a physical description, ownership information, or other purposes.</p>
+
+<p>The value of the <code class="language-plaintext highlighter-rouge">metadata</code> property <em class="rfc">must</em> be an array of <abbr title="JavaScript Object Notation">JSON</abbr> objects, where each item in the array has both <code class="language-plaintext highlighter-rouge">label</code> and <code class="language-plaintext highlight

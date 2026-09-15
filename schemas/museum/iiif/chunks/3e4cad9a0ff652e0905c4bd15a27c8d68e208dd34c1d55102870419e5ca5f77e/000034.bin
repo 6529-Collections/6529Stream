@@ -1,0 +1,71 @@
+Block.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"@context"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://iiif.io/api/presentation/3/context.json"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/annotation/p0001-image"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Annotation"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"motivation"</span><span class="p">:</span><span class="w"> </span><span class="s2">"painting"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"body"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/page1/full/max/0/default.jpg"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Image"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Page 1"</span><span class="w"> </span><span class="p">],</span><span class="w"> </span><span class="nl">"es"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Página 1"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"image/jpeg"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"service"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/page1"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ImageService3"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"profile"</span><span class="p">:</span><span class="w"> </span><span class="s2">"level2"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"service"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"@id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/auth/login"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"@type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AuthCookieService1"</span><span class="w">
+          </span><span class="p">}</span><span class="w">
+        </span><span class="p">]</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">],</span><span class="w">
+    </span><span class="nl">"height"</span><span class="p">:</span><span class="w"> </span><span class="mi">2000</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"width"</span><span class="p">:</span><span class="w"> </span><span class="mi">1500</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"target"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/canvas/p1"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h3 id="58-annotation-collection">
+        
+        
+          5.8. Annotation Collection <a href="#58-annotation-collection" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>Annotation Collections represent groupings of Annotation Pages that should be managed as a single whole, regardless of which Canvas or resource they target. This allows, for example, all of the Annotations that make up a particular translation of the text of a book to be collected together. A client might then present a user interface that allows all of the Annotations in an Annotation Collection to be displayed or hidden according to the user’s preference.</p>
+
+<p>Annotation Collections <em class="rfc">must</em> have a URI, and it <em class="rfc">should</em> be an <abbr title="Hypertext Transfer Protocol">HTTP</abbr>(S) URI. They <em class="rfc">should</em> have a <code class="language-plaintext highlighter-rouge">label</code> and <em class="rfc">may</em> have any of the other descriptive, linking or rights properties.</p>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"@context"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://iiif.io/api/presentation/3/context.json"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/annocoll/transcription"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AnnotationCollection"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"Diplomatic Transcription"</span><span class="p">]},</span><span class="w">
+
+  </span><span class="nl">"first"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/annopage/l1"</span><span class="p">,</span><span class="w"> </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AnnotationPage"</span><span class="w"> </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"last"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/annopage/l120"</span><span class="p">,</span><span class="w"> </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AnnotationPage"</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>For Annotation Collections with many Annotations, there will be many pages. The Annotation Collection refers to the first and last page, and then the pages refer to the previous and next pages in the ordered list.  Each page is part of the Annotation Collection.</p>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="cop

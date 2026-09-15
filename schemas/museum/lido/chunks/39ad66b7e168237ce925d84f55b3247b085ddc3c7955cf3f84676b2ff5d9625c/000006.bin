@@ -1,0 +1,141 @@
+ for values of elements and
+            attributes,</li>
+            <li>the number and order of child elements is declared in <a
+            href="https://www.w3schools.com/xml/el_complextype.asp"><em>complex
+            types</em></a>.</li>
+            </ul>
+            <h3 data-number="3.2.3" id="namespaces"><span
+            class="header-section-number">3.2.3</span> Namespaces</h3>
+            <p>As explained in section <a href="#background"><em>2.3
+            Background</em></a>, reuse of existing specifications is an
+            important objective in the design of the LIDO schema. XML
+            has mechanisms for combining definitions from more than one
+            schema. This allows a schema definition to “borrow” element
+            or attribute definitions from other schemas, typically using
+            a mechanism known as <em>namespaces</em>.</p>
+            <p>Declaring a namespace for LIDO allows to distinguish
+            between elements or attributes that are part of the LIDO
+            data model, and others that are defined elsewhere.
+            Namespaces determine the scope and origin of an element or
+            attribute name. In other words, a namespace indicates who is
+            responsible for the definition of a particular element or
+            attribute name and where XML processing software can find
+            the corresponding schema. Namespaces also allow to
+            distinguish between elements or attributes that carry
+            identical names. As an example, the meaning of
+            <em>rdf:type</em> is different from that of
+            <em>lido:type</em>.</p>
+            <p>A combination of namespace and name is referred to as
+            <em>qualified name</em> (a QName in XML terminology). QNames
+            can be written either in full or in an abbreviated form:</p>
+            <div class="sourceCode" id="cb1"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">http:</span><span class="er">//</span><span class="ot">www.lido-schema.org</span><span class="er">/titleSet&gt;</span></span></code></pre></div>
+            <p>is identical to</p>
+            <div class="sourceCode" id="cb2"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:titleSet</span><span class="ot"> xmns:lido=</span><span class="st">&quot;http://www.lido-schema.org&quot;</span>&gt;</span></code></pre></div>
+            <p>In practice, the abbreviated namespace (in this case,
+            “lido”) is only declared once in the outermost element of an
+            XML document. This allows all subsequent elements and
+            attributes from the LIDO namespace to be written with what
+            is known as a <em>namespace prefix</em>, followed by a
+            colon:</p>
+            <div class="sourceCode" id="cb3"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:lidoWrap</span><span class="ot">  xmns:lido=</span><span class="st">&quot;http://www.lido-schema.org&quot;</span> <span class="er">(...)</span>  &gt;</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    (...)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:titleSet</span>&gt;</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    (...)</span></code></pre></div>
+            <p>LIDO XML records prepared using the Schema Version 1.1
+            can (and should) include the following prefix declarations
+            in their outermost element.</p>
+            <p><strong>Table 1: Prefix declarations</strong></p>
+            <table>
+            <colgroup>
+            <col style="width: 36%" />
+            <col style="width: 30%" />
+            <col style="width: 32%" />
+            </colgroup>
+            <thead>
+            <tr class="header">
+            <th>Namespace URI</th>
+            <th>Prefix</th>
+            <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr class="odd">
+            <td><a href="http://www.lido-schema.org"
+            class="uri">http://www.lido-schema.org</a></td>
+            <td>lido</td>
+            <td>The LIDO XML schema. A particular version can be
+            selected with the <em>xsi:schemaLocation
+            attribute</em>.</td>
+            </tr>
+            <tr class="even">
+            <td><a href="http://www.opengis.net/gml"
+            class="uri">http://www.opengis.net/gml</a></td>
+            <td>gml</td>
+            <td>The Geography Markup Language (GML) schema, used for
+            location coordinates.</td>
+            </tr>
+            <tr class="odd">
+            <td><a href="http://www.w3.org/2002/07/owl"
+            class="uri">http://www.w3.org/2002/07/owl</a>#</td>
+            <td>owl</td>
+            <td>The Web Ontology Language (OWL) namespace, used for the
+            <em>sameAs</em> identity statement.</td>
+            </tr>
+            <tr class="even">
+            <td><a href="http://www.w3.org/1999/02/22-rdf-syntax-ns"
+            class="uri">http://www.w3.org/1999/02/22-rdf-syntax-ns</a>#</td>
+            <td>rdf</td>
+            <td>The RDF namespace, used within elements from the SKOS
+            namespace.</td>
+            </tr>
+            <tr class="odd">
+            <td><a href="http://www.w3.org/2004/02/skos/core"
+            class="uri">http://www.w3.org/2004/02/skos/core</a>#</td>
+            <td>skos</td>
+            <td>The SKOS namespace, used for statements about linked
+            vocabulary data.</td>
+            </tr>
+            <tr class="even">
+            <td><a href="http://www.w3.org/XML/1998/namespace"
+            class="uri">http://www.w3.org/XML/1998/namespace</a></td>
+            <td>xml</td>
+            <td>The XML namespace, used for the language
+            (<em>xml:lang</em>) attribute.</td>
+            </tr>
+            <tr class="odd">
+            <td><a href="http://www.w3.org/2001/XMLSchema-instance"
+            class="uri">http://www.w3.org/2001/XMLSchema-instance</a></td>
+            <td>xsi</td>
+            <td>An XML utility namespace, used for retrieving schema
+            declarations in cases where the namespace URI does not
+            resolve to the desired schema version.</td>
+            </tr>
+            </tbody>
+            </table>
+            <h2 data-number="3.3" id="supporting-web-principles"><span
+            class="header-section-number">3.3</span> Supporting Web
+            principles</h2>
+            <p>The Web as a platform for cultural heritage information
+            has seen a number of changes since the introduction of LIDO
+            v1.0. Arguably the most significant developments are
+            concerned with openness and interconnection of published
+            knowledge. In LIDO Schema Version 1.1 new constructs were
+            introduced, primarily focussing on requirements from two
+            areas: the <a href="https://www.go-fair.org/">FAIR
+            Principles</a> and the <a
+            href="https://www.w3.org/TR/ldp-bp/">Linked Data Platform
+            Guidelines</a>.</p>
+            <h3 data-number="3.3.1" id="fair-principles"><span
+            class="header-section-number">3.3.1</span> FAIR
+            Principles</h3>
+            <p>The FAIR Principles, first published in 2016, are
+            guidelines provided by the research data community to
+            improve the computability for finding, accessing,
+            interoperating, and reusing data. The principles may also
+            serve as a checklist for funding agencies. LIDO is well
+            suited to play a key role in implementing FAIR principles in
+            the domain of cultural heritage metadata. Four main
+      

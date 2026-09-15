@@ -170,7 +170,7 @@ class CustomErrorCatalogTests(unittest.TestCase):
             self.assertEqual(resolver["severity"], "high")
             self.assertIn("resolver assignment", resolver["caller_action"])
             self.assertIn(
-                "test/unit/revenue/StreamPrimarySaleSettlement.t.sol",
+                "test/unit/revenue/StreamRevenueAssignments.t.sol",
                 resolver["traceability"]["tests"],
             )
 
@@ -181,7 +181,7 @@ class CustomErrorCatalogTests(unittest.TestCase):
             self.assertEqual(settlement["severity"], "high")
             self.assertIn("primary-sale settlement", settlement["caller_action"])
             self.assertIn(
-                "test/unit/revenue/StreamPrimarySaleSettlement.t.sol",
+                "test/unit/revenue/StreamUniversalSettlement.t.sol",
                 settlement["traceability"]["tests"],
             )
 

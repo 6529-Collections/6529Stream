@@ -1,0 +1,148 @@
+a
+            href="http://terminology.lido-schema.org/lido00163"><em>Person</em></a>:
+            <a
+            href="http://vocab.getty.edu/ulan/500010879"><strong>Leonardo
+            da Vinci</strong></a></td>
+            </tr>
+            <tr class="odd">
+            <td>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#displayDate">lido:displayDate</a>&gt;</td>
+            <td>Between 1503/1519</td>
+            <td>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#earliestDate">lido:earliestDate</a>&gt;
+            <em><a
+            href="http://terminology.lido-schema.org/lido00529">Estimated
+            date</a></em>: <strong>1503</strong><br> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#latestDate">lido:latestDate</a>&gt;
+            <em><a
+            href="http://terminology.lido-schema.org/lido00529">Estimated
+            date</a></em>: <strong>1519</strong></td>
+            </tr>
+            <tr class="even">
+            <td>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#displayEdition">lido:displayEdition</a>&gt;</td>
+            <td>Not applicable</td>
+            <td>Not applicable</td>
+            </tr>
+            <tr class="odd">
+            <td>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#displayEvent">lido:displayEvent</a>&gt;</td>
+            <td>Production</td>
+            <td>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventType">lido:eventType</a>&gt;
+            <a
+            href="http://vocab.getty.edu/aat/300069682"><strong>Production</strong></a></td>
+            </tr>
+            <tr class="even">
+            <td>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#displayMaterialsTech">lido:displayMaterialsTech</a>&gt;</td>
+            <td>Oil on poplar panel</td>
+            <td>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#termMaterialsTech">lido:termMaterialsTech</a>&gt;
+            <a
+            href="http://terminology.lido-schema.org/lido00513"><em>Medium</em></a>:
+            <a href="http://vocab.getty.edu/aat/300015050"><strong>oil
+            paint</strong></a><br/> <a
+            href="http://terminology.lido-schema.org/lido00514"><em>Support</em></a>:
+            <a
+            href="http://vocab.getty.edu/aat/300012363"><strong>poplar</strong></a>;
+            <a
+            href="http://vocab.getty.edu/aat/300014657"><strong>panel</strong></a>;<br><a
+            href="http://terminology.lido-schema.org/lido00131"><em>Technique</em></a>:
+            <a href="http://vocab.getty.edu/aat/300178675"><strong>panel
+            painting</strong></a>; <a
+            href="http://vocab.getty.edu/aat/300053421"><strong>sfumato</strong></a></td>
+            </tr>
+            <tr class="odd">
+            <td>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#displayObject">lido:displayObject</a>&gt;</td>
+            <td>Mona Lisa</td>
+            <td>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectObject">lido:subjectObject</a>&gt;
+            &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#object">lido:object</a>&gt;
+            &lt;<a href="">lido:objectID</a>&gt; <a
+            href="http://terminology.lido-schema.org/lido00099"><em>URI</em></a>:
+            <a href="http://www.wikidata.org/entity/Q12418"><strong>Mona
+            Lisa</strong></a></td>
+            </tr>
+            <tr class="even">
+            <td>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#displayObjectMeasurements">lido:displayObjectMeasurements</a>&gt;</td>
+            <td>Height x width: 77 x 53 cm</td>
+            <td>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#measurementType">lido:measurementType</a>&gt;
+            <a
+            href="http://www.wikidata.org/wiki/Q208826"><strong>height</strong></a><br/>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#measurementUnit">lido:measurementUnit</a>&gt;
+            <a
+            href="http://www.wikidata.org/entity/Q11573"><strong>metre</strong></a><br/>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#measurementValue">lido:measurementValue</a>&gt;<strong>0.79</strong></td>
+            </tr>
+            <tr class="odd">
+            <td>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#displayPlace">lido:displayPlace</a>&gt;</td>
+            <td>Florence</td>
+            <td><a href="http://www.wikidata.org/entity/Q515">City</a>:
+            <a
+            href="http://www.wikidata.org/entity/Q2044">Florence</a></td>
+            </tr>
+            <tr class="even">
+            <td>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#displayRelatedWork">lido:displayRelatedWork</a>&gt;</td>
+            <td>Leonardo da Vinci, Study for Mona Lisa, drawing</td>
+            <td>&lt;<a href="">lido:objectID</a>&gt; <a
+            href="http://terminology.lido-schema.org/lido00100"><em>Local
+            identifier</em></a>: <strong>08012138</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#relatedWorkRelType">lido:relatedWorkRelType</a>&gt;
+            <em><a
+            href="http://terminology.lido-schema.org/lido00259">has
+            preparatory study</a></em>: <a
+            href="http://foto.biblhertz.it/obj08012138"><strong>Study
+            for Mona Lisa, drawing</strong></a></td>
+            </tr>
+            <tr class="odd">
+            <td>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#displayRepository">lido:displayRepository</a>&gt;</td>
+            <td>Musée du Louvre, Département des Peintures</td>
+            <td>&lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#repositoryName">lido:repositoryName</a>&gt;
+            &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#legalBodyID">lido:legalBodyID</a>&gt;
+            <a
+            href="http://terminology.lido-schema.org/lido00099"><em>URI</em></a>:
+            <a
+            href="http://www.wikidata.org/entity/Q3044768"><strong>Department
+            of Paintings of the Louvre</strong></a></td>
+            </tr>
+            <tr class="even">
+            <td>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#displayState">lido:displayState</a>&gt;</td>
+            <td>Not applicable</td>
+            <td>Not applicable</td>
+            </tr>
+            <tr class="odd">
+            <td>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#displaySubject">lido:displaySubject</a>&gt;</td>
+            <td>Half-length portrait of Lisa del Giocondo against the
+            backdrop of a landscape</td>
+            <td>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subject">lido:subject</a>&gt;
+            <a
+            href="http://terminology.lido-schema.org/lido00525"><em>Description</em></a>
+            &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectConcept">lido:subjectConcept</a>&gt;
+            <a
+            href="http://vocab.getty.edu/aat/300025943"><strong>woman</strong></a>;
+            <a href="http://vocab.getty.edu/aat/300047469"><strong>half
+            figure</strong></a> <br/> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#extentSubject">lido:extentSubject</a>&gt;
+            <a
+            href="http://vocab.getty.edu/aat/300056369"><strong>backgound</strong></a>
+            &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectConcept">lido:subjectConcept</a>&gt;
+            <a
+            href="http://vocab.getty.edu/aat/300008626"><strong>landscape</strong></a>
+            <br/>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subject">lido:subject</a>&gt;
+        

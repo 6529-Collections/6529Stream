@@ -1,0 +1,86 @@
+nore motivation values that they do not understand. Other motivation values given in the Web Annotation specification <em class="rfc">should</em> be used where appropriate, and examples are given in the <a href="https://iiif.io/api/cookbook/" title="IIIF Cookbook">Presentation <abbr title="Application Programming Interface">API</abbr> Cookbook</a>.</p>
+
+<table class="api-table" id="table-motivations">
+  <thead>
+    <tr>
+      <th>Value</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">painting</code></td>
+      <td>Resources associated with a Canvas by an Annotation that has the <code class="language-plaintext highlighter-rouge">motivation</code> value <code class="language-plaintext highlighter-rouge">painting</code>  <em class="rfc">must</em> be presented to the user as the representation of the Canvas. The content can be thought of as being <em>of</em> the Canvas. The use of this motivation with target resources other than Canvases is undefined. For example, an Annotation that has the <code class="language-plaintext highlighter-rouge">motivation</code> value <code class="language-plaintext highlighter-rouge">painting</code>, a body of an Image and the target of the Canvas is an instruction to present that Image as (part of) the visual representation of the Canvas. Similarly, a textual body is to be presented as (part of) the visual representation of the Canvas and not positioned in some other part of the user interface.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">supplementing</code></td>
+      <td>Resources associated with a Canvas by an Annotation that has the <code class="language-plaintext highlighter-rouge">motivation</code> value <code class="language-plaintext highlighter-rouge">supplementing</code>  <em class="rfc">may</em> be presented to the user as part of the representation of the Canvas, or <em class="rfc">may</em> be presented in a different part of the user interface. The content can be thought of as being <em>from</em> the Canvas. The use of this motivation with target resources other than Canvases is undefined. For example, an Annotation that has the <code class="language-plaintext highlighter-rouge">motivation</code> value <code class="language-plaintext highlighter-rouge">supplementing</code>, a body of an Image and the target of part of the Canvas is an instruction to present that Image to the user either in the Canvas’s rendering area or somewhere associated with it, and could be used to present an easier to read representation of a diagram. Similarly, a textual body is to be presented either in the targeted region of the Canvas or otherwise associated with it, and might be OCR, a manual transcription or a translation of handwritten text, or captions for what is being said in a Canvas with audio content.</td>
+    </tr>
+  </tbody>
+</table>
+      <h2 id="4-json-ld-considerations">
+        
+        
+          4. <abbr title="JSON for Linking Data">JSON-LD</abbr> Considerations <a href="#4-json-ld-considerations" class="anchorClass"></a>
+        
+        
+      </h2>
+    
+
+<p>This section describes features applicable to all of the Presentation <abbr title="Application Programming Interface">API</abbr> content. For the most part, these are features of the <abbr title="JSON for Linking Data">JSON-LD</abbr> specification that have particular uses within the <abbr title="Application Programming Interface">API</abbr>.</p>
+      <h3 id="41-case-sensitivity">
+        
+        
+          4.1. Case Sensitivity <a href="#41-case-sensitivity" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>Terms in <abbr title="JSON for Linking Data">JSON-LD</abbr> are <a href="https://www.w3.org/TR/json-ld11/#the-context" title="JSON-LD Context">case sensitive</a>.  The cases of properties and enumerated values in <abbr title="International Image Interoperability Framework">IIIF</abbr> Presentation <abbr title="Application Programming Interface">API</abbr> responses <em class="rfc">must</em> match those used in this specification. For example to specify that a resource is a Manifest, the property <em class="rfc">must</em> be given as <code class="language-plaintext highlighter-rouge">type</code> and not <code class="language-plaintext highlighter-rouge">Type</code> or <code class="language-plaintext highlighter-rouge">tYpE</code>, and the value <em class="rfc">must</em> be given as <code class="language-plaintext highlighter-rouge">Manifest</code> and not <code class="language-plaintext highlighter-rouge">manifest</code> or <code class="language-plaintext highlighter-rouge">manIfEsT</code>.</p>
+      <h3 id="42-resource-representations">
+        
+        
+          4.2. Resource Representations <a href="#42-resource-representations" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>Resource descriptions <em class="rfc">should</em> be <a href="/api/presentation/3.0/#12-terminology">embedded</a> within the <abbr title="JavaScript Object Notation">JSON</abbr> description of parent resources, and <em class="rfc">may</em> also be available via separate requests from the <abbr title="Hypertext Transfer Protocol">HTTP</abbr>(S) URI given in the resource’s <code class="language-plaintext highlighter-rouge">id</code> property. Links to resources <em class="rfc">must</em> be given as a <abbr title="JavaScript Object Notation">JSON</abbr> object with the <code class="language-plaintext highlighter-rouge">id</code> and <code class="language-plaintext highlighter-rouge">type</code> properties and <em class="rfc">should</em> have <code class="language-plaintext highlighter-rouge">format</code> or <code class="language-plaintext highlighter-rouge">profile</code> to give a hint as to what sort of resource is being referred to.</p>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"rendering"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/content/book.pdf"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Text"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Example Book (pdf)"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"application/pdf"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h3 id="43-properties-with-multiple-values">
+        
+        
+          4.3. Properties with Multiple Values <a href="#43-properties-with-multiple-values" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>Any of the properties in the <abbr title="Application Programming Interface">API</abbr> that can have multiple values <em class="rfc">must</em> always be given as an array of values, even if there is only a single item in that array.</p>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-j

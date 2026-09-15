@@ -1,0 +1,183 @@
+b>
+			</xs:documentation>
+		</xs:annotation>
+	</xs:attribute>
+	<xs:complexType name="recordInfoSetComplexType" id="recordInfoSetComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines metadata, presentation and service information for the described object.</tei:ab>
+				<tei:ab type="note">The metadata information contains the reference to the
+					"lido"-metadata set but may also be constituted by reference to an "object data
+					sheet" in an online database.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="recordInfoID" type="lido:identifierComplexType" minOccurs="0" maxOccurs="unbounded" id="recordInfoID">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An identifier for the metadata.<br/>
+							Repeated for identifiers from different sources.</tei:ab>
+						<tei:ab type="label">Record Info Identifier</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="recordInfoLink" type="lido:webResourceComplexType" minOccurs="0" maxOccurs="unbounded" id="recordInfoLink">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A text element providing an URL for access to metadata, presentation or service information.</tei:ab>
+						<tei:ab type="label">Record Info Link</tei:ab>
+						<tei:ab type="dataValues">Free text</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="recordMetadataDate" minOccurs="0" maxOccurs="unbounded" id="recordMetadataDate">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">Expression of the date and possibly time of the metadata, presentation or service information.
+							The encoding of the date/time should conform to ISO 8601.</tei:ab>
+						<tei:ab type="label">Record Metadata Date</tei:ab>
+						<tei:ab type="dataValues">Controlled format</tei:ab>
+						<tei:ab type="recommendation"><tei:ref target="https://www.iso.org/iso-8601-date-and-time-format.html">ISO 8601: Representation of dates and times</tei:ref>.</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="lido:textComplexType">
+							<xs:attribute ref="lido:type" id="recordMetadataDate_type">
+								<xs:annotation>
+									<xs:documentation>
+										<tei:ab type="description">An attribute indicating the point in time
+											either for creation or modification date of the containing
+											<tei:ref target="#recordInfoSet">Record Info Set</tei:ref>.<br/>
+										     Examples are <em>created</em> or <em>modified</em>.</tei:ab>
+										<tei:ab type="dataValues">Controlled terminology</tei:ab>
+										<tei:ab type="recommendation">LIDO Terminology for
+											<tei:ref target="../../documents/terminology-recommendation.html#recordMetadataDate_type">Type of Record Metadata Date</tei:ref></tei:ab>
+									</xs:documentation>
+								</xs:annotation>
+	  					 	</xs:attribute>
+							<xs:attribute ref="lido:source"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute ref="lido:type" id="recordInfoSet_type">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An attribute indicating the scope of metadata information,
+							presentation information or service information contained in the element set.</tei:ab>
+						<tei:ab type="dataValues"/>
+					</xs:documentation>
+				</xs:annotation>
+		</xs:attribute>
+		<xs:attribute ref="lido:sortorder"/>
+	</xs:complexType>
+	<xs:element name="recordWrap" id="recordWrap">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">A wrapper for information about this LIDO record, as well as other metadata,
+					presentation and service information for the described object.<br/>
+					Note that this section does not refer to any object or resource information,
+					but to the source record only.</tei:ab>
+				<tei:ab type="label">Record Wrapper</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="recordID" type="lido:identifierComplexType" maxOccurs="unbounded" id="recordID">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">An identifier for the record in the
+								(local) system of the contributor.<br/>
+								Repeated for identifiers from different sources.</tei:ab>
+							<tei:ab type="label">Record Identifier</tei:ab>
+						</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="recordType" type="lido:conceptComplexType" id="recordType">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">An index element for the kind of
+								cataloging level chosen for the record in focus, whether the record
+								is considered a single item, a constituent component of an item, or
+								an object group.</tei:ab>
+							<tei:ab type="label">Record Type</tei:ab>
+							
+							
+							<tei:ab type="dataValues">Controlled terminology</tei:ab>
+							<tei:ab type="recommendation">LIDO Terminology for
+								<tei:ref target="../../documents/terminology-recommendation.html#recordType">Record Type</tei:ref></tei:ab>
+							</xs:documentation>
+
+						<xs:appinfo>
+							<sch:pattern>
+								<sch:rule context="lido:recordType">
+									<sch:extends rule="sch_SKOS"/>
+								</sch:rule>
+							</sch:pattern>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="recordSource" maxOccurs="unbounded" id="recordSource">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">A set of elements identifying the source of information in this LIDO record,
+								generally the repository or other institution.</tei:ab>
+							<tei:ab type="label">Record Source</tei:ab>
+						</xs:documentation>
+						<xs:appinfo>
+							<sch:pattern>
+								<sch:rule context="lido:recordSource">
+									<sch:extends rule="sch_OWL"/>
+								</sch:rule>
+							</sch:pattern>
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:complexContent>
+							<xs:extension base="lido:legalBodyRefComplexType">
+								<xs:attribute ref="lido:type" id="recordSource_type">
+									<xs:annotation>
+										<xs:documentation>
+											<tei:ab type="description">An attribute for the kind of source of the record in focus.<br/>
+												Note that this type attribute is primarily intended for use in application profiles.</tei:ab>
+											<tei:ab type="dataValues">Controlled terminology</tei:ab>
+											<tei:ab type="recommendation">To be determined by application profiles.</tei:ab>
+										</xs:documentation>
+									</xs:annotation>
+								</xs:attribute>
+								<xs:attribute ref="lido:sortorder"/>
+							</xs:extension>
+						</xs:complexContent>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="recordRights" minOccurs="0" maxOccurs="unbounded" id="recordRights">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">A set of structured information about rights regarding
+								the content provided in this LIDO record.</tei:ab>
+							<tei:ab type="label">Rights for Record</tei:ab>
+						</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:complexContent>
+							<xs:extension base="lido:rightsComplexType">
+								<xs:attribute ref="lido:sortorder"/>
+							</xs:extension>
+						</xs:complexContent>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="recordInfoSet" type="lido:recordInfoSetComplexType" minOccurs="0" maxOccurs="unbounded" id="recordInfoSet">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">A set of elements for metadata, presentation and
+								service information for the described object.</tei:ab>
+							<tei:ab type="label">Record Metadata Information Set</tei:ab>
+						</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="collection" type="lido:objectSetComplexType" minOccurs="0" maxOccurs="unbounded" id="collection">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="des

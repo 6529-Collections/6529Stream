@@ -1,0 +1,120 @@
+>
+    <rdfs:label xml:lang="de">veränderte</rdfs:label>
+    <rdfs:label xml:lang="el">τροποποίησε</rdfs:label>
+    <rdfs:label xml:lang="fr">a modifié</rdfs:label>
+    <rdfs:label xml:lang="pt">modificou</rdfs:label>
+    <rdfs:label xml:lang="ru">измeнил</rdfs:label>
+    <rdfs:label xml:lang="zh">已更改</rdfs:label>
+    <rdfs:comment>This property identifies the instance of E18 Physical Thing modified in an instance of E11 Modification.</rdfs:comment>
+    <rdfs:domain rdf:resource="E11_Modification" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <rdfs:subPropertyOf rdf:resource="P12_occurred_in_the_presence_of" />
+    <owl:inverseOf rdf:resource="P31i_was_modified_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P31i_was_modified_by">
+    <rdfs:label xml:lang="en">was modified by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde verändert durch</rdfs:label>
+    <rdfs:label xml:lang="el">τροποποιήθηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été modifié par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi modificada por</rdfs:label>
+    <rdfs:label xml:lang="ru">измeнeн</rdfs:label>
+    <rdfs:label xml:lang="zh">被更改</rdfs:label>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E11_Modification" />
+    <rdfs:subPropertyOf rdf:resource="P12i_was_present_at" />
+    <owl:inverseOf rdf:resource="P31_has_modified" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P32_used_general_technique">
+    <rdfs:label xml:lang="en">used general technique</rdfs:label>
+    <rdfs:label xml:lang="de">benutzte das allgemeine Verfahren</rdfs:label>
+    <rdfs:label xml:lang="el">χρησιμοποίησε γενική τεχνική</rdfs:label>
+    <rdfs:label xml:lang="fr">a mobilisé comme technique générale</rdfs:label>
+    <rdfs:label xml:lang="pt">usou técnica geral</rdfs:label>
+    <rdfs:label xml:lang="ru">использовал общий мeтод</rdfs:label>
+    <rdfs:label xml:lang="zh">使用通用技术</rdfs:label>
+    <rdfs:comment>This property identifies the technique or method, modelled as an instance of E55 Type, that was employed in an instance of E7 Activity.
+These techniques should be drawn from an external E55 Type hierarchy of consistent terminology of general techniques or methods such as embroidery, oil-painting, carbon dating, etc. Specific documented techniques should be described as instances of E29 Design or Procedure.</rdfs:comment>
+    <rdfs:domain rdf:resource="E7_Activity" />
+    <rdfs:range rdf:resource="E55_Type" />
+    <rdfs:subPropertyOf rdf:resource="P125_used_object_of_type" />
+    <owl:inverseOf rdf:resource="P32i_was_technique_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P32i_was_technique_of">
+    <rdfs:label xml:lang="en">was technique of</rdfs:label>
+    <rdfs:label xml:lang="de">war Verfahren von</rdfs:label>
+    <rdfs:label xml:lang="el">ήταν τεχνική του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">a été la technique générale mise en œuvre dans</rdfs:label>
+    <rdfs:label xml:lang="pt">foi técnica da</rdfs:label>
+    <rdfs:label xml:lang="ru">был мeтодом/способом для</rdfs:label>
+    <rdfs:label xml:lang="zh">是技术</rdfs:label>
+    <rdfs:domain rdf:resource="E55_Type" />
+    <rdfs:range rdf:resource="E7_Activity" />
+    <rdfs:subPropertyOf rdf:resource="P125i_was_type_of_object_used_in" />
+    <owl:inverseOf rdf:resource="P32_used_general_technique" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P33_used_specific_technique">
+    <rdfs:label xml:lang="en">used specific technique</rdfs:label>
+    <rdfs:label xml:lang="de">benutzte das bestimmte Verfahren</rdfs:label>
+    <rdfs:label xml:lang="el">χρησιμοποίησε συγκεκριμένη τεχνική</rdfs:label>
+    <rdfs:label xml:lang="fr">a mobilisé comme technique spécifique</rdfs:label>
+    <rdfs:label xml:lang="pt">usou técnica específica</rdfs:label>
+    <rdfs:label xml:lang="ru">использовал особую тeхнику</rdfs:label>
+    <rdfs:label xml:lang="zh">使用特定技术</rdfs:label>
+    <rdfs:comment>This property identifies a specific instance of E29 Design or Procedure in order to carry out an instance of E7 Activity or parts of it.
+The property differs from P32 used general technique (was technique of) in that P33 refers to an instance of E29 Design or Procedure, which is a concrete information object in its own right rather than simply being a term or a method known by tradition.
+Typical examples would include intervention plans for conservation or the construction plans of a building.</rdfs:comment>
+    <rdfs:domain rdf:resource="E7_Activity" />
+    <rdfs:range rdf:resource="E29_Design_or_Procedure" />
+    <rdfs:subPropertyOf rdf:resource="P16_used_specific_object" />
+    <owl:inverseOf rdf:resource="P33i_was_used_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P33i_was_used_by">
+    <rdfs:label xml:lang="en">was used by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde benutzt von</rdfs:label>
+    <rdfs:label xml:lang="el">χρησιμοποιήθηκε για</rdfs:label>
+    <rdfs:label xml:lang="fr">a été la technique spécifique mise en œuvre dans</rdfs:label>
+    <rdfs:label xml:lang="pt">foi usada por</rdfs:label>
+    <rdfs:label xml:lang="ru">был использован в</rdfs:label>
+    <rdfs:label xml:lang="zh">被使用</rdfs:label>
+    <rdfs:domain rdf:resource="E29_Design_or_Procedure" />
+    <rdfs:range rdf:resource="E7_Activity" />
+    <rdfs:subPropertyOf rdf:resource="P16i_was_used_for" />
+    <owl:inverseOf rdf:resource="P33_used_specific_technique" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P34_concerned">
+    <rdfs:label xml:lang="en">concerned</rdfs:label>
+    <rdfs:label xml:lang="de">betraf</rdfs:label>
+    <rdfs:label xml:lang="el">αφορούσε σε</rdfs:label>
+    <rdfs:label xml:lang="fr">a porté sur</rdfs:label>
+    <rdfs:label xml:lang="pt">interessada</rdfs:label>
+    <rdfs:label xml:lang="ru">имeл дeло с</rdfs:label>
+    <rdfs:label xml:lang="zh">已评估</rdfs:label>
+    <rdfs:comment>This property identifies the instance of E18 Physical Thing that was assessed during an instance of E14 Condition Assessment.
+Conditions may be assessed either by direct observation or using recorded evidence. In the latter case the instance of E18 Physical Thing does not need to be present or extant at the time of assessment.</rdfs:comment>
+    <rdfs:domain rdf:resource="E14_Condition_Assessment" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <rdfs:subPropertyOf rdf:resource="P140_assigned_attribute_to" />
+    <owl:inverseOf rdf:resource="P34i_was_assessed_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P34i_was_assessed_by">
+    <rdfs:label xml:lang="en">was assessed by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde beurteilt durch</rdfs:label>
+    <rdfs:label xml:lang="el">εκτιμήθηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été évalué par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi avaliada por</rdfs:label>
+    <rdfs:label xml:lang="ru">оцeнeн посрeдством</rdfs:label>
+    <rdfs:label xml:lang="zh">被评估</rdfs:label>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E14_Condition_Assessment" />
+    <rdfs:subPropertyOf rdf:resource="P140i_was_attributed_by" />
+    <owl:inverseOf rdf:resource="P34_concerned" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P35_has_identified">
+    <rdfs:label xml:lang="en">has identified</rdfs:label>
+    <rdfs:label xml:lang="de">hat identifiziert</rdfs:label>
+    <rdfs:label xml:lang="el">έχει διαπιστώσει</rdfs:label>
+    <rdfs:label xml:lang="fr">a identifié</rdfs:label>
+    <rdfs:label xml:lang="pt">identificou</rdfs:label>
+    <rdfs:label xml:lang="ru">идeнтифицировал</rdfs:label>
+    <rdfs:label xml:lang="zh">有标识</rdfs:label>
+    <rdfs:comment>This property identifies the instance of E3 Condition State that was observed in an i

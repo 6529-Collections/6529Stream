@@ -1,0 +1,79 @@
+xml:lang="de">Typuszuweisung</rdfs:label>
+    <rdfs:label xml:lang="el">Απόδοση Τύπου</rdfs:label>
+    <rdfs:label xml:lang="fr">Assignation de type</rdfs:label>
+    <rdfs:label xml:lang="pt">Atribuição de Tipo</rdfs:label>
+    <rdfs:label xml:lang="ru">Назначeниe Типа</rdfs:label>
+    <rdfs:label xml:lang="zh">类型赋值</rdfs:label>
+    <rdfs:comment>This class comprises the actions of classifying items of whatever kind. Such items include objects, specimens, people, actions, and concepts.
+This class allows for the documentation of the context of classification acts in cases where the value of the classification depends on the personal opinion of the classifier, and the date that the classification was made. This class also encompasses the notion of “determination,” i.e. the systematic and molecular identification of a specimen in biology.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E13_Attribute_Assignment" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E18_Physical_Thing">
+    <rdfs:label xml:lang="en">Physical Thing</rdfs:label>
+    <rdfs:label xml:lang="de">Materielles</rdfs:label>
+    <rdfs:label xml:lang="el">Υλικό Πράγμα</rdfs:label>
+    <rdfs:label xml:lang="fr">Chose matérielle</rdfs:label>
+    <rdfs:label xml:lang="pt">Coisa Material</rdfs:label>
+    <rdfs:label xml:lang="ru">Матeриальный Прeдмeт</rdfs:label>
+    <rdfs:label xml:lang="zh">实物</rdfs:label>
+    <rdfs:comment>This class comprises all persistent physical items with a relatively stable form, human-made or natural.
+Depending on the existence of natural boundaries of such things, the CIDOC CRM distinguishes the instances of E19 Physical Object from instances of E26 Physical Feature, such as holes, rivers, pieces of land, etc. Most instances of E19 Physical Object can be moved (if not too heavy), whereas features are integral to the surrounding matter.
+An instance of E18 Physical Thing occupies not only a particular geometric space at any instant of its existence, but in the course of its existence it also forms a trajectory through spacetime, which occupies a real, that is phenomenal, volume in spacetime. We include in the occupied space the space filled by the matter of the physical thing and all its inner spaces, such as the interior of a box. For the purpose of more detailed descriptions of the presence of an instance of E18 Physical Thing in space and time it can be associated with its specific instance of E92 Spacetime Volume by the property P196 defines (is defined by).
+The CIDOC CRM is generally not concerned with amounts of matter in fluid or gaseous states, as long as they are not confined in an identifiable way for an identifiable minimal time-span.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E72_Legal_Object" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E19_Physical_Object">
+    <rdfs:label xml:lang="en">Physical Object</rdfs:label>
+    <rdfs:label xml:lang="de">Materieller Gegenstand</rdfs:label>
+    <rdfs:label xml:lang="el">Υλικό Αντικείμενο</rdfs:label>
+    <rdfs:label xml:lang="fr">Objet matériel</rdfs:label>
+    <rdfs:label xml:lang="pt">Objeto Material</rdfs:label>
+    <rdfs:label xml:lang="ru">Матeриальный Объeкт</rdfs:label>
+    <rdfs:label xml:lang="zh">物质对象</rdfs:label>
+    <rdfs:comment>This class comprises items of a material nature that are units for documentation and have physical boundaries that separate them completely in an objective way from other objects.
+The class also includes all aggregates of objects made for functional purposes of whatever kind, independent of physical coherence, such as a set of chessmen. Typically, instances of E19 Physical Object can be moved (if not too heavy).
+In some contexts, such objects, except for aggregates, are also called “bona fide objects”, i.e. naturally defined objects (Smith &amp;amp; Varzi, 2000).
+The decision as to what is documented as a complete item, rather than by its parts or components, may be purely administrative or may be a result of the order in which the item was acquired.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E18_Physical_Thing" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E20_Biological_Object">
+    <rdfs:label xml:lang="en">Biological Object</rdfs:label>
+    <rdfs:label xml:lang="de">Biologischer Gegenstand</rdfs:label>
+    <rdfs:label xml:lang="el">Βιολογικό Ακτικείμενο</rdfs:label>
+    <rdfs:label xml:lang="fr">Objet biologique</rdfs:label>
+    <rdfs:label xml:lang="pt">Objeto Biológico</rdfs:label>
+    <rdfs:label xml:lang="ru">Биологичeский Объeкт</rdfs:label>
+    <rdfs:label xml:lang="zh">生物对象</rdfs:label>
+    <rdfs:comment>This class comprises individual items of a material nature, which live, have lived, or are natural products of or from living organisms.
+Artificial objects that incorporate biological elements, such as Victorian butterfly frames, can be documented as both instances of E20 Biological Object and E22 Human-Made Object.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E19_Physical_Object" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E21_Person">
+    <rdfs:label xml:lang="en">Person</rdfs:label>
+    <rdfs:label xml:lang="de">Person</rdfs:label>
+    <rdfs:label xml:lang="el">Πρόσωπο</rdfs:label>
+    <rdfs:label xml:lang="fr">Personne</rdfs:label>
+    <rdfs:label xml:lang="pt">Pessoa</rdfs:label>
+    <rdfs:label xml:lang="ru">Личность</rdfs:label>
+    <rdfs:label xml:lang="zh">人物</rdfs:label>
+    <rdfs:comment>This class comprises real persons who live or are assumed to have lived.
+Legendary figures that may have existed, such as Ulysses and King Arthur, fall into this class if the documentation refers to them as historical figures. In cases where doubt exists as to whether several persons are in fact identical, multiple instances can be created and linked to indicate their relationship. The CIDOC CRM does not propose a specific form to support reasoning about possible identity.
+In a bibliographic context, a name presented following the conventions usually employed for personal names will be assumed to correspond to an actual real person (an instance of E21 Person), unless evidence is available to indicate that this is not the case. The fact that a persona may erroneously be classified as an instance of E21 Person does not imply that the concept comprises personae.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E20_Biological_Object" />
+    <rdfs:subClassOf rdf:resource="E39_Actor" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E22_Human-Made_Object">
+    <rdfs:label xml:lang="en">Human-Made Object</rdfs:label>
+    <rdfs:label xml:lang="fr">Objet élaboré par l’humain</rdfs:label>
+    <rdfs:label xml:lang="ru">Рукотворный Объeкт</rdfs:label>
+    <rdfs:comment>This class comprises all persistent physical objects of any size that are purposely created by human activity and have physical boundaries that separate them completely in an objective way from other objects.
+The class also includes all aggregates of objects made for functional purposes of whatever kind, independent of physical coherence, such as a set of chessmen.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E19_Physical_Object" />
+    <rdfs:subClassOf rdf:resource="E24_Physical_Human-Made_Thing" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E24_Physical_Human-Made_Thing">
+    <rdfs:label xml:lang="en">Physical Human-Made Thing</rdfs:label>
+    <rdfs:label xml:lang="fr">Chose matérielle élaborée par l’humain</rdfs:label>
+    <rdfs:label xml:lang="ru">Матeриальный Рукотворный Объeкт</rdfs:label>
+    <rdfs:comment>This class comprises all persistent physical items of any size that are purposely created by human activity. This class comprises, besides others, human-made objects, such as a sword, and human-made features, such as rock art. For example, a “cup and ring” carving on bedrock is regarded as instance of E24 Physical Human-Made Thing.
+Instances of E24 Physical Human-Made Thing ma

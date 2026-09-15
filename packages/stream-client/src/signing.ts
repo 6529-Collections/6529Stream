@@ -1,5 +1,7 @@
-import { getAddress, isHexString, TypedDataEncoder, type TypedDataDomain, type TypedDataField } from "ethers";
+import { TypedDataEncoder, type TypedDataDomain, type TypedDataField } from "ethers";
 import { signingFields, type Address, type ContractFunctions, type Hex } from "./generated/contracts.js";
+
+import { buildSigningPayload } from "./signing-payload.js";
 
 export type NativeSaleAuthorization = ContractFunctions["nativeSale"]["authorizationDigest"]["args"][0];
 export type ERC20SaleAuthorization = ContractFunctions["erc20Sale"]["authorizationDigest"]["args"][0];
@@ -28,47 +30,12 @@ const schemes = {
   auction: ["6529StreamEnglishAuction", "AuctionAuthorization"],
 } as const;
 
-function uint(value: unknown, bits: number, field: string): bigint {
-  if (typeof value !== "bigint" || value < 0n || value >= (1n << BigInt(bits))) {
-    throw new Error(`${field} must be a nonnegative bigint fitting uint${bits}`);
-  }
-  return value;
-}
-
 /** Pure payload construction. This verifies encoding, not live nonce, consent, balance or policy. */
 export function typedData<K extends SigningKind>(kind: K, chainId: bigint, verifyingContract: Address, message: SigningMessages[K]): SigningPayload<SigningMessages[K]> {
-  uint(chainId, 256, "chainId");
-  if (chainId === 0n) throw new Error("chainId must be nonzero");
   const scheme = schemes[kind];
   if (!scheme) throw new Error("Unknown signing kind");
   const [name, primaryType] = scheme;
-  const fields = signingFields[primaryType];
-  if (message === null || typeof message !== "object" || Array.isArray(message)) throw new Error("message must be an object");
-  const keys = Object.keys(message);
-  if (keys.length !== fields.length || keys.some(key => !fields.some(field => field.name === key))) {
-    throw new Error(`Expected exactly the ${primaryType} fields`);
-  }
-  const normalized: Record<string, unknown> = {};
-  for (const field of fields) {
-    const value = (message as unknown as Record<string, unknown>)[field.name];
-    if (field.type === "address") {
-      if (typeof value !== "string") throw new Error(`${field.name} must be an address string`);
-      normalized[field.name] = getAddress(value);
-    }
-    else if (field.type === "bytes32") {
-      if (typeof value !== "string" || !isHexString(value, 32)) throw new Error(`${field.name} must contain exactly 32 bytes`);
-      normalized[field.name] = value;
-    } else if (field.type.startsWith("uint")) normalized[field.name] = uint(value, Number(field.type.slice(4)), field.name);
-    else throw new Error(`Unsupported signing field ${field.type}`);
-  }
-  const domain = { name, version: "1", chainId, verifyingContract: getAddress(verifyingContract) };
-  const types = { [primaryType]: fields.map(field => ({ ...field })) };
-  for (const field of types[primaryType]!) Object.freeze(field);
-  Object.freeze(types[primaryType]);
-  Object.freeze(types);
-  // Copy caller fields so later mutations of the input cannot silently alter the reviewed payload.
-  const copy = Object.freeze(normalized) as unknown as SigningMessages[K];
-  return Object.freeze({ domain: Object.freeze(domain), types, primaryType, message: copy, digest: TypedDataEncoder.hash(domain, types, copy) as Hex });
+  return buildSigningPayload(chainId, verifyingContract, name, primaryType, signingFields[primaryType], message);
 }
 
 export const nativeSaleTypedData = (chainId: bigint, adapter: Address, message: NativeSaleAuthorization) => typedData("nativeSale", chainId, adapter, message);

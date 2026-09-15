@@ -1,0 +1,6 @@
+="arcType">
+  <xs:group ref="xlink:arcModel"/>
+  <xs:attributeGroup ref="xlink:arcAttrs"/>
+ </xs:complexType>
+
+</xs:schema>

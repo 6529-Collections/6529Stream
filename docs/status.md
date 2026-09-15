@@ -19,6 +19,26 @@ transfer. The [public instance evidence](../deployments/current/sepolia-2026-09-
 records exact source, deployed runtime, configuration and transaction readbacks.
 It is separate from the historical and production acceptance gates below.
 
+The expanded full-v1 implementation is tracked in the
+[current delivery report](../ops/V1_CURRENT_STATUS.md). It adds Artist recovery,
+delegated authority and attestations, wider native commerce, live attribution,
+typed script/media manifests, preservation and museum exports. These are
+implementation batches with separately scoped runtime evidence; the full-v1
+system has not been frozen or demonstrated on testnet. Application developers
+can use the explicitly versioned current client helpers and compiler-selected
+interfaces described in the [client guide](integrations/typescript-client.md).
+
+Dormancy/steward history, authority payload discovery, native secondary
+inventory and delegated offer/claim paths, complete chunked snapshots and
+museum BagIt/OCFL packaging are source-integrated. Entropy provider lifecycle
+has focused runtime coverage; museum packaging and local byte hydration have
+offline execution coverage. Remaining work includes further recovery and
+reconstruction profiles, broader preservation exports, full genesis/operator
+activation, combined Safe and hostile testing, transaction gas conformance and
+matching candidate evidence. The current delivery report owns changing test
+counts and exact source boundaries. The released supported RC1 and its Sepolia
+evidence remain unchanged.
+
 The historical Gate A regression/evidence baseline records:
 
 - The checked fresh-contributor path in

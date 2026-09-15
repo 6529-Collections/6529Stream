@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.opengis.net/gml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml" elementFormDefault="qualified" version="3.1.1.2">
+	<annotation>
+		<appinfo source="urn:opengis:specification:gml:schema-xsd:coverage:3.1.1">coverage.xsd</appinfo>
+		<documentation xml:lang="en">GML Coverage schema.
+			
+			GML is an OGC Standard.
+			Copyright (c) 2001,2005,2010 Open Geospatial Consortium.
+			To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .
+		</documentation>
+	</annotation>
+	<!-- ==============================================================
+       includes and imports
+	============================================================== -->
+	<include schemaLocation="gml.xsd"/>
+	<include schemaLocation="feature.xsd"/>
+	<include schemaLocation="valueObjects.xsd"/>
+	<include schemaLocation="grids.xsd"/>
+	<include schemaLocation="geometryAggregates.xsd"/>
+	<!-- ==============================================================
+       global types and elements
+	============================================================== -->
+	<!-- ================= Abstract coverage definition ================== -->
+	<!-- =========================================================== -->
+	<!-- =========================================================== -->
+	<element name="_Coverage" type="gml:AbstractCoverageType" abstract="true" substitutionGroup="gml:_Feature"/>
+	<!-- =========================================================== -->
+	<complexType name="AbstractCoverageType" abstract="true">
+		<annotation>
+			<documentation>Abstract element which acts as the head of a substitution group for coverages. Note that a coverage is a GML feature.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractFeatureType">
+				<sequence>
+					<element ref="gml:domainSet"/>
+					<element ref="gml:rangeSet"/>
+				</sequence>
+				<attribute name="dimension" type="positiveInteger" use="optional"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="_ContinuousCoverage" type="gml:AbstractContinuousCoverageType" abstract="true" substitutionGroup="gml:_Coverage"/>
+	<!-- =========================================================== -->
+	<complexType name="AbstractContinuousCoverageType" abstract="true">
+		<annotation>
+			<documentation>A continuous coverage as defined in ISO 19123 is a coverage that can return different values for the same feature attribute at different direct positions within a single spatiotemporal object in its spatiotemporal domain</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCoverageType">
+				<sequence>
+					<element ref="gml:coverageFunction" minOccurs="0"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="_DiscreteCoverage" type="gml:AbstractDiscreteCoverageType" abstract="true" substitutionGroup="gml:_Coverage"/>
+	<!-- =========================================================== -->
+	<complexType name="AbstractDiscreteCoverageType" abstract="true">
+		<annotation>
+			<documentation>A discrete coverage consists of a domain set, range set and optionally a coverage function. The domain set consists of either geometry or temporal objects, finite in number. The range set is comprised of a finite number of attribute values each of which is associated to every direct position within any single spatiotemporal object in the domain. In other words, the range values are constant on each spatiotemporal object in the domain. This coverage function maps each element from the coverage domain to an element in its range. This definition conforms to ISO 19123.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCoverageType">
+				<sequence>
+					<element ref="gml:coverageFunction" minOccurs="0"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="domainSet" type="gml:DomainSetType"/>
+	<!-- =========================================================== -->
+	<complexType name="DomainSetType">
+		<annotation>
+			<documentation>The spatiotemporal domain of a coverage.  
+  Typically 
+  * a geometry collection, 
+  * an implicit geometry (e.g. a grid), 
+  * an explicit or implicit collection of time instances or periods, or
+
+N.B. Temporal geometric complexes and temporal grids are not yet implemented in GML.</documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<choice>
+				<element ref="gml:_Geometry"/>
+				<element ref="gml:_TimeObject"/>
+			</choice>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="rangeSet" type="gml:RangeSetType"/>
+	<!-- =========================================================== -->
+	<complexType name="RangeSetType">
+		<choice>
+			<element ref="gml:ValueArray" maxOccurs="unbounded">
+				<annotation>
+					<documentation>each member _Value holds a tuple or "row" from the equivalent table</documentation>
+				</annotation>
+			</element>
+			<group ref="gml:ScalarValueList" maxOccurs="unbounded">
+				<annotation>
+					<documentation>each list holds the complete set of one scalar component from the values - i.e. a "column" from the equivalent table</documentation>
+				</annotation>
+			</group>
+			<element ref="gml:DataBlock">
+				<annotation>
+					<documentation>Its tuple list holds the values as space-separated tuples each of which contains comma-separated components, and the tuple structure is specified using the rangeParameters property.</documentation>
+				</annotation>
+			</element>
+			<element ref="gml:File">
+				<annotation>
+					<documentation>a reference to an external source for the data, together with a description of how that external source is structured</documentation>
+				</annotation>
+			</element>
+		</choice>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="coverageFunction" type="gml:CoverageFunctionType"/>
+	<!-- =========================================================== -->
+	<complexType name="CoverageFunctionType">
+		<annotation>
+			<documentation>The function or rule which defines the map from members of the domainSet to the range.  
+      More functions will be added to this list</documentation>
+		</annotation>
+		<choice>
+			<element ref="gml:MappingRule"/>
+			<element ref="gml:GridFunction"/>
+		</choice>
+	</complexType>
+	<!-- =========================================================== -->
+	<!-- ============== Components for encoding the rangeSet ============= -->
+	<!-- =========================================================== -->
+	<element name="DataBlock" type="gml:DataBlockType"/>
+	<!-- =========================================================== -->
+	<complexType name="DataBlockType">
+		<sequence>
+			<element ref="gml:rangeParameters"/>
+			<choice>
+				<element ref="gml:tupleList"/>
+				<element ref="gml:doubleOrNullTupleList"/>
+			</choice>
+		</sequence>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="tupleList" type="gml:CoordinatesType"/>
+	<!-- =========================================================== -->
+	<element name="doubleOrNullTupleList" type="gml:doubleOrNullList"/>
+	<!-- =========================================================== -->
+	<element name="File" type="gml:FileType"/>
+	<!-- =========================================================== -->
+	<complexType name="FileType">
+		<sequence>
+			<element ref="gml:rangeParameters"/>
+			<element name="fileName" type="anyURI"/>
+			<element name="fileStructure" type="gml:FileValueModelType"/>
+			<element name="mimeType" type="anyURI" minOccurs="0"/>
+			<element name="compression" type="anyURI" minOccurs="0"/>
+		</sequence>
+	</complexType>
+	<!-- =========================================================== -->
+	<simpleType name="F

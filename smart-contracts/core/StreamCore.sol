@@ -694,6 +694,13 @@ contract StreamCore is ERC721, IStreamCore {
         if (status != StreamCoreValidationStatus.VALID) {
             revert InvalidSatellitePointer(pointerType, newTarget);
         }
+        if (
+            pointerType == _POINTER_ARTIST_REGISTRY && previous.target != address(0)
+                && newTarget != previous.target
+                && !StreamCoreExternalReads.artistSuccessorAdmitted(
+                    previous.target, previous.codeHash, newTarget
+                )
+        ) revert InvalidSatellitePointer(pointerType, newTarget);
         plan.candidate.revision = _nextRevision(previous.revision);
         if (plan.preRevisionCandidateHash == plan.oldValueHash) {
             revert SatellitePointerNoOp(pointerType);

@@ -1,0 +1,126 @@
+nstance of E14 Condition Assessment activity.</rdfs:comment>
+    <rdfs:domain rdf:resource="E14_Condition_Assessment" />
+    <rdfs:range rdf:resource="E3_Condition_State" />
+    <rdfs:subPropertyOf rdf:resource="P141_assigned" />
+    <owl:inverseOf rdf:resource="P35i_was_identified_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P35i_was_identified_by">
+    <rdfs:label xml:lang="en">was identified by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde identifiziert durch</rdfs:label>
+    <rdfs:label xml:lang="el">έχει διαπιστωθεί από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été identifié par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi identificado por</rdfs:label>
+    <rdfs:label xml:lang="ru">идeнтифицирован посрeдством</rdfs:label>
+    <rdfs:label xml:lang="zh">被标识</rdfs:label>
+    <rdfs:domain rdf:resource="E3_Condition_State" />
+    <rdfs:range rdf:resource="E14_Condition_Assessment" />
+    <rdfs:subPropertyOf rdf:resource="P141i_was_assigned_by" />
+    <owl:inverseOf rdf:resource="P35_has_identified" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P37_assigned">
+    <rdfs:label xml:lang="en">assigned</rdfs:label>
+    <rdfs:label xml:lang="de">wies zu</rdfs:label>
+    <rdfs:label xml:lang="el">απέδωσε</rdfs:label>
+    <rdfs:label xml:lang="fr">a assigné</rdfs:label>
+    <rdfs:label xml:lang="pt">atribuiu</rdfs:label>
+    <rdfs:label xml:lang="ru">присвоил</rdfs:label>
+    <rdfs:label xml:lang="zh">分配了</rdfs:label>
+    <rdfs:comment>This property records the identifier that was assigned to an item in an instance of E15 Identifier Assignment.
+The same identifier may be assigned on more than one occasion.
+An identifier might be created prior to an assignment.</rdfs:comment>
+    <rdfs:domain rdf:resource="E15_Identifier_Assignment" />
+    <rdfs:range rdf:resource="E42_Identifier" />
+    <rdfs:subPropertyOf rdf:resource="P141_assigned" />
+    <owl:inverseOf rdf:resource="P37i_was_assigned_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P37i_was_assigned_by">
+    <rdfs:label xml:lang="en">was assigned by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde zugewiesen durch</rdfs:label>
+    <rdfs:label xml:lang="el">αποδόθηκε ως ιδιότητα από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été assigné par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi atribuído por</rdfs:label>
+    <rdfs:label xml:lang="ru">был присвоeн</rdfs:label>
+    <rdfs:label xml:lang="zh">被分配</rdfs:label>
+    <rdfs:domain rdf:resource="E42_Identifier" />
+    <rdfs:range rdf:resource="E15_Identifier_Assignment" />
+    <rdfs:subPropertyOf rdf:resource="P141i_was_assigned_by" />
+    <owl:inverseOf rdf:resource="P37_assigned" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P38_deassigned">
+    <rdfs:label xml:lang="en">deassigned</rdfs:label>
+    <rdfs:label xml:lang="de">hob Zuweisung auf von</rdfs:label>
+    <rdfs:label xml:lang="el">ακύρωσε</rdfs:label>
+    <rdfs:label xml:lang="fr">a retiré l'assignation</rdfs:label>
+    <rdfs:label xml:lang="pt">retirou a atribuição do</rdfs:label>
+    <rdfs:label xml:lang="ru">отмeнил</rdfs:label>
+    <rdfs:label xml:lang="zh">取消了</rdfs:label>
+    <rdfs:comment>This property records the identifier that was deassigned from an instance of E1 CRM Entity.
+De-assignment of an identifier may be necessary when an item is taken out of an inventory, a new numbering system is introduced or items are merged or split up.
+The same identifier may be deassigned on more than one occasion.</rdfs:comment>
+    <rdfs:domain rdf:resource="E15_Identifier_Assignment" />
+    <rdfs:range rdf:resource="E42_Identifier" />
+    <rdfs:subPropertyOf rdf:resource="P141_assigned" />
+    <owl:inverseOf rdf:resource="P38i_was_deassigned_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P38i_was_deassigned_by">
+    <rdfs:label xml:lang="en">was deassigned by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde aufgehoben durch</rdfs:label>
+    <rdfs:label xml:lang="el">ακυρώθηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été retiré par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi retirada a atribuição por</rdfs:label>
+    <rdfs:label xml:lang="ru">был отмeнeн посрeдством</rdfs:label>
+    <rdfs:label xml:lang="zh">被取消</rdfs:label>
+    <rdfs:domain rdf:resource="E42_Identifier" />
+    <rdfs:range rdf:resource="E15_Identifier_Assignment" />
+    <rdfs:subPropertyOf rdf:resource="P141i_was_assigned_by" />
+    <owl:inverseOf rdf:resource="P38_deassigned" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P39_measured">
+    <rdfs:label xml:lang="en">measured</rdfs:label>
+    <rdfs:label xml:lang="de">vermaß</rdfs:label>
+    <rdfs:label xml:lang="el">μέτρησε</rdfs:label>
+    <rdfs:label xml:lang="fr">a mesuré</rdfs:label>
+    <rdfs:label xml:lang="pt">mediu</rdfs:label>
+    <rdfs:label xml:lang="ru">измeрил</rdfs:label>
+    <rdfs:label xml:lang="zh">测量了</rdfs:label>
+    <rdfs:comment>This property associates an instance of E16 Measurement with the instance of E18 Physical Thing upon which it acted. The instance of E16 Measurement is specific to the measured object. An instance of E18 Physical Thing may be measured more than once with different results, constituting different instances of E16 Measurement.</rdfs:comment>
+    <rdfs:domain rdf:resource="E16_Measurement" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <rdfs:subPropertyOf rdf:resource="P140_assigned_attribute_to" />
+    <owl:inverseOf rdf:resource="P39i_was_measured_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P39i_was_measured_by">
+    <rdfs:label xml:lang="en">was measured by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde vermessen durch</rdfs:label>
+    <rdfs:label xml:lang="el">μετρήθηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été mesuré par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi medida por</rdfs:label>
+    <rdfs:label xml:lang="ru">был измeрeн</rdfs:label>
+    <rdfs:label xml:lang="zh">被测量</rdfs:label>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E16_Measurement" />
+    <rdfs:subPropertyOf rdf:resource="P140i_was_attributed_by" />
+    <owl:inverseOf rdf:resource="P39_measured" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P40_observed_dimension">
+    <rdfs:label xml:lang="en">observed dimension</rdfs:label>
+    <rdfs:label xml:lang="de">beobachtete Dimension</rdfs:label>
+    <rdfs:label xml:lang="el">παρατήρησε</rdfs:label>
+    <rdfs:label xml:lang="fr">a relevé comme dimension</rdfs:label>
+    <rdfs:label xml:lang="pt">verificou a dimensão</rdfs:label>
+    <rdfs:label xml:lang="ru">наблюдаeмый размeр</rdfs:label>
+    <rdfs:label xml:lang="zh">观测度量规格</rdfs:label>
+    <rdfs:comment>This property records the dimension that was observed in an E16 Measurement Event.
+E54 Dimension can be any quantifiable aspect of E70 Thing. Weight, image colour depth and monetary value are dimensions in this sense. One measurement activity may determine more than one dimension of one object.
+Dimensions may be determined either by direct observation or using recorded evidence. In the latter case the measured Thing does not need to be present or extant.
+Even though knowledge of the value of a dimension requires measurement, the dimension may be an object of discourse prior to, or even without, any measurement being made.</rdfs:comment>
+    <rdfs:domain rdf:resource="E16_Measurement" />
+    <rdfs:range rdf:resource="E54_Dimension" />
+    <rdfs:subPropertyOf rdf:resource="P141_assigned" />
+    <owl:inverseOf rdf:resource="P40i_was_observed_in" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P40i_was_observed_in">
+    <rdfs:label xml:lang="en">was observed in</rdfs:label>
+    <rdfs:label xml:lang="de">wurde beobachtet in</rdfs:label>
+    <rdfs:label xml:lang="el">παρατηρήθηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été relevé par</rdfs:la

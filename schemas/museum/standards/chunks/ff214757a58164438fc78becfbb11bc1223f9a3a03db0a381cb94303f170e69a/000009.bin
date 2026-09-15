@@ -1,0 +1,66 @@
+s not intend to describe the idiosyncratic characteristics of an individual physical embodiment of a visual item, but the underlying prototype. For example, a mark such as the ICOM logo is generally considered to be the same logo when used on any number of publications. The size, orientation, and colour may change, but the logo remains uniquely identifiable. The same is true of images that are reproduced many times. This means that visual items are independent of their physical support.
+The E36 Visual Item class provides a means of identifying and linking together instances of E24 Physical Human-Made Thing that carry the same visual symbols, marks, or images, etc. The property P62 depicts (is depicted by) between E24 Physical Human-Made Thing and the depicted subjects (E1 CRM Entity) can be regarded as a shortcut of the more fully developed path from E24 Physical Human-Made Thing through P65 shows visual item (is shown by), E36 Visual Item, P138 represents (has representation) to E1 CRM Entity, which in addition captures the optical features of the depiction.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E73_Information_Object" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E37_Mark">
+    <rdfs:label xml:lang="en">Mark</rdfs:label>
+    <rdfs:label xml:lang="de">Marke</rdfs:label>
+    <rdfs:label xml:lang="el">Σήμανση</rdfs:label>
+    <rdfs:label xml:lang="fr">Marque</rdfs:label>
+    <rdfs:label xml:lang="pt">Marca</rdfs:label>
+    <rdfs:label xml:lang="ru">Знак</rdfs:label>
+    <rdfs:label xml:lang="zh">标记</rdfs:label>
+    <rdfs:comment>This class comprises symbols, signs, signatures, or short texts applied to instances of E24 Physical Human-Made Thing by arbitrary techniques, often in order to indicate such things as creator, owner, dedications, purpose, or to communicate information generally. Instances of E37 Mark do not represent the actual image of a mark, but the abstract ideal (or archetype) as used for codification in reference documents forming cultural documentation.
+This class specifically excludes features that have no semantic significance, such as scratches or tool marks. These should be documented as instances of E25 Human-Made Feature.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E36_Visual_Item" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E39_Actor">
+    <rdfs:label xml:lang="en">Actor</rdfs:label>
+    <rdfs:label xml:lang="de">Akteur</rdfs:label>
+    <rdfs:label xml:lang="el">Δράστης</rdfs:label>
+    <rdfs:label xml:lang="fr">Actant</rdfs:label>
+    <rdfs:label xml:lang="pt">Agente</rdfs:label>
+    <rdfs:label xml:lang="ru">Дeйствующий Субъeкт</rdfs:label>
+    <rdfs:label xml:lang="zh">参与者</rdfs:label>
+    <rdfs:comment>This class comprises people, either individually or in groups, who have the potential to perform intentional actions of kinds for which they can be held responsible.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E77_Persistent_Item" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E41_Appellation">
+    <rdfs:label xml:lang="en">Appellation</rdfs:label>
+    <rdfs:label xml:lang="de">Benennung</rdfs:label>
+    <rdfs:label xml:lang="el">Ονομασία</rdfs:label>
+    <rdfs:label xml:lang="fr">Appellation</rdfs:label>
+    <rdfs:label xml:lang="pt">Designação</rdfs:label>
+    <rdfs:label xml:lang="ru">Обозначeниe</rdfs:label>
+    <rdfs:label xml:lang="zh">称谓</rdfs:label>
+    <rdfs:comment>This class comprises all signs, either meaningful or not, or arrangements of signs following a specific syntax, that are used or can be used to refer to and identify a specific instance of some class within a certain context.
+Instances of E41 Appellation do not identify things by their meaning, even if they happen to have one, but by convention, tradition, or agreement. Instances of E41 Appellation are cultural constructs; as such, they have a context, a history, and a use in time and space by some group of users. A given instance of E41 Appellation can have alternative forms, i.e. other instances of E41 Appellation that are regarded as equivalent, regardless of the thing it denotes.
+Different languages may use different appellations for the same thing, such as the names of major cities. Some appellations may be formulated using a valid noun phrase of a particular language. In these cases, the respective instances of E41 Appellation should also be declared as instances of E33 Linguistic Object. Then the language using the appellation can be declared with the property P72 has language: E56 Language.
+Instances of E41 Appellation may be used to identify any instance of E1 CRM Entity and sometimes are characteristic for instances of more specific subclasses of E1 CRM Entity, such as for instances of E52 Time-Span (for instance “dates”), E39 Actor, E53 Place or E28 Conceptual Object. Postal addresses and E-mail addresses are characteristic examples of identifiers used by services transporting things between clients.
+Even numerically expressed identifiers for extents in space or time are also regarded as instances of E41 Appellation, such as Gregorian dates or spatial coordinates, even though they allow for determining some time or location by a known procedure starting from a reference point and by virtue of that fact play a double role as instances of E59 Primitive Value.
+E41 Appellation should not be confused with the act of naming something. Cf. E15 Identifier Assignment.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E90_Symbolic_Object" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E42_Identifier">
+    <rdfs:label xml:lang="en">Identifier</rdfs:label>
+    <rdfs:label xml:lang="de">Kennung</rdfs:label>
+    <rdfs:label xml:lang="el">Κωδικός Αναγνώρισης</rdfs:label>
+    <rdfs:label xml:lang="fr">Identifiant</rdfs:label>
+    <rdfs:label xml:lang="pt">Identificador de Objeto</rdfs:label>
+    <rdfs:label xml:lang="ru">Идeнтификатор</rdfs:label>
+    <rdfs:label xml:lang="zh">标识符</rdfs:label>
+    <rdfs:comment>This class comprises strings or codes assigned to instances of E1 CRM Entity in order to identify them uniquely and permanently within the context of one or more organisations. Such codes are often known as inventory numbers, registration codes, etc. and are typically composed of alphanumeric sequences. Postal addresses, telephone numbers, URLs and e-mail addresses are characteristic examples of identifiers used by services transporting things between clients.
+The class E42 Identifier is not normally used for machine-generated identifiers used for automated processing unless these are also used by human agents.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E41_Appellation" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E52_Time-Span">
+    <rdfs:label xml:lang="en">Time-Span</rdfs:label>
+    <rdfs:label xml:lang="de">Zeitspanne</rdfs:label>
+    <rdfs:label xml:lang="el">Χρονικό Διάστημα</rdfs:label>
+    <rdfs:label xml:lang="fr">Intervalle temporel</rdfs:label>
+    <rdfs:label xml:lang="pt">Período de Tempo</rdfs:label>
+    <rdfs:label xml:lang="ru">Интeрвал Врeмeни</rdfs:label>
+    <rdfs:label xml:lang="zh">时段</rdfs:label>
+    <rdfs:comment>This class comprises abstract temporal extents, in the sense of Galilean physics, having a beginning, an end, and a duration.
+Instances of E52 Time-Span have no semantic connotations about phenomena happening within the temporal extent they represent. They do not convey any meaning other than a positioning on the “time-line” of chronology. The actual extent of an instance of E52 Time-Span can be approximated by properties of E52 Time-Span giving inner and outer bounds in the form of dates (instances of E61 Time Primitive). Comparing knowledge about time-spans is fundamental for chronological reasoning.
+Some instances of E52 Time-Span may be defined as the actual, in principle observable, temporal extent of instances of E2 Temporal Entity via the property P4 has time-span (is time-span of): E52 Time-Span. They constitute phenomenal time-spans as defined in CRMgeo (Doerr &amp;amp; Hieb

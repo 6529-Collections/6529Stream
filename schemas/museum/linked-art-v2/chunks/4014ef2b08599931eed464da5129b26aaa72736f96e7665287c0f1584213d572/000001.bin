@@ -1,0 +1,107 @@
+tle": "Specific", "type": "string", "const": "RightAcquisition"}]},
+				"_label": {"$ref": "core.json#/$defs/labelProp"},
+				"identified_by": {"$ref": "core.json#/$defs/identified_byProp"},
+				"classified_as": {"$ref": "core.json#/$defs/classified_asProp"},
+				"referred_to_by": {"$ref": "core.json#/$defs/referred_to_byProp"},
+				"took_place_at": {"$ref": "core.json#/$defs/took_place_atProp"},
+				"timespan": {"$ref": "core.json#/$defs/timespanProp"},
+				"caused_by": {"$ref": "core.json#/$defs/caused_byProp"},
+				"carried_out_by": {"$ref": "core.json#/$defs/carried_out_byProp"},
+				"used_specific_object": {"$ref": "core.json#/$defs/used_specific_objectProp"},
+				"influenced_by": {"$ref": "core.json#/$defs/influenced_byProp"},
+				"technique": {"$ref": "core.json#/$defs/techniqueProp"},
+				"during": {"$ref": "core.json#/$defs/duringProp"},
+				"after": {"$ref": "core.json#/$defs/afterProp"},
+				"before": {"$ref": "core.json#/$defs/beforeProp"},
+
+				"establishes": {"title": "la:establishes", "description": "", "type": "array", "items": {"$ref": "core.json#/$defs/Right"}},
+				"invalidates": {"title": "la:invalidates", "description": "", "type": "array", "items": {"$ref": "core.json#/$defs/Right"}}
+			},
+			"required": ["type", "establishes"],
+			"additionalProperties": false	
+		},
+		"Move": {
+			"title": "crm:E9_Move",
+			"description": "",
+			"type": "object",
+			"properties": {
+				"type": {"allOf": [{"title": "General", "$ref": "core.json#/$defs/typeProp"},
+					{"title": "Specific", "type": "string", "const": "Move"}]},
+				"_label": {"$ref": "core.json#/$defs/labelProp"},
+				"identified_by": {"$ref": "core.json#/$defs/identified_byProp"},
+				"classified_as": {"$ref": "core.json#/$defs/classified_asProp"},
+				"referred_to_by": {"$ref": "core.json#/$defs/referred_to_byProp"},
+				"took_place_at": {"$ref": "core.json#/$defs/took_place_atProp"},
+				"timespan": {"$ref": "core.json#/$defs/timespanProp"},
+				"caused_by": {"$ref": "core.json#/$defs/caused_byProp"},
+				"carried_out_by": {"$ref": "core.json#/$defs/carried_out_byProp"},
+				"used_specific_object": {"$ref": "core.json#/$defs/used_specific_objectProp"},
+				"influenced_by": {"$ref": "core.json#/$defs/influenced_byProp"},
+				"technique": {"$ref": "core.json#/$defs/techniqueProp"},
+				"during": {"$ref": "core.json#/$defs/duringProp"},
+				"after": {"$ref": "core.json#/$defs/afterProp"},
+				"before": {"$ref": "core.json#/$defs/beforeProp"},
+
+				"moved_from": {"title": "crm:P27_moved_from", "description": "Reference to the Place where the objects were moved from", "$ref": "core.json#/$defs/PlaceRef"},
+				"moved_to": {"title": "crm:P26_moved_to", "description": "Reference to the Place where the objects were moved to", "$ref": "core.json#/$defs/PlaceRef"},
+				"moved": {"title": "crm:P25_moved", "description": "The objects that were moved", "type": "array", "items": {"$ref": "core.json#/$defs/HumanMadeObjectRef"}}
+			},
+			"required": ["type", "moved"],
+			"additionalProperties": false	
+		},		
+		"Encounter": {
+			"title": "sci:S19_Encounter_Event",
+			"description": "",
+			"type": "object",
+			"properties": {
+				"type": {"allOf": [{"title": "General", "$ref": "core.json#/$defs/typeProp"},
+					{"title": "Specific", "type": "string", "const": "Encounter"}]},
+				"_label": {"$ref": "core.json#/$defs/labelProp"},
+				"identified_by": {"$ref": "core.json#/$defs/identified_byProp"},
+				"classified_as": {"$ref": "core.json#/$defs/classified_asProp"},
+				"referred_to_by": {"$ref": "core.json#/$defs/referred_to_byProp"},
+				"took_place_at": {"$ref": "core.json#/$defs/took_place_atProp"},
+				"timespan": {"$ref": "core.json#/$defs/timespanProp"},
+				"caused_by": {"$ref": "core.json#/$defs/caused_byProp"},
+				"carried_out_by": {"$ref": "core.json#/$defs/carried_out_byProp"},
+				"used_specific_object": {"$ref": "core.json#/$defs/used_specific_objectProp"},
+				"influenced_by": {"$ref": "core.json#/$defs/influenced_byProp"},
+				"technique": {"$ref": "core.json#/$defs/techniqueProp"},
+				"during": {"$ref": "core.json#/$defs/duringProp"},
+				"after": {"$ref": "core.json#/$defs/afterProp"},
+				"before": {"$ref": "core.json#/$defs/beforeProp"},
+
+				"encountered": {"title": "sci:O19_has_found_object", "description": "The objects that were encountered during this event", "type": "array", "items": {"$ref": "core.json#/$defs/HumanMadeObjectRef"}}
+			},
+			"required": ["type", "encountered"],
+			"additionalProperties": false	
+		},
+		"Promise": {
+			"title": "crm:E7_Activity",
+			"description": "",
+			"type": "object",
+			"properties": {
+				"type": {"allOf": [{"title": "General", "$ref": "core.json#/$defs/typeProp"},
+					{"title": "Specific", "type": "string", "const": "Activity"}]},
+				"_label": {"$ref": "core.json#/$defs/labelProp"},
+				"identified_by": {"$ref": "core.json#/$defs/identified_byProp"},
+				"classified_as": {"$ref": "core.json#/$defs/classified_asProp"},
+				"referred_to_by": {"$ref": "core.json#/$defs/referred_to_byProp"},
+				"took_place_at": {"$ref": "core.json#/$defs/took_place_atProp"},
+				"timespan": {"$ref": "core.json#/$defs/timespanProp"},
+				"caused_by": {"$ref": "core.json#/$defs/caused_byProp"},
+				"carried_out_by": {"$ref": "core.json#/$defs/carried_out_byProp"},
+				"used_specific_object": {"$ref": "core.json#/$defs/used_specific_objectProp"},
+				"influenced_by": {"$ref": "core.json#/$defs/influenced_byProp"},
+				"technique": {"$ref": "core.json#/$defs/techniqueProp"},
+				"during": {"$ref": "core.json#/$defs/duringProp"},
+				"after": {"$ref": "core.json#/$defs/afterProp"},
+				"before": {"$ref": "core.json#/$defs/beforeProp"}
+			},
+			"required": ["type", "classified_as"],
+			"additionalProperties": false	
+		}
+	},
+	"required": ["@context", "id", "type", "_label", "classified_as"],
+	"additionalProperties": false
+}

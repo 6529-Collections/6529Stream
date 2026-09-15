@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF xml:lang="en" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" xml:base="http://www.cidoc-crm.org/cidoc-crm/">
+  <owl:Ontology rdf:about="http://www.cidoc-crm.org/cidoc-crm/">
+    <owl:versionIRI rdf:resource="http://www.cidoc-crm.org/cidoc-crm/7.1.3/" />
+    <owl:versionInfo>RDFs Implementation (February 2024) of CIDOC-CRM 7.1.3</owl:versionInfo>
+    <rdfs:comment xml:lang="en">CIDOC CRM v7.1.3 implemented in RDFS
+
+This is the implementation approved by the 58th CRM-SIG meeting (March 2024)
+as the current RDFS version for the CIDOC CRM namespace.
+Note that this is NOT a definition of the CIDOC CRM, but a CIDOC CRM compatible implementation
+of an RDF Schema derived from the authoritative release of the CIDOC CRM v7.1.3 on February 2024
+https://cidoc-crm.org/Version/version-7.1.3 by an automated algorithm. It is intended for an
+assumed majority of uses. Depending on the application, users may create adequate extensions 
+compatible with the logical definitions of the CIDOC CRM.
+
+Created by FORTH-ICS February 13, 2024
+CC BY 4.0 https://creativecommons.org/licenses/by/4.0/legalcode
+
+
+
+Encoding Rules:
+1. The RDF spelling rules do not allow blanks. Hence we have replaced them by underscores.
+   For instance "E63_Beginning_of_Existence" or "P2i_is_type_of".
+
+2. RDF does not allow to instantiate properties beginning from a range value.
+   Therefore, each CRM property is represented as two RDFS properties.
+   For instance "P2 has type (is type of)" is represented as:
+   "P2_has_type" for the domain to range direction and "P2i_is_type_of" for the range to domain direction.
+
+3. The primitive values "E60 Number", "E61 Time Primitive", "E62 String", "E94 Space Primitive" and 
+   "E95 Spacetime Primitive" referred in the Model for formal completeness are interpreted as rdfs:literal.
+
+4. RDF does not support properties of properties, therefore, users may create their own
+   subProperties for CRM properties that have a type property such as "P3 has note":
+   Instead of P3 has note (P3-1 has type : parts description) declare
+   &lt;rdf:Property rdf:about="P3_parts_description"&gt;
+      &lt;rdfs:domain rdf:resource="E1_CRM_Entity"/&gt;
+      &lt;rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/&gt;
+      &lt;rdfs:subPropertyOf rdf:resource="P3_has_note"/&gt;
+   &lt;/rdf:Property&gt;
+
+5. Scope notes are represented as &lt;rdfs:comment&gt; elements.
+
+6. In addition this encoding contains labels in languages different from English, 
+   which are taken from translations of previous versions of the CIDOC CRM.    
+
+7. Any other differences in labels, scope notes  and semantic relationships of this encoding 
+   to the authoritative definition of the CIDOC CRM v7.1.3 (February 2024) are not intended transfer errors. 
+   FORTH appreciates your feed-back on such errors.
+
+8. CRM time extension 1.0 Encoded in RDFS (http://old.cidoc-crm.org/docs/How_to%20implement%20CRM_Time_in%20RDF.pdf)
+   Since the Time Primitive of the CRM can not directly be implemented in RDF Triple Stores, we define in this extension
+   of 4 properties replacing P81 and P82 adequately using xsd:dateTime. 
+   Property P81 is dedicated for modeling the Time-Span's maximum known temporal extent i.e. ongoing_throughout. 
+   Property P82 is for modeling the minimum outer bounds of events i.e. at_some_time_within. 
+   P81 has its time interval redefined by P81a and P81b. Similarly, we redefine P82 by P82a and P82b.
+## RDFS Generation Policies
+
+### Sources
+
+Policies followed for the RDFS implementation of CIDOC v.7.1.3 were created w.r.t.:
+
+- Implementing the CIDOC Conceptual Reference Model in RDF (http://www.cidoc-crm.org/Resources/implementing-the-cidoc-conceptual-reference-model-in-rdf)
+- How to implement CRM Time in RDF (http://old.cidoc-crm.org/docs/How_to%20implement%20CRM_Time_in%20RDF.pdf)
+- CIDOC-CRM SIG feedback and the general guidelines:
+  - Each property is declared twice, forward and backwards, unless no inverse name is defined in parentheses, or domain or range is interpreted as literal
+  - All Primitive Values become rdfs:Literal
+  - All IsA declarations from/to and between Primitive values are ignored
+
+### Policies
+
+#### **A. CIDOC Classes implementation in RDFS**
+
+The CIDOC-CRM model defines classes, that in Triple Stores are typically implemented as primitive values. These classes are all subclasses of `E59 Primitive Value` and in RDFS they are interpreted as Literal. There are some classes in the CIDOC-CRM model that are both subclasses of `E59 Primitive Value` and E41 Appellation. So far we have followed the decision by CRM-SIG in "Issue 394: Solution for Dualism of E41 Appellation and rdfs:label" in 28-11-2018 wrt the question whether these classes should be implemented as rdfs:Class or still be interpreted as rdfs:Literal.
+
+In this version we have followed the following policy regarding CIDOC Classes implementation in RDFS:
+
+&gt; A1. CIDOC Classes that are subClasses of `E59 Primitive Value` are interpreted as rdfs:Literal regardless of whether they are also subClasses of another Class.
+
+As a result, the following CIDOC classes were not defined in RDFS:
+
+- `E59 Primitive Value`
+- `E60 Number`
+- `E61 Time Primitive`
+- `E62 String`
+- `E94 Space Primitive`
+- `E95 Spacetime Primitive`
+
+Additionally, the following isA relationships were not defined in RDFS:
+
+- `E59 Primitive Value` `subClassOf` `E1 CRM Entity`
+- `E60 Number` `subClassOf` `E59 Primitive Value`
+- `E61 Time Primitive` `subClassOf` `E41 Appellation`
+- `E61 Time Primitive` `subClassOf` `E59 Primitive Value`
+- `E62 String` `subClassOf` `E59 Primitive Value`
+- `E94 Space Primitive` `subClassOf` `E41 Appellation`
+- `E94 Space Primitive` `subClassOf` `E59 Primitive Value`
+- `E95 Spacetime Primitive` `subClassOf` `E41 Appellation`
+- `E95 Spacetime Primitive` `subClassOf` `E59 Primitive Value`
+
+#### **B. CIDOC Properties implementation in RDFS**
+
+The decisions in policy A affect the implementation of CIDOC Properties in RDFS. A property cannot define an rdfs:Literal as rdfs:domain, and the backwards direction of a property with an rdfs:Literal as rdfs:range cannot be created for the exact same reason.
+
+Further, the property ranges defined as rdfs:Literal in this implementation do not inherit the properties of the superclasses defined in the CIDOC Model. A separate guideline will describe how to instantiate such properties if at all needed.
+
+Another aspect considered for the implementation of properties in RDFS is whether a distinct inverse property definition should be provided.
+
+In this version we followed the following policies regarding CIDOC Properties implementation in RDFS:
+
+&gt; B1. CIDOC Property backwards/inverse direction is **not** defined, whenever no inverse name for the property has been specified in parentheses in the official CIDOC documentation and property domain is not equal with property range.
+
+As a result, the following properties do not define an inverse direction.
+
+- `E1 CRM Entity. P3 has note: E62 String`
+- `E19 Physical Object. P57 has number of parts: E60 Number`
+- `E52 Time-Span. P79 beginning is qualified by: E62 String`
+- `E52 Time-Span. P80 end is qualified by: E62 String`
+- `E52 Time-Span. P81 ongoing throughout: E61 Time Primitive`
+- `E52 Time-Span. P82 at some time within: E61 Time Primitive`
+- `E54 Dimension. P90 has value: E60 Number`
+- `E53 Place. P171 at some place within: E94 Space Primitive`
+- `E53 Place. P172 contains: E94 Space Primitive`
+- `E90 Symbolic Object. P190 has symbolic content: E62 String`
+
+&gt; B2. CIDOC Property forward direction is **not** defined whenever property domain is interpreted as rdfs:Literal (A.1). Similarly, CIDOC Property backwards/inverse direction is **not** defined, whenever property range is interpreted as rdfs:Literal (A.1). Further, the instances of classes interpreted as rdfs:Literal, cannot express in RDFs the

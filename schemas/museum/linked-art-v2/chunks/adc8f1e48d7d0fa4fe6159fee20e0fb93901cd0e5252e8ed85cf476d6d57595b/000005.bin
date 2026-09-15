@@ -1,0 +1,245 @@
+erty_type",
+                    "description": "The relationship from the attributed entity to the assigned entity, given as a string which resolves to a relationship in the context definition",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "type",
+                "assigned"
+            ],
+            "additionalProperties": false
+        },
+
+        "DigitalService": {
+            "title": "la:DigitalService",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "DigitalService"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "identified_by": {
+                    "$ref": "#/$defs/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/$defs/classified_asProp"
+                },
+                "referred_to_by": {
+                    "$ref": "#/$defs/referred_to_byProp"
+                },
+                "access_point": {
+                    "$ref": "#/$defs/access_pointProp"
+                },
+                "conforms_to": {
+                    "$ref": "#/$defs/conforms_toProp"
+                }
+            }
+        },
+
+        "DigitalObjectEmbed": {
+            "title": "dig:D1_Digital_Object",
+            "description": "An embedded Digital Object, such as a home page reference",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "DigitalObject"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "identified_by": {
+                    "$ref": "#/$defs/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/$defs/classified_asProp"
+                },
+                "referred_to_by": {
+                    "$ref": "#/$defs/referred_to_byProp"
+                },
+                "access_point": {
+                    "$ref": "#/$defs/access_pointProp"
+                },
+                "format": {
+                    "$ref": "#/$defs/formatProp"
+                },
+                "conforms_to": {
+                    "$ref": "#/$defs/conforms_toProp"
+                }                                
+            }
+        },
+
+        "VisualItemEmbed": {
+            "title": "crm:E36_Visual_Item",
+            "description": "An embedded Visual Item, such as the content of a digital image",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "VisualItem"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "identified_by": {
+                    "$ref": "#/$defs/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/$defs/classified_asProp"
+                },
+                "referred_to_by": {
+                    "$ref": "#/$defs/referred_to_byProp"
+                },
+                "digitally_shown_by": {
+                    "$ref": "#/$defs/digitally_shown_byProp"
+                }
+            },
+            "required": [
+                "type"
+            ],
+            "additionalProperties": false  
+        },
+
+        "LinguisticObjectEmbed": {
+            "title": "crm:E33_Linguistic_Object",
+            "description": "An embedded Linguistic Object, such as the content of a web page",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "LinguisticObject"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "identified_by": {
+                    "$ref": "#/$defs/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/$defs/classified_asProp"
+                },
+                "referred_to_by": {
+                    "$ref": "#/$defs/referred_to_byProp"
+                },
+                "language": {
+                    "$ref": "#/$defs/languageProp"
+                },
+                "digitally_carried_by": {
+                    "$ref": "#/$defs/digitally_carried_byProp"
+                }
+            },
+            "required": [
+                "type"
+            ],
+            "additionalProperties": false            
+        },
+
+        "HumanMadeObjectPart": {
+            "title": "crm:E22_Human-Made_Object",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "const": "HumanMadeObject"
+                },
+                "_label": {
+                    "type": "string"
+                },
+                "identified_by": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/NameOrIdentifier"
+                    }
+                },
+                "classified_as": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/Concept"
+                    }
+                },
+                "referred_to_by": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/Statement"
+                    }
+                },
+                "dimension": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/Dimension"
+                    }
+                },
+                "made_of": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/MaterialRef"
+                    }
+                },
+                "part": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/HumanMadeObjectPart"
+                    }
+                },
+                "shows": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/VisualItemRef"
+                    }
+                },
+                "carries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/LinguisticObjectRef"
+                    }
+                },
+                "representation": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/VisualItemRef"
+                    }
+                }
+            },
+            "required": [
+                "type"
+            ],
+            

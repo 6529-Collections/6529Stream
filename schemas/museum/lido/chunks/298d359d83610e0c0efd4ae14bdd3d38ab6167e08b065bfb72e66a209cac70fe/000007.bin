@@ -1,0 +1,136 @@
+ ref="gml:baseSurface">
+						<annotation>
+							<documentation>References or contains the base surface (positive orientation).</documentation>
+						</annotation>
+					</element>
+				</sequence>
+				<attribute name="orientation" type="gml:SignType" default="+">
+					<annotation>
+						<documentation>If the orientation is "+", then the OrientableSurface is identical to the baseSurface. If the orientation is "-", then the OrientableSurface is a reference to a Surface with an up-normal that reverses the direction for this OrientableSurface, the sense of "the top of the surface". "+" is the default value.</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<!-- surface patches (2-dimensional) -->
+	<!-- =========================================================== -->
+	<!-- =========================================================== -->
+	<element name="_SurfacePatch" type="gml:AbstractSurfacePatchType" abstract="true">
+		<annotation>
+			<documentation>The "_SurfacePatch" element is the abstract head of the substituition group for all surface pach elements describing a continuous portion of a surface.</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<complexType name="AbstractSurfacePatchType" abstract="true">
+		<annotation>
+			<documentation>A surface patch defines a homogenuous portion of a surface.</documentation>
+		</annotation>
+		<sequence/>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="patches" type="gml:SurfacePatchArrayPropertyType">
+		<annotation>
+			<documentation>This property element contains a list of surface patches. The order of the elements is significant and shall be preserved when processing the array.</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<complexType name="SurfacePatchArrayPropertyType">
+		<annotation>
+			<documentation>A container for an array of surface patches.</documentation>
+		</annotation>
+		<sequence minOccurs="0" maxOccurs="unbounded">
+			<element ref="gml:_SurfacePatch"/>
+		</sequence>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="PolygonPatch" type="gml:PolygonPatchType" substitutionGroup="gml:_SurfacePatch"/>
+	<!-- =========================================================== -->
+	<complexType name="PolygonPatchType">
+		<annotation>
+			<documentation>A PolygonPatch is a surface patch that is defined by a set of boundary curves and an underlying surface to which these curves adhere. The curves are coplanar and the polygon uses planar interpolation in its interior. Implements GM_Polygon of ISO 19107.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractSurfacePatchType">
+				<sequence>
+					<element ref="gml:exterior" minOccurs="0"/>
+					<element ref="gml:interior" minOccurs="0" maxOccurs="unbounded"/>
+				</sequence>
+				<attribute name="interpolation" type="gml:SurfaceInterpolationType" fixed="planar">
+					<annotation>
+						<documentation>The attribute "interpolation" specifies the interpolation mechanism used for this surface patch. Currently only planar surface patches are defined in GML 3, the attribute is fixed to "planar", i.e. the interpolation method shall return points on a single plane. The boundary of the patch shall be contained within that plane.</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="Triangle" type="gml:TriangleType" substitutionGroup="gml:_SurfacePatch"/>
+	<!-- =========================================================== -->
+	<complexType name="TriangleType">
+		<annotation>
+			<documentation>Represents a triangle as a surface with an outer boundary consisting of a linear ring. Note that this is a polygon (subtype) with no inner boundaries. The number of points in the linear ring must be four.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractSurfacePatchType">
+				<sequence>
+					<element ref="gml:exterior">
+						<annotation>
+							<documentation>Constraint: The Ring shall be a LinearRing and must form a triangle, the first and the last position must be co-incident.</documentation>
+						</annotation>
+					</element>
+				</sequence>
+				<attribute name="interpolation" type="gml:SurfaceInterpolationType" fixed="planar">
+					<annotation>
+						<documentation>The attribute "interpolation" specifies the interpolation mechanism used for this surface patch. Currently only planar surface patches are defined in GML 3, the attribute is fixed to "planar", i.e. the interpolation method shall return points on a single plane. The boundary of the patch shall be contained within that plane.</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="Rectangle" type="gml:RectangleType" substitutionGroup="gml:_SurfacePatch"/>
+	<!-- =========================================================== -->
+	<complexType name="RectangleType">
+		<annotation>
+			<documentation>Represents a rectangle as a surface with an outer boundary consisting of a linear ring. Note that this is a polygon (subtype) with no inner boundaries. The number of points in the linear ring must be five.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractSurfacePatchType">
+				<sequence>
+					<element ref="gml:exterior">
+						<annotation>
+							<documentation>Constraint: The Ring shall be a LinearRing and must form a rectangle; the first and the last position must be co-incident.</documentation>
+						</annotation>
+					</element>
+				</sequence>
+				<attribute name="interpolation" type="gml:SurfaceInterpolationType" fixed="planar">
+					<annotation>
+						<documentation>The attribute "interpolation" specifies the interpolation mechanism used for this surface patch. Currently only planar surface patches are defined in GML 3, the attribute is fixed to "planar", i.e. the interpolation method shall return points on a single plane. The boundary of the patch shall be contained within that plane.</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="curveMember" type="gml:CurvePropertyType">
+		<annotation>
+			<documentation>This property element either references a curve via the XLink-attributes or contains the curve element. A curve element is any element which is substitutable for "_Curve".</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<element name="Ring" type="gml:RingType" substitutionGroup="gml:_Ring"/>
+	<!-- =========================================================== -->
+	<complexType name="RingType">
+		<annotation>
+			<documentation>A Ring is used to represent a single connected component of a surface boundary. It consists of a sequence of curves connected in a cycle (an object whose boundary is empty).
+A Ring is structurally similar to a composite curve in that the endPoint of each curve in the sequence is the startPoint of the next curve in the Sequence. Since the sequence is circular, there is no exception to this rule. Each ring, like all boundaries, is a cycle and each ring is simple.
+NOTE: Even though each Ring is simple, the boundary need not be simple. The easiest case of this is where one of the interior rings of a surface is tangent to its exterior ring.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractRingType">
+				<sequence>
+					<element ref="gml:curveMember" maxOccurs="unbounded">
+						<annotation>
+							<documentation>This element references or contains one curve in the composite curve. The curves are contiguous, the collection of curves is ordered.
+NOTE: T

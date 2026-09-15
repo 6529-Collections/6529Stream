@@ -1,0 +1,142 @@
+ "bulge" is the real number multiplier for the normal that determines the offset direction of the midpoint of each arc. The length of the bulge sequence is exactly 1 less than the length of the control point array, since a bulge is needed for each pair of adjacent points in the control point array. The bulge is not given by a distance, since it is simply a multiplier for the normal.
+The midpoint of the resulting arc is given by: midPoint = ((startPoint + endPoint)/2.0) + bulge*normal</documentation>
+						</annotation>
+					</element>
+					<element name="normal" type="gml:VectorType">
+						<annotation>
+							<documentation>The attribute "normal" is a vector normal (perpendicular) to the chord of the arc, the line joining the first and last
+point of the arc. In a 2D coordinate system, there are only two possible directions for the normal, and it is often given as a signed real, indicating its length, with a positive sign indicating a left turn angle from the chord line, and a negative sign indicating a right turn from the chord. In 3D, the normal determines the plane of the arc, along with the start and endPoint of the arc.
+The normal is usually a unit vector, but this is not absolutely necessary. If the normal is a zero vector, the geometric object becomes equivalent to the straight line between the two end points. The length of the normal sequence is exactly the same as for the bulge sequence, 1 less than the control point sequence length.</documentation>
+						</annotation>
+					</element>
+				</sequence>
+				<attribute name="numArc" type="integer" use="optional" fixed="1">
+					<annotation>
+						<documentation>An arc is an arc string consiting of a single arc, the attribute is fixed to "1".</documentation>
+					</annotation>
+				</attribute>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =========== global element in "_CurveSegment" substitution group ================ -->
+	<element name="ArcByCenterPoint" type="gml:ArcByCenterPointType" substitutionGroup="gml:_CurveSegment"/>
+	<!-- =========================================================== -->
+	<complexType name="ArcByCenterPointType">
+		<annotation>
+			<documentation>This variant of the arc requires that the points on the arc have to be computed instead of storing the coordinates directly. The control point is the center point of the arc plus the radius and the bearing at start and end. This represenation can be used only in 2D.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCurveSegmentType">
+				<sequence>
+					<choice>
+						<annotation>
+							<documentation>GML supports two different ways to specify the control points of a curve segment.
+1. A "pos" (DirectPositionType) or "pointProperty" (PointPropertyType) element. The "pos" element contains a center point that is only part of this curve segment, a "pointProperty" element contains a point that may be referenced from other geometry elements or reference another point defined outside of this curve segment (reuse of existing points).
+2. The "posList" element can be used to specifiy the coordinates of the center point, too. The number of direct positions in the list must be one.</documentation>
+						</annotation>
+						<choice>
+							<element ref="gml:pos"/>
+							<element ref="gml:pointProperty"/>
+							<element ref="gml:pointRep">
+								<annotation>
+									<documentation>Deprecated with GML version 3.1.0. Use "pointProperty" instead. Included for backwards compatibility with GML 3.0.0.</documentation>
+								</annotation>
+							</element>
+						</choice>
+						<element ref="gml:posList"/>
+						<element ref="gml:coordinates">
+							<annotation>
+								<documentation>Deprecated with GML version 3.1.0. Use "posList" instead.</documentation>
+							</annotation>
+						</element>
+					</choice>
+					<element name="radius" type="gml:LengthType">
+						<annotation>
+							<documentation>The radius of the arc.</documentation>
+						</annotation>
+					</element>
+					<element name="startAngle" type="gml:AngleType" minOccurs="0">
+						<annotation>
+							<documentation>The bearing of the arc at the start.</documentation>
+						</annotation>
+					</element>
+					<element name="endAngle" type="gml:AngleType" minOccurs="0">
+						<annotation>
+							<documentation>The bearing of the arc at the end.</documentation>
+						</annotation>
+					</element>
+				</sequence>
+				<attribute name="interpolation" type="gml:CurveInterpolationType" fixed="circularArcCenterPointWithRadius">
+					<annotation>
+						<documentation>The attribute "interpolation" specifies the curve interpolation mechanism used for this segment. This mechanism
+uses the control points and control parameters to determine the position of this curve segment. For an ArcByCenterPoint the interpolation is fixed as "circularArcCenterPointWithRadius".</documentation>
+					</annotation>
+				</attribute>
+				<attribute name="numArc" type="integer" use="required" fixed="1">
+					<annotation>
+						<documentation>Since this type describes always a single arc, the attribute is fixed to "1".</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========== global element in "_CurveSegment" substitution group ================ -->
+	<element name="CircleByCenterPoint" type="gml:CircleByCenterPointType" substitutionGroup="gml:ArcByCenterPoint"/>
+	<!-- =========================================================== -->
+	<complexType name="CircleByCenterPointType">
+		<annotation>
+			<documentation>A CircleByCenterPoint is an ArcByCenterPoint with identical start and end angle to form a full circle. Again, this represenation can be used only in 2D.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:ArcByCenterPointType"/>
+		</complexContent>
+	</complexType>
+	<!-- ================================================================================ -->
+	<element name="OffsetCurve" type="gml:OffsetCurveType" substitutionGroup="gml:_CurveSegment"/>
+	<!-- ================================================================================ -->
+	<complexType name="OffsetCurveType">
+		<annotation>
+			<documentation>An offset curve is a curve at a constant
+		 distance from the basis curve. They can be useful as a cheap
+		 and simple alternative to constructing curves that are offsets	
+		 by definition.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCurveSegmentType">
+				<sequence>
+					<element name="offsetBase" type="gml:CurvePropertyType">
+						<annotation>
+							<documentation>offsetBase is a reference to thecurve from which this
+							 curve is define	as an offset.</documentation>
+						</annotation>
+					</element>
+					<element name="distance" type="gml:LengthType">
+						<annotation>
+							<documentation>distance is the distance at which the
+							 offset curve is generated from the basis curve. In 2D systems, positive distances
+							 are to be to the left of the basis curve, and the negative distances are to be to the 
+							 right of the basis curve.</documentation>
+						</annotation>
+					</element>
+					<element name="refDirection" type="gml:VectorType" minOccurs="0">
+						<annotation>
+							<documentation>refDistance is used to define the vector
+       direction of the offset curve from the basis curve. It can
+       be omitted in the 2D case, where the distance can be 
+       positive or negative. In that case, distance defines left
+       side (positive distance) or right side (negative distance)
+       with respect to the tangent to the basis curve.
+
+       In 3D the basis curve shall have a well defined tangent 
+       direction for every point. The offset curve at any point 
+       in 3D, the basis curve shall have a well-defined tangent
+       direction for every point. The offset curve at any point
+       (parameter) on the basis curve c is in the direction
+       -   -   -         -               
+       s = v x t  where  v = c.refDirection()  
+       and
+       -
+       t = c.tangent()
+                                                    -
+       For the offset direction to be well-defined, v shall not
+       

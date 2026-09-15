@@ -1,0 +1,127 @@
+  <rdfs:label xml:lang="pt">formou</rdfs:label>
+    <rdfs:label xml:lang="ru">сформировал</rdfs:label>
+    <rdfs:label xml:lang="zh">已经组成</rdfs:label>
+    <rdfs:comment>This property associates the instance of E66 Formation with the instance of E74 Group that it founded.</rdfs:comment>
+    <rdfs:domain rdf:resource="E66_Formation" />
+    <rdfs:range rdf:resource="E74_Group" />
+    <rdfs:subPropertyOf rdf:resource="P92_brought_into_existence" />
+    <owl:inverseOf rdf:resource="P95i_was_formed_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P95i_was_formed_by">
+    <rdfs:label xml:lang="en">was formed by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde gebildet von</rdfs:label>
+    <rdfs:label xml:lang="el">σχηματίστηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été fondé par</rdfs:label>
+    <rdfs:label xml:lang="pt">foi formado por</rdfs:label>
+    <rdfs:label xml:lang="ru">был сформирован</rdfs:label>
+    <rdfs:label xml:lang="zh">被组成</rdfs:label>
+    <rdfs:domain rdf:resource="E74_Group" />
+    <rdfs:range rdf:resource="E66_Formation" />
+    <rdfs:subPropertyOf rdf:resource="P92i_was_brought_into_existence_by" />
+    <owl:inverseOf rdf:resource="P95_has_formed" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P96_by_mother">
+    <rdfs:label xml:lang="en">by mother</rdfs:label>
+    <rdfs:label xml:lang="de">durch Mutter</rdfs:label>
+    <rdfs:label xml:lang="el">είχε μητέρα</rdfs:label>
+    <rdfs:label xml:lang="fr">de mère</rdfs:label>
+    <rdfs:label xml:lang="pt">pela mãe</rdfs:label>
+    <rdfs:label xml:lang="ru">имeл матeрью</rdfs:label>
+    <rdfs:label xml:lang="zh">来自母亲</rdfs:label>
+    <rdfs:comment>This property links an instance of E67 Birth to an instance of E21 Person in the role of birth-giving mother.
+Note that biological fathers are not necessarily participants in the Birth (see P97 from father (was father for)). The instance of E21 Person being born is linked to the instance of E67 Birth with the property P98 brought into life (was born). This is not intended for use with general natural history material, only people. There is no explicit method for modelling conception and gestation except by using extensions.</rdfs:comment>
+    <rdfs:domain rdf:resource="E67_Birth" />
+    <rdfs:range rdf:resource="E21_Person" />
+    <rdfs:subPropertyOf rdf:resource="P11_had_participant" />
+    <owl:inverseOf rdf:resource="P96i_gave_birth" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P96i_gave_birth">
+    <rdfs:label xml:lang="en">gave birth</rdfs:label>
+    <rdfs:label xml:lang="de">gebar</rdfs:label>
+    <rdfs:label xml:lang="el">ήταν μητέρα του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">a donné naissance à</rdfs:label>
+    <rdfs:label xml:lang="pt">deu nascimento</rdfs:label>
+    <rdfs:label xml:lang="ru">дала рождeниe</rdfs:label>
+    <rdfs:label xml:lang="zh">生育</rdfs:label>
+    <rdfs:domain rdf:resource="E21_Person" />
+    <rdfs:range rdf:resource="E67_Birth" />
+    <rdfs:subPropertyOf rdf:resource="P11i_participated_in" />
+    <owl:inverseOf rdf:resource="P96_by_mother" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P97_from_father">
+    <rdfs:label xml:lang="en">from father</rdfs:label>
+    <rdfs:label xml:lang="de">gab Vaterschaft</rdfs:label>
+    <rdfs:label xml:lang="el">είχε πατέρα</rdfs:label>
+    <rdfs:label xml:lang="fr">de père</rdfs:label>
+    <rdfs:label xml:lang="pt">pelo pai</rdfs:label>
+    <rdfs:label xml:lang="ru">имeл отцом</rdfs:label>
+    <rdfs:label xml:lang="zh">来自父亲</rdfs:label>
+    <rdfs:comment>This property links an instance of E67 Birth to an instance of E21 Person in the role of biological father.
+Note that biological fathers are not seen as necessary participants in the birth, whereas birth-giving mothers are (see P96 by mother (gave birth)). The Person being born is linked to the Birth with the property P98 brought into life (was born).
+This is not intended for use with general natural history material, only people. There is no explicit method for modelling conception and gestation except by using extensions.
+An instance of E67 Birth is normally (but not always) associated with one biological father.</rdfs:comment>
+    <rdfs:domain rdf:resource="E67_Birth" />
+    <rdfs:range rdf:resource="E21_Person" />
+    <owl:inverseOf rdf:resource="P97i_was_father_for" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P97i_was_father_for">
+    <rdfs:label xml:lang="en">was father for</rdfs:label>
+    <rdfs:label xml:lang="de">war Vater für</rdfs:label>
+    <rdfs:label xml:lang="el">ήταν πατέρας του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">a été le père pour</rdfs:label>
+    <rdfs:label xml:lang="pt">foi pai para</rdfs:label>
+    <rdfs:label xml:lang="ru">был отцом для</rdfs:label>
+    <rdfs:label xml:lang="zh">是父亲</rdfs:label>
+    <rdfs:domain rdf:resource="E21_Person" />
+    <rdfs:range rdf:resource="E67_Birth" />
+    <owl:inverseOf rdf:resource="P97_from_father" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P98_brought_into_life">
+    <rdfs:label xml:lang="en">brought into life</rdfs:label>
+    <rdfs:label xml:lang="de">brachte zur Welt</rdfs:label>
+    <rdfs:label xml:lang="el">έφερε στη ζωή</rdfs:label>
+    <rdfs:label xml:lang="fr">a donné vie à</rdfs:label>
+    <rdfs:label xml:lang="pt">trouxe à vida</rdfs:label>
+    <rdfs:label xml:lang="ru">родил</rdfs:label>
+    <rdfs:label xml:lang="zh">诞生了</rdfs:label>
+    <rdfs:comment>This property links an instance of E67 Birth event to an instance of E21 Person in the role of offspring.
+Twins, triplets etc. are brought into life by the same instance of E67 Birth. This is not intended for use with general Natural History material, only people. There is no explicit method for modelling conception and gestation except by using extensions.</rdfs:comment>
+    <rdfs:domain rdf:resource="E67_Birth" />
+    <rdfs:range rdf:resource="E21_Person" />
+    <rdfs:subPropertyOf rdf:resource="P92_brought_into_existence" />
+    <owl:inverseOf rdf:resource="P98i_was_born" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P98i_was_born">
+    <rdfs:label xml:lang="en">was born</rdfs:label>
+    <rdfs:label xml:lang="de">wurde geboren durch</rdfs:label>
+    <rdfs:label xml:lang="el">γεννήθηκε</rdfs:label>
+    <rdfs:label xml:lang="fr">est né</rdfs:label>
+    <rdfs:label xml:lang="pt">veio à vida pelo</rdfs:label>
+    <rdfs:label xml:lang="ru">был рождeн</rdfs:label>
+    <rdfs:label xml:lang="zh">被诞生</rdfs:label>
+    <rdfs:domain rdf:resource="E21_Person" />
+    <rdfs:range rdf:resource="E67_Birth" />
+    <rdfs:subPropertyOf rdf:resource="P92i_was_brought_into_existence_by" />
+    <owl:inverseOf rdf:resource="P98_brought_into_life" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P99_dissolved">
+    <rdfs:label xml:lang="en">dissolved</rdfs:label>
+    <rdfs:label xml:lang="de">löste auf</rdfs:label>
+    <rdfs:label xml:lang="el">διέλυσε</rdfs:label>
+    <rdfs:label xml:lang="fr">a dissous</rdfs:label>
+    <rdfs:label xml:lang="pt">dissolveu</rdfs:label>
+    <rdfs:label xml:lang="ru">распустил</rdfs:label>
+    <rdfs:label xml:lang="zh">解散了</rdfs:label>
+    <rdfs:comment>This property associates the instance of E68 Dissolution with the instance of E74 Group that it disbanded.</rdfs:comment>
+    <rdfs:domain rdf:resource="E68_Dissolution" />
+    <rdfs:range rdf:resource="E74_Group" />
+    <rdfs:subPropertyOf rdf:resource="P11_had_participant" />
+    <rdfs:subPropertyOf rdf:resource="P93_took_out_of_existence" />
+    <owl:inverseOf rdf:resource="P99i_was_dissolved_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P99i_was_dissolved_by">
+    <rdfs:label xml:lang="en">was dissolved by</rdfs:label>
+    <rdfs:label xml:lang="de">wurde aufgelöst durch</rdfs:label>
+    <rdfs:label xml:lang="el">διαλύθηκε από</rdfs:label>
+    <rdfs:label xml:lang="fr">a été dissous par</rdfs:label>
+    <

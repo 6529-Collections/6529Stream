@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.opengis.net/gml" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml" elementFormDefault="qualified" version="3.1.1.2" xml:lang="en">
+	<annotation>
+		<appinfo source="urn:opengis:specification:gml:schema-xsd:coordinateReferenceSystems:3.1.1"/>
+		<documentation>How to encode coordinate reference system definitions. Builds on referenceSystems.xsd to encode the data needed to define coordinate reference systems, including the specific subtypes of coordinate reference systems. 
+		This schema encodes the Coordinate Reference System (SC_) package of the extended UML Model for OGC Abstract Specification Topic 2: Spatial Referencing by Coordinates, with the exception of the abstract "SC_CRS" class. The "SC_CRS" class is encoded in referenceSystems.xsd, to eliminate the (circular) references from coordinateOperations.xsd to coordinateReferenceSystems.xsd. That UML model is adapted from ISO 19111 - Spatial referencing by coordinates, as described in Annex C of Topic 2. 
+		Caution: The CRS package in GML 3.1 and GML 3.1.1 is preliminary, and is expected to undergo some modifications that are not backward compatible during the development of GML 3.2 (ISO 19136). The GML 3.2 package will implement the model described in the revised version of ISO 19111. 
+		
+		GML is an OGC Standard.
+		Copyright (c) 2001,2005,2010 Open Geospatial Consortium.
+		To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .
+		</documentation>
+	</annotation>
+	<!-- ======================================================
+       includes and imports
+	====================================================== -->
+	<include schemaLocation="gml.xsd"/>
+	<include schemaLocation="coordinateSystems.xsd"/>
+	<include schemaLocation="datums.xsd"/>
+	<include schemaLocation="coordinateOperations.xsd"/>
+	<!-- ======================================================
+       elements and types
+	====================================================== -->
+	<element name="_CoordinateReferenceSystem" type="gml:AbstractReferenceSystemType" abstract="true" substitutionGroup="gml:_CRS">
+		<annotation>
+			<documentation>A coordinate reference system consists of an ordered sequence of coordinate system axes that are related to the earth through a datum. A coordinate reference system is defined by one datum and by one coordinate system. Most coordinate reference system do not move relative to the earth, except for engineering coordinate reference systems defined on moving platforms such as cars, ships, aircraft, and spacecraft. For further information, see OGC Abstract Specification Topic 2.
+
+Coordinate reference systems are commonly divided into sub-types. The common classification criterion for sub-typing of coordinate reference systems is the way in which they deal with earth curvature. This has a direct effect on the portion of the earth's surface that can be covered by that type of CRS with an acceptable degree of error. The exception to the rule is the subtype "Temporal" which has been added by analogy. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="coordinateReferenceSystemRef" type="gml:CoordinateReferenceSystemRefType"/>
+	<!-- =================================================== -->
+	<complexType name="CoordinateReferenceSystemRefType">
+		<annotation>
+			<documentation>Association to a coordinate reference system, either referencing or containing the definition of that reference system. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:_CoordinateReferenceSystem"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="CompoundCRS" type="gml:CompoundCRSType" substitutionGroup="gml:_CRS"/>
+	<!-- =================================================== -->
+	<complexType name="CompoundCRSType">
+		<annotation>
+			<documentation>A coordinate reference system describing the position of points through two or more independent coordinate reference systems. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractReferenceSystemType">
+				<sequence>
+					<element ref="gml:includesCRS" minOccurs="2" maxOccurs="unbounded">
+						<annotation>
+							<documentation>Ordered sequence of associations to all the component coordinate reference systems included in this compound coordinate reference system. </documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="includesCRS" type="gml:CoordinateReferenceSystemRefType">
+		<annotation>
+			<documentation>An association to a component coordinate reference system included in this compound coordinate reference system. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="compoundCRSRef" type="gml:CompoundCRSRefType"/>
+	<!-- =================================================== -->
+	<complexType name="CompoundCRSRefType">
+		<annotation>
+			<documentation>Association to a compound coordinate reference system, either referencing or containing the definition of that reference system. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:CompoundCRS"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="GeographicCRS" type="gml:GeographicCRSType" substitutionGroup="gml:_CoordinateReferenceSystem"/>
+	<!-- =================================================== -->
+	<complexType name="GeographicCRSType">
+		<annotation>
+			<documentation>A coordinate reference system based on an ellipsoidal approximation of the geoid; this provides an accurate representation of the geometry of geographic features for a large portion of the earth's surface.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractReferenceSystemType">
+				<sequence>
+					<element ref="gml:usesEllipsoidalCS"/>
+					<element ref="gml:usesGeodeticDatum"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="usesEllipsoidalCS" type="gml:EllipsoidalCSRefType">
+		<annotation>
+			<documentation>Association to the ellipsoidal coordinate system used by this CRS. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="usesGeodeticDatum" type="gml:GeodeticDatumRefType">
+		<annotation>
+			<documentation>Association to the geodetic datum used by this CRS. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="geographicCRSRef" type="gml:GeographicCRSRefType"/>
+	<!-- =================================================== -->
+	<complexType name="GeographicCRSRefType">
+		<annotation>
+			<documentation>Association to a geographic coordinate reference system, either referencing or containing the definition of that reference system. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:GeographicCRS"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="VerticalCRS" type="gml:VerticalCRSType" substitutionGroup="gml:_CoordinateReferenceSystem"/>
+	<!-- =================================================== -->
+	<complexType name="VerticalCRSType">
+		<annotation>
+			<documentation>A 1D coordinate reference system used for recording heights or depths. Vertical CRSs make use of the direction of gravity to define the concept of height or depth, but the relationship with gravity may not be straightforward. By implication, ellipsoidal heights (h) cannot be captured in a vertical coordinate reference system. Ellipsoidal heights cannot exist independently, but only as an insep

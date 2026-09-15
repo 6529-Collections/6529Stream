@@ -1,0 +1,25 @@
+
+      </a> 
+      will not change.
+     </p>
+     <p>
+      Previous dated (and unchanging) versions of this schema 
+      document are at:
+     </p>
+     <ul>
+      <li><a href="http://www.w3.org/2009/01/xml.xsd">
+	http://www.w3.org/2009/01/xml.xsd</a></li>
+      <li><a href="http://www.w3.org/2007/08/xml.xsd">
+	http://www.w3.org/2007/08/xml.xsd</a></li>
+      <li><a href="http://www.w3.org/2004/10/xml.xsd">
+	http://www.w3.org/2004/10/xml.xsd</a></li>
+      <li><a href="http://www.w3.org/2001/03/xml.xsd">
+	http://www.w3.org/2001/03/xml.xsd</a></li>
+     </ul>
+    </div>
+   </div>
+  </xs:documentation>
+ </xs:annotation>
+
+</xs:schema>
+

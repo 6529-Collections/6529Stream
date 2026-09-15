@@ -1,0 +1,12 @@
+{
+  "name": "STREAM_SCOPE_MEMBERSHIP_ABI_V1",
+  "version": 1,
+  "grammar": "abi.encode(uint16 version,uint256 chainId,address core,uint256 collectionId,uint8 scopeType,uint256 tokenCount,bytes32 tokenListHash,bytes32[] chunkHashes)",
+  "headBytes": 256,
+  "arrayOffset": 256,
+  "totalBytes": "288 + 32 * chunkHashes.length",
+  "widths": "Integers and addresses have canonical zero-extended ABI words; version equals 1 and scopeType is 2, 3 or 4. There is no outer struct offset and no trailing data.",
+  "parts": "At most 64 native document-store chunks. Every nonfinal chunk is exactly 8192 bytes. A final nonempty chunk has 32 through 8192 bytes, divisible by 32. Each chunk key is nonzero and hashes the exact retained bytes. Chunk order is authoritative.",
+  "completeList": "Concatenate all chunk bytes in order. Its byte length is exactly 32 * tokenCount and its Keccak-256 equals tokenListHash. Each word is a big-endian unsigned uint256 token ID. Member IDs must be strictly increasing. Empty lists have zero chunks and tokenListHash equal to Keccak-256 of empty bytes.",
+  "bounds": "The encoded storage profile permits 0 through 16384 IDs. There is no smaller token-list cap. A partial prefix is not a complete membership list. Any schema, width, length, partition or ordering violation rejects."
+}

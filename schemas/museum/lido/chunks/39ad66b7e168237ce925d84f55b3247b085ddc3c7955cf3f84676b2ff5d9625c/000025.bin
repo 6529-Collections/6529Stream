@@ -1,0 +1,73 @@
+eAppellation</span>&gt;</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:sourceAppellation</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a><span class="ot">        xml:lang=</span><span class="st">&quot;de&quot;</span>&gt;</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>        German National Library, GND, Mona Lisa. URL: https://d-nb.info/gnd/4074156-4 [2022-07-04]</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:sourceAppellation</span>&gt;</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:titleSet</span>&gt;</span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Alternative title; descriptive title --&gt;</span></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:titleSet</span></span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:type=</span><span class="st">&quot;http://vocab.getty.edu/aat/300417199&quot;</span></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00170&quot;</span>&gt;</span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>    <span class="co">&lt;!-- Alternative appellation --&gt;</span></span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:appellationValue</span></span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00170&quot;</span></span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a><span class="ot">        xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>        Portrait of Lisa Gherardini</span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:appellationValue</span>&gt;</span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:sourceAppellation</span>&gt;</span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a>        Getty Vocabulary Program, CONA [online], Mona Lisa. URL: http://vocab.getty.edu/page/cona/700000213</span>
+<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:sourceAppellation</span>&gt;</span>
+<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:titleSet</span>&gt;</span>
+<span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Alternative title; published title --&gt;</span></span>
+<span id="cb22-39"><a href="#cb22-39" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:titleSet</span></span>
+<span id="cb22-40"><a href="#cb22-40" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:type=</span><span class="st">&quot;http://vocab.getty.edu/aat/300417206&quot;</span></span>
+<span id="cb22-41"><a href="#cb22-41" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00170&quot;</span>&gt;</span>
+<span id="cb22-42"><a href="#cb22-42" aria-hidden="true" tabindex="-1"></a>    <span class="co">&lt;!-- Alternative appellation --&gt;</span></span>
+<span id="cb22-43"><a href="#cb22-43" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:appellationValue</span></span>
+<span id="cb22-44"><a href="#cb22-44" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00170&quot;</span></span>
+<span id="cb22-45"><a href="#cb22-45" aria-hidden="true" tabindex="-1"></a><span class="ot">        xml:lang=</span><span class="st">&quot;fr&quot;</span>&gt;</span>
+<span id="cb22-46"><a href="#cb22-46" aria-hidden="true" tabindex="-1"></a>        PORTRAIT DE MONA LISA (1479-1528) ; DITE LA JOCONDE</span>
+<span id="cb22-47"><a href="#cb22-47" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:appellationValue</span>&gt;</span>
+<span id="cb22-48"><a href="#cb22-48" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:sourceAppellation</span>&gt;</span>
+<span id="cb22-49"><a href="#cb22-49" aria-hidden="true" tabindex="-1"></a>        Collections des musées de France (Joconde), Portait de Mona Lisa. URL: https://www.pop.culture.gouv.fr/notice/joconde/000PE025604</span>
+<span id="cb22-50"><a href="#cb22-50" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:sourceAppellation</span>&gt;</span>
+<span id="cb22-51"><a href="#cb22-51" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:titleSet</span>&gt;</span></code></pre></div>
+            <blockquote>
+            <p>See also <a
+            href="https://vraweb.org/wp-content/uploads/2020/04/CatalogingCulturalObjectsFullv2.pdf">Cataloging
+            Cultural Objects</a>: 1.2.2 Rules for Title, pp. 58–69.</p>
+            </blockquote>
+            <h3 data-number="5.1.5" id="record-identifier"><span
+            class="header-section-number">5.1.5</span> Record
+            Identifier</h3>
+            <p><strong>Element name:</strong> &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#recordID">lido:recordID</a>&gt;</p>
+            <p><strong>Note:</strong> The Record Identifier element is a
+            text string uniquely identifying the record in the
+            contributor’s database or other recordkeeping system. It
+            serves as a reference for all communication with the
+            originator concerning the contents of the metadata
+            record.</p>
+            <p><strong>Example:</strong> The following example shows the
+            local identifier for the record describing the “<a
+            href="https://www.bildindex.de/document/obj00076417">Mona
+            Lisa</a>” provided by Deutsches Dokumentationszentrum für
+            Kunstgeschichte - Bildarchiv Foto Marburg.</p>
+            <blockquote>
+            <p><strong>Record Identifier:</strong> obj00076417
+            <strong><em>Type:</em></strong> Local identifier |
+            <strong>Source:</strong> Deutsches Dokumentationszentrum für
+            Kunstgeschichte - Bildarchiv Foto Marburg</p>
+            </blockquote>
+            <div class="sourceCode" id="cb23"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:recordID</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:source=</span><span class="st">&quot;Deutsches Dokumentationszentrum für Kunstgeschichte - Bildarchiv Foto Marburg&quot;</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00100&quot;</span>&gt;</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    obj00076417</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:recordID</span>&gt;</span></code></pre></div>
+            <h3 data-number="5.1.6" id="record-type"><span
+            class="header-section-number">5.1.6</span> Record Type</h3>
+            <p><strong>Element name:</strong> &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#recordType">lido:recordType</a>&gt;</p>
+            <p><strong>Note:</strong> The Record Type element indicates
+         

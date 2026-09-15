@@ -1,0 +1,251 @@
+",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "HumanMadeObject"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "equivalent": {"$ref": "#/$defs/equivalentProp"}
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "DigitalObjectRef": {
+            "title": "dig:D1_Digital_Object\nSee: [Schema](digital.html)",
+            "description": "Reference to a `DigitalObject`",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "DigitalObject"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "equivalent": {"$ref": "#/$defs/equivalentProp"}
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "LinguisticObjectRef": {
+            "title": "crm:E33_Linguistic_Object",
+            "description": "Reference to a `LinguisticObject`\nSee: [Schema](text.html)",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "type": "string",
+                            "const": "LinguisticObject"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "equivalent": {"$ref": "#/$defs/equivalentProp"}
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "SetRef": {
+            "title": "la:Set",
+            "description": "Reference to a `Set`\nSee: [Schema](set.html)",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Set"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "equivalent": {"$ref": "#/$defs/equivalentProp"}
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "InfoObjectRef": {
+            "title": "crm:E73_Information_Object",
+            "description": "Reference to an `InformationObject`",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "type": "string",
+                            "const": "InformationObject"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "equivalent": {"$ref": "#/$defs/equivalentProp"}
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "PeriodRef": {
+            "title": "crm:E4_Period",
+            "description": "Reference to a `Period`\nSee: [Schema](event.html)",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Period"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "equivalent": {"$ref": "#/$defs/equivalentProp"}
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "EventRef": {
+            "title": "crm:E6_Event",
+            "description": "Reference to an `Event`\nSee: [Schema](event.html)",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Event"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "equivalent": {"$ref": "#/$defs/equivalentProp"}
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "ActivityRef": {
+            "title": "crm:E7_Activity",
+            "description": "Reference to an `Activity`\nSee: [Schema](event.html)",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Activity"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "equivalent": {"$ref": "#/$defs/equivalentProp"}
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "VisualItemRef": {
+            "title": "crm:E36_Visual_Item",
+            "description": "Reference to a `VisualItem`\nSee: [Schema](image.html)",
+            "type": "obje

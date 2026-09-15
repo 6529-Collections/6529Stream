@@ -1,0 +1,148 @@
+      class="toc-section-number">6.1</span> Syntactic
+      validation</a></li>
+      <li><a href="#schematron"><span
+      class="toc-section-number">6.2</span> Schematron</a></li>
+      <li><a href="#further-measures"><span
+      class="toc-section-number">6.3</span> Further measures</a></li>
+      </ul></li>
+      <li><a href="#references-and-further-reading"><span
+      class="toc-section-number">7</span> References and further
+      reading</a>
+      <ul>
+      <li><a href="#lido"><span class="toc-section-number">7.1</span>
+      LIDO</a></li>
+      <li><a href="#general-introductions"><span
+      class="toc-section-number">7.2</span> General
+      introductions</a></li>
+      <li><a href="#metadata-standards-and-guidelines"><span
+      class="toc-section-number">7.3</span> Metadata standards and
+      guidelines</a></li>
+      <li><a href="#content-standards-and-guidelines"><span
+      class="toc-section-number">7.4</span> Content standards and
+      guidelines</a></li>
+      <li><a href="#value-vocabularies"><span
+      class="toc-section-number">7.5</span> Value vocabularies</a></li>
+      <li><a href="#linked-data-and-semantic-web"><span
+      class="toc-section-number">7.6</span> Linked Data and Semantic
+      Web</a></li>
+      <li><a href="#application-profiles-1"><span
+      class="toc-section-number">7.7</span> Application
+      profiles</a></li>
+      <li><a href="#formal-languages-and-specifications"><span
+      class="toc-section-number">7.8</span> Formal languages and
+      specifications</a></li>
+      </ul></li>
+      </ul>
+      <hr />
+      <a href="https://lido-schema.org">https://lido-schema.org</a>
+      </nav>
+        <article>
+              <header id="title-block-header">
+        <h1 class="title">LIDO Primer</h1>
+                  <p class="subtitle">Lightweight Information Describing
+Objects (LIDO) Primer</p>
+                          <p class="latest">
+            <b>Latest version:</b>
+            <a href="https://lido-schema.org/documents/primer/latest/lido-primer.html">https://lido-schema.org/documents/primer/latest/lido-primer.html</a>
+          </p>
+          <p class="version">
+            <b>This version:</b>
+            <a href="https://lido-schema.org/documents/primer/2024-09-11/lido-primer.html">https://lido-schema.org/documents/primer/2024-09-11/lido-primer.html</a>
+          </p>
+          <p class="date">
+            <b>Publication date:</b>
+            2024-09-11
+          </p>
+                          <p class="editor">
+            <b>Editor:</b>
+            <a href="https://cidoc.mini.icom.museum/working-groups/lido/">CIDOC
+LIDO Working Group</a>
+          </p>
+                          <p class="author">
+            <b>Authors:</b>
+                          Jutta Lindenthal,
+                          Hanna-Lena Meiners,
+                          Detlev Balzer          </p>
+                          <p class="contributor">
+            <b>Contributors:</b>
+                          Barbara Fichtl,
+                          Simon Sendler,
+                          Regine Stein,
+                          LIDO-DE Working Group          </p>
+                          <p class="cite-as">
+            <b>Cite as:</b>
+            CIDOC LIDO Working Group (2024-09-11). LIDO Primer. <a href="https://lido-schema.org/documents/primer/2024-09-11/lido-primer.html">https://lido-schema.org/documents/primer/2024-09-11/lido-primer.html</a>
+          </p>
+                                      <p class="licence">
+              <b>License:</b>
+              <a href="https://creativecommons.org/licenses/by/4.0/">CC
+BY 4.0</a>
+            </p>
+                          </header>
+            <h1 data-number="1" id="about-this-document"><span
+            class="header-section-number">1</span> About this
+            document</h1>
+            <h2 data-number="1.1" id="scope"><span
+            class="header-section-number">1.1</span> Scope</h2>
+            <p>The LIDO Primer is a user guide for those who wish to
+            represent information describing objects or works of
+            material culture and natural heritage with LIDO. Described
+            objects may be human-made art works or utilitarian objects,
+            as well as natural specimens or archeological remains. It
+            is intended for anyone concerned with producing,
+            maintaining, transforming, or publishing metadata for
+            cultural heritage collections, not only limited to museums,
+            but also including, for example, libraries and archives. The
+            Primer complements the more technical documents listed below
+            by giving background information and introductory examples
+            for applying the LIDO schema in practice.</p>
+            <p>Throughout this Primer, the painting <em>Mona Lisa</em>
+            by Leonardo da Vinci serves as an example of an object
+            description in LIDO Version 1.1. XML snippets are provided
+            to show the usage of LIDO elements, attributes, and
+            recommended terminology. Besides, the <em>Mona Lisa</em>
+            also features in the Europeana Data Model Primer (<a
+            href="https://pro.europeana.eu/files/Europeana_Professional/Share_your_data/Technical_requirements/EDM_Documentation/EDM_Primer_130714.pdf">EDM
+            Primer</a>) to illustrate the main features of the model.
+            The example in LIDO intends to demonstrate similarities
+            between its XML-based model and the RDF graph resulting from
+            application of the EDM.</p>
+            <h2 data-number="1.2" id="associated-documents"><span
+            class="header-section-number">1.2</span> Associated
+            documents</h2>
+            <ul>
+            <li>The <strong>LIDO XML Schema Definition</strong> is the
+            authoritative reference for all LIDO elements and
+            attributes. The latest version can be found here: <a
+            href="http://lido-schema.org/schema/latest/lido.xsd"
+            class="uri">http://lido-schema.org/schema/latest/lido.xsd</a></li>
+            <li>The <strong>LIDO Documentation</strong> provides a
+            concise description of all LIDO elements and attributes as
+            well as detailed structural and technical information. It is
+            recommended to consult the documentation for a systematic
+            description of all LIDO elements and attributes. The latest
+            version can be found here: <a
+            href="http://lido-schema.org/schema/latest/lido.html"
+            class="uri">http://lido-schema.org/schema/latest/lido.html</a></li>
+            <li>The <strong>LIDO Terminology Recommendation</strong>
+            provides references to recommended terms from the LIDO
+            Terminology or other linked open vocabularies for a number
+            of LIDO elements and attributes. The latest version can be
+            found here: <a
+            href="http://lido-schema.org/documents/terminology-recommendation.html"
+            class="uri">http://lido-schema.org/documents/terminology-recommendation.html</a></li>
+            <li>The <strong>LIDO Terminology</strong> is publicly
+            accessible via <a href="http://terminology.lido-schema.org"
+            class="uri">http://terminology.lido-schema.org</a>. A short
+            introduction and a documentation of the LIDO Terminology LOD
+            interface is given here: <a
+            href="https://cidoc.mini.icom.museum/working-groups/lido/lido-overview/lido-terminology/"
+            class="uri">https://cidoc.mini.icom.museum/working-groups/lido/lido-overview/lido-terminology/</a></li>
+            <li><strong>LIDO Examples</strong> can be found here: <a
+            href="https://lido-schema.org/examples">LIDO
+            Examples</a></li>
+            <li>The <strong>LIDO website</strong> provides further
+            information about LIDO and other resources: <a
+            href="https://lido-schema.org"
+            class="uri">https://lido-schema.org</a> </li>
+      

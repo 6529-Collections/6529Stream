@@ -1,0 +1,97 @@
+f E36 Visual Item shown by an instance of E24 Physical Human-Made Thing.
+This property is similar to P62 depicts (is depicted by) in that it associates an instance of E24 Physical Human-Made Thing with a visual representation. However, P65 shows visual item (is shown by) differs from the P62 depicts (is depicted by) property in that it makes no claims about what the instance of E36 Visual Item is deemed to represent. An instance of E36 Visual Item identifies a recognisable image or visual symbol, regardless of what this image may or may not represent.
+For example, all recent British coins bear a portrait of Queen Elizabeth II, a fact that is correctly documented using P62 depicts (is depicted by). Different portraits have been used at different periods, however. P65 shows visual item (is shown by) can be used to refer to a particular portrait.
+P65 shows visual item (is shown by) may also be used for Visual Items such as signs, marks and symbols, for example the 'Maltese Cross' or the 'copyright symbol’ that have no particular representational content.
+This property is part of the fully developed path E24 Physical Human-Made Thing, P65 shows visual item, E36 Visual Item, P138 represents to E1 CRM Entity which is shortcut by, P62 depicts (is depicted by).</rdfs:comment>
+    <rdfs:domain rdf:resource="E24_Physical_Human-Made_Thing" />
+    <rdfs:range rdf:resource="E36_Visual_Item" />
+    <rdfs:subPropertyOf rdf:resource="P128_carries" />
+    <owl:inverseOf rdf:resource="P65i_is_shown_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P65i_is_shown_by">
+    <rdfs:label xml:lang="en">is shown by</rdfs:label>
+    <rdfs:label xml:lang="de">wird gezeigt durch</rdfs:label>
+    <rdfs:label xml:lang="el">εμφανίζεται σε</rdfs:label>
+    <rdfs:label xml:lang="fr">est représenté par</rdfs:label>
+    <rdfs:label xml:lang="pt">é apresentado por</rdfs:label>
+    <rdfs:label xml:lang="ru">показан при помощи</rdfs:label>
+    <rdfs:label xml:lang="zh">被展示</rdfs:label>
+    <rdfs:domain rdf:resource="E36_Visual_Item" />
+    <rdfs:range rdf:resource="E24_Physical_Human-Made_Thing" />
+    <rdfs:subPropertyOf rdf:resource="P128i_is_carried_by" />
+    <owl:inverseOf rdf:resource="P65_shows_visual_item" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P67_refers_to">
+    <rdfs:label xml:lang="en">refers to</rdfs:label>
+    <rdfs:label xml:lang="de">verweist auf</rdfs:label>
+    <rdfs:label xml:lang="el">αναφέρεται σε</rdfs:label>
+    <rdfs:label xml:lang="fr">renvoie à</rdfs:label>
+    <rdfs:label xml:lang="pt">referencia</rdfs:label>
+    <rdfs:label xml:lang="ru">ссылаeтся на</rdfs:label>
+    <rdfs:label xml:lang="zh">涉及</rdfs:label>
+    <rdfs:comment>This property documents that an instance of E89 Propositional Object makes a statement about an instance of E1 CRM Entity. P67 refers to (is referred to by) has the P67.1 has type link to an instance of E55 Type. This is intended to allow a more detailed description of the type of reference. This differs from P129 is about (is subject of), which describes the primary subject or subjects of the instance of E89 Propositional Object.</rdfs:comment>
+    <rdfs:domain rdf:resource="E89_Propositional_Object" />
+    <rdfs:range rdf:resource="E1_CRM_Entity" />
+    <owl:inverseOf rdf:resource="P67i_is_referred_to_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P67i_is_referred_to_by">
+    <rdfs:label xml:lang="en">is referred to by</rdfs:label>
+    <rdfs:label xml:lang="de">wird angeführt von</rdfs:label>
+    <rdfs:label xml:lang="el">αναφέρεται από</rdfs:label>
+    <rdfs:label xml:lang="fr">fait l'objet d'un renvoi par</rdfs:label>
+    <rdfs:label xml:lang="pt">é referenciado por</rdfs:label>
+    <rdfs:label xml:lang="ru">на который ссылаeтся</rdfs:label>
+    <rdfs:label xml:lang="zh">被涉及</rdfs:label>
+    <rdfs:domain rdf:resource="E1_CRM_Entity" />
+    <rdfs:range rdf:resource="E89_Propositional_Object" />
+    <owl:inverseOf rdf:resource="P67_refers_to" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P68_foresees_use_of">
+    <rdfs:label xml:lang="en">foresees use of</rdfs:label>
+    <rdfs:label xml:lang="de">sieht den Gebrauch vor von</rdfs:label>
+    <rdfs:label xml:lang="el">συνήθως χρησιμοποιεί</rdfs:label>
+    <rdfs:label xml:lang="fr">prévoit l'usage de</rdfs:label>
+    <rdfs:label xml:lang="pt">normalmente emprega</rdfs:label>
+    <rdfs:label xml:lang="ru">прeдусматриваeт использованиe</rdfs:label>
+    <rdfs:label xml:lang="zh">预知使用</rdfs:label>
+    <rdfs:comment>This property identifies an instance of E57 Material foreseen to be used by an instance of E29 Design or Procedure.
+E29 Designs and procedures commonly foresee the use of particular instances of E57 Material. The fabrication of adobe bricks, for example, requires straw, clay and water. This property enables this to be documented.
+This property is not intended for the documentation of instances of E57 Materials that were used on a particular occasion when an instance of E29 Design or Procedure was executed.</rdfs:comment>
+    <rdfs:domain rdf:resource="E29_Design_or_Procedure" />
+    <rdfs:range rdf:resource="E57_Material" />
+    <rdfs:subPropertyOf rdf:resource="P67_refers_to" />
+    <owl:inverseOf rdf:resource="P68i_use_foreseen_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P68i_use_foreseen_by">
+    <rdfs:label xml:lang="en">use foreseen by</rdfs:label>
+    <rdfs:label xml:lang="de">vorgesehen für Gebrauch durch defined</rdfs:label>
+    <rdfs:label xml:lang="el">συνήθως χρησιμοποιείται από</rdfs:label>
+    <rdfs:label xml:lang="fr">usage prévu de</rdfs:label>
+    <rdfs:label xml:lang="pt">é empregado por</rdfs:label>
+    <rdfs:label xml:lang="ru">использованиe прeдусмотрeно</rdfs:label>
+    <rdfs:label xml:lang="zh">被预知使用</rdfs:label>
+    <rdfs:domain rdf:resource="E57_Material" />
+    <rdfs:range rdf:resource="E29_Design_or_Procedure" />
+    <rdfs:subPropertyOf rdf:resource="P67i_is_referred_to_by" />
+    <owl:inverseOf rdf:resource="P68_foresees_use_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P69_has_association_with">
+    <rdfs:label xml:lang="en">has association with</rdfs:label>
+    <rdfs:label xml:lang="de">ist verbunden mit</rdfs:label>
+    <rdfs:label xml:lang="el">σχετίζεται με</rdfs:label>
+    <rdfs:label xml:lang="fr">est associé à</rdfs:label>
+    <rdfs:label xml:lang="pt">é associado com</rdfs:label>
+    <rdfs:label xml:lang="ru">ассоциируeтся с</rdfs:label>
+    <rdfs:label xml:lang="zh">关联</rdfs:label>
+    <rdfs:comment>This property generalises relationships like whole-part, sequence, prerequisite or inspired by between instances of E29 Design or Procedure. Any instance of E29 Design or Procedure may be associated with other designs or procedures. The property is considered to be symmetrical unless otherwise indicated by P69.1 has type. The property is not transitive.
+This property is a directed relationship. The P69.1 has type property of P69 has association with allows the nature of the association to be specified reading from domain to range; examples of types of association between instances of E29 Design or Procedure include: has part, follows, requires, etc.
+Instances of this property are considered to be symmetric, in case no directed sense is provided for them by the property P69.1 has type.
+The property can typically be used to model the decomposition of the description of a complete workflow into a series of separate procedures.</rdfs:comment>
+    <rdfs:domain rdf:resource="E29_Design_or_Procedure" />
+    <rdfs:range rdf:resource="E29_Design_or_Procedure" />
+    <owl:inverseOf rdf:resource="P69i_is_associated_with" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P69i_is_associated_with">
+    <rdfs:label xml:lang="en">is associated with</rdfs:label>
+    <rdfs:label xml:lang="fr">est associé à</rdfs:label>
+    <rdfs:label xml:lang="ru">ассоциирован с</rdfs:lab

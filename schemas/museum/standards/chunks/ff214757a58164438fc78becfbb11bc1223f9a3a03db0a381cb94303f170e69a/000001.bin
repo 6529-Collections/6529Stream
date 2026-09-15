@@ -1,0 +1,89 @@
+ir **inherited** properties that could be expressed according to CIDOC Model.
+
+As a result,
+
+a) The following **direct forward direction** CIDOC Properties **cannot** be expressed and are **not defined** in RDFS:
+
+- `E95 Spacetime Primitive. P169 defines spacetime volume (spacetime volume is defined by): E92 Spacetime Volume`
+- `E61 Time Primitive. P170 defines time (time is defined by): E52 Time-Span`
+
+b) The following **direct backwards direction** CIDOC Properties **cannot** be expressed and are **not defined** in RDFS:
+
+- `E94 Space Primitive. P168i defines place (place is defined by): E53 Place`
+
+&gt; B3. Whenever no backwards/inverse property name is specified and property domain matches with property range, then the forward/direct property direction should be used for **both** directions and **no backwards/inverse property** needs to be defined.
+
+As a result, we did not implement a separate backwards/inverse direction for the following CIDOC Properties:
+
+- `E53 Place. P121 overlaps with: E53 Place`
+- `E53 Place. P122 borders with: E53 Place`
+- `E92 Spacetime Volume. P132 spatiotemporally overlaps with: E92 Spacetime Volume`
+- `E92 Spacetime Volume. P133 is spatiotemporally separated from: E92 Spacetime Volume`
+
+Additionally, all aforementioned redundant backwards/inverse CIDOC Property direction references, are replaced by the respective direct/forward CIDOC Property direction.
+
+- The hierarchical link of  `P10i` subPropertyOf `P132i` was replaced with `P10i` subPropertyOf `P132`.
+
+#### **C. Labels and appellations**
+
+CIDOC-CRM version 7.1.3 defines the below subpropertyOf relations:
+
+- `P168 place is defined by` `subPropertyOf` `P1 is identified by`
+- `P169i spacetime volume is defined by` `subPropertyOf` `P1 is identified by`
+- `P170i time is defined by` `subPropertyOf` `P1 is identified by`
+
+The range of P168, P169i and P170i is `E94 Space Primitive`, `E95 Spacetime Primitive` and `E61 Time Primitive` respectively, which are all subclasses of `E41 Appellation` and interpreted as `rdfs:Literal` in RDFS, i.e. these three properties are datatype properties. However, the P1 property has range E41 Appellation, i.e. this property is an object property. Since OWL 2 distinguishes between object subproperties (https://www.w3.org/TR/2012/REC-owl2-syntax-20121211/#Object_Subproperties), data subproperties (https://www.w3.org/TR/2012/REC-owl2-syntax-20121211/#Data_Subproperties) and annotation subproperties (https://www.w3.org/TR/2012/REC-owl2-syntax-20121211/#Annotation_Subproperties), and also in OWL-DL the subject and object of a subproperty statement must be either both datatype properties or both object properties (see here (https://www.w3.org/TR/owl-ref/#subPropertyOf-def)), we do not include these three subPropertyOf relations in the provided RDFS implementation to avoid inconsistencies when reasoning with OWL 2 and OWL DL. Instead, we provide them in a separate ‘supplementary’ RDFS file which one can use if such inconsistencies are not expected.
+
+In addition, since in the current practice, the property `rdfs:label` is widely used to denote appellations (see CRM-SIG Issue 394 (http://cidoc-crm.org/Issue/ID-394-solution-for-dualism-of-e41-appellation-and-rdfslabel)), the following `subPropertyOf` relation was also included in the supplementary RDFS file:
+
+- `rdfs:label` subPropertyOf `P1 is identified by`
+
+Note that according to the RDF Schema 1.1 specification, the domain (or range) of a property does not necessarily need to be 'subClassOf' or 'equal' to the domain (or range) of its superproperties. By including this subproperty relation, one can either directly use `rdfs:label` for providing a non-URI identifier/appellation for an instance of `E1 CRM Entity`, or use `P1 is identified by` for associating an additional URI-identifier with an instance of `E1 CRM Entity`, or use `P1 is identified by` and create an intermediate node (i.e. a URI-identifier for instance of `E41_Appellation`) for providing more detailed information about this appellation.
+
+#### **D. Implementing Value Intervals**
+
+The following are property pairs needed to simulate the interval-valued primitive values foreseen by the CRM:
+
+&gt; D1. addition of two new properties, defined as subproperties of `E52 Time-Span. P81 ongoing throughout: E61 Time Primitive`, for the 'maximum known temporal extent' boundaries specification of `E61 Time Primitive`.
+
+As a result, we have created the following property definitions:
+
+- `E52 Time-Span. P81a end of the begin: rdfs:Literal` (subPropertyOf `E52 Time-Span. P81 ongoing throughout: E61 Time Primitive`)
+- `E52 Time-Span. P81b begin of the end: rdfs:Literal` (subPropertyOf `E52 Time-Span. P81 ongoing throughout: E61 Time Primitive`)
+
+&gt; D2. addition of two new properties, defined as subproperties of `E52 Time-Span. P82 at some time within: E61 Time Primitive`, for the 'minimum outer bounds' specification of `E61 Time Primitive`.
+
+Consequently, we have created the following property definitions:
+
+- `E52 Time-Span. P82a begin of the begin: rdfs:Literal` (subPropertyOf `E52 Time-Span. P82 at some time within: E61 Time Primitive`)
+- `E52 Time-Span. P82b end of the end: rdfs:Literal` (subPropertyOf `E52 Time-Span. P82 at some time within: E61 Time Primitive`)
+
+&gt; D3. addition of two new properties, defined as subproperties of `E54 Dimension. P90 has value: E60 Number`, for the upper and lower boundaries specification of `E60 Number`.
+
+Consequently, we have created the following property definitions:
+
+- `E54 Dimension. P90a has lower value limit: rdfs:Literal` (subPropertyOf `E54 Dimension. P90 has value: E60 Number`)
+- `E54 Dimension. P90b has upper value limit: rdfs:Literal` (subPropertyOf `E54 Dimension. P90 has value: E60 Number`)
+
+#### **E. Multiple ISA custom declaration Classes**
+
+The following are declarations of frequently used multiple instantiations as classes with respective multiple IsA (so far only one):
+
+&gt; E1. addition of a new class, defined as subClassOf `E41 Appellation` and `E33 Linguistic Object`, for all Appellations being regarded
+specific to or characteristic for a language group and being described indirectly via a URI.
+
+As a result, we have created the following class definition:
+
+- `E33_E41_Linguistic_Appellation` subClass of `E33_Linguistic_Object` and `E41_Appellation`
+
+#### **F. Translations and Scope notes**
+
+&gt; F1. **Translations** Each RDFS Class or Property definition is accompanied by a set of translations expressed as rdfs:labels separated by xml:lang tags. The translation label used for each language is **the most recent** still **valid** translation. Still valid translation may be interpreted in the following ways:
+
+- The English label of the `CurrentVersion` that the current RDFS file is referring to is *almost equal* (accepting only differences regarding multiple spaces) to the English label of the `TranslationVersion` that the translated label was created for. For example, in order to accept a translation for `E22 Human-Made Object` in the CurrentVersion (7.1.3) we should have a translation for E22 that was created based on a CIDOC version that used the same name for E22. The class name of E22 was changed from `E22 Man-Made Object` to `E22 Human-Made Object` in version 6.2.7. So the only **valid** translations would be these that were created based on version 6.2.7 or later. Currently no such translation has been created, so `E22 Human-Made Object` in CurrentVersion (7.1.3) does not define any translation in the RDFS file.
+
+- Another option is to qualify translations as **valid** based on the scope note comparison of `CurrentVersion` and `TranslationVersion`. Since scope notes include formatting information, the comparison should ignore formatting changes.
+
+Currently in this version we follow the option to qualify translations as valid based on the comparison of the respective labels in the corresponding CIDOC versions.
+
+&gt; F2. **Scope notes** are defined as rdfs:comment and include only the text of the official CIDOC-CRM version in English language. Since scope notes are not just simple text

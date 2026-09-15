@@ -165,7 +165,7 @@ class ReleaseChecksumTests(unittest.TestCase):
     def test_release_tool_trust_policy_has_exact_configured_cardinality(
         self,
     ) -> None:
-        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 369)
+        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 373)
         self.assertEqual(
             len(set(generator.DEFAULT_COVERED_PATHS)),
             len(generator.DEFAULT_COVERED_PATHS),
@@ -3475,6 +3475,41 @@ class ReleaseChecksumTests(unittest.TestCase):
         }
         self.assert_committed_checksums_cover(expected_paths)
 
+    def test_current_continuity_extension_is_in_canonical_policy(self) -> None:
+        expected = {
+            Path("docs/architecture/artist-owner-record-continuity-extension-v1.json"),
+            Path("docs/architecture/artist-owner-record-continuity-extension-v1.schema.json"),
+            Path("tools/protocol/check_artist_owner_record_continuity_extension.py"),
+            Path("tools/protocol/test_artist_owner_record_continuity_extension.py"),
+        }
+        self.assertTrue(expected.issubset(set(generator.DEFAULT_COVERED_PATHS)))
+
+    def test_committed_checksums_cover_current_continuity_extension(self) -> None:
+        self.assert_committed_checksums_cover({
+            Path("docs/architecture/artist-owner-record-continuity-extension-v1.json"),
+            Path("docs/architecture/artist-owner-record-continuity-extension-v1.schema.json"),
+            Path("tools/protocol/check_artist_owner_record_continuity_extension.py"),
+            Path("tools/protocol/test_artist_owner_record_continuity_extension.py"),
+        })
+
+    def test_work_lido_subtree_retains_exact_lf_xml_policy(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            attributes = root / ".gitattributes"
+            attributes.write_bytes(b".gitattributes text eol=lf\nschemas/museum/work-lido/** text eol=lf\n")
+            xml = root / "schemas/museum/work-lido/example/record.xml"
+            xml.parent.mkdir(parents=True)
+            original = b"<record>\n</record>\n"
+            xml.write_bytes(original)
+            facts = generator.validate_covered_file_line_endings(root, [attributes, xml])
+            self.assertEqual(facts[xml.relative_to(root).as_posix()].classification, "lf")
+            self.assertEqual(xml.read_bytes(), original)
+            xml.write_bytes(original.replace(b"\n", b"\r\n"))
+            with self.assertRaisesRegex(generator.ChecksumError, "eol=lf"):
+                generator.validate_covered_file_line_endings(root, [attributes, xml])
+            with self.assertRaisesRegex(generator.ChecksumError, "unsupported"):
+                generator._parse_root_gitattributes(b"schemas/museum/work-lido/**/record.xml text eol=lf\n")
+
     def test_committed_checksums_cover_artist_owner_record_continuity_packet(
         self,
     ) -> None:
@@ -3601,6 +3636,40 @@ class ReleaseChecksumTests(unittest.TestCase):
             },
             {"lf", "crlf"},
         )
+
+    def test_whitespace_diagnostic_override_preserves_canonical_eol_rules(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            attributes = root / ".gitattributes"
+            attributes.write_bytes(
+                b"* text=auto\n.gitattributes text eol=lf\n*.html text eol=lf\n"
+                b"notice.html whitespace=-blank-at-eol\n"
+            )
+            notice = root / "notice.html"
+            original = b"upstream notice retains spaces  \n"
+            notice.write_bytes(original)
+            facts = generator.validate_covered_file_line_endings(root, [attributes, notice])
+            self.assertEqual(facts["notice.html"].classification, "lf")
+            self.assertEqual(notice.read_bytes(), original)
+            notice.write_bytes(original.replace(b"\n", b"\r\n"))
+            with self.assertRaisesRegex(generator.ChecksumError, "eol=lf"):
+                generator.validate_covered_file_line_endings(root, [attributes, notice])
+
+    def test_whitespace_diagnostic_override_can_share_explicit_text_rule(self) -> None:
+        self.assertEqual(
+            generator._parse_root_gitattributes(
+                b"notice.html text eol=lf whitespace=-blank-at-eol\n"
+            ),
+            [("notice.html", "text", "lf")],
+        )
+
+    def test_whitespace_diagnostic_override_does_not_allow_other_attributes(self) -> None:
+        for attribute in (b"filter=external", b"working-tree-encoding=UTF-16", b"whitespace=unknown"):
+            with self.subTest(attribute=attribute):
+                with self.assertRaisesRegex(generator.ChecksumError, "unsupported .* attribute"):
+                    generator._parse_root_gitattributes(
+                        b"*.html text eol=lf\nnotice.html whitespace=-blank-at-eol " + attribute + b"\n"
+                    )
 
     def test_line_ending_validator_accepts_declared_canonical_parity(
         self,

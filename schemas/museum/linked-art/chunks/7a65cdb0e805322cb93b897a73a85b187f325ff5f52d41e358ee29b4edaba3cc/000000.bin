@@ -1,0 +1,218 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://linked.art/api/1.0/schema/core.json",
+    "title": "Core Schema Definitions",
+    "description": "Core definitions that are used to compose the Linked Art JSON-LD API",
+    "type": "object",
+    "definitions": {
+        "idProp": {
+            "title": "the subject uri",
+            "description": "The URI of the entity",
+            "type": "string",
+            "format": "uri"
+        },
+        "labelProp": {
+            "title": "rdfs:label",
+            "description": "A human readable name or label for the entity, intended for developers",
+            "type": "string",
+            "examples": [
+                "Georgia O'Keeffe",
+                "Blue by Georgia O'Keeffe",
+                "New Haven, CT"
+            ]
+        },
+        "typeProp": {
+            "title": "rdf:type",
+            "description": "The class of the entity",
+            "type": "string",
+            "examples": [
+                "Person",
+                "Place",
+                "Type",
+                "HumanMadeObject"
+            ]
+        },
+        "identified_byProp": {
+            "title": "crm:P1_is_identified_by",
+            "description": "A `Name` or `Identifier` that identifies the entity",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/NameOrIdentifier"
+            }
+        },
+        "classified_asProp": {
+            "title": "crm:P2_has_type",
+            "description": "A `Type` which classifies this entity beyond the class given in the `type` property",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Concept"
+            }
+        },
+        "contentProp": {
+            "title": "crm:P190_has_symbolic_content",
+            "description": "The string representation of a `Name`, `Identifier`, `Statement` or other text",
+            "type": "string"
+        },
+        "referred_to_byProp": {
+            "title": "crm:P67i_is_referred_to_by",
+            "description": "An embedded statement about this entity, or a reference to a text that refers to the entity",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/LingObjOrDigitalObjOrStatement"
+            }
+        },
+        "aboutProp": {
+            "title": "crm:P129_is_about", 
+            "description": "The main topic(s) of the content", 
+            "type": "array", 
+            "items": {
+                "$ref": "core.json#/definitions/AnyRef"
+            }
+        },
+        "languageProp": {
+            "title": "crm:P72_has_language",
+            "description": "A reference to one or more `Language` entities in which the `content` of this text is written",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/LanguageRef"
+            }
+        },
+        "equivalentProp": {
+            "title": "la:equivalent",
+            "description": "A reference to one or more other identities for this entity, such as in external vocabularies or systems",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/AnyRef"
+            }
+        },
+        "representationProp": {
+            "title": "crm:P138i_has_representation",
+            "description": "An embedded link through a VisualItem to a Digital Object",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/VisualItemEmbed"
+            }
+        },
+        "member_ofSetProp": {
+            "title": "la:member_of",
+            "description": "A reference to one or more `Set` entities of which this entity is a member",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/SetRef"
+            }
+        },
+        "member_ofGroupProp": {
+            "title": "crm:P107i_is_current_or_former_member_of",
+            "description": "A reference to one or more `Group` entities of which this entity is a member",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/GroupRef"
+            }
+        },
+        "valueProp": {
+            "title": "crm:P90_has_value",
+            "description": "The numeric value of a `Dimension` or `MonetaryAmount`",
+            "type": "number",
+            "examples": [
+                10,
+                0.5,
+                42.75
+            ]
+        },
+        "upper_value_limitProp": {
+            "title": "crm:P90a_has_upper_value_limit",
+            "description": "The highest possible value for the `Dimension` or `MonetaryAmount`",
+            "type": "number",
+            "examples": [
+                100
+            ]
+        },
+        "lower_value_limitProp": {
+            "title": "crm:P90a_has_lower_value_limit",
+            "description": "The lowest possible value for the `Dimension` or `MonetaryAmount`",
+            "type": "number",
+            "examples": [
+                5
+            ]
+        },
+        "took_place_atProp": {
+            "title": "crm:P7_took_place_at",
+            "description": "A `Place` at which this event occured",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/PlaceRef"
+            }
+        },
+        "timespanProp": {
+            "title": "crm:P4_has_time-span",
+            "description": "A `TimeSpan` which describes the date-time range during which this event occured",
+            "$ref": "#/definitions/TimeSpan"
+        },
+        "caused_byProp": {
+            "title": "sci:O13i_is_triggered_by",
+            "description": "Another event which caused this event to occur",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/EventRefOrActivityRef"
+            }
+        },
+        "carried_out_byProp": {
+            "title": "crm:P14_carried_out_by",
+            "description": "A reference to a Person or Group which carried out this activity",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/PersonRefOrGroupRef"
+            }
+        },
+        "techniqueProp": {
+            "title": "crm:P32_used_general_technique",
+            "description": "A general technique that was employed to carry out this activity",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Concept"
+            }
+        },
+        "used_specific_objectProp": {
+            "title": "crm:P16_used_specific_object",
+            "description": "An object or set of things which was used to carry out this activity",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/HumanMadeObjectRefOrSetRef"
+            }
+        },
+        "influenced_byProp": {
+            "title": "crm:P15_was_influenced_by",
+            "description": "An entity that influenced the activity in some way",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/AnyRef"
+            }
+        },
+        "carried_outProp": {
+            "title": "crm:P14i_performed",
+            "description": "One or more activities which this entity carried out or performed",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Activity"
+            }
+        },
+        "contact_pointProp": {
+            "title": "crm:P76_has_contact_point",
+            "description": "An identifier which can be used as a contact point or address for the entity, such as an email address",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Identifier"
+            }
+        },
+        "residenceProp": {
+            "title": "crm:P74_has_current_or_former_residence",
+            "description": "A `Place` where this entity has resided or done business",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/PlaceRef"
+            }
+        },
+        "dimensionProp": {
+            "title": "crm:P43_has_dimension",
+            "description": "One or more `Dimension` structures that describe this entity",
+            "type": "array",

@@ -1,0 +1,123 @@
+ based on XML Schema integer type.  An element of this type contains a space-separated list of integer values</documentation>
+    </annotation>
+    <list itemType="integer"/>
+  </simpleType>
+  <!-- =========================================================== -->
+  <complexType name="CodeType">
+    <annotation>
+      <documentation>Name or code with an (optional) authority.  Text token.  
+      If the codeSpace attribute is present, then its value should identify a dictionary, thesaurus 
+      or authority for the term, such as the organisation who assigned the value, 
+      or the dictionary from which it is taken.  
+      A text string with an optional codeSpace attribute. </documentation>
+    </annotation>
+    <simpleContent>
+      <extension base="string">
+        <attribute name="codeSpace" type="anyURI" use="optional"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+  <!-- =========================================================== -->
+  <complexType name="CodeListType">
+    <annotation>
+      <documentation>List of values on a uniform nominal scale.  List of text tokens.   
+      In a list context a token should not include any spaces, so xsd:Name is used instead of xsd:string.   
+      If a codeSpace attribute is present, then its value is a reference to 
+      a Reference System for the value, a dictionary or code list.</documentation>
+    </annotation>
+    <simpleContent>
+      <extension base="gml:NameList">
+        <attribute name="codeSpace" type="anyURI" use="optional"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+  <!-- =========================================================== -->
+  <complexType name="CodeOrNullListType">
+    <annotation>
+      <documentation>List of values on a uniform nominal scale.  List of text tokens.   
+      In a list context a token should not include any spaces, so xsd:Name is used instead of xsd:string.  
+      A member of the list may be a typed null.  
+      If a codeSpace attribute is present, then its value is a reference to 
+      a Reference System for the value, a dictionary or code list.</documentation>
+    </annotation>
+    <simpleContent>
+      <extension base="gml:NameOrNullList">
+        <attribute name="codeSpace" type="anyURI" use="optional"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+  <!-- =========================================================== -->
+  <complexType name="MeasureType">
+    <annotation>
+      <documentation>Number with a scale.  
+      The value of uom (Units Of Measure) attribute is a reference to a Reference System for the amount, either a ratio or position scale. </documentation>
+    </annotation>
+    <simpleContent>
+      <extension base="double">
+        <attribute name="uom" type="anyURI" use="required"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+  <!-- =========================================================== -->
+  <complexType name="MeasureListType">
+    <annotation>
+      <documentation>List of numbers with a uniform scale.  
+      The value of uom (Units Of Measure) attribute is a reference to 
+      a Reference System for the amount, either a ratio or position scale. </documentation>
+    </annotation>
+    <simpleContent>
+      <extension base="gml:doubleList">
+        <attribute name="uom" type="anyURI" use="required"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+  <!-- =========================================================== -->
+  <complexType name="MeasureOrNullListType">
+    <annotation>
+      <documentation>List of numbers with a uniform scale.  
+      A member of the list may be a typed null. 
+      The value of uom (Units Of Measure) attribute is a reference to 
+      a Reference System for the amount, either a ratio or position scale. </documentation>
+    </annotation>
+    <simpleContent>
+      <extension base="gml:doubleOrNullList">
+        <attribute name="uom" type="anyURI" use="required"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+  <!-- =========================================================== -->
+  <complexType name="CoordinatesType">
+    <annotation>
+      <documentation>Tables or arrays of tuples.  
+        May be used for text-encoding of values from a table.  
+        Actually just a string, but allows the user to indicate which characters are used as separators.  
+        The value of the 'cs' attribute is the separator for coordinate values, 
+        and the value of the 'ts' attribute gives the tuple separator (a single space by default); 
+        the default values may be changed to reflect local usage.
+        Defaults to CSV within a tuple, space between tuples.  
+        However, any string content will be schema-valid.  </documentation>
+    </annotation>
+    <simpleContent>
+      <extension base="string">
+        <attribute name="decimal" type="string" default="."/>
+        <attribute name="cs" type="string" default=","/>
+        <attribute name="ts" type="string" default="&#x20;"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+  <!-- =========================================================== -->
+  <simpleType name="NCNameList">
+    <annotation>
+      <documentation>A set of values, representing a list of token with the lexical value space of NCName. The tokens are seperated by whitespace.</documentation>
+    </annotation>
+    <list itemType="NCName"/>
+  </simpleType>
+  <!-- ============================================================== -->
+  <simpleType name="QNameList">
+    <annotation>
+      <documentation>A set of values, representing a list of token with the lexical value space of QName. The tokens are seperated by whitespace.</documentation>
+    </annotation>
+    <list itemType="QName"/>
+  </simpleType>
+  <!-- ============================================================== -->
+</schema>

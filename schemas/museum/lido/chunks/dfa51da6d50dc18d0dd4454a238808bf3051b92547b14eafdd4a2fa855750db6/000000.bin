@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:doc="http://www.mda.org.uk/spectrumXML/Documentation" xmlns:gml="http://www.opengis.net/gml" xmlns:lido="http://www.lido-schema.org" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tei="http://www.tei-c.org/ns/1.0" xmlns:sch="http://purl.oclc.org/dsdl/schematron" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" targetNamespace="http://www.lido-schema.org" elementFormDefault="qualified" attributeFormDefault="qualified">
+
+	<xs:annotation>
+		<xs:documentation>
+			<tei:teiHeader>
+				<tei:fileDesc>
+					<tei:titleStmt lang="en">
+						<tei:title>LIDO - Lightweight Information Describing Objects Version 1.1</tei:title>
+						<tei:author>ICOM-CIDOC LIDO Working Group</tei:author>
+					</tei:titleStmt>
+					<tei:publicationStmt lang="en">
+						<tei:publisher>ICOM-CIDOC LIDO Working Group</tei:publisher>
+						<tei:date type="publicationDate">2021-12-20</tei:date>
+						<tei:authority>ARTstor, Collections Trust, Deutscher Museumsbund - Fachgruppe Dokumentation, Deutsches Dokumentationszentrum für Kunstgeschichte - Bildarchiv Foto Marburg, digiCULT-Verbund eG, Institut für Museumsforschung (SMB-PK), J. Paul
+							Getty Trust, Göttingen State and University Library, Zuse-Institut Berlin.</tei:authority>
+						<tei:availability>
+							<tei:p>LIDO is an XML schema intended for delivering metadata, for use in a variety of online services, from an organization’s collections database to portals of aggregated resources, as well as exposing, sharing and connecting data on the web. Its strength lies in its ability to support the typical range of descriptive information about objects of material culture. It can be used for all kinds of object, e.g., art, cultural, technology and natural science and supports multilingual portal environments.</tei:p>
+
+							<tei:p>The LIDO schema is the result of a substantial redesign and enhancement of the CDWA Lite and museumdat schemas based on recommendations of the CDWA Lite/museumdat Working Group, community feedback and further CIDOC-CRM analysis. It mainly builds on CDWA and includes additional concepts to meet SPECTRUM requirements.</tei:p>
+
+							<tei:p>For more information on LIDO please refer to: <tei:ref target="http://www.lido-schema.org">www.lido-schema.org</tei:ref></tei:p>
+
+							<tei:p>Prepared for CIDOC LIDO Working Group by LIDO-DE Working Group.</tei:p>
+
+							<tei:p>The schema is developed at <tei:ref target="https://gitlab.gwdg.de/lido/development">gitlab.gwdg.de/lido/development</tei:ref>. LIDO v1.1 is backwards compatible with LIDO v1.0. For a summary of changes please refer to the repository’s README. The full history of LIDO can be found in <tei:ref target="http://www.lido-schema.org/schema/v1.0/lido-v1.0-specification.pdf">lido-v1.0-specification.pdf</tei:ref>, 2.3 History of the schema.</tei:p>
+
+							<tei:p>Editors: Erin Coburn, Richard Light, Jutta Lindenthal, Gordon McKenna (Collections Trust), Regine Stein (Göttingen State and University Library), Axel Vitzthum (digiCULT Verbund e.G.), Michelle Weidling (Göttingen State and University Library).
+							</tei:p>
+							<tei:p>Contributors: Detlev Balzer, Regine Heuchert (Technoseum), Angela Kailus (Deutsches Dokumentationszentrum für Kunstgeschichte - Bildarchiv Foto Marburg), Herdis Kley (Freie Universität Berlin), Marco Klindt (Zuse Institute Berlin), Markus Matoni (Göttingen State and University Library), Hanna-Lena Meiners (Göttingen State and University Library), Timo Schleier (Göttingen State and University Library and Head Office of the GBV Common Library Network), Francesca Schulze (German National Library), Martin Stricker (Hermann von Helmholtz-Zentrum für Kulturtechnik).
+							</tei:p>
+							<tei:p>LIDO name and logo courtesy Rob Lancefield.</tei:p>
+							<tei:p>Copyright 2009-2021 ICOM-CIDOC for the LIDO Working Group.</tei:p>
+							<tei:p><tei:ref target="http://lido-schema.org/schema/v1.1/lido-v1.1.html">LIDO - Lightweight Information Describing Objects Version 1.1</tei:ref> by <tei:ref target="https://cidoc.mini.icom.museum/working-groups/lido/">CIDOC LIDO Working Group</tei:ref> is licensed under <tei:ref targt="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0.</tei:ref></tei:p>
+							<tei:licence target="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</tei:licence>
+						</tei:availability>
+					</tei:publicationStmt>
+				</tei:fileDesc>
+			</tei:teiHeader>
+		</xs:documentation>
+	</xs:annotation>
+
+	<xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="http://www.w3.org/2001/03/xml.xsd"/>
+	<xs:import namespace="http://www.opengis.net/gml" schemaLocation="http://schemas.opengis.net/gml/3.1.1/base/gml.xsd"/>
+
+	<xs:annotation>
+		<xs:appinfo>
+			<sch:ns uri="http://www.lido-schema.org" prefix="lido"/>
+			<sch:ns uri="http://www.w3.org/2002/07/owl#" prefix="owl"/>
+			<sch:ns uri="http://www.w3.org/2004/02/skos/core#" prefix="skos"/>
+			
+			<sch:title>Schematron constraints for LIDO Version 1.1</sch:title>
+			<sch:pattern>
+				<sch:title>Either free text or index element</sch:title>
+				<sch:p>In LIDO v1.1 some text elements are extended to <tei:ref target="#conceptComplexType">conceptComplexType</tei:ref>
+					in order to foster controlled indexing in the future. To enable backwards 
+					compatibility either elements of <tei:ref target="#textComplexType">textComplexType</tei:ref> or elements of 
+					<tei:ref target="#conceptComplexType">conceptComplexType</tei:ref>  
+					are allowed. Note that the elements are defined to be mutually exclusive.</sch:p>
+				<sch:rule abstract="true" id="sch_MixedContent">
+					<sch:assert role="fatal" test="        (skos:Concept or lido:conceptID or lido:term) and not(text()[not(normalize-space(.) = '')] or @xml:lang or @lido:encodinganalog or @lido:label)        or        (text()[normalize-space(.) != ''] and not(skos:Concept or lido:conceptID or lido:term))        or        (not(*) and (not(text()) or normalize-space(.) = ''))        "> Asserts that either an element based on <tei:ref target="#textComplexType">textComplexType</tei:ref> or an element 
+						based on <tei:ref target="#conceptComplexType">conceptComplexType</tei:ref> is used for <sch:name/>, but not both at the same time.
+						</sch:assert>
+				</sch:rule>
+			</sch:pattern>
+
+			<sch:pattern>
+				<sch:title>conceptComplexType allows only skos:Concept from SKOS namespace</sch:title>
+				<sch:p>Asserts that only skos:Concept and not any other class from the SKOS namespace is used for 
+					statements about a LIDO element based on <tei:ref target="#conceptComplexType">conceptComplexType</tei:ref>.</sch:p>
+
+				<sch:rule abstract="true" id="sch_SKOS">
+					<sch:assert role="fatal" test="not(skos:*[not(self::skos:Concept)])">
+						Only skos:Concept should be used as embedded class in <sch:name/> from the SKOS namespace.
+					</sch:assert>
+				</sch:rule>
+			</sch:pattern>
+
+			<sch:pattern>
+				<sch:title>skos:Concept allows only SKOS properties</sch:title>
+				<sch:p>Asserts that only properties in the domain or range of the skos:Concept 
+					Class are used for statements about a LIDO sub-element of <tei:ref target="#conceptComplexType">conceptComplexType</tei:ref>.</sch:p>
+
+				<sch:rule context="skos:Concept" id="sch_SKOS_properties">
+					<sch:report role="fatal" test="child::*[namespace-uri() != 'http://www.w3.org/2004/02/skos/core#']">
+						Only SKOS properties in the domain or range of the skos:Concept Class are allowed.
+					</sch:report>
+				</sch:rule>
+			</sch:pattern>
+
+			<sch:pattern>
+				<sch:title>ComplexType allows only owl:sameAs from OWL namespace</sch:title>
+				<sch:p>Asserts that only owl:sameAs and not any other property or class from the 
+					OWL namespace is used to state identity equivalence in instances of LIDO elements contained in
+					<tei:ref target="#actorComplexType">actorComplexType</tei:ref>,
+					<tei:ref target="#eventComplexType">eventComplexType</tei:ref>, 
+					<tei:ref target="#legalBodyRefComplexType">legalBodyRefComplexType</tei:ref>, 
+					<tei:ref target="#objectComplexType">objectComplexType</t

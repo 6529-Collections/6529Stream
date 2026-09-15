@@ -1,0 +1,80 @@
+55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a><span class="ot">           xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>           painters (artists)</span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>       &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a>       &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a><span class="ot">           xml:lang=</span><span class="st">&quot;de&quot;</span>&gt;</span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a>           Maler</span>
+<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a>       &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a>   &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb55-13"><a href="#cb55-13" aria-hidden="true" tabindex="-1"></a>   <span class="co">&lt;!-- Display label--&gt;</span></span>
+<span id="cb55-14"><a href="#cb55-14" aria-hidden="true" tabindex="-1"></a>   &lt;<span class="kw">lido:term</span></span>
+<span id="cb55-15"><a href="#cb55-15" aria-hidden="true" tabindex="-1"></a><span class="ot">       lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00526&quot;</span></span>
+<span id="cb55-16"><a href="#cb55-16" aria-hidden="true" tabindex="-1"></a><span class="ot">       xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb55-17"><a href="#cb55-17" aria-hidden="true" tabindex="-1"></a>       Painter</span>
+<span id="cb55-18"><a href="#cb55-18" aria-hidden="true" tabindex="-1"></a>   &lt;/<span class="kw">lido:term</span>&gt;</span>
+<span id="cb55-19"><a href="#cb55-19" aria-hidden="true" tabindex="-1"></a>   &lt;<span class="kw">lido:term</span></span>
+<span id="cb55-20"><a href="#cb55-20" aria-hidden="true" tabindex="-1"></a><span class="ot">       lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00526&quot;</span></span>
+<span id="cb55-21"><a href="#cb55-21" aria-hidden="true" tabindex="-1"></a><span class="ot">       xml:lang=</span><span class="st">&quot;de&quot;</span>&gt;</span>
+<span id="cb55-22"><a href="#cb55-22" aria-hidden="true" tabindex="-1"></a>       Maler</span>
+<span id="cb55-23"><a href="#cb55-23" aria-hidden="true" tabindex="-1"></a>   &lt;/<span class="kw">lido:term</span>&gt;</span>
+<span id="cb55-24"><a href="#cb55-24" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:roleActor</span>&gt;</span></code></pre></div>
+            <h3 data-number="5.4.12" id="relatedencoding"><span
+            class="header-section-number">5.4.12</span> <span
+            class="citation"
+            data-cites="relatedEncoding">@relatedEncoding</span></h3>
+            <p><strong>Attribute name:</strong> <a
+            href="http://lido-schema.org/schema/latest/lido.html#relatedEncoding">lido:relatedEncoding</a></p>
+            <p><strong>Note:</strong> Attribute held by the &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#lidoWrap">lido:lidoWrap</a>&gt;
+            and &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#lido">lido:lido</a>&gt;
+            elements to indicate the format of the whole data source
+            from which the data were migrated. For individual elements
+            with data values the corresponding source data fields can be
+            indicated using the attributes <a
+            href="https://lido-schema.org/schema/latest/lido.html#encodinganalog">lido:encodinganalog</a>
+            and <a
+            href="https://lido-schema.org/schema/latest/lido.html#label">lido:label</a>.</p>
+            <h3 data-number="5.4.13" id="sortorder"><span
+            class="header-section-number">5.4.13</span> <span
+            class="citation"
+            data-cites="sortorder">@sortorder</span></h3>
+            <p><strong>Attribute name:</strong> <a
+            href="http://lido-schema.org/schema/latest/lido.html#sortorder">lido:sortorder</a></p>
+            <p><strong>Note:</strong> Attribute held by many LIDO
+            elements to suggest a sequential ordering among sibling
+            elements for online presentation.</p>
+            <p><strong>Example:</strong> The following XML code snippet
+            marks the “<a
+            href="http://terminology.lido-schema.org/lido00001">Aquisition</a>”
+            of the object as the second event in the list of events the
+            object is involved in.</p>
+            <div class="sourceCode" id="cb56"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:eventSet</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:sortorder=</span><span class="st">&quot;2&quot;</span>&gt;</span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:event</span>&gt;</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:eventType</span>&gt;</span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">skos:Concept</span></span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a><span class="ot">                rdf:about=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00001&quot;</span>&gt;</span>
+<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a><span class="ot">                    xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a>                    Acquisition</span>
+<span id="cb56-10"><a href="#cb56-10" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb56-11"><a href="#cb56-11" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb56-12"><a href="#cb56-12" aria-hidden="true" tabindex="-1"></a><span class="ot">                    xml:lang=</span><span class="st">&quot;de&quot;</span>&gt;</span>
+<span id="cb56-13"><a href="#cb56-13" aria-hidden="true" tabindex="-1"></a>                    Erwerb</span>
+<span id="cb56-14"><a href="#cb56-14" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb56-15"><a href="#cb56-15" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb56-16"><a href="#cb56-16" aria-hidden="true" tabindex="-1"></a>         &lt;/<span class="kw">lido:eventType</span>&gt;</span>
+<span id="cb56-17"><a href="#cb56-17" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:event</span>&gt;</span>
+<span id="cb56-18"><a href="#cb56-18" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:eventSet</span>&gt;</span></code></pre></div>
+            <h3 data-number="5.4.14" id="source"><span
+            class="header-section-number">5.4.14</span> <span
+            class="citation" data-cites="source">@source</span></h3>
+            <p><strong>Attribute name:</strong> <a
+            href="http://lido-schema.org/schema/latest/lido.html#source">lido:source</a></p>
+            <p><strong>Note:</strong> Attribute held by identifier and
+            date elements to describe the source of the information
+            given in the holding element.</p>
+            <p><strong>Example:</strong> The following XML code snippet
+            shows the source for the estimated earlie

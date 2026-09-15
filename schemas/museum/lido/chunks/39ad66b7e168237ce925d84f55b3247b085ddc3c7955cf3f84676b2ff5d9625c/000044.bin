@@ -1,0 +1,76 @@
+<span id="cb40-27"><a href="#cb40-27" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">gml:Point</span>&gt;</span>
+<span id="cb40-28"><a href="#cb40-28" aria-hidden="true" tabindex="-1"></a>                        &lt;<span class="kw">gml:pos</span>&gt;</span>
+<span id="cb40-29"><a href="#cb40-29" aria-hidden="true" tabindex="-1"></a>                            44.7715, 9.3864</span>
+<span id="cb40-30"><a href="#cb40-30" aria-hidden="true" tabindex="-1"></a>                        &lt;/<span class="kw">gml:pos</span>&gt;</span>
+<span id="cb40-31"><a href="#cb40-31" aria-hidden="true" tabindex="-1"></a>                    &lt;/<span class="kw">gml:Point</span>&gt;</span>
+<span id="cb40-32"><a href="#cb40-32" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">lido:gml</span>&gt;</span>
+<span id="cb40-33"><a href="#cb40-33" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:place</span>&gt;</span>
+<span id="cb40-34"><a href="#cb40-34" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:subjectPlace</span>&gt;</span>
+<span id="cb40-35"><a href="#cb40-35" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:subject</span>&gt;</span>
+<span id="cb40-36"><a href="#cb40-36" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:subjectSet</span>&gt;</span></code></pre></div>
+            <h4 data-number="5.2.7.6" id="subject-object"><span
+            class="header-section-number">5.2.7.6</span> Subject
+            Object</h4>
+            <p><strong>Element name:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectObject">lido:subjectObject</a>&gt;</p>
+            <p><strong>Note:</strong> Subject Object contains
+            information about a particular object depicted in, or
+            referred to, by the object in focus. Fictitious actors,
+            fictitious places, iconographical narratives and fictitious
+            events are indexed as Subject Object as well.</p>
+            <p><strong>Example:</strong> Since there is no object as a
+            topic in Leonardo’s <em>Mona Lisa</em>, a <a
+            href="http://photothek.khi.fi.it/documents/obj/07703517/07703517%2Ffld0008210x_p">photograph</a>
+            depicting the painting when it was exhibited in the Uffizi
+            1913 has been chosen as an example instead. The subject type
+            is “<a
+            href="http://terminology.lido-schema.org/lido00136">Identification</a>”.</p>
+            <blockquote>
+            <p><strong>Subject Object:</strong> Mona Lisa<br />
+            <strong><em>Subject Type:</em></strong> Identification</p>
+            </blockquote>
+            <div class="sourceCode" id="cb41"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:subjectSet</span>&gt;</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">&lt;!-- Identification --&gt;</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:subject</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00136&quot;</span>&gt;</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:subjectObject</span>&gt;</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:displayObject</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a><span class="ot">                xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>                Mona Lisa</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:displayObject</span>&gt;</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:object</span>&gt;</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">lido:objectID</span></span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a><span class="ot">                    lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00099&quot;</span>&gt;</span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>                    https://collections.louvre.fr/en/ark:/53355/cl010062370</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">lido:objectID</span>&gt;</span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">lido:objectNote</span></span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a><span class="ot">                    xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>                    Photograph of the painting exhibited in the Uffizi 1913</span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">lido:objectNote</span>&gt;</span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:object</span>&gt;</span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:subjectObject</span>&gt;</span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:subject</span>&gt;</span>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:subjectSet</span>&gt;</span></code></pre></div>
+            <blockquote>
+            <p>For more information on subject indexing see Getty
+            Vocabulary Program, CONA Editorial Rules, <a
+            href="https://www.getty.edu/research/tools/vocabularies/guidelines/cona_3_6_3_subject_authority.html">Chapter
+            3.6.3 Depicted Subject, Iconography Authority</a>.</p>
+            </blockquote>
+            <h2 data-number="5.3"
+            id="elements-from-other-namespaces"><span
+            class="header-section-number">5.3</span> Elements from other
+            namespaces</h2>
+            <p>LIDO “borrows” some definitions from other schemas,
+            following the principle that useful data types and elements
+            defined elsewhere should be reused instead of redefined. All
+            schemas are identified by namespace prefixes which must be
+            declared using the xmlns Attribute, preferably on the
+            outermost element of a LIDO record.</p>
+            <div class="sourceCode" id="cb42"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;?xml</span><span class="ot"> version=</span><span class="st">&quot;1.0&quot;</span><span class="ot"> encoding=</span><span class="st">&quot;UTF-8&quot;</span><span class="fu">?&gt;</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:lido</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="ot">    xsi:schemaLocation=</span><span class="st">&quot;http://www.lido-schema.org http://lido-schema.org/schema/v1.1/lido-v1.1.xsd&quot;</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="ot">    xmlns:lido=</span><span class="st">&quot;http://www.lido-schema.org&quot;</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a><sp

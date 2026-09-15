@@ -1,0 +1,23 @@
+on>
+			<documentation>Label for the object, normally a descriptive name. An object may have several names, typically assigned by different authorities.  The authority for a name is indicated by the value of its (optional) codeSpace attribute.  The name may or may not be unique, as determined by the rules of the organization responsible for the codeSpace.</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<element name="description" type="gml:StringOrRefType">
+		<annotation>
+			<documentation>Contains a simple text description of the object, or refers to an external description.</documentation>
+		</annotation>
+	</element>
+	<!-- ===================================================== -->
+	<complexType name="StringOrRefType">
+		<annotation>
+			<documentation>This type is available wherever there is a need for a "text" type property. It is of string type, so the text can be included inline, but the value can also be referenced remotely via xlinks from the AssociationAttributeGroup. If the remote reference is present, then the value obtained by traversing the link should be used, and the string content of the element can be used for an annotation.</documentation>
+		</annotation>
+		<simpleContent>
+			<extension base="string">
+				<attributeGroup ref="gml:AssociationAttributeGroup"/>
+			</extension>
+		</simpleContent>
+	</complexType>
+	<!-- ===================================================== -->
+</schema>

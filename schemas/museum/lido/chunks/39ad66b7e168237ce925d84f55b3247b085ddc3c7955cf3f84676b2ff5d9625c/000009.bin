@@ -1,0 +1,114 @@
+        </figure>
+            <p>The profile workflow is built around the LIDO Profile
+            Definition XML. This file contains all the information users
+            need to provide for the process to produce a valid LIDO
+            application profile: profile metadata, profile
+            documentation, and the profile rules. This way, the Profile
+            Definition serves as a single source for both
+            machine-actionable rules as well as HTML documentation. Each
+            of the output files is produced by a single XSL
+            transformation of the Profile Definition.</p>
+            <p>Machine-actionable rules can be declared as XML Schema
+            rules, as well as Schematron rules.</p>
+            <p>Profile documentation in the Profile Definition follows
+            TEI-Lite and is the primary source for HTML documentation.
+            For ease of use, the workflow can also produce simple
+            documentation of individual rules and Schematron constraints
+            if desired.</p>
+            <p>The repository contains an empty Profile Definition
+            template to facilitate the creation of new Profile
+            Definitions by users, as well as further resources to aid
+            the creation of application profiles.</p>
+            <p>For more information on LIDO profiles, see section <a
+            href="#application-profile"><em>4.2.4 Application
+            Profile</em></a>, the <a
+            href="https://gitlab.gwdg.de/lido/profiles">GitLab
+            Repository</a> hosting the workflow, and <a
+            href="https://cidoc.mini.icom.museum/working-groups/lido/lido-overview/profiles/"
+            class="uri">https://cidoc.mini.icom.museum/working-groups/lido/lido-overview/profiles/</a>.
+            </p>
+            <h1 data-number="4" id="basic-structure-of-lido"><span
+            class="header-section-number">4</span> Basic structure of
+            LIDO</h1>
+            <h2 data-number="4.1"
+            id="lido-document-and-lido-record"><span
+            class="header-section-number">4.1</span> LIDO document and
+            LIDO record</h2>
+            <p>The basic structure of LIDO is determined by the XML
+            representation. Any data represented in XML requires a
+            single outer element, enclosing all further data. With
+            regard to the tree-like structure of XML, this outermost
+            element is referred to as the <em>root</em> element. The
+            root element is where all machine processing of XML data
+            starts and ends. Either the LIDO wrapper &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#lidoWrap">lido:lidoWrap</a>&gt;
+            or the LIDO element &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#lido">lido:lido</a>&gt;
+            can be used as the root element for an entire
+            <abbr title="In LIDO an XML instance provided as a whole unit">LIDO
+            document</abbr>. A document with the root &lt;lido:lido&gt;
+            can contain only one
+            <abbr title="In LIDO an XML instance for the description of a single record">LIDO
+            record</abbr>, while a document with the root
+            &lt;lido:lidoWrap&gt; can contain one or more
+            &lt;lido:lido&gt; elements i.e. one ore more
+            <abbr title="In LIDO an XML instance for the description of a single record">LIDO
+            records</abbr>. Both forms are valid with respect to the
+            LIDO XML schema.</p>
+            <figure>
+            <img src="img/figure_root-branches.png"
+            alt="Figure 3: Two views of the root-and-branch metaphor used in describing nested structures in LIDO" />
+            <figcaption aria-hidden="true">Figure 3: Two views of the
+            root-and-branch metaphor used in describing nested
+            structures in LIDO</figcaption>
+            </figure>
+            <h2 data-number="4.2" id="top-level-elements"><span
+            class="header-section-number">4.2</span> Top level
+            elements</h2>
+            <p>In the &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#lido">lido:lido</a>&gt;
+            element six elements are nested at the top. Following is an
+            outline of these elements with short descriptions.</p>
+            <p>The &lt;lido:lido&gt; element fully encloses a metadata
+            record. The following list contains the six elements that
+            can occur at the upper level of a LIDO record. Three of
+            these are mandatory elements:</p>
+            <ul>
+            <li><a
+            href="https://lido-schema.org/schema/latest/lido.html#lidoRecID">LIDO
+            Metadata Record Identifier</a> <span
+            class="important">required</span></li>
+            <li><a
+            href="https://lido-schema.org/schema/latest/lido.html#objectPublishedID">Published
+            Object Identifier</a></li>
+            <li><a
+            href="https://lido-schema.org/schema/latest/lido.html#category">Category</a></li>
+            <li><a
+            href="https://lido-schema.org/schema/latest/lido.html#applicationProfile">Application
+            Profile</a> <span class="green">new in LIDO v1.1</span></li>
+            <li><a
+            href="https://lido-schema.org/schema/latest/lido.html#descriptiveMetadata">Descriptive
+            Metadata</a> <span class="important">required</span></li>
+            <li><a
+            href="https://lido-schema.org/schema/latest/lido.html#administrativeMetadata">Administrative
+            Metadata</a> <span class="important">required</span></li>
+            </ul>
+            <p>The LIDO top level elements in XML syntax:</p>
+            <div class="sourceCode" id="cb4"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:lido</span>&gt;</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:lidoRecID</span><span class="ot"> lido:type=</span><span class="st">&quot;{...}&quot;</span>&gt;[...]&lt;/<span class="kw">lido:lidoRecID</span>&gt;</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:objectPublishedID</span>&gt;[...]&lt;/<span class="kw">lido:objectPublishedID</span>&gt;</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:category</span>&gt;[...]&lt;/<span class="kw">lido:category</span>&gt;</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:applicationProfile</span><span class="ot"> lido:type=</span><span class="st">&quot;{...}&quot;</span>&gt;[...]&lt;/<span class="kw">lido:applicationProfile</span>&gt;</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:descriptiveMetadata</span><span class="ot"> xml:lang=</span><span class="st">&quot;{...}&quot;</span>&gt;[...]&lt;/<span class="kw">lido:descriptiveMetadata</span>&gt;</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:administrativeMetadata</span><span class="ot"> xml:lang=</span><span class="st">&quot;{...}&quot;</span>&gt;[...]&lt;/<span class="kw">lido:administrativeMetadata</span>&gt;</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:lido</span>&gt;</span></code></pre></div>
+            <h3 data-number="4.2.1"
+            id="lido-metadata-record-identifier"><span
+            class="header-section-number">4.2.1</span> LIDO Metadata
+            Record Identifier</h3>
+            <p><strong>Element name:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#lidoRecID">lido:lidoRecID</a>&gt;</p>
+            <p><strong>Note:</strong> This mandatory element serves to
+            distinguish an individual LIDO record from any other record
+         

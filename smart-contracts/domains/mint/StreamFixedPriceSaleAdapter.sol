@@ -1,37 +1,49 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "./StreamSaleArtist.sol";
+import "./StreamLegacySaleConsent.sol";
+import "./StreamSaleFunding.sol";
+import "./StreamSaleTemplate.sol";
+import "../../interfaces/stream/mint/IStreamMintReads.sol";
+
 import "../../interfaces/stream/mint/IStreamFixedPriceSaleAdapter.sol";
 import "../../interfaces/stream/mint/IStreamMintManager.sol";
 import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
-import "../../interfaces/stream/artist/IStreamCollectionArtistRegistry.sol";
+import "../../interfaces/stream/artist/IStreamArtistAttribution.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
 import "../../vendor/openzeppelin/ReentrancyGuard.sol";
 import "./StreamSaleSignatures.sol";
 
 /// @notice One signed native sale mints one NFT and funds its immutable split wallet atomically.
-/// @dev Both creator and platform approve the complete sale. The wallet is funded before
-///      Core invokes a recipient callback. Any later failure rolls back payment and replay state.
+/// @dev Both creator and platform approve the complete V2 sale and current primary policy.
+///      Before the mint callback, revenue is either in the verified wallet or exactly owed in
+///      escrow. Any later failure rolls back funding, replay state and the mint.
 contract StreamFixedPriceSaleAdapter is
     IStreamFixedPriceSaleAdapter,
     ERC165,
     Ownable,
-    ReentrancyGuard
+    ReentrancyGuard,
+    StreamSaleFunding
 {
     bytes32 public constant SALE_AUTHORIZATION_TYPEHASH = keccak256(
-        "SaleAuthorization(uint256 collectionId,bytes32 phaseId,address payer,address recipient,address artist,bytes32 profileId,bytes32 tokenDataHash,bytes32 mintCommitment,bytes32 mintPolicyHash,uint256 price,bytes32 nonce,uint64 deadline,uint64 signerEpoch)"
+        "SaleAuthorization(uint256 collectionId,bytes32 phaseId,address payer,address recipient,address artist,bytes32 profileId,bytes32 expectedPrimaryPolicyHash,bytes32 tokenDataHash,bytes32 mintCommitment,bytes32 mintPolicyHash,uint256 price,bytes32 nonce,uint64 deadline,uint64 signerEpoch)"
     );
     bytes32 private constant DOMAIN_TYPEHASH = keccak256(
         "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
     );
     bytes32 private constant NONCE_DOMAIN = keccak256("6529STREAM_NATIVE_SALE_NONCE_V1");
     bytes32 private constant NAME_HASH = keccak256("6529StreamFixedPriceSale");
-    bytes32 private constant VERSION_HASH = keccak256("1");
+    bytes32 private constant VERSION_HASH = keccak256("2");
+    bytes32 public constant REVENUE_CLASS = keccak256("PRIMARY_SALE");
+    bytes32 public constant PRIMARY_POLICY_DOMAIN = keccak256("6529STREAM_PRIMARY_POLICY_V1");
 
     IStreamMintManager public immutable mintManager;
     IStreamSplitFactory public immutable splitFactory;
-    IStreamCollectionArtistRegistry public immutable artistRegistry;
+    IStreamRevenueResolver public immutable override revenueResolver;
+    IStreamArtistAttribution public immutable artistRegistry;
+    bytes32 public immutable artistRegistryCodeHash;
     address public platformSigner;
     uint64 public signerEpoch = 1;
     bool public paused;
@@ -41,32 +53,35 @@ contract StreamFixedPriceSaleAdapter is
 
     constructor(
         IStreamMintManager mintManager_,
-        IStreamSplitFactory splitFactory_,
+        IStreamRevenueResolver resolver_,
         address platformSigner_,
-        IStreamCollectionArtistRegistry artistRegistry_
-    ) {
+        IStreamArtistAttribution artistRegistry_,
+        IStreamRevenueEscrow escrow_
+    ) StreamSaleFunding(IStreamSplitFactory(resolver_.splitFactory()), escrow_) {
+        IStreamSplitFactory splitFactory_ = IStreamSplitFactory(resolver_.splitFactory());
         if (
             address(mintManager_).code.length == 0 || address(splitFactory_).code.length == 0
-                || platformSigner_ == address(0)
+                || platformSigner_ == address(0) || !resolver_.isStreamRevenueResolver()
         ) revert InvalidSaleConfiguration();
-        if (
-            address(artistRegistry_).code.length == 0
-                || !artistRegistry_.supportsInterface(
-                    type(IStreamCollectionArtistRegistry).interfaceId
-                ) || artistRegistry_.supportsInterface(0xffffffff)
-        ) revert InvalidSaleConfiguration();
+        if (!StreamSaleArtist.supportsAttribution(artistRegistry_)) {
+            revert InvalidSaleConfiguration();
+        }
         (bool bound, bytes memory coreData) =
             address(mintManager_).staticcall(abi.encodeWithSignature("core()"));
         if (
             !bound || coreData.length != 32
                 || abi.decode(coreData, (address)) != artistRegistry_.core()
+                || resolver_.core() != artistRegistry_.core()
+                || resolver_.artistRegistry() != address(artistRegistry_)
         ) {
             revert InvalidSaleConfiguration();
         }
         mintManager = mintManager_;
         splitFactory = splitFactory_;
+        revenueResolver = resolver_;
         platformSigner = platformSigner_;
         artistRegistry = artistRegistry_;
+        artistRegistryCodeHash = address(artistRegistry_).codehash;
     }
 
     function supportsInterface(bytes4 interfaceId)
@@ -125,7 +140,7 @@ contract StreamFixedPriceSaleAdapter is
         return (
             0x0f,
             "6529StreamFixedPriceSale",
-            "1",
+            "2",
             block.chainid,
             address(this),
             bytes32(0),
@@ -143,6 +158,66 @@ contract StreamFixedPriceSaleAdapter is
         return keccak256(abi.encodePacked(hex"1901", domainSeparator(), structHash));
     }
 
+    struct Execution {
+        bytes32 id;
+        bytes32 digest;
+        address wallet;
+        bytes32 previewRoot;
+        bytes32 operationId;
+        bool escrowed;
+        StreamSaleTemplate.Selection selected;
+    }
+
+    function primaryPolicy(uint256 collectionId)
+        public
+        view
+        override
+        returns (bytes32 policyHash, bytes32 profileId, address wallet)
+    {
+        StreamSaleTemplate.Selection memory selected = _primarySelection(collectionId);
+        return (
+            StreamSaleTemplate.policyHash(revenueResolver, collectionId, selected),
+            selected.profileId,
+            selected.wallet
+        );
+    }
+
+    function _primarySelection(uint256 collectionId)
+        private
+        view
+        returns (StreamSaleTemplate.Selection memory selected)
+    {
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory a =
+            revenueResolver.resolvePrimaryAssignment(collectionId, 0, REVENUE_CLASS);
+        if (a.assignmentType == 2) {
+            return StreamSaleTemplate.preview(revenueResolver, collectionId, a);
+        }
+        if (
+            !a.exists || a.assignmentType != 1 || a.scope != 1 || a.scopeId != collectionId
+                || a.templateId != bytes32(0) || a.profileId == bytes32(0)
+                || a.assignmentHash == bytes32(0)
+        ) {
+            revert NativePrimaryAssignmentUnsupported();
+        }
+        selected.profileId = a.profileId;
+        selected.wallet = splitFactory.walletFor(a.profileId);
+        selected.assignmentHash = a.assignmentHash;
+        _requireFundingWallet(selected.profileId, selected.wallet);
+    }
+
+    function _requirePrimaryPolicy(SaleAuthorization calldata sale)
+        private
+        view
+        returns (StreamSaleTemplate.Selection memory selected)
+    {
+        selected = _primarySelection(sale.collectionId);
+        if (selected.profileId != sale.profileId) revert InvalidSplitProfile(sale.profileId);
+        bytes32 policy = StreamSaleTemplate.policyHash(revenueResolver, sale.collectionId, selected);
+        if (policy != sale.expectedPrimaryPolicyHash) {
+            revert NativePrimaryPolicyMismatch(sale.expectedPrimaryPolicyHash, policy);
+        }
+    }
+
     function buy(
         SaleAuthorization calldata sale,
         bytes calldata tokenData,
@@ -151,42 +226,69 @@ contract StreamFixedPriceSaleAdapter is
     ) external payable override nonReentrant returns (uint256 tokenId, bytes32 operationRoot) {
         if (paused) revert SalesPaused();
         _validateSale(sale, tokenData);
-        artistRegistry.requireArtist(sale.collectionId, sale.artist);
-        bytes32 digest = authorizationDigest(sale);
-        _requireSignature(platformSigner, digest, platformSignature);
-        _requireSignature(sale.artist, digest, artistSignature);
-        address wallet = splitFactory.walletFor(sale.profileId);
-        if (!splitFactory.splitWalletExists(sale.profileId)) {
-            revert InvalidSplitProfile(sale.profileId);
+        StreamLegacySaleConsent.requireNone(
+            artistRegistry, artistRegistryCodeHash, sale.collectionId, sale.artist
+        );
+        Execution memory e;
+        e.digest = authorizationDigest(sale);
+        _requireSignature(platformSigner, e.digest, platformSignature);
+        _requireSignature(sale.artist, e.digest, artistSignature);
+        e.selected = _requirePrimaryPolicy(sale);
+        e.wallet = e.selected.wallet;
+        e.id = authorizationId(sale.artist, sale.nonce);
+        IStreamMintManager.MintBatch memory batch = _mintBatch(sale, tokenData, e.digest, e.id);
+        bytes32[] memory ids;
+        (e.previewRoot, ids) =
+            IStreamMintReads(address(mintManager)).previewSingleStepMintOperation(batch, "");
+        if (e.previewRoot == bytes32(0) || ids.length != 1 || ids[0] == bytes32(0)) {
+            revert SaleMintResultInvalid();
         }
+        e.operationId = ids[0];
+        return _executeSale(sale, batch, e);
+    }
 
-        bytes32 id = authorizationId(sale.artist, sale.nonce);
-        IStreamMintManager.MintBatch memory batch = _mintBatch(sale, tokenData, digest, id);
+    function _executeSale(
+        SaleAuthorization calldata sale,
+        IStreamMintManager.MintBatch memory batch,
+        Execution memory e
+    ) private returns (uint256 tokenId, bytes32 operationRoot) {
+        StreamSaleTemplate.materialize(revenueResolver, sale.collectionId, e.selected);
         authorizationUsed[sale.artist][sale.nonce] = true;
         nativeProceeds[sale.profileId] += msg.value;
         totalNativeProceeds += msg.value;
-        if (msg.value != 0) {
-            (bool deposited,) = payable(wallet).call{ value: msg.value }("");
-            if (!deposited) revert SaleDepositFailed(wallet);
-        }
+        e.escrowed = _fundNative(
+            REVENUE_CLASS, sale.profileId, e.wallet, msg.value, e.selected.templateId != bytes32(0)
+        );
+        if (e.selected.templateId == bytes32(0)) _requirePrimaryPolicy(sale);
+        else StreamSaleTemplate.requireCurrent(revenueResolver, sale.collectionId, e.selected);
+        StreamLegacySaleConsent.requireNone(
+            artistRegistry, artistRegistryCodeHash, sale.collectionId, sale.artist
+        );
         uint256[] memory tokenIds;
         bytes32[] memory operationIds;
         (tokenIds, operationRoot, operationIds) = mintManager.executeSingleStepMint(batch, "");
         if (
-            tokenIds.length != 1 || tokenIds[0] == 0 || operationRoot == bytes32(0)
-                || operationIds.length != 1 || operationIds[0] == bytes32(0)
+            tokenIds.length != 1 || tokenIds[0] == 0 || operationRoot != e.previewRoot
+                || operationIds.length != 1 || operationIds[0] != e.operationId
         ) revert SaleMintResultInvalid();
         tokenId = tokenIds[0];
-        _emitSale(sale, id, digest, tokenId, operationRoot, wallet);
+        StreamLegacySaleConsent.requireNone(
+            artistRegistry, artistRegistryCodeHash, sale.collectionId, sale.artist
+        );
+        _emitSale(sale, e.id, e.digest, tokenId, operationRoot, e.wallet);
+        emit SaleRevenueFunded(
+            1, e.id, operationRoot, sale.profileId, e.wallet, address(0), msg.value, e.escrowed
+        );
     }
 
     function _validateSale(SaleAuthorization calldata sale, bytes calldata tokenData) private view {
         if (
             sale.collectionId == 0 || sale.phaseId == bytes32(0) || sale.payer != msg.sender
                 || sale.recipient == address(0) || sale.artist == address(0)
-                || sale.profileId == bytes32(0) || sale.nonce == bytes32(0)
-                || sale.mintPolicyHash == bytes32(0) || sale.mintCommitment == bytes32(0)
-                || sale.signerEpoch != signerEpoch || keccak256(tokenData) != sale.tokenDataHash
+                || sale.profileId == bytes32(0) || sale.expectedPrimaryPolicyHash == bytes32(0)
+                || sale.nonce == bytes32(0) || sale.mintPolicyHash == bytes32(0)
+                || sale.mintCommitment == bytes32(0) || sale.signerEpoch != signerEpoch
+                || keccak256(tokenData) != sale.tokenDataHash
         ) revert InvalidSaleAuthorization();
         if (block.timestamp > sale.deadline) revert SaleExpired(sale.deadline);
         if (msg.value != sale.price) revert IncorrectSaleValue(sale.price, msg.value);

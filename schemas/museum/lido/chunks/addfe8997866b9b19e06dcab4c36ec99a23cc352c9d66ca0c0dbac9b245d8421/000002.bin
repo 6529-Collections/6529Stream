@@ -1,0 +1,156 @@
+
+			</annotation>
+		</attributeGroup>
+	</complexType>
+	<!-- ============================================================== -->
+	<element name="pointArrayProperty" type="gml:PointArrayPropertyType"/>
+	<!-- =========================================================== -->
+	<complexType name="PointArrayPropertyType">
+		<annotation>
+			<documentation>A container for an array of points. The elements are always contained in the array property, referencing geometry 
+			elements or arrays of geometry elements is not supported.</documentation>
+		</annotation>
+		<sequence>
+			<element ref="gml:Point" minOccurs="0" maxOccurs="unbounded"/>
+		</sequence>
+	</complexType>
+	<!-- =========================================================== -->
+	<!-- primitive geometry objects (1-dimensional) -->
+	<!-- ============================================================== -->
+	<element name="_Curve" type="gml:AbstractCurveType" abstract="true" substitutionGroup="gml:_GeometricPrimitive">
+		<annotation>
+			<documentation>The "_Curve" element is the abstract head of the substituition group for all (continuous) curve elements.</documentation>
+		</annotation>
+	</element>
+	<!-- ============================================================== -->
+	<complexType name="AbstractCurveType" abstract="true">
+		<annotation>
+			<documentation>An abstraction of a curve to support the different levels of complexity. The curve can always be viewed as a geometric 
+			primitive, i.e. is continuous.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractGeometricPrimitiveType"/>
+		</complexContent>
+	</complexType>
+	<!-- ============================================================== -->
+	<element name="curveProperty" type="gml:CurvePropertyType">
+		<annotation>
+			<appinfo>
+				<sch:pattern name="Check either href or content not both">
+					<sch:rule context="gml:curveProperty">
+						<sch:extends rule="hrefOrContent"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+			<documentation>This property element either references a curve via the XLink-attributes or contains the curve element. curveProperty is the 
+			predefined property which can be used by GML Application Schemas whenever a GML Feature has a property with a value that is 
+			substitutable for _Curve.</documentation>
+		</annotation>
+	</element>
+	<!-- ============================================================== -->
+	<complexType name="CurvePropertyType">
+		<annotation>
+			<documentation>A property that has a curve as its value domain can either be an appropriate geometry element encapsulated in an 
+			element of this type or an XLink reference to a remote geometry element (where remote includes geometry elements located elsewhere 
+			in the same document). Either the reference or the contained element must be given, but neither both nor none.</documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:_Curve"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup">
+			<annotation>
+				<documentation>This attribute group includes the XLink attributes (see xlinks.xsd). XLink is used in GML to reference remote 
+				resources (including those elsewhere in the same document). A simple link element can be constructed by including a specific 
+				set of XLink attributes. The XML Linking Language (XLink) is currently a Proposed Recommendation of the World Wide Web Consortium. 
+				XLink allows elements to be inserted into XML documents so as to create sophisticated links between resources; such links can be used 
+				to reference remote properties. A simple link element can be used to implement pointer functionality, and this functionality has been built 
+				into various GML 3 elements by including the gml:AssociationAttributeGroup.</documentation>
+			</annotation>
+		</attributeGroup>
+	</complexType>
+	<!-- ============================================================== -->
+	<element name="curveArrayProperty" type="gml:CurveArrayPropertyType"/>
+	<!-- =========================================================== -->
+	<complexType name="CurveArrayPropertyType">
+		<annotation>
+			<documentation>A container for an array of curves. The elements are always contained in the array property, referencing geometry elements 
+			or arrays of geometry elements is not supported.</documentation>
+		</annotation>
+		<sequence>
+			<element ref="gml:_Curve" minOccurs="0" maxOccurs="unbounded"/>
+		</sequence>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="LineString" type="gml:LineStringType" substitutionGroup="gml:_Curve"/>
+	<!-- =========================================================== -->
+	<complexType name="LineStringType">
+		<annotation>
+			<documentation>A LineString is a special curve that consists of a single segment with linear interpolation. It is defined by two or more coordinate 
+			tuples, with linear interpolation between them. It is backwards compatible with the LineString of GML 2, GM_LineString of ISO 19107 is 
+			implemented by LineStringSegment.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCurveType">
+				<sequence>
+					<choice>
+						<annotation>
+							<documentation>GML supports two different ways to specify the control points of a line string. 1. A sequence of "pos" 
+							(DirectPositionType) or "pointProperty" (PointPropertyType) elements. "pos" elements are control points that are only part 
+							of this curve, "pointProperty" elements contain a point that may be referenced from other geometry elements or reference 
+							another point defined outside of this curve (reuse of existing points). 2. The "posList" element allows for a compact way to 
+							specifiy the coordinates of the control points, if all control points are in the same coordinate reference systems and belong 
+							to this curve only. The number of direct positions in the list must be at least two.</documentation>
+						</annotation>
+						<choice minOccurs="2" maxOccurs="unbounded">
+							<element ref="gml:pos"/>
+							<element ref="gml:pointProperty"/>
+							<element ref="gml:pointRep">
+								<annotation>
+									<documentation>Deprecated with GML version 3.1.0. Use "pointProperty" instead. Included for backwards compatibility 
+									with GML 3.0.0.</documentation>
+								</annotation>
+							</element>
+							<element ref="gml:coord">
+								<annotation>
+									<documentation>Deprecated with GML version 3.0. Use "pos" instead. The "coord" element is included for backwards 
+									compatibility with GML 2.</documentation>
+								</annotation>
+							</element>
+						</choice>
+						<element ref="gml:posList"/>
+						<element ref="gml:coordinates">
+							<annotation>
+								<documentation>Deprecated with GML version 3.1.0. Use "posList" instead.</documentation>
+							</annotation>
+						</element>
+					</choice>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ============================================================== -->
+	<!-- positions -->
+	<!-- =========================================================== -->
+	<element name="pos" type="gml:DirectPositionType">
+		<annotation>
+			<appinfo>
+				<sch:pattern name="Check SRS tags">
+					<sch:rule context="gml:pos">
+						<sch:extends rule="CRSLabels"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+		</annotation>
+	</element>
+	<!-- ============================================================== -->
+	<complexType name="DirectPositionType">
+		<annotation>
+			<documentation>DirectPosition instances hold the coordinates for a position within some coordinate reference system (CRS). Since 
+			DirectPositions, as data types, will often be included in larger objects (such as geometry elements) that have references to CRS, the 
+			"srsName" attribute will in general be missing, if this particular DirectPosition is included in a larger element with such a reference to a 
+			CRS. In this case, the CRS is implicitly assumed to take on the value of the containing object's CRS.</documentation>
+		</annotation>
+		<simpleContent>
+			<extension base="gml:doubleList">
+				<attributeGroup ref="gml:SRSReferenceGroup"/>
+			</exte

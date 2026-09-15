@@ -1,0 +1,84 @@
+
+            documented in &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#rightsWorkSet">lido:rightsWorkSet</a>&gt;.</p>
+            <p><strong>Note on Rights Type</strong></p>
+            <p>The &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#rightsType">lido:rightsType</a>&gt;
+            element allows for indexing rights pertaining to each of the
+            above information areas, i.e., the object or work, the
+            record, and the resource. LIDO allows two distinct usages of
+            this element: a <a
+            href="http://terminology.lido-schema.org/lido00920">generic
+            type</a> statement designating the kind of right in
+            question, e.g., copyright or performance right, and <a
+            href="http://terminology.lido-schema.org/lido00921">specific
+            rights information</a>, such as a particular license. The
+            values are provided by the LIDO <a
+            href="http://terminology.lido-schema.org/rightsType_type">Rights
+            Type Type-Vocabulary</a>.</p>
+            <p><strong>Example:</strong> Following is an example of how
+            to record a generic rights type.</p>
+            <div class="sourceCode" id="cb17"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:rightsWorkWrap</span>&gt;</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:rightsWorkSet</span>&gt;</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>        <span class="co">&lt;!-- &quot;Generic rights type&quot; --&gt;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:rightsType</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="ot">            lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00920&quot;</span>&gt;</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">skos:Concept</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="ot">                rdf:about=</span><span class="st">&quot;http://vocab.getty.edu/aat/300055598&quot;</span>&gt;</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">skos:prefLabel</span><span class="ot"> xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>                    copyright</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:rightsType</span>&gt;</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:rightsWorkSet</span>&gt;</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:rightsWorkWrap</span>&gt;</span></code></pre></div>
+            <p><strong>Example:</strong> Following is an example of how
+            to record specific rights information.</p>
+            <div class="sourceCode" id="cb18"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:rightsWorkWrap</span>&gt;</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:rightsWorkSet</span>&gt;</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>        <span class="co">&lt;!-- &quot;Specific rights information&quot; --&gt;</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:rightsType</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="ot">            lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00921&quot;</span>&gt;</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">skos:Concept</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="ot">                rdf:about=</span><span class="st">&quot;https://creativecommons.org/publicdomain/mark/1.0/&quot;</span>&gt;</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">skos:prefLabel</span><span class="ot"> xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>                    Public Domain Mark 1.0</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:rightsType</span>&gt;</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:rightsWorkSet</span>&gt;</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:rightsWorkWrap</span>&gt;</span></code></pre></div>
+            <h4 data-number="4.4.2.2" id="record"><span
+            class="header-section-number">4.4.2.2</span> Record</h4>
+            <p>The <a
+            href="http://lido-schema.org/schema/latest/lido.html#recordWrap"><strong>Record
+            Wrapper</strong></a> contains information about this very
+            LIDO record. It encloses three mandatory elements: &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#recordID">lido:recordID</a>&gt;
+            relates to identifiers from systems where the description
+            was produced, &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#recordType">lido:recordType</a>&gt;
+            indicates the description level chosen for the object, and
+            &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#recordSource">lido:recordSource</a>&gt;
+            holds data about the producer of this record. Further
+            elements relate the identity of the originator, how the LIDO
+            record can be referenced in databases or metadata
+            repositories, and what rights are claimed by the originator
+            for using this record. The rights associated with the record
+            are documented in &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#recordRights">lido:recordRights</a>&gt;.</p>
+            <p>Please note: Rights specifications in &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#recordRights">lido:recordRights</a>&gt;
+            refer to all elements of the current LIDO record. It is
+            possible to specify different rights for individual object
+            description texts in &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#descriptiveNoteValue">lido:descriptiveNoteValue</a>&gt;
+            using the element &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectDescriptionRights">lido:objectDescriptionRights</a>&gt;
+            in the corresponding &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectDescriptionSet">lido:objectDescriptionSet</a>&gt;.
+            Rights specifications in &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectDescriptionRights">lido:objectDescriptionRights</a>&gt;
+        

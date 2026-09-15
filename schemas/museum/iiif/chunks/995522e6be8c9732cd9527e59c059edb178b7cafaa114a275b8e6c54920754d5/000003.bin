@@ -1,0 +1,148 @@
+um of leading cultural institutions.</p>
+      </div>
+      <div class="column"></div>
+      
+      <div class="column menu-column">
+        <h4>About</h4>
+        <ul>
+        
+          <li>
+            <a href="https://iiif.io/get-started/how-iiif-works">How IIIF Works</a>
+          </li>
+        
+          <li>
+            <a href="https://iiif.io/api">APIs & Documentation</a>
+          </li>
+        
+          <li>
+            <a href="https://iiif.io/demos">Demos</a>
+          </li>
+        
+          <li>
+            <a href="https://iiif.io/guides">Tutorials & Guides</a>
+          </li>
+        
+          <li>
+            <a href="https://iiif.io/privacy">Privacy policy</a>
+          </li>
+        
+        </ul>
+      </div>
+      
+      <div class="column menu-column">
+        <h4>Stay Connected</h4>
+        <ul>
+        
+          <li>
+            <a href="https://iiif.io/news-and-events">News & Events</a>
+          </li>
+        
+          <li>
+            <a href="https://iiif.io/newsletter">Join Newsletter</a>
+          </li>
+        
+          <li>
+            <a href="https://iiif.io/community/groups">Community Groups</a>
+          </li>
+        
+          <li>
+            <a href="https://iiif.io/community/consortium">Consortium</a>
+          </li>
+        
+          <li>
+            <a href="https://iiif.io/contact">Contact Us</a>
+          </li>
+        
+        </ul>
+      </div>
+      
+    </div>
+  </div>
+</footer><script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+    <script type="text/javascript" src="https://iiif.io/api/cookbook/assets/js/carouselInit.js"></script>
+
+    
+        <!-- Read the Formbutton docs at formspree.io/formbutton/docs. See more examples at codepen.io/formspree -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css" />
+
+<script src="https://formspree.io/js/formbutton-v1.min.js" defer></script>
+<script>
+  /* paste this line in verbatim */
+  window.formbutton=window.formbutton||function(){(formbutton.q=formbutton.q||[]).push(arguments)};
+  /* customize formbutton below*/     
+  formbutton("create", {
+    action: "https://formspree.io/f/xbjwjlbn",
+    title: "Feedback",
+    fields: [
+      {
+        type: "radio",
+        name: "feedback_type",
+        value: "Comment",
+        label: "Comment",
+        style: {
+            display: "inline-block",
+            "padding-right": "10px"
+        }
+      },
+      {
+        type: "radio",
+        name: "feedback_type",
+        value: "Correction",
+        label: "Correction",
+        style: {
+            display: "inline-block",
+            "padding-right": "10px"
+        }
+      },
+      {
+        type: "radio",
+        name: "feedback_type",
+        value: "Bug",
+        label: "Bug",
+        style: {
+            display: "inline-block",
+            "padding-right": "10px"
+        }
+      },
+      { 
+        type: "email", 
+        label: "Email:", 
+        name: "Email",
+        required: true,
+        placeholder: "your@email.com"
+      },
+      {
+        type: "textarea",
+        label: "Message:",
+        name: "Message",
+        placeholder: "We want to hear from you! Enter your feedback here.",
+      },
+      { 
+        type: "submit",
+        value: "Submit"
+      },
+      {
+        type: "hidden",
+        name: "Page",
+        value: window.location.pathname.replaceAll('/','|'),
+        style: {
+            display: "none"
+        }
+      }
+    ],
+    buttonImg: "<i class='fas fa-comment' style='font-size:24px'/>", 
+    styles: {
+      title: {
+        backgroundColor: "#0d232d"
+      },
+      button: {
+        backgroundColor: "#0d232d"
+      }
+    }
+  });
+</script>
+
+    
+  </body>
+</html>

@@ -1,0 +1,1141 @@
+{
+  "schemaVersion": 1,
+  "description": "Encoding-only actual current-house getter calls on a disposable Anvil. Linked libraries were normally deployed; the exact linked house runtime was installed with anvil_setCode, without its constructor or initialized immutable dependencies. These four getters use only the authorization, chain ID and house address. No auction lifecycle, valid authorization, deployment or gas acceptance is claimed.",
+  "nativeBuildId": "9afed4da42860457",
+  "nativeBuildSha256": "sha256:e1d103d13c3c3c5166806939ce66b9b4dac81242ba9453eaf442fed701eb52a0",
+  "nativeCompilerInputSha256": "sha256:db9d1616738f88cd92527b1efb5d9394efd0da53e277c0692f59389de7421cef",
+  "sourceHashes": {
+    "smart-contracts/domains/auctions/StreamNativeAuctionContent.sol": "sha256:aa6d458ab513f17a95aa837916d27a4e1b14235bf57d29599617da67c0b9c8b3",
+    "smart-contracts/domains/auctions/StreamNativeAuctionDelegation.sol": "sha256:f09ae0d546d173c0664bbe6707a239c2167842c2cda2348b26d7c6fc6510f41a",
+    "smart-contracts/domains/auctions/StreamNativeEnglishAuction.sol": "sha256:d888bcf0724cff45459708e63e1a8c1139d0c294aeb7f9949f34e1c4737df2fc",
+    "smart-contracts/domains/auctions/StreamNativeEnglishAuctionContentSettlement.sol": "sha256:55d996ec0d15bbe22418cb35e5a21e3be77d5fa723d29264cb80b3e5ffe337aa",
+    "smart-contracts/domains/auctions/StreamNativeEnglishAuctionContentUnlock.sol": "sha256:20e17b6fab0da84f12a7925f0203e5c41ede71983e71092be928d0a853316c69",
+    "smart-contracts/domains/auctions/StreamNativeEnglishAuctionCurated.sol": "sha256:652211ea32f02a288488ef8ac954000dd47beea322c55373a81957ab527a76e9",
+    "smart-contracts/domains/auctions/StreamNativeEnglishAuctionCustodyReads.sol": "sha256:c4bba310762dc4c1a75dd4522dbc6ec2d5f4710feb41ec5fc69e762aaf2d2e3d",
+    "smart-contracts/domains/auctions/StreamNativeEnglishAuctionCustodyRegistration.sol": "sha256:067b6b6665aec7346a94cdcef52ab60efd899837ef900fc8d94d3dce87919c25",
+    "smart-contracts/domains/auctions/StreamNativeEnglishAuctionCustodySettlement.sol": "sha256:b8db362a903fbea3e8b6f180eddd8e5c2650bdf3a09f669175d3af8f5c060a7e",
+    "smart-contracts/domains/auctions/StreamNativeEnglishAuctionCustodyStart.sol": "sha256:fe8f7eb35ad8c5372e89a5d4afd315fc8f15eae29d9b1da3b5aa2180a4a6c35f",
+    "smart-contracts/domains/auctions/StreamNativeEnglishAuctionRegistration.sol": "sha256:3e089e72dd1170e870da3556b7703b285092b539413941fe68268fc6c7151e4e",
+    "smart-contracts/domains/auctions/StreamNativeEnglishAuctionRightsRegistration.sol": "sha256:0d239324e345908c3a47e620759935aec19d9fd78d718313c651af6a649af4d2",
+    "smart-contracts/domains/auctions/StreamNativeEnglishAuctionRightsSettlement.sol": "sha256:42b0b84fcccf4fbbf22cbc403673968b0f768fb1084ac4379cae2ca10fb620de",
+    "smart-contracts/domains/auctions/StreamNativeEnglishAuctionSettlement.sol": "sha256:bf8582fc162ff032093f8fca1951e21011d7be35eb00a1f0be785c0736e2f78b",
+    "smart-contracts/domains/auctions/StreamNativeEnglishAuctionState.sol": "sha256:bcffac562d62f78f8588b3be309fe2de81059c82360f622ecd7742bb37665420",
+    "smart-contracts/domains/auctions/StreamNativeEnglishAuctionSupport.sol": "sha256:27c23e0af778fbcb1edc86717a843e1cca7985d65ef101fdd16d571f3f96d82b",
+    "smart-contracts/domains/auctions/StreamNativeEnglishAuctionTerminal.sol": "sha256:519c51ea12c6e05be54b08413e26d00d92fdc40edd0d7416a4864b79840c11bf",
+    "smart-contracts/domains/auctions/StreamNativeEnglishAuctionUnlock.sol": "sha256:43e119bec9da9d6228c4dc3cb1d101a92da8b880f65856429f7735efc21c58c2",
+    "smart-contracts/domains/mint/StreamMintGateValidator.sol": "sha256:90495cf6d623fb5ece45f41348e5278b02492cd794d399e55c8621de9f2b2a34",
+    "smart-contracts/domains/mint/StreamMintRoyaltyPolicy.sol": "sha256:5e78edca1118e81fa5d58f4d6e991cac1dd3f7dd477d507e65d84efa57b0ebf6",
+    "smart-contracts/domains/mint/StreamPreparedNativeContentReads.sol": "sha256:3f893bacc03782482dd873be7d6f6a0c3945fb702314e27f8c028e3271c4156d",
+    "smart-contracts/domains/mint/StreamRefundWindowSupport.sol": "sha256:06a4685037f5b4b1375d47255137f66122d845a69b7e2ff6dba09f6ee74a7884",
+    "smart-contracts/domains/revenue/StreamNativeCustodyPrimaryAdmission.sol": "sha256:1d0ce56f5905f13757eba9ca40d4040020a49efcd6953548fbbc6cddd91437cd",
+    "smart-contracts/domains/revenue/StreamNativeCustodyPrimaryValidation.sol": "sha256:97e5bcc392e0bb134fe13242fc1f787bfe1e3bff4639e0b415886c8bf2f709ee",
+    "smart-contracts/domains/revenue/StreamNativeSettlementSupport.sol": "sha256:d946293e31fbd7d5afd61ad977f14ca6af4bd32628732500c34a54ff70ce49c6",
+    "smart-contracts/domains/revenue/StreamPreparedNativeContentValidation.sol": "sha256:668e65af8b4970e804289253f516c31e78cc0c92f507a9c84ed8cd3665be9223",
+    "smart-contracts/domains/revenue/StreamPreparedNativeRightsProjection.sol": "sha256:41b3402c1f391a694d89b8a78250cc06cbe689660220ccb5c31913850fa520a5",
+    "smart-contracts/domains/revenue/StreamPreparedNativeRightsValidation.sol": "sha256:abc92df1566871def18dc6e752d965e38ee302e001fbd36b2e73f7dc848af1de",
+    "smart-contracts/domains/revenue/StreamPreparedNativeSettlementAdmission.sol": "sha256:e052c3d0d08a8e8e4f76e6787a55174cbf1d4deba28c6cd39e9d359dde104468",
+    "smart-contracts/domains/revenue/StreamPreparedNativeSettlementValidation.sol": "sha256:01cebdd4bb0fd788f12933844b14fd03eb19c8d5db7fe04f6cc89fe278e488af",
+    "smart-contracts/domains/revenue/StreamPrimarySettlementRights.sol": "sha256:79cd702491968b2f88ff0b2e24086b1fc6e61cf6f69049b0693d787d4fb67efd"
+  },
+  "houseRuntimeSha256": "sha256:58664ba9c1560d14fd550aceaa340c6c724f9c299aca35e46bc6cae1a656a2f1",
+  "houseImmutableReferences": {
+    "119448": [
+      {
+        "start": 6571,
+        "length": 32
+      },
+      {
+        "start": 21687,
+        "length": 32
+      }
+    ],
+    "119450": [
+      {
+        "start": 13148,
+        "length": 32
+      },
+      {
+        "start": 22326,
+        "length": 32
+      }
+    ],
+    "119452": [
+      {
+        "start": 3348,
+        "length": 32
+      },
+      {
+        "start": 21767,
+        "length": 32
+      }
+    ],
+    "119455": [
+      {
+        "start": 6433,
+        "length": 32
+      },
+      {
+        "start": 21807,
+        "length": 32
+      }
+    ],
+    "119458": [
+      {
+        "start": 6502,
+        "length": 32
+      },
+      {
+        "start": 21885,
+        "length": 32
+      }
+    ],
+    "119461": [
+      {
+        "start": 5435,
+        "length": 32
+      },
+      {
+        "start": 8325,
+        "length": 32
+      },
+      {
+        "start": 8890,
+        "length": 32
+      },
+      {
+        "start": 9731,
+        "length": 32
+      },
+      {
+        "start": 13217,
+        "length": 32
+      }
+    ],
+    "119463": [
+      {
+        "start": 12886,
+        "length": 32
+      },
+      {
+        "start": 22289,
+        "length": 32
+      }
+    ],
+    "119465": [
+      {
+        "start": 12395,
+        "length": 32
+      },
+      {
+        "start": 22366,
+        "length": 32
+      }
+    ],
+    "119467": [
+      {
+        "start": 12454,
+        "length": 32
+      },
+      {
+        "start": 21846,
+        "length": 32
+      }
+    ],
+    "119469": [
+      {
+        "start": 9270,
+        "length": 32
+      },
+      {
+        "start": 21924,
+        "length": 32
+      }
+    ],
+    "119471": [
+      {
+        "start": 5475,
+        "length": 32
+      },
+      {
+        "start": 6376,
+        "length": 32
+      },
+      {
+        "start": 8365,
+        "length": 32
+      },
+      {
+        "start": 8930,
+        "length": 32
+      },
+      {
+        "start": 9771,
+        "length": 32
+      }
+    ],
+    "119474": [
+      {
+        "start": 2129,
+        "length": 32
+      },
+      {
+        "start": 12815,
+        "length": 32
+      },
+      {
+        "start": 13874,
+        "length": 32
+      },
+      {
+        "start": 18594,
+        "length": 32
+      }
+    ],
+    "119477": [
+      {
+        "start": 9211,
+        "length": 32
+      },
+      {
+        "start": 18634,
+        "length": 32
+      }
+    ],
+    "119480": [
+      {
+        "start": 5085,
+        "length": 32
+      },
+      {
+        "start": 18672,
+        "length": 32
+      }
+    ],
+    "119482": [
+      {
+        "start": 11838,
+        "length": 32
+      },
+      {
+        "start": 18710,
+        "length": 32
+      }
+    ],
+    "119484": [
+      {
+        "start": 18511,
+        "length": 32
+      }
+    ],
+    "184247": [
+      {
+        "start": 2990,
+        "length": 32
+      },
+      {
+        "start": 5513,
+        "length": 32
+      },
+      {
+        "start": 7079,
+        "length": 32
+      },
+      {
+        "start": 8403,
+        "length": 32
+      },
+      {
+        "start": 8968,
+        "length": 32
+      },
+      {
+        "start": 9809,
+        "length": 32
+      }
+    ],
+    "222724": [
+      {
+        "start": 1538,
+        "length": 32
+      },
+      {
+        "start": 18554,
+        "length": 32
+      },
+      {
+        "start": 21650,
+        "length": 32
+      }
+    ],
+    "222727": [
+      {
+        "start": 3417,
+        "length": 32
+      },
+      {
+        "start": 18748,
+        "length": 32
+      },
+      {
+        "start": 21979,
+        "length": 32
+      }
+    ],
+    "222731": [
+      {
+        "start": 6154,
+        "length": 32
+      },
+      {
+        "start": 21727,
+        "length": 32
+      }
+    ],
+    "222735": [
+      {
+        "start": 8200,
+        "length": 32
+      },
+      {
+        "start": 22133,
+        "length": 32
+      }
+    ],
+    "222739": [
+      {
+        "start": 2666,
+        "length": 32
+      },
+      {
+        "start": 22211,
+        "length": 32
+      }
+    ],
+    "222741": [
+      {
+        "start": 5935,
+        "length": 32
+      },
+      {
+        "start": 22056,
+        "length": 32
+      }
+    ],
+    "222743": [
+      {
+        "start": 2550,
+        "length": 32
+      },
+      {
+        "start": 18787,
+        "length": 32
+      },
+      {
+        "start": 22018,
+        "length": 32
+      }
+    ],
+    "222745": [
+      {
+        "start": 11109,
+        "length": 32
+      },
+      {
+        "start": 22094,
+        "length": 32
+      }
+    ],
+    "222747": [
+      {
+        "start": 3251,
+        "length": 32
+      },
+      {
+        "start": 22172,
+        "length": 32
+      }
+    ],
+    "222749": [
+      {
+        "start": 2609,
+        "length": 32
+      },
+      {
+        "start": 22250,
+        "length": 32
+      }
+    ]
+  },
+  "chainId": "31337",
+  "house": "0x0000000000000000000000000000000065290001",
+  "libraries": [
+    {
+      "source": "smart-contracts/domains/auctions/StreamNativeAuctionContent.sol",
+      "name": "StreamNativeAuctionContent",
+      "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      "creationSha256": "sha256:18d2c5313ee6be000de707d7627422909e363fe81a9497586a022e58a988969a",
+      "runtimeSha256": "sha256:07a669c4462266e655ac56ecd03b75d1a0e462fabc55746df8e23eda677fe0dc",
+      "transactionHash": "0x633c7ef45c0c3875823bea2615b1f2635dc742d10c4aebcd8d789f04a05bf4c4"
+    },
+    {
+      "source": "smart-contracts/domains/auctions/StreamNativeAuctionDelegation.sol",
+      "name": "StreamNativeAuctionDelegation",
+      "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      "creationSha256": "sha256:1f790ac2fc9d2821cc1e1ac0840d2845e76056a003ba80204ac1c2189bbec72e",
+      "runtimeSha256": "sha256:dd020c4dbc4f5958e602d8c69ad709a9a92b88719b05850ee49d25a457124d3a",
+      "transactionHash": "0x723b23fff240bb31047b96f576232e2fbce8dfa3a1a4d07d64218a3888d5d5bd"
+    },
+    {
+      "source": "smart-contracts/domains/auctions/StreamNativeEnglishAuctionContentSettlement.sol",
+      "name": "StreamNativeEnglishAuctionContentSettlement",
+      "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+      "creationSha256": "sha256:54757b74d92a0884ea4d3d3f545af6231ba78ba12a759b5aa2e35f1055925641",
+      "runtimeSha256": "sha256:a30d08a1cb41a5c6154620f91061a06b2dc09bf2437314f5b424f8ae3ac21be0",
+      "transactionHash": "0x80ad2d789557a619f190558d25cbe8f0572ff26381347d06d7ce6470d70e4271"
+    },
+    {
+      "source": "smart-contracts/domains/auctions/StreamNativeEnglishAuctionContentUnlock.sol",
+      "name": "StreamNativeEnglishAuctionContentUnlock",
+      "address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+      "creationSha256": "sha256:8b415bfdbe30450443c3a3d31d80805a303b891b1caef706acda153e1b6ed06f",
+      "runtimeSha256": "sha256:c3546931715db57bf86ea6de704f512f62bb442900f147a02a875150ca2013e9",
+      "transactionHash": "0xfcee5b8965e42acbce919d1c8339e3d2e380bfb480108173395e47cb2a8891b1"
+    },
+    {
+      "source": "smart-contracts/domains/auctions/StreamNativeEnglishAuctionCurated.sol",
+      "name": "StreamNativeEnglishAuctionCurated",
+      "address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+      "creationSha256": "sha256:8dd3a0080ce665d7d21579a32f6d6345b6b491378fdfee42a1a9aee1e02b89ea",
+      "runtimeSha256": "sha256:86b4f4a978b5f90327cda0ce911e4fc42846839478c03de54af04b6320a0ae40",
+      "transactionHash": "0x379fcbeb5f0347a93c5c316650b01706a31e935decfac03fcb40a6ad2de4ff61"
+    },
+    {
+      "source": "smart-contracts/domains/auctions/StreamNativeEnglishAuctionCustodyReads.sol",
+      "name": "StreamNativeEnglishAuctionCustodyReads",
+      "address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+      "creationSha256": "sha256:56db3d3087faedae5ca276c4954e6b67b4f153a9d5cb7a435c84d02adbfe8459",
+      "runtimeSha256": "sha256:f2bd8991a0525fdbcfcefed51b8ab30ff4ebc657a52f20bf000f5922689f6e97",
+      "transactionHash": "0x935b8300daccfb3b474fef37ba9314ad158221436f0684b288fdabffae96c909"
+    },
+    {
+      "source": "smart-contracts/domains/auctions/StreamNativeEnglishAuctionCustodyRegistration.sol",
+      "name": "StreamNativeEnglishAuctionCustodyRegistration",
+      "address": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+      "creationSha256": "sha256:b87ae1629fd1427b4a41c17aaa7785eeba72da640d10d953372a24f2c00c364a",
+      "runtimeSha256": "sha256:a8787b265f8c69559b22b8431d41d4601e0879fcc706ad084eb7c365412e16a5",
+      "transactionHash": "0xa0babff4fe4efd81a8c385f5fab4ecdc0853282da914248ea8cf207f1d9e1a54"
+    },
+    {
+      "source": "smart-contracts/domains/auctions/StreamNativeEnglishAuctionCustodySettlement.sol",
+      "name": "StreamNativeEnglishAuctionCustodySettlement",
+      "address": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
+      "creationSha256": "sha256:413c5be31df9f6a749e3ff14de736c8dc6005ac55bb6ad93f590333bce96cb19",
+      "runtimeSha256": "sha256:3db105d55cb55cd739e71196af467bd45b312f50551b94278f9dffd3377058b7",
+      "transactionHash": "0x465d57edce854dd8c4978f03a7a76e37eb8305d8173597fef9cae91befe25648"
+    },
+    {
+      "source": "smart-contracts/domains/auctions/StreamNativeEnglishAuctionCustodyStart.sol",
+      "name": "StreamNativeEnglishAuctionCustodyStart",
+      "address": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+      "creationSha256": "sha256:b7e85c066b4790dff1537b5d2d4c4e5952ca9111d2455833d4b8eb2c4db24844",
+      "runtimeSha256": "sha256:d392b88e28bff20985c4f9cefb576c9653b37e87d9693c1ab95a14f735e624f5",
+      "transactionHash": "0x59b3f5eab7566c5b0426cc23ca7b563f4e7684c16963dafaf8dead9159822fa2"
+    },
+    {
+      "source": "smart-contracts/domains/auctions/StreamNativeEnglishAuctionRegistration.sol",
+      "name": "StreamNativeEnglishAuctionRegistration",
+      "address": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
+      "creationSha256": "sha256:d543682d627966a10cc7aa8377fde76e3b24ace6db933bb97fcc73df8ada1576",
+      "runtimeSha256": "sha256:afad506edede4c76a84565bacafa30c0e6d8f059e39b67b2a8991acd9c34afef",
+      "transactionHash": "0x15b7de82810e4343a6b27664839f2e24dfec25f3a328da8e012db1d591d703ff"
+    },
+    {
+      "source": "smart-contracts/domains/auctions/StreamNativeEnglishAuctionRightsRegistration.sol",
+      "name": "StreamNativeEnglishAuctionRightsRegistration",
+      "address": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
+      "creationSha256": "sha256:ba14c3e6e56c3bf4b16c91870a86762d9d058cc071929ffe41c12991b3e59289",
+      "runtimeSha256": "sha256:15592318171148fb6226f5114cb8652afd1f602bda7cfc899e8f379b5b65d578",
+      "transactionHash": "0xd4238c4d1cb6ce235775c445fe8a54b9716777b7d1a006c2a746b381862755f7"
+    },
+    {
+      "source": "smart-contracts/domains/auctions/StreamNativeEnglishAuctionRightsSettlement.sol",
+      "name": "StreamNativeEnglishAuctionRightsSettlement",
+      "address": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+      "creationSha256": "sha256:44c994f84ee0d6abe07ea0909f0eef2ab7db4f8b06ed55ccd9f5f16750752bbf",
+      "runtimeSha256": "sha256:0dabc1e3115a35d2514f9c93b02310dc02b0ebf267d2d39ea6337e7e52d14f07",
+      "transactionHash": "0x8d600049fc71ac112ce49982ec9421fe841c129a9268de3cba28c71c5144f76d"
+    },
+    {
+      "source": "smart-contracts/domains/auctions/StreamNativeEnglishAuctionSettlement.sol",
+      "name": "StreamNativeEnglishAuctionSettlement",
+      "address": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
+      "creationSha256": "sha256:72389ccc7e655f299fc3eac7078818be4cfe6f24c4475f5f4c0849a2168fbaa1",
+      "runtimeSha256": "sha256:93dba00328bd4c726a12cff19870a6c508ed727dc01aff6e8ca56b107b355b39",
+      "transactionHash": "0xa52948365a7628646fb97cf4a31fb3bcca265ff4165ea62f9f4592dab64918dc"
+    },
+    {
+      "source": "smart-contracts/domains/auctions/StreamNativeEnglishAuctionState.sol",
+      "name": "StreamNativeEnglishAuctionState",
+      "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+      "creationSha256": "sha256:9bdefcd21b4a3b16e21dd9531191a766e1a3b9bdbc6cf3431007d1f3b9745a38",
+      "runtimeSha256": "sha256:8dbeb2be3179d50ad4112b3ead0ea2667763c204ef6cf851906f953bcca2a37a",
+      "transactionHash": "0x3a327a0556366d1d3e1060c63c44a5baf4827446414944d276b5f16dc6f78430"
+    },
+    {
+      "source": "smart-contracts/domains/auctions/StreamNativeEnglishAuctionSupport.sol",
+      "name": "StreamNativeEnglishAuctionSupport",
+      "address": "0x9A676e781A523b5d0C0e43731313A708CB607508",
+      "creationSha256": "sha256:40972ad45ddbb3178f18e0f992a946925dd0c801f6da4d85a108410c4b81d388",
+      "runtimeSha256": "sha256:33e11f64f91772063280f8f982de50dbea908a6f89579ec65d5b27a9cf4073c2",
+      "transactionHash": "0xb3815a9796ec290fd8890e412a639adfafb703532406dda72470696720634beb"
+    },
+    {
+      "source": "smart-contracts/domains/auctions/StreamNativeEnglishAuctionTerminal.sol",
+      "name": "StreamNativeEnglishAuctionTerminal",
+      "address": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
+      "creationSha256": "sha256:f48d825929fb188a57713df1b0c1d1e8d73c6f18e06594939d7eadfc2d83cd74",
+      "runtimeSha256": "sha256:93876fd6332c325c9cefb0baddb5824a875eb8732cc4b85a7af5d6322a5ef81c",
+      "transactionHash": "0x6ad81a33f34c9257d5f5ea1bbc4041ba80e06d1fd18ac89ad05838c791dc387a"
+    },
+    {
+      "source": "smart-contracts/domains/auctions/StreamNativeEnglishAuctionUnlock.sol",
+      "name": "StreamNativeEnglishAuctionUnlock",
+      "address": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
+      "creationSha256": "sha256:79f4aa9d1b4ce0c0ac3fc08a2c004aae09739a441ad38195400532f479762b24",
+      "runtimeSha256": "sha256:3549a5ca83a6819d51a52f0ee8458f49dc31d2b14fcd338153b6b553b08b166f",
+      "transactionHash": "0x57fafae3ed62911f89593bec60485dca7f9a3344f2e956f9c4ec02eb75f3d360"
+    },
+    {
+      "source": "smart-contracts/domains/mint/StreamMintGateValidator.sol",
+      "name": "StreamMintGateValidator",
+      "address": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
+      "creationSha256": "sha256:97b04b2f93f26ad66a3926145af3a63aa70563f780d020c7e39a49addb3a5d34",
+      "runtimeSha256": "sha256:ce0d0a5a1935af1c3dc161bb022eb40f75af1684c706ff16376fcf758d2518ab",
+      "transactionHash": "0x46974b7ae4bacf38587d0edb14308332906cfea3a94fdfa61a08b975fc6d4b15"
+    },
+    {
+      "source": "smart-contracts/domains/mint/StreamMintRoyaltyPolicy.sol",
+      "name": "StreamMintRoyaltyPolicy",
+      "address": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
+      "creationSha256": "sha256:c6ebc3e5dcac3515a20a08955a3dedcb4b25687f2008447b6e498dbc16f5f1fc",
+      "runtimeSha256": "sha256:b0e5f25489ea55a0f4938dfa35efe0361aad48394fb52b4ae47292011036d59f",
+      "transactionHash": "0x66105f48741b4fa5a4f0086c4e91081ed1df2ef4a9bbdfcc113854156372e4be"
+    },
+    {
+      "source": "smart-contracts/domains/mint/StreamPreparedNativeContentReads.sol",
+      "name": "StreamPreparedNativeContentReads",
+      "address": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
+      "creationSha256": "sha256:7f732ba8fd39b8c183419594304f721ada82b4353f05a7393944519fe3779a46",
+      "runtimeSha256": "sha256:4840e809fd77754c036d1eb9bd6f56e6836bcf8ae6c502d12882d38b3729f329",
+      "transactionHash": "0xbcfd55e71d26d1d639a3910a757fc9f61f58e4b4e5b1a52b349f445b2c4f5d16"
+    },
+    {
+      "source": "smart-contracts/domains/mint/StreamRefundWindowSupport.sol",
+      "name": "StreamRefundWindowSupport",
+      "address": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
+      "creationSha256": "sha256:54b08c28f62f816defa6c466cefa31383e547cb786209f57065618f5775bfa61",
+      "runtimeSha256": "sha256:cf2297a1ffec09a359d65745b736d9ba0138948508aa9dc46297b61f0628d74f",
+      "transactionHash": "0xa60e708491eeb57fef5577f750291b1a06ec22b649afb7c75395ea6c4d2577ec"
+    },
+    {
+      "source": "smart-contracts/domains/revenue/StreamNativeCustodyPrimaryAdmission.sol",
+      "name": "StreamNativeCustodyPrimaryAdmission",
+      "address": "0x59b670e9fA9D0A427751Af201D676719a970857b",
+      "creationSha256": "sha256:79793c368d76291850aedaab92c16b52315bcb3bb5e45d1522a48203d1d076df",
+      "runtimeSha256": "sha256:4dcba320a0f1ad6a21cbfbdb26d1952d55f41c7d646157e92e04030a96c51996",
+      "transactionHash": "0x6bf84e7f7ea9a137caacc38054f8388f1e387ceae60a5715fbc8f4eb11ea8be7"
+    },
+    {
+      "source": "smart-contracts/domains/revenue/StreamNativeCustodyPrimaryValidation.sol",
+      "name": "StreamNativeCustodyPrimaryValidation",
+      "address": "0x4ed7c70F96B99c776995fB64377f0d4aB3B0e1C1",
+      "creationSha256": "sha256:f6223e48394fe9816f66b1644453e287d035f87cec1bcc6f3da4f8a02d91727b",
+      "runtimeSha256": "sha256:39910bf3c5b70a3f9bccae400965fe0b004e05498eb87f934dec2deefbb31d4a",
+      "transactionHash": "0x8e9600e20a3d197ef6bded774b01ec566f94396be04f4d8436263d744a9eff7f"
+    },
+    {
+      "source": "smart-contracts/domains/revenue/StreamNativeSettlementSupport.sol",
+      "name": "StreamNativeSettlementSupport",
+      "address": "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44",
+      "creationSha256": "sha256:06da3c392c1d0d97f8e7e0f2e87197b070f994e51cd334eecc1eadf859e3e448",
+      "runtimeSha256": "sha256:09b3fd1c069d2623d352275b38bcaa2ff11638b60aeb93195270138834d56df8",
+      "transactionHash": "0x0d9400233625d0b9ca8731025f852567629327acd24492328814b00fc31e5ca1"
+    },
+    {
+      "source": "smart-contracts/domains/revenue/StreamPreparedNativeContentValidation.sol",
+      "name": "StreamPreparedNativeContentValidation",
+      "address": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
+      "creationSha256": "sha256:5affdbdd0df87b1c5c2256971147656e0e39e837d5ad31e5a035bd339aac31f4",
+      "runtimeSha256": "sha256:a3f768d2777786651e1dd46274f585a3ddbfd6033ba1c4107af504f9b689027d",
+      "transactionHash": "0x59d47d5e54dfe56b56ff6e660f5c8a7045e60302baf93f2477e8e3951e2e7f3c"
+    },
+    {
+      "source": "smart-contracts/domains/revenue/StreamPreparedNativeRightsProjection.sol",
+      "name": "StreamPreparedNativeRightsProjection",
+      "address": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319",
+      "creationSha256": "sha256:3abdbf8ef13b3bbe8c7fe662be84492432ccb988db6e3ab04a700a692eaf365e",
+      "runtimeSha256": "sha256:c597f52bcf129cadc85043d61c3c2ebe3261f161dff805e23f4b7c4b657cc3be",
+      "transactionHash": "0xc367c9224804d30d1ff51cfa39bb179fc9e583eb467bdff871a3b7d7edaabae9"
+    },
+    {
+      "source": "smart-contracts/domains/revenue/StreamPreparedNativeRightsValidation.sol",
+      "name": "StreamPreparedNativeRightsValidation",
+      "address": "0x7a2088a1bFc9d81c55368AE168C2C02570cB814F",
+      "creationSha256": "sha256:24f7a38751188f5aec2c1465c9c337cb8e9f1809cb77cd5c660ef8f2a187a82a",
+      "runtimeSha256": "sha256:8b570aef59639032158e98807e434e970214f59593835ef27614b3e427d2a2d0",
+      "transactionHash": "0x926c0d9b413fc11cb31a4db9e648045f6cae3260e69faebbbdf192c80ec64143"
+    },
+    {
+      "source": "smart-contracts/domains/revenue/StreamPreparedNativeSettlementAdmission.sol",
+      "name": "StreamPreparedNativeSettlementAdmission",
+      "address": "0x09635F643e140090A9A8Dcd712eD6285858ceBef",
+      "creationSha256": "sha256:8f93a6b10f9620329f863bd511fa85a48b47597dc44288d255744422b7d9b60d",
+      "runtimeSha256": "sha256:3973c550cf4ebc280cb900916e38e819113070ff344589eb58491ca0d83909e9",
+      "transactionHash": "0x45cf506b270b67b0fa12ee464bfd56b2160f939399e788c22f7a366c1c136d21"
+    },
+    {
+      "source": "smart-contracts/domains/revenue/StreamPreparedNativeSettlementValidation.sol",
+      "name": "StreamPreparedNativeSettlementValidation",
+      "address": "0xc5a5C42992dECbae36851359345FE25997F5C42d",
+      "creationSha256": "sha256:6fb1ceb7040a023611bc2b71112fff865e91452f23e1e574afb7e32bc00b49f2",
+      "runtimeSha256": "sha256:98105093d45db754f265f4824b5b3bb1e17e0e57a55c01684ac9a6bd4ace528c",
+      "transactionHash": "0xba12ecc48324d8883a4d3de53330955dc4f524b73c384ba2ead0613b7dcda2c0"
+    },
+    {
+      "source": "smart-contracts/domains/revenue/StreamPrimarySettlementRights.sol",
+      "name": "StreamPrimarySettlementRights",
+      "address": "0x67d269191c92Caf3cD7723F116c85e6E9bf55933",
+      "creationSha256": "sha256:ddaeb4e2aad204e4772fc4272df35caf2dec6366c4729301495fc35e9b72e389",
+      "runtimeSha256": "sha256:d0384860b578e556331ed17f6a1ff1c7dc228d3d16a9be0ac7dd3eb134eeb3e2",
+      "transactionHash": "0xc43d8b7ff0f57e1ac02951c4c0dc5bb4cc6ca5eb7afc55289c0236c0db3bb0dc"
+    }
+  ],
+  "getterAbi": [
+    {
+      "type": "function",
+      "name": "bidAuthorizationDigest",
+      "inputs": [
+        {
+          "name": "a",
+          "type": "tuple",
+          "internalType": "struct IStreamNativeEnglishAuction.BidAuthorization",
+          "components": [
+            {
+              "name": "auctionId",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            },
+            {
+              "name": "configHash",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            },
+            {
+              "name": "payer",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "executor",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "deliverTo",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "maxRevealFee",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            },
+            {
+              "name": "deadline",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "finalizeBy",
+              "type": "uint64",
+              "internalType": "uint64"
+            }
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "creationAuthorizationDigest",
+      "inputs": [
+        {
+          "name": "a",
+          "type": "tuple",
+          "internalType": "struct IStreamNativeEnglishAuction.CreationAuthorization",
+          "components": [
+            {
+              "name": "configHash",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            },
+            {
+              "name": "artist",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "nonce",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            },
+            {
+              "name": "deadline",
+              "type": "uint64",
+              "internalType": "uint64"
+            }
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "custodyAcquisitionDigest",
+      "inputs": [
+        {
+          "name": "authorization",
+          "type": "tuple",
+          "internalType": "struct IStreamNativeCustodyAuction.Acquisition",
+          "components": [
+            {
+              "name": "configHash",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            },
+            {
+              "name": "tokenDataHash",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            },
+            {
+              "name": "expectedSaleNonce",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "expectedTokenId",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "expectedCollectionSerial",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "expectedOperationNonce",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "contextHash",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            },
+            {
+              "name": "executor",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "revealFeeDeposit",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "artist",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "nonce",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            },
+            {
+              "name": "deadline",
+              "type": "uint64",
+              "internalType": "uint64"
+            }
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "preparedCustodyAcquisitionDigest",
+      "inputs": [
+        {
+          "name": "authorization",
+          "type": "tuple",
+          "internalType": "struct IStreamNativeCustodyAuction.Acquisition",
+          "components": [
+            {
+              "name": "configHash",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            },
+            {
+              "name": "tokenDataHash",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            },
+            {
+              "name": "expectedSaleNonce",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "expectedTokenId",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "expectedCollectionSerial",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "expectedOperationNonce",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "contextHash",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            },
+            {
+              "name": "executor",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "revealFeeDeposit",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "artist",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "nonce",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            },
+            {
+              "name": "deadline",
+              "type": "uint64",
+              "internalType": "uint64"
+            }
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "view"
+    }
+  ],
+  "vectors": [
+    {
+      "request": {
+        "kind": "nativeAuctionCreation",
+        "chainId": "31337",
+        "verifyingContract": "0x0000000000000000000000000000000065290001",
+        "message": {
+          "configHash": "0x0000000000000000000000000000000000000000000000000000000000123401",
+          "artist": "0x0000000000000000000000000000000000abc002",
+          "nonce": "0x0000000000000000000000000000000000000000000000000000000000123403",
+          "deadline": "18446744073709551556"
+        }
+      },
+      "getter": "creationAuthorizationDigest",
+      "fields": [
+        {
+          "name": "configHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "artist",
+          "type": "address"
+        },
+        {
+          "name": "nonce",
+          "type": "bytes32"
+        },
+        {
+          "name": "deadline",
+          "type": "uint64"
+        }
+      ],
+      "calldata": "0x83fc8a6700000000000000000000000000000000000000000000000000000000001234010000000000000000000000000000000000000000000000000000000000abc0020000000000000000000000000000000000000000000000000000000000123403000000000000000000000000000000000000000000000000ffffffffffffffc4",
+      "result": "0x0f2c30e52d857c38fe81e1ac4ecee6af6b4c38a3007039ecfee4fd2101414594",
+      "digest": "0x0f2c30e52d857c38fe81e1ac4ecee6af6b4c38a3007039ecfee4fd2101414594"
+    },
+    {
+      "request": {
+        "kind": "nativeAuctionBid",
+        "chainId": "31337",
+        "verifyingContract": "0x0000000000000000000000000000000065290001",
+        "message": {
+          "auctionId": "0x0000000000000000000000000000000000000000000000000000000000123401",
+          "configHash": "0x0000000000000000000000000000000000000000000000000000000000123402",
+          "payer": "0x0000000000000000000000000000000000abc003",
+          "executor": "0x0000000000000000000000000000000000abc004",
+          "deliverTo": "0x0000000000000000000000000000000000abc005",
+          "amount": "1606938044258990275541962092341162602522202993782792835301382",
+          "maxRevealFee": "1606938044258990275541962092341162602522202993782792835301383",
+          "nonce": "0x0000000000000000000000000000000000000000000000000000000000123408",
+          "deadline": "18446744073709551561",
+          "finalizeBy": "18446744073709551562"
+        }
+      },
+      "getter": "bidAuthorizationDigest",
+      "fields": [
+        {
+          "name": "auctionId",
+          "type": "bytes32"
+        },
+        {
+          "name": "configHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "payer",
+          "type": "address"
+        },
+        {
+          "name": "executor",
+          "type": "address"
+        },
+        {
+          "name": "deliverTo",
+          "type": "address"
+        },
+        {
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "name": "maxRevealFee",
+          "type": "uint256"
+        },
+        {
+          "name": "nonce",
+          "type": "bytes32"
+        },
+        {
+          "name": "deadline",
+          "type": "uint64"
+        },
+        {
+          "name": "finalizeBy",
+          "type": "uint64"
+        }
+      ],
+      "calldata": "0x3680f006000000000000000000000000000000000000000000000000000000000012340100000000000000000000000000000000000000000000000000000000001234020000000000000000000000000000000000000000000000000000000000abc0030000000000000000000000000000000000000000000000000000000000abc0040000000000000000000000000000000000000000000000000000000000abc005000000000000010000000000000000000000000000000000000000000000000600000000000001000000000000000000000000000000000000000000000000070000000000000000000000000000000000000000000000000000000000123408000000000000000000000000000000000000000000000000ffffffffffffffc9000000000000000000000000000000000000000000000000ffffffffffffffca",
+      "result": "0x3b3fa1de325067f31f9615c6037c8f6eeda3296a646fe94e22a7855c8941dad5",
+      "digest": "0x3b3fa1de325067f31f9615c6037c8f6eeda3296a646fe94e22a7855c8941dad5"
+    },
+    {
+      "request": {
+        "kind": "nativeCustodyAcquisition",
+        "chainId": "31337",
+        "verifyingContract": "0x0000000000000000000000000000000065290001",
+        "message": {
+          "configHash": "0x0000000000000000000000000000000000000000000000000000000000123401",
+          "tokenDataHash": "0x0000000000000000000000000000000000000000000000000000000000123402",
+          "expectedSaleNonce": "1606938044258990275541962092341162602522202993782792835301379",
+          "expectedTokenId": "1606938044258990275541962092341162602522202993782792835301380",
+          "expectedCollectionSerial": "1606938044258990275541962092341162602522202993782792835301381",
+          "expectedOperationNonce": "1606938044258990275541962092341162602522202993782792835301382",
+          "contextHash": "0x0000000000000000000000000000000000000000000000000000000000123407",
+          "executor": "0x0000000000000000000000000000000000abc008",
+          "revealFeeDeposit": "1606938044258990275541962092341162602522202993782792835301385",
+          "artist": "0x0000000000000000000000000000000000abc00a",
+          "nonce": "0x000000000000000000000000000000000000000000000000000000000012340b",
+          "deadline": "18446744073709551564"
+        }
+      },
+      "getter": "custodyAcquisitionDigest",
+      "fields": [
+        {
+          "name": "configHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "tokenDataHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "expectedSaleNonce",
+          "type": "uint256"
+        },
+        {
+          "name": "expectedTokenId",
+          "type": "uint256"
+        },
+        {
+          "name": "expectedCollectionSerial",
+          "type": "uint256"
+        },
+        {
+          "name": "expectedOperationNonce",
+          "type": "uint256"
+        },
+        {
+          "name": "contextHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "executor",
+          "type": "address"
+        },
+        {
+          "name": "revealFeeDeposit",
+          "type": "uint256"
+        },
+        {
+          "name": "artist",
+          "type": "address"
+        },
+        {
+          "name": "nonce",
+          "type": "bytes32"
+        },
+        {
+          "name": "deadline",
+          "type": "uint64"
+        }
+      ],
+      "calldata": "0x7016de6700000000000000000000000000000000000000000000000000000000001234010000000000000000000000000000000000000000000000000000000000123402000000000000010000000000000000000000000000000000000000000000000300000000000001000000000000000000000000000000000000000000000000040000000000000100000000000000000000000000000000000000000000000005000000000000010000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000001234070000000000000000000000000000000000000000000000000000000000abc00800000000000001000000000000000000000000000000000000000000000000090000000000000000000000000000000000000000000000000000000000abc00a000000000000000000000000000000000000000000000000000000000012340b000000000000000000000000000000000000000000000000ffffffffffffffcc",
+      "result": "0x20ab656ca11fd9754fb4f5fb8111ced3db1d6084d515e648e37aa64868f52f56",
+      "digest": "0x20ab656ca11fd9754fb4f5fb8111ced3db1d6084d515e648e37aa64868f52f56"
+    },
+    {
+      "request": {
+        "kind": "preparedNativeCustodyAcquisition",
+        "chainId": "31337",
+        "verifyingContract": "0x0000000000000000000000000000000065290001",
+        "message": {
+          "configHash": "0x0000000000000000000000000000000000000000000000000000000000123401",
+          "tokenDataHash": "0x0000000000000000000000000000000000000000000000000000000000123402",
+          "expectedSaleNonce": "1606938044258990275541962092341162602522202993782792835301379",
+          "expectedTokenId": "1606938044258990275541962092341162602522202993782792835301380",
+          "expectedCollectionSerial": "1606938044258990275541962092341162602522202993782792835301381",
+          "expectedOperationNonce": "1606938044258990275541962092341162602522202993782792835301382",
+          "contextHash": "0x0000000000000000000000000000000000000000000000000000000000123407",
+          "executor": "0x0000000000000000000000000000000000abc008",
+          "revealFeeDeposit": "1606938044258990275541962092341162602522202993782792835301385",
+          "artist": "0x0000000000000000000000000000000000abc00a",
+          "nonce": "0x000000000000000000000000000000000000000000000000000000000012340b",
+          "deadline": "18446744073709551564"
+        }
+      },
+      "getter": "preparedCustodyAcquisitionDigest",
+      "fields": [
+        {
+          "name": "configHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "tokenDataHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "expectedSaleNonce",
+          "type": "uint256"
+        },
+        {
+          "name": "expectedTokenId",
+          "type": "uint256"
+        },
+        {
+          "name": "expectedCollectionSerial",
+          "type": "uint256"
+        },
+        {
+          "name": "expectedOperationNonce",
+          "type": "uint256"
+        },
+        {
+          "name": "contextHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "executor",
+          "type": "address"
+        },
+        {
+          "name": "revealFeeDeposit",
+          "type": "uint256"
+        },
+        {
+          "name": "artist",
+          "type": "address"
+        },
+        {
+          "name": "nonce",
+          "type": "bytes32"
+        },
+        {
+          "name": "deadline",
+          "type": "uint64"
+        }
+      ],
+      "calldata": "0xfe5f3ad200000000000000000000000000000000000000000000000000000000001234010000000000000000000000000000000000000000000000000000000000123402000000000000010000000000000000000000000000000000000000000000000300000000000001000000000000000000000000000000000000000000000000040000000000000100000000000000000000000000000000000000000000000005000000000000010000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000001234070000000000000000000000000000000000000000000000000000000000abc00800000000000001000000000000000000000000000000000000000000000000090000000000000000000000000000000000000000000000000000000000abc00a000000000000000000000000000000000000000000000000000000000012340b000000000000000000000000000000000000000000000000ffffffffffffffcc",
+      "result": "0x7e96f9c8672144d66f5637c3236cb012b9bc255e5134f3f0437a43c809faedc7",
+      "digest": "0x7e96f9c8672144d66f5637c3236cb012b9bc255e5134f3f0437a43c809faedc7"
+    }
+  ]
+}

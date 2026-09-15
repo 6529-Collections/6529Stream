@@ -1,0 +1,126 @@
+.0.0.</documentation>
+								</annotation>
+							</element>
+						</choice>
+						<element ref="gml:posList"/>
+						<element ref="gml:coordinates">
+							<annotation>
+								<documentation>Deprecated with GML version 3.1.0. Use "posList" instead.</documentation>
+							</annotation>
+						</element>
+					</choice>
+				</sequence>
+				<attribute name="numArc" type="integer" use="optional" fixed="1">
+					<annotation>
+						<documentation>An arc is an arc string consiting of a single arc, the attribute is fixed to "1".</documentation>
+					</annotation>
+				</attribute>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =========== global element in "_CurveSegment" substitution group ================ -->
+	<element name="Circle" type="gml:CircleType" substitutionGroup="gml:Arc"/>
+	<!-- =========================================================== -->
+	<complexType name="CircleType">
+		<annotation>
+			<documentation>A Circle is an arc whose ends coincide to form a simple closed loop. The "start" and "end" bearing are equal and shall be the bearing for the first controlPoint listed. The three control points must be distinct non-co-linear points for the Circle to be unambiguously defined. The arc is simply extended past the third control point until the first control point is encountered.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:ArcType"/>
+		</complexContent>
+	</complexType>
+	<!-- =========== global element in "_CurveSegment" substitution group ================ -->
+	<element name="ArcStringByBulge" type="gml:ArcStringByBulgeType" substitutionGroup="gml:_CurveSegment"/>
+	<!-- =========================================================== -->
+	<complexType name="ArcStringByBulgeType">
+		<annotation>
+			<documentation>This variant of the arc computes the mid points of the arcs instead of storing the coordinates directly. The control point sequence consists of the start and end points of each arc plus the bulge.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCurveSegmentType">
+				<sequence>
+					<choice>
+						<annotation>
+							<documentation>GML supports two different ways to specify the control points of a curve segment.
+1. A sequence of "pos" (DirectPositionType) or "pointProperty" (PointPropertyType) elements. "pos" elements are control points that are only part of this curve segment, "pointProperty" elements contain a point that may be referenced from other geometry elements or reference another point defined outside of this curve segment (reuse of existing points).
+2. The "posList" element allows for a compact way to specifiy the coordinates of the control points, if all control points are in the same coordinate reference systems and belong to this curve segment only. The number of direct positions in the list must be at least two.</documentation>
+						</annotation>
+						<choice minOccurs="2" maxOccurs="unbounded">
+							<element ref="gml:pos"/>
+							<element ref="gml:pointProperty"/>
+							<element ref="gml:pointRep">
+								<annotation>
+									<documentation>Deprecated with GML version 3.1.0. Use "pointProperty" instead. Included for backwards compatibility with GML 3.0.0.</documentation>
+								</annotation>
+							</element>
+						</choice>
+						<element ref="gml:posList"/>
+						<element ref="gml:coordinates">
+							<annotation>
+								<documentation>Deprecated with GML version 3.1.0. Use "posList" instead.</documentation>
+							</annotation>
+						</element>
+					</choice>
+					<element name="bulge" type="double" maxOccurs="unbounded">
+						<annotation>
+							<documentation>The bulge controls the offset of each arc's midpoint. The "bulge" is the real number multiplier for the normal that determines the offset direction of the midpoint of each arc. The length of the bulge sequence is exactly 1 less than the length of the control point array, since a bulge is needed for each pair of adjacent points in the control point array. The bulge is not given by a distance, since it is simply a multiplier for the normal.
+The midpoint of the resulting arc is given by: midPoint = ((startPoint + endPoint)/2.0) + bulge*normal</documentation>
+						</annotation>
+					</element>
+					<element name="normal" type="gml:VectorType" maxOccurs="unbounded">
+						<annotation>
+							<documentation>The attribute "normal" is a vector normal (perpendicular) to the chord of the arc, the line joining the first and last
+point of the arc. In a 2D coordinate system, there are only two possible directions for the normal, and it is often given as a signed real, indicating its length, with a positive sign indicating a left turn angle from the chord line, and a negative sign indicating a right turn from the chord. In 3D, the normal determines the plane of the arc, along with the start and endPoint of the arc.
+The normal is usually a unit vector, but this is not absolutely necessary. If the normal is a zero vector, the geometric object becomes equivalent to the straight line between the two end points. The length of the normal sequence is exactly the same as for the bulge sequence, 1 less than the control point sequence length.</documentation>
+						</annotation>
+					</element>
+				</sequence>
+				<attribute name="interpolation" type="gml:CurveInterpolationType" fixed="circularArc2PointWithBulge">
+					<annotation>
+						<documentation>The attribute "interpolation" specifies the curve interpolation mechanism used for this segment. This mechanism
+uses the control points and control parameters to determine the position of this curve segment. For an ArcStringByBulge the interpolation is fixed as "circularArc2PointWithBulge".</documentation>
+					</annotation>
+				</attribute>
+				<attribute name="numArc" type="integer" use="optional">
+					<annotation>
+						<documentation>The number of arcs in the arc string can be explicitly stated in this attribute. The number of control points in the arc string must be numArc + 1.</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========== global element in "_CurveSegment" substitution group ================ -->
+	<element name="ArcByBulge" type="gml:ArcByBulgeType" substitutionGroup="gml:ArcStringByBulge"/>
+	<!-- =========================================================== -->
+	<complexType name="ArcByBulgeType">
+		<annotation>
+			<documentation>An ArcByBulge is an arc string with only one arc unit, i.e. two control points and one bulge.</documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:ArcStringByBulgeType">
+				<sequence>
+					<choice>
+						<annotation>
+							<documentation>GML supports two different ways to specify the control points of a curve segment.
+1. A sequence of "pos" (DirectPositionType) or "pointProperty" (PointPropertyType) elements. "pos" elements are control points that are only part of this curve segment, "pointProperty" elements contain a point that may be referenced from other geometry elements or reference another point defined outside of this curve segment (reuse of existing points).
+2. The "posList" element allows for a compact way to specifiy the coordinates of the control points, if all control points are in the same coordinate reference systems and belong to this curve segment only. The number of direct positions in the list must be two.</documentation>
+						</annotation>
+						<choice minOccurs="2" maxOccurs="2">
+							<element ref="gml:pos"/>
+							<element ref="gml:pointProperty"/>
+							<element ref="gml:pointRep">
+								<annotation>
+									<documentation>Deprecated with GML version 3.1.0. Use "pointProperty" instead. Included for backwards compatibility with GML 3.0.0.</documentation>
+								</annotation>
+							</element>
+						</choice>
+						<element ref="gml:posList"/>
+						<element ref="gml:coordinates">
+							<annotation>
+								<documentation>Deprecated with GML version 3.1.0. Use "posList" instead.</documentation>
+							</annotation>
+						</element>
+					</choice>
+					<element name="bulge" type="double">
+						<annotation>
+							<documentation>The bulge controls the offset of each arc's midpoint. The

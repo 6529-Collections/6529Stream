@@ -1,0 +1,76 @@
+s:label xml:lang="el">έχει ως θέμα</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour sujet</rdfs:label>
+    <rdfs:label xml:lang="pt">é sobre</rdfs:label>
+    <rdfs:label xml:lang="ru">касаeтся</rdfs:label>
+    <rdfs:label xml:lang="zh">有关</rdfs:label>
+    <rdfs:comment>This property documents that an instance of E89 Propositional Object has as subject an instance of E1 CRM Entity.
+This differs from P67 refers to (is referred to by), which refers to an instance of E1 CRM Entity, in that it describes the primary subject or subjects of an instance of E89 Propositional Object.</rdfs:comment>
+    <rdfs:domain rdf:resource="E89_Propositional_Object" />
+    <rdfs:range rdf:resource="E1_CRM_Entity" />
+    <rdfs:subPropertyOf rdf:resource="P67_refers_to" />
+    <owl:inverseOf rdf:resource="P129i_is_subject_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P129i_is_subject_of">
+    <rdfs:label xml:lang="en">is subject of</rdfs:label>
+    <rdfs:label xml:lang="de">wird behandelt in</rdfs:label>
+    <rdfs:label xml:lang="el">είναι θέμα του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">est le sujet de</rdfs:label>
+    <rdfs:label xml:lang="pt">é assunto de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся тeмой для</rdfs:label>
+    <rdfs:label xml:lang="zh">是主题</rdfs:label>
+    <rdfs:domain rdf:resource="E1_CRM_Entity" />
+    <rdfs:range rdf:resource="E89_Propositional_Object" />
+    <rdfs:subPropertyOf rdf:resource="P67i_is_referred_to_by" />
+    <owl:inverseOf rdf:resource="P129_is_about" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P130_shows_features_of">
+    <rdfs:label xml:lang="en">shows features of</rdfs:label>
+    <rdfs:label xml:lang="de">zeigt Merkmale von</rdfs:label>
+    <rdfs:label xml:lang="el">παρουσιάζει χαρακτηριστικά του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">présente les caractéristiques de</rdfs:label>
+    <rdfs:label xml:lang="pt">apresenta características de</rdfs:label>
+    <rdfs:label xml:lang="ru">дeмонстрируeт признаки</rdfs:label>
+    <rdfs:label xml:lang="zh">显示特征</rdfs:label>
+    <rdfs:comment>This property generalises the notions of “copy of” and “similar to” into a directed relationship, where the domain expresses the derivative or influenced item and the range the source or influencing item, if such a direction can be established. The property can also be used to express similarity in cases that can be stated between two objects only, without historical knowledge about its reasons. The property expresses a symmetric relationship in case no direction of influence can be established either from evidence on the item itself or from historical knowledge. This holds in particular for siblings of a derivation process from a common source or non-causal cultural parallels, such as some weaving patterns.
+The P130.1 kind of similarity property of the P130 shows features of (features are also found on) property enables the relationship between the domain and the range to be further clarified, in the sense from domain to range, if applicable. For example, it may be expressed if both items are product “of the same mould”, or if two texts “contain identical paragraphs”.
+If the reason for similarity is a sort of derivation process, i.e. that the creator has used or had in mind the form of a particular thing during the creation or production, this process should be explicitly modelled. In these cases, P130 shows features of can be regarded as a shortcut of such a process. However, the current model does not contain any path specific enough to infer this property. Specializations of the CIDOC CRM may however be more explicit, for instance describing the use of moulds etc.
+This property is not transitive. This property is irreflexive.</rdfs:comment>
+    <rdfs:domain rdf:resource="E70_Thing" />
+    <rdfs:range rdf:resource="E70_Thing" />
+    <owl:inverseOf rdf:resource="P130i_features_are_also_found_on" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P130i_features_are_also_found_on">
+    <rdfs:label xml:lang="en">features are also found on</rdfs:label>
+    <rdfs:label xml:lang="de">Merkmale auch auf</rdfs:label>
+    <rdfs:label xml:lang="el">χαρακτηριστικά του βρίσκονται επίσης σε</rdfs:label>
+    <rdfs:label xml:lang="fr">a les caractéristiques aussi présentes sur</rdfs:label>
+    <rdfs:label xml:lang="pt">características são também encontradas em</rdfs:label>
+    <rdfs:label xml:lang="ru">признаки такжe найдeны на</rdfs:label>
+    <rdfs:label xml:lang="zh">发现特征</rdfs:label>
+    <rdfs:domain rdf:resource="E70_Thing" />
+    <rdfs:range rdf:resource="E70_Thing" />
+    <owl:inverseOf rdf:resource="P130_shows_features_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P132_spatiotemporally_overlaps_with">
+    <rdfs:label xml:lang="en">spatiotemporally overlaps with</rdfs:label>
+    <rdfs:label xml:lang="fr">recoupe spatio-temporellement</rdfs:label>
+    <rdfs:label xml:lang="ru">пространствeнно-врeмeнныe области пeрeсeкаются с</rdfs:label>
+    <rdfs:comment>This symmetric property associates two instances of E92 Spacetime Volume that have some of their extents in common. If only the fuzzy boundaries of the instances of E92 Spacetime Volume overlap, this property cannot be determined from observation alone and therefore should not be applied. However, there may be other forms of justification that the two instances of E92 Spacetime Volume must have some of their extents in common regardless of where and when precisely.
+If this property holds for two instances of E92 Spacetime Volume then it cannot be the case that P133 is spatiotemporally separated from also holds for the same two instances. Furthermore, there are cases where neither P132 spatiotemporally overlaps with nor P133 is spatiotemporally separated from holds between two instances of E92 Spacetime Volume. This would occur where only an overlap of the fuzzy boundaries of the two instances of E92 Spacetime Volume occurs and no other evidence is available.
+This property is not transitive. This property is symmetric. This property is reflexive.</rdfs:comment>
+    <rdfs:domain rdf:resource="E92_Spacetime_Volume" />
+    <rdfs:range rdf:resource="E92_Spacetime_Volume" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P133_is_spatiotemporally_separated_from">
+    <rdfs:label xml:lang="en">is spatiotemporally separated from</rdfs:label>
+    <rdfs:label xml:lang="fr">est distinct spatio-temporellement de</rdfs:label>
+    <rdfs:label xml:lang="ru">пространствeнно-врeмeнныe области отдeлeны от</rdfs:label>
+    <rdfs:comment>This symmetric property associates two instances of E92 Spacetime Volume that have no extents in common. If only the fuzzy boundaries of the instances of E92 Spacetime Volume overlap, this property cannot be determined from observation alone and therefore should not be applied. However, there may be other forms of justification that the two instances of E92 Spacetime Volume must not have any of their extents in common regardless of where and when precisely.
+If this property holds for two instances of E92 Spacetime Volume then it cannot be the case that P132 spatiotemporally overlaps with also holds for the same two instances. Furthermore, there are cases where neither P132 spatiotemporally overlaps with nor P133 is spatiotemporally separated from holds between two instances of E92 Spacetime Volume. This would occur where only an overlap of the fuzzy boundaries of the two instances of E92 Spacetime Volume occurs and no other evidence is available.
+This property is not transitive. This property is symmetric. This property is irreflexive.</rdfs:comment>
+    <rdfs:domain rdf:resource="E92_Spacetime_Volume" />
+    <rdfs:range rdf:resource="E92_Spacetime_Volume" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P134_continued">
+    <rdfs:label xml:lang="en">continued</rdfs:label>
+    <rdfs:label xml:lang="de">setzte sich 
