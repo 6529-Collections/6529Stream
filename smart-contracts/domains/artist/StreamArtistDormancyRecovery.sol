@@ -34,6 +34,10 @@ import {
     StreamArtistRecoveryDormancyPredecessor as DormPredecessor
 } from "./StreamArtistRecoveryDormancyPredecessor.sol";
 
+import {
+    StreamArtistRecoveryDormancyRotation as DormRotation
+} from "./StreamArtistRecoveryDormancyRotation.sol";
+
 /// @notice First designated dormancy recovery, retaining original recipes for all earlier profiles.
 library StreamArtistDormancyRecovery {
     function context(
@@ -159,7 +163,7 @@ library StreamArtistDormancyRecovery {
             i.request,
             i.acceptance
         );
-        (, R.GuardianRecord memory guardian) = DormPredecessor.facts(
+        (, R.GuardianRecord memory guardian) = _facts(
             s,
             dormancy,
             estate,
@@ -173,6 +177,29 @@ library StreamArtistDormancyRecovery {
         );
         return StreamArtistIdentityRecoveryMutation.prepareWithGuardian(
             s, rotations, replay, i, c, guardian
+        );
+    }
+
+    function _facts(
+        RecoveryState.State storage s,
+        StreamArtistDormancyState.State storage dormancy,
+        StreamArtistEstateState.State storage estate,
+        StreamArtistRotationState.State storage rotations,
+        StreamArtistIdentityResolutionState.State storage resolutions,
+        StreamArtistSuccessionState.State storage succession,
+        StreamArtistIdentityContestState.State storage contests,
+        StreamArtistHashes.Environment memory e,
+        Dismissal.Cause memory cause,
+        Recovery.Request memory p
+    ) private view returns (bytes32, R.GuardianRecord memory) {
+        // Both context and preparation consume the same selected origin/terminal and guardian proof.
+        if (rotations.latestExecution[p.artistId] != dormancy.activation[p.artistId]) {
+            return DormRotation.facts(
+                s, dormancy, estate, rotations, resolutions, succession, contests, e, cause, p
+            );
+        }
+        return DormPredecessor.facts(
+            s, dormancy, estate, rotations, resolutions, succession, contests, e, cause, p
         );
     }
 
@@ -213,7 +240,7 @@ library StreamArtistDormancyRecovery {
         if (p.supersededRecordHashes.length != 0) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         }
-        (bytes32 predecessor, R.GuardianRecord memory guardian) = DormPredecessor.facts(
+        (bytes32 predecessor, R.GuardianRecord memory guardian) = _facts(
             s,
             dormancy,
             estate,

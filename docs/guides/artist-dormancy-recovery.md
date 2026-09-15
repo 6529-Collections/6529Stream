@@ -117,6 +117,71 @@ new-side Safe acceptance, replay guards, receipts and Archive atomicity remain.
 The old no-rotation branch and original Facts hash bytes are unchanged. Only the
 new nonempty standing proof uses an additional domain-tagged commitment.
 
+## Executed rotations after designated dormancy
+
+The rotated profile admits the original designated operation 43, one or more
+actually executed class-3 operation-32 rotations, a fresh kind-1 compromise of
+the terminal incumbent, and the original elected operation-35 recovery. The
+appointment remains the distinct capability origin. Its full notice, completion
+record, immutable vesting snapshot, original designation/directives, delegation
+epoch and complete guardian prefix are authenticated without substituting the
+terminal incumbent for the originally designated successor. An earlier living
+operation-32 parent and its earlier plan signer remain supported.
+
+The current execution and vesting heads must both be the actual terminal rotation.
+The reader authenticates its canonical rotation record and vesting snapshot,
+immediate previous commitment, address/revision/time continuity, captured guardian
+prefix and original timing/quorum. Fixed-owner vesting admission requires each
+write-once snapshot to extend the sole stored latest head. With the unchanged
+operation-43 activation and no prior recovery, this trusted admitted chain binds
+the current class-3 lineage to that origin. The reader does not replay every
+intermediate historical witness or use mutable old retirement entries as ancestry
+anchors. A legitimately returning address is supported. The terminal retirement
+entry is still checked against the actual latest execution.
+
+This profile requires the original operation-43 window to be unclosed and
+uncontested. Intermediate and terminal rotation windows may instead have actual
+operation-58 closures: kind-1 compromise or kind-2 standing veto, including an
+abandoned pending attempt before the next executed rotation. The immutable first
+closure, its original dismissal/cause, and the current latest dismissal are
+independent proofs. An early abandoned terminal window permits a later fresh
+compromise before its former end; an unclosed window requires the saved current
+cause time to be at or after its own end. Waiting cannot mature an earlier cause.
+
+Guardian selection retains the complete original lifetime prefix and every
+later admitted entry. An eligible intermediate class-3 record retains its exact
+historical signer; a record written after the terminal rotation must name the
+current terminal signer and its exact eligible association. Abandoned provisional
+records never mature, while fresh empty-association records after dismissal may
+become operational. Lower-nonce lifetime guardians retain veto. Operation 29
+adds no capability bit: even a zero-mask successor can rotate under its original
+new-side acceptance, delay or captured guardian acceleration rules.
+
+Both context and preparation select this same proof and operational guardian.
+New tagged fact commitments enter the existing old-state and new-intent hashes;
+the unrotated predecessor and its original hash bytes are unchanged. Original
+action election, new-side Safe acceptance, nonce/replay guards, capability
+continuity, three recovery receipts and atomic Archive composition are retained.
+No operation ID, facade selector or storage field is added. Operations 1–60 keep
+their original domains and recipes.
+
+An operation-43 closure preceding the first rotation remains a separate missing
+profile, including the existing standing-history rejection control. Prior
+operation-35 recovery, enumerated supersession and class-4 authority transitions
+are outside this rotated-dormancy increment.
+
+Nine authored cases in `StreamArtistDormancyRotationRecoveryActual.t.sol` cover
+earlier living ancestry, original receipts and replay, repeated rotations with
+an intermediate guardian and returning address, zero-mask guardian-accelerated
+rotation, early terminal dismissal and permanently abandoned candidates, a closed
+intermediate rotation plus standing attempt, persistent early-cause refusal,
+lifetime Safe veto, parent commitment corruption/restoration, and identical
+late-Archive retry. They use actual Artist owners, Archive and threshold Safes;
+Core/governance remain explicit typed unit boundaries. The new suite and retained
+standing-history suite pass a 752-source ABI/storage type check. These new cases
+have not executed; consolidated native, product-size and current-Core/Executor
+acceptance remain separate.
+
 ## Validation
 
 Eight new authored cases use actual Artist owners, threshold Safe acceptance,

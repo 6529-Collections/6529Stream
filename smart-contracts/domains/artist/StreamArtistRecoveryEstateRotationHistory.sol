@@ -31,8 +31,8 @@ import {
 } from "../../interfaces/stream/artist/StreamArtistIdentityRecoveryOperationTypes.sol";
 
 /// @notice Constant-size consumption of the admitted class3 vesting chain.
-/// @dev Caller authenticates unchanged original op40 and excludes prior recovery/supersession.
-/// Only op40 can establish class3 from class1; op32 preserves it and each write-once vesting
+/// @dev Caller authenticates unchanged original op40 or designated op43 and excludes prior
+/// recovery/supersession. These admitted origins establish class3; op32 preserves it and each write-once vesting
 /// snapshot binds the owner's actual preceding head. No mutable retirement is a lineage anchor.
 library StreamArtistRecoveryEstateRotationHistory {
     function terminal(

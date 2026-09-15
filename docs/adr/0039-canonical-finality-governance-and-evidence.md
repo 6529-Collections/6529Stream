@@ -1727,3 +1727,24 @@ a separate schema-1 evidence companion identifies the finding, intent and notice
 Fixed workers retain the existing host and Identity layouts. The full caller
 recipe and source/runtime boundary are in
 [the integration guide](../integrations/artist-entropy-unavailability.md).
+
+
+### Designated dormancy followed by executed successor rotations
+
+The first elected class-3 recovery may consume an unchanged admitted operation-43
+appointment followed by actual class-3 operation-32 history. The original notice,
+completion, plan, capability origin, epoch and guardian prefix remain distinct
+from the terminal incumbent. Canonical terminal/immediate-parent records and the
+fixed owner's write-once latest-head vesting invariant authenticate the chain;
+old mutable retirement mappings do not anchor ancestry. The current cause must
+name the exact terminal execution and satisfy that window's timing or its actual
+first/latest dismissal proofs. Intermediate standing closures remain separately
+bound when a subsequent rotation stages from an abandoned pending attempt.
+
+The original operation-43 closure is empty in this increment. Full guardian
+history, native association eligibility, lifetime veto, original action election,
+new-side acceptance, capability restrictions and replay/Archive atomicity remain.
+Both context and preparation consume the same new tagged proof; original
+unrotated fact bytes and all operations 1–60 are unchanged. No class-4 or
+supersession authority is introduced. The [caller guide](../guides/artist-dormancy-recovery.md)
+states the admitted profile and the remaining closed-origin/prior-recovery work.
