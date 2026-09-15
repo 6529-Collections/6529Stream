@@ -12,7 +12,8 @@ abstract contract StreamRefundWindowBook is IStreamNativeRefundWindowSale, Reent
     StreamRefundWindowBookStore.State internal _book;
 
     function refundSaleRecord(bytes32 id) external view override returns (RefundSaleRecord memory) {
-        return _book._refundSales[id];
+        bytes memory out = StreamRefundWindowBookStore.readRecord(_book, msg.sig, id);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
     function refundPurchaseRecord(bytes32 id)
@@ -21,7 +22,8 @@ abstract contract StreamRefundWindowBook is IStreamNativeRefundWindowSale, Reent
         override
         returns (RefundPurchaseRecord memory)
     {
-        return _book._purchases[id];
+        bytes memory out = StreamRefundWindowBookStore.readRecord(_book, msg.sig, id);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
     function purchaseDeadlines(bytes32 id)

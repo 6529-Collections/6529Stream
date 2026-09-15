@@ -13,13 +13,13 @@ import {
 ///      Functional integration does not satisfy the separately measured collector gas ceiling.
 contract StreamCurrentClearingSaleTest is StreamCurrentSafeGovernanceFixture {
     bytes32 private constant CLEARING_PHASE = keccak256("current clearing phase");
-    uint256[] private signingKeys;
+    uint256[] internal signingKeys;
     OfficialSafe private artistSafe;
-    OfficialSafe private payerSafe;
+    OfficialSafe internal payerSafe;
     OfficialSafe private keeperSafe;
-    StreamNativeClearingSale private clearing;
+    StreamNativeClearingSale internal clearing;
     StreamPrimarySaleSettlement private recorder;
-    bytes32 private saleId;
+    bytes32 internal saleId;
 
     function setUp() public {
         signingKeys.push(0xC1EA01);
@@ -71,6 +71,13 @@ contract StreamCurrentClearingSaleTest is StreamCurrentSafeGovernanceFixture {
         return 1;
     }
 
+    /// @dev Optional test subclass capability; original fixtures explicitly retain zero mode.
+    function _refundClaimDeployment()
+        internal
+        virtual
+        returns (IStreamNativeRefundDelegatedClaims.DelegationDeployment memory d)
+    { }
+
     function _deployAdditionalProducts() internal override {
         recorder =
             new StreamPrimarySaleSettlement(primaryResolver, address(registry), revenueEscrow);
@@ -92,6 +99,7 @@ contract StreamCurrentClearingSaleTest is StreamCurrentSafeGovernanceFixture {
         deployment.parameters[2] = IStreamGasParameterHost.GasParameterConfig(
             "REVEAL_ATTEMPT_GAS_LIMIT", 4000000, 50000, 2
         );
+        deployment.delegation = _refundClaimDeployment();
         clearing = new StreamNativeClearingSale(deployment);
         _assertDeployableProductionInstance(address(recorder));
         _assertDeployableProductionInstance(address(clearing));
@@ -112,7 +120,9 @@ contract StreamCurrentClearingSaleTest is StreamCurrentSafeGovernanceFixture {
             500000,
             address(clearing).codehash,
             DEPLOYMENT_HASH,
-            keccak256("current clearing module"),
+            clearing.refundDelegationConfiguration().registry == address(0)
+                ? keccak256("current clearing module")
+                : clearing.refundDelegationManifestHash(),
             "urn:stream:current:clearing"
         );
         (GovernanceCall[] memory calls, bytes[] memory data) =
@@ -260,7 +270,7 @@ contract StreamCurrentClearingSaleTest is StreamCurrentSafeGovernanceFixture {
         );
     }
 
-    function _consent() private {
+    function _consent() internal {
         bytes32 configHash = clearing.saleRecord(saleId).configHash;
         ClearingConsent.Consent memory terms =
             ClearingConsent.Consent(1, address(clearing), saleId, configHash);
@@ -285,7 +295,7 @@ contract StreamCurrentClearingSaleTest is StreamCurrentSafeGovernanceFixture {
     }
 
     function _purchaseData(uint256 number)
-        private
+        internal
         returns (IStreamNativeClearingSale.ClearingPurchaseData memory d)
     {
         IStreamNativeClearingSale.ClearingSaleRecord memory sale_ = clearing.saleRecord(saleId);
@@ -319,7 +329,7 @@ contract StreamCurrentClearingSaleTest is StreamCurrentSafeGovernanceFixture {
     }
 
     function _buy(IStreamNativeClearingSale.ClearingPurchaseData memory d, uint256 value)
-        private
+        internal
         returns (bytes32 id)
     {
         id = keccak256(
@@ -373,7 +383,7 @@ contract StreamCurrentClearingSaleTest is StreamCurrentSafeGovernanceFixture {
         );
     }
 
-    function _exec(OfficialSafe account, address target, uint256 value, bytes memory data) private {
+    function _exec(OfficialSafe account, address target, uint256 value, bytes memory data) internal {
         require(
             executeSafe(account, signingKeys, target, value, data, 0),
             "actual Safe executes Stream call"

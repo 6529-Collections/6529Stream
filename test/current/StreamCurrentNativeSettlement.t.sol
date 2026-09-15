@@ -5,7 +5,9 @@ import "../helpers/StreamCurrentStackFixture.sol";
 import "../helpers/OfficialSafeFixture.sol";
 import "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
 import "../../smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol";
-import { StreamArtistSaleTypes as SaleTerms } from "../../smart-contracts/interfaces/stream/artist/StreamArtistSaleTypes.sol";
+import {
+    StreamArtistSaleTypes as SaleTerms
+} from "../../smart-contracts/interfaces/stream/artist/StreamArtistSaleTypes.sol";
 
 contract CurrentNativeRecipient is IERC721Receiver {
     error CurrentNativeRejected();
@@ -32,14 +34,14 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
     bytes32 private constant NATIVE_PHASE = keccak256("current shared native phase");
     uint256 private constant PRICE = 1000;
     StreamPrimarySaleSettlement private recorder;
-    StreamNativeFixedPriceSaleAdapter private nativeSale;
+    StreamNativeFixedPriceSaleAdapter internal nativeSale;
     OfficialSafe private artistSafe;
-    OfficialSafe private payerSafe;
-    uint256[] private keys;
-    bytes32 private saleId;
-    bytes32 private zeroProgram;
-    bytes32 private pwywProgram;
-    bytes32 private openProgram;
+    OfficialSafe internal payerSafe;
+    uint256[] internal keys;
+    bytes32 internal saleId;
+    bytes32 internal zeroProgram;
+    bytes32 internal pwywProgram;
+    bytes32 internal openProgram;
     bool private useTemplate;
     bool private requireSaleConsent;
 
@@ -73,6 +75,13 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
         return safeThresholdSignature(keys, safeMessageDigest(artistSafe, abi.encode(digest)));
     }
 
+    /// @dev Optional test subclass capability; original fixtures explicitly retain zero mode.
+    function _refundClaimDeployment()
+        internal
+        virtual
+        returns (IStreamNativeRefundDelegatedClaims.DelegationDeployment memory d)
+    { }
+
     function _deployAdditionalProducts() internal override {
         recorder =
             new StreamPrimarySaleSettlement(primaryResolver, address(registry), revenueEscrow);
@@ -81,7 +90,10 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
             recorder,
             vm.addr(PLATFORM_KEY),
             IStreamArtistAttribution(address(artists)),
-            IStreamGasParameterHost.GasParameterConfig("REVEAL_ATTEMPT_GAS_LIMIT", 2_000_000, 50_000, 2)
+            IStreamGasParameterHost.GasParameterConfig(
+                "REVEAL_ATTEMPT_GAS_LIMIT", 2_000_000, 50_000, 2
+            ),
+            _refundClaimDeployment()
         );
         _assertDeployableProductionInstance(address(recorder));
         _assertDeployableProductionInstance(address(nativeSale));
@@ -153,7 +165,9 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
             500_000,
             address(nativeSale).codehash,
             DEPLOYMENT_HASH,
-            keccak256("native current module"),
+            nativeSale.refundDelegationConfiguration().registry == address(0)
+                ? keccak256("native current module")
+                : nativeSale.refundDelegationManifestHash(),
             "urn:6529stream:fixture:native"
         );
         (GovernanceCall[] memory calls, bytes[] memory data) =
@@ -445,7 +459,7 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
     }
 
     function _programExecution(bytes32 id, uint256 nonce, uint256 chosen, uint256 signedPrice)
-        private
+        internal
         returns (IStreamNativePricePrograms.PriceProgramExecution memory e)
     {
         e.chosenUnitPrice = chosen;
@@ -654,7 +668,7 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
     }
 
     function _execution(uint256 nonce, address recipient)
-        private
+        internal
         returns (
             IStreamNativeFixedPriceSaleAdapter.SaleExecutionData memory e,
             StreamNativeSettlementTypes.NativeSettlementCandidate memory c

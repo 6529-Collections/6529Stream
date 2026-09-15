@@ -53,16 +53,16 @@ contract StreamCurrentRefundWindowTest is StreamCurrentSafeGovernanceFixture {
     bytes32 private constant SALT = keccak256("actual current refund entropy salt");
     uint256 private constant PRICE = 1000;
     uint256 private constant FEE = 100;
-    uint256[] private keys;
+    uint256[] internal keys;
     OfficialSafe private artistSafe;
     OfficialSafe private operatorSafe;
-    OfficialSafe private payerSafe;
+    OfficialSafe internal payerSafe;
     OfficialSafe private keeperSafe;
     StreamPrimarySaleSettlement private recorder;
-    StreamNativeRefundWindowSale private refundSale;
+    StreamNativeRefundWindowSale internal refundSale;
     StreamEntropyProviderARRNG private arrng;
     CurrentRefundARRNGService private upstream;
-    bytes32 private refundId;
+    bytes32 internal refundId;
 
     function setUp() public {
         keys.push(0x5AFE01);
@@ -120,10 +120,16 @@ contract StreamCurrentRefundWindowTest is StreamCurrentSafeGovernanceFixture {
         );
     }
 
+    /// @dev Optional test subclass capability; original fixtures explicitly retain zero mode.
+    function _refundClaimDeployment()
+        internal
+        virtual
+        returns (IStreamNativeRefundDelegatedClaims.DelegationDeployment memory d)
+    { }
+
     function _deployAdditionalProducts() internal override {
-        recorder = new StreamPrimarySaleSettlement(
-            primaryResolver, address(registry), revenueEscrow
-        );
+        recorder =
+            new StreamPrimarySaleSettlement(primaryResolver, address(registry), revenueEscrow);
         StreamNativeRefundWindowSale.DeploymentConfig memory config;
         config.manager = manager;
         config.recorder = recorder;
@@ -142,6 +148,7 @@ contract StreamCurrentRefundWindowTest is StreamCurrentSafeGovernanceFixture {
         config.parameters[2] = IStreamGasParameterHost.GasParameterConfig(
             "REVEAL_ATTEMPT_GAS_LIMIT", 4_000_000, 50_000, 2
         );
+        config.delegation = _refundClaimDeployment();
         refundSale = new StreamNativeRefundWindowSale(config);
         upstream = new CurrentRefundARRNGService(address(operatorSafe), address(artistSafe));
         arrng = new StreamEntropyProviderARRNG(
@@ -200,7 +207,9 @@ contract StreamCurrentRefundWindowTest is StreamCurrentSafeGovernanceFixture {
             500_000,
             address(refundSale).codehash,
             DEPLOYMENT_HASH,
-            keccak256("current refund module"),
+            refundSale.refundDelegationConfiguration().registry == address(0)
+                ? keccak256("current refund module")
+                : refundSale.refundDelegationManifestHash(),
             "urn:stream:current:refund"
         );
         (GovernanceCall[] memory calls, bytes[] memory data) =
@@ -461,7 +470,7 @@ contract StreamCurrentRefundWindowTest is StreamCurrentSafeGovernanceFixture {
     }
 
     function _purchaseData(uint256 number)
-        private
+        internal
         returns (IStreamNativeRefundWindowSale.RefundPurchaseData memory data)
     {
         IStreamNativeRefundWindowSale.RefundSaleRecord memory record =
@@ -492,7 +501,7 @@ contract StreamCurrentRefundWindowTest is StreamCurrentSafeGovernanceFixture {
     }
 
     function _purchase(IStreamNativeRefundWindowSale.RefundPurchaseData memory data)
-        private
+        internal
         returns (bytes32 id)
     {
         vm.recordLogs();
@@ -568,7 +577,7 @@ contract StreamCurrentRefundWindowTest is StreamCurrentSafeGovernanceFixture {
         _exec(payerSafe, address(refundSale), 0, data);
     }
 
-    function _exec(OfficialSafe caller, address target, uint256 value, bytes memory data) private {
+    function _exec(OfficialSafe caller, address target, uint256 value, bytes memory data) internal {
         require(
             executeSafe(caller, keys, target, value, data, 0), "actual threshold Safe execution"
         );

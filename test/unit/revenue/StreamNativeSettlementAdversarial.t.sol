@@ -60,7 +60,10 @@ contract StreamNativeSettlementAdversarialTest is NativeSettlementTestBase {
             IStreamPrimarySaleSettlement(address(old)),
             vm.addr(PLATFORM_KEY),
             artists,
-            IStreamGasParameterHost.GasParameterConfig("REVEAL_ATTEMPT_GAS_LIMIT", 2_000_000, 50_000, 2)
+            IStreamGasParameterHost.GasParameterConfig("REVEAL_ATTEMPT_GAS_LIMIT", 2_000_000, 50_000, 2),
+            IStreamNativeRefundDelegatedClaims.DelegationDeployment(
+                address(0), 0, bytes32(0), IStreamGasParameterHost.GasParameterConfig("", 0, 0, 0)
+            )
         );
     }
 
@@ -70,7 +73,10 @@ contract StreamNativeSettlementAdversarialTest is NativeSettlementTestBase {
             recorder,
             vm.addr(PLATFORM_KEY),
             artists,
-            IStreamGasParameterHost.GasParameterConfig("REVEAL_ATTEMPT_GAS_LIMIT", 2_000_000, 50_000, 2)
+            IStreamGasParameterHost.GasParameterConfig("REVEAL_ATTEMPT_GAS_LIMIT", 2_000_000, 50_000, 2),
+            IStreamNativeRefundDelegatedClaims.DelegationDeployment(
+                address(0), 0, bytes32(0), IStreamGasParameterHost.GasParameterConfig("", 0, 0, 0)
+            )
         );
         _register(
             address(wrong),

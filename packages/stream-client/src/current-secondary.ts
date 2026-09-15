@@ -316,3 +316,98 @@ export class CurrentSecondaryClient {
       account: vault, delegate: signer, scope: address(scope), witness: w, startDate: row[2] as bigint, expiryDate: row[3] as bigint, purpose });
   }
 }
+
+
+/** Explicit caller-selected current native refund ABI; no new signature or spending authority. */
+export class CurrentNativeRefundClaimsClient {
+  readonly chainId: bigint;
+  readonly adapter: Address;
+  readonly #abi: Interface;
+  constructor(chainId: bigint, adapter: Address, compiledAdapterAbi: InterfaceAbi) {
+    this.chainId = uint(chainId); if (chainId === 0n) throw Error("Nonzero chain required");
+    this.adapter = address(adapter, true); this.#abi = new Interface(compiledAdapterAbi);
+    const expected = ["uint256 chainId", "address core", "address registry", "bytes32 registryCodeHash", "uint256 usecase", "bytes32 baseManifestHash", "address moduleRegistry", "bytes32 moduleRegistryCodeHash"];
+    const read = this.#abi.getFunction("refundDelegationConfiguration");
+    const claim = this.#abi.getFunction("claimRefundFor");
+    if (!read?.constant || read.inputs.length !== 0 || read.outputs.length !== 1
+      || read.outputs[0]?.components?.map(x => `${x.type} ${x.name}`).join(",") !== expected.join(",")
+      || !claim || claim.stateMutability !== "nonpayable" || claim.inputs.map(x => x.format("sighash")).join(",") !== "bytes32,address,(bool,uint256)"
+      || claim.inputs[2]?.components?.map(x => x.name).join(",") !== "walletWide,index"
+      || claim.outputs.length !== 1 || claim.outputs[0]?.type !== "uint256") throw Error("Selected ABI lacks exact native refund capability");
+    Object.freeze(this);
+  }
+  #call(method: string, args: readonly unknown[]): UnsignedCall {
+    const fn = this.#abi.getFunction(method); if (!fn || fn.inputs.length !== args.length) throw Error(`Selected ABI lacks ${method}`);
+    return Object.freeze({ to: this.adapter, value: 0n, data: this.#abi.encodeFunctionData(fn, args.map((v, i) => normalize(fn.inputs[i]!, v))) as Hex });
+  }
+  #recipient(account: Address): Address {
+    const a = address(account, true); if (same(a, this.adapter)) throw Error("Refund cannot target its host"); return a;
+  }
+  claim(account: Address, saleId: Hex, recipient: Address = account): SecondaryActorCall {
+    return Object.freeze({ caller: this.#recipient(account), call: this.#call("claimRefund", [hash(saleId, true), this.#recipient(recipient)]) });
+  }
+  claimFor(delegate: Address, saleId: Hex, account: Address, witness: SecondaryDelegationWitness): SecondaryActorCall {
+    const caller = this.#recipient(delegate), vault = this.#recipient(account);
+    if (same(caller, vault)) throw Error("Use original own-account claim");
+    keys(witness, ["walletWide", "index"]);
+    if (typeof witness.walletWide !== "boolean") throw Error("Expected boolean witness scope");
+    return Object.freeze({ caller, call: this.#call("claimRefundFor", [hash(saleId, true), vault, { walletWide: witness.walletWide, index: uint(witness.index) }]) });
+  }
+  async #read(provider: Pick<Provider, "call">, method: string, args: readonly unknown[], blockTag: BlockTag) {
+    const fn = this.#abi.getFunction(method); if (!fn?.constant) throw Error("Expected compiled read method");
+    const raw = await provider.call({ ...this.#call(method, args), blockTag });
+    const result = this.#abi.decodeFunctionResult(fn, raw);
+    if (!same(this.#abi.encodeFunctionResult(fn, result), raw)) throw Error("Noncanonical contract read");
+    return result;
+  }
+  /** Only retained deployment/grant facts are checked; earned claims have no current module/Artist gate. */
+  async observeDelegation(provider: Pick<Provider, "getNetwork" | "getBlock" | "call" | "getCode">,
+    pins: SecondaryDelegationPins, account: Address, delegate: Address, witness: SecondaryDelegationWitness,
+    blockTag: BlockTag = "latest") {
+    keys(pins, ["core", "adapterCodeHash", "moduleRegistry", "moduleRegistryCodeHash", "delegateRegistry", "delegateRegistryCodeHash", "usecase", "baseManifestHash"]);
+    pins = Object.freeze({ core: address(pins.core, true), adapterCodeHash: hash(pins.adapterCodeHash, true),
+      moduleRegistry: address(pins.moduleRegistry, true), moduleRegistryCodeHash: hash(pins.moduleRegistryCodeHash, true),
+      delegateRegistry: address(pins.delegateRegistry, true), delegateRegistryCodeHash: hash(pins.delegateRegistryCodeHash, true),
+      usecase: uint(pins.usecase), baseManifestHash: hash(pins.baseManifestHash, true) });
+    keys(witness, ["walletWide", "index"]);
+    if (typeof witness.walletWide !== "boolean") throw Error("Expected boolean witness scope");
+    const w = Object.freeze({ walletWide: witness.walletWide, index: uint(witness.index) });
+    const vault = this.#recipient(account), caller = this.#recipient(delegate);
+    if (same(vault, caller) || same(pins.core, allCollections) || pins.usecase === 0n || pins.usecase === 998n || pins.usecase === 999n) throw Error("Invalid delegation coordinates");
+    if ((await provider.getNetwork()).chainId !== this.chainId) throw Error("RPC chain differs");
+    const block = await provider.getBlock(blockTag); if (!block?.hash) throw Error("Observed block unavailable");
+    const at = block.number, timestamp = BigInt(block.timestamp);
+    const [configuration] = await this.#read(provider, "refundDelegationConfiguration", [], at);
+    const expected = [this.chainId, pins.core, pins.delegateRegistry, pins.delegateRegistryCodeHash, pins.usecase,
+      pins.baseManifestHash, pins.moduleRegistry, pins.moduleRegistryCodeHash];
+    for (let i = 0; i < expected.length; ++i) if (!same(String(configuration[i]), String(expected[i]))) throw Error("Pinned refund deployment differs");
+    const manifest = coder.encode(["bytes32", "uint256", "address", "bytes32", "address", "address", "bytes32", "uint256"],
+      [id("6529STREAM_NATIVE_AUCTION_NFTDELEGATION_MANIFEST_V1"), this.chainId, this.adapter, pins.baseManifestHash, pins.core,
+        pins.delegateRegistry, pins.delegateRegistryCodeHash, pins.usecase]);
+    const [actualManifest] = await this.#read(provider, "refundDelegationManifest", [], at);
+    if (!same(actualManifest, manifest)) throw Error("Pinned refund manifest differs");
+    for (const [target, codeHash] of [[this.adapter, pins.adapterCodeHash], [pins.delegateRegistry, pins.delegateRegistryCodeHash]] as const) {
+      const code = await provider.getCode(target, at);
+      if (code === "0x" || !same(keccak256(code), codeHash)) throw Error("Pinned runtime differs");
+    }
+    const scope = w.walletWide ? allCollections : pins.core;
+    const key = solidityPackedKeccak256(["address", "address", "address", "uint256"], [vault, scope, caller, pins.usecase]);
+    const data = id("globalDelegationHashes(bytes32,uint256)").slice(0, 10) + coder.encode(["bytes32", "uint256"], [key, w.index]).slice(2);
+    const raw = await provider.call({ to: pins.delegateRegistry, data, blockTag: at });
+    if (!isHexString(raw, 192)) throw Error("Delegation row must contain exactly six words");
+    const row = coder.decode(["uint256", "uint256", "uint256", "uint256", "uint256", "uint256"], raw);
+    if (row[0] !== BigInt(vault) || row[1] !== BigInt(caller) || row[2] > timestamp || row[3] <= timestamp || row[4] !== 1n || row[5] !== 0n) throw Error("Exact live retained delegation row is absent");
+    if ((await provider.getBlock(at))?.hash !== block.hash) throw Error("Observed block changed; repeat reads");
+    return Object.freeze({ blockNumber: at, blockHash: block.hash, account: vault, delegate: caller,
+      witness: w, manifestHash: keccak256(manifest) as Hex, startDate: row[2] as bigint, expiryDate: row[3] as bigint });
+  }
+  async readCredit(provider: Pick<Provider, "getNetwork" | "call">, saleId: Hex, account: Address, blockTag: BlockTag = "latest"): Promise<bigint> {
+    if ((await provider.getNetwork()).chainId !== this.chainId) throw Error("RPC chain differs");
+    const [value] = await this.#read(provider, "refundableBalance", [hash(saleId, true), this.#recipient(account)], blockTag);
+    return value as bigint;
+  }
+  async simulate(provider: Pick<Provider, "call" | "getNetwork">, prepared: SecondaryActorCall, blockTag: BlockTag = "latest"): Promise<string> {
+    if ((await provider.getNetwork()).chainId !== this.chainId || !same(prepared.call.to, this.adapter) || prepared.call.value !== 0n) throw Error("Refund simulation chain/adapter/value mismatch");
+    return provider.call({ ...prepared.call, from: this.#recipient(prepared.caller), blockTag });
+  }
+}

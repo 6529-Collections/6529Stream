@@ -384,7 +384,10 @@ contract StreamCurrentPreparedNativeSettlementTest is RevenueV1TestBase, Officia
             recorder,
             vm.addr(SIGNER_KEY),
             artists,
-            IStreamGasParameterHost.GasParameterConfig("REVEAL_ATTEMPT_GAS_LIMIT", 2_000_000, 50_000, 2)
+            IStreamGasParameterHost.GasParameterConfig("REVEAL_ATTEMPT_GAS_LIMIT", 2_000_000, 50_000, 2),
+            IStreamNativeRefundDelegatedClaims.DelegationDeployment(
+                address(0), 0, bytes32(0), IStreamGasParameterHost.GasParameterConfig("", 0, 0, 0)
+            )
         );
         require(address(nativeSale).code.length <= 24576, "original native adapter fits");
         _register(address(nativeSale), keccak256("NATIVE_PRIMARY_SALE_ADAPTER"),

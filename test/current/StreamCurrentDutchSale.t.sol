@@ -56,16 +56,16 @@ contract StreamCurrentDutchSaleTest is StreamCurrentSafeGovernanceFixture {
     bytes32 private constant SALT = keccak256("actual current Dutch entropy salt");
     uint256 private constant PRICE = 1000;
     uint256 private constant FEE = 100;
-    uint256[] private keys;
+    uint256[] internal keys;
     OfficialSafe private artistSafe;
     OfficialSafe private operatorSafe;
-    OfficialSafe private payerSafe;
+    OfficialSafe internal payerSafe;
     OfficialSafe private keeperSafe;
     StreamPrimarySaleSettlement private recorder;
-    StreamNativeDutchSale private dutchSale;
+    StreamNativeDutchSale internal dutchSale;
     StreamEntropyProviderARRNG private arrng;
     CurrentDutchARRNGService private upstream;
-    bytes32 private dutchId;
+    bytes32 internal dutchId;
 
     function setUp() public {
         keys.push(0x5AFE01);
@@ -123,6 +123,13 @@ contract StreamCurrentDutchSaleTest is StreamCurrentSafeGovernanceFixture {
         );
     }
 
+    /// @dev Optional test subclass capability; original fixtures explicitly retain zero mode.
+    function _refundClaimDeployment()
+        internal
+        virtual
+        returns (IStreamNativeRefundDelegatedClaims.DelegationDeployment memory d)
+    { }
+
     function _deployAdditionalProducts() internal override {
         recorder =
             new StreamPrimarySaleSettlement(primaryResolver, address(registry), revenueEscrow);
@@ -144,6 +151,7 @@ contract StreamCurrentDutchSaleTest is StreamCurrentSafeGovernanceFixture {
         config.parameters[2] = IStreamGasParameterHost.GasParameterConfig(
             "REVEAL_ATTEMPT_GAS_LIMIT", 4_000_000, 50_000, 2
         );
+        config.delegation = _refundClaimDeployment();
         dutchSale = new StreamNativeDutchSale(config);
         upstream = new CurrentDutchARRNGService(address(operatorSafe), address(artistSafe));
         arrng = new StreamEntropyProviderARRNG(
@@ -202,7 +210,9 @@ contract StreamCurrentDutchSaleTest is StreamCurrentSafeGovernanceFixture {
             500_000,
             address(dutchSale).codehash,
             DEPLOYMENT_HASH,
-            keccak256("current Dutch module"),
+            dutchSale.refundDelegationConfiguration().registry == address(0)
+                ? keccak256("current Dutch module")
+                : dutchSale.refundDelegationManifestHash(),
             "urn:stream:current:dutch"
         );
         (GovernanceCall[] memory calls, bytes[] memory data) =
@@ -462,7 +472,7 @@ contract StreamCurrentDutchSaleTest is StreamCurrentSafeGovernanceFixture {
         );
     }
 
-    function _consent() private {
+    function _consent() internal {
         bytes32 configHash = dutchSale.saleRecord(dutchId).configHash;
         SaleTerms.Consent memory terms =
             SaleTerms.Consent(1, address(dutchSale), dutchId, configHash);
@@ -490,7 +500,7 @@ contract StreamCurrentDutchSaleTest is StreamCurrentSafeGovernanceFixture {
     }
 
     function _purchaseData(uint256 number, uint256 maximum)
-        private
+        internal
         returns (IStreamNativeDutchSale.DutchPurchaseData memory data)
     {
         IStreamNativeDutchSale.DutchSaleRecord memory record = dutchSale.saleRecord(dutchId);
@@ -518,7 +528,7 @@ contract StreamCurrentDutchSaleTest is StreamCurrentSafeGovernanceFixture {
     }
 
     function _purchase(IStreamNativeDutchSale.DutchPurchaseData memory data, uint256 value)
-        private
+        internal
         returns (IStreamNativeDutchSale.DutchPurchaseResult memory result)
     {
         vm.recordLogs();

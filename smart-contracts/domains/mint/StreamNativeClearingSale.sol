@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamNativeRefundDelegation.sol";
 
 import "./StreamClearingSaleExecution.sol";
 import "./StreamClearingClock.sol";
@@ -20,6 +21,7 @@ contract StreamNativeClearingSale is
     IStreamNativeClearingSale,
     StreamSettlementContext,
     StreamGasParameterHost,
+    StreamNativeRefundDelegation,
     IStreamArtistSaleFacts,
     IStreamNativeClearingSaleBinding,
     Ownable,
@@ -35,6 +37,7 @@ contract StreamNativeClearingSale is
         IStreamRoleRegistry roles;
         address authority;
         GasParameterConfig[3] parameters;
+        DelegationDeployment delegation;
     }
 
     bytes32 private constant _SALE_SIGNATURE_GAS =
@@ -61,6 +64,9 @@ contract StreamNativeClearingSale is
             deployment.recorder.revenueResolver(), deployment.recorder.moduleRegistry()
         )
         StreamGasParameterHost(deployment.authority)
+        StreamNativeRefundDelegation(
+            deployment.recorder.core(), deployment.recorder.moduleRegistry(), deployment.delegation
+        )
     {
         if (
             deployment.authority == address(0)
@@ -104,6 +110,9 @@ contract StreamNativeClearingSale is
         for (uint256 i; i < 3; ++i) {
             _registerGasParameter(deployment.parameters[i]);
         }
+        if (deployment.delegation.registry != address(0)) {
+            _registerGasParameter(deployment.delegation.gas);
+        }
         mintManager = deployment.manager;
         primarySaleSettlement = address(deployment.recorder);
         platformSigner = deployment.platform;
@@ -118,7 +127,7 @@ contract StreamNativeClearingSale is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return id == type(IStreamNativeClearingSale).interfaceId
+        return _refundDelegationSupported(id) || id == type(IStreamNativeClearingSale).interfaceId
             || id == type(IStreamArtistSaleFacts).interfaceId
             || id == type(IStreamNativeSaleBinding).interfaceId
             || id == type(IStreamNativeClearingSaleBinding).interfaceId
@@ -154,6 +163,7 @@ contract StreamNativeClearingSale is
         nonReentrant
         returns (bytes32)
     {
+        _requireRefundDelegationManifest();
         return StreamClearingSaleExecution.registerClearingSale(
             _state, _executionContext(), config, nextSaleNonce++
         );
@@ -334,6 +344,16 @@ contract StreamNativeClearingSale is
         returns (uint256)
     {
         return StreamClearingSaleExecution.announceRebate(_state, id, payer);
+    }
+
+    function claimRefundFor(bytes32 id, address account, DelegationWitness calldata witness)
+        external
+        override
+        nonReentrant
+        returns (uint256 amount)
+    {
+        _requireRefundDelegate(account, witness);
+        return StreamClearingSaleExecution.claimRefundAccount(_state, id, account, account);
     }
 
     function claimRefund(bytes32 id, address recipient)

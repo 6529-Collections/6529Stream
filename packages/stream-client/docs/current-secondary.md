@@ -144,3 +144,42 @@ maker/delegate principal separation, precise grant/manifest failures, immutable
 observations, original own exits and Safe CALL coordinates. These client tests
 use controlled RPC responses; they do not execute a new contract deployment or
 establish native contract, callback-capacity, audit or release acceptance.
+
+## Other native refund hosts
+
+`CurrentNativeRefundClaimsClient(chainId, adapter, compiledAdapterAbi)` covers
+the current fixed/price-program, Dutch, clearing and refund-window adapters.
+Supply the actual selected host ABI containing `IStreamNativeRefundDelegatedClaims`;
+the retained generated deployment catalog is not expanded or represented as
+containing these new methods. For a local ABI test fixture only:
+
+```sh
+node scripts/generate-current-refund-fixture.mjs INPUT.json OUTPUT.json
+node scripts/generate-current-refund-fixture.mjs INPUT.json OUTPUT.json --check
+```
+
+Both arguments must be explicitly selected successful Solidity standard-JSON
+input/output. The fixture records their hashes and exact host source hashes;
+it establishes no deployed-bytecode or chain identity.
+
+Use `claimFor(delegate, saleId, account, {walletWide, index})` for a delegate or
+`claim(account, saleId, recipient)` for the original account. Native value is
+always `0n`; the witness index and returned credit retain full-width `bigint`.
+The delegated path has no recipient override. `observeDelegation` accepts the
+same independently reviewed `SecondaryDelegationPins` and reads the new
+immutable configuration/manifest, pinned host and actual registry runtimes,
+and complete live row. Its claim observation has no current module status or
+Artist/entropy gate. A failed row read remains terminal. The ordinary account
+path needs no delegation observation, including on zero-mode deployments.
+
+`reviewNativeRefundClaim` in the existing example reads earned credit, snapshots
+inputs before awaits, observes delegated authority if necessary, simulates the
+exact caller CALL and returns Safe operation0 coordinates. It never sends the
+transaction or chooses Safe nonce/gas/refund settings. Use an explicitly fixed
+block tag for a coherent review and simulate again before any independently
+authorized submission. State can change after observation; controlled RPC
+client tests do not prove future transaction admission or native execution.
+
+The protocol's [native refund guide](../../../docs/native-refund-delegated-claims.md)
+records optional constructor migration, original manifest/accounting semantics
+and source-only native-test qualification.

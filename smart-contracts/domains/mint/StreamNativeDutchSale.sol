@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamNativeRefundDelegation.sol";
 
 import "./StreamDutchSaleSupport.sol";
 import "./StreamNativePriceProgram.sol";
@@ -17,6 +18,7 @@ contract StreamNativeDutchSale is
     IStreamNativeDutchSale,
     StreamSettlementContext,
     StreamGasParameterHost,
+    StreamNativeRefundDelegation,
     IStreamArtistSaleFacts,
     Ownable,
     ReentrancyGuard,
@@ -31,6 +33,7 @@ contract StreamNativeDutchSale is
         IStreamRoleRegistry roles;
         address authority;
         GasParameterConfig[3] parameters;
+        DelegationDeployment delegation;
     }
 
     bytes32 private constant _SALE_SIGNATURE_GAS =
@@ -79,6 +82,9 @@ contract StreamNativeDutchSale is
             deployment.recorder.revenueResolver(), deployment.recorder.moduleRegistry()
         )
         StreamGasParameterHost(deployment.authority)
+        StreamNativeRefundDelegation(
+            deployment.recorder.core(), deployment.recorder.moduleRegistry(), deployment.delegation
+        )
     {
         if (
             deployment.authority == address(0)
@@ -120,6 +126,9 @@ contract StreamNativeDutchSale is
         for (uint256 i; i < 3; ++i) {
             _registerGasParameter(deployment.parameters[i]);
         }
+        if (deployment.delegation.registry != address(0)) {
+            _registerGasParameter(deployment.delegation.gas);
+        }
         mintManager = deployment.manager;
         primarySaleSettlement = address(deployment.recorder);
         platformSigner = deployment.platform;
@@ -134,7 +143,7 @@ contract StreamNativeDutchSale is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return id == type(IStreamNativeDutchSale).interfaceId
+        return _refundDelegationSupported(id) || id == type(IStreamNativeDutchSale).interfaceId
             || id == type(IStreamArtistSaleFacts).interfaceId
             || id == type(IStreamNativeSaleBinding).interfaceId || super.supportsInterface(id);
     }
@@ -168,6 +177,7 @@ contract StreamNativeDutchSale is
         nonReentrant
         returns (bytes32 id)
     {
+        _requireRefundDelegationManifest();
         _requireNativeContext();
         (bytes32 baseline, bytes32 assignment) =
             StreamDutchSaleSupport.validateConfig(_support(), config);
@@ -348,20 +358,37 @@ contract StreamNativeDutchSale is
     }
 
     function claimRefund(bytes32 id, address recipient) external override nonReentrant {
-        uint256 amount = _credits[id][msg.sender];
-        if (amount == 0) revert DutchCreditEmpty(id, msg.sender);
+        _claimRefundAccount(id, msg.sender, recipient);
+    }
+
+    function claimRefundFor(bytes32 id, address account, DelegationWitness calldata witness)
+        external
+        override
+        nonReentrant
+        returns (uint256 amount)
+    {
+        _requireRefundDelegate(account, witness);
+        return _claimRefundAccount(id, account, account);
+    }
+
+    function _claimRefundAccount(bytes32 id, address account, address recipient)
+        private
+        returns (uint256 amount)
+    {
+        amount = _credits[id][account];
+        if (amount == 0) revert DutchCreditEmpty(id, account);
         if (recipient == address(0) || recipient == address(this)) {
             revert DutchTransferFailed(recipient);
         }
         uint256 beforeBalance = address(this).balance;
         if (beforeBalance < refundLiability) revert DutchAccountingMismatch();
-        _credits[id][msg.sender] = 0;
-        refundCredit[msg.sender] -= amount;
+        _credits[id][account] = 0;
+        refundCredit[account] -= amount;
         refundLiability -= amount;
         (bool ok,) = recipient.call{ value: amount }("");
         if (!ok) revert DutchTransferFailed(recipient);
         if (address(this).balance != beforeBalance - amount) revert DutchAccountingMismatch();
-        emit DutchRefundClaimed(1, id, msg.sender, recipient, amount);
+        emit DutchRefundClaimed(1, id, account, recipient, amount);
     }
 
     function closeSale(bytes32 id) external override onlyOwner nonReentrant {

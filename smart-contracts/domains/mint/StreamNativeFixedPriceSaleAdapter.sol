@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamNativeImmediateSaleWorker } from "./StreamNativeImmediateSaleWorker.sol";
+import "./StreamNativeRefundDelegation.sol";
 
 import "./StreamSaleArtist.sol";
 import "./StreamSaleConsent.sol";
@@ -33,6 +35,7 @@ contract StreamNativeFixedPriceSaleAdapter is
     IStreamArtistSaleFacts,
     StreamSettlementContext,
     StreamGasParameterHost,
+    StreamNativeRefundDelegation,
     IStreamImmediateSaleReveal,
     Ownable,
     ReentrancyGuard,
@@ -73,17 +76,20 @@ contract StreamNativeFixedPriceSaleAdapter is
         IStreamPrimarySaleSettlement recorder,
         address signer,
         IStreamArtistAttribution artists,
-        GasParameterConfig memory revealGas
+        GasParameterConfig memory revealGas,
+        DelegationDeployment memory delegation
     )
         StreamSettlementContext(recorder.revenueResolver(), recorder.moduleRegistry())
         StreamGasParameterHost(IStreamSplitFactory(recorder.revenueResolver().splitFactory())
                 .governanceAuthority())
+        StreamNativeRefundDelegation(recorder.core(), recorder.moduleRegistry(), delegation)
     {
         if (
             keccak256(bytes(revealGas.name)) != keccak256("REVEAL_ATTEMPT_GAS_LIMIT")
                 || revealGas.failureClass != FAILURE_CLASS_FAIL_CLOSED_PRECHECK
         ) revert InvalidNativeSale();
         _registerGasParameter(revealGas);
+        if (delegation.registry != address(0)) _registerGasParameter(delegation.gas);
         if (
             !StreamSettlementAdmission.isContract(address(manager)) || signer == address(0)
                 || !StreamSettlementAdmission.isContract(address(recorder))
@@ -107,7 +113,7 @@ contract StreamNativeFixedPriceSaleAdapter is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return id == type(IStreamImmediateSaleReveal).interfaceId
+        return _refundDelegationSupported(id) || id == type(IStreamImmediateSaleReveal).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId
             || id == type(IStreamNativeFixedPriceSaleAdapter).interfaceId
             || id == type(IStreamNativePricePrograms).interfaceId
@@ -132,15 +138,8 @@ contract StreamNativeFixedPriceSaleAdapter is
             uint256[] memory extensions
         )
     {
-        return (
-            hex"0f",
-            "6529StreamNativeFixedPriceSaleAdapter",
-            "1",
-            block.chainid,
-            address(this),
-            bytes32(0),
-            new uint256[](0)
-        );
+        bytes memory out = StreamNativeRefundReadEncoding.domain(0);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
     /// @inheritdoc IStreamNativePriceProgramDomain
@@ -158,15 +157,8 @@ contract StreamNativeFixedPriceSaleAdapter is
             uint256[] memory extensions
         )
     {
-        return (
-            hex"0f",
-            "6529StreamNativePricePrograms",
-            "1",
-            block.chainid,
-            address(this),
-            bytes32(0),
-            new uint256[](0)
-        );
+        bytes memory out = StreamNativeRefundReadEncoding.domain(1);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
     /// @notice Canonical declaration checked against the actual registered module record.
@@ -185,13 +177,9 @@ contract StreamNativeFixedPriceSaleAdapter is
         override
         returns (uint256 collectionId, bytes32 saleConfigHash)
     {
-        SaleRecord storage fixedRecord = _sales[id];
-        if (fixedRecord.saleNonce != 0) {
-            return (fixedRecord.config.collectionId, fixedRecord.configHash);
-        }
-        PriceProgramRecord storage program = _pricePrograms[id];
-        if (program.saleNonce != 0) return (program.config.collectionId, program.configHash);
-        revert SaleConsentFactsUnavailable(id);
+        bytes memory out =
+            StreamNativeImmediateSaleWorker.read(_sales, _pricePrograms, core, msg.data);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
     function registerPriceProgram(PriceProgramConfig calldata config)
@@ -201,26 +189,12 @@ contract StreamNativeFixedPriceSaleAdapter is
         nonReentrant
         returns (bytes32 id)
     {
+        _requireRefundDelegationManifest();
         _requireSaleContext();
-        StreamNativePriceProgram.validateConfig(_priceProgramContext(), config);
-        StreamImmediateSaleReveal.quote(core, config.collectionId);
-        StreamNativeSettlementTypes.SaleLifecycleBinding memory lifecycle =
-            StreamNativeSettlementAdmission.capture(moduleRegistry, address(this));
-        uint256 nonce = nextSaleNonce++;
-        id = priceProgramIdFor(config.collectionId, config.phaseId, config.kind, nonce);
-        bytes32 hash = keccak256(
-            abi.encode(keccak256("6529STREAM_NATIVE_PRICE_PROGRAM_CONFIG_V1"), id, config)
+        id = StreamNativeImmediateSaleWorker.registerProgram(
+            _pricePrograms, _priceProgramContext(), core, moduleRegistry, config, nextSaleNonce
         );
-        _pricePrograms[id] = PriceProgramRecord(config, nonce, hash, lifecycle, 0, false);
-        emit NativePriceProgramConfigured(
-            id,
-            1,
-            nonce,
-            hash,
-            config,
-            lifecycle.saleCreatedAt,
-            lifecycle.saleAdapterRegistryRevision
-        );
+        ++nextSaleNonce;
     }
 
     function priceProgramIdFor(uint256 collectionId, bytes32 phaseId, uint8 kind, uint256 nonce)
@@ -248,7 +222,9 @@ contract StreamNativeFixedPriceSaleAdapter is
         override
         returns (PriceProgramRecord memory)
     {
-        return _pricePrograms[id];
+        bytes memory out =
+            StreamNativeImmediateSaleWorker.read(_sales, _pricePrograms, core, msg.data);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
     function closePriceProgram(bytes32 id) external override onlyOwner nonReentrant {
@@ -337,11 +313,9 @@ contract StreamNativeFixedPriceSaleAdapter is
 
     /// @inheritdoc IStreamImmediateSaleReveal
     function saleRevealQuote(bytes32 id) external view override returns (RevealQuote memory) {
-        uint256 collectionId = _sales[id].saleNonce != 0
-            ? _sales[id].config.collectionId
-            : _pricePrograms[id].config.collectionId;
-        if (collectionId == 0) revert NativeSaleUnavailable(id);
-        return StreamImmediateSaleReveal.quote(core, collectionId);
+        bytes memory out =
+            StreamNativeImmediateSaleWorker.read(_sales, _pricePrograms, core, msg.data);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
     function refundableBalance(bytes32 id, address payer) external view override returns (uint256) {
@@ -358,19 +332,36 @@ contract StreamNativeFixedPriceSaleAdapter is
 
     /// @dev Claims remain available while paused or after module retirement.
     function claimRefund(bytes32 id, address recipient) external override nonReentrant {
-        uint256 amount = _refunds[id][msg.sender];
-        if (amount == 0) revert SaleRefundEmpty(id, msg.sender);
+        _claimRefundAccount(id, msg.sender, recipient);
+    }
+
+    function claimRefundFor(bytes32 id, address account, DelegationWitness calldata witness)
+        external
+        override
+        nonReentrant
+        returns (uint256 amount)
+    {
+        _requireRefundDelegate(account, witness);
+        return _claimRefundAccount(id, account, account);
+    }
+
+    function _claimRefundAccount(bytes32 id, address account, address recipient)
+        private
+        returns (uint256 amount)
+    {
+        amount = _refunds[id][account];
+        if (amount == 0) revert SaleRefundEmpty(id, account);
         if (recipient == address(0) || recipient == address(this)) {
             revert SaleRefundTransferFailed(recipient);
         }
         uint256 beforeBalance = address(this).balance;
         if (beforeBalance < refundLiability) revert SaleRevealAccountingMismatch();
-        _refunds[id][msg.sender] = 0;
+        _refunds[id][account] = 0;
         refundLiability -= amount;
         (bool ok,) = recipient.call{ value: amount }("");
         if (!ok) revert SaleRefundTransferFailed(recipient);
         if (address(this).balance != beforeBalance - amount) revert SaleRevealAccountingMismatch();
-        emit SaleRefundClaimed(1, id, msg.sender, recipient, amount);
+        emit SaleRefundClaimed(1, id, account, recipient, amount);
     }
 
     function _creditRefund(bytes32 id, address payer, uint256 excess) private {
@@ -441,25 +432,12 @@ contract StreamNativeFixedPriceSaleAdapter is
         nonReentrant
         returns (bytes32 saleId)
     {
+        _requireRefundDelegationManifest();
         _requireSaleContext();
-        if (
-            config.collectionId == 0 || config.phaseId == 0 || config.price == 0
-                || config.endsAt <= config.startsAt || config.endsAt < block.timestamp
-                || config.mintPolicyHash == 0 || config.primaryAssignmentHash == 0
-                || IStreamMintReads(address(mintManager))
-                        .phasePolicyHash(config.collectionId, config.phaseId)
-                    != config.mintPolicyHash
-        ) revert InvalidNativeSale();
-        StreamImmediateSaleReveal.quote(core, config.collectionId);
-        StreamSaleTemplate.Selection memory rights = _rights(config.collectionId);
-        if (rights.assignmentHash != config.primaryAssignmentHash) revert InvalidNativeSale();
-        StreamNativeSettlementTypes.SaleLifecycleBinding memory binding =
-            StreamNativeSettlementAdmission.capture(moduleRegistry, address(this));
-        uint256 nonce = nextSaleNonce++;
-        saleId = saleIdFor(config.collectionId, config.phaseId, nonce);
-        bytes32 hash = keccak256(abi.encode(_CONFIG, saleId, config));
-        _sales[saleId] = SaleRecord(config, nonce, hash, binding, false);
-        emit NativeSaleConfigured(saleId, config.collectionId, config.phaseId, 1, nonce, hash);
+        saleId = StreamNativeImmediateSaleWorker.registerFixed(
+            _sales, _priceProgramContext(), core, moduleRegistry, config, nextSaleNonce
+        );
+        ++nextSaleNonce;
     }
 
     function saleIdFor(uint256 collectionId, bytes32 phaseId, uint256 nonce)
@@ -482,7 +460,9 @@ contract StreamNativeFixedPriceSaleAdapter is
     }
 
     function saleRecord(bytes32 id) external view override returns (SaleRecord memory) {
-        return _sales[id];
+        bytes memory out =
+            StreamNativeImmediateSaleWorker.read(_sales, _pricePrograms, core, msg.data);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
     function nativeSaleLifecycleBinding(bytes32 id)
@@ -491,7 +471,9 @@ contract StreamNativeFixedPriceSaleAdapter is
         override
         returns (StreamNativeSettlementTypes.SaleLifecycleBinding memory)
     {
-        return _sales[id].saleNonce != 0 ? _sales[id].lifecycle : _pricePrograms[id].lifecycle;
+        bytes memory out =
+            StreamNativeImmediateSaleWorker.read(_sales, _pricePrograms, core, msg.data);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
     function cancelSale(bytes32 id) external override onlyOwner nonReentrant {
@@ -527,28 +509,9 @@ contract StreamNativeFixedPriceSaleAdapter is
         override
         returns (bytes32)
     {
-        return _authorizationDigest(authorization);
-    }
-
-    function _authorizationDigest(SaleAuthorization memory authorization)
-        private
-        view
-        returns (bytes32)
-    {
-        bytes32 domain = keccak256(
-            abi.encode(
-                _DOMAIN,
-                keccak256("6529StreamNativeFixedPriceSaleAdapter"),
-                keccak256("1"),
-                block.chainid,
-                address(this)
-            )
-        );
-        return keccak256(
-            abi.encodePacked(
-                hex"1901", domain, keccak256(abi.encode(SALE_AUTHORIZATION_TYPEHASH, authorization))
-            )
-        );
+        bytes memory out =
+            StreamNativeImmediateSaleWorker.read(_sales, _pricePrograms, core, msg.data);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
     function previewExecution(SaleExecutionData calldata execution)
@@ -557,7 +520,18 @@ contract StreamNativeFixedPriceSaleAdapter is
         override
         returns (StreamNativeSettlementTypes.NativeSettlementCandidate memory c)
     {
-        (c,) = _candidate(execution);
+        _requireSaleContext();
+        _requireConsent(execution.authorization.saleId);
+        bytes memory out = StreamNativeImmediateSaleWorker.preview(
+            _priceProgramContext(),
+            _sales[execution.authorization.saleId],
+            execution,
+            paused,
+            authorizationUsed[execution.authorization.artist][execution.authorization.nonce],
+            executionIdByNonce[execution.authorization
+                .saleId][execution.authorization.executionNonce]
+        );
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
     function purchase(SaleExecutionData calldata execution)
@@ -667,28 +641,9 @@ contract StreamNativeFixedPriceSaleAdapter is
     }
 
     function _requireConsent(bytes32 id) private view {
-        SaleRecord storage fixedRecord = _sales[id];
-        if (fixedRecord.saleNonce != 0) {
-            StreamSaleConsent.requireConsent(
-                core,
-                address(artistRegistry),
-                artistRegistryCodeHash,
-                fixedRecord.config.collectionId,
-                id,
-                fixedRecord.configHash
-            );
-        } else {
-            PriceProgramRecord storage program = _pricePrograms[id];
-            if (program.saleNonce == 0) revert NativeSaleUnavailable(id);
-            StreamSaleConsent.requireConsent(
-                core,
-                address(artistRegistry),
-                artistRegistryCodeHash,
-                program.config.collectionId,
-                id,
-                program.configHash
-            );
-        }
+        StreamNativeImmediateSaleWorker.requireConsent(
+            _sales, _pricePrograms, core, address(artistRegistry), artistRegistryCodeHash, id
+        );
     }
 
     function _rights(uint256 collectionId)

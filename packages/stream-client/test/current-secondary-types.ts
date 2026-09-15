@@ -14,3 +14,11 @@ client.acceptOffer("0x1", offer, { mode: "delegate" });
 client.acceptOffer("0x1", offer, { mode: "maker", witness: { walletWide: false, index: 0n } });
 // @ts-expect-error delegated claims have no receiver override
 client.claimNftFor("0x1", "0x2", "0x3", { walletWide: true, index: 1n, receiver: "0x4" });
+
+import { CurrentNativeRefundClaimsClient } from "../src/index.js";
+declare const refunds: CurrentNativeRefundClaimsClient;
+refunds.claimFor("0x1", "0x2", "0x3", { walletWide: false, index: 1n });
+// @ts-expect-error registry row coordinates remain full-width bigint
+refunds.claimFor("0x1", "0x2", "0x3", { walletWide: false, index: 1 });
+// @ts-expect-error delegated refund has no destination override
+refunds.claimFor("0x1", "0x2", "0x3", { walletWide: false, index: 1n, recipient: "0x4" });

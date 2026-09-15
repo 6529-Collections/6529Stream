@@ -431,23 +431,33 @@ library StreamClearingSaleExecution {
         public
         returns (uint256 amount)
     {
+        return claimRefundAccount(state, id, msg.sender, recipient);
+    }
+
+    /// @dev Fixed guarded host authenticates account; this worker retains the original per-key accounting.
+    function claimRefundAccount(
+        StreamClearingSaleState.State storage state,
+        bytes32 id,
+        address account,
+        address recipient
+    ) public returns (uint256 amount) {
         if (recipient == address(0) || recipient == address(this)) {
             revert IStreamNativeClearingSale.ClearingTransferFailed(recipient);
         }
-        amount = StreamClearingSaleBook.refundableBalance(state.financial, id, msg.sender);
-        if (amount == 0) revert IStreamNativeClearingSale.ClearingCreditEmpty(id, msg.sender);
+        amount = StreamClearingSaleBook.refundableBalance(state.financial, id, account);
+        if (amount == 0) revert IStreamNativeClearingSale.ClearingCreditEmpty(id, account);
         uint256 beforeBalance = address(this).balance;
         if (beforeBalance < state.financial.totalBuyerLiability) {
             revert IStreamNativeClearingSale.ClearingAccountingMismatch();
         }
-        announceRebate(state, id, msg.sender);
-        StreamClearingSaleBook.debitClaim(state.financial, id, msg.sender, amount);
+        announceRebate(state, id, account);
+        StreamClearingSaleBook.debitClaim(state.financial, id, account, amount);
         (bool ok,) = recipient.call{ value: amount }("");
         if (!ok) revert IStreamNativeClearingSale.ClearingTransferFailed(recipient);
         if (address(this).balance != beforeBalance - amount) {
             revert IStreamNativeClearingSale.ClearingAccountingMismatch();
         }
-        emit ClearingRefundClaimed(1, id, msg.sender, recipient, amount);
+        emit ClearingRefundClaimed(1, id, account, recipient, amount);
     }
 
     function announceRebate(StreamClearingSaleState.State storage state, bytes32 id, address payer)

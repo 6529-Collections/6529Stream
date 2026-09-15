@@ -46,3 +46,17 @@ export async function reviewInventoryClaim(client, provider, delegate, account, 
   await client.simulate(provider, prepared, blockTag);
   return { caller: prepared.caller, safeCall: toSafeCall(prepared.call) };
 }
+
+/** Earned credit: delegate may trigger payment only to account. No signer or broadcaster. */
+export async function reviewNativeRefundClaim(client, provider, caller, account, saleId, delegation, blockTag = "latest") {
+  const own = caller.toLowerCase() === account.toLowerCase();
+  if (!own && !delegation) throw Error("Delegate claim requires retained witness and independently reviewed pins");
+  const witness = own ? undefined : Object.freeze({ ...delegation.witness });
+  const pins = own ? undefined : Object.freeze({ ...delegation.pins });
+  const prepared = own ? client.claim(account, saleId) : client.claimFor(caller, saleId, account, witness);
+  const credit = await client.readCredit(provider, saleId, account, blockTag);
+  if (credit === 0n) throw Error("No recorded refund credit");
+  const observation = own ? undefined : await client.observeDelegation(provider, pins, account, caller, witness, blockTag);
+  await client.simulate(provider, prepared, blockTag);
+  return { credit, observation, caller: prepared.caller, safeCall: toSafeCall(prepared.call) };
+}

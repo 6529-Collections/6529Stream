@@ -233,18 +233,43 @@ library StreamRefundWindowBookStore {
         );
     }
 
+    /// @dev Terminal-only read forwarding preserves complete original configured/purchase tuples.
+    function readRecord(State storage state, bytes4 selector, bytes32 id)
+        public
+        view
+        returns (bytes memory)
+    {
+        if (selector == IStreamNativeRefundWindowSale.refundSaleRecord.selector) {
+            return abi.encode(state._refundSales[id]);
+        }
+        if (selector == IStreamNativeRefundWindowSale.refundPurchaseRecord.selector) {
+            return abi.encode(state._purchases[id]);
+        }
+        revert IStreamNativeRefundWindowSale.InvalidRefundSale();
+    }
+
     function claimRefund(State storage state, bytes32 saleId, address payable recipient)
         public
         returns (uint256 amount)
     {
+        return claimRefundAccount(state, saleId, msg.sender, recipient);
+    }
+
+    /// @dev Fixed guarded host authenticates account; this worker retains the original per-key accounting.
+    function claimRefundAccount(
+        State storage state,
+        bytes32 saleId,
+        address account,
+        address payable recipient
+    ) public returns (uint256 amount) {
         if (recipient == address(0) || recipient == address(this)) {
             revert IStreamNativeRefundWindowSale.RefundTransferFailed(recipient);
         }
         _requireSolvent(state);
-        amount = state.saleRefundCredit[saleId][msg.sender];
-        if (amount == 0) revert IStreamNativeRefundWindowSale.RefundCreditEmpty(msg.sender);
-        state.saleRefundCredit[saleId][msg.sender] = 0;
-        state.refundCredit[msg.sender] -= amount;
+        amount = state.saleRefundCredit[saleId][account];
+        if (amount == 0) revert IStreamNativeRefundWindowSale.RefundCreditEmpty(account);
+        state.saleRefundCredit[saleId][account] = 0;
+        state.refundCredit[account] -= amount;
         state.totalBuyerLiabilities -= amount;
         uint256 beforeBalance = address(this).balance;
         bool ok;
@@ -255,7 +280,7 @@ library StreamRefundWindowBookStore {
             revert IStreamNativeRefundWindowSale.RefundAccountingMismatch();
         }
         _requireSolvent(state);
-        emit RefundCreditClaimed(1, saleId, msg.sender, recipient, amount);
+        emit RefundCreditClaimed(1, saleId, account, recipient, amount);
     }
 
     function _capturePurchase(
