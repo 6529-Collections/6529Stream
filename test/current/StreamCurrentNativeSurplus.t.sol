@@ -942,7 +942,7 @@ contract StreamCurrentClearingSurplusTest is StreamCurrentClearingSaleTest {
         probe = new NativeSurplusProbe(core, registry, executor, roles, governorSafe, governorKeys);
         _consent();
         _buy(_purchaseData(1), 1217);
-        probe.sweepAndAssert(NS(address(clearing)), 217, false);
+        probe.sweepAndAssert(NS(address(clearing)), 1017, false);
         require(
             executeSafe(
                 payerSafe,

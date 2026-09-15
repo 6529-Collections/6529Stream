@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamNativeSaleCreditHost, StreamNativeSaleCreditReads, IStreamNativeSaleCredits } from "./StreamNativeSaleCreditHost.sol";
 import { StreamNativeSurplusHost, StreamNativeSurplus, IStreamNativeSurplus } from "./StreamNativeSurplusHost.sol";
 import "./StreamNativeRefundDelegation.sol";
 
@@ -20,6 +21,7 @@ import "../../vendor/openzeppelin/ERC165.sol";
 /// @dev The shared guard covers every consumer mutation; governance gas raises retain their host authority.
 contract StreamNativeClearingSale is
     StreamNativeSurplusHost,
+    StreamNativeSaleCreditHost,
     IStreamNativeClearingSale,
     StreamSettlementContext,
     StreamGasParameterHost,
@@ -129,7 +131,7 @@ contract StreamNativeClearingSale is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return id == type(IStreamNativeSurplus).interfaceId || _refundDelegationSupported(id) || id == type(IStreamNativeClearingSale).interfaceId
+        return id == type(IStreamNativeSaleCredits).interfaceId || id == type(IStreamNativeSurplus).interfaceId || _refundDelegationSupported(id) || id == type(IStreamNativeClearingSale).interfaceId
             || id == type(IStreamArtistSaleFacts).interfaceId
             || id == type(IStreamNativeSaleBinding).interfaceId
             || id == type(IStreamNativeClearingSaleBinding).interfaceId
@@ -567,4 +569,7 @@ contract StreamNativeClearingSale is
         return _sweepNativeSurplus(amount, reasonHash);
     }
     function _nativeSurplusOwed() internal view override returns (uint256) { return _state.financial.totalBuyerLiability; }
+    function _nativeSaleCreditRead() internal view override returns (bytes memory) {
+        return StreamNativeSaleCreditReads.clearingRead(_state.financial, msg.data);
+    }
 }

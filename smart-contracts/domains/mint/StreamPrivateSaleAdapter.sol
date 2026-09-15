@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamNativeSaleCreditHost, StreamNativeSaleCreditReads, IStreamNativeSaleCredits } from "./StreamNativeSaleCreditHost.sol";
 import { StreamNativeSurplusHost, StreamNativeSurplus, IStreamNativeSurplus } from "./StreamNativeSurplusHost.sol";
 
 import "./StreamPrivateSaleSupport.sol";
@@ -27,6 +28,7 @@ import "../../vendor/openzeppelin/ERC165.sol";
 ///      consignor proceeds and buyer excess are separate perpetual claims. No primary mint occurs.
 contract StreamPrivateSaleAdapter is
     StreamNativeSurplusHost,
+    StreamNativeSaleCreditHost,
     IStreamPrivateSaleAdapter,
     IStreamPrivateSaleDelegatedClaims,
     IStreamPrivateSaleDelegatedOffers,
@@ -164,7 +166,7 @@ contract StreamPrivateSaleAdapter is
     }
 
     function supportsInterface(bytes4 id) public view override(IERC165, ERC165) returns (bool) {
-        return id == type(IStreamNativeSurplus).interfaceId || ((id == type(IStreamPrivateSaleDelegatedClaims).interfaceId
+        return id == type(IStreamNativeSaleCredits).interfaceId || id == type(IStreamNativeSurplus).interfaceId || ((id == type(IStreamPrivateSaleDelegatedClaims).interfaceId
                     || id == type(IStreamPrivateSaleDelegatedOffers).interfaceId)
                 && delegateRegistry != address(0))
             || id == type(IStreamPrivateSaleAdapter).interfaceId
@@ -885,4 +887,7 @@ contract StreamPrivateSaleAdapter is
     }
     function _nativeSurplusPrivateRegistry() internal pure override returns (bool) { return true; }
     function _nativeSurplusOwed() internal view override returns (uint256) { return _money.totalLiabilities; }
+    function _nativeSaleCreditRead() internal view override returns (bytes memory) {
+        return StreamNativeSaleCreditReads.privateRead(_money, msg.data);
+    }
 }

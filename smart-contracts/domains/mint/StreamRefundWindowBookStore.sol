@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamNativeSaleCreditIndex } from "./StreamNativeSaleCreditIndex.sol";
 
 import {
     IStreamNativeRefundWindowSale
@@ -367,6 +368,7 @@ library StreamRefundWindowBookStore {
         state.lastPurchaseNonce[a.saleId][a.payer] = a.purchaseNonce;
         ++sale.purchasedQuantity;
         state.totalPendingDeposits += deposit;
+        StreamNativeSaleCreditIndex.touch(a.saleId, a.payer);
         state.totalBuyerLiabilities += msg.value;
         uint256 excess = msg.value - deposit;
         state.refundCredit[a.payer] += excess;

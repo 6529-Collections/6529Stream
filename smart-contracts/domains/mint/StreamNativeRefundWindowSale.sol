@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamNativeSaleCreditHost, StreamNativeSaleCreditReads, IStreamNativeSaleCredits } from "./StreamNativeSaleCreditHost.sol";
 import { StreamNativeSurplusHost, StreamNativeSurplus, IStreamNativeSurplus } from "./StreamNativeSurplusHost.sol";
 import "./StreamNativeRefundDelegation.sol";
 
@@ -20,6 +21,7 @@ import "../../vendor/openzeppelin/ERC165.sol";
 /// @dev New deferred schema only. Refund credit and deadline escape never read mutable providers.
 contract StreamNativeRefundWindowSale is
     StreamNativeSurplusHost,
+    StreamNativeSaleCreditHost,
     StreamRefundWindowBook,
     StreamSettlementContext,
     StreamGasParameterHost,
@@ -151,7 +153,7 @@ contract StreamNativeRefundWindowSale is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return id == type(IStreamNativeSurplus).interfaceId || _refundDelegationSupported(id)
+        return id == type(IStreamNativeSaleCredits).interfaceId || id == type(IStreamNativeSurplus).interfaceId || _refundDelegationSupported(id)
             || id == type(IStreamNativeRefundWindowSale).interfaceId
             || id == type(IStreamDeferredNativeSaleBinding).interfaceId
             || id == type(IStreamArtistSaleFacts).interfaceId || super.supportsInterface(id);
@@ -480,4 +482,7 @@ contract StreamNativeRefundWindowSale is
         return _sweepNativeSurplus(amount, reasonHash);
     }
     function _nativeSurplusOwed() internal view override returns (uint256) { return _book.totalBuyerLiabilities; }
+    function _nativeSaleCreditRead() internal view override returns (bytes memory) {
+        return StreamNativeSaleCreditReads.windowRead(_book, msg.data);
+    }
 }

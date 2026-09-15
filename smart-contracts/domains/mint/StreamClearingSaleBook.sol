@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamNativeSaleCreditIndex } from "./StreamNativeSaleCreditIndex.sol";
 
 import "./StreamClearingCeilingBook.sol";
 
@@ -114,6 +115,7 @@ library StreamClearingSaleBook {
         if (p.nonce != next) revert ClearingBookNonceInvalid(next, p.nonce);
         buyer.ceilings.record(ceiling, sale.maximumQuantity);
         book.saleCeilings[p.saleId].record(ceiling, sale.maximumQuantity);
+        StreamNativeSaleCreditIndex.touch(p.saleId, p.buyer);
         buyer.lastPurchaseNonce = next;
         buyer.paidSum += charge;
         buyer.excessCredit += p.excess;

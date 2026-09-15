@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamNativeSaleCreditHost, StreamNativeSaleCreditReads, IStreamNativeSaleCredits } from "../mint/StreamNativeSaleCreditHost.sol";
 import { StreamNativeSurplusHost, StreamNativeSurplus, IStreamNativeSurplus } from "../mint/StreamNativeSurplusHost.sol";
 import "./StreamNativeEnglishAuctionRightsRegistration.sol";
 import "./StreamPlatformNativeAuctionRegistration.sol";
@@ -46,6 +47,7 @@ import "../../vendor/openzeppelin/IERC721Receiver.sol";
 /// Other declared v1 profiles remain separate work.
 contract StreamNativeEnglishAuction is
     StreamNativeSurplusHost,
+    StreamNativeSaleCreditHost,
     IStreamNativeEnglishAuction,
     IStreamNativeCuratedAuction,
     IStreamNativeCustodyAuction,
@@ -203,7 +205,7 @@ contract StreamNativeEnglishAuction is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return id == type(IStreamNativeSurplus).interfaceId || (id == type(IStreamNativeAuctionDelegatedDelivery).interfaceId
+        return id == type(IStreamNativeSaleCredits).interfaceId || id == type(IStreamNativeSurplus).interfaceId || (id == type(IStreamNativeAuctionDelegatedDelivery).interfaceId
                 && delegateRegistry != address(0))
             || id == type(IStreamNativeEnglishAuction).interfaceId
             || id == type(IStreamNativeCuratedAuction).interfaceId
@@ -544,7 +546,7 @@ contract StreamNativeEnglishAuction is
         override
         returns (bytes32)
     {
-        return StreamNativeEnglishAuctionCustodyStart.digest(authorization);
+        return StreamNativeEnglishAuctionCustodyStart.acquisitionDigestFromCalldata(msg.data);
     }
 
     function registerCustodyAuction(
@@ -565,7 +567,7 @@ contract StreamNativeEnglishAuction is
         override
         returns (bytes32)
     {
-        return StreamNativeEnglishAuctionCustodyStart.preparedDigest(authorization);
+        return StreamNativeEnglishAuctionCustodyStart.acquisitionDigestFromCalldata(msg.data);
     }
 
     function registerPreparedCustodyAuction(
@@ -1086,4 +1088,7 @@ contract StreamNativeEnglishAuction is
         return _sweepNativeSurplus(amount, reasonHash);
     }
     function _nativeSurplusOwed() internal view override returns (uint256) { return _state.liabilities; }
+    function _nativeSaleCreditRead() internal view override returns (bytes memory) {
+        return StreamNativeSaleCreditReads.auctionRead(_state, msg.data);
+    }
 }

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamNativeSaleCreditIndex } from "../mint/StreamNativeSaleCreditIndex.sol";
 
 import "../../interfaces/stream/auctions/IStreamNativeEnglishAuction.sol";
 import "../mint/StreamRefundClock.sol";
@@ -167,6 +168,7 @@ library StreamNativeEnglishAuctionState {
         a.winner = bid;
         uint256 added = bid.amount + bid.revealFee;
         s.liveDeposits += added;
+        StreamNativeSaleCreditIndex.touch(a.saleId, bid.payer);
         s.liabilities += added;
         if (transition.extended) {
             emit AuctionExtended(
@@ -195,6 +197,7 @@ library StreamNativeEnglishAuctionState {
         uint256 amount
     ) internal {
         if (amount == 0) return;
+        StreamNativeSaleCreditIndex.touch(a.saleId, payer);
         s.credits[a.saleId][payer] += amount;
         emit NativeAuctionRefundCredit(id, a.saleId, payer, amount);
     }

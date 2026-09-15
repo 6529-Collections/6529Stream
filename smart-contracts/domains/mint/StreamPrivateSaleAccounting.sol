@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamNativeSaleCreditIndex } from "./StreamNativeSaleCreditIndex.sol";
 import "./StreamPrivateSaleSupport.sol";
 
 /// @notice Per-sale native consignor, buyer-excess and royalty liabilities.
@@ -49,12 +50,15 @@ library StreamPrivateSaleAccounting {
         sale.royaltyAmount = amount;
         uint256 proceeds = sale.config.price - amount;
         uint256 excess = msg.value - sale.config.price;
+        if (proceeds != 0) StreamNativeSaleCreditIndex.touch(id, sale.config.consignor);
+        if (excess != 0) StreamNativeSaleCreditIndex.touch(id, sale.config.buyer);
         self.credits[id][sale.config.consignor].consignorProceeds += proceeds;
         self.credits[id][sale.config.buyer].excess += excess;
         self.totalLiabilities += proceeds + excess;
         if (amount != 0) {
             bool delivered = StreamPrivateSaleSupport.deliverRoyalty(receiver, amount, royaltyGas);
             if (!delivered) {
+                StreamNativeSaleCreditIndex.touch(id, receiver);
                 self.credits[id][receiver].royalty += amount;
                 self.totalLiabilities += amount;
             }

@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamNativeSaleCreditIndex } from "./StreamNativeSaleCreditIndex.sol";
+import { StreamNativeSaleCreditHost, StreamNativeSaleCreditReads, IStreamNativeSaleCredits } from "./StreamNativeSaleCreditHost.sol";
 import { StreamNativeSurplusHost, StreamNativeSurplus, IStreamNativeSurplus } from "./StreamNativeSurplusHost.sol";
 import "./StreamNativeRefundDelegation.sol";
 
@@ -17,6 +19,7 @@ import "../../vendor/openzeppelin/ERC165.sol";
 /// @dev Positive price uses the official native recorder; declared zero never settles revenue.
 contract StreamNativeDutchSale is
     StreamNativeSurplusHost,
+    StreamNativeSaleCreditHost,
     IStreamNativeDutchSale,
     StreamSettlementContext,
     StreamGasParameterHost,
@@ -145,7 +148,7 @@ contract StreamNativeDutchSale is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return id == type(IStreamNativeSurplus).interfaceId || _refundDelegationSupported(id) || id == type(IStreamNativeDutchSale).interfaceId
+        return id == type(IStreamNativeSaleCredits).interfaceId || id == type(IStreamNativeSurplus).interfaceId || _refundDelegationSupported(id) || id == type(IStreamNativeDutchSale).interfaceId
             || id == type(IStreamArtistSaleFacts).interfaceId
             || id == type(IStreamNativeSaleBinding).interfaceId || super.supportsInterface(id);
     }
@@ -337,6 +340,7 @@ contract StreamNativeDutchSale is
         _requireRetained(c, captured.association);
         if (address(this).balance != original + r.excessCredited) revert DutchAccountingMismatch();
         if (r.excessCredited != 0) {
+            StreamNativeSaleCreditIndex.touch(c.sale.settlementId, c.sale.payer);
             _credits[c.sale.settlementId][c.sale.payer] += r.excessCredited;
             refundCredit[c.sale.payer] += r.excessCredited;
             refundLiability += r.excessCredited;
@@ -519,4 +523,7 @@ contract StreamNativeDutchSale is
         return _sweepNativeSurplus(amount, reasonHash);
     }
     function _nativeSurplusOwed() internal view override returns (uint256) { return refundLiability; }
+    function _nativeSaleCreditRead() internal view override returns (bytes memory) {
+        return StreamNativeSaleCreditReads.dutchRead(_credits, refundLiability, msg.data);
+    }
 }

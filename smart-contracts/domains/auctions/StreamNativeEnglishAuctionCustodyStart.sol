@@ -47,6 +47,19 @@ library StreamNativeEnglishAuctionCustodyStart {
         bytes32 authorizationDigest
     );
 
+    /// @dev Both original digest bodies remain unchanged; decode their shared acquisition tuple here.
+    function acquisitionDigestFromCalldata(bytes calldata input) public view returns (bytes32) {
+        bytes4 selector = bytes4(input[:4]);
+        if (selector != IStreamNativeCustodyAuction.custodyAcquisitionDigest.selector
+            && selector != IStreamPreparedNativeCustodyAuction.preparedCustodyAcquisitionDigest.selector) {
+            revert IStreamNativeCustodyAuction.InvalidNativeCustody();
+        }
+        IStreamNativeCustodyAuction.Acquisition memory a =
+            abi.decode(input[4:], (IStreamNativeCustodyAuction.Acquisition));
+        return selector == IStreamNativeCustodyAuction.custodyAcquisitionDigest.selector
+            ? digest(a) : preparedDigest(a);
+    }
+
     function digest(IStreamNativeCustodyAuction.Acquisition memory a)
         public
         view

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamNativeSaleCreditHost, StreamNativeSaleCreditReads, IStreamNativeSaleCredits } from "./StreamNativeSaleCreditHost.sol";
 import { StreamNativeSurplusHost, StreamNativeSurplus, IStreamNativeSurplus } from "./StreamNativeSurplusHost.sol";
 import { StreamNativeImmediateSaleWorker } from "./StreamNativeImmediateSaleWorker.sol";
 import "./StreamNativeRefundDelegation.sol";
@@ -30,6 +31,7 @@ import "../../vendor/openzeppelin/ERC165.sol";
 /// @dev Sale revenue excludes reveal fees; unused fee allowance is a payer-owned pull credit.
 contract StreamNativeFixedPriceSaleAdapter is
     StreamNativeSurplusHost,
+    StreamNativeSaleCreditHost,
     IStreamNativeFixedPriceSaleAdapter,
     IStreamNativePricePrograms,
     IStreamNativePriceProgramDomain,
@@ -118,7 +120,7 @@ contract StreamNativeFixedPriceSaleAdapter is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return id == type(IStreamNativeSurplus).interfaceId || _refundDelegationSupported(id) || id == type(IStreamImmediateSaleReveal).interfaceId
+        return id == type(IStreamNativeSaleCredits).interfaceId || id == type(IStreamNativeSurplus).interfaceId || _refundDelegationSupported(id) || id == type(IStreamImmediateSaleReveal).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId
             || id == type(IStreamNativeFixedPriceSaleAdapter).interfaceId
             || id == type(IStreamNativePricePrograms).interfaceId
@@ -676,4 +678,7 @@ contract StreamNativeFixedPriceSaleAdapter is
         return _sweepNativeSurplus(amount, reasonHash);
     }
     function _nativeSurplusOwed() internal view override returns (uint256) { return refundLiability; }
+    function _nativeSaleCreditRead() internal view override returns (bytes memory) {
+        return StreamNativeSaleCreditReads.fixedRead(_refunds, _refundSales, _refundPayers, refundLiability, msg.data);
+    }
 }
