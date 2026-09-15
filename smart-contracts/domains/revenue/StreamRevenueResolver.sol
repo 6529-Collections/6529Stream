@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/revenue/IStreamRevenueResolver.sol";
 import "./StreamPrimaryAssignmentHash.sol";
+import { StreamPrimaryIdentityReads } from "./StreamPrimaryIdentityReads.sol";
 import { StreamPrimaryResolverState } from "./StreamPrimaryResolverState.sol";
 import {
     StreamPrimaryTemplateRuntime as TemplateRuntime
@@ -1123,14 +1124,9 @@ contract StreamRevenueResolver is
     }
 
     function _requireSelectedArtistRegistry() private view {
-        if (core.codehash != coreCodeHash) revert InvalidPrimaryResolverConfiguration();
-        (address selected, bytes32 selectedCodeHash,,,,,,,,) =
-            IStreamCore(core).getSatellitePointer(keccak256("ARTIST_REGISTRY"));
-        if (
-            selected != artistRegistry || selected.codehash != artistRegistryCodeHash
-                || selectedCodeHash != artistRegistryCodeHash
-                || IStreamArtistAttribution(selected).core() != core
-        ) revert InvalidPrimaryArtistRegistry(selected);
+        StreamPrimaryIdentityReads.requireSelectedArtistRegistry(
+            core, coreCodeHash, artistRegistry, artistRegistryCodeHash
+        );
     }
 
     function _requireMutableArtistScope(uint8 scope, uint256 scopeId) private view {
@@ -1152,21 +1148,9 @@ contract StreamRevenueResolver is
         view
         returns (uint256 collectionId)
     {
-        collectionId = suppliedCollectionId;
-        if (tokenId != 0) {
-            (bool exists, uint256 mappedCollection,,) =
-                IStreamCore(core).tokenCollectionIdentity(tokenId);
-            if (
-                !exists || mappedCollection == 0
-                    || (collectionId != 0 && collectionId != mappedCollection)
-            ) {
-                revert InvalidPrimaryTokenIdentity(tokenId, suppliedCollectionId);
-            }
-            collectionId = mappedCollection;
-        }
-        if (collectionId != 0 && !IStreamCore(core).collectionExists(collectionId)) {
-            revert InvalidPrimaryCollection(collectionId);
-        }
+        return StreamPrimaryIdentityReads.resolveCollectionIdentity(
+            core, suppliedCollectionId, tokenId
+        );
     }
 
     function _requireRevenueClass(bytes32 revenueClass) private pure {
