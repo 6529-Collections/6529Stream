@@ -117,9 +117,9 @@ retry, source/type drift rejection, corrective-Artist refund escape and an exact
 two-wallet-call Safe rollback/retry. These are authored source cases; they have
 not been executed as part of this source handoff. Actual Artist declaration
 and correction production are accepted prerequisites, not claimed as executed
-by this fixture. Token-TEMPLATE platform custody, primary allocation-time
-snapshots, other sale products and transaction-capacity acceptance remain
-separate scope. ERC-20 native-allowance and inherited/global freeze proposals
+by this fixture. The custody extensions below cover separate known-token
+workflows. Primary allocation-time snapshots, other sale products and
+transaction-capacity acceptance remain separate scope. ERC-20 native-allowance and inherited/global freeze proposals
 remain untouched.
 
 
@@ -171,8 +171,8 @@ No-bid return, pre-bid cancellation, pending own NFT claims and deadline refund
 remain usable despite a later contest or accepted corrective Artist. These cases
 are authored and typechecked, not executed in this source handoff. Artist,
 governance and entropy retain the fixture's explicit typed boundaries.
-Token-specific platform rights and consignment remain separate follow-on workflows;
-this route does not admit them.
+Token-specific platform rights require the appended activation described below.
+Consignment remains a separate workflow; original acquisition does not admit it.
 
 
 Template custody additionally requires the additive
@@ -198,3 +198,68 @@ actual override refusals, current template drift, and exact two-credit-call Safe
 rollback/retry. The prior seven fixed-profile cases remain included in the quick
 typecheck. No native execution or joined actual Artist authority is claimed by
 this source extension.
+
+
+## Known-token platform rights activation
+
+`IStreamPlatformTokenCustodyAuction` appends an explicit pre-bid approval to a
+platform custody auction originally acquired under families 8–11. Family 12
+requires the actual token's own PROFILE assignment; family 13 requires its own
+static or SALE_POSTER TEMPLATE. Collection/default fallback cannot satisfy either.
+Governance still installs Resolver assignments through the original setters.
+Activation does not grant Resolver mutation authority or fabricate Artist consent.
+
+The original poster calls `activatePlatformTokenCustody`. The canonical platform
+signer authorizes EIP-712 `PlatformTokenCustodyRights` under
+`6529StreamPlatformTokenCustodyRights`, version 1, the actual chain and house.
+The ordered fields are `auctionId`, `baseConfigHash`, `originHash`, `tokenId`,
+`declarationHash`, `rightsMode`, `assignmentHash`, `primaryPolicyHash`,
+`primaryPolicyMode`, `nonce`, and `deadline`. The last two numeric widths are
+`uint8 primaryPolicyMode` and `uint64 deadline`; `rightsMode` is `uint8`, token ID
+is `uint256`, and the remaining values are `bytes32`. This new nonce domain is
+house-local and platform-specific, separate from original acquisition and payer
+bid nonces. A nonce is consumed once across this house's platform token activations.
+
+Activation is once-only, before the first bid and auction end, with the original
+custody token still held, no pause and the original current declaration still
+admitted. An open or sustained contest, or any corrective Artist generation,
+cannot authorize platform activation or paid settlement. Corrected works need
+the separate Artist consent workflow. The exact initial token policy and full
+assignment are signed. `primaryPolicyMode` must be ALLOW_CURRENT (1): later
+current terms may change within the same signed token family, with the canonical
+actual-token policy and full current witness retained in each payment receipt.
+
+The original acquisition configuration, sale ID, origin and royalty snapshot
+remain unchanged. The appended effective configuration commits the complete
+activation. Only `bidPlatformTokenCustody`, `bidSignedPlatformTokenCustody` and
+`settlePlatformTokenCustody` accept activated paid sales; original entries reject
+them, including old pre-signed bids. Signed bids keep the original bid domain and
+field order but bind the new effective configuration. Both entry families retain
+the same payer replay state and canonical consumed sale/result accounting.
+
+The additive recorder capability emits schema-1
+`PlatformTokenCustodyRevenueRecorded` with the complete activation, original
+opening rights, custody facts, current beneficiary witness and result. Token
+TEMPLATE materialization uses the original signed poster, never a later executor.
+Actual declaration, scope-2 source, profile/wallet and custody facts are rechecked
+around funding. A failed payment restores materialization, replay and accounting;
+an identical Safe transaction may retry. No new mint or royalty snapshot occurs.
+Original no-bid returns, cancellation, own claims and deadline refunds remain
+available when current platform admission is lost.
+
+Seven focused cases are authored and ABI/typechecked with actual Core, Manager,
+Ledger, Resolver, recorder, escrow, Factory and threshold Safe contracts. Artist,
+governance and entropy remain the explicit typed fixture boundary. Selected size
+checks are separate from native execution; this source handoff claims no executed
+test or transaction-capacity result. Consignment and primary snapshot-at-mint
+remain separate workflows; blocked ERC-20 and inherited/global freeze proposals
+are untouched.
+
+
+The fixed `StreamNativeCustodyEntryWorker` forwards the twelve original/new
+explicit custody activation, bid and settlement selectors. Each public host
+wrapper retains its original reentrancy modifier, parameters and return type;
+mutating paths return normally through the modifier epilogue. The worker receives
+explicit existing storage references, the appended token-activation state and
+original runtime pins. It runs in the house context with the original caller and
+value. View-only large getters keep their separate terminal ABI forwarding.

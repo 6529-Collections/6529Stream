@@ -1,28 +1,26 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "./StreamPlatformCustodyValidation.sol";
-import "../../interfaces/stream/revenue/IStreamPlatformCustodyPrimarySettlement.sol";
+import "./StreamPlatformTokenCustodyValidation.sol";
+import "../../interfaces/stream/revenue/IStreamPlatformTokenCustodySettlement.sol";
 import "./StreamNativePrimaryExecution.sol";
 import "./StreamScopedNativePrimaryExecution.sol";
 import "./StreamPrimarySettlementEmission.sol";
 import "./StreamPrimarySettlementHash.sol";
 
 /// @notice Official payment before custody delivery, with no mint or ledger operation.
-import "./StreamPlatformTokenCustodyHash.sol";
-
-library StreamPlatformCustodyRecording {
+library StreamPlatformTokenCustodyRecording {
     struct Context {
         StreamNativeCustodyPrimaryAdmission.Context admission;
         bytes32 resolverHash;
         StreamNativePrimaryExecution.Context funding;
     }
-    event PlatformCustodyRevenueRecorded(
+    event PlatformTokenCustodyRevenueRecorded(
         uint16 schemaVersion,
         bytes32 indexed settlementKey,
         bytes32 indexed saleKey,
         bytes32 indexed factsHash,
-        bytes32 declarationHash,
+        StreamPlatformTokenCustodyTypes.Activation activation,
         StreamPreparedNativeRightsTypes.OriginalPolicy original,
         StreamNativeCustodySettlementTypes.Facts facts,
         bytes32 beneficiaryHash,
@@ -42,12 +40,15 @@ library StreamPlatformCustodyRecording {
         mapping(address => uint256) storage total,
         bytes32 id
     ) public returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory r) {
-        StreamPlatformTokenCustodyHash.requireLegacy(msg.sender, id);
         requireContext(x);
         StreamNativeCustodySettlementTypes.Facts memory f =
-            StreamPlatformCustodyValidation.read(x.admission, pin, id);
-        (bytes32 declaration, StreamPreparedNativeRightsTypes.OriginalPolicy memory original) =
-            StreamPlatformCustodyValidation.binding(x.funding.rights.resolver, msg.sender, f);
+            StreamPlatformTokenCustodyValidation.read(x.admission, pin, id);
+        (
+            StreamPlatformTokenCustodyTypes.Activation memory activation,
+            StreamPreparedNativeRightsTypes.OriginalPolicy memory original
+        ) = StreamPlatformTokenCustodyValidation.activation(
+            x.funding.rights.resolver, msg.sender, f
+        );
         if (
             msg.value != f.auction.winner.amount
                 || f.auction.winner.payer == address(x.funding.escrow)
@@ -58,7 +59,9 @@ library StreamPlatformCustodyRecording {
             StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c,
             StreamSaleTemplate.Selection memory selected,
             bytes32 beneficiaryHash
-        ) = StreamPlatformCustodyValidation.derive(x.funding.rights, f, msg.sender, address(this));
+        ) = StreamPlatformTokenCustodyValidation.derive(
+            x.funding.rights, f, msg.sender, address(this)
+        );
         if (c.sale.payer == selected.wallet) {
             revert IStreamNativeCustodyPrimarySettlement.InvalidNativeCustodySettlement();
         }
@@ -77,7 +80,7 @@ library StreamPlatformCustodyRecording {
             x.funding,
             c.sale.collectionId,
             c.sale.tokenId,
-            original.mode,
+            activation.authorization.rightsMode,
             c.sale.poster,
             c.sale.amount,
             selected,
@@ -85,31 +88,34 @@ library StreamPlatformCustodyRecording {
         );
         requireContext(x);
         StreamNativeCustodySettlementTypes.Facts memory after_ =
-            StreamPlatformCustodyValidation.read(x.admission, pin, id);
+            StreamPlatformTokenCustodyValidation.read(x.admission, pin, id);
         (
-            bytes32 afterDeclaration,
+            StreamPlatformTokenCustodyTypes.Activation memory afterActivation,
             StreamPreparedNativeRightsTypes.OriginalPolicy memory afterOriginal
-        ) = StreamPlatformCustodyValidation.binding(x.funding.rights.resolver, msg.sender, after_);
+        ) = StreamPlatformTokenCustodyValidation.activation(
+            x.funding.rights.resolver, msg.sender, after_
+        );
         (
             StreamPrimarySettlementTypes.ERC20SettlementCandidate memory afterCandidate,,
             bytes32 afterBeneficiaries
-        ) = StreamPlatformCustodyValidation.derive(
+        ) = StreamPlatformTokenCustodyValidation.derive(
             x.funding.rights, after_, msg.sender, address(this)
         );
         if (
             keccak256(abi.encode(f)) != keccak256(abi.encode(after_))
-                || declaration != afterDeclaration
+                || keccak256(abi.encode(activation)) != keccak256(abi.encode(afterActivation))
                 || keccak256(abi.encode(original)) != keccak256(abi.encode(afterOriginal))
                 || keccak256(abi.encode(c)) != keccak256(abi.encode(afterCandidate))
                 || beneficiaryHash != afterBeneficiaries
         ) {
             revert IStreamNativeCustodyPrimarySettlement.InvalidNativeCustodySettlement();
         }
-        bytes32 factsHash =
-            StreamPlatformCustodyHash.facts(address(this), msg.sender, f, declaration, original);
+        bytes32 factsHash = StreamPlatformTokenCustodyHash.facts(
+            address(this), msg.sender, f, activation, original
+        );
         r = StreamPrimarySettlementTypes.PrimarySettlementResult(
-            StreamPlatformCustodyHash.candidate(
-                address(this), msg.sender, f, declaration, original, c, beneficiaryHash
+            StreamPlatformTokenCustodyHash.candidate(
+                address(this), msg.sender, f, activation, original, c, beneficiaryHash
             ),
             key,
             selected.profileId,
@@ -140,8 +146,8 @@ library StreamPlatformCustodyRecording {
         StreamPrimarySettlementEmission.emitSettlement(
             c, r, address(0), f.auction.config.expectedPrimaryPolicyHash
         );
-        emit PlatformCustodyRevenueRecorded(
-            1, key, saleKey, factsHash, declaration, original, f, beneficiaryHash, r
+        emit PlatformTokenCustodyRevenueRecorded(
+            1, key, saleKey, factsHash, activation, original, f, beneficiaryHash, r
         );
     }
 

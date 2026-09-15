@@ -5,6 +5,8 @@ import { StreamScopedSaleTemplate } from "../mint/StreamScopedSaleTemplate.sol";
 import { StreamDefaultSaleTemplate } from "../mint/StreamDefaultSaleTemplate.sol";
 import { StreamPlatformSaleTemplate } from "../mint/StreamPlatformSaleTemplate.sol";
 
+import { StreamPlatformTokenPrimary } from "./StreamPlatformTokenPrimary.sol";
+
 library StreamScopedNativePrimaryExecution {
     function fund(
         StreamNativePrimaryExecution.Context memory x,
@@ -18,7 +20,11 @@ library StreamScopedNativePrimaryExecution {
     ) public returns (bool escrowed) {
         uint256 original = address(this).balance - msg.value;
         if (selected.templateId != 0) {
-            if (mode == 8 || mode == 9) {
+            if (mode == 13) {
+                StreamPlatformTokenPrimary.materialize(
+                    x.rights.resolver, collection, token, mode, poster, selected, witness
+                );
+            } else if (mode == 8 || mode == 9) {
                 StreamPlatformSaleTemplate.materialize(
                     x.rights.resolver, collection, token, mode, poster, selected, witness
                 );

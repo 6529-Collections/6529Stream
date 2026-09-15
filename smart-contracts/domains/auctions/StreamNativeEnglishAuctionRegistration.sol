@@ -11,6 +11,8 @@ import {
 } from "../../interfaces/stream/auctions/IStreamNativeEnglishAuction.sol";
 
 /// @notice Original registration and bid admission executed in the fixed house context.
+import "../revenue/StreamPlatformTokenCustodyValidation.sol";
+
 library StreamNativeEnglishAuctionRegistration {
     event NativeAuctionCreated(
         bytes32 indexed auctionId,
@@ -272,7 +274,17 @@ library StreamNativeEnglishAuctionRegistration {
             );
             StreamNativeCustodySettlementTypes.Origin memory origin =
                 IStreamNativeCustodyAuction(address(this)).custodyOrigin(id);
-            if (rightsMode >= 8 && rightsMode <= 11) {
+            if (rightsMode == 12 || rightsMode == 13) {
+                StreamNativeEnglishAuctionCustodyReads.requireCustody(x, a, origin);
+                StreamPlatformTokenCustodyValidation.derive(
+                    StreamPrimarySettlementRights.Context(
+                        x.base.resolver, x.factory, x.factory.splitWalletRuntimeCodeHash()
+                    ),
+                    StreamNativeCustodySettlementTypes.Facts(id, a, origin),
+                    address(this),
+                    x.recorder
+                );
+            } else if (rightsMode >= 8 && rightsMode <= 11) {
                 StreamNativeEnglishAuctionCustodyReads.requireCustody(x, a, origin);
                 StreamPlatformCustodyValidation.derive(
                     StreamPrimarySettlementRights.Context(

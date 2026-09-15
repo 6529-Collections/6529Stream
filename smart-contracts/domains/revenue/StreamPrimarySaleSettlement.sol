@@ -10,6 +10,7 @@ import "./StreamNativeCustodyPrimaryRecording.sol";
 import "./StreamTokenProfileCustodyRecording.sol";
 import "./StreamCustodyRightsRecording.sol";
 import "./StreamPlatformCustodyRecording.sol";
+import "./StreamPlatformTokenCustodyRecording.sol";
 import "../../interfaces/stream/revenue/IStreamPlatformTemplateCustodySettlement.sol";
 import "./StreamNativeSupplementalExecution.sol";
 import "./StreamNativePrimaryExecution.sol";
@@ -47,6 +48,7 @@ contract StreamPrimarySaleSettlement is
     IStreamTokenProfileCustodySettlement,
     IStreamCustodyRightsSettlement,
     IStreamPlatformCustodyPrimarySettlement,
+    IStreamPlatformTokenCustodySettlement,
     IStreamPlatformTemplateCustodySettlement,
     IStreamPreparedNativeRightsPrimarySettlement,
     IStreamPlatformNativePrimarySettlement,
@@ -141,6 +143,7 @@ contract StreamPrimarySaleSettlement is
             || id == type(IStreamTokenProfileCustodySettlement).interfaceId
             || id == type(IStreamCustodyRightsSettlement).interfaceId
             || id == type(IStreamPlatformCustodyPrimarySettlement).interfaceId
+            || id == type(IStreamPlatformTokenCustodySettlement).interfaceId
             || id == type(IStreamPlatformTemplateCustodySettlement).interfaceId
             || id == type(IStreamPreparedNativeRightsPrimarySettlement).interfaceId
             || id == type(IStreamPlatformNativePrimarySettlement).interfaceId
@@ -510,6 +513,36 @@ contract StreamPrimarySaleSettlement is
             totalOfficialSettled,
             id
         );
+    }
+
+    function isStreamPlatformTokenCustodySettlement() external pure override returns (bool) {
+        return true;
+    }
+
+    function settlePlatformTokenCustodyPrimarySale(bytes32 id)
+        external
+        payable
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory)
+    {
+        return StreamPlatformTokenCustodyRecording.execute(
+                StreamPlatformTokenCustodyRecording.Context(
+                    _custodyAdmissionContext(),
+                    resolverCodeHash,
+                    StreamNativePrimaryExecution.Context(
+                        _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
+                    )
+                ),
+                _canonicalCustodyHouse,
+                preparedNativeSaleConsumed,
+                settlementConsumed,
+                _results,
+                nativeCustodyFactsHash,
+                _officialSettled,
+                totalOfficialSettled,
+                id
+            );
     }
 
     function supplementalFloorKey(bytes32 originalKey) public view returns (bytes32) {
