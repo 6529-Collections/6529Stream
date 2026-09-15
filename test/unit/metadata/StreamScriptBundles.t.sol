@@ -230,12 +230,12 @@ contract BundleFrozenSourceBoundary {
 /// @notice Actual MetadataV1/Router/bytecode blobs and original Safe; Core/Artist/governance are explicit typed boundaries.
 contract StreamScriptBundlesTest is CharacterizationTestBase, OfficialSafeFixture {
     using Strings for uint256;
-    PresentationCoreBoundary private core;
-    BundleArtistBoundary private artist;
-    PresentationEntropyBoundary private entropy;
-    StreamMetadataRouter private router;
-    StreamCollectionMetadataV1 private metadata;
-    bytes32 private constant SCRIPT = keccak256("SCRIPT");
+    PresentationCoreBoundary internal core;
+    BundleArtistBoundary internal artist;
+    PresentationEntropyBoundary internal entropy;
+    StreamMetadataRouter internal router;
+    StreamCollectionMetadataV1 internal metadata;
+    bytes32 internal constant SCRIPT = keccak256("SCRIPT");
 
     function setUp() public {
         core = new PresentationCoreBoundary();
@@ -293,7 +293,7 @@ contract StreamScriptBundlesTest is CharacterizationTestBase, OfficialSafeFixtur
         bool libraryOnly,
         bytes32 libraryBundle,
         M.PayloadSourceType source
-    ) private pure returns (B.Plan memory p) {
+    ) internal pure returns (B.Plan memory p) {
         p.sourceType = source;
         p.libraryOnly = libraryOnly;
         p.libraryBundle = libraryBundle;
@@ -308,7 +308,7 @@ contract StreamScriptBundlesTest is CharacterizationTestBase, OfficialSafeFixtur
         p.payloadHash = keccak256(joined);
     }
 
-    function _one(bytes memory payload) private pure returns (bytes[] memory chunks) {
+    function _one(bytes memory payload) internal pure returns (bytes[] memory chunks) {
         chunks = new bytes[](1);
         chunks[0] = payload;
     }
@@ -318,7 +318,7 @@ contract StreamScriptBundlesTest is CharacterizationTestBase, OfficialSafeFixtur
         bool libraryOnly,
         bytes32 libraryBundle,
         M.PayloadSourceType source
-    ) private returns (bytes32 id) {
+    ) internal returns (bytes32 id) {
         id = metadata.beginScriptBundle(_plan(chunks, libraryOnly, libraryBundle, source));
         for (uint256 i; i < chunks.length; ++i) {
             metadata.appendScriptBundle(id, i, chunks[i]);
@@ -326,7 +326,7 @@ contract StreamScriptBundlesTest is CharacterizationTestBase, OfficialSafeFixtur
         metadata.finalizeScriptBundle(id);
     }
 
-    function _manifest(bytes32 id) private view returns (M.ScriptManifest memory m) {
+    function _manifest(bytes32 id) internal view returns (M.ScriptManifest memory m) {
         B.Facts memory f = metadata.scriptBundle(id);
         m.scriptHash = f.payloadHash;
         m.rendererCompatibility = keccak256("6529STREAM_ROUTER_CHUNKED_PRESENTATION_V1");
@@ -339,7 +339,7 @@ contract StreamScriptBundlesTest is CharacterizationTestBase, OfficialSafeFixtur
         if (f.libraryBundle != 0) m.libraryURI = "https://example.test/provenance-only.js";
     }
 
-    function _select(bytes32 id) private returns (M.ScriptManifest memory m) {
+    function _select(bytes32 id) internal returns (M.ScriptManifest memory m) {
         m = _manifest(id);
         artist.approve(
             1,
@@ -350,7 +350,7 @@ contract StreamScriptBundlesTest is CharacterizationTestBase, OfficialSafeFixtur
         router.setCollectionScriptManifest(1, m);
     }
 
-    function _contains(string memory text, string memory needle) private pure returns (bool) {
+    function _contains(string memory text, string memory needle) internal pure returns (bool) {
         bytes memory a = bytes(text);
         bytes memory b = bytes(needle);
         if (b.length > a.length) return false;
@@ -833,6 +833,8 @@ contract StreamScriptBundlesTest is CharacterizationTestBase, OfficialSafeFixtur
             );
         }
         string memory html = router.tokenHTML(91);
+        bytes32 historical =
+            keccak256(bytes(router.historicalFullTokenMetadataJSON(address(core), 91)));
         require(_contains(html, "savedArtwork();"));
         _pointer(keccak256("COLLECTION_METADATA"), address(artist));
         _pointer(keccak256("METADATA_ROUTER"), address(artist));
@@ -842,6 +844,11 @@ contract StreamScriptBundlesTest is CharacterizationTestBase, OfficialSafeFixtur
         );
         core.setLifecycle(3);
         require(_contains(router.tokenJSON(91), '"render_state":"burned"'));
+        require(
+            keccak256(bytes(router.historicalFullTokenMetadataJSON(address(core), 91)))
+                == historical,
+            "frozen historical full bytes survive burn"
+        );
         source.setFault(1);
         vm.expectRevert(
             abi.encodeWithSelector(

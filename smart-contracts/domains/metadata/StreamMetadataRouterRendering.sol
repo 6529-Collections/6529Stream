@@ -59,9 +59,15 @@ library StreamMetadataRouterRendering {
         bool frozen;
         string memory result;
         if (mode >= 2) {
-            (frozen, result) = StreamMetadataFinalityServing.fullToken(
-                presentations, anchors, env, x.anchor, tokenId, mode == 3
-            );
+            if (mode == 4) {
+                (frozen, result) = StreamMetadataFinalityServing.historicalFullToken(
+                    presentations, anchors, env, x.anchor, tokenId
+                );
+            } else {
+                (frozen, result) = StreamMetadataFinalityServing.fullToken(
+                    presentations, anchors, env, x.anchor, tokenId, mode == 3
+                );
+            }
         } else {
             (frozen, result) = StreamMetadataFinalityServing.token(
                 presentations, anchors, env, x.anchor, tokenId, allowBurned, mode == 1
@@ -71,7 +77,7 @@ library StreamMetadataRouterRendering {
         StreamMetadataTokenReads.TokenFacts memory facts =
             StreamMetadataTokenReads.facts(x.core, tokenId, allowBurned);
         if (allowBurned && !facts.finalized) revert TokenEntropyNotFinalized(tokenId);
-        if (mode >= 2) {
+        if (mode == 2 || mode == 3) {
             (,,, bool burned) = IStreamCore(x.core).tokenCollectionIdentity(tokenId);
             if (burned) facts.state = "burned";
         }
@@ -96,11 +102,13 @@ library StreamMetadataRouterRendering {
         if (bundle.bundleId != 0) {
             StreamMetadataBundleRenderer.requireLive(bundle, x.core);
             return StreamMetadataBundleRenderer.render(
-                mode, token, metadata, artist, bundle, address(this), block.chainid
+                mode == 4 ? 2 : mode, token, metadata, artist, bundle, address(this), block.chainid
             );
         }
         if (mode == 3) return StreamMetadataTokenRenderer.html(token, metadata);
-        if (mode == 2) return StreamMetadataTokenRenderer.fullJSON(token, metadata, artist);
+        if (mode == 2 || mode == 4) {
+            return StreamMetadataTokenRenderer.fullJSON(token, metadata, artist);
+        }
         return mode == 1
             ? StreamMetadataTokenRenderer.renderURI(token, metadata, artist)
             : StreamMetadataTokenRenderer.render(token, metadata, artist);

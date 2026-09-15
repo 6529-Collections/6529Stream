@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
-    IStreamMetadataFullViews
+    IStreamMetadataFullViews,
+    IStreamMetadataHistoricalFullView
 } from "../../interfaces/stream/metadata/IStreamMetadataFullViews.sol";
 import {
     IStreamScriptBundles as B,
@@ -292,6 +293,7 @@ contract StreamMetadataRouter is
         return id == type(IStreamGasParameterHost).interfaceId
             || id == type(IStreamMetadataRouter).interfaceId
             || id == type(IStreamMetadataRenderingProfile).interfaceId
+            || id == type(IStreamMetadataHistoricalFullView).interfaceId
             || id == type(IStreamMetadataFullViews).interfaceId
             || id == type(IStreamScriptBundleSelection).interfaceId
             || id == type(IStreamContentRootPublication).interfaceId
@@ -759,6 +761,15 @@ contract StreamMetadataRouter is
 
     function tokenJSON(uint256 tokenId) external view returns (string memory) {
         return _serveTokenView(tokenId, true, 2);
+    }
+
+    function historicalFullTokenMetadataJSON(address core_, uint256 tokenId)
+        external
+        view
+        returns (string memory)
+    {
+        _requireCore(core_);
+        return _serveTokenView(tokenId, true, 4);
     }
 
     function _serveToken(uint256 tokenId, bool allowBurned, bool asURI)

@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamChunkedCheckpoint } from "./StreamChunkedCheckpoint.sol";
+import "../../interfaces/stream/finality/IStreamChunkedContentCheckpoint.sol";
 
 import "../../interfaces/stream/core/IStreamCoreMint.sol";
 import "../../interfaces/stream/core/IStreamCoreIdentity.sol";
@@ -15,7 +17,7 @@ import "../metadata/StreamTokenContentTree.sol";
 import "../parameters/StreamGasParameterHost.sol";
 import "./StreamOnchainContentBytes.sol";
 
-/// @notice Incremental, permissionless verification of complete inline ONCHAIN content roots.
+/// @notice Incremental, permissionless verification of explicit inline or chunked ONCHAIN roots.
 /// @dev All artwork fields are locked before a plan starts. The plan is computation evidence;
 ///      an authoritative record and preserved leaf manifest are separate publication requirements.
 contract StreamOnchainContentCheckpoint is
@@ -45,6 +47,8 @@ contract StreamOnchainContentCheckpoint is
     mapping(bytes32 => Plan) private _plans;
     mapping(bytes32 => mapping(uint256 => StreamTokenContentLeaf)) private _leaves;
     mapping(bytes32 => mapping(uint256 => bytes32)) private _frontier;
+    mapping(bytes32 => bytes32) private _profiles;
+    event ChunkedCheckpointProfile(uint16 schemaVersion, bytes32 indexed planHash, bytes32 profile);
 
     constructor(
         address core_,
@@ -107,7 +111,8 @@ contract StreamOnchainContentCheckpoint is
 
     function supportsInterface(bytes4 id) external pure override returns (bool) {
         return id == type(IERC165).interfaceId || id == type(IStreamGasParameterHost).interfaceId
-            || id == type(IStreamOnchainContentCheckpoint).interfaceId;
+            || id == type(IStreamOnchainContentCheckpoint).interfaceId
+            || id == type(IStreamChunkedContentCheckpoint).interfaceId;
     }
 
     /// @inheritdoc IStreamOnchainContentCheckpoint
@@ -116,16 +121,29 @@ contract StreamOnchainContentCheckpoint is
         override
         returns (bytes32 id)
     {
+        return _begin(collectionId, PROFILE);
+    }
+
+    function beginChunkedCollectionCheckpoint(uint256 collectionId) external returns (bytes32) {
+        return _begin(collectionId, StreamChunkedCheckpoint.PROFILE);
+    }
+
+    function checkpointProfile(bytes32 id) public view returns (bytes32) {
+        if (_plans[id].tokenCount == 0) revert CheckpointUnknown(id);
+        return _profiles[id] == 0 ? PROFILE : _profiles[id];
+    }
+
+    function _begin(uint256 collectionId, bytes32 profile) private returns (bytes32 id) {
         _requireBindings();
         (uint256 count, bytes32 inventoryHash) = _inventory(collectionId);
         if (count == 0 || count > type(uint64).max) revert CheckpointUnsupportedPresentation();
-        (bytes32 servingHash,) = _serving(collectionId);
+        (bytes32 servingHash,) = _servingProfile(collectionId, profile);
         id = keccak256(
             abi.encode(
                 _PLAN,
                 deploymentChainId,
                 address(this),
-                PROFILE,
+                profile,
                 core,
                 metadataRouter,
                 tokenInventory,
@@ -137,6 +155,10 @@ contract StreamOnchainContentCheckpoint is
         );
         if (_plans[id].tokenCount == 0) {
             _plans[id] = Plan(collectionId, uint64(count), 0, inventoryHash, servingHash, 0, 0);
+            if (profile != PROFILE) {
+                _profiles[id] = profile;
+                emit ChunkedCheckpointProfile(1, id, profile);
+            }
             emit ContentCheckpointStarted(id, _plans[id]);
         }
     }
@@ -169,7 +191,9 @@ contract StreamOnchainContentCheckpoint is
             if (payloads[i].tokenId != expected) {
                 revert CheckpointTokenMismatch(expected, payloads[i].tokenId);
             }
-            StreamTokenContentLeaf memory leaf = _leaf(payloads[i], imageURI);
+            StreamTokenContentLeaf memory leaf = checkpointProfile(id) == PROFILE
+                ? _leaf(payloads[i], imageURI)
+                : StreamChunkedCheckpoint.leaf(_chunkContext(), payloads[i], imageURI);
             bytes32 leafHash = StreamTokenContentTree.leafHash(deploymentChainId, core, leaf);
             _leaves[id][index] = leaf;
             _appendFrontier(id, index, leafHash);
@@ -214,7 +238,8 @@ contract StreamOnchainContentCheckpoint is
         if (plan.tokenCount == 0) revert CheckpointUnknown(id);
         _requireBindings();
         (uint256 count, bytes32 inventoryHash) = _inventory(plan.collectionId);
-        (bytes32 servingHash, string memory uri) = _serving(plan.collectionId);
+        (bytes32 servingHash, string memory uri) =
+            _servingProfile(plan.collectionId, checkpointProfile(id));
         if (
             count != plan.tokenCount || inventoryHash != plan.inventoryHash
                 || servingHash != plan.servingStateHash
@@ -262,6 +287,26 @@ contract StreamOnchainContentCheckpoint is
             ),
             (uint256, bytes32)
         );
+    }
+
+    function _chunkContext() private view returns (StreamChunkedCheckpoint.Context memory) {
+        return StreamChunkedCheckpoint.Context(
+            core,
+            metadataRouter,
+            deploymentChainId,
+            _gasParameterValue(DEPENDENCY_READ_GAS),
+            _gasParameterValue(RENDER_READ_GAS)
+        );
+    }
+
+    function _servingProfile(uint256 collectionId, bytes32 profile)
+        private
+        view
+        returns (bytes32, string memory)
+    {
+        if (profile == PROFILE) return _serving(collectionId);
+        if (profile != StreamChunkedCheckpoint.PROFILE) revert CheckpointUnsupportedPresentation();
+        return StreamChunkedCheckpoint.serving(_chunkContext(), collectionId);
     }
 
     function _serving(uint256 collectionId) private view returns (bytes32, string memory) {

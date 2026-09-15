@@ -109,6 +109,25 @@ configured caps are maxima, and nested reads may forward less when the caller
 provides less gas. New floors are implementation values, not measured collector
 or all-cold gas conformance.
 
+## Component evidence and archival roots
+
+The fixed Router evidence helper recognizes an explicitly selected chunked
+bundle and uses `6529STREAM_CHUNKED_ROUTER_COMPONENT_EVIDENCE_V1`. Original
+stable-profile preimages remain unchanged. Script facts bind the exact saved
+manifest and finalized bundle; dependency facts additionally bind the actual
+library and pinned registry version. An unavailable registry cannot silently
+replace library bytes, and does not prevent independent media or script
+commitment reads. Renderer/context facts identify the actual chunk renderer,
+while metadata facts retain the actual locked display and artist presentation.
+
+The [explicit chunked checkpoint](integrations/onchain-content-checkpoints.md)
+computes full-artwork roots using `historicalFullTokenMetadataJSON(core,tokenId)`.
+That archival view retains historical lifecycle and locked artist bytes after a
+burn, including when authenticated finality selects the original frozen source.
+Public full views retain their current burn disclosure. The current snapshot
+serializer still accepts only its separately declared stable inline profile;
+complete chunked snapshot/export composition remains required.
+
 ## Validation boundary
 
 Thirteen authored cases cover maximum logical capacity, physical blobs, paged/full

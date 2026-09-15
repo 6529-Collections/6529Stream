@@ -81,6 +81,25 @@ library StreamMetadataFinalityServing {
         return (true, _render(c, serial, _sources(c, true), asHTML ? 3 : 2));
     }
 
+    function historicalFullToken(
+        mapping(uint256 => IStreamMetadataServingFacts.ArtistPresentation) storage presentations,
+        mapping(uint256 => StreamMetadataRecoveryRoutes.OriginalAnchor) storage anchors,
+        StreamMetadataRecoveryRoutes.Environment memory e,
+        StreamMetadataRecoveryRoutes.OriginalAnchor memory durable,
+        uint256 id
+    ) public view returns (bool frozen, string memory result) {
+        (uint256 collection, uint256 serial) = _identity(e.core, id, true);
+        (StreamMetadataRecoveryRoutes.Context memory c, bool active) = StreamMetadataRecoveryRoutes.context(
+            e,
+            presentations[collection].locked,
+            anchors[collection],
+            durable,
+            StreamFinalityScope(StreamFinalityScopeType.TOKEN, collection, id, 0)
+        );
+        if (!active) return (false, "");
+        return (true, _render(c, serial, _sources(c, true), 4));
+    }
+
     function _render(
         StreamMetadataRecoveryRoutes.Context memory c,
         uint256 serial,
@@ -103,7 +122,7 @@ library StreamMetadataFinalityServing {
         StreamMetadataRenderTypes.Token memory input = StreamMetadataRenderTypes.Token(
             id, c.scope.collectionId, serial, seed, true, "final", data, true
         );
-        if (mode >= 2) {
+        if (mode == 2 || mode == 3) {
             (,,, bool burned) = abi.decode(
                 StreamMetadataRecoveryRoutes.read(
                     c.core,
@@ -121,7 +140,7 @@ library StreamMetadataFinalityServing {
         if (s.bundle.bundleId != 0) {
             callData = abi.encodeWithSignature(
                 "renderBundleForFinality(uint8,bytes)",
-                mode,
+                mode == 4 ? 2 : mode,
                 abi.encode(
                     input,
                     s.metadata,

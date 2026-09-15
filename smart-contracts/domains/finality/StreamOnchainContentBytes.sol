@@ -23,6 +23,26 @@ library StreamOnchainContentBytes {
         return actual == keccak256(suffix);
     }
 
+    /// @notice Exact stable full-view suffix; current burned disclosure is not a checkpoint input.
+    function matchesFullAnimation(bytes memory json, bytes memory animation, bytes memory tokenData)
+        public
+        pure
+        returns (bool)
+    {
+        bytes memory suffix = abi.encodePacked(
+            ',"animation_url":"data:text/html;base64,',
+            Base64.encode(animation),
+            '","token_data_base64":"',
+            Base64.encode(tokenData),
+            '","properties":{"stream":{"render_state":"final"}}}'
+        );
+        if (suffix.length > json.length) return false;
+        uint256 offset = json.length - suffix.length;
+        bytes32 actual;
+        assembly ("memory-safe") { actual := keccak256(add(add(json, 32), offset), mload(suffix)) }
+        return actual == keccak256(suffix);
+    }
+
     /// @notice Empty means absent. Nonempty images must be exact inline base64 data URI bytes.
     function matchesImage(bytes memory json, string memory imageURI, bytes memory image)
         public

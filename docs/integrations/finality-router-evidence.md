@@ -90,3 +90,21 @@ limit, full Safe acceptance and complete finality evidence remain required.
 
 See [the typed-provider decision](../adr/0041-typed-finality-evidence-provider.md)
 and [active delivery](../../ops/V1_DELIVERY.md) for the remaining scope.
+
+## Explicit chunked presentation
+
+The fixed helper also supports actual selected
+[chunked scripts](../chunked-script-profile.md) through a distinct
+`6529STREAM_CHUNKED_ROUTER_COMPONENT_EVIDENCE_V1` data domain. It authenticates
+saved manifest/bundle facts and optional version-pinned library dependencies.
+All six family kinds and the provider's existing authority/eligibility checks
+remain unchanged. Registry liveness is required by the dependency family;
+media, display and script commitments retain their independent reads.
+The original stable family preimages and no-external-dependency declaration
+remain restricted to the original stable renderer.
+
+This extension has six authored checkpoint/component cases with real Router,
+Metadata and immutable blobs, plus typed membership/Artist/Core boundaries.
+ABI checking and selected bytecode sizing passed; native execution and full
+current-stack finality acceptance remain pending for this extension. The older
+passing cohort above does not establish this new branch's runtime behavior.

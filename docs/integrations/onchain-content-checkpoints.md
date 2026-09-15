@@ -53,6 +53,51 @@ profile. Raster signature checks validate admission; they do not decode an
 entire image or establish that it will render. External-image, OFFCHAIN, HYBRID,
 TOKEN, RELEASE, SEASON and VIEW support remain separate required work.
 
+## The explicit chunked ONCHAIN profile
+
+For an actual selected [chunked script and optional library](../chunked-script-profile.md),
+call `beginChunkedCollectionCheckpoint(collectionId)` through the
+[additive interface](../../smart-contracts/interfaces/stream/finality/IStreamChunkedContentCheckpoint.sol).
+Its profile is `keccak256("6529STREAM_CONTENT_CHUNKED_ONCHAIN_V1")`;
+`checkpointProfile(planId)` identifies the saved profile. The original
+`beginCollectionCheckpoint` remains limited to the inline profile and retains
+its original plan preimage. The chunked plan includes the new profile in that
+same explicit profile field and emits `ChunkedCheckpointProfile(1,...)`.
+
+All six locks, the selected Router binding, full original inventory and mint
+coordinator checks still apply. The serving commitment authenticates the saved
+metadata owner/code, selected immutable bundle, canonical typed script manifest,
+optional library bundle and its exact registry version/code/typed content hash.
+It also commits the actual chunk renderer and its context/dependency profile.
+A changed current registry version does not change a pinned older version;
+unavailable pinned code or mismatched source bytes fail the applicable read.
+There is no fallback to a current script, URI download or copied replacement.
+
+The leaf fields retain the meanings above, with `metadataHash` taken from
+`historicalFullTokenMetadataJSON(core,tokenId)`. This separate archival read
+uses the original historical `final` lifecycle state and locked artist bytes.
+The public `tokenJSON`/`tokenHTML` reads still disclose a later burn. Existing
+selected-finality route and source checks apply to both paths. Burning a token
+or later freezing Core therefore does not change the completed archival root.
+
+Supply the exact HTML decoded from this full JSON's `animation_url`; the
+standalone `tokenHTML` includes an additional disclosure attribute and is not
+interchangeable. The verifier compares the complete full-view suffix, including
+animation Base64, explicit token bytes and the historical lifecycle field.
+Animation is bounded at 2,000,000 bytes, full JSON at 3,000,000 bytes and token
+data at 16,384 bytes. Script and library each retain the full 32 × 24,576 logical
+byte limit. Image support remains absent or the original bounded inline raster
+profile. These envelopes do not establish that a maximum-size transaction fits
+an intended chain's block or RPC limits.
+
+The existing preserved leaf-manifest verifier reads the saved checkpoint plan
+and exact six-word leaves; it does not assume the inline profile and needs no
+new leaf schema. Authoritative profile registration, publication consent and
+archival/finality acceptance remain independent. The current snapshot producer
+still requires the stable inline presentation and embeds that older script
+representation: a versioned complete chunked snapshot/export composition is
+separate required work, not satisfied by a compact default-view link.
+
 ## Build and read a checkpoint
 
 1. Complete the [token inventory](collection-token-inventory.md), including
@@ -104,3 +149,15 @@ artist and entropy boundaries. It exercises burns, interleaved collections,
 maximum script/token data, retry and Safe custody. Complete finality,
 authoritative publication, archival coverage and deployment gas acceptance
 remain separately tracked in the [delivery ledger](../../ops/V1_DELIVERY.md).
+
+Six additional authored chunked cases use actual MetadataV1, Router, immutable
+blobs, DependencyRegistry and Checkpoint, with explicit Core/Artist/inventory/
+entropy boundaries. They cover an independent plan and root, all six component
+families, library-version pinning and independent failures, full bytes, burn and
+Core-freeze stability, actual blob corruption/restoration, payload/entropy
+rollback with retry, and original inline compatibility. The test inherits the
+thirteen bundle cases without changing their setup. The frozen-route bundle
+case also checks stable full historical bytes after pointer replacement and
+burn. These new cases type-check; their native execution is deferred. Selected
+production bytecode generation confirms size fit for ten affected products;
+it does not establish runtime or deployment gas acceptance.

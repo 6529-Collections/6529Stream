@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamChunkedContentEvidence as Chunks } from "./StreamChunkedContentEvidence.sol";
 
 import "../../interfaces/stream/metadata/IStreamMetadataServingFacts.sol";
 import "../../interfaces/stream/metadata/IStreamMetadataRenderingProfile.sol";
@@ -7,7 +8,7 @@ import "../../interfaces/stream/modules/IStreamModule.sol";
 import "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
 import "../../interfaces/stream/finality/StreamFinalityEvidenceTypes.sol";
 
-/// @notice Actual, family-separated source commitments for the stable Router profile.
+/// @notice Actual, family-separated source commitments for explicit stable and chunked Router profiles.
 /// @dev Callers supply constructor-fixed bindings. No routed tokenURI, adapter or provider is read.
 library StreamFinalityRouterEvidence {
     bytes32 internal constant PROFILE = keccak256("6529STREAM_ROUTER_STABLE_PRESENTATION_V1");
@@ -72,6 +73,9 @@ library StreamFinalityRouterEvidence {
         returns (bool frozen, bytes32 dataHash)
     {
         if (!supported(family)) revert RouterEvidenceFamily(family);
+        if (Chunks.selected(c.router, scope.collectionId, c.sourceGas)) {
+            return _chunked(c, family, scope);
+        }
         bytes32 payload;
         if (
             family == StreamFinalityDomains.COMPONENT_RENDER_CONTEXT
@@ -117,6 +121,49 @@ library StreamFinalityRouterEvidence {
             keccak256(abi.encode(DOMAIN, c.chainId, c.core, c.router, family, scope, payload));
     }
 
+    function _chunked(Config memory c, bytes32 family, StreamFinalityScope memory scope)
+        private
+        view
+        returns (bool frozen, bytes32 dataHash)
+    {
+        IStreamMetadataServingFacts.ServingFacts memory f = serving(c, scope.collectionId);
+        if (f.presentationProfile != Chunks.PROFILE) revert RouterEvidenceProfile(c.router);
+        bytes32 payload;
+        if (family == StreamFinalityDomains.COMPONENT_MEDIA_MANIFEST) {
+            frozen = f.mediaLocked && f.baseURILocked;
+            payload = keccak256(abi.encode(f.imageURIHash, f.animationBaseURIHash));
+        } else if (family == StreamFinalityDomains.COMPONENT_METADATA_ROUTER) {
+            (frozen, payload) = _display(c, scope.collectionId, f);
+        } else if (
+            family == StreamFinalityDomains.COMPONENT_RENDERER
+                || family == StreamFinalityDomains.COMPONENT_RENDER_CONTEXT
+        ) {
+            (bytes32 context,) = Chunks.renderer(f, c.readGas);
+            frozen = f.scriptLocked && f.dependenciesLocked;
+            payload = family == StreamFinalityDomains.COMPONENT_RENDERER
+                ? keccak256(abi.encode(f.renderer, f.rendererCodeHash))
+                : keccak256(abi.encode(Chunks.PROFILE, context));
+        } else {
+            bool dependencies = family == StreamFinalityDomains.COMPONENT_DEPENDENCY_SOURCE;
+            Chunks.Evidence memory e = Chunks.source(
+                c.core, c.router, c.chainId, scope.collectionId, f, c.sourceGas, dependencies
+            );
+            frozen = f.scriptLocked && (!dependencies || f.dependenciesLocked);
+            payload = dependencies ? e.dependencyCommitment : e.scriptCommitment;
+        }
+        dataHash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_CHUNKED_ROUTER_COMPONENT_EVIDENCE_V1"),
+                c.chainId,
+                c.core,
+                c.router,
+                family,
+                scope,
+                payload
+            )
+        );
+    }
+
     function serving(Config memory c, uint256 collectionId)
         public
         view
@@ -132,9 +179,12 @@ library StreamFinalityRouterEvidence {
             (IStreamMetadataServingFacts.ServingFacts)
         );
         if (
-            f.presentationProfile != PROFILE
+            (f.presentationProfile != PROFILE && f.presentationProfile != Chunks.PROFILE)
                 || (f.mode != keccak256("ONCHAIN") && f.mode != keccak256("OFFCHAIN"))
-                || f.scriptBytes > 8192 || (f.scriptBytes == 0) != (f.mode == keccak256("OFFCHAIN"))
+                || f.scriptBytes > (f.presentationProfile == PROFILE ? 8192 : 786432)
+                || (f.presentationProfile == Chunks.PROFILE
+                    && (f.mode != keccak256("ONCHAIN") || !f.configured))
+                || (f.scriptBytes == 0) != (f.mode == keccak256("OFFCHAIN"))
         ) {
             revert RouterEvidenceProfile(c.router);
         }
@@ -188,7 +238,7 @@ library StreamFinalityRouterEvidence {
         frozen = f.configured && f.displayMetadataLocked && p.locked;
         payload = keccak256(
             abi.encode(
-                PROFILE,
+                f.presentationProfile,
                 f.configured,
                 f.mode,
                 keccak256(bytes(s.name)),
