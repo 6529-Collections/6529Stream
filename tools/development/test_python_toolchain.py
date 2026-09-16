@@ -51,7 +51,7 @@ steps:
 
 
 def valid_multi_job_ci_workflow() -> str:
-    """Return five pinned Python jobs and the independent client job."""
+    """Return six pinned Python jobs and the independent client job."""
 
     return f"""\
 jobs:
@@ -103,6 +103,17 @@ jobs:
       - run: |
           {checker.LOCK_INSTALL_COMMAND}
           {checker.PIP_CHECK_COMMAND}
+  repository-checks:
+    steps:
+      - uses: actions/setup-python@{checker.SETUP_PYTHON_SHA}
+        with:
+          python-version: "{checker.PYTHON_VERSION}"
+      - uses: foundry-rs/foundry-toolchain@{checker.FOUNDRY_TOOLCHAIN_SHA}
+        with:
+          version: {checker.FOUNDRY_VERSION}
+      - run: |
+          {checker.LOCK_INSTALL_COMMAND}
+          {checker.PIP_CHECK_COMMAND}
   foundry:
     steps:
       - uses: actions/setup-python@{checker.SETUP_PYTHON_SHA}
@@ -115,6 +126,10 @@ jobs:
           {checker.LOCK_INSTALL_COMMAND}
           {checker.PIP_CHECK_COMMAND}
           {checker.PLAYWRIGHT_INSTALL_COMMAND}
+  foundry-result:
+    steps:
+      - run: |
+          echo required-status aggregate
   stream-client:
     steps:
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
@@ -236,7 +251,7 @@ class PythonToolchainTests(unittest.TestCase):
 
         self.assertEqual(checker.check_workflow(Path("workflow.yml"), valid_workflow()), [])
 
-    def test_five_isolated_ci_toolchain_jobs_pass(self) -> None:
+    def test_six_isolated_ci_toolchain_jobs_pass(self) -> None:
         """Each CI job independently installs the same pinned environment."""
 
         self.assertEqual(
@@ -520,6 +535,119 @@ class PythonToolchainTests(unittest.TestCase):
             jobs["foundry"].index("- name: Aggregate size and warning diagnostic"),
         )
         self.assertIn("- name: Canonical release build", jobs["foundry"])
+
+    def test_job_concurrency_does_not_queue_independent_pr_checks_behind_native(self) -> None:
+        workflow = (SCRIPT_PATH.parents[2] / checker.CI_WORKFLOW_PATH).read_text(encoding="utf-8")
+        self.assertNotIn("\nconcurrency:", workflow)
+        jobs = checker.workflow_job_blocks(workflow)
+        groups = set()
+        for name, block in jobs.items():
+            if name == "foundry-result":
+                continue
+            with self.subTest(job=name):
+                header = block.split("    steps:\n", 1)[0]
+                self.assertNotIn("needs:", header)
+                group = next(line.strip() for line in header.splitlines() if "group:" in line)
+                self.assertNotIn(group, groups)
+                groups.add(group)
+                self.assertIn("${{ github.event_name }}-${{ github.ref }}", group)
+                condition = "github.event_name == 'pull_request'"
+                if name in {"current-stack", "foundry"}:
+                    condition += " && !github.event.pull_request.draft"
+                self.assertIn("cancel-in-progress: ${{ " + condition + " }}", header)
+                if name != "current-stack":
+                    self.assertIn("if: github.event_name == 'pull_request' || github.event_name == 'push'", header)
+
+    def test_independent_checks_and_current_export_remain_fail_closed(self) -> None:
+        workflow = (SCRIPT_PATH.parents[2] / checker.CI_WORKFLOW_PATH).read_text(encoding="utf-8")
+        jobs = checker.workflow_job_blocks(workflow)
+        repository = jobs["repository-checks"]
+        for stage in ("Changelog gate", "Repository hygiene", "Current artist extension design and historical runner isolation",
+                      "Historical artist-57 semantic owner matrix", "Historical artist-57 record/event reconstruction",
+                      "Historical artist-57 owner-record continuity", "PowerShell syntax and wrapper runtime"):
+            with self.subTest(stage=stage):
+                self.assertIn("- name: " + stage + "\n", repository)
+                self.assertNotIn("- name: " + stage + "\n", jobs["foundry"])
+        self.assertNotIn("forge build", repository)
+        self.assertIn("if: always()", repository)
+        self.assertIn("name: repository-check-logs", repository)
+        validation = jobs["current-stack"].split("- name: Validate the current compilation\n", 1)[1].split("      - name:", 1)[0]
+        self.assertIn("make current-stack-check", validation)
+        self.assertIn("--output-dir ci-logs/current-candidate --check\n", validation)
+        self.assertEqual(validation.count("generate_current_stack_artifacts"), 1)
+
+    def test_github_expression_operators_are_not_yaml_syntax(self) -> None:
+        expression = "${{ github.event_name == 'pull_request' && !github.event.pull_request.draft }}"
+        base = valid_workflow()
+        self.assertEqual(checker.check_workflow(Path("workflow.yml"), "concurrency:\n  cancel-in-progress: " + expression + "\n" + base), [])
+        for marker in ("&anchor ", "*alias ", "!!str "):
+            with self.subTest(marker=marker):
+                errors = checker.check_workflow(Path("workflow.yml"), "concurrency:\n  cancel-in-progress: " + marker + expression + "\n" + base)
+                self.assertTrue(any("YAML anchors" in error or "YAML tags" in error for error in errors))
+
+    def test_museum_profile_rejects_unpinned_or_incomplete_execution(self) -> None:
+        path = checker.MUSEUM_WORKFLOW_PATH
+        workflow = (SCRIPT_PATH.parents[2] / path).read_text(encoding="utf-8")
+        self.assertEqual(checker.check_workflow(path, workflow), [])
+        changes = (
+            (checker.SETUP_PYTHON_SHA, "v5"),
+            ('python: "3.12.13"', 'python: "3.x"'),
+            ('python: "3.12.10"', 'python: "3.12.13"'),
+            ("contents: read", "contents: write"),
+            ("persist-credentials: false", "persist-credentials: true"),
+            ("--only-binary=:all: -r tools/museum/requirements-jsonld.txt", "PyLD"),
+            ("run: python -m pip check", "run: echo skipped"),
+            ('-s tools/preservation -t . -p "test_*.py"', '-s tools/preservation -t . -p "test_package.py"'),
+            ('-s tools/museum -t . -p "test_*.py"', '-s tools/museum -t . -p "test_authority.py"'),
+            ("      - name: Test offline validation and export\n", "      - name: Test offline validation and export\n        if: false\n"),
+            ("        run: python -m tools.museum.schemas --check", "        continue-on-error: true\n        run: python -m tools.museum.schemas --check"),
+            ('      - "tools/preservation/**"', '      - "never-runs/**"'),
+        )
+        for old, new in changes:
+            with self.subTest(change=new):
+                self.assertIn(old, workflow)
+                self.assertTrue(checker.check_workflow(path, workflow.replace(old, new, 1)))
+
+    def test_required_foundry_status_rejects_failed_cancelled_or_skipped_dependencies(self) -> None:
+        workflow = (SCRIPT_PATH.parents[2] / checker.CI_WORKFLOW_PATH).read_text(encoding="utf-8")
+        jobs = checker.workflow_job_blocks(workflow)
+        gate = jobs["foundry-result"]
+        self.assertEqual(workflow.count("    name: Foundry smoke\n"), 1)
+        self.assertIn("needs: [foundry, repository-checks]", gate)
+        self.assertIn("if: ${{ always() && (github.event_name == 'pull_request' || github.event_name == 'push') }}", gate)
+        self.assertIn("NATIVE_RESULT: ${{ needs.foundry.result }}", gate)
+        self.assertIn("REPOSITORY_RESULT: ${{ needs.repository-checks.result }}", gate)
+        self.assertNotIn("continue-on-error", gate)
+        bash_path = Path("C:/Program Files/Git/bin/bash.exe")
+        bash = str(bash_path) if bash_path.is_file() else shutil.which("bash")
+        if not bash:
+            self.skipTest("Bash is required to execute the required-status gate")
+        commands = "\n".join(line[10:] for line in gate.split("        run: |\n", 1)[1].splitlines())
+        for native in ("success", "failure", "cancelled", "skipped", ""):
+            for repository in ("success", "failure", "cancelled", "skipped", ""):
+                with self.subTest(native=native, repository=repository):
+                    result = subprocess.run([bash, "-c", commands], env=dict(os.environ, NATIVE_RESULT=native, REPOSITORY_RESULT=repository), capture_output=True)
+                    self.assertEqual(result.returncode == 0, native == repository == "success")
+
+    def test_museum_requirements_reject_unpinned_packages_and_external_includes(self) -> None:
+        root = SCRIPT_PATH.parents[2]
+        paths = (*checker.PROVENANCE_PATHS, Path("tools/release/generate_release_checksums.py"))
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = Path(directory)
+            for path in paths:
+                target = fixture / path
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes((root / path).read_bytes())
+            self.assertEqual(checker.check_repository(fixture)[0], [])
+            target = fixture / "tools/museum/requirements-jsonld.txt"
+            original = target.read_text(encoding="utf-8")
+            for altered in (original.replace("PyLD==3.3.0", "PyLD>=3.3.0"),
+                            original.replace("-r requirements.txt", "-r https://example.com/requirements.txt"),
+                            original + "\n--extra-index-url https://example.com\n", ""):
+                with self.subTest(contents=altered):
+                    target.write_text(altered, encoding="utf-8")
+                    self.assertTrue(any("tools/museum/requirements-jsonld.txt" in error
+                                        for error in checker.check_repository(fixture)[0]))
 
     def test_current_cache_recovery_runs_once_only_after_fallback_export_failure(self) -> None:
         git_bash = Path("C:/Program Files/Git/bin/bash.exe")

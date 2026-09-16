@@ -5,6 +5,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Run repository checks independently of native CI builds and cancel superseded
+  PR checks per job, preserving draft native caches and the required combined
+  Foundry status; validate and checksum-cover the separate museum toolchain.
+
 - Add native owner and independent record catalogs with complete per-scope
   histories and authenticated empty lanes, plus bounded Core ownership-history
   capture and replay; genuine native acceptance and full dossier assembly

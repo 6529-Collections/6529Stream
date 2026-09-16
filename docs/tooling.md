@@ -56,12 +56,32 @@ change its inherited text/LF policy or remove trailing spaces from the upstream
 bytes. The complete `.gitattributes` file remains part of the checksum inputs;
 other unsupported attributes still fail validation.
 
-Draft pull requests retain their running CI job when new commits arrive. GitHub
-keeps the newest pending run for that pull request, so repeated integration
-pushes do not keep discarding an unfinished compiler run. Ready pull requests
-still cancel superseded runs. Always associate a result with its tested commit;
-a completed earlier run does not validate the pending revision. This uses
-[GitHub's workflow concurrency behavior](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency).
+CI schedules each job independently. Draft pull requests retain their running
+current/default native jobs so their completed compiler caches survive integration
+pushes; only the newest pending revision waits for each native job. Repository,
+client, Windows, Slither and release-verification jobs cancel superseded PR work
+and can check a new revision while an older native job finishes. Ready pull
+requests cancel superseded native jobs too. Push and manual runs keep separate
+concurrency groups and are not canceled by PR updates. Always associate every
+result with its tested commit; an earlier pass does not validate a new revision.
+This uses [GitHub's job concurrency behavior](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency).
+
+Repository hygiene, historical design checks and wrapper checks run independently
+of the default compiler. The existing required `Foundry smoke` status succeeds
+only when both jobs from that revision succeed; failed, canceled or skipped
+dependencies fail that status. Every PR/main revision still schedules all CI jobs;
+there are no changed-path exemptions from native, Safe, fuzz, gas or release
+gates. Compiler caches remain accelerators: Forge checks current inputs after
+restore, graph preparation authenticates the selected native hosts, and export
+checks bind the current candidate. CI generates that candidate once after the
+build and checks it again after tests without rewriting it. Release Mode and the
+full local release command keep their complete validation sequence.
+
+The Python toolchain policy checks the independent museum workflow's reviewed
+Windows/Linux matrix, action pins, dependency setup and complete offline test
+commands. Its separate requirement files use exact version pins; they do not
+use the release tools' hash lock. Museum workflow and requirement inputs are
+included in release checksum coverage when the frozen bundle is regenerated.
 
 ## Current graph fixture preparation
 

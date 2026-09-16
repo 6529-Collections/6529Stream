@@ -165,7 +165,7 @@ class ReleaseChecksumTests(unittest.TestCase):
     def test_release_tool_trust_policy_has_exact_configured_cardinality(
         self,
     ) -> None:
-        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 373)
+        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 376)
         self.assertEqual(
             len(set(generator.DEFAULT_COVERED_PATHS)),
             len(generator.DEFAULT_COVERED_PATHS),
@@ -3236,6 +3236,9 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path("requirements-tools.txt"),
             Path("requirements-tools.lock"),
             Path(".github/workflows/ci.yml"),
+            Path(".github/workflows/museum.yml"),
+            Path("tools/museum/requirements.txt"),
+            Path("tools/museum/requirements-jsonld.txt"),
             Path(".github/workflows/release-mode.yml"),
             Path("tools/development/check_python_toolchain.py"),
             Path("tools/development/test_python_toolchain.py"),
