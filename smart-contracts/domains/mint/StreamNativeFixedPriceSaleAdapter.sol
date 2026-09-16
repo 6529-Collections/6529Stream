@@ -18,6 +18,9 @@ import "../revenue/StreamNativeSettlementAdmission.sol";
 import "../revenue/StreamNativeSettlementSupport.sol";
 import "../../interfaces/stream/revenue/IStreamNativePrimarySaleSettlement.sol";
 import "../../interfaces/stream/mint/IStreamNativeFixedPriceSaleAdapter.sol";
+import { IStreamBurnMintNativeSale } from "../../interfaces/stream/mint/IStreamBurnMintNativeSale.sol";
+import { StreamNativeBurnCallback } from "./StreamNativeBurnCallback.sol";
+import { StreamNativeSaleMint } from "./StreamNativeSaleMint.sol";
 import "../../interfaces/stream/mint/IStreamNativePriceProgramDomain.sol";
 import "../../interfaces/standards/IERC5267.sol";
 import "../../interfaces/stream/artist/IStreamArtistSaleFacts.sol";
@@ -33,6 +36,7 @@ contract StreamNativeFixedPriceSaleAdapter is
     StreamNativeSurplusHost,
     StreamNativeSaleCreditHost,
     IStreamNativeFixedPriceSaleAdapter,
+    IStreamBurnMintNativeSale,
     IStreamNativePricePrograms,
     IStreamNativePriceProgramDomain,
     IERC5267,
@@ -77,6 +81,8 @@ contract StreamNativeFixedPriceSaleAdapter is
     mapping(bytes32 => mapping(uint256 => bytes32)) public executionIdByNonce;
     mapping(bytes32 => uint8) public executionStatus;
     mapping(bytes32 => PriceProgramRecord) private _pricePrograms;
+    // Appended one-use callback context; no active burn proof survives a completed purchase.
+    StreamNativeBurnCallback.Context private _burnPurchaseContext;
 
     constructor(
         IStreamMintManager manager,
@@ -123,6 +129,7 @@ contract StreamNativeFixedPriceSaleAdapter is
         return id == type(IStreamNativeSaleCredits).interfaceId || id == type(IStreamNativeSurplus).interfaceId || _refundDelegationSupported(id) || id == type(IStreamImmediateSaleReveal).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId
             || id == type(IStreamNativeFixedPriceSaleAdapter).interfaceId
+            || id == type(IStreamBurnMintNativeSale).interfaceId
             || id == type(IStreamNativePricePrograms).interfaceId
             || id == type(IStreamNativePriceProgramDomain).interfaceId
             || id == type(IERC5267).interfaceId || id == type(IStreamArtistSaleFacts).interfaceId
@@ -205,22 +212,14 @@ contract StreamNativeFixedPriceSaleAdapter is
     }
 
     function priceProgramIdFor(uint256 collectionId, bytes32 phaseId, uint8 kind, uint256 nonce)
-        public
+        external
         view
         override
         returns (bytes32)
     {
-        return keccak256(
-            abi.encode(
-                keccak256("6529STREAM_SALE_V1"),
-                block.chainid,
-                address(this),
-                kind,
-                collectionId,
-                phaseId,
-                nonce
-            )
-        );
+        bytes memory out =
+            StreamNativeImmediateSaleWorker.read(_sales, _pricePrograms, core, msg.data);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
     function priceProgramRecord(bytes32 id)
@@ -247,7 +246,9 @@ contract StreamNativeFixedPriceSaleAdapter is
         override
         returns (bytes32)
     {
-        return StreamNativePriceProgram.authorizationDigest(authorization);
+        bytes memory out =
+            StreamNativeImmediateSaleWorker.read(_sales, _pricePrograms, core, msg.data);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
     function previewPriceProgram(PriceProgramExecution calldata e)
@@ -292,14 +293,11 @@ contract StreamNativeFixedPriceSaleAdapter is
             r.escrowed = settled.escrowed;
             _requireRetained(c, e.authorization.artist);
         }
-        (uint256[] memory tokens, bytes32 root, bytes32[] memory ids) =
-            mintManager.executeSingleStepMint(batch, "");
-        if (
-            tokens.length != 1 || tokens[0] == 0 || root != c.operationIdentityCommitment
-                || ids.length != 1 || ids[0] != c.operationId
-        ) revert NativeMintResultInvalid();
+        r.tokenId = StreamNativeSaleMint.execute(
+            mintManager, batch, c.operationIdentityCommitment, c.operationId
+        );
         StreamImmediateSaleReveal.fundAndAttempt(
-            core, c.sale.collectionId, tokens[0], reveal, revealCap
+            core, c.sale.collectionId, r.tokenId, reveal, revealCap
         );
         if (c.sale.amount != 0) {
             _requireRetained(c, e.authorization.artist);
@@ -313,7 +311,6 @@ contract StreamNativeFixedPriceSaleAdapter is
         }
         if (address(this).balance != original + excess) revert NativeSettlementFailed();
         _creditRefund(c.sale.settlementId, c.sale.payer, excess);
-        r.tokenId = tokens[0];
         executionStatus[c.executionBinding.executionId] = 2;
         StreamNativePriceProgram.emitCompletion(e.authorization.saleId, c, r, record.mintedQuantity);
     }
@@ -448,22 +445,14 @@ contract StreamNativeFixedPriceSaleAdapter is
     }
 
     function saleIdFor(uint256 collectionId, bytes32 phaseId, uint256 nonce)
-        public
+        external
         view
         override
         returns (bytes32)
     {
-        return keccak256(
-            abi.encode(
-                keccak256("6529STREAM_SALE_V1"),
-                block.chainid,
-                address(this),
-                uint8(0),
-                collectionId,
-                phaseId,
-                nonce
-            )
-        );
+        bytes memory out =
+            StreamNativeImmediateSaleWorker.read(_sales, _pricePrograms, core, msg.data);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
     function saleRecord(bytes32 id) external view override returns (SaleRecord memory) {
@@ -551,18 +540,54 @@ contract StreamNativeFixedPriceSaleAdapter is
             uint256 tokenId
         )
     {
+        return _purchase(execution, msg.sender, msg.value);
+    }
+
+    function purchaseWithBurn(SaleExecutionData calldata execution, uint256[] calldata sources)
+        external
+        payable
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result, uint256 tokenId)
+    {
+        return StreamNativeBurnCallback.purchase(
+            _burnPurchaseContext, _sales, core, mintManager, msg.data
+        );
+    }
+
+    function executeBurnPurchase(
+        SaleExecutionData memory execution,
+        address buyer,
+        uint256 suppliedValue,
+        uint256[] calldata sources
+    )
+        external
+        override
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result, uint256 tokenId)
+    {
+        StreamNativeBurnCallback.consume(
+            _burnPurchaseContext, _sales, core, mintManager, msg.data
+        );
+        (result, tokenId) = _purchase(execution, buyer, suppliedValue);
+        _burnPurchaseContext.commitment = keccak256(abi.encode(result, tokenId));
+    }
+
+    function _purchase(SaleExecutionData memory execution, address buyer, uint256 suppliedValue)
+        private
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result, uint256 tokenId)
+    {
         (
             StreamNativeSettlementTypes.NativeSettlementCandidate memory c,
             IStreamMintManager.MintBatch memory batch
         ) = _candidate(execution);
-        if (msg.sender != c.sale.payer || msg.sender != c.executor || msg.value < c.sale.amount) {
+        if (buyer != c.sale.payer || buyer != c.executor || suppliedValue < c.sale.amount) {
             revert InvalidNativeSale();
         }
-        uint256 original = address(this).balance - msg.value;
+        uint256 original = address(this).balance - suppliedValue;
         RevealQuote memory reveal = StreamImmediateSaleReveal.quote(core, c.sale.collectionId);
         uint256 revealCap = gasParameter(_REVEAL_GAS);
         uint256 excess =
-            StreamImmediateSaleReveal.preflight(reveal, msg.value - c.sale.amount, revealCap);
+            StreamImmediateSaleReveal.preflight(reveal, suppliedValue - c.sale.amount, revealCap);
         StreamNativeSettlementAdmission.requireAdmission(moduleRegistry, c);
         authorizationUsed[execution.authorization.artist][execution.authorization.nonce] = true;
         executionIdByNonce[execution.authorization.saleId][execution.authorization.executionNonce] =
@@ -579,24 +604,20 @@ contract StreamNativeFixedPriceSaleAdapter is
         );
         result = _settle(c);
         _requireRetained(c, execution.authorization.artist);
-        (uint256[] memory tokens, bytes32 root, bytes32[] memory ids) =
-            mintManager.executeSingleStepMint(batch, "");
-        if (
-            tokens.length != 1 || tokens[0] == 0 || root != c.operationIdentityCommitment
-                || ids.length != 1 || ids[0] != c.operationId
-        ) revert NativeMintResultInvalid();
+        tokenId = StreamNativeSaleMint.execute(
+            mintManager, batch, c.operationIdentityCommitment, c.operationId
+        );
         StreamImmediateSaleReveal.fundAndAttempt(
-            core, c.sale.collectionId, tokens[0], reveal, revealCap
+            core, c.sale.collectionId, tokenId, reveal, revealCap
         );
         _requireRetained(c, execution.authorization.artist);
         if (address(this).balance != original + excess) revert NativeSettlementFailed();
         _creditRefund(c.sale.settlementId, c.sale.payer, excess);
-        tokenId = tokens[0];
         executionStatus[c.executionBinding.executionId] = 2;
         emit NativeSaleExecution(
             execution.authorization.saleId,
             c.executionBinding.executionId,
-            root,
+            c.operationIdentityCommitment,
             1,
             2,
             result.settlementKey,
@@ -611,20 +632,7 @@ contract StreamNativeFixedPriceSaleAdapter is
         _requireSaleContext();
         StreamNativeSettlementAdmission.requireAdmission(moduleRegistry, c);
         _requireConsent(c.sale.settlementId);
-        StreamSaleArtist.requireArtist(
-            artistRegistry, artistRegistryCodeHash, c.sale.collectionId, artist
-        );
-        StreamNativeSettlementSupport.requireCurrent(
-            revenueResolver,
-            c.sale.collectionId,
-            StreamSaleTemplate.Selection(
-                c.rights.profileId,
-                c.rights.wallet,
-                c.rights.templateId,
-                c.rights.assignmentHash,
-                c.rights.entriesHash
-            )
-        );
+        StreamNativeSaleMint.requireRetainedRights(_priceProgramContext(), c, artist);
     }
 
     function _candidate(SaleExecutionData memory e)

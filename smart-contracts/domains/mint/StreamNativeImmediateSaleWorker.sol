@@ -41,6 +41,21 @@ library StreamNativeImmediateSaleWorker {
         bytes calldata data
     ) public view returns (bytes memory) {
         bytes4 selector = bytes4(data[:4]);
+        if (selector == F.saleIdFor.selector) {
+            (uint256 collection, bytes32 phase, uint256 nonce) =
+                abi.decode(data[4:], (uint256, bytes32, uint256));
+            return abi.encode(_id(collection, phase, 0, nonce));
+        }
+        if (selector == P.priceProgramIdFor.selector) {
+            (uint256 collection, bytes32 phase, uint8 kind, uint256 nonce) =
+                abi.decode(data[4:], (uint256, bytes32, uint8, uint256));
+            return abi.encode(_id(collection, phase, kind, nonce));
+        }
+        if (selector == P.priceProgramAuthorizationDigest.selector) {
+            P.PriceProgramAuthorization memory authorization =
+                abi.decode(data[4:], (P.PriceProgramAuthorization));
+            return abi.encode(StreamNativePriceProgram.authorizationDigest(authorization));
+        }
         if (selector == F.authorizationDigest.selector) {
             F.SaleAuthorization memory a = abi.decode(data[4:], (F.SaleAuthorization));
             bytes32 domain = keccak256(
