@@ -18,13 +18,13 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 16 September parallel implementation batch
 
-Source through `fda1d244` includes free-burn reveal credits, original Artist
+Source through `33ddd132` includes free-burn reveal credits, original Artist
 withdrawal61, the native-price adapter size repair, distribution/burn/price
 clients including saved refund-window purchase verification, museum authority reconciliation and expanded actual-current test hosts.
 The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
 records exact handoffs and evidence, superseding older queue descriptions.
 
-All 1,978 Solidity sources pass ABI/type/storage checking. Root passes all 347
+All 1,989 Solidity sources pass ABI/type/storage checking. Root passes all 347
 client tests with generation/build/types, 131 museum authority/profile tests and
 a separate 27-case archival export/publication cohort.
 Separate native cohorts pass mint101, Royalty11, Core29, entropy10, final burn49
@@ -36,11 +36,13 @@ attested against all 312 sources and 351 compiler metadata records. It measures
 24,560 runtime bytes. Dutch/clearing price consumers are integrated as fbacfc7d
 with 26 authored tests and fitting selected products; their runtime acceptance
 and ERC20 consumer implementation remain. Refund-window captured pricing is
-integrated as 08775172: its pinned native cohort passes 76/77 with all 139
-compiled production products fitting. The single failure is a test expecting an
-inactive settlement getter to return zero instead of its intentional revert.
-The test-only correction is integrated as fda1d244 and its focused retry run is
-pending. Original signed authorization and refund accounting remain distinct. Artist
+integrated as 08775172. The original run passes 76/77, with one test incorrectly
+expecting an inactive settlement getter to return zero instead of reverting.
+Test-only correction fda1d244 passes all 14 focused retry cases: 77 distinct
+cases are now accepted across the two runs, with 139 production products fitting.
+Root matches all 291 corrected-capture sources to the exact production/test
+commits. This is a scoped cohort, not latest current-stack acceptance. Original
+signed authorization and refund accounting remain distinct. Artist
 withdrawal has ten authored cases; Royalty successor tests and actual-governance
 burn/Safe tests are authored but await complete current-stack execution.
 
@@ -75,18 +77,25 @@ gas for full JSON, exceeding the fixture's 30m render budget. Increasing a test
 budget is not target-chain acceptance. Pure encoding optimization 9753b496 now
 passes 11 focused cases, including three 256-input fuzz properties. The isolated
 24,576-byte ONCHAIN JSON workload drops from 42.69m to 7.71m gas with identical
-bytes. Root verifies all 14 captured sources. Its full cold Renderer/checkpoint
-transaction benchmark is running separately; no complete capacity claim follows.
+bytes. Root verifies all 14 captured sources. The joined Renderer/checkpoint
+run passes all nine behavior cases plus a scope diagnostic under the high-gas
+harness, but its 24,576-byte append/current paths still cost 35.33m/21.41m gas.
+Every bounded transaction attempt rejects at the complete read-budget guard.
+Pure byte-scan improvements are now assigned; the guard remains unchanged.
 
 Sepolia enforces a 16,777,216 per-transaction gas limit; `eth_call` is separate.
-The pre-optimization workload exceeded that limit; the complete optimized
-checkpoint transaction still needs acceptance. [Ethereum Foundation gas-cap guidance](https://blog.ethereum.org/2025/10/21/fusaka-gascap-update).
+The measured joined workload still exceeds that limit; full checkpoint
+transaction capacity remains unfinished. [Ethereum Foundation gas-cap guidance](https://blog.ethereum.org/2025/10/21/fusaka-gascap-update).
 
 A specification/source reconciliation confirms a remaining implementation gap:
 fixed-price PUBLIC/COMMIT_REVEAL and buyer-bound private sales of selected
 unminted works. The existing curated auction path does not supply these sale
-flows. Parallel work is assigned for sale carriers, shared per-purchase settlement
-and wallet calls; original creation identity and auction replay remain intact.
+flows. Shared per-purchase settlement and full historical private revocation
+are now integrated as 33ddd132, with independent source/ABI/storage review clear.
+All ten selected products fit (Manager 22,694 runtime bytes; recorder 20,128).
+Ten focused cases are authored; runtime remains pending. Parallel sale carriers,
+actual paid-purchase tests and wallet calls continue. Original creation identity,
+purchase/execution domains and auction replay remain intact.
 
 Full current-stack/Safe/fuzz acceptance follows deployable integrated source.
 The optional primary graph-transition proposal is not an adopted launch

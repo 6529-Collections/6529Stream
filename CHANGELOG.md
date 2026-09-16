@@ -5,6 +5,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add per-purchase curated native settlement and full-payload historical private
+  authorization revocation, preserving original identities and auction replay.
+  Extract six stored Manager view encodings to preserve deployment headroom.
+
 - Reduce pure STATIC JSON/HTML encoding gas while preserving exact bytes, with
   frozen-reference differential fuzzing and large-script performance cases.
 

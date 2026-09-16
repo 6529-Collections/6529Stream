@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `fda1d244`: 1,978-source ABI/type/storage pass including exact bundle-return and pure-encoding repairs; root client 347, museum authority/profile 131 and archival export 27 pass. Free-burn credits, Artist withdrawal61, native-price size repair, distribution/burn/price clients STATIC output/gas correction, complete output-hash manifests, Dutch/clearing/refund prices, typed authority capture and expanded current-system tests are integrated. Separate native captures retain their exact source limits. Three Artist/STATIC size blockers, remaining price/authority profiles, Royalty successor consumption and final system acceptance remain. RC1 stays `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
+| Source checkpoint | `33ddd132`: 1,989-source ABI/type/storage pass including curated per-purchase settlement, exact bundle-return and pure-encoding repairs; root client 347, museum authority/profile 131 and archival export 27 pass. Free-burn credits, Artist withdrawal61, native-price size repair, distribution/burn/price clients STATIC output/gas correction, complete output-hash manifests, Dutch/clearing/refund prices, typed authority capture and expanded current-system tests are integrated. Separate native captures retain their exact source limits. Three Artist/STATIC size blockers, remaining price/authority profiles, Royalty successor consumption and final system acceptance remain. RC1 stays `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -40,8 +40,8 @@ ownership assignments where it transfers a queue.
 
 | Lead | Owned feature group and next queue | Shared boundaries |
 | --- | --- | --- |
-| Artist authority | Held Artist proposals await their specific approval; currently improving pure STATIC encoding with exact-output parity/fuzz tests | Own only StreamStaticRenderEncoding and StreamRenderContextV1 in the active performance branch; preserve isolated Artist work. |
-| Commerce and revenue | Economic Resolver continuity and shared per-purchase curated admission/settlement; exact canonical Ledger authorization/revocation | Own shared revenue/prepared-content libraries and interfaces; coordinate selected-work sale carriers with the mint task. Held Royalty proposal remains unapplied. |
+| Artist authority | Held Artist proposals remain isolated; pure encoding is integrated, and full STATIC checkpoint capacity is the active build | Own coordinated ContentBytes, Context.scriptText and StaticText byte scans; preserve exact outputs and the full read-budget guard. |
+| Commerce and revenue | Shared curated admission/settlement and revocation are integrated as 33ddd132; complete actual recorder/carrier replay and rollback tests next | Own shared revenue/prepared-content libraries and interfaces; coordinate selected-work sale carriers with the mint task. Held Royalty proposal remains unapplied. |
 | Metadata, records and museum | Onchain STATIC rendering, metadata/records/preservation and finality producers | Own onchain metadata interfaces/contracts/tests; the visible museum task owns offchain semantics. |
 | Root integrator | Shared Core/entropy interfaces, economic pointer checks, integrated source and final candidate acceptance | Coordinate all feature tasks, independent review, release and testnet. |
 
