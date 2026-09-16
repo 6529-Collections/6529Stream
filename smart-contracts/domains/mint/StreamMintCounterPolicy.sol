@@ -115,13 +115,13 @@ library StreamMintCounterPolicy {
         );
     }
 
-    /// @notice Fails closed until a standard mint sale path consumes authenticated leaf prices.
+    /// @notice Rejects an undeclared value; enabled prices are interpreted only by sale consumers.
     function validateSupportedPrice(
         bytes32 counterId,
         address account,
         IStreamMintCounterPolicy.AllowlistProof memory proof
     ) internal pure {
-        if (proof.hasPriceOverride || proof.priceOverride != 0) {
+        if (!proof.hasPriceOverride && proof.priceOverride != 0) {
             revert IStreamMintCounterPolicy.MintAllowlistPriceOverrideUnsupported(
                 counterId, account, proof.hasPriceOverride, proof.priceOverride
             );

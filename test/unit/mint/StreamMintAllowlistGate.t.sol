@@ -84,18 +84,18 @@ contract StreamMintAllowlistGateTest is MintEngineTestBase {
         _configure(gate, IStreamMintManager.CounterKeyMode.PAYER, cap);
     }
 
-    function _pricedRecipientGate(bool hasPriceOverride, uint256 priceOverride)
+    function _pricedRecipientGate(bool hasPriceOverride, uint256 priceOverride, uint64 cap)
         private
         returns (StreamMintAllowlistGate gate, IStreamMintCounterPolicy.AllowlistProof memory proof)
     {
-        proof = _proof(1);
+        proof = _proof(cap);
         proof.hasPriceOverride = hasPriceOverride;
         proof.priceOverride = priceOverride;
         bytes32 root = StreamMintCounterPolicy.allowlistLeaf(
             address(manager), COLLECTION, ALLOW_PHASE, ALLOWLIST, ALICE, proof
         );
         gate = new StreamMintAllowlistGate(root, ALLOWLIST);
-        _configure(gate, IStreamMintManager.CounterKeyMode.RECIPIENT, 1);
+        _configure(gate, IStreamMintManager.CounterKeyMode.RECIPIENT, cap);
     }
 
     function _configure(
@@ -207,6 +207,14 @@ contract StreamMintAllowlistGateTest is MintEngineTestBase {
         view
         returns (uint64)
     {
+        return ledger.counterValue(_counterValueKey(id, account, keyMode));
+    }
+
+    function _counterValueKey(
+        bytes32 id,
+        address account,
+        IStreamMintManager.CounterKeyMode keyMode
+    ) private view returns (bytes32) {
         bytes32 subject = manager.previewSubjectKey(
             keyMode,
             COLLECTION,
@@ -218,10 +226,7 @@ contract StreamMintAllowlistGateTest is MintEngineTestBase {
             address(0),
             keccak256("allowlist context")
         );
-        return
-            ledger.counterValue(
-                manager.previewCounterValueKey(COLLECTION, ALLOW_PHASE, id, subject)
-            );
+        return manager.previewCounterValueKey(COLLECTION, ALLOW_PHASE, id, subject);
     }
 
     function _nullifier(StreamMintAllowlistGate gate, bytes32 nonce)
@@ -404,25 +409,20 @@ contract StreamMintAllowlistGateTest is MintEngineTestBase {
         );
     }
 
-    function _assertPriceOverrideUnsupported(
-        bool hasPriceOverride,
-        uint256 priceOverride,
-        bytes32 nonce
-    ) private {
+    function testInconsistentPricePayloadFailsClosedWithoutReplayOrCounterWrites() public {
+        bytes32 nonce = keccak256("inconsistent price nonce");
         (StreamMintAllowlistGate gate, IStreamMintCounterPolicy.AllowlistProof memory proof) =
-            _pricedRecipientGate(hasPriceOverride, priceOverride);
+            _pricedRecipientGate(false, 1, 1);
         IStreamMintManager.MintBatch memory b = _batch(_one(ALICE));
         b.resolverData = _resolver(_singleProof(proof));
-        b.authorizationId = keccak256(
-            abi.encode("unsupported allowlist price", hasPriceOverride, priceOverride, nonce)
-        );
+        b.authorizationId = keccak256("inconsistent allowlist price");
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamMintCounterPolicy.MintAllowlistPriceOverrideUnsupported.selector,
                 ALLOWLIST,
                 ALICE,
-                hasPriceOverride,
-                priceOverride
+                false,
+                uint256(1)
             )
         );
         gate.previewAuthorizationId(address(manager), address(this), b, nonce);
@@ -438,16 +438,150 @@ contract StreamMintAllowlistGateTest is MintEngineTestBase {
                 && !manager.isAuthorizationUsed(b.authorizationId)
                 && !manager.isNullifierUsed(_nullifier(gate, nonce))
                 && _value(ALICE, IStreamMintManager.CounterKeyMode.RECIPIENT) == 0,
-            "priced gate proof wrote state"
+            "inconsistent gate price wrote state"
         );
     }
 
-    function testFreePriceOverrideFailsClosedWithoutReplayOrCounterWrites() public {
-        _assertPriceOverrideUnsupported(true, 0, keccak256("free override nonce"));
+    function _assertAuthenticatedGatePricePreservesAccounting(uint256 price) private {
+        (StreamMintAllowlistGate gate, IStreamMintCounterPolicy.AllowlistProof memory proof) =
+            _pricedRecipientGate(true, price, 2);
+        IStreamMintManager.MintBatch memory first = _batch(_one(ALICE));
+        first.resolverData = _resolver(_singleProof(proof));
+        bytes32 nonce = keccak256("authenticated price nonce");
+        first = _authorize(gate, first, nonce);
+        IStreamMintGate.GateResult memory result = _directResult(gate, first, nonce);
+        bytes32[] memory leaves = new bytes32[](1);
+        leaves[0] = StreamMintCounterPolicy.allowlistLeaf(
+            address(manager), COLLECTION, ALLOW_PHASE, ALLOWLIST, ALICE, proof
+        );
+        require(
+            result.gateHash
+                == keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_MINT_ALLOWLIST_GATE_RESULT_V1"),
+                        gate.gateConfigHash(),
+                        first.authorizationId,
+                        keccak256(
+                            abi.encode(
+                                keccak256("6529STREAM_MINT_ALLOWLIST_GATE_LEAVES_V1"), leaves
+                            )
+                        )
+                    )
+                ),
+            "price leaf missing from gate result"
+        );
+        (bytes32 root,) = manager.previewSingleStepMintOperation(first, abi.encode(nonce));
+        manager.executeSingleStepMint(first, abi.encode(nonce));
+        require(
+            core.minted() == 1 && manager.nextOperationNonce() == 1
+                && manager.isAuthorizationUsed(first.authorizationId)
+                && manager.isNullifierUsed(_nullifier(gate, nonce))
+                && manager.isOperationRootUsed(root)
+                && _value(ALICE, IStreamMintManager.CounterKeyMode.RECIPIENT) == 1,
+            "price changed gate accounting"
+        );
+
+        IStreamMintManager.MintBatch memory replay = _batch(_one(ALICE));
+        replay.resolverData = _resolver(_singleProof(proof));
+        replay.contextHash = keccak256("priced replay changed context");
+        replay = _authorize(gate, replay, nonce);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamMintLedger.NullifierAlreadyConsumed.selector, _nullifier(gate, nonce)
+            )
+        );
+        manager.executeSingleStepMint(replay, abi.encode(nonce));
+        require(
+            !manager.isAuthorizationUsed(replay.authorizationId) && core.minted() == 1
+                && manager.nextOperationNonce() == 1,
+            "price bypassed gate nonce"
+        );
+
+        bytes32 secondNonce = keccak256("second priced nonce");
+        replay = _authorize(gate, replay, secondNonce);
+        manager.executeSingleStepMint(replay, abi.encode(secondNonce));
+        bytes32 thirdNonce = keccak256("third priced nonce");
+        IStreamMintManager.MintBatch memory over = _authorize(gate, replay, thirdNonce);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamMintLedger.CounterCapExceeded.selector,
+                _counterValueKey(ALLOWLIST, ALICE, IStreamMintManager.CounterKeyMode.RECIPIENT),
+                uint256(3),
+                uint256(2)
+            )
+        );
+        manager.executeSingleStepMint(over, abi.encode(thirdNonce));
+        require(
+            core.minted() == 2 && manager.nextOperationNonce() == 2
+                && _value(ALICE, IStreamMintManager.CounterKeyMode.RECIPIENT) == 2
+                && !manager.isAuthorizationUsed(over.authorizationId)
+                && !manager.isNullifierUsed(_nullifier(gate, thirdNonce)),
+            "price bypassed gate leaf cap"
+        );
     }
 
-    function testInconsistentPricePayloadFailsClosedWithoutReplayOrCounterWrites() public {
-        _assertPriceOverrideUnsupported(false, 1, keccak256("inconsistent price nonce"));
+    function testAuthenticatedZeroPricePreservesGateAccountingAndNonceReplay() public {
+        _assertAuthenticatedGatePricePreservesAccounting(0);
+    }
+
+    function testAuthenticatedNonzeroPricePreservesGateAccountingAndNonceReplay() public {
+        _assertAuthenticatedGatePricePreservesAccounting(17);
+    }
+
+    function testAuthenticatedFullWidthPricePreservesGateAccountingAndNonceReplay() public {
+        _assertAuthenticatedGatePricePreservesAccounting(type(uint256).max);
+    }
+
+    function testPriceAndEnabledFlagTamperingRejectWithoutReplayOrCounterWrites() public {
+        (StreamMintAllowlistGate gate, IStreamMintCounterPolicy.AllowlistProof memory proof) =
+            _pricedRecipientGate(true, 17, 1);
+        IStreamMintManager.MintBatch memory b = _batch(_one(ALICE));
+        bytes32 nonce = keccak256("tampered price nonce");
+        b.resolverData = _resolver(_singleProof(proof));
+        b = _authorize(gate, b, nonce);
+        proof.priceOverride = 18;
+        b.resolverData = _resolver(_singleProof(proof));
+        _assertTamperedGatePriceRejected(gate, b, nonce);
+        proof.hasPriceOverride = false;
+        proof.priceOverride = 0;
+        b.resolverData = _resolver(_singleProof(proof));
+        _assertTamperedGatePriceRejected(gate, b, nonce);
+
+        proof.hasPriceOverride = true;
+        proof.priceOverride = 17;
+        b.resolverData = _resolver(_singleProof(proof));
+        manager.executeSingleStepMint(b, abi.encode(nonce));
+        require(
+            core.minted() == 1 && manager.isAuthorizationUsed(b.authorizationId)
+                && manager.isNullifierUsed(_nullifier(gate, nonce)),
+            "valid priced gate retry"
+        );
+    }
+
+    function _assertTamperedGatePriceRejected(
+        StreamMintAllowlistGate gate,
+        IStreamMintManager.MintBatch memory b,
+        bytes32 nonce
+    ) private {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamMintCounterPolicy.MintAllowlistProofInvalid.selector, ALLOWLIST, ALICE
+            )
+        );
+        gate.previewAuthorizationId(address(manager), address(this), b, nonce);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamMintGateValidator.MintGateCallFailed.selector, address(gate)
+            )
+        );
+        manager.executeSingleStepMint(b, abi.encode(nonce));
+        require(
+            core.minted() == 0 && manager.nextOperationNonce() == 0
+                && !manager.isAuthorizationUsed(b.authorizationId)
+                && !manager.isNullifierUsed(_nullifier(gate, nonce))
+                && _value(ALICE, IStreamMintManager.CounterKeyMode.RECIPIENT) == 0,
+            "tampered gate price wrote state"
+        );
     }
 
     function testProofGroupsFollowConfiguredMerkleCounterOrder() public {

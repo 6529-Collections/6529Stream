@@ -1,7 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import { StreamNativeSaleCreditHost, StreamNativeSaleCreditReads, IStreamNativeSaleCredits } from "./StreamNativeSaleCreditHost.sol";
-import { StreamNativeSurplusHost, StreamNativeSurplus, IStreamNativeSurplus } from "./StreamNativeSurplusHost.sol";
+import {
+    StreamNativeSaleCreditHost,
+    StreamNativeSaleCreditReads,
+    IStreamNativeSaleCredits
+} from "./StreamNativeSaleCreditHost.sol";
+import {
+    StreamNativeSurplusHost,
+    StreamNativeSurplus,
+    IStreamNativeSurplus
+} from "./StreamNativeSurplusHost.sol";
 import { StreamNativeImmediateSaleWorker } from "./StreamNativeImmediateSaleWorker.sol";
 import "./StreamNativeRefundDelegation.sol";
 
@@ -18,7 +26,9 @@ import "../revenue/StreamNativeSettlementAdmission.sol";
 import "../revenue/StreamNativeSettlementSupport.sol";
 import "../../interfaces/stream/revenue/IStreamNativePrimarySaleSettlement.sol";
 import "../../interfaces/stream/mint/IStreamNativeFixedPriceSaleAdapter.sol";
-import { IStreamBurnMintNativeSale } from "../../interfaces/stream/mint/IStreamBurnMintNativeSale.sol";
+import {
+    IStreamBurnMintNativeSale
+} from "../../interfaces/stream/mint/IStreamBurnMintNativeSale.sol";
 import { StreamNativeBurnCallback } from "./StreamNativeBurnCallback.sol";
 import { StreamNativeSaleMint } from "./StreamNativeSaleMint.sol";
 import "../../interfaces/stream/mint/IStreamNativePriceProgramDomain.sol";
@@ -38,6 +48,7 @@ contract StreamNativeFixedPriceSaleAdapter is
     IStreamNativeFixedPriceSaleAdapter,
     IStreamBurnMintNativeSale,
     IStreamNativePricePrograms,
+    IStreamNativeAllowlistPricePrograms,
     IStreamNativePriceProgramDomain,
     IERC5267,
     IStreamArtistSaleFacts,
@@ -83,6 +94,7 @@ contract StreamNativeFixedPriceSaleAdapter is
     mapping(bytes32 => PriceProgramRecord) private _pricePrograms;
     // Appended one-use callback context; no active burn proof survives a completed purchase.
     StreamNativeBurnCallback.Context private _burnPurchaseContext;
+    mapping(bytes32 => AllowlistPricePolicy) private _allowlistPricePolicies;
 
     constructor(
         IStreamMintManager manager,
@@ -126,11 +138,14 @@ contract StreamNativeFixedPriceSaleAdapter is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return id == type(IStreamNativeSaleCredits).interfaceId || id == type(IStreamNativeSurplus).interfaceId || _refundDelegationSupported(id) || id == type(IStreamImmediateSaleReveal).interfaceId
+        return id == type(IStreamNativeSaleCredits).interfaceId
+            || id == type(IStreamNativeSurplus).interfaceId || _refundDelegationSupported(id)
+            || id == type(IStreamImmediateSaleReveal).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId
             || id == type(IStreamNativeFixedPriceSaleAdapter).interfaceId
             || id == type(IStreamBurnMintNativeSale).interfaceId
             || id == type(IStreamNativePricePrograms).interfaceId
+            || id == type(IStreamNativeAllowlistPricePrograms).interfaceId
             || id == type(IStreamNativePriceProgramDomain).interfaceId
             || id == type(IERC5267).interfaceId || id == type(IStreamArtistSaleFacts).interfaceId
             || id == type(IStreamNativeSaleBinding).interfaceId || super.supportsInterface(id);
@@ -211,6 +226,54 @@ contract StreamNativeFixedPriceSaleAdapter is
         ++nextSaleNonce;
     }
 
+    function registerAllowlistPriceProgram(
+        PriceProgramConfig calldata config,
+        AllowlistPricePolicy calldata policy
+    ) external override onlyOwner nonReentrant returns (bytes32 id) {
+        _requireRefundDelegationManifest();
+        _requireSaleContext();
+        id = StreamNativeImmediateSaleWorker.registerAllowlistProgram(
+            _pricePrograms,
+            _allowlistPricePolicies,
+            _priceProgramContext(),
+            core,
+            moduleRegistry,
+            config,
+            policy,
+            nextSaleNonce
+        );
+        ++nextSaleNonce;
+    }
+
+    function allowlistPricePolicy(bytes32 id)
+        external
+        view
+        override
+        returns (AllowlistPricePolicy memory)
+    {
+        return _allowlistPricePolicies[id];
+    }
+
+    function previewAllowlistPriceProgram(
+        PriceProgramExecution calldata e,
+        bytes calldata resolverData
+    ) external view override returns (PriceProgramResult memory) {
+        if (_allowlistPricePolicies[e.authorization.saleId].counterId == 0) revert InvalidAllowlistPricePolicy();
+        (StreamNativeSettlementTypes.NativeSettlementCandidate memory c,) =
+            _preparePriceProgram(e, resolverData);
+        return _priceProgramResult(c);
+    }
+
+    function executeAllowlistPriceProgram(
+        PriceProgramExecution calldata e,
+        bytes calldata resolverData
+    ) external payable override nonReentrant returns (PriceProgramResult memory) {
+        if (_allowlistPricePolicies[e.authorization.saleId].counterId == 0) {
+            revert InvalidAllowlistPricePolicy();
+        }
+        return _executePriceProgram(e, resolverData);
+    }
+
     function priceProgramIdFor(uint256 collectionId, bytes32 phaseId, uint8 kind, uint256 nonce)
         external
         view
@@ -257,7 +320,8 @@ contract StreamNativeFixedPriceSaleAdapter is
         override
         returns (PriceProgramResult memory r)
     {
-        (StreamNativeSettlementTypes.NativeSettlementCandidate memory c,) = _preparePriceProgram(e);
+        (StreamNativeSettlementTypes.NativeSettlementCandidate memory c,) =
+            _preparePriceProgram(e, "");
         return _priceProgramResult(c);
     }
 
@@ -268,10 +332,17 @@ contract StreamNativeFixedPriceSaleAdapter is
         nonReentrant
         returns (PriceProgramResult memory r)
     {
+        return _executePriceProgram(e, "");
+    }
+
+    function _executePriceProgram(PriceProgramExecution calldata e, bytes memory resolverData)
+        private
+        returns (PriceProgramResult memory r)
+    {
         (
             StreamNativeSettlementTypes.NativeSettlementCandidate memory c,
             IStreamMintManager.MintBatch memory batch
-        ) = _preparePriceProgram(e);
+        ) = _preparePriceProgram(e, resolverData);
         if (msg.sender != c.sale.payer || msg.sender != c.executor || msg.value < c.sale.amount) {
             revert InvalidNativePriceProgram();
         }
@@ -380,7 +451,7 @@ contract StreamNativeFixedPriceSaleAdapter is
         emit SalePaymentExcessCredited(1, id, payer, excess);
     }
 
-    function _preparePriceProgram(PriceProgramExecution calldata e)
+    function _preparePriceProgram(PriceProgramExecution calldata e, bytes memory resolverData)
         private
         view
         returns (
@@ -399,9 +470,22 @@ contract StreamNativeFixedPriceSaleAdapter is
         if (executionIdByNonce[e.authorization.saleId][e.authorization.executionNonce] != 0) {
             revert NativeExecutionUsed(e.authorization.saleId, e.authorization.executionNonce);
         }
-        (c, batch) = StreamNativePriceProgram.prepare(
-            _priceProgramContext(), _pricePrograms[e.authorization.saleId], e, paused
-        );
+        AllowlistPricePolicy memory policy = _allowlistPricePolicies[e.authorization.saleId];
+        if (policy.counterId == 0) {
+            if (resolverData.length != 0) revert InvalidAllowlistPricePolicy();
+            (c, batch) = StreamNativePriceProgram.prepare(
+                _priceProgramContext(), _pricePrograms[e.authorization.saleId], e, paused
+            );
+        } else {
+            (c, batch) = StreamNativePriceProgram.prepareAllowlist(
+                _priceProgramContext(),
+                _pricePrograms[e.authorization.saleId],
+                e,
+                paused,
+                policy,
+                resolverData
+            );
+        }
         StreamNativeSettlementAdmission.requireAdmission(moduleRegistry, c);
     }
 
@@ -548,7 +632,10 @@ contract StreamNativeFixedPriceSaleAdapter is
         payable
         override
         nonReentrant
-        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result, uint256 tokenId)
+        returns (
+            StreamPrimarySettlementTypes.PrimarySettlementResult memory result,
+            uint256 tokenId
+        )
     {
         return StreamNativeBurnCallback.purchase(
             _burnPurchaseContext, _sales, core, mintManager, msg.data
@@ -563,18 +650,22 @@ contract StreamNativeFixedPriceSaleAdapter is
     )
         external
         override
-        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result, uint256 tokenId)
+        returns (
+            StreamPrimarySettlementTypes.PrimarySettlementResult memory result,
+            uint256 tokenId
+        )
     {
-        StreamNativeBurnCallback.consume(
-            _burnPurchaseContext, _sales, core, mintManager, msg.data
-        );
+        StreamNativeBurnCallback.consume(_burnPurchaseContext, _sales, core, mintManager, msg.data);
         (result, tokenId) = _purchase(execution, buyer, suppliedValue);
         _burnPurchaseContext.commitment = keccak256(abi.encode(result, tokenId));
     }
 
     function _purchase(SaleExecutionData memory execution, address buyer, uint256 suppliedValue)
         private
-        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result, uint256 tokenId)
+        returns (
+            StreamPrimarySettlementTypes.PrimarySettlementResult memory result,
+            uint256 tokenId
+        )
     {
         (
             StreamNativeSettlementTypes.NativeSettlementCandidate memory c,
@@ -681,12 +772,21 @@ contract StreamNativeFixedPriceSaleAdapter is
     }
 
     function sweepNativeSurplus(uint256 amount, bytes32 reasonHash)
-        external override nonReentrant returns (uint256)
+        external
+        override
+        nonReentrant
+        returns (uint256)
     {
         return _sweepNativeSurplus(amount, reasonHash);
     }
-    function _nativeSurplusOwed() internal view override returns (uint256) { return refundLiability; }
+
+    function _nativeSurplusOwed() internal view override returns (uint256) {
+        return refundLiability;
+    }
+
     function _nativeSaleCreditRead() internal view override returns (bytes memory) {
-        return StreamNativeSaleCreditReads.fixedRead(_refunds, _refundSales, _refundPayers, refundLiability, msg.data);
+        return StreamNativeSaleCreditReads.fixedRead(
+            _refunds, _refundSales, _refundPayers, refundLiability, msg.data
+        );
     }
 }

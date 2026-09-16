@@ -228,24 +228,85 @@ library StreamNativeImmediateSaleWorker {
             lifecycle.saleAdapterRegistryRevision
         );
     }
+    event NativeAllowlistPricePolicy(
+        bytes32 indexed saleId,
+        bytes32 indexed counterId,
+        uint16 schemaVersion,
+        bool allowFree,
+        bytes32 saleConfigHash
+    );
+
+    function registerAllowlistProgram(
+        mapping(bytes32 => P.PriceProgramRecord) storage programs,
+        mapping(
+            bytes32 => IStreamNativeAllowlistPricePrograms.AllowlistPricePolicy
+        ) storage policies,
+        StreamNativePriceProgram.Context memory context,
+        address core,
+        address modules,
+        P.PriceProgramConfig memory config,
+        IStreamNativeAllowlistPricePrograms.AllowlistPricePolicy memory policy,
+        uint256 nonce
+    ) public returns (bytes32 id) {
+        if (policy.counterId == 0 || (policy.allowFree && config.kind != 0 && config.kind != 1)) {
+            revert IStreamNativeAllowlistPricePrograms.InvalidAllowlistPricePolicy();
+        }
+        StreamMintSaleAllowlist.validatePolicy(
+            address(context.manager), config.collectionId, config.phaseId, policy.counterId
+        );
+        StreamNativePriceProgram.validateConfig(context, config);
+        StreamImmediateSaleReveal.quote(core, config.collectionId);
+        StreamNativeSettlementTypes.SaleLifecycleBinding memory lifecycle =
+            StreamNativeSettlementAdmission.capture(modules, address(this));
+        id = _id(config.collectionId, config.phaseId, config.kind, nonce);
+        bytes32 originalHash = keccak256(
+            abi.encode(keccak256("6529STREAM_NATIVE_PRICE_PROGRAM_CONFIG_V1"), id, config)
+        );
+        bytes32 hash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_NATIVE_ALLOWLIST_PRICE_PROGRAM_CONFIG_V1"),
+                originalHash,
+                policy
+            )
+        );
+        programs[id] = P.PriceProgramRecord(config, nonce, hash, lifecycle, 0, false);
+        policies[id] = policy;
+        emit NativePriceProgramConfigured(
+            id,
+            1,
+            nonce,
+            hash,
+            config,
+            lifecycle.saleCreatedAt,
+            lifecycle.saleAdapterRegistryRevision
+        );
+        emit NativeAllowlistPricePolicy(id, policy.counterId, 1, policy.allowFree, hash);
+    }
+
     error InvalidSettlementContext(address target);
 
     /// @dev Original host immutable getters, fixed self-read only. External dependency checks
     /// retain the original Registry -> Resolver -> Factory -> Recorder -> Manager order.
     function requireContext() public view {
         StreamSettlementAdmission.requireRegistry(
-            address(uint160(_contextWord("core()"))), bytes32(_contextWord("coreCodeHash()")),
-            address(uint160(_contextWord("moduleRegistry()"))), bytes32(_contextWord("moduleRegistryCodeHash()"))
+            address(uint160(_contextWord("core()"))),
+            bytes32(_contextWord("coreCodeHash()")),
+            address(uint160(_contextWord("moduleRegistry()"))),
+            bytes32(_contextWord("moduleRegistryCodeHash()"))
         );
         _requireCode("revenueResolver()", "resolverCodeHash()");
         _requireCode("splitFactory()", "factoryCodeHash()");
         _requireCode("primarySaleSettlement()", "settlementCodeHash()");
         _requireCode("mintManager()", "mintManagerCodeHash()");
     }
+
     function _requireCode(string memory getter, string memory hashGetter) private view {
         address target = address(uint160(_contextWord(getter)));
-        if (target.codehash != bytes32(_contextWord(hashGetter))) revert InvalidSettlementContext(target);
+        if (target.codehash != bytes32(_contextWord(hashGetter))) {
+            revert InvalidSettlementContext(target);
+        }
     }
+
     function _contextWord(string memory getter) private view returns (uint256 word) {
         bytes memory data = abi.encodeWithSelector(bytes4(keccak256(bytes(getter))));
         bool ok;

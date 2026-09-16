@@ -7,6 +7,8 @@ import "../../interfaces/stream/mint/IStreamNativeFixedPriceSaleAdapter.sol";
 import "../revenue/StreamNativeSettlementHash.sol";
 import "../revenue/StreamNativeSettlementSupport.sol";
 import "./StreamSaleArtist.sol";
+import "./StreamMintSaleAllowlist.sol";
+import "../../interfaces/stream/mint/IStreamNativeAllowlistPricePrograms.sol";
 import "../revenue/StreamPrimarySettlementHash.sol";
 import "../../interfaces/stream/revenue/IStreamNativePrimarySaleSettlement.sol";
 import "../../interfaces/stream/revenue/IStreamPrimarySaleSettlement.sol";
@@ -96,6 +98,46 @@ library StreamNativePriceProgram {
             IStreamMintManager.MintBatch memory batch
         )
     {
+        IStreamNativeAllowlistPricePrograms.AllowlistPricePolicy memory policy;
+        return _prepare(x, record, e, paused, policy, "");
+    }
+
+    function prepareAllowlist(
+        Context memory x,
+        IStreamNativePricePrograms.PriceProgramRecord memory record,
+        IStreamNativePricePrograms.PriceProgramExecution memory e,
+        bool paused,
+        IStreamNativeAllowlistPricePrograms.AllowlistPricePolicy memory policy,
+        bytes memory resolverData
+    )
+        public
+        view
+        returns (
+            StreamNativeSettlementTypes.NativeSettlementCandidate memory c,
+            IStreamMintManager.MintBatch memory batch
+        )
+    {
+        if (policy.counterId == 0) {
+            revert IStreamNativeAllowlistPricePrograms.InvalidAllowlistPricePolicy();
+        }
+        return _prepare(x, record, e, paused, policy, resolverData);
+    }
+
+    function _prepare(
+        Context memory x,
+        IStreamNativePricePrograms.PriceProgramRecord memory record,
+        IStreamNativePricePrograms.PriceProgramExecution memory e,
+        bool paused,
+        IStreamNativeAllowlistPricePrograms.AllowlistPricePolicy memory policy,
+        bytes memory resolverData
+    )
+        private
+        view
+        returns (
+            StreamNativeSettlementTypes.NativeSettlementCandidate memory c,
+            IStreamMintManager.MintBatch memory batch
+        )
+    {
         IStreamNativePricePrograms.PriceProgramAuthorization memory a = e.authorization;
         IStreamNativePricePrograms.PriceProgramConfig memory config = record.config;
         if (
@@ -113,17 +155,7 @@ library StreamNativePriceProgram {
         ) {
             revert IStreamNativePricePrograms.InvalidNativePriceProgram();
         }
-        uint256 minimum = config.minUnitPrice;
-        if (config.kind == 13) {
-            if (a.unitPrice > minimum) minimum = a.unitPrice;
-        } else if (a.unitPrice != minimum) {
-            revert IStreamNativePricePrograms.InvalidNativePriceProgram();
-        }
-        if (e.chosenUnitPrice < minimum || e.chosenUnitPrice > config.maxUnitPrice) {
-            revert IStreamNativePricePrograms.NativePriceOutsideBand(
-                e.chosenUnitPrice, minimum, config.maxUnitPrice
-            );
-        }
+        _requirePrice(x.manager, config, e, policy, resolverData);
         if (config.kind == 12 && a.expectedPrimaryPolicyHash != 0) {
             revert IStreamNativePricePrograms.InvalidNativePriceProgram();
         }
@@ -183,7 +215,9 @@ library StreamNativePriceProgram {
                 rights.entriesHash
             );
         }
-        c.saleExecutionHash = keccak256(abi.encode(e));
+        c.saleExecutionHash = policy.counterId == 0
+            ? keccak256(abi.encode(e))
+            : keccak256(abi.encode(e, resolverData));
         batch.collectionId = config.collectionId;
         batch.phaseId = config.phaseId;
         batch.payer = a.payer;
@@ -199,6 +233,7 @@ library StreamNativePriceProgram {
         batch.authorizationId =
             keccak256(abi.encode(keccak256("6529STREAM_MINT_TICKET_AUTHORIZATION_V1"), digest));
         batch.contextHash = digest;
+        batch.resolverData = resolverData;
         bytes32[] memory ids;
         (c.operationIdentityCommitment, ids) =
             IStreamMintReads(address(x.manager)).previewSingleStepMintOperation(batch, "");
@@ -208,6 +243,58 @@ library StreamNativePriceProgram {
         c.operationId = ids[0];
         c.executionBinding.executionId = StreamNativeSettlementHash.executionId(c);
     }
+
+    function _requirePrice(
+        IStreamMintManager manager,
+        IStreamNativePricePrograms.PriceProgramConfig memory config,
+        IStreamNativePricePrograms.PriceProgramExecution memory e,
+        IStreamNativeAllowlistPricePrograms.AllowlistPricePolicy memory policy,
+        bytes memory resolverData
+    ) private view {
+        bool overridden;
+        uint256 price;
+        if (policy.counterId != 0) {
+            (overridden, price) = StreamMintSaleAllowlist.price(
+                address(manager),
+                config.collectionId,
+                config.phaseId,
+                e.authorization.payer,
+                e.authorization.recipient,
+                resolverData,
+                policy.counterId
+            );
+        }
+        uint256 minimum = config.minUnitPrice;
+        uint256 maximum = config.maxUnitPrice;
+        if (config.kind == 13) {
+            uint256 authorizedMinimum = overridden ? price : e.authorization.unitPrice;
+            if (authorizedMinimum > minimum) minimum = authorizedMinimum;
+        } else {
+            // Preserve the original signed fixed/free price; only the independently
+            // proven leaf can replace its charging role.
+            if (e.authorization.unitPrice != minimum) {
+                revert IStreamNativePricePrograms.InvalidNativePriceProgram();
+            }
+            if (overridden) {
+                if (config.kind == 12) {
+                    if (price != 0) {
+                        revert IStreamNativeAllowlistPricePrograms.InvalidAllowlistPricePolicy();
+                    }
+                } else if (price == 0 && !policy.allowFree) {
+                    revert IStreamNativeAllowlistPricePrograms.SalePriceOverrideZeroUndeclared(e.authorization
+                        .saleId);
+                }
+                minimum = price;
+                maximum = price;
+            }
+        }
+        if (e.chosenUnitPrice < minimum || e.chosenUnitPrice > maximum) {
+            revert IStreamNativePricePrograms.NativePriceOutsideBand(
+                e.chosenUnitPrice, minimum, maximum
+            );
+        }
+    }
+
     event NativePriceProgramFreeMint(
         bytes32 indexed saleId,
         bytes32 indexed executionId,

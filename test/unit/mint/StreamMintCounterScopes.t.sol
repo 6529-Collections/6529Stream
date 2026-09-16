@@ -79,6 +79,15 @@ contract StreamMintCounterScopesTest is MintEngineTestBase {
         IStreamMintManager.CounterKeyMode key,
         address recipient
     ) private view returns (uint64) {
+        return ledger.counterValue(_valueKey(collection, phase, key, recipient));
+    }
+
+    function _valueKey(
+        uint256 collection,
+        bytes32 phase,
+        IStreamMintManager.CounterKeyMode key,
+        address recipient
+    ) private view returns (bytes32) {
         bytes32 subject = manager.previewSubjectKey(
             key,
             collection,
@@ -90,8 +99,7 @@ contract StreamMintCounterScopesTest is MintEngineTestBase {
             address(0),
             keccak256("context")
         );
-        return
-            ledger.counterValue(manager.previewCounterValueKey(collection, phase, COUNTER, subject));
+        return manager.previewCounterValueKey(collection, phase, COUNTER, subject);
     }
 
     function testCollectionRecipientCapSharedAcrossPhases() public {
@@ -257,10 +265,7 @@ contract StreamMintCounterScopesTest is MintEngineTestBase {
         return b;
     }
 
-    function _assertPriceOverrideUnsupported(bool hasPriceOverride, uint256 priceOverride) private {
-        IStreamMintCounterPolicy.AllowlistProof memory p = _proof(1);
-        p.hasPriceOverride = hasPriceOverride;
-        p.priceOverride = priceOverride;
+    function _configureMerkleProof(IStreamMintCounterPolicy.AllowlistProof memory p) private {
         bytes32 root =
             StreamMintCounterPolicy.allowlistLeaf(address(manager), 1, A, COUNTER, signer, p);
         bytes32 hash = _definition(
@@ -274,16 +279,22 @@ contract StreamMintCounterScopesTest is MintEngineTestBase {
             hash,
             IStreamMintManager.CounterKeyMode.RECIPIENT,
             IStreamMintLedger.CounterCapMode.MERKLE_STATIC,
-            1
+            p.maxCount
         );
+    }
+
+    function testMerkleInconsistentPricePayloadUnsupported() public {
+        IStreamMintCounterPolicy.AllowlistProof memory p = _proof(1);
+        p.priceOverride = 1;
+        _configureMerkleProof(p);
         IStreamMintManager.MintBatch memory b = _withProof(_request(1, A, signer, 1), p, false);
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamMintCounterPolicy.MintAllowlistPriceOverrideUnsupported.selector,
                 COUNTER,
                 signer,
-                hasPriceOverride,
-                priceOverride
+                false,
+                uint256(1)
             )
         );
         manager.executeSingleStepMint(b, "");
@@ -291,16 +302,101 @@ contract StreamMintCounterScopesTest is MintEngineTestBase {
             core.minted() == 0 && manager.nextOperationNonce() == 0
                 && !manager.isAuthorizationUsed(b.authorizationId)
                 && _value(1, A, IStreamMintManager.CounterKeyMode.RECIPIENT, signer) == 0,
-            "priced proof wrote state"
+            "inconsistent price proof wrote state"
         );
     }
 
-    function testMerkleFreePriceOverrideUnsupported() public {
-        _assertPriceOverrideUnsupported(true, 0);
+    function _assertAuthenticatedPricePreservesAccounting(uint256 price) private {
+        IStreamMintCounterPolicy.AllowlistProof memory p = _proof(2);
+        p.hasPriceOverride = true;
+        p.priceOverride = price;
+        _configureMerkleProof(p);
+        IStreamMintManager.MintBatch memory first = _withProof(_request(1, A, signer, 1), p, false);
+        (bytes32 root,) = manager.previewSingleStepMintOperation(first, "");
+        manager.executeSingleStepMint(first, "");
+        require(
+            core.minted() == 1 && manager.nextOperationNonce() == 1
+                && manager.isAuthorizationUsed(first.authorizationId)
+                && manager.isOperationRootUsed(root)
+                && _value(1, A, IStreamMintManager.CounterKeyMode.RECIPIENT, signer) == 1,
+            "authenticated price changed accounting"
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamMintLedger.AuthorizationAlreadyConsumed.selector, first.authorizationId
+            )
+        );
+        manager.executeSingleStepMint(first, "");
+        require(core.minted() == 1 && manager.nextOperationNonce() == 1, "price bypassed replay");
+
+        manager.executeSingleStepMint(_withProof(_request(1, A, signer, 1), p, false), "");
+        IStreamMintManager.MintBatch memory over = _withProof(_request(1, A, signer, 1), p, false);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamMintLedger.CounterCapExceeded.selector,
+                _valueKey(1, A, IStreamMintManager.CounterKeyMode.RECIPIENT, signer),
+                uint256(3),
+                uint256(2)
+            )
+        );
+        manager.executeSingleStepMint(over, "");
+        require(
+            core.minted() == 2 && manager.nextOperationNonce() == 2
+                && !manager.isAuthorizationUsed(over.authorizationId)
+                && _value(1, A, IStreamMintManager.CounterKeyMode.RECIPIENT, signer) == 2,
+            "price bypassed leaf cap"
+        );
     }
 
-    function testMerkleInconsistentPricePayloadUnsupported() public {
-        _assertPriceOverrideUnsupported(false, 1);
+    function testMerkleAuthenticatedZeroPricePreservesAccountingAndReplay() public {
+        _assertAuthenticatedPricePreservesAccounting(0);
+    }
+
+    function testMerkleAuthenticatedNonzeroPricePreservesAccountingAndReplay() public {
+        _assertAuthenticatedPricePreservesAccounting(17);
+    }
+
+    function testMerkleAuthenticatedFullWidthPricePreservesAccountingAndReplay() public {
+        _assertAuthenticatedPricePreservesAccounting(type(uint256).max);
+    }
+
+    function testMerklePriceAndEnabledFlagTamperingRejectBeforeWrites() public {
+        IStreamMintCounterPolicy.AllowlistProof memory p = _proof(1);
+        p.hasPriceOverride = true;
+        p.priceOverride = 17;
+        _configureMerkleProof(p);
+        IStreamMintManager.MintBatch memory b = _request(1, A, signer, 1);
+        p.priceOverride = 18;
+        b = _withProof(b, p, false);
+        _assertTamperedPriceProofRejected(b);
+        p.hasPriceOverride = false;
+        p.priceOverride = 0;
+        b = _withProof(b, p, false);
+        _assertTamperedPriceProofRejected(b);
+
+        p.hasPriceOverride = true;
+        p.priceOverride = 17;
+        b = _withProof(b, p, false);
+        manager.executeSingleStepMint(b, "");
+        require(
+            core.minted() == 1 && manager.isAuthorizationUsed(b.authorizationId),
+            "valid proof retry"
+        );
+    }
+
+    function _assertTamperedPriceProofRejected(IStreamMintManager.MintBatch memory b) private {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamMintCounterPolicy.MintAllowlistProofInvalid.selector, COUNTER, signer
+            )
+        );
+        manager.executeSingleStepMint(b, "");
+        require(
+            core.minted() == 0 && manager.nextOperationNonce() == 0
+                && !manager.isAuthorizationUsed(b.authorizationId)
+                && _value(1, A, IStreamMintManager.CounterKeyMode.RECIPIENT, signer) == 0,
+            "tampered price proof wrote state"
+        );
     }
 
     function testMerkleDifferentiatedCapsAndIndependentSubjectConsumption() public {

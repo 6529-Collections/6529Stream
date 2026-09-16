@@ -119,10 +119,11 @@ are injected only to prove that the zero branch does not enter those reads;
 positive-price controls prove the same boundary is enforced. Full current-Core
 composition and fully cold gas limits require separate integration evidence.
 
-Public purchases without per-buyer signatures and allowlist price overrides
-remain required subsequent work, dependent on canonical artist sale-parameter
-consent and signer-set facts. Phase/economics consent is not substituted for
-that authority. Reveal-fee allowance handling, pause-window tolling and batch
+[Native allowlist price programs](native-allowlist-price-programs.md) add
+same-leaf price overrides through an explicit creation policy and proof-bearing
+entrypoints. Public purchases without per-buyer signatures remain subsequent
+work, dependent on canonical artist sale-parameter consent and signer-set facts.
+Phase/economics consent is not substituted for that authority. Reveal-fee allowance handling, pause-window tolling and batch
 purchases are also outside this profile. Refund-window sales follow as a
 separate deferred purchase/escrow/finalize/refund/unlock lifecycle: buying does
 not mint or create official revenue, and a dead finalization path must always
