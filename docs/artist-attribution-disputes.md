@@ -29,7 +29,8 @@ new transport-specific payload.
 `Filing.disputeAction` is exactly 1 for operation 44 and exactly 3 for operation
 45. Action 2 (withdrawal) is not silently accepted by OPEN. Its compatible
 transport recipe is a separate remaining feature. Original operations 47–50
-cover staged repudiation and remain the next implementation batch.
+now have the separate [staged repudiation implementation](artist-attribution-repudiation.md),
+with its own explicit source and validation scope.
 
 A direct authority call uses an empty signature and the exact current Identity
 nonce hint; direct delegate calls use the original delegate lane hint. Relayed

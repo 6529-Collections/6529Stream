@@ -21,3 +21,10 @@ client.materialize(address, 1n, hash, true);
 // @ts-expect-error original authorization nonce is full-width bigint
 const badAuth: RevenueAuthorization = { ...auth, nonce: 1 };
 void disabled; void badToken; void badScope; void badAuth;
+const clear: RevenueIntent = { kind: "primary-template-clear", collectionId: 1n, scope: 2n, scopeId: 2n, templateId: hash };
+const freeze: RevenueIntent = { kind: "primary-template-freeze", collectionId: 1n, scope: 1n, scopeId: 1n, templateId: hash };
+// @ts-expect-error exact-template mutations never authorize global/default scope
+const globalFreeze: RevenueIntent = { ...freeze, scope: 0n, scopeId: 0n };
+// @ts-expect-error a reviewed template ID is required for a clear intent
+const unknownTemplate: RevenueIntent = { kind: "primary-template-clear", collectionId: 1n, scope: 2n, scopeId: 2n };
+void clear; void freeze; void globalFreeze; void unknownTemplate;

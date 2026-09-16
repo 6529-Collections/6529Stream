@@ -1042,8 +1042,10 @@ contract StreamEntropyCoordinator is
         --pendingRequestCount;
         emit EntropyRequestTerminal(requestKey, status);
         uint256 tokenId = requests[requestKey].tokenId;
-        if (tokenId != 0) --nonterminalTokenCount[subject.collectionId];
-        if (tokenId != 0) _notify(tokenId, requestKey);
+        if (tokenId != 0) {
+            --nonterminalTokenCount[subject.collectionId];
+            _notify(tokenId, requestKey);
+        }
     }
 
     function claimEntropyFeeCredit(address payable destination) external nonReentrant {
@@ -1072,6 +1074,22 @@ contract StreamEntropyCoordinator is
         returns (StreamEntropyStatus)
     {
         return _subjects[_tokenKey(tokenId)].status;
+    }
+
+    /// @notice Original token render facts, read directly without external or delegated calls.
+    /// @dev Status values match IStreamEntropyView. A saved request pins its original provider;
+    ///      before a request, provider follows the original collection configuration lookup.
+    function staticTokenRenderFacts(uint256 tokenId)
+        external
+        view
+        returns (uint8 status, bytes32 seed, address provider)
+    {
+        Subject storage subject = _subjects[_tokenKey(tokenId)];
+        status = uint8(subject.status);
+        seed = subject.seed;
+        provider = subject.requestKey == bytes32(0)
+            ? collectionEntropyConfig[subject.collectionId].provider
+            : _requestPolicies[subject.requestKey].provider;
     }
 
     function tokenEntropy(uint256 tokenId)

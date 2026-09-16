@@ -248,9 +248,11 @@ abstract contract ArtistPublicationHydrationFixture is ArtistOnboardingFixture {
             abi.encodeCall(IStreamArtistOnboarding.recordArtistAttestation, (p, a, statement))
         );
         originalAttestations.push(RH.AttestationInput(p, a.nonce));
-        originalAttestationRecords.push(
-            IStreamArtistAttributionOwner(suite.owners[4]).attestation(1, kind, subject).recordHash
-        );
+        bytes32 record =
+            IStreamArtistAttributionOwner(suite.owners[4]).attestation(1, kind, subject).recordHash;
+        originalAttestationRecords.push(record);
+        // Original op24 consumes this record-scoped guard in addition to digest and nonce.
+        _candidate(2, "identity_authority.replay.attestation_key", keccak256(abi.encode(record)));
     }
 
     function _readyRequest() internal view returns (RH.Request memory p) {
@@ -806,6 +808,7 @@ abstract contract ArtistPublicationHydrationFixture is ArtistOnboardingFixture {
         .attestation(1, p.subjectKind, p.subjectId)
         .recordHash;
         require(record == _publicationExpected(p, a, 1), "independent original op24 preimage");
+        _candidate(2, "identity_authority.replay.attestation_key", keccak256(abi.encode(record)));
         publicationIndices.push(originalAttestations.length);
         originalAttestations.push(RH.AttestationInput(p, a.nonce));
         originalAttestationRecords.push(record);

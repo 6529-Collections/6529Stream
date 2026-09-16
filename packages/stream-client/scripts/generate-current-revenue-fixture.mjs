@@ -18,7 +18,7 @@ export function revenueFixture(inputBytes, outputBytes) {
   for (const [key, [path, contract]] of Object.entries(targets)) {
     const literal = input.sources?.[path]?.content, abi = output.contracts?.[path]?.[contract]?.abi;
     if (typeof literal !== "string" || !Array.isArray(abi) || !abi.length) throw Error(`Missing compiler target ${key}`);
-    const selected = key === "artist" ? ["core", "acceptedArtist", "economicsConsentDigest", "recordEconomicsConsent", "recordProspectiveEconomicsConsent", "recordProspectiveTemplateEconomicsConsent", "requireEconomicsConsent"]
+    const selected = key === "artist" ? ["core", "acceptedArtist", "economicsConsentDigest", "recordEconomicsConsent", "recordProspectiveEconomicsConsent", "recordProspectiveTemplateEconomicsConsent", "recordProspectiveTemplateFreezeConsent", "requireEconomicsConsent"]
       : key === "manager" ? ["core", "owner", "phaseRoyaltyConfigHash", "registerPhaseRoyaltyPolicy", "phaseRoyaltyPolicy"] : null;
     abis[key] = selected ? abi.filter(x => x.type === "function" && selected.includes(x.name)) : abi;
     if (selected && abis[key].length !== selected.length) throw Error(`Missing exact selected ${key} functions`);
@@ -34,7 +34,14 @@ export function revenueFixture(inputBytes, outputBytes) {
     const literal = input.sources?.[path]?.content, value = literal?.match(pattern)?.[1];
     if (!value) throw Error(`Missing original ${key} preimage`); preimages[key] = value; sources[path] = sha(literal);
   }
-  return { schemaVersion: 1, qualification: "Explicit current compiler ABI/source fixture; no deployment or onchain execution claim", inputSha256: sha(inputBytes), outputSha256: sha(outputBytes), sources, preimages, abis };
+  const factoryPath = "smart-contracts/interfaces/stream/revenue/IStreamSplitFactory.sol";
+  const factory = output.contracts?.[factoryPath]?.IStreamSplitFactory?.abi?.filter(x => x.type === "function" && ["assetPolicyRegistry", "splitWalletRuntimeCodeHash"].includes(x.name));
+  if (factory?.length !== 2 || typeof input.sources?.[factoryPath]?.content !== "string") throw Error("Missing template factory getters");
+  sources[factoryPath] = sha(input.sources[factoryPath].content);
+  const hashPath = "smart-contracts/domains/revenue/StreamPrimaryAssignmentHash.sol";
+  if (typeof input.sources?.[hashPath]?.content !== "string") throw Error("Missing primary assignment hash source");
+  sources[hashPath] = sha(input.sources[hashPath].content);
+  return { schemaVersion: 1, qualification: "Explicit current compiler ABI/source fixture; no deployment or onchain execution claim", inputSha256: sha(inputBytes), outputSha256: sha(outputBytes), sources, preimages, abis, auxiliaryAbis: { factory } };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const [input, output, mode] = process.argv.slice(2);

@@ -43,6 +43,7 @@ deployment evidence.
 | Buy with an ERC-20 and payer consent | [ERC-20 sales](erc20-sales.md) |
 | Discover, publish or challenge a state export | [State exports](state-exports.md) |
 | Build both signatures | [Wallets and EIP-712](wallets-and-signatures.md) |
+| Review all-CALL Safe atomicity and its current execution boundary | [Current Safe batches](current-safe-batches.md) |
 | Approve fixed-profile economics and freeze royalties on the modular artist line | [Artist economics](artist-economics.md) |
 | Integrate developing content consent and defensive artist freezes | [Artist content](artist-content.md) |
 | Register and discover immutable split profiles on the new factory line | [Split profiles](split-profiles.md) |

@@ -148,6 +148,96 @@ contract StreamEntropySubjectIdentityTest is CharacterizationTestBase, EntropyTi
         tokenKey = keccak256(abi.encode("TOKEN", TOKEN_ID));
     }
 
+    function testStaticRenderFactsMatchRegisteredAndUnknownSubjects() public view {
+        _assertStaticRenderFacts(TOKEN_ID);
+        _assertStaticRenderFacts(type(uint256).max);
+        (uint8 status, bytes32 seed, address originalProvider) =
+            entropy.staticTokenRenderFacts(TOKEN_ID);
+        require(status == uint8(StreamEntropyStatus.REGISTERED));
+        require(seed == bytes32(0) && originalProvider == address(provider));
+    }
+
+    function testStaticRenderFactsMatchRequestedFinalizedAndBurnedSubjects() public {
+        (, uint256 requestId) = entropy.requestEntropy(TOKEN_ID);
+        _assertStaticRenderFacts(TOKEN_ID);
+        provider.fulfill(requestId, keccak256("static render source"));
+        _assertStaticRenderFacts(TOKEN_ID);
+        (uint8 status, bytes32 seed, address originalProvider) =
+            entropy.staticTokenRenderFacts(TOKEN_ID);
+        require(status == uint8(StreamEntropyStatus.FINALIZED) && seed != bytes32(0));
+        require(originalProvider == address(provider));
+        core.burnToken(TOKEN_ID);
+        _assertStaticRenderFacts(TOKEN_ID);
+        (uint8 retained, bytes32 retainedSeed, address retainedProvider) =
+            entropy.staticTokenRenderFacts(TOKEN_ID);
+        require(retained == status && retainedSeed == seed && retainedProvider == originalProvider);
+    }
+
+    function testStaticRenderFactsRemainAvailableWithoutSubjectReadLibrary() public {
+        (, uint256 requestId) = entropy.requestEntropy(TOKEN_ID);
+        provider.fulfill(requestId, keccak256("independent raw source"));
+        (bytes32 expectedSeed, bool finalized) = entropy.tokenSeed(TOKEN_ID);
+        require(finalized && expectedSeed != bytes32(0));
+        vm.etch(address(StreamEntropySubjectReads), hex"60006000fd");
+        (bool oldReadWorks,) =
+            address(entropy).staticcall(abi.encodeCall(entropy.tokenSeed, (TOKEN_ID)));
+        require(!oldReadWorks, "control must reach disabled delegated reader");
+        (bool success, bytes memory raw) = address(entropy)
+            .staticcall(abi.encodeCall(entropy.staticTokenRenderFacts, (TOKEN_ID)));
+        require(success && raw.length == 96, "direct STATIC source remains available");
+        (uint8 status, bytes32 seed, address originalProvider) =
+            abi.decode(raw, (uint8, bytes32, address));
+        require(status == uint8(StreamEntropyStatus.FINALIZED));
+        require(seed == expectedSeed && originalProvider == address(provider));
+    }
+
+    function testStaticRenderFactsMatchStaleTokenAndTerminalCounters() public {
+        (bytes32 key,) = entropy.requestEntropy(TOKEN_ID);
+        vm.roll(block.number + entropy.effectiveRequestTimeoutBlocks(1) + 1);
+        entropy.markRequestStale(key);
+        _assertStaticRenderFacts(TOKEN_ID);
+        (uint8 status, bytes32 seed, address originalProvider) =
+            entropy.staticTokenRenderFacts(TOKEN_ID);
+        require(status == uint8(StreamEntropyStatus.STALE));
+        require(seed == bytes32(0) && originalProvider == address(provider));
+        require(entropy.pendingRequestCount() == 0 && entropy.nonterminalTokenCount(1) == 0);
+        require(core.metadataNotifications() == 1);
+    }
+
+    function testStaticRenderFactsMatchFailedTokenWhileScopeKeepsTokenCounters() public {
+        bytes32 scope = entropy.registerEntropyScope(1, 0, keccak256("terminal scope"));
+        (bytes32 scopeKey, uint256 scopeRequest) =
+            entropy.requestScopeEntropy(scope, keccak256("terminal scope inputs"));
+        provider.fail(scopeRequest);
+        entropy.markRequestFailed(scopeKey);
+        require(entropy.pendingRequestCount() == 0 && entropy.nonterminalTokenCount(1) == 1);
+        require(core.metadataNotifications() == 0);
+        _assertStaticRenderFacts(TOKEN_ID);
+
+        (bytes32 key, uint256 requestId) = entropy.requestEntropy(TOKEN_ID);
+        provider.fail(requestId);
+        entropy.markRequestFailed(key);
+        _assertStaticRenderFacts(TOKEN_ID);
+        (uint8 status, bytes32 seed, address originalProvider) =
+            entropy.staticTokenRenderFacts(TOKEN_ID);
+        require(status == uint8(StreamEntropyStatus.FAILED));
+        require(seed == bytes32(0) && originalProvider == address(provider));
+        require(entropy.pendingRequestCount() == 0 && entropy.nonterminalTokenCount(1) == 0);
+        require(core.metadataNotifications() == 1);
+    }
+
+    function _assertStaticRenderFacts(uint256 tokenId) private view {
+        (StreamEntropyStatus expectedStatus, bytes32 expectedSeed, address expectedProvider,,,,,) =
+            entropy.tokenEntropy(tokenId);
+        (bool success, bytes memory raw) =
+            address(entropy).staticcall(abi.encodeCall(entropy.staticTokenRenderFacts, (tokenId)));
+        require(success && raw.length == 96, "exact fixed-width STATIC response");
+        (uint8 status, bytes32 seed, address originalProvider) =
+            abi.decode(raw, (uint8, bytes32, address));
+        require(status == uint8(expectedStatus) && seed == expectedSeed);
+        require(originalProvider == expectedProvider, "original request/config provider");
+    }
+
     function testRequesterCannotUseTokenKeyAsScopeAndTokenStillFinalizes() public {
         _expectTokenSubstitutionRejected(REQUESTER);
         require(provider.nextRequestId() == 1, "rejection cannot request provider output");

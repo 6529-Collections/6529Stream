@@ -63,10 +63,9 @@ contract StreamArtistDormancyStandingHistoryActualTest is StreamArtistDormancyRe
         if (provisional) {
             dsCandidate = record;
             require(
-                g.provisional.transitionRecordHash == dsLast
-                    && g.provisional.windowEndsAt
-                        == ingress.rotationRecord(dsLast).transition.contestEndsAt,
-                "candidate belongs to actual pending rotation"
+                g.provisional.transitionRecordHash == origin
+                    && g.provisional.windowEndsAt == windowEnd,
+                "candidate belongs to actual executed op43 post-window"
             );
         } else {
             selectedGuardian = record;
@@ -265,14 +264,12 @@ contract StreamArtistDormancyStandingHistoryActualTest is StreamArtistDormancyRe
         Estate.AuthorityCapabilities memory caps = ingress.currentAuthorityCapabilities(artistId);
         V.Snapshot memory v = IStreamArtistGuardianVestingHistory(suite.owners[2])
             .guardianVestingSnapshot(artistId, record);
-        (bytes32 primary, bytes32 occurrence, bytes32 secondary) =
-            IStreamArtistIdentityRecoveryOwner(suite.owners[2]).identityRecoveryReceipts(record);
+        _assertOriginalRecoveryReceipts(record);
         require(
             record != 0 && caps.authorityClass == 3 && caps.status == 3
                 && caps.authorityAddress == p.newAddress && caps.activationRecordHash == origin
                 && caps.effectiveCapabilities == 256 && v.operationId == 35
-                && v.previousTransitionRecordHash == origin && primary == record && occurrence != 0
-                && secondary != 0 && secondary != primary && _standingHistory() == dsSaved
+                && v.previousTransitionRecordHash == origin && _standingHistory() == dsSaved
                 && _operationPayload(35, manager.governanceAuthority(), record).length != 0,
             "original appointment/capabilities/history plus all original recovery receipts"
         );
@@ -281,16 +278,31 @@ contract StreamArtistDormancyStandingHistoryActualTest is StreamArtistDormancyRe
     function _abandoned() private view {
         R.GuardianRecord memory g = ingress.guardianSetRecord(dsCandidate);
         require(
-            dsCandidate != 0 && g.provisional.transitionRecordHash != origin
+            dsCandidate != 0 && g.provisional.transitionRecordHash == origin
+                && g.provisional.windowEndsAt == windowEnd && block.timestamp >= windowEnd
                 && !IStreamArtistRotationOwner(suite.owners[2])
                     .provisionalRecordEligible(artistId, g.provisional),
-            "abandoned pending guardian never matures"
+            "guardian of the abandoned executed appointment never matures"
+        );
+    }
+
+    function standingDormancyAbandonOriginalGuardian() external standingSelf {
+        vm.warp(windowEnd - 11);
+        this.standingDormancyGuardian(true);
+        // Staging29 creates no provisional association, and veto31 marks only its
+        // pending rotation. Only this actual early op33 marks the executed appointment.
+        this.standingDormancyCompromise(windowEnd - 10);
+        this.standingDormancyDismiss();
+        require(
+            ingress.identityTransitionClosure(artistId, origin).abandoned,
+            "actual early kind1 closure abandons the candidate's executed origin"
         );
     }
 
     function _one(bool prior, bool candidate) private {
         this.standingDormancySetup(prior);
-        this.standingDormancyAt(windowEnd, 97001, bytes32(0), candidate);
+        if (candidate) this.standingDormancyAbandonOriginalGuardian();
+        this.standingDormancyAt(windowEnd, 97001, bytes32(0), false);
         this.standingDormancyDismiss();
         this.standingDormancyCompromise(windowEnd + 1);
     }
@@ -345,10 +357,9 @@ contract StreamArtistDormancyStandingHistoryActualTest is StreamArtistDormancyRe
 
     function testDormancyStandingAfterEarlyKind1ClosureKeepsOriginalAbandonment() public {
         this.standingDormancySetup(false);
-        this.standingDormancyCompromise(windowEnd - 10);
-        this.standingDormancyDismiss();
+        this.standingDormancyAbandonOriginalGuardian();
         bytes32 first = dsFirst;
-        this.standingDormancyAt(windowEnd - 9, 97001, bytes32(0), true);
+        this.standingDormancyAt(windowEnd - 9, 97001, bytes32(0), false);
         this.standingDormancyDismiss();
         require(
             dsLatest != first
@@ -374,7 +385,8 @@ contract StreamArtistDormancyStandingHistoryActualTest is StreamArtistDormancyRe
 
     function testDormancyStandingFreshGuardianAfterDismissalRetainsCompleteHistory() public {
         this.standingDormancySetup(false);
-        this.standingDormancyAt(windowEnd, 97001, bytes32(0), true);
+        this.standingDormancyAbandonOriginalGuardian();
+        this.standingDormancyAt(windowEnd, 97001, bytes32(0), false);
         this.standingDormancyDismiss();
         this.standingDormancyGuardian(false);
         _abandoned();
@@ -408,15 +420,37 @@ contract StreamArtistDormancyStandingHistoryActualTest is StreamArtistDormancyRe
     ) private {
         DormancyRecoveryStorageVm trace = DormancyRecoveryStorageVm(address(vm));
         trace.record();
-        IStreamArtistIdentityDismissalOwner(suite.owners[2])
+        Dismissal.Closure memory closure = IStreamArtistIdentityDismissalOwner(suite.owners[2])
             .identityTransitionClosure(artistId, transition);
-        (bytes32[] memory slots,) = trace.accesses(suite.owners[2]);
-        require(slots.length == 4, "actual four packed closure cells");
-        bytes32[] memory saved = new bytes32[](4);
+        (bytes32[] memory reads,) = trace.accesses(suite.owners[2]);
+        // The fixed read adapter also touches the owner prefix. Locate the actual
+        // transition word and verify the complete adjacent four-cell closure layout.
+        uint256 base = uint256(_slot(transition, reads)) - 1;
+        bytes32[4] memory slots;
+        bytes32[4] memory saved;
+        bytes32 packed = bytes32(
+            uint256(closure.windowEndsAt) | (uint256(closure.contestedAt) << 64)
+                | (closure.abandoned ? uint256(1) << 128 : 0)
+        );
         for (uint256 i; i < 4; ++i) {
+            slots[i] = bytes32(base + i);
+            bool observed;
+            for (uint256 j; j < reads.length; ++j) {
+                if (reads[j] == slots[i]) observed = true;
+            }
+            require(observed, "actual closure cell was read");
             saved[i] = vm.load(suite.owners[2], slots[i]);
+        }
+        require(
+            saved[0] == artistId && saved[1] == transition
+                && saved[2] == closure.dismissalRecordHash && saved[3] == packed,
+            "exact four packed closure fields"
+        );
+        bytes32 prefix = vm.load(suite.owners[2], bytes32(0));
+        for (uint256 i; i < 4; ++i) {
             vm.store(suite.owners[2], slots[i], bytes32(0));
         }
+        require(vm.load(suite.owners[2], bytes32(0)) == prefix, "owner routing prefix untouched");
         avm.expectPartialRevert(IdentityRecovery.UnsupportedIdentityRecoveryProfile.selector);
         ingress.identityRecoveryContext(p, a);
         for (uint256 i; i < 4; ++i) {

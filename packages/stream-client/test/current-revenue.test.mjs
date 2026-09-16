@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { AbiCoder, Interface, ZeroAddress, ZeroHash, id, keccak256, concat, toUtf8Bytes } from "ethers";
-import { CurrentRevenueClient, primaryCollaboratorSource, primaryAccountSources, snapshotModeAssignmentHash, toSafeCall } from "../dist/index.js";
+import { CurrentRevenueClient, primaryCollaboratorSource, primaryAccountSources, primaryTemplateAssignmentHash, snapshotModeAssignmentHash, toSafeCall } from "../dist/index.js";
 import { revenueFixture } from "../scripts/generate-current-revenue-fixture.mjs";
 
 const fixture = JSON.parse(await readFile(new URL("./fixtures/current-revenue-abi.json", import.meta.url), "utf8"));
@@ -215,4 +215,101 @@ test("runnable Artist Safe recipe retains exact retry call and verifies approval
   assert.equal(revenueRecipeInput(input).intent.collectionId,collection);
   assert.throws(()=>revenueRecipeInput({...input,chainId:31337}),/decimal string/);
   assert.throws(()=>revenueRecipeInput({...input,intent:{...input.intent,scopeId:"01"}}),/decimal string/);
+});
+
+// The RPC below implements only getter/encoding boundaries, never a mined write.
+const templateId=id('reviewed template'), factoryAddress=A(70), factoryAbi=new Interface(fixture.auxiliaryAbis.factory);
+const templateContext={factory:factoryAddress,factoryCodeHash:codeHash,assetPolicy:A(71),walletRuntimeCodeHash:id('wallet runtime'),entriesHash:id('template entries'),metadataURIHash:ZeroHash,beneficiaryWitness:ZeroHash};
+// Literal Solidity preimage, intentionally independent of the client helper.
+function literalTemplateHash(scope,scopeId,frozen,context=templateContext){
+  const h=(types,values)=>keccak256(coder.encode(types,values));
+  const resolver=h(['bytes32','address','address','address','bytes32'],[id('6529STREAM_PRIMARY_ASSIGNMENT_RESOLVER_CONTEXT_V1'),addresses.primary,context.factory,context.assetPolicy,context.walletRuntimeCodeHash]);
+  const scoped=h(['bytes32','bytes32','uint8','uint256','uint8'],[id('6529STREAM_PRIMARY_ASSIGNMENT_SCOPE_CONTEXT_V1'),PRIMARY,scope,scopeId,2n]);
+  const template=h(['bytes32','bytes32','bytes32'],[id('6529STREAM_PRIMARY_ASSIGNMENT_TEMPLATE_CONTEXT_V1'),context.entriesHash,context.metadataURIHash]);
+  const pointer=h(['bytes32','bytes32','bytes32','bytes32','bytes32'],[id('6529STREAM_PRIMARY_ASSIGNMENT_POINTER_CONTEXT_V1'),ZeroHash,ZeroHash,templateId,template]);
+  return h(['bytes32','uint256','bytes32','bytes32','bytes32','bytes32','bool'],[id('6529STREAM_PRIMARY_ASSIGNMENT_V1'),chain,resolver,scoped,pointer,ZeroHash,frozen]);
+}
+class TemplateRPC extends RPC {
+  exists=true; frozen=false; template=templateId; badPrevious=false; badNext=false; dynamic=false; witness=id('original beneficiaries'); factoryMalformed=false; correctedBinding=false;
+  async call(tx){
+    if(tx.to.toLowerCase()===factoryAddress.toLowerCase()){
+      this.calls.push(tx);const p=factoryAbi.parseTransaction(tx);
+      const result=factoryAbi.encodeFunctionResult(p.name,[p.name==='assetPolicyRegistry'?templateContext.assetPolicy:templateContext.walletRuntimeCodeHash]);
+      return this.factoryMalformed?result+'00'.repeat(32):result;
+    }
+    if(tx.to.toLowerCase()===addresses.primary.toLowerCase()){
+      const p=abi.primary.parseTransaction(tx),a=p.args;let result;
+      if(this.correctedBinding && ['dynamicPrimaryTemplateFacts','previewArtistScopedPrimaryTemplateAssignment'].includes(p.name)) throw Error('Old collaborator source no longer matches corrected binding');
+      if(p.name==='splitFactory') result=[factoryAddress];
+      else if(p.name==='primaryTemplate')result=[true,templateContext.entriesHash,templateContext.metadataURIHash];
+      else if(p.name==='isDynamicPrimaryTemplate')result=[this.dynamic];
+      else if(p.name==='primaryTemplateConsentFacts')result=[templateContext.entriesHash,templateContext.metadataURIHash,1000000n];
+      else if(p.name==='dynamicPrimaryTemplateFacts')result=[templateContext.entriesHash,templateContext.metadataURIHash,1000000n,this.witness];
+      else if(p.name==='primaryEconomicsFacts')result=[{exists:this.exists,scope:a[1],scopeId:a[2],assignmentType:this.exists?2n:0n,profileId:ZeroHash,templateId:this.exists?this.template:ZeroHash,policyHash:ZeroHash,assignmentHash:this.exists?literalTemplateHash(a[1],a[2],this.frozen):ZeroHash,frozen:this.frozen}];
+      else if(p.name==='previewArtistScopedPrimaryTemplateAssignment')result=[F('primary',a[1],a[2],this.badNext&&a[5]?id('bad frozen result'):literalTemplateHash(a[1],a[2],a[5]))];
+      else if(p.name==='previewArtistPrimaryClear')result=[F('primary',a[1],a[2],ZeroHash),this.badPrevious?id('wrong previous'):literalTemplateHash(a[1],a[2],false)];
+      if(result){this.calls.push(tx);return abi.primary.encodeFunctionResult(p.name,result);}
+    }
+    return super.call(tx);
+  }
+}
+const mutation=(kind,scope=2n)=>({kind,collectionId:collection,scope,scopeId:scope===1n?collection:token,templateId});
+
+test('exact TEMPLATE CLEAR binds previous key, signs zero and confirms absence rather than inherited precedence',async()=>{
+  const c=make(),rpc=new TemplateRPC(),plan=await c.quote(rpc,artist,mutation('primary-template-clear'));
+  assert.equal(plan.previousAssignmentHash,literalTemplateHash(2n,token,false));assert.equal(plan.fact.assignmentHash,ZeroHash);
+  assert.equal(plan.templateHashContext.factory,factoryAddress);
+  const approval=c.prepareArtistApproval(plan,authorization),parsed=abi.artist.parseTransaction(approval.call);
+  assert.equal(parsed.name,'recordProspectiveEconomicsConsent');assert.deepEqual(Array.from(parsed.args[1]),[ZeroHash,ZeroHash,0n,false]);
+  assert.equal(approval.payload.digest,messageHash(approval));assert.equal(parsed.args[0].scopeId,token);
+  assert.equal(abi.primary.parseTransaction(plan.ownerCall.call).name,'clearPrimaryAssignment');
+  assert.equal(toSafeCall(plan.ownerCall.call).value,'0');
+  await assert.rejects(c.assertInstalled(rpc,plan,artist),/not cleared/);
+  rpc.exists=false;await c.assertInstalled(rpc,plan,artist);
+  await assert.rejects(c.assertFresh(rpc,plan,artist),/mutable exact/);
+});
+
+test('exact TEMPLATE FREEZE uses separate prospective selector and independently reconstructed flag',async()=>{
+  const c=make(),rpc=new TemplateRPC(),plan=await c.quote(rpc,artist,mutation('primary-template-freeze',1n));
+  assert.equal(plan.fact.assignmentHash,literalTemplateHash(1n,collection,true));
+  assert.notEqual(plan.fact.assignmentHash,plan.previousAssignmentHash);
+  assert.equal(primaryTemplateAssignmentHash(chain,addresses.primary,1n,collection,templateId,true,plan.templateHashContext),plan.fact.assignmentHash);
+  const approval=c.prepareArtistApproval(plan,authorization),parsed=abi.artist.parseTransaction(approval.call);
+  assert.equal(parsed.name,'recordProspectiveTemplateFreezeConsent');assert.equal(parsed.args[0].assignmentHash,plan.fact.assignmentHash);
+  assert.equal(approval.payload.digest,messageHash(approval));assert.equal(abi.primary.parseTransaction(plan.ownerCall.call).name,'freezePrimaryAssignment');
+  rpc.number++;await c.assertFresh(rpc,plan,artist);assert.equal(c.prepareArtistApproval(plan,authorization).call.data,approval.call.data);
+  await assert.rejects(c.assertInstalled(rpc,plan,artist),/not frozen/);rpc.frozen=true;await c.assertInstalled(rpc,plan,artist);
+});
+
+test('exact mutation rejects default scope, inherited/missing/frozen/wrong-template keys and changed readbacks',async()=>{
+  const c=make(),rpc=new TemplateRPC(),intent=mutation('primary-template-freeze');
+  await assert.rejects(c.quote(rpc,artist,{...intent,scope:0n,scopeId:0n}),/collection\/token/);
+  for(const [field,value] of [['exists',false],['frozen',true],['template',id('different template')]]){
+    const r=new TemplateRPC();r[field]=value;await assert.rejects(c.quote(r,artist,intent),/mutable exact/);
+  }
+  rpc.badNext=true;await assert.rejects(c.quote(rpc,artist,intent),/Independent frozen/);rpc.badNext=false;
+  rpc.badPrevious=true;await assert.rejects(c.quote(rpc,artist,mutation('primary-template-clear')),/exact previous/);rpc.badPrevious=false;
+  rpc.factoryMalformed=true;await assert.rejects(c.quote(rpc,artist,intent),/Noncanonical template/);
+});
+
+test('dynamic beneficiary witness churn invalidates template freeze even if assignment hash is unchanged',async()=>{
+  const c=make(),rpc=new TemplateRPC();rpc.dynamic=true;
+  const plan=await c.quote(rpc,artist,mutation('primary-template-freeze'));
+  rpc.witness=id('rotated collaborator payout');await assert.rejects(c.assertFresh(rpc,plan,artist),/proposal changed/);
+});
+
+test('CLEAR remains available when binding correction invalidates old dynamic template beneficiaries',async()=>{
+  const c=make(),rpc=new TemplateRPC();rpc.dynamic=true;rpc.correctedBinding=true;
+  const plan=await c.quote(rpc,artist,mutation('primary-template-clear'));
+  assert.equal(plan.fact.assignmentHash,ZeroHash);assert.equal(plan.templateHashContext.beneficiaryWitness,ZeroHash);
+  assert.equal(c.prepareArtistApproval(plan,authorization).method,'recordProspectiveEconomicsConsent');
+  await assert.rejects(c.quote(rpc,artist,mutation('primary-template-freeze')),/corrected binding/);
+});
+
+test('accepted factory and freeze ABIs decode exact preparation; older catalogs fail closed',async()=>{
+  const c=make(),rpc=new TemplateRPC(),p=await c.quote(rpc,artist,mutation('primary-template-freeze'));
+  const auth=c.prepareArtistApproval(p,authorization);assert.equal(abi.artist.parseTransaction(auth.call).args[1].nonce,authorization.nonce);
+  const bindings={...fixture.abis,artist:fixture.abis.artist.filter(x=>x.name!=='recordProspectiveTemplateFreezeConsent')};
+  const old=new CurrentRevenueClient(chain,addresses,bindings),plan=await old.quote(rpc,artist,mutation('primary-template-freeze'));
+  assert.throws(()=>old.prepareArtistApproval(plan,authorization),/Unknown|unknown|function/i);
 });

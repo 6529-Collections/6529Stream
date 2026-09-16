@@ -6,6 +6,10 @@ import {
 import {
     IStreamArtistStaticIdentityProjection as StaticProjection
 } from "../../interfaces/stream/artist/IStreamArtistStaticIdentityProjection.sol";
+import "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
+import {
+    StreamArtistRepudiationTypes as RP
+} from "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
 
 import "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
 import {
@@ -1644,6 +1648,8 @@ contract StreamArtistIdentityAuthority is
     }
 
     function _baselineTiming() private view {
+        (,, uint64 repudiationRevision) = StreamArtistRepudiationTiming.info();
+        if (repudiationRevision != 1) revert T.UnsupportedProfile();
         if (
             _rotations.timingRevision != 0 || _estate.noticeRevision != 0
                 || _dormancy.timingRevision != 0 || _unavailability.timingRevision != 0
@@ -1720,6 +1726,29 @@ contract StreamArtistIdentityAuthority is
         T.Authorization calldata a,
         T.SignerApproval calldata proof
     ) external returns (bytes32) {
+        _forwardIdentityWriter();
+    }
+
+    function consumeRepudiation(
+        T.ActionContext calldata c,
+        AD.Filing calldata p,
+        RP.Admission calldata admission,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external returns (bytes32) {
+        _forwardIdentityWriter();
+    }
+
+    function contestRepudiation(T.ActionContext calldata c, RP.GuardianProof calldata proof)
+        external
+        returns (bytes32)
+    {
+        _forwardIdentityWriter();
+    }
+
+    function noteRepudiationCancellation(T.ActionContext calldata c, RP.Record calldata record)
+        external
+    {
         _forwardIdentityWriter();
     }
 }

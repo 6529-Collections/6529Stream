@@ -5,10 +5,34 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tools.build.prepare_current_graph import CAMPAIGN_HOSTS, CREATION_NAME, CREATION_SOURCE, check_campaign_owner, select_build, source_closure, validate_sources
+from tools.build.prepare_current_graph import CAMPAIGN_HOSTS, CREATION_NAME, CREATION_SOURCE, check_campaign_owner, host_coordinate, prepare, select_build, source_closure, validate_sources
 
 
 class CurrentGraphInputsTests(unittest.TestCase):
+    def test_explicit_safe_host_cannot_fall_back_to_stack(self):
+        source, name = host_coordinate('test/current/StreamCurrentSafe.t.sol:StreamCurrentSafeTest')
+        cache = {'files': {'test/current/StreamCurrentStack.t.sol': {'artifacts': {
+            'StreamCurrentStackTest': {'0.8.19': {'current': {
+                'path': 'StreamCurrentStack.t.sol/StreamCurrentStackTest.json', 'build_id': 'stack'}}}}}}}
+        with self.assertRaisesRegex(ValueError, 'No current graph test host'):
+            select_build(cache, ((source, name),))
+
+    def test_invalid_host_coordinates_fail_before_writing(self):
+        for value in ('test/../outside.t.sol:X', 'test/a.t.sol:X:Y', 'test/a.t.sol:.*',
+                      'test\\a.t.sol:X', 'smart-contracts/A.sol:A', 'test//A.t.sol:A'):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                host_coordinate(value)
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            with self.assertRaisesRegex(ValueError, 'Campaign host selection is fixed'):
+                prepare(root, root / 'products.json', campaign=True, selected_hosts=CAMPAIGN_HOSTS)
+            self.assertFalse((root / 'artifacts').exists())
+
+    def test_astless_frozen_output_requires_real_rebuild(self):
+        build = {'input': {'sources': {'A.sol': {'content': ''}}}, 'output': {'sources': {'A.sol': {'id': 0}}}}
+        with self.assertRaisesRegex(ValueError, 'Compiler AST missing.*rebuild'):
+            source_closure(build, {'A.sol'})
+
     def test_host_cache_selection_does_not_replace_creation_owner(self):
         source = "test/current/StreamNativeFinalityAssembly.t.sol"
         name = "StreamNativeFinalityAssemblyTest"

@@ -19,13 +19,16 @@ import {
     IStreamArtistContentHostEvidence
 } from "../../../smart-contracts/interfaces/stream/artist/IStreamArtistContentHostEvidence.sol";
 import { EntropyTimeTestConfigs } from "../../helpers/EntropyTimeTestMocks.sol";
-import { MockEntropyRoleRegistry } from "../../mocks/MockEntropyRoleRegistry.sol";
+import {
+    StreamRoleRegistry
+} from "../../../smart-contracts/domains/governance/StreamRoleRegistry.sol";
 import { MockStreamEntropyProvider } from "../../mocks/MockStreamEntropyProvider.sol";
 
 /// @notice Actual Artist owners/facade/Archive and entropy coordinator/workers in one Safe flow.
-/// @dev Core, role resolution, governance execution context and upstream randomness remain typed
-/// boundaries. No Artist consent/evidence or entropy state/result is mocked. These cases do not
-/// demonstrate a real mint, delayed Executor, upstream provider or transaction gas conformance.
+/// @dev Core, Artist admin roles, governance execution context and upstream randomness remain
+/// typed boundaries. Entropy role membership uses the actual canonical registry. No Artist
+/// consent/evidence or entropy state/result is mocked. These cases do not demonstrate a real
+/// mint, delayed Executor, upstream provider or transaction gas conformance.
 contract StreamArtistEntropyRecoveryJoinTest is ArtistOnboardingFixture {
     bytes32 private constant FAMILY = keccak256("6529STREAM_ENTROPY_RECOVERY_V1");
     bytes32 private constant INCIDENT_ROLE = keccak256("ROLE_ENTROPY_INCIDENT_DECLARER");
@@ -34,7 +37,7 @@ contract StreamArtistEntropyRecoveryJoinTest is ArtistOnboardingFixture {
     StreamEntropyCoordinator private entropy;
     MockStreamEntropyProvider private originalProvider;
     MockStreamEntropyProvider private nextProvider;
-    MockEntropyRoleRegistry private entropyRoles;
+    StreamRoleRegistry private entropyRoles;
     ArtistUnitGovernance private entropyAuthority;
 
     function _deployJoined() private {
@@ -44,8 +47,15 @@ contract StreamArtistEntropyRecoveryJoinTest is ArtistOnboardingFixture {
             ArtistUnitModuleRegistry(core.targets(keccak256("MODULE_REGISTRY")))
                 .governanceExecutor()
         );
-        entropyRoles = new MockEntropyRoleRegistry(address(entropyAuthority));
-        entropyRoles.setHolder(INCIDENT_ROLE, address(artist));
+        // Entropy and preservation must pin the registry selected by the same canonical authority.
+        entropyRoles = estateFixityRoles;
+        require(
+            entropyAuthority.roleRegistry() == address(entropyRoles)
+                && entropyRoles.owner() == address(entropyAuthority),
+            "original canonical role registry"
+        );
+        _setEntropyRole(keccak256("ROLE_ENTROPY_ADMIN"), address(entropyAuthority), true);
+        _setEntropyRole(INCIDENT_ROLE, address(artist), true);
         // The shared typed Core exposes one collection before its entropy policy is frozen.
         avm.mockCall(
             address(core),
@@ -150,21 +160,106 @@ contract StreamArtistEntropyRecoveryJoinTest is ArtistOnboardingFixture {
     function _govern(bytes memory data, uint8 cls, bytes32 scope, bytes32 oldHash, bytes32 newHash)
         private
     {
+        _governTarget(address(entropy), data, cls, scope, oldHash, newHash);
+    }
+
+    function _governTarget(
+        address target,
+        bytes memory data,
+        uint8 cls,
+        bytes32 scope,
+        bytes32 oldHash,
+        bytes32 newHash
+    ) private {
         // The shared governance fixture otherwise uses one constant action ID.
         // Supply distinct exact typed action facts so actual policy replay checks remain active.
         bytes memory selector = abi.encodeCall(IStreamGovernanceReads.currentAction, ());
-        bytes32 actionId =
-            keccak256(abi.encode(address(entropy), data, cls, scope, oldHash, newHash));
+        bytes32 actionId = keccak256(abi.encode(target, data, cls, scope, oldHash, newHash));
         avm.mockCall(
             address(entropyAuthority),
             selector,
             abi.encode(true, actionId, cls, scope, oldHash, newHash)
         );
-        entropyAuthority.executeModuleContext(address(entropy), data, cls, scope, oldHash, newHash);
+        entropyAuthority.executeModuleContext(target, data, cls, scope, oldHash, newHash);
         avm.mockCall(
             address(entropyAuthority),
             selector,
             abi.encode(false, bytes32(0), uint8(0), bytes32(0), bytes32(0), bytes32(0))
+        );
+    }
+
+    function _setEntropyRole(bytes32 role, address holder, bool granted) private {
+        bool previous = entropyRoles.hasRole(role, holder);
+        require(previous != granted, "actual role membership transition");
+        (bytes32 chain, uint64 revision) = entropyRoles.roleMutationState(role);
+        (bytes32 global, uint64 globalRevision) = entropyRoles.globalRoleMutationState();
+        bytes32 scope = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ROLE_MUTATION_SCOPE_V1"),
+                block.chainid,
+                address(entropyRoles),
+                role,
+                holder
+            )
+        );
+        bytes32 oldHash = _roleState(scope, previous, chain, revision, global, globalRevision);
+        chain = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ROLE_MUTATION_V1"),
+                chain,
+                block.chainid,
+                address(entropyRoles),
+                role,
+                holder,
+                granted,
+                revision + 1
+            )
+        );
+        global = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_GLOBAL_ROLE_MUTATION_V1"),
+                global,
+                block.chainid,
+                address(entropyRoles),
+                role,
+                holder,
+                granted,
+                globalRevision + 1
+            )
+        );
+        _governTarget(
+            address(entropyRoles),
+            granted
+                ? abi.encodeCall(entropyRoles.grantRole, (role, holder))
+                : abi.encodeCall(entropyRoles.revokeRole, (role, holder)),
+            1,
+            scope,
+            oldHash,
+            _roleState(scope, granted, chain, revision + 1, global, globalRevision + 1)
+        );
+        require(entropyRoles.hasRole(role, holder) == granted, "actual canonical role membership");
+    }
+
+    function _roleState(
+        bytes32 scope,
+        bool granted,
+        bytes32 chain,
+        uint64 revision,
+        bytes32 global,
+        uint64 globalRevision
+    ) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ROLE_MUTATION_STATE_V1"),
+                block.chainid,
+                address(entropyRoles),
+                scope,
+                granted,
+                chain,
+                revision,
+                global,
+                globalRevision
+            )
         );
     }
 
@@ -430,6 +525,53 @@ contract StreamArtistEntropyRecoveryJoinTest is ArtistOnboardingFixture {
             this.executeJoinedRecovery(_input(old), 0),
             "identical original consent after host restoration"
         );
+    }
+
+    function testActualRecoveryRejectsCanonicalRoleRegistryDriftAndAllowsExactRetry() external {
+        _deployJoined();
+        (bytes32 scope, bytes32 old) = _failedScope();
+        (bytes32 key, bytes32 state, bytes32 record) = _consent(old);
+        entropyAuthority.configureContestReads(
+            suite.roleRegistry, address(this), keccak256("archival fixture"), "urn:unit:archival"
+        );
+        // The alternative has live code and the same owner; only its canonical identity changed.
+        require(
+            suite.roleRegistry.code.length != 0
+                && ArtistUnitRoles(suite.roleRegistry).owner() == address(entropyAuthority)
+                && address(entropyRoles) != suite.roleRegistry,
+            "distinct live registry with original owner"
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamEntropyCoordinator.InvalidDependency.selector, address(entropyRoles)
+            )
+        );
+        entropy.configureCollectionRevealPolicy(1, 0, keccak256("ROLE_ENTROPY_REVEAL_OWNER"), 10, 0);
+        _rejected(_input(old));
+        entropyAuthority.configureContestReads(
+            address(entropyRoles), address(this), keccak256("archival fixture"), "urn:unit:archival"
+        );
+        require(
+            this.executeJoinedRecovery(_input(old), 0), "original consent after pin restoration"
+        );
+        _assertReceipt(scope, old, key, state, record);
+    }
+
+    function testActualRecoveryRequiresLiveIncidentRoleAfterArtistConsent() external {
+        _deployJoined();
+        (bytes32 scope, bytes32 old) = _failedScope();
+        (bytes32 key, bytes32 state, bytes32 record) = _consent(old);
+        _setEntropyRole(INCIDENT_ROLE, address(artist), false);
+        _rejected(_input(old));
+        require(
+            entropy.freshRecoveryReceipt(key).artistRecordHash == 0,
+            "revoked role cannot consume original Artist evidence"
+        );
+        _setEntropyRole(INCIDENT_ROLE, address(artist), true);
+        require(
+            this.executeJoinedRecovery(_input(old), 0), "original consent after role restoration"
+        );
+        _assertReceipt(scope, old, key, state, record);
     }
 
     function testActualSafeProviderFailureRollsBackConsumptionAndFeeCredit() external {

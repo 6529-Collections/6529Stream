@@ -267,6 +267,12 @@ library StreamArtistDisputeState {
         m.replayCommitment = m.record;
     }
 
+    function markRepudiated(uint256 id, uint64 generation) public {
+        AD.Head storage h = store().heads[key(id, generation)];
+        if (h.open) revert AD.InvalidAttributionDispute(id);
+        h.revocationReason = 3;
+    }
+
     function resolveEncoded(AttrState.State storage s, bytes calldata data)
         public
         returns (AD.Mutation memory m)

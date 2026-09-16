@@ -5,6 +5,17 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add official Safe all-CALL batch tests for paid mint, entropy, custody,
+  replay and cross-component rollback; native execution remains pending.
+
+- Correct the Artist entropy-recovery test fixture's canonical role-registry
+  pin and add live-role revocation/regrant and registry-drift regressions.
+
+- Add reproducible selected-host current-graph acceptance captures with native
+  compiler provenance, complete suite inventories and production size checks.
+- Add ordered Safe CALL plans, exact primary-template CLEAR/FREEZE callers with
+  independent assignment reconstruction, and eight-family Artist ceremony packets.
+
 - Add complete typed Artist authority hydration for original living, payout
   and direct-economics histories, preserving source records and replay guards.
 - Add historical native sale-credit enumeration and pinned offline export for

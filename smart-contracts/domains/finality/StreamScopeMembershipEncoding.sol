@@ -65,10 +65,9 @@ library StreamScopeMembershipEncoding {
         ) {
             revert InvalidScopeMembershipEncoding();
         }
-        return
-            keccak256(
-                abi.encode(SCOPE_ID_DOMAIN, chainId, core, collectionId, scopeType, recordHash)
-            );
+        return keccak256(
+            abi.encode(SCOPE_ID_DOMAIN, chainId, core, collectionId, scopeType, recordHash)
+        );
     }
 
     function membershipHash(
@@ -79,6 +78,18 @@ library StreamScopeMembershipEncoding {
         StreamFinalityScope memory scope,
         StreamScopeMembershipFacts memory f
     ) public pure returns (bytes32) {
+        return membershipHashStatic(chainId, core, metadataHost, inventory, scope, f);
+    }
+
+    /// @notice Exact original seven-fact commitment without a linked-library call.
+    function membershipHashStatic(
+        uint256 chainId,
+        address core,
+        address metadataHost,
+        address inventory,
+        StreamFinalityScope memory scope,
+        StreamScopeMembershipFacts memory f
+    ) internal pure returns (bytes32) {
         // The output hash field is intentionally excluded; all other seven fact words are bound.
         bytes32 factsHash = keccak256(
             abi.encode(

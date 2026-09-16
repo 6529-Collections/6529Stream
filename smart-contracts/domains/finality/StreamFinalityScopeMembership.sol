@@ -338,7 +338,7 @@ contract StreamFinalityScopeMembership is
             _sourcePins(s);
             return _scopedFacts(s);
         }
-        f.membershipHash = StreamScopeMembershipEncoding.membershipHash(
+        f.membershipHash = StreamScopeMembershipEncoding.membershipHashStatic(
             deploymentChainId, core, metadataHost, tokenInventory, scope, f
         );
     }
@@ -353,7 +353,7 @@ contract StreamFinalityScopeMembership is
         f.sourceRecordHash = s.publication.recordHash;
         f.tokenCount = s.manifest.tokenCount;
         f.tokenListHash = s.manifest.tokenListHash;
-        f.membershipHash = StreamScopeMembershipEncoding.membershipHash(
+        f.membershipHash = StreamScopeMembershipEncoding.membershipHashStatic(
             deploymentChainId, core, metadataHost, tokenInventory, s.scope, f
         );
     }
@@ -469,7 +469,7 @@ contract StreamFinalityScopeMembership is
         view
         returns (bytes memory)
     {
-        return StreamScopeMembershipReads.read(
+        return StreamScopeMembershipReads.readStatic(
             target, input, length, _gasParameterValue(DEPENDENCY_READ_GAS), true
         );
     }

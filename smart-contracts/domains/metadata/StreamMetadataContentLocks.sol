@@ -38,7 +38,8 @@ library StreamMetadataContentLocks {
                     || (lockClass != keccak256("SCRIPT")
                         && lockClass != keccak256("MEDIA_MANIFEST")
                         && lockClass != keccak256("BASE_URI")
-                        && lockClass != keccak256("DEPENDENCIES"))
+                        && lockClass != keccak256("DEPENDENCIES")
+                        && lockClass != keccak256("RENDERER_CONFIG"))
             ) revert InvalidArtistContentFreeze(freezeRecordHash);
             (bool authorized, bytes32 operative) =
                 authority.isContentFreezeAuthorized(collectionId, lockClass);

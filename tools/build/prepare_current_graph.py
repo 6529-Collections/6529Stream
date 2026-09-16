@@ -11,6 +11,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import re
 from pathlib import Path, PurePosixPath
 import subprocess
 import sys
@@ -34,6 +35,17 @@ CAMPAIGN_HOSTS = (
     ("test/current/StreamCurrentStackFuzz.t.sol", "StreamCurrentStackFuzzTest"),
     ("test/current/StreamCurrentStackInvariant.t.sol", "StreamCurrentStackInvariantTest"),
 )
+
+
+def host_coordinate(value: str) -> tuple[str, str]:
+    """Accept an exact test source/product coordinate, never a broad test filter."""
+    source, separator, name = value.partition(":")
+    path = PurePosixPath(source)
+    if (not separator or not source.startswith("test/") or not source.endswith(".t.sol")
+            or path.as_posix() != source or ".." in path.parts or "\\" in source
+            or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name)):
+        raise ValueError(f"Expected test/path.t.sol:ContractName, got {value!r}")
+    return source, name
 
 
 def select_build(cache: dict, hosts: tuple | None = None) -> str:
@@ -60,7 +72,9 @@ def source_closure(build: dict, roots: set[str]) -> set[str]:
             continue
         if source not in build['input']['sources'] or source not in build['output']['sources']:
             raise ValueError(f'Compiler dependency missing: {source}')
-        ast = build['output']['sources'][source]['ast']
+        ast = build['output']['sources'][source].get('ast')
+        if not isinstance(ast, dict):
+            raise ValueError(f'Compiler AST missing: {source}; rebuild with build_info=true and ast=true')
         if ast['absolutePath'] != source:
             raise ValueError(f'Compiler AST source differs: {source}')
         selected.add(source)
@@ -115,11 +129,18 @@ def retain_exports(exports: Path, artifact_root: Path, build_id: str) -> Path:
 
 
 def prepare(project: Path, products_path: Path, *, out: Path | None = None,
-            cache_dir: Path | None = None, campaign: bool = False) -> dict:
+            cache_dir: Path | None = None, campaign: bool = False,
+            selected_hosts: tuple[tuple[str, str], ...] | None = None) -> dict:
     project = project.resolve()
     out = (project / (out or 'out/current')).resolve()
     cache_dir = (project / (cache_dir or 'cache/current')).resolve()
-    hosts = CAMPAIGN_HOSTS if campaign else GRAPH_HOSTS
+    if campaign and selected_hosts is not None:
+        raise ValueError('Campaign host selection is fixed; do not combine --campaign and --host')
+    hosts = selected_hosts if selected_hosts is not None else (CAMPAIGN_HOSTS if campaign else GRAPH_HOSTS)
+    if not hosts or len({name for _, name in hosts}) != len(hosts):
+        raise ValueError('Select nonempty, uniquely named test hosts')
+    for source, name in hosts:
+        host_coordinate(source + ':' + name)
     artifact_root = project / 'artifacts/current-graph'
     artifact_root.mkdir(parents=True, exist_ok=True)
     lock = artifact_root / '.prepare.lock'
@@ -132,8 +153,8 @@ def prepare(project: Path, products_path: Path, *, out: Path | None = None,
         check_campaign_owner(project, campaign)
         cache_path = cache_dir / 'solidity-files-cache.json'
         cache_raw = cache_path.read_bytes(); cache = json.loads(cache_raw)
-        if campaign and any(source not in cache['files'] for source, _ in hosts):
-            raise ValueError('Both campaign hosts must be compiled before preparation')
+        if (campaign or selected_hosts is not None) and any(source not in cache['files'] for source, _ in hosts):
+            raise ValueError('Every selected test host must be compiled before preparation')
         select_build(cache, hosts)  # At least one selected test host is required.
         helper = {CREATION_NAME: CREATION_SOURCE}
         helper.update({name: source for source, name in hosts if source in cache['files']})
@@ -144,7 +165,10 @@ def prepare(project: Path, products_path: Path, *, out: Path | None = None,
             raise ValueError('Graph product inventory must name production sources')
         contexts = {}; transports = set()
         for ident in sorted(set(coordinates.values())):
-            path = out / 'build-info' / (ident + '.json'); raw = path.read_bytes(); build = json.loads(raw)
+            path = out / 'build-info' / (ident + '.json')
+            if not path.is_file():
+                raise ValueError(f'Full build-info missing: {path}; rebuild with build_info=true and ast=true')
+            raw = path.read_bytes(); build = json.loads(raw)
             if build['id'] != ident:
                 raise ValueError('Build-info identity differs from its selected cache entry')
             helpers = {name: source for name, source in helper.items() if coordinates[name] == ident}
@@ -212,10 +236,13 @@ def main() -> int:
     parser.add_argument("--out", type=Path, help="Completed Forge output directory, relative to project or absolute")
     parser.add_argument("--cache-path", type=Path, help="Matching Forge cache directory")
     parser.add_argument("--campaign", action="store_true", help="Bind both executed fuzz/invariant hosts")
+    parser.add_argument("--host", action="append", type=host_coordinate,
+                        help="Exact test/path.t.sol:ContractName to authenticate (repeatable)")
     args = parser.parse_args()
     try:
         print(json.dumps(prepare(args.project, args.products, out=args.out,
-                                 cache_dir=args.cache_path, campaign=args.campaign), indent=2))
+                                 cache_dir=args.cache_path, campaign=args.campaign,
+                                 selected_hosts=tuple(args.host) if args.host else None), indent=2))
         return 0
     except (AssertionError, KeyError, OSError, ValueError, subprocess.CalledProcessError) as exc:
         print(f"Graph preparation failed: {exc}", file=sys.stderr)

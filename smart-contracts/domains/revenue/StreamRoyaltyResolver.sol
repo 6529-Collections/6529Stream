@@ -26,11 +26,31 @@ import {
 
 import { StreamRevenueArtistSelection } from "./StreamRevenueArtistSelection.sol";
 
+import {
+    IStreamRevenueResolverContinuity
+} from "../../interfaces/stream/revenue/IStreamRevenueResolverContinuity.sol";
+import {
+    StreamRoyaltyContinuityParameters as ContinuityParameters
+} from "./StreamRoyaltyContinuityParameters.sol";
+import {
+    IStreamGasParameterHost
+} from "../../interfaces/stream/parameters/IStreamGasParameterHost.sol";
+import { StreamRoyaltyContinuityState as Continuity } from "./StreamRoyaltyContinuityState.sol";
+import {
+    StreamRoyaltyContinuityImport as ContinuityImport
+} from "./StreamRoyaltyContinuityImport.sol";
+import {
+    StreamRoyaltyContinuityTypes as RoyaltyContinuityTypes,
+    IStreamRoyaltyEconomicContinuity
+} from "../../interfaces/stream/revenue/IStreamRoyaltyEconomicContinuity.sol";
+
 /// @notice Governance-owned live royalties and explicitly elected prepared collection snapshots.
 /// @dev Default/collection terms are independent of primary-sale profiles. ERC-2981 discloses royalties;
 ///      it does not restrict transfers or require a marketplace to pay them.
 contract StreamRoyaltyResolver is
     IStreamRoyaltyResolver,
+    IStreamRoyaltyEconomicContinuity,
+    IStreamGasParameterHost,
     IStreamArtistRoyaltyFacts,
     IStreamArtistRoyaltyPreview,
     IStreamArtistRoyaltyScopeFacts,
@@ -47,6 +67,8 @@ contract StreamRoyaltyResolver is
     IStreamSplitFactory public immutable splitFactory;
     IStreamArtistAttribution public immutable artistRegistry;
     bytes32 public immutable artistRegistryCodeHash;
+
+    address public immutable override governanceAuthority;
 
     RoyaltyConfig private _defaultRoyalty;
     mapping(uint256 => RoyaltyConfig) private _collectionRoyalties;
@@ -81,6 +103,8 @@ contract StreamRoyaltyResolver is
         artistRegistry = artistRegistry_;
         artistRegistryCodeHash = artist.codehash;
         _transferOwnership(governanceExecutor_);
+        governanceAuthority = governanceExecutor_;
+        ContinuityParameters.initialize(governanceExecutor_);
     }
 
     function supportsInterface(bytes4 id) public view override(ERC165, IERC165) returns (bool) {
@@ -91,6 +115,9 @@ contract StreamRoyaltyResolver is
             || id == type(IStreamTokenRoyaltyResolver).interfaceId
             || id == type(IStreamRoyaltyFreeze).interfaceId
             || id == type(IStreamRoyaltySnapshot).interfaceId
+            || id == type(IStreamRevenueResolverContinuity).interfaceId
+            || id == type(IStreamRoyaltyEconomicContinuity).interfaceId
+            || id == type(IStreamGasParameterHost).interfaceId
             || id == type(IStreamArtistSnapshotRoyaltyFacts).interfaceId
             || super.supportsInterface(id);
     }
@@ -313,6 +340,7 @@ contract StreamRoyaltyResolver is
         external
         override
         onlyOwner
+        economicWritable
     {
         _configure(_defaultRoyalty, 0, profileId, royaltyBps);
     }
@@ -321,6 +349,7 @@ contract StreamRoyaltyResolver is
         external
         override
         onlyOwner
+        economicWritable
     {
         _requireCollection(collectionId);
         _requireSelectedArtistRegistry();
@@ -387,6 +416,7 @@ contract StreamRoyaltyResolver is
         external
         override
         onlyOwner
+        economicWritable
     {
         uint256 collectionId = _tokenCollection(tokenId);
         _requireLiveRoyaltyMutation(collectionId);
@@ -417,11 +447,16 @@ contract StreamRoyaltyResolver is
         _emitContext(collectionId, 2, tokenId, previous, candidate);
     }
 
-    function clearTokenRoyalty(uint256 tokenId) external override onlyOwner {
+    function clearTokenRoyalty(uint256 tokenId) external override onlyOwner economicWritable {
         _clearRoyalty(_tokenCollection(tokenId), 2, tokenId);
     }
 
-    function clearCollectionRoyalty(uint256 collectionId) external override onlyOwner {
+    function clearCollectionRoyalty(uint256 collectionId)
+        external
+        override
+        onlyOwner
+        economicWritable
+    {
         _requireCollection(collectionId);
         _clearRoyalty(collectionId, 1, collectionId);
     }
@@ -451,7 +486,7 @@ contract StreamRoyaltyResolver is
         _emitContext(collectionId, scope, scopeId, previous, empty);
     }
 
-    function freezeTokenRoyalty(uint256 tokenId) external override onlyOwner {
+    function freezeTokenRoyalty(uint256 tokenId) external override onlyOwner economicWritable {
         uint256 collectionId = _tokenCollection(tokenId);
         _requireLiveRoyaltyMutation(collectionId);
         _requireSelectedArtistRegistry();
@@ -485,6 +520,7 @@ contract StreamRoyaltyResolver is
         }
         emit RevenueAssignmentFrozen(keccak256("ROYALTY_ERC2981"), 2, tokenId, 1, true, 1);
         _emitContext(collectionId, 2, tokenId, previous, candidate);
+        _recordProtected(2, tokenId, collectionId, candidate);
     }
 
     function tokenRoyalty(uint256 tokenId) external view override returns (RoyaltyConfig memory) {
@@ -537,12 +573,17 @@ contract StreamRoyaltyResolver is
         return IStreamArtistAttribution(selected);
     }
 
-    function freezeDefaultRoyalty() external override onlyOwner {
+    function freezeDefaultRoyalty() external override onlyOwner economicWritable {
         _freeze(_defaultRoyalty, 0);
     }
 
     /// @notice Materializes inherited defaults before freezing, including an inherited zero rate.
-    function freezeCollectionRoyalty(uint256 collectionId) external override onlyOwner {
+    function freezeCollectionRoyalty(uint256 collectionId)
+        external
+        override
+        onlyOwner
+        economicWritable
+    {
         _requireCollection(collectionId);
         _requireLiveRoyaltyMutation(collectionId);
         _requireSelectedArtistRegistry();
@@ -562,6 +603,7 @@ contract StreamRoyaltyResolver is
     function applyArtistRoyaltyFreeze(uint256 collectionId, bytes32 expectedAssignmentHash)
         external
         override
+        economicWritable
     {
         _requireCollection(collectionId);
         _requireLiveRoyaltyMutation(collectionId);
@@ -640,6 +682,7 @@ contract StreamRoyaltyResolver is
         emit RoyaltyFrozen(
             collectionId, item.profileId, item.wallet, item.royaltyBps, item.revision
         );
+        _recordProtected(collectionId == 0 ? 0 : 1, collectionId, collectionId, item);
     }
 
     function _requireCollection(uint256 collectionId) private view {
@@ -772,5 +815,196 @@ contract StreamRoyaltyResolver is
         if (_snapshots.elections[collectionId].mode == 2) {
             revert RoyaltySnapshotMutationClosed(collectionId);
         }
+    }
+
+    modifier economicWritable() {
+        Continuity.writable();
+        _;
+        Continuity.noteMutation();
+    }
+
+    function _recordProtected(
+        uint8 scope,
+        uint256 id,
+        uint256 collection,
+        RoyaltyConfig memory item
+    ) private {
+        bytes32 assignment = _assignmentHash(item, scope, id);
+        IStreamRoyaltySnapshot.Snapshot memory empty;
+        Continuity.recordRoute(
+            address(boundCore),
+            RoyaltyContinuityTypes.Route(
+                scope,
+                id,
+                collection,
+                address(this),
+                item,
+                assignment,
+                _policyHash(collection, scope, id, item, assignment),
+                empty
+            )
+        );
+    }
+
+    function _continuityContext() private view returns (ContinuityImport.Context memory) {
+        return ContinuityImport.Context(
+            address(boundCore), boundCoreCodeHash, address(splitFactory), owner(), MAX_ROYALTY_BPS
+        );
+    }
+
+    function continuityHeader()
+        external
+        view
+        override
+        returns (RoyaltyContinuityTypes.Header memory)
+    {
+        return Continuity.header(address(boundCore), address(splitFactory), MAX_ROYALTY_BPS);
+    }
+
+    function frozenEconomicStateHash(address core_) external view override returns (bytes32) {
+        if (core_ != address(boundCore)) revert RoyaltyContinuityTypes.InvalidEconomicContinuity();
+        return Continuity.header(core_, address(splitFactory), MAX_ROYALTY_BPS).frozenStateHash;
+    }
+
+    function economicRouteHash(address core_, bytes32 revenueClass, uint8 scope, uint256 scopeId)
+        external
+        view
+        override
+        returns (bytes32)
+    {
+        if (
+            core_ != address(boundCore) || revenueClass != Continuity.CLASS || scope > 2
+                || (scope == 0 && scopeId != 0) || (scope != 0 && scopeId == 0)
+        ) revert RoyaltyContinuityTypes.InvalidEconomicContinuity();
+        return Continuity.protectedHash(core_, scope, scopeId);
+    }
+
+    function protectedEconomicRouteAt(uint256 index)
+        external
+        view
+        override
+        returns (RoyaltyContinuityTypes.Route memory r)
+    {
+        r = Continuity.routeAt(index);
+        // The witness must still equal the original authoritative ledgers, including zero records.
+        IStreamRoyaltySnapshot.Snapshot memory actual;
+        if (r.scope == 2) actual = _snapshots.snapshots[r.scopeId];
+        if (
+            keccak256(abi.encode(r.config)) != keccak256(abi.encode(_key(r.scope, r.scopeId)))
+                || keccak256(abi.encode(r.snapshot)) != keccak256(abi.encode(actual))
+        ) revert RoyaltyContinuityTypes.InvalidEconomicContinuity();
+    }
+
+    function economicElectionAt(uint256 index)
+        external
+        view
+        override
+        returns (RoyaltyContinuityTypes.Election memory e)
+    {
+        e = Continuity.electionAt(index);
+        StreamRoyaltySnapshot.Election storage actual = _snapshots.elections[e.collectionId];
+        if (e.mode != actual.mode || e.electionHash != actual.hash) {
+            revert RoyaltyContinuityTypes.InvalidEconomicContinuity();
+        }
+    }
+
+    function economicContinuityState()
+        external
+        view
+        override
+        returns (RoyaltyContinuityTypes.ImportState memory)
+    {
+        return Continuity.state().transfer;
+    }
+
+    function economicContinuityReady() external view override returns (bool) {
+        return Continuity.state().transfer.status != 1;
+    }
+
+    function continuitySource() external view override returns (address) {
+        return Continuity.state().transfer.source;
+    }
+
+    function continuityManifestHash() external view override returns (bytes32) {
+        return Continuity.state().transfer.manifestHash;
+    }
+
+    function previewEconomicContinuity(
+        address source,
+        RoyaltyContinuityTypes.ManifestRef calldata manifestReference
+    )
+        external
+        view
+        override
+        returns (bytes32 manifestHash, bytes32 scope, bytes32 oldValueHash, bytes32 newValueHash)
+    {
+        return ContinuityImport.preview(_continuityContext(), source, manifestReference);
+    }
+
+    function beginEconomicContinuity(
+        address source,
+        RoyaltyContinuityTypes.ManifestRef calldata manifestReference
+    ) external override {
+        if (owner() != governanceAuthority) {
+            revert RoyaltyContinuityTypes.InvalidEconomicContinuity();
+        }
+        ContinuityParameters.requireAuthority(governanceAuthority);
+        ContinuityImport.begin(_continuityContext(), source, manifestReference);
+    }
+
+    function importEconomicContinuity(uint256 maxRoutes, uint256 maxElections) external override {
+        ContinuityImport.importNext(
+            _defaultRoyalty,
+            _collectionRoyalties,
+            _tokenRoyalties,
+            _snapshots,
+            _continuityContext(),
+            maxRoutes,
+            maxElections
+        );
+    }
+
+    function completeEconomicContinuity() external override {
+        ContinuityImport.complete(_continuityContext());
+    }
+
+    function supportsEconomicContinuity(address oldResolver, bytes32 oldHash, bytes32 manifestHash)
+        external
+        view
+        override
+        returns (bool)
+    {
+        return ContinuityImport.supportsContinuity(
+            _continuityContext(), oldResolver, oldHash, manifestHash
+        );
+    }
+
+    function gasParameter(bytes32 id) external view override returns (uint256) {
+        return ContinuityParameters.value(id);
+    }
+
+    function gasParameterInfo(bytes32 id)
+        external
+        view
+        override
+        returns (uint256, uint256, uint8, uint64)
+    {
+        return ContinuityParameters.info(id);
+    }
+
+    function gasParameterIds() external pure override returns (bytes32[] memory) {
+        return ContinuityParameters.ids();
+    }
+
+    function gasParameterTransition(bytes32 id, uint256 next)
+        external
+        view
+        returns (bytes32, bytes32, bytes32)
+    {
+        return ContinuityParameters.transition(id, next);
+    }
+
+    function raiseGasParameter(bytes32 id, uint256 next) external override {
+        ContinuityParameters.raise(governanceAuthority, id, next);
     }
 }

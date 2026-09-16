@@ -30,17 +30,20 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 ## Autonomous feature-group leads
 
 The owner requested parallel ownership of whole feature groups on 15 September.
-Three implementation leads work alongside the root integrator. The current
-session has four concurrent agent slots; leads continue coding themselves.
-They own their queues and move to the next coherent batch without waiting for
-the integrator to assign each small task.
+Three local implementation leads work alongside the root integrator. At the
+owner's explicit request, five additional visible Codex tasks now implement
+independent feature groups in separate worktrees. The local four-agent limit
+does not describe this whole delivery team. Every lead remains a hands-on
+builder and owns successive coherent batches; root owns shared decisions,
+integration and final delivery. The task roster below supersedes older broad
+ownership assignments where it transfers a queue.
 
 | Lead | Owned feature group and next queue | Shared boundaries |
 | --- | --- | --- |
-| Artist authority | Disputes44–46, remaining47–50/withdrawal; collaborator approval policies; delegated mint-policy/sale consent; remaining succession/recovery; complete hydration; C2PA and Artist ceremony clients. Current scope: ART01–ART42. | Own Artist contracts/interfaces/tests/guides. Publish exact dependency needs to commerce and metadata leads before changing shared consumers. |
-| Commerce and revenue | Common factory/runtime lifecycle and incident escrow recovery; frozen economic Resolver continuity; token/PLATFORM and exact-template clients; full distribution; remaining supported sale/settlement behavior. | Own revenue, sales and commerce clients. Core mint policy/ledger, concrete mint gates and burn programs remain with root. Earlier denied artifacts remain unapplied. |
-| Metadata, records and museum | CollectionViews; mandatory selectable/versioned STATIC rendering; preservation/finality evidence producers; remaining record/authority/geography mappings; complete museum schema/profile and semantic authoring. | Own metadata/records/preservation/museum implementation. Coordinate Core, Artist and finality Registry interfaces with their owners; DYNAMIC implementation remains excluded. |
-| Root integrator | Core mint engine, standard/vault gates, shared counters/continuity and burn programs; entropy/governance/operator and finality Registry closure; integrate all feature batches and own candidate acceptance. | Own final architecture decisions, shared interfaces, root fixtures, combined tests, release and testnet. |
+| Artist authority | Artist contracts: remaining repudiation/withdrawal, collaborator policies, delegated consent, succession/recovery, hydration and raw STATIC display transport | Own Artist contracts/interfaces/tests; publish exact ABI to the client task. |
+| Commerce and revenue | Economic Resolver continuity, escrow/runtime contracts and remaining supported sale/settlement behavior | Own revenue contracts; coordinate the burn task's specific native adapter entry and publish ABI to clients. |
+| Metadata, records and museum | Onchain STATIC rendering, metadata/records/preservation and finality producers | Own onchain metadata interfaces/contracts/tests; the visible museum task owns offchain semantics. |
+| Root integrator | Shared Core/entropy interfaces, economic pointer checks, integrated source and final candidate acceptance | Coordinate all feature tasks, independent review, release and testnet. |
 
 Each lead owns requirements through source, tests and usable public entrypoints.
 Interfaces/readers alone do not complete a feature whose write path cannot admit
@@ -57,13 +60,51 @@ After the implementation batch stabilizes, root owns complete current-stack/Safe
 fuzz/stateful, gas/capacity and final release/testnet acceptance. Build, test and
 runtime integration statuses stay separate in the shared feature checklist.
 
+### Visible parallel feature tasks
+
+The left-rail section **Stream delivery** contains the coordinator and these
+five active tasks. All started from integration commit `738314e6` in independent
+worktrees; each checks later dependency handoffs before integration. The owner
+can inspect any task, while the coordinator manages handoffs and decisions.
+
+| Task | ID | Owned feature group |
+| --- | --- | --- |
+| Stream — mint eligibility and continuity | `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c` | Manager/Ledger, proof-bound caps, phase/collection/global counters, non-burn gates and replacement continuity |
+| Stream — burn mint and distribution | `01a0a68e-7594-7be0-b7bb-15849febcae4` | Burn-to-mint executor/gate, current batch distribution and the coordinated native purchase-with-burn entry |
+| Stream — museum records and semantics | `01a0a68e-81ad-73f1-98f4-1ce2ecdb1350` | Offchain museum source adapters, schemas, institutional/condition/conservation/authority/geography semantics and authoring |
+| Stream — developer clients and Safe workflows | `01a0a68e-8f38-7a33-95b6-45d8ac943569` | Client package, typed ceremonies, Safe CALL plans, exact-template and commerce/operator caller recipes |
+| Stream — integration and fuzz testing | `01a0a68e-9941-7b13-aff3-d559e39613c4` | Canonical current-graph harness, entropy-join fixture repair, actual component/Safe tests and fuzz/stateful campaigns |
+
+The local Artist lead retains Artist contracts and the raw STATIC display
+transport. The local revenue lead retains economic/Resolver/escrow contracts.
+The local metadata lead retains onchain metadata, STATIC rendering, records,
+preservation and finality producers. Client-only, offchain museum, mint engine,
+burn/distribution and harness work moves to the corresponding visible task.
+Root retains Core and shared interface decisions, source integration, independent
+review assignment, complete candidate acceptance and network deployment.
+
+Communicate shared-interface changes before consumers are changed. The mint task
+owns Manager/Ledger; the burn task owns burn gates and executors. The client task
+uses published compiled ABI; the testing task owns canonical artifact preparation.
+The burn task may add the specifically coordinated native purchase-with-burn
+entry while preserving original buyer/refund accounting; other revenue changes
+remain with the revenue lead. Existing denied patches remain unapplied.
+
+Use compact task snapshots and coherent commit handoffs. Do not duplicate work
+or require the owner to relay messages. Root updates shared feature status after
+integration; feature tasks maintain their local implementation and evidence.
+Coordinate expensive compiler captures, while independent small checks and
+implementation continue. Separate source completion from executed acceptance.
+
 ### Model routing
 
 The owner requested a mix of models to optimize quality, speed and cost. Root
 chooses models at new task or coherent batch boundaries; productive existing
 work is not interrupted merely to change models. The three current leads retain
-their inherited models. Four total agent slots include root, so additional
-management layers do not create more concurrent builder capacity.
+their inherited models. The five visible task leads use the owner's configured
+default model; bounded workers follow the task's model-routing decisions. New
+tasks increase independent delivery capacity while each task remains responsible
+for its own coherent result.
 
 | Work | Preferred model or executor |
 | --- | --- |
@@ -97,7 +138,7 @@ pending checks. The immutable RC1 remains the released baseline.
 
 | Owner | Implementation batch |
 | --- | --- |
-| Integrator | Native4 completed 167 passed /39 failed. Own entropy dependency diagnosis and canonical current-graph harness preparation; burn redemption passes 17 focused tests. Continue missing burn-to-mint/gates/counters and integrate reviewed feature handoffs. |
+| Integrator | Coordinate the five visible tasks and three local leads; integrate reviewed handoffs. Own shared Core/entropy STATIC interfaces, economic pointer continuity checks and final candidate acceptance. Harness, entropy fixture, mint/gate/counter and burn/distribution work is assigned in the visible roster above. |
 | Artist builder | Disputes44–46 integrated; reviewed 47–50 handoff d95e8aaa awaits integration. Repair native4 authority/hydration/URI and recovery fixture failures, then continue withdrawal, multi-party policy, delegated consent and remaining Artist queue. |
 | Revenue builder | Runtime/factory lifecycle and incident escrow recovery integrated; 17 corrected focused tests pass. Build frozen economic Resolver continuity, then remaining commerce/client/distribution queue. Actual-governance and complete paid-flow acceptance remain. |
 | Fourth engineer | CollectionViews integrated with 9 focused tests passing. Build actual selectable STATIC route and transitive raw-source reads; renderer prerequisite c0369e0b awaits review/integration. Continue preservation/museum queue. |

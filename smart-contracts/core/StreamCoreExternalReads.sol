@@ -12,6 +12,7 @@ import "../interfaces/stream/mint/IStreamMintLedger.sol";
 import "../interfaces/stream/mint/IStreamMintManager.sol";
 import "../interfaces/stream/modules/IStreamModuleRegistry.sol";
 import "../interfaces/stream/revenue/IStreamRoyaltyResolver.sol";
+import "../interfaces/stream/revenue/IStreamRoyaltyEconomicContinuity.sol";
 import "../interfaces/stream/governance/IStreamSystemManifest.sol";
 import "./StreamCoreReadBuffer.sol";
 
@@ -269,6 +270,11 @@ library StreamCoreExternalReads {
         (status, plan.candidate) =
             eligiblePointer(registryPointer, target, expectedModuleType, expectedInterfaceId);
         if (status != StreamCoreValidationStatus.VALID) return (status, plan);
+        if (
+            pointerType == _POINTER_ROYALTY_RESOLVER && current.target != address(0)
+                && target != current.target
+                && !_royaltySuccessorAdmitted(current.target, current.codeHash, target)
+        ) return (StreamCoreValidationStatus.INVALID_TARGET, plan);
 
         plan.candidate.revision = nextRevision;
         (plan.scopeHash, plan.oldValueHash, plan.newValueHash) =
@@ -640,6 +646,66 @@ library StreamCoreExternalReads {
                 valid := 0
             }
         }
+    }
+
+    /// @dev A replacement cannot expose partial imports or discard original frozen economics.
+    /// Initial installation and same-address catalog refresh retain their original semantics.
+    function _royaltySuccessorAdmitted(address previous, bytes32 previousCode, address candidate)
+        private
+        view
+        returns (bool)
+    {
+        if (!_isValidContract(previous) || previousCode == 0 || previous.codehash != previousCode) {
+            return false;
+        }
+        (bool ok, bytes32 word) = _continuityWord(
+            candidate, abi.encodeCall(IStreamRoyaltyEconomicContinuity.economicContinuityReady, ())
+        );
+        if (!ok || word != bytes32(uint256(1))) return false;
+        (ok, word) = _continuityWord(
+            previous,
+            abi.encodeCall(
+                IStreamRevenueResolverContinuity.frozenEconomicStateHash, (address(this))
+            )
+        );
+        if (!ok) return false;
+        bytes32 protectedHash = word;
+        if (protectedHash == 0) return true;
+        (ok, word) = _continuityWord(
+            candidate,
+            abi.encodeCall(
+                IStreamRevenueResolverContinuity.frozenEconomicStateHash, (address(this))
+            )
+        );
+        if (!ok || word != protectedHash) return false;
+        (ok, word) = _continuityWord(
+            candidate, abi.encodeCall(IStreamRoyaltyEconomicContinuity.continuitySource, ())
+        );
+        // Exact full-word address equality also rejects dirty high bits.
+        if (!ok || word != bytes32(uint256(uint160(previous)))) return false;
+        (ok, word) = _continuityWord(
+            candidate, abi.encodeCall(IStreamRoyaltyEconomicContinuity.continuityManifestHash, ())
+        );
+        if (!ok || word == 0) return false;
+        (ok, word) = _continuityWord(
+            candidate,
+            abi.encodeCall(
+                IStreamRevenueResolverContinuity.supportsEconomicContinuity,
+                (previous, protectedHash, word)
+            )
+        );
+        return ok && word == bytes32(uint256(1));
+    }
+
+    function _continuityWord(address target, bytes memory data)
+        private
+        view
+        returns (bool ok, bytes32 word)
+    {
+        bytes memory raw;
+        (ok, raw) = _boundedStaticRead(target, data, 32);
+        if (!ok || raw.length != 32) return (false, bytes32(0));
+        assembly ("memory-safe") { word := mload(add(raw, 32)) }
     }
 
     /// @notice Replacement only: exact current predecessor must be committed by the successor.

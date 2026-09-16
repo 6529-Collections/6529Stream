@@ -285,6 +285,19 @@ library StreamScopeMembershipReads {
         view
         returns (bytes memory output)
     {
+        return readStatic(target, input, maximum, cap, exact);
+    }
+
+    /// @notice Exact original bounded read, inlined for transitive STATIC serving paths.
+    /// @dev The public read ABI remains for original publication callers. No source, cap,
+    /// malformed-return or parent-gas rule differs between the two entry paths.
+    function readStatic(
+        address target,
+        bytes memory input,
+        uint256 maximum,
+        uint256 cap,
+        bool exact
+    ) internal view returns (bytes memory output) {
         output = new bytes(maximum);
         if (cap == 0 || cap > type(uint256).max / 64) {
             revert IStreamFinalityScopeMembership.InvalidScopeMembershipConfiguration();

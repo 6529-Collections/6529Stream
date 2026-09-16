@@ -4,6 +4,11 @@ import { StreamArtistRegistryAuxiliaryEncoding } from "./StreamArtistRegistryAux
 import { StreamArtistStaticProjectionTransport } from "./StreamArtistStaticProjectionTransport.sol";
 import { StreamArtistStaticDisplay } from "./StreamArtistStaticDisplay.sol";
 import { StreamArtistStaticCalls } from "./StreamArtistStaticCalls.sol";
+import "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
+import {
+    StreamArtistRepudiationTypes as RP
+} from "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
+
 import "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
 import {
     StreamArtistAttributionDisputeTypes as AD
@@ -2032,6 +2037,53 @@ contract StreamArtistOnboardingRegistry is
         external
         view
         returns (AD.Context memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function revokeAttribution(AD.Filing calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function vetoAttributionRepudiation(uint256 id, bytes32 expected, bytes32 reason) external {
+        _forwardRegistryWriter();
+    }
+
+    function cancelAttributionRepudiation(uint256 id, bytes32 expected) external {
+        _forwardRegistryWriter();
+    }
+
+    function executeAttributionRepudiation(uint256 id, bytes32 expected) external {
+        _forwardRegistryWriter();
+    }
+
+    function pendingRepudiation(uint256 id) external view returns (uint64, uint64, bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function attributionRepudiationRecord(bytes32 hash) external view returns (RP.Record memory) {
+        _forwardRegistryRead();
+    }
+
+    function attributionRepudiationTerminal(bytes32 hash)
+        external
+        view
+        returns (RP.Terminal memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function activeRepudiationCount(bytes32 artistId) external view returns (uint256) {
+        _forwardRegistryRead();
+    }
+
+    function attributionRepudiationDigest(AD.Filing calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
     {
         _forwardRegistryRead();
     }

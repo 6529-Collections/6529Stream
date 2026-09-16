@@ -53,6 +53,46 @@ library StreamArtistIdentityCauseState {
         m.state = keccak256(abi.encode(m.state, causeHash));
     }
 
+    function fileRepudiation(
+        StreamArtistIdentityResolutionState.State storage resolutions,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        StreamArtistIdentityContestState.State storage contests,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        Contest.Request memory p,
+        bytes32 capturedGuardians
+    ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        Dismissal.CauseFacts memory cause =
+            StreamArtistIdentityDismissalState.causeFacts(
+                resolutions,
+                identity,
+                rotations,
+                p.artistId,
+                1,
+                bytes32(0),
+                c.actor,
+                p.reasonHash,
+                p.evidenceHash
+            );
+        m = StreamArtistIdentityContestState.fileWithRepudiation(
+            contests,
+            identity,
+            rotations,
+            replay,
+            o,
+            c,
+            p,
+            _facts(resolutions, rotations, p.artistId, p.subjectRecordHash),
+            capturedGuardians
+        );
+        cause.referenceHash = m.record;
+        bytes32 causeHash =
+            StreamArtistIdentityDismissalState.capture(resolutions, o.environment, cause);
+        m.state = keccak256(abi.encode(m.state, causeHash));
+    }
+
     function context(
         StreamArtistIdentityResolutionState.State storage resolutions,
         StreamArtistIdentityState.State storage identity,

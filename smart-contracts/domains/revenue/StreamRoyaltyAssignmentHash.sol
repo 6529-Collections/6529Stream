@@ -4,6 +4,8 @@ pragma solidity ^0.8.19;
 import { IStreamRoyaltyResolver } from "../../interfaces/stream/revenue/IStreamRoyaltyResolver.sol";
 import { IStreamSplitFactory } from "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
 
+import { StreamRoyaltyContinuityState as Continuity } from "./StreamRoyaltyContinuityState.sol";
+
 /// @notice Original canonical royalty hashes, shared by live and prepared snapshot paths.
 /// @dev Fixed library calls retain actual Resolver address(this). Mode consent stays separate.
 library StreamRoyaltyAssignmentHash {
@@ -13,10 +15,23 @@ library StreamRoyaltyAssignmentHash {
         uint8 scope,
         uint256 scopeId
     ) public view returns (bytes32) {
+        return assignmentForOrigin(
+            splitFactory, item, scope, scopeId, Continuity.origin(scope, scopeId, item.frozen)
+        );
+    }
+
+    /// @notice Reproduce the immutable original Resolver preimage during a verified handoff.
+    function assignmentForOrigin(
+        IStreamSplitFactory splitFactory,
+        IStreamRoyaltyResolver.RoyaltyConfig memory item,
+        uint8 scope,
+        uint256 scopeId,
+        address hashOrigin
+    ) public view returns (bytes32) {
         bytes32 resolverContext = keccak256(
             abi.encode(
                 keccak256("6529STREAM_PRIMARY_ASSIGNMENT_RESOLVER_CONTEXT_V1"),
-                address(this),
+                hashOrigin,
                 address(splitFactory),
                 address(splitFactory.assetPolicyRegistry()),
                 splitFactory.splitWalletRuntimeCodeHash()
@@ -75,12 +90,30 @@ library StreamRoyaltyAssignmentHash {
         IStreamRoyaltyResolver.RoyaltyConfig memory item,
         bytes32 assignmentHash
     ) public view returns (bytes32) {
+        return policyForOrigin(
+            collectionId,
+            scope,
+            scopeId,
+            item,
+            assignmentHash,
+            Continuity.origin(scope, scopeId, item.frozen)
+        );
+    }
+
+    function policyForOrigin(
+        uint256 collectionId,
+        uint8 scope,
+        uint256 scopeId,
+        IStreamRoyaltyResolver.RoyaltyConfig memory item,
+        bytes32 assignmentHash,
+        address hashOrigin
+    ) public view returns (bytes32) {
         if (!item.configured) return bytes32(0);
         return keccak256(
             abi.encode(
                 keccak256("6529STREAM_ROYALTY_POLICY_V1"),
                 block.chainid,
-                address(this),
+                hashOrigin,
                 scope == 0 ? uint256(0) : collectionId,
                 scope == 2 ? scopeId : uint256(0),
                 item.profileId,
