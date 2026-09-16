@@ -18,13 +18,13 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 16 September parallel implementation batch
 
-Source through `2b333b74` includes free-burn reveal credits, original Artist
+Source through `fbd9dcec` includes free-burn reveal credits, original Artist
 withdrawal61, the native-price adapter size repair, distribution/burn/price
 clients including saved refund-window purchase verification, museum authority reconciliation and expanded actual-current test hosts.
 The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
 records exact handoffs and evidence, superseding older queue descriptions.
 
-All 2,037 Solidity sources pass ABI/type/storage checking at 5e6c6140. Root passes all 375
+All 2,061 Solidity sources pass ABI/type/storage checking at fbd9dcec. Root passes all 375
 client tests with generation/build/types, including the new curated callers, 131 museum authority/profile tests and
 a separate 27-case archival export/publication cohort. The offline dossier and
 legacy BagIt/hydration cohort also passes all 44 cases at a0d71d2.
@@ -36,8 +36,8 @@ and component boundaries; counts must not be added into a complete-system claim.
 The exact repaired native-price adapter passes 76 scoped cases, independently
 attested against all 312 sources and 351 compiler metadata records. It measures
 24,560 runtime bytes. Dutch/clearing price consumers are integrated as fbacfc7d
-with 26 authored tests and fitting selected products; their runtime acceptance
-and ERC20 consumer implementation remain. Refund-window captured pricing is
+with all 26 scoped cases passing after test-only economics-consent correction
+963cfce8. ERC20 consumer implementation and actual complete graph acceptance remain. Refund-window captured pricing is
 integrated as 08775172. The original run passes 76/77, with one test incorrectly
 expecting an inactive settlement getter to return zero instead of reverting.
 Test-only correction fda1d244 passes all 14 focused retry cases: 77 distinct
@@ -141,10 +141,15 @@ Offline preservation checks are included in the existing Windows/Linux CI.
 The status table's earlier moving-price selection gap was incorrect: it is an
 explicit future extension. Free/Merkle families already exist; the specification
 does not independently require every combination with selected artwork. Canonical
-primary mint offers, however, are explicitly required and missing: existing offers
-only transfer custody-held tokens. Native implementation is assigned to the
-burn/commerce task, with the mint task owning shared replay/admission changes.
-ERC20 offers retain their explicit payer-intent requirements.
+primary mint offers are explicitly required; the earlier custody-only offer
+path did not fulfill them. Native primary offers are now source-integrated as
+364ec9e2 with shared seam 9945d612. Selected and unselected paths preserve
+original buyer/seller domains, independent replay stores and executor-funded
+value. Independent source review is clear; all six final carrier products fit
+and thirteen final authorization tests pass. Seventy total cases are authored;
+separate 45-case seam and 25-case carrier/current runs are underway. Complete
+current/Safe acceptance is pending. ERC20 offers retain their explicit
+payer-intent implementation requirement.
 
 Full current-stack/Safe/fuzz acceptance follows deployable integrated source.
 The optional primary graph-transition proposal is not an adopted launch

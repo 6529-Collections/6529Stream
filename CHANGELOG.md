@@ -5,6 +5,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add atomic native primary mint offers for unselected and selected artwork,
+  preserving original buyer/seller signatures, separate replay protection,
+  executor-funded payments and buyer-owned pull refunds.
+
 - Preserve exact reference-metric source and runtime archives, verify restored
   execution with typed transcripts and exact environment joins, and run offline
   preservation controls in the existing Windows/Linux CI workflow.
