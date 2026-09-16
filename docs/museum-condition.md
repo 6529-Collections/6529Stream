@@ -74,10 +74,39 @@ The earlier local owner-capture fixture has an opaque schema with the same
 unchanged; a matching name does not reinterpret that historical record as a
 complete condition report.
 
-Projection files are derivatives. Callers retaining a dossier must also retain
-the original complete source package/anchor/transcript/interpretation evidence
-and external pins. This module does not yet assemble an independently replayable
-condition package through a single build command.
+## Reproducible condition packages
+
+`tools.museum.condition_package` retains the complete verified recorded account
+package, exact selected source evidence, schemas, profile, selection plan and
+condition output. Its verifier replays the original sources and reconstructs
+every derivative byte; replacing output and recomputing checksums does not pass.
+
+The canonical plan has exactly `version: "1"`, `sourceKind`, `sourceHash` and
+`records`. Use `sourceKind: "owner_records"` with the externally pinned owner
+snapshot hash and original record hashes. Supply `--owner-inputs` containing
+`anchor.json`, `transcript.json` and `deployment-evidence.json`, plus an
+`--owner-pins` object with `anchorHash`, `transcriptHash` and `sourceHash`.
+The owner and recorded account anchors must agree on the original chain, Core,
+block number/hash, state root, timestamp and environment.
+
+For `sourceKind: "independent_records"`, use the original recorded source's
+`state.commitment` and exact whole-record selectors; owner inputs are prohibited.
+Each plan selects between one and 64 records from one source kind. A private or
+restricted package is unsupported: the explicit public classification applies
+to all retained source evidence, including rows outside the display selection.
+
+```text
+python -m tools.museum.condition_package build SOURCE PLAN OUTPUT --source-manifest-hash HASH --plan-hash HASH --profile-hash HASH --disclosure public --owner-inputs OWNER_INPUTS --owner-pins OWNER_PINS
+python -m tools.museum.condition_package verify OUTPUT --manifest-hash HASH
+python -m unittest tools.museum.test_condition_package -v
+```
+
+Omit the two owner arguments for independent-source plans. The build never
+fetches captures or instruments, publishes records, or upgrades the unproven
+examination/treatment claims. Positive package tests use synthetic owner wire
+evidence alongside the retained recorded account fixture. The existing actual
+independent fixture verifies rejection of an unrelated family; a genuine typed
+independent condition/treatment package remains untested.
 
 ## Verification and remaining joins
 
