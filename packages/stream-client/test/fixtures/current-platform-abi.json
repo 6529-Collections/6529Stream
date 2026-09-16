@@ -1,0 +1,1851 @@
+{
+  "sourceCommit": "0d7c1b57",
+  "compilerVersion": "0.8.19",
+  "scope": "Selected declaration-bound PLATFORM auction callers and reads; no runtime or signature acceptance",
+  "provenance": {
+    "compilerInputSha256": "6b5a36b391f91187447d38e77939ca882df43ccb978924b8d69e7c2a5abb8012",
+    "compilerOutputSha256": "0719df2601b45dbb79e65d41d0b378a7e858677390062ab4307a2441cc97a9eb"
+  },
+  "contracts": [
+    {
+      "source": "smart-contracts/interfaces/stream/auctions/IStreamPlatformNativeRightsAuction.sol",
+      "contract": "IStreamPlatformNativeRightsAuction",
+      "sourceSha256": "5318a49de60e8c54cb92ceb936a1f66f793b2e2760ef82521b1a6c30f01baf10",
+      "methods": [
+        "platformRightsConfigurationHash",
+        "platformRightsCreationDigest",
+        "registerPlatformRightsAuction",
+        "platformAuctionDeclaration"
+      ],
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "saleId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "platformAuctionDeclaration",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "collectionId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "phaseId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "tokenId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "mintAtSettlement",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "artworkCommitment",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "contentManifestRoot",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "mintCommitment",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "poster",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint96",
+                  "name": "reservePrice",
+                  "type": "uint96"
+                },
+                {
+                  "internalType": "uint16",
+                  "name": "minIncrementBps",
+                  "type": "uint16"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "incrementFloorWaived",
+                  "type": "bool"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint64",
+                      "name": "startTime",
+                      "type": "uint64"
+                    },
+                    {
+                      "internalType": "uint64",
+                      "name": "endTime",
+                      "type": "uint64"
+                    },
+                    {
+                      "internalType": "uint32",
+                      "name": "firstBidDuration",
+                      "type": "uint32"
+                    },
+                    {
+                      "internalType": "uint32",
+                      "name": "antiSnipeWindow",
+                      "type": "uint32"
+                    },
+                    {
+                      "internalType": "uint32",
+                      "name": "antiSnipeExtension",
+                      "type": "uint32"
+                    },
+                    {
+                      "internalType": "uint32",
+                      "name": "maxTotalExtension",
+                      "type": "uint32"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "startOnFirstBid",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "hardClose",
+                      "type": "bool"
+                    }
+                  ],
+                  "internalType": "struct StreamEnglishAuctionClock.Configuration",
+                  "name": "clock",
+                  "type": "tuple"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedPrimaryPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "primaryPolicyMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "settlementWindow",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "mintPolicyHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamNativeEnglishAuction.Configuration",
+              "name": "config",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint8",
+                  "name": "mode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "assignmentHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "templateId",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct StreamPreparedNativeRightsTypes.OriginalPolicy",
+              "name": "original",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "declarationHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "platformRightsConfigurationHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "configHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "declarationHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "nonce",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "deadline",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct IStreamPlatformNativeRightsAuction.PlatformCreationAuthorization",
+              "name": "authorization",
+              "type": "tuple"
+            }
+          ],
+          "name": "platformRightsCreationDigest",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "collectionId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "phaseId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "tokenId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "mintAtSettlement",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "artworkCommitment",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "contentManifestRoot",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "mintCommitment",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "poster",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint96",
+                  "name": "reservePrice",
+                  "type": "uint96"
+                },
+                {
+                  "internalType": "uint16",
+                  "name": "minIncrementBps",
+                  "type": "uint16"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "incrementFloorWaived",
+                  "type": "bool"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint64",
+                      "name": "startTime",
+                      "type": "uint64"
+                    },
+                    {
+                      "internalType": "uint64",
+                      "name": "endTime",
+                      "type": "uint64"
+                    },
+                    {
+                      "internalType": "uint32",
+                      "name": "firstBidDuration",
+                      "type": "uint32"
+                    },
+                    {
+                      "internalType": "uint32",
+                      "name": "antiSnipeWindow",
+                      "type": "uint32"
+                    },
+                    {
+                      "internalType": "uint32",
+                      "name": "antiSnipeExtension",
+                      "type": "uint32"
+                    },
+                    {
+                      "internalType": "uint32",
+                      "name": "maxTotalExtension",
+                      "type": "uint32"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "startOnFirstBid",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "hardClose",
+                      "type": "bool"
+                    }
+                  ],
+                  "internalType": "struct StreamEnglishAuctionClock.Configuration",
+                  "name": "clock",
+                  "type": "tuple"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedPrimaryPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "primaryPolicyMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "settlementWindow",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "mintPolicyHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamNativeEnglishAuction.Configuration",
+              "name": "config",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint8",
+                  "name": "mode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "assignmentHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "templateId",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct StreamPreparedNativeRightsTypes.OriginalPolicy",
+              "name": "original",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes",
+              "name": "tokenData",
+              "type": "bytes"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "configHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "declarationHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "nonce",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "deadline",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct IStreamPlatformNativeRightsAuction.PlatformCreationAuthorization",
+              "name": "authorization",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes",
+              "name": "platformSignature",
+              "type": "bytes"
+            }
+          ],
+          "name": "registerPlatformRightsAuction",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "auctionId",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "source": "smart-contracts/interfaces/stream/auctions/IStreamPlatformCustodyAuction.sol",
+      "contract": "IStreamPlatformCustodyAuction",
+      "sourceSha256": "67ec4f59978fef9b4b0a4e2ea95c77291dcfb8b086b3b70025bafd35481be618",
+      "methods": [
+        "platformCustodyAcquisitionDigest",
+        "registerPlatformCustodyAuction"
+      ],
+      "abi": [
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "configHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "declarationHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "tokenDataHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "expectedSaleNonce",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "expectedTokenId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "expectedCollectionSerial",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "expectedOperationNonce",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "contextHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "executor",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "revealFeeDeposit",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "nonce",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "deadline",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct IStreamPlatformCustodyAuction.PlatformCustodyAuthorization",
+              "name": "authorization",
+              "type": "tuple"
+            }
+          ],
+          "name": "platformCustodyAcquisitionDigest",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "collectionId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "phaseId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "tokenId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "mintAtSettlement",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "artworkCommitment",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "contentManifestRoot",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "mintCommitment",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "poster",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint96",
+                  "name": "reservePrice",
+                  "type": "uint96"
+                },
+                {
+                  "internalType": "uint16",
+                  "name": "minIncrementBps",
+                  "type": "uint16"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "incrementFloorWaived",
+                  "type": "bool"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint64",
+                      "name": "startTime",
+                      "type": "uint64"
+                    },
+                    {
+                      "internalType": "uint64",
+                      "name": "endTime",
+                      "type": "uint64"
+                    },
+                    {
+                      "internalType": "uint32",
+                      "name": "firstBidDuration",
+                      "type": "uint32"
+                    },
+                    {
+                      "internalType": "uint32",
+                      "name": "antiSnipeWindow",
+                      "type": "uint32"
+                    },
+                    {
+                      "internalType": "uint32",
+                      "name": "antiSnipeExtension",
+                      "type": "uint32"
+                    },
+                    {
+                      "internalType": "uint32",
+                      "name": "maxTotalExtension",
+                      "type": "uint32"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "startOnFirstBid",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "hardClose",
+                      "type": "bool"
+                    }
+                  ],
+                  "internalType": "struct StreamEnglishAuctionClock.Configuration",
+                  "name": "clock",
+                  "type": "tuple"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedPrimaryPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "primaryPolicyMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "settlementWindow",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "mintPolicyHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamNativeEnglishAuction.Configuration",
+              "name": "config",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint8",
+                  "name": "mode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "assignmentHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "templateId",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct StreamPreparedNativeRightsTypes.OriginalPolicy",
+              "name": "original",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes",
+              "name": "tokenData",
+              "type": "bytes"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "configHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "declarationHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "tokenDataHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "expectedSaleNonce",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "expectedTokenId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "expectedCollectionSerial",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "expectedOperationNonce",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "contextHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "executor",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "revealFeeDeposit",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "nonce",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "deadline",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct IStreamPlatformCustodyAuction.PlatformCustodyAuthorization",
+              "name": "authorization",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes",
+              "name": "platformSignature",
+              "type": "bytes"
+            }
+          ],
+          "name": "registerPlatformCustodyAuction",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "auctionId",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "payable",
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "source": "smart-contracts/interfaces/stream/auctions/IStreamPlatformTokenCustodyAuction.sol",
+      "contract": "IStreamPlatformTokenCustodyAuction",
+      "sourceSha256": "4bd6014caf2b9c9cf9effaf2d52c33630f940f3ff2cc7a6256784b79ff5043a2",
+      "methods": [
+        "platformTokenCustodyDigest",
+        "activatePlatformTokenCustody",
+        "platformTokenCustodyActivation",
+        "platformTokenCustodyConfigurationHash",
+        "platformTokenCustodyNonceUsed",
+        "bidPlatformTokenCustody",
+        "bidSignedPlatformTokenCustody",
+        "settlePlatformTokenCustody"
+      ],
+      "abi": [
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "auctionId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "baseConfigHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "originHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "tokenId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "declarationHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "rightsMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "assignmentHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "primaryPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "primaryPolicyMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "nonce",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "deadline",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamPlatformTokenCustodyTypes.Authorization",
+              "name": "authorization",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes",
+              "name": "platformSignature",
+              "type": "bytes"
+            }
+          ],
+          "name": "activatePlatformTokenCustody",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "auctionId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "deliverTo",
+              "type": "address"
+            }
+          ],
+          "name": "bidPlatformTokenCustody",
+          "outputs": [],
+          "stateMutability": "payable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "auctionId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "configHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "payer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "executor",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "deliverTo",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "maxRevealFee",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "nonce",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "deadline",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "finalizeBy",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct IStreamNativeEnglishAuction.BidAuthorization",
+              "name": "authorization",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes",
+              "name": "signature",
+              "type": "bytes"
+            }
+          ],
+          "name": "bidSignedPlatformTokenCustody",
+          "outputs": [],
+          "stateMutability": "payable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "auctionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "platformTokenCustodyActivation",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes32",
+                      "name": "auctionId",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "baseConfigHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "originHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "tokenId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "declarationHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint8",
+                      "name": "rightsMode",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "assignmentHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "primaryPolicyHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint8",
+                      "name": "primaryPolicyMode",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "nonce",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint64",
+                      "name": "deadline",
+                      "type": "uint64"
+                    }
+                  ],
+                  "internalType": "struct StreamPlatformTokenCustodyTypes.Authorization",
+                  "name": "authorization",
+                  "type": "tuple"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "authorizationDigest",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "effectiveConfigHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct StreamPlatformTokenCustodyTypes.Activation",
+              "name": "",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "auctionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "platformTokenCustodyConfigurationHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "auctionId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "baseConfigHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "originHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "tokenId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "declarationHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "rightsMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "assignmentHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "primaryPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "primaryPolicyMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "nonce",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "deadline",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamPlatformTokenCustodyTypes.Authorization",
+              "name": "authorization",
+              "type": "tuple"
+            }
+          ],
+          "name": "platformTokenCustodyDigest",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "nonce",
+              "type": "bytes32"
+            }
+          ],
+          "name": "platformTokenCustodyNonceUsed",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "auctionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "settlePlatformTokenCustody",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "settlementKey",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "source": "smart-contracts/interfaces/stream/auctions/IStreamNativeCustodyAuction.sol",
+      "contract": "IStreamNativeCustodyAuction",
+      "sourceSha256": "2ce50878afd1f2447683f446ea77fb5db6d2425d8c495576038519355fcd2f71",
+      "methods": [
+        "custodyOrigin"
+      ],
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "auctionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "custodyOrigin",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "manager",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "managerCodeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "operationRoot",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "operationId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "authorizationId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "tokenDataHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "tokenId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "collectionSerial",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "operationNonce",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "address",
+                  "name": "fundingAccount",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "revealFeeForwarded",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "eligible",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct StreamNativeCustodySettlementTypes.Origin",
+              "name": "",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "source": "smart-contracts/interfaces/stream/revenue/IStreamRevenueResolver.sol",
+      "contract": "IStreamRevenueResolver",
+      "sourceSha256": "f0990f39b158d09f2f98419ab2e63296c4a486074e4aa43ac166a6cfefdd9c9e",
+      "methods": [
+        "resolvePrimaryAssignment"
+      ],
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            }
+          ],
+          "name": "resolvePrimaryAssignment",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "exists",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "scope",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "scopeId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "assignmentType",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "profileId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "templateId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "policyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "assignmentHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "frozen",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct IStreamRevenueResolver.ResolvedPrimaryAssignment",
+              "name": "assignment",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "source": "smart-contracts/interfaces/stream/artist/IStreamArtistPlatformWorks.sol",
+      "contract": "IStreamArtistPlatformWorks",
+      "sourceSha256": "99c20a7dd5da469528daf77f02cac9e2268bdb0ee57bfa9099b329ebfbfa848f",
+      "methods": [
+        "platformWorksDeclaration",
+        "platformWorksContest",
+        "platformWorksCorrection"
+      ],
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "platformWorksContest",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "platformWorksCorrection",
+          "outputs": [
+            {
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "platformWorksDeclaration",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "source": "smart-contracts/domains/auctions/StreamNativeEnglishAuction.sol",
+      "contract": "StreamNativeEnglishAuction",
+      "sourceSha256": "4b0d0a892d2aa9b145289d602df308ac26fe19cc961bca3fb63db6fca7f5f1d8",
+      "methods": [
+        "auction",
+        "auctionDeadlines",
+        "revenueResolver",
+        "artistRegistry"
+      ],
+      "abi": [
+        {
+          "inputs": [],
+          "name": "artistRegistry",
+          "outputs": [
+            {
+              "internalType": "contract IStreamArtistAttribution",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "id",
+              "type": "bytes32"
+            }
+          ],
+          "name": "auction",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "collectionId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "phaseId",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "tokenId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "mintAtSettlement",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "artworkCommitment",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "contentManifestRoot",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "mintCommitment",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "poster",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "uint96",
+                      "name": "reservePrice",
+                      "type": "uint96"
+                    },
+                    {
+                      "internalType": "uint16",
+                      "name": "minIncrementBps",
+                      "type": "uint16"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "incrementFloorWaived",
+                      "type": "bool"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "uint64",
+                          "name": "startTime",
+                          "type": "uint64"
+                        },
+                        {
+                          "internalType": "uint64",
+                          "name": "endTime",
+                          "type": "uint64"
+                        },
+                        {
+                          "internalType": "uint32",
+                          "name": "firstBidDuration",
+                          "type": "uint32"
+                        },
+                        {
+                          "internalType": "uint32",
+                          "name": "antiSnipeWindow",
+                          "type": "uint32"
+                        },
+                        {
+                          "internalType": "uint32",
+                          "name": "antiSnipeExtension",
+                          "type": "uint32"
+                        },
+                        {
+                          "internalType": "uint32",
+                          "name": "maxTotalExtension",
+                          "type": "uint32"
+                        },
+                        {
+                          "internalType": "bool",
+                          "name": "startOnFirstBid",
+                          "type": "bool"
+                        },
+                        {
+                          "internalType": "bool",
+                          "name": "hardClose",
+                          "type": "bool"
+                        }
+                      ],
+                      "internalType": "struct StreamEnglishAuctionClock.Configuration",
+                      "name": "clock",
+                      "type": "tuple"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "expectedPrimaryPolicyHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint8",
+                      "name": "primaryPolicyMode",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "uint32",
+                      "name": "settlementWindow",
+                      "type": "uint32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "mintPolicyHash",
+                      "type": "bytes32"
+                    }
+                  ],
+                  "internalType": "struct IStreamNativeEnglishAuction.Configuration",
+                  "name": "config",
+                  "type": "tuple"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "configHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "saleId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "saleNonce",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "auctionNonce",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "status",
+                  "type": "uint8"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint64",
+                      "name": "originalEnd",
+                      "type": "uint64"
+                    },
+                    {
+                      "internalType": "uint64",
+                      "name": "nominalEnd",
+                      "type": "uint64"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "budgetWarningEmitted",
+                      "type": "bool"
+                    }
+                  ],
+                  "internalType": "struct StreamEnglishAuctionClock.State",
+                  "name": "clock",
+                  "type": "tuple"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "pauseBaseline",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "terminalToll",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "bindingGeneration",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "artistId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "bindingHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "creationDigest",
+                  "type": "bytes32"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint64",
+                      "name": "saleCreatedAt",
+                      "type": "uint64"
+                    },
+                    {
+                      "internalType": "uint64",
+                      "name": "saleAdapterRegistryRevision",
+                      "type": "uint64"
+                    }
+                  ],
+                  "internalType": "struct StreamNativeSettlementTypes.SaleLifecycleBinding",
+                  "name": "lifecycle",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "payer",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "executor",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "deliverTo",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "amount",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "revealFee",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "bidIndex",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "authorizationDigest",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint64",
+                      "name": "signedFinalizeBy",
+                      "type": "uint64"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "signed",
+                      "type": "bool"
+                    }
+                  ],
+                  "internalType": "struct IStreamNativeEnglishAuction.WinningBid",
+                  "name": "winner",
+                  "type": "tuple"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "tokenId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "settlementKey",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "nftClaimant",
+                  "type": "address"
+                }
+              ],
+              "internalType": "struct IStreamNativeEnglishAuction.Auction",
+              "name": "",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "id",
+              "type": "bytes32"
+            }
+          ],
+          "name": "auctionDeadlines",
+          "outputs": [
+            {
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "revenueResolver",
+          "outputs": [
+            {
+              "internalType": "contract IStreamRevenueResolver",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ]
+    }
+  ]
+}

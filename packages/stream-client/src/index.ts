@@ -7,6 +7,7 @@ export * from "./snapshot.js";
 export * from "./safe.js";
 export * from "./safe-plan.js";
 export * from "./current-signing.js";
+export * from "./current-platform.js";
 export * from "./current-artist.js";
 export * from "./current-artist-ceremony.js";
 export * from "./current-custody.js";

@@ -342,3 +342,5 @@ contract profiles and outstanding larger-script work.
   Artist approval, independent assignment reconstruction and owner installation.
 - [Artist ceremony packets](docs/current-artist-ceremony.md) disclose all signed
   fields for eight supported families and check their digest and replay lane.
+- [Declared PLATFORM auctions](docs/current-platform.md) prepare families 8–13
+  with separate signing domains, exact custody funding and dedicated token-rights calls.
