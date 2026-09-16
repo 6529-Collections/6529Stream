@@ -70,14 +70,28 @@ def _bind_declarations(source, original_plan_bytes, candidates):
 
 def build_authority_package(directory, expected_manifest_hash, request_bytes, selection_bytes, snapshots, *,
                             request_hash, selection_hash, profile_hash, disclosure):
+    return _build_authority_package(directory, expected_manifest_hash, request_bytes, selection_bytes, snapshots,
+        request_hash=request_hash, selection_hash=selection_hash, profile_hash=profile_hash, disclosure=disclosure, version="1")
+
+
+def _build_authority_package(directory, expected_manifest_hash, request_bytes, selection_bytes, snapshots, *,
+                            request_hash, selection_hash, profile_hash, disclosure, version):
+    need(version in ("1", "2"), "package implementation version")
+    name, definition, profile_bytes, pin, mode = NAME, BODY_SCHEMA_BYTES, PROFILE_BYTES, PROFILE_HASH, MODE
+    candidate_reader, declaration_guard = _candidates, _bind_declarations
+    if version == "2":
+        from . import authority_v2 as typed
+        from .authority_admission_v2 import candidates, bind_declarations
+        name, definition, profile_bytes, pin, mode = typed.NAME, typed.BODY_SCHEMA_BYTES, typed.PROFILE_BYTES, typed.PROFILE_HASH, MODE + "_v2"
+        candidate_reader, declaration_guard = candidates, bind_declarations
     need(disclosure == "public", "explicit public classification required")
-    need(profile_hash == PROFILE_HASH, "external profile differs")
+    need(profile_hash == pin, "external profile differs")
     directory = Path(directory).resolve(); original = verify_recorded_package(directory, expected_manifest_hash)
     original_files = dict(original.files); pins = loads(original.manifest, maximum=2097152)["pins"]
     source = replay_source_bytes(directory / "dependencies", {name: original_files["inputs/" + name] for name in INPUT_FILES},
         **{key + "_hash": pins[key] for key in ("source", "publication", "interpretation", "profile")})
-    candidates, selected = _candidates(source, selection_bytes, selection_hash)
-    _bind_declarations(source, original_files["inputs/plan.json"], candidates)
+    candidates, selected = candidate_reader(source, selection_bytes, selection_hash)
+    declaration_guard(source, original_files["inputs/plan.json"], candidates)
     projected = _reconcile(request_bytes, candidates, snapshots, request_hash=request_hash, profile_hash=profile_hash,
         mode="recorded_account_authority_reconciliation", model=validator(directory / "dependencies"))
     # An extension may add equivalent to an already-selected resource of the same
@@ -90,7 +104,7 @@ def build_authority_package(directory, expected_manifest_hash, request_bytes, se
                 "selected original entity cannot change type")
     files = {"source/" + name: raw for name, raw in original.files}; files["source/manifest.json"] = original.manifest
     files.update({"inputs/requests.json": request_bytes, "inputs/selection.json": selection_bytes,
-        "definitions/authority-profile.json": PROFILE_BYTES, "definitions/" + NAME + ".json": BODY_SCHEMA_BYTES})
+        "definitions/authority-profile.json": profile_bytes, "definitions/" + name + ".json": definition})
     index = {}
     for logical_path, (descriptor_bytes, raw, descriptor_hash) in sorted(snapshots.items()):
         name = keccak256(logical_path.encode("utf-8"))[2:]
@@ -102,15 +116,20 @@ def build_authority_package(directory, expected_manifest_hash, request_bytes, se
         "sourceProfileHash": selected.profile_hash, "selectionHash": selection_hash,
         "diagnostics": [{"selector": loads(row.selector, canonical=True), "reason": row.reason} for row in selected.diagnostics]})
     files.update(projected)
-    return _assemble(directory, files, {"mode": MODE, "version": "1", "sourceManifestHash": original.manifest_hash,
+    return _assemble(directory, files, {"mode": mode, "version": version, "sourceManifestHash": original.manifest_hash,
         "requestHash": request_hash, "selectionHash": selection_hash, "profileHash": profile_hash, "claims": CLAIMS,
         "disclosure": disclosure})
 
 
 def verify_authority_package(directory, expected_manifest_hash):
+    return _verify_authority_package(directory, expected_manifest_hash, version="1")
+
+
+def _verify_authority_package(directory, expected_manifest_hash, *, version):
     directory = Path(directory).resolve(); raw, manifest, files = _read_package(directory, expected_manifest_hash)
     need(set(manifest) == {"mode", "version", "sourceManifestHash", "requestHash", "selectionHash", "profileHash", "claims", "disclosure", "files"}
-        and manifest["mode"] == MODE and manifest["version"] == "1" and manifest["claims"] == CLAIMS, "package manifest differs")
+        and manifest["mode"] == MODE + ("_v2" if version == "2" else "") and manifest["version"] == version
+        and manifest["claims"] == CLAIMS, "package manifest differs")
     try:
         index = loads(files["inputs/snapshot-index.json"], maximum=524288, canonical=True)
         need(isinstance(index, dict) and len(index) <= 64, "snapshot index bound")
@@ -118,15 +137,15 @@ def verify_authority_package(directory, expected_manifest_hash):
         for path, row in index.items():
             need(isinstance(row, dict) and set(row) == {"descriptorPath", "rawPath", "descriptorHash"}, "snapshot index shape")
             snapshots[path] = (files[row["descriptorPath"]], files[row["rawPath"]], row["descriptorHash"])
-        rebuilt = build_authority_package(directory / "source", manifest["sourceManifestHash"], files["inputs/requests.json"],
+        rebuilt = _build_authority_package(directory / "source", manifest["sourceManifestHash"], files["inputs/requests.json"],
             files["inputs/selection.json"], snapshots, request_hash=manifest["requestHash"], selection_hash=manifest["selectionHash"],
-            profile_hash=manifest["profileHash"], disclosure=manifest["disclosure"])
+            profile_hash=manifest["profileHash"], disclosure=manifest["disclosure"], version=version)
     except (KeyError, FileNotFoundError) as exc: raise MuseumError("authority package input missing") from exc
     need(rebuilt.manifest == raw and dict(rebuilt.files) == files, "package semantic reconstruction differs")
     return rebuilt
 
 
-def main():
+def main(*, version="1"):
     import argparse
     p = argparse.ArgumentParser(description=__doc__); sub = p.add_subparsers(dest="command", required=True)
     verify = sub.add_parser("verify"); verify.add_argument("directory", type=Path); verify.add_argument("--manifest-hash", required=True)
@@ -138,7 +157,7 @@ def main():
         need(path.stat().st_size <= limit, "input file bound")
         raw = path.read_bytes(); need(len(raw) <= limit, "input file changed beyond bound"); return raw
     try:
-        if args.command == "verify": result = verify_authority_package(args.directory, args.manifest_hash)
+        if args.command == "verify": result = _verify_authority_package(args.directory, args.manifest_hash, version=version)
         else:
             index = loads(read(args.snapshot_index, 524288), maximum=524288, canonical=True)
             need(isinstance(index, dict) and len(index) <= 64, "snapshot index bound")
@@ -147,9 +166,9 @@ def main():
                 need(isinstance(row, dict) and set(row) == {"descriptorPath", "rawPath", "descriptorHash"}, "snapshot index shape")
                 snapshots[path] = (read(_package_path(args.snapshot_index.parent.resolve(), row["descriptorPath"]), 65536),
                     read(_package_path(args.snapshot_index.parent.resolve(), row["rawPath"]), 1048576), row["descriptorHash"])
-            result = build_authority_package(args.source, args.source_manifest_hash, read(args.requests, 524288),
+            result = _build_authority_package(args.source, args.source_manifest_hash, read(args.requests, 524288),
                 read(args.selection, 524288), snapshots, request_hash=args.request_hash, selection_hash=args.selection_hash,
-                profile_hash=args.profile_hash, disclosure=args.disclosure)
+                profile_hash=args.profile_hash, disclosure=args.disclosure, version=version)
             write_package(result, args.directory)
         print(result.manifest_hash)
     except (MuseumError, OSError) as exc: p.exit(2, str(exc) + "\n")

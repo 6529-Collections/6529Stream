@@ -49,8 +49,9 @@ def select_recorded(source, policy_bytes, *, policy_hash):
         require(reviewer == issuer, "cross-account review is unsupported; human independence unresolved")
         require(policy["allowAccountSelfReview"], "account SELF review requires explicit policy opt-in")
         require(original_position < position, "recorded review must follow exact original publication")
+        original_profile_hash = source.payload(source.record(body["assertionRecord"]))["profileHash"]
         require(body["assertionRevisionHash"] == keccak256(dumps(original))
-            and body["profileHash"] == source.profile_hash and body["mappingRule"] == original["mappingRule"]
+            and body["profileHash"] == original_profile_hash and body["mappingRule"] == original["mappingRule"]
             and review["subject"] == original["id"], "recorded review original revision/profile/rule mismatch")
         key = dumps(body["assertionRecord"])
         if key not in sources:
@@ -121,7 +122,7 @@ def project_recorded(source, selection_bytes, plan_bytes, *, selection_hash, pla
         plan_hash=plan_hash, profile_hash=source.profile_hash, profile=source.profile, selection=selection,
         entity_reader=source.entity, plan_mode="recorded_account_resource_projection",
         sidecar_mode="recorded_account_projection_sidecar", report_mode="recorded_account_resource_projection",
-        external_kinds=KINDS | {"account"})
+        external_kinds=getattr(source.profile, "entity_kinds", KINDS) | {"account"})
     report = loads(result.report, maximum=67108864, canonical=True)
     report["sourceEvidence"] = {"trustModel": "externally anchored trusted RPC; no MPT or consensus proof",
         "environment": source.anchor["environment"], "sourceCaptureHash": keccak256(source.capture_bytes),

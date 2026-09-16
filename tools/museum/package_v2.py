@@ -242,6 +242,9 @@ def verify_package(directory, expected_manifest_hash):
     if isinstance(value, dict) and value.get("mode") == "recorded_account_authority_package":
         from .authority_package import verify_authority_package
         return verify_authority_package(directory, expected_manifest_hash)
+    if isinstance(value, dict) and value.get("mode") == "recorded_account_authority_package_v2":
+        from .authority_package_v2 import verify_authority_package
+        return verify_authority_package(directory, expected_manifest_hash)
     if isinstance(value, dict) and value.get("mode") == "recorded_independent_exhibition_package":
         from .exhibition_package import verify_exhibition_package
         return verify_exhibition_package(directory, expected_manifest_hash)

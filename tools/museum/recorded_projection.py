@@ -21,7 +21,10 @@ def replay_source_bytes(root, inputs, *, source_hash, publication_hash, interpre
         ReplayTransport(inputs["transcript.json"], source_hash), provenance="trusted_rpc")
     publication = IndependentPublicationAdapter(source, inputs["publication-hints.json"],
         ReplayTransport(inputs["publication-transcript.json"], publication_hash), provenance="trusted_rpc")
-    profile = AccountProjectionProfile(root, expected_hash=profile_hash)
+    profile = AccountProjectionProfile(root)
+    if profile.profile_hash != profile_hash:
+        from .typed_authority_profile import TypedAuthorityProfile
+        profile = TypedAuthorityProfile(root, expected_hash=profile_hash)
     interpretation = RegisteredInterpretationCapture(publication, profile,
         ReplayTransport(inputs["interpretation-transcript.json"], interpretation_hash))
     return RecordedSemanticSource(interpretation, profile_hash=profile_hash)

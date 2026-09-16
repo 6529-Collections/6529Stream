@@ -213,7 +213,12 @@ def _inspect(body, snapshots):
 
 def _reconcile(request_bytes, candidates, snapshots, *, request_hash, profile_hash, mode, model=None):
     from .exhibitions import fields
-    need(profile_hash == PROFILE_HASH and keccak256(request_bytes) == request_hash, "external profile/request pin differs")
+    body_reader, mapping_rule, version, typed = _body, RULE, "1", False
+    if profile_hash != PROFILE_HASH:
+        from . import authority_v2
+        need(profile_hash == authority_v2.PROFILE_HASH, "external profile/request pin differs")
+        body_reader, mapping_rule, version, typed = authority_v2._body, authority_v2.RULE, "2", True
+    need(keccak256(request_bytes) == request_hash, "external profile/request pin differs")
     plan = _validate(REQUEST_SCHEMA, request_bytes)
     need(len(candidates) <= 128, "assertion bound")
     snapshots = _snapshots(snapshots)
@@ -226,13 +231,13 @@ def _reconcile(request_bytes, candidates, snapshots, *, request_hash, profile_ha
         kinds[row["entityId"]] = row["entityKind"]
     rows, by_id, referenced = [], {}, set()
     for candidate in candidates:
-        assertion = candidate["assertion"]; body = _body(assertion); a = body["alignment"]
+        assertion = candidate["assertion"]; body = body_reader(assertion); a = body["alignment"]
         need(assertion["id"] not in by_id, "duplicate assertion identity")
         need((a["entityId"], a["authority"]) in requests, "candidate outside requested scope")
         need(requests[(a["entityId"], a["authority"])]["entityKind"] == body["entityKind"], "local requested type differs")
         referenced.add(a["snapshotRef"]["path"])
         reasons, used = _inspect(body, snapshots)
-        if mode == "recorded_account_authority_reconciliation" and body["entityKind"] == "Type":
+        if mode == "recorded_account_authority_reconciliation" and body["entityKind"] == "Type" and not typed:
             reasons.append("recorded_type_declaration_unsupported")
         if not candidate["eligible"]: reasons.append(candidate["eligibilityReason"])
         if assertion["reviewStatus"] in ("withdrawn", "disputed"): reasons.append("withdrawn_or_disputed_alignment")
@@ -241,6 +246,7 @@ def _reconcile(request_bytes, candidates, snapshots, *, request_hash, profile_ha
             "position": candidate["position"], "reasons": sorted(set(reasons)), "snapshotPointers": used,
             "eligible": not reasons, "supersededBy": []}
         if "entityDeclaration" in candidate: row["entityDeclaration"] = deepcopy(candidate["entityDeclaration"])
+        if "declarationLineage" in candidate: row["declarationLineage"] = deepcopy(candidate["declarationLineage"])
         rows.append(row); by_id[assertion["id"]] = row
     need(set(snapshots) <= referenced, "unreferenced authority snapshot")
     # Use authenticated publication order where supplied; never recency as a truth tie-breaker.
@@ -268,7 +274,7 @@ def _reconcile(request_bytes, candidates, snapshots, *, request_hash, profile_ha
         identities = {row["body"]["alignment"]["canonicalIri"] for row in eligible if row["body"]["alignment"]["matchKind"] == "equivalent_entity"}
         status = "ambiguous" if len(identities) > 1 else "resolved" if identities else "unresolved"
         reason = "competing_eligible_identities" if len(identities) > 1 else "reviewed_snapshot_alignment" if identities else "no_selected_identity_alignment"
-        if mode == "recorded_account_authority_reconciliation" and request["entityKind"] == "Type":
+        if mode == "recorded_account_authority_reconciliation" and request["entityKind"] == "Type" and not typed:
             reason = "recorded_type_declaration_unsupported"
         results.append({**request, "status": status, "reasonCode": reason,
             "candidateAssertions": sorted(row["assertion"]["id"] for row in scoped), "candidateIdentities": sorted(identities)})
@@ -281,10 +287,11 @@ def _reconcile(request_bytes, candidates, snapshots, *, request_hash, profile_ha
         target = {"id": identity, "type": kind, "_label": identity}
         if target not in resource["equivalent"]: resource["equivalent"].append(target)
         provenance.append({"entity": request["entityId"], "property": "https://linked.art/ns/terms/equivalent", "value": identity,
-            "mappingRule": RULE, "sources": [{"assertionId": r["assertion"]["id"], "assertionHash": r["assertionHash"],
+            "mappingRule": mapping_rule, "sources": [{"assertionId": r["assertion"]["id"], "assertionHash": r["assertionHash"],
                 "selector": r["source"], "reviewEvidence": r["reviewEvidence"], "snapshotRef": r["body"]["alignment"]["snapshotRef"],
                 "snapshotPointers": r["snapshotPointers"],
-                **({"entityDeclaration": r["entityDeclaration"]} if "entityDeclaration" in r else {})}
+                **({"entityDeclaration": r["entityDeclaration"]} if "entityDeclaration" in r else {}),
+                **({"declarationLineage": r["declarationLineage"]} if "declarationLineage" in r else {})}
                 for r in sorted(matches, key=lambda r: r["assertion"]["id"])],
             "qualification": "Scoped reviewed alignment; external identity recognition grants no Stream signing authority."})
     files, index = {}, []
@@ -294,7 +301,7 @@ def _reconcile(request_bytes, candidates, snapshots, *, request_hash, profile_ha
         path = "authority/resources/" + name + ".json"; files[path] = raw
         if model is not None: files["authority/expanded/" + name + ".json"] = model.validate_and_expand(raw).expanded_bytes
         index.append({"id": identifier, "type": resource["type"], "path": path})
-    report = {"mode": mode, "version": "1", "profileHash": PROFILE_HASH, "requestHash": request_hash,
+    report = {"mode": mode, "version": version, "profileHash": profile_hash, "requestHash": request_hash,
         "results": results, "claims": CLAIMS, "sourceAuthentication": "historical_independent_account" if mode == "recorded_account_authority_reconciliation" else "not_established",
         "linkedArtValidation": "validated_emitted_resources" if model else "not_evaluated",
         "qualification": "Deterministic scoped reconciliation. Snapshot integrity is checked; publisher identity, real-world equivalence and qualified human independence remain separate evidence."}

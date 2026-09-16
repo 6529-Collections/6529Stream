@@ -2,6 +2,10 @@
 
 Status: bounded candidate implementation guide
 
+This guide describes V1. The separately versioned
+[typed authority profile V2](museum-typed-authority-profile.md) adds recorded
+`Type` support and explicit declaration continuation without changing V1.
+
 `tools/museum/authority_snapshot.py` and `tools/museum/authority.py` implement a
 finite, offline reconciliation boundary for `[MSM-AUTHORITIES]`. The recorded
 package wrapper in `tools/museum/authority_package.py` applies that boundary to

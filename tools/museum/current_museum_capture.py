@@ -35,6 +35,16 @@ def h(kinds, values): return keccak256(encode(kinds, values))
 
 
 class CurrentMuseumFixture(CurrentNativeFixture):
+    def profile_for_capture(self):
+        """Registered interpretation profile; subclasses may add versioned documents."""
+        return AccountProjectionProfile(ROOT)
+
+    def plans_for_capture(self, source, *, omit_publisher=False):
+        return selected_plans(source, omit_publisher=omit_publisher)
+
+    def export_capture(self, source, output):
+        return export_media(source, output, plans_function=self.plans_for_capture)
+
     def manifest_payload(self, payload):
         pointer = self.store_payload(payload)
         digest, size = keccak256(payload), len(payload)
@@ -150,13 +160,13 @@ class CurrentMuseumFixture(CurrentNativeFixture):
         tail, tail_data = self.publication(pointer, digest)
         self.govern(3, [self.operation(self.addresses["StreamGovernanceExecutor"], data, (scope, old, new)), tail], [hex_bytes(data), tail_data])
 
-    def register_document(self, name, kind, raw, canonical=RAW_BYTES):
+    def register_document(self, name, kind, raw, canonical=RAW_BYTES, supersedes=ZERO):
         chunks = []
         for offset in range(0, len(raw), 8192):
             part = raw[offset:offset + 8192]
             self.invoke(self.store, "publishChunk(bytes)", ("bytes",), (part,))
             chunks.append(keccak256(part))
-        spec = (name, kind, keccak256(raw), canonical, ZERO, "", len(raw))
+        spec = (name, kind, keccak256(raw), canonical, supersedes, "", len(raw))
         transition = self.call("StreamSchemaRegistry", "registrationTransition", (spec, chunks))
         data = self.data("StreamSchemaRegistry", "registerDocument", (spec, chunks))
         self.govern(1, [self.operation(self.schemas, data, transition)], [hex_bytes(data)])
@@ -201,14 +211,22 @@ class CurrentMuseumFixture(CurrentNativeFixture):
             "https://example.org/current-media/attestations.json", schema_id("current museum attestation module"),
             ("METADATA_ERC1271_VERIFY_GAS", 400000, 90000, 2), ("METADATA_DEPENDENCY_READ_GAS", 300000, 50000, 2)),))
         prior, sid = self.publish(seed, seed_schema, RAW_BYTES, 1)
-        profile = AccountProjectionProfile(ROOT)
+        profile = self.profile_for_capture()
         for name in [JCS_NAME] + [n for n in profile.documents if n != JCS_NAME]:
             kind, raw = profile.documents[name]
-            self.register_document(name, kind, raw, RAW_BYTES if name == JCS_NAME else JCS_ID)
+            canonical = getattr(profile, "document_canonicalizations", {}).get(
+                name, RAW_BYTES if name == JCS_NAME else JCS_ID)
+            supersedes = getattr(profile, "document_predecessors", {}).get(name, ZERO)
+            self.register_document(name, kind, raw, canonical, supersedes)
         stamp = datetime.fromtimestamp(int(self.rpc("eth_getBlockByNumber", ["latest", False])["timestamp"], 16), timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-        for nonce, raw in enumerate(payloads(chain_id=31337, attestor=self.attestor, subject_id=sid,
-                profile_hash=profile.profile_hash, prior=prior, source_digest=keccak256(seed), created_at=stamp), 2):
+        media_profile = AccountProjectionProfile(ROOT)
+        media_payloads = payloads(chain_id=31337, attestor=self.attestor, subject_id=sid,
+            profile_hash=media_profile.profile_hash, prior=prior, source_digest=keccak256(seed), created_at=stamp)
+        for nonce, raw in enumerate(media_payloads, 2):
             self.publish(raw, schema_id(NAMES[1]), JCS_ID, nonce)
+        self.capture_context = {"profile": profile, "mediaProfile": media_profile, "subjectId": sid,
+            "prior": prior, "seedSchema": seed_schema, "seedDigest": keccak256(seed), "createdAt": stamp,
+            "nextNonce": 2 + len(media_payloads)}
         self.after_media_publications()
         block = self.rpc("eth_getBlockByNumber", ["latest", False])
         evidence = dumps({"kind": "local_evm_fixture", "workflow": "actual_current_foundation_safe_recorded_media_v1",
@@ -256,7 +274,7 @@ def capture(fixture, output):
     publication_replay = IndependentPublicationAdapter(source_replay, hint_bytes,
         ReplayTransport(publication_transcript, keccak256(publication_transcript)), provenance="trusted_rpc")
     require(publication_replay.snapshot() == publication_raw, "current publication replay differs")
-    profile = AccountProjectionProfile(ROOT)
+    profile = fixture.profile_for_capture()
     interpretation = RegisteredInterpretationCapture(publication, profile, RpcTransport(fixture.endpoint))
     interpretation_raw = interpretation.snapshot()
     interpretation_transcript = interpretation.probe.reader.transcript()
@@ -266,14 +284,14 @@ def capture(fixture, output):
         ReplayTransport(interpretation_transcript, keccak256(interpretation_transcript)))
     require(interpreted_replay.snapshot() == interpretation_raw, "current interpretation replay differs")
     source = RecordedSemanticSource(interpreted_replay, profile_hash=profile.profile_hash)
-    return export_media(source, output)
+    return fixture.export_capture(source, output)
 
 
-def export_media(source, output):
+def export_media(source, output, *, plans_function=selected_plans):
     """Export only an already verified captured source; no chain calls or metadata inference."""
-    plans = selected_plans(source)
+    plans = plans_function(source)
     for name, raw in plans.items(): output.joinpath(name).write_bytes(raw)
-    for name, raw in selected_plans(source, omit_publisher=True).items(): output.joinpath("missing-publisher-" + name).write_bytes(raw)
+    for name, raw in plans_function(source, omit_publisher=True).items(): output.joinpath("missing-publisher-" + name).write_bytes(raw)
     from .package_recorded import build_recorded_directory
     from .package import write_package
     from .package_v2 import verify_package
@@ -297,7 +315,7 @@ def export_media(source, output):
     output.joinpath("pins.json").write_bytes(dumps(pins | {"package_manifest": result.manifest_hash}))
     # The same captured source with only publisher selection omitted must not invent a legal body.
     from .package_recorded import build_recorded_package, INPUT_FILES
-    missing = selected_plans(source, omit_publisher=True)
+    missing = plans_function(source, omit_publisher=True)
     inputs = {name: output.joinpath(name).read_bytes() for name in INPUT_FILES}
     inputs.update({name: missing[name] for name in ("selection.json", "plan.json")})
     negative_pins = pins | {key: keccak256(missing[name]) for key, name in (
@@ -321,7 +339,8 @@ def export_media(source, output):
     return result.manifest_hash
 
 
-def main(*, fixture_type=None, capture_function=None):
+def main(*, fixture_type=None, capture_function=None, configure_parser=None, prepare_arguments=None,
+         configure_fixture=None):
     fixture_type = CurrentMuseumFixture if fixture_type is None else fixture_type
     capture_function = capture if capture_function is None else capture_function
     parser = argparse.ArgumentParser(description=__doc__)
@@ -330,10 +349,12 @@ def main(*, fixture_type=None, capture_function=None):
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--disclosure", required=True, choices=("public", "restricted"))
     parser.add_argument("--anvil", default="anvil")
+    if configure_parser is not None: configure_parser(parser)
     args = parser.parse_args()
     require(args.disclosure == "public", "restricted current capture is unsupported")
     manifest_raw = args.native_manifest.read_bytes()
     require(hashlib.sha256(manifest_raw).hexdigest() == args.native_manifest_sha256, "native manifest hash mismatch")
+    if prepare_arguments is not None: prepare_arguments(args)
     args.output.mkdir(parents=True, exist_ok=False)
     args.output.joinpath("native-inputs.json").write_bytes(manifest_raw)
     with socket.socket() as sock:
@@ -347,7 +368,9 @@ def main(*, fixture_type=None, capture_function=None):
         try:
             for _ in range(100):
                 try:
-                    fixture = fixture_type(args.native_manifest, endpoint, expected_manifest_sha256=args.native_manifest_sha256); break
+                    fixture = fixture_type(args.native_manifest, endpoint, expected_manifest_sha256=args.native_manifest_sha256)
+                    if configure_fixture is not None: configure_fixture(fixture, args)
+                    break
                 except OSError:
                     require(process.poll() is None, "current capture Anvil exited"); time.sleep(0.05)
             require(fixture is not None, "current capture Anvil did not start")

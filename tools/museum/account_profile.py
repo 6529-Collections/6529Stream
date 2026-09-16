@@ -52,6 +52,10 @@ CROSSWALK_HASH = keccak256(CROSSWALK_BYTES)
 
 
 class AccountProjectionProfile(ProjectionProfileV2):
+    name = NAME
+    profile_schema_name = NAMES[0]
+    assertion_schema_name = NAMES[1]
+    assertion_schema_bytes = ASSERTION_SCHEMA_BYTES
     version = "account-1"
     crosswalk_bytes = CROSSWALK_BYTES
     crosswalk_hash = CROSSWALK_HASH
@@ -99,6 +103,9 @@ class AccountProjectionProfile(ProjectionProfileV2):
         self.documents = MappingProxyType(documents)
         self.identity = dumps({**loads(self.identity), "accountAuthorityPolicyHash": keccak256(POLICY_BYTES),
                                "registeredProfileContentHash": self.profile_hash})
+
+    def assertion_rules(self):
+        return {schema_id(NAMES[1]): (ASSERTION_SCHEMA_BYTES, schema_id(NAMES[0]), self.profile_hash)}
 
 
 def main():

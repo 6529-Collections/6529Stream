@@ -44,9 +44,10 @@ def resolve_pointer(payload, pointer):
 class RegisteredInterpretationCapture:
     """Reuse the exact native document/chunk reader at the original source anchor."""
     def __init__(self, publication, profile, transport):
+        from .typed_authority_profile import TypedAuthorityProfile
         require(type(publication) is IndependentPublicationAdapter and publication.provenance == "trusted_rpc",
                 "actual publication adapter required")
-        require(type(profile) is AccountProjectionProfile and type(transport) in (RpcTransport, ReplayTransport),
+        require(type(profile) in (AccountProjectionProfile, TypedAuthorityProfile) and type(transport) in (RpcTransport, ReplayTransport),
                 "registered interpretation profile/transport required")
         self.publication = publication
         self.publication_bytes = publication.snapshot()
@@ -71,15 +72,20 @@ class RegisteredInterpretationCapture:
             _, actual, view = probe.documents[identifier]
             require(actual == raw and view[3][2] == keccak256(raw), "registered interpretation exact bytes mismatch")
             # JCS bootstraps through RAW_BYTES; every selected JSON document uses the registered JCS definition.
-            require(view[3][3] == (RAW_BYTES if identifier == JCS_ID else JCS_ID),
+            expected_canonical = getattr(self.profile, "document_canonicalizations", {}).get(name,
+                RAW_BYTES if identifier == JCS_ID else JCS_ID)
+            require(view[3][3] == expected_canonical,
                     "registered interpretation canonicalization mismatch")
+            predecessors = getattr(self.profile, "document_predecessors", {})
+            if name in predecessors:
+                require(view[3][4] == predecessors[name], "registered interpretation predecessor mismatch")
         probe._block()
         if isinstance(probe.reader.transport, ReplayTransport):
             probe.reader.transport.finish()
         self._snapshot = dumps({"mode": "registered_account_interpretation", "version": "1",
             "anchorHash": keccak256(probe.anchor_bytes), "publicationHash": keccak256(self.publication_bytes),
-            "profileId": schema_id(NAME), "profileHash": self.profile.profile_hash,
-            "profileSchemaId": schema_id(NAMES[0]), "transcriptHash": keccak256(probe.reader.transcript()),
+            "profileId": schema_id(self.profile.name), "profileHash": self.profile.profile_hash,
+            "profileSchemaId": schema_id(self.profile.profile_schema_name), "transcriptHash": keccak256(probe.reader.transcript()),
             "documents": [{"documentId": key, "originalHex": "0x" + payload.hex(),
                 "rawViewHex": "0x" + raw.hex()} for key, (raw, payload, _) in probe.documents.items()]})
         return self._snapshot
@@ -116,7 +122,7 @@ class RecordedSemanticSource:
             records.append(RetainedSourceRecord(selector, hex_bytes(row["payloadHex"]), generic[2][1],
                                                documents[generic[4]], facts, "public"))
             canonicalizations[row["recordHash"]] = generic[2][2]
-        identity = dumps({"mode": "recorded_state", "profile": NAME, "environment": self.anchor["environment"],
+        identity = dumps({"mode": "recorded_state", "profile": self.profile.name, "environment": self.anchor["environment"],
             "anchorHash": keccak256(publication.source.anchor_bytes), "sourceCaptureHash": keccak256(self.capture_bytes),
             "publicationHash": keccak256(self.publication_bytes), "interpretationHash": keccak256(self.interpretation_bytes),
             "profileHash": profile_hash, "records": [{"selector": r.selector.__dict__, "payloadHash": r.payload_hash,
@@ -148,13 +154,14 @@ class RecordedSemanticSource:
         require(record is self.records.get(h), "foreign recorded source")
         if h in self._payloads:
             return loads(record.payload, canonical=True)
-        require(record.selector.record_type == RECORD_TYPE and record.selector.schema_id == schema_id(NAMES[1])
-                and record.schema == ASSERTION_SCHEMA_BYTES, "recorded semantic original schema/family mismatch")
+        rule = self.profile.assertion_rules().get(record.selector.schema_id)
+        require(record.selector.record_type == RECORD_TYPE and rule is not None
+                and record.schema == rule[0], "recorded semantic original schema/family mismatch")
         require(self.canonicalizations[h] == JCS_ID, "semantic payload needs registered JCS canonicalization")
         payload = _validate(record.schema, record.payload)
         facts = loads(record.authority_evidence)
-        require(payload["profileSchemaId"] == schema_id(NAMES[0])
-            and payload["profileHash"] == self.profile_hash and payload["anchorSubject"] == {
+        require(payload["profileSchemaId"] == rule[1]
+            and payload["profileHash"] == rule[2] and payload["anchorSubject"] == {
             "kind": facts["subjectKind"], "subjectId": record.selector.subject_id}, "semantic profile or subject mismatch")
         # These selected-record admission checks never parse wholly unselected opaque records.
         priors = [self._prior(record, row) for row in payload["sourceRecords"]]
@@ -176,6 +183,10 @@ class RecordedSemanticSource:
                     resolve_pointer(prior.payload, evidence["selector"])
                 if evidence["basis"] == "own_signed_statement":
                     require(all(p.selector.recorder == record.selector.recorder for p in matches), "own statement has another attestor")
+        from .typed_authority_profile import NAMES as TYPED_NAMES
+        if record.selector.schema_id == schema_id(TYPED_NAMES[1]):
+            from .typed_declarations import validate_continuations
+            validate_continuations(self, record, payload)
         self._payloads.add(h)
         return payload
 

@@ -20,7 +20,7 @@ class EntityDeclaration:
 
 def entity_index(declarations: tuple[EntityDeclaration, ...],
                  selected_selectors: dict[tuple[str, str], str], references: tuple[str, ...],
-                 external_entities: frozenset[str] = frozenset()):
+                 external_entities: frozenset[str] = frozenset(), *, allowed_kinds=KINDS):
     """Map exact selectors to their admitted agents after the authority check.
 
     Reuse across selected declarations needs a later explicit continuation
@@ -37,7 +37,7 @@ def entity_index(declarations: tuple[EntityDeclaration, ...],
             raise MuseumError("entity requires an absolute IRI")
         if declaration.declaring_agent != selected_selectors[key]:
             raise MuseumError("entity declaring agent not admitted")
-        if declaration.kind not in KINDS:
+        if declaration.kind not in allowed_kinds:
             raise MuseumError("unsupported selected entity kind")
         previous = selected.get(declaration.identifier)
         if previous:

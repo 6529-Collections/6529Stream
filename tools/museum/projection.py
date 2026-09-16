@@ -210,7 +210,8 @@ def _project_selected(state, selection_bytes, plan_bytes, *, selection_hash, pla
         if "entity" in assertion["object"]:
             references.append(assertion["object"]["entity"])
         references.extend(loads(e)["reviewer"] for e in claim.review_evidence)
-    selected_entities, _ = entity_index(tuple(declarations), selected_rows, tuple(references), frozenset(external))
+    selected_entities, _ = entity_index(tuple(declarations), selected_rows, tuple(references), frozenset(external),
+        allowed_kinds=getattr(profile, "entity_kinds", KINDS))
     policy = loads(selection_bytes, maximum=524288)
     specializations = profile.content_specializations(selection, entities, policy)
     resolved_classes = {identifier: classes.get(value["kind"]) for identifier, (value, _) in entities.items()}
