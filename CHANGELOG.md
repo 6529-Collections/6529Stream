@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add native same-leaf Merkle price programs with explicit price-counter and
+  free-tier policy, retaining original sale signatures, replay and refund ownership.
+
 - Add scoped/Merkle mint accounting, concrete eligibility gates, authenticated
   Ledger import and Core replacement admission, preserving prepared-mint abort.
 - Add protected Royalty import and Core continuity admission, Artist repudiation,

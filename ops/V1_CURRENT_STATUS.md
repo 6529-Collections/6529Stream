@@ -18,23 +18,25 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 16 September parallel implementation batch
 
-Source through `3520bbb4` includes mint successor lineage and Artist consumption,
+Source through `e7eb51f0` includes mint successor lineage and Artist consumption,
 Core migration guards, burn-to-mint free/prepared/native-paid paths, STATIC raw
 facts/selection/formatting repairs, royalty and mint clients, and museum Transfer,
 condition-package and semantic-authoring tools. The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
 records exact source/evidence boundaries and supersedes older queue descriptions.
 
-All 1,940 Solidity sources pass ABI/type/storage checking at `a45c566c`;
-the later two-file client fix leaves Solidity unchanged.
+All 1,944 Solidity sources pass ABI/type/storage checking at `e7eb51f0`.
 Scoped native captures pass mint 101, Royalty 11, Core 29 and entropy 10 cases.
-Root clients pass all 256 tests with mint continuity and the async-input
-correction; generation, build and types also pass. Separate museum cohorts pass 72, 22 and 19 checks
+Root clients pass all 268 tests with mint continuity, gate input producers and
+the async-input correction; generation, build and types also pass. Separate museum cohorts pass 72, 22 and 19 checks
 with overlap; they must not be totaled as unique tests. Eight actual-current
 mint cutover/consent/Safe cases are authored, with combined execution pending.
-These separate results are not a full-system pass. Native4's recorded failures
+The exact final burn cohort passes 49 cases, with all 306 sources independently
+matched to 57d70b58 and all 301 production artifacts fitting. It excludes later
+price and allowance changes. These separate results are not a full-system pass. Native4's recorded failures
 and the interrupted acceptance-b run remain historical, qualified evidence.
 
-Remaining implementation includes required Merkle sale-price consumption,
+Native immediate Merkle sale-price consumption is integrated with native tests
+running; Dutch, clearing, refund and ERC20 profiles remain. Remaining work includes
 free-burn maximum reveal allowance/refunds, ERC20 paid burn, Artist authority
 profiles, Royalty future mint after replacement, and museum conformance. Three
 measured products still exceed deployment limits: Artist Attribution, Identity

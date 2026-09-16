@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `3520bbb4`: 1,940-source ABI/type/storage pass; mint lineage and Artist consumer, burn, STATIC selection/codec repairs, royalty/mint clients and museum Transfer/package/authoring source integrated. Mint 101, Royalty 11, Core 29 and entropy 10 scoped cases pass; root clients 256 and separate museum 72/22/19 cohorts pass. Three size blockers, mandatory Merkle prices, Royalty successor consumption and final system acceptance remain. See STREAM_FEATURE_STATUS.md. RC1 stays `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
+| Source checkpoint | `e7eb51f0`: 1,944-source ABI/type/storage pass; mint lineage and Artist consumer, burn, STATIC selection/codec repairs, royalty/mint clients and museum Transfer/package/authoring source integrated. Mint 101, Royalty 11, Core 29 and entropy 10 scoped cases pass; root clients 268, exact burn 49 and separate museum 72/22/19 cohorts pass. Three size blockers, remaining Merkle sale profiles, Royalty successor consumption and final system acceptance remain. See STREAM_FEATURE_STATUS.md. RC1 stays `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
