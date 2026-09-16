@@ -346,3 +346,5 @@ contract profiles and outstanding larger-script work.
   with separate signing domains, exact custody funding and dedicated token-rights calls.
 - [Royalty economic continuity](docs/current-royalty-continuity.md) reconstructs
   protected inventories and manifests, then prepares bounded import and completion calls.
+- [Mint counter profiles and continuity](docs/current-mint-continuity.md) produce
+  reviewed inventory manifests and prepare bounded definition, ancestry and state imports.
