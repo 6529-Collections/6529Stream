@@ -105,6 +105,8 @@ contract StreamRoyaltyEconomicContinuityTest is RevenueV1TestBase, OfficialSafeF
             address(0xB0B), 1_000_000, keccak256("original recipient")
         );
         (profile, wallet) = factory.registerProfile(entries, keccak256("original profile metadata"));
+        require(factory.deployWallet(profile) == wallet, "actual predicted royalty wallet");
+        require(factory.splitWalletExists(profile), "deployed canonical royalty wallet");
         signingKeys.push(0xC0171);
         signingKeys.push(0xC0172);
         runner = createOfficialSafe(

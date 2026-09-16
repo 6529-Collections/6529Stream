@@ -51,9 +51,14 @@ See [the continuity guide](../docs/guides/royalty-economic-continuity.md).
 
 The final source passes a 1,032-source ABI closure. All 70 original ABI entries
 and five original recursive storage roots remain exact. The initial six-product
-capture and the canonical-authority correction's two-product recheck fit: Royalty Resolver runtime
-24,281 bytes, with 295 bytes of margin. Eleven unit/Safe cases and two
-actual-current Artist/Core/paid-sale/custody cases are authored, not executed.
+capture and the canonical-authority correction's two-product recheck fit:
+Royalty Resolver runtime 24,281 bytes, with 295 bytes of margin. The focused
+77-source native rerun passes all eleven unit/Safe cases and all 21 production
+products fit. Two actual-current Artist/Core/paid-sale/custody cases remain
+unexecuted here. The first retained run passed two and failed nine at an
+undeployed fixture wallet; the two-line test repair deploys through the actual
+Factory and checks its predicted address/existence. No production change was
+required.
 The begin action now authenticates the immutable constructor authority, exact
 captured runtime and canonical marker independently of public Ownable transfers.
 Independent source review cleared both the continuity worker and that correction;
@@ -67,6 +72,12 @@ Base captures are `.tmp-royalty-continuity-abi10` and
 `D:/repos/6529Stream`. Completion requires actual guarded pointer replacement,
 unchanged snapshot and zero/default-source behavior, Safe rollback/retry and
 same-NFT custody settlement. A typed boundary alone does not establish that join.
+
+Native evidence is retained at
+`D:/temp/6529stream-v1-delivery-20260911/revenue/royalty-continuity-native1-20260916`
+and `royalty-continuity-native2-20260916`. The latter records the exact immutable
+source base plus the sole test overlay, compiler configuration, official Safe
+fixtures, log and production sizes. It completed in 63.828 seconds.
 
 ## Ordered next batches
 

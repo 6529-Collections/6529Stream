@@ -111,12 +111,19 @@ guard. No provider gas parameter is borrowed. Reads copy only fixed expected
 return sizes and clip their forwarded gas to the available frame budget while
 reserving decoding/error gas. The original ordinary storage prefix is unchanged.
 
-The source batch has eleven authored unit/Safe cases and two actual-current
-Artist/Core/Manager/Executor/Safe cases. The latter start with genuine op15 terms,
-paid dynamic primary mint, configured-zero or positive default-source snapshot,
-and real catalog/manifest governance; the positive case continues to same-NFT
-private custody resale. Unit Core/Artist and governance-context doubles remain
-explicitly scoped. These new behavior cases have not been executed at handoff.
+All eleven focused unit/Safe cases pass in the retained
+`royalty-continuity-native2-20260916` capture (77 sources, 63.828 seconds).
+They execute actual Resolver/Factory/Wallet and threshold Safe code; Core,
+Artist and governance-context doubles remain explicitly scoped. The first
+immutable-source capture passed two and failed nine before continuity execution:
+the fixture registered a split profile without deploying its wallet. The fixture
+now calls the original Factory deployment and verifies its predicted address and
+existence. That failed capture is retained; no production rule was relaxed.
+
+Two separate actual-current Artist/Core/Manager/Executor/Safe cases remain
+unexecuted here. They start with genuine op15 terms, paid dynamic primary mint,
+configured-zero or positive default-source snapshot, and real catalog/manifest
+governance; the positive case continues to same-NFT private custody resale.
 
 The 1,032-source ABI/storage check passes. All 70 original ABI entries and all
 five original recursive Royalty Resolver storage roots remain exact. The
@@ -126,8 +133,10 @@ for its two changed products: Resolver 24,281 runtime bytes / 25,900 creation
 bytes, and Parameters 1,826 runtime bytes. Unchanged products retain their
 recorded measurements: Import 13,815; State 5,450; AssignmentHash 2,334; Snapshot
 11,504 runtime bytes. The host has 295 bytes of runtime headroom; combined
-build sizing and cold read gas remain acceptance work. This is source/type/selected-size evidence, not deployment, runtime
-acceptance or a general protocol audit.
+build sizing and cold read gas remain acceptance work. The focused native run
+also measures all 21 production products within limits and reproduces those six
+measurements. These are scoped unit results, not actual-current cutover,
+deployment, release acceptance or a general protocol audit.
 
 ### Core replacement regression evidence
 
