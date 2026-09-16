@@ -245,6 +245,9 @@ def verify_package(directory, expected_manifest_hash):
     if isinstance(value, dict) and value.get("mode") == "recorded_account_authority_package_v2":
         from .authority_package_v2 import verify_authority_package
         return verify_authority_package(directory, expected_manifest_hash)
+    if isinstance(value, dict) and value.get("mode") == "recorded_typed_account_semantic_export":
+        from .semantic_export import verify_export
+        return verify_export(directory, expected_manifest_hash)
     if isinstance(value, dict) and value.get("mode") == "recorded_independent_exhibition_package":
         from .exhibition_package import verify_exhibition_package
         return verify_exhibition_package(directory, expected_manifest_hash)

@@ -142,6 +142,11 @@ these completed mechanisms from remaining adopted-profile acceptance.
 
 ## Remaining acceptance
 
+The [archival semantic exporter](museum-archival-semantic-export.md) can now
+retain this package beneath a compact, source-bound export manifest. Its new
+export schema preserves the registered V1/V2 definitions and keeps publication
+authority separate from the underlying independent-account claims.
+
 This completes a bounded typed-account interpretation and reconciliation path.
 The new export schema allocation does not implement the full semantic archival
 export lifecycle. Qualified external review, artist/curator/institution lanes,

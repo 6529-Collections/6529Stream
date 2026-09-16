@@ -87,6 +87,9 @@ the release policy in `docs/release-policy.md`.
 
 - Add ordered Safe CALL plans, exact primary-template CLEAR/FREEZE callers with
   independent assignment reconstruction, and eight-family Artist ceremony packets.
+- Add compact source-bound archival semantic exports, preserving exact typed
+  authority selections and immutable earlier schemas, with a separate governed
+  ARCHIVE publication route and offline reconstruction.
 
 - Add complete typed Artist authority hydration for original living, payout
   and direct-economics histories, preserving source records and replay guards.

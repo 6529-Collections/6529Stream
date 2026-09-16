@@ -15,6 +15,11 @@ qualified account-review derivatives, with explicit remaining profile coverage.
 versioned `Type` declarations, exact later declaration reuse and a registered
 interpretation closure while preserving all V1 bytes.
 
+[Archival semantic exports](../../docs/museum-archival-semantic-export.md) add a
+compact source-bound V3 manifest over those original packages and a separate
+preservation/global-admin ARCHIVE publication route. Exact selections and
+resource indexes remain retained children; full Museum acceptance stays explicit.
+
 Run from the repository root with Python 3.11 or later. Create an isolated
 environment and install the Museum dependency set; the repository's general
 tools lock alone does not include `rfc8785` or the JSON-LD processor. The full
