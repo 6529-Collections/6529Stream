@@ -361,7 +361,8 @@ contract StreamPreparedNativeOfferTest {
         house.bind(seller, 1);
         Content.Row[] memory rows = new Content.Row[](2);
         rows[0] = Content.Row(0, keccak256("actual selected bytes"), "urn:preview:zero");
-        rows[1] = Content.Row(bytes32(uint256(1)), keccak256("other actual bytes"), "urn:preview:one");
+        rows[1] =
+            Content.Row(bytes32(uint256(1)), keccak256("other actual bytes"), "urn:preview:one");
         gate = new StreamNativePrimaryOfferGate(
             address(manager), address(house), SALE, 1, PHASE, COUNTER, rows
         );
@@ -656,8 +657,9 @@ contract StreamPreparedNativeOfferTest {
         Case memory c = _case(false);
         DelegationManagementContract delegates = _delegated(c);
         _read(c);
+        address core = manager.core();
         vm.prank(buyer);
-        delegates.revokeDelegationAddress(manager.core(), c.purchase.authorizer, 2);
+        delegates.revokeDelegationAddress(core, c.purchase.authorizer, 2);
         vm.expectRevert();
         _read(c);
     }
@@ -669,16 +671,22 @@ contract StreamPreparedNativeOfferTest {
         vm.expectRevert();
         _signatures(c);
         c.data.buyerDelegation.walletWide = false;
+        _signatures(c);
+        vm.warp(1499);
+        _signatures(c);
         vm.warp(1500);
         vm.expectRevert();
         _signatures(c);
         vm.warp(1000);
+        _signatures(c);
+        address core = manager.core();
         vm.prank(buyer);
-        delegates.registerDelegationAddress(
-            manager.core(), c.purchase.authorizer, 2000, 2, false, 1
-        );
+        delegates.registerDelegationAddress(core, c.purchase.authorizer, 2000, 2, false, 1);
+        _assertGrantRow(delegates, core, c.purchase.authorizer, 1, 2000, false, 1);
         c.data.buyerDelegation.index = 1;
         vm.expectRevert();
+        _signatures(c);
+        c.data.buyerDelegation.index = 0;
         _signatures(c);
     }
 
@@ -774,7 +782,11 @@ contract StreamPreparedNativeOfferTest {
             c.data.selection.tokenDataHash = keccak256(c.batch.tokenData[0]);
             c.data.selection.proof = new bytes32[](1);
             c.data.selection.proof[0] = ContentHash.leaf(
-                block.chainid, address(house), SALE, bytes32(uint256(1)), keccak256("other actual bytes")
+                block.chainid,
+                address(house),
+                SALE,
+                bytes32(uint256(1)),
+                keccak256("other actual bytes")
             );
             c.intent.contentSelectionHash = ContentHash.leaf(
                 block.chainid, address(house), SALE, 0, c.data.selection.tokenDataHash
@@ -916,6 +928,7 @@ contract StreamPreparedNativeOfferTest {
 
     function _delegated(Case memory c) private returns (DelegationManagementContract delegates) {
         delegates = new DelegationManagementContract();
+        address core = manager.core();
         address signer = vm.addr(DELEGATE_KEY);
         c.purchase.authorizer = signer;
         c.batch.authorizer = signer;
@@ -923,7 +936,7 @@ contract StreamPreparedNativeOfferTest {
         _sign(c, SELLER_KEY, DELEGATE_KEY);
         Refund.DelegationConfiguration memory config = Refund.DelegationConfiguration(
             block.chainid,
-            manager.core(),
+            core,
             address(delegates),
             address(delegates).codehash,
             2,
@@ -942,7 +955,7 @@ contract StreamPreparedNativeOfferTest {
                 block.chainid,
                 address(house),
                 config.baseManifestHash,
-                manager.core(),
+                core,
                 address(delegates),
                 address(delegates).codehash,
                 uint256(2)
@@ -953,8 +966,35 @@ contract StreamPreparedNativeOfferTest {
         r.revision = 1;
         registry.set(address(house), r);
         vm.prank(buyer);
-        delegates.registerDelegationAddress(manager.core(), signer, 1500, 2, true, 0);
+        delegates.registerDelegationAddress(core, signer, 1500, 2, true, 0);
+        _assertGrantRow(delegates, core, signer, 0, 1500, true, 0);
         _arm(c);
+        _signatures(c);
+    }
+
+    function _assertGrantRow(
+        DelegationManagementContract delegates,
+        address core,
+        address signer,
+        uint256 index,
+        uint256 expiry,
+        bool allTokens,
+        uint256 tokenId
+    ) private view {
+        bytes32 key = keccak256(abi.encodePacked(buyer, core, signer, uint256(2)));
+        (
+            address vault,
+            address delegate,
+            uint256 registered,
+            uint256 expires,
+            bool all,
+            uint256 token
+        ) = delegates.globalDelegationHashes(key, index);
+        require(
+            vault == buyer && delegate == signer && registered == 1000 && expires == expiry
+                && all == allTokens && token == tokenId,
+            "actual buyer delegation row at expected index"
+        );
     }
 
     function _active(Case memory c) private returns (Prepared.Facts memory f) {
