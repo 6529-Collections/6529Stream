@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Correct the Artist entropy-recovery test fixture's canonical role-registry
+  pin and add live-role revocation/regrant and registry-drift regressions.
+
 - Add reproducible selected-host current-graph acceptance captures with native
   compiler provenance, complete suite inventories and production size checks.
 
