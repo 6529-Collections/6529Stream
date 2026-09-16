@@ -220,9 +220,23 @@ abstract contract PreservationNativeFixture is
                 keccak256("native manifest")
             )
         );
-        c.configureCollection(
-            1, address(new MockStreamEntropyProvider(address(c))), keccak256("salt"), true, 10
+        address nativeProvider = address(new MockStreamEntropyProvider(address(c)));
+        string memory reason = "urn:stream:fixture:preservation-provider";
+        (bytes32 scope, bytes32 oldHash, bytes32 newHash, uint8 actionClass) =
+            c.entropyProviderTransition(nativeProvider, EntropyProviderState.ACTIVE, reason);
+        require(actionClass == 1);
+        // The existing typed governance boundary admits the actual provider before use.
+        this.setCurrentAction(
+            true,
+            keccak256(abi.encode("preservation provider admission", address(c), nativeProvider)),
+            actionClass,
+            scope,
+            oldHash,
+            newHash
         );
+        c.activateEntropyProvider(nativeProvider, reason);
+        this.setCurrentAction(false, 0, 0, 0, 0, 0);
+        c.configureCollection(1, nativeProvider, keccak256("salt"), true, 10);
         c.configureCollectionRevealPolicy(1, 0, keccak256("ROLE_ENTROPY_REVEAL_OWNER"), 10, 0);
         c.registerEntropyScope(1, 1, keccak256("scope"));
     }
