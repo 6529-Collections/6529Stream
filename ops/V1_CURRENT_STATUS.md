@@ -18,7 +18,7 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 16 September parallel implementation batch
 
-Source through `2503b218` includes free-burn reveal credits, original Artist
+Source through `61b87646` includes free-burn reveal credits, original Artist
 withdrawal61, the native-price adapter size repair, distribution/burn/price
 clients including saved refund-window purchase verification, museum authority reconciliation and expanded actual-current test hosts.
 The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
@@ -87,7 +87,13 @@ native inventory reconstruction and partial assembly, with 60 root tests and
 four definition checks passing. Its complete inventory transport is synthetic;
 actual capture8 verifies only identity as a complete adopted requirement.
 The remaining required inputs cannot be satisfied by labels or supplied opaque
-bytes. Native lane/history adapters and genuine inventory capture continue.
+bytes. Complete owner and independent catalogs plus anchored Core ownership
+history are now integrated as 61b87646. Independent review is clear; all 111
+root new/compatibility tests and three profile checks pass. Genesis receipt
+walks, dynamic owner types, empty lanes and historical author pointers are
+covered. Their complete transport controls remain synthetic; genuine same-block
+captures, remaining hosts/scopes and canonical assembler joins continue. Two
+fixture-URI Solidity regressions are authored but have not run.
 
 Renderer repair `df440372` corrects three exact return sizes
 from 416 to 384 bytes. Root attests all 226 frozen sources; four new actual
