@@ -46,6 +46,7 @@ abstract contract DutchSaleTestBase is UniversalSettlementTestBase {
         resolver.setPrimaryProfileAssignment(CLASS, 1, 1, profile, 0);
         artists.accept(artist);
         refundArtist.setPayout(artist);
+        _approveCurrentPrimaryEconomics();
         recorder = new StreamPrimarySaleSettlement(resolver, address(registry), escrow);
         _producer(true);
         refundRoles = new StreamRoleRegistry(address(revenueAuthority));
@@ -64,6 +65,20 @@ abstract contract DutchSaleTestBase is UniversalSettlementTestBase {
 
     function _refundArtistFacade(RefundRuntimeArtist target) internal virtual returns (address) {
         return address(target);
+    }
+
+    function _approveCurrentPrimaryEconomics() internal {
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory assignment =
+            resolver.resolvePrimaryAssignment(1, 0, CLASS);
+        DutchRuntimeArtist(address(refundArtist)).recordTestEconomicsConsent(
+            address(resolver),
+            1,
+            CLASS,
+            assignment.scope,
+            assignment.scopeId,
+            assignment.assignmentHash,
+            true
+        );
     }
 
     function _deployment() internal returns (StreamNativeDutchSale.DeploymentConfig memory d) {
@@ -199,7 +214,38 @@ abstract contract DutchSaleTestBase is UniversalSettlementTestBase {
 
 /// @dev Current consent evidence seam only; actual op16 provenance remains integration-owned.
 contract DutchRuntimeArtist is RefundRuntimeArtist {
+    mapping(bytes32 => bool) private economicsConsents;
+
     constructor(address c) RefundRuntimeArtist(c) { }
+
+    function recordTestEconomicsConsent(
+        address resolver,
+        uint256 collection,
+        bytes32 revenueClass,
+        uint8 scope,
+        uint256 scopeId,
+        bytes32 assignmentHash,
+        bool allowed
+    ) external {
+        economicsConsents[_economicsKey(
+            resolver, collection, revenueClass, scope, scopeId, assignmentHash
+        )] = allowed;
+    }
+
+    function requireEconomicsConsent(
+        uint256 collection,
+        bytes32 revenueClass,
+        uint8 scope,
+        uint256 scopeId,
+        bytes32 assignmentHash
+    ) external view {
+        require(
+            economicsConsents[_economicsKey(
+                    msg.sender, collection, revenueClass, scope, scopeId, assignmentHash
+                )],
+            "current exact typed consent"
+        );
+    }
 
     function saleConsentScope(uint256) external view returns (uint8) {
         return saleConsentRequired ? 1 : 0;
@@ -213,5 +259,27 @@ contract DutchRuntimeArtist is RefundRuntimeArtist {
         bytes32 key = keccak256(abi.encode(msg.sender, collection, id, hash));
         bool allowed = saleConsents[key];
         return (allowed, allowed ? keccak256(abi.encode("Dutch consent", key)) : bytes32(0));
+    }
+
+    function _economicsKey(
+        address resolver,
+        uint256 collection,
+        bytes32 revenueClass,
+        uint8 scope,
+        uint256 scopeId,
+        bytes32 assignmentHash
+    ) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                resolver,
+                collection,
+                generation,
+                binding,
+                revenueClass,
+                scope,
+                scopeId,
+                assignmentHash
+            )
+        );
     }
 }

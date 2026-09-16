@@ -55,6 +55,7 @@ abstract contract ClearingSaleTestBase is DutchSaleTestBase {
         resolver.setPrimaryProfileAssignment(CLASS, 1, 1, profile, 0);
         artists.accept(artist);
         refundArtist.setPayout(artist);
+        _approveCurrentPrimaryEconomics();
         escrow = new StreamRevenueEscrow(
             factory,
             address(revenueAuthority),
