@@ -28,6 +28,9 @@ export function buildSigningPayload<T extends object>(chainId: bigint, verifying
     else if (field.type === "bytes32") {
       if (typeof value !== "string" || !isHexString(value, 32)) throw new Error(`${field.name} must contain exactly 32 bytes`);
       normalized[field.name] = value;
+    } else if (field.type === "bool") {
+      if (typeof value !== "boolean") throw new Error(`${field.name} must be boolean`);
+      normalized[field.name] = value;
     } else if (field.type.startsWith("uint")) normalized[field.name] = uint(value, Number(field.type.slice(4)), field.name);
     else throw new Error(`Unsupported signing field ${field.type}`);
   }

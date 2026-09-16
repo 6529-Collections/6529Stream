@@ -51,6 +51,9 @@ the release policy in `docs/release-policy.md`.
 - Add reproducible selected-host current-graph acceptance captures with native
   compiler provenance, complete suite inventories and production size checks.
 
+- Add native Dutch and clearing allowlist callers with original signatures,
+  same-leaf ceilings, explicit registration hash evidence and payer refund recovery.
+
 - Add native allowlist-price registration, original-domain signing and payable
   purchase callers, with explicit price rules and price-bearing mint-gate proofs.
 

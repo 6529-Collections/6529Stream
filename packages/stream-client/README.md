@@ -356,3 +356,7 @@ contract profiles and outstanding larger-script work.
   approval, prepare free or native purchases and recover free-burn fee credits.
 - [Native allowlist prices](docs/current-native-allowlist-price.md) prepare explicit
   price policies and proof-bearing purchases with the original signing domain.
+- [Native Dutch allowlists](docs/current-native-allowlist-dutch.md) preserve signed
+  maxima, apply leaf ceilings to the schedule and recover payer excess credits.
+- [Native clearing allowlists](docs/current-native-allowlist-clearing.md) require
+  exact signed proof prices and retain the original rebate and supplement calls.
