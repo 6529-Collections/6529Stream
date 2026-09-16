@@ -18,14 +18,15 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 16 September parallel implementation batch
 
-Source through `df440372` includes free-burn reveal credits, original Artist
+Source through `fda1d244` includes free-burn reveal credits, original Artist
 withdrawal61, the native-price adapter size repair, distribution/burn/price
 clients including saved refund-window purchase verification, museum authority reconciliation and expanded actual-current test hosts.
 The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
 records exact handoffs and evidence, superseding older queue descriptions.
 
-All 1,975 Solidity sources pass ABI/type/storage checking. Root passes all 347
-client tests with generation/build/types and 131 museum authority/profile tests.
+All 1,978 Solidity sources pass ABI/type/storage checking. Root passes all 347
+client tests with generation/build/types, 131 museum authority/profile tests and
+a separate 27-case archival export/publication cohort.
 Separate native cohorts pass mint101, Royalty11, Core29, entropy10, final burn49
 and later burn-credit31 distinct cases. These captures have different sources
 and component boundaries; counts must not be added into a complete-system claim.
@@ -35,8 +36,11 @@ attested against all 312 sources and 351 compiler metadata records. It measures
 24,560 runtime bytes. Dutch/clearing price consumers are integrated as fbacfc7d
 with 26 authored tests and fitting selected products; their runtime acceptance
 and ERC20 consumer implementation remain. Refund-window captured pricing is
-integrated as 08775172 with 14 authored cases and a running pinned native cohort;
-its original signed authorization and refund accounting remain distinct. Artist
+integrated as 08775172: its pinned native cohort passes 76/77 with all 139
+compiled production products fitting. The single failure is a test expecting an
+inactive settlement getter to return zero instead of its intentional revert.
+The test-only correction is integrated as fda1d244 and its focused retry run is
+pending. Original signed authorization and refund accounting remain distinct. Artist
 withdrawal has ten authored cases; Royalty successor tests and actual-governance
 burn/Safe tests are authored but await complete current-stack execution.
 
@@ -58,18 +62,25 @@ composition. Root attests all 194 sources and 75 fitting production products.
 Full rendered-byte retention and publication authority remain separate work.
 These changes are separate from the held Router patch. Museum Type/declaration/later-review records now have an actual local Safe
 capture and offline replay in 8ba023dc. Its RDF/JSON snapshot remains synthetic;
-qualified external authority, wider schema/conformance and archival export
-publication remain. Renderer repair `df440372` corrects three exact return sizes
+qualified external authority and wider schema/conformance remain. Archival
+export 23477832 now retains all selected source claims in a compact immutable V3
+manifest and publishes it through the actual local governed Metadata ARCHIVE
+route. All 27 root tests pass; independent review also rebuilds its 24 original
+inputs offline. Complete object dossiers, media and institutional acceptance
+remain separate. Renderer repair `df440372` corrects three exact return sizes
 from 416 to 384 bytes. Root attests all 226 frozen sources; four new actual
 Metadata/DependencyRegistry cases pass. The wider scoped capture has 27 passing
 cases and one remaining capacity failure: a 24,576-byte script needs about 46.7m
 gas for full JSON, exceeding the fixture's 30m render budget. Increasing a test
-budget is not target-chain acceptance. A separate pure-encoding optimization
-batch is underway with exact-output differential fuzzing.
+budget is not target-chain acceptance. Pure encoding optimization 9753b496 now
+passes 11 focused cases, including three 256-input fuzz properties. The isolated
+24,576-byte ONCHAIN JSON workload drops from 42.69m to 7.71m gas with identical
+bytes. Root verifies all 14 captured sources. Its full cold Renderer/checkpoint
+transaction benchmark is running separately; no complete capacity claim follows.
 
 Sepolia enforces a 16,777,216 per-transaction gas limit; `eth_call` is separate.
-Therefore this measured workload cannot yet be used inside an onchain
-checkpoint transaction. [Ethereum Foundation gas-cap guidance](https://blog.ethereum.org/2025/10/21/fusaka-gascap-update).
+The pre-optimization workload exceeded that limit; the complete optimized
+checkpoint transaction still needs acceptance. [Ethereum Foundation gas-cap guidance](https://blog.ethereum.org/2025/10/21/fusaka-gascap-update).
 
 A specification/source reconciliation confirms a remaining implementation gap:
 fixed-price PUBLIC/COMMIT_REVEAL and buyer-bound private sales of selected

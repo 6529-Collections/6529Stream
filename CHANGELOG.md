@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Reduce pure STATIC JSON/HTML encoding gas while preserving exact bytes, with
+  frozen-reference differential fuzzing and large-script performance cases.
+
 - Correct the STATIC renderer's exact script-bundle return length, with actual
   metadata/dependency regression tests and a canonical PNG test fixture.
 
