@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistOnboardingOperations.sol";
+import "./StreamArtistUnavailabilityOperations.sol";
 import { StreamArtistRecoveryActionOperations } from "./StreamArtistRecoveryActionOperations.sol";
 import { StreamArtistAttestationOperations } from "./StreamArtistAttestationOperations.sol";
 import { StreamArtistIdentityOperations } from "./StreamArtistIdentityOperations.sol";
@@ -26,6 +28,20 @@ import {
 
 /// @notice Fixed decoders for original variable-length Coordinator recipes.
 library StreamArtistCoordinatorRecordTransport {
+    function propose(D.CoordinatorContext memory x, bytes calldata data)
+        public
+        returns (bytes32 artistId, bytes32 bindingHash)
+    {
+        (
+            address actor,
+            uint256 id,
+            T.BindingProposal memory p,
+            bytes memory document,
+            string memory displayName
+        ) = abi.decode(data[4:], (address, uint256, T.BindingProposal, bytes, string));
+        return StreamArtistOnboardingOperations.propose(x, actor, id, p, document, displayName);
+    }
+
     function prepareRecovery(D.CoordinatorContext memory x, bytes calldata data)
         public
         returns (bytes32)
@@ -95,5 +111,17 @@ library StreamArtistCoordinatorRecordTransport {
             Succ.PublicDocument memory document
         ) = abi.decode(data[4:], (address, Succ.Directive, T.Authorization, Succ.PublicDocument));
         return StreamArtistSuccessionOperations.directive(x, actor, p, a, document);
+    }
+
+    function unavailability(
+        D.CoordinatorContext memory x,
+        address originalFinality,
+        bytes calldata data
+    ) public returns (bytes32) {
+        (address actor, Recovery.FindingRequest memory request, U.Target memory target) =
+            abi.decode(data[4:], (address, Recovery.FindingRequest, U.Target));
+        return StreamArtistUnavailabilityOperations.record(
+            x, originalFinality, actor, request, target
+        );
     }
 }

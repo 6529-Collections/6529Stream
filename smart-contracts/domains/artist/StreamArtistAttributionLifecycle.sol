@@ -11,6 +11,7 @@ import {
     StreamArtistRepudiationTypes as RP
 } from "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
 import "./StreamArtistRepudiationState.sol";
+import "./StreamArtistRepudiationAttributionTransport.sol";
 
 import "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
 import {
@@ -800,8 +801,8 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         uint256 nonce
     ) external returns (bytes32) {
         _check(c, 47);
-        RP.Mutation memory m = StreamArtistRepudiationState.stage(
-            _attestationStore(), _environment(), c, p, admission, nonce
+        RP.Mutation memory m = StreamArtistRepudiationAttributionTransport.applyEncoded(
+            _attestationStore(), _environment(), msg.data
         );
         _repudiationCommit(c, m, keccak256("attribution_lifecycle.replay.repudiation_key"));
         _native(47, m.record, admission.binding_.artistId, p.collectionId);
@@ -814,13 +815,17 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         RP.GuardianProof calldata proof
     ) external {
         _check(c, 48);
-        RP.Mutation memory m = StreamArtistRepudiationState.veto(c, record, proof);
+        RP.Mutation memory m = StreamArtistRepudiationAttributionTransport.applyEncoded(
+            _attestationStore(), _environment(), msg.data
+        );
         _repudiationCommit(c, m, keccak256("attribution_lifecycle.replay.repudiation_veto_key"));
     }
 
     function cancelRepudiation(T.ActionContext calldata c, RP.Record calldata record) external {
         _check(c, 49);
-        RP.Mutation memory m = StreamArtistRepudiationState.cancel(c, record);
+        RP.Mutation memory m = StreamArtistRepudiationAttributionTransport.applyEncoded(
+            _attestationStore(), _environment(), msg.data
+        );
         _repudiationCommit(
             c, m, keccak256("attribution_lifecycle.replay.repudiation_cancellation_key")
         );
@@ -828,9 +833,8 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
 
     function executeRepudiation(T.ActionContext calldata c, RP.Record calldata record) external {
         _check(c, 50);
-        RP.Mutation memory m = StreamArtistRepudiationState.execute(_attestationStore(), c, record);
-        StreamArtistDisputeState.markRepudiated(
-            record.terms.collectionId, record.terms.bindingGeneration
+        RP.Mutation memory m = StreamArtistRepudiationAttributionTransport.applyEncoded(
+            _attestationStore(), _environment(), msg.data
         );
         _repudiationCommit(
             c, m, keccak256("attribution_lifecycle.replay.repudiation_execution_key")

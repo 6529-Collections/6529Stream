@@ -28,6 +28,157 @@ import {
 
 /// @notice Fixed typed read encoding; suite and host originate from the immutable reader.
 library StreamArtistRegistryAuthorityEncoding {
+    /// @dev Original facade arguments decoded once; each typed encoder below is unchanged.
+    function readEncoded(address host, address coordinator, bytes calldata data)
+        public
+        view
+        returns (bytes memory)
+    {
+        bytes4 selector = bytes4(data[:4]);
+        if (selector == bytes4(keccak256("estateActivationState(bytes32)"))) {
+            bytes32 artistId = abi.decode(data[4:], (bytes32));
+            return estateActivationState(host, coordinator, artistId);
+        }
+        if (selector == bytes4(keccak256("estateActivationRecord(bytes32)"))) {
+            bytes32 record = abi.decode(data[4:], (bytes32));
+            return estateActivationRecord(host, coordinator, record);
+        }
+        if (selector == bytes4(keccak256("estateActivationNonceHint(bytes32,address)"))) {
+            (bytes32 artistId, address successor) = abi.decode(data[4:], (bytes32, address));
+            return estateActivationNonceHint(host, coordinator, artistId, successor);
+        }
+        if (selector == bytes4(keccak256("currentAuthorityCapabilities(bytes32)"))) {
+            bytes32 artistId = abi.decode(data[4:], (bytes32));
+            return currentAuthorityCapabilities(host, coordinator, artistId);
+        }
+        if (selector == bytes4(keccak256("estateAccelerationContext((bytes32,bytes32,bytes32))"))) {
+            Estate.Execution memory p = abi.decode(data[4:], (Estate.Execution));
+            return estateAccelerationContext(host, coordinator, p);
+        }
+        if (selector == bytes4(keccak256("collectionArtistAuthority(uint256)"))) {
+            uint256 collectionId = abi.decode(data[4:], (uint256));
+            return collectionArtistAuthority(host, coordinator, collectionId);
+        }
+        if (selector == bytes4(keccak256("successorDesignation(bytes32)"))) {
+            bytes32 artistId = abi.decode(data[4:], (bytes32));
+            return successorDesignation(host, coordinator, artistId);
+        }
+        if (selector == bytes4(keccak256("operativeSuccessorRecord(bytes32)"))) {
+            bytes32 artistId = abi.decode(data[4:], (bytes32));
+            return operativeSuccessorRecord(host, coordinator, artistId);
+        }
+        if (selector == bytes4(keccak256("operativeEstateDirective(bytes32)"))) {
+            bytes32 artistId = abi.decode(data[4:], (bytes32));
+            return operativeEstateDirective(host, coordinator, artistId);
+        }
+        if (selector == bytes4(keccak256("successorDesignationRecord(bytes32)"))) {
+            bytes32 record = abi.decode(data[4:], (bytes32));
+            return successorDesignationRecord(host, coordinator, record);
+        }
+        if (selector == bytes4(keccak256("estateDirectiveRecord(bytes32)"))) {
+            bytes32 record = abi.decode(data[4:], (bytes32));
+            return estateDirectiveRecord(host, coordinator, record);
+        }
+        if (selector == bytes4(keccak256("estateDirectivePayload(bytes32)"))) {
+            bytes32 record = abi.decode(data[4:], (bytes32));
+            return estateDirectivePayload(host, coordinator, record);
+        }
+        if (
+            selector
+                == bytes4(
+                    keccak256(
+                        "identityContestDismissalContext((bytes32,bytes32,bytes32,bytes32,bytes32,bool,bytes32))"
+                    )
+                )
+        ) {
+            Dismissal.Request memory p = abi.decode(data[4:], (Dismissal.Request));
+            return identityContestDismissalContext(host, coordinator, p);
+        }
+        if (selector == bytes4(keccak256("currentIdentityContestCause(bytes32)"))) {
+            bytes32 artistId = abi.decode(data[4:], (bytes32));
+            return currentIdentityContestCause(host, coordinator, artistId);
+        }
+        if (selector == bytes4(keccak256("identityContestCause(bytes32)"))) {
+            bytes32 causeHash = abi.decode(data[4:], (bytes32));
+            return identityContestCause(host, coordinator, causeHash);
+        }
+        if (selector == bytes4(keccak256("identityContestDismissalRecord(bytes32)"))) {
+            bytes32 recordHash = abi.decode(data[4:], (bytes32));
+            return identityContestDismissalRecord(host, coordinator, recordHash);
+        }
+        if (selector == bytes4(keccak256("latestIdentityContestDismissal(bytes32)"))) {
+            bytes32 artistId = abi.decode(data[4:], (bytes32));
+            return latestIdentityContestDismissal(host, coordinator, artistId);
+        }
+        if (selector == bytes4(keccak256("identityTransitionClosure(bytes32,bytes32)"))) {
+            (bytes32 artistId, bytes32 transitionRecordHash) =
+                abi.decode(data[4:], (bytes32, bytes32));
+            return identityTransitionClosure(host, coordinator, artistId, transitionRecordHash);
+        }
+        if (selector == bytes4(keccak256("identityRevisionContinuation(bytes32)"))) {
+            bytes32 continuationHash = abi.decode(data[4:], (bytes32));
+            return identityRevisionContinuation(host, coordinator, continuationHash);
+        }
+        if (selector == bytes4(keccak256("identityContestRecord(bytes32)"))) {
+            bytes32 record = abi.decode(data[4:], (bytes32));
+            return identityContestRecord(host, coordinator, record);
+        }
+        if (selector == bytes4(keccak256("latestIdentityContest(bytes32)"))) {
+            bytes32 artistId = abi.decode(data[4:], (bytes32));
+            return latestIdentityContest(host, coordinator, artistId);
+        }
+        if (
+            selector
+                == bytes4(
+                    keccak256("identityContestGovernanceContext(bytes32,bytes32,bytes32,bytes32)")
+                )
+        ) {
+            (
+                bytes32 artistId,
+                bytes32 subjectRecordHash,
+                bytes32 evidenceHash,
+                bytes32 reasonHash
+            ) = abi.decode(data[4:], (bytes32, bytes32, bytes32, bytes32));
+            return identityContestGovernanceContext(
+                host, coordinator, artistId, subjectRecordHash, evidenceHash, reasonHash
+            );
+        }
+        if (selector == bytes4(keccak256("guardianSetRecord(bytes32)"))) {
+            bytes32 record = abi.decode(data[4:], (bytes32));
+            return guardianSetRecord(host, coordinator, record);
+        }
+        if (selector == bytes4(keccak256("rotationRecord(bytes32)"))) {
+            bytes32 record = abi.decode(data[4:], (bytes32));
+            return rotationRecord(host, coordinator, record);
+        }
+        if (selector == bytes4(keccak256("standingRevocationRecord(bytes32)"))) {
+            bytes32 record = abi.decode(data[4:], (bytes32));
+            return standingRevocationRecord(host, coordinator, record);
+        }
+        if (selector == bytes4(keccak256("identityRecordBytes(bytes32)"))) {
+            bytes32 artistId = abi.decode(data[4:], (bytes32));
+            return identityRecordBytes(host, coordinator, artistId);
+        }
+        if (selector == bytes4(keccak256("identityDocumentBytes(bytes32)"))) {
+            bytes32 hash = abi.decode(data[4:], (bytes32));
+            return identityDocumentBytes(host, coordinator, hash);
+        }
+        if (selector == bytes4(keccak256("artistDisplayName(bytes32)"))) {
+            bytes32 artistId = abi.decode(data[4:], (bytes32));
+            return artistDisplayName(host, coordinator, artistId);
+        }
+        if (selector == bytes4(keccak256("identityRevisionRecord(bytes32)"))) {
+            bytes32 record = abi.decode(data[4:], (bytes32));
+            return identityRevisionRecord(host, coordinator, record);
+        }
+        if (selector == bytes4(keccak256("artistAuthorizationState(bytes32,bytes32,uint256)"))) {
+            (bytes32 artistId, bytes32 digest, uint256 nonce) =
+                abi.decode(data[4:], (bytes32, bytes32, uint256));
+            return artistAuthorizationState(host, coordinator, artistId, digest, nonce);
+        }
+        revert T.InvalidRecord();
+    }
+
     struct Context {
         address host;
         address coordinator;
@@ -109,17 +260,17 @@ library StreamArtistRegistryAuthorityEncoding {
             .currentAuthorityCapabilities(artistId);
     }
 
-    function estateAccelerationContext(
-        address host,
-        address coordinator,
-        Estate.Execution calldata p
-    ) public view returns (bytes memory) {
+    function estateAccelerationContext(address host, address coordinator, Estate.Execution memory p)
+        public
+        view
+        returns (bytes memory)
+    {
         Estate.AccelerationContext memory v0 =
             _original_estateAccelerationContext(Context(host, coordinator), p);
         return abi.encode(v0);
     }
 
-    function _original_estateAccelerationContext(Context memory x, Estate.Execution calldata p)
+    function _original_estateAccelerationContext(Context memory x, Estate.Execution memory p)
         private
         view
         returns (Estate.AccelerationContext memory)
@@ -274,7 +425,7 @@ library StreamArtistRegistryAuthorityEncoding {
     function identityContestDismissalContext(
         address host,
         address coordinator,
-        Dismissal.Request calldata p
+        Dismissal.Request memory p
     ) public view returns (bytes memory) {
         Dismissal.Context memory v0 = _original_identityContestDismissalContext(
             Context(host, coordinator), p
@@ -282,10 +433,11 @@ library StreamArtistRegistryAuthorityEncoding {
         return abi.encode(v0);
     }
 
-    function _original_identityContestDismissalContext(
-        Context memory x,
-        Dismissal.Request calldata p
-    ) private view returns (Dismissal.Context memory) {
+    function _original_identityContestDismissalContext(Context memory x, Dismissal.Request memory p)
+        private
+        view
+        returns (Dismissal.Context memory)
+    {
         return IStreamArtistIdentityDismissalOwner(_contentSuite(x).owners[2])
             .identityContestDismissalContext(p);
     }

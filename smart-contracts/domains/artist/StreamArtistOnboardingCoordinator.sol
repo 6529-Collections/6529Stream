@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistCoordinatorDisputeTransport.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
 import {
     StreamArtistRepudiationTypes as RP
@@ -451,8 +452,8 @@ contract StreamArtistOnboardingCoordinator is
         U.Target calldata target
     ) external operation returns (bytes32) {
         _unavailabilityPins();
-        return StreamArtistUnavailabilityOperations.record(
-            _economicContext(), finalityRegistry, actor, p, target
+        return StreamArtistCoordinatorRecordTransport.unavailability(
+            _economicContext(), finalityRegistry, msg.data
         );
     }
 
@@ -678,9 +679,7 @@ contract StreamArtistOnboardingCoordinator is
         bytes calldata document,
         string calldata displayName
     ) external operation returns (bytes32 artistId, bytes32 bindingHash) {
-        return StreamArtistOnboardingOperations.propose(
-            _economicContext(), actor, collectionId, p, document, displayName
-        );
+        return StreamArtistCoordinatorRecordTransport.propose(_economicContext(), msg.data);
     }
 
     function coordinateAcceptArtistBinding(
@@ -1068,7 +1067,9 @@ contract StreamArtistOnboardingCoordinator is
         AD.Standing calldata standing,
         T.Authorization calldata a
     ) external operation returns (bytes32) {
-        return StreamArtistDisputeOperations.file(_economicContext(), actor, p, standing, a, 44);
+        return StreamArtistCoordinatorDisputeTransport.applyEncoded(
+            _economicContext(), msg.data, 44
+        );
     }
 
     function coordinateRecordCounterStatement(
@@ -1077,7 +1078,9 @@ contract StreamArtistOnboardingCoordinator is
         AD.Standing calldata standing,
         T.Authorization calldata a
     ) external operation returns (bytes32) {
-        return StreamArtistDisputeOperations.file(_economicContext(), actor, p, standing, a, 45);
+        return StreamArtistCoordinatorDisputeTransport.applyEncoded(
+            _economicContext(), msg.data, 45
+        );
     }
 
     function coordinateResolveAttributionDispute(address actor, AD.ResolutionRequest calldata p)
@@ -1085,7 +1088,8 @@ contract StreamArtistOnboardingCoordinator is
         operation
         returns (bytes32)
     {
-        return StreamArtistDisputeOperations.resolve(_economicContext(), actor, p);
+        return
+            StreamArtistCoordinatorDisputeTransport.applyEncoded(_economicContext(), msg.data, 46);
     }
 
     function coordinateRevokeAttribution(
@@ -1093,7 +1097,9 @@ contract StreamArtistOnboardingCoordinator is
         AD.Filing calldata p,
         T.Authorization calldata a
     ) external operation returns (bytes32) {
-        return StreamArtistRepudiationOperations.stage(_economicContext(), actor, p, a);
+        return StreamArtistCoordinatorDisputeTransport.applyEncoded(
+            _economicContext(), msg.data, 47
+        );
     }
 
     function coordinateVetoAttributionRepudiation(
@@ -1102,20 +1108,20 @@ contract StreamArtistOnboardingCoordinator is
         bytes32 expected,
         bytes32 reason
     ) external operation {
-        StreamArtistRepudiationOperations.veto(_economicContext(), actor, id, expected, reason);
+        StreamArtistCoordinatorDisputeTransport.applyEncoded(_economicContext(), msg.data, 48);
     }
 
     function coordinateCancelAttributionRepudiation(address actor, uint256 id, bytes32 expected)
         external
         operation
     {
-        StreamArtistRepudiationOperations.cancel(_economicContext(), actor, id, expected);
+        StreamArtistCoordinatorDisputeTransport.applyEncoded(_economicContext(), msg.data, 49);
     }
 
     function coordinateExecuteAttributionRepudiation(address actor, uint256 id, bytes32 expected)
         external
         operation
     {
-        StreamArtistRepudiationOperations.execute(_economicContext(), actor, id, expected);
+        StreamArtistCoordinatorDisputeTransport.applyEncoded(_economicContext(), msg.data, 50);
     }
 }
