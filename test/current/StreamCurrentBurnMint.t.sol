@@ -1,14 +1,55 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../helpers/StreamCurrentStackFixture.sol";
-import "../helpers/OfficialSafeFixture.sol";
+import "../helpers/StreamCurrentSafeGovernanceFixture.sol";
 import "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
 import "../../smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol";
 import { StreamBurnMintGate } from "../../smart-contracts/domains/mint/StreamBurnMintGate.sol";
 import {
     IStreamBurnMintGate as Burn
 } from "../../smart-contracts/interfaces/stream/mint/IStreamBurnMintGate.sol";
+import {
+    IStreamNativeSurplus as BurnSurplus
+} from "../../smart-contracts/interfaces/stream/mint/IStreamNativeSurplus.sol";
+import { StreamNativeSurplus } from "../../smart-contracts/domains/mint/StreamNativeSurplus.sol";
+import { ReentrancyGuard } from "../../smart-contracts/vendor/openzeppelin/ReentrancyGuard.sol";
+
+interface CurrentBurnCallVm {
+    function expectCall(address, uint256, bytes calldata, uint64) external;
+    function expectEmit(bool, bool, bool, bool, address) external;
+}
+
+contract CurrentBurnForcedNative {
+    constructor(address payable target) payable {
+        selfdestruct(target);
+    }
+}
+
+contract CurrentBurnSurplusRecipient {
+    StreamBurnMintGate private immutable gate;
+    bytes32 private immutable key;
+    bool public rejects;
+    bool public reentered;
+    bytes public callbackError;
+    uint256 private donation;
+
+    constructor(StreamBurnMintGate gate_, bytes32 key_) {
+        gate = gate_;
+        key = key_;
+    }
+
+    function configure(bool reject_, uint256 donation_) external {
+        rejects = reject_;
+        donation = donation_;
+    }
+
+    receive() external payable {
+        require(!rejects, "burn surplus recipient rejects");
+        (reentered, callbackError) =
+            address(gate).call(abi.encodeCall(gate.claimRefund, (key, address(this))));
+        if (donation != 0) new CurrentBurnForcedNative{ value: donation }(payable(address(gate)));
+    }
+}
 
 contract CurrentBurnMintReceiver is IERC721Receiver {
     bool public rejects;
@@ -31,7 +72,7 @@ contract CurrentBurnMintReceiver is IERC721Receiver {
 
 /// @notice Whole current Core/Manager/Ledger/Artist/registry/recorder/native adapter joins and threshold Safes.
 /// @dev The shared fixture's external entropy provider remains the explicit service boundary.
-contract StreamCurrentBurnMintTest is StreamCurrentStackFixture, OfficialSafeFixture {
+contract StreamCurrentBurnMintTest is StreamCurrentSafeGovernanceFixture {
     bytes32 private constant BURN_PHASE = keccak256("current burn mint phase");
     bytes32 private constant SEED_PHASE = keccak256("current burn sources");
     bytes32 private constant CAP = keccak256("burn supply");
@@ -43,6 +84,12 @@ contract StreamCurrentBurnMintTest is StreamCurrentStackFixture, OfficialSafeFix
     uint256[] private keys;
     bool private nativeMode;
     bytes32 private nativeId;
+    bytes32 private constant BURN_SURPLUS_REASON =
+        keccak256("recover unsolicited burn gate native value");
+    bytes32 private constant EMERGENCY = keccak256("ROLE_EMERGENCY_RECIPIENT");
+    event AdapterSurplusSwept(
+        uint16 schemaVersion, address indexed to, address asset, uint256 amount, bytes32 actionId
+    );
 
     function setUp() public {
         keys.push(0xB001);
@@ -121,6 +168,26 @@ contract StreamCurrentBurnMintTest is StreamCurrentStackFixture, OfficialSafeFix
     function _additionalEscrowProducers() internal view override returns (address[] memory rows) {
         rows = new address[](1);
         rows[0] = address(recorder);
+    }
+
+    function _additionalOperatingPolicies()
+        internal
+        view
+        override
+        returns (GovernanceActionPolicyEntry[] memory rows)
+    {
+        rows = new GovernanceActionPolicyEntry[](1);
+        rows[0] = GovernanceActionPolicyEntry(
+            1,
+            address(burnGate),
+            BurnSurplus.sweepNativeSurplus.selector,
+            address(burnGate).codehash,
+            keccak256(abi.encode(DEPLOYMENT_HASH, address(burnGate))),
+            1,
+            0,
+            0,
+            bytes32(0)
+        );
     }
 
     function _configureAdditionalProducts() internal override {
@@ -429,5 +496,300 @@ contract StreamCurrentBurnMintTest is StreamCurrentStackFixture, OfficialSafeFix
             "Safe refund claim"
         );
         require(address(buyerSafe).balance == 1 ether - 1000, "payer pays price only");
+    }
+
+    /// @dev External setup/time boundaries prevent via-IR from reusing timestamps across test warps.
+    function prepareCurrentBurnSurplus()
+        external
+        returns (CurrentBurnSurplusRecipient recipient, bytes32 key)
+    {
+        require(msg.sender == address(this), "fixture only");
+        this.deployBurnScenario(false);
+        uint256[] memory sources = _seed();
+        require(
+            executeSafe(
+                buyerSafe,
+                keys,
+                address(burnGate),
+                25,
+                abi.encodeCall(
+                    burnGate.burnAndMint, (_batch(BURN_PHASE, address(buyerSafe)), sources)
+                ),
+                0
+            ),
+            "actual Safe burn creates credit"
+        );
+        key = burnGate.program(1).configHash;
+        require(
+            burnGate.refundableBalance(key, address(buyerSafe)) == 25
+                && burnGate.refundLiability() == 25,
+            "actual buyer liability"
+        );
+        uint256[] memory governanceKeys = new uint256[](2);
+        governanceKeys[0] = 0x6001;
+        governanceKeys[1] = 0x6002;
+        OfficialSafe next = createOfficialSafe(
+            deploySafeComponents("1.4.1"), safeOwnerAddresses(governanceKeys), 2, 203
+        );
+        _installGovernorSafe(next, governanceKeys);
+        recipient = new CurrentBurnSurplusRecipient(burnGate, key);
+        while (roles.roleHolderCount(EMERGENCY) != 0) {
+            this.setCurrentBurnEmergency(roles.roleHolderAt(EMERGENCY, 0), false);
+        }
+        this.setCurrentBurnEmergency(address(recipient), true);
+        vm.deal(address(this), 100);
+        new CurrentBurnForcedNative{ value: 100 }(payable(address(burnGate)));
+    }
+
+    function setCurrentBurnEmergency(address holder, bool granted) external {
+        require(msg.sender == address(this), "fixture only");
+        (GovernanceCall memory call_, bytes memory data) = _roleCall(EMERGENCY, holder, granted);
+        _govern(
+            _burnRequest(
+                call_.target, data, call_.scopeHash, call_.oldValueHash, call_.newValueHash
+            )
+        );
+        require(roles.hasRole(EMERGENCY, holder) == granted, "actual emergency role mutation");
+    }
+
+    function _burnRequest(
+        address target,
+        bytes memory data,
+        bytes32 scope,
+        bytes32 before_,
+        bytes32 after_
+    ) private view returns (GovernanceActionRequest memory request) {
+        request = _governanceRequest(1, target, data, scope, before_, after_);
+        request.notBefore = uint64(this.burnScenarioTime() + executor.minimumDelay(1));
+        request.expiresAfter = request.notBefore + 7 days;
+    }
+
+    function _burnSweepRequest(BurnSurplus.NativeSurplusQuote memory q)
+        private
+        view
+        returns (GovernanceActionRequest memory)
+    {
+        return _burnRequest(
+            address(burnGate),
+            abi.encodeCall(burnGate.sweepNativeSurplus, (q.amount, q.reasonHash)),
+            q.scopeHash,
+            q.oldValueHash,
+            q.newValueHash
+        );
+    }
+
+    function _assertCurrentBurnQuote(BurnSurplus.NativeSurplusQuote memory q, address recipient)
+        private
+        view
+    {
+        require(
+            q.state.balance == 125 && q.state.liabilities == 25 && q.state.available == 100,
+            "only forced ETH available"
+        );
+        StreamNativeSurplus.Context memory context = StreamNativeSurplus.Context(
+            address(core),
+            address(core).codehash,
+            address(registry),
+            address(registry).codehash,
+            address(executor)
+        );
+        bytes32 scope = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_NATIVE_SURPLUS_SCOPE_V1"),
+                block.chainid,
+                address(burnGate),
+                context
+            )
+        );
+        bytes32 request = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_NATIVE_SURPLUS_REQUEST_V1"),
+                q.amount,
+                BURN_SURPLUS_REASON,
+                q.authority
+            )
+        );
+        require(
+            q.scopeHash == scope && q.reasonHash == BURN_SURPLUS_REASON
+                && q.oldValueHash
+                    == keccak256(
+                        abi.encode(
+                            keccak256("6529STREAM_NATIVE_SURPLUS_STATE_V1"),
+                            scope,
+                            request,
+                            uint256(25),
+                            uint64(0),
+                            uint256(0)
+                        )
+                    )
+                && q.newValueHash
+                    == keccak256(
+                        abi.encode(
+                            keccak256("6529STREAM_NATIVE_SURPLUS_STATE_V1"),
+                            scope,
+                            request,
+                            uint256(25),
+                            uint64(1),
+                            q.amount
+                        )
+                    ),
+            "independent gate scope and exact liability transition"
+        );
+        (bytes32 chain, uint64 revision) = roles.roleMutationState(EMERGENCY);
+        require(
+            q.authority.executor == address(executor)
+                && q.authority.executorCodeHash == address(executor).codehash
+                && q.authority.roleRegistry == address(roles)
+                && q.authority.roleRegistryCodeHash == address(roles).codehash
+                && q.authority.recipient == recipient && q.authority.roleChainHash == chain
+                && q.authority.roleRevision == revision,
+            "actual canonical recipient witness"
+        );
+    }
+
+    function _claimCurrentBurnCredit(bytes32 key, uint256 surplus) private {
+        require(
+            executeSafe(
+                buyerSafe,
+                keys,
+                address(burnGate),
+                0,
+                abi.encodeCall(burnGate.claimRefund, (key, address(buyerSafe))),
+                0
+            ),
+            "original buyer Safe claims"
+        );
+        require(
+            address(buyerSafe).balance == 1 ether && burnGate.refundLiability() == 0
+                && address(burnGate).balance == surplus
+                && burnGate.nativeSurplusState().available == surplus,
+            "original credit remains withdrawable independently"
+        );
+        require(
+            core.ownerOf(core.lastAllocatedTokenId()) == address(buyerSafe)
+                && core.collectionMintedEver(1) == 2
+                && recorder.totalOfficialSettled(address(0)) == 0,
+            "sweep and claim do not alter NFT or revenue"
+        );
+    }
+
+    function testCurrentBurnSurplusSafeGovernancePreservesCreditAndRejectsClaimReentry() public {
+        (CurrentBurnSurplusRecipient recipient, bytes32 key) = this.prepareCurrentBurnSurplus();
+        recipient.configure(false, 3);
+        BurnSurplus.NativeSurplusQuote memory q =
+            burnGate.nativeSurplusQuote(60, BURN_SURPLUS_REASON);
+        _assertCurrentBurnQuote(q, address(recipient));
+        vm.expectRevert(
+            abi.encodeWithSelector(BurnSurplus.AdapterSurplusUnderfunded.selector, address(0))
+        );
+        burnGate.nativeSurplusQuote(101, BURN_SURPLUS_REASON);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                BurnSurplus.NativeSurplusAuthorityInvalid.selector, address(this)
+            )
+        );
+        burnGate.sweepNativeSurplus(60, BURN_SURPLUS_REASON);
+        GovernanceActionRequest memory request = _burnSweepRequest(q);
+        bytes32 id = _scheduleAsGovernor(request);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceActionNotExecutable.selector,
+                id,
+                request.notBefore
+            )
+        );
+        executor.executeGovernanceAction(id, request.callData);
+        vm.warp(request.notBefore);
+        CurrentBurnCallVm(address(vm)).expectEmit(true, false, false, true, address(burnGate));
+        emit AdapterSurplusSwept(1, address(recipient), address(0), 60, id);
+        _executeAsGovernor(id, request.callData);
+        require(
+            !recipient.reentered()
+                && keccak256(recipient.callbackError())
+                    == keccak256(
+                        abi.encodeWithSelector(
+                            ReentrancyGuard.ReentrancyGuardReentrantCall.selector
+                        )
+                    ),
+            "exact shared guard blocks refund callback"
+        );
+        BurnSurplus.NativeSurplusState memory after_ = burnGate.nativeSurplusState();
+        require(
+            after_.balance == 68 && after_.liabilities == 25 && after_.available == 43
+                && after_.revision == 1 && after_.cumulativeSwept == 60 && after_.lastActionId == id
+                && burnGate.nativeSurplusActionUsed(id) && address(recipient).balance == 57,
+            "surplus donation and buyer liability conserved"
+        );
+        this.setCurrentBurnEmergency(address(recipient), false);
+        _claimCurrentBurnCredit(key, 43);
+    }
+
+    function _signedCurrentGovernorSweep(bytes32 id, bytes memory data)
+        private
+        returns (bytes memory)
+    {
+        bytes memory callData = abi.encodeCall(executor.executeGovernanceAction, (id, data));
+        bytes32 digest = governorSafe.getTransactionHash(
+            address(executor), 0, callData, 0, 0, 0, 0, address(0), address(0), governorSafe.nonce()
+        );
+        return abi.encodeCall(
+            governorSafe.execTransaction,
+            (
+                address(executor),
+                uint256(0),
+                callData,
+                uint8(0),
+                uint256(0),
+                uint256(0),
+                uint256(0),
+                address(0),
+                payable(address(0)),
+                safeThresholdSignature(governorKeys, digest)
+            )
+        );
+    }
+
+    function testCurrentBurnSurplusFailedRecipientRetriesIdenticalSignedSafeTransaction() public {
+        (CurrentBurnSurplusRecipient recipient, bytes32 key) = this.prepareCurrentBurnSurplus();
+        BurnSurplus.NativeSurplusQuote memory q =
+            burnGate.nativeSurplusQuote(100, BURN_SURPLUS_REASON);
+        _assertCurrentBurnQuote(q, address(recipient));
+        GovernanceActionRequest memory request = _burnSweepRequest(q);
+        bytes32 id = _scheduleAsGovernor(request);
+        vm.warp(request.notBefore);
+        recipient.configure(true, 0);
+        bytes memory signedCall = _signedCurrentGovernorSweep(id, request.callData);
+        uint256 nonce = governorSafe.nonce();
+        CurrentBurnCallVm(address(vm)).expectCall(address(recipient), 100, bytes(""), 2);
+        (bool ok, bytes memory result) = address(governorSafe).call(signedCall);
+        require(
+            !ok
+                && keccak256(result)
+                    == keccak256(abi.encodeWithSignature("Error(string)", "GS013")),
+            "actual rejected Safe transfer"
+        );
+        BurnSurplus.NativeSurplusState memory failed = burnGate.nativeSurplusState();
+        require(
+            failed.balance == 125 && failed.liabilities == 25 && failed.available == 100
+                && failed.revision == 0 && failed.cumulativeSwept == 0 && failed.lastActionId == 0
+                && !burnGate.nativeSurplusActionUsed(id) && governorSafe.nonce() == nonce
+                && executor.governanceAction(id).status == GovernanceActionStatus.SCHEDULED,
+            "failure preserves all balances and both replay ledgers"
+        );
+        recipient.configure(false, 0);
+        (ok, result) = address(governorSafe).call(signedCall);
+        require(
+            ok && abi.decode(result, (bool)) && governorSafe.nonce() == nonce + 1
+                && address(recipient).balance == 100 && burnGate.nativeSurplusActionUsed(id)
+                && executor.governanceAction(id).status == GovernanceActionStatus.EXECUTED,
+            "byte identical governor Safe retry completes"
+        );
+        require(
+            burnGate.nativeSurplusState().balance == 25 && burnGate.refundLiability() == 25,
+            "governance never spends buyer allowance"
+        );
+        (ok,) = address(governorSafe).call(signedCall);
+        require(!ok, "signed Safe transaction cannot replay");
+        _claimCurrentBurnCredit(key, 0);
     }
 }

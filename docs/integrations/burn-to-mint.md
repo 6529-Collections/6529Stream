@@ -166,6 +166,12 @@ allowances, funder ownership, perpetual claims and liability accounting. The
 uses the actual adapter, recorder, Resolver, factory and escrow, with a hostile
 typed gate and a Manager boundary. Neither substitutes for the authored
 [whole current-stack test](../../test/current/StreamCurrentBurnMint.t.sol),
-whose execution is tracked separately by the coordinator. Release manifests,
+whose execution is tracked separately by the coordinator. Its authored surplus
+scenarios use a separate governor Safe, the real delayed Executor and current
+RoleRegistry while a buyer Safe retains its free-burn credit. They cover
+liability-preserving recovery, a callback donation, the exact shared-guard
+failure, a rejected recipient with byte-identical signed Safe retry, and the
+buyer's later refund even after the emergency recipient role is cleared.
+Release manifests,
 genesis wiring, combined validation and testnet delivery remain integration
 work; these sources do not establish production readiness.
