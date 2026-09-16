@@ -18,13 +18,13 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 16 September parallel implementation batch
 
-Source through `2b93a187` includes free-burn reveal credits, original Artist
+Source through `5e6c6140` includes free-burn reveal credits, original Artist
 withdrawal61, the native-price adapter size repair, distribution/burn/price
 clients including saved refund-window purchase verification, museum authority reconciliation and expanded actual-current test hosts.
 The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
 records exact handoffs and evidence, superseding older queue descriptions.
 
-All 2,035 Solidity sources pass ABI/type/storage checking at 3fb128d6. Root passes all 375
+All 2,037 Solidity sources pass ABI/type/storage checking at 5e6c6140. Root passes all 375
 client tests with generation/build/types, including the new curated callers, 131 museum authority/profile tests and
 a separate 27-case archival export/publication cohort. The offline dossier and
 legacy BagIt/hydration cohort also passes all 44 cases at a0d71d2.
@@ -104,18 +104,30 @@ reviews are clear after refund repeat-unlock correction b25b3d16. Original 97
 unit cases and overlapping corrected Book 35 pass. The frozen current run
 finishes with 48 passes and two fixture failures: all 41 own fixed/private/Safe
 sale cases pass. The missing block advance and incorrect mock royalty pointer
-are corrected in test-only 301ccda9; its ten-case retry is pending. All 217
+are corrected in test-only 301ccda9; its ten-case retry passes. Root verifies
+55 distinct expected passes, all 379 captured sources and both log hashes.
+This original 5605d019 production cohort excludes the separately tested later
+refund correction. All 217
 captured production products fit. Wallet callers 2b93a187 are integrated and
 root passes all 375 package tests plus both compiled ABI fixture checks.
 Remaining required sale profiles stay visible.
 
-Versioned PERCEPTUAL_TOLERANCE/CURATED_EQUIVALENCE source is integrated 2351111e.
-Its eleven Solidity cases are authored only: five products fail deployment size.
-The builder is correcting those overages, missing condition institution/credential
-inventory rows and incomplete ABI enum descriptions found by independent review.
-Root's 11 metric tests pass, including an independent rational SSIM oracle.
-Original BYTE_EXACT remains unchanged. Full curated composition, executable-byte
-closure and institution-signer alternatives still need completion.
+Versioned PERCEPTUAL_TOLERANCE/CURATED_EQUIVALENCE source now includes
+correction 5e6c6140: exact signed condition references, an additive standard ABI
+V2 document and fixed transport workers. Independent extraction and schema/closure
+reviews are clear. Original V1 definitions and BYTE_EXACT are unchanged. Root's 11
+metric tests pass. A pre-final capture fits 17 products, but six production files
+changed afterward; exact final sizes are being checked before 12 authored native
+cases run. Complete executable supplement/offline replay, full curated composition
+and institution-signer alternatives remain.
+
+The status table's earlier moving-price selection gap was incorrect: it is an
+explicit future extension. Free/Merkle families already exist; the specification
+does not independently require every combination with selected artwork. Canonical
+primary mint offers, however, are explicitly required and missing: existing offers
+only transfer custody-held tokens. Native implementation is assigned to the
+burn/commerce task, with the mint task owning shared replay/admission changes.
+ERC20 offers retain their explicit payer-intent requirements.
 
 Full current-stack/Safe/fuzz acceptance follows deployable integrated source.
 The optional primary graph-transition proposal is not an adopted launch

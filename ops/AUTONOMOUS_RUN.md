@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `2b93a187`: native curated fixed/private carriers, recorder/Safe tests, reviewed refund idempotency fix, STATIC byte-scan capacity and initial additional finality modes integrated. Curated wallet callers pass all 375 root package tests; 41 own current sale/Safe cases pass with two wider fixture failures corrected and ten-case retry pending. All 2,035 sources passed ABI/type/storage at 3fb128d6; focused results and pending current-runtime, five new mode-size repairs and independent mode findings are explicit in V1_CURRENT_STATUS. RC1 stays `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
+| Source checkpoint | `5e6c6140`: curated sales and callers integrated; root 375 package tests and 55 distinct current contract cases pass on their recorded source scopes. Exact finality archive/schema/codec corrections integrated and independently reviewed; 2,037-source ABI/type/storage pass. Exact final-mode size/native and full-system acceptance remain. Primary mint OFFER_SALE is assigned; moving-price selection explicitly deferred by spec. RC1 stays `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -40,9 +40,9 @@ ownership assignments where it transfers a queue.
 
 | Lead | Owned feature group and next queue | Shared boundaries |
 | --- | --- | --- |
-| Artist authority | Held Artist proposals isolated; pure STATIC scan capacity integrated 3fb128d6 with 13 focused and 15 pure passes | Preserve exact outputs and full read-budget guard; Router deployment repair remains separate. |
+| Artist authority | Held Artist proposals isolated; STATIC scan capacity and curated-client/finality-worker reviews complete; requirements reconciliation complete | Independent source review; preserve exact outputs and full gas guard; Router deployment repair remains separate. |
 | Commerce and revenue | Curated shared seam and actual recorder tests integrated; independent carrier review complete; assess metric implementation-byte closure | Own revenue boundaries, fixed transport review and original identities; held Royalty proposal remains unapplied. |
-| Metadata, records and museum | Initial reference modes integrated 2351111e; fix five size overages and reviewed archive/schema omissions | Own onchain producer/consumer contracts; coordinate new frozen capture and independent review. |
+| Metadata, records and museum | Finality corrections integrated 5e6c6140; exact final-size/native run and new metric supplement underway | Own onchain schema/inventory/admission; revenue lead owns metric runtime packaging/replay; visible museum owns token archive. |
 | Root integrator | Shared Core/entropy interfaces, economic pointer checks, integrated source and final candidate acceptance | Coordinate all feature tasks, independent review, release and testnet. |
 
 Each lead owns requirements through source, tests and usable public entrypoints.

@@ -34,10 +34,11 @@ the denominator. The integrator owns this reporting correction and delivery.
 
 ## Latest integration: 16 September
 
-The current source checkpoint is 2b93a187, including curated callers with 375 root
-package passes and test-only current fixture corrections (retry pending). Native curated fixed/private sales,
+The current source checkpoint is 5e6c6140, including curated callers with 375 root
+package passes, 55 distinct current contract passes and independently reviewed
+finality archive/schema/codec corrections (final native capture pending). Native curated fixed/private sales,
 actual recorder/Safe tests, repeat-refund correction, STATIC scan capacity and
-initial additional finality modes are integrated. The 2,035-source ABI check
+initial additional finality modes are integrated. The 2,037-source ABI check
 passes. The [current status](V1_CURRENT_STATUS.md) and
 [feature batch](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
 record distinct test scopes and remaining size/runtime/closure work.
