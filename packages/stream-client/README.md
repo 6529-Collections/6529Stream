@@ -364,3 +364,9 @@ contract profiles and outstanding larger-script work.
   exact proof prices while preserving original public-price signatures and windows.
 - [Stored refund purchases](docs/current-refund-purchase-record.md) verify saved
   prices, exact proofs and immutable commitments through later terminal outcomes.
+- [Curated manifests](docs/current-curated-content.md) preserve complete publication
+  bytes, ordered proofs and original sale, content and purchase identities.
+- [Curated fixed sales](docs/current-curated-fixed.md) prepare PUBLIC purchases,
+  commit/reveal deposits and separate deposit-refund and excess-credit claims.
+- [Curated private sales](docs/current-curated-private.md) retain original Sales
+  signatures, buyer-bound execution and historical Manager/Ledger revocation.

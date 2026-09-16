@@ -1,0 +1,392 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "33ddd13251716f5409d66c1bd22544ed1cb9cb3a",
+  "sourceTree": "b0c723f77f949ea923ad9edcf2971139e2281ff9",
+  "sourceCount": 1989,
+  "compilerVersion": "0.8.19",
+  "sourceNormalization": "UTF-8 CRLF to LF",
+  "inputSha256": "fc38c3ca352512ac8e86c515c031e9c9e280cca2e941996fedfaf03d7024c822",
+  "outputSha256": "de02dfa841cd9b7333159f810f1bddf26e0d60e5e4fa7d1b0661b2346bd76f2a",
+  "qualification": "Original Manager/Ledger historical authorization ABI and selected source evidence; separate from carrier capture and from runtime/Safe acceptance.",
+  "sources": {
+    "smart-contracts/domains/mint/StreamMintManager.sol": "c3a33f1a88d62a1b11f7f54d2b1a90a27913edf114080af464075a2c71b88cb7",
+    "smart-contracts/domains/mint/StreamMintLedger.sol": "8c6af5ec1bbb548f40f82b2cbccab34c2b1d9890ed0c095bb614d594c31d8e22",
+    "smart-contracts/domains/mint/StreamMintRevocation.sol": "44a8cc19151b86062e5d91995f7f01a464bb8c0d0bb2a521b299774dd4da6445",
+    "smart-contracts/domains/mint/StreamMintTicketHash.sol": "9a8fc8138ab62da42b698a7155d0954a7fbf6fb947c6c78f8f23b07685c01fe8",
+    "smart-contracts/domains/mint/StreamPrivateSaleHash.sol": "a21fcd6c254f885fac448410f1f084aa030baac8bfb8192b824f60303b63d54e",
+    "smart-contracts/domains/mint/StreamPreparedNativeContentPurchaseHash.sol": "45e21177895758633d39fea7e078c4e75e07d5385a0d8e2eb6f915f62c333255",
+    "smart-contracts/interfaces/stream/mint/IStreamMintSaleAuthorizationRevocation.sol": "a4d399f80059787d95b2c02358b4ee4fba5ecf39ef8553ec5a430a6373bfe0ca",
+    "smart-contracts/interfaces/stream/mint/IStreamMintAuthorizationRevocation.sol": "0f9270a1761407534c45a61dd28f974f3429a7471c6e7ba4004953652f1431ba",
+    "smart-contracts/interfaces/stream/mint/IStreamMintLedger.sol": "be94ef9d2b751f57de9fec33f55cabc5c3556d6c48a2d1a5949fd575f162c2ce",
+    "smart-contracts/interfaces/stream/mint/IStreamMintLedgerRevocation.sol": "052578fb58cf729331679f980c6be8893e5da991b41d214a10f331b286bb2399",
+    "smart-contracts/interfaces/stream/mint/StreamPrivateSaleTypes.sol": "46476e372467bcf0f7961ec9f95c7d077a02d40faa68bda2fcb4de00cd139fd2"
+  },
+  "selections": {
+    "manager": {
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
+      "contract": "StreamMintManager",
+      "methods": [
+        "mintLedger",
+        "mintSaleAuthorizationId",
+        "voidMintSaleAuthorization",
+        "isAuthorizationUsed"
+      ]
+    },
+    "ledger": {
+      "source": "smart-contracts/domains/mint/StreamMintLedger.sol",
+      "contract": "StreamMintLedger",
+      "methods": [
+        "isManagerAuthorizationUsed"
+      ]
+    }
+  },
+  "abis": {
+    "manager": [
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "authorizationId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "isAuthorizationUsed",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "mintLedger",
+        "outputs": [
+          {
+            "internalType": "contract IStreamMintLedger",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "chainId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "saleAdapter",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "mintManager",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "phaseId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "saleId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "saleKind",
+                "type": "uint8"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "expectedPrimaryPolicyHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "primaryPolicyMode",
+                "type": "uint8"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "initialRecipientsHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "beneficiariesHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "tokenDataArrayHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "mintCommitmentsHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "payer",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "executor",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "asset",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "unitPrice",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "quantity",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "contentSelectionHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "policyHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "nonce",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint64",
+                "name": "deadline",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "finalizeBy",
+                "type": "uint64"
+              }
+            ],
+            "internalType": "struct StreamPrivateSaleTypes.SaleAuthorization",
+            "name": "authorization",
+            "type": "tuple"
+          }
+        ],
+        "name": "mintSaleAuthorizationId",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "chainId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "saleAdapter",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "mintManager",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "phaseId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "saleId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "saleKind",
+                "type": "uint8"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "expectedPrimaryPolicyHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "primaryPolicyMode",
+                "type": "uint8"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "initialRecipientsHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "beneficiariesHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "tokenDataArrayHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "mintCommitmentsHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "payer",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "executor",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "asset",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "unitPrice",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "quantity",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "contentSelectionHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "policyHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "nonce",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint64",
+                "name": "deadline",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "finalizeBy",
+                "type": "uint64"
+              }
+            ],
+            "internalType": "struct StreamPrivateSaleTypes.SaleAuthorization",
+            "name": "authorization",
+            "type": "tuple"
+          },
+          {
+            "internalType": "bytes",
+            "name": "revocationSignature",
+            "type": "bytes"
+          }
+        ],
+        "name": "voidMintSaleAuthorization",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ],
+    "ledger": [
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "manager",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "authorizationId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "isManagerAuthorizationUsed",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ]
+  }
+}

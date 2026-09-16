@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add curated manifest, fixed and private sale callers with original content and
+  authorization hashes, commit/reveal refunds, historical revocation and Safe CALL plans.
+
 - Add native selected-work fixed and buyer-bound private sale carriers, with
   pause-aware commitments, original purchase/settlement identities and pull
   refunds; keep repeated credited refunds idempotent after clock collapse.

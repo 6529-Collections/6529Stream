@@ -28,4 +28,7 @@ export * from "./current-native-allowlist-dutch.js";
 export * from "./current-native-allowlist-clearing.js";
 export * from "./current-native-allowlist-refund.js";
 export * from "./current-refund-purchase-record.js";
+export * from "./current-curated-content.js";
+export * from "./current-curated-fixed.js";
+export * from "./current-curated-private.js";
 export * from "./current-entropy-authority.js";
