@@ -360,3 +360,7 @@ contract profiles and outstanding larger-script work.
   maxima, apply leaf ceilings to the schedule and recover payer excess credits.
 - [Native clearing allowlists](docs/current-native-allowlist-clearing.md) require
   exact signed proof prices and retain the original rebate and supplement calls.
+- [Native refund-window allowlists](docs/current-native-allowlist-refund.md) capture
+  exact proof prices while preserving original public-price signatures and windows.
+- [Stored refund purchases](docs/current-refund-purchase-record.md) verify saved
+  prices, exact proofs and immutable commitments through later terminal outcomes.
