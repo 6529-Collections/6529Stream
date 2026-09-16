@@ -10,9 +10,9 @@ not yet feature-complete or accepted as a combined system. The integrated branch
 now includes mint eligibility/continuity, free and native-paid burn paths with
 free-entry reveal credits, Artist dispute withdrawal, wallet-specific native
 pricing and its clients, and bounded museum authority reconciliation. Root
-passes 375 client tests, a 131-case museum authority/profile cohort, 27 archival
+passes 398 client tests, a 131-case museum authority/profile cohort, 27 archival
 export/publication cases, 44 scoped-dossier/legacy packaging cases, 62 actual-token
-capture/replay cases and 81 offline preservation checks. The copied metric
+capture/replay cases, 60 object-dossier adapter/assembly cases and 81 offline preservation checks. The copied metric
 runtime also executes successfully; broad Solidity ABI/type/storage checking passes. Separate native cohorts cover specific contract
 boundaries. Remaining work includes other required price-sale profiles,
 Artist authority profiles, three measured Artist/STATIC deployment-size blockers,
@@ -51,7 +51,7 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `fbd9dcec7b51839ed616c248fe460dd2e81ca043`; see the [16 September batch](#parallel-feature-batch-16-september) for scoped evidence and remaining joins |
+| Current integration source | `2503b2188a93817472c5277c5d197c0950b70003`; see the [16 September batch](#parallel-feature-batch-16-september) for scoped evidence and remaining joins |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
@@ -60,7 +60,7 @@ document records delivery status without narrowing those requirements.
 | Integrated OwnerRecords capture handoff | `57ac8d041c9adc479f1061fafec748c8330ac974`; MUSEUM-36 |
 | Latest broad cheap compilation evidence | 2,061-source ABI/type/storage check passes at fbd9dcec in 17.453 seconds; no errors. This is not bytecode or full-system runtime evidence. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
-| Latest focused native evidence | Separate captures: entropy 10, Royalty 11, mint 101, actual-Core 29, final burn 49 and later burn-credit 31 distinct cases pass. Repaired native-price 76 passes at 766c5dfd with independent source/artifact attestation; STATIC output manifest 9 passes in a separate capture. Root clients 375 and a museum authority/profile cohort of 131 pass. Other museum cohorts overlap. No complete-system pass is inferred. |
+| Latest focused native evidence | Separate captures: entropy 10, Royalty 11, mint 101, actual-Core 29, final burn 49 and later burn-credit 31 distinct cases pass. Repaired native-price 76 passes at 766c5dfd with independent source/artifact attestation; STATIC output manifest 9 passes in a separate capture. Root clients 398 and a museum authority/profile cohort of 131 pass. Other museum cohorts overlap. No complete-system pass is inferred. |
 
 Earlier implementation notes use “integrated” to mean source merged. In this
 document, that is only **code location**; runtime integration has its own column.
@@ -131,11 +131,11 @@ These 163 rows are capabilities and delivery checks of different sizes. Row coun
 | [sales.native-fixed](#salesnative-fixed-evidence) Native fixed-price and open-edition sales | Built | Partly tested | Partial | Current native paid immediate consumer, original Artist/platform signatures, exact settlement and phase accounting. **Remaining:** Latest actual-current transaction/receipt/reveal/capacity acceptance. Earlier accepted current graph captures do not validate all later code. |
 | [sales.free-pwyw](#salesfree-pwyw-evidence) Free phases and pay-what-you-want price programs | Built | Partly tested | Partial | Declared zero-price and native chosen-amount/minimum programs; original signature/payment rules retained. **Remaining:** Final actual-current paid/free/reveal/Safe matrix; do not infer arbitrary batch airdrops from a zero-price single mint. |
 | [sales.english](#salesenglish-evidence) Native English auction lifecycle | Built | Partly tested | Partial | Reserve/minimum bid/anti-snipe/first-bid start, old exits, escrowed native bids and delayed settlement. **Remaining:** Latest full actual-Artist/Core authority, exits and transaction-capacity acceptance. ERC20 bidding is expressly non-genesis. |
-| [sales.curated](#salescurated-evidence) Chosen curated-work auction and content selection | Built | Partly tested | Partial | Existing curated auction plus native fixed PUBLIC/COMMIT_REVEAL and buyer-bound private carriers are integrated 161cda75; 55 distinct current-cohort cases pass on original 5605d019 plus test-only 301ccda9. Later refund correction b25b3d16 has separate 35-case coverage. Curated clients 2b93a187 pass root 375 package tests. Native primary offers with selected work are now source-integrated as 364ec9e2; exact source review is clear and focused/current tests are underway. **Remaining:** Final current/Safe/cold acceptance and explicit supported-profile reconciliation. Moving-price selection is a future extension; unsupported free/Merkle/ERC20 selected combinations are not automatically separate genesis blockers. |
+| [sales.curated](#salescurated-evidence) Chosen curated-work auction and content selection | Built | Partly tested | Partial | Existing curated auction plus native fixed PUBLIC/COMMIT_REVEAL and buyer-bound private carriers are integrated 161cda75; 55 distinct current-cohort cases pass on original 5605d019 plus test-only 301ccda9. Later refund correction b25b3d16 has separate 35-case coverage. Curated clients 2b93a187 pass root 375 package tests. Native primary offers with selected work are now source-integrated as 364ec9e2; exact source review is clear and 70 distinct complementary cases pass, with explicit typed Artist/entropy/governance boundaries. **Remaining:** Final current/Safe/cold acceptance and explicit supported-profile reconciliation. Moving-price selection is a future extension; unsupported free/Merkle/ERC20 selected combinations are not automatically separate genesis blockers. |
 | [sales.dutch](#salesdutch-evidence) Native descending-price Dutch sales | Built | Partly tested | Partial | Linear/stepped native schedule and signed maximum/current paid price. **Remaining:** Latest current-core/Safe paid/reveal/royalty composition and collector gas; no generic ERC20 Dutch implementation claimed. |
 | [sales.clearing](#salesclearing-evidence) Uniform-clearing Dutch and buyer rebates | Built | Partly tested | Partial | Native clearing book, price fixing, sparse/compressed purchase records, permanent rebates and supplements. **Remaining:** Latest complete conservation/clock/rights/escape runtime. Retained consumer gas measurements exceed 500,000; old 8,755,856 trace was warm-up preceded, not all-cold/current. |
 | [sales.refund-window](#salesrefund-window-evidence) Native refund-window sales and unconditional escape | Built | Partly tested | Partial | Original held deposits, finalization/refund/escape clocks and own-account credits. **Remaining:** Final graph settlement/delegation/export/surplus and timing/callback invariant execution; native-only scope explicit. |
-| [sales.private-offer](#salesprivate-offer-evidence) Native private sales and atomic offers | Built | Partly tested | Partial | Custody private/offer purchases, royalty-itemized secondary receipts and buyer-bound primary private selections are built. Canonical native primary mint OFFER_SALE (tokenId=0, optionally selected) is source-integrated in 364ec9e2/9945d612 with original dual-digest replay/revocation and independently reviewed source. **Remaining:** Current/Safe acceptance; carrier and shared-seam runtime tests are underway. ERC20 offer payer-intent obligations remain required; existing generic fixed settlement is not this offer family. |
+| [sales.private-offer](#salesprivate-offer-evidence) Native private sales and atomic offers | Built | Partly tested | Partial | Custody private/offer purchases, royalty-itemized secondary receipts and buyer-bound primary private selections are built. Canonical native primary mint OFFER_SALE (tokenId=0, optionally selected) is source-integrated in 364ec9e2/9945d612 with original dual-digest replay/revocation and independently reviewed source. Seventy distinct complementary cases pass, including actual Core/Manager/Ledger and 2-of-2 Safe, with typed Artist/entropy/governance. **Remaining:** Final full-graph/current/Safe acceptance. ERC20 offer payer-intent obligations remain required; existing generic fixed settlement is not this offer family. |
 | [sales.inventory-consignment](#salesinventory-consignment-evidence) Secondary inventory and declared consigned resale | Built | Tests written | Not integrated | Immutable sorted original-owner inventory; per-token sale/replay/royalty, genuine previously delivered token resale profile and proceeds claims. **Remaining:** Independent 017172a0 source/oracle review clear; seven authored cases require combined native execution. Prior delivery cannot be inferred merely from MINTED. |
 | [sales.prepared-custody](#salesprepared-custody-evidence) Original prepared acquisition and same-NFT custody sale | Built | Partly tested | Partial | Snapshot created at original acquisition; original config/origin/acquisition grants retained and later payment transfers the same NFT. **Remaining:** Final whole current graph plus new rights activations and royalty/reveal invariants; earlier source cohorts are not latest runtime. |
 | [sales.token-rights](#salestoken-rights-evidence) Known-token PROFILE/TEMPLATE and default rights activation | Built | Tests written | Not integrated | Pre-bid append-only scoped activation, exact original auction/acquisition IDs and shared consumed/replay; old bid route excluded after activation. **Remaining:** ba0db85d seven actual Artist/Core/Safe source cases integrated as f0e651ef; native execution pending. Do not list token overrides/default templates as absent. |
@@ -272,7 +272,7 @@ These 163 rows are capabilities and delivery checks of different sizes. Row coun
 | [MUSEUM-22](#museum-22-evidence) External authority matching and archived reconciliation | In progress | Partly tested | Partial | fef4b2f6 adds retained authority snapshots/reconciliation; 8ba023dc adds versioned Type/declaration/continuation support, preserves original schema hashes, and replays an actual local Safe declaration/alignment/later SELF review. Root 131 authority/profile/regression tests pass. **Remaining:** Qualified external/artist/curator/institution lanes, full conformance and public/latest-graph acceptance. The positive RDF/JSON remains explicitly synthetic; separately retained Getty SPARQL bytes do not prove publisher-backed equivalence. |
 | [MUSEUM-23](#museum-23-evidence) Historical, uncertain and role-specific place semantics | In progress | Partly tested | Not integrated | Nine-role qualified geography draft projection integrated87f844eb, with historic/uncertainty/precision controls. **Remaining:** Authenticated authority/reviewer and recorded-source joins. Unverified draft matches cannot emit equivalence. |
 | [MUSEUM-24](#museum-24-evidence) File roles, observed ingest and physical-event relationships | In progress | Partly tested | Partial | Distinct carriers, original/derived resources and named activities; explicit local preservation observations and evidence links. Planned/cancelled/unknown activities are withheld from performed graph output. **Remaining:** Complete software/dependency/reference-render and physical production/custody/accession/title relations, described/received/verified evidence for every source kind, and actual website safety-scan path parity remain. |
-| [MUSEUM-25](#museum-25-evidence) Deterministic recorded export and database-free offline replay | In progress | Tested* | Integrated* | Bounded deterministic package partitions, exact original source/transcript/schema bytes, pinned block/read scope, hashes, dependency resolution, whole-package recomputation, public-disclosure refusal and immutable derivatives work for named finite profiles. Compact immutable V3 export 23477832 now has actual class-6 Safe ARCHIVE publication and offline replay; all 27 root tests and independent artifact review pass. Scoped collection dossier a0d71d2 adds selected-media and offline package integration, with 44 tests passing. Actual-token capture/replay 1db47ad9 adds 62 passing tests and a fresh paid-token/15 Safe-record/source-block PNG join. **Remaining:** Complete source-family coverage, canonical token object-dossier/full media inventory, subsequent-export lineage, latest graph and full institutional conformance; original V1/V2 stay immutable. |
+| [MUSEUM-25](#museum-25-evidence) Deterministic recorded export and database-free offline replay | In progress | Tested* | Integrated* | Bounded deterministic package partitions, exact original source/transcript/schema bytes, pinned block/read scope, hashes, dependency resolution, whole-package recomputation, public-disclosure refusal and immutable derivatives work for named finite profiles. Compact immutable V3 export 23477832 now has actual class-6 Safe ARCHIVE publication and offline replay; all 27 root tests and independent artifact review pass. Scoped collection dossier a0d71d2 adds selected-media and offline package integration, with 44 tests passing. Actual-token capture/replay 1db47ad9 adds 62 passing tests and a fresh paid-token/15 Safe-record/source-block PNG join. Object tooling 2503b218 adds a concrete native-inventory reader and honest partial assembly, with 60 root tests passing; its complete inventory vector is synthetic. **Remaining:** Complete source-family coverage, canonical token object-dossier/full media inventory, subsequent-export lineage, latest graph and full institutional conformance; original V1/V2 stay immutable. |
 | [MUSEUM-26](#museum-26-evidence) Linked Art and CRM projection | Built | Tested* | Integrated* | Pinned offline JSON-LD expansion and finite Linked Art/CRM entity projection with extension sidecars, complete input/output correspondence for supported profiles. **Remaining:** Complete adopted crosswalk and all real record-family source adapters remain. Archival URNs and data-model validity do not claim optional HTTP API conformance. |
 | [MUSEUM-27](#museum-27-evidence) PREMIS file/fixity facts and recorded source adapter | Built | Tested* | Integrated* | Original pinned PREMIS3 schema, exact file IDs/size/digest/format and correspondence from selected registered source facts. Missing fields yield explicit unsupported diagnostics. **Remaining:** General source coverage beyond selected account facts remains; a declared digest alone does not prove a performed fixity check. |
 | [MUSEUM-28](#museum-28-evidence) IIIF Presentation3 archival manifest | Built | Tested* | Integrated* | Same-source four-media presentation, original numeric/URI semantics, complete local context lock and exact correspondence to file/semantic facts. **Remaining:** Full additional artwork/presentation profiles and external viewer/availability behavior remain. Hash-addressed media needs a compatible resolver; validation does not claim that service exists. |
@@ -523,7 +523,7 @@ settlement behavior listed above.
 
 ### Parallel feature batch 16 September
 
-The latest source is `fbd9dcec`. All 2,061 Solidity inputs pass ABI/type/storage
+The latest source is `2503b218`. All 2,061 Solidity inputs pass ABI/type/storage
 checking in 17.453 seconds after explicit test/deployment import repairs,
 without bytecode or runtime acceptance. Root client 375, museum authority 131, archive 27 and
 dossier 44 results retain their original source scopes. The following new batches supersede older queue notes.
@@ -536,19 +536,40 @@ dossier 44 results retain their original source scopes. The following new batche
   receives the token and pull refund. Full historical revocation, explicit
   EOA/ERC1271 signers and Safe CALL cases are included. Independent review is
   clear for exact carrier/shared production. All six final carrier products
-  fit; the carrier is 23,649 runtime bytes. Manager/recorder preflight also
-  fits, qualified by one whitespace-only source difference. Thirteen final
-  authorization tests pass; 70 total focused/current cases are authored, with
-  separate 45-case seam and 25-case carrier runs underway. No complete current
-  or Safe runtime acceptance is claimed. Eleven import-only test/deployment
+  fit; the carrier is 23,649 runtime bytes. The exact committed Manager and
+  recorder now measure 23,098/20,797 in the native capture. All 70 distinct
+  cases pass: 25 carrier/current/Safe plus 45 shared-seam cases. The latter
+  combines 21 unchanged passes with a 24-case retry after test-only e1bf2306
+  fixes buyer prank ordering and adds real-grant success controls. Independent
+  review verifies both case sets, all source/artifact pins and unchanged
+  production. The carrier uses actual Core/Manager/Ledger/recorder and 2-of-2
+  Safe; Artist/entropy/governance remain typed, so full-graph acceptance is separate. Eleven import-only test/deployment
   corrections preserve all other tokens; the whole 2,061-source ABI/type/storage
   check passes at `fbd9dcec`. ERC20 offer payer-intent implementation remains
   distinct. See [native primary offers](../docs/integrations/native-primary-offers.md).
+- Primary-offer clients `dc4828b7` are integrated as `1c101938`. Root passes
+  all 398 package tests including generation, build and TypeScript checks;
+  the complete 396-source compiler fixture also regenerates exactly in check
+  mode. Original 12/24-field signatures, selected/unselected paths, dual replay,
+  historical revocation and executor-funded Safe CALL plans are covered.
+  This is client/encoding/simulated-RPC acceptance, separate from contract runtime.
+- Museum object-dossier tooling `352bb01b` is integrated as `2503b218`.
+  Independent source review is clear; root passes all 60 focused tests in
+  165.032 seconds and all four definition checks. The native inventory adapter
+  reconstructs exact context, item/segment chains, required stages, runtime pins
+  and receipt ancestry. Its complete transport vector remains synthetic. The
+  actual capture8 partial assembler preserves original files, accounts for 49
+  fixed requirements and verifies identity only as a complete requirement;
+  supplied opaque components cannot imply conformance. Full histories, actual
+  completed native-inventory RPC capture, complete render bytes and full dossier
+  acceptance remain. These are evidence-coverage diagnostics, not a protocol
+  completion percentage. See [object dossier](../docs/museum-object-dossier.md).
+
 - Dutch/clearing retry `ba735199` is integrated as `963cfce8`. All 26 cases
   pass (15 Dutch and 11 clearing), with exact economics-consent behavior added
   only to typed Artist fixtures. Production is unchanged from the original
-  25/26 run. The retained retry reports 301 source inputs and 154 fitting
-  production products. It exercises actual sale/proof/recorder/registry/wallet/
+  25/26 run. Independent review verifies all 301 source inputs, 303 selected artifact
+  metadata records and 154 fitting production products. It exercises actual sale/proof/recorder/registry/wallet/
   escrow with typed Core/Manager/Artist/entropy/governance and counter-read
   seams; complete current-graph acceptance remains separate.
 

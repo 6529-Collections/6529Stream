@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `fbd9dcec`: Museum actual-token replay passes 62 root tests; metric tooling passes 81 offline controls and one restored-runtime execution. Full object dossier and joined browser/finality acceptance remain. Earlier curated sales and callers integrated; root 375 package tests and 55 distinct current contract cases pass on their recorded source scopes. Exact finality archive/schema/codec corrections integrated and independently reviewed; 2,061-source ABI/type/storage pass. Final-mode size preflight passes; native compilation fails with a Yul stack-layout error, with no tests run. Diagnosis and full-system acceptance remain. Native primary OFFER_SALE is source-integrated and independently reviewed, with 13 authorization passes and remaining 45/25 seam/current runs underway; Dutch/clearing 26 pass; moving-price selection explicitly deferred by spec. RC1 stays `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
+| Source checkpoint | `2503b218`: Museum actual-token replay passes 62 root tests; metric tooling passes 81 offline controls and one restored-runtime execution. Full object dossier and joined browser/finality acceptance remain. Earlier curated sales and callers integrated; root 398 package tests and 55 distinct current contract cases pass on their recorded source scopes. Exact finality archive/schema/codec corrections integrated and independently reviewed; 2,061-source ABI/type/storage pass. Final-mode size preflight passes; native compilation fails with a Yul stack-layout error, with no tests run. Diagnosis and full-system acceptance remain. Native primary OFFER_SALE is source-integrated and independently reviewed, with 70 distinct verified passes across seam/current/Safe scopes and 398 client passes; object-dossier native adapter/partial assembly passes 60 root tests, full conformance still pending; Dutch/clearing 26 pass; moving-price selection explicitly deferred by spec. RC1 stays `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -69,11 +69,11 @@ can inspect any task, while the coordinator manages handoffs and decisions.
 
 | Task | ID | Owned feature group |
 | --- | --- | --- |
-| Stream — mint eligibility and continuity | `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c` | Manager/Ledger, proof-bound caps, phase/collection/global counters, non-burn gates and replacement continuity |
-| Stream — burn mint and distribution | `01a0a68e-7594-7be0-b7bb-15849febcae4` | Burn-to-mint/distribution and required native primary OFFER_SALE carrier, coordinated with the mint task |
+| Stream — mint eligibility and continuity | `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c` | Manager/Ledger and required ERC20 primary-offer admission/gates; completed native offer, cap and continuity work remains pinned |
+| Stream — burn mint and distribution | `01a0a68e-7594-7be0-b7bb-15849febcae4` | Required ERC20 primary OFFER_SALE carrier using existing payer-bound token settlement, coordinated with mint; accepted native batch remains pinned |
 | Stream — museum records and semantics | `01a0a68e-81ad-73f1-98f4-1ce2ecdb1350` | Offchain museum source adapters and full object-dossier inventory/history/assembly; preserve completed scoped token replay |
 | Stream — developer clients and Safe workflows | `01a0a68e-8f38-7a33-95b6-45d8ac943569` | Client package, typed ceremonies, Safe CALL plans, exact-template and commerce/operator caller recipes |
-| Stream — integration and fuzz testing | `01a0a68e-9941-7b13-aff3-d559e39613c4` | Canonical current-graph harness, entropy-join fixture repair, actual component/Safe tests and fuzz/stateful campaigns |
+| Stream — integration and fuzz testing | `01a0a68e-9941-7b13-aff3-d559e39613c4` | CI/test throughput improvements preserving final acceptance gates, plus independent ERC20 offer review and final current/Safe/fuzz orchestration |
 
 The local Artist lead retains Artist contracts and the raw STATIC display
 transport. The local revenue lead retains economic/Resolver/escrow contracts.
@@ -95,6 +95,14 @@ or require the owner to relay messages. Root updates shared feature status after
 integration; feature tasks maintain their local implementation and evidence.
 Coordinate expensive compiler captures, while independent small checks and
 implementation continue. Separate source completion from executed acceptance.
+
+The next ERC20 offer batch uses the existing nonpayable PROFILE/order-1
+settlement flow with contract20 as sole token puller. Buyer is payer and final
+recipient. A relayer/delegate requires the payer's separate PaymentIntent;
+only an actual payer call to contract20 gets the existing by-construction
+exception. Nonzero native reveal fees remain unsupported in this batch while
+the exact previously rejected allowance artifact remains held. No new payment
+order, caller exception or alternate signing domain is authorized by this profile.
 
 ### Model routing
 

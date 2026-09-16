@@ -18,13 +18,13 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 16 September parallel implementation batch
 
-Source through `fbd9dcec` includes free-burn reveal credits, original Artist
+Source through `2503b218` includes free-burn reveal credits, original Artist
 withdrawal61, the native-price adapter size repair, distribution/burn/price
 clients including saved refund-window purchase verification, museum authority reconciliation and expanded actual-current test hosts.
 The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
 records exact handoffs and evidence, superseding older queue descriptions.
 
-All 2,061 Solidity sources pass ABI/type/storage checking at fbd9dcec. Root passes all 375
+All 2,061 Solidity sources pass ABI/type/storage checking at fbd9dcec. Root passes all 398
 client tests with generation/build/types, including the new curated callers, 131 museum authority/profile tests and
 a separate 27-case archival export/publication cohort. The offline dossier and
 legacy BagIt/hydration cohort also passes all 44 cases at a0d71d2.
@@ -82,7 +82,12 @@ graph. Root passes all 62 tests; independent review verifies 305 selected
 products and 27 original inputs. Offline export/BagIt/OCFL replay succeeds.
 Controlled entropy, synthetic authority and trusted local RPC remain explicit;
 complete record/ownership histories, authoritative render inventory and the
-full OBJECT_DOSSIER remain active work.
+full OBJECT_DOSSIER remain active work. Object tooling 2503b218 adds concrete
+native inventory reconstruction and partial assembly, with 60 root tests and
+four definition checks passing. Its complete inventory transport is synthetic;
+actual capture8 verifies only identity as a complete adopted requirement.
+The remaining required inputs cannot be satisfied by labels or supplied opaque
+bytes. Native lane/history adapters and genuine inventory capture continue.
 
 Renderer repair `df440372` corrects three exact return sizes
 from 416 to 384 bytes. Root attests all 226 frozen sources; four new actual
@@ -146,9 +151,11 @@ path did not fulfill them. Native primary offers are now source-integrated as
 364ec9e2 with shared seam 9945d612. Selected and unselected paths preserve
 original buyer/seller domains, independent replay stores and executor-funded
 value. Independent source review is clear; all six final carrier products fit
-and thirteen final authorization tests pass. Seventy total cases are authored;
-separate 45-case seam and 25-case carrier/current runs are underway. Complete
-current/Safe acceptance is pending. ERC20 offers retain their explicit
+and all seventy distinct cases pass across the independently verified 45-case
+shared seam and 25-case carrier/current cohorts. Actual Core/Manager/Ledger and
+2-of-2 Safe are included; typed Artist/entropy/governance remain explicit.
+Offer clients 1c101938 pass all 398 root package tests and exact ABI fixture
+regeneration. Complete full-graph/current/Safe acceptance remains pending. ERC20 offers retain their explicit
 payer-intent implementation requirement.
 
 Full current-stack/Safe/fuzz acceptance follows deployable integrated source.

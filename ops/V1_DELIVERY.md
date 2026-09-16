@@ -34,18 +34,21 @@ the denominator. The integrator owns this reporting correction and delivery.
 
 ## Latest integration: 16 September
 
-The current source checkpoint is fbd9dcec, including curated callers with 375 root
+The current source checkpoint is 2503b218, including offer callers with 398 root
 package passes, 55 distinct current contract passes and independently reviewed
 finality archive/schema/codec corrections (final native capture pending). Native curated fixed/private sales,
 actual recorder/Safe tests, repeat-refund correction, STATIC scan capacity and
 initial additional finality modes are integrated. Native primary mint offers
-are source-integrated with independent review, thirteen passing authorization
-tests and seventy total authored cases; shared/current runtime runs are pending.
+are source-integrated with seventy distinct independently verified passing
+cases across shared and carrier/current captures; typed authority seams and
+complete final-system acceptance remain.
 Dutch/clearing scoped acceptance passes all 26 cases after a fixture-only fix.
 The 2,061-source ABI check passes. Actual-token museum capture 1db47ad9 passes 62 root tests and independent
 source/artifact review. Metric packaging dffb8444/2b333b74 passes 81 offline
 controls and a separate restored-runtime execution; full browser/finality and
-OBJECT_DOSSIER composition remain. The [current status](V1_CURRENT_STATUS.md) and
+OBJECT_DOSSIER composition remain. Object tooling2503b218 adds a concrete
+synthetic native-inventory verifier and actual-token partial assembly, with
+60 root tests passing; full dossier conformance remains incomplete. The [current status](V1_CURRENT_STATUS.md) and
 [feature batch](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
 record distinct test scopes and remaining size/runtime/closure work.
 
