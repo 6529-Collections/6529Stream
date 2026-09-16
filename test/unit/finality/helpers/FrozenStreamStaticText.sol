@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 /// @notice Original UTF-8 and escaping algorithms, internally compiled with no external call.
-library StreamStaticText {
+library FrozenStreamStaticText {
     function escapeJsonString(string memory raw) internal pure returns (string memory) {
         // Six bytes is the worst case for each input byte (\u00xx). Keep the checked
         // allocation, write only within it, and retain its allocation after shortening.
@@ -63,19 +63,6 @@ library StreamStaticText {
             valid := 1
 
             for { } lt(cursor, end) { cursor := add(cursor, 1) } {
-                // ASCII bytes (including controls) are all valid UTF-8. Skip only a complete
-                // in-bounds word; non-ASCII words retain the original byte validator below.
-                if iszero(lt(sub(end, cursor), 32)) {
-                    if iszero(
-                        and(
-                            mload(cursor),
-                            0x8080808080808080808080808080808080808080808080808080808080808080
-                        )
-                    ) {
-                        cursor := add(cursor, 31)
-                        continue
-                    }
-                }
                 let lead := byte(and(cursor, 31), mload(and(cursor, not(31))))
 
                 if iszero(lt(lead, 0x80)) {

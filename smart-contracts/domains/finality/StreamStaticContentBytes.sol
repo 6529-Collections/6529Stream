@@ -23,20 +23,50 @@ library StreamStaticContentBytes {
         );
     }
 
-    function _field(bytes memory json, bytes memory field) private pure returns (bool) {
+    function _field(bytes memory json, bytes memory field) private pure returns (bool found) {
         if (field.length > json.length) return false;
+        // Both fixed field encodings above exceed one word. Candidate bytes and the full
+        // hashed span therefore remain in-bounds, including the final allowed position.
         bytes32 expected = keccak256(field);
-        bytes32 firstWord;
-        assembly ("memory-safe") { firstWord := mload(add(field, 32)) }
-        for (uint256 i; i <= json.length - field.length; ++i) {
-            if (json[i] != 0x2c || json[i + 1] != 0x22) continue;
-            // Exact fixed serializer keys cannot occur unescaped inside a JSON string.
-            bytes32 actual;
-            assembly ("memory-safe") { actual := mload(add(add(json, 32), i)) }
-            if (actual != firstWord) continue;
-            assembly ("memory-safe") { actual := keccak256(add(add(json, 32), i), mload(field)) }
-            if (actual == expected) return true;
+        assembly ("memory-safe") {
+            function at(p) -> b { b := byte(and(p, 31), mload(and(p, not(31)))) }
+            let start := add(json, 32)
+            let limit := add(start, sub(mload(json), mload(field)))
+            let first := mload(add(field, 32))
+            for { let p := start } iszero(gt(p, limit)) { p := add(p, 1) } {
+                // Most of the large field is Base64. A word without ',' cannot begin a
+                // match. Retain byte-position comparisons whenever a comma is possible.
+                if iszero(lt(sub(limit, p), 31)) {
+                    let x :=
+                        xor(
+                            mload(p),
+                            0x2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c
+                        )
+                    if iszero(
+                        and(
+                            and(
+                                sub(
+                                    x,
+                                    0x0101010101010101010101010101010101010101010101010101010101010101
+                                ),
+                                not(x)
+                            ),
+                            0x8080808080808080808080808080808080808080808080808080808080808080
+                        )
+                    ) {
+                        p := add(p, 31)
+                        continue
+                    }
+                }
+                if and(eq(at(p), 44), eq(at(add(p, 1)), 34)) {
+                    if eq(mload(p), first) {
+                        if eq(keccak256(p, mload(field)), expected) {
+                            found := 1
+                            break
+                        }
+                    }
+                }
+            }
         }
-        return false;
     }
 }

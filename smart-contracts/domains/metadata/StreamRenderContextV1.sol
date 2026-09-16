@@ -308,6 +308,30 @@ library StreamRenderContextV1 {
             }
             let end := add(add(raw, 32), mload(raw))
             for { let p := add(raw, 32) } lt(p, end) { p := add(p, 1) } {
+                // A full word without '<' cannot contain the start of the original prefix.
+                // The zero-byte test is used only to skip whole words, never as an index.
+                if iszero(lt(sub(end, p), 32)) {
+                    let x :=
+                        xor(
+                            mload(p),
+                            0x3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c
+                        )
+                    if iszero(
+                        and(
+                            and(
+                                sub(
+                                    x,
+                                    0x0101010101010101010101010101010101010101010101010101010101010101
+                                ),
+                                not(x)
+                            ),
+                            0x8080808080808080808080808080808080808080808080808080808080808080
+                        )
+                    ) {
+                        p := add(p, 31)
+                        continue
+                    }
+                }
                 if isEndTag(p, end) {
                     matches := add(matches, 1)
                     p := add(p, 7)
@@ -359,6 +383,30 @@ library StreamRenderContextV1 {
             let run := add(raw, 32)
             let dst := add(out, 32)
             for { let p := run } lt(p, end) { p := add(p, 1) } {
+                // A full word without '<' cannot contain the start of the original prefix.
+                // The zero-byte test is used only to skip whole words, never as an index.
+                if iszero(lt(sub(end, p), 32)) {
+                    let x :=
+                        xor(
+                            mload(p),
+                            0x3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c
+                        )
+                    if iszero(
+                        and(
+                            and(
+                                sub(
+                                    x,
+                                    0x0101010101010101010101010101010101010101010101010101010101010101
+                                ),
+                                not(x)
+                            ),
+                            0x8080808080808080808080808080808080808080808080808080808080808080
+                        )
+                    ) {
+                        p := add(p, 31)
+                        continue
+                    }
+                }
                 if isEndTag(p, end) {
                     let size := add(sub(p, run), 1)
                     copy(dst, run, size)

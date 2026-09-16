@@ -62,8 +62,8 @@ contract StreamStaticContentCheckpointTest is StaticMetadataRoutingFixture {
         outputs = new StreamStaticContentCheckpoint(
             address(selections),
             address(executor),
-            _gas("STATIC_CONTENT_READ_GAS", 8000000),
-            _gas("STATIC_CONTENT_RENDER_GAS", 30000000)
+            _gas("STATIC_CONTENT_READ_GAS", 4000000),
+            _gas("STATIC_CONTENT_RENDER_GAS", 10000000)
         );
         _pointer();
         // Canonical PNG signature admission fixture; no complete image-decoder claim.
@@ -305,7 +305,35 @@ contract StreamStaticContentCheckpointTest is StaticMetadataRoutingFixture {
         _admin(abi.encodeCall(router.setCollectionScriptManifest, (1, manifest)));
         bytes32 selection = _prepare(1, R.MetadataMode.ONCHAIN);
         bytes32 id = outputs.begin(selection, 0);
-        outputs.append(id, _payloads(1, 1));
+        O.Payload[] memory payloads = _payloads(1, 1);
+        StreamStaticContentCheckpoint insufficient = new StreamStaticContentCheckpoint(
+            address(selections),
+            address(executor),
+            _gas("STATIC_CONTENT_READ_GAS", 8000000),
+            _gas("STATIC_CONTENT_RENDER_GAS", 30000000)
+        );
+        bytes32 refused = insufficient.begin(selection, 0);
+        _coolLargeRender(bundle, address(insufficient));
+        (bool oversizedBudget,) = _envelope(
+            address(insufficient),
+            abi.encodeCall(insufficient.append, (refused, payloads)),
+            "30m configured admission"
+        );
+        require(!oversizedBudget && insufficient.checkpoint(refused).nextIndex == 0);
+        _coolLargeRender(bundle, address(outputs));
+        (bool fits,) = _envelope(
+            address(outputs),
+            abi.encodeCall(outputs.append, (id, payloads)),
+            "24kb append transaction"
+        );
+        require(fits, "24kb append must fit transaction envelope");
+        // Independent high-budget diagnostic on another plan, kept separate from admission proof.
+        bytes32 diagnostic = outputs.begin(selection, keccak256("unbounded diagnostic"));
+        _coolLargeRender(bundle, address(outputs));
+        uint256 beforeAppend = gasleft();
+        outputs.append(diagnostic, payloads);
+        uint256 appendGas = beforeAppend - gasleft();
+        require(outputs.checkpoint(diagnostic).contentRoot == outputs.checkpoint(id).contentRoot);
         require(_has(router.tokenHTML(1), string(program)));
         require(_has(router.tokenMetadataJSON(address(core), 1), '"render_mode":"compact"'));
         require(outputs.outputAt(id, 0).leaf.metadataHash == keccak256(bytes(router.tokenJSON(1))));
@@ -313,7 +341,168 @@ contract StreamStaticContentCheckpointTest is StaticMetadataRoutingFixture {
             outputs.outputAt(id, 0).leaf.metadataHash
                 != keccak256(bytes(router.tokenMetadataJSON(address(core), 1)))
         );
+        _coolLargeRender(bundle, address(outputs));
+        (bool currentFits,) = _envelope(
+            address(outputs),
+            abi.encodeCall(outputs.requireCurrentCheckpoint, (id)),
+            "24kb current transaction"
+        );
+        require(currentFits, "24kb current must fit transaction envelope");
+        _coolLargeRender(bundle, address(outputs));
+        uint256 beforeCurrent = gasleft();
         require(outputs.requireCurrentCheckpoint(id).nextIndex == 1);
+        emit LargeRenderFixtureGas(10000000, appendGas, beforeCurrent - gasleft());
+    }
+
+    event LargeRenderFixtureGas(uint256 configuredRenderGas, uint256 appendGas, uint256 currentGas);
+    event log_named_uint(string key, uint256 value);
+    event CapacityObservation(
+        string label, bool success, uint256 intrinsicGas, uint256 executionGas, bytes4 failure
+    );
+
+    /// Diagnostic envelope, not a declaration that an unsuccessful workload is supported.
+    /// Includes calldata/base intrinsic cost and reserves 5,000 for CALL/measurement overhead.
+    function _envelope(address target, bytes memory input, string memory label)
+        private
+        returns (bool ok, bytes memory result)
+    {
+        uint256 intrinsic = 21000;
+        for (uint256 i; i < input.length; ++i) {
+            intrinsic += input[i] == 0 ? 4 : 16;
+        }
+        uint256 budget = 16777216 - intrinsic - 5000;
+        uint256 before_ = gasleft();
+        (ok, result) = target.call{ gas: budget }(input);
+        uint256 used = before_ - gasleft();
+        bytes4 failure;
+        if (!ok && result.length >= 4) {
+            assembly ("memory-safe") { failure := mload(add(result, 32)) }
+        }
+        emit CapacityObservation(label, ok, intrinsic, used, failure);
+        emit log_named_uint(string.concat(label, " success"), ok ? 1 : 0);
+        emit log_named_uint(string.concat(label, " gas+intrinsic"), used + intrinsic);
+        if (ok) require(used + intrinsic <= 16777216);
+    }
+
+    function testCapacityFourThenTwoRowsAndSixRowCurrentWithinTransactionEnvelope() public {
+        bytes32 selection = _prepare(6, R.MetadataMode.ONCHAIN);
+        bytes32 id = outputs.begin(selection, 0);
+        O.Payload[] memory first = _payloads(1, 4);
+        _coolLargeRender(bytes32(0), address(outputs));
+        (bool fits,) = _envelope(
+            address(outputs),
+            abi.encodeCall(outputs.append, (id, first)),
+            "four row append transaction"
+        );
+        require(fits, "four row append must fit");
+        O.Payload[] memory second = _payloads(5, 2);
+        _coolLargeRender(bytes32(0), address(outputs));
+        (bool secondFits,) = _envelope(
+            address(outputs),
+            abi.encodeCall(outputs.append, (id, second)),
+            "two row append after four transaction"
+        );
+        require(secondFits, "second append includes original four current rows");
+        _coolLargeRender(bytes32(0), address(outputs));
+        (bool currentFits,) = _envelope(
+            address(outputs),
+            abi.encodeCall(outputs.requireCurrentCheckpoint, (id)),
+            "six row current transaction"
+        );
+        require(currentFits, "six row current must fit");
+        // Admission may not turn actual live attribution into unavailable output.
+        for (uint256 i; i < 6; ++i) {
+            require(
+                outputs.outputAt(id, i).leaf.metadataHash
+                    == keccak256(bytes(router.tokenJSON(i + 1))),
+                "unrestricted output parity"
+            );
+        }
+        _coolLargeRender(bytes32(0), address(outputs));
+        uint256 beforeCurrent = gasleft();
+        require(outputs.requireCurrentCheckpoint(id).nextIndex == 6);
+        emit log_named_uint("six row high-budget current", beforeCurrent - gasleft());
+    }
+
+    function testEightRowsRemainExplicitAdmissionDiagnostic() public {
+        bytes32 selection = _prepare(8, R.MetadataMode.ONCHAIN);
+        bytes32 id = outputs.begin(selection, 0);
+        O.Payload[] memory first = _payloads(1, 4);
+        outputs.append(id, first);
+        O.Payload[] memory second = _payloads(5, 4);
+        _coolLargeRender(bytes32(0), address(outputs));
+        (bool fits, bytes memory reason) = _envelope(
+            address(outputs),
+            abi.encodeCall(outputs.append, (id, second)),
+            "eight row second batch diagnostic"
+        );
+        require(
+            !fits && bytes4(reason) == O.StaticContentParentGas.selector
+                && outputs.checkpoint(id).nextIndex == 4,
+            "no partial or starved append"
+        );
+        outputs.append(id, second); // High-budget diagnostic only; never a bounded acceptance oracle.
+        _coolLargeRender(bytes32(0), address(outputs));
+        (fits, reason) = _envelope(
+            address(outputs),
+            abi.encodeCall(outputs.requireCurrentCheckpoint, (id)),
+            "eight row current diagnostic"
+        );
+        require(
+            !fits && bytes4(reason) == O.StaticContentParentGas.selector,
+            "oversized current reservation"
+        );
+        _coolLargeRender(bytes32(0), address(outputs));
+        uint256 beforeCurrent = gasleft();
+        require(outputs.requireCurrentCheckpoint(id).nextIndex == 8);
+        emit log_named_uint("eight row high-budget current", beforeCurrent - gasleft());
+        StreamStaticContentCheckpoint reserved = new StreamStaticContentCheckpoint(
+            address(selections),
+            address(executor),
+            _gas("STATIC_CONTENT_READ_GAS", 4000000),
+            _gas("STATIC_CONTENT_RENDER_GAS", 14000000)
+        );
+        bytes32 reservedId = reserved.begin(selection, 0);
+        (bool tooWide, bytes memory failure) = _envelope(
+            address(reserved),
+            abi.encodeCall(reserved.append, (reservedId, first)),
+            "14m reservation diagnostic"
+        );
+        require(
+            !tooWide && bytes4(failure) == O.StaticContentParentGas.selector
+                && reserved.checkpoint(reservedId).nextIndex == 0,
+            "full budget admission retained"
+        );
+    }
+
+    /// @dev Reset named fixture account/storage access and both SSTORE2 carriers after setup.
+    /// This is not a full current-stack or complete transitive cold-readset acceptance claim.
+    function _coolLargeRender(bytes32 bundle, address producer) private {
+        Raw.Chunk memory chunk;
+        if (bundle != bytes32(0)) chunk = metadata.staticBundleChunk(bundle, 0);
+        (address encoding,) = renderer.encodingBinding();
+        address[17] memory targets = [
+            address(core),
+            address(router),
+            address(metadata),
+            address(renderer),
+            address(entropy),
+            address(attribution),
+            producer,
+            address(selections),
+            selections.scopeMembership(),
+            address(inventory),
+            address(versions),
+            address(modules),
+            address(schemas),
+            address(executor),
+            encoding,
+            chunk.first,
+            chunk.tail
+        ];
+        for (uint256 i; i < targets.length; ++i) {
+            if (targets[i] != address(0)) safeVm.cool(targets[i]);
+        }
     }
 
     function _prepare(uint256 count, R.MetadataMode mode) private returns (bytes32 selection) {
