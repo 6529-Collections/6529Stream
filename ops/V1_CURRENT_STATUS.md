@@ -18,13 +18,13 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 16 September parallel implementation batch
 
-Source through `61b87646` includes free-burn reveal credits, original Artist
+Source through `7d5ba35c` includes free-burn reveal credits, original Artist
 withdrawal61, the native-price adapter size repair, distribution/burn/price
 clients including saved refund-window purchase verification, museum authority reconciliation and expanded actual-current test hosts.
 The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
 records exact handoffs and evidence, superseding older queue descriptions.
 
-All 2,061 Solidity sources pass ABI/type/storage checking at fbd9dcec. Root passes all 398
+All 2,069 Solidity sources pass ABI/type/storage checking at 7d5ba35c. Root passes all 398
 client tests with generation/build/types, including the new curated callers, 131 museum authority/profile tests and
 a separate 27-case archival export/publication cohort. The offline dossier and
 legacy BagIt/hydration cohort also passes all 44 cases at a0d71d2.
@@ -140,6 +140,28 @@ error after 1,682.74 seconds; none of the 12 authored cases execute. The origina
 inputs/log are retained and test code generation is being isolated. Complete
 joined supplement/finality runtime, curated composition and institution-signer
 alternatives remain.
+
+The metric supplement is now source-integrated as 5562bdb0. It retains exact
+source/runtime/replay evidence, requires its original-record-bound receipt for
+full PERCEPTUAL finality and locks, and adds all fourteen supplement inventory
+roles. Independent review verifies the committed source, original ABI/storage
+prefix and retained proof capture. Seven native proof cases and 256 parity fuzz
+runs pass; thirteen nonempty production products fit. The proof call costs
+7,706,520 gas, which excludes the full publisher transaction. Root passes 81
+offline preservation tests with one opt-in runtime test skipped, plus the new
+profile check. Genuine combined browser/metric replay and complete publication,
+Safe retry, lock, inventory and final transaction-capacity acceptance remain.
+The separate joined fixture is still being completed; its export alone will
+not establish acceptance.
+
+CI batch 7d5ba35c lets repository checks overlap native compilation and cancels
+obsolete independent PR jobs while retaining draft native runs and their caches.
+The required Foundry smoke status still requires both native and repository
+jobs to succeed on the same run. All original Forge commands remain; the Museum
+workflow now has explicit toolchain-policy and checksum coverage. Root passes
+49 orchestration tests, the policy/cardinality checks and actionlint syntax and
+expression checks. Frozen release checksums still require final regeneration;
+this is not a claim that remote CI or release verification passes.
 
 Metric packaging dffb8444/2b333b74 now retains original source and the copied
 interpreter/dependencies. Root passes 81 offline preservation checks and a

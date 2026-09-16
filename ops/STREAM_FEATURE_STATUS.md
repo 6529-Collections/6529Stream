@@ -52,14 +52,14 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `61b87646bb1873bf5ad151a602b8216ac76f2e89`; see the [16 September batch](#parallel-feature-batch-16-september) for scoped evidence and remaining joins |
+| Current integration source | `7d5ba35cecad1f6d824332c07de1cb79612da59d`; see the [16 September batch](#parallel-feature-batch-16-september) for scoped evidence and remaining joins |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
 | Further integrated Artist handoff | `9ea144c85768050ec910cc8534af13bcac82e20d`, received during assembly: closed-origin dormancy/rotation extension on the preceding handoff; ART24 |
 | Integrated entropy client handoff | `642d017d9d0cd8ee9b6b813abbdbe10a4c6b1265`; client.entropy-authority |
 | Integrated OwnerRecords capture handoff | `57ac8d041c9adc479f1061fafec748c8330ac974`; MUSEUM-36 |
-| Latest broad cheap compilation evidence | 2,061-source ABI/type/storage check passes at fbd9dcec in 17.453 seconds; no errors. This is not bytecode or full-system runtime evidence. |
+| Latest broad cheap compilation evidence | 2,069-source ABI/type/storage check passes at 7d5ba35c in 17.485 seconds; no errors. This is not bytecode or full-system runtime evidence. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
 | Latest focused native evidence | Separate captures: entropy 10, Royalty 11, mint 101, actual-Core 29, final burn 49 and later burn-credit 31 distinct cases pass. Repaired native-price 76 passes at 766c5dfd with independent source/artifact attestation; STATIC output manifest 9 passes in a separate capture. Root clients 398 and a museum authority/profile cohort of 131 pass. Other museum cohorts overlap. No complete-system pass is inferred. |
 
@@ -524,8 +524,8 @@ settlement behavior listed above.
 
 ### Parallel feature batch 16 September
 
-The latest source is `61b87646`. All 2,061 Solidity inputs at `fbd9dcec` pass
-ABI/type/storage checking in 17.453 seconds after explicit test/deployment import repairs,
+The latest source is `7d5ba35c`. All 2,069 Solidity inputs pass ABI/type/storage
+checking in 17.485 seconds, including the metric supplement and Museum URI cases,
 without bytecode or runtime acceptance. Root client 375, museum authority 131, archive 27 and
 dossier 44 results retain their original source scopes. The following new batches supersede older queue notes.
 
@@ -636,6 +636,24 @@ dossier 44 results retain their original source scopes. The following new batche
   test-codegen trigger is isolated. Full curated composition, joined metric
   supplement/finality runtime and institution-signer alternatives remain. See
   [mode scope](../docs/integrations/reference-finality-modes.md).
+
+- Metric supplement `7ca6a2df` is integrated as `5562bdb0`. Full PERCEPTUAL
+  finality now binds retained source/runtime/replay closure to the original
+  publication, lock and twenty-two-item interpretation inventory. Original
+  V1 ABI/storage prefix and other finality identities are preserved. Independent
+  source/artifact review is clear; seven native proof cases and 256 parity fuzz
+  inputs pass, with thirteen nonempty production products fitting. Proof-call
+  gas is 7,706,520; complete publisher capacity remains pending. Root passes 81
+  offline preservation tests with one opt-in skip and exact profile generation.
+  Genuine combined replay and joined publisher/Safe/lock/inventory acceptance
+  remain separate. See [metric supplement](../docs/integrations/reference-metric-supplement.md).
+- CI throughput `95a21a28` is integrated as `7d5ba35c`. Repository checks run
+  independently of native compilation; obsolete independent PR jobs cancel,
+  while draft native runs retain their caches. The required Foundry smoke
+  result still requires both same-run jobs to succeed and all original native
+  commands remain. Root passes 49 orchestration tests, policy/cardinality and
+  actionlint syntax/expression checks. Frozen checksum refresh and full remote
+  CI acceptance remain pending; no release artifact was rewritten.
 
 - Scope reconciliation: moving-price selection is extension 19 and
   [SSA-CONTENT-TIME](../docs/stream-sales-and-auctions.md#content-selection-on-time-varying-kinds),

@@ -5,6 +5,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Bind full perceptual finality to retained metric source, runtime and replay
+  evidence through an additive original-record supplement and staged byte
+  retention. Preserve historical interfaces and storage; joined publication,
+  replay and transaction-capacity acceptance remain pending.
+
 - Run repository checks independently of native CI builds and cancel superseded
   PR checks per job, preserving draft native caches and the required combined
   Foundry status; validate and checksum-cover the separate museum toolchain.
