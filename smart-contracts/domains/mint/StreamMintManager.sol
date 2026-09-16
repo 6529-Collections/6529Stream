@@ -17,6 +17,8 @@ import "./StreamMintRevocation.sol";
 import "./StreamMintManagerAccounting.sol";
 import "./StreamPreparedNativeMintExecution.sol";
 import "./StreamPreparedNativeContentExecution.sol";
+import "./StreamPreparedNativeContentPurchaseExecution.sol";
+import "../../interfaces/stream/mint/IStreamMintSaleAuthorizationRevocation.sol";
 import "./StreamMintManagerTranscript.sol";
 import "./StreamMintManagerExecution.sol";
 import "./StreamMintManagerPolicy.sol";
@@ -34,6 +36,8 @@ contract StreamMintManager is
     StreamMintTranscriptTypes,
     IStreamPreparedNativeMint,
     IStreamPreparedNativeContentMint,
+    IStreamPreparedNativeContentPurchaseMint,
+    IStreamMintSaleAuthorizationRevocation,
     IStreamPreparedNativeRightsMint,
     IStreamMintAuthorizationRevocation,
     IStreamMintRoyaltyPolicy,
@@ -193,6 +197,8 @@ contract StreamMintManager is
         return interfaceId == type(IStreamMintManager).interfaceId
             || interfaceId == type(IStreamPreparedNativeMint).interfaceId
             || interfaceId == type(IStreamPreparedNativeContentMint).interfaceId
+            || interfaceId == type(IStreamPreparedNativeContentPurchaseMint).interfaceId
+            || interfaceId == type(IStreamMintSaleAuthorizationRevocation).interfaceId
             || interfaceId == type(IStreamPreparedNativeRightsMint).interfaceId
             || interfaceId == type(IStreamMintAuthorizationRevocation).interfaceId
             || interfaceId == type(IStreamMintRoyaltyPolicy).interfaceId
@@ -238,6 +244,19 @@ contract StreamMintManager is
         return StreamMintRevocation.voidOffer(
             _revocationContext(), offer, buyerKind, revocationSignature
         );
+    }
+
+    function mintSaleAuthorizationId(StreamPrivateSaleTypes.SaleAuthorization calldata authorization)
+        external view override returns (bytes32)
+    {
+        return StreamMintRevocation.saleAuthorizationId(authorization);
+    }
+
+    function voidMintSaleAuthorization(
+        StreamPrivateSaleTypes.SaleAuthorization calldata authorization,
+        bytes calldata revocationSignature
+    ) external override nonReentrant returns (bytes32) {
+        return StreamMintRevocation.voidSaleAuthorization(_revocationContext(), authorization, revocationSignature);
     }
 
     function _revocationContext() private view returns (StreamMintRevocation.Context memory) {
@@ -399,7 +418,8 @@ contract StreamMintManager is
         override
         returns (StreamPreparedNativeSettlementTypes.Facts memory)
     {
-        return _preparedNative.active;
+        bytes memory encoded = StreamMintManagerViews.preparedEncoded(_preparedNative.active);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function bindPreparedNativeRecorder(address recorder) external override onlyOwner nonReentrant {
@@ -493,7 +513,8 @@ contract StreamMintManager is
         override
         returns (StreamPreparedNativeRightsTypes.Facts memory)
     {
-        return _preparedRights.active;
+        bytes memory encoded = StreamMintManagerViews.rightsEncoded(_preparedRights.active);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function executePreparedNativeContentMint(
@@ -530,13 +551,48 @@ contract StreamMintManager is
         );
     }
 
+    function executePreparedNativeContentPurchaseMint(
+        MintBatch calldata batch,
+        bytes calldata gateData,
+        bytes32 intentHash
+    )
+        external
+        override
+        nonReentrant
+        returns (
+            uint256 tokenId,
+            bytes32 operationRoot,
+            bytes32 operationId,
+            StreamPrimarySettlementTypes.PrimarySettlementResult memory result
+        )
+    {
+        StreamPreparedNativeContentPurchaseExecution.admit(
+            _preparedContent, address(moduleRegistry), batch, gateData, intentHash
+        );
+        OperationTranscript memory transcript =
+            _operationTranscript(batch, gateData, MINT_EXECUTION_PATH_PREPARED);
+        if (transcript.quantity != 1) revert InvalidPreparedNativeMint();
+        _reserveOperationNonces(transcript.firstOperationNonce, transcript.quantity);
+        return StreamMintManagerExecution.contentPurchasePaid(
+            _executionContext(),
+            _phaseGateConfigs[batch.collectionId][batch.phaseId],
+            _preparedNative,
+            _preparedContent,
+            batch,
+            gateData,
+            intentHash,
+            transcript
+        );
+    }
+
     function activePreparedNativeContent()
         external
         view
         override
         returns (StreamPreparedNativeContentTypes.Facts memory)
     {
-        return _preparedContent.active;
+        bytes memory encoded = StreamMintManagerViews.contentEncoded(_preparedContent.active);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function preparedNativeContentAdmission() external view override returns (bytes32) {
@@ -551,7 +607,8 @@ contract StreamMintManager is
         returns (bool exists, MintPhaseConfig memory config)
     {
         StreamMintPhaseState.PhaseState storage phaseState = _phases[collectionId][phaseId];
-        return (phaseState.exists, phaseState.config);
+        bytes memory encoded = StreamMintManagerViews.phaseEncoded(phaseState);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     /// @notice Returns manager-scoped authorization replay state independent of the caller.
@@ -599,7 +656,8 @@ contract StreamMintManager is
         override
         returns (MintCounterConfig memory)
     {
-        return _counterConfigs[collectionId][phaseId][counterId];
+        bytes memory encoded = StreamMintManagerViews.counterEncoded(_counterConfigs[collectionId][phaseId][counterId]);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     /// @notice Returns one phase's optional gate config.
@@ -609,7 +667,8 @@ contract StreamMintManager is
         override
         returns (MintGateConfig memory)
     {
-        return _phaseGateConfigs[collectionId][phaseId];
+        bytes memory encoded = StreamMintManagerViews.gateEncoded(_phaseGateConfigs[collectionId][phaseId]);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     /// @notice Previews the manager-derived subject key for one token/counter context.

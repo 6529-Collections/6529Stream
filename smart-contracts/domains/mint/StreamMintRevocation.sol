@@ -73,6 +73,49 @@ library StreamMintRevocation {
         );
     }
 
+    function saleAuthorizationId(StreamPrivateSaleTypes.SaleAuthorization memory authorization)
+        public view returns (bytes32)
+    {
+        return StreamMintTicketHash.authorizationId(StreamPrivateSaleHash.digest(
+            block.chainid, authorization.saleAdapter, StreamPrivateSaleHash.authorizationBody(authorization)
+        ));
+    }
+
+    function voidSaleAuthorization(
+        Context memory c,
+        StreamPrivateSaleTypes.SaleAuthorization calldata authorization,
+        bytes calldata signature
+    ) public returns (bytes32 id) {
+        if (authorization.chainId != block.chainid || authorization.mintManager != address(this)
+            || authorization.saleAdapter == address(0) || authorization.saleId == 0
+            || authorization.saleKind != 5 || authorization.revenueClass != keccak256("PRIMARY_SALE")) {
+            revert IStreamMintAuthorizationRevocation.MintRevocationInvalidBinding();
+        }
+        // Exact immutable historical membership only. Expiry, current phase, module admission,
+        // Artist authority and payment availability never condition a revocation.
+        bytes memory data = abi.encodeWithSignature("curatedSaleAuthorizationBinding(bytes32)", authorization.saleId);
+        bytes memory raw = new bytes(160);
+        address adapter = authorization.saleAdapter;
+        bool ok;
+        uint256 size;
+        assembly ("memory-safe") {
+            ok := staticcall(gas(), adapter, add(data, 32), mload(data), add(raw, 32), 160)
+            size := returndatasize()
+        }
+        if (!ok || size != 160) revert IStreamMintAuthorizationRevocation.MintRevocationInvalidBinding();
+        (uint256 collection, bytes32 phase, address signer, uint8 kind, bytes32 configHash) =
+            abi.decode(raw, (uint256, bytes32, address, uint8, bytes32));
+        if (keccak256(raw) != keccak256(abi.encode(collection, phase, signer, kind, configHash))
+            || collection == 0 || collection != authorization.collectionId || phase == 0
+            || phase != authorization.phaseId || signer == address(0) || configHash == 0) {
+            revert IStreamMintAuthorizationRevocation.MintRevocationInvalidBinding();
+        }
+        id = saleAuthorizationId(authorization);
+        _authorizer(c, signer, kind, id, StreamPrivateSaleHash.domain(block.chainid, adapter), signature);
+        _void(c.ledger, id);
+        emit MintAuthorizationVoided(1, collection, phase, id, signer, adapter, 2);
+    }
+
     function voidOffer(
         Context memory c,
         StreamPrivateSaleTypes.SaleOffer calldata offer,

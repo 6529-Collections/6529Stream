@@ -27,6 +27,7 @@ import "./StreamDeferredNativeSettlementValidation.sol";
 import "./StreamPreparedNativeSettlementAccounting.sol";
 import "./StreamPreparedNativeSettlementExecution.sol";
 import "./StreamPreparedNativeContentRecording.sol";
+import "./StreamPreparedNativeContentPurchaseRecording.sol";
 import "../../interfaces/stream/revenue/IStreamDeferredNativePrimarySaleSettlement.sol";
 import "../../interfaces/stream/revenue/IStreamNativePrimarySaleSettlement.sol";
 import "../mint/StreamSaleTemplate.sol";
@@ -43,6 +44,7 @@ contract StreamPrimarySaleSettlement is
     IStreamDeferredNativePrimarySaleSettlement,
     IStreamPreparedNativePrimarySaleSettlement,
     IStreamPreparedNativeContentSettlement,
+    IStreamPreparedNativeContentPurchaseSettlement,
     IStreamNativeSupplementalSettlement,
     IStreamNativeCustodyPrimarySettlement,
     IStreamTokenProfileCustodySettlement,
@@ -91,6 +93,7 @@ contract StreamPrimarySaleSettlement is
     StreamNativeCustodySettlementTypes.CanonicalHouse private _canonicalCustodyHouse;
     mapping(bytes32 => bytes32) public override nativeCustodyFactsHash;
     mapping(bytes32 => bytes32) public override preparedNativeRightsFactsHash;
+    mapping(address => mapping(bytes32 => bool)) public override preparedNativeContentPurchaseConsumed;
 
     constructor(IStreamRevenueResolver resolver, address registry, IStreamRevenueEscrow escrow)
         StreamSettlementContext(resolver, registry)
@@ -139,6 +142,7 @@ contract StreamPrimarySaleSettlement is
             || id == type(IStreamDeferredNativePrimarySaleSettlement).interfaceId
             || id == type(IStreamPreparedNativePrimarySaleSettlement).interfaceId
             || id == type(IStreamPreparedNativeContentSettlement).interfaceId
+            || id == type(IStreamPreparedNativeContentPurchaseSettlement).interfaceId
             || id == type(IStreamNativeCustodyPrimarySettlement).interfaceId
             || id == type(IStreamTokenProfileCustodySettlement).interfaceId
             || id == type(IStreamCustodyRightsSettlement).interfaceId
@@ -345,6 +349,39 @@ contract StreamPrimarySaleSettlement is
                 )
             ),
             preparedNativeSaleConsumed,
+            settlementConsumed,
+            _results,
+            preparedNativeFactsHash,
+            preparedNativeContentHash,
+            _officialSettled,
+            totalOfficialSettled,
+            facts,
+            intent
+        );
+    }
+
+    function settlePreparedNativeContentPurchase(
+        StreamPreparedNativeSettlementTypes.Facts calldata facts,
+        StreamPreparedNativeSettlementTypes.Intent calldata intent
+    )
+        external
+        payable
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
+    {
+        return StreamPreparedNativeContentPurchaseRecording.execute(
+            StreamPreparedNativeContentPurchaseRecording.Context(
+                core,
+                coreCodeHash,
+                moduleRegistry,
+                moduleRegistryCodeHash,
+                resolverCodeHash,
+                StreamNativePrimaryExecution.Context(
+                    _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
+                )
+            ),
+            preparedNativeContentPurchaseConsumed,
             settlementConsumed,
             _results,
             preparedNativeFactsHash,
