@@ -91,8 +91,18 @@ a missing entropy source fails rendering. A and the integrator own those source 
 The attribution companion preserves the original complete fact/identity/claim/attestation/
 sanction checks and pure serializer, with constructor-bound Router identity and saved chain
 ID replacing delegatecall context. Its existing finality/snapshot/membership source chain
-also requires the transitive gate. In particular, current ScopeMembership's public read
-helper remains a known delegatecall seam until the dedicated static source work is integrated.
+also requires the transitive gate. ScopeMembership now uses internal copies of its exact
+original bounded read and seven-fact
+membership hash in serving paths. The original public helper ABIs and publication path remain
+unchanged. Four authored cases disable the linked helper runtimes after publication and check
+same facts, pending prefixes, burned tokens, malformed Core data and changed recorded blobs.
+This removes that known serving seam; it does not substitute for whole-program opcode analysis.
+
+Provisional Artist identity maturity is a separate dependency: the original live getter uses
+current time. The Artist producer is adding an explicit permissionless checkpoint after the
+original eligibility succeeds. STATIC must require that exact checkpoint and recheck its live
+stored association/transition facts, using no timestamp. Until it exists, the optional identity
+frame is explicitly unavailable; an old stable name must not be relabeled the current document.
 
 Activated `collectionServingFacts` uses distinct `6529STREAM_STATIC_METADATA_SELECTION_V1`
 with the exact selected renderer. Prior finality providers must reject that profile rather
