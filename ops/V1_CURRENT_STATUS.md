@@ -18,14 +18,14 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 16 September parallel implementation batch
 
-Source through `006a16bc` includes free-burn reveal credits, original Artist
+Source through `8ba023dc` includes free-burn reveal credits, original Artist
 withdrawal61, the native-price adapter size repair, distribution/burn/price
 clients, museum authority reconciliation and expanded actual-current test hosts.
 The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
 records exact handoffs and evidence, superseding older queue descriptions.
 
-All 1,969 Solidity sources pass ABI/type/storage checking. Root passes all 304
-client tests with generation/build/types and 34 new museum authority tests.
+All 1,973 Solidity sources pass ABI/type/storage checking. Root passes all 327
+client tests with generation/build/types and 131 museum authority/profile tests.
 Separate native cohorts pass mint101, Royalty11, Core29, entropy10, final burn49
 and later burn-credit31 distinct cases. These captures have different sources
 and component boundaries; counts must not be added into a complete-system claim.
@@ -34,15 +34,19 @@ The exact repaired native-price adapter passes 76 scoped cases, independently
 attested against all 312 sources and 351 compiler metadata records. It measures
 24,560 runtime bytes. Dutch/clearing price consumers are integrated as fbacfc7d
 with 26 authored tests and fitting selected products; their runtime acceptance
-and refund/ERC20 consumer implementation remain. Artist
+and ERC20 consumer implementation remain. Refund-window captured pricing is
+integrated as 08775172 with 14 authored cases and a running pinned native cohort;
+its original signed authorization and refund accounting remain distinct. Artist
 withdrawal has ten authored cases; Royalty successor tests and actual-governance
 burn/Safe tests are authored but await complete current-stack execution.
 
-Artist Attribution, Identity deployment and STATIC Router have prior measured
-oversize failures. Four exact repair/consumer patches are preserved and their
+Artist Attribution and Identity deployment measure 29,556 and 25,911 runtime
+bytes at exact withdrawal source `13118faa`; the other 17 selected products fit.
+STATIC Router also has a prior measured oversize failure. Four exact repair/consumer patches are preserved and their
 specific approval question is pending after automatic review rejection; rejected
 production changes remain unapplied. A separate collaborator co-signing mutation
-was also rejected and its complete reviewable proposal is being prepared.
+was also rejected; its exact 21-path proposal is independently source-reviewed
+and a separate specific approval question is pending.
 Other work continues under the owner's delivery authorization.
 
 Independent review reproduced a low-gas false-currentness error in the separate
@@ -52,9 +56,19 @@ STATIC output manifests are also integrated as 006a16bc: nine scoped tests pass,
 including two fuzz properties and actual Renderer/checkpoint/schema/archival
 composition. Root attests all 194 sources and 75 fitting production products.
 Full rendered-byte retention and publication authority remain separate work.
-These changes are separate from the held Router patch. Museum Type/actual positive-record
-joins and wider schema/conformance remain; authority fixture successes alone
-do not establish institutional acceptance.
+These changes are separate from the held Router patch. Museum Type/declaration/later-review records now have an actual local Safe
+capture and offline replay in 8ba023dc. Its RDF/JSON snapshot remains synthetic;
+qualified external authority, wider schema/conformance and archival export
+publication remain. The original nine content recipes have a test-fixture URI
+repair with eight passes; the remaining failure identifies three Renderer reads
+expecting 416 bytes from a 384-byte metadata return. A minimal correction and
+actual-contract regressions are in progress.
+
+A specification/source reconciliation confirms a remaining implementation gap:
+fixed-price PUBLIC/COMMIT_REVEAL and buyer-bound private sales of selected
+unminted works. The existing curated auction path does not supply these sale
+flows. Parallel work is assigned for sale carriers, shared per-purchase settlement
+and wallet calls; original creation identity and auction replay remain intact.
 
 Full current-stack/Safe/fuzz acceptance follows deployable integrated source.
 The optional primary graph-transition proposal is not an adopted launch

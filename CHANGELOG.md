@@ -5,6 +5,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add refund-window same-leaf price capture with immutable charged-price/proof
+  facts, unchanged original signatures and saved-amount refunds/finalization.
+- Add versioned museum Type/declaration continuation and replayable local Safe
+  authority records, preserving original profiles and snapshot provenance.
+
 - Add native Dutch and clearing same-leaf Merkle price consumers, preserving
   original signatures, Dutch free-sale rules and clearing rebate accounting.
 - Add canonical complete STATIC output-hash manifests with exact registered
