@@ -50,7 +50,7 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `3fb128d6a0b10ecb7174df5eaee4d8a930464414`; see the [16 September batch](#parallel-feature-batch-16-september) for scoped evidence and remaining joins |
+| Current integration source | `2b93a187a031a5eb3209a3982e7572a9c1f18d1f`; see the [16 September batch](#parallel-feature-batch-16-september) for scoped evidence and remaining joins |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
@@ -130,7 +130,7 @@ These 163 rows are capabilities and delivery checks of different sizes. Row coun
 | [sales.native-fixed](#salesnative-fixed-evidence) Native fixed-price and open-edition sales | Built | Partly tested | Partial | Current native paid immediate consumer, original Artist/platform signatures, exact settlement and phase accounting. **Remaining:** Latest actual-current transaction/receipt/reveal/capacity acceptance. Earlier accepted current graph captures do not validate all later code. |
 | [sales.free-pwyw](#salesfree-pwyw-evidence) Free phases and pay-what-you-want price programs | Built | Partly tested | Partial | Declared zero-price and native chosen-amount/minimum programs; original signature/payment rules retained. **Remaining:** Final actual-current paid/free/reveal/Safe matrix; do not infer arbitrary batch airdrops from a zero-price single mint. |
 | [sales.english](#salesenglish-evidence) Native English auction lifecycle | Built | Partly tested | Partial | Reserve/minimum bid/anti-snipe/first-bid start, old exits, escrowed native bids and delayed settlement. **Remaining:** Latest full actual-Artist/Core authority, exits and transaction-capacity acceptance. ERC20 bidding is expressly non-genesis. |
-| [sales.curated](#salescurated-evidence) Chosen curated-work auction and content selection | In progress | Partly tested | Partial | Existing curated auction plus native fixed PUBLIC/COMMIT_REVEAL and buyer-bound private carriers are source-integrated as 161cda75, with independent reviews and fitting selected products. Original 97 scoped cases pass; refund idempotency correction b25b3d16 passes the overlapping 35-case book cohort. **Remaining:** Current-contract/Safe runtime acceptance, wallet callers and remaining required moving-price, free/Merkle and ERC20 selected-work profiles. |
+| [sales.curated](#salescurated-evidence) Chosen curated-work auction and content selection | In progress | Partly tested | Partial | Existing curated auction plus native fixed PUBLIC/COMMIT_REVEAL and buyer-bound private carriers are source-integrated as 161cda75, with independent reviews and fitting selected products. Original 97 scoped cases pass; refund idempotency correction b25b3d16 passes the overlapping 35-case book cohort. All 41 own current sale/Safe cases pass on frozen 5605d019; wider revocation/settlement fixture retry remains. Curated callers 2b93a187 pass root package checks. **Remaining:** Combined current-contract/Safe acceptance and remaining required moving-price, free/Merkle and ERC20 selected-work profiles. |
 | [sales.dutch](#salesdutch-evidence) Native descending-price Dutch sales | Built | Partly tested | Partial | Linear/stepped native schedule and signed maximum/current paid price. **Remaining:** Latest current-core/Safe paid/reveal/royalty composition and collector gas; no generic ERC20 Dutch implementation claimed. |
 | [sales.clearing](#salesclearing-evidence) Uniform-clearing Dutch and buyer rebates | Built | Partly tested | Partial | Native clearing book, price fixing, sparse/compressed purchase records, permanent rebates and supplements. **Remaining:** Latest complete conservation/clock/rights/escape runtime. Retained consumer gas measurements exceed 500,000; old 8,755,856 trace was warm-up preceded, not all-cold/current. |
 | [sales.refund-window](#salesrefund-window-evidence) Native refund-window sales and unconditional escape | Built | Partly tested | Partial | Original held deposits, finalization/refund/escape clocks and own-account credits. **Remaining:** Final graph settlement/delegation/export/surplus and timing/callback invariant execution; native-only scope explicit. |
@@ -305,7 +305,7 @@ These 163 rows are capabilities and delivery checks of different sizes. Row coun
 
 | Feature | Build | Tests | Integration | Scope and remaining work |
 | --- | --- | --- | --- | --- |
-| [client.commerce](#clientcommerce-evidence) Typed native/revenue/secondary and saved inventory workflows | Built | Tested* | Partial | Exact TEMPLATE CLEAR/FREEZE, PLATFORM families 8–13, Royalty/mint continuity, distribution, burn/refund and native-price callers, including Dutch/clearing 18e8396a and refund-window fdb00c77, are integrated. Root all 347 package tests, generation/build/type checks pass. **Remaining:** Curated selection callers, current live contract/Safe execution, collaborators and all-call inventory closure. Simulated RPC tests are not deployed acceptance. |
+| [client.commerce](#clientcommerce-evidence) Typed native/revenue/secondary and saved inventory workflows | Built | Tested* | Partial | Exact TEMPLATE CLEAR/FREEZE, PLATFORM families 8–13, Royalty/mint continuity, distribution, burn/refund and native-price callers, including Dutch/clearing 18e8396a and refund-window fdb00c77, plus curated selection 2b93a187, are integrated. Root all 375 package tests, generation/build/type checks and both curated ABI fixture checks pass. **Remaining:** current live contract/Safe execution, collaborators and all-call inventory closure. Simulated RPC tests are not deployed acceptance. |
 | [client.entropy-authority](#cliententropy-authority-evidence) Explicit entropy finding and op60 hydration Safe client | Built | Tested* | Not integrated | Complete original entropy finding/target/intent context and typed operation60 hydration with seven owner commitments. Source 642d017d is merged as 50c553c9; independent source review is clear. **Remaining:** All 175 package tests and generation/build/type checks pass on the integration checkout; real deployed Safe/provider composition remains pending. |
 | [operator.commerce](#operatorcommerce-evidence) Saved governance, mint setup and native surplus plans | Built | Partly tested | Partial | Current deployment/catalog activation primitives and saved phase/surplus/lifecycle plans with exact current call/state checks. **Remaining:** Final full product graph deployment/activation and all caller-compatible saved workflows. Earlier deployment productsActivated=false is not a launch. c9d0353d six new surplus-plan tests are authored/source reviewed; root owns native acceptance. |
 | [conformance.commerce-gas](#conformancecommerce-gas-evidence) Collector gas, capacity and complete cross-mode conservation | In progress | Partly tested | Not integrated | Required conformance across public paid/current Safe paths and complete liabilities; this is not a new sale feature. **Remaining:** Do not waive500,000 paid single-step ceiling. Retained partial-cold/warm clearing measurements exceed it;8,755,856 historical trace is not current/all-cold. Final all-cold collector, worst-case capacity/stateful fuzz, six-host financial conservation and final-source native campaigns remain integrator-owned. |
@@ -317,7 +317,7 @@ These 163 rows are capabilities and delivery checks of different sizes. Row coun
 | [quality.repo](#qualityrepo-evidence) Developer layout, domain interfaces and contributor documentation | Built | Partly tested | Partial | Current Core/domain/interface split, explicit legacy reference area, current-stack guides, tooling and examples. **Remaining:** Keep public docs aligned with this feature register and finish examples for remaining features. A tidy layout is not product completeness. |
 | [quality.fuzz](#qualityfuzz-evidence) Modern Foundry unit, negative, fuzz and stateful testing system | Built | Partly tested | Partial | Scoped 64/256-input fuzz campaigns pass on their recorded sources. The actual-current driver 2f917fef now asserts counters, original replay/entropy records, per-payer conservation and exact receiver-failure retry, with 15 mandatory opening actions and a one-wei model sensitivity case. **Remaining:** Execute the expanded stateful campaign and broad final combined feature set; resolve failures. |
 | [quality.safe](#qualitysafe-evidence) Safe compatibility for every supported call | In progress | Partly tested | Partial | Actual Safe cohorts cover selected mint, custody, payment, Artist and governance flows; generic ordered CALL plans are integrated. Seven actual all-CALL batch tests are authored through ebcff757 but native-pending. **Remaining:** Every final ABI selector/overload/read/receive/fallback/callback needs its supported Safe path or a tested protocol-only restriction. |
-| [quality.capacity](#qualitycapacity-evidence) Full-system gas, deployment size and transaction capacity | In progress | Partly tested | Partial | Current individual Core, entropy, mint, royalty and distribution captures fit. The repaired native price adapter has 16 bytes, Manager 38 bytes and entropy Coordinator 5 bytes of measured runtime margin; exact captures differ. **Remaining:** Latest selected Artist Attribution 29,556/Identity deployment 25,911 and prior STATIC Router measurements still exceed runtime limits; complete latest graph, cold gas, ceremonies and transaction limits. Older native4 sizing does not cover this source. |
+| [quality.capacity](#qualitycapacity-evidence) Full-system gas, deployment size and transaction capacity | In progress | Partly tested | Partial | Current individual Core, entropy, mint, royalty and distribution captures fit. The native price adapter has 16 bytes and entropy Coordinator 5 bytes of measured runtime margin; newer shared Manager is 22,694 bytes. Curated fixed/private fit 24,081/23,545 bytes. Exact captures differ. **Remaining:** Latest selected Artist Attribution 29,556/Identity deployment 25,911 and unchanged STATIC Router 39,393 still exceed runtime limits; complete latest graph, cold gas, ceremonies and transaction limits. Older native4 sizing does not cover this source. |
 | [quality.ci](#qualityci-evidence) Complete conformance, generated artifacts and CI for the new candidate | In progress | Partly tested | Not integrated | Deterministic tooling/checkers and release pipeline exist, with partial spec-rule and feature evidence coverage. **Remaining:** Refresh after implementation stabilizes: exact ABI/storage, complete requirement mapping, generators, notes/manifests, checksum bundle and full CI. |
 | [release.rc1](#releaserc1-evidence) Supported RC1 contract release and Sepolia deployment | Built | Tested* | Integrated* | Existing frozen supported release at 569bf87f1fa808787d324f6e1582924b5ccf1d40, with recorded Sepolia evidence. **Remaining:** No full-v1 completeness is implied by this earlier release. |
 | [release.full-v1](#releasefull-v1-evidence) Freeze and launch the complete expanded v1 candidate on testnet | In progress | Partly tested | Not integrated | Active implementation branch contains the expanded candidate, plus separately authored handoffs listed below. **Remaining:** Finish missing features, integrate and test the final system, freeze its source and deploy matching testnet evidence. |
@@ -522,8 +522,8 @@ settlement behavior listed above.
 
 ### Parallel feature batch 16 September
 
-The latest source is `3fb128d6`. All 2,035 Solidity inputs pass ABI/type/storage
-checking in 17.281 seconds, without bytecode or runtime acceptance. Existing
+The latest source is `2b93a187`. All 2,035 Solidity inputs passed ABI/type/storage
+checking at 3fb128d6 in 17.281 seconds, without bytecode or runtime acceptance. Existing
 root client 347, museum authority 131, archive 27 and dossier 44 results retain their
 original source scopes. The following new batches supersede older queue notes.
 
@@ -534,9 +534,23 @@ original source scopes. The following new batches supersede older queue notes.
   cases pass across retained runs. Independent review found a repeat-refund
   ordering edge; `b25b3d16` fixes it with an original failing regression and
   35/35 corrected book tests, including conservation fuzzing. This overlaps the
-  original unit cohort. The separate 55-case current-contract/Safe capture is
-  still running on the original pre-correction source; caller work continues.
+  original unit cohort. The frozen 5605d019 current-contract run finishes with
+  48 passes and two fixture failures (50 results from 55 intended cases because
+  six revocation cases fail setup). All 41 own fixed/private/Safe sale cases pass,
+  including 256-run selection fuzzing. The independently reviewed test-only
+  correction 301ccda9 adds the missing block advance and accurately represents
+  the revocation fixture's absent royalty resolver. Its two-suite ten-case retry
+  is pending; the original failure evidence is retained. All 217 captured
+  production products fit, with 395 metadata records/source hashes checked.
   See [selected-work sales](../docs/integrations/native-curated-selected-sales.md).
+- Curated clients `28703540` are integrated as `2b93a187`: complete manifest
+  bytes/proofs, fixed purchase/commit/reveal/refunds, private full-payload TICKET
+  and historical revocation, and Safe CALL plans. Root passes all 375 package
+  tests including generation/build/types, and both exact-source ABI fixture
+  checks. This is caller/encoding/simulated-RPC evidence, separate from native
+  contract tests and full deployed Safe acceptance. See the
+  [fixed caller](../packages/stream-client/docs/current-curated-fixed.md) and
+  [private caller](../packages/stream-client/docs/current-curated-private.md).
 - STATIC scan optimization `78fdf46e`/`c4967b10` is integrated as
   `849bfd68`/`3fb128d6`. All 13 focused composition/gas tests and 15 pure tests
   pass, including five 256-input parity properties. The named cold 24 KB append

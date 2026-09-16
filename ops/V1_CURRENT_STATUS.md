@@ -18,14 +18,14 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 16 September parallel implementation batch
 
-Source through `3fb128d6` includes free-burn reveal credits, original Artist
+Source through `2b93a187` includes free-burn reveal credits, original Artist
 withdrawal61, the native-price adapter size repair, distribution/burn/price
 clients including saved refund-window purchase verification, museum authority reconciliation and expanded actual-current test hosts.
 The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
 records exact handoffs and evidence, superseding older queue descriptions.
 
-All 2,035 Solidity sources pass ABI/type/storage checking at 3fb128d6. Root passes all 347
-client tests with generation/build/types, 131 museum authority/profile tests and
+All 2,035 Solidity sources pass ABI/type/storage checking at 3fb128d6. Root passes all 375
+client tests with generation/build/types, including the new curated callers, 131 museum authority/profile tests and
 a separate 27-case archival export/publication cohort. The offline dossier and
 legacy BagIt/hydration cohort also passes all 44 cases at a0d71d2.
 These earlier cohorts do not automatically validate later Solidity increments.
@@ -101,9 +101,13 @@ The selected-work fixed PUBLIC/COMMIT_REVEAL and buyer-bound private native
 carriers are built and integrated as 161cda75, with actual recorder cases 2c9effb4.
 Both fit deployment size (24,081/23,545 runtime bytes), and independent source
 reviews are clear after refund repeat-unlock correction b25b3d16. Original 97
-unit cases and overlapping corrected Book 35 pass. The separate 55-case actual
-current-contract/Safe capture is running on frozen pre-correction source;
-wallet callers are being built. Remaining required sale profiles stay visible.
+unit cases and overlapping corrected Book 35 pass. The frozen current run
+finishes with 48 passes and two fixture failures: all 41 own fixed/private/Safe
+sale cases pass. The missing block advance and incorrect mock royalty pointer
+are corrected in test-only 301ccda9; its ten-case retry is pending. All 217
+captured production products fit. Wallet callers 2b93a187 are integrated and
+root passes all 375 package tests plus both compiled ABI fixture checks.
+Remaining required sale profiles stay visible.
 
 Versioned PERCEPTUAL_TOLERANCE/CURATED_EQUIVALENCE source is integrated 2351111e.
 Its eleven Solidity cases are authored only: five products fail deployment size.

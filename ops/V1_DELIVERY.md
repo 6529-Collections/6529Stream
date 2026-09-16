@@ -34,7 +34,8 @@ the denominator. The integrator owns this reporting correction and delivery.
 
 ## Latest integration: 16 September
 
-The current source checkpoint is 3fb128d6. Native curated fixed/private sales,
+The current source checkpoint is 2b93a187, including curated callers with 375 root
+package passes and test-only current fixture corrections (retry pending). Native curated fixed/private sales,
 actual recorder/Safe tests, repeat-refund correction, STATIC scan capacity and
 initial additional finality modes are integrated. The 2,035-source ABI check
 passes. The [current status](V1_CURRENT_STATUS.md) and
