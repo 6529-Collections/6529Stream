@@ -18,6 +18,8 @@ import "./StreamMintManagerAccounting.sol";
 import "./StreamPreparedNativeMintExecution.sol";
 import "./StreamPreparedNativeContentExecution.sol";
 import "./StreamPreparedNativeContentPurchaseExecution.sol";
+import "./StreamPreparedNativeOfferExecution.sol";
+import "./StreamMintManagerOfferTranscript.sol";
 import "../../interfaces/stream/mint/IStreamMintSaleAuthorizationRevocation.sol";
 import "./StreamMintManagerTranscript.sol";
 import "./StreamMintManagerExecution.sol";
@@ -37,6 +39,7 @@ contract StreamMintManager is
     IStreamPreparedNativeMint,
     IStreamPreparedNativeContentMint,
     IStreamPreparedNativeContentPurchaseMint,
+    IStreamPreparedNativeOfferMint,
     IStreamMintSaleAuthorizationRevocation,
     IStreamPreparedNativeRightsMint,
     IStreamMintAuthorizationRevocation,
@@ -137,6 +140,7 @@ contract StreamMintManager is
     StreamPreparedNativeRightsExecution.State private _preparedRights;
     mapping(uint256 => mapping(bytes32 => IStreamMintRoyaltyPolicy.Policy)) private _phaseRoyalties;
     mapping(uint256 => bool) public hasRegisteredPhasePolicy;
+    StreamPreparedNativeContentExecution.State private _preparedOffer;
 
     constructor(IStreamCore core_, IStreamMintLedger mintLedger_, IERC165 moduleRegistry_)
         StreamGasParameterHost(StreamMintArtistConsent.governance(
@@ -198,6 +202,7 @@ contract StreamMintManager is
             || interfaceId == type(IStreamPreparedNativeMint).interfaceId
             || interfaceId == type(IStreamPreparedNativeContentMint).interfaceId
             || interfaceId == type(IStreamPreparedNativeContentPurchaseMint).interfaceId
+            || interfaceId == type(IStreamPreparedNativeOfferMint).interfaceId
             || interfaceId == type(IStreamMintSaleAuthorizationRevocation).interfaceId
             || interfaceId == type(IStreamPreparedNativeRightsMint).interfaceId
             || interfaceId == type(IStreamMintAuthorizationRevocation).interfaceId
@@ -585,6 +590,51 @@ contract StreamMintManager is
         );
     }
 
+    function executePreparedNativeOfferMint(
+        MintBatch calldata batch,
+        bytes calldata gateData,
+        bytes32 intentHash
+    )
+        external
+        override
+        nonReentrant
+        returns (
+            uint256 tokenId,
+            bytes32 operationRoot,
+            bytes32 operationId,
+            StreamPrimarySettlementTypes.PrimarySettlementResult memory result
+        )
+    {
+        StreamPreparedNativeOfferExecution.admit(
+            _preparedOffer, address(moduleRegistry), batch, gateData, intentHash
+        );
+        OperationTranscript memory transcript =
+            _offerOperationTranscript(batch, gateData, MINT_EXECUTION_PATH_PREPARED);
+        if (transcript.quantity != 1) revert InvalidPreparedNativeMint();
+        _reserveOperationNonces(transcript.firstOperationNonce, transcript.quantity);
+        return StreamMintManagerExecution.offerPaid(
+            _executionContext(),
+            _phaseGateConfigs[batch.collectionId][batch.phaseId],
+            _preparedNative,
+            _preparedOffer,
+            batch,
+            gateData,
+            intentHash,
+            transcript
+        );
+    }
+
+    function activePreparedNativeOfferContent()
+        external view override returns (StreamPreparedNativeContentTypes.Facts memory)
+    {
+        bytes memory encoded = StreamMintManagerViews.contentEncoded(_preparedOffer.active);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
+    }
+
+    function preparedNativeOfferAdmission() external view override returns (bytes32) {
+        return _preparedOffer.admissionHash;
+    }
+
     function activePreparedNativeContent()
         external
         view
@@ -767,6 +817,39 @@ contract StreamMintManager is
             _counterConfigs[batch.collectionId][batch.phaseId],
             _phaseExecutors[batch.collectionId][batch.phaseId],
             StreamMintManagerTranscript.Context(
+                address(core),
+                _policyContext(batch.collectionId, batch.phaseId),
+                phasePolicyHash[batch.collectionId][batch.phaseId],
+                nextOperationNonce,
+                _gasParameterValue(GGP_ARTIST_AUTHORITY_GAS_LIMIT)
+            )
+        );
+    }
+
+    function _offerOperationTranscript(
+        MintBatch calldata batch,
+        bytes calldata gateData,
+        bytes32 executionPath
+    ) private view returns (OperationTranscript memory transcript) {
+        StreamMintPhaseState.PhaseState storage phaseState = _requireExecutablePhase(batch);
+        StreamMintRoyaltyPolicy.requireCurrent(
+            _phaseRoyalties[batch.collectionId][batch.phaseId],
+            _royaltyContext(),
+            batch.collectionId,
+            batch.phaseId,
+            phaseState.config.configHash,
+            executionPath == MINT_EXECUTION_PATH_SINGLE_STEP
+        );
+        return StreamMintManagerOfferTranscript.build(
+            batch,
+            gateData,
+            executionPath,
+            phaseState,
+            _phaseGateConfigs[batch.collectionId][batch.phaseId],
+            _phaseCounterIds[batch.collectionId][batch.phaseId],
+            _counterConfigs[batch.collectionId][batch.phaseId],
+            _phaseExecutors[batch.collectionId][batch.phaseId],
+            StreamMintManagerOfferTranscript.Context(
                 address(core),
                 _policyContext(batch.collectionId, batch.phaseId),
                 phasePolicyHash[batch.collectionId][batch.phaseId],

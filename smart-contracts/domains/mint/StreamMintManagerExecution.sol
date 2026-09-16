@@ -6,6 +6,7 @@ import "./StreamMintTranscriptTypes.sol";
 import "./StreamPreparedNativeMintExecution.sol";
 import "./StreamPreparedNativeContentExecution.sol";
 import "./StreamPreparedNativeContentPurchaseExecution.sol";
+import "./StreamPreparedNativeOfferExecution.sol";
 import "./StreamPreparedNativeRightsExecution.sol";
 import "../../interfaces/stream/parameters/IStreamGasParameterHost.sol";
 
@@ -250,6 +251,42 @@ library StreamMintManagerExecution {
             .gasParameter(GGP_PREPARED_NATIVE_CALLBACK_GAS_LIMIT);
         (tokenId, result) =
             StreamPreparedNativeContentPurchaseExecution.execute(prepared, content, gateData, batch, op);
+        _emitOperationCompletion(batch, transcript, tokenId);
+        return (tokenId, transcript.operationRoot, transcript.operationIds[0], result);
+    }
+
+    function offerPaid(
+        Context memory x,
+        IStreamMintManager.MintGateConfig storage gate,
+        StreamPreparedNativeMintExecution.State storage prepared,
+        StreamPreparedNativeContentExecution.State storage content,
+        IStreamMintManager.MintBatch calldata batch,
+        bytes calldata gateData,
+        bytes32 intentHash,
+        StreamMintTranscriptTypes.OperationTranscript memory transcript
+    )
+        public
+        returns (
+            uint256 tokenId,
+            bytes32 operationRoot,
+            bytes32 operationId,
+            StreamPrimarySettlementTypes.PrimarySettlementResult memory result
+        )
+    {
+        _consumeOperation(x, batch, transcript);
+        _emitGateValidation(gate, batch, transcript);
+        StreamPreparedNativeMintExecution.Operation memory op;
+        op.core = x.core;
+        op.registry = x.registry;
+        op.intentHash = intentHash;
+        op.operationRoot = transcript.operationRoot;
+        op.operationId = transcript.operationIds[0];
+        op.currentPolicyHash = transcript.currentPolicyHash;
+        op.boundPolicyHash = transcript.boundPolicyHash;
+        op.callbackGas = IStreamGasParameterHost(address(this))
+            .gasParameter(GGP_PREPARED_NATIVE_CALLBACK_GAS_LIMIT);
+        (tokenId, result) =
+            StreamPreparedNativeOfferExecution.execute(prepared, content, gateData, batch, op);
         _emitOperationCompletion(batch, transcript, tokenId);
         return (tokenId, transcript.operationRoot, transcript.operationIds[0], result);
     }
