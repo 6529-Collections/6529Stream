@@ -344,3 +344,5 @@ contract profiles and outstanding larger-script work.
   fields for eight supported families and check their digest and replay lane.
 - [Declared PLATFORM auctions](docs/current-platform.md) prepare families 8–13
   with separate signing domains, exact custody funding and dedicated token-rights calls.
+- [Royalty economic continuity](docs/current-royalty-continuity.md) reconstructs
+  protected inventories and manifests, then prepares bounded import and completion calls.

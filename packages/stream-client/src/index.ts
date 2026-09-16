@@ -18,4 +18,5 @@ export * from "./current-native-sale-credits.js";
 export * from "./current-entropy.js";
 export * from "./current-inventory-workflow.js";
 export * from "./current-revenue.js";
+export * from "./current-royalty-continuity.js";
 export * from "./current-entropy-authority.js";

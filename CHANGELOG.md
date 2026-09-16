@@ -21,6 +21,9 @@ the release policy in `docs/release-policy.md`.
 - Add reproducible selected-host current-graph acceptance captures with native
   compiler provenance, complete suite inventories and production size checks.
 
+- Add royalty continuity manifest producers and bounded import callers that
+  preserve original route origins, frozen configurations, snapshots and elections.
+
 - Add declared PLATFORM auction callers for families 8–13, independent signing
   and configuration hashes, partial pinned inspections and exact Safe CALL inputs.
 
