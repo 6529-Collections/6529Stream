@@ -65,8 +65,8 @@ contract StreamStaticContentCheckpoint is C, StreamGasParameterHost, IERC165 {
     ) StreamGasParameterHost(executor) {
         if (
             selection.code.length == 0 || _registerGasParameter(readGas) != READ_GAS
-                || _registerGasParameter(renderGas) != RENDER_GAS || readGas.failureClass != 1
-                || renderGas.failureClass != 1
+                || _registerGasParameter(renderGas) != RENDER_GAS || readGas.failureClass != 2
+                || renderGas.failureClass != 2
         ) {
             revert InvalidStaticContentConfiguration();
         }
@@ -364,10 +364,29 @@ contract StreamStaticContentCheckpoint is C, StreamGasParameterHost, IERC165 {
     function _read(address target, bytes memory input, uint256 maximum, bool exact, bool render)
         private
         view
-        returns (bytes memory)
+        returns (bytes memory output)
     {
-        return Calls.read(
-            target, input, maximum, exact, _gasParameterValue(render ? RENDER_GAS : READ_GAS)
-        );
+        uint256 cap = _gasParameterValue(render ? RENDER_GAS : READ_GAS);
+        if (target.code.length == 0) revert Calls.RendererReadFailed(target, bytes4(input));
+        if (cap > type(uint256).max / 2) {
+            revert StaticContentParentGas(gasleft(), type(uint256).max);
+        }
+        // Admission must not turn caller starvation into a successful unavailable display.
+        // Prepare input and warm the target before the preflight; leave room for EIP-150,
+        // STATICCALL overhead and local work. Never clamp the configured dependency budget.
+        uint256 required = cap + cap / 63 + 100000;
+        uint256 available = gasleft();
+        if (available <= required) revert StaticContentParentGas(available, required);
+        bool ok;
+        uint256 size;
+        assembly ("memory-safe") {
+            ok := staticcall(cap, target, add(input, 32), mload(input), 0, 0)
+            size := returndatasize()
+        }
+        if (!ok || size > maximum || (exact && size != maximum)) {
+            revert Calls.RendererReadFailed(target, bytes4(input));
+        }
+        output = new bytes(size);
+        assembly ("memory-safe") { returndatacopy(add(output, 32), 0, size) }
     }
 }

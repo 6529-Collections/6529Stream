@@ -344,7 +344,11 @@ contract StreamStaticContentCheckpointTest is StaticMetadataRoutingFixture {
         pure
         returns (IStreamGasParameterHost.GasParameterConfig memory)
     {
-        return IStreamGasParameterHost.GasParameterConfig(name, value, 50000, 1);
+        uint8 failure = keccak256(bytes(name)) == keccak256("STATIC_CONTENT_READ_GAS")
+            || keccak256(bytes(name)) == keccak256("STATIC_CONTENT_RENDER_GAS")
+            ? 2
+            : 1;
+        return IStreamGasParameterHost.GasParameterConfig(name, value, 50000, failure);
     }
 
     function _pointer() private {

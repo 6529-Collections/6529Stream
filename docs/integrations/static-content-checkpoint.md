@@ -44,7 +44,11 @@ snapshot/source-binding profile. These are remaining implementations, not inferr
 
 Append batches are bounded to four tokens and the current read visits all completed rows.
 Returned bytes are bounded before copying; new governed dependency/render budgets control
-this producer's calls. It does not raise Router or renderer budgets. The 16 MiB structural
+this producer's calls. Both new parameters use failure class 2. Immediately before each direct
+STATICCALL, after parameter lookup, input preparation and target warmup, the producer requires
+the entire configured cap plus its EIP-150 allowance and a 100,000-gas local reserve. It never
+clamps that cap to the caller's remaining gas; insufficient parent gas returns
+`StaticContentParentGas`. It does not raise Router or renderer budgets. The 16 MiB structural
 bound is not a demonstrated gas or transaction-capacity claim. Large scopes may exceed an
 available parent budget and fail closed; no partial result is labeled current. Cold nested
 calls, worst-case capacity and combined deployment sizes remain to be measured.
@@ -63,4 +67,16 @@ remain the named typed fixture boundaries. The tests cover original ordered thre
 token overrides, actual 24,576-byte SSTORE2 reconstruction, exact image/animation rejection,
 live Artist and burn changes, entropy/runtime/membership refusal, and full Safe rollback with
 identical signed retry. A 221-source ABI check over committed source plus only this new producer
-passes. No native runtime, actual-current ceremony, gas, size or conformance pass is claimed.
+passes. Those nine larger composition recipes remain authored, not runtime acceptance.
+
+Two additional isolated gas regressions use the actual RendererV1 and content producer with
+explicit typed Core, Router and selection boundaries. The original producer reproduced false
+currentness: a checkpoint captured while attribution was unavailable was accepted after the
+source recovered when the caller supplied 2,000,000 gas. The corrected producer passes both
+cases: all 18 swept budgets from 200,000 through 45,000,000 reject that changed checkpoint; a
+2,000,000-gas unchanged-output call returns the explicit admission error, while 45,000,000 gas
+accepts the unchanged output. These are behavioral regression bounds, not deployment defaults
+or a cold/current-stack capacity claim. The fixed 117-source native build measures the producer
+at 16,459 runtime bytes and RendererV1 at 17,757 bytes. The combined 222-source ABI check includes
+all eleven cases. Full current-graph execution, cold/worst-case gas and transitive read-set/opcode
+conformance remain pending. Existing denied Router experiments were excluded from both builds.

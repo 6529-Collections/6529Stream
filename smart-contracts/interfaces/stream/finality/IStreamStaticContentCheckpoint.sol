@@ -30,6 +30,7 @@ interface IStreamStaticContentCheckpoint {
         bytes32 htmlHash;
     }
     error InvalidStaticContentConfiguration();
+    error StaticContentParentGas(uint256 available, uint256 required);
     error StaticContentChanged(bytes32 id);
     error StaticContentPayload(uint256 tokenId);
     error StaticContentBatch(uint256 count);
