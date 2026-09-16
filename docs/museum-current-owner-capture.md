@@ -83,6 +83,16 @@ record hashes are read back with their full receipts and signature bundles and
 checked by `verify_wire`. The result supplies selected records and the exact
 three transaction hashes needed for the loan plus complete valuation lane.
 
+New captures use an empty optional record URI because the payload is embedded
+and no hosted fixture location is established. The former fixture URN fails
+the native content-URI policy. The Python helper and current-stack recipe now
+use the permitted empty value, with native renderer regression cases authored
+for the next coordinated test run. This repair does not establish execution
+acceptance for the old recipe or modify any retained fixture bytes.
+The recipe's separate required module-manifest URI uses the raw CID of its
+exact local manifest bytes. This is a content commitment; no IPFS publication
+or remote availability is asserted.
+
 Minting is deliberately delegated to the existing current graph recipe. A
 foundation with no Artist or minted token cannot substitute a platform shortcut.
 Do not run this helper against another task's Anvil process. Coordinate the

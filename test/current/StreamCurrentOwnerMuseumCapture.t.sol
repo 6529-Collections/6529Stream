@@ -5,6 +5,22 @@ import "../helpers/StreamCurrentStackFixture.sol";
 import "../helpers/OfficialSafeFixture.sol";
 import "../../smart-contracts/domains/metadata/StreamOwnerRecords.sol";
 import "../../smart-contracts/domains/metadata/StreamSchemaRegistry.sol";
+import "../../smart-contracts/domains/metadata/StreamMetadataRenderer.sol";
+
+/// @notice Native URI regression for future local owner captures; no hosted fixture claim.
+contract StreamOwnerFixtureUriRegressionTest {
+    function testEmbeddedFixtureAllowsEmptyOptionalUri() public pure {
+        StreamMetadataRenderer.requireValidUtf8ContentUri("recordURI", "", 2048, true);
+        require(StreamMetadataRenderer.isSafeContentUri("", true), "empty optional URI");
+    }
+
+    function testFormerFixtureUrnIsNotAnAllowedContentUri() public pure {
+        require(
+            !StreamMetadataRenderer.isSafeContentUri("urn:stream:public-local-owner-fixture", true),
+            "fixture URN must not be published"
+        );
+    }
+}
 
 /// @notice Authored current Core/Artist/Executor/Schema/OwnerRecords/Safe capture recipe.
 /// @dev Randomness remains the inherited upstream double. Foundry logs are test oracles,
@@ -76,7 +92,8 @@ contract StreamCurrentOwnerMuseumCaptureTest is StreamCurrentStackFixture, Offic
         c.schemas = address(ownerSchemas);
         c.executor = address(executor);
         c.deploymentManifestHash = DEPLOYMENT_HASH;
-        c.manifestURI = "urn:stream:local-owner:capture";
+        // Raw CID of the exact manifest bytes below; publication/availability is not asserted.
+        c.manifestURI = "ipfs://bafkreihrgxci5bintrod4j2fsvklcrs2pibs6h6detr2jgseg3f4emrdpq";
         c.manifestHash = keccak256("public local owner dossier recipe");
         c.signatureGas = IStreamGasParameterHost.GasParameterConfig(
             "METADATA_ERC1271_VERIFY_GAS", 400000, 90000, 2
@@ -209,7 +226,7 @@ contract StreamCurrentOwnerMuseumCaptureTest is StreamCurrentStackFixture, Offic
             ownerRecords.deriveOwnerSubject(tokenId),
             keccak256(bytes(schema)),
             IStreamPreservationRecords.HashRef(1, abi.encode(keccak256(raw)), JCS),
-            "urn:stream:public-local-owner-fixture",
+            "",
             raw,
             uint64(block.timestamp)
         );

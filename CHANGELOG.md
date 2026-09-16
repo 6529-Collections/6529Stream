@@ -5,6 +5,12 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add native owner and independent record catalogs with complete per-scope
+  histories and authenticated empty lanes, plus bounded Core ownership-history
+  capture and replay; genuine native acceptance and full dossier assembly
+  remain separate requirements. Repair owner capture URI inputs without
+  asserting hosted fixture availability.
+
 - Add object-dossier requirement accounting, bounded supplied components and
   replayable partial assembly from the retained actual-token capture, plus a
   finite native render-inventory reader with complete segment reconstruction;

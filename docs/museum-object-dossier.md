@@ -148,11 +148,75 @@ for test token `71`, with snapshot commitment
 `0x6a1ff2fc9edf69ea6943713ca4278ee837873f76ac874f4cccdee499aeb3967a`.
 It is independent test data, not capture8 token `1` or an EVM-executed capture.
 
+## Native record catalogs and ownership history
+
+Three additional source readers reconstruct protocol-defined inventories at
+one externally pinned block. Their anchors bind the chain, source block,
+runtime and deployment evidence; callers cannot supply a shortened lane list.
+All expose `snapshot()` and `transcript()` and support pinned offline replay.
+
+| Reader | Completeness denominator | Verified absence |
+| --- | --- | --- |
+| `tools.museum.owner_catalog_source.OwnerCatalogSource` | Ten built-in owner types plus every successful `OwnerRecordTypeAdmitted` event from genesis through the anchor; every record index for the exact token and every observed author's latest pointer. | Zero count and zero head, with no corresponding publication in the complete receipt history. |
+| `tools.museum.independent_catalog_source.IndependentCatalogSource` | All eight native independent types for one exact collection scope, all record indexes and scoped latest pointers, plus the complete deduplicated payload/signature pointer inventory. | Zero count and zero head for each explicitly retained empty lane. |
+| `tools.museum.ownership_source.OwnershipSource` | Every block transaction receipt from genesis through the anchor; Core's complete ERC-721 `Transfer` stream for the exact token. | Missing mint evidence is an error; it is never represented as an absent ownership history. |
+
+Owner and independent hosts do not expose `recordTypeCount/At`. Those getters
+belong to the separate MetadataV1 host. Independent types form a fixed closed
+catalog; additional owner types require complete admission-event discovery.
+Independent scope `0` is supported as its own deployment-wide scope. Capturing
+one scope does not establish every scope applicable to a token.
+
+The owner reader checks each original record hash, receipt, signature bundle,
+publication event, chain link and recorded timestamp. It retains valid empty
+payloads and every native hash algorithm. Embedded Keccak-256 and SHA-256
+content is checked; URI-only and opaque algorithm commitments remain explicitly
+unverified as content. Historical schema commitments are preserved without
+claiming schema interpretation or legal title. Native receipt acceptance is
+not replaced by today's ownership or signature policy.
+
+The independent reader retains all subjects in a scope's lanes, including
+records for other tokens and media, so filtering cannot conceal chain members.
+It checks original schema/document/chunk closure and historical attestor
+receipts. Pointer counts are not record counts: native storage deduplicates
+each `(family, content hash)` pair. Repeated record occurrences remain distinct.
+
+The shared receipt walk follows parent-linked headers to block zero, fetches
+every transaction receipt, and checks receipt coordinates and contiguous
+block-wide log indexes. It refuses sources above 4,096 blocks including genesis,
+or beyond its 64 MiB transcript limit, rather than truncating the history.
+The ownership reader requires one mint, uninterrupted owner transitions,
+optional terminal burn and agreement with permanent collection identity and
+lifecycle. It checks `ownerOf` for a live token; burned tokens retain identity
+and are reconciled without calling the reverting ownership getter. Self-transfers
+are valid. Original Transfer logs are also retained as canonical JSONL.
+
+Each module provides `capture`, `replay` and `definitions --check` commands.
+Capture uses an environment-variable name for the RPC endpoint. Replay requires
+separate external anchor and transcript commitments; its default provenance is
+`synthetic_fixture`. Example:
+
+```powershell
+python -m tools.museum.ownership_source replay --anchor work/ownership/anchor.json --anchor-hash <external-anchor-hash> --transcript work/ownership/transcript.json --transcript-hash <external-transcript-hash> --output work/ownership-replay
+python -m tools.museum.independent_catalog_source definitions --output schemas/museum/object-dossier --check
+```
+
+These readers supply consistency evidence under caller-admitted RPC and native
+runtime pins. They do not verify Ethereum receipt tries, consensus or the
+complete registered address set required by LTA-EVENT-HISTORY. Token Transfer
+JSONL is not relabeled as that full protocol archive snapshot. Their synthetic
+controls are not genuine native capture acceptance. Capture8 contains selected
+records and a mint receipt; it does not contain the new complete source
+transcripts. The diagnostic assembler therefore keeps its previous requirement
+results until concrete adapters join new evidence to the exact source identity
+and block. No existing retained fixture is rewritten.
+
 ## Remaining required work
 
 Full assembly needs concrete canonical adapters and a complete positive for
-the remaining sources. These include all applicable native record catalogs and
-lanes, complete ownership and title-binding history, finality/content and
+the remaining sources. These include actual complete record-catalog and
+ownership captures, all remaining applicable native record hosts and scopes,
+title-binding history and its covering event archive, finality/content and
 entropy evidence, conservation/rights/attribution state, and every authoritative
 render byte. A current inventory roster does not prove all those bytes are held.
 

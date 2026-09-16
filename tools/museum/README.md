@@ -35,6 +35,12 @@ account for the adopted requirements, retain supplied components without
 promoting their authority, and replay the actual token fixture into explicit
 partial diagnostics.
 
+The same guide documents complete native owner/independent catalogs and
+mint-to-source-block ownership readers. Their protocol-defined lane inventories
+and complete receipt walk retain authenticated empty lanes, historical
+attribution and explicit opaque-content limits. Synthetic replay controls,
+genuine native capture and full dossier acceptance remain separate.
+
 Run from the repository root with Python 3.11 or later. Create an isolated
 environment and install the Museum dependency set; the repository's general
 tools lock alone does not include `rfc8785` or the JSON-LD processor. The full

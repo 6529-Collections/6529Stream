@@ -79,7 +79,7 @@ def loan_payload(records, payloads, token_id=1):
 def record_input(subject, family, schema, payload, effective_at):
     require(0 < len(payload) <= 8192 and 0 < effective_at < 2**64, "owner capture payload/date bound")
     return (schema_id(family), subject, schema_id(schema), (1, hex_bytes(keccak256(payload)), JCS_ID),
-        "urn:stream:public-local-owner-fixture", payload, effective_at)
+        "", payload, effective_at)
 
 
 def publish_owner_records(fixture, token_id, owner_safe):

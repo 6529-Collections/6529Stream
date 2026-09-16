@@ -1,5 +1,7 @@
 """Prospective payloads and synthetic RPC controls. No actual OwnerRecords capture claim."""
 import copy
+import base64
+import hashlib
 from pathlib import Path
 import tempfile
 from types import SimpleNamespace
@@ -56,8 +58,21 @@ class CurrentOwnerCapture(unittest.TestCase):
         raw = example_payloads()['valuation.json']; r = record_input(H(9), 'VALUATION', 'STREAM_VALUATION_V1', raw, 7)
         self.assertEqual(decode((OWNER_RECORD,), encode((OWNER_RECORD,), (r,))), (r,))
         self.assertEqual(r[3], (1, hex_bytes(keccak256(raw)), JCS_ID)); self.assertEqual(r[-1], 7)
+        # Native OwnerRecordBook admits an empty optional URI. No hosted
+        # availability is asserted for these embedded public test bytes.
+        self.assertEqual(r[4], '')
         for raw_, stamp in ((b'', 7), (raw, 0), (b'x'*8193, 7), (raw, 2**64)):
             with self.assertRaises(MuseumError): record_input(H(9), 'LOAN', 'STREAM_LOAN_V1', raw_, stamp)
+
+    def test_native_recipe_required_manifest_uri_commits_to_exact_local_bytes(self):
+        # The native constructor requires a nonempty safe URI. This raw CID
+        # identifies the literal manifest bytes, without asserting publication.
+        recipe = (Path(__file__).resolve().parents[2] /
+            'test/current/StreamCurrentOwnerMuseumCapture.t.sol').read_text(encoding='utf-8')
+        raw = b'public local owner dossier recipe'
+        cid = 'b' + base64.b32encode(bytes([1, 0x55, 0x12, 0x20]) + hashlib.sha256(raw).digest()).decode().lower().rstrip('=')
+        self.assertIn('c.manifestURI = "ipfs://' + cid + '";', recipe)
+        self.assertIn('c.manifestHash = keccak256("' + raw.decode() + '");', recipe)
 
     def _synthetic(self):
         # Existing source is real recorded account evidence; all owner responses below
