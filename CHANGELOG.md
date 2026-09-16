@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add native primary offer clients with original buyer and seller signatures,
+  executor-funded payments, buyer refunds, historical revocation and Safe CALL plans.
+
 - Add atomic native primary mint offers for unselected and selected artwork,
   preserving original buyer/seller signatures, separate replay protection,
   executor-funded payments and buyer-owned pull refunds.

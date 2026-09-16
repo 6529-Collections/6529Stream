@@ -370,3 +370,9 @@ contract profiles and outstanding larger-script work.
   commit/reveal deposits and separate deposit-refund and excess-credit claims.
 - [Curated private sales](docs/current-curated-private.md) retain original Sales
   signatures, buyer-bound execution and historical Manager/Ledger revocation.
+- [Primary offer signatures](docs/current-primary-offer-signing.md) preserve the
+  original full buyer offer and seller authorization with separate replay keys.
+- [Primary offer workflows](docs/current-primary-offer.md) prepare native payments
+  from the actual executor, buyer refunds, historical revocation and Safe CALLs.
+- [Selected-work offer manifests](docs/current-primary-offer-content.md) verify
+  complete publication bytes and the distinct primary-offer gate capability.
