@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistIdentityWriterTransport.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
 import {
     StreamArtistRepudiationTypes as RP
@@ -92,9 +93,10 @@ contract StreamArtistIdentityWriterExtension is
         string calldata displayName
     ) external onlyHost returns (bytes32) {
         _check(c, 1);
-        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityState.register(
-            _identity, _replay, _ownerContext(), artist, documentHash, uri, document, displayName
-        );
+        StreamArtistIdentityState.Mutation memory m =
+            StreamArtistIdentityWriterTransport.registerEncoded(
+                _identity, _replay, _ownerContext(), msg.data
+            );
         _commit(c, m.action, m.state, m.replay, m.record);
         _native(c.operationId, m.record, m.record, 0);
         return m.record;
@@ -108,9 +110,10 @@ contract StreamArtistIdentityWriterExtension is
     ) external onlyHost returns (bytes32 record) {
         _check(c, 27);
         _deadline(a.time);
-        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityState.revokeDelegation(
-            _identity, _replay, _delegations, _ownerContext(), c, p, a, proof
-        );
+        StreamArtistIdentityState.Mutation memory m =
+            StreamArtistIdentityWriterTransport.revokeGrantEncoded(
+                _identity, _replay, _delegations, _ownerContext(), msg.data
+            );
         _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
         _native(c.operationId, m.record, p.artistId, 0);
@@ -124,19 +127,18 @@ contract StreamArtistIdentityWriterExtension is
     ) external onlyHost returns (bytes32) {
         _check(c, 58);
         address executor = IStreamArtistIdentityContestOwner(address(this)).artistWindowAuthority();
-        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityDismissalState.dismiss(
-            _resolutions,
-            _identity,
-            _rotations,
-            _identityRevisions,
-            _succession,
-            _replay,
-            _ownerContext(),
-            c,
-            p,
-            governance,
-            executor
-        );
+        StreamArtistIdentityState.Mutation memory m =
+            StreamArtistIdentityWriterTransport.dismissEncoded(
+                _resolutions,
+                _identity,
+                _rotations,
+                _identityRevisions,
+                _succession,
+                _replay,
+                _ownerContext(),
+                executor,
+                msg.data
+            );
         _commit(c, m.action, m.state, m.replay, m.record);
         _native(c.operationId, m.record, p.artistId, 0);
         return m.record;
@@ -153,9 +155,10 @@ contract StreamArtistIdentityWriterExtension is
             _succession, _rotations, p.artistId, p.capabilities
         );
         if (a.time != 0) revert T.InvalidRecord();
-        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityState.grantDelegation(
-            _identity, _replay, _delegations, _ownerContext(), c, p, a, proof
-        );
+        StreamArtistIdentityState.Mutation memory m =
+            StreamArtistIdentityWriterTransport.grantEncoded(
+                _identity, _replay, _delegations, _ownerContext(), msg.data
+            );
         _estate.grantEpoch[m.record] = _estate.delegationEpoch[p.artistId];
         _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
@@ -171,17 +174,8 @@ contract StreamArtistIdentityWriterExtension is
     ) external onlyHost returns (bytes32) {
         _check(c, 36);
         StreamArtistIdentityState.Mutation memory m =
-            StreamArtistSuccessionState.designateWithResolution(
-                _succession,
-                _identity,
-                _rotations,
-                _replay,
-                _ownerContext(),
-                c,
-                p,
-                a,
-                proof,
-                _currentIdentityClosure(p.artistId)
+            StreamArtistIdentityWriterTransport.designateEncoded(
+                _succession, _identity, _rotations, _resolutions, _replay, _ownerContext(), msg.data
             );
         _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
@@ -198,18 +192,8 @@ contract StreamArtistIdentityWriterExtension is
     ) external onlyHost returns (bytes32) {
         _check(c, 37);
         StreamArtistIdentityState.Mutation memory m =
-            StreamArtistSuccessionState.directiveWithResolution(
-                _succession,
-                _identity,
-                _rotations,
-                _replay,
-                _ownerContext(),
-                c,
-                p,
-                a,
-                proof,
-                document,
-                _currentIdentityClosure(p.artistId)
+            StreamArtistIdentityWriterTransport.directiveEncoded(
+                _succession, _identity, _rotations, _resolutions, _replay, _ownerContext(), msg.data
             );
         _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
@@ -235,20 +219,14 @@ contract StreamArtistIdentityWriterExtension is
     ) external onlyHost returns (bytes32) {
         _check(c, 25);
         StreamArtistIdentityState.Mutation memory m =
-            StreamArtistIdentityRevisionState.reviseWithResolution(
+            StreamArtistIdentityWriterTransport.reviseEncoded(
                 _identityRevisions,
                 _identity,
                 _rotations,
+                _resolutions,
                 _replay,
                 _ownerContext(),
-                c,
-                p,
-                a,
-                proof,
-                document,
-                displayName,
-                _currentIdentityClosure(p.artistId),
-                _resolutions.continuations[_resolutions.continuationHead[p.artistId]]
+                msg.data
             );
         _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
@@ -263,9 +241,10 @@ contract StreamArtistIdentityWriterExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32) {
         _check(c, 54);
-        StreamArtistIdentityState.Mutation memory m = StreamArtistAuthorizationState.revoke(
-            _identity, _replay, _ownerContext(), c, p, a, proof
-        );
+        StreamArtistIdentityState.Mutation memory m =
+            StreamArtistIdentityWriterTransport.revokeEncoded(
+                _identity, _replay, _ownerContext(), msg.data
+            );
         _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
         _native(c.operationId, m.record, p.artistId, 0);
@@ -301,18 +280,10 @@ contract StreamArtistIdentityWriterExtension is
     ) external onlyHost returns (bytes32) {
         _check(c, 6);
         _deadline(a.time);
-        StreamArtistIdentityState.Mutation memory m = StreamArtistCollaboratorIdentityState.register(
-            _identity,
-            _collaboratorAccounts,
-            _replay,
-            _ownerContext(),
-            c,
-            p,
-            a,
-            proof,
-            document,
-            displayName
-        );
+        StreamArtistIdentityState.Mutation memory m =
+            StreamArtistIdentityWriterTransport.collaboratorEncoded(
+                _identity, _collaboratorAccounts, _replay, _ownerContext(), msg.data
+            );
         _commit(c, m.action, m.state, m.replay, m.record);
         _native(c.operationId, m.record, m.record, 0);
         return m.record;
@@ -593,7 +564,7 @@ contract StreamArtistIdentityWriterExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32) {
         _check(c, p.disputeAction == 1 ? 44 : 45);
-        (StreamArtistIdentityState.Mutation memory m, bytes32 record) = StreamArtistDisputeIdentityMutation.consume(
+        (StreamArtistIdentityState.Mutation memory m, bytes32 record) = StreamArtistIdentityWriterTransport.disputeEncoded(
             _identity,
             _replay,
             _estate,
@@ -603,12 +574,7 @@ contract StreamArtistIdentityWriterExtension is
             _unavailability,
             _dormancy,
             _ownerContext(),
-            c,
-            p,
-            b,
-            standing,
-            a,
-            proof
+            msg.data
         );
         if (standing.delegation == 0) {
             _noteLiving(_ownerContext(), _replay, standing.artistId, proof.signer, c.operationId, m);

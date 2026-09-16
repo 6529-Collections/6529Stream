@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRegistryAuxiliaryEncoding } from "./StreamArtistRegistryAuxiliaryEncoding.sol";
+import { StreamArtistStaticProjectionTransport } from "./StreamArtistStaticProjectionTransport.sol";
+import { StreamArtistStaticDisplay } from "./StreamArtistStaticDisplay.sol";
+import { StreamArtistStaticCalls } from "./StreamArtistStaticCalls.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
 import {
     StreamArtistRepudiationTypes as RP
@@ -723,8 +727,7 @@ contract StreamArtistOnboardingRegistry is
     }
 
     function saleConsentRecord(bytes32 recordHash) external view returns (Sale.Record memory) {
-        return
-            IStreamArtistSaleConsentOwner(_contentSuite().owners[6]).saleConsentRecord(recordHash);
+        _returnAuxiliaryRead();
     }
 
     function requireRecordPublication(bytes32 recordHash, P.Publication calldata publication)
@@ -733,6 +736,52 @@ contract StreamArtistOnboardingRegistry is
         returns (P.Evidence memory)
     {
         _forwardRegistryRead();
+    }
+
+    /// @notice Permissionless derivative checkpoint; the fixed Identity owner validates maturity.
+    function checkpointStaticIdentityMaturity(bytes32 artistId) external returns (bytes32) {
+        return StreamArtistStaticProjectionTransport.checkpoint(operationCoordinator, artistId);
+    }
+
+    /// @notice Additive closed display transport. The linked worker is called by STATICCALL,
+    /// not Solidity's library dispatch, and its owner reads never enter delegatecall codecs.
+    function staticDisplayRead(bytes calldata originalCalldata)
+        external
+        view
+        returns (bytes memory)
+    {
+        address target = address(StreamArtistStaticDisplay);
+        address coordinator = operationCoordinator;
+        bytes4 selector = StreamArtistStaticDisplay.read.selector;
+        bytes4 failed = StreamArtistStaticCalls.StaticArtistReadFailed.selector;
+        assembly ("memory-safe") {
+            let pointer := mload(0x40)
+            mstore(pointer, selector)
+            mstore(add(pointer, 4), coordinator)
+            mstore(add(pointer, 36), 64)
+            mstore(add(pointer, 68), originalCalldata.length)
+            let padded := and(add(originalCalldata.length, 31), not(31))
+            mstore(add(add(pointer, 100), originalCalldata.length), 0)
+            calldatacopy(add(pointer, 100), originalCalldata.offset, originalCalldata.length)
+            let output := add(pointer, and(add(add(padded, 100), 31), not(31)))
+            let ok := 0
+            if gt(gas(), 12000) {
+                ok := staticcall(sub(gas(), 10000), target, pointer, add(100, padded), output, 704)
+            }
+            let size := returndatasize()
+            let length := mload(add(output, 32))
+            let malformed := or(lt(size, 64), gt(size, 704))
+            malformed := or(malformed, iszero(eq(mload(output), 32)))
+            malformed := or(malformed, or(gt(length, 640), and(length, 31)))
+            malformed := or(malformed, iszero(eq(size, add(64, length))))
+            if or(iszero(ok), malformed) {
+                mstore(pointer, failed)
+                mstore(add(pointer, 4), target)
+                revert(pointer, 36)
+            }
+            // Canonical outer bytes result is already the exact facade return.
+            return(output, size)
+        }
     }
 
     function collectionArtistState(uint256 collectionId)
@@ -1153,14 +1202,7 @@ contract StreamArtistOnboardingRegistry is
     }
 
     function recordDelegation(bytes32 record) external view returns (bytes32) {
-        T.SuiteConfiguration memory s =
-            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
-        bytes32 grant = IStreamArtistDelegatedConsentOwner(s.owners[6]).recordDelegation(record);
-        return grant != 0
-            ? grant
-            : IStreamArtistAuthenticatedAttestationOwner(s.owners[4])
-            .attestationAssociation(record)
-            .delegation;
+        _returnAuxiliaryRead();
     }
 
     function proposeArtistBinding(
@@ -1405,10 +1447,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (Attest.Association memory)
     {
-        T.SuiteConfiguration memory s =
-            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
-        return
-            IStreamArtistAuthenticatedAttestationOwner(s.owners[4]).attestationAssociation(record);
+        _returnAuxiliaryRead();
     }
 
     function recordArtistScopedAttestation(
@@ -1648,6 +1687,12 @@ contract StreamArtistOnboardingRegistry is
         returns (bytes32)
     {
         _forwardRegistryRead();
+    }
+
+    function _returnAuxiliaryRead() private view {
+        bytes memory result =
+            StreamArtistRegistryAuxiliaryEncoding.read(operationCoordinator, msg.data);
+        assembly ("memory-safe") { return(add(result, 32), mload(result)) }
     }
 
     function _reads() private view returns (StreamArtistOnboardingReads) {

@@ -117,8 +117,8 @@ contract StreamArtistRegistryReadExtension {
         returns (P.Evidence memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.requireRecordPublication(
-                _host, operationCoordinator, recordHash, publication
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
             )
         );
     }
@@ -139,9 +139,7 @@ contract StreamArtistRegistryReadExtension {
         returns (address, uint64, bytes32)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.estateActivationState(
-                _host, operationCoordinator, artistId
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -152,9 +150,7 @@ contract StreamArtistRegistryReadExtension {
         returns (Estate.RequestRecord memory, uint8, Estate.ExecutionFacts memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.estateActivationRecord(
-                _host, operationCoordinator, record
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -165,9 +161,7 @@ contract StreamArtistRegistryReadExtension {
         returns (uint256)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.estateActivationNonceHint(
-                _host, operationCoordinator, artistId, successor
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -178,9 +172,7 @@ contract StreamArtistRegistryReadExtension {
         returns (Estate.AuthorityCapabilities memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.currentAuthorityCapabilities(
-                _host, operationCoordinator, artistId
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -191,9 +183,7 @@ contract StreamArtistRegistryReadExtension {
         returns (Estate.AccelerationContext memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.estateAccelerationContext(
-                _host, operationCoordinator, p
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -204,16 +194,14 @@ contract StreamArtistRegistryReadExtension {
         returns (bytes32, uint64, bytes32, address, uint8, uint8, uint32)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.collectionArtistAuthority(
-                _host, operationCoordinator, collectionId
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
     function platformWorksState(uint256 id) external view onlyHost returns (PW.State memory) {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.platformWorksState(
-                _host, operationCoordinator, id
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
             )
         );
     }
@@ -225,23 +213,25 @@ contract StreamArtistRegistryReadExtension {
         returns (bool, bytes32, uint64)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.platformWorksDeclaration(
-                _host, operationCoordinator, id
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
             )
         );
     }
 
     function platformWorksContest(uint256 id) external view onlyHost returns (uint8, bytes32) {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.platformWorksContest(
-                _host, operationCoordinator, id
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
             )
         );
     }
 
     function displayBinding(uint256 id) external view onlyHost returns (T.Binding memory) {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.displayBinding(_host, operationCoordinator, id)
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
+            )
         );
     }
 
@@ -252,8 +242,8 @@ contract StreamArtistRegistryReadExtension {
         returns (uint8, bytes32, bytes32, uint8, uint64)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.artistAttestationStatus(
-                _host, operationCoordinator, id, kind, subjectId, currentHash
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
             )
         );
     }
@@ -265,16 +255,16 @@ contract StreamArtistRegistryReadExtension {
         returns (S.Record memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.displaySanction(
-                _host, operationCoordinator, scope
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
             )
         );
     }
 
     function attributionClaims(uint256 id) external view onlyHost returns (uint256, bytes32) {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.attributionClaims(
-                _host, operationCoordinator, id
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
             )
         );
     }
@@ -286,16 +276,16 @@ contract StreamArtistRegistryReadExtension {
         returns (bytes32, uint8, uint64)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.deploymentAttestation(
-                _host, operationCoordinator, id
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
             )
         );
     }
 
     function attestationAuthorityClass(bytes32 record) external view onlyHost returns (uint8) {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.attestationAuthorityClass(
-                _host, operationCoordinator, record
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
             )
         );
     }
@@ -307,24 +297,24 @@ contract StreamArtistRegistryReadExtension {
         returns (StreamArtistAttributionClaimTypes.Claim memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.attributionClaimRecord(
-                _host, operationCoordinator, record
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
             )
         );
     }
 
     function platformWorksClaims(uint256 id) external view onlyHost returns (uint256, bytes32) {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.platformWorksClaims(
-                _host, operationCoordinator, id
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
             )
         );
     }
 
     function platformWorksCorrection(uint256 id) external view onlyHost returns (uint64, bytes32) {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.platformWorksCorrection(
-                _host, operationCoordinator, id
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
             )
         );
     }
@@ -336,8 +326,8 @@ contract StreamArtistRegistryReadExtension {
         returns (PW.Claim memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.platformWorksClaimRecord(
-                _host, operationCoordinator, hash
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
             )
         );
     }
@@ -349,8 +339,8 @@ contract StreamArtistRegistryReadExtension {
         returns (PW.Contest memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.platformWorksContestRecord(
-                _host, operationCoordinator, hash
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
             )
         );
     }
@@ -364,8 +354,8 @@ contract StreamArtistRegistryReadExtension {
         bool correction
     ) external view onlyHost returns (PW.Context memory) {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.platformWorksContext(
-                _host, operationCoordinator, id, state, claim_, evidence, reason, correction
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
             )
         );
     }
@@ -393,25 +383,19 @@ contract StreamArtistRegistryReadExtension {
         returns (address, uint8, uint32, bytes32, bytes32, uint256)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.successorDesignation(
-                _host, operationCoordinator, artistId
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
     function operativeSuccessorRecord(bytes32 artistId) external view onlyHost returns (bytes32) {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.operativeSuccessorRecord(
-                _host, operationCoordinator, artistId
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
     function operativeEstateDirective(bytes32 artistId) external view onlyHost returns (bytes32) {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.operativeEstateDirective(
-                _host, operationCoordinator, artistId
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -422,9 +406,7 @@ contract StreamArtistRegistryReadExtension {
         returns (Succ.DesignationRecord memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.successorDesignationRecord(
-                _host, operationCoordinator, record
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -435,17 +417,13 @@ contract StreamArtistRegistryReadExtension {
         returns (Succ.DirectiveRecord memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.estateDirectiveRecord(
-                _host, operationCoordinator, record
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
     function estateDirectivePayload(bytes32 record) external view onlyHost returns (bytes memory) {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.estateDirectivePayload(
-                _host, operationCoordinator, record
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -488,9 +466,7 @@ contract StreamArtistRegistryReadExtension {
         returns (Dismissal.Context memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.identityContestDismissalContext(
-                _host, operationCoordinator, p
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -501,9 +477,7 @@ contract StreamArtistRegistryReadExtension {
         returns (Dismissal.Cause memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.currentIdentityContestCause(
-                _host, operationCoordinator, artistId
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -514,9 +488,7 @@ contract StreamArtistRegistryReadExtension {
         returns (Dismissal.Cause memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.identityContestCause(
-                _host, operationCoordinator, causeHash
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -527,9 +499,7 @@ contract StreamArtistRegistryReadExtension {
         returns (Dismissal.Record memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.identityContestDismissalRecord(
-                _host, operationCoordinator, recordHash
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -540,9 +510,7 @@ contract StreamArtistRegistryReadExtension {
         returns (bytes32)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.latestIdentityContestDismissal(
-                _host, operationCoordinator, artistId
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -553,9 +521,7 @@ contract StreamArtistRegistryReadExtension {
         returns (Dismissal.Closure memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.identityTransitionClosure(
-                _host, operationCoordinator, artistId, transitionRecordHash
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -566,9 +532,7 @@ contract StreamArtistRegistryReadExtension {
         returns (Dismissal.RevisionContinuation memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.identityRevisionContinuation(
-                _host, operationCoordinator, continuationHash
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -579,17 +543,13 @@ contract StreamArtistRegistryReadExtension {
         returns (Contest.Record memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.identityContestRecord(
-                _host, operationCoordinator, record
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
     function latestIdentityContest(bytes32 artistId) external view onlyHost returns (bytes32) {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.latestIdentityContest(
-                _host, operationCoordinator, artistId
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -600,14 +560,7 @@ contract StreamArtistRegistryReadExtension {
         bytes32 reasonHash
     ) external view onlyHost returns (bytes32, bytes32, bytes32) {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.identityContestGovernanceContext(
-                    _host,
-                    operationCoordinator,
-                    artistId,
-                    subjectRecordHash,
-                    evidenceHash,
-                    reasonHash
-                )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -618,9 +571,7 @@ contract StreamArtistRegistryReadExtension {
         returns (R.GuardianRecord memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.guardianSetRecord(
-                _host, operationCoordinator, record
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -631,9 +582,7 @@ contract StreamArtistRegistryReadExtension {
         returns (R.RotationRecord memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.rotationRecord(
-                _host, operationCoordinator, record
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -644,9 +593,7 @@ contract StreamArtistRegistryReadExtension {
         returns (R.StandingRecord memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.standingRevocationRecord(
-                _host, operationCoordinator, record
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -658,17 +605,13 @@ contract StreamArtistRegistryReadExtension {
 
     function identityRecordBytes(bytes32 artistId) external view onlyHost returns (bytes memory) {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.identityRecordBytes(
-                _host, operationCoordinator, artistId
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
     function identityDocumentBytes(bytes32 hash) external view onlyHost returns (bytes memory) {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.identityDocumentBytes(
-                _host, operationCoordinator, hash
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -679,9 +622,7 @@ contract StreamArtistRegistryReadExtension {
         returns (string memory, bytes32)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.artistDisplayName(
-                _host, operationCoordinator, artistId
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -692,9 +633,7 @@ contract StreamArtistRegistryReadExtension {
         returns (StreamArtistIdentityRevisionTypes.Record memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.identityRevisionRecord(
-                _host, operationCoordinator, record
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -705,9 +644,7 @@ contract StreamArtistRegistryReadExtension {
         returns (StreamArtistAuthorizationTypes.State memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryAuthorityEncoding.artistAuthorizationState(
-                _host, operationCoordinator, artistId, digest, nonce
-            )
+            StreamArtistRegistryAuthorityEncoding.readEncoded(_host, operationCoordinator, msg.data)
         );
     }
 
@@ -718,8 +655,8 @@ contract StreamArtistRegistryReadExtension {
         returns (C.IdentityProposalState memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.collaboratorIdentityProposal(
-                _host, operationCoordinator, account, identityRecordHash
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
             )
         );
     }
@@ -731,16 +668,16 @@ contract StreamArtistRegistryReadExtension {
         returns (C.Row memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.collaboratorAt(
-                _host, operationCoordinator, collectionId, generation, index
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
             )
         );
     }
 
     function delegationRecord(bytes32 grant) public view onlyHost returns (D.Record memory) {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.delegationRecord(
-                _host, operationCoordinator, grant
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
             )
         );
     }
@@ -752,8 +689,8 @@ contract StreamArtistRegistryReadExtension {
         returns (bool, address, uint256, uint32, uint64, uint64, uint64)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.delegationState(
-                _host, operationCoordinator, grant
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
             )
         );
     }
@@ -765,8 +702,8 @@ contract StreamArtistRegistryReadExtension {
         returns (L.Terminal memory)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.bindingTermination(
-                _host, operationCoordinator, collectionId, generation
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
             )
         );
     }
@@ -782,8 +719,8 @@ contract StreamArtistRegistryReadExtension {
         returns (bool, bytes32, bytes32)
     {
         _returnRegistryEncoded(
-            StreamArtistRegistryPresentationEncoding.firstReleaseRatification(
-                _host, operationCoordinator, collectionId
+            StreamArtistRegistryPresentationEncoding.readEncoded(
+                _host, operationCoordinator, msg.data
             )
         );
     }

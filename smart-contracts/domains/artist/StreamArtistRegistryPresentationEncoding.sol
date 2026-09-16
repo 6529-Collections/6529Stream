@@ -28,6 +28,130 @@ import {
 
 /// @notice Fixed typed read encoding; suite and host originate from the immutable reader.
 library StreamArtistRegistryPresentationEncoding {
+    /// @dev Original facade arguments decoded once; each typed encoder below is unchanged.
+    function readEncoded(address host, address coordinator, bytes calldata data)
+        public
+        view
+        returns (bytes memory)
+    {
+        bytes4 selector = bytes4(data[:4]);
+        if (
+            selector
+                == bytes4(
+                    keccak256(
+                        "requireRecordPublication(bytes32,(address,address,uint256,bytes32,bytes32,bytes32,bytes32,uint16,bytes32,bytes32,uint64,bytes32))"
+                    )
+                )
+        ) {
+            (bytes32 recordHash, P.Publication memory publication) =
+                abi.decode(data[4:], (bytes32, P.Publication));
+            return requireRecordPublication(host, coordinator, recordHash, publication);
+        }
+        if (selector == bytes4(keccak256("platformWorksState(uint256)"))) {
+            uint256 id = abi.decode(data[4:], (uint256));
+            return platformWorksState(host, coordinator, id);
+        }
+        if (selector == bytes4(keccak256("platformWorksDeclaration(uint256)"))) {
+            uint256 id = abi.decode(data[4:], (uint256));
+            return platformWorksDeclaration(host, coordinator, id);
+        }
+        if (selector == bytes4(keccak256("platformWorksContest(uint256)"))) {
+            uint256 id = abi.decode(data[4:], (uint256));
+            return platformWorksContest(host, coordinator, id);
+        }
+        if (selector == bytes4(keccak256("displayBinding(uint256)"))) {
+            uint256 id = abi.decode(data[4:], (uint256));
+            return displayBinding(host, coordinator, id);
+        }
+        if (selector == bytes4(keccak256("artistAttestationStatus(uint256,uint8,bytes32,bytes32)")))
+        {
+            (uint256 id, uint8 kind, bytes32 subjectId, bytes32 currentHash) =
+                abi.decode(data[4:], (uint256, uint8, bytes32, bytes32));
+            return artistAttestationStatus(host, coordinator, id, kind, subjectId, currentHash);
+        }
+        if (selector == bytes4(keccak256("displaySanction((uint8,uint256,uint256,bytes32))"))) {
+            StreamFinalityScope memory scope = abi.decode(data[4:], (StreamFinalityScope));
+            return displaySanction(host, coordinator, scope);
+        }
+        if (selector == bytes4(keccak256("attributionClaims(uint256)"))) {
+            uint256 id = abi.decode(data[4:], (uint256));
+            return attributionClaims(host, coordinator, id);
+        }
+        if (selector == bytes4(keccak256("deploymentAttestation(uint256)"))) {
+            uint256 id = abi.decode(data[4:], (uint256));
+            return deploymentAttestation(host, coordinator, id);
+        }
+        if (selector == bytes4(keccak256("attestationAuthorityClass(bytes32)"))) {
+            bytes32 record = abi.decode(data[4:], (bytes32));
+            return attestationAuthorityClass(host, coordinator, record);
+        }
+        if (selector == bytes4(keccak256("attributionClaimRecord(bytes32)"))) {
+            bytes32 record = abi.decode(data[4:], (bytes32));
+            return attributionClaimRecord(host, coordinator, record);
+        }
+        if (selector == bytes4(keccak256("platformWorksClaims(uint256)"))) {
+            uint256 id = abi.decode(data[4:], (uint256));
+            return platformWorksClaims(host, coordinator, id);
+        }
+        if (selector == bytes4(keccak256("platformWorksCorrection(uint256)"))) {
+            uint256 id = abi.decode(data[4:], (uint256));
+            return platformWorksCorrection(host, coordinator, id);
+        }
+        if (selector == bytes4(keccak256("platformWorksClaimRecord(bytes32)"))) {
+            bytes32 hash = abi.decode(data[4:], (bytes32));
+            return platformWorksClaimRecord(host, coordinator, hash);
+        }
+        if (selector == bytes4(keccak256("platformWorksContestRecord(bytes32)"))) {
+            bytes32 hash = abi.decode(data[4:], (bytes32));
+            return platformWorksContestRecord(host, coordinator, hash);
+        }
+        if (
+            selector
+                == bytes4(
+                    keccak256("platformWorksContext(uint256,uint8,bytes32,bytes32,bytes32,bool)")
+                )
+        ) {
+            (
+                uint256 id,
+                uint8 state,
+                bytes32 claim_,
+                bytes32 evidence,
+                bytes32 reason,
+                bool correction
+            ) = abi.decode(data[4:], (uint256, uint8, bytes32, bytes32, bytes32, bool));
+            return
+                platformWorksContext(
+                    host, coordinator, id, state, claim_, evidence, reason, correction
+                );
+        }
+        if (selector == bytes4(keccak256("collaboratorIdentityProposal(address,bytes32)"))) {
+            (address account, bytes32 identityRecordHash) = abi.decode(data[4:], (address, bytes32));
+            return collaboratorIdentityProposal(host, coordinator, account, identityRecordHash);
+        }
+        if (selector == bytes4(keccak256("collaboratorAt(uint256,uint64,uint256)"))) {
+            (uint256 collectionId, uint64 generation, uint256 index) =
+                abi.decode(data[4:], (uint256, uint64, uint256));
+            return collaboratorAt(host, coordinator, collectionId, generation, index);
+        }
+        if (selector == bytes4(keccak256("delegationRecord(bytes32)"))) {
+            bytes32 grant = abi.decode(data[4:], (bytes32));
+            return delegationRecord(host, coordinator, grant);
+        }
+        if (selector == bytes4(keccak256("delegationState(bytes32)"))) {
+            bytes32 grant = abi.decode(data[4:], (bytes32));
+            return delegationState(host, coordinator, grant);
+        }
+        if (selector == bytes4(keccak256("bindingTermination(uint256,uint64)"))) {
+            (uint256 collectionId, uint64 generation) = abi.decode(data[4:], (uint256, uint64));
+            return bindingTermination(host, coordinator, collectionId, generation);
+        }
+        if (selector == bytes4(keccak256("firstReleaseRatification(uint256)"))) {
+            uint256 collectionId = abi.decode(data[4:], (uint256));
+            return firstReleaseRatification(host, coordinator, collectionId);
+        }
+        revert T.InvalidRecord();
+    }
+
     struct Context {
         address host;
         address coordinator;
@@ -37,7 +161,7 @@ library StreamArtistRegistryPresentationEncoding {
         address host,
         address coordinator,
         bytes32 recordHash,
-        P.Publication calldata publication
+        P.Publication memory publication
     ) public view returns (bytes memory) {
         P.Evidence memory v0 = _original_requireRecordPublication(
             Context(host, coordinator), recordHash, publication
@@ -48,7 +172,7 @@ library StreamArtistRegistryPresentationEncoding {
     function _original_requireRecordPublication(
         Context memory x,
         bytes32 recordHash,
-        P.Publication calldata publication
+        P.Publication memory publication
     ) private view returns (P.Evidence memory) {
         return StreamArtistRecordPublicationReads.requirePublication(
             _contentSuite(x), recordHash, publication
@@ -151,7 +275,7 @@ library StreamArtistRegistryPresentationEncoding {
             .artistAttestationStatus(id, kind, subjectId, currentHash);
     }
 
-    function displaySanction(address host, address coordinator, StreamFinalityScope calldata scope)
+    function displaySanction(address host, address coordinator, StreamFinalityScope memory scope)
         public
         view
         returns (bytes memory)
@@ -160,7 +284,7 @@ library StreamArtistRegistryPresentationEncoding {
         return abi.encode(v0);
     }
 
-    function _original_displaySanction(Context memory x, StreamFinalityScope calldata scope)
+    function _original_displaySanction(Context memory x, StreamFinalityScope memory scope)
         private
         view
         returns (S.Record memory)
