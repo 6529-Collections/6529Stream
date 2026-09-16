@@ -1,0 +1,187 @@
+ataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open authority file for
+							<tei:ref target="../../documents/terminology-recommendation.html#subjectEvent">Subject Event</tei:ref>
+						</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:eventSetComplexType">
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="subjectPlace" minOccurs="0" maxOccurs="unbounded" id="subjectPlace">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A set of display and index elements for a place depicted by the object/work in focus, 
+							or what it is about.<br/>
+							Repeated if there are multiple places.</tei:ab>
+						<tei:ab type="label">Subject Place</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:placeSetComplexType">
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="subjectObject" minOccurs="0" maxOccurs="unbounded" id="subjectObject">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A set of display and index elements for an object depicted by the object/work in focus, or what it is
+							about. The object may be, for instance, a particular building, like the
+							<em>Hagia Sophia</em>, or an individual work of art, such as a watercolor painting showing a
+							<em>View of the Hagia Sophia in Constantinople</em>.<br/>
+							    Note that Subject Object does not relate to generic concepts,
+							    but to individual entities only.<br/>
+							    Repeated if there are multiple objects.</tei:ab>
+						<tei:ab type="label">Subject Object</tei:ab>
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open authority file for
+						    <tei:ref target="../../documents/terminology-recommendation.html#subjectObject">Subject Object</tei:ref>
+						</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:objectSetComplexType">
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute ref="lido:type" id="subject_type">
+			<xs:annotation>
+				<xs:documentation>
+					<tei:ab type="description">An attribute for the kind of subject information, whether it is, for instance,
+						a <em>description</em> of a generic subject, an <em>identification</em> of a named individual, 
+						or an <em>interpretation</em> of the theme.</tei:ab>
+					<tei:ab type="dataValues"/>
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<xs:complexType name="subjectSetComplexType" id="subjectSetComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines display and index elements for a
+					single set of subject information.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="displaySubject" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="displaySubject">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A display element for the subject matter depicted
+							in the object/work, or what it is about, corresponding to the subsequent
+							<tei:ref target="#subject">Subject</tei:ref> element.<br/>
+							Repeated for language variants only.</tei:ab>
+						<tei:ab type="label">Display Subject</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Free text</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="subject" type="lido:subjectComplexType" minOccurs="0" id="subject">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A wrapper for information about the subject of the
+							object/work in focus. The sub-elements identify, describe, and/or interpret
+							what is depicted in and by an object/work, or what it is about.<br/>
+							While not required, it is highly recommended to include subject information.</tei:ab>
+						<tei:ab type="label">Subject</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="subjectWrap" id="subjectWrap">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">A wrapper for structured information about the subject
+					matter of the object/work in focus. This may be a description or identification
+					of what the object/work depicts, also referred to as <em>ofness</em>,
+					or an interpretation of its meaning, also referred to as <em>aboutness</em>.<br/>
+					Description relates to the generic content depicted in or by the work, that is,
+					what would be seen in the work by an objective viewer.<br/>
+					Identification relates to the specific subject, including named historical, mythological, or fictional subjects.<br/>
+					Interpretation relates to the iconographical, thematic, or symbolic meaning represented by the object/work.<br/>
+					To indicate the type of subject, refer to the terminology recommendation for
+					<tei:ref target="../../documents/terminology-recommendation.html#subject_type">Type of Subject</tei:ref>.
+					</tei:ab>
+				<tei:ab type="label">Subject Wrapper</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="subjectSet" minOccurs="0" maxOccurs="unbounded" id="subjectSet">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">A set of display and index elements for one set of subject information.<br/>
+								Repeated for multiple subjects, if the object/work has multiple parts, or if the
+								subject information is qualified by a type attribute.</tei:ab>
+							<tei:ab type="label">Subject Set</tei:ab>
+							
+							
+						</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:complexContent>
+							<xs:extension base="lido:subjectSetComplexType">
+								<xs:attribute ref="lido:sortorder"/>
+							</xs:extension>
+						</xs:complexContent>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="termComplexType" id="termComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines information about a word or phrase used to
+					designate a concept for indexing.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute ref="lido:pref"/>
+				<xs:attribute ref="lido:addedSearchTerm"/>
+				<xs:attributeGroup ref="lido:textAttributesSet"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="textComplexType" id="textComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines simple text with encodinganalog and label attribute.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attributeGroup ref="lido:textAttributesSet"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+
+	<xs:group name="conceptElementsSet" id="conceptElementsSet">
+		<xs:sequence>
+			<xs:any minOccurs="0" processContents="skip" namespace="http://www.w3.org/2004/02/skos/core#"/>
+			<xs:element name="conceptID" type="lido:identifierComplexType" minOccurs="0" maxOccurs="unbounded" id="conceptID">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An identifier for the concept.<br/>
+							Repeatable for identifiers from different controlled vocabularies or other sources.<br/> 
+							The recommended method, however, is to reference equivalent resources using a 
+							<tei:ref target="https://www.w3.org/TR/skos-reference/#mapping">
+							skos:mappingRelation</tei:ref> property, stating that two or more URIs refer to a similar conce

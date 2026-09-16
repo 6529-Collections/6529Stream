@@ -1,0 +1,106 @@
+   the cataloging level selected for the record in question. It
+            represents the logical tier of the &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#lido">lido</a>&gt;
+            object record, whether it refers to a single item, a part
+            thereof, or a group of objects. Objects or works may be
+            described at the following levels of granularity, as
+            recommended in the LIDO <a
+            href="http://terminology.lido-schema.org/lido00140">Record
+            Type Vocabulary</a>:</p>
+            <ul>
+            <li><a
+            href="http://terminology.lido-schema.org/lido00141"><em>Item-level
+            records</em></a> describe one single object or work in a
+            single LIDO record, e.g., an “<a
+            href="https://www.getty.edu/research/publications/electronic_publications/cdwa/examples/02_oil_painting_2ricci.html">Oil
+            painting</a>”; a description at item-level may also embrace
+            parts of an object, e.g., a “<a
+            href="https://www.getty.edu/research/publications/electronic_publications/cdwa/examples/14_sevres_bowl.html">Sèvres
+            Bowl</a>” comprising bowl, lid and dish.</li>
+            <li><a
+            href="http://terminology.lido-schema.org/lido00453"><em>Group-level
+            records</em></a> describe more than one object in a single
+            LIDO record, e.g., a “<a
+            href="https://www.getty.edu/research/publications/electronic_publications/cdwa/examples/63_collection_of_photos.html">Collection
+            of photographs</a>”, a “<a
+            href="https://www.getty.edu/research/publications/electronic_publications/cdwa/examples/56_group_of_drawings.html">Group
+            of drawings</a>”, or a “<a
+            href="https://www.getty.edu/research/publications/electronic_publications/cdwa/examples/102_tea_set.html">Tea
+            service set</a>”.</li>
+            <li><a
+            href="http://terminology.lido-schema.org/lido00447"><em>Component-level
+            records</em></a> describe parts or components as distinct
+            LIDO records. These records must be linked to the record for
+            the whole, thus establishing a hierarchy of whole and parts;
+            e.g., the “<a
+            href="https://www.getty.edu/research/publications/electronic_publications/cdwa/examples/120_dome.html">Dome</a>”
+            as a component of Saint Peter’s Basilica.</li>
+            <li><a
+            href="http://terminology.lido-schema.org/lido01021"><em>Conceptual-level
+            records</em></a> are designated to collocate other records.
+            This level allows introducing a record that is merely
+            notional in nature, not describing any real object as an
+            instance. Typical uses are assembling items of a multiple,
+            or for series items under a common concept; e.g., “<a
+            href="http://vocab.getty.edu/page/cona/700008708">Great Wave
+            off Kanagawa</a>”.</li>
+            </ul>
+            <p><strong>Example:</strong> The following example refers to
+            the cataloging level of an item. The values for the concept
+            URI and the labels are drawn from the LIDO <a
+            href="http://terminology.lido-schema.org/lido00140">Record
+            Type Vocabulary</a>. If desired, a custom display label may
+            be added manually.</p>
+            <blockquote>
+            <p><strong>Record Type:</strong> Item
+            <strong><em>Preference:</em></strong> Display</p>
+            </blockquote>
+            <div class="sourceCode" id="cb24"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:recordType</span>&gt;</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">skos:Concept</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="ot">        rdf:about=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00141&quot;</span>&gt;</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="ot">            xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>            item-level record</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="ot">            xml:lang=</span><span class="st">&quot;de&quot;</span>&gt;</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>            Einzelobjekt</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">&lt;!-- Display label --&gt;</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:term</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00526&quot;</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a><span class="ot">        xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>        Item</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:term</span>&gt;</span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:recordType</span>&gt;</span></code></pre></div>
+            <blockquote>
+            <p>See also Categories for the Description of Works of Art:
+            <a
+            href="https://www.getty.edu/research/publications/electronic_publications/cdwa/1object.html#RTFToC2a">1.1.
+            Catalog Level</a> in chapter <a
+            href="https://www.getty.edu/research/publications/electronic_publications/cdwa/1object.html">1.
+            Object/Work</a>.</p>
+            </blockquote>
+            <h3 data-number="5.1.7" id="record-source"><span
+            class="header-section-number">5.1.7</span> Record
+            Source</h3>
+            <p><strong>Element name:</strong> &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#recordSource">lido:recordSource</a>&gt;</p>
+            <p><strong>Note:</strong> The Record Source element holds
+            identifying information on the source from which, or where
+            the &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#lido">lido</a>&gt;
+            object record was created. The source is usually the
+            repository, institution or person creating the record in
+            question.</p>
+            <p><strong>Example:</strong> The following example shows the
+            source information for the record describing the “<a
+            href="https://www.bildindex.de/document/obj00076417">Mona
+            Lisa</a>” provided by Deutsches Dokumentationszentrum für
+            Kunstgeschichte - Bildarchiv Foto Marburg.</p>
+            <blockquote>
+            <p><strong>Record Source:</strong> Deutsches
+            Dokumentationszentrum für Kunstgeschichte - Bildarchiv Foto
+            Ma

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.opengis.net/gml" elementFormDefault="qualified" version="3.1.1.2" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:gml="http://www.opengis.net/gml" xmlns:sch="http://www.ascc.net/xml/schematron" xmlns="http://www.w3.org/2001/XMLSchema">
+	<annotation>
+		<appinfo source="urn:opengis:specification:gml:schema-xsd:topology:3.1.1">topology.xsd</appinfo>
+		<documentation>
+			GML is an OGC Standard.
+			Copyright (c) 2001,2005,2010 Open Geospatial Consortium.
+			To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .
+		</documentation>
+	</annotation>
+	<include schemaLocation="gml.xsd"/>
+	<include schemaLocation="geometryComplexes.xsd"/>
+	<!-- ==============================================================
+       abstract supertype for topology objects
+        =============================================================== -->
+	<!-- ========================================================== -->
+	<element name="_Topology" type="gml:AbstractTopologyType" abstract="true" substitutionGroup="gml:_GML"/>
+	<!-- ========================================================== -->
+	<complexType name="AbstractTopologyType" abstract="true">
+		<complexContent>
+			<extension base="gml:AbstractGMLType"/>
+		</complexContent>
+	</complexType>
+	<!-- ========================================================== -->
+	<element name="_TopoPrimitive" type="gml:AbstractTopoPrimitiveType" abstract="true" substitutionGroup="gml:_Topology">
+		<annotation>
+			<documentation>Substitution group branch for Topo Primitives, used by TopoPrimitiveArrayAssociationType</documentation>
+		</annotation>
+	</element>
+	<!-- ========================================================== -->
+	<complexType name="AbstractTopoPrimitiveType" abstract="true">
+		<complexContent>
+			<extension base="gml:AbstractTopologyType">
+				<sequence>
+					<element ref="gml:isolated" minOccurs="0" maxOccurs="unbounded"/>
+					<element ref="gml:container" minOccurs="0"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ========================================================== -->
+	<element name="isolated" type="gml:IsolatedPropertyType">
+		<annotation>
+			<appinfo>
+				<sch:pattern name="refAndContent co-occurence prohibited">
+					<sch:rule context="gml:isolated">
+						<sch:extends rule="hrefOrContent"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+		</annotation>
+	</element>
+	<!-- ========================================================== -->
+	<complexType name="IsolatedPropertyType">
+		<choice minOccurs="0">
+			<element ref="gml:Node"/>
+			<element ref="gml:Edge"/>
+		</choice>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- ========================================================== -->
+	<element name="container" type="gml:ContainerPropertyType">
+		<annotation>
+			<appinfo>
+				<sch:pattern name="refAndContent co-occurence prohibited">
+					<sch:rule context="gml:containerProperty">
+						<sch:extends rule="hrefOrContent"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+		</annotation>
+	</element>
+	<!-- ========================================================== -->
+	<complexType name="ContainerPropertyType">
+		<sequence minOccurs="0">
+			<choice>
+				<element ref="gml:Face"/>
+				<element ref="gml:TopoSolid"/>
+			</choice>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =========================================================== -->
+	<!-- primitive topology objects -->
+	<!-- ========================================================== -->
+	<element name="Node" type="gml:NodeType" substitutionGroup="gml:_TopoPrimitive"/>
+	<!-- =========================================================== -->
+	<complexType name="NodeType">
+		<annotation>
+			<documentation>Its optional co-boundary is a set of connected directedEdges.  The orientation of one of these dirEdges is "+" if the Node is the "to" node of the Edge, and "-" if it is the "from" node.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractTopoPrimitiveType">
+				<sequence>
+					<element ref="gml:directedEdge" minOccurs="0" maxOccurs="unbounded"/>
+					<element ref="gml:pointProperty" minOccurs="0"/>
+					<!-- <element name="geometry" type="gml:PointPropertyType" minOccurs="0"/> -->
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ===== Property for topology association - by Value or by Reference ===== -->
+	<element name="directedNode" type="gml:DirectedNodePropertyType">
+		<annotation>
+			<appinfo>
+				<sch:pattern name="refAndContent co-occurence prohibited">
+					<sch:rule context="gml:directedNode">
+						<sch:extends rule="hrefOrContent"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<complexType name="DirectedNodePropertyType">
+		<sequence minOccurs="0">
+			<element ref="gml:Node"/>
+		</sequence>
+		<attribute name="orientation" type="gml:SignType" default="+"/>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- ========================================================== -->
+	<!-- primitive topology objects (1-dimensional) -->
+	<!-- ========================================================== -->
+	<element name="Edge" type="gml:EdgeType" substitutionGroup="gml:_TopoPrimitive"/>
+	<!-- ========================================================== -->
+	<complexType name="EdgeType">
+		<annotation>
+			<documentation>There is precisely one positively directed and one negatively directed node in the boundary of every edge. The negatively and positively directed nodes correspond to the start and end nodes respectively. The optional coboundary of an edge is a circular sequence of directed faces which are incident on this edge in document order. Faces which use a particular boundary edge in its positive orientation appear with positive orientation on the coboundary of the same edge. In the 2D case, the orientation of the face on the left of the edge is "+"; the orientation of the face on the right on its right is "-". An edge may optionally be realised by a 1-dimensional (curve) geometric primitive.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractTopoPrimitiveType">
+				<sequence>
+					<element ref="gml:directedNode" minOccurs="2" maxOccurs="2"/>
+					<element ref="gml:directedFace" minOccurs="0" maxOccurs="unbounded"/>
+					<element ref="gml:curveProperty" minOccurs="0"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ===== Property for topology association - by Value or by Reference ===== -->
+	<element name="directedEdge" type="gml:DirectedEdgePropertyType">
+		<annotation>
+			<appinfo>
+				<sch:pattern name="refAndContent co-occurence prohibited">
+					<sch:rule context="gml:directedEdge">
+						<sch:extends rule="hrefOrContent"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<complexType name="DirectedEdgePropertyType">
+		<sequence minOccurs="0">
+			<element ref="gml:Edge"/>
+		</sequence>
+		<attribute name="orientation" type="gml:SignType" default="+"/>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- ========================================================== -->
+	<!-- primitive topology objects (2-dimensional) -->
+	<!-- ========================================================== -->
+	<element name="Face" type="gml:FaceType" substitutionGroup="gml:_TopoPrimitive"/>
+	<!-- ========================================================== -->
+	<complexType name="FaceType">
+		<annotation>
+			<documentation>. The topological boundary of a face consists of a set of directed edges. Note that all edges associated with a Face, including dangling and interior edges, appear in the boundary.  Dangling and interior edges are each referenced by pairs of directedEdges with opposing orientations.  The optional coboundary of a face is a pair of directed solids which are bounded by this face. If present, there is precisely one pos

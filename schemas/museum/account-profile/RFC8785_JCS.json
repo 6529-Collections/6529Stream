@@ -1,0 +1,1 @@
+{"input":"Valid I-JSON values; duplicate properties and invalid Unicode reject.","name":"RFC8785_JCS","output":"RFC 8785 JSON Canonicalization Scheme UTF-8 bytes without a byte-order mark.","sourceRule":"Original bytes must already equal the canonical encoding; do not repair or normalize them.","standard":"https://www.rfc-editor.org/rfc/rfc8785","version":"1"}

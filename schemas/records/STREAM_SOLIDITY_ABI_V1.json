@@ -1,0 +1,1 @@
+{"name":"STREAM_SOLIDITY_ABI_V1","rule":"Canonical Solidity0.8.19 ABI encoding of the exact ordered closed schema tuple. Decode then abi.encode must reproduce every byte; no trailing data or alternative offsets. No transformation of embedded bytes or strings.","version":1}

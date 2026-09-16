@@ -1,0 +1,766 @@
+{
+  "schemaVersion": 1,
+  "qualification": "Compiler-selected refund ABI only; no deployment/runtime claim",
+  "inputSha256": "852f04b90df8376a1654fea76faf6b49e302727107c55a3f1801d451b7d96b24",
+  "outputSha256": "0e2a5608f54fed8deaed265cb86003ab3ad5ad5276b0d0c7478fc35977ce0b19",
+  "sources": {
+    "smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol": "e98145b2bbffec7f5a26c6029252b49198e7865c8e7601460c6f116890be54c1",
+    "smart-contracts/domains/mint/StreamNativeDutchSale.sol": "2beed0dd47f3be50d74062ee816396617971374c5ea0d5f4bdb464cbd51ab65f",
+    "smart-contracts/domains/mint/StreamNativeClearingSale.sol": "6f3730f81c184b1f16033fd963d595753f921b26263e88d1c807abba60a8f4b7",
+    "smart-contracts/domains/mint/StreamNativeRefundWindowSale.sol": "a20fbdcd75b65c60054952abe79acd9febe6be9cb40a7a1073d9bc7501339b0f"
+  },
+  "abis": {
+    "fixed": [
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address"
+          }
+        ],
+        "name": "claimRefund",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "components": [
+              {
+                "internalType": "bool",
+                "name": "walletWide",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint256",
+                "name": "index",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct IStreamNativeRefundDelegatedClaims.DelegationWitness",
+            "name": "witness",
+            "type": "tuple"
+          }
+        ],
+        "name": "claimRefundFor",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "parameterId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "gasParameter",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "value",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "refundDelegationConfiguration",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "chainId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "core",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "registry",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "registryCodeHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "usecase",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "baseManifestHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "moduleRegistry",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "moduleRegistryCodeHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamNativeRefundDelegatedClaims.DelegationConfiguration",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "refundDelegationManifest",
+        "outputs": [
+          {
+            "internalType": "bytes",
+            "name": "",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "refundDelegationManifestHash",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "payer",
+            "type": "address"
+          }
+        ],
+        "name": "refundableBalance",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    "dutch": [
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address"
+          }
+        ],
+        "name": "claimRefund",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "components": [
+              {
+                "internalType": "bool",
+                "name": "walletWide",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint256",
+                "name": "index",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct IStreamNativeRefundDelegatedClaims.DelegationWitness",
+            "name": "witness",
+            "type": "tuple"
+          }
+        ],
+        "name": "claimRefundFor",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "parameterId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "gasParameter",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "value",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "refundDelegationConfiguration",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "chainId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "core",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "registry",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "registryCodeHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "usecase",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "baseManifestHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "moduleRegistry",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "moduleRegistryCodeHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamNativeRefundDelegatedClaims.DelegationConfiguration",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "refundDelegationManifest",
+        "outputs": [
+          {
+            "internalType": "bytes",
+            "name": "",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "refundDelegationManifestHash",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "payer",
+            "type": "address"
+          }
+        ],
+        "name": "refundableBalance",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    "clearing": [
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address"
+          }
+        ],
+        "name": "claimRefund",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "components": [
+              {
+                "internalType": "bool",
+                "name": "walletWide",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint256",
+                "name": "index",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct IStreamNativeRefundDelegatedClaims.DelegationWitness",
+            "name": "witness",
+            "type": "tuple"
+          }
+        ],
+        "name": "claimRefundFor",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "parameterId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "gasParameter",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "value",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "refundDelegationConfiguration",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "chainId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "core",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "registry",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "registryCodeHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "usecase",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "baseManifestHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "moduleRegistry",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "moduleRegistryCodeHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamNativeRefundDelegatedClaims.DelegationConfiguration",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "refundDelegationManifest",
+        "outputs": [
+          {
+            "internalType": "bytes",
+            "name": "",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "refundDelegationManifestHash",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "payer",
+            "type": "address"
+          }
+        ],
+        "name": "refundableBalance",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    "window": [
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "saleId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address payable",
+            "name": "recipient",
+            "type": "address"
+          }
+        ],
+        "name": "claimRefund",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "components": [
+              {
+                "internalType": "bool",
+                "name": "walletWide",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint256",
+                "name": "index",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct IStreamNativeRefundDelegatedClaims.DelegationWitness",
+            "name": "witness",
+            "type": "tuple"
+          }
+        ],
+        "name": "claimRefundFor",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "parameterId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "gasParameter",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "value",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "refundDelegationConfiguration",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "chainId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "core",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "registry",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "registryCodeHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "usecase",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "baseManifestHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "moduleRegistry",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "moduleRegistryCodeHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamNativeRefundDelegatedClaims.DelegationConfiguration",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "refundDelegationManifest",
+        "outputs": [
+          {
+            "internalType": "bytes",
+            "name": "",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "refundDelegationManifestHash",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "saleId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          }
+        ],
+        "name": "refundableBalance",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ]
+  }
+}

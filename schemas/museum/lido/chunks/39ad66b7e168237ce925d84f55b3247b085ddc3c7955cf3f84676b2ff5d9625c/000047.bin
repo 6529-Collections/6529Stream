@@ -1,0 +1,129 @@
+nt is permitted or
+            required to hold. Each attribute appears as a pair of
+            attribute name and attribute value (known as a key-value
+            pair). Many attributes are used for several different
+            elements in LIDO. For many of the LIDO attributes there are
+            recommended value lists provided by the LIDO Terminology.
+            This particularly applies to the <a
+            href="http://lido-schema.org/schema/latest/lido.html#type"><em>lido:type</em></a>
+            attribute.</p>
+            <p>Fourteen attributes are defined in the LIDO Schema
+            Version 1.1 namespace. In addition, the language attribute
+            <a
+            href="https://www.w3.org/TR/REC-xml/#sec-lang-tag"><em>xml:lang</em></a>
+            from the XML namespace can be used for all text elements and
+            is mandatory for the elements &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#administrativeMetadata">lido:administrativeMetadata</a>&gt;
+            and &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#descriptiveMetadata">lido:descriptiveMetadata</a>&gt;.</p>
+            <h3 data-number="5.4.1" id="type"><span
+            class="header-section-number">5.4.1</span> <span
+            class="citation" data-cites="type">@type</span></h3>
+            <p><strong>The type attribute</strong> is of particular
+            importance. The <a href="#content-lido-terminology">LIDO
+            Terminology</a> contains LIDO Vocabularies for some type
+            attributes, depending on the element in which the attribute
+            occurs:</p>
+            <ul>
+            <li><a
+            href="http://terminology.lido-schema.org/actor_type">Actor
+            Type-Vocabulary</a></li>
+            <li><a
+            href="http://terminology.lido-schema.org/classification_type">Classification
+            Type-Vocabulary</a></li>
+            <li><a
+            href="http://terminology.lido-schema.org/earliestDate_type">Earliest
+            Date Type-Vocabulary</a></li>
+            <li><a
+            href="http://terminology.lido-schema.org/eventPlace_type">Event
+            Place Type-Vocabulary</a></li>
+            <li><a
+            href="http://terminology.lido-schema.org/genderActor_type">Gender
+            Actor Type-Vocabulary</a></li>
+            <li><a
+            href="http://terminology.lido-schema.org/identifier_type">Identifier
+            Type-Vocabulary</a></li>
+            <li><a
+            href="http://terminology.lido-schema.org/latestDate_type">Latest
+            Date Type-Vocabulary</a></li>
+            <li><a
+            href="http://terminology.lido-schema.org/nationalityActor_type">Nationality
+            Actor Type-Vocabulary</a></li>
+            <li><a
+            href="http://terminology.lido-schema.org/objectDescriptionSet_type">Object
+            Description Set Type-Vocabulary</a></li>
+            <li><a
+            href="http://terminology.lido-schema.org/objectMeasurementsSet_type">Object
+            Measurements Set Type-Vocabulary</a></li>
+            <li><a
+            href="http://terminology.lido-schema.org/objectWorkType_type">Object/Work
+            Type Type-Vocabulary</a></li>
+            <li><a
+            href="http://terminology.lido-schema.org/periodName_type">Period
+            Name Type-Vocabulary</a></li>
+            <li><a
+            href="http://terminology.lido-schema.org/recordInfoSet_type">Record
+            Info Set Type-Vocabulary</a></li>
+            <li><a
+            href="http://terminology.lido-schema.org/recordMetadataDate_type">Record
+            Metadata Date Type-Vocabulary</a></li>
+            <li><a
+            href="http://terminology.lido-schema.org/repositorySet_type">Repository
+            Set Type-Vocabulary</a></li>
+            <li><a
+            href="http://terminology.lido-schema.org/workID_type">Repository
+            Work ID Type-Vocabulary</a></li>
+            <li><a
+            href="http://terminology.lido-schema.org/resourceRepresentation_type">Resource
+            Representation Type-Vocabulary</a></li>
+            <li><a
+            href="http://terminology.lido-schema.org/rightsType_type">Rights
+            Type Type-Vocabulary</a></li>
+            <li><a
+            href="http://terminology.lido-schema.org/termMaterialsTech_type">Term
+            Materials/Techniques Type-Vocabulary</a></li>
+            <li><a
+            href="http://terminology.lido-schema.org/vitalDatesActor_type">Vital
+            Dates Actor Type-Vocabulary</a></li>
+            <li><a
+            href="http://terminology.lido-schema.org/vitalPlaceActor_type">Vital
+            Place Actor Type-Vocabulary</a></li>
+            </ul>
+            <h3 data-number="5.4.2" id="addedsearchterm"><span
+            class="header-section-number">5.4.2</span> <span
+            class="citation"
+            data-cites="addedSearchTerm">@addedSearchTerm</span></h3>
+            <p><strong>Attribute name:</strong> <a
+            href="https://lido-schema.org/schema/latest/lido.html#addedSearchTerm">lido:addedSearchTerm</a></p>
+            <p><strong>Note:</strong> Boolean attribute of the &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#term">lido:term</a>&gt;
+            element indicating that the term has been added to enhance
+            retrieval when set to “yes” (“no” is default). The
+            additional term may be a synonym, a broader term, or an
+            equivalent term in a further language, taken from a local or
+            published controlled vocabulary.</p>
+            <p>Possible use cases for adding a term are: The index term
+            from a linked data vocabulary (a) does not provide a
+            (correct) term in the desired language; (b) does not include
+            a synonym considered useful as search entry by the data
+            provider; (c) is not expected to be fully exploited with
+            regard to its semantic relationships by the portal, so that
+            adding a broader term is useful for expanding the search
+            result.</p>
+            <p><strong>Example 1:</strong> The following XML code
+            snippet is an example for use case (a): The <a
+            href="http://vocab.getty.edu/page/aat/300015050">AAT
+            descriptor</a> provides an incorrect German equivalent,
+            ‘Ölgemälde’.</p>
+            <div class="sourceCode" id="cb46"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Medium --&gt;</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:termMaterialsTech</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="ot">   lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00513&quot;</span>&gt;</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>   &lt;<span class="kw">skos:Concept</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="ot">       rdf:about=</span><span class="st">&quot;http://vocab.getty.edu/aat/300015050&quot;</span>&gt;</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>       &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a><span class="ot">           xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>           oil paint (paint)</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>       &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>       <span class="co">&lt;!-- The following label is an incorrect German translation --&gt;</span></span>
+<span id="cb46-11"

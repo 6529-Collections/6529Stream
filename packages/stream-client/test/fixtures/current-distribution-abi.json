@@ -1,0 +1,1042 @@
+{
+  "compilerCommit": "57d70b58209a1c7f54cfbf6715967489fef28c31",
+  "compilerTree": "1ab689164d36de0b610ef20c980e0db423f3a20f",
+  "targetCommit": "d8f3982603c2b19cef6dc953e5b4969e5295408f",
+  "targetTree": "51ecfa45406ab8a030175357aebd04c4ccab42f5",
+  "compilerVersion": "0.8.19",
+  "sourceCount": 1014,
+  "normalization": "Compiler capture strips a UTF-8 BOM and uses universal newlines; source-binding.json records comparison to compilerCommit.",
+  "scope": "Selected operator-distribution hashes, execution, current Manager/reveal reads and claims; encoding/read/simulation only",
+  "provenance": {
+    "compilerInputSha256": "1abdcd09b08dfd45b5b3f807d5f51776cc381250d56ba0ea6473ea8b68373345",
+    "compilerOutputSha256": "60baf05d47d79f1023c3b2539a22946838a6046521130bad751f9161e5c72530",
+    "sourceBindingSha256": "88dc6ee7bdf4f57edf779b6d3ecab0adf36307c9ad2a26e9e07791127a1ef959"
+  },
+  "contracts": [
+    {
+      "source": "smart-contracts/interfaces/stream/mint/IStreamOperatorDistribution.sol",
+      "contract": "IStreamOperatorDistribution",
+      "gitBlob": "e74463573bd16cbe6aec37bb5405575b826bcbc8",
+      "sourceSha256": "d7daf958861ee4f2332c0149d357bf921b88dfb47bd182f24bf2e75f51514906",
+      "methods": [
+        "programHash",
+        "sliceHash",
+        "sliceAuthorization",
+        "distribute",
+        "sliceUsed",
+        "nftClaim",
+        "claimNft",
+        "claimNftFor"
+      ],
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "receiver",
+              "type": "address"
+            }
+          ],
+          "name": "claimNft",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "delivered",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "walletWide",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint256",
+              "name": "delegationIndex",
+              "type": "uint256"
+            }
+          ],
+          "name": "claimNftFor",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "delivered",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "operator",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "slicesRoot",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "supplyCounterId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "recipientCounterId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "totalQuantity",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "perRecipientCap",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "enum IStreamOperatorDistribution.DeliveryMode",
+                  "name": "deliveryMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "prepared",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct IStreamOperatorDistribution.Program",
+              "name": "program",
+              "type": "tuple"
+            },
+            {
+              "internalType": "uint256",
+              "name": "sliceIndex",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "proof",
+              "type": "bytes32[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "collectionId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "phaseId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "payer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "authorizer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "initialRecipients",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "beneficiaries",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "bytes[]",
+                  "name": "tokenData",
+                  "type": "bytes[]"
+                },
+                {
+                  "internalType": "bytes32[]",
+                  "name": "mintCommitments",
+                  "type": "bytes32[]"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "authorizationId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "contextHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "resolverData",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct IStreamMintManager.MintBatch",
+              "name": "batch",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes",
+              "name": "gateData",
+              "type": "bytes"
+            }
+          ],
+          "name": "distribute",
+          "outputs": [
+            {
+              "internalType": "uint256[]",
+              "name": "tokenIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "payable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "nftClaim",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "collectionId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "phaseId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "beneficiary",
+                  "type": "address"
+                }
+              ],
+              "internalType": "struct IStreamOperatorDistribution.NftClaim",
+              "name": "",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "operator",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "slicesRoot",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "supplyCounterId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "recipientCounterId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "totalQuantity",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "perRecipientCap",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "enum IStreamOperatorDistribution.DeliveryMode",
+                  "name": "deliveryMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "prepared",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct IStreamOperatorDistribution.Program",
+              "name": "program",
+              "type": "tuple"
+            }
+          ],
+          "name": "programHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "sliceIndex",
+              "type": "uint256"
+            }
+          ],
+          "name": "sliceAuthorization",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "sliceIndex",
+              "type": "uint256"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "collectionId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "phaseId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "payer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "authorizer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "initialRecipients",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "beneficiaries",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "bytes[]",
+                  "name": "tokenData",
+                  "type": "bytes[]"
+                },
+                {
+                  "internalType": "bytes32[]",
+                  "name": "mintCommitments",
+                  "type": "bytes32[]"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "authorizationId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "contextHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "resolverData",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct IStreamMintManager.MintBatch",
+              "name": "batch",
+              "type": "tuple"
+            }
+          ],
+          "name": "sliceHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "sliceIndex",
+              "type": "uint256"
+            }
+          ],
+          "name": "sliceUsed",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "source": "smart-contracts/domains/mint/StreamOperatorDistribution.sol",
+      "contract": "StreamOperatorDistribution",
+      "gitBlob": "69e2888a01f7b0dfae81d75ff18f88ab5f9a5012",
+      "sourceSha256": "8d14b4fc8ab4163593ebc631a54d42be5324a0d6bd16f3260824472c183a6a7e",
+      "methods": [
+        "core",
+        "manager"
+      ],
+      "abi": [
+        {
+          "inputs": [],
+          "name": "core",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "manager",
+          "outputs": [
+            {
+              "internalType": "contract IStreamMintManager",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "source": "smart-contracts/interfaces/stream/mint/IStreamMintManager.sol",
+      "contract": "IStreamMintManager",
+      "gitBlob": "8279a1a37a10275686a3410f1d7083391e7a0297",
+      "sourceSha256": "ece6ea0115a625d2ded00cf13c04813f5bb36e334c49b34aaee5f2cd2bc9dd44",
+      "methods": [
+        "phase",
+        "phasePolicyHash",
+        "phaseExecutor",
+        "counterConfig"
+      ],
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "counterConfig",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "enabled",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "enum IStreamMintManager.CounterKeyMode",
+                  "name": "keyMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "enum IStreamMintLedger.CounterCapMode",
+                  "name": "capMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "enum IStreamMintLedger.CounterDeltaMode",
+                  "name": "deltaMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "staticCap",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "staticIncrement",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "counterConfigHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamMintManager.MintCounterConfig",
+              "name": "",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "phase",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "paused",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "startTime",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "endTime",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "maxBatchQuantity",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "configHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "metadataHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamMintManager.MintPhaseConfig",
+              "name": "config",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "executor",
+              "type": "address"
+            }
+          ],
+          "name": "phaseExecutor",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "phasePolicyHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
+      "contract": "StreamMintManager",
+      "gitBlob": "ac3274ce70857db6a21aca112fc44a18bed04968",
+      "sourceSha256": "65235456763df6dda98b5fa6f9ddf8765fb363a4de75be812c1557a18d1bc19b",
+      "methods": [
+        "core",
+        "mintLedger"
+      ],
+      "abi": [
+        {
+          "inputs": [],
+          "name": "core",
+          "outputs": [
+            {
+              "internalType": "contract IStreamCore",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "mintLedger",
+          "outputs": [
+            {
+              "internalType": "contract IStreamMintLedger",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "source": "smart-contracts/interfaces/stream/mint/IStreamMintRoyaltyPolicy.sol",
+      "contract": "IStreamMintRoyaltyPolicy",
+      "gitBlob": "e2a80028733d33c1d1b011cd170c2bd890ef2b1e",
+      "sourceSha256": "56b6ce23513d0028d55f42b5cdf85321de4a2a328caaf124c416c18d79404999",
+      "methods": [
+        "phaseRoyaltyPolicy",
+        "phaseRoyaltyConfigHash"
+      ],
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "configured",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "applicationConfigHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "resolver",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "resolverRuntimeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "electionHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedModeAssignmentHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedSourceRoyaltyPolicyHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamMintRoyaltyPolicy.Policy",
+              "name": "policy",
+              "type": "tuple"
+            }
+          ],
+          "name": "phaseRoyaltyConfigHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "phaseRoyaltyPolicy",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "configured",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "applicationConfigHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "resolver",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "resolverRuntimeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "electionHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedModeAssignmentHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedSourceRoyaltyPolicyHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamMintRoyaltyPolicy.Policy",
+              "name": "",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "source": "smart-contracts/interfaces/stream/core/IStreamCorePointers.sol",
+      "contract": "IStreamCorePointers",
+      "gitBlob": "56c2812181979060a25f74226633ba4945004ff0",
+      "sourceSha256": "d3971717024317891effbb623d6ee4351427d7ba7e6ceed0f79630b5565d3a55",
+      "methods": [
+        "getSatellitePointer"
+      ],
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            }
+          ],
+          "name": "getSatellitePointer",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "codeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "frozen",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "internalType": "uint8",
+              "name": "registryStatus",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "source": "smart-contracts/interfaces/stream/entropy/IStreamRevealFeeEscrow.sol",
+      "contract": "IStreamRevealFeeEscrow",
+      "gitBlob": "60c9b302cf792032da6ee83552404fbd81a8e064",
+      "sourceSha256": "825385f4b71cde29d2f0bc37331415e5156f6de785e99652fc0497035f10b5c0",
+      "methods": [
+        "core",
+        "collectionRevealPolicy"
+      ],
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionRevealPolicy",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "declared",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "requestMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "revealOwnerRole",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "requestSLOBlocks",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "revealFeePerTokenWei",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct IStreamRevealFeeEscrow.CollectionRevealPolicy",
+              "name": "",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "core",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ]
+    }
+  ]
+}

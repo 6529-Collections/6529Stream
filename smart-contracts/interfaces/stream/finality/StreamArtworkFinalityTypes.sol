@@ -654,6 +654,15 @@ library StreamFinalityComponentSet {
         StreamFinalityComponentExpectation[] memory components,
         bytes memory componentCallData
     ) public view returns (uint8 failCode, uint256 failIndex) {
+        return verifyComponentsStrict(components, componentCallData, 0);
+    }
+
+    /// @notice Same strict comparisons with a caller-hosted governed per-read cap.
+    function verifyComponentsStrict(
+        StreamFinalityComponentExpectation[] memory components,
+        bytes memory componentCallData,
+        uint256 gasCap
+    ) public view returns (uint8 failCode, uint256 failIndex) {
         for (uint256 i = 0; i < components.length; i++) {
             address component = components[i].component;
             if (component.code.length == 0) {
@@ -663,7 +672,7 @@ library StreamFinalityComponentSet {
                 return (STRICT_CODEHASH_MISMATCH, i);
             }
             (bool readable, StreamFinalityComponentState memory state) =
-                observeComponent(component, componentCallData, 0);
+                observeComponent(component, componentCallData, gasCap);
             if (!readable) {
                 return (STRICT_UNREADABLE, i);
             }

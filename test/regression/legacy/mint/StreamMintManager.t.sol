@@ -12,7 +12,7 @@ import "../../../../smart-contracts/interfaces/stream/mint/compatibility/IStream
 import {LegacyStreamCore as StreamCore} from "../helpers/LegacyStreamCore.sol";
 import "../../../../smart-contracts/domains/metadata/StreamMetadataRenderer.sol";
 import "../../../../smart-contracts/domains/mint/StreamMintLedger.sol";
-import "../../../../smart-contracts/domains/mint/StreamMintManager.sol";
+import {LegacyRC1StreamMintManager as StreamMintManager} from "../../../fixtures/legacy-rc1/contracts/LegacyRC1StreamMintManager.sol";
 import "../../../../smart-contracts/domains/mint/StreamMintModuleRegistry.sol";
 import "../../../helpers/Assertions.sol";
 import "../helpers/CharacterizationTestBase.sol";

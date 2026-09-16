@@ -7,7 +7,8 @@ interface IStreamMintLedger {
     enum CounterCapMode {
         NONE,
         STATIC,
-        RESOLVER
+        RESOLVER,
+        MERKLE_STATIC
     }
 
     /// @notice Counter increment source for launch mint accounting.

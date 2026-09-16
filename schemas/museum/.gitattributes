@@ -1,0 +1,5 @@
+# Exact captured upstream bytes; content hashes include all original whitespace.
+*.bin -text -diff
+fixtures/dependencies/LICENSE.linked-art.txt -text whitespace=-blank-at-eof
+standards/LICENSE.linked-art.txt -text whitespace=-blank-at-eof
+linked-art-v2/LICENSE.linked-art.txt -text whitespace=-blank-at-eof

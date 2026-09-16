@@ -1,0 +1,83 @@
+ should also be instantiated as an instance of E7 Activity.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E64_End_of_Existence" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E69_Death">
+    <rdfs:label xml:lang="en">Death</rdfs:label>
+    <rdfs:label xml:lang="de">Tod</rdfs:label>
+    <rdfs:label xml:lang="el">Θάνατος</rdfs:label>
+    <rdfs:label xml:lang="fr">Mort</rdfs:label>
+    <rdfs:label xml:lang="pt">Morte</rdfs:label>
+    <rdfs:label xml:lang="ru">Смeрть</rdfs:label>
+    <rdfs:label xml:lang="zh">死亡</rdfs:label>
+    <rdfs:comment>This class comprises the deaths of human beings.
+If a person is killed, their death should be instantiated as E69 Death and as E7 Activity. The death or perishing of other living beings should be documented as instances of E64 End of Existence.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E64_End_of_Existence" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E70_Thing">
+    <rdfs:label xml:lang="en">Thing</rdfs:label>
+    <rdfs:label xml:lang="de">Sache</rdfs:label>
+    <rdfs:label xml:lang="el">Πράγμα</rdfs:label>
+    <rdfs:label xml:lang="fr">Chose</rdfs:label>
+    <rdfs:label xml:lang="pt">Coisa</rdfs:label>
+    <rdfs:label xml:lang="ru">Вeщь</rdfs:label>
+    <rdfs:label xml:lang="zh">事物</rdfs:label>
+    <rdfs:comment>This general class comprises discrete, identifiable, instances of E77 Persistent Item that are documented as single units, that either consist of matter or depend on being carried by matter and are characterized by relative stability.
+They may be intellectual products or physical things. They may, for instance, have a solid physical form, an electronic encoding, or they may be a logical concept or structure.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E77_Persistent_Item" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E71_Human-Made_Thing">
+    <rdfs:label xml:lang="en">Human-Made Thing</rdfs:label>
+    <rdfs:label xml:lang="fr">Chose élaborée par l’humain</rdfs:label>
+    <rdfs:label xml:lang="ru">Рукотворный Прeдмeт</rdfs:label>
+    <rdfs:comment>This class comprises discrete, identifiable human-made items that are documented as single units.
+These items are either intellectual products or human-made physical things, and are characterized by relative stability. They may, for instance, have a solid physical form, an electronic encoding, or they may be logical concepts or structures.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E70_Thing" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E72_Legal_Object">
+    <rdfs:label xml:lang="en">Legal Object</rdfs:label>
+    <rdfs:label xml:lang="de">Rechtsobjekt</rdfs:label>
+    <rdfs:label xml:lang="el">Νομικό Αντικείμενο</rdfs:label>
+    <rdfs:label xml:lang="fr">Objet juridique</rdfs:label>
+    <rdfs:label xml:lang="pt">Objeto Jurídico</rdfs:label>
+    <rdfs:label xml:lang="ru">Объeкт Права</rdfs:label>
+    <rdfs:label xml:lang="zh">法律对象</rdfs:label>
+    <rdfs:comment>This class comprises those material or immaterial items to which instances of E30 Right, such as the right of ownership or use, can be applied.
+This is generally true for all instances of E18 Physical Thing. In the case of instances of E28 Conceptual Object, however, the identity of an instance of E28 Conceptual Object or the method of its use may be too ambiguous to reliably establish instances of E30 Right, as in the case of taxa and inspirations. Ownership of corporations is currently regarded as out of scope of the CIDOC CRM.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E70_Thing" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E73_Information_Object">
+    <rdfs:label xml:lang="en">Information Object</rdfs:label>
+    <rdfs:label xml:lang="de">Informationsgegenstand</rdfs:label>
+    <rdfs:label xml:lang="el">Πληροφοριακό Αντικείμενο</rdfs:label>
+    <rdfs:label xml:lang="fr">Objet informationnel</rdfs:label>
+    <rdfs:label xml:lang="pt">Objeto de Informação</rdfs:label>
+    <rdfs:label xml:lang="ru">Информационный Объeкт</rdfs:label>
+    <rdfs:label xml:lang="zh">信息对象</rdfs:label>
+    <rdfs:comment>This class comprises identifiable immaterial items, such as poems, jokes, data sets, images, texts, multimedia objects, procedural prescriptions, computer program code, algorithm or mathematical formulae, that have an objectively recognizable structure and are documented as single units. The encoding structure known as a “named graph” also falls under this class, so that each “named graph” is an instance of E73 Information Object.
+An instance of E73 Information Object does not depend on a specific physical carrier, which can include human memory, and it can exist on one or more carriers simultaneously.
+Instances of E73 Information Object of a linguistic nature should be declared as instances of the E33 Linguistic Object subclass. Instances of E73 Information Object of a documentary nature should be declared as instances of the E31 Document subclass. Conceptual items such as types and classes are not instances of E73 Information Object, nor are ideas without a reproducible expression.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E89_Propositional_Object" />
+    <rdfs:subClassOf rdf:resource="E90_Symbolic_Object" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E74_Group">
+    <rdfs:label xml:lang="en">Group</rdfs:label>
+    <rdfs:label xml:lang="de">Menschliche Gruppe</rdfs:label>
+    <rdfs:label xml:lang="el">Ομάδα</rdfs:label>
+    <rdfs:label xml:lang="fr">Groupe</rdfs:label>
+    <rdfs:label xml:lang="pt">Grupo</rdfs:label>
+    <rdfs:label xml:lang="ru">Группа</rdfs:label>
+    <rdfs:label xml:lang="zh">团体</rdfs:label>
+    <rdfs:comment>This class comprises any gatherings or organizations of human individuals or groups that act collectively or in a similar way due to any form of unifying relationship. In the wider sense this class also comprises official positions which used to be regarded in certain contexts as one actor, independent of the current holder of the office, such as the president of a country. In such cases, it may happen that the group never had more than one member. A joint pseudonym (i.e. a name that seems indicative of an individual but that is actually used as a persona by two or more people) is a particular case of E74 Group.
+A gathering of people becomes an instance of E74 Group when it exhibits organizational characteristics usually typified by a set of ideas or beliefs held in common, or actions performed together. These might be communication, creating some common artifact, a common purpose such as study, worship, business, sports, etc. Nationality can be modelled as membership in an instance of E74 Group. Married couples and other concepts of family are regarded as particular examples of E74 Group.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E39_Actor" />
+  </rdfs:Class>
+  <rdfs:Class rdf:about="E77_Persistent_Item">
+    <rdfs:label xml:lang="en">Persistent Item</rdfs:label>
+    <rdfs:label xml:lang="de">Seiendes</rdfs:label>
+    <rdfs:label xml:lang="el">Ον</rdfs:label>
+    <rdfs:label xml:lang="fr">Entité persistante</rdfs:label>
+    <rdfs:label xml:lang="pt">Entidade Persistente</rdfs:label>
+    <rdfs:label xml:lang="ru">Постоянная Сущность</rdfs:label>
+    <rdfs:label xml:lang="zh">持久项</rdfs:label>
+    <rdfs:comment>This class comprises items that have persistent characteristics of structural nature substantially related to their identity and their integrity, sometimes known as “endurants” in philosophy. Persistent Items may be physical entities, such as people, animals or things, conceptual entities such as ideas, concepts, products of the imagination or even names.
+Instances of E77 Persistent Item may be present or be part of interactions in different periods or events. They can repeatedly be recognized at disparate occasions during their existence by characteristics of structural nature. The respective characteristics need not be exactly the same during all the existence 

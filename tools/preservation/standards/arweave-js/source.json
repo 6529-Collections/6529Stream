@@ -1,0 +1,17 @@
+{
+  "commit": "af2073ae0025c6d68535f1dcea3d7d94962ace4f",
+  "files": [
+    {
+      "path": "src/common/lib/merkle.ts",
+      "url": "https://raw.githubusercontent.com/ArweaveTeam/arweave-js/af2073ae0025c6d68535f1dcea3d7d94962ace4f/src/common/lib/merkle.ts",
+      "bytes": 10154,
+      "sha256": "19c033264b8bf29c000ae98a90a5d09b46579aaca0a460a8ca70ee73e2ed80cd"
+    },
+    {
+      "path": "LICENSE.md",
+      "url": "https://raw.githubusercontent.com/ArweaveTeam/arweave-js/af2073ae0025c6d68535f1dcea3d7d94962ace4f/LICENSE.md",
+      "bytes": 1109,
+      "sha256": "ba8c48367a38dcd77a0d5eb308da42ff31f00c961c4fa56fe4c3319114b2f892"
+    }
+  ]
+}

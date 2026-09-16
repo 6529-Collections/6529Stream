@@ -2748,8 +2748,14 @@ Requirements [SSA-REVEAL]:
    storage value in-transaction ([SSA-FIXED] rule 2, [SSA-ZERO]
    rule 2, [SSA-PWYW] rule 2). Maximum-price kinds charge the live fee
    and bind the remainder as the price maximum ([SSA-DUTCH] rule 3);
-   ERC-20 purchases bound the fee inside `PaymentIntent.maxAmount`
-   under the revenue spec's exact-delta rule. Deferred-mint kinds
+   ERC-20 purchases keep `PaymentIntent.maxAmount` and Permit2 amounts
+   denominated solely in the signed token asset. The bound transaction
+   executor supplies a separate native-wei reveal allowance through
+   `msg.value`; the adapter charges exactly the live declared wei fee
+   and credits unused wei to that executor as a pull refund, even when
+   the executor differs from the ERC-20 payer. There is no token/wei
+   conversion or mixed-unit addition
+   ([ADR 0045](adr/0045-native-reveal-fees-for-token-sales.md)). Deferred-mint kinds
    escrow and reconcile the line item per rule 7.
 3. The reveal fee is never official revenue: the adapter must forward
    the collected line item to the coordinator's per-collection

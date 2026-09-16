@@ -8,9 +8,10 @@ import "../../../smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol";
 import "../../../smart-contracts/domains/revenue/StreamSplitFactory.sol";
 import "../../../smart-contracts/domains/revenue/StreamSplitWallet.sol";
 import "../../helpers/Assertions.sol";
+import "../../helpers/RevenueV1TestBase.sol";
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 
-contract StreamSplitWalletTest is CharacterizationTestBase {
+contract StreamSplitWalletTest is RevenueV1TestBase {
     using Assertions for address;
     using Assertions for bool;
     using Assertions for bytes32;
@@ -28,9 +29,9 @@ contract StreamSplitWalletTest is CharacterizationTestBase {
     bytes32 private constant SPLIT_PROFILE_CREATED_TOPIC =
         keccak256("SplitProfileCreated(bytes32,bytes32,bytes32,uint16,uint16,address)");
     bytes32 private constant SPLIT_WALLET_DEPLOYED_TOPIC =
-        keccak256("SplitWalletDeployed(bytes32,address,uint16,bytes32,bytes32)");
+        keccak256("SplitWalletDeployed(bytes32,address,uint16,uint16,bytes32,bytes32)");
     bytes32 private constant SPLIT_WALLET_DISCOVERED_TOPIC =
-        keccak256("SplitWalletDiscovered(bytes32,address,uint16,bytes32,bytes32)");
+        keccak256("SplitWalletDiscovered(bytes32,address,uint16,uint16,bytes32,bytes32)");
     bytes32 private constant ASSET_OBSERVATION_INITIALIZED_TOPIC =
         keccak256("AssetObservationInitialized(bytes32,address,uint256)");
     bytes32 private constant ASSET_SYNCED_TOPIC =
@@ -50,111 +51,114 @@ contract StreamSplitWalletTest is CharacterizationTestBase {
     );
 
     function setUp() public {
-        assetPolicyRegistry = new StreamAssetPolicyRegistry();
-        factory = new StreamSplitFactory(assetPolicyRegistry);
+        assetPolicyRegistry = new StreamAssetPolicyRegistry(address(_revenueAuthority()));
+        factory = new StreamSplitFactory(
+            assetPolicyRegistry, address(revenueAuthority), _walletGasConfigs()
+        );
     }
 
     function testAssetPolicyRegistryLifecycleAndFactoryPin() public {
         StandardERC20Mock token = new StandardERC20Mock();
-
-        uint256(assetPolicyRegistry.assetStatus(address(token)))
-            .assertEq(assetPolicyRegistry.ASSET_STATUS_UNKNOWN(), "default status");
+        uint256(assetPolicyRegistry.assetStatus(address(token))).assertEq(0, "default status");
         assetPolicyRegistry.isAssetActive(address(token)).assertFalse("default inactive");
         address(factory.assetPolicyRegistry())
             .assertEq(address(assetPolicyRegistry), "factory registry");
         IStreamSplitWallet wallet = _createTwoAccountWallet();
         wallet.assetPolicyRegistry().assertEq(address(assetPolicyRegistry), "wallet registry");
-
-        uint8 activeStatusForRevert = assetPolicyRegistry.ASSET_STATUS_ACTIVE();
-        vm.expectRevert("Ownable: caller is not the owner");
-        vm.prank(ACCOUNT_A);
-        assetPolicyRegistry.setAssetStatus(
-            address(token), activeStatusForRevert, STANDARD_ERC20_POLICY_HASH
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamAssetPolicyRegistry.AssetPolicyNotAuthority.selector, ACCOUNT_A
+            )
         );
-
+        vm.prank(ACCOUNT_A);
+        assetPolicyRegistry.setAssetStatus(address(token), 1, STANDARD_ERC20_POLICY_HASH, 0);
+        _prepareAssetPolicy(
+            assetPolicyRegistry, address(0x123456), 1, STANDARD_ERC20_POLICY_HASH, 0
+        );
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamAssetPolicyRegistry.InvalidAsset.selector, address(0x123456)
             )
         );
-        assetPolicyRegistry.setAssetStatus(
-            address(0x123456), activeStatusForRevert, STANDARD_ERC20_POLICY_HASH
-        );
-
-        assetPolicyRegistry.setAssetStatus(
-            address(token), assetPolicyRegistry.ASSET_STATUS_ACTIVE(), STANDARD_ERC20_POLICY_HASH
-        );
-        (uint8 activeStatus, bytes32 activePolicyHash, uint64 activeEffectiveAt) =
+        vm.prank(address(revenueAuthority));
+        assetPolicyRegistry.setAssetStatus(address(0x123456), 1, STANDARD_ERC20_POLICY_HASH, 0);
+        _setAssetPolicy(assetPolicyRegistry, address(token), 1, STANDARD_ERC20_POLICY_HASH, 0);
+        (uint8 activeStatus, bytes32 activePolicyHash, uint64 effectiveAt, uint64 grace) =
             assetPolicyRegistry.assetPolicy(address(token));
-        uint256(activeStatus).assertEq(assetPolicyRegistry.ASSET_STATUS_ACTIVE(), "active status");
+        uint256(activeStatus).assertEq(1, "active status");
         activePolicyHash.assertEq(STANDARD_ERC20_POLICY_HASH, "policy hash");
-        uint256(activeEffectiveAt).assertEq(block.timestamp, "effective timestamp");
+        uint256(effectiveAt).assertEq(block.timestamp, "effective timestamp");
+        uint256(grace).assertEq(0, "initial grace");
         assetPolicyRegistry.isAssetActive(address(token)).assertTrue("active");
-
-        assetPolicyRegistry.setAssetStatus(
-            address(token), assetPolicyRegistry.ASSET_STATUS_DEPRECATED(), keccak256("deprecated")
+        _setAssetPolicy(
+            assetPolicyRegistry,
+            address(token),
+            3,
+            keccak256("deprecated"),
+            uint64(block.timestamp + 180 days)
         );
-        uint256(assetPolicyRegistry.assetStatus(address(token)))
-            .assertEq(assetPolicyRegistry.ASSET_STATUS_DEPRECATED(), "deprecated");
-        assetPolicyRegistry.isAssetActive(address(token)).assertFalse("deprecated inactive");
+        uint256(assetPolicyRegistry.assetStatus(address(token))).assertEq(3, "deprecated");
+        assetPolicyRegistry.isAssetActive(address(token))
+            .assertFalse("deprecated rejects new acceptance");
     }
 
     function testAssetPolicyRegistryRejectsInvalidUpdatesAndCanClearPolicy() public {
         StandardERC20Mock token = new StandardERC20Mock();
-        uint8 active = assetPolicyRegistry.ASSET_STATUS_ACTIVE();
-        uint8 unknown = assetPolicyRegistry.ASSET_STATUS_UNKNOWN();
-        uint8 invalid = assetPolicyRegistry.ASSET_STATUS_UNSUPPORTED() + 1;
-
+        _prepareAssetPolicy(assetPolicyRegistry, address(token), 5, STANDARD_ERC20_POLICY_HASH, 0);
         vm.expectRevert(
-            abi.encodeWithSelector(IStreamAssetPolicyRegistry.InvalidAssetStatus.selector, invalid)
+            abi.encodeWithSelector(IStreamAssetPolicyRegistry.InvalidAssetStatus.selector, uint8(5))
         );
-        assetPolicyRegistry.setAssetStatus(address(token), invalid, STANDARD_ERC20_POLICY_HASH);
-
+        vm.prank(address(revenueAuthority));
+        assetPolicyRegistry.setAssetStatus(address(token), 5, STANDARD_ERC20_POLICY_HASH, 0);
+        _prepareAssetPolicy(assetPolicyRegistry, address(token), 1, bytes32(0), 0);
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamAssetPolicyRegistry.InvalidAssetPolicyHash.selector,
                 address(token),
-                active,
+                uint8(1),
                 bytes32(0)
             )
         );
-        assetPolicyRegistry.setAssetStatus(address(token), active, bytes32(0));
-
+        vm.prank(address(revenueAuthority));
+        assetPolicyRegistry.setAssetStatus(address(token), 1, bytes32(0), 0);
+        _prepareAssetPolicy(assetPolicyRegistry, address(token), 0, STANDARD_ERC20_POLICY_HASH, 0);
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamAssetPolicyRegistry.InvalidAssetPolicyHash.selector,
                 address(token),
-                unknown,
+                uint8(0),
                 STANDARD_ERC20_POLICY_HASH
             )
         );
-        assetPolicyRegistry.setAssetStatus(address(token), unknown, STANDARD_ERC20_POLICY_HASH);
-
-        assetPolicyRegistry.setAssetStatus(address(token), active, STANDARD_ERC20_POLICY_HASH);
+        vm.prank(address(revenueAuthority));
+        assetPolicyRegistry.setAssetStatus(address(token), 0, STANDARD_ERC20_POLICY_HASH, 0);
+        _setAssetPolicy(assetPolicyRegistry, address(token), 1, STANDARD_ERC20_POLICY_HASH, 0);
+        _prepareAssetPolicy(assetPolicyRegistry, address(token), 1, STANDARD_ERC20_POLICY_HASH, 0);
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamAssetPolicyRegistry.AssetPolicyUnchanged.selector,
                 address(token),
-                active,
+                uint8(1),
                 STANDARD_ERC20_POLICY_HASH
             )
         );
-        assetPolicyRegistry.setAssetStatus(address(token), active, STANDARD_ERC20_POLICY_HASH);
-
-        assetPolicyRegistry.setAssetStatus(address(token), unknown, bytes32(0));
-        uint256(assetPolicyRegistry.assetStatus(address(token))).assertEq(unknown, "cleared status");
+        vm.prank(address(revenueAuthority));
+        assetPolicyRegistry.setAssetStatus(address(token), 1, STANDARD_ERC20_POLICY_HASH, 0);
+        _setAssetPolicy(assetPolicyRegistry, address(token), 0, bytes32(0), 0);
+        uint256(assetPolicyRegistry.assetStatus(address(token))).assertEq(0, "cleared status");
         assetPolicyRegistry.assetPolicyHash(address(token)).assertEq(bytes32(0), "cleared hash");
         assetPolicyRegistry.isAssetActive(address(token)).assertFalse("cleared inactive");
-
+        _prepareAssetPolicy(assetPolicyRegistry, address(token), 0, bytes32(0), 0);
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamAssetPolicyRegistry.AssetPolicyUnchanged.selector,
                 address(token),
-                unknown,
+                uint8(0),
                 bytes32(0)
             )
         );
-        assetPolicyRegistry.setAssetStatus(address(token), unknown, bytes32(0));
+        vm.prank(address(revenueAuthority));
+        assetPolicyRegistry.setAssetStatus(address(token), 0, bytes32(0), 0);
     }
 
     function testSplitFactoryRejectsInvalidAssetPolicyRegistry() public {
@@ -163,7 +167,9 @@ contract StreamSplitWalletTest is CharacterizationTestBase {
                 IStreamSplitFactory.InvalidAssetPolicyRegistry.selector, address(0)
             )
         );
-        new StreamSplitFactory(IStreamAssetPolicyRegistry(address(0)));
+        new StreamSplitFactory(
+            IStreamAssetPolicyRegistry(address(0)), address(revenueAuthority), _walletGasConfigs()
+        );
 
         address noCodeRegistry = address(0x123456);
         vm.expectRevert(
@@ -171,7 +177,11 @@ contract StreamSplitWalletTest is CharacterizationTestBase {
                 IStreamSplitFactory.InvalidAssetPolicyRegistry.selector, noCodeRegistry
             )
         );
-        new StreamSplitFactory(IStreamAssetPolicyRegistry(noCodeRegistry));
+        new StreamSplitFactory(
+            IStreamAssetPolicyRegistry(noCodeRegistry),
+            address(revenueAuthority),
+            _walletGasConfigs()
+        );
 
         NoMarkerRegistryMock noMarker = new NoMarkerRegistryMock();
         vm.expectRevert(
@@ -179,7 +189,11 @@ contract StreamSplitWalletTest is CharacterizationTestBase {
                 IStreamSplitFactory.InvalidAssetPolicyRegistry.selector, address(noMarker)
             )
         );
-        new StreamSplitFactory(IStreamAssetPolicyRegistry(address(noMarker)));
+        new StreamSplitFactory(
+            IStreamAssetPolicyRegistry(address(noMarker)),
+            address(revenueAuthority),
+            _walletGasConfigs()
+        );
 
         WrongActiveStatusRegistryMock wrongActive = new WrongActiveStatusRegistryMock();
         vm.expectRevert(
@@ -187,7 +201,11 @@ contract StreamSplitWalletTest is CharacterizationTestBase {
                 IStreamSplitFactory.InvalidAssetPolicyRegistry.selector, address(wrongActive)
             )
         );
-        new StreamSplitFactory(IStreamAssetPolicyRegistry(address(wrongActive)));
+        new StreamSplitFactory(
+            IStreamAssetPolicyRegistry(address(wrongActive)),
+            address(revenueAuthority),
+            _walletGasConfigs()
+        );
     }
 
     function testCreateProfileRejectsZeroAccountZeroShareAndBadPpmSum() public {
@@ -996,7 +1014,9 @@ contract StreamSplitWalletTest is CharacterizationTestBase {
             .assertEq(7 ether, "active release");
     }
 
-    function testInactiveDeprecatedAndUnsupportedErc20RevertBeforeLedgerMutation() public {
+    function testInactiveExpiredUnobservedDeprecatedAndUnsupportedErc20RevertBeforeLedgerMutation()
+        public
+    {
         StandardERC20Mock token = new StandardERC20Mock();
         IStreamSplitWallet wallet = _createTwoAccountWallet();
         token.mint(address(wallet), 10 ether);
@@ -1006,6 +1026,7 @@ contract StreamSplitWalletTest is CharacterizationTestBase {
         wallet.syncAsset(address(token));
 
         _setAssetStatus(address(token), assetPolicyRegistry.ASSET_STATUS_DEPRECATED(), "deprecated");
+        vm.warp(assetPolicyRegistry.assetReleaseGraceUntil(address(token)));
         _expectPolicyRevert(address(token), assetPolicyRegistry.ASSET_STATUS_DEPRECATED());
         wallet.release(address(token), ACCOUNT_A, payable(ACCOUNT_A));
 
@@ -1074,8 +1095,11 @@ contract StreamSplitWalletTest is CharacterizationTestBase {
     function testGasCappedOrMalformedRegistryReadsFailClosed() public {
         StandardERC20Mock gasToken = new StandardERC20Mock();
         GasGriefAssetPolicyRegistryMock gasRegistry = new GasGriefAssetPolicyRegistryMock();
-        StreamSplitFactory gasFactory =
-            new StreamSplitFactory(IStreamAssetPolicyRegistry(address(gasRegistry)));
+        StreamSplitFactory gasFactory = new StreamSplitFactory(
+            IStreamAssetPolicyRegistry(address(gasRegistry)),
+            address(revenueAuthority),
+            _walletGasConfigs()
+        );
         IStreamSplitWallet gasWallet = _createSingleAccountWallet(gasFactory, ACCOUNT_A);
         gasToken.mint(address(gasWallet), 1 ether);
 
@@ -1091,8 +1115,11 @@ contract StreamSplitWalletTest is CharacterizationTestBase {
 
         StandardERC20Mock malformedToken = new StandardERC20Mock();
         MalformedAssetPolicyRegistryMock malformedRegistry = new MalformedAssetPolicyRegistryMock();
-        StreamSplitFactory malformedFactory =
-            new StreamSplitFactory(IStreamAssetPolicyRegistry(address(malformedRegistry)));
+        StreamSplitFactory malformedFactory = new StreamSplitFactory(
+            IStreamAssetPolicyRegistry(address(malformedRegistry)),
+            address(revenueAuthority),
+            _walletGasConfigs()
+        );
         IStreamSplitWallet malformedWallet = _createSingleAccountWallet(malformedFactory, ACCOUNT_A);
         malformedToken.mint(address(malformedWallet), 1 ether);
 
@@ -1107,12 +1134,13 @@ contract StreamSplitWalletTest is CharacterizationTestBase {
         _assertFailedTokenReadDidNotMutate(malformedWallet, address(malformedToken));
 
         StandardERC20Mock oversizedToken = new StandardERC20Mock();
-        OversizedAssetPolicyRegistryMock oversizedRegistry =
-            new OversizedAssetPolicyRegistryMock();
-        StreamSplitFactory oversizedFactory =
-            new StreamSplitFactory(IStreamAssetPolicyRegistry(address(oversizedRegistry)));
-        IStreamSplitWallet oversizedWallet =
-            _createSingleAccountWallet(oversizedFactory, ACCOUNT_A);
+        OversizedAssetPolicyRegistryMock oversizedRegistry = new OversizedAssetPolicyRegistryMock();
+        StreamSplitFactory oversizedFactory = new StreamSplitFactory(
+            IStreamAssetPolicyRegistry(address(oversizedRegistry)),
+            address(revenueAuthority),
+            _walletGasConfigs()
+        );
+        IStreamSplitWallet oversizedWallet = _createSingleAccountWallet(oversizedFactory, ACCOUNT_A);
         oversizedToken.mint(address(oversizedWallet), 1 ether);
 
         vm.expectRevert(
@@ -1128,8 +1156,11 @@ contract StreamSplitWalletTest is CharacterizationTestBase {
         StandardERC20Mock outOfRangeToken = new StandardERC20Mock();
         OutOfRangeAssetPolicyRegistryMock outOfRangeRegistry =
             new OutOfRangeAssetPolicyRegistryMock();
-        StreamSplitFactory outOfRangeFactory =
-            new StreamSplitFactory(IStreamAssetPolicyRegistry(address(outOfRangeRegistry)));
+        StreamSplitFactory outOfRangeFactory = new StreamSplitFactory(
+            IStreamAssetPolicyRegistry(address(outOfRangeRegistry)),
+            address(revenueAuthority),
+            _walletGasConfigs()
+        );
         IStreamSplitWallet outOfRangeWallet =
             _createSingleAccountWallet(outOfRangeFactory, ACCOUNT_A);
         outOfRangeToken.mint(address(outOfRangeWallet), 1 ether);
@@ -1356,7 +1387,11 @@ contract StreamSplitWalletTest is CharacterizationTestBase {
     }
 
     function _setAssetStatus(address token, uint8 status, string memory label) private {
-        assetPolicyRegistry.setAssetStatus(token, status, keccak256(bytes(label)));
+        uint64 grace = assetPolicyRegistry.assetReleaseGraceUntil(token);
+        if (status == 3 && grace < block.timestamp + 180 days) {
+            grace = uint64(block.timestamp + 180 days);
+        }
+        _setAssetPolicy(assetPolicyRegistry, token, status, keccak256(bytes(label)), grace);
     }
 
     function _expectPolicyRevert(address token, uint8 status) private {

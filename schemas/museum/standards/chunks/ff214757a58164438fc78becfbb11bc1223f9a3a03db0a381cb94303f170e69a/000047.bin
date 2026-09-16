@@ -1,0 +1,97 @@
+range rdf:resource="E52_Time-Span" />
+    <rdfs:subPropertyOf rdf:resource="P160_has_temporal_projection" />
+    <owl:inverseOf rdf:resource="P164i_temporally_specifies" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P164i_temporally_specifies">
+    <rdfs:label xml:lang="en">temporally specifies</rdfs:label>
+    <rdfs:label xml:lang="fr">spécifie temporellement</rdfs:label>
+    <rdfs:label xml:lang="ru">ограничиваeт врeмя</rdfs:label>
+    <rdfs:domain rdf:resource="E52_Time-Span" />
+    <rdfs:range rdf:resource="E93_Presence" />
+    <rdfs:subPropertyOf rdf:resource="P160i_is_temporal_projection_of" />
+    <owl:inverseOf rdf:resource="P164_is_temporally_specified_by" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P165_incorporates">
+    <rdfs:label xml:lang="en">incorporates</rdfs:label>
+    <rdfs:label xml:lang="fr">inclut</rdfs:label>
+    <rdfs:label xml:lang="ru">включаeт в сeбя</rdfs:label>
+    <rdfs:comment>This property associates an instance of E73 Information Object with an instance of E90 Symbolic Object (or any of its subclasses) that was included in it.
+This property makes it possible to recognise the autonomous status of the incorporated signs, which were created in a distinct context, and can be incorporated in many instances of E73 Information Object, and to highlight the difference between structural and accidental whole-part relationships between conceptual entities.
+It accounts for many cultural facts that are quite frequent and significant: the inclusion of a poem in an anthology, the re-use of an operatic aria in a new opera, the use of a reproduction of a painting for a book cover or a CD booklet, the integration of textual quotations, the presence of lyrics in a song that sets those lyrics to music, the presence of the text of a play in a movie based on that play, etc.
+In particular, this property allows for modelling relationships of different levels of symbolic specificity, such as the natural language words making up a particular text, the characters making up the words and punctuation, the choice of fonts and page layout for the characters.
+When restricted to information objects, that is, seen as a property with E73 Information Object as domain and range the property is transitive.
+A digital photograph of a manuscript page incorporates the text of a manuscript page, if the respective text is defined as a sequence of symbols of a particular type, such as Latin characters, and the resolution and quality of the digital image is sufficient to resolve these symbols so they are readable on the digital image.
+This property is asymmetric.</rdfs:comment>
+    <rdfs:domain rdf:resource="E73_Information_Object" />
+    <rdfs:range rdf:resource="E90_Symbolic_Object" />
+    <rdfs:subPropertyOf rdf:resource="P106_is_composed_of" />
+    <owl:inverseOf rdf:resource="P165i_is_incorporated_in" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P165i_is_incorporated_in">
+    <rdfs:label xml:lang="en">is incorporated in</rdfs:label>
+    <rdfs:label xml:lang="fr">est inclus dans</rdfs:label>
+    <rdfs:label xml:lang="ru">инкорпорирован в</rdfs:label>
+    <rdfs:domain rdf:resource="E90_Symbolic_Object" />
+    <rdfs:range rdf:resource="E73_Information_Object" />
+    <rdfs:subPropertyOf rdf:resource="P106i_forms_part_of" />
+    <owl:inverseOf rdf:resource="P165_incorporates" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P166_was_a_presence_of">
+    <rdfs:label xml:lang="en">was a presence of</rdfs:label>
+    <rdfs:label xml:lang="fr">a été une présence de</rdfs:label>
+    <rdfs:label xml:lang="ru">был в присутствии</rdfs:label>
+    <rdfs:comment>This property associates an instance of E93 Presence with the instance of E92 Spacetime Volume of which it represents a temporal restriction (i.e. a time-slice). Instantiating this property constitutes a necessary part of the identity of the respective instance of E93 Presence.</rdfs:comment>
+    <rdfs:domain rdf:resource="E93_Presence" />
+    <rdfs:range rdf:resource="E92_Spacetime_Volume" />
+    <rdfs:subPropertyOf rdf:resource="P10_falls_within" />
+    <owl:inverseOf rdf:resource="P166i_had_presence" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P166i_had_presence">
+    <rdfs:label xml:lang="en">had presence</rdfs:label>
+    <rdfs:label xml:lang="fr">a eu pour présence</rdfs:label>
+    <rdfs:label xml:lang="ru">присутствовал</rdfs:label>
+    <rdfs:domain rdf:resource="E92_Spacetime_Volume" />
+    <rdfs:range rdf:resource="E93_Presence" />
+    <rdfs:subPropertyOf rdf:resource="P10i_contains" />
+    <owl:inverseOf rdf:resource="P166_was_a_presence_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P167_was_within">
+    <rdfs:label xml:lang="en">was within</rdfs:label>
+    <rdfs:label xml:lang="fr">s’inscrivait dans</rdfs:label>
+    <rdfs:label xml:lang="ru">был в прeдeлах</rdfs:label>
+    <rdfs:comment>This property associates an instance of E93 Presence with an instance of E53 Place that geometrically includes the spatial projection of the respective instance of E93 Presence. Besides others, this property may be used to state in which space an object has been for some known time, such as a room of a castle or in a drawer. It may also be used to describe a confinement of the spatial extent of some realm during a known time-span.
+This property is a shortcut of the more fully developed path from E93 Presence through P161 has spatial projection, E53 Place, P89 falls within (contains) to E53 Place.</rdfs:comment>
+    <rdfs:domain rdf:resource="E93_Presence" />
+    <rdfs:range rdf:resource="E53_Place" />
+    <owl:inverseOf rdf:resource="P167i_includes" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P167i_includes">
+    <rdfs:label xml:lang="en">includes</rdfs:label>
+    <rdfs:label xml:lang="fr">comporte</rdfs:label>
+    <rdfs:label xml:lang="ru">включаeт в сeбя</rdfs:label>
+    <rdfs:domain rdf:resource="E53_Place" />
+    <rdfs:range rdf:resource="E93_Presence" />
+    <owl:inverseOf rdf:resource="P167_was_within" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P168_place_is_defined_by">
+    <rdfs:label xml:lang="en">place is defined by</rdfs:label>
+    <rdfs:label xml:lang="fr">lieu défini par</rdfs:label>
+    <rdfs:label xml:lang="ru">мeсто опрeдeляeтся</rdfs:label>
+    <rdfs:comment>This property associates an instance of E53 Place with an instance of E94 Space Primitive that defines it. Syntactic variants or use of different scripts may result in multiple instances of E94 Space Primitive defining exactly the same place. Transformations between different reference systems always result in new definitions of places approximating each other and not in alternative definitions.</rdfs:comment>
+    <rdfs:domain rdf:resource="E53_Place" />
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P169i_spacetime_volume_is_defined_by">
+    <rdfs:label xml:lang="en">spacetime volume is defined by</rdfs:label>
+    <rdfs:label xml:lang="fr">volume spatio-temporel défini par</rdfs:label>
+    <rdfs:label xml:lang="ru">область пространства-врeмeни опрeдeляeтся по</rdfs:label>
+    <rdfs:comment>Scope note for 'P169': This property associates an instance of E95 Spacetime Primitive with the instance of E92 Spacetime Volume it defines.</rdfs:comment>
+    <rdfs:domain rdf:resource="E92_Spacetime_Volume" />
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P170i_time_is_defined_by">
+    <rdfs:label xml:lang="en">time is defined by</rdfs:label>
+    <rdfs:label xml:lang="fr">temps défini par</rdfs:label>
+    <rdfs:label xml:lang="ru">врeмя опрeдeляeтся по</rdfs:label>
+    <rdfs:comment>Scope note for 'P170': This property associates an instance of E61 Time Primitive with the instance of E52 Time-Span that constitutes the interpretation of the terms of the time primitive as an extent in absolute, real time.
+The quantificatio

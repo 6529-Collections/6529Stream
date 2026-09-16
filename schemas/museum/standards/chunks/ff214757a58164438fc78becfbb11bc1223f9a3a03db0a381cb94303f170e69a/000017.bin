@@ -1,0 +1,92 @@
+f:about="P5_consists_of">
+    <rdfs:label xml:lang="en">consists of</rdfs:label>
+    <rdfs:label xml:lang="de">besteht aus</rdfs:label>
+    <rdfs:label xml:lang="el">αποτελείται από</rdfs:label>
+    <rdfs:label xml:lang="fr">comprend</rdfs:label>
+    <rdfs:label xml:lang="pt">consiste de</rdfs:label>
+    <rdfs:label xml:lang="ru">состоит из</rdfs:label>
+    <rdfs:label xml:lang="zh">包括</rdfs:label>
+    <rdfs:comment>This property describes the decomposition of an instance of E3 Condition State into discrete, subsidiary states.
+It is assumed that the sub-states into which the condition state is analysed form a logical whole, although the entire story may not be completely known, and that the sub-states are in fact constitutive of the general condition state. For example, a general condition state of “in ruins” may be decomposed into the individual stages of decay.
+This property is transitive and asymmetric.</rdfs:comment>
+    <rdfs:domain rdf:resource="E3_Condition_State" />
+    <rdfs:range rdf:resource="E3_Condition_State" />
+    <owl:inverseOf rdf:resource="P5i_forms_part_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P5i_forms_part_of">
+    <rdfs:label xml:lang="en">forms part of</rdfs:label>
+    <rdfs:label xml:lang="de">bildet Teil von</rdfs:label>
+    <rdfs:label xml:lang="el">αποτελεί μέρος του/της</rdfs:label>
+    <rdfs:label xml:lang="fr">fait partie de</rdfs:label>
+    <rdfs:label xml:lang="pt">faz parte de</rdfs:label>
+    <rdfs:label xml:lang="ru">являeтся частью</rdfs:label>
+    <rdfs:label xml:lang="zh">组成部分</rdfs:label>
+    <rdfs:domain rdf:resource="E3_Condition_State" />
+    <rdfs:range rdf:resource="E3_Condition_State" />
+    <owl:inverseOf rdf:resource="P5_consists_of" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P7_took_place_at">
+    <rdfs:label xml:lang="en">took place at</rdfs:label>
+    <rdfs:label xml:lang="de">fand statt in</rdfs:label>
+    <rdfs:label xml:lang="el">έλαβε χώρα σε</rdfs:label>
+    <rdfs:label xml:lang="fr">a eu lieu dans</rdfs:label>
+    <rdfs:label xml:lang="pt">ocorreu em</rdfs:label>
+    <rdfs:label xml:lang="ru">совeршался на</rdfs:label>
+    <rdfs:label xml:lang="zh">发生地在</rdfs:label>
+    <rdfs:comment>This property describes the spatial location of an instance of E4 Period.
+The related instance of E53 Place should be seen as a wider approximation of the geometric area within which the phenomena that characterise the period in question occurred, see below. P7 took place at (witnessed) does not convey any meaning other than spatial positioning (frequently on the surface of the earth). For example, the period “Révolution française” can be said to have taken place in “France in 1789”; the “Victorian” period may be said to have taken place in “Britain from 1837-1901” and its colonies, as well as other parts of Europe and North America. An instance of E4 Period can take place at multiple non-contiguous, non-overlapping locations.
+Any place where something happened includes the spatial projection of the happening given in the same geometric reference system. For instance, HMS Victory, as place of Lord Nelson's dying, includes the location of his body relative to the hull of HMS Victory at his time of death as the most precise location of his death. By the definition of P161 has spatial projection, an instance of E4 Period takes place on all its spatial projections to respective reference systems, that is, instances of E53 Place. Therefore, this property implies the more fully developed path from E4 Period through P161 has spatial projection, E53 Place, P89 falls within to E53 Place, where both places are defined in the same geometric reference system. The relation between an instance of E53 Place and its reference system can conveniently be documented via the property P157 is at rest relative to (provides reference space for).
+Something that has happened at a given place can also be considered to have happened at a smaller place within it: for example, it is reasonable to say Caesar’s murder took place in Rome, but also on the Forum Romanum, and more precisely in the Curia. It is characteristic for different historical sources to use varying precision in such statements, without being in contradiction with each other. This may be due to lack of knowledge or to the relevance of the precision for the purpose of the statement. In information integration, the more precise statement improves the overall knowledge.</rdfs:comment>
+    <rdfs:domain rdf:resource="E4_Period" />
+    <rdfs:range rdf:resource="E53_Place" />
+    <owl:inverseOf rdf:resource="P7i_witnessed" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P7i_witnessed">
+    <rdfs:label xml:lang="en">witnessed</rdfs:label>
+    <rdfs:label xml:lang="de">bezeugte</rdfs:label>
+    <rdfs:label xml:lang="el">υπήρξε τόπος του</rdfs:label>
+    <rdfs:label xml:lang="fr">a été témoin de</rdfs:label>
+    <rdfs:label xml:lang="pt">testemunhou</rdfs:label>
+    <rdfs:label xml:lang="ru">было мeстом совeршeния</rdfs:label>
+    <rdfs:label xml:lang="zh">发生过</rdfs:label>
+    <rdfs:domain rdf:resource="E53_Place" />
+    <rdfs:range rdf:resource="E4_Period" />
+    <owl:inverseOf rdf:resource="P7_took_place_at" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P8_took_place_on_or_within">
+    <rdfs:label xml:lang="en">took place on or within</rdfs:label>
+    <rdfs:label xml:lang="de">fand statt auf oder innerhalb von</rdfs:label>
+    <rdfs:label xml:lang="el">έλαβε χώρα σε ή εντός</rdfs:label>
+    <rdfs:label xml:lang="fr">a eu lieu à</rdfs:label>
+    <rdfs:label xml:lang="pt">ocorreu em ou dentro</rdfs:label>
+    <rdfs:label xml:lang="ru">имeл мeсто на или в</rdfs:label>
+    <rdfs:label xml:lang="zh">发生的所在对象是</rdfs:label>
+    <rdfs:comment>This property describes the location of an instance of E4 Period with respect to an instance of E18 Physical Thing.
+This property is a shortcut of the more fully developed path from E4 Period through P7 took place at, E53 Place, P156i is occupied by to E18 Physical Thing.
+It describes a period that can be located with respect to the space defined by an E19 Physical Object such as a ship or a building. The precise geographical location of the object during the period in question may be unknown or unimportant.
+For example, the French and German armistice of 22-nd June 1940 was signed in the same railway carriage as the armistice of 11-th November 1918.</rdfs:comment>
+    <rdfs:domain rdf:resource="E4_Period" />
+    <rdfs:range rdf:resource="E18_Physical_Thing" />
+    <owl:inverseOf rdf:resource="P8i_witnessed" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P8i_witnessed">
+    <rdfs:label xml:lang="en">witnessed</rdfs:label>
+    <rdfs:label xml:lang="de">bezeugte</rdfs:label>
+    <rdfs:label xml:lang="el">υπήρξε τόπος του</rdfs:label>
+    <rdfs:label xml:lang="fr">a été témoin de</rdfs:label>
+    <rdfs:label xml:lang="pt">testemunhou</rdfs:label>
+    <rdfs:label xml:lang="ru">являлся мeстом для</rdfs:label>
+    <rdfs:label xml:lang="zh">发生过</rdfs:label>
+    <rdfs:domain rdf:resource="E18_Physical_Thing" />
+    <rdfs:range rdf:resource="E4_Period" />
+    <owl:inverseOf rdf:resource="P8_took_place_on_or_within" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P9_consists_of">
+    <rdfs:label xml:lang="en">consists of</rdfs:label>
+    <rdfs:label xml:lang="de">setzt sich zusammen aus</rdfs:label>
+    <rdfs:label xml:lang="el">αποτελείται από</rdfs:label>
+    <rdfs:label xml:lang="fr">comprend</rdfs:label>
+    <rdfs:label xml:lang="pt">consiste de</rdfs:label>
+    <rdfs:label xml:lang="ru">состоит из</rdfs:label>
+    <rdfs:label xml:lang="zh">包括</rdfs:label>
+    <rdfs:comment>This property associates an instance of E4 Period with another instance of E4 Period that is defined by a subset of the phenomena that define the former. Therefore, the spacetime volume of the latter m

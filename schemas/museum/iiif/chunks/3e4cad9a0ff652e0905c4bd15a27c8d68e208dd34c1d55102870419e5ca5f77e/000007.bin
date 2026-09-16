@@ -1,0 +1,75 @@
+an option in a Choice of resources.<br />
+Clients <em class="rfc">should</em> render <code class="language-plaintext highlighter-rouge">thumbnail</code> on a content resource.</li>
+  <li>Other types of resource <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">thumbnail</code> property with at least one item.<br />
+Clients <em class="rfc">may</em> render <code class="language-plaintext highlighter-rouge">thumbnail</code> on other types of resource.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"thumbnail"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/img/thumb.jpg"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Image"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"image/jpeg"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"width"</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"height"</span><span class="p">:</span><span class="w"> </span><span class="mi">200</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="navdate">
+        
+        
+          navDate <a href="#navdate" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>A date that clients may use for navigation purposes when presenting the resource to the user in a date-based user interface, such as a calendar or timeline. More descriptive date ranges, intended for display directly to the user, <em class="rfc">should</em> be included in the <code class="language-plaintext highlighter-rouge">metadata</code> property for human consumption. If the resource contains Canvases that have the <code class="language-plaintext highlighter-rouge">duration</code> property, the datetime given corresponds to the navigation datetime of the start of the resource. For example, a Range that includes a Canvas that represents a set of video content recording a historical event, the <code class="language-plaintext highlighter-rouge">navDate</code> is the datetime of the first moment of the recorded event.</p>
+
+<p>The value <em class="rfc">must</em> be an <a href="https://www.w3.org/TR/xmlschema11-2/#dateTime" title="XSD DateTime">XSD dateTime literal</a>. The value <em class="rfc">must</em> have a timezone, and <em class="rfc">should</em> be given in UTC with the <code class="language-plaintext highlighter-rouge">Z</code> timezone indicator, but <em class="rfc">may</em> instead be given as an offset of the form <code class="language-plaintext highlighter-rouge">+hh:mm</code>.</p>
+
+<ul>
+  <li>A Collection <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">navDate</code> property.<br />
+Clients <em class="rfc">may</em> render <code class="language-plaintext highlighter-rouge">navDate</code> on a Collection.</li>
+  <li>A Manifest <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">navDate</code> property.<br />
+Clients <em class="rfc">may</em> render <code class="language-plaintext highlighter-rouge">navDate</code> on a Manifest.</li>
+  <li>A Range <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">navDate</code> property.<br />
+Clients <em class="rfc">may</em> render <code class="language-plaintext highlighter-rouge">navDate</code> on a Range.</li>
+  <li>A Canvas <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">navDate</code> property.<br />
+Clients <em class="rfc">may</em> render <code class="language-plaintext highlighter-rouge">navDate</code> on a Canvas.</li>
+  <li>Other types of resource <em class="rfc">must not</em> have the <code class="language-plaintext highlighter-rouge">navDate</code> property.<br />
+Clients <em class="rfc">should</em> ignore <code class="language-plaintext highlighter-rouge">navDate</code> on other types of resource.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nl">"navDate"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2010-01-01T00:00:00Z"</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="placeholdercanvas">
+        
+        
+          placeholderCanvas <a href="#placeholdercanvas" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>A single Canvas that provides additional content for use before the main content of the resource that has the <code class="language-plaintext highlighter-rouge">placeholderCanvas</code> property is rendered, or as an advertisement or stand-in for that content. Examples include images, text and sound standing in for video content before the user initiates playback; or a film poster to attract user attention. The content provided by <code class="language-plaintext highlighter-rouge">placeholderCanvas</code> differs from a thumbnail: a client might use <code class="language-plaintext highlighter-rouge">thumbnail</code> to summarize and navigate multiple resources, then show content from <code class="language-plaintext highlighter-rouge">placeholderCanvas</code> as part of the initial presentation of a single resource. A placeholder Canvas is likely to have different dimensions to those of the Canvas(es) of the resource that has the <code class="language-plaintext highlighter-rouge">placeholderCanvas</code> property.</p>
+
+<p>Clients <em class="rfc">may</em> display the content of a linked placeholder Canvas when presenting the resource. When more than one such Canvas is available, for example if <code class="language-plaintext highlighter-rouge">placeholderCanvas</code> is provided for the currently selected Range and the current Manifest, the client <em class="rfc">should</em> pick the one most specific to the content. Publishers <em class="rfc">should not</em> assume that the placeholder Canvas will be processed by all clients. Clients <em class="rfc">should</em> take care to avoid conflicts between time-based media in the rendered placeholder Canvas and the content of the resource that has the <code class="language-plaintext highlighter-rouge">placeholderCanvas</code> property.</p>
+
+<p>The value <em class="rfc">must</em> be a <abbr title="JavaScript Object Notation">JSON</abbr> object with the <code class="language-plaintext highlighter-rouge">id</code> and <code class="language-plaintext highlighter-rouge">type</code> properties, and <em class="rfc">may</em> have other properties of Canvases. The value of <code class="language-plaintext highlighter-rouge">type</code> <em class="rfc">must</em> be the string <code class="language-plaintext highlighter-rouge">Canvas</code>. The object <em class="rfc">must not</em> have the <code class="language-plaintext highlighter-rouge">placeholderCanvas</code> property, nor the <code class="language-plaintext highlighter-rouge">accompanyingCanvas</code> property.</p>
+
+<ul>
+  <li>A Collection <em class="rfc">may</em> have the <code class="language-pl

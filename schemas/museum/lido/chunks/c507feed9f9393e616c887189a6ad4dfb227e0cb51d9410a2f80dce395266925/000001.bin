@@ -1,0 +1,39 @@
+ent name="end" type="gml:TimeNodePropertyType"/>
+					<element name="extent" type="gml:TimePeriodPropertyType" minOccurs="0"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ================================================================== -->
+	<complexType name="TimeEdgePropertyType">
+		<annotation>
+			<documentation>A time edge property can either be any time edge element encapsulated in an element of this type 
+			or an XLink reference to a remote time edge element (where remote includes elements located elsewhere in the same document). 
+			Note that either the reference or the contained element must be given, but not both or none.</documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:TimeEdge"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- ================================================================== -->
+	<!-- ===       Succession        === -->
+	<!-- ================================================================== -->
+	<simpleType name="SuccessionType">
+		<annotation>
+			<documentation>Feature succession is a semantic relationship derived from evaluation of observer, and 
+			Feature Substitution, Feature Division and Feature Fusion are defined as associations between 
+			previous features and next features in the temporal context. 
+			Successions shall be represented in either following two ways. 
+			* define a temporal topological complex element as a feature element 
+			* define an association same as temporal topological complex between features.</documentation>
+		</annotation>
+		<restriction base="string">
+			<enumeration value="substitution"/>
+			<enumeration value="division"/>
+			<enumeration value="fusion"/>
+			<enumeration value="initiation"/>
+		</restriction>
+	</simpleType>
+	<!-- ================================================================== -->
+</schema>

@@ -1,0 +1,118 @@
+><span class="p">{</span><span class="w"> </span><span class="nl">"width"</span><span class="p">:</span><span class="w"> </span><span class="mi">1200</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="duration">
+        
+        
+          duration <a href="#duration" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>The duration of the Canvas or external content resource, given in seconds.</p>
+
+<p>The value <em class="rfc">must</em> be a positive floating point number.</p>
+
+<ul>
+  <li>A Canvas <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">duration</code> property.<br />
+Clients <em class="rfc">must</em> process <code class="language-plaintext highlighter-rouge">duration</code> on a Canvas.</li>
+  <li>Content resources <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">duration</code> property, if appropriate to the resource type.<br />
+Clients <em class="rfc">should</em> process <code class="language-plaintext highlighter-rouge">duration</code> on content resources.</li>
+  <li>Other types of resource <em class="rfc">must not</em> have a <code class="language-plaintext highlighter-rouge">duration</code>.<br />
+Clients <em class="rfc">should</em> ignore <code class="language-plaintext highlighter-rouge">duration</code> on other types of resource.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nl">"duration"</span><span class="p">:</span><span class="w"> </span><span class="mf">125.0</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="viewingdirection">
+        
+        
+          viewingDirection <a href="#viewingdirection" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>The direction in which a set of Canvases <em class="rfc">should</em> be displayed to the user. This specification defines four direction values in the table below. Others may be defined externally <a href="/api/presentation/3.0/#46-linked-data-context-and-extensions" title="Linked Data Context and Extensions">as an extension</a>.</p>
+
+<p>The value <em class="rfc">must</em> be a string.</p>
+
+<ul>
+  <li>A Collection <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">viewingDirection</code> property.<br />
+Clients <em class="rfc">should</em> process <code class="language-plaintext highlighter-rouge">viewingDirection</code> on a Collection.</li>
+  <li>A Manifest <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">viewingDirection</code> property.<br />
+Clients <em class="rfc">should</em> process <code class="language-plaintext highlighter-rouge">viewingDirection</code> on a Manifest.</li>
+  <li>A Range <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">viewingDirection</code> property.<br />
+Clients <em class="rfc">may</em> process <code class="language-plaintext highlighter-rouge">viewingDirection</code> on a Range.</li>
+  <li>Other types of resource <em class="rfc">must not</em> have the <code class="language-plaintext highlighter-rouge">viewingDirection</code> property.<br />
+Clients <em class="rfc">should</em> ignore <code class="language-plaintext highlighter-rouge">viewingDirection</code> on other types of resource.</li>
+</ul>
+
+<table class="api-table" id="table-direction">
+  <thead>
+    <tr>
+      <th>Value</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">left-to-right</code></td>
+      <td>The object is displayed from left to right. The default if not specified.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">right-to-left</code></td>
+      <td>The object is displayed from right to left.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">top-to-bottom</code></td>
+      <td>The object is displayed from the top to the bottom.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">bottom-to-top</code></td>
+      <td>The object is displayed from the bottom to the top.</td>
+    </tr>
+  </tbody>
+</table>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nl">"viewingDirection"</span><span class="p">:</span><span class="w"> </span><span class="s2">"left-to-right"</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="behavior">
+        
+        
+          behavior <a href="#behavior" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>A set of user experience features that the publisher of the content would prefer the client to use when presenting the resource. This specification defines the values in the table below. Others may be defined externally as an <a href="/api/presentation/3.0/#46-linked-data-context-and-extensions" title="Linked Data Context and Extensions">extension</a>.</p>
+
+<p>In order to determine the behaviors that are governing a particular resource, there are four inheritance rules from resources that reference the current resource:</p>
+<ul>
+  <li>Collections inherit behaviors from their referencing Collection.</li>
+  <li>Manifests <strong>DO NOT</strong> inherit behaviors from any referencing Collections.</li>
+  <li>Canvases inherit behaviors from their referencing Manifest, but <strong>DO NOT</strong> inherit behaviors from any referencing Ranges, as there might be several with different behaviors.</li>
+  <li>Ranges inherit behaviors from any referencing Range and referencing Manifest.</li>
+</ul>
+
+<p>Clients should interpret behaviors on a Range only when that Range is selected or is in some other way the context for the user’s current interaction with the resources. A Range with the <code class="language-plaintext highlighter-rouge">behavior</code> value <code class="language-plaintext highlighter-rouge">continuous</code>, in a Manifest with the <code class="language-plaintext highlighter-rouge">behavior</code> value <code class="language-plaintext highlighter-rouge">paged</code>, would mean that the Manifest’s Canvases should be rendered in a paged fashion, unless the range is selected to be viewed, and its included Canvases would be rendered in that context only as being virtually stitched together. This might occur, for example, when a physical scroll is cut into pages and bound into a codex with other pages, and the publisher would like to provide the user the experience of the scroll in its original form.</p>
+
+<p>The descriptions of the behavior values have a set of which other values they are disjoint with, meaning that the same resource <em class="rfc">must not</em> have both of two or more from that set. In order to determine which is in effect, the client <em class="rfc">should</em> follow the inheritance rules above, taking the value from the closest resource. The user interface effects of the possible permutations of non-disjoint behavior values are client dependent, and implementers are advised to look for relevant recipes in the <a href="https://iiif.io/api/cookbook/" title="IIIF Cookbook"><abbr title="International Image Interoperability Framework">IIIF</abbr> cookbook</a>.</p>
+
+<p class="warning"><strong>Future Clarification Anticipated</strong><br />
+Further clarifications about the implications of interactions between behavior values should be expected in subsequent minor releases.</p>
+
+<p>The value <em class="rfc">must</em> 

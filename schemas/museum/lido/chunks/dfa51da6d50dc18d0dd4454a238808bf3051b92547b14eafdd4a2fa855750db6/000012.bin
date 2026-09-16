@@ -1,0 +1,201 @@
+/work to which the dimensions or measurements in focus apply.</tei:ab>
+						<tei:ab type="label">Extent Measurements</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#extentMeasurements">Extent Measurements</tei:ref></tei:ab>
+					</xs:documentation>
+
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:extentMeasurements">
+								<sch:extends rule="sch_MixedContent"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:conceptMixedComplexType">
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="qualifierMeasurements" minOccurs="0" maxOccurs="unbounded" id="qualifierMeasurements">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element qualifying the dimensions, or other measurements,
+							of an object/work, indicating the kind or precision of measurement results.<br/>
+							Examples may include approximate, average, maximum, or variable.</tei:ab>
+						<tei:ab type="label">Qualifier Measurements</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#qualifierMeasurements">Qualifier Measurements</tei:ref></tei:ab>
+					</xs:documentation>
+
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:qualifierMeasurements">
+								<sch:extends rule="sch_MixedContent"/>
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:conceptMixedComplexType">
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="formatMeasurements" minOccurs="0" maxOccurs="unbounded" id="formatMeasurements">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for the format or
+							conventional size of an object/work, including technical formats.<br/>
+							Examples may include digital audio or image file formats, as well as
+						    size for book or photograph formats.</tei:ab>
+						<tei:ab type="label">Format Measurements</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#formatMeasurements">Format Measurements</tei:ref></tei:ab>
+					</xs:documentation>
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:formatMeasurements">
+								<sch:extends rule="sch_MixedContent"/>
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:conceptMixedComplexType">
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="shapeMeasurements" minOccurs="0" maxOccurs="unbounded" id="shapeMeasurements">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for the outline, form, or characteristic configuration of an
+							object/work or a part thereof, including contours. Used for distinguishing shape characteristics, such as <em>oval</em>,
+							or <em>square</em>.</tei:ab>
+						<tei:ab type="label">Shape Measurements</tei:ab>
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#shapeMeasurements">Shape Measurements</tei:ref>
+						</tei:ab>
+						
+						
+					</xs:documentation>
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:shapeMeasurements">
+								<sch:extends rule="sch_MixedContent"/>
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:conceptMixedComplexType">
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="scaleMeasurements" minOccurs="0" maxOccurs="unbounded" id="scaleMeasurements">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for the ratio between the size of an object/work
+							and its representation, for instance the size of the drawn structure and the actual built work.<br/>
+							Examples may include <em>full-size</em> or <em>life-size</em>.
+						</tei:ab>
+						<tei:ab type="label">Scale Measurements</tei:ab>
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#scaleMeasurements">Scale Measurements</tei:ref></tei:ab>
+						
+						
+					</xs:documentation>
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:scaleMeasurements">
+								<sch:extends rule="sch_MixedContent"/>
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:conceptMixedComplexType">
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="objectMeasurementsSetComplexType" id="objectMeasurementsSetComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines display and index elements for the
+					dimensions, or other measurements, of the object/work.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="displayObjectMeasurements" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="displayObjectMeasurements">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A display element for the dimensions, or other
+							measurements, of the object/work, corresponding to the subsequent
+							<tei:ref target="#objectMeasurements">Object Measurements</tei:ref> element.<br/>
+							Repeated for language variants only.</tei:ab>
+						<tei:ab type="label">Display Object Measurements</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Free text</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="objectMeasurements" type="lido:objectMeasurementsComplexType" minOccurs="0" id="objectMeasurements">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A wrapper for information about the dimensions, or
+							other measurements, of the object/work in focus.<br/>
+							May also include extents of the parts of a complex object or work.</tei:ab>
+						<tei:ab type="label">Object Measurements</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="objectMaterialsTechWrap" id="objectMaterialsTechWrap">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">A wrapper for information about materials
+					and techniques used for or incorporated in the object/work in focus.</tei:ab>
+				<tei:ab type="label">Object Materials/Techniques Wrapper</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="objectMaterialsTechSet" type="lido:materialsTechSetComplexType" minOccurs="0" maxOccurs="unbounded" id="objectMaterialsTechSet">
+					<xs:annotation>
+						<xs:documentation>
+					

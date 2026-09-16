@@ -1,0 +1,98 @@
+           content. In this Primer document, the wrapper and set
+            elements are referred to as <strong>structural
+            elements</strong>, whereas the elements actually holding
+            data are called <strong>content elements</strong>. Since a
+            complete LIDO record can have a dozen or more nesting
+            levels, some distinctions between kinds of elements are made
+            in the LIDO element descriptions.</p>
+            <p>The following figure shows the nesting of LIDO structural
+            and content elements with a corresponding example for the
+            description of materials and techniques, used in the
+            production of an object. The <a
+            href="https://lido-schema.org/schema/latest/lido.html#objectMaterialsTechWrap">Object
+            Materials/Techniques Wrapper</a> contains the <a
+            href="https://lido-schema.org/schema/latest/lido.html#objectMaterialsTechSet">Object
+            Materials/Techniques Set</a>, enclosing the <a
+            href="https://lido-schema.org/schema/latest/lido.html#displayMaterialsTech">Display
+            Materials/Techniques</a> element and the set for <a
+            href="https://lido-schema.org/schema/latest/lido.html#materialsTech">Materials/Techniques</a>,
+            holding the index elements.</p>
+            <figure>
+            <img src="img/figure_nesting.png"
+            alt="Figure 6: Nesting of structural and content elements" />
+            <figcaption aria-hidden="true">Figure 6: Nesting of
+            structural and content elements</figcaption>
+            </figure>
+            <p><strong>Example:</strong> Following is an XML code
+            snippet containing the elements depicted in figure 5.</p>
+            <div class="sourceCode" id="cb10"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a> &lt;<span class="kw">lido:objectMaterialsTechWrap</span>&gt;</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:objectMaterialsTechSet</span>&gt;</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:displayMaterialsTech</span><span class="ot"> xml:lang=</span><span class="st">&quot;{...}&quot;</span>&gt;[...]&lt;/<span class="kw">lido:displayMaterialsTech</span>&gt;</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:materialsTech</span>&gt;</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:termMaterialsTech</span><span class="ot"> lido:type=</span><span class="st">&quot;{...}&quot;</span>&gt;</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">skos:Concept</span><span class="ot"> rdf:about=</span><span class="st">&quot;{...}&quot;</span>&gt;&lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:termMaterialsTech</span>&gt;</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:materialsTech</span>&gt;</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:objectMaterialsTechSet</span>&gt;</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:objectMaterialsTechWrap</span>&gt;</span></code></pre></div>
+            <h3 data-number="4.3.1" id="structural-elements"><span
+            class="header-section-number">4.3.1</span> Structural
+            elements</h3>
+            <p>LIDO defines structural elements for grouping more
+            specific elements together. A structural element is either a
+            <strong>wrapper</strong> which is non-repeatable, or a
+            repeatable <strong>set</strong>. Usually, wrappers are on a
+            higher nesting level relative to set elements, the latter
+            being typically enclosed by a wrapper. However, wrapper
+            elements may also occur as sub-elements of wrappers as well
+            as sets.</p>
+            <h4 data-number="4.3.1.1" id="wrapper-elements"><span
+            class="header-section-number">4.3.1.1</span> Wrapper
+            elements</h4>
+            <p><strong>Note:</strong> In the <a
+            href="https://lido-schema.org/schema/latest/lido.html">LIDO
+            Schema Documentation</a>, an element is introduced as “A
+            wrapper …” if it structures the data in a LIDO record and if
+            it is not repeatable.</p>
+            <p><strong>Features:</strong> Wrappers are not repeatable,
+            have no attributes, except for a language attribute that can
+            be given to administrative and descriptive metadata. A
+            wrapper itself does not hold any content data.</p>
+            <p><strong>Example:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectMaterialsTechWrap">lido:classificationWrap</a>&gt;
+            is a wrapper for the index element &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#classification">lido:classification</a>&gt;,
+            and is contained by the wrapper element &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectClassificationWrap">lido:objectClassificationWrap</a>&gt;.</p>
+            <div class="sourceCode" id="cb11"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:classificationWrap</span>&gt;</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:classification</span><span class="ot"> lido:type=</span><span class="st">&quot;{...}&quot;</span>&gt;</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">skos:Concept</span><span class="ot"> rdf:about=</span><span class="st">&quot;{...}&quot;</span>&gt;&lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:classification</span>&gt;</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:classificationWrap</span>&gt;</span></code></pre></div>
+            <h4 data-number="4.3.1.2" id="set-elements"><span
+            class="header-section-number">4.3.1.2</span> Set
+            elements</h4>
+            <p><strong>Note:</strong> In the <a
+            href="https://lido-schema.org/schema/latest/lido.html">LIDO
+            Schema documentation</a>, an element is introduced as “A set
+            …” if it structures the data in a LIDO record and if it is
+            repeatable.</p>
+            <p><strong>Features:</strong> In contrast to LIDO wrappers,
+            sets are repeatable and can have attributes. Like wrappers,
+            they do not hold any content data.</p>
+            <p><strong>Example:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#measurementsSet">lido:measurementsSet</a>&gt;
+            is a set element that encloses three index elements for
+            object dimensions (&lt;lido:measurementType&gt;,
+            &lt;lido:measurementUnit&gt;,
+            &lt;lido:measurementValue&gt;), all of which are mandatory
+            if &lt;lido:measurementsSet&gt; is used. The set is
+            repeatable within its parent element so that it can
+            accommodate data for different types of dimensions, such as
+            height, width, weight, etc. The following XML code snippet
+            shows the usage of measurement types “height” and
+            “width”.</p>
+            <div class="sourceCode" id="cb12"><pre
+            class="sourceCode

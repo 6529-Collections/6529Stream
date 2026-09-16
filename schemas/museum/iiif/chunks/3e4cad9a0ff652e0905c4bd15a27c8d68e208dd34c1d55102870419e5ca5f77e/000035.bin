@@ -1,0 +1,86 @@
+y-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"@context"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://iiif.io/api/presentation/3/context.json"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/annopage/l1"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AnnotationPage"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"partOf"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/annocoll/transcription"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AnnotationCollection"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"next"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/annopage/l2"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AnnotationPage"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"items"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/annopage/p1/a1"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Annotation"</span><span class="w">
+      </span><span class="c1">// ...</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h2 id="6-http-requests-and-responses">
+        
+        
+          6. <abbr title="Hypertext Transfer Protocol">HTTP</abbr> Requests and Responses <a href="#6-http-requests-and-responses" class="anchorClass"></a>
+        
+        
+      </h2>
+    
+
+<p>This section describes the <em class="rfc">recommended</em> request and response interactions for the <abbr title="Application Programming Interface">API</abbr>. The <abbr title="Representational State Transfer">REST</abbr> and simple <abbr title="Hypermedia as the Engine of Application State">HATEOAS</abbr> approach is followed where an interaction will retrieve a description of the resource, and additional calls may be made by following links obtained from within the description. All of the requests use the <abbr title="Hypertext Transfer Protocol">HTTP</abbr> GET method; creation and update of resources is not covered by this specification. It is <em class="rfc">recommended</em> that implementations also support <abbr title="Hypertext Transfer Protocol">HTTP</abbr> HEAD requests.</p>
+      <h3 id="61-uri-recommendations">
+        
+        
+          6.1. URI Recommendations <a href="#61-uri-recommendations" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>While any <abbr title="Hypertext Transfer Protocol">HTTP</abbr>(S) URI is technically acceptable for any of the resources in the <abbr title="Application Programming Interface">API</abbr>, there are several best practices for designing the URIs for the resources.</p>
+
+<ul>
+  <li>The URI <em class="rfc">should</em> use the <abbr title="Hypertext Transfer Protocol (Secure)">HTTPS</abbr> scheme, not <abbr title="Hypertext Transfer Protocol">HTTP</abbr>.</li>
+  <li>The URI <em class="rfc">should not</em> include query parameters or fragments.</li>
+  <li>Once published, they <em class="rfc">should</em> be as persistent and unchanging as possible.</li>
+  <li>Special characters <em class="rfc">must</em> be encoded.</li>
+</ul>
+      <h3 id="62-requests">
+        
+        
+          6.2. Requests <a href="#62-requests" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>Clients are only expected to follow links to Presentation <abbr title="Application Programming Interface">API</abbr> resources. Unlike <a href="/api/image/3.0/" title="Image API"><abbr title="International Image Interoperability Framework">IIIF</abbr> Image <abbr title="Application Programming Interface">API</abbr></a> requests, or other parameterized services, the URIs for Presentation <abbr title="Application Programming Interface">API</abbr> resources cannot be assumed to follow any particular pattern.</p>
+      <h3 id="63-responses">
+        
+        
+          6.3. Responses <a href="#63-responses" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>The format for all responses is <abbr title="JavaScript Object Notation">JSON</abbr>, as described above. It is good practice for all resources with an <abbr title="Hypertext Transfer Protocol">HTTP</abbr>(S) URI to provide their description when the URI is dereferenced. If a resource is <a href="/api/presentation/3.0/#12-terminology">referenced</a> within a response, rather than being <a href="/api/presentation/3.0/#12-terminology">embedded</a>, then it <em class="rfc">must</em> be able to be dereferenced.</p>
+
+<p>If the server receives a request with an <code class="language-plaintext highlighter-rouge">Accept</code> header, it <em class="rfc">should</em> respond following the rules of <a href="https://tools.ietf.org/html/rfc7231#section-5.3.2" title="HTTP 1.1, 5.3.2. Accept">content negotiation</a>. Note that content types provided in the <code class="language-plaintext highlighter-rouge">Accept</code> header of the request <em class="rfc">may</em> include parameters, for example <code class="language-plaintext highlighter-rouge">profile</code> or <code class="language-plaintext highlighter-rouge">charset</code>.</p>
+
+<p>If the request does not include an <code class="language-plaintext highlighter-rouge">Accept</code> header, the <abbr title="Hypertext Transfer Protocol">HTTP</abbr> <code class="language-plaintext highlighter-rouge">Content-Type</code> header of the response <em class="rfc">should</em> have the value <code class="language-plaintext highlighter-rouge">application/ld+json</code> (<abbr title="JSON for Linking Data">JSON-LD</abbr>) with the <code class="language-plaintext highlighter-rouge">profile</code> parameter given as the context document: <code class="language-plaintext highlighter-rouge">http://iiif.io/api/presentation/3/context.json</code>.</p>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-plaintext urltemplate highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Content-Type: application/ld+json;profile="http://iiif.io/api/presentation/3/context.json"
+</code></pre></div></div>
+
+<p>If the <code class="language-plaintext highlighter-rouge">Content-Type</code> header <code class="language-plaintext highlighter-rouge">application/ld+json</code> cannot be generated due to server configuration details, then the <code class="language-plaintext highlighter-rouge">Content-Type</code> header <em class="rfc">should</em> instead be <code class="language-plaintext highlighter-rouge">application/json</code> (regular <abbr title="JavaScript Object Notation">JSON</abbr>), without a <code class="language-plai

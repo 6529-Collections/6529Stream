@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "registryFileDate": "2026-08-08",
+  "documents": [
+    {
+      "name": "rfc5646.txt",
+      "url": "https://www.rfc-editor.org/rfc/rfc5646.txt",
+      "originalBytes": 208592,
+      "originalSha256": "5d9515f053163c80e7294a84d18217dc83471acc7caa9773da2ac40deeec8228",
+      "transport": "gzip; original bytes include all copyright and whitespace",
+      "gzipSha256": "077d024682500ee41eb68a0b2cc22312dbed5d981640f5fd8c35eb9bb087aa52"
+    },
+    {
+      "name": "language-subtag-registry.txt",
+      "url": "https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry",
+      "originalBytes": 731799,
+      "originalSha256": "be21e91b6851f750a7b1a687f11209d46ad5a8471d6b10a1efc8d1dac4c8a926",
+      "transport": "gzip; original bytes include all copyright and whitespace",
+      "gzipSha256": "e53c35e96b5595a3a20af7487e49dc10c928f1be6566e6a9508b5568c88d3c5c"
+    }
+  ],
+  "status": "Exact offline standards; no onchain registration or extension-specific validity claim."
+}

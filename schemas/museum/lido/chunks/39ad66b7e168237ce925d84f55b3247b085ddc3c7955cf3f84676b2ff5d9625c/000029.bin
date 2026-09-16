@@ -1,0 +1,141 @@
+iew-1"><span
+            class="header-section-number">5.2.1</span> Overview</h3>
+            <p>The mandatory LIDO elements are sufficient to identify an
+            object or work unambiguously, given that metadata elements
+            are applied correctly. In most cases, however, providing the
+            bare minimum of metadata will usually not be enough to
+            enable good retrieval results in terms of findability and
+            object discovery. Compared to LIDO, the CDWA standard
+            defines some more elements as required, marked “core” in the
+            <a
+            href="https://www.getty.edu/research/publications/electronic_publications/cdwa/categories.html">CDWA
+            Overview of Categories</a>. These are, besides information
+            on the creator and creation, particularly metadata for
+            classification and subject matter.</p>
+            <p><strong>Overview of mandatory and recommended elements in
+            LIDO</strong></p>
+            <p>Mandatory elements are</p>
+            <ul>
+            <li><a
+            href="https://lido-schema.org/schema/latest/lido.html#lidoRecID">LIDO
+            Metadata Record Identifier</a></li>
+            <li><a
+            href="http://lido-schema.org/schema/latest/lido.html#objectWorkType">Object/Work
+            Type</a></li>
+            <li><a
+            href="http://lido-schema.org/schema/latest/lido.html#titleSet">Title</a></li>
+            <li><a
+            href="http://lido-schema.org/schema/latest/lido.html#recordID">Record
+            ID</a></li>
+            <li><a
+            href="http://lido-schema.org/schema/latest/lido.html#recordType">Record
+            Type</a></li>
+            <li><a
+            href="http://lido-schema.org/schema/latest/lido.html#recordSource">Record
+            Source</a></li>
+            </ul>
+            <p>It is strongly recommended to provide indexing terms for
+            the following elements. These elements are further described
+            below.</p>
+            <ul>
+            <li><a
+            href="http://lido-schema.org/schema/latest/lido.html#classification">Classification</a></li>
+            <li><a
+            href="http://lido-schema.org/schema/latest/lido.html#measurementsSet">Measurements</a></li>
+            <li><a
+            href="http://lido-schema.org/schema/latest/lido.html#materialsTech">Materials/Techniques</a></li>
+            <li><a
+            href="http://lido-schema.org/schema/latest/lido.html#event">Event</a></li>
+            <li><a
+            href="http://lido-schema.org/schema/latest/lido.html#subject">Subject</a></li>
+            <li><a
+            href="http://lido-schema.org/schema/latest/lido.html#relatedWork">Related
+            Works</a></li>
+            </ul>
+            <p>It is strongly recommended to provide information for <a
+            href="http://lido-schema.org/schema/latest/lido.html#rightsWorkSet">Rights
+            for Work</a>, <a
+            href="http://lido-schema.org/schema/latest/lido.html#recordRights">Rights
+            for Record</a>, and <a
+            href="http://lido-schema.org/schema/latest/lido.html#rightsResource">Rights
+            Resource</a>. For more information see section <a
+            href="##administrative-metadata-1"><em>4.4.2 Administrative
+            Metadata</em></a>“.</p>
+            <p>It is also recommended to provide information for the
+            following elements:</p>
+            <ul>
+            <li><a
+            href="http://lido-schema.org/schema/latest/lido.html#inscriptions">Inscriptions</a></li>
+            <li><a
+            href="http://lido-schema.org/schema/latest/lido.html#repositorySet">Repository</a></li>
+            <li><a
+            href="http://lido-schema.org/schema/latest/lido.html#objectDescriptionSet">Description</a></li>
+            <li><a
+            href="http://lido-schema.org/schema/latest/lido.html#recordInfoSet">Record
+            Metadata</a></li>
+            <li><a
+            href="http://lido-schema.org/schema/latest/lido.html#resourceRepresentation">Resource
+            Representation</a></li>
+            </ul>
+            <p>In addition to the mandatory and recommended elements
+            above, data producers are encouraged to utilize further
+            schema elements in the LIDO record based on the following
+            considerations:</p>
+            <ul>
+            <li>the nature of the items being described;</li>
+            <li>the availability of data in the organization’s
+            collections management system;</li>
+            <li>the requirements of the target portal.</li>
+            </ul>
+            <h3 data-number="5.2.2" id="classification"><span
+            class="header-section-number">5.2.2</span>
+            Classification</h3>
+            <p><strong>Element name:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#classification">lido:classification</a>&gt;</p>
+            <p><strong>Note:</strong> Classification assigns an object
+            to one or more classes from a shared class scheme. Like
+            &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#objectWorkType">lido:objectWorkType</a>&gt;,
+            the Classification element is used for grouping similar
+            objects so that they can be retrieved in a single search
+            operation. Unlike Object/WorkType which classifies the
+            object at the most specific level suitable, the
+            classification element aggregates objects on the basis of
+            broad categories. For example, a work of type “oil painting”
+            can be classified under “paintings”, a “bas-relief” would be
+            assigned to a class “sculptures”, and a “cathedral” should
+            be grouped into a category “architecture”.</p>
+            <p>Classes can be used to implement browsing facilities in
+            digital environments. Examples are the <a
+            href="https://www.europeana.eu/en/themes">Europeana
+            Themes</a> or the access to the Louvre collections entitled
+            <a href="https://collections.louvre.fr/en/">Explore the
+            collections</a>. Such categories may also give a first
+            impression of what can be expected to be found in the
+            database and thus serve as a useful starting point for
+            discovery in a Web portal.</p>
+            <p>An object can be assigned several classification terms
+            from different classification schemes, depending on the
+            aspect or point of view. The schemes may vary in the
+            division criteria used to arrange the classes, such as by
+            period, location, or status of property. An example is the
+            categorization of the <em>Mona Lisa</em> in Wikipedia under
+            <a
+            href="https://en.wikipedia.org/wiki/Category:16th-century_portraits">16th-century
+            portraits</a>, <a
+            href="https://en.wikipedia.org/wiki/Category:Portrait_paintings_in_the_Louvre">Portrait
+            paintings in the Louvre</a>, and <a
+            href="https://en.wikipedia.org/wiki/Category:Stolen_works_of_art">Stolen
+            works of art</a>.</p>
+            <p>Classification categories can refer to different aspects
+            under which the object is viewed. Two common aspects are the
+            <em>genre or form</em> represented by the object, reflecting
+            its <em>isness</em> at a broad level, and the <em>thematic
+            context</em> the object is related to, such as a “subject
+            category” or a domain-specific grouping. For example, a
+            farmhouse like the <a
+            href="https://d-nb.info/gnd/7843738-6">Olson House</a> could
+            be classified as a “building” by object genre and assigned
+            to “agriculture” as subject category; for a religious
+            building like the <a
+            href="https://d-nb.info/gnd/1173755292">Holy Name of 

@@ -1,0 +1,85 @@
+rtof">
+        
+        
+          partOf <a href="#partof" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>A containing resource that includes the resource that has the <code class="language-plaintext highlighter-rouge">partOf</code> property. When a client encounters the <code class="language-plaintext highlighter-rouge">partOf</code> property, it might retrieve the <a href="/api/presentation/3.0/#12-terminology">referenced</a> containing resource, if it is not <a href="/api/presentation/3.0/#12-terminology">embedded</a> in the current representation, in order to contribute to the processing of the contained resource. For example, the <code class="language-plaintext highlighter-rouge">partOf</code> property on a Canvas can be used to reference an external Manifest in order to enable the discovery of further relevant information. Similarly, a Manifest can reference a containing Collection using <code class="language-plaintext highlighter-rouge">partOf</code> to aid in navigation.</p>
+
+<p>The value <em class="rfc">must</em> be an array of <abbr title="JavaScript Object Notation">JSON</abbr> objects. Each item <em class="rfc">must</em> have the <code class="language-plaintext highlighter-rouge">id</code> and <code class="language-plaintext highlighter-rouge">type</code> properties, and <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">label</code> property.</p>
+
+<ul>
+  <li>Any resource type <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">partOf</code> property with at least one item<br />
+Clients <em class="rfc">may</em> render <code class="language-plaintext highlighter-rouge">partOf</code> on any resource type.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nl">"partOf"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/1"</span><span class="p">,</span><span class="w"> </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Manifest"</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="start">
+        
+        
+          start <a href="#start" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>A Canvas, or part of a Canvas, which the client <em class="rfc">should</em> show on initialization for the resource that has the <code class="language-plaintext highlighter-rouge">start</code> property. The reference to part of a Canvas is handled in the same way that Ranges reference parts of Canvases. This property allows the client to begin with the first Canvas that contains interesting content rather than requiring the user to manually navigate to find it.</p>
+
+<p>The value <em class="rfc">must</em> be a <abbr title="JavaScript Object Notation">JSON</abbr> object, which <em class="rfc">must</em> have the <code class="language-plaintext highlighter-rouge">id</code> and <code class="language-plaintext highlighter-rouge">type</code> properties.  The object <em class="rfc">must</em> be either a Canvas (as in the first example below), or a Specific Resource with a Selector and a <code class="language-plaintext highlighter-rouge">source</code> property where the value is a Canvas (as in the second example below).</p>
+
+<ul>
+  <li>A Manifest <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">start</code> property.<br />
+Clients <em class="rfc">should</em> process <code class="language-plaintext highlighter-rouge">start</code> on a Manifest.</li>
+  <li>A Range <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">start</code> property.<br />
+Clients <em class="rfc">should</em> process <code class="language-plaintext highlighter-rouge">start</code> on a Range.</li>
+  <li>Other types of resource <em class="rfc">must not</em> have the <code class="language-plaintext highlighter-rouge">start</code> property.<br />
+Clients <em class="rfc">should</em> ignore <code class="language-plaintext highlighter-rouge">start</code> on other types of resource.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nl">"start"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/1/canvas/1"</span><span class="p">,</span><span class="w"> </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Canvas"</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"start"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/1/canvas-segment/1"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SpecificResource"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/1/canvas/1"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"selector"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PointSelector"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"t"</span><span class="p">:</span><span class="w"> </span><span class="mf">14.5</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="supplementary">
+        
+        
+          supplementary <a href="#supplementary" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>A link from this Range to an Annotation Collection that includes the <code class="language-plaintext highlighter-rouge">supplementing</code> Annotations of content resources for the Range. Clients might use this to present additional content to the user from a different Canvas when interacting with the Range, or to jump to the next part of the Range within the same Canvas.  For example, the Range might represent a newspaper article that spans non-sequential pages, and then uses the <code class="language-plaintext highlighter-rouge">supplementary</code> property to reference an Annotation Collection that consists of the Annotations that record the text, split into Annotation Pages per newspaper page. Alternatively, the Range migh

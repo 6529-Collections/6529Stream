@@ -1,16 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../interfaces/stream/artist/IStreamArtistHistory.sol";
 
 import "../vendor/openzeppelin/IERC165.sol";
 import "../interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol";
-import "../interfaces/stream/metadata/IStreamCollectionMetadata.sol";
-import "../interfaces/stream/artist/IStreamCollectionArtistRegistry.sol";
+import "../interfaces/stream/metadata/IStreamCollectionMetadataV1.sol";
+import "../interfaces/stream/artist/IStreamArtistMintConsent.sol";
 import "../interfaces/stream/entropy/IStreamEntropyCoordinator.sol";
 import "../interfaces/stream/metadata/IStreamMetadataRouter.sol";
 import "../interfaces/stream/mint/IStreamMintLedger.sol";
 import "../interfaces/stream/mint/IStreamMintManager.sol";
+import "../interfaces/stream/mint/IStreamMintReads.sol";
+import "../interfaces/stream/mint/IStreamMintLedgerImport.sol";
 import "../interfaces/stream/modules/IStreamModuleRegistry.sol";
 import "../interfaces/stream/revenue/IStreamRoyaltyResolver.sol";
+import "../interfaces/stream/revenue/IStreamRoyaltyEconomicContinuity.sol";
 import "../interfaces/stream/governance/IStreamSystemManifest.sol";
 import "./StreamCoreReadBuffer.sol";
 
@@ -148,7 +152,7 @@ library StreamCoreExternalReads {
             return (true, pointerType, type(IStreamMetadataRouter).interfaceId);
         }
         if (pointerType == _POINTER_ARTIST_REGISTRY) {
-            return (true, pointerType, type(IStreamCollectionArtistRegistry).interfaceId);
+            return (true, pointerType, type(IStreamArtistMintConsent).interfaceId);
         }
         if (pointerType == _POINTER_ARTWORK_FINALITY_RECOVERY) {
             return (true, _MODULE_ARTWORK_FINALITY_RECOVERY, _INTERFACE_ARTWORK_FINALITY_RECOVERY);
@@ -163,7 +167,7 @@ library StreamCoreExternalReads {
             return (true, pointerType, type(IStreamArtworkFinalityRegistry).interfaceId);
         }
         if (pointerType == _POINTER_COLLECTION_METADATA) {
-            return (true, pointerType, type(IStreamCollectionMetadata).interfaceId);
+            return (true, pointerType, type(IStreamCollectionMetadataV1).interfaceId);
         }
         if (pointerType == _POINTER_MODULE_REGISTRY) {
             return (true, pointerType, type(IStreamModuleRegistry).interfaceId);
@@ -268,6 +272,19 @@ library StreamCoreExternalReads {
         (status, plan.candidate) =
             eligiblePointer(registryPointer, target, expectedModuleType, expectedInterfaceId);
         if (status != StreamCoreValidationStatus.VALID) return (status, plan);
+        if (
+            pointerType == _POINTER_ROYALTY_RESOLVER && current.target != address(0)
+                && target != current.target
+                && !_royaltySuccessorAdmitted(current.target, current.codeHash, target)
+        ) return (StreamCoreValidationStatus.INVALID_TARGET, plan);
+
+        if (
+            pointerType == _POINTER_MINT_MANAGER && current.target != address(0)
+                && target != current.target
+                && !_mintSuccessorAdmitted(
+                    registryPointer, current.target, current.codeHash, target
+                )
+        ) return (StreamCoreValidationStatus.INVALID_TARGET, plan);
 
         plan.candidate.revision = nextRevision;
         (plan.scopeHash, plan.oldValueHash, plan.newValueHash) =
@@ -639,5 +656,132 @@ library StreamCoreExternalReads {
                 valid := 0
             }
         }
+    }
+
+    /// @dev A replacement cannot expose partial imports or discard original frozen economics.
+    /// Initial installation and same-address catalog refresh retain their original semantics.
+    function _royaltySuccessorAdmitted(address previous, bytes32 previousCode, address candidate)
+        private
+        view
+        returns (bool)
+    {
+        if (!_isValidContract(previous) || previousCode == 0 || previous.codehash != previousCode) {
+            return false;
+        }
+        (bool ok, bytes32 word) = _continuityWord(
+            candidate, abi.encodeCall(IStreamRoyaltyEconomicContinuity.economicContinuityReady, ())
+        );
+        if (!ok || word != bytes32(uint256(1))) return false;
+        (ok, word) = _continuityWord(
+            previous,
+            abi.encodeCall(
+                IStreamRevenueResolverContinuity.frozenEconomicStateHash, (address(this))
+            )
+        );
+        if (!ok) return false;
+        bytes32 protectedHash = word;
+        if (protectedHash == 0) return true;
+        (ok, word) = _continuityWord(
+            candidate,
+            abi.encodeCall(
+                IStreamRevenueResolverContinuity.frozenEconomicStateHash, (address(this))
+            )
+        );
+        if (!ok || word != protectedHash) return false;
+        (ok, word) = _continuityWord(
+            candidate, abi.encodeCall(IStreamRoyaltyEconomicContinuity.continuitySource, ())
+        );
+        // Exact full-word address equality also rejects dirty high bits.
+        if (!ok || word != bytes32(uint256(uint160(previous)))) return false;
+        (ok, word) = _continuityWord(
+            candidate, abi.encodeCall(IStreamRoyaltyEconomicContinuity.continuityManifestHash, ())
+        );
+        if (!ok || word == 0) return false;
+        (ok, word) = _continuityWord(
+            candidate,
+            abi.encodeCall(
+                IStreamRevenueResolverContinuity.supportsEconomicContinuity,
+                (previous, protectedHash, word)
+            )
+        );
+        return ok && word == bytes32(uint256(1));
+    }
+
+    /// @dev The candidate's own immutable Ledger must have completed this exact migration.
+    /// Sharing the predecessor Ledger does not waive Manager-namespaced counter/replay import.
+    function _mintSuccessorAdmitted(
+        StreamCorePointerState memory registryPointer,
+        address previous,
+        bytes32 previousCode,
+        address candidate
+    ) private view returns (bool) {
+        if (!_isValidContract(previous) || previousCode == 0 || previous.codehash != previousCode) {
+            return false;
+        }
+        (bool ok, bytes32 word) =
+            _continuityWord(previous, abi.encodeCall(IStreamMintReads.core, ()));
+        bytes32 expectedCore = bytes32(uint256(uint160(address(this))));
+        if (!ok || word != expectedCore) return false;
+        (ok, word) = _continuityWord(candidate, abi.encodeCall(IStreamMintReads.core, ()));
+        if (!ok || word != expectedCore) return false;
+        address oldLedger = _mintLedgerOf(previous);
+        address newLedger = _mintLedgerOf(candidate);
+        if (oldLedger == address(0) || newLedger == address(0)) return false;
+        (StreamCoreValidationStatus ledgerStatus,) = eligiblePointer(
+            registryPointer, newLedger, _POINTER_MINT_LEDGER, type(IStreamMintLedger).interfaceId
+        );
+        if (ledgerStatus != StreamCoreValidationStatus.VALID) return false;
+        (ok, word) = _continuityWord(
+            newLedger,
+            abi.encodeCall(
+                IStreamMintLedgerImport.isMintSuccessorReady, (oldLedger, previous, candidate)
+            )
+        );
+        return ok && word == bytes32(uint256(1));
+    }
+
+    function _mintLedgerOf(address manager) private view returns (address ledger) {
+        (bool ok, bytes32 word) =
+            _continuityWord(manager, abi.encodeCall(IStreamMintReads.mintLedger, ()));
+        if (!ok || uint256(word) > type(uint160).max) return address(0);
+        ledger = address(uint160(uint256(word)));
+        if (!_isValidContract(ledger)) return address(0);
+    }
+
+    function _continuityWord(address target, bytes memory data)
+        private
+        view
+        returns (bool ok, bytes32 word)
+    {
+        bytes memory raw;
+        (ok, raw) = _boundedStaticRead(target, data, 32);
+        if (!ok || raw.length != 32) return (false, bytes32(0));
+        assembly ("memory-safe") { word := mload(add(raw, 32)) }
+    }
+
+    /// @notice Replacement only: exact current predecessor must be committed by the successor.
+    /// @dev Reuses the Core's existing bounded static-return convention; initial installation is unchanged.
+    function artistSuccessorAdmitted(address previous, bytes32 previousCode, address candidate)
+        public
+        view
+        returns (bool)
+    {
+        if (previous == address(0)) return true;
+        if (previous.codehash != previousCode || previousCode == 0) return false;
+        (bool ok, bytes memory raw) = _boundedStaticRead(
+            candidate,
+            abi.encodeCall(IStreamArtistHistory.artistHistoryPredecessorBinding, (previous)),
+            96
+        );
+        if (!ok || raw.length != 96) return false;
+        uint256 yes;
+        bytes32 hash;
+        uint256 count;
+        assembly ("memory-safe") {
+            yes := mload(add(raw, 32))
+            hash := mload(add(raw, 64))
+            count := mload(add(raw, 96))
+        }
+        return yes == 1 && hash == previousCode && count != 0;
     }
 }

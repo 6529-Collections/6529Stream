@@ -14,8 +14,10 @@ a complete transaction.
 | Path | Responsibility | Command |
 | --- | --- | --- |
 | `current/` | Product, adversarial flow and catalog replacement integration | `python scripts/dev.py test` |
+| `current/StreamCurrentSafeBatch.t.sol` | Official Safe all-CALL purchase/reveal/custody and cross-component rollback | `python scripts/dev.py test --match-contract StreamCurrentSafeBatchTest` |
 | `current/StreamCurrentStackFuzz.t.sol`, `current/StreamCurrentStackInvariant.t.sol` | Varied signed inputs and dependent handler sequences | `python scripts/dev.py campaign --mode quick --seed 0x6529` |
 | `unit/<domain>/` | Current contract/library behavior and focused target components | `python scripts/dev.py test --suite unit` |
+| `unit/metadata/StreamTokenContentTree.t.sol`, `unit/finality/StreamFinalityHostAdapter.t.sol` | Independent content-root vectors, fuzzing and fixed-host boundary/Safe reads | Select `StreamTokenContentTreeTest` or `StreamFinalityHostAdapterTest` in the unit suite |
 | `regression/legacy/<domain>/` | Earlier behavior whose import closure reaches LegacyStreamCore | `python scripts/dev.py test --suite legacy` |
 | `gas/` | Scenario snapshots and gas budgets | `python scripts/dev.py test --suite gas` |
 | `helpers/`, `mocks/`, `fixtures/` | Shared setup, adversarial collaborators and vectors | Imported by suites |

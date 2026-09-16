@@ -1,0 +1,120 @@
+      principles are defined that should guide the preparation of
+            data and metadata, in particular (identifiers in square
+            brackets refer to the corresponding topics from the FAIR
+            guidelines):</p>
+            <p><strong>F – Findable:</strong> LIDO mandates the use of
+            publishable identifiers both for the object [<a
+            href="https://www.go-fair.org/fair-principles/f3-metadata-clearly-explicitly-include-identifier-data-describe/">F3</a>]
+            and the metadata record [<a
+            href="https://www.go-fair.org/fair-principles/f1-meta-data-assigned-globally-unique-persistent-identifiers/">F1</a>].
+            LIDO implements a rich metadata model [<a
+            href="https://www.go-fair.org/fair-principles/f2-data-described-rich-metadata/">F2</a>]
+            designed for indexing and retrieval [<a
+            href="https://www.go-fair.org/fair-principles/f4-metadata-registered-indexed-searchable-resource/">F4</a>].</p>
+            <p><strong>A – Accessible:</strong> LIDO metadata is readily
+            distributed via open protocols such as OAI-PMH and
+            REST-based APIs [<a
+            href="https://www.go-fair.org/fair-principles/metadata-retrievable-identifier-standardised-communication-protocol/">A1</a>]
+            and is harvested by aggregators [<a
+            href="https://www.go-fair.org/fair-principles/a2-metadata-accessible-even-data-no-longer-available/">A2</a>]
+            at significant scale.</p>
+            <p><strong>I – Interoperable:</strong> LIDO builds upon a
+            well-established and extensively documented XML schema
+            definition [<a
+            href="https://www.go-fair.org/fair-principles/i1-metadata-use-formal-accessible-shared-broadly-applicable-language-knowledge-representation/">I1</a>]
+            that expressly supports the use of linked open vocabularies
+            [<a
+            href="https://www.go-fair.org/fair-principles/i2-metadata-use-vocabularies-follow-fair-principles/">I2</a>].</p>
+            <p><strong>R – Reusable</strong>: LIDO has provisions for
+            detailed licensing information, for both the data resources
+            and the metadata [<a
+            href="https://www.go-fair.org/fair-principles/r1-1-metadata-released-clear-accessible-data-usage-license/">R1.1</a>],
+            for metadata provenance [<a
+            href="https://www.go-fair.org/fair-principles/r1-2-metadata-associated-detailed-provenance/">R1.2</a>],
+            and for domain-specific metadata such as events occuring in
+            the object lifecycle [<a
+            href="https://www.go-fair.org/fair-principles/r1-3-metadata-meet-domain-relevant-community-standards/">R1.3</a>].</p>
+            <h3 data-number="3.3.2" id="semantic-web-technologies"><span
+            class="header-section-number">3.3.2</span> Semantic Web
+            technologies</h3>
+            <p>The notion of a <a
+            href="https://www.w3.org/standards/semanticweb/">Semantic
+            Web</a> originated soon after the “classic” Web had gained
+            acceptance. While ordinary Web pages with hyperlinks support
+            little more than free-text search, a desire was felt to make
+            assertions on the Web that can be acted upon by machines
+            more precisely, for example, for compiling databases of
+            factual statements derived from, and linked to, Web pages.
+            Initially, metadata standards such as LIDO were not
+            primarily designed as building blocks for the Semantic Web,
+            but rather to co-exist with it.</p>
+            <p>The Semantic Web idea gave rise to a technology known as
+            the <a href="https://www.w3.org/TR/rdf11-concepts/">Resource
+            Description Framework</a> (RDF). RDF is a data model that
+            uses a sentence-like structure (subject–predicate–object) to
+            express statements about things. For example, a painting
+            (the <em>subject</em>) was created (the <em>predicate</em>)
+            by a person (the <em>object</em>) where the person can
+            become the subject for further statements, such as the
+            person’s date of birth, place of activity, working field,
+            etc.</p>
+            <p>The LIDO schema beginning with version 1.1, while
+            strictly rooted in XML technology, permits a limited number
+            of RDF statements (<a
+            href="https://www.w3.org/2009/08/skos-reference/skos.html#Concept">&lt;skos:Concept&gt;</a>,
+            <a
+            href="https://www.w3.org/TR/owl-ref/#sameAs-def">&lt;owl:sameAs&gt;</a>)
+            to be used as a bridge to Linked Open Data (LOD), and thus
+            the Semantic Web. Moreover, the <a
+            href="http://terminology-view.lido-schema.org">LIDO
+            Terminology</a> was designed from the ground up to comply
+            with Semantic Web principles.</p>
+            <p>Initiatives for transforming LIDO data to RDF are
+            underway. However, development of a fully RDF-based metadata
+            schema for cultural heritage is still at an early stage.
+            Examples are the proposed <a
+            href="http://vraweb.org/vra-core-rdf-ontology-available-for-review/">RDF
+            Ontology</a> for the <a
+            href="http://www.loc.gov/standards/vracore/">Visual
+            Resources Association Core</a> (VRA CORE) standard, and the
+            data model proposed by the <a
+            href="https://linked.art/">Linked Art</a> community.</p>
+            <blockquote>
+            <p>Progress in this area can be followed by subscribing to
+            the LIDO mailing list or by sending email to the LIDO
+            working group. For details, see <a
+            href="https://cidoc.mini.icom.museum/working-groups/lido/lido-community/"
+            class="uri">https://cidoc.mini.icom.museum/working-groups/lido/lido-community/</a>.</p>
+            </blockquote>
+            <h3 data-number="3.3.3" id="linked-data"><span
+            class="header-section-number">3.3.3</span> Linked Data</h3>
+            <p>Data published in accordance with Semantic Web principles
+            is known as <a
+            href="https://www.w3.org/wiki/LinkedData">Linked Data</a>.
+            Most Linked Data of interest to the cultural heritage
+            community is freely available as <em>Linked Open Data</em>
+            (LOD).</p>
+            <p>LIDO strongly recommends the use of controlled
+            vocabularies wherever an index element for a concept can
+            occur, and of shared authority files where a reference to a
+            named entity, such as a person, an organization, or a place
+            is expected. Very often the relevant concept or entity is
+            described in one of the major LOD sources such as the <a
+            href="https://www.getty.edu/research/tools/vocabularies/aat/index.html">Art
+            &amp; Architecture Thesaurus</a> (AAT), the German <a
+            href="https://www.dnb.de/DE/Home/home_node.html">Integrated
+            Authority File</a> (GND), or in an aggregated Linked Data
+            source such as <a href="https://viaf.org/">VIAF</a> or <a
+            href="https://www.wikidata.org/wiki/Wikidata:Main_Page">Wikidata</a>.
+            Last, but not least, the <a
+            href="http://terminology-view.lido-schema.org">LIDO
+            Terminology</a>, recommended for many of the type attributes
+            in LIDO, is also available as a LOD source.</p>
+            <p>In order to qualify as Linked Data, a data source must
+            use the RDF data model. Each item must be uniquely and
+            persistently identified by a URI, and the URI must be
+            dereferenceable as a Web resource. The latter means that
+            machines or humans can invoke the URI as a network address
+            and obtain the corresponding resource in the desired RDF
+            syntax, or in a human-readable rendering. A useful add-on to
+            man

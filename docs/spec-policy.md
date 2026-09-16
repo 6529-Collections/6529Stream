@@ -218,6 +218,7 @@ requirement; only the amendment process changes requirements.
 | [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md) | Permanent interfaces + Replaceable genesis modules | Draft |
 | [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md) | Permanent interfaces + Replaceable genesis modules | Draft |
 | [`docs/collection-metadata-contract.md`](collection-metadata-contract.md) | Permanent interfaces + Replaceable genesis modules | Draft |
+| [`docs/museum-semantic-mapping.md`](museum-semantic-mapping.md) | Replaceable catalog/profile state + Operational mappings, exports and validation; inherited Permanent mechanisms unchanged | Draft (scope adopted, ADR 0036) |
 | [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) | Permanent interfaces + Replaceable genesis modules | Draft |
 | [`docs/stream-entropy-providers.md`](stream-entropy-providers.md) | Replaceable (provider adapters) | Draft |
 | [`docs/stream-artist-authority.md`](stream-artist-authority.md) | Permanent interfaces + Replaceable genesis modules (artist authority) | Draft |

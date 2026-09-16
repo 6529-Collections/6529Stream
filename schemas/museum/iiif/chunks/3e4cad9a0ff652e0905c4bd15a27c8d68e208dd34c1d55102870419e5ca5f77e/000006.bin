@@ -1,0 +1,66 @@
+her types of resource <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">provider</code> property with at least one item. <br />
+Clients <em class="rfc">should</em> render <code class="language-plaintext highlighter-rouge">provider</code> on other types of resource.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"provider"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/about"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Agent"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Example Organization"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"homepage"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Text"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Example Organization Homepage"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"text/html"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"logo"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/images/logo.png"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Image"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"image/png"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"height"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"width"</span><span class="p">:</span><span class="w"> </span><span class="mi">120</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"seeAlso"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://data.example.org/about/us.jsonld"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Dataset"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"application/ld+json"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"profile"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://schema.org/"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="thumbnail">
+        
+        
+          thumbnail <a href="#thumbnail" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>A content resource, such as a small image or short audio clip, that represents the resource that has the <code class="language-plaintext highlighter-rouge">thumbnail</code> property. A resource <em class="rfc">may</em> have multiple thumbnail resources that have the same or different <code class="language-plaintext highlighter-rouge">type</code> and <code class="language-plaintext highlighter-rouge">format</code>.</p>
+
+<p>The value <em class="rfc">must</em> be an array of <abbr title="JavaScript Object Notation">JSON</abbr> objects, each of which <em class="rfc">must</em> have the <code class="language-plaintext highlighter-rouge">id</code> and <code class="language-plaintext highlighter-rouge">type</code> properties, and <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">format</code> property. Images and videos <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">width</code> and <code class="language-plaintext highlighter-rouge">height</code> properties, and time-based media <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">duration</code> property. It is <em class="rfc">recommended</em> that a <a href="/api/image/3.0/" title="Image API"><abbr title="International Image Interoperability Framework">IIIF</abbr> Image <abbr title="Application Programming Interface">API</abbr></a> service be available for images to enable manipulations such as resizing.</p>
+
+<ul>
+  <li>A Collection <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">thumbnail</code> property with at least one item.<br />
+Clients <em class="rfc">should</em> render <code class="language-plaintext highlighter-rouge">thumbnail</code> on a Collection.</li>
+  <li>A Manifest <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">thumbnail</code> property with at least one item.<br />
+Clients <em class="rfc">should</em> render <code class="language-plaintext highlighter-rouge">thumbnail</code> on a Manifest.</li>
+  <li>A Canvas <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">thumbnail</code> property with at least one item. A Canvas <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">thumbnail</code> property if there are multiple resources that make up the view.<br />
+Clients <em class="rfc">should</em> render <code class="language-plaintext highlighter-rouge">thumbnail</code> on a Canvas.</li>
+  <li>A content resource <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">thumbnail</code> property with at least one item. Content resources <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">thumbnail</code> property with at least one item if it is 

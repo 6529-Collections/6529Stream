@@ -1,0 +1,247 @@
+sci:O13_triggers",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "caused_by": {
+      "@id": "sci:O13i_is_triggered_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "encountered": {
+      "@id": "sci:O19_encountered_object",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "encountered_by": {
+      "@id": "sci:O19i_was_object_encountered_at",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "_label": {
+      "@id": "rdfs:label"
+    },
+    "narrower": {
+      "@id": "skos:narrower",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "broader": {
+      "@id": "skos:broader",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "notation": {
+      "@id": "skos:notation"
+    },
+    "conforms_to": {
+      "@id": "dcterms:conformsTo",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "format": {
+      "@id": "dc:format"
+    },
+    "Transfer": {
+      "@id": "la:Transfer"
+    },
+    "Payment": {
+      "@id": "la:Payment",
+      "@context": {
+        "part": {
+          "@id": "crm:P9_consists_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "part_of": {
+          "@id": "crm:P9i_forms_part_of",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "member_of": {
+          "@id": "la:member_of",
+          "@type": "@id",
+          "@container": "@set"
+        }
+      }
+    },
+    "Set": {
+      "@id": "la:Set",
+      "@context": {
+        "member": {
+          "@id": "la:has_member",
+          "@type": "@id",
+          "@container": "@set"
+        },
+        "member_of": {
+          "@id": "la:member_of",
+          "@type": "@id",
+          "@container": "@set"
+        }
+      }
+    },
+    "Addition": {
+      "@id": "la:Addition"
+    },
+    "Removal": {
+      "@id": "la:Removal"
+    },
+    "DigitalService": {
+      "@id": "la:DigitalService"
+    },
+    "RightAcquisition": {
+      "@id": "la:RightAcquisition"
+    },
+    "property_classified_as": {
+      "@id": "la:property_classified_as",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "current_permanent_custodian": {
+      "@id": "la:current_permanent_custodian",
+      "@type": "@id"
+    },
+    "current_permanent_custodian_of": {
+      "@id": "la:current_permanent_custodian_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "equivalent": {
+      "@id": "la:equivalent",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "transferred": {
+      "@id": "la:transferred",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "transferred_from": {
+      "@id": "la:transferred_from",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "transferred_to": {
+      "@id": "la:transferred_to",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "paid_amount": {
+      "@id": "la:paid_amount",
+      "@type": "@id"
+    },
+    "paid_from": {
+      "@id": "la:paid_from",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "paid_to": {
+      "@id": "la:paid_to",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "members_exemplified_by": {
+      "@id": "la:members_exemplified_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "members_contained_by": {
+      "@id": "la:members_contained_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "contains_members_of": {
+      "@id": "la:contains_members_of",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "added_to": {
+      "@id": "la:added_to",
+      "@type": "@id"
+    },
+    "added_to_by": {
+      "@id": "la:added_to_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "added_member": {
+      "@id": "la:added_member",
+      "@type": "@id"
+    },
+    "added_member_by": {
+      "@id": "la:added_member_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "removed_from": {
+      "@id": "la:removed_from",
+      "@type": "@id"
+    },
+    "removed_from_by": {
+      "@id": "la:removed_from_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "removed_member": {
+      "@id": "la:removed_member",
+      "@type": "@id"
+    },
+    "removed_member_by": {
+      "@id": "la:removed_member_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "digitally_carries": {
+      "@id": "la:digitally_carries",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "digitally_carried_by": {
+      "@id": "la:digitally_carried_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "digitally_shows": {
+      "@id": "la:digitally_shows",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "digitally_shown_by": {
+      "@id": "la:digitally_shown_by",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "access_point": {
+      "@id": "la:access_point",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "digitally_available_via": {
+      "@id": "la:digitally_available_via",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "digitally_makes_available": {
+      "@id": "la:digitally_makes_available",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "establishes": {
+      "@id": "la:establishes",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "established_by": {
+      "@id": "la:established_by",
+      "@type": "@id"
+    },
+    "invalidates": {
+      "@id": "la:invalidates",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "invalidated_by": {
+      "@id": "la:invalidated_by",
+      "@type": "@id"
+    }
+  }
+}

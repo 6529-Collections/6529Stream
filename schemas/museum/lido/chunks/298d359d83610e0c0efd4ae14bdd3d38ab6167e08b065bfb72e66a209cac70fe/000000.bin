@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSPY v5 rel. 2 U (http://www.xmlspy.com) by Clemens Portele (interactive instruments) -->
+<schema targetNamespace="http://www.opengis.net/gml" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:sch="http://www.ascc.net/xml/schematron" xmlns:gml="http://www.opengis.net/gml" xmlns:xlink="http://www.w3.org/1999/xlink" elementFormDefault="qualified"
+        version="3.1.1.2">
+	<annotation>
+		<appinfo source="urn:opengis:specification:gml:schema-xsd:geometryPrimitives:3.1.1">geometryPrimitives.xsd</appinfo>
+		<documentation>
+			GML is an OGC Standard.
+			Copyright (c) 2001,2005,2010 Open Geospatial Consortium.
+			To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .
+		</documentation>
+	</annotation>
+	<!-- =========================================================== -->
+	<include schemaLocation="gml.xsd"/>
+	<include schemaLocation="geometryBasic2d.xsd"/>
+	<!-- =========================================================== -->
+	<element name="Curve" type="gml:CurveType" substitutionGroup="gml:_Curve"/>
+	<!-- =========================================================== -->
+	<complexType name="CurveType">
+		<annotation>
+			<documentation>Curve is a 1-dimensional primitive. Curves are continuous, connected, and have a measurable length in terms of the coordinate system. 
+				A curve is composed of one or more curve segments. Each curve segment within a curve may be defined using a different interpolation method. The curve segments are connected to one another, with the end point of each segment except the last being the start point of the next segment in the segment list.
+				The orientation of the curve is positive.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCurveType">
+				<sequence>
+					<element ref="gml:segments">
+						<annotation>
+							<documentation>This element encapsulates the segments of the curve.</documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="baseCurve" type="gml:CurvePropertyType">
+		<annotation>
+			<appinfo>
+				<sch:pattern name="Check either href or content not both">
+					<sch:rule context="gml:baseCurve">
+						<sch:extends rule="hrefOrContent"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+			<documentation>This property element either references a curve via the XLink-attributes or contains the curve element. A curve element is any element which is substitutable for "_Curve".</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<element name="OrientableCurve" type="gml:OrientableCurveType" substitutionGroup="gml:_Curve"/>
+	<!-- =========================================================== -->
+	<complexType name="OrientableCurveType">
+		<annotation>
+			<documentation>OrientableCurve consists of a curve and an orientation. If the orientation is "+", then the OrientableCurve is identical to the baseCurve. If the orientation is "-", then the OrientableCurve is related to another _Curve with a parameterization that reverses the sense of the curve traversal.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCurveType">
+				<sequence>
+					<element ref="gml:baseCurve">
+						<annotation>
+							<documentation>References or contains the base curve (positive orientation).
+NOTE: This definition allows for a nested structure, i.e. an OrientableCurve may use another OrientableCurve as its base curve.</documentation>
+						</annotation>
+					</element>
+				</sequence>
+				<attribute name="orientation" type="gml:SignType" default="+">
+					<annotation>
+						<documentation>If the orientation is "+", then the OrientableCurve is identical to the baseCurve. If the orientation is "-", then the OrientableCurve is related to another _Curve with a parameterization that reverses the sense of the curve traversal. "+" is the default value.</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<!-- curve segments (1-dimensional) -->
+	<!-- =========================================================== -->
+	<!-- =========================================================== -->
+	<element name="_CurveSegment" type="gml:AbstractCurveSegmentType" abstract="true">
+		<annotation>
+			<documentation>The "_CurveSegment" element is the abstract head of the substituition group for all curve segment elements, i.e. continuous segments of the same interpolation mechanism.</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<complexType name="AbstractCurveSegmentType" abstract="true">
+		<annotation>
+			<documentation>Curve segment defines a homogeneous segment of a curve.</documentation>
+		</annotation>
+		<sequence/>
+		<attribute name="numDerivativesAtStart" type="integer" use="optional" default="0">
+			<annotation>
+				<documentation>The attribute "numDerivativesAtStart" specifies the type of continuity between this curve segment and its predecessor. If this is the first curve segment in the curve, one of these values, as appropriate, is ignored. The default value of "0" means simple continuity, which is a mandatory minimum level of continuity. This level is referred to as "C 0 " in mathematical texts. A value of 1 means that the function and its first derivative are continuous at the appropriate end point: "C 1 " continuity. A value of "n" for any integer means the function and its first n derivatives are continuous: "C n " continuity.
+NOTE: Use of these values is only appropriate when the basic curve definition is an underdetermined system. For example, line string segments cannot support continuity above C 0 , since there is no spare control parameter to adjust the incoming angle at the end points of the segment. Spline functions on the other hand often have extra degrees of freedom on end segments that allow them to adjust the values of the derivatives to support C 1 or higher continuity.</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="numDerivativesAtEnd" type="integer" use="optional" default="0">
+			<annotation>
+				<documentation>The attribute "numDerivativesAtEnd" specifies the type of continuity between this curve segment and its successor. If this is the last curve segment in the curve, one of these values, as appropriate, is ignored. The default value of "0" means simple continuity, which is a mandatory minimum level of continuity. This level is referred to as "C 0 " in mathematical texts. A value of 1 means that the function and its first derivative are continuous at the appropriate end point: "C 1 " continuity. A value of "n" for any integer means the function and its first n derivatives are continuous: "C n " continuity.
+NOTE: Use of these values is only appropriate when the basic curve definition is an underdetermined system. For example, line string segments cannot support continuity above C 0 , since there is no spare control parameter to adjust the incoming angle at the end points of the segment. Spline functions on the other hand often have extra degrees of freedom on end segments that allow them to adjust the values of the derivatives to support C 1 or higher continuity.</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="numDerivativeInterior" type="integer" use="optional" default="0">
+			<annotation>
+				<documentation>The attribute "numDerivativesInterior" specifies the type of continuity that is guaranteed interior to the curve. The default value of "0" means simple continuity, which is a mandatory minimum level of continuity. This level is referred to as "C 0 " in mathematical texts. A value of 1 means that the function and its first derivative are continuous at the appropriate end point: "C 1 " continuity. A value of "n" for any integer means the function and its first n derivatives are continuous: "C n " continuity.
+NOTE: Use of these values is only appropriate wh

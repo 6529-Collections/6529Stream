@@ -1,566 +1,752 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/standards/IERC20.sol";
-
-import "../../interfaces/stream/revenue/IStreamAssetPolicyRegistry.sol";
+import "./StreamSettlementContext.sol";
+import "../../interfaces/stream/revenue/IStreamPlatformNativePrimarySettlement.sol";
+import "../../interfaces/stream/revenue/IStreamPlatformProfilePrimarySettlement.sol";
+import "./StreamERC20PrimaryRecording.sol";
+import "./StreamPreparedNativeRightsRecording.sol";
+import "./StreamNativeCustodyPrimaryRecording.sol";
+import "./StreamTokenProfileCustodyRecording.sol";
+import "./StreamCustodyRightsRecording.sol";
+import "./StreamPlatformCustodyRecording.sol";
+import "./StreamPlatformTokenCustodyRecording.sol";
+import "../../interfaces/stream/revenue/IStreamPlatformTemplateCustodySettlement.sol";
+import "./StreamNativeSupplementalExecution.sol";
+import "./StreamNativePrimaryExecution.sol";
+import "./StreamNativePrimaryRecording.sol";
+import "./StreamPrimaryTokenRouting.sol";
+import "./StreamPrimarySettlementValidation.sol";
+import "./StreamPrimarySettlementHash.sol";
+import "./StreamNativeSettlementHash.sol";
+import "./StreamNativeSettlementAdmission.sol";
+import "./StreamNativeSettlementSupport.sol";
+import "./StreamPrimarySettlementEmission.sol";
+import "./StreamPrimarySettlementRights.sol";
+import "./StreamDeferredNativeSettlementValidation.sol";
+import "./StreamPreparedNativeSettlementAccounting.sol";
+import "./StreamPreparedNativeSettlementExecution.sol";
+import "./StreamPreparedNativeContentRecording.sol";
+import "./StreamPreparedNativeContentPurchaseRecording.sol";
+import "./StreamPreparedNativeOfferRecording.sol";
+import "../../interfaces/stream/revenue/IStreamDeferredNativePrimarySaleSettlement.sol";
+import "../../interfaces/stream/revenue/IStreamNativePrimarySaleSettlement.sol";
+import "../mint/StreamSaleTemplate.sol";
 import "../../interfaces/stream/revenue/IStreamPrimarySaleSettlement.sol";
-import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
-import "../../vendor/openzeppelin/Ownable.sol";
 import "../../vendor/openzeppelin/ReentrancyGuard.sol";
+import "../../vendor/openzeppelin/ERC165.sol";
 
-/// @notice Outside-Core adapter for recording official primary-sale settlement evidence.
-contract StreamPrimarySaleSettlement is IStreamPrimarySaleSettlement, Ownable, ReentrancyGuard {
-    bytes32 private constant _SETTLEMENT_KEY_DOMAIN =
-        keccak256("6529STREAM_PRIMARY_SETTLEMENT_KEY_V1");
-    bytes32 private constant _OFFICIAL_SETTLED_DOMAIN =
-        keccak256("6529STREAM_OFFICIAL_PRIMARY_SETTLED_V1");
-    bytes32 private constant _SALE_CONTEXT_DOMAIN = keccak256("6529STREAM_PRIMARY_SALE_CONTEXT_V1");
-    uint8 private constant _ASSET_STATUS_ACTIVE = 1;
-    uint256 private constant _ASSET_POLICY_GAS_LIMIT = 30_000;
-    uint256 private constant _ASSET_POLICY_PARENT_GAS_MIN = 31_000;
+/// @notice Official recorder for typed mint payments and native clearing supplemental revenue.
+/// @dev Registered sale adapters call directly. The ERC20 path is funded only by its bound contract20;
+///      native adapters supply exact value. No owner, payer allowance or arbitrary transfer route.
+contract StreamPrimarySaleSettlement is
+    IStreamPrimarySaleSettlement,
+    IStreamNativePrimarySaleSettlement,
+    IStreamDeferredNativePrimarySaleSettlement,
+    IStreamPreparedNativePrimarySaleSettlement,
+    IStreamPreparedNativeContentSettlement,
+    IStreamPreparedNativeContentPurchaseSettlement,
+    IStreamPreparedNativeOfferSettlement,
+    IStreamNativeSupplementalSettlement,
+    IStreamNativeCustodyPrimarySettlement,
+    IStreamTokenProfileCustodySettlement,
+    IStreamCustodyRightsSettlement,
+    IStreamPlatformCustodyPrimarySettlement,
+    IStreamPlatformTokenCustodySettlement,
+    IStreamPlatformTemplateCustodySettlement,
+    IStreamPreparedNativeRightsPrimarySettlement,
+    IStreamPlatformNativePrimarySettlement,
+    IStreamPlatformProfilePrimarySettlement,
+    StreamSettlementContext,
+    ReentrancyGuard,
+    ERC165
+{
+    // Retain decoding for the same error now bubbled through the linked rights helper.
+    error UnsupportedSaleTemplate();
+    // Preserve decoding of the exact errors now emitted by the fixed ERC20 worker.
+    error SaleTemplateMaterializationMismatch();
+    error SaleTemplateAssignmentChanged();
+    error SaleLifecycleReadFailed(address saleAdapter);
+    error SaleLifecycleReadMalformed(address saleAdapter, uint256 length);
+    error SaleLifecycleMismatch(address saleAdapter, bytes32 saleId);
+    error SettlementModuleReadMalformed(address module, uint256 length);
+    error SettlementModuleNotAdmitted(address module);
+    error SettlementModuleReadFailed(address module);
 
-    bytes32 public constant override PRIMARY_POLICY_DOMAIN = keccak256("STREAM_PRIMARY_POLICY_V1");
-    uint8 public constant override POLICY_MODE_STRICT_MATCH = 0;
-    uint8 public constant override POLICY_MODE_ALLOW_CURRENT = 1;
-
-    IStreamRevenueResolver public immutable override revenueResolver;
-    IStreamSplitFactory public immutable splitFactory;
-    IStreamAssetPolicyRegistry public immutable assetPolicyRegistry;
-
-    mapping(address => bool) public override settlementCaller;
+    bytes32 private constant _CLASS = keccak256("PRIMARY_SALE");
+    bytes32 private constant _TOTAL = keccak256("6529STREAM_OFFICIAL_PRIMARY_SETTLED_V1");
+    IStreamRevenueEscrow public immutable override revenueEscrow;
+    bytes32 public immutable escrowCodeHash;
+    bytes32 public immutable walletCodeHash;
     mapping(bytes32 => bool) public override settlementConsumed;
+    mapping(bytes32 => StreamPrimarySettlementTypes.PrimarySettlementResult) private _results;
     mapping(bytes32 => uint256) private _officialSettled;
     mapping(address => uint256) public override totalOfficialSettled;
+    mapping(bytes32 => bool) public deferredPurchaseConsumed;
+    mapping(bytes32 => bool) public supplementalPurchaseConsumed;
+    mapping(bytes32 => bool) public supplementalFloorConsumed;
+    mapping(bytes32 => StreamNativeSupplementalTypes.NativeSupplementalResult) private
+        _supplementalResults;
+    mapping(bytes32 => bytes32) public override preparedNativeFactsHash;
+    mapping(bytes32 => bool) public override preparedNativeSaleConsumed;
+    mapping(bytes32 => bytes32) public override preparedNativeContentHash;
+    address public immutable custodyGovernanceAuthority;
+    bytes32 public immutable custodyGovernanceAuthorityCodeHash;
+    StreamNativeCustodySettlementTypes.CanonicalHouse private _canonicalCustodyHouse;
+    mapping(bytes32 => bytes32) public override nativeCustodyFactsHash;
+    mapping(bytes32 => bytes32) public override preparedNativeRightsFactsHash;
+    mapping(address => mapping(bytes32 => bool)) public override preparedNativeContentPurchaseConsumed;
+    mapping(address => mapping(bytes32 => bool)) public override preparedNativeOfferConsumed;
 
-    struct SaleResolution {
-        bytes32 profileId;
-        address wallet;
-        uint8 assignmentType;
-        bytes32 templateId;
-        bytes32 assignmentHash;
-        bytes32 resolvedPolicyHash;
+    constructor(IStreamRevenueResolver resolver, address registry, IStreamRevenueEscrow escrow)
+        StreamSettlementContext(resolver, registry)
+    {
+        if (
+            !StreamSettlementAdmission.isContract(address(escrow))
+                || _read(address(escrow), abi.encodeWithSignature("splitFactory()"), gasleft())
+                    != uint256(uint160(address(splitFactory)))
+                || _read(
+                        address(escrow), abi.encodeWithSignature("assetPolicyRegistry()"), gasleft()
+                    ) != uint256(uint160(address(assetPolicyRegistry)))
+                || _read(address(escrow), abi.encodeWithSignature("factoryCodeHash()"), gasleft())
+                    != uint256(factoryCodeHash)
+                || escrow.governanceAuthority() != splitFactory.governanceAuthority()
+        ) revert InvalidSettlementContext(address(escrow));
+        custodyGovernanceAuthority = splitFactory.governanceAuthority();
+        custodyGovernanceAuthorityCodeHash = StreamNativeCustodyPrimaryAdmission.validateAuthority(
+            splitFactory.governanceAuthority()
+        );
+        revenueEscrow = escrow;
+        escrowCodeHash = address(escrow).codehash;
+        walletCodeHash = splitFactory.splitWalletRuntimeCodeHash();
+        if (
+            _read(address(escrow), abi.encodeWithSignature("walletCodeHash()"), gasleft())
+                != uint256(walletCodeHash)
+        ) {
+            revert InvalidSettlementContext(address(escrow));
+        }
     }
 
-    constructor(IStreamRevenueResolver revenueResolver_) {
-        if (address(revenueResolver_).code.length == 0) {
-            revert PrimaryAssignmentMissing(bytes32(0), 0, 0);
-        }
-        try revenueResolver_.isStreamRevenueResolver() returns (bool ok) {
-            if (!ok) {
-                revert PrimaryAssignmentMissing(bytes32(0), 0, 0);
-            }
-        } catch {
-            revert PrimaryAssignmentMissing(bytes32(0), 0, 0);
-        }
-
-        IStreamSplitFactory splitFactory_ = IStreamSplitFactory(revenueResolver_.splitFactory());
-        if (address(splitFactory_).code.length == 0) {
-            revert UnverifiedSplitWallet(bytes32(0), address(0));
-        }
-        IStreamAssetPolicyRegistry assetPolicyRegistry_ = splitFactory_.assetPolicyRegistry();
-        if (address(assetPolicyRegistry_).code.length == 0) {
-            revert AssetPolicyReadFailed(address(assetPolicyRegistry_), address(0));
-        }
-        try assetPolicyRegistry_.ASSET_STATUS_ACTIVE() returns (uint8 activeStatus) {
-            if (activeStatus != _ASSET_STATUS_ACTIVE) {
-                revert AssetPolicyReadFailed(address(assetPolicyRegistry_), address(0));
-            }
-        } catch {
-            revert AssetPolicyReadFailed(address(assetPolicyRegistry_), address(0));
-        }
-
-        revenueResolver = revenueResolver_;
-        splitFactory = splitFactory_;
-        assetPolicyRegistry = assetPolicyRegistry_;
-    }
-
-    /// @notice Returns true for deployment validation.
     function isStreamPrimarySaleSettlement() external pure override returns (bool) {
         return true;
     }
 
-    /// @notice Enables or disables a settlement caller.
-    function setSettlementCaller(address caller, bool enabled) external override onlyOwner {
-        if (caller == address(0)) {
-            revert InvalidSettlementCaller(caller);
-        }
-        settlementCaller[caller] = enabled;
-        emit SettlementCallerUpdated(caller, enabled, msg.sender);
+    function isStreamPlatformProfilePrimarySettlement() external pure override returns (bool) {
+        return true;
     }
 
-    /// @notice Settles a native ETH primary sale into the resolved split wallet.
-    function settleNativePrimarySale(PrimarySale calldata sale)
-        external
-        payable
+    function isStreamPlatformNativePrimarySettlement() external pure override returns (bool) {
+        return true;
+    }
+
+    function supportsInterface(bytes4 id) public view override returns (bool) {
+        return id == type(IStreamPrimarySaleSettlement).interfaceId
+            || id == type(IStreamNativePrimarySaleSettlement).interfaceId
+            || id == type(IStreamDeferredNativePrimarySaleSettlement).interfaceId
+            || id == type(IStreamPreparedNativePrimarySaleSettlement).interfaceId
+            || id == type(IStreamPreparedNativeContentSettlement).interfaceId
+            || id == type(IStreamPreparedNativeContentPurchaseSettlement).interfaceId
+            || id == type(IStreamPreparedNativeOfferSettlement).interfaceId
+            || id == type(IStreamNativeCustodyPrimarySettlement).interfaceId
+            || id == type(IStreamTokenProfileCustodySettlement).interfaceId
+            || id == type(IStreamCustodyRightsSettlement).interfaceId
+            || id == type(IStreamPlatformCustodyPrimarySettlement).interfaceId
+            || id == type(IStreamPlatformTokenCustodySettlement).interfaceId
+            || id == type(IStreamPlatformTemplateCustodySettlement).interfaceId
+            || id == type(IStreamPreparedNativeRightsPrimarySettlement).interfaceId
+            || id == type(IStreamPlatformNativePrimarySettlement).interfaceId
+            || id == type(IStreamPlatformProfilePrimarySettlement).interfaceId
+            || id == type(IStreamNativeSupplementalSettlement).interfaceId
+            || super.supportsInterface(id);
+    }
+
+    function settlementKey(address saleAdapter, bytes32 executionId)
+        public
+        view
         override
-        nonReentrant
-        returns (bytes32 key, bytes32 profileId, address wallet)
+        returns (bytes32)
     {
-        _requireSettlementCaller();
-        _validateSale(sale);
-        if (msg.value != sale.amount) {
-            revert IncorrectNativeValue(sale.amount, msg.value);
-        }
-        key = _settlementKey(sale);
-        _requireSettlementUnconsumed(key);
-        SaleResolution memory resolution = _resolveSale(sale);
-        _consumeSettlementKey(key);
-        profileId = resolution.profileId;
-        wallet = resolution.wallet;
-
-        (bool success,) = payable(wallet).call{ value: sale.amount }("");
-        if (!success) {
-            revert NativeTransferFailed(wallet, sale.amount);
-        }
-
-        _recordOfficialSettlement(key, sale, address(0), resolution);
+        return StreamPrimarySettlementHash.settlementKey(address(this), saleAdapter, executionId);
     }
 
-    /// @notice Settles an approved standard ERC-20 primary sale into the resolved split wallet.
-    function settleERC20PrimarySale(PrimarySale calldata sale, address asset)
+    function settlementResult(bytes32 key)
         external
+        view
         override
-        nonReentrant
-        returns (bytes32 key, bytes32 profileId, address wallet)
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory)
     {
-        _requireSettlementCaller();
-        _validateSale(sale);
-        _requireActiveAsset(asset);
-        key = _settlementKey(sale);
-        _requireSettlementUnconsumed(key);
-        SaleResolution memory resolution = _resolveSale(sale);
-        _consumeSettlementKey(key);
-        profileId = resolution.profileId;
-        wallet = resolution.wallet;
-
-        _transferFromERC20(asset, sale.payer, address(this), sale.amount);
-        _transferERC20(asset, address(this), wallet, sale.amount);
-
-        _recordOfficialSettlement(key, sale, asset, resolution);
+        return _results[key];
     }
 
-    /// @notice Computes the consumed settlement key for a sale context.
-    function settlementKey(PrimarySale calldata sale) external view override returns (bytes32) {
-        return _settlementKey(sale);
-    }
-
-    /// @notice Computes the resolved primary policy hash for explicit settlement inputs.
-    function resolvedPrimaryPolicyHash(
-        bytes32 revenueClass,
-        uint256 collectionId,
-        uint256 tokenId,
-        bytes32 templateId,
-        bytes32 profileId,
-        address wallet,
-        bytes32 assignmentHash
-    ) external view override returns (bytes32) {
-        return _resolvedPrimaryPolicyHash(
-            revenueClass, collectionId, tokenId, templateId, profileId, wallet, assignmentHash
-        );
-    }
-
-    /// @notice Returns official primary revenue settled for a wallet/profile/revenue class/asset.
     function officialSettled(bytes32 revenueClass, bytes32 profileId, address wallet, address asset)
         external
         view
         override
         returns (uint256)
     {
-        return _officialSettled[_officialSettledKey(revenueClass, profileId, wallet, asset)];
+        return _officialSettled[_totalKey(revenueClass, profileId, wallet, asset)];
     }
 
-    function _requireSettlementCaller() private view {
-        if (!settlementCaller[msg.sender]) {
-            revert UnauthorizedSettlementCaller(msg.sender);
-        }
-    }
-
-    function _validateSale(PrimarySale calldata sale) private pure {
-        if (
-            sale.settlementId == bytes32(0) || sale.revenueClass == bytes32(0)
-                || sale.expectedPolicyHash == bytes32(0) || sale.payer == address(0)
-                || sale.amount == 0
-        ) {
-            revert InvalidPrimarySale(sale.settlementId);
-        }
-        if (
-            sale.policyMode != POLICY_MODE_STRICT_MATCH
-                && sale.policyMode != POLICY_MODE_ALLOW_CURRENT
-        ) {
-            revert InvalidPolicyMode(sale.policyMode);
-        }
-    }
-
-    function _requireSettlementUnconsumed(bytes32 key) private view {
-        if (settlementConsumed[key]) {
-            revert SettlementAlreadyConsumed(key);
-        }
-    }
-
-    function _consumeSettlementKey(bytes32 key) private {
-        settlementConsumed[key] = true;
-    }
-
-    function _resolveSale(PrimarySale calldata sale)
-        private
-        returns (SaleResolution memory resolution)
+    function settleERC20PrimarySaleFromAdapter(
+        address paymentAdapter,
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate calldata candidate
+    )
+        external
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
     {
-        IStreamRevenueResolver.ResolvedPrimaryAssignment memory assignment =
-            revenueResolver.resolvePrimaryAssignment(
-                sale.collectionId, sale.tokenId, sale.revenueClass
-            );
-        if (!assignment.exists) {
-            revert PrimaryAssignmentMissing(sale.revenueClass, sale.collectionId, sale.tokenId);
-        }
-
-        if (assignment.assignmentType == revenueResolver.ASSIGNMENT_TYPE_PROFILE()) {
-            resolution.profileId = assignment.profileId;
-            resolution.wallet = splitFactory.walletFor(resolution.profileId);
-            if (!splitFactory.splitWalletExists(resolution.profileId)) {
-                revert UnverifiedSplitWallet(resolution.profileId, resolution.wallet);
-            }
-        } else if (assignment.assignmentType == revenueResolver.ASSIGNMENT_TYPE_TEMPLATE()) {
-            (resolution.profileId, resolution.wallet,) =
-                revenueResolver.materializePrimaryProfile(assignment.templateId, sale.poster);
-            resolution.templateId = assignment.templateId;
-            address expectedWallet = splitFactory.walletFor(resolution.profileId);
-            if (
-                resolution.wallet != expectedWallet
-                    || !splitFactory.splitWalletExists(resolution.profileId)
-            ) {
-                revert UnverifiedSplitWallet(resolution.profileId, resolution.wallet);
-            }
-        } else {
-            revert PrimaryAssignmentMissing(sale.revenueClass, sale.collectionId, sale.tokenId);
-        }
-
-        resolution.assignmentType = assignment.assignmentType;
-        resolution.assignmentHash = assignment.assignmentHash;
-        resolution.resolvedPolicyHash = _resolvedPrimaryPolicyHash(
-            sale.revenueClass,
-            sale.collectionId,
-            sale.tokenId,
-            resolution.templateId,
-            resolution.profileId,
-            resolution.wallet,
-            assignment.assignmentHash
-        );
-        if (
-            sale.policyMode == POLICY_MODE_STRICT_MATCH
-                && resolution.resolvedPolicyHash != sale.expectedPolicyHash
-        ) {
-            revert PrimaryPolicyHashMismatch(sale.expectedPolicyHash, resolution.resolvedPolicyHash);
-        }
-    }
-
-    function _recordOfficialSettlement(
-        bytes32 key,
-        PrimarySale calldata sale,
-        address asset,
-        SaleResolution memory resolution
-    ) private {
-        bytes32 totalsKey = _officialSettledKey(
-            sale.revenueClass, resolution.profileId, resolution.wallet, asset
-        );
-        _officialSettled[totalsKey] += sale.amount;
-        totalOfficialSettled[asset] += sale.amount;
-        bool policyDrift = sale.expectedPolicyHash != resolution.resolvedPolicyHash;
-        bytes32 contextHash = _saleContextHash(sale, asset, resolution);
-
-        _emitPrimaryRevenueSettled(key, sale, asset, resolution, contextHash, policyDrift);
-        _emitPrimaryRevenueSettlementContext(key, sale, resolution.profileId, resolution.templateId);
-        _emitPrimaryRevenueSettlementPolicy(key, sale, resolution);
-    }
-
-    function _emitPrimaryRevenueSettled(
-        bytes32 key,
-        PrimarySale calldata sale,
-        address asset,
-        SaleResolution memory resolution,
-        bytes32 contextHash,
-        bool policyDrift
-    ) private {
-        emit PrimaryRevenueSettled(
-            key,
-            sale.revenueClass,
-            resolution.profileId,
-            resolution.wallet,
-            asset,
-            sale.payer,
-            sale.amount,
-            contextHash,
-            policyDrift,
-            resolution.assignmentType
+        return StreamERC20PrimaryRecording.execute(
+            _erc20RecordingContext(),
+            settlementConsumed,
+            _results,
+            _officialSettled,
+            totalOfficialSettled,
+            paymentAdapter,
+            candidate
         );
     }
 
-    function _emitPrimaryRevenueSettlementContext(
-        bytes32 key,
-        PrimarySale calldata sale,
-        bytes32 profileId,
-        bytes32 templateId
-    ) private {
-        emit PrimaryRevenueSettlementContext(
-            key,
-            sale.revenueClass,
-            profileId,
-            msg.sender,
-            sale.settlementId,
-            sale.policyMode,
-            sale.collectionId,
-            sale.tokenId,
-            sale.saleId,
-            sale.poster,
-            sale.beneficiary,
-            templateId
+    function settleNativePrimarySaleFromAdapter(
+        StreamNativeSettlementTypes.NativeSettlementCandidate calldata candidate
+    )
+        external
+        payable
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
+    {
+        return StreamNativePrimaryRecording.settleNative(
+            _nativeRecordingContext(),
+            settlementConsumed,
+            _results,
+            _officialSettled,
+            totalOfficialSettled,
+            candidate
         );
     }
 
-    function _emitPrimaryRevenueSettlementPolicy(
-        bytes32 key,
-        PrimarySale calldata sale,
-        SaleResolution memory resolution
-    ) private {
-        emit PrimaryRevenueSettlementPolicy(
-            key,
-            sale.revenueClass,
-            resolution.profileId,
-            sale.expectedPolicyHash,
-            resolution.resolvedPolicyHash,
-            resolution.assignmentHash,
-            resolution.templateId
+    function deferredPurchaseKey(address adapter, bytes32 purchaseId)
+        public
+        view
+        returns (bytes32)
+    {
+        return StreamDeferredNativeSettlementHash.purchaseKey(address(this), adapter, purchaseId);
+    }
+
+    function settleDeferredNativePrimarySaleFromAdapter(
+        StreamDeferredNativeSettlementTypes.DeferredNativeCandidate calldata candidate
+    )
+        external
+        payable
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
+    {
+        return StreamNativePrimaryRecording.settleDeferred(
+            _nativeRecordingContext(),
+            settlementConsumed,
+            _results,
+            _officialSettled,
+            totalOfficialSettled,
+            deferredPurchaseConsumed,
+            candidate
         );
     }
 
-    function _requireActiveAsset(address asset) private view {
-        if (asset == address(0) || asset.code.length == 0) {
-            revert UnsupportedAsset(asset);
-        }
-        address registry = address(assetPolicyRegistry);
-        (bool success, uint256 statusWord) = _readAssetStatusWord(registry, asset);
-        if (!success || statusWord > type(uint8).max) {
-            revert AssetPolicyReadFailed(registry, asset);
-        }
-        // Safe because statusWord is bounded to uint8 above.
-        // forge-lint: disable-next-line(unsafe-typecast)
-        uint8 status = uint8(statusWord);
-        if (status != _ASSET_STATUS_ACTIVE) {
-            revert AssetNotActive(asset, status);
-        }
+    function supplementalPurchaseKey(address adapter, bytes32 id) public view returns (bytes32) {
+        return StreamNativeSupplementalHash.purchaseKey(address(this), adapter, id);
     }
 
-    function _settlementKey(PrimarySale calldata sale) private view returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                _SETTLEMENT_KEY_DOMAIN,
-                uint256(block.chainid),
-                address(this),
-                sale.settlementId,
-                sale.revenueClass,
-                sale.collectionId,
-                sale.tokenId,
-                sale.saleId,
-                sale.payer,
-                sale.poster,
-                sale.beneficiary,
-                sale.amount
-            )
-        );
+    function preparedNativeSaleKey(address adapter, bytes32 saleId, uint256 saleNonce)
+        public
+        view
+        override
+        returns (bytes32)
+    {
+        return StreamPreparedNativeSettlementHash.saleKey(address(this), adapter, saleId, saleNonce);
     }
 
-    function _officialSettledKey(
-        bytes32 revenueClass,
-        bytes32 profileId,
-        address wallet,
-        address asset
-    ) private pure returns (bytes32) {
-        return keccak256(
-            abi.encode(_OFFICIAL_SETTLED_DOMAIN, revenueClass, profileId, wallet, asset)
-        );
-    }
-
-    function _saleContextHash(
-        PrimarySale calldata sale,
-        address asset,
-        SaleResolution memory resolution
-    ) private view returns (bytes32) {
-        bytes32 saleIdentityHash = keccak256(
-            abi.encode(sale.settlementId, sale.collectionId, sale.tokenId, sale.saleId)
-        );
-        bytes32 participantHash =
-            keccak256(abi.encode(msg.sender, sale.payer, sale.poster, sale.beneficiary));
-        bytes32 policyHash = keccak256(
-            abi.encode(
-                sale.policyMode,
-                sale.expectedPolicyHash,
-                resolution.resolvedPolicyHash,
-                resolution.assignmentHash
-            )
-        );
-        return keccak256(
-            abi.encode(
-                _SALE_CONTEXT_DOMAIN,
-                uint256(block.chainid),
-                address(this),
-                sale.revenueClass,
-                saleIdentityHash,
-                participantHash,
-                asset,
-                sale.amount,
-                policyHash,
-                resolution.templateId,
-                resolution.profileId,
-                resolution.wallet
-            )
+    function settlePreparedNativePrimarySale(
+        StreamPreparedNativeSettlementTypes.Facts calldata facts,
+        StreamPreparedNativeSettlementTypes.Intent calldata intent
+    )
+        external
+        payable
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
+    {
+        return StreamPreparedNativeSettlementExecution.execute(
+            StreamPreparedNativeSettlementExecution.Context(
+                core,
+                coreCodeHash,
+                moduleRegistry,
+                moduleRegistryCodeHash,
+                resolverCodeHash,
+                StreamNativePrimaryExecution.Context(
+                    _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
+                )
+            ),
+            preparedNativeSaleConsumed,
+            settlementConsumed,
+            _results,
+            preparedNativeFactsHash,
+            _officialSettled,
+            totalOfficialSettled,
+            facts,
+            intent
         );
     }
 
-    function _resolvedPrimaryPolicyHash(
-        bytes32 revenueClass,
-        uint256 collectionId,
-        uint256 tokenId,
-        bytes32 templateId,
-        bytes32 profileId,
-        address wallet,
-        bytes32 assignmentHash
-    ) private view returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                PRIMARY_POLICY_DOMAIN,
-                uint256(block.chainid),
-                address(revenueResolver),
-                revenueClass,
-                collectionId,
-                tokenId,
-                templateId,
-                profileId,
-                wallet,
-                assignmentHash
-            )
+    function settlePreparedNativeRightsSale(
+        StreamPreparedNativeRightsTypes.Facts calldata facts,
+        StreamPreparedNativeRightsTypes.Intent calldata intent
+    )
+        external
+        payable
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
+    {
+        return StreamPreparedNativeRightsRecording.execute(
+            StreamPreparedNativeRightsRecording.Context(
+                core,
+                coreCodeHash,
+                moduleRegistry,
+                moduleRegistryCodeHash,
+                resolverCodeHash,
+                StreamNativePrimaryExecution.Context(
+                    _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
+                )
+            ),
+            preparedNativeSaleConsumed,
+            settlementConsumed,
+            _results,
+            preparedNativeRightsFactsHash,
+            _officialSettled,
+            totalOfficialSettled,
+            facts,
+            intent
         );
     }
 
-    function _readAssetStatusWord(address registry, address asset)
+    function settlePreparedNativeContentSale(
+        StreamPreparedNativeSettlementTypes.Facts calldata facts,
+        StreamPreparedNativeSettlementTypes.Intent calldata intent
+    )
+        external
+        payable
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
+    {
+        return StreamPreparedNativeContentRecording.execute(
+            StreamPreparedNativeContentRecording.Context(
+                core,
+                coreCodeHash,
+                moduleRegistry,
+                moduleRegistryCodeHash,
+                resolverCodeHash,
+                StreamNativePrimaryExecution.Context(
+                    _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
+                )
+            ),
+            preparedNativeSaleConsumed,
+            settlementConsumed,
+            _results,
+            preparedNativeFactsHash,
+            preparedNativeContentHash,
+            _officialSettled,
+            totalOfficialSettled,
+            facts,
+            intent
+        );
+    }
+
+    function settlePreparedNativeContentPurchase(
+        StreamPreparedNativeSettlementTypes.Facts calldata facts,
+        StreamPreparedNativeSettlementTypes.Intent calldata intent
+    )
+        external
+        payable
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
+    {
+        return StreamPreparedNativeContentPurchaseRecording.execute(
+            StreamPreparedNativeContentPurchaseRecording.Context(
+                core,
+                coreCodeHash,
+                moduleRegistry,
+                moduleRegistryCodeHash,
+                resolverCodeHash,
+                StreamNativePrimaryExecution.Context(
+                    _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
+                )
+            ),
+            preparedNativeContentPurchaseConsumed,
+            settlementConsumed,
+            _results,
+            preparedNativeFactsHash,
+            preparedNativeContentHash,
+            _officialSettled,
+            totalOfficialSettled,
+            facts,
+            intent
+        );
+    }
+
+    function settlePreparedNativeOffer(
+        StreamPreparedNativeSettlementTypes.Facts calldata facts,
+        StreamPreparedNativeSettlementTypes.Intent calldata intent
+    )
+        external
+        payable
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
+    {
+        return StreamPreparedNativeOfferRecording.execute(
+            StreamPreparedNativeOfferRecording.Context(
+                core,
+                coreCodeHash,
+                moduleRegistry,
+                moduleRegistryCodeHash,
+                resolverCodeHash,
+                StreamNativePrimaryExecution.Context(
+                    _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
+                )
+            ),
+            preparedNativeOfferConsumed,
+            settlementConsumed,
+            _results,
+            preparedNativeFactsHash,
+            preparedNativeContentHash,
+            _officialSettled,
+            totalOfficialSettled,
+            facts,
+            intent
+        );
+    }
+
+    function _custodyAdmissionContext()
         private
         view
-        returns (bool success, uint256 statusWord)
+        returns (StreamNativeCustodyPrimaryAdmission.Context memory)
     {
-        if (gasleft() < _ASSET_POLICY_PARENT_GAS_MIN) {
-            return (false, 0);
-        }
-        uint256 selector = uint32(bytes4(keccak256("assetStatus(address)")));
-        uint256 gasLimit = _ASSET_POLICY_GAS_LIMIT;
-        assembly ("memory-safe") {
-            let ptr := mload(0x40)
-            mstore(ptr, shl(224, selector))
-            mstore(add(ptr, 0x04), asset)
-            success := staticcall(gasLimit, registry, ptr, 0x24, 0, 0)
-            if iszero(and(success, eq(returndatasize(), 0x20))) { success := 0 }
-            if success {
-                returndatacopy(ptr, 0, 0x20)
-                statusWord := mload(ptr)
-            }
-        }
+        return StreamNativeCustodyPrimaryAdmission.Context(
+            core,
+            coreCodeHash,
+            moduleRegistry,
+            moduleRegistryCodeHash,
+            custodyGovernanceAuthority,
+            custodyGovernanceAuthorityCodeHash
+        );
     }
 
-    function _erc20BalanceOf(address asset, address account) private view returns (uint256 amount) {
-        bool success;
-        uint256 selector = uint32(IERC20.balanceOf.selector);
-        assembly ("memory-safe") {
-            let ptr := mload(0x40)
-            mstore(ptr, shl(224, selector))
-            mstore(add(ptr, 0x04), account)
-            success := staticcall(gas(), asset, ptr, 0x24, 0, 0)
-            if iszero(and(success, eq(returndatasize(), 0x20))) { success := 0 }
-            if success {
-                returndatacopy(ptr, 0, 0x20)
-                amount := mload(ptr)
-            }
-        }
-        if (!success) {
-            revert ERC20BalanceReadFailed(asset, account);
-        }
+    function canonicalCustodyHouse()
+        external
+        view
+        override
+        returns (StreamNativeCustodySettlementTypes.CanonicalHouse memory)
+    {
+        return _canonicalCustodyHouse;
     }
 
-    function _transferFromERC20(address asset, address from, address to, uint256 amount) private {
-        uint256 fromBefore = _erc20BalanceOf(asset, from);
-        uint256 toBefore = _erc20BalanceOf(asset, to);
-        _callTransferFrom(asset, from, to, amount);
-        _assertERC20TransferDelta(asset, from, to, amount, fromBefore, toBefore);
+    function custodyHouseTransition(address house)
+        external
+        view
+        override
+        returns (bytes32, bytes32, bytes32)
+    {
+        return StreamNativeCustodyPrimaryAdmission.transition(
+            _custodyAdmissionContext(), _canonicalCustodyHouse, house
+        );
     }
 
-    function _transferERC20(address asset, address from, address to, uint256 amount) private {
-        uint256 fromBefore = _erc20BalanceOf(asset, from);
-        uint256 toBefore = _erc20BalanceOf(asset, to);
-        _callTransfer(asset, to, amount);
-        _assertERC20TransferDelta(asset, from, to, amount, fromBefore, toBefore);
+    function bindCanonicalCustodyHouse(address house) external override nonReentrant {
+        StreamNativeCustodyPrimaryAdmission.bind(
+            _custodyAdmissionContext(), _canonicalCustodyHouse, house
+        );
     }
 
-    function _assertERC20TransferDelta(
-        address asset,
-        address from,
-        address to,
-        uint256 amount,
-        uint256 fromBefore,
-        uint256 toBefore
-    ) private view {
-        uint256 fromAfter = _erc20BalanceOf(asset, from);
-        uint256 toAfter = _erc20BalanceOf(asset, to);
-        if (fromBefore < amount || type(uint256).max - toBefore < amount) {
-            revert ERC20TransferInvariantBroken(
-                asset, from, to, fromBefore, fromAfter, toBefore, toAfter
+    function requireCanonicalCustodyHouse(address house) external view override {
+        StreamNativeCustodyPrimaryAdmission.requireCurrent(
+            _custodyAdmissionContext(), _canonicalCustodyHouse, house
+        );
+    }
+
+    function settleNativeCustodyPrimarySale(bytes32 id)
+        external
+        payable
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory)
+    {
+        return StreamNativeCustodyPrimaryRecording.execute(
+            StreamNativeCustodyPrimaryRecording.Context(
+                _custodyAdmissionContext(),
+                resolverCodeHash,
+                StreamNativePrimaryExecution.Context(
+                    _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
+                )
+            ),
+            _canonicalCustodyHouse,
+            preparedNativeSaleConsumed,
+            settlementConsumed,
+            _results,
+            nativeCustodyFactsHash,
+            _officialSettled,
+            totalOfficialSettled,
+            id
+        );
+    }
+
+    function settleTokenProfileCustodyPrimarySale(bytes32 id)
+        external
+        payable
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory)
+    {
+        return StreamTokenProfileCustodyRecording.execute(
+            StreamTokenProfileCustodyRecording.Context(
+                _custodyAdmissionContext(),
+                resolverCodeHash,
+                StreamNativePrimaryExecution.Context(
+                    _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
+                )
+            ),
+            _canonicalCustodyHouse,
+            preparedNativeSaleConsumed,
+            settlementConsumed,
+            _results,
+            nativeCustodyFactsHash,
+            _officialSettled,
+            totalOfficialSettled,
+            id
+        );
+    }
+
+    function settleCustodyRightsPrimarySale(bytes32 id)
+        external
+        payable
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory)
+    {
+        return StreamCustodyRightsRecording.execute(
+            StreamCustodyRightsRecording.Context(
+                _custodyAdmissionContext(),
+                resolverCodeHash,
+                StreamNativePrimaryExecution.Context(
+                    _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
+                )
+            ),
+            _canonicalCustodyHouse,
+            preparedNativeSaleConsumed,
+            settlementConsumed,
+            _results,
+            nativeCustodyFactsHash,
+            _officialSettled,
+            totalOfficialSettled,
+            id
+        );
+    }
+
+    function isStreamPlatformTemplateCustodySettlement() external pure override returns (bool) {
+        return true;
+    }
+
+    function isStreamPlatformCustodyPrimarySettlement() external pure override returns (bool) {
+        return true;
+    }
+
+    function settlePlatformCustodyPrimarySale(bytes32 id)
+        external
+        payable
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory)
+    {
+        return StreamPlatformCustodyRecording.execute(
+            StreamPlatformCustodyRecording.Context(
+                _custodyAdmissionContext(),
+                resolverCodeHash,
+                StreamNativePrimaryExecution.Context(
+                    _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
+                )
+            ),
+            _canonicalCustodyHouse,
+            preparedNativeSaleConsumed,
+            settlementConsumed,
+            _results,
+            nativeCustodyFactsHash,
+            _officialSettled,
+            totalOfficialSettled,
+            id
+        );
+    }
+
+    function isStreamPlatformTokenCustodySettlement() external pure override returns (bool) {
+        return true;
+    }
+
+    function settlePlatformTokenCustodyPrimarySale(bytes32 id)
+        external
+        payable
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory)
+    {
+        return StreamPlatformTokenCustodyRecording.execute(
+                StreamPlatformTokenCustodyRecording.Context(
+                    _custodyAdmissionContext(),
+                    resolverCodeHash,
+                    StreamNativePrimaryExecution.Context(
+                        _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
+                    )
+                ),
+                _canonicalCustodyHouse,
+                preparedNativeSaleConsumed,
+                settlementConsumed,
+                _results,
+                nativeCustodyFactsHash,
+                _officialSettled,
+                totalOfficialSettled,
+                id
             );
+    }
+
+    function supplementalFloorKey(bytes32 originalKey) public view returns (bytes32) {
+        return StreamNativeSupplementalHash.floorKey(address(this), originalKey);
+    }
+
+    function nativeSupplementalResult(bytes32 key)
+        external
+        view
+        override
+        returns (StreamNativeSupplementalTypes.NativeSupplementalResult memory)
+    {
+        return _supplementalResults[key];
+    }
+
+    function settleNativeSupplementalRevenueFromAdapter(
+        StreamNativeSupplementalTypes.NativeSupplementalCandidate calldata candidate
+    )
+        external
+        payable
+        override
+        nonReentrant
+        returns (StreamNativeSupplementalTypes.NativeSupplementalResult memory result)
+    {
+        StreamNativeSupplementalTypes.NativeSupplementalCandidate memory c = candidate;
+        if (msg.sender != c.originalFloor.saleAdapter) {
+            revert InvalidNativeSupplementalSettlement();
         }
-        uint256 expectedFrom = fromBefore - amount;
-        uint256 expectedTo = toBefore + amount;
-        if (fromAfter != expectedFrom || toAfter != expectedTo) {
-            revert ERC20TransferInvariantBroken(
-                asset, from, to, expectedFrom, fromAfter, expectedTo, toAfter
+        bytes32 purchaseKey = supplementalPurchaseKey(c.originalFloor.saleAdapter, c.purchaseId);
+        if (supplementalPurchaseConsumed[purchaseKey]) {
+            revert SupplementalPurchaseAlreadyConsumed(purchaseKey);
+        }
+        bytes32 floorKey = supplementalFloorKey(c.purchase.floorSettlementKey);
+        if (supplementalFloorConsumed[floorKey]) revert SupplementalFloorAlreadyConsumed(floorKey);
+        bytes32 key = settlementKey(
+            c.originalFloor.saleAdapter, StreamNativeSupplementalHash.executionId(address(this), c)
+        );
+        if (settlementConsumed[key]) revert SettlementAlreadyConsumed(key);
+        _requireNativeContext();
+        if (!settlementConsumed[c.purchase.floorSettlementKey]) {
+            revert InvalidNativeSupplementalSettlement();
+        }
+        StreamDeferredNativeSettlementValidation.Bindings memory bindings =
+            StreamDeferredNativeSettlementValidation.Bindings(
+                core, moduleRegistry, address(revenueResolver), address(revenueEscrow)
             );
+        uint256 amount = StreamNativeSupplementalValidation.validate(
+            bindings, c, _results[c.purchase.floorSettlementKey]
+        );
+        supplementalPurchaseConsumed[purchaseKey] = true;
+        supplementalFloorConsumed[floorKey] = true;
+        settlementConsumed[key] = true;
+        result = StreamNativeSupplementalExecution.fund(
+            StreamNativeSupplementalExecution.Context(
+                _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
+            ),
+            c,
+            key,
+            amount
+        );
+        _requireNativeContext();
+        StreamNativeSupplementalValidation.requireCurrent(bindings, c);
+        StreamPrimarySettlementTypes.PrimarySettlementResult memory common =
+            StreamNativeSupplementalExecution.commonResult(c, result);
+        _results[key] = common;
+        _supplementalResults[key] = result;
+        _officialSettled[_totalKey(_CLASS, result.profileId, result.wallet, address(0))] += amount;
+        totalOfficialSettled[address(0)] += amount;
+        StreamNativeSupplementalExecution.emitResult(c, result, common);
+    }
+
+    function _erc20RecordingContext()
+        private
+        view
+        returns (StreamERC20PrimaryRecording.Context memory x)
+    {
+        x.core = core;
+        x.moduleRegistry = moduleRegistry;
+        x.revenueResolver = revenueResolver;
+        x.splitFactory = splitFactory;
+        x.assetPolicyRegistry = assetPolicyRegistry;
+        x.coreCodeHash = coreCodeHash;
+        x.moduleRegistryCodeHash = moduleRegistryCodeHash;
+        x.resolverCodeHash = resolverCodeHash;
+        x.factoryCodeHash = factoryCodeHash;
+        x.assetRegistryCodeHash = assetRegistryCodeHash;
+        x.revenueEscrow = revenueEscrow;
+        x.escrowCodeHash = escrowCodeHash;
+        x.walletCodeHash = walletCodeHash;
+    }
+
+    function _nativeRecordingContext()
+        private
+        view
+        returns (StreamNativePrimaryRecording.Context memory)
+    {
+        return StreamNativePrimaryRecording.Context(
+            core,
+            coreCodeHash,
+            moduleRegistry,
+            moduleRegistryCodeHash,
+            resolverCodeHash,
+            StreamNativePrimaryExecution.Context(
+                _rightsContext(), revenueEscrow, escrowCodeHash, factoryCodeHash
+            )
+        );
+    }
+
+    /// @dev Native payments do not consult ERC20 status or permit-policy availability.
+    function _requireNativeContext() private view {
+        StreamSettlementAdmission.requireRegistry(
+            core, coreCodeHash, moduleRegistry, moduleRegistryCodeHash
+        );
+        if (address(revenueResolver).codehash != resolverCodeHash) {
+            revert InvalidSettlementContext(address(revenueResolver));
+        }
+        if (address(splitFactory).codehash != factoryCodeHash) {
+            revert InvalidSettlementContext(address(splitFactory));
         }
     }
 
-    function _callTransferFrom(address asset, address from, address to, uint256 amount) private {
-        bool success;
-        uint256 transferResult;
-        uint256 selector = uint32(IERC20.transferFrom.selector);
-        assembly ("memory-safe") {
-            let ptr := mload(0x40)
-            mstore(ptr, shl(224, selector))
-            mstore(add(ptr, 0x04), from)
-            mstore(add(ptr, 0x24), to)
-            mstore(add(ptr, 0x44), amount)
-            success := call(gas(), asset, 0, ptr, 0x64, 0, 0)
-            if iszero(and(success, eq(returndatasize(), 0x20))) { success := 0 }
-            if success {
-                returndatacopy(ptr, 0, 0x20)
-                transferResult := mload(ptr)
-            }
-        }
-        if (!success || transferResult != 1) {
-            revert ERC20TransferFailed(asset, from, to, amount);
-        }
+    function _rightsContext() private view returns (StreamPrimarySettlementRights.Context memory) {
+        return StreamPrimarySettlementRights.Context(revenueResolver, splitFactory, walletCodeHash);
     }
 
-    function _callTransfer(address asset, address to, uint256 amount) private {
-        bool success;
-        uint256 transferResult;
-        uint256 selector = uint32(IERC20.transfer.selector);
-        assembly ("memory-safe") {
-            let ptr := mload(0x40)
-            mstore(ptr, shl(224, selector))
-            mstore(add(ptr, 0x04), to)
-            mstore(add(ptr, 0x24), amount)
-            success := call(gas(), asset, 0, ptr, 0x44, 0, 0)
-            if iszero(and(success, eq(returndatasize(), 0x20))) { success := 0 }
-            if success {
-                returndatacopy(ptr, 0, 0x20)
-                transferResult := mload(ptr)
-            }
-        }
-        if (!success || transferResult != 1) {
-            revert ERC20TransferFailed(asset, address(this), to, amount);
-        }
+    function _totalKey(bytes32 revenueClass, bytes32 profileId, address wallet, address asset)
+        private
+        pure
+        returns (bytes32)
+    {
+        return keccak256(abi.encode(_TOTAL, revenueClass, profileId, wallet, asset));
     }
 }

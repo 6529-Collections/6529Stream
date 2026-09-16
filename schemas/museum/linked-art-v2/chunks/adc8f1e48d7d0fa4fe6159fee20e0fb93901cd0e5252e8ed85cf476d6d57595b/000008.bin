@@ -1,0 +1,247 @@
+ct",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "type": "string",
+                            "const": "VisualItem"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "equivalent": {"$ref": "#/$defs/equivalentProp"}
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "AbstractWorkRef": {
+            "title": "crm:E89_Propositional_Object",
+            "description": "Reference to a `PropositionalObject`\nSee: [Schema](abstract.html)",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "type": "string",
+                            "const": "PropositionalObject"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "equivalent": {"$ref": "#/$defs/equivalentProp"}
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "UnitRef": {
+            "title": "crm:E58_Measurement_Unit",
+            "description": "Reference to a `MeasurementUnit`",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "type": "string",
+                            "const": "MeasurementUnit"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "equivalent": {"$ref": "#/$defs/equivalentProp"}
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "CurrencyRef": {
+            "title": "crm:E98_Currency",
+            "description": "Reference to a `Currency`",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Currency"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "equivalent": {"$ref": "#/$defs/equivalentProp"}
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "MaterialRef": {
+            "title": "crm:E57_Material",
+            "description": "Reference to a `Material`",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Material"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "equivalent": {"$ref": "#/$defs/equivalentProp"}
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "LanguageRef": {
+            "title": "crm:E56_Language",
+            "description": "Reference to a `Language`",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Language"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "equivalent": {"$ref": "#/$defs/equivalentProp"}
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "TypeRef": {
+            "title": "crm:E55_Type",
+            "description": "Reference to a `Type`",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Type"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "equivalent": {"$ref": "#/$defs/equivalentProp"}
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "AnyTypeRef": {
+            "title": "crm:E55_Type, or subclass",
+            "description": "Reference to a Type or any subclass (Language, Material, Currency, MeasurementUnit)",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/$defs/typeProp"
+                        },
+                        {
+                            "type": "string",
+                            "enum": ["Type", "Language", "Material", "Currency", "MeasurementUnit"]
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/$defs/labelProp"
+                },
+                "equivalent": {"$ref": "#/$defs/equivalentProp"}
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false            
+        }
+    }        
+}

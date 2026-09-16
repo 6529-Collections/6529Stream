@@ -1,0 +1,18 @@
+ents in one XML document to contain short (abbreviated XPointer) references, which are resolved to an external definition provided in a Dictionary element in the same XML document. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:DefinitionType">
+				<sequence>
+					<element ref="gml:definitionRef">
+						<annotation>
+							<documentation>A reference to a remote entry in this dictionary, used when this dictionary entry is identified to allow external references to this specific entry. The remote entry referenced can be in a dictionary in the same or different XML document. </documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ===================================================== -->
+	<element name="definitionRef" type="gml:ReferenceType"/>
+	<!-- =========================================================== -->
+</schema>

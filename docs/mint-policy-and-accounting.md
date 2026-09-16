@@ -4076,6 +4076,11 @@ Requirements [MPA-GAS-BUDGET]:
    ceiling is a spec amendment through the ADR process, not a
    release-artifact change; the report may state tighter per-path
    envelopes inside the ceilings for regression tracking.
+   [ADR 0033](adr/0033-engineering-rehearsals-and-collector-gas.md) permits
+   separately identified local/testnet engineering deployments using test
+   assets while this gate remains failed. That exception supplies development
+   evidence only; these ceilings still gate a conforming release candidate
+   and production deployment.
 3. The report must include side-by-side measured comparisons against
    named competitor primary-mint paths (at minimum one Manifold, one
    Zora, and one Art Blocks mint) and the measured all-cold per-mint and

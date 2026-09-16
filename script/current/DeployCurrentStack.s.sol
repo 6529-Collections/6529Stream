@@ -14,14 +14,15 @@ interface CurrentDeploymentVm {
     function stopBroadcast() external;
 }
 
-/// @notice Deploys an unaudited current-stack development instance to Anvil or Sepolia.
+/// @notice Two-phase current-stack deployment with an explicit saved governance boundary.
 /// @dev No key is read by this script. Supply a Foundry signer or an unlocked local account.
 ///      Broadcast receipts under broadcast/ identify every deployment and configuration call.
 contract DeployCurrentStack is StreamCurrentStackDeployment {
     CurrentDeploymentVm private constant vm =
         CurrentDeploymentVm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
-    struct DeploymentAddresses {
+    struct DeploymentV2 {
+        uint16 schemaVersion;
         address core;
         address executor;
         address governanceRoot;
@@ -42,42 +43,210 @@ contract DeployCurrentStack is StreamCurrentStackDeployment {
         bool developmentEntropy;
         address erc20Sale;
         address primaryRevenueResolver;
+        address revenueEscrow;
+        address artistCoordinator;
+        address artistArchive;
+        address artistValidator;
+        address artistReads;
+        address[7] artistOwners;
+        address roleRegistry;
+        address assetPolicy;
+        address archivalCheckpoint;
+        address archivalCoverage;
+        bytes32 archivalConfigurationHash;
+        bytes32 deploymentProfileHash;
+        bool foundationInitialized;
+        bool productsActivated;
+        bytes foundationPlan;
+        StreamModuleRegistration[] productRegistrations;
+        GovernanceActionPolicyEntry[] catalogAdditions;
     }
 
-    function run() external returns (DeploymentAddresses memory deployed) {
+    struct Phase1V3 {
+        uint16 schemaVersion;
+        uint8 phase;
+        address checkpoint;
+        bytes32 checkpointPayloadHash;
+        address operator;
+        address core;
+        address executor;
+        address artistRegistry;
+        address coordinatorSlot;
+        address reservedCoordinator;
+        address collectionMetadata;
+        address metadataRouter;
+        address entropyProvider;
+        bool graphPrerequisitesSelected;
+        StreamModuleRegistration[] prerequisiteRegistrations;
+        GovernanceActionPolicyEntry[] catalogAdmissionIntent;
+    }
+
+    struct Phase2V3 {
+        uint16 schemaVersion;
+        uint8 phase;
+        address phaseOneCheckpoint;
+        bool graphPrerequisitesSelected;
+        bytes32[3] selectedPrerequisites;
+        DeploymentV2 deployment;
+        address collectionMetadata;
+        address schemaRegistry;
+        address schemaStore;
+        address finalityRegistry;
+        address nativeEvidenceProvider;
+        address discovery;
+        address snapshots;
+        address referencePublication;
+        address workSelector;
+        address rightsSelector;
+        address conservationSelector;
+        address inventory;
+        address bundleCoverage;
+        address artifactCoverage;
+        address externalCoverage;
+    }
+
+    function run() external returns (Phase1V3 memory staged) {
         require(block.chainid == 31337 || block.chainid == 11155111, "Anvil or Sepolia only");
         deployer = vm.envAddress("STREAM_DEPLOYER");
         require(deployer != address(0), "deployer required");
         protocol = vm.envOr("STREAM_PROTOCOL_TREASURY", deployer);
         localDevelopment = block.chainid == 31337;
+        _loadOperatorConfiguration();
         if (!localDevelopment) _loadVRFConfig();
         address selectedArtist = vm.envOr("STREAM_ARTIST", deployer);
         address platform = vm.envOr("STREAM_PLATFORM_SIGNER", deployer);
         vm.startBroadcast(deployer);
         _deployCurrentStack(selectedArtist, platform);
+        StreamCurrentGraphCheckpoint checkpoint = _savePhaseOne();
         vm.stopBroadcast();
-        deployed = DeploymentAddresses(
-            address(core),
-            address(executor),
-            address(governanceRoot),
-            address(registry),
-            address(manifest),
-            address(manager),
-            address(ledger),
-            address(sale),
-            address(auction),
-            address(factory),
-            wallet,
-            address(entropy),
-            address(provider),
-            address(router),
-            address(royalty),
-            address(artistRegistry),
-            profile,
-            localDevelopment,
-            address(erc20Sale),
-            address(primaryRevenue)
-        );
+        staged.schemaVersion = 3;
+        staged.phase = 1;
+        staged.checkpoint = address(checkpoint);
+        staged.checkpointPayloadHash = checkpoint.payloadHash();
+        staged.operator = deployer;
+        staged.core = address(core);
+        staged.executor = address(executor);
+        staged.artistRegistry = address(artistRegistry);
+        staged.coordinatorSlot = address(assemblyCoordinatorSlot);
+        staged.reservedCoordinator = assemblyCoordinatorAddress;
+        staged.collectionMetadata = address(assemblyMetadata);
+        staged.metadataRouter = address(router);
+        staged.entropyProvider = address(provider);
+        staged.graphPrerequisitesSelected = false;
+        staged.prerequisiteRegistrations = _graphRegistrations();
+        staged.catalogAdmissionIntent = _productPolicyAdditions();
+    }
+
+    /// @notice Rehydrate phase one and complete the actual graph after separately executed governance.
+    /// @dev A partially broadcast invocation must resume its original Foundry transaction journal;
+    /// this entry accepts only the original unconsumed slots and never deploys replacements for them.
+    function resume(address checkpointAddress) external returns (Phase2V3 memory completed) {
+        require(block.chainid == 31337 || block.chainid == 11155111, "Anvil or Sepolia only");
+        deployer = vm.envAddress("STREAM_DEPLOYER");
+        _restorePhaseOne(checkpointAddress);
+        _requireCurrentGraphSelections();
+        bytes memory catalog = _currentGraphRendererCatalog(1);
+        vm.startBroadcast(deployer);
+        _completeDeploymentArtistSuite(catalog);
+        vm.stopBroadcast();
+        completed.schemaVersion = 3;
+        completed.phase = 2;
+        completed.phaseOneCheckpoint = checkpointAddress;
+        completed.graphPrerequisitesSelected = true;
+        completed.selectedPrerequisites = [
+            keccak256("COLLECTION_METADATA"),
+            keccak256("METADATA_ROUTER"),
+            keccak256("ARTIST_REGISTRY")
+        ];
+        completed.collectionMetadata = address(assemblyMetadata);
+        completed.schemaRegistry = address(assemblySchemas);
+        completed.schemaStore = address(assemblyStore);
+        completed.finalityRegistry = address(assemblyFinality);
+        completed.nativeEvidenceProvider = address(assemblyProvider);
+        completed.discovery = address(assemblyDiscovery);
+        completed.snapshots = address(assemblySnapshots);
+        completed.referencePublication = address(assemblyReference);
+        completed.workSelector = address(assemblyWork);
+        completed.rightsSelector = address(assemblyRights);
+        completed.conservationSelector = address(assemblyConservation);
+        completed.inventory = address(assemblyInventory);
+        completed.bundleCoverage = address(assemblyBundle);
+        completed.artifactCoverage = address(assemblyArtifact);
+        completed.externalCoverage = address(assemblyExternal);
+        completed.deployment = _completedDeployment();
+    }
+
+    /// @notice Prepare after each preceding stage has actually executed. No action is scheduled here.
+    function prepareGraphRegistration(address checkpointAddress)
+        external
+        returns (GenesisBatch memory)
+    {
+        deployer = vm.envAddress("STREAM_DEPLOYER");
+        _restorePhaseOne(checkpointAddress);
+        return _graphRegistrationBatch();
+    }
+
+    function prepareGraphSelection(
+        address checkpointAddress,
+        address payload,
+        StreamSystemManifestUpdate calldata update
+    ) external returns (GenesisBatch memory) {
+        deployer = vm.envAddress("STREAM_DEPLOYER");
+        _restorePhaseOne(checkpointAddress);
+        return _graphSelectionBatch(payload, update);
+    }
+
+    function _completedDeployment() private view returns (DeploymentV2 memory deployed) {
+        deployed.schemaVersion = 2;
+        deployed.core = address(core);
+        deployed.executor = address(executor);
+        deployed.governanceRoot = address(governanceRoot);
+        deployed.registry = address(registry);
+        deployed.manifest = address(manifest);
+        deployed.manager = address(manager);
+        deployed.ledger = address(ledger);
+        deployed.sale = address(sale);
+        deployed.auction = address(auction);
+        deployed.splitFactory = address(factory);
+        deployed.splitWallet = wallet;
+        deployed.entropy = address(entropy);
+        deployed.provider = address(provider);
+        deployed.metadata = address(router);
+        deployed.royalty = address(royalty);
+        deployed.artistRegistry = address(artistRegistry);
+        deployed.splitProfile = profile;
+        deployed.developmentEntropy = localDevelopment;
+        deployed.erc20Sale = address(erc20Sale);
+        deployed.primaryRevenueResolver = address(primaryRevenue);
+        deployed.revenueEscrow = address(revenueEscrow);
+        deployed.artistCoordinator = address(artistCoordinator);
+        deployed.artistArchive = artistSuite.archive;
+        deployed.artistValidator = artistSuite.validator;
+        deployed.artistReads = address(artistCoordinator.reads());
+        deployed.artistOwners = artistSuite.owners;
+        deployed.roleRegistry = address(roles);
+        deployed.assetPolicy = address(assetPolicy);
+        deployed.archivalCheckpoint = address(archivalCheckpoint);
+        deployed.archivalCoverage = address(archivalCoverage);
+        deployed.archivalConfigurationHash = archivalCheckpoint.configurationHash();
+        deployed.deploymentProfileHash = DEPLOYMENT_HASH;
+        deployed.foundationInitialized = executor.genesisInitialized();
+        // This legacy field denotes completion of all product selections. V3 separately
+        // reports the three prerequisites already selected during the governance boundary.
+        deployed.productsActivated = _allProductSelectionsActive();
+        deployed.foundationPlan = encodedFoundationPlan;
+        deployed.productRegistrations = _productRegistrations();
+        deployed.catalogAdditions = _productPolicyAdditions();
+    }
+
+    /// @notice Unscheduled catalog additions for the deployed product configuration.
+    /// @dev The stateless planner builds these rows outside broadcasting without a script self-call.
+    function deploymentCatalogAdditions()
+        external
+        view
+        returns (GovernanceActionPolicyEntry[] memory)
+    {
+        return _productPolicyAdditions();
     }
 
     function _loadVRFConfig() private {
@@ -98,5 +267,20 @@ contract DeployCurrentStack is StreamCurrentStackDeployment {
         vrfConfig.callbackGasLimit = uint32(callbackGas);
         vrfConfig.maximumCallbackGasLimit = uint32(maximumCallbackGas);
         vrfConfig.nativePayment = vm.envOr("STREAM_VRF_NATIVE_PAYMENT", true);
+    }
+
+    function _buildGovernanceFoundationPlan(
+        StreamGovernanceGenesisPlan.Configuration memory configuration,
+        address payloadRoot,
+        StreamSystemManifestUpdate memory update
+    )
+        internal
+        override
+        returns (SystemManifestBootstrapBinding memory binding, GenesisBatch[] memory batches)
+    {
+        vm.stopBroadcast();
+        (binding, batches) =
+            super._buildGovernanceFoundationPlan(configuration, payloadRoot, update);
+        vm.startBroadcast(deployer);
     }
 }

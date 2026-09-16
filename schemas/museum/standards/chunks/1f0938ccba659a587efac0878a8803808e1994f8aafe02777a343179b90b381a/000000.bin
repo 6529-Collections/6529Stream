@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<rdf:RDF xml:lang="en" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xml:base="http://www.cidoc-crm.org/cidoc-crm/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:la="https://linked.art/ns/terms/" xmlns:schema="http://schema.org/" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:ore="http://www.openarchives.org/ore/terms/" xmlns:dig="http://www.ics.forth.gr/isl/CRMdig/">
+
+<!--                                -->
+<!-- Hopefully temporary extensions -->
+<!--                                -->
+
+<!-- Allow dot ones via Attribute Assignment -->
+
+<rdf:Property rdf:about="https://linked.art/ns/terms/property_classified_as">
+        <rdfs:label xml:lang="en">Property Classified As</rdfs:label>
+        <rdfs:comment xml:lang="en">Record dot one properties via Attribute Assignments</rdfs:comment>
+        <rdfs:domain rdf:resource="E13_Attribute_Assignment"/>
+        <rdfs:range rdf:resource="E55_Type"/>
+</rdf:Property>
+
+<!-- permanent_custodian -->
+<!-- CRM turned down the inclusion of this at CRM SIG in March 2021 -->
+
+<rdf:Property rdf:about="https://linked.art/ns/terms/current_permanent_custodian">
+    <rdfs:label xml:lang="en">Current Permanent Custodian</rdfs:label>
+    <rdfs:comment xml:lang="en">This property records the normal custodian of the object at the time when the assertion was made. The object may have a temporary custodian, for example when it is loaned to another organization for an exhibition or between departments for conservation or storage.</rdfs:comment>
+    <rdfs:domain rdf:resource="E19_Physical_Object"/>
+    <rdfs:range rdf:resource="E39_Actor"/>
+    <owl:inverseOf rdf:resource="https://linked.art/ns/terms/current_permanent_custodian_of"/>
+</rdf:Property>
+
+<rdf:Property rdf:about="https://linked.art/ns/terms/current_permanent_custodian_of">
+    <rdfs:label xml:lang="en">Current Permanent Custodian Of</rdfs:label>
+    <rdfs:comment xml:lang="en">Inverse of Current Permanent Custodian</rdfs:comment>
+    <rdfs:range rdf:resource="E19_Physical_Object"/>
+    <rdfs:domain rdf:resource="E39_Actor"/>
+    <owl:inverseOf rdf:resource="https://linked.art/ns/terms/current_permanent_custodian"/>
+</rdf:Property>
+
+<!-- Equivalence -->
+
+<rdf:Property rdf:about="https://linked.art/ns/terms/equivalent">
+    <rdfs:label xml:lang="en">has equivalent instance</rdfs:label>
+    <rdfs:comment xml:lang="en">Similar to skos:exactMatch, the referenced entity is an equivalent instance to the referencing entity. This would not have the same inference issue as exactMatch, whereby the domain and range become skos:Concept, which is equivalent to E55_Type ... and thus everything becomes a Type.</rdfs:comment>
+    <rdfs:domain rdf:resource="E1_CRM_Entity"/>
+    <rdfs:range rdf:resource="E1_CRM_Entity"/>
+</rdf:Property>
+
+
+<!-- Payment of a Monetary Amount -->
+
+<rdfs:Class rdf:about="https://linked.art/ns/terms/Transfer">
+    <rdfs:label xml:lang="en">Transfer</rdfs:label>
+    <rdfs:comment>Abstract transferral of something between entities</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E7_Activity"/>
+</rdfs:Class>
+
+<rdfs:Class rdf:about="E8_Acquisition">
+    <rdfs:subClassOf rdf:resource="https://linked.art/ns/terms/Transfer"/>
+</rdfs:Class>
+<rdfs:Class rdf:about="E9_Move">
+    <rdfs:subClassOf rdf:resource="https://linked.art/ns/terms/Transfer"/>
+</rdfs:Class>
+<rdfs:Class rdf:about="E10_Transfer_of_Custody">
+    <rdfs:subClassOf rdf:resource="https://linked.art/ns/terms/Transfer"/>
+</rdfs:Class>
+
+<rdf:Property rdf:about="https://linked.art/ns/terms/transferred">
+        <rdfs:label xml:lang="en">transferred</rdfs:label>
+        <rdfs:comment xml:lang="en">What was transferred</rdfs:comment>
+        <rdfs:domain rdf:resource="https://linked.art/ns/terms/Transfer"/>
+        <rdfs:range rdf:resource="E1_CRM_Entity"/>
+</rdf:Property>
+
+<rdf:Property rdf:about="https://linked.art/ns/terms/transferred_from">
+        <rdfs:label xml:lang="en">transferred from</rdfs:label>
+        <rdfs:comment xml:lang="en">Where or with whom did it start</rdfs:comment>
+        <rdfs:domain rdf:resource="https://linked.art/ns/terms/Transfer"/>
+        <rdfs:range rdf:resource="E1_CRM_Entity"/>
+</rdf:Property>
+
+<rdf:Property rdf:about="https://linked.art/ns/terms/transferred_to">
+        <rdfs:label xml:lang="en">transferred to</rdfs:label>
+        <rdfs:comment xml:lang="en">Where or with whom did it end</rdfs:comment>
+        <rdfs:domain rdf:resource="https://linked.art/ns/terms/Transfer"/>
+        <rdfs:range rdf:resource="E1_CRM_Entity"/>
+</rdf:Property>
+
+<rdfs:Class rdf:about="https://linked.art/ns/terms/Payment">
+    <rdfs:label xml:lang="en">Payment</rdfs:label>
+    <rdfs:comment>Payment of Money</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="https://linked.art/ns/terms/Transfer"/>
+</rdfs:Class>
+
+<rdf:Property rdf:about="https://linked.art/ns/terms/paid_amount">
+        <rdfs:label xml:lang="en">Paid Amount</rdfs:label>
+        <rdfs:comment xml:lang="en">The amount paid</rdfs:comment>
+        <rdfs:domain rdf:resource="https://linked.art/ns/terms/Payment"/>
+        <rdfs:range rdf:resource="E97_Monetary_Amount"/>
+</rdf:Property>
+
+<rdf:Property rdf:about="https://linked.art/ns/terms/paid_from">
+        <rdfs:label xml:lang="en">Paid From</rdfs:label>
+        <rdfs:comment xml:lang="en">Who the payment came from</rdfs:comment>
+        <rdfs:domain rdf:resource="https://linked.art/ns/terms/Payment"/>
+        <rdfs:range rdf:resource="E39_Actor"/>
+</rdf:Property>
+
+<rdf:Property rdf:about="https://linked.art/ns/terms/paid_to">
+        <rdfs:label xml:lang="en">Paid To</rdfs:label>
+        <rdfs:comment xml:lang="en">Who the payment went to</rdfs:comment>
+        <rdfs:domain rdf:resource="https://linked.art/ns/terms/Payment"/>
+        <rdfs:range rdf:resource="E39_Actor"/>
+</rdf:Property>
+
+<!-- Set of Things, as potential superclass of Group and Collection -->
+<!-- e.g. an auction lot is not a curated holding, but we need a class for its membership -->
+<!-- Sets can have rights (right to add /remove) and be about subjects (e.g. exhibition) -->
+
+<rdfs:Class rdf:about="https://linked.art/ns/terms/Set">
+    <rdfs:label xml:lang="en">Set</rdfs:label>
+    <rdfs:comment></rdfs:comment>
+    <rdfs:subClassOf rdf:resource="E89_Propositional_Object"/>
+    <rdfs:subClassOf rdf:resource="E72_Legal_Object"/>
+</rdfs:Class>
+
+<rdfs:Class rdf:about="E74_Group">
+    <rdfs:subClassOf rdf:resource="https://linked.art/ns/terms/Set"/>
+    <rdfs:subClassOf rdf:resource="E39_Actor"/>
+</rdfs:Class>
+
+<rdf:Property rdf:about="https://linked.art/ns/terms/has_member">
+    <rdfs:label xml:lang="en">has member</rdfs:label>
+    <rdfs:comment xml:lang="en"></rdfs:comment>
+    <rdfs:domain rdf:resource="https://linked.art/ns/terms/Set"/>
+    <rdfs:range rdf:resource="E1_CRM_Entity"/>
+    <owl:inverseOf rdf:resource="https://linked.art/ns/terms/member_of"/>
+</rdf:Property>
+
+<rdf:Property rdf:about="https://linked.art/ns/terms/member_of">
+    <rdfs:label xml:lang="en">member of</rdfs:label>
+    <rdfs:comment xml:lang="en"></rdfs:comment>
+    <rdfs:domain rdf:resource="E1_CRM_Entity"/>
+    <rdfs:range rdf:resource="https://linked.art/ns/terms/Set"/>
+    <owl:inverseOf rdf:resource="https://linked.art/ns/terms/has_member"/>
+</rdf:Property>
+
+<!-- No inverse, as we don't want instances to be exemplars -->
+<rdf:Property rdf:about="https://linked.art/ns/terms/members_exemplified_by">
+    <rdfs:label xml:lang="en">members exemplified by</rdfs:label>
+    <rdfs:comment xml:lang="en"></rdfs:comment>
+    <rdfs:domain rdf:resource="https://linked.art/ns/terms/Set"/>
+    <rdfs:range rdf:resource="E1_CRM_Entity"/>
+</rdf:Property>
+
+<rdf:Property rdf:about="https://linked.art/ns/terms/members_contained_by">
+    <rdfs:label xml:lang="en">members contained by</rdfs:label>
+    <rdfs:comment xml:lang="en"></rdfs:comment>
+    <rdfs:domain rdf:resource="https://linked.art/ns/terms/Set"/>
+    <rdfs:range rdf:resource="E18_Physical_Thing"/>
+    <owl:inverseOf rdf:resource="https://linked.art/ns/terms/contains_members_of"/>
+</rdf:Property

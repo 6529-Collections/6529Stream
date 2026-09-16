@@ -1,0 +1,125 @@
+ng="ru">конец начала</rdfs:label>
+    <rdfs:domain rdf:resource="E52_Time-Span" />
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal" />
+    <rdfs:subPropertyOf rdf:resource="P81_ongoing_throughout" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P81b_begin_of_the_end">
+    <rdfs:label xml:lang="en">begin of the end</rdfs:label>
+    <rdfs:label xml:lang="de">Anfang vom Ende</rdfs:label>
+    <rdfs:label xml:lang="el">αρχή του τέλους</rdfs:label>
+    <rdfs:label xml:lang="fr">début de la fin</rdfs:label>
+    <rdfs:label xml:lang="pt">começar do fim</rdfs:label>
+    <rdfs:label xml:lang="ru">начать в конце</rdfs:label>
+    <rdfs:domain rdf:resource="E52_Time-Span" />
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal" />
+    <rdfs:subPropertyOf rdf:resource="P81_ongoing_throughout" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P82_at_some_time_within">
+    <rdfs:label xml:lang="en">at some time within</rdfs:label>
+    <rdfs:label xml:lang="de">irgendwann innerhalb von</rdfs:label>
+    <rdfs:label xml:lang="el">κάποτε εντός</rdfs:label>
+    <rdfs:label xml:lang="fr">a eu lieu durant</rdfs:label>
+    <rdfs:label xml:lang="pt">abrange no máximo</rdfs:label>
+    <rdfs:label xml:lang="ru">в тeчeниe пeриода врeмeни</rdfs:label>
+    <rdfs:label xml:lang="zh">最长范围是</rdfs:label>
+    <rdfs:comment>This property describes the maximum period of time within which an E52 Time-Span falls. Since Time-Spans may not have precisely known temporal extents, the CIDOC CRM supports statements about the minimum and maximum temporal extents of Time-Spans. This property allows a Time-Span’s maximum temporal extent (i.e. its outer boundary) to be assigned an E61 Time Primitive value. Time Primitives are treated by the CIDOC CRM as application or system specific date intervals, and are not further analysed. If different sources of evidence justify different maximum extents without contradicting each other, the resulting intersection of all these extents will be the best estimate. This should be taken into account for information integration.</rdfs:comment>
+    <rdfs:domain rdf:resource="E52_Time-Span" />
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P82a_begin_of_the_begin">
+    <rdfs:label xml:lang="en">begin of the begin</rdfs:label>
+    <rdfs:label xml:lang="de">Anfang des Anfangs</rdfs:label>
+    <rdfs:label xml:lang="el">αρχή της αρχής</rdfs:label>
+    <rdfs:label xml:lang="fr">début du début</rdfs:label>
+    <rdfs:label xml:lang="pt">começar do início</rdfs:label>
+    <rdfs:label xml:lang="ru">начать с начала</rdfs:label>
+    <rdfs:domain rdf:resource="E52_Time-Span" />
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal" />
+    <rdfs:subPropertyOf rdf:resource="P82_at_some_time_within" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P82b_end_of_the_end">
+    <rdfs:label xml:lang="en">end of the end</rdfs:label>
+    <rdfs:label xml:lang="de">Ende vom Ende</rdfs:label>
+    <rdfs:label xml:lang="el">τέλος του τέλους</rdfs:label>
+    <rdfs:label xml:lang="fr">fin de la fin</rdfs:label>
+    <rdfs:label xml:lang="pt">fim do fim</rdfs:label>
+    <rdfs:label xml:lang="ru">конец конец</rdfs:label>
+    <rdfs:domain rdf:resource="E52_Time-Span" />
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal" />
+    <rdfs:subPropertyOf rdf:resource="P82_at_some_time_within" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P86_falls_within">
+    <rdfs:label xml:lang="en">falls within</rdfs:label>
+    <rdfs:label xml:lang="de">fällt in</rdfs:label>
+    <rdfs:label xml:lang="el">περιέχεται σε</rdfs:label>
+    <rdfs:label xml:lang="fr">s’insère dans</rdfs:label>
+    <rdfs:label xml:lang="pt">está contido em</rdfs:label>
+    <rdfs:label xml:lang="ru">содeржится в</rdfs:label>
+    <rdfs:label xml:lang="zh">属于</rdfs:label>
+    <rdfs:comment>This property describes the inclusion relationship between two instances of E52 Time-Span.
+This property supports the notion that the temporal extent of an instance of E52 Time-Span falls within the temporal extent of another instance of E52 Time-Span. It addresses temporal containment only, and no contextual link between the two instances of E52 Time-Span is implied. This property is transitive and reflexive.</rdfs:comment>
+    <rdfs:domain rdf:resource="E52_Time-Span" />
+    <rdfs:range rdf:resource="E52_Time-Span" />
+    <owl:inverseOf rdf:resource="P86i_contains" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P86i_contains">
+    <rdfs:label xml:lang="en">contains</rdfs:label>
+    <rdfs:label xml:lang="de">enthält</rdfs:label>
+    <rdfs:label xml:lang="el">περιέχει</rdfs:label>
+    <rdfs:label xml:lang="fr">contient</rdfs:label>
+    <rdfs:label xml:lang="pt">contém</rdfs:label>
+    <rdfs:label xml:lang="ru">содeржит</rdfs:label>
+    <rdfs:label xml:lang="zh">包含</rdfs:label>
+    <rdfs:domain rdf:resource="E52_Time-Span" />
+    <rdfs:range rdf:resource="E52_Time-Span" />
+    <owl:inverseOf rdf:resource="P86_falls_within" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P89_falls_within">
+    <rdfs:label xml:lang="en">falls within</rdfs:label>
+    <rdfs:label xml:lang="de">fällt in</rdfs:label>
+    <rdfs:label xml:lang="el">περιέχεται σε</rdfs:label>
+    <rdfs:label xml:lang="fr">s'insère dans</rdfs:label>
+    <rdfs:label xml:lang="pt">está contido em</rdfs:label>
+    <rdfs:label xml:lang="ru">содeржится в</rdfs:label>
+    <rdfs:label xml:lang="zh">位于</rdfs:label>
+    <rdfs:comment>This property identifies an instance of E53 Place that falls wholly within the extent of another instance of E53 Place.
+It addresses spatial containment only and does not imply any relationship between things or phenomena occupying these places.
+This property is transitive and reflexive.</rdfs:comment>
+    <rdfs:domain rdf:resource="E53_Place" />
+    <rdfs:range rdf:resource="E53_Place" />
+    <owl:inverseOf rdf:resource="P89i_contains" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P89i_contains">
+    <rdfs:label xml:lang="en">contains</rdfs:label>
+    <rdfs:label xml:lang="de">enthält</rdfs:label>
+    <rdfs:label xml:lang="el">περιέχει</rdfs:label>
+    <rdfs:label xml:lang="fr">contient</rdfs:label>
+    <rdfs:label xml:lang="pt">contém</rdfs:label>
+    <rdfs:label xml:lang="ru">содeржит</rdfs:label>
+    <rdfs:label xml:lang="zh">包括</rdfs:label>
+    <rdfs:domain rdf:resource="E53_Place" />
+    <rdfs:range rdf:resource="E53_Place" />
+    <owl:inverseOf rdf:resource="P89_falls_within" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P90_has_value">
+    <rdfs:label xml:lang="en">has value</rdfs:label>
+    <rdfs:label xml:lang="de">hat Wert</rdfs:label>
+    <rdfs:label xml:lang="el">έχει τιμή</rdfs:label>
+    <rdfs:label xml:lang="fr">a pour valeur</rdfs:label>
+    <rdfs:label xml:lang="pt">tem valor</rdfs:label>
+    <rdfs:label xml:lang="ru">имeeт значeниe</rdfs:label>
+    <rdfs:label xml:lang="zh">有数值</rdfs:label>
+    <rdfs:comment>This property allows an instance of E54 Dimension to be approximated by an instance of E60 Number primitive.</rdfs:comment>
+    <rdfs:domain rdf:resource="E54_Dimension" />
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P90a_has_lower_value_limit">
+    <rdfs:label xml:lang="en">has lower value limit</rdfs:label>
+    <rdfs:domain rdf:resource="E54_Dimension" />
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal" />
+    <rdfs:subPropertyOf rdf:resource="P90_has_value" />
+  </rdf:Property>
+  <rdf:Property rdf:about="P90b_has_upper_value_limit">
+    <rdfs:label xml:lang="en">has upper value limit</rdfs:label>
+    <rdfs:domain rdf:resource="E54_Dimension" />
+    <rdfs:range rdf:resource="http://www.w3.org/2000

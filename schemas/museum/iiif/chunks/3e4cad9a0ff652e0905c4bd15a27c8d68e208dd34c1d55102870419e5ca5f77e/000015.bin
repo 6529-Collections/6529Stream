@@ -1,0 +1,77 @@
+idth</code> properties of the available logos. The client <em class="rfc">may</em> decide on the logo by inspecting properties defined as <a href="/api/presentation/3.0/#46-linked-data-context-and-extensions" title="Linked Data Context and Extensions">extensions</a>.</p>
+
+<p>The value of this property <em class="rfc">must</em> be an array of <abbr title="JavaScript Object Notation">JSON</abbr> objects, each of which <em class="rfc">must</em> have <code class="language-plaintext highlighter-rouge">id</code> and <code class="language-plaintext highlighter-rouge">type</code> properties, and <em class="rfc">should</em> have <code class="language-plaintext highlighter-rouge">format</code>. The value of <code class="language-plaintext highlighter-rouge">type</code> <em class="rfc">must</em> be “Image”.</p>
+
+<ul>
+  <li>Agent resources <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">logo</code> property.<br />
+Clients <em class="rfc">must</em> render <code class="language-plaintext highlighter-rouge">logo</code> on Agent resources.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"logo"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/img/logo.jpg"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Image"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"image/jpeg"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"height"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"width"</span><span class="p">:</span><span class="w"> </span><span class="mi">120</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="rendering">
+        
+        
+          rendering <a href="#rendering" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>A resource that is an alternative, non-<abbr title="International Image Interoperability Framework">IIIF</abbr> representation of the resource that has the <code class="language-plaintext highlighter-rouge">rendering</code> property. Such representations typically cannot be painted onto a single Canvas, as they either include too many views, have incompatible dimensions, or are compound resources requiring additional rendering functionality. The <code class="language-plaintext highlighter-rouge">rendering</code> resource <em class="rfc">must</em> be able to be displayed directly to a human user, although the presentation may be outside of the <abbr title="International Image Interoperability Framework">IIIF</abbr> client. The resource <em class="rfc">must not</em> have a splash page or other interstitial resource that mediates access to it. If access control is required, then the <a href="/api/auth/" title="IIIF Authentication API"><abbr title="International Image Interoperability Framework">IIIF</abbr> Authentication <abbr title="Application Programming Interface">API</abbr></a> is <em class="rfc">recommended</em>. Examples include a rendering of a book as a PDF or EPUB, a slide deck with images of a building, or a 3D model of a statue.</p>
+
+<p>The value <em class="rfc">must</em> be an array of <abbr title="JavaScript Object Notation">JSON</abbr> objects. Each item <em class="rfc">must</em> have the <code class="language-plaintext highlighter-rouge">id</code>, <code class="language-plaintext highlighter-rouge">type</code> and <code class="language-plaintext highlighter-rouge">label</code> properties, and <em class="rfc">should</em> have a <code class="language-plaintext highlighter-rouge">format</code> property.</p>
+
+<ul>
+  <li>Any resource type <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">rendering</code> property with at least one item.<br />
+Clients <em class="rfc">should</em> render <code class="language-plaintext highlighter-rouge">rendering</code> on a Collection, Manifest or Canvas, and <em class="rfc">may</em> render <code class="language-plaintext highlighter-rouge">rendering</code> on other types of resource.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"rendering"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/1.pdf"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Text"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"PDF Rendering of Book"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"application/pdf"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="service">
+        
+        
+          service <a href="#service" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>A service that the client might interact with directly and gain additional information or functionality for using the resource that has the <code class="language-plaintext highlighter-rouge">service</code> property, such as from an Image to the base URI of an associated <a href="/api/image/3.0/" title="Image API"><abbr title="International Image Interoperability Framework">IIIF</abbr> Image <abbr title="Application Programming Interface">API</abbr></a> service. The service resource <em class="rfc">should</em> have additional information associated with it in order to allow the client to determine how to make appropriate use of it. Please see the <a href="/api/registry/services/">Service Registry</a> document for the details of currently known service types.</p>
+
+<p>The value <em class="rfc">must</em> be an array of <abbr title="JavaScript Object Notation">JSON</abbr> objects. Each object will have properties depending on the service’s definition, but <em class="rfc">must</em> have either the <code class="language-plaintext highlighter-rouge">id</code> or <code class="language-plaintext highlighter-rouge">@id</code> and <code class="language-plaintext highlighter-rouge">type</code> or <code class="language-plaintext highlighter-rouge">@type</code> properties. Each object <em class="rfc">should</em> have a <code class="language-plaintext highlighter-rouge">profile</code> property.</p>
+
+<ul>
+  <li>Any resource type <em class="r

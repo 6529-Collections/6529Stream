@@ -594,67 +594,53 @@ library StreamMetadataRenderer {
     }
 
     function escapeJsonString(string memory raw) public pure returns (string memory) {
-        bytes memory input = bytes(raw);
-        bytes memory output = new bytes(input.length * 6);
-        uint256 outputLength = 0;
-
-        for (uint256 i = 0; i < input.length; i++) {
-            bytes1 character = input[i];
-            if (character == 0x22) {
-                output[outputLength] = 0x5c;
-                outputLength++;
-                output[outputLength] = 0x22;
-                outputLength++;
-            } else if (character == 0x5c) {
-                output[outputLength] = 0x5c;
-                outputLength++;
-                output[outputLength] = 0x5c;
-                outputLength++;
-            } else if (character == 0x08) {
-                output[outputLength] = 0x5c;
-                outputLength++;
-                output[outputLength] = 0x62;
-                outputLength++;
-            } else if (character == 0x0c) {
-                output[outputLength] = 0x5c;
-                outputLength++;
-                output[outputLength] = 0x66;
-                outputLength++;
-            } else if (character == 0x0a) {
-                output[outputLength] = 0x5c;
-                outputLength++;
-                output[outputLength] = 0x6e;
-                outputLength++;
-            } else if (character == 0x0d) {
-                output[outputLength] = 0x5c;
-                outputLength++;
-                output[outputLength] = 0x72;
-                outputLength++;
-            } else if (character == 0x09) {
-                output[outputLength] = 0x5c;
-                outputLength++;
-                output[outputLength] = 0x74;
-                outputLength++;
-            } else if (uint8(character) < 0x20) {
-                output[outputLength] = 0x5c;
-                outputLength++;
-                output[outputLength] = 0x75;
-                outputLength++;
-                output[outputLength] = 0x30;
-                outputLength++;
-                output[outputLength] = 0x30;
-                outputLength++;
-                output[outputLength] = _hexNibble(uint8(character) >> 4);
-                outputLength++;
-                output[outputLength] = _hexNibble(uint8(character) & 0x0f);
-                outputLength++;
-            } else {
-                output[outputLength] = character;
-                outputLength++;
+        // Six bytes is the worst case for each input byte (\u00xx). Keep the checked
+        // allocation, write only within it, and retain its allocation after shortening.
+        // UTF-8 validation remains the caller's separate responsibility, as before.
+        bytes memory output = new bytes(bytes(raw).length * 6);
+        assembly ("memory-safe") {
+            let cursor := add(raw, 32)
+            let end := add(cursor, mload(raw))
+            let start := add(output, 32)
+            let destination := start
+            let hexDigits := 0x3031323334353637383961626364656600000000000000000000000000000000
+            for { } lt(cursor, end) { cursor := add(cursor, 1) } {
+                let character := byte(0, mload(cursor))
+                let escaped := 0
+                switch character
+                case 0x22 { escaped := 0x22 }
+                case 0x5c { escaped := 0x5c }
+                case 0x08 { escaped := 0x62 }
+                case 0x0c { escaped := 0x66 }
+                case 0x0a { escaped := 0x6e }
+                case 0x0d { escaped := 0x72 }
+                case 0x09 { escaped := 0x74 }
+                switch iszero(escaped)
+                case 0 {
+                    mstore8(destination, 0x5c)
+                    mstore8(add(destination, 1), escaped)
+                    destination := add(destination, 2)
+                }
+                default {
+                    switch lt(character, 0x20)
+                    case 1 {
+                        mstore8(destination, 0x5c)
+                        mstore8(add(destination, 1), 0x75)
+                        mstore8(add(destination, 2), 0x30)
+                        mstore8(add(destination, 3), 0x30)
+                        mstore8(add(destination, 4), byte(shr(4, character), hexDigits))
+                        mstore8(add(destination, 5), byte(and(character, 15), hexDigits))
+                        destination := add(destination, 6)
+                    }
+                    default {
+                        mstore8(destination, character)
+                        destination := add(destination, 1)
+                    }
+                }
             }
+            mstore(output, sub(destination, start))
         }
-
-        return string(_truncateBytes(output, outputLength));
+        return string(output);
     }
 
     function isValidUtf8(string memory raw) public pure returns (bool valid) {

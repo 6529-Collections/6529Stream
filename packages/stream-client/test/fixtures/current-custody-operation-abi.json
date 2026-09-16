@@ -1,0 +1,409 @@
+{
+  "compiler": "0.8.19",
+  "sourceCommit": "80b99ee8",
+  "validation": "Compiled interface ABI and source preimages; actual getter execution remains pending",
+  "families": {
+    "tokenProfileCustodyActivation": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "auctionId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "baseConfigHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "originHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "tokenId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "assignmentHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "primaryPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "primaryPolicyMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "address",
+                  "name": "artist",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "nonce",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "deadline",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamTokenProfileCustodyTypes.Authorization",
+              "name": "authorization",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes",
+              "name": "platformSignature",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "artistSignature",
+              "type": "bytes"
+            }
+          ],
+          "name": "activateTokenProfileCustody",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "auctionId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "deliverTo",
+              "type": "address"
+            }
+          ],
+          "name": "bidTokenProfileCustody",
+          "outputs": [],
+          "stateMutability": "payable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "auctionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "settleTokenProfileCustody",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "settlementKey",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "auctionId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "baseConfigHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "originHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "tokenId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "assignmentHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "primaryPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "primaryPolicyMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "address",
+                  "name": "artist",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "nonce",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "deadline",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamTokenProfileCustodyTypes.Authorization",
+              "name": "authorization",
+              "type": "tuple"
+            }
+          ],
+          "name": "tokenProfileCustodyDigest",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "domain": "6529StreamTokenProfileCustodyAllowCurrent",
+      "typePreimage": "TokenProfileCustodyActivation(bytes32 auctionId,bytes32 baseConfigHash,bytes32 originHash,uint256 tokenId,bytes32 assignmentHash,bytes32 primaryPolicyHash,uint8 primaryPolicyMode,address artist,bytes32 nonce,uint64 deadline)",
+      "getter": "tokenProfileCustodyDigest",
+      "stem": "TokenProfileCustody"
+    },
+    "custodyRightsActivation": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "auctionId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "baseConfigHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "originHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "tokenId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "rightsMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "assignmentHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "primaryPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "primaryPolicyMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "address",
+                  "name": "artist",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "nonce",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "deadline",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamCustodyRightsTypes.Authorization",
+              "name": "authorization",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes",
+              "name": "platformSignature",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "artistSignature",
+              "type": "bytes"
+            }
+          ],
+          "name": "activateCustodyRights",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "auctionId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "deliverTo",
+              "type": "address"
+            }
+          ],
+          "name": "bidCustodyRights",
+          "outputs": [],
+          "stateMutability": "payable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "auctionId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "baseConfigHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "originHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "tokenId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "rightsMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "assignmentHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "primaryPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "primaryPolicyMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "address",
+                  "name": "artist",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "nonce",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "deadline",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamCustodyRightsTypes.Authorization",
+              "name": "authorization",
+              "type": "tuple"
+            }
+          ],
+          "name": "custodyRightsDigest",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "auctionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "settleCustodyRights",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "settlementKey",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ],
+      "domain": "6529StreamCustodyRightsAllowCurrent",
+      "typePreimage": "CustodyRightsActivation(bytes32 auctionId,bytes32 baseConfigHash,bytes32 originHash,uint256 tokenId,uint8 rightsMode,bytes32 assignmentHash,bytes32 primaryPolicyHash,uint8 primaryPolicyMode,address artist,bytes32 nonce,uint64 deadline)",
+      "getter": "custodyRightsDigest",
+      "stem": "CustodyRights"
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "kind": "normative typed operation extension",
+  "operationId": 59,
+  "write": "grantStewardCapabilities",
+  "preservedOperations": {
+    "historicalPrefix": [
+      1,
+      57
+    ],
+    "adoptedIdentityDismissal": 58
+  },
+  "recipeId": "6529stream.artist.operation-recipe.v2.59.grantStewardCapabilities",
+  "producerId": "operation_59.identity_authority.apply",
+  "writeDomain": "6529STREAM_ARTIST_REGISTRY_WRITE_GRANT_STEWARD_CAPABILITIES_V1",
+  "coordinator": "coordinateGrantStewardCapabilities",
+  "ownerCallback": "grantStewardCapabilities",
+  "typedInterface": "smart-contracts/interfaces/stream/artist/IStreamArtistStewardCapabilities.sol",
+  "payloadFields": [
+    "artistId:bytes32",
+    "expectedAppointmentHash:bytes32",
+    "expectedSteward:address",
+    "expectedDirectiveHash:bytes32",
+    "expectedGrantHead:bytes32",
+    "expectedCapabilities:uint32",
+    "addedCapabilities:uint32",
+    "reasonHash:bytes32",
+    "reasonURI:string"
+  ],
+  "authority": "actual immutable Executor; exact per-call TERMINAL_FREEZE (2); original stored captured veto commitment and selector admission",
+  "signerTypehash": null,
+  "snapshotOwnerMask": "0x04",
+  "readOwnerMask": "0x04",
+  "writeOwnerMask": "0x04",
+  "allowedAddedCapabilities": {
+    "CAP_ECONOMICS_CONSENT": 4,
+    "CAP_SANCTION": 8
+  },
+  "forbiddenOverrides": "none; original artist directive and permanent exclusions are absolute",
+  "replaySurfaces": [
+    "identity_authority.replay.steward_capability_grant",
+    "identity_authority.replay.steward_capability_grant_action"
+  ],
+  "recordDomain": "6529STREAM_ARTIST_STEWARD_CAPABILITY_GRANT_V1",
+  "event": "StewardCapabilitiesGranted",
+  "eventSchemaVersion": 1,
+  "archive": "original operation evidence V1 payload and appendArtistEvidenceV2, operation59, atomic with Identity mutation",
+  "implementation": "smart-contracts/domains/artist/StreamArtistStewardCapabilityOperations.sol",
+  "validationState": "implemented source and ABI checks; native behavior/integrated Executor/product-size validation pending"
+}

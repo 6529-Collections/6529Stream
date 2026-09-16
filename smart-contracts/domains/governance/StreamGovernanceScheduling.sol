@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamGovernanceManifest.sol";
+import { StreamGovernanceRecoveryPolicy } from "./StreamGovernanceRecoveryPolicy.sol";
 
 /// @notice Linked scheduling validation and record encoding for the immutable Executor.
 /// @dev Storage references point to the Executor's existing fields. This library does
@@ -73,20 +74,22 @@ library StreamGovernanceScheduling {
             IStreamGovernanceExecutor.sealSystemManifestBootstrap.selector
         );
         prepared.callsHash = StreamGovernanceBootstrap.governanceCallsHash(calls);
-        (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash) =
-            StreamGovernanceBootstrap.deriveBatchTransitionHashes(calls, prepared.callsHash);
-        if (ctx.scopeHash != scopeHash) {
-            revert IStreamGovernanceExecutor.BatchScopeHashMismatch(scopeHash, ctx.scopeHash);
-        }
-        if (ctx.oldValueHash != oldValueHash) {
-            revert IStreamGovernanceExecutor.BatchOldValueHashMismatch(
-                oldValueHash, ctx.oldValueHash
-            );
-        }
-        if (ctx.newValueHash != newValueHash) {
-            revert IStreamGovernanceExecutor.BatchNewValueHashMismatch(
-                newValueHash, ctx.newValueHash
-            );
+        {
+            (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash) =
+                StreamGovernanceBootstrap.deriveBatchTransitionHashes(calls, prepared.callsHash);
+            if (ctx.scopeHash != scopeHash) {
+                revert IStreamGovernanceExecutor.BatchScopeHashMismatch(scopeHash, ctx.scopeHash);
+            }
+            if (ctx.oldValueHash != oldValueHash) {
+                revert IStreamGovernanceExecutor.BatchOldValueHashMismatch(
+                    oldValueHash, ctx.oldValueHash
+                );
+            }
+            if (ctx.newValueHash != newValueHash) {
+                revert IStreamGovernanceExecutor.BatchNewValueHashMismatch(
+                    newValueHash, ctx.newValueHash
+                );
+            }
         }
         // The atomic committed initializer alone has immediate windows.
         if (runtime.genesisInitialized && !manifest.isSealed) {
@@ -132,6 +135,9 @@ library StreamGovernanceScheduling {
             ctx.actionClass,
             calls,
             callDatas
+        );
+        StreamGovernanceRecoveryPolicy.validate(
+            manifest.core, manifest.coreCodeHash, ctx.actionClass, calls, callDatas
         );
         if (ctx.actionClass == StreamGovernanceActionClasses.TERMINAL_FREEZE) {
             StreamGovernanceManifest.requireBoundRoleRegistry(manifest);

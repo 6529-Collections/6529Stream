@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="generator" content="pandoc" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+          <meta name="author" content="Jutta Lindenthal" />
+          <meta name="author" content="Hanna-Lena Meiners" />
+          <meta name="author" content="Detlev Balzer" />
+              <meta name="dcterms.date" content="2024-09-11" />
+                  <title>LIDO Primer</title>
+      <style>
+        code{white-space: pre-wrap;}
+        span.smallcaps{font-variant: small-caps;}
+        span.underline{text-decoration: underline;}
+        div.column{display: inline-block; vertical-align: top; width: 50%;}
+        div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+        ul.task-list{list-style: none;}
+        pre > code.sourceCode { white-space: pre; position: relative; }
+        pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+        pre > code.sourceCode > span:empty { height: 1.2em; }
+        .sourceCode { overflow: visible; }
+        code.sourceCode > span { color: inherit; text-decoration: inherit; }
+        div.sourceCode { margin: 1em 0; }
+        pre.sourceCode { margin: 0; }
+        @media screen {
+        div.sourceCode { overflow: auto; }
+        }
+        @media print {
+        pre > code.sourceCode { white-space: pre-wrap; }
+        pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+        }
+        pre.numberSource code
+          { counter-reset: source-line 0; }
+        pre.numberSource code > span
+          { position: relative; left: -4em; counter-increment: source-line; }
+        pre.numberSource code > span > a:first-child::before
+          { content: counter(source-line);
+            position: relative; left: -1em; text-align: right; vertical-align: baseline;
+            border: none; display: inline-block;
+            -webkit-touch-callout: none; -webkit-user-select: none;
+            -khtml-user-select: none; -moz-user-select: none;
+            -ms-user-select: none; user-select: none;
+            padding: 0 4px; width: 4em;
+            color: #aaaaaa;
+          }
+        pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+        div.sourceCode
+          {   }
+        @media screen {
+        pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+        }
+        code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+        code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+        code span.at { color: #7d9029; } /* Attribute */
+        code span.bn { color: #40a070; } /* BaseN */
+        code span.bu { } /* BuiltIn */
+        code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+        code span.ch { color: #4070a0; } /* Char */
+        code span.cn { color: #880000; } /* Constant */
+        code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+        code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+        code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+        code span.dt { color: #902000; } /* DataType */
+        code span.dv { color: #40a070; } /* DecVal */
+        code span.er { color: #ff0000; font-weight: bold; } /* Error */
+        code span.ex { } /* Extension */
+        code span.fl { color: #40a070; } /* Float */
+        code span.fu { color: #06287e; } /* Function */
+        code span.im { } /* Import */
+        code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+        code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+        code span.op { color: #666666; } /* Operator */
+        code span.ot { color: #007020; } /* Other */
+        code span.pp { color: #bc7a00; } /* Preprocessor */
+        code span.sc { color: #4070a0; } /* SpecialChar */
+        code span.ss { color: #bb6688; } /* SpecialString */
+        code span.st { color: #4070a0; } /* String */
+        code span.va { color: #19177c; } /* Variable */
+        code span.vs { color: #4070a0; } /* VerbatimString */
+        code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+        .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+      </style>
+          <link rel="stylesheet" href="style.css" />
+              <!--[if lt IE 9]>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+      <![endif]-->
+          <script src="navigation.js" charset="utf-8" defer></script>
+      </head>
+  <body>
+              <nav id="TOC" role="doc-toc">
+      <a href="https://lido-schema.org"><img src="https://lido-schema.org/schema/v1.1/logo.jpg" alt="LIDO Logo" /></a>
+            <h2 class="title">LIDO Primer</h2>
+      <ul>
+      <li><a href="#about-this-document"><span
+      class="toc-section-number">1</span> About this document</a>
+      <ul>
+      <li><a href="#scope"><span class="toc-section-number">1.1</span>
+      Scope</a></li>
+      <li><a href="#associated-documents"><span
+      class="toc-section-number">1.2</span> Associated
+      documents</a></li>
+      </ul></li>
+      <li><a href="#about-lido"><span
+      class="toc-section-number">2</span> About LIDO</a>
+      <ul>
+      <li><a href="#what-is-lido"><span
+      class="toc-section-number">2.1</span> What is LIDO?</a></li>
+      <li><a href="#why-lido"><span
+      class="toc-section-number">2.2</span> Why LIDO?</a></li>
+      <li><a href="#background"><span
+      class="toc-section-number">2.3</span> Background</a>
+      <ul>
+      <li><a href="#cdwa-lite"><span
+      class="toc-section-number">2.3.1</span> CDWA Lite</a></li>
+      <li><a href="#cidoc-crm"><span
+      class="toc-section-number">2.3.2</span> CIDOC CRM</a></li>
+      <li><a href="#spectrum"><span
+      class="toc-section-number">2.3.3</span> Spectrum</a></li>
+      </ul></li>
+      <li><a href="#related-standards"><span
+      class="toc-section-number">2.4</span> Related standards</a></li>
+      </ul></li>
+      <li><a href="#design-principles"><span
+      class="toc-section-number">3</span> Design principles</a>
+      <ul>
+      <li><a href="#basic-considerations"><span
+      class="toc-section-number">3.1</span> Basic
+      considerations</a></li>
+      <li><a href="#choice-of-technologies"><span
+      class="toc-section-number">3.2</span> Choice of technologies</a>
+      <ul>
+      <li><a href="#an-xml-schema-for-lido"><span
+      class="toc-section-number">3.2.1</span> An XML schema for
+      LIDO</a></li>
+      <li><a href="#schema-design"><span
+      class="toc-section-number">3.2.2</span> Schema design</a></li>
+      <li><a href="#namespaces"><span
+      class="toc-section-number">3.2.3</span> Namespaces</a></li>
+      </ul></li>
+      <li><a href="#supporting-web-principles"><span
+      class="toc-section-number">3.3</span> Supporting Web
+      principles</a>
+      <ul>
+      <li><a href="#fair-principles"><span
+      class="toc-section-number">3.3.1</span> FAIR Principles</a></li>
+      <li><a href="#semantic-web-technologies"><span
+      class="toc-section-number">3.3.2</span> Semantic Web
+      technologies</a></li>
+      <li><a href="#linked-data"><span
+      class="toc-section-number">3.3.3</span> Linked Data</a></li>
+      </ul></li>
+      <li><a href="#enabling-adaptability"><span
+      class="toc-section-number">3.4</span> Enabling adaptability</a>
+      <ul>
+      <li><a href="#restriction-and-simplification"><span
+      class="toc-section-number">3.4.1</span> Restriction and
+      simplification</a></li>
+      <li><a href="#extension"><span
+      class="toc-section-number">3.4.2</span> Extension</a></li>
+      <li><a href="#application-profiles"><span
+      class="toc-section-number">3.4.3</span> Application
+      profiles</a></li>
+      </ul></li>
+      </ul></

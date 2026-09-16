@@ -1,0 +1,185 @@
+     "residenceProp": {
+            "title": "crm:P74_has_current_or_former_residence",
+            "description": "A `Place` where this entity has resided or done business",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/PlaceRef"
+            }
+        },
+        "dimensionProp": {
+            "title": "crm:P43_has_dimension",
+            "description": "One or more `Dimension` structures that describe this entity",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/Dimension"
+            }
+        },
+        "made_ofProp": {
+            "title": "crm:P45_consists_of",
+            "description": "One or more `Material` types of which this object is made",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/MaterialRef"
+            }
+        },
+        "current_ownerProp": {
+            "title": "crm:P52_has_current_owner",
+            "description": "The current owner (a `Person` or `Group`) of this object",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/PersonRefOrGroupRef"
+            }
+        },
+        "current_custodianProp": {
+            "title": "crm:P50_has_current_keeper",
+            "description": "The current custodian (a `Person` or `Group`) of this object, if different from its owner",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/PersonRefOrGroupRef"
+            }
+        },
+        "current_permanent_custodianProp": {
+            "title": "la:current_permanent_custodian",
+            "description": "The current normal custodian (a `Person` or `Group`) if different from the current custodian, for example an object that is owned by an individual, currently in an exhibition, and normally under the custody of an organization",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/PersonRefOrGroupRef"
+            }
+        },
+        "current_locationProp": {
+            "title": "crm:P55_has_current_location",
+            "description": "The current location (a `Place`) of this object",
+            "$ref": "#/$defs/PlaceRef"
+        },
+        "current_permanent_locationProp": {
+            "title": "crm:P54_has_current_permanent_location",
+            "description": "The current normal location (a `Place`) of this object, if different from the current location",
+            "$ref": "#/$defs/PlaceRef"
+        },
+        "held_or_supported_byProp": {
+            "title": "crm:P198i_is_held_or_supported_by",
+            "description": "The physical object which holds/contains or supports this object",
+            "$ref": "#/$defs/HumanMadeObjectRef"
+        },
+        "used_forProp": {
+            "title": "crm:P16i_was_used_for",
+            "description": "Activities that this entity was used for.",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/Activity"
+            }
+        },
+        "showsProp": {
+            "title": "crm:P65_shows_visual_item",
+            "description": "A reference to a `VisualItem` that this object shows the image content of",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/VisualItemRef"
+            }
+        },
+        "carriesProp": {
+            "title": "crm:P128_carries",
+            "description": "A reference to a `LinguisticObject` that this object carries the textual content of",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/LinguisticObjectRef"
+            }
+        },
+		"subject_ofProp": {
+            "title": "crm:P129i_is_subject_of",
+            "description": "One or more human-readable web pages or other digital objects where the focus of the content is this entity",
+			"type": "array", 
+			"items": {"$ref": "#/$defs/LinguisticObjectEmbed"}
+		},
+        "subject_toProp": {
+            "title": "crm:P104i_is_subject_to",
+            "description": "One or more Rights that this object is subject to",
+            "type": "array", 
+            "items": {"$ref": "#/$defs/Right"}
+        },
+        "attributed_byProp": {
+            "title": "crm:P140i_was_attributed_by",
+            "description": "One or more AttributeAssignments that relate some other entity to this one",
+            "type": "array", 
+            "items": {"$ref": "#/$defs/AttributeAssignment"}
+        },
+        "attributed_byRelProp": {
+            "title": "crm:P140i_was_attributed_by",
+            "description": "One or more AttributeAssignments that relate some other entity to this one",
+            "type": "array", 
+            "items": {"$ref": "#/$defs/AttributeAssignment"}
+        },
+        "formatProp": {
+            "title": "dc:format",
+            "description": "The media type of the content of the embedded text, e.g. text/plain",
+            "type": "string",
+            "examples": [
+                "text/html",
+                "image/jpeg"
+            ]
+        },
+        "conforms_toProp": {
+            "title": "dcterms:conformsTo",
+            "description": "A standard or specification that this entity conforms to or embodies",
+            "type": "array",
+            "items": {"$ref": "#/$defs/InfoObjectRef"}
+        },
+        "access_pointProp": {
+            "title": "la:access_point",
+            "description": "A URL from which the digital object is able to be retrieved",
+            "type": "array",
+            "items": {"$ref": "#/$defs/DigitalObjectRef"}
+        },
+        "digitally_shown_byProp": {
+            "title": "la:digitally_shown_by",
+            "description": "A digital object that shows the current visual item",
+            "type": "array",
+            "items": {"$ref": "#/$defs/DigitalObjectEmbed"}
+        },
+        "digitally_carried_byProp": {
+            "title": "la:digitally_carried_by",
+            "description": "A digital object that carries the current linguistic object",
+            "type": "array",
+            "items": {"$ref": "#/$defs/DigitalObjectEmbed"}
+        },
+        "digitally_available_viaProp": {
+            "title": "la:digitally_available_via",
+            "description": "A digital service that may be interacted with in order to retrieve or act upon the digital object",
+            "type": "array",
+            "items": {"$ref": "#/$defs/DigitalService"}
+        },
+        "conceptually_part_ofProp": {
+            "title": "crm:P148i_is_component_of",
+            "description": "An Abstract Work that the current work is conceptually part of",
+            "type": "array",
+            "items": {"$ref": "#/$defs/AbstractWorkRef"}
+        },
+        "members_contained_byProp": {
+            "title": "la:members_contained_by",
+            "description": "A physical object that this object is contained by (like a box or folder) or supported by (like a shelf)",
+            "type": "array",
+            "items": {"$ref": "#/$defs/HumanMadeObjectRef"}
+        },
+
+        "duringProp": {
+            "title": "crm:P10_falls_within",
+            "description": "A reference to a Period that the current temporal entity occurs during",
+            "type": "array",
+            "items": {"$ref": "#/$defs/PeriodRef"}
+        },
+        "beforeProp": {
+            "title": "crm:P183_ends_before_the_start_of",
+            "description": "A Period, Event or Activity that the current Period, Event or Activity is before. (e.g. the referenced temporal entity is after the current one)",
+            "type": "array",
+            "items": {"$ref": "#/$defs/PeriodRefOrEventRefOrActivityRef"}
+        },
+        "afterProp": {
+            "title": "crm:P183i_starts_after_the_end_of",
+            "description": "A Period, Event or Activity that the current Period, Event or Activity is after. (e.g. the referenced temporal entity is before the current one)",
+            "type": "array",
+            "items": {"$ref": "#/$defs/PeriodRefOrEventRefOrActivityRef"}
+        },
+
+        "Name": {
+            "title": "crm:E33_E41_Linguistic_Appellation",
+            "description": "A name of an entity\nSee: [API](https://linked.art/api/1.0/shared/name/) | [Model](htt

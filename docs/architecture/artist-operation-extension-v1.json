@@ -1,0 +1,1064 @@
+{
+  "schema": "6529stream.artist-operation-extension.v1",
+  "status": "ACCEPTED_DESIGN_IMPLEMENTATION_PENDING",
+  "decision": "docs/adr/0029-identity-contest-dismissal-and-cohort-closure.md",
+  "historical_inputs": [
+    {
+      "path": "release-artifacts/issue-670-adapter-freeze/artist-operation-matrix-v1.json",
+      "sha256": "34e768291af8fd0327cbd6d99177d4a829fa8d8076fdc18da58bf74912efa8df"
+    },
+    {
+      "path": "docs/architecture/artist-semantic-owner-matrix-v2.json",
+      "sha256": "f76fc366a0a62e8c79ea064f2a1efc2f932ce6f3be86b8917ee7828dcb8ddf90"
+    },
+    {
+      "path": "docs/architecture/artist-semantic-owner-matrix-v2.schema.json",
+      "sha256": "b242c5480ecdf8e4aa57dc02d76fd8cd81631298eeda0b96cbba9b036d72b473"
+    },
+    {
+      "path": "docs/architecture/artist-operation-shared-mechanics-freeze-v1.json",
+      "sha256": "1e8da06698d400ec4e526507551fc163513721d57ca3233c83a92c70130e41da"
+    },
+    {
+      "path": "docs/architecture/artist-operation-shared-mechanics-freeze-v1.schema.json",
+      "sha256": "d61b29f63c662494047fc1b30bf72035ab7d586a23fe45c2bb6f2d8a0ae795b0"
+    },
+    {
+      "path": "docs/architecture/artist-owner-state-mechanics-foundation-v1.json",
+      "sha256": "2b4841ab5544c78bc64c5dea088d104b248bc2e0c3fc34fb13573ace80987e5a"
+    },
+    {
+      "path": "docs/architecture/artist-owner-state-mechanics-foundation-v1.schema.json",
+      "sha256": "2c643f5a8fe67380481f64e107878a638866627ff86ba2ea6a20086577519550"
+    },
+    {
+      "path": "docs/architecture/artist-owner-record-continuity-v1.json",
+      "sha256": "09f5d194a6d1938f8a09dfee5d34dd5b0ee5f595132216bd001097a230e53b42"
+    },
+    {
+      "path": "docs/architecture/artist-owner-record-continuity-v1.schema.json",
+      "sha256": "2c665c57e677e266eb139ad3fb9aeaa63b83f0e3204ed59d10d964052f7dfac5"
+    },
+    {
+      "path": "docs/architecture/artist-record-event-reconstruction-correction-v1.json",
+      "sha256": "cbd235ecd06edf49f84a67d3130fa47fe99fcbab3d66431ba6edf2014dcdef7b"
+    },
+    {
+      "path": "docs/architecture/artist-record-event-reconstruction-correction-v1.schema.json",
+      "sha256": "1527009ad4ae3bf27bd7d78edf96beae44a7b27672990b4bd907dc5c1f2618f6"
+    }
+  ],
+  "effective_inventory": {
+    "base": "release-artifacts/issue-670-adapter-freeze/artist-operation-matrix-v1.json",
+    "historical_ids": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57
+    ],
+    "extension_ids": [
+      58
+    ],
+    "operation_count": 58,
+    "historical_stop_overlays": "unchanged"
+  },
+  "operation_columns": [
+    "id",
+    "write",
+    "family",
+    "validation_selector",
+    "write_selector",
+    "write_selector_preimage",
+    "authority",
+    "signature_rule",
+    "typehash",
+    "field_mask",
+    "fields",
+    "current_state_facts",
+    "replay_facts",
+    "primary_record",
+    "secondary_record",
+    "dependencies",
+    "events",
+    "implementation_stop"
+  ],
+  "operations": [
+    [
+      58,
+      "dismissArtistIdentityContest",
+      "F",
+      "0x3df50249",
+      "0x7433c9e2",
+      "6529STREAM_ARTIST_REGISTRY_WRITE_DISMISS_ARTIST_IDENTITY_CONTEST_V1",
+      "staged canonical Executor class 1 or 2; current ATTRIBUTION_ARBITER proposer; exact per-call governance witness",
+      "DIRECT_CALLER",
+      "NONE",
+      "0x00007f",
+      "artistId:b32;expectedCauseHash:b32;expectedResolutionHash:b32;evidenceHash:b32;reasonHash:b32;removePriorStanding:bool;expectedRetirementHash:b32",
+      "exact current cause/incumbent/class/status; prior resolution; immutable captured cohorts and selected heads; exact optional actor retirement",
+      "one-use cause resolution; per-call staged action; owner-derived revision continuation; preserved consumed predecessors",
+      "IDENTITY_DISMISSAL_RECORD_DOMAIN",
+      "NONE",
+      "GOVERNANCE",
+      "ArtistIdentityContestDismissed",
+      [
+        "DISMISSAL_SOURCE_AND_CONSUMERS_PENDING",
+        "CURRENT_EXECUTOR_SAFE_COMPOSITION_PENDING",
+        "EFFECTIVE_SOURCE_CONFIGURATION_BINDING_PENDING"
+      ]
+    ]
+  ],
+  "abi": {
+    "public_methods": [
+      {
+        "signature": "currentIdentityContestCause(bytes32)",
+        "selector": "0x3aa0292f"
+      },
+      {
+        "signature": "dismissArtistIdentityContest((bytes32,bytes32,bytes32,bytes32,bytes32,bool,bytes32))",
+        "selector": "0x1ae10cc1"
+      },
+      {
+        "signature": "identityContestCause(bytes32)",
+        "selector": "0x8dd04832"
+      },
+      {
+        "signature": "identityContestDismissalContext((bytes32,bytes32,bytes32,bytes32,bytes32,bool,bytes32))",
+        "selector": "0x3df50249"
+      },
+      {
+        "signature": "identityContestDismissalRecord(bytes32)",
+        "selector": "0xd8af5502"
+      },
+      {
+        "signature": "identityRevisionContinuation(bytes32)",
+        "selector": "0xadb13e29"
+      },
+      {
+        "signature": "identityTransitionClosure(bytes32,bytes32)",
+        "selector": "0x01cd780e"
+      },
+      {
+        "signature": "latestIdentityContestDismissal(bytes32)",
+        "selector": "0x896b3d06"
+      }
+    ],
+    "interface_id": "0x6ddc41b6",
+    "request_type": "Request",
+    "validation_signature": "identityContestDismissalContext((bytes32,bytes32,bytes32,bytes32,bytes32,bool,bytes32))",
+    "write_signature": "dismissArtistIdentityContest((bytes32,bytes32,bytes32,bytes32,bytes32,bool,bytes32))",
+    "selector_kinds": {
+      "validation_selector": "Solidity ABI selector of the public context read",
+      "write_selector": "first four bytes of the semantic write preimage hash",
+      "public_write": "Solidity ABI selector in public_methods"
+    }
+  },
+  "types": {
+    "Request": [
+      {
+        "name": "artistId",
+        "type": "bytes32"
+      },
+      {
+        "name": "expectedCauseHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "expectedResolutionHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "evidenceHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "reasonHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "removePriorStanding",
+        "type": "bool"
+      },
+      {
+        "name": "expectedRetirementHash",
+        "type": "bytes32"
+      }
+    ],
+    "CauseFacts": [
+      {
+        "name": "artistId",
+        "type": "bytes32"
+      },
+      {
+        "name": "kind",
+        "type": "uint8"
+      },
+      {
+        "name": "referenceHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "actor",
+        "type": "address"
+      },
+      {
+        "name": "reasonHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "evidenceHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "enteredAt",
+        "type": "uint64"
+      },
+      {
+        "name": "incumbent",
+        "type": "address"
+      },
+      {
+        "name": "authorityClass",
+        "type": "uint8"
+      },
+      {
+        "name": "priorStatus",
+        "type": "uint8"
+      },
+      {
+        "name": "pendingTransitionHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "executedTransitionHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "previousCauseHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "previousResolutionHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "actorRetirementHash",
+        "type": "bytes32"
+      }
+    ],
+    "Cause": [
+      {
+        "name": "causeHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "facts",
+        "type": "CauseFacts"
+      }
+    ],
+    "Context": [
+      {
+        "name": "scopeHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "oldValueHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "newValueHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "causeHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "cohortHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "revisionContinuationHead",
+        "type": "bytes32"
+      }
+    ],
+    "Record": [
+      {
+        "name": "recordHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "terms",
+        "type": "Request"
+      },
+      {
+        "name": "executor",
+        "type": "address"
+      },
+      {
+        "name": "proposer",
+        "type": "address"
+      },
+      {
+        "name": "actionClass",
+        "type": "uint8"
+      },
+      {
+        "name": "actionId",
+        "type": "bytes32"
+      },
+      {
+        "name": "incumbent",
+        "type": "address"
+      },
+      {
+        "name": "authorityClass",
+        "type": "uint8"
+      },
+      {
+        "name": "restoredStatus",
+        "type": "uint8"
+      },
+      {
+        "name": "dismissedAt",
+        "type": "uint64"
+      },
+      {
+        "name": "cohortHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "governanceWitnessHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "revisionContinuationHead",
+        "type": "bytes32"
+      }
+    ],
+    "Closure": [
+      {
+        "name": "artistId",
+        "type": "bytes32"
+      },
+      {
+        "name": "transitionRecordHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "dismissalRecordHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "windowEndsAt",
+        "type": "uint64"
+      },
+      {
+        "name": "contestedAt",
+        "type": "uint64"
+      },
+      {
+        "name": "abandoned",
+        "type": "bool"
+      }
+    ],
+    "RevisionContinuation": [
+      {
+        "name": "continuationHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "artistId",
+        "type": "bytes32"
+      },
+      {
+        "name": "dismissalRecordHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "previousContinuationHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "stableRevisionRecordHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "stableDocumentHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "abandonedRevisionRecordHash",
+        "type": "bytes32"
+      }
+    ],
+    "PayoutResolutionFacts": [
+      {
+        "name": "artistId",
+        "type": "bytes32"
+      },
+      {
+        "name": "currentTransitionClosure",
+        "type": "Closure"
+      },
+      {
+        "name": "candidateTransitionClosure",
+        "type": "Closure"
+      }
+    ],
+    "TransitionState": [
+      {
+        "name": "artistId",
+        "type": "bytes32"
+      },
+      {
+        "name": "recordHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "stagedAt",
+        "type": "uint64"
+      },
+      {
+        "name": "contestEndsAt",
+        "type": "uint64"
+      },
+      {
+        "name": "executedAt",
+        "type": "uint64"
+      },
+      {
+        "name": "postWindowEndsAt",
+        "type": "uint64"
+      },
+      {
+        "name": "contestedAt",
+        "type": "uint64"
+      },
+      {
+        "name": "phase",
+        "type": "uint8"
+      }
+    ],
+    "CohortSnapshot": [
+      {
+        "name": "pendingTransition",
+        "type": "TransitionState"
+      },
+      {
+        "name": "executedTransition",
+        "type": "TransitionState"
+      },
+      {
+        "name": "stableRevision",
+        "type": "bytes32"
+      },
+      {
+        "name": "pendingRevision",
+        "type": "bytes32"
+      },
+      {
+        "name": "selectedRevision",
+        "type": "bytes32"
+      },
+      {
+        "name": "selectedDocumentHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "stableGuardian",
+        "type": "bytes32"
+      },
+      {
+        "name": "provisionalGuardian",
+        "type": "bytes32"
+      },
+      {
+        "name": "selectedGuardian",
+        "type": "bytes32"
+      },
+      {
+        "name": "stableDesignation",
+        "type": "bytes32"
+      },
+      {
+        "name": "candidateDesignation",
+        "type": "bytes32"
+      },
+      {
+        "name": "selectedDesignation",
+        "type": "bytes32"
+      },
+      {
+        "name": "stableDirective",
+        "type": "bytes32"
+      },
+      {
+        "name": "candidateDirective",
+        "type": "bytes32"
+      },
+      {
+        "name": "selectedDirective",
+        "type": "bytes32"
+      },
+      {
+        "name": "previousContinuation",
+        "type": "bytes32"
+      },
+      {
+        "name": "existingPendingClosure",
+        "type": "Closure"
+      },
+      {
+        "name": "existingExecutedClosure",
+        "type": "Closure"
+      }
+    ]
+  },
+  "recipe": {
+    "operation_id": 58,
+    "snapshot_mask": "0x04",
+    "read_mask": "0x04",
+    "write_mask": "0x04",
+    "owner": "identity_authority",
+    "external_providers": [
+      "canonical_executor",
+      "role_registry"
+    ],
+    "actions": [
+      "capture_exact_cause_and_cohort",
+      "validate_per_call_governance_and_current_arbiter",
+      "consume_resolution_and_action_replay",
+      "close_only_unclosed_captured_cohorts",
+      "checkpoint_selected_mature_heads",
+      "append_revision_continuation_if_abandoned",
+      "optionally_remove_exact_prior_standing",
+      "restore_captured_incumbent_status",
+      "commit_identity_once",
+      "append_archive_atomically"
+    ],
+    "payout_access": "NONE",
+    "authority_classes": [
+      1,
+      2
+    ],
+    "supported_prior_statuses": [
+      1
+    ],
+    "supported_incumbent_classes": [
+      1
+    ],
+    "future_full_v1": [
+      "SUCCEEDED restoration",
+      "DORMANCY_NOTICE restoration with original captured deadline",
+      "specified appeal path"
+    ]
+  },
+  "domains": [
+    {
+      "preimage": "6529STREAM_ARTIST_IDENTITY_CONTEST_CAUSE_V1",
+      "hash": "0xd0157eaa7980e5bedc94210e8543a2b885a5fce4672f7aae1fdbd333d79a5d7b"
+    },
+    {
+      "preimage": "6529STREAM_ARTIST_IDENTITY_DISMISSAL_SCOPE_V1",
+      "hash": "0x9ce301a07c6b32410b8972c9f07f976b216e5925c5cacbb4c00b484756c43572"
+    },
+    {
+      "preimage": "6529STREAM_ARTIST_IDENTITY_DISMISSAL_COHORT_V1",
+      "hash": "0xc91db8992b12ffb09bc0d469cdb1129798cea8e3c54df599c7fc3309b271f4a0"
+    },
+    {
+      "preimage": "6529STREAM_ARTIST_IDENTITY_DISMISSAL_STATE_V1",
+      "hash": "0xdfccca5d49ea91107d4f4afd9738c4850e7630b3a125defb143b7440c73c1b05"
+    },
+    {
+      "preimage": "6529STREAM_ARTIST_IDENTITY_DISMISSAL_INTENT_V1",
+      "hash": "0xb96eb2f149abfd93e42f9cf74389688e83bf779061561a7d8986f1c2d3bc2e51"
+    },
+    {
+      "preimage": "6529STREAM_ARTIST_IDENTITY_DISMISSAL_RECORD_V1",
+      "hash": "0xa765abb2eeef2907344f31bb764e43670e56ef7d7643ecf8e7a756d2284deb47"
+    },
+    {
+      "preimage": "6529STREAM_ARTIST_IDENTITY_REVISION_CONTINUATION_V1",
+      "hash": "0x2b49acf78cd70ce8e3d92e7f4d7b8d46c60d29e034171a74fbecbf7f7d5b26be"
+    }
+  ],
+  "hash_recipes": {
+    "encoding": "keccak256(abi.encode(...)); struct fields retain declared order",
+    "cause": [
+      "IDENTITY_CONTEST_CAUSE_V1",
+      "chainId",
+      "registry",
+      "identityOwner",
+      "CauseFacts"
+    ],
+    "scope": [
+      "IDENTITY_DISMISSAL_SCOPE_V1",
+      "chainId",
+      "registry",
+      "identityOwner",
+      "artistId"
+    ],
+    "cohort": [
+      "IDENTITY_DISMISSAL_COHORT_V1",
+      "artistId",
+      "CohortSnapshot"
+    ],
+    "old_value": [
+      "IDENTITY_DISMISSAL_STATE_V1",
+      "scopeHash",
+      "Cause",
+      "currentAuthority",
+      "currentAuthorityClass",
+      "currentStatus",
+      "latestDismissal",
+      "cohortHash"
+    ],
+    "new_value": [
+      "IDENTITY_DISMISSAL_INTENT_V1",
+      "scopeHash",
+      "oldValueHash",
+      "Request"
+    ],
+    "governance_witness": [
+      "unchanged operation33 GovernanceWitness"
+    ],
+    "record": [
+      "IDENTITY_DISMISSAL_RECORD_V1",
+      "chainId",
+      "registry",
+      "identityOwner",
+      "Request",
+      "executor",
+      "proposer",
+      "actionClass",
+      "actionId",
+      "incumbent",
+      "authorityClass",
+      "restoredStatus",
+      "dismissedAt",
+      "cohortHash",
+      "governanceWitnessHash"
+    ],
+    "continuation": [
+      "IDENTITY_REVISION_CONTINUATION_V1",
+      "chainId",
+      "registry",
+      "identityOwner",
+      "artistId",
+      "dismissalRecordHash",
+      "previousContinuationHash",
+      "stableRevisionRecordHash",
+      "stableDocumentHash",
+      "abandonedRevisionRecordHash"
+    ],
+    "domain_prefix": "6529STREAM_ARTIST_"
+  },
+  "events": [
+    {
+      "name": "ArtistIdentityContestDismissed",
+      "emitter": "identity_authority",
+      "schema_version": 1,
+      "signature": "ArtistIdentityContestDismissed(uint16,bytes32,bytes32,bytes32,bytes32,address,address,uint8,bytes32,address,uint8,uint8,bytes32,bytes32,bool,bytes32,uint64,bytes32,bytes32,bytes32)",
+      "topic0": "0x39c34e27d7622bd32d9003d8019c26454eb7836e65f41b8d53d782b16eb1bf25",
+      "fields": [
+        {
+          "name": "schemaVersion",
+          "type": "uint16",
+          "indexed": false
+        },
+        {
+          "name": "artistId",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "causeHash",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "dismissalRecordHash",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "previousDismissalRecordHash",
+          "type": "bytes32",
+          "indexed": false
+        },
+        {
+          "name": "executor",
+          "type": "address",
+          "indexed": false
+        },
+        {
+          "name": "proposer",
+          "type": "address",
+          "indexed": false
+        },
+        {
+          "name": "actionClass",
+          "type": "uint8",
+          "indexed": false
+        },
+        {
+          "name": "actionId",
+          "type": "bytes32",
+          "indexed": false
+        },
+        {
+          "name": "incumbent",
+          "type": "address",
+          "indexed": false
+        },
+        {
+          "name": "authorityClass",
+          "type": "uint8",
+          "indexed": false
+        },
+        {
+          "name": "restoredStatus",
+          "type": "uint8",
+          "indexed": false
+        },
+        {
+          "name": "evidenceHash",
+          "type": "bytes32",
+          "indexed": false
+        },
+        {
+          "name": "reasonHash",
+          "type": "bytes32",
+          "indexed": false
+        },
+        {
+          "name": "removePriorStanding",
+          "type": "bool",
+          "indexed": false
+        },
+        {
+          "name": "retiredTransitionRecordHash",
+          "type": "bytes32",
+          "indexed": false
+        },
+        {
+          "name": "dismissedAt",
+          "type": "uint64",
+          "indexed": false
+        },
+        {
+          "name": "cohortHash",
+          "type": "bytes32",
+          "indexed": false
+        },
+        {
+          "name": "governanceWitnessHash",
+          "type": "bytes32",
+          "indexed": false
+        },
+        {
+          "name": "revisionContinuationHead",
+          "type": "bytes32",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "name": "ArtistIdentityContestCauseCaptured",
+      "emitter": "identity_authority",
+      "schema_version": 1,
+      "signature": "ArtistIdentityContestCauseCaptured(uint16,bytes32,bytes32,uint8,bytes32,address,bytes32,bytes32,uint64,address,uint8,uint8,bytes32,bytes32,bytes32,bytes32,bytes32)",
+      "topic0": "0xbb7c729ddc2593327e34f6c63c4b92293a3afc8c2118ecf7f3b58c74d0873483",
+      "fields": [
+        {
+          "name": "schemaVersion",
+          "type": "uint16",
+          "indexed": false
+        },
+        {
+          "name": "artistId",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "causeHash",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "kind",
+          "type": "uint8",
+          "indexed": false
+        },
+        {
+          "name": "referenceHash",
+          "type": "bytes32",
+          "indexed": false
+        },
+        {
+          "name": "actor",
+          "type": "address",
+          "indexed": false
+        },
+        {
+          "name": "reasonHash",
+          "type": "bytes32",
+          "indexed": false
+        },
+        {
+          "name": "evidenceHash",
+          "type": "bytes32",
+          "indexed": false
+        },
+        {
+          "name": "enteredAt",
+          "type": "uint64",
+          "indexed": false
+        },
+        {
+          "name": "incumbent",
+          "type": "address",
+          "indexed": false
+        },
+        {
+          "name": "authorityClass",
+          "type": "uint8",
+          "indexed": false
+        },
+        {
+          "name": "priorStatus",
+          "type": "uint8",
+          "indexed": false
+        },
+        {
+          "name": "pendingTransitionHash",
+          "type": "bytes32",
+          "indexed": false
+        },
+        {
+          "name": "executedTransitionHash",
+          "type": "bytes32",
+          "indexed": false
+        },
+        {
+          "name": "previousCauseHash",
+          "type": "bytes32",
+          "indexed": false
+        },
+        {
+          "name": "previousResolutionHash",
+          "type": "bytes32",
+          "indexed": false
+        },
+        {
+          "name": "actorRetirementHash",
+          "type": "bytes32",
+          "indexed": false
+        }
+      ]
+    }
+  ],
+  "record_event_join": {
+    "record": "ArtistIdentityContestDismissed",
+    "environment": [
+      "chainId",
+      "registry",
+      "identityOwner"
+    ],
+    "fields": {
+      "Request.artistId": "artistId",
+      "Request.expectedCauseHash": "causeHash",
+      "Request.expectedResolutionHash": "previousDismissalRecordHash",
+      "Request.evidenceHash": "evidenceHash",
+      "Request.reasonHash": "reasonHash",
+      "Request.removePriorStanding": "removePriorStanding",
+      "Request.expectedRetirementHash": "retiredTransitionRecordHash",
+      "executor": "executor",
+      "proposer": "proposer",
+      "actionClass": "actionClass",
+      "actionId": "actionId",
+      "incumbent": "incumbent",
+      "authorityClass": "authorityClass",
+      "restoredStatus": "restoredStatus",
+      "dismissedAt": "dismissedAt",
+      "cohortHash": "cohortHash",
+      "governanceWitnessHash": "governanceWitnessHash"
+    },
+    "derived_nonpreimage_field": "revisionContinuationHead"
+  },
+  "replay": [
+    {
+      "surface": "identity_authority.replay.contest_resolution",
+      "scope": [
+        "artistId",
+        "causeHash"
+      ],
+      "cell": [
+        "dismissalRecordHash",
+        "revision+1",
+        1,
+        2
+      ]
+    },
+    {
+      "surface": "identity_authority.replay.dismissal_action",
+      "scope": [
+        "actionId",
+        "scopeHash",
+        "oldValueHash",
+        "newValueHash"
+      ],
+      "cell": [
+        "dismissalRecordHash",
+        "revision+1",
+        1,
+        2
+      ]
+    },
+    {
+      "surface": "identity_authority.replay.identity_revision_continuation",
+      "operation_id": 25,
+      "scope": [
+        "artistId",
+        "stableRevisionRecordHash",
+        "stableDocumentHash",
+        "continuationHash"
+      ],
+      "rule": "one replacement child selected only by current owner-derived continuation; original predecessor stays consumed"
+    }
+  ],
+  "archive": {
+    "operation_id": 58,
+    "owner": "identity_authority",
+    "header": "unchanged operation evidence environment/version",
+    "payload": [
+      "Request",
+      "GovernanceWitness",
+      "Cause",
+      "Context",
+      "Record",
+      "RevisionContinuation",
+      "pendingClosure",
+      "executedClosure"
+    ]
+  },
+  "source_prerequisites": [
+    {
+      "id": "cause_capture",
+      "operations": [
+        31,
+        33
+      ],
+      "requirement": "append actual typed cause before mutation; preserve31 NONE and33 Record ABI/preimages"
+    },
+    {
+      "id": "rotation_closure",
+      "operations": [
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        58
+      ],
+      "requirement": "association/activeWindow/stage recognize immutable closure; old transitions and historical eligibility remain immutable"
+    },
+    {
+      "id": "identity_revision_continuation",
+      "operations": [
+        25,
+        58
+      ],
+      "requirement": "detach only exact abandoned child; retain old replay and signed preimages; owner-derived one-child continuation"
+    },
+    {
+      "id": "payout_continuation",
+      "operations": [
+        18
+      ],
+      "requirement": "typed Coordinator snapshot; exact Identity closure and Payout candidate/stable predecessor; old callback fail-closed; mutable payout head unchanged"
+    },
+    {
+      "id": "operative_reads",
+      "operations": [
+        18,
+        25,
+        26,
+        36,
+        37,
+        58
+      ],
+      "requirement": "preserve mature selections; permanently exclude abandoned associations; checkpoint before pointer replacement"
+    },
+    {
+      "id": "effective_source_configuration",
+      "operations": [
+        58
+      ],
+      "requirement": "current supported selector/operation/configuration evidence must use this effective inventory; historical57 checker is insufficient"
+    }
+  ],
+  "implementation_stops": [
+    "DISMISSAL_SOURCE_AND_CONSUMERS_PENDING",
+    "CURRENT_EXECUTOR_SAFE_COMPOSITION_PENDING",
+    "EFFECTIVE_SOURCE_CONFIGURATION_BINDING_PENDING"
+  ]
+}

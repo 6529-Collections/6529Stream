@@ -69,7 +69,7 @@ contract StreamCurrentStateExportTest is StreamCurrentStackFixture {
         _anchor(999, keccak256("block 999"));
     }
 
-    function _configureAdditionalProducts() internal override {
+    function _deployAdditionalProducts() internal override {
         probe = new StateExportExecutionProbe(executor);
     }
 

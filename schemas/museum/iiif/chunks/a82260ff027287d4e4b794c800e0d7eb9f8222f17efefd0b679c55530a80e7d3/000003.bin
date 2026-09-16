@@ -1,0 +1,91 @@
+         key,            0x1324,         draft,      SLH-DSA-SHAKE-192f private key; as specified by FIPS 205
+slhdsa-sha2-256s-priv,          key,            0x1325,         draft,      SLH-DSA-SHA2-256s private key; as specified by FIPS 205
+slhdsa-shake-256s-priv,         key,            0x1326,         draft,      SLH-DSA-SHAKE-256s private key; as specified by FIPS 205
+slhdsa-sha2-256f-priv,          key,            0x1327,         draft,      SLH-DSA-SHA2-256f private key; as specified by FIPS 205
+slhdsa-shake-256f-priv,         key,            0x1328,         draft,      SLH-DSA-SHAKE-256f private key; as specified by FIPS 205
+bip340-pub,                     key,            0x1340,         draft,      BIP340 public key
+bip340-priv,                    key,            0x1341,         draft,      BIP340 private key
+lamport-sha3-512-pub,           key,            0x1a14,         draft,      Lamport public key based on SHA3-512
+lamport-sha3-384-pub,           key,            0x1a15,         draft,      Lamport public key based on SHA3-384
+lamport-sha3-256-pub,           key,            0x1a16,         draft,      Lamport public key based on SHA3-256
+lamport-sha3-512-priv,          key,            0x1a24,         draft,      Lamport private key based on SHA3-512
+lamport-sha3-384-priv,          key,            0x1a25,         draft,      Lamport private key based on SHA3-384
+lamport-sha3-256-priv,          key,            0x1a26,         draft,      Lamport private key based on SHA3-256
+lamport-sha3-512-priv-share,    key,            0x1a34,         draft,      Lamport private key share based on SHA3-512 and split with Shamir gf256
+lamport-sha3-384-priv-share,    key,            0x1a35,         draft,      Lamport private key share based on SHA3-384 and split with Shamir gf256
+lamport-sha3-256-priv-share,    key,            0x1a36,         draft,      Lamport private key share based on SHA3-256 and split with Shamir gf256
+lamport-sha3-512-sig,           multisig,       0x1a44,         draft,      Lamport signature based on SHA3-512
+lamport-sha3-384-sig,           multisig,       0x1a45,         draft,      Lamport signature based on SHA3-384
+lamport-sha3-256-sig,           multisig,       0x1a46,         draft,      Lamport signature based on SHA3-256
+lamport-sha3-512-sig-share,     multisig,       0x1a54,         draft,      Lamport signature share based on SHA3-512 and split with Shamir gf256
+lamport-sha3-384-sig-share,     multisig,       0x1a55,         draft,      Lamport signature share based on SHA3-384 and split with Shamir gf256
+lamport-sha3-256-sig-share,     multisig,       0x1a56,         draft,      Lamport signature share based on SHA3-256 and split with Shamir gf256
+kt-128,                         multihash,      0x1d01,         draft,      KangarooTwelve KT128 extendable-output hash function (XOF) as defined in RFC 9861
+kt-256,                         multihash,      0x1d02,         draft,      KangarooTwelve KT256 extendable-output hash function (XOF) as defined in RFC 9861
+aes-gcm-256,                    encryption,     0x2000,         draft,      AES Galois/Counter Mode with 256-bit key and 12-byte IV
+ech,                            multiaddr,      0x2679,         draft,      ECHConfigList as defined in RFC 9849 (0x2679 == 9849). See the multiaddr repo for more details.
+silverpine,                     multiaddr,      0x3f42,         draft,      Experimental QUIC over yggdrasil and ironwood routing protocol
+sm3-256,                        multihash,      0x534d,         draft,
+sha256a,                        hash,           0x7012,         draft,      The sum of multiple sha2-256 hashes; as specified by Ceramic CIP-124.
+chacha20-poly1305,              multikey,       0xa000,         draft,      ChaCha20_Poly1305 encryption scheme
+blake2b-8,                      multihash,      0xb201,         draft,      Blake2b consists of 64 output lengths that give different hashes
+blake2b-16,                     multihash,      0xb202,         draft,
+blake2b-24,                     multihash,      0xb203,         draft,
+blake2b-32,                     multihash,      0xb204,         draft,
+blake2b-40,                     multihash,      0xb205,         draft,
+blake2b-48,                     multihash,      0xb206,         draft,
+blake2b-56,                     multihash,      0xb207,         draft,
+blake2b-64,                     multihash,      0xb208,         draft,
+blake2b-72,                     multihash,      0xb209,         draft,
+blake2b-80,                     multihash,      0xb20a,         draft,
+blake2b-88,                     multihash,      0xb20b,         draft,
+blake2b-96,                     multihash,      0xb20c,         draft,
+blake2b-104,                    multihash,      0xb20d,         draft,
+blake2b-112,                    multihash,      0xb20e,         draft,
+blake2b-120,                    multihash,      0xb20f,         draft,
+blake2b-128,                    multihash,      0xb210,         draft,
+blake2b-136,                    multihash,      0xb211,         draft,
+blake2b-144,                    multihash,      0xb212,         draft,
+blake2b-152,                    multihash,      0xb213,         draft,
+blake2b-160,                    multihash,      0xb214,         draft,
+blake2b-168,                    multihash,      0xb215,         draft,
+blake2b-176,                    multihash,      0xb216,         draft,
+blake2b-184,                    multihash,      0xb217,         draft,
+blake2b-192,                    multihash,      0xb218,         draft,
+blake2b-200,                    multihash,      0xb219,         draft,
+blake2b-208,                    multihash,      0xb21a,         draft,
+blake2b-216,                    multihash,      0xb21b,         draft,
+blake2b-224,                    multihash,      0xb21c,         draft,
+blake2b-232,                    multihash,      0xb21d,         draft,
+blake2b-240,                    multihash,      0xb21e,         draft,
+blake2b-248,                    multihash,      0xb21f,         draft,
+blake2b-256,                    multihash,      0xb220,         permanent,
+blake2b-264,                    multihash,      0xb221,         draft,
+blake2b-272,                    multihash,      0xb222,         draft,
+blake2b-280,                    multihash,      0xb223,         draft,
+blake2b-288,                    multihash,      0xb224,         draft,
+blake2b-296,                    multihash,      0xb225,         draft,
+blake2b-304,                    multihash,      0xb226,         draft,
+blake2b-312,                    multihash,      0xb227,         draft,
+blake2b-320,                    multihash,      0xb228,         draft,
+blake2b-328,                    multihash,      0xb229,         draft,
+blake2b-336,                    multihash,      0xb22a,         draft,
+blake2b-344,                    multihash,      0xb22b,         draft,
+blake2b-352,                    multihash,      0xb22c,         draft,
+blake2b-360,                    multihash,      0xb22d,         draft,
+blake2b-368,                    multihash,      0xb22e,         draft,
+blake2b-376,                    multihash,      0xb22f,         draft,
+blake2b-384,                    multihash,      0xb230,         draft,
+blake2b-392,                    multihash,      0xb231,         draft,
+blake2b-400,                    multihash,      0xb232,         draft,
+blake2b-408,                    multihash,      0xb233,         draft,
+blake2b-416,                    multihash,      0xb234,         draft,
+blake2b-424,                    multihash,      0xb235,         draft,
+blake2b-432,                    multihash,      0xb236,         draft,
+blake2b-440,                    multihash,      0xb237,         draft,
+blake2b-448,                    multihash,      0xb238,         draft,
+blake2b-456,                    multihash,      0xb239,         draft,
+blake2b-464,                    multihash,      0xb23a,         draft,
+blake2b-472,                    multihash,      0xb23b,         draft,
+blake2b-480,                    multihash,      0xb23c,         draft,
+blake2b-488,                    multihash,

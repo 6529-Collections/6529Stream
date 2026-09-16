@@ -1,0 +1,149 @@
+rdinates use a coordinate reference system that uses this coordinate system. This abstract complexType shall not be used, extended, or restricted, in an Application Schema, to define a concrete subtype with a meaning equivalent to a concrete subtype specified in this document. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCoordinateSystemBaseType">
+				<sequence>
+					<element ref="gml:csID" minOccurs="0" maxOccurs="unbounded">
+						<annotation>
+							<documentation>Set of alternative identifications of this coordinate system. The first csID, if any, is normally the primary identification code, and any others are aliases. </documentation>
+						</annotation>
+					</element>
+					<element ref="gml:remarks" minOccurs="0">
+						<annotation>
+							<documentation>Comments on or information about this coordinate system, including data source information. </documentation>
+						</annotation>
+					</element>
+					<element ref="gml:usesAxis" maxOccurs="unbounded">
+						<annotation>
+							<documentation>Ordered sequence of associations to the coordinate system axes included in this coordinate system. </documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="csID" type="gml:IdentifierType">
+		<annotation>
+			<documentation>An identification of a coordinate system. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="usesAxis" type="gml:CoordinateSystemAxisRefType">
+		<annotation>
+			<documentation>Association to a coordinate system axis. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="coordinateSystemRef" type="gml:CoordinateSystemRefType"/>
+	<!-- =================================================== -->
+	<complexType name="CoordinateSystemRefType">
+		<annotation>
+			<documentation>Association to a coordinate system, either referencing or containing the definition of that coordinate system. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:_CoordinateSystem"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="EllipsoidalCS" type="gml:EllipsoidalCSType" substitutionGroup="gml:_CoordinateSystem"/>
+	<!-- =================================================== -->
+	<complexType name="EllipsoidalCSType">
+		<annotation>
+			<documentation>A two- or three-dimensional coordinate system in which position is specified by geodetic latitude, geodetic longitude, and (in the three-dimensional case) ellipsoidal height. An EllipsoidalCS shall have two or three usesAxis associations. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCoordinateSystemType"/>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="ellipsoidalCSRef" type="gml:EllipsoidalCSRefType"/>
+	<!-- =================================================== -->
+	<complexType name="EllipsoidalCSRefType">
+		<annotation>
+			<documentation>Association to an ellipsoidal coordinate system, either referencing or containing the definition of that coordinate system. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:EllipsoidalCS"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="CartesianCS" type="gml:CartesianCSType" substitutionGroup="gml:_CoordinateSystem"/>
+	<!-- =================================================== -->
+	<complexType name="CartesianCSType">
+		<annotation>
+			<documentation>A 1-, 2-, or 3-dimensional coordinate system. Gives the position of points relative to orthogonal straight axes in the 2- and 3-dimensional cases. In the 1-dimensional case, it contains a single straight coordinate axis. In the multi-dimensional case, all axes shall have the same length unit of measure. A CartesianCS shall have one, two, or three usesAxis associations. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCoordinateSystemType"/>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="cartesianCSRef" type="gml:CartesianCSRefType"/>
+	<!-- =================================================== -->
+	<complexType name="CartesianCSRefType">
+		<annotation>
+			<documentation>Association to a Cartesian coordinate system, either referencing or containing the definition of that coordinate system. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:CartesianCS"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="VerticalCS" type="gml:VerticalCSType" substitutionGroup="gml:_CoordinateSystem"/>
+	<!-- =================================================== -->
+	<complexType name="VerticalCSType">
+		<annotation>
+			<documentation>A one-dimensional coordinate system used to record the heights (or depths) of points. Such a coordinate system is usually dependent on the Earth's gravity field, perhaps loosely as when atmospheric pressure is the basis for the vertical coordinate system axis. A VerticalCS shall have one usesAxis association. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCoordinateSystemType"/>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="verticalCSRef" type="gml:VerticalCSRefType"/>
+	<!-- =================================================== -->
+	<complexType name="VerticalCSRefType">
+		<annotation>
+			<documentation>Association to a vertical coordinate system, either referencing or containing the definition of that coordinate system. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:VerticalCS"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="TemporalCS" type="gml:TemporalCSType" substitutionGroup="gml:_CoordinateSystem"/>
+	<!-- =================================================== -->
+	<complexType name="TemporalCSType">
+		<annotation>
+			<documentation>A one-dimensional coordinate system containing a single time axis, used to describe the temporal position of a point in the specified time units from a specified time origin. A TemporalCS shall have one usesAxis association. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCoordinateSystemType"/>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="temporalCSRef" type="gml:TemporalCSRefType"/>
+	<!-- =================================================== -->
+	<complexType name="TemporalCSRefType">
+		<annotation>
+			<documentation>Association to a temporal coordinate system, either referencing or containing the definition of that coordinate system. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:TemporalCS"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="LinearCS" type="gml:LinearCSType" substitutionGroup="gml:_CoordinateSystem"/>
+	<!-- =================================================== -->
+	<complexType name="LinearCSType">
+		<annotation>
+			<documentation>A one-dimensional coordinate system that consists of the points that lie on the single axis described. The associated ordinate is the distance from the specified origin to the point along the axis. Example: usage of the line feature representing a road to describe points on or along that road. A LinearCS shall have one usesAxis association. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="

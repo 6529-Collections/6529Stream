@@ -2,8 +2,10 @@
 pragma solidity ^0.8.19;
 
 import "../../../vendor/openzeppelin/IERC165.sol";
+import "../mint/IStreamSaleFunding.sol";
+import "../revenue/IStreamRevenueResolver.sol";
 
-interface IStreamEnglishAuctionHouse is IERC165 {
+interface IStreamEnglishAuctionHouse is IERC165, IStreamSaleFunding {
     enum AuctionStatus {
         None,
         Created,
@@ -20,6 +22,7 @@ interface IStreamEnglishAuctionHouse is IERC165 {
         bytes32 phaseId;
         address artist;
         bytes32 profileId;
+        bytes32 expectedPrimaryPolicyHash;
         bytes32 tokenDataHash;
         bytes32 mintCommitment;
         bytes32 mintPolicyHash;
@@ -48,6 +51,9 @@ interface IStreamEnglishAuctionHouse is IERC165 {
         bool settled;
         bool cancelled;
         address pendingNoBidNftClaimant;
+        bytes32 authorizationId;
+        bytes32 operationRoot;
+        bytes32 primaryPolicyHash;
     }
 
     error InvalidAuctionConfiguration();
@@ -66,6 +72,8 @@ interface IStreamEnglishAuctionHouse is IERC165 {
     error UnexpectedAuctionNFT();
     error AuctionMintResultInvalid();
     error InvalidAuctionSplitProfile(bytes32 profileId);
+    error AuctionPrimaryAssignmentUnsupported();
+    error AuctionPrimaryPolicyMismatch(bytes32 expected, bytes32 actual);
     error AuctionNativeTransferFailed(address recipient);
     error NoAuctionRefund();
     error NoPendingAuctionNFTClaim(uint256 tokenId);
@@ -116,6 +124,14 @@ interface IStreamEnglishAuctionHouse is IERC165 {
         bytes calldata platformSignature,
         bytes calldata artistSignature
     ) external returns (uint256 tokenId);
+
+    /// @notice Immutable resolver used when new auction rights are authorized.
+    function revenueResolver() external view returns (IStreamRevenueResolver);
+    /// @notice Current explicit collection PRIMARY_SALE commitment, checked at creation only.
+    function primaryPolicy(uint256 collectionId)
+        external
+        view
+        returns (bytes32 policyHash, bytes32 profileId, address wallet);
 
     function bid(uint256 tokenId, address recipient) external payable;
     function settle(uint256 tokenId) external;

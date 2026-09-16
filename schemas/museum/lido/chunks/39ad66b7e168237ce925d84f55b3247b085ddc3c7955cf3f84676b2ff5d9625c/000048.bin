@@ -1,0 +1,74 @@
+><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>       &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a><span class="ot">           xml:lang=</span><span class="st">&quot;de&quot;</span>&gt;</span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>           Ölgemälde</span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a>       &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a>   &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a>   &lt;<span class="kw">lido:term</span></span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a><span class="ot">       lido:addedSearchTerm=</span><span class="st">&quot;yes&quot;</span></span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a><span class="ot">       xml:lang=</span><span class="st">&quot;de&quot;</span>&gt;</span>
+<span id="cb46-19"><a href="#cb46-19" aria-hidden="true" tabindex="-1"></a>       Ölfarbe</span>
+<span id="cb46-20"><a href="#cb46-20" aria-hidden="true" tabindex="-1"></a>   &lt;/<span class="kw">lido:term</span>&gt;</span>
+<span id="cb46-21"><a href="#cb46-21" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:termMaterialsTech</span>&gt;</span></code></pre></div>
+            <p><strong>Example 2:</strong> The following XML code
+            snippet is an example for use case (b): The AAT concept is
+            represented by two terms, ‘smiling’ and ‘smiled’. The term
+            ‘smile’ which is likely to be searched for, is not provided
+            and therefore added as a search term.</p>
+            <div class="sourceCode" id="cb47"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:subjectConcept</span>&gt;</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>   &lt;<span class="kw">skos:Concept</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="ot">       rdf:about=</span><span class="st">&quot;http://vocab.getty.edu/aat/300417502&quot;</span>&gt;</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>       &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a><span class="ot">           xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>           smiling</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>       &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>       &lt;<span class="kw">skos:altLabel</span></span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a><span class="ot">           xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>           smiled</span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>       &lt;/<span class="kw">skos:altLabel</span>&gt;</span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>       &lt;<span class="kw">skos:mappingRelation</span>&gt;</span>
+<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a>           http://www.wikidata.org/entity/Q487</span>
+<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a>       &lt;/<span class="kw">skos:mappingRelation</span>&gt;</span>
+<span id="cb47-15"><a href="#cb47-15" aria-hidden="true" tabindex="-1"></a>       &lt;<span class="kw">skos:mappingRelation</span>&gt;</span>
+<span id="cb47-16"><a href="#cb47-16" aria-hidden="true" tabindex="-1"></a>           https://d-nb.info/gnd/4034011-9</span>
+<span id="cb47-17"><a href="#cb47-17" aria-hidden="true" tabindex="-1"></a>       &lt;/<span class="kw">skos:mappingRelation</span>&gt;</span>
+<span id="cb47-18"><a href="#cb47-18" aria-hidden="true" tabindex="-1"></a>   &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb47-19"><a href="#cb47-19" aria-hidden="true" tabindex="-1"></a>   &lt;<span class="kw">lido:term</span></span>
+<span id="cb47-20"><a href="#cb47-20" aria-hidden="true" tabindex="-1"></a><span class="ot">       lido:addedSearchTerm=</span><span class="st">&quot;yes&quot;</span></span>
+<span id="cb47-21"><a href="#cb47-21" aria-hidden="true" tabindex="-1"></a><span class="ot">       xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb47-22"><a href="#cb47-22" aria-hidden="true" tabindex="-1"></a>       smile</span>
+<span id="cb47-23"><a href="#cb47-23" aria-hidden="true" tabindex="-1"></a>   &lt;/<span class="kw">lido:term</span>&gt;</span>
+<span id="cb47-24"><a href="#cb47-24" aria-hidden="true" tabindex="-1"></a>   &lt;<span class="kw">lido:term</span></span>
+<span id="cb47-25"><a href="#cb47-25" aria-hidden="true" tabindex="-1"></a><span class="ot">       lido:addedSearchTerm=</span><span class="st">&quot;yes&quot;</span></span>
+<span id="cb47-26"><a href="#cb47-26" aria-hidden="true" tabindex="-1"></a><span class="ot">       xml:lang=</span><span class="st">&quot;de&quot;</span>&gt;</span>
+<span id="cb47-27"><a href="#cb47-27" aria-hidden="true" tabindex="-1"></a>       Lächeln</span>
+<span id="cb47-28"><a href="#cb47-28" aria-hidden="true" tabindex="-1"></a>   &lt;/<span class="kw">lido:term</span>&gt;</span>
+<span id="cb47-29"><a href="#cb47-29" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:subjectConcept</span>&gt;</span></code></pre></div>
+            <h3 data-number="5.4.3" id="codecresource"><span
+            class="header-section-number">5.4.3</span> <span
+            class="citation"
+            data-cites="codecResource">@codecResource</span></h3>
+            <p><strong>Attribute name:</strong> <a
+            href="http://lido-schema.org/schema/latest/lido.html#codecResource">lido:codecResource</a></p>
+            <p><strong>Note:</strong> Attribute for &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#linkResource">lido:linkResource</a>&gt;
+            and &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#resourceSet">lido:resourceSet</a>&gt;
+            to indicate that a particular codec is required for
+            rendering the resource. Values and URIs for codec names can
+            be found in the <a
+            href="http://metadataregistry.org/uri/Codecs">Open Metadata
+            Registry</a>.</p>
+            <p><strong>Example:</strong> The following XML code snippet
+            indicates that the linked resource is a provided audio to be
+            rendered as digital audio encoded according to a
+            specification officially named MPEG Audio Version 1 Layer 3
+            (colloquially referred to as MP3). The resource is an ‘<a
+            href="https://www.deutsche-digitale-bibliothek.de/item/CW4ACDL2YTHT7YP2BKIAO56KM66PKPBQ">audio
+            excerpt</a>’ from the opera <em><a
+            href="https://en.wikipedia.org/wiki/Mona_Lisa_(opera)">Mona
+            Lisa</a></em>, provided by the German Digital Library.</p>
+            <div class="sourceCode" id="cb48"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:resourceRepresentation</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00465&quot;</span>&gt;</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:linkResource</sp

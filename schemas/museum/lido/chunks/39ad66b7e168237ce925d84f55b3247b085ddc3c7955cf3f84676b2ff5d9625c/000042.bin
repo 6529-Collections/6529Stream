@@ -1,0 +1,75 @@
+an>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>                Sitter: Lisa del Giocondo (1479–1542)</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:displayActor</span>&gt;</span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>                <span class="co">&lt;!-- Person --&gt;</span></span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">lido:actor</span></span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a><span class="ot">                    lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00163&quot;</span>&gt;</span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">lido:actorID</span></span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a><span class="ot">                    lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00099&quot;</span>&gt;</span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>                    http://viaf.org/viaf/50517148</span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">lido:actorID</span>&gt;</span>
+<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">lido:nameActorSet</span>&gt;</span>
+<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a>                    <span class="co">&lt;!-- Index name --&gt;</span></span>
+<span id="cb38-19"><a href="#cb38-19" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">lido:appellationValue</span></span>
+<span id="cb38-20"><a href="#cb38-20" aria-hidden="true" tabindex="-1"></a><span class="ot">                        lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00961&quot;</span></span>
+<span id="cb38-21"><a href="#cb38-21" aria-hidden="true" tabindex="-1"></a><span class="ot">                        xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb38-22"><a href="#cb38-22" aria-hidden="true" tabindex="-1"></a>                        Del Giocondo, Lisa</span>
+<span id="cb38-23"><a href="#cb38-23" aria-hidden="true" tabindex="-1"></a>                    &lt;/<span class="kw">lido:appellationValue</span>&gt;</span>
+<span id="cb38-24"><a href="#cb38-24" aria-hidden="true" tabindex="-1"></a>                    <span class="co">&lt;!-- Display name --&gt;</span></span>
+<span id="cb38-25"><a href="#cb38-25" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">lido:appellationValue</span></span>
+<span id="cb38-26"><a href="#cb38-26" aria-hidden="true" tabindex="-1"></a><span class="ot">                        lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00526&quot;</span></span>
+<span id="cb38-27"><a href="#cb38-27" aria-hidden="true" tabindex="-1"></a><span class="ot">                        xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb38-28"><a href="#cb38-28" aria-hidden="true" tabindex="-1"></a>                        Lisa del Giocondo</span>
+<span id="cb38-29"><a href="#cb38-29" aria-hidden="true" tabindex="-1"></a>                    &lt;/<span class="kw">lido:appellationValue</span>&gt;</span>
+<span id="cb38-30"><a href="#cb38-30" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">lido:nameActorSet</span>&gt;</span>
+<span id="cb38-31"><a href="#cb38-31" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:actor</span>&gt;</span>
+<span id="cb38-32"><a href="#cb38-32" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:subjectActor</span>&gt;</span>
+<span id="cb38-33"><a href="#cb38-33" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:subject</span>&gt;</span>
+<span id="cb38-34"><a href="#cb38-34" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:subjectSet</span>&gt;</span></code></pre></div>
+            <h4 data-number="5.2.7.4" id="subject-event"><span
+            class="header-section-number">5.2.7.4</span> Subject
+            Event</h4>
+            <p><strong>Element name:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectEvent">lido:subjectEvent</a>&gt;</p>
+            <p><strong>Note:</strong> Subject Event contains information
+            about a particular event the object depicts or is about.
+            Iconographical narratives and fictitious events are indexed
+            as &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectObject">lido:subjectObject</a>&gt;.</p>
+            <p><strong>Example:</strong> Since there is no event as a
+            topic in Leonardo’s <em>Mona Lisa</em>, a <a
+            href="https://www.deutsche-digitale-bibliothek.de/item/34FHQ3ZRQMVVHPX3W63EGF5Q7I2MJDZ7">Punch
+            cartoon</a> has been chosen as an example instead,
+            addressing the theft of the <em>Mona Lisa</em> from the
+            Louvre in 1911. The values for the preferred labels in
+            English, German, and French are drawn from <a
+            href="http://www.wikidata.org/entity/Q2727213">Wikidata</a>.
+            Note that the LIDO <a
+            href="http://terminology.lido-schema.org/lido00222">Event
+            Type Terminology</a> does not provide terms for
+            &lt;lido:subjectEvent&gt;. Rather, the event type should be
+            drawn from an external vocabulary. Many authority files
+            provide a generic concept as a broader term for named events
+            that may be used as values for &lt;lido:eventType&gt;. In
+            the following snippet, a superclass for the “<a
+            href="https://www.wikidata.org/wiki/Q61266859">theft of Mona
+            Lisa</a>” from Wikidata is used. The subject type is “<a
+            href="http://terminology.lido-schema.org/lido00136">Identification</a>”.</p>
+            <blockquote>
+            <p><strong>Subject Event:</strong> Theft of Mona Lisa <br />
+            <strong><em>Subject Type:</em></strong> Identification<br/>
+            <strong>Event Type:</strong> theft
+            <strong><em>Preference:</em></strong> Preferred</p>
+            </blockquote>
+            <div class="sourceCode" id="cb39"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:subjectSet</span>&gt;</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">&lt;!-- Identification --&gt;</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:subject</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00136&quot;</span>&gt;</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:subjectEvent</span>&gt;</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:displayEvent</span></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a><span class="ot">                xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>                Theft of Mona Lisa</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:displayEvent</span>&gt;</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:event</span>&gt;</span>
+<span id="cb39-11"><a h

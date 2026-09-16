@@ -1,0 +1,372 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:6529stream:live-artist-attribution:v1",
+  "title": "Live Artist attribution object v1",
+  "description": "The object at properties.provenance.attribution; explicit historical/finality rendering uses its original profile. This schema validates shape, not source truth or signatures.",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "const": "attribution_unavailable"
+        }
+      },
+      "required": [
+        "state"
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "enum": [
+            "claimed",
+            "artist_accepted",
+            "artist_sanctioned",
+            "disputed",
+            "revoked"
+          ]
+        },
+        "works_class": {
+          "enum": [
+            "artist_bound",
+            "platform_works"
+          ]
+        },
+        "consent_mode": {
+          "enum": [
+            "artist_signed_policy",
+            "artist_delegated",
+            "platform_works"
+          ]
+        },
+        "artist_id": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "artist_address": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{40}$"
+        },
+        "artist_display_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "identity_record_hash": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "binding_generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "corrected_attribution": {
+          "type": "boolean"
+        },
+        "deployment_attestation": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "attestation_status": {
+          "enum": [
+            "none",
+            "attested_current",
+            "attested_stale",
+            "disputed"
+          ]
+        },
+        "attestation_record": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "attestation_authority_class": {
+          "enum": [
+            "artist",
+            "delegate",
+            "successor",
+            "steward"
+          ]
+        },
+        "attested_state_hash": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "sanction_record": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "sanction_authority_class": {
+          "enum": [
+            "artist",
+            "delegate",
+            "successor",
+            "steward"
+          ]
+        },
+        "contested": {
+          "type": "boolean"
+        },
+        "contest_record": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "claim_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "latest_claim_record": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "collaborators": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "artist_id": {
+                "type": "string",
+                "pattern": "^0x[0-9a-f]{64}$"
+              },
+              "account": {
+                "type": "string",
+                "pattern": "^0x[0-9a-f]{40}$"
+              },
+              "role": {
+                "type": "string",
+                "pattern": "^0x[0-9a-f]{64}$"
+              },
+              "verification_state": {
+                "const": "artist_accepted"
+              },
+              "artist_display_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "identity_record_hash": {
+                "type": "string",
+                "pattern": "^0x[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "artist_id",
+              "account",
+              "role",
+              "verification_state",
+              "artist_display_name",
+              "identity_record_hash"
+            ]
+          }
+        }
+      },
+      "required": [
+        "state",
+        "works_class",
+        "consent_mode",
+        "claim_count"
+      ],
+      "dependentRequired": {
+        "attestation_record": [
+          "attestation_authority_class",
+          "attested_state_hash"
+        ],
+        "attestation_authority_class": [
+          "attestation_record",
+          "attested_state_hash"
+        ],
+        "attested_state_hash": [
+          "attestation_record",
+          "attestation_authority_class"
+        ],
+        "sanction_record": [
+          "sanction_authority_class"
+        ],
+        "sanction_authority_class": [
+          "sanction_record"
+        ]
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "works_class": {
+                "const": "artist_bound"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "artist_id",
+              "artist_address",
+              "artist_display_name",
+              "identity_record_hash",
+              "binding_generation",
+              "corrected_attribution",
+              "attestation_status"
+            ],
+            "properties": {
+              "consent_mode": {
+                "enum": [
+                  "artist_signed_policy",
+                  "artist_delegated"
+                ]
+              }
+            }
+          },
+          "else": {
+            "required": [
+              "contested"
+            ],
+            "properties": {
+              "consent_mode": {
+                "const": "platform_works"
+              }
+            },
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "artist_id"
+                  ]
+                },
+                {
+                  "required": [
+                    "artist_address"
+                  ]
+                },
+                {
+                  "required": [
+                    "artist_display_name"
+                  ]
+                },
+                {
+                  "required": [
+                    "identity_record_hash"
+                  ]
+                },
+                {
+                  "required": [
+                    "binding_generation"
+                  ]
+                },
+                {
+                  "required": [
+                    "corrected_attribution"
+                  ]
+                },
+                {
+                  "required": [
+                    "attestation_status"
+                  ]
+                },
+                {
+                  "required": [
+                    "deployment_attestation"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "claim_count": {
+                "const": 0
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "latest_claim_record"
+              ]
+            }
+          },
+          "else": {
+            "required": [
+              "latest_claim_record"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "contested"
+            ],
+            "properties": {
+              "contested": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "contest_record"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "corrected_attribution"
+            ],
+            "properties": {
+              "corrected_attribution": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "contested"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "attestation_status"
+            ],
+            "properties": {
+              "attestation_status": {
+                "const": "none"
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "attestation_record"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "attestation_status"
+            ],
+            "properties": {
+              "attestation_status": {
+                "enum": [
+                  "attested_current",
+                  "attested_stale",
+                  "disputed"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "attestation_record"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

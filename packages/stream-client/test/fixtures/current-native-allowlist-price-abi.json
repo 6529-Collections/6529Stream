@@ -1,0 +1,836 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "f1745f33be3e601aca75a89ffe428f534a352615",
+  "sourceTree": "b4d68b320f8a7dfde2b5f4caba4218b8713b27b3",
+  "sourceCount": 159,
+  "compilerVersion": "0.8.19",
+  "sourceNormalization": "UTF-8 CRLF to LF",
+  "qualification": "Selected ABI and source encoding evidence only; no native-runtime, live eligibility, signature, payment, or release acceptance claim.",
+  "inputSha256": "c59a2da7dcecfa40e5b3e9ac4223bcc4ed111c5bfd2edc46c9c49b093289b7e6",
+  "outputSha256": "c2e32bb4330404d4a923d810b4a32a801eeaf9ff2f9b478cbefbb0201b51b677",
+  "sources": {
+    "smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol": "5f5b629b9c68ab941d3f1f13358de49dd3158a8e66b9dbf77ad11f7f15d41efb",
+    "smart-contracts/domains/mint/StreamNativeImmediateSaleWorker.sol": "43940392b455fe62e979c3ae6bc24e492d3281fbcd0fe467dccbada6c4920592",
+    "smart-contracts/domains/mint/StreamNativePriceProgram.sol": "56c3599698c6e2efcd541b1c92d9ef8bfd21063339c92d1e685fecd3e9242360",
+    "smart-contracts/domains/mint/StreamMintSaleAllowlist.sol": "d315b29738e5a70c8b0272ba247c03e15fbeb05b96be244bb09405776d5202d6",
+    "smart-contracts/domains/mint/StreamMintCounterPolicy.sol": "86f8e2308d298e093c6a1f7e746f1d18e2940a722d991c7733e6834396b5ba76",
+    "smart-contracts/interfaces/stream/mint/IStreamNativeAllowlistPricePrograms.sol": "7a9489cc94df4b5423a096a3ceac10d177e3096769a1ea203297cdbd4b3d9381",
+    "smart-contracts/interfaces/stream/mint/IStreamNativePricePrograms.sol": "ae2577d96da4710998e042974052d0c3a2b700b0a3cb5020553b15edff7be499",
+    "smart-contracts/interfaces/stream/revenue/StreamNativeSettlementTypes.sol": "5ce37350566d225333360f9c04575904c969faecaa2beb1aad3d38b9e997956c"
+  },
+  "methods": [
+    "registerAllowlistPriceProgram",
+    "allowlistPricePolicy",
+    "previewAllowlistPriceProgram",
+    "executeAllowlistPriceProgram",
+    "priceProgramIdFor",
+    "priceProgramRecord",
+    "priceProgramAuthorizationDigest",
+    "saleRevealQuote",
+    "nextSaleNonce",
+    "owner",
+    "core",
+    "mintManager"
+  ],
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        }
+      ],
+      "name": "allowlistPricePolicy",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "allowFree",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct IStreamNativeAllowlistPricePrograms.AllowlistPricePolicy",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "core",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "saleId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "saleConfigHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "payer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "executor",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "recipient",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "artist",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "tokenDataHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "mintCommitment",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "executionNonce",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "nonce",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "deadline",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedPrimaryPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "unitPrice",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct IStreamNativePricePrograms.PriceProgramAuthorization",
+              "name": "authorization",
+              "type": "tuple"
+            },
+            {
+              "internalType": "uint256",
+              "name": "chosenUnitPrice",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "tokenData",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "platformSignature",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "artistSignature",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct IStreamNativePricePrograms.PriceProgramExecution",
+          "name": "e",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes",
+          "name": "resolverData",
+          "type": "bytes"
+        }
+      ],
+      "name": "executeAllowlistPriceProgram",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint8",
+              "name": "revenueOutcome",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "executionId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "operationId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "chargedAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "settlementKey",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "escrowed",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct IStreamNativePricePrograms.PriceProgramResult",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "mintManager",
+      "outputs": [
+        {
+          "internalType": "contract IStreamMintManager",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "nextSaleNonce",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "saleId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "saleConfigHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "payer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "executor",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "recipient",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "artist",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "tokenDataHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "mintCommitment",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "executionNonce",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "nonce",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "deadline",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedPrimaryPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "unitPrice",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct IStreamNativePricePrograms.PriceProgramAuthorization",
+              "name": "authorization",
+              "type": "tuple"
+            },
+            {
+              "internalType": "uint256",
+              "name": "chosenUnitPrice",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "tokenData",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "platformSignature",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "artistSignature",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct IStreamNativePricePrograms.PriceProgramExecution",
+          "name": "e",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes",
+          "name": "resolverData",
+          "type": "bytes"
+        }
+      ],
+      "name": "previewAllowlistPriceProgram",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint8",
+              "name": "revenueOutcome",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "executionId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "operationId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "chargedAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "settlementKey",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "escrowed",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct IStreamNativePricePrograms.PriceProgramResult",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "saleId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "saleConfigHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "executor",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "artist",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "tokenDataHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "mintCommitment",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "executionNonce",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "nonce",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "deadline",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedPrimaryPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "unitPrice",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct IStreamNativePricePrograms.PriceProgramAuthorization",
+          "name": "authorization",
+          "type": "tuple"
+        }
+      ],
+      "name": "priceProgramAuthorizationDigest",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "kind",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "nonce",
+          "type": "uint256"
+        }
+      ],
+      "name": "priceProgramIdFor",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        }
+      ],
+      "name": "priceProgramRecord",
+      "outputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "collectionId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "phaseId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "kind",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "minUnitPrice",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "maxUnitPrice",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "maxSaleQuantity",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "startsAt",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "endsAt",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "closeRule",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "mintPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "primaryAssignmentHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamNativePricePrograms.PriceProgramConfig",
+              "name": "config",
+              "type": "tuple"
+            },
+            {
+              "internalType": "uint256",
+              "name": "saleNonce",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "configHash",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint64",
+                  "name": "saleCreatedAt",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "saleAdapterRegistryRevision",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamNativeSettlementTypes.SaleLifecycleBinding",
+              "name": "lifecycle",
+              "type": "tuple"
+            },
+            {
+              "internalType": "uint64",
+              "name": "mintedQuantity",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bool",
+              "name": "closed",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct IStreamNativePricePrograms.PriceProgramRecord",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "kind",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "minUnitPrice",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maxUnitPrice",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint64",
+              "name": "maxSaleQuantity",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "startsAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "endsAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint8",
+              "name": "closeRule",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "mintPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "primaryAssignmentHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct IStreamNativePricePrograms.PriceProgramConfig",
+          "name": "config",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "allowFree",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct IStreamNativeAllowlistPricePrograms.AllowlistPricePolicy",
+          "name": "policy",
+          "type": "tuple"
+        }
+      ],
+      "name": "registerAllowlistPriceProgram",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        }
+      ],
+      "name": "saleRevealQuote",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "coordinator",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "coordinatorCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "declared",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "requestMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "revealOwnerRole",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "requestSLOBlocks",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "revealFeePerTokenWei",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct IStreamRevealFeeEscrow.CollectionRevealPolicy",
+              "name": "policy",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct IStreamImmediateSaleReveal.RevealQuote",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ]
+}

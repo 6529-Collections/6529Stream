@@ -1,0 +1,123 @@
+y"/>
+	<xs:element name="formatRegistryName" type="stringPlusAuthority"/>
+	<xs:element name="formatRegistryKey" type="stringPlusAuthority"/>
+	<xs:element name="formatRegistryRole" type="stringPlusAuthority"/>
+	<xs:element name="hwName" type="stringPlusAuthority"/>
+	<xs:element name="hwType" type="stringPlusAuthority"/>
+	<xs:element name="inhibitorTarget" type="stringPlusAuthority"/>
+	<xs:element name="inhibitorType" type="stringPlusAuthority"/>
+	<xs:element name="licenseDocumentationIdentifierType" type="stringPlusAuthority"/>
+	<xs:element name="licenseDocumentationRole" type="stringPlusAuthority"/>
+	<xs:element name="licenseIdentifierType" type="stringPlusAuthority"/>
+	<xs:element name="linkingAgentIdentifierType" type="stringPlusAuthority"/>
+	<xs:element name="linkingAgentRole" type="stringPlusAuthority"/>
+	<xs:element name="linkingEventIdentifierType" type="stringPlusAuthority"/>
+    <xs:element name="linkingEnvironmentRole" type="stringPlusAuthority"/>
+	<xs:element name="linkingObjectIdentifierType" type="stringPlusAuthority"/>
+	<xs:element name="linkingObjectRole" type="stringPlusAuthority"/>
+	<xs:element name="linkingRightsStatementIdentifierType" type="stringPlusAuthority"/>
+	<xs:element name="messageDigestAlgorithm" type="stringPlusAuthority"/>
+	<xs:element name="messageDigestOriginator" type="stringPlusAuthority"/>
+	<xs:element name="objectIdentifierType" type="stringPlusAuthority"/>
+	<xs:element name="otherRightsBasis" type="stringPlusAuthority"/>
+	<xs:element name="otherRightsDocumentationRole" type="stringPlusAuthority"/>
+	<xs:element name="otherRightsDocumentationIdentifierType" type="stringPlusAuthority"/>
+    <xs:element name="preservationLevelType" type="stringPlusAuthority"/>
+  	<xs:element name="preservationLevelValue" type="stringPlusAuthority"/>
+	<xs:element name="preservationLevelRole" type="stringPlusAuthority"/>
+    <xs:element name="relatedEventIdentifierType" type="stringPlusAuthority"/>
+	<xs:element name="relatedEnvironmentPurpose" type="stringPlusAuthority"/>
+    <xs:element name="relatedEnvironmentCharacteristic" type="stringPlusAuthority"/>
+	<xs:element name="relatedObjectIdentifierType" type="stringPlusAuthority"/>
+	<xs:element name="relationshipType" type="stringPlusAuthority"/>
+	<xs:element name="relationshipSubType" type="stringPlusAuthority"/>
+	<xs:element name="restriction" type="stringPlusAuthority"/>
+	<xs:element name="rightsBasis" type="stringPlusAuthority"/>
+	<xs:element name="rightsStatementIdentifierType" type="stringPlusAuthority"/>
+	<xs:element name="signatureEncoding" type="stringPlusAuthority"/>
+	<xs:element name="signatureMethod" type="stringPlusAuthority"/>
+	<xs:element name="signatureValidationRules" type="stringPlusAuthority"/>
+	<xs:element name="signer" type="stringPlusAuthority"/>
+	<xs:element name="significantPropertiesType" type="stringPlusAuthority"/>
+	<xs:element name="storageMedium" type="stringPlusAuthority"/>
+	<xs:element name="statuteCitation" type="stringPlusAuthority"/>
+	<xs:element name="statuteDocumentationIdentifierType" type="stringPlusAuthority"/>
+	<xs:element name="statuteDocumentationRole" type="stringPlusAuthority"/>
+	<xs:element name="swName" type="stringPlusAuthority"/>
+	<xs:element name="swType" type="stringPlusAuthority"/>
+	<xs:element name="swDependency" type="stringPlusAuthority"/>
+		<!-- 
+		
+		****** countryCode type element declarations
+	-->
+	<xs:element name="copyrightJurisdiction" type="countryCode"/> 
+	<xs:element name="statuteJurisdiction" type="countryCode"/>   
+	
+
+	<!-- 
+****** complex  type element declarations
+ 	-->
+	<xs:element name="agentIdentifier" type="agentIdentifierComplexType"/>
+	<xs:element name="contentLocation" type="contentLocationComplexType"/>
+    <xs:element name="compositionLevel" type="compositionLevelComplexType"/>
+	<xs:element name="copyrightDocumentationIdentifier" type="copyrightDocumentationIdentifierComplexType"/>
+	<xs:element name="copyrightInformation" type="copyrightInformationComplexType"/>
+	<xs:element name="creatingApplication" type="creatingApplicationComplexType"/>
+    <xs:element name="environmentFunction" type="environmentFunctionComplexType"/>
+    <xs:element name="environmentDesignation" type="environmentDesignationComplexType"/>
+    <xs:element  name="environmentRegistry" type="environmentRegistryComplexType"/>                    
+    <xs:element name="eventDetailInformation" type="eventDetailInformationComplexType"/>
+    <xs:element name="eventIdentifier" type="eventIdentifierComplexType"/>
+	<xs:element name="eventOutcomeDetail" type="eventOutcomeDetailComplexType"/>
+	<xs:element name="eventOutcomeInformation" type="eventOutcomeInformationComplexType"/>
+	<xs:element name="fixity" type="fixityComplexType"/>
+	<xs:element name="format" type="formatComplexType"/>
+	<xs:element name="formatDesignation" type="formatDesignationComplexType"/>
+	<xs:element name="formatRegistry" type="formatRegistryComplexType"/>
+	<xs:element name="inhibitors" type="inhibitorsComplexType"/>
+	<xs:element name="licenseDocumentationIdentifier" type="licenseDocumentationIdentifierComplexType"/>
+	<xs:element name="licenseInformation" type="licenseInformationComplexType"/>
+	<xs:element name="linkingAgentIdentifier" type="linkingAgentIdentifierComplexType"/>
+    <xs:element name="linkingEnvironmentIdentifier" type="linkingEnvironmentIdentifierComplexType"/>
+    <xs:element name="linkingEventIdentifier" type="linkingEventIdentifierComplexType"/>
+	<xs:element name="linkingObjectIdentifier" type="linkingObjectIdentifierComplexType"/>
+	<xs:element name="linkingRightsStatementIdentifier" type="linkingRightsStatementIdentifierComplexType"/>
+	<xs:element name="objectCharacteristics" type="objectCharacteristicsComplexType"/>
+	<xs:element name="objectIdentifier" type="objectIdentifierComplexType"/>
+	<xs:element name="originalName" type="originalNameComplexType"/>
+	<xs:element name="otherRightsDocumentationIdentifier" type="otherRightsDocumentationIdentifierComplexType"/>
+	<xs:element name="otherRightsInformation" type="otherRightsInformationComplexType"/>
+	<xs:element name="preservationLevel" type="preservationLevelComplexType"/>
+	<xs:element name="relatedEventIdentifier" type="relatedEventIdentifierComplexType"/>
+	<xs:element name="relatedObjectIdentifier" type="relatedObjectIdentifierComplexType"/>
+    <xs:element name="relationship" type="relationshipComplexType"/>
+	<xs:element name="rightsGranted" type="rightsGrantedComplexType"/>
+	<xs:element name="rightsStatement" type="rightsStatementComplexType"/>
+	<xs:element name="rightsStatementIdentifier" type="rightsStatementIdentifierComplexType"/>
+	<xs:element name="signature" type="signatureComplexType"/>
+	<xs:element name="signatureInformation" type="signatureInformationComplexType"/>
+	<xs:element name="significantProperties" type="significantPropertiesComplexType"/>
+	<xs:element name="statuteDocumentationIdentifier" type="statuteDocumentationIdentifierComplexType"/>
+	<xs:element name="statuteInformation" type="statuteInformationComplexType"/>
+	<xs:element name="storage" type="storageComplexType"/>
+	<!-- 
+****** other xs  type  element declarations
+ 	-->
+	<xs:element name="relatedEventSequence" type="xs:nonNegativeInteger"/>
+	<xs:element name="relatedObjectSequence" type="xs:nonNegativeInteger"/>
+	<xs:element name="size" type="xs:long"/>
+	<!-- 
+****** date type  element declarations
+ 	-->
+	<xs:element name="dateCreatedByApplication" type="edtfSimpleType"/>
+	<xs:element name="endDate" type="edtfSimpleType"/>
+	<xs:element name="copyrightApplicableDates" type="startAndEndDateComplexType"/>
+	<xs:element name="copyrightStatusDeterminationDate" type="edtfSimpleType"/>
+	<xs:element name="eventDateTime" type="xs:string"/>
+	<xs:element name="licenseApplicableDates" type="startAndEndDateComplexType"/>
+	<xs:element name="preservationLevelDateAssigned" type="edtfSimpleType"/>
+	<xs:element name="startDate" type="edtfSimpleType"/>
+	<xs:element name="otherRightsApplicableDates" type="startAndEndDateComplexType"/>
+	<xs:element name="statuteApplicableDates" type="startAndEndDateComplexType"/>
+	<xs:element name="statuteInformationDeterminationDate" type="edtfSimpleType"/>
+	<xs:element name="termOfGrant" type="startAndEndDateComp

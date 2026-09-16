@@ -1,0 +1,100 @@
+   that may occur in a database, data repository, or any other
+            aggregation of machine-processable records. The LIDO
+            Metadata Record Identifier is preferably composed of an
+            identifier for the contributor and a record identification
+            in the (local) system of the contributor. It is not required
+            to be persistent, which means that it can be obsoleted when
+            new versions of a LIDO record become available. Any
+            subsequent version of a LIDO record should be
+            distinguishable at least by using the &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#recordMetadataDate">lido:recordMetadataDate</a>&gt;
+            element. For identifiers guaranteed to be persistent see the
+            &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectPublishedID">lido:objectPublishedID</a>&gt;
+            described below. However, some aggregators will expect this
+            identifier to be persistent throughout all updates.</p>
+            <p><strong>Example for “URI”:</strong> In the following
+            example the LIDO Metadata Record Identifier is composed of
+            the ISIL (International Standard Identifier for Libraries
+            and Related Organisations) of the contributor and the local
+            record ID. The mandatory <em>type</em> attribute has a value
+            from the LIDO Terminology for “URI”, and the source is
+            provided as ISIL of the contributor.</p>
+            <blockquote>
+            <p><strong>LIDO Metadata Record Identifier:</strong>
+            ld.zdb-services.de/resource/organisations/DE-Mb112/lido-obj00154983</p>
+            </blockquote>
+            <p><strong><em>Type:</em></strong> URI |
+            <strong><em>Source:</em></strong>
+            ld.zdb-services.de/resource/organisations/DE-Mb112</p>
+            <div class="sourceCode" id="cb5"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:lidoRecID</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00099&quot;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:source=</span><span class="st">&quot;ld.zdb-services.de/resource/organisations/DE-Mb112&quot;</span>&gt;</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    ld.zdb-services.de/resource/organisations/DE/DE-Mb112/lido-obj00154983</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:lidoRecID</span>&gt;</span></code></pre></div>
+            <p><strong>Example for “Local identifier”:</strong> In the
+            following example the LIDO Metadata Record Identifier is
+            composed of the ISIL of the contributor (data provider) and
+            the local record ID. The mandatory <em>lido:type</em>
+            attribute has a value from the LIDO Terminology for “Local
+            identifier”, and the source is provided as free text.</p>
+            <blockquote>
+            <p><strong>LIDO Metadata Record Identifier:</strong>
+            DE-Mb112/lido-obj00154983 <strong><em>Type:</em></strong>
+            Local identifier | <strong><em>Source:</em></strong>
+            Deutsches Dokumentationszentrum für Kunstgeschichte -
+            Bildarchiv Foto Marburg</p>
+            </blockquote>
+            <div class="sourceCode" id="cb6"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:lidoRecID</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00100&quot;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:source=</span><span class="st">&quot;Deutsches Dokumentationszentrum für Kunstgeschichte - Bildarchiv Foto Marburg&quot;</span>&gt;</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    DE-Mb112/lido-obj00154983</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:lidoRecID</span>&gt;</span></code></pre></div>
+            <h3 data-number="4.2.2"
+            id="published-object-identifier"><span
+            class="header-section-number">4.2.2</span> Published Object
+            Identifier</h3>
+            <p><strong>Element name:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectPublishedID">lido:objectPublishedID</a>&gt;</p>
+            <p><strong>Note:</strong> This element contains a public
+            entry for the described object or work in another
+            information system or authority file. This identifier should
+            always be a dereferenceable URI so that it can be used as a
+            key to associated information. Repeatable for identifiers
+            from more than one source. If there are multiple published
+            identifiers, then the attribute <a
+            href="http://lido-schema.org/schema/latest/lido.html#pref">lido:pref</a>
+            should mark the one preferred by the provider of the LIDO
+            record.</p>
+            <p><strong>Example:</strong> In the following example the
+            Published Object Identifier is marked as the preferred one
+            by the data provider. The mandatory <em>lido:type</em>
+            attribute has a value from the LIDO Terminology for “URI”,
+            and the <em>source</em> is provided as free-text.</p>
+            <blockquote>
+            <p><strong>Published Object Identifier:</strong> <a
+            href="https://d-nb.info/gnd/4074156-4"
+            class="uri">https://d-nb.info/gnd/4074156-4</a>
+            <strong><em>Preference:</em></strong> Preferred |
+            <strong><em>Type:</em></strong> URI |
+            <strong><em>Source:</em></strong> Deutsche
+            Nationalbibliothek: Gemeinsame Normdatei. URL: <a
+            href="https://d-nb.info/gnd"
+            class="uri">https://d-nb.info/gnd</a> [2022-09-23]</p>
+            </blockquote>
+            <div class="sourceCode" id="cb7"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:objectPublishedID</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00169&quot;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00099&quot;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:source=</span><span class="st">&quot;Deutsche Nationalbibliothek: Gemeinsame Normdatei. URL: http://d-nb.info/gnd [2022-09-23]&quot;</span>&gt;</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    http://d-nb.info/gnd/4074156-4</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:objectPublishedID</span>&gt;</span></code></pre></div>
+            <h3 data-number="4.2.3" id="category"><span
+            class="header-section-number">4.2.3</span> Category</h3>
+            <p><strong>Element name:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#category">lido:category</a>&gt;</p>
+            <p><strong>Note:</strong> Category is a content element for
+            grouping LIDO records together by very broad classes of
+            objects or works. Initially intended to be p

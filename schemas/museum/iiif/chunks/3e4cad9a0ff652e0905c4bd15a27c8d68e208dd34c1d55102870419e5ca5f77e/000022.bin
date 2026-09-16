@@ -1,0 +1,76 @@
+son-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"thumbnail"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/images/thumb1.jpg"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Image"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"image/jpeg"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h3 id="language-of-property-values">
+        
+        
+          4.4. Language of Property Values <a href="#language-of-property-values" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>Language <em class="rfc">may</em> be associated with strings that are intended to be displayed to the user for the <code class="language-plaintext highlighter-rouge">label</code> and <code class="language-plaintext highlighter-rouge">summary</code> properties, plus the <code class="language-plaintext highlighter-rouge">label</code> and <code class="language-plaintext highlighter-rouge">value</code> properties of the <code class="language-plaintext highlighter-rouge">metadata</code> and <code class="language-plaintext highlighter-rouge">requiredStatement</code> objects.</p>
+
+<p>The values of these properties <em class="rfc">must</em> be <abbr title="JavaScript Object Notation">JSON</abbr> objects, with the keys being the <a href="https://tools.ietf.org/html/bcp47" title="Tags for Identifying Languages">BCP 47</a> language code for the language, or if the language is either not known or the string does not have a language, then the key <em class="rfc">must</em> be the string <code class="language-plaintext highlighter-rouge">none</code>. The associated values <em class="rfc">must</em> be arrays of strings, where each item is the content in the given language.</p>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="s2">"Whistler's Mother"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"Arrangement in Grey and Black No. 1: The Artist's Mother"</span><span class="w">
+    </span><span class="p">],</span><span class="w">
+    </span><span class="nl">"fr"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="s2">"Arrangement en gris et noir no 1"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"Portrait de la mère de l'artiste"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"La Mère de Whistler"</span><span class="w">
+    </span><span class="p">],</span><span class="w">
+    </span><span class="nl">"none"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Whistler (1871)"</span><span class="w"> </span><span class="p">]</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Note that <a href="https://tools.ietf.org/html/bcp47" title="Tags for Identifying Languages">BCP 47</a> allows the script of the text to be included after a hyphen, such as <code class="language-plaintext highlighter-rouge">ar-latn</code>, and clients should be aware of this possibility.</p>
+
+<p>In the case where multiple values are supplied, clients <em class="rfc">must</em> use the following algorithm to determine which values to display to the user.</p>
+
+<ul>
+  <li>If all of the values are associated with the <code class="language-plaintext highlighter-rouge">none</code> key, the client <em class="rfc">must</em> display all of those values.</li>
+  <li>Else, the client should try to determine the user’s language preferences, or failing that use some default language preferences. Then:
+    <ul>
+      <li>If any of the values have a language associated with them, the client <em class="rfc">must</em> display all of the values associated with the language that best matches the language preference.</li>
+      <li>If all of the values have a language associated with them, and none match the language preference, the client <em class="rfc">must</em> select a language and display all of the values associated with that language.</li>
+      <li>If some of the values have a language associated with them, but none match the language preference, the client <em class="rfc">must</em> display all of the values that do not have a language associated with them.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Note that this does not apply to <a href="/api/presentation/3.0/#12-terminology">embedded</a> textual bodies in Annotations, which use the Web Annotation pattern of <code class="language-plaintext highlighter-rouge">value</code> and <code class="language-plaintext highlighter-rouge">language</code> as separate properties.</p>
+      <h3 id="45-html-markup-in-property-values">
+        
+        
+          4.5. <abbr title="HyperText Markup Language">HTML</abbr> Markup in Property Values <a href="#45-html-markup-in-property-values" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>Minimal <abbr title="HyperText Markup Language">HTML</abbr> markup <em class="rfc">may</em> be included for processing in the <code class="language-plaintext highlighter-rouge">summary</code> property and the <code class="language-plaintext highlighter-rouge">value</code> property in the <code class="language-plaintext highlighter-rouge">metadata</code> and <code class="language-plaintext highlighter-rouge">requiredStatement</code> objects. It <em class="rfc">must not</em> be used in <code class="language-plaintext highlighter-rouge">label</code> or other properties. This is included to allow content publishers to add links and simple formatting instructions to blocks of text. The content <em class="rfc">must</em> be well-formed <abbr title="eXtensible Markup Language">XML</abbr> and therefore <em class="rfc">must</em> be wrapped in an element such as <code class="language-plaintext highlighter-rouge">p</code> or <code class="language-plaintext highlighter-rouge">span</code>. There <em class="rfc">must not</em> be whitespace on either side of the <abbr title="HyperText Markup Language">HTML</abbr> string, and thus the first character in the string <em class="rfc">must</em> be a ‘&lt;’ character and the last character <em class="rfc">must</em> be ‘&gt;’, allowing a consuming application to test whether the value is <abbr title="HyperText Markup Language">HTML</abbr> or plain text using these. To avoid a non-<abbr title="HyperText Markup Language">HTML</abbr> string matching this, it is <em class="rfc">recommended</em> that an additional whitespace character be added to the end of the value in situations where plain text happens to start and end this way.</p>
+
+<p>In order to avoid <abbr title="HyperText Markup Language">HTML</abbr> or script injection attacks, clients <em class="rfc">must</em> remove:</p>
+
+<ul>
+  <li>Tags such as <code class="language-plaintext highlighter-rouge">script</code>, <code class="language-plaintext highlighter-rouge">style</co

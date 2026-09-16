@@ -1,0 +1,1216 @@
+{
+  "qualification": "Compiler-selected encoding fixture only; no deployed-state, runtime or source inventory acceptance.",
+  "sources": {
+    "smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol": "fc808f368b1bdd10bace2dbbbab0a7b8cd6cbea13f6485d86c9eb51d95427b98",
+    "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol": "504c6e25f1ccd920a419806de9b04345b8984d727a8565320022cdba7f227152",
+    "smart-contracts/domains/artist/StreamArtistOnboardingCoordinator.sol": "730c9f60423befa90447b0a93cdf50555506dd78d64caef4a6970340e7a6c62d",
+    "smart-contracts/domains/artist/StreamArtistIdentityAuthority.sol": "7adebb23c23bc4c57053b175e2bebe0b36da26fa9186bd0f757db5c742c542d0",
+    "smart-contracts/interfaces/stream/core/IStreamCore.sol": "897997004aa06c03a43cceb96fc47eb07153dfbca14bd13fdbdf96be35bb951f"
+  },
+  "abis": {
+    "artist": [
+      {
+        "inputs": [],
+        "name": "core",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "artistId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "evidenceHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "reasonHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistRecoveryTypes.FindingRequest",
+            "name": "request",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "coordinator",
+                "type": "address"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "bytes32",
+                    "name": "oldRequestKey",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "string",
+                    "name": "reasonURI",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "providerEvidenceHash",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct IStreamEntropyFreshRecovery.RecoveryInput",
+                "name": "recovery",
+                "type": "tuple"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "intentHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "unavailableEvidenceHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistEntropyUnavailabilityTypes.Target",
+            "name": "target",
+            "type": "tuple"
+          }
+        ],
+        "name": "entropyUnavailabilityFindingContext",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "scopeHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "oldValueHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "newValueHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint64",
+                "name": "noticeSeconds",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "timingRevision",
+                "type": "uint64"
+              }
+            ],
+            "internalType": "struct StreamArtistUnavailabilityTypes.Context",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "hash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "entropyUnavailabilityFindingRecord",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "recordHash",
+                "type": "bytes32"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "bytes32",
+                    "name": "artistId",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "collectionId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "evidenceHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "reasonHash",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct StreamArtistRecoveryTypes.FindingRequest",
+                "name": "terms",
+                "type": "tuple"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "governanceActionId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint64",
+                "name": "noticeEndsAt",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "recordedAt",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "noticeSeconds",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "timingRevision",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "bindingGeneration",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "bindingHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistRecoveryTypes.FindingRecord",
+            "name": "",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "components": [
+                  {
+                    "internalType": "address",
+                    "name": "coordinator",
+                    "type": "address"
+                  },
+                  {
+                    "components": [
+                      {
+                        "internalType": "bytes32",
+                        "name": "oldRequestKey",
+                        "type": "bytes32"
+                      },
+                      {
+                        "internalType": "string",
+                        "name": "reasonURI",
+                        "type": "string"
+                      },
+                      {
+                        "internalType": "bytes32",
+                        "name": "providerEvidenceHash",
+                        "type": "bytes32"
+                      }
+                    ],
+                    "internalType": "struct IStreamEntropyFreshRecovery.RecoveryInput",
+                    "name": "recovery",
+                    "type": "tuple"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "intentHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "unavailableEvidenceHash",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct StreamArtistEntropyUnavailabilityTypes.Target",
+                "name": "target",
+                "type": "tuple"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "uint256",
+                    "name": "collectionId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "scopeId",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "oldRequestKey",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "newRequestKey",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "priorJournalHead",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "journalHead",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "currentContentStateHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "contentStateHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "requestPolicyHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "incidentEvidenceHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "providerEvidenceHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "reasonHash",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct IStreamEntropyArtistUnavailability.Intent",
+                "name": "intent",
+                "type": "tuple"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "coordinatorCodeHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "activityEpoch",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "governanceWitnessHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistEntropyUnavailabilityTypes.Admission",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "components": [
+                  {
+                    "internalType": "uint256",
+                    "name": "bindingIndex",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "artistId",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "collectionId",
+                    "type": "uint256"
+                  },
+                  {
+                    "components": [
+                      {
+                        "internalType": "bytes32",
+                        "name": "schema",
+                        "type": "bytes32"
+                      },
+                      {
+                        "components": [
+                          {
+                            "internalType": "bytes32",
+                            "name": "domainId",
+                            "type": "bytes32"
+                          },
+                          {
+                            "internalType": "uint64",
+                            "name": "revision",
+                            "type": "uint64"
+                          },
+                          {
+                            "internalType": "bytes32",
+                            "name": "stateRoot",
+                            "type": "bytes32"
+                          },
+                          {
+                            "internalType": "bytes32",
+                            "name": "recordChainTip",
+                            "type": "bytes32"
+                          }
+                        ],
+                        "internalType": "struct StreamArtistOnboardingTypes.Snapshot",
+                        "name": "ownerState",
+                        "type": "tuple"
+                      },
+                      {
+                        "internalType": "bytes32",
+                        "name": "replayRoot",
+                        "type": "bytes32"
+                      },
+                      {
+                        "internalType": "uint256",
+                        "name": "replayCount",
+                        "type": "uint256"
+                      },
+                      {
+                        "internalType": "bytes32",
+                        "name": "nonceRoot",
+                        "type": "bytes32"
+                      },
+                      {
+                        "internalType": "uint256",
+                        "name": "nonceIndexCount",
+                        "type": "uint256"
+                      }
+                    ],
+                    "internalType": "struct IStreamArtistAuthorityCheckpoint.Checkpoint[7]",
+                    "name": "expectedSource",
+                    "type": "tuple[7]"
+                  },
+                  {
+                    "components": [
+                      {
+                        "internalType": "bytes32",
+                        "name": "surface",
+                        "type": "bytes32"
+                      },
+                      {
+                        "internalType": "bytes32",
+                        "name": "scope",
+                        "type": "bytes32"
+                      }
+                    ],
+                    "internalType": "struct StreamArtistAuthorityHydrationTypes.Origin[][7]",
+                    "name": "replayOrigins",
+                    "type": "tuple[][7]"
+                  },
+                  {
+                    "components": [
+                      {
+                        "internalType": "bytes32",
+                        "name": "phaseId",
+                        "type": "bytes32"
+                      },
+                      {
+                        "internalType": "bytes32",
+                        "name": "policyHash",
+                        "type": "bytes32"
+                      }
+                    ],
+                    "internalType": "struct StreamArtistAuthorityHydrationTypes.PolicyKey[]",
+                    "name": "policies",
+                    "type": "tuple[]"
+                  }
+                ],
+                "internalType": "struct StreamArtistAuthorityHydrationTypes.Request",
+                "name": "authority",
+                "type": "tuple"
+              },
+              {
+                "internalType": "bool",
+                "name": "includePayout",
+                "type": "bool"
+              },
+              {
+                "internalType": "bool",
+                "name": "publications",
+                "type": "bool"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "uint256",
+                    "name": "collectionId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "resolver",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "revenueClass",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "uint8",
+                    "name": "scope",
+                    "type": "uint8"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "scopeId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "assignmentHash",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct StreamArtistOnboardingTypes.EconomicsConsent[]",
+                "name": "economics",
+                "type": "tuple[]"
+              },
+              {
+                "components": [
+                  {
+                    "components": [
+                      {
+                        "internalType": "uint256",
+                        "name": "collectionId",
+                        "type": "uint256"
+                      },
+                      {
+                        "internalType": "uint8",
+                        "name": "subjectKind",
+                        "type": "uint8"
+                      },
+                      {
+                        "internalType": "bytes32",
+                        "name": "subjectId",
+                        "type": "bytes32"
+                      },
+                      {
+                        "internalType": "bytes32",
+                        "name": "subjectStateHash",
+                        "type": "bytes32"
+                      },
+                      {
+                        "internalType": "bytes32",
+                        "name": "schemaId",
+                        "type": "bytes32"
+                      },
+                      {
+                        "internalType": "bytes32",
+                        "name": "statementHash",
+                        "type": "bytes32"
+                      },
+                      {
+                        "internalType": "string",
+                        "name": "statementURI",
+                        "type": "string"
+                      }
+                    ],
+                    "internalType": "struct StreamArtistOnboardingTypes.Attestation",
+                    "name": "terms",
+                    "type": "tuple"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "nonce",
+                    "type": "uint256"
+                  }
+                ],
+                "internalType": "struct StreamArtistReadinessHydrationTypes.AttestationInput[]",
+                "name": "attestations",
+                "type": "tuple[]"
+              }
+            ],
+            "internalType": "struct StreamArtistEntropyFindingHydrationTypes.Request",
+            "name": "p",
+            "type": "tuple"
+          }
+        ],
+        "name": "hydrateArtistAuthorityWithEntropyFindings",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "operationCoordinator",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "artistId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "evidenceHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "reasonHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistRecoveryTypes.FindingRequest",
+            "name": "request",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "coordinator",
+                "type": "address"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "bytes32",
+                    "name": "oldRequestKey",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "string",
+                    "name": "reasonURI",
+                    "type": "string"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "providerEvidenceHash",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct IStreamEntropyFreshRecovery.RecoveryInput",
+                "name": "recovery",
+                "type": "tuple"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "intentHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "unavailableEvidenceHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistEntropyUnavailabilityTypes.Target",
+            "name": "target",
+            "type": "tuple"
+          }
+        ],
+        "name": "recordEntropyUnavailabilityFinding",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "coordinator",
+            "type": "address"
+          },
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "oldRequestKey",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "reasonURI",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "providerEvidenceHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamEntropyFreshRecovery.RecoveryInput",
+            "name": "input",
+            "type": "tuple"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "intentHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "expectedFinding",
+            "type": "bytes32"
+          }
+        ],
+        "name": "verifyEntropyRecoveryUnavailability",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint64",
+            "name": "",
+            "type": "uint64"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    "entropy": [
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "oldRequestKey",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "reasonURI",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "providerEvidenceHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamEntropyFreshRecovery.RecoveryInput",
+            "name": "input",
+            "type": "tuple"
+          }
+        ],
+        "name": "artistEntropyRecoveryIntent",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "scopeId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "oldRequestKey",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "newRequestKey",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "priorJournalHead",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "journalHead",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "currentContentStateHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "contentStateHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "requestPolicyHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "incidentEvidenceHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "providerEvidenceHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "reasonHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamEntropyArtistUnavailability.Intent",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "core",
+        "outputs": [
+          {
+            "internalType": "contract IStreamCore",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "requestKey",
+            "type": "bytes32"
+          }
+        ],
+        "name": "entropyUnavailabilityEvidence",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint64",
+            "name": "",
+            "type": "uint64"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "oldRequestKey",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "reasonURI",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "providerEvidenceHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamEntropyFreshRecovery.RecoveryInput",
+            "name": "input",
+            "type": "tuple"
+          }
+        ],
+        "name": "freshRecoveryTransition",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "requestKey",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "contentStateHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "providerFee",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "oldRequestKey",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "reasonURI",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "providerEvidenceHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamEntropyFreshRecovery.RecoveryInput",
+            "name": "input",
+            "type": "tuple"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "findingRecordHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "requestFreshEntropyWithUnavailability",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "requestKey",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "providerRequestId",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "payable",
+        "type": "function"
+      }
+    ],
+    "coordinator": [
+      {
+        "inputs": [],
+        "name": "authorityHydrationSuite",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "registry",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "archive",
+                "type": "address"
+              },
+              {
+                "internalType": "address[7]",
+                "name": "owners",
+                "type": "address[7]"
+              },
+              {
+                "internalType": "address",
+                "name": "core",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "mintManager",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "roleRegistry",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "metadata",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "primaryResolver",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "royaltyResolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "primaryRevenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "validator",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.SuiteConfiguration",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    "owner": [
+      {
+        "inputs": [],
+        "name": "artistRegistry",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "authorityHydrationCommitment",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "core",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "hash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "entropyUnavailabilityFindingOrigin",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "operationCoordinator",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    "core": [
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "pointerType",
+            "type": "bytes32"
+          }
+        ],
+        "name": "getSatellitePointer",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "target",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "codeHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bool",
+            "name": "frozen",
+            "type": "bool"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "moduleType",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes4",
+            "name": "interfaceId",
+            "type": "bytes4"
+          },
+          {
+            "internalType": "address",
+            "name": "registry",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "registryStatus",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "moduleManifestHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "deploymentManifestHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint64",
+            "name": "revision",
+            "type": "uint64"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ]
+  }
+}

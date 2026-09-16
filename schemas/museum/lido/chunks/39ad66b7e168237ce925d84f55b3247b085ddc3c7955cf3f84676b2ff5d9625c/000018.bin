@@ -1,0 +1,126 @@
+nWrap"><strong>Object
+            Classification Wrapper</strong></a> groups objects together
+            on the basis of shared characteristics for discovery. It
+            contains the information groups for <a
+            href="https://lido-schema.org/schema/latest/lido.html#objectWorkTypeWrap">Object/Work
+            Type</a> and <a
+            href="https://lido-schema.org/schema/latest/lido.html#classificationWrap">Classification</a>
+            with the index elements &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectWorkType">lido:objectWorkType</a>&gt;
+            and &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#classification">lido:classification</a>&gt;.
+            While the former describes the object or work type as
+            specific as possible, the latter groups objects together by
+            broad categories, particularly for browsing or facet
+            filtering. For information on the index elements &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectWorkType">lido:objectWorkType</a>&gt;
+            and &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#classification">lido:classification</a>&gt;
+            see sections <a href="#mandatory-elements"><em>5.1 Mandatory
+            elements</em></a> and <a
+            href="#recommended-elements"><em>5.2 Recommended
+            elements</em></a>.</p>
+            <h4 data-number="4.4.1.2" id="object-identification"><span
+            class="header-section-number">4.4.1.2</span> Object
+            Identification</h4>
+            <p>The <a
+            href="https://lido-schema.org/schema/latest/lido.html#objectIdentificationWrap"><strong>Object
+            Identification Wrapper</strong></a> contains identifying
+            information about an item, including its title, repository
+            information, a textual object description, and description
+            of the physical appearance. A minimum of information in this
+            area is necessary to identify the unique item described in
+            the LIDO record, distinguishing it from all similar ones in
+            a collection, a local database, or an aggregation portal.
+            For information on &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#titleSet">lido:titleSet</a>&gt;,
+            &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectMeasurements">lido:objectMeasurements</a>&gt;,
+            and &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#materialsTech">lido:materialsTech</a>&gt;
+            see sections <a href="#mandatory-elements"><em>5.1 Mandatory
+            elements</em></a> and <a
+            href="#recommended-elements"><em>5.2 Recommended
+            elements</em></a>.</p>
+            <h4 data-number="4.4.1.3" id="event"><span
+            class="header-section-number">4.4.1.3</span> Event</h4>
+            <p>The <a
+            href="https://lido-schema.org/schema/latest/lido.html#eventWrap"><strong>Event
+            Wrapper</strong></a> contains the repeatable &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventSet">lido:eventSet</a>&gt;
+            and enables the description of various events the object or
+            work has been involved in or is associated with in some way.
+            The &lt;lido:eventSet&gt; itself may be equally repeated in
+            order to record the history of an object and its provenance
+            as a chain of custodial events. An event-centric cataloging
+            opens up ways to establish a network of contextual entities
+            that may be associated with the event, usually actors,
+            places, and dates. The LIDO elements &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventActor">lido:eventActor</a>&gt;,
+            &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventPlace">lido:eventPlace</a>&gt;,
+            and &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventDate">lido:eventDate</a>&gt;
+            reflect the high-level entities of the CIDOC CRM model, <a
+            href="https://cidoc-crm.org/html/cidoc_crm_v7.1.1_with_translations.html#E39">E39
+            Actor</a>, <a
+            href="https://cidoc-crm.org/html/cidoc_crm_v7.1.1_with_translations.html#E53">E53
+            Place</a>, and <a
+            href="https://cidoc-crm.org/html/cidoc_crm_v7.1.1_with_translations.html#E52">E52
+            Time-Span</a>, respectively. For information on indexing
+            events see section <a href="#recommended-elements"><em>5.2
+            Recommended elements</em></a>.</p>
+            <h4 data-number="4.4.1.4" id="object-relation"><span
+            class="header-section-number">4.4.1.4</span> Object
+            Relation</h4>
+            <p>The <a
+            href="https://lido-schema.org/schema/latest/lido.html#objectRelationWrap"><strong>Object
+            Relation Wrapper</strong></a> comprises information on the
+            topics of the object in focus, i.e., what it is about, and
+            possible relations to other objects or works. It contains
+            the two information groups &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectWrap">lido:subjectWrap</a>&gt;
+            and &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#relatedWorksWrap">lido:relatedWorksWrap</a>&gt;.
+            For information on the index elements &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subject">lido:subject</a>&gt;
+            and &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#relatedWork">lido:relatedWork</a>&gt;
+            see sections <a href="#mandatory-elements"><em>5.1 Mandatory
+            elements</em></a> and <a
+            href="#recommended-elements"><em>5.2 Recommended
+            elements</em></a>.</p>
+            <h3 data-number="4.4.2" id="administrative-metadata-1"><span
+            class="header-section-number">4.4.2</span> Administrative
+            Metadata</h3>
+            <p><a
+            href="https://lido-schema.org/schema/latest/lido.html#administrativeMetadata"><strong>Administrative
+            Metadata</strong></a> in LIDO relate to the management of
+            the described record or resource, and associated usage or
+            intellectual property rights. This includes information
+            about the rights holder, preservation and archiving
+            processes the record or resource has gone through, as well
+            as technical characterstics, e.g., for decoding or rendering
+            the digital representation.</p>
+            <p>Information in the Administrative Metadata part of the
+            LIDO schema is divided into three information areas, each of
+            which has its dedicated wrapper element.</p>
+            <ol type="1">
+            <li><strong>Rights for Work</strong></li>
+            <li><strong>Record</strong></li>
+            <li><strong>Resource</strong></li>
+            </ol>
+            <h4 data-number="4.4.2.1" id="rights-for-work"><span
+            class="header-section-number">4.4.2.1</span> Rights for
+            Work</h4>
+            <p>The <a
+            href="https://lido-schema.org/schema/latest/lido.html#rightsWorkWrap"><strong>Rights
+            for Work Wrapper</strong></a> contains information about
+            intellectual property and usage rights associated with the
+            described object or work. “Work” here refers to the object
+            at hand as either a distinct intellectual or artistic
+            creation such as a human-made artifact, or as a natural
+            object such as a plant or a mineral specimen. Being an
+            object in its own right, it is distinct from any surrogate
+            resource which is to be described in its own wrapper. The
+            rights associated with the described object or work are
