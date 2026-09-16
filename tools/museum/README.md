@@ -1,5 +1,11 @@
 # Museum offline tooling
 
+New bounded adapters cover [institutional owner documentation](../../docs/museum-institutional-records.md),
+[condition and conservation](../../docs/museum-condition.md) and
+[public geography drafts](../../docs/museum-geography.md). Their guides distinguish
+original recorded-source admission, synthetic controls and remaining actual
+evidence joins. They do not establish full museum conformance.
+
 Run from the repository root with Python 3.11 or later. Create an isolated
 environment and install the Museum dependency set; the repository's general
 tools lock alone does not include `rfc8785` or the JSON-LD processor. The full
