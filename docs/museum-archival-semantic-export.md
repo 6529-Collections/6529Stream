@@ -152,7 +152,10 @@ Museum-profile acceptance. It does not establish qualified human identity,
 publisher authentication, institutional ingest, archival redundancy, or a
 public deployment.
 
-BagIt/OCFL object-dossier integration, media embedding/fetch policy, complete
-typed institutional joins, mixed scopes/lanes, subsequent-export lineage and
-full Museum conformance remain separate acceptance work. The original
-[packaging tools](museum-bagit-ocfl.md) keep their own profiles and claims.
+The [scoped evidence-dossier bridge](museum-scoped-dossier.md) embeds this
+export and its locally supplied selected media in BagIt/OCFL with full offline
+replay. It uses a distinct honest collection-capable profile. Full token-bound
+object-dossier acceptance, complete typed institutional joins, mixed
+scopes/lanes, subsequent-export lineage and full Museum conformance remain
+separate acceptance work. The original [packaging tools](museum-bagit-ocfl.md)
+keep their own profiles and claims.

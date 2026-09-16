@@ -5,6 +5,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add offline scoped semantic-evidence dossiers from authenticated museum
+  exports, with required local media bytes, original dependency closure and
+  BagIt/OCFL reconstruction; full token object-dossier acceptance stays explicit.
+
 - Add per-purchase curated native settlement and full-payload historical private
   authorization revocation, preserving original identities and auction replay.
   Extract six stored Manager view encodings to preserve deployment headroom.

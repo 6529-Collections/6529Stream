@@ -87,6 +87,11 @@ def _description(raw):
             or d["disclosure"] != "public"):
         raise MuseumError("unsupported or restricted packaging input")
     _citation(d["citation"])
+    return _common_description(d)
+
+
+def _common_description(d):
+    """Shared transport constraints; callers first validate their closed identity/profile."""
     if not isinstance(d["baggingDate"], str) or not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", d["baggingDate"]):
         raise MuseumError("invalid bagging date")
     try:
@@ -185,6 +190,12 @@ def _lines(rows, algorithm):
 def build_bag(description_bytes, payloads):
     """Preserve exact caller-supplied bytes; no chain lookup, downloads or authority inference."""
     d = _description(description_bytes)
+    return _build_bag(d, payloads, profile_bytes=PROFILE_BYTES, profile_hash=PROFILE_HASH,
+                      mode="stream_bagit_package", identifier=d["citation"])
+
+
+def _build_bag(d, payloads, *, profile_bytes, profile_hash, mode, identifier):
+    """Exact BagIt byte layout shared by independently validated closed profiles."""
     payloads = dict(payloads)
     rows = d["payloads"]
     expected = {r["path"] for r in rows if r["delivery"]["kind"] == "embedded"}
@@ -199,19 +210,19 @@ def build_bag(description_bytes, payloads):
             raise MuseumError("payload fixity mismatch")
     fetch = [r for r in rows if r["delivery"]["kind"] == "fetch"]
     status = "fetch_dependent" if fetch else "self_contained"
-    manifest = dumps({"mode": "stream_bagit_package", "version": "1", "profileHash": PROFILE_HASH,
+    manifest = dumps({"mode": mode, "version": "1", "profileHash": profile_hash,
         "selfContainment": status, "input": d,
         "qualification": {"sourceAuthorityVerified": False, "inventoryCompletenessVerified": False,
                           "archivalAuthorityVerified": False, "institutionalIngest": False}})
     if len(manifest) > MAX_MANIFEST:
         raise MuseumError("bag manifest byte bound")
-    info = {"External-Identifier": d["citation"], "Bagging-Date": d["baggingDate"],
+    info = {"External-Identifier": identifier, "Bagging-Date": d["baggingDate"],
             "Payload-Oxum": str(sum(uint(r["bytes"], 64) for r in rows)) + "." + str(len(rows)),
             "Stream-Schema-Id": d["schema"]["id"], "Stream-Schema-Hash": d["schema"]["hash"],
             "Stream-Self-Containment": status}
     files = {"data/" + name: raw for name, raw in payloads.items()}
     files.update({"bagit.txt": DECLARATION, "bag-info.txt": "".join(k + ": " + v + "\n" for k, v in info.items()).encode(),
-        "stream-manifest.json": manifest, "stream-bagit-profile.json": PROFILE_BYTES,
+        "stream-manifest.json": manifest, "stream-bagit-profile.json": profile_bytes,
         "manifest-sha256.txt": _lines(rows, "sha256"), "manifest-keccak256.txt": _lines(rows, "keccak256")})
     if fetch:
         files["fetch.txt"] = "".join(r["delivery"]["uri"] + " " + r["bytes"] + " data/" + r["path"] + "\n" for r in fetch).encode()
@@ -236,6 +247,9 @@ def verify_bag_files(files, expected_manifest_hash):
     if value.get("mode") == "stream_bagit_hydrated_package":
         from .hydration import verify_hydrated_bag_files
         return verify_hydrated_bag_files(files, expected_manifest_hash)
+    if value.get("mode") == "stream_museum_dossier_bagit_package":
+        from .dossier_bagit import verify_files
+        return verify_files(files, expected_manifest_hash)
     rebuilt = build_bag(dumps(value["input"]), {name[5:]: content for name, content in files.items() if name.startswith("data/")})
     if dict(rebuilt.files) != files or rebuilt.manifest != raw:
         raise MuseumError("noncanonical, missing or altered bag content/tags")
@@ -287,12 +301,23 @@ def write_tree(files, directory):
 
 
 def _verify_semantics(d, payload_directory):
+    if d["mode"] == "stream_museum_dossier_bagit_input":
+        from .dossier import verify_payload_directory
+        verify_payload_directory(d, Path(payload_directory))
+        return
     for package in d["semanticPackages"]:
         from .package_v2 import verify_package
         original = verify_package(Path(payload_directory) / package["prefix"], package["manifestHash"])
         source_mode = loads(original.manifest, maximum=MAX_MANIFEST)["mode"]
         if source_mode.startswith("synthetic") and d["sourceMode"] != "synthetic_fixture":
             raise MuseumError("synthetic semantic package cannot become recorded")
+
+
+def bag_identity(description):
+    if description["mode"] == "stream_museum_dossier_bagit_input":
+        from .dossier_bagit import identity
+        return identity(description["scope"], description["externalIdentifier"])
+    return _citation(description["citation"])
 
 
 def verify_bag(directory, expected_manifest_hash):

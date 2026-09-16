@@ -20,6 +20,11 @@ compact source-bound V3 manifest over those original packages and a separate
 preservation/global-admin ARCHIVE publication route. Exact selections and
 resource indexes remain retained children; full Museum acceptance stays explicit.
 
+[Scoped semantic-evidence dossiers](../../docs/museum-scoped-dossier.md) package
+those exports and explicitly supplied selected media into BagIt/OCFL, with
+offline source reconstruction and byte fixity. Collection scope stays distinct
+from the required token-bound object-dossier acceptance.
+
 Run from the repository root with Python 3.11 or later. Create an isolated
 environment and install the Museum dependency set; the repository's general
 tools lock alone does not include `rfc8785` or the JSON-LD processor. The full

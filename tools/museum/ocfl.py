@@ -6,7 +6,7 @@ from hashlib import sha256, sha512
 import re
 
 from .canonical import MuseumError, dumps, keccak256, loads
-from .bagit import MAX_BYTES, MAX_FILES, MAX_MANIFEST, ZERO, _citation, _keys, _paths, _text
+from .bagit import MAX_BYTES, MAX_FILES, MAX_MANIFEST, ZERO, bag_identity, _keys, _paths, _text
 from .bagit import read_tree, verify_bag_files, write_tree
 
 DECLARATION_NAME = "0=ocfl_object_1.1"
@@ -60,7 +60,7 @@ def build_version(bag, *, created, message, previous=None, previous_inventory_ha
     b = loads(bag.manifest, maximum=MAX_MANIFEST)
     if b["selfContainment"] != "self_contained":
         raise MuseumError("OCFL does not ingest an incomplete fetch-dependent bag")
-    d = b["input"]; identity = _citation(d["citation"])
+    d = b["input"]; identity = bag_identity(d)
     _time(created); _text(message, 4096)
     files = {DECLARATION_NAME: DECLARATION}
     inventory = {"id": identity, "type": INVENTORY_TYPE, "digestAlgorithm": "sha256",
@@ -187,7 +187,7 @@ def verify_object_files(files, expected_inventory_hash):
         if not set(fresh) <= set(version["state"]):
             raise MuseumError("OCFL unused new content")
         bag, d = _bag_for_state(files, inv, version["state"])
-        if _citation(d["citation"]) != current["id"]:
+        if bag_identity(d) != current["id"]:
             raise MuseumError("bag citation differs from OCFL identity")
         if d["predecessor"] != (ZERO if previous_bag is None else previous_bag.manifest_hash):
             raise MuseumError("OCFL bag predecessor mismatch")
