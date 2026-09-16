@@ -1,6 +1,6 @@
 # Revenue, commerce and client build queue
 
-Owner: revenue builder / commerce orchestrator. Updated 15 September 2026.
+Owner: revenue builder / commerce orchestrator. Updated 16 September 2026.
 This is a task-owned implementation queue. The integrator owns the shared
 feature register, final current-stack execution, source integration and release.
 
@@ -50,15 +50,20 @@ origins and all original stored economics remain unchanged through replacement.
 See [the continuity guide](../docs/guides/royalty-economic-continuity.md).
 
 The final source passes a 1,032-source ABI closure. All 70 original ABI entries
-and five original recursive storage roots remain exact. One selected production
-capture finds all six products deployable: Royalty Resolver runtime 24,131 bytes,
-with 445 bytes of margin. Ten unit/Safe cases and two actual-current
-Artist/Core/paid-sale/custody cases are authored, not executed. The integrator
-owns the Core pointer guard and combined runtime validation. Source review of
-the new continuity worker remains separate from the compiler checks.
+and five original recursive storage roots remain exact. The initial six-product
+capture and the canonical-authority correction's two-product recheck fit: Royalty Resolver runtime
+24,281 bytes, with 295 bytes of margin. Eleven unit/Safe cases and two
+actual-current Artist/Core/paid-sale/custody cases are authored, not executed.
+The begin action now authenticates the immutable constructor authority, exact
+captured runtime and canonical marker independently of public Ownable transfers.
+Independent source review cleared both the continuity worker and that correction;
+it did not execute tests. The integrator owns the Core pointer guard and combined
+runtime validation.
 
-Captures are `.tmp-royalty-continuity-abi10`,
-`.tmp-royalty-continuity-size11` and `.tmp-royalty-continuity-compat12` under
+Base captures are `.tmp-royalty-continuity-abi10` and
+`.tmp-royalty-continuity-size11`; final correction captures are
+`.tmp-royalty-continuity-abi14`, `.tmp-royalty-continuity-size15` and
+`.tmp-royalty-continuity-compat16` under
 `D:/repos/6529Stream`. Completion requires actual guarded pointer replacement,
 unchanged snapshot and zero/default-source behavior, Safe rollback/retry and
 same-NFT custody settlement. A typed boundary alone does not establish that join.
@@ -67,8 +72,11 @@ same-NFT custody settlement. A typed boundary alone does not establish that join
 
 1. Finish Royalty continuity integration with the Core guard, then preserve
    frozen primary economics across the actual Manager/suite replacement seam.
-   This is distinct from following an Artist successor and does not implement
-   the separately denied inherited/global freeze changes.
+   The current Artist suite pins the original primary Resolver; copied state
+   alone cannot authorize a replacement. A proposed ADR must resolve the exact
+   authenticated consumer transition without weakening original op60 equality
+   or treating imported receipts as new consent. This is distinct from following
+   an Artist successor and does not implement the separately denied inherited/global freeze changes.
 2. Complete remaining supported settlement/sale behavior from the shared
    feature rows, including explicit reconciliation of ERC20 sale-family
    obligations and remaining curated/content selection combinations. Do not

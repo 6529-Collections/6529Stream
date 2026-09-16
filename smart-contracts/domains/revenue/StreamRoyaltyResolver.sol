@@ -945,6 +945,10 @@ contract StreamRoyaltyResolver is
         address source,
         RoyaltyContinuityTypes.ManifestRef calldata manifestReference
     ) external override {
+        if (owner() != governanceAuthority) {
+            revert RoyaltyContinuityTypes.InvalidEconomicContinuity();
+        }
+        ContinuityParameters.requireAuthority(governanceAuthority);
         ContinuityImport.begin(_continuityContext(), source, manifestReference);
     }
 

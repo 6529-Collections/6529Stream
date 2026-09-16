@@ -55,8 +55,11 @@ authority checks.
    commitments must be scheduled through the canonical executing governance
    authority. `beginEconomicContinuity` verifies the current action, complete
    source header, current Core pointer/runtime, source capability/owner/Core
-   binding and exact manifest. The event emits bytes that hash to the saved
-   manifest commitment.
+   binding and exact manifest. The current owner must still be the immutable
+   constructor governance authority, with its captured runtime and canonical
+   authority marker. Transferring ordinary Ownable ownership does not grant the
+   replacement owner this continuity authority. The event emits bytes that hash
+   to the saved manifest commitment.
 4. Any caller, including a Safe with operation `CALL` and zero value, may call
    `importEconomicContinuity(maxRoutes,maxElections)`. One call admits at most
    16 routes and 64 elections; elections are copied first. Every chunk copies the
@@ -107,7 +110,7 @@ guard. No provider gas parameter is borrowed. Reads copy only fixed expected
 return sizes and clip their forwarded gas to the available frame budget while
 reserving decoding/error gas. The original ordinary storage prefix is unchanged.
 
-The source batch has ten authored unit/Safe cases and two actual-current
+The source batch has eleven authored unit/Safe cases and two actual-current
 Artist/Core/Manager/Executor/Safe cases. The latter start with genuine op15 terms,
 paid dynamic primary mint, configured-zero or positive default-source snapshot,
 and real catalog/manifest governance; the positive case continues to same-NFT
@@ -115,10 +118,12 @@ private custody resale. Unit Core/Artist and governance-context doubles remain
 explicitly scoped. These new behavior cases have not been executed at handoff.
 
 The 1,032-source ABI/storage check passes. All 70 original ABI entries and all
-five original recursive Royalty Resolver storage roots remain exact. One
-selected production capture finds all six products within limits: Resolver
-24,131 runtime bytes / 25,743 creation bytes; Import 13,815; State 5,450;
-Parameters 1,802; AssignmentHash 2,334; Snapshot 11,504. The host has 445 bytes
-of runtime headroom; combined build sizing and cold read gas remain acceptance
-work. This is source/type/selected-size evidence, not deployment, runtime
+five original recursive Royalty Resolver storage roots remain exact. The
+initial selected production capture found all six products within limits. The
+canonical-authority correction was independently source-reviewed and recompiled
+for its two changed products: Resolver 24,281 runtime bytes / 25,900 creation
+bytes, and Parameters 1,826 runtime bytes. Unchanged products retain their
+recorded measurements: Import 13,815; State 5,450; AssignmentHash 2,334; Snapshot
+11,504 runtime bytes. The host has 295 bytes of runtime headroom; combined
+build sizing and cold read gas remain acceptance work. This is source/type/selected-size evidence, not deployment, runtime
 acceptance or a general protocol audit.

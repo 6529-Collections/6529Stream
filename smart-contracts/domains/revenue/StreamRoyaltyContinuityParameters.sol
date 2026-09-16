@@ -113,10 +113,8 @@ library StreamRoyaltyContinuityParameters {
         return keccak256(abi.encode(STATE, scope, amount, r.floor, r.failureClass, revision));
     }
 
-    function raise(address authority, bytes32 id, uint256 next) public {
-        if (msg.sender != authority || authority == address(0)) {
-            revert G.GasParameterNotAuthority(msg.sender);
-        }
+    /// @notice Authenticate the immutable constructor authority before trusting its action context.
+    function requireAuthority(address authority) public view {
         if (authority.code.length == 0 || authority.codehash != _store().authorityCodeHash) {
             revert G.GasParameterInvalidAuthority(authority);
         }
@@ -131,6 +129,13 @@ library StreamRoyaltyContinuityParameters {
         bytes memory marker =
             _read(authority, abi.encodeCall(A.isStreamGovernedParameterAuthority, ()), 32);
         if (abi.decode(marker, (uint256)) != 1) revert G.GasParameterInvalidAuthority(authority);
+    }
+
+    function raise(address authority, bytes32 id, uint256 next) public {
+        if (msg.sender != authority || authority == address(0)) {
+            revert G.GasParameterNotAuthority(msg.sender);
+        }
+        requireAuthority(authority);
         (bytes32 scope, bytes32 oldHash, bytes32 newHash) = transition(id, next);
         bytes memory context = _read(authority, abi.encodeCall(A.currentAction, ()), 192);
         uint256 executingWord;

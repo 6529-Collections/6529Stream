@@ -101,8 +101,7 @@ contract StreamRoyaltyEconomicContinuityTest is RevenueV1TestBase, OfficialSafeF
         target = _resolver();
         coreFacts.select(address(artistFacts), address(source));
         IStreamSplitWallet.SplitEntry[] memory entries = new IStreamSplitWallet.SplitEntry[](1);
-        entries[0] =
-            IStreamSplitWallet.SplitEntry(
+        entries[0] = IStreamSplitWallet.SplitEntry(
             address(0xB0B), 1_000_000, keccak256("original recipient")
         );
         (profile, wallet) = factory.registerProfile(entries, keccak256("original profile metadata"));
@@ -371,6 +370,43 @@ contract StreamRoyaltyEconomicContinuityTest is RevenueV1TestBase, OfficialSafeF
         );
     }
 
+    function testTransferredSharedOwnerCannotManufactureContinuityGovernance() public {
+        _state();
+        MockGovernedParameterAuthority impostor = new MockGovernedParameterAuthority(true);
+        _owner(source, abi.encodeCall(source.transferOwnership, (address(impostor))));
+        _owner(target, abi.encodeCall(target.transferOwnership, (address(impostor))));
+        RC.ManifestRef memory r = _reference(source, target);
+        (, bytes32 scope, bytes32 oldHash, bytes32 newHash) =
+            target.previewEconomicContinuity(address(source), r);
+        impostor.setCurrentAction(true, bytes32(uint256(9901)), 1, scope, oldHash, newHash);
+        vm.expectRevert(abi.encodeWithSelector(RC.InvalidEconomicContinuity.selector));
+        vm.prank(address(impostor));
+        target.beginEconomicContinuity(address(source), r);
+        require(target.economicContinuityState().status == 0, "impostor cannot reserve import");
+        // Original Ownable authority remains intact, including restoration for the exact manifest.
+        vm.prank(address(impostor));
+        source.transferOwnership(address(revenueAuthority));
+        vm.prank(address(impostor));
+        target.transferOwnership(address(revenueAuthority));
+        _prepare(source, target, r, 1);
+        revenueAuthority.setMarkerResponseMode(
+            MockGovernedParameterAuthority.MarkerResponseMode.NonCanonical
+        );
+        vm.expectRevert();
+        this.ownerCall(target, abi.encodeCall(target.beginEconomicContinuity, (address(source), r)));
+        require(
+            target.economicContinuityState().status == 0, "malformed marker cannot reserve import"
+        );
+        revenueAuthority.setMarkerResponseMode(
+            MockGovernedParameterAuthority.MarkerResponseMode.Canonical
+        );
+        this.ownerCall(target, abi.encodeCall(target.beginEconomicContinuity, (address(source), r)));
+        require(
+            target.economicContinuityState().status == 1,
+            "original manifest succeeds with actual pinned authority"
+        );
+    }
+
     function testRecordedManifestEventEmitsItsExactCanonicalPreimage() public {
         _state();
         vm.recordLogs();
@@ -427,8 +463,7 @@ contract StreamRoyaltyEconomicContinuityTest is RevenueV1TestBase, OfficialSafeF
         bytes memory data =
             abi.encodeCall(target.importEconomicContinuity, (uint256(16), uint256(64)));
         uint256 nonce = runner.nonce();
-        bytes32 digest =
-            runner.getTransactionHash(
+        bytes32 digest = runner.getTransactionHash(
             address(target), 0, data, 0, 0, 0, 0, address(0), address(0), nonce
         );
         bytes memory signed = abi.encodeCall(
