@@ -230,6 +230,9 @@ def verify_package(directory, expected_manifest_hash):
     if isinstance(value, dict) and value.get("mode") == "recorded_owner_loan_dossier_package":
         from .loan_package import verify_loan_package
         return verify_loan_package(directory, expected_manifest_hash)
+    if isinstance(value, dict) and value.get("mode") == "recorded_institutional_documentation_package":
+        from .institutional_package import verify_institutional_package
+        return verify_institutional_package(directory, expected_manifest_hash)
     if isinstance(value, dict) and value.get("mode") == "recorded_independent_exhibition_package":
         from .exhibition_package import verify_exhibition_package
         return verify_exhibition_package(directory, expected_manifest_hash)

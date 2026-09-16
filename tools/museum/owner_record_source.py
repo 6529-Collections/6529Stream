@@ -39,10 +39,10 @@ def native_hash(chain, host, core, record, receipt):
     return generic_hash(chain, host, core, receipt[0], receipt[1], generic)
 
 
-def verify_wire(chain, host, core, timestamp, expected, token, record, receipt, bundle):
+def verify_wire(chain, host, core, timestamp, expected, token, record, receipt, bundle, *, families=FAMILIES):
     rt, sid, schema, content, uri, payload, effective = record
     require(receipt[0] == token and token > 0 and receipt[1] != ZERO_ADDRESS
-        and 0 < receipt[2] <= timestamp and effective > 0 and rt in FAMILIES
+        and 0 < receipt[2] <= timestamp and effective > 0 and rt in families
         and sid == subject_id("token", str(chain), core, "0", token_id=str(token))
         and schema != ZERO and receipt[9] != ZERO and receipt[10] != ZERO,
         "owner original receipt/family/subject differs")
@@ -69,10 +69,18 @@ def verify_wire(chain, host, core, timestamp, expected, token, record, receipt, 
 
 
 class OwnerRecordSource:
+    profile = PROFILE
+    families = FAMILIES
     _read = IndependentSourceAdapter._read
     _block = IndependentSourceAdapter._block
     _chunk = IndependentSourceAdapter._chunk
     _document = IndependentSourceAdapter._document
+
+    def _capture_extra(self, records):
+        return None
+
+    def _validate_predecessor(self, record, receipt):
+        pass
 
     def __init__(self, anchor_bytes, transport, *, provenance="synthetic_fixture"):
         require(provenance in ("synthetic_fixture", "trusted_rpc") and
@@ -80,7 +88,7 @@ class OwnerRecordSource:
         a = loads(anchor_bytes, maximum=524288, canonical=True)
         require(isinstance(a,dict) and set(a) == {"profile", "chainId", "blockHash", "blockNumber", "timestamp", "stateRoot",
             "environment", "deploymentEvidenceHash", "host", "core", "schemas", "store", "codePins", "records"}
-            and a["profile"] == PROFILE and a["environment"] in ("local_evm_fixture", "public_chain"), "owner anchor shape")
+            and a["profile"] == self.profile and a["environment"] in ("local_evm_fixture", "public_chain"), "owner anchor shape")
         for f in ("chainId", "blockNumber", "timestamp"): uint(a[f], 64 if f == "timestamp" else 256)
         for f in ("blockHash", "stateRoot", "deploymentEvidenceHash"): require(hex_bytes(a[f],32) != bytes(32), "owner anchor commitment")
         for f in ("host", "core", "schemas", "store"): require(hex_bytes(a[f],20) != bytes(20), "owner dependency address")
@@ -125,7 +133,7 @@ class OwnerRecordSource:
             h,token=chosen["recordHash"],uint(chosen["tokenId"])
             _,(r,t)=self._read(a["host"],"ownerRecord(bytes32)",("bytes32",),(h,),(OWNER_RECORD,RECEIPT))
             _,(pointer,bundle)=self._read(a["host"],"ownerRecordSignatureBundle(bytes32)",("bytes32",),(h,),("address","bytes"))
-            verify_wire(uint(a["chainId"]),a["host"],a["core"],uint(a["timestamp"]),h,token,r,t,bundle)
+            verify_wire(uint(a["chainId"]),a["host"],a["core"],uint(a["timestamp"]),h,token,r,t,bundle,families=self.families)
             require(self._chunk(t[12],pointer)==bundle and self._chunk(keccak256(r[5]))==r[5],"owner stored payload differs")
             self._document(r[2],0,t[9]);self._document(r[3][2],1,t[10])
             if t[5]:
@@ -139,18 +147,22 @@ class OwnerRecordSource:
                 _,(pr,pt)=self._read(a["host"],"ownerRecord(bytes32)",("bytes32",),(prior,),(OWNER_RECORD,RECEIPT))
                 require(prior!=ZERO and pt[0]==token and pt[3]+1==t[3] and pr[0]==r[0]
                     and native_hash(uint(a["chainId"]),a["host"],a["core"],pr,pt)==prior,"owner immediate predecessor differs")
+                self._validate_predecessor(pr, pt)
                 previous=pt[4]
             require(record_chain(a["chainId"],a["host"],str(token),r[0],previous,h,str(t[3]))==t[4],"owner receipt chain differs")
             records[h]={"recordHash":h,"record":json_values(r),"receipt":json_values(t),"selection":chosen,
                 "payloadHex":"0x"+r[5].hex(),"signatureBundleHex":"0x"+bundle.hex(),
                 "authority":{"mode":"historical_owner_receipt","owner":t[1],"relayed":t[5],"recordedAt":str(t[2]),
                     "currentOwnerProven":False,"legalTitleProven":False,"custodyTransferProven":False}}
+        extra = self._capture_extra(records)
         self._block()
         if type(self.reader.transport) is ReplayTransport:self.reader.transport.finish()
         self.records=MappingProxyType(records)
-        self._snapshot=dumps({"profile":PROFILE,"version":"1","mode":"recorded_state" if self.provenance=="trusted_rpc" else "synthetic_fixture",
+        snapshot={"profile":self.profile,"version":"1","mode":"recorded_state" if self.provenance=="trusted_rpc" else "synthetic_fixture",
             "anchorHash":keccak256(self.anchor_bytes),"transcriptHash":keccak256(self.reader.transcript()),"records":list(records.values()),
             "documents":[{"documentId":k,"payloadHex":"0x"+raw.hex()} for k,(_,raw,_) in self.documents.items()],
             "claims":{"selectedHistoricalReceiptsChecked":True,"fullLaneHistory":False,"hostSelectionAuthorityProven":False,
-                "currentOwnerProven":False,"legalTitleProven":False,"cryptographicStateProof":False}})
+                "currentOwnerProven":False,"legalTitleProven":False,"cryptographicStateProof":False}}
+        if extra is not None: snapshot["additionalEvidence"] = extra
+        self._snapshot=dumps(snapshot)
         return self._snapshot
