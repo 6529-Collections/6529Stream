@@ -21,6 +21,7 @@ import {
     StreamPreservationDocumentReads as Documents
 } from "./StreamPreservationDocumentReads.sol";
 import { StreamReferenceModeDefinitions as D } from "../records/StreamReferenceModeDefinitions.sol";
+import { StreamReferenceMetricInventory } from "./StreamReferenceMetricInventory.sol";
 import {
     StreamConservationRecordTypes
 } from "../../interfaces/stream/metadata/StreamConservationRecordTypes.sol";
@@ -90,7 +91,16 @@ library StreamReferenceModeInventory {
         );
         if (!curated) {
             rows[6] = Documents.item(d, e.perceptual.metric.metricId, facts.interpretationHash);
-            return rows;
+            T.Item[] memory metric =
+                StreamReferenceMetricInventory.items(d, c.referenceRender.recordHash);
+            T.Item[] memory complete = new T.Item[](rows.length + metric.length);
+            for (uint256 i; i < rows.length; ++i) {
+                complete[i] = rows[i];
+            }
+            for (uint256 i; i < metric.length; ++i) {
+                complete[rows.length + i] = metric[i];
+            }
+            return complete;
         }
         bytes memory raw =
             IO.fixedRead(d.targets[6], abi.encodeCall(Host.modeDependencies, ()), 128, d.readGas);

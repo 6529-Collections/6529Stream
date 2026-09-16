@@ -13,7 +13,7 @@ environment or institutional acceptance.
 | Mode | Producer admission | Typed consumer and preservation closure |
 | --- | --- | --- |
 | BYTE_EXACT | Existing producer and exact original repeated PNG requirement | Original profile and preimages remain accepted unchanged |
-| PERCEPTUAL_TOLERANCE | Exact active registered Metric document; tool/version/implementation/parameters hashes; threshold and score for each original first/last sample; complete context-bound report preimage | New exact profile, current source validation and original class-2 lock; both actual PNG objects, registered metric bytes and full mode evidence enter the inventory |
+| PERCEPTUAL_TOLERANCE | Exact active registered Metric document; tool/version/implementation/parameters hashes; threshold and score for each original first/last sample; complete context-bound report preimage | Full finality additionally requires the once-only original-record-bound metric source/runtime/replay supplement; its exact identity enters current input, class-2 lock and complete inventory |
 | CURATED_EQUIVALENCE | Current original ARTIST_INTENT selection, complete significant-properties bytes and ordered affirmative assessment of every field for every sample; actual original EIP712/ERC1271 INDEPENDENT_CONDITION receipt | Same typed current/lock gate; original condition record, payload, signature bundle, examiner host runtime, complete properties and definitions enter the inventory |
 
 The supported CURATED route is the independent SIGNER_VERIFIED alternative.
@@ -60,7 +60,10 @@ the legacy equality comparison.
 5. The actual original Metadata CURATOR class-3 or global class-8 grant must
    authorize `publishModeReference`. Its revision/predecessor, unique reference
    identity, source pins and prepared bytes are checked again atomically.
-6. Use the existing governed class-2 lock transition. The typed finality reader
+6. For PERCEPTUAL, complete the [metric supplement](reference-metric-supplement.md)
+   and staged byte retention before requesting full finality or locking. The
+   historical V1 source proof alone does not establish executable closure.
+7. Use the existing governed class-2 lock transition. The typed finality reader
    calls the actual current producer before accepting its receipt or lock. A
    later incompatible source/intent/coverage change prevents current acceptance;
    original historical bytes and receipts remain available.
@@ -146,6 +149,8 @@ transaction-capacity claim follows from the STATIC renderer's separate capacity
 campaign. No held Router proposal or blocked retained-output feature is part of
 this batch.
 
-Full PERCEPTUAL executable closure is still being extended by an additive
-original-record-bound metric supplement and restored offline replay. The V1
-implementation hash and report alone do not establish that complete closure.
+The additive [metric supplement](reference-metric-supplement.md) now supplies
+the exact source/runtime/replay admission and inventory code. Its guide separates
+the retained synthetic-context replay vector, authored genuine combined-package
+publication recipe, pending runtime/capacity acceptance, and unchanged V1 facts.
+The V1 implementation hash and report alone do not establish complete closure.

@@ -7,6 +7,15 @@ import "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
 import "../records/StreamReferenceRenderDefinitions.sol";
 import "../records/StreamReferenceModeDefinitions.sol";
 import "../../interfaces/stream/preservation/IStreamReferenceModePublication.sol";
+import {
+    IStreamReferenceMetricSupplement
+} from "../../interfaces/stream/preservation/IStreamReferenceMetricSupplement.sol";
+import {
+    StreamReferenceMetricTypes as Metric
+} from "../../interfaces/stream/preservation/StreamReferenceMetricTypes.sol";
+import {
+    StreamReferenceMetricDefinitions as MetricD
+} from "../records/StreamReferenceMetricDefinitions.sol";
 import "./StreamFinalityRouterEvidence.sol";
 
 /// @notice Fixed current reference publication consumption with an explicit local lock gate.
@@ -80,6 +89,7 @@ library StreamFinalityReferenceReads {
                 || r.recordedAt > block.timestamp || r.reasonHash == 0
                 || (revision == 1 ? r.predecessor != 0 : r.predecessor == 0) || !_profile(r)
         ) revert InvalidReferenceEvidence();
+        bytes32 metricSupplement;
         if (r.profileHash == StreamReferenceModeDefinitions.PROFILE_HASH) {
             // requireCurrent above validates the full registered mode proof and original sources.
             bytes memory modeRaw = StreamFinalityRouterEvidence.read(
@@ -96,6 +106,9 @@ library StreamFinalityReferenceReads {
                         && mode != StreamReferenceModeTypes.Mode.CURATED_EQUIVALENCE)
             ) {
                 revert InvalidReferenceEvidence();
+            }
+            if (mode == StreamReferenceModeTypes.Mode.PERCEPTUAL_TOLERANCE) {
+                metricSupplement = _metric(d, r);
             }
         }
         raw = StreamFinalityRouterEvidence.read(
@@ -170,6 +183,71 @@ library StreamFinalityReferenceReads {
                 e
             )
         );
+        if (metricSupplement != 0) {
+            // The old reference remains independently readable. Complete PERCEPTUAL
+            // finality additionally commits the once-only executable/replay closure.
+            e.inputHash = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_FINALITY_METRIC_REFERENCE_INPUT_V1"),
+                    e.inputHash,
+                    metricSupplement
+                )
+            );
+            if (e.locked) {
+                e.componentDataHash = keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_LOCKED_METRIC_REFERENCE_COMPONENT_V1"),
+                        e.componentDataHash,
+                        metricSupplement
+                    )
+                );
+            }
+        }
+    }
+
+    function _metric(Dependencies memory d, StreamReferenceRenderTypes.Receipt memory original)
+        private
+        view
+        returns (bytes32)
+    {
+        bytes memory raw = StreamFinalityRouterEvidence.read(
+            d.referencePublisher,
+            abi.encodeCall(
+                IStreamReferenceMetricSupplement.requireMetricSupplement, (original.recordHash)
+            ),
+            416,
+            d.validationGas
+        );
+        Metric.Receipt memory r = abi.decode(raw, (Metric.Receipt));
+        if (
+            keccak256(raw) != keccak256(abi.encode(r)) || r.supplementHash == 0
+                || r.referenceRecordHash != original.recordHash || r.payloadHash == 0
+                || r.payloadBytes == 0 || r.payloadBytes > 524288 || r.runtimeHash == 0
+                || r.replayHash == 0 || r.schemaHash != MetricD.SCHEMA_HASH
+                || r.profileHash != MetricD.PROFILE_HASH
+                || r.canonicalizationHash != StreamReferenceModeDefinitions.CANON_HASH
+                || r.recorder == address(0)
+                || (r.authorizationClass != 3 && r.authorizationClass != 8) || r.grantRevision == 0
+                || r.recordedAt < original.recordedAt || r.recordedAt > block.timestamp
+        ) {
+            revert InvalidReferenceEvidence();
+        }
+        bytes32 result = r.supplementHash;
+        r.supplementHash = 0;
+        if (
+            result
+                != keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_METRIC_SUPPLEMENT_V1"),
+                        d.chainId,
+                        d.referencePublisher,
+                        d.core,
+                        d.metadata,
+                        r
+                    )
+                )
+        ) revert InvalidReferenceEvidence();
+        return result;
     }
 
     function requireLocked(

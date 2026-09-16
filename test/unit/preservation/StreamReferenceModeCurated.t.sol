@@ -42,10 +42,8 @@ contract CuratedModeSourceProbe {
     bytes private _evidence;
     Mode.Dependencies private _bindings;
 
-    function observe(Mode.Evidence memory e, Mode.Facts memory f, Mode.Dependencies memory b)
-        external
-    {
-        _evidence = abi.encode(e, f);
+    function observe(bytes calldata canonicalPair, Mode.Dependencies memory b) external {
+        _evidence = canonicalPair;
         _bindings = b;
     }
 
@@ -54,7 +52,8 @@ contract CuratedModeSourceProbe {
         view
         returns (Mode.Evidence memory, Mode.Facts memory)
     {
-        return abi.decode(_evidence, (Mode.Evidence, Mode.Facts));
+        bytes memory raw = _evidence;
+        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
     }
 
     function modeDependencies() external view returns (Mode.Dependencies memory) {
@@ -298,7 +297,7 @@ contract StreamReferenceModeCuratedTest is ConservationSelectionFixture {
         c.referenceRender.recordHash = keccak256("typed original mode reference");
         c.conservation.selectionHash = selected;
         c.conservation.record.recordHash = witness.intentRecordHash;
-        probe.observe(evidence, mode, bindings);
+        probe.observe(abi.encode(evidence, mode), bindings);
         Inventory.Item[] memory rows = probe.inventory(d, c);
         require(rows.length == 15);
         for (uint256 i; i < 2; ++i) {

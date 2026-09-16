@@ -3,6 +3,14 @@ pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/preservation/IStreamReferenceModePublication.sol";
 import { StreamReferenceModePreparation } from "./StreamReferenceModePreparation.sol";
+import { StreamReferenceMetricStorage } from "./StreamReferenceMetricStorage.sol";
+import { StreamReferenceModeStateReads } from "./StreamReferenceModeStateReads.sol";
+import {
+    IStreamReferenceMetricSupplement
+} from "../../interfaces/stream/preservation/IStreamReferenceMetricSupplement.sol";
+import {
+    StreamReferenceMetricTypes as Metric
+} from "../../interfaces/stream/preservation/StreamReferenceMetricTypes.sol";
 import { StreamReferenceModeProof } from "./StreamReferenceModeProof.sol";
 import { StreamReferenceModeDefinitionsRead } from "./StreamReferenceModeDefinitionsRead.sol";
 import { StreamReferenceModeDefinitions } from "../records/StreamReferenceModeDefinitions.sol";
@@ -22,11 +30,14 @@ import "../parameters/StreamGasParameterHost.sol";
 ///      complete original canonical manifests and ABI witnesses use actual immutable Store chunks.
 contract StreamReferenceModePublication is
     IStreamReferenceModePublication,
+    IStreamReferenceMetricSupplement,
     IStreamArtworkFinalityComponent,
     IStreamArtworkScopedFinalityComponent,
     IStreamModule,
     StreamGasParameterHost
 {
+    // Retain the original ABI error now emitted by the fixed writer-read worker.
+    error ReferenceDependency(address target);
     bytes32 public constant READ_GAS = keccak256("6529STREAM_GGP_REFERENCE_READ_GAS");
     bytes32 public constant SOURCE_GAS = keccak256("6529STREAM_GGP_REFERENCE_SOURCE_GAS");
     bytes32 public constant SNAPSHOT_GAS = keccak256("6529STREAM_GGP_REFERENCE_SNAPSHOT_GAS");
@@ -50,6 +61,7 @@ contract StreamReferenceModePublication is
     mapping(bytes32 => StreamSnapshotManifestBytes.Manifest) private _modeEvidence;
     StreamReferenceModeTypes.Dependencies private _modeBindings;
     mapping(bytes32 => StreamReferenceModeTypes.Facts) private _modeFacts;
+    StreamReferenceMetricStorage.State private _metricSupplements;
 
     constructor(
         StreamReferenceRenderTypes.Dependencies memory d,
@@ -113,6 +125,7 @@ contract StreamReferenceModePublication is
     function supportsInterface(bytes4 id) external pure override returns (bool) {
         return id == type(IERC165).interfaceId
             || id == type(IStreamReferenceModePublication).interfaceId
+            || id == type(IStreamReferenceMetricSupplement).interfaceId
             || id == type(IStreamArtworkFinalityComponent).interfaceId
             || id == type(IStreamArtworkScopedFinalityComponent).interfaceId
             || id == type(IStreamModule).interfaceId
@@ -139,6 +152,52 @@ contract StreamReferenceModePublication is
         returns (StreamReferenceModeTypes.Dependencies memory)
     {
         return _modeBindings;
+    }
+
+    function publishMetricSupplement(bytes32 hash, Metric.Supplement calldata)
+        external
+        override
+        guarded
+        returns (bytes32)
+    {
+        _known(hash);
+        StreamReferenceRenderTypes.Receipt memory r = _receipts[hash];
+        requireCurrent(r.collectionId, hash, r.revision);
+        if (_locks[r.collectionId].actionId != 0) {
+            revert StreamReferenceRenderTypes.ReferenceLocked();
+        }
+        (uint8 cls, uint64 rev) = _authority(r.collectionId, msg.sender);
+        StreamReferenceMetricStorage.Context memory c =
+            StreamReferenceMetricStorage.Context(dependencies(), r, msg.sender, cls, rev);
+        return StreamReferenceMetricStorage.publish(
+            _metricSupplements, c, _publications[hash], _modeEvidence[hash], msg.data
+        );
+    }
+
+    function metricSupplement(bytes32 hash)
+        external
+        view
+        override
+        returns (bytes memory, Metric.Receipt memory)
+    {
+        _known(hash);
+        bytes memory raw = StreamReferenceMetricStorage.encoded(_metricSupplements, hash);
+        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
+    }
+
+    function requireMetricSupplement(bytes32 hash)
+        external
+        view
+        override
+        returns (Metric.Receipt memory)
+    {
+        _known(hash);
+        StreamReferenceRenderTypes.Receipt memory r = _receipts[hash];
+        requireCurrent(r.collectionId, hash, r.revision);
+        bytes memory raw = StreamReferenceMetricStorage.requireEncoded(
+            _metricSupplements, dependencies(), hash, _publications[hash], _modeEvidence[hash]
+        );
+        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
     }
 
     function previewReference(StreamReferenceRenderTypes.Publication memory, address)
@@ -309,16 +368,15 @@ contract StreamReferenceModePublication is
             revert StreamReferenceRenderTypes.ReferenceLineage(hash, _head(cid));
         }
         StreamReferenceRenderTypes.Dependencies memory d = dependencies();
-        (bytes32 sourcesHash, StreamReferenceModeTypes.Facts memory mode) = StreamReferenceModePreparation.current(
-            d, _modeBindings, _publications[hash], _modeEvidence[hash]
+        StreamReferenceModePreparation.requireCurrent(
+            d,
+            _modeBindings,
+            _publications[hash],
+            _modeEvidence[hash],
+            _modeFacts[hash],
+            _payloads[hash],
+            _receipts[hash]
         );
-        if (
-            sourcesHash != r.sourcesHash
-                || keccak256(abi.encode(mode)) != keccak256(abi.encode(_modeFacts[hash]))
-                || StreamSnapshotManifestBytes.requireIntact(_payloads[hash]) != r.payloadHash
-        ) {
-            revert StreamReferenceModeTypes.InvalidModeEvidence();
-        }
     }
 
     function lockTransition(uint256 cid)
@@ -331,17 +389,13 @@ contract StreamReferenceModePublication is
         if (r.recordHash == 0 || _locks[cid].actionId != 0) {
             revert StreamReferenceRenderTypes.ReferenceLocked();
         }
-        scope = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_REFERENCE_LOCK_SCOPE_V1"),
-                deploymentChainId,
-                address(this),
-                core,
-                cid
-            )
+        bytes32 supplement;
+        if (_modeFacts[r.recordHash].mode == StreamReferenceModeTypes.Mode.PERCEPTUAL_TOLERANCE) {
+            supplement = _metricHash(r.recordHash);
+        }
+        return StreamReferenceModeStateReads.lock(
+            deploymentChainId, core, cid, r.recordHash, r.revision, supplement
         );
-        oldHash = keccak256(abi.encode(scope, r.recordHash, r.revision, false));
-        newHash = keccak256(abi.encode(scope, r.recordHash, r.revision, true));
     }
 
     function lockReference(uint256 cid) external override guarded {
@@ -391,25 +445,24 @@ contract StreamReferenceModePublication is
         if (l.actionId == 0 || l.recordHash != r.recordHash || l.revision != r.revision) {
             revert StreamReferenceRenderTypes.ReferenceLocked();
         }
-        return StreamFinalityComponentState(
-            true,
-            StreamFinalityDomains.COMPONENT_REFERENCE_RENDER,
-            address(this),
-            type(IStreamArtworkFinalityComponent).interfaceId,
-            address(this).codehash,
+        bytes32 supplement;
+        if (_modeFacts[r.recordHash].mode == StreamReferenceModeTypes.Mode.PERCEPTUAL_TOLERANCE) {
+            supplement = _metricHash(r.recordHash);
+        }
+        return StreamReferenceModeStateReads.component(
+            _receipts[r.recordHash],
+            _locks[cid],
+            deploymentChainId,
+            core,
+            cid,
             streamModuleVersion(),
-            StreamReferenceModeDefinitions.PROFILE_HASH,
-            keccak256(
-                abi.encode(
-                    keccak256("6529STREAM_LOCKED_REFERENCE_COMPONENT_V1"),
-                    deploymentChainId,
-                    address(this),
-                    core,
-                    cid,
-                    r,
-                    l
-                )
-            )
+            supplement
+        );
+    }
+
+    function _metricHash(bytes32 hash) private view returns (bytes32) {
+        return StreamReferenceMetricStorage.requireHash(
+            _metricSupplements, dependencies(), hash, _publications[hash], _modeEvidence[hash]
         );
     }
 
@@ -482,49 +535,14 @@ contract StreamReferenceModePublication is
 
     function _authority(uint256 cid, address actor) private view returns (uint8 cls, uint64 rev) {
         if (actor == address(0)) revert StreamReferenceRenderTypes.ReferenceAuthority(actor);
-        for (uint8 i; i < 2; ++i) {
-            cls = i == 0 ? 3 : 8;
-            bytes memory raw = StreamFinalityRouterEvidence.read(
-                metadataHost,
-                abi.encodeCall(
-                    IStreamCollectionMetadataV1.familyWriter,
-                    (i == 0 ? cid : 0, StreamRecordFamilies.CURATOR, cls, actor)
-                ),
-                64,
-                gasParameter(READ_GAS)
+        return
+            StreamReferenceModeStateReads.authority(
+                metadataHost, cid, actor, gasParameter(READ_GAS)
             );
-            bool enabled;
-            (enabled, rev) = abi.decode(raw, (bool, uint64));
-            if (keccak256(raw) != keccak256(abi.encode(enabled, rev))) {
-                revert StreamReferenceRenderTypes.ReferenceDependency(metadataHost);
-            }
-            if (enabled && rev != 0) return (cls, rev);
-        }
-        revert StreamReferenceRenderTypes.ReferenceAuthority(actor);
     }
 
     function _candidate(StreamReferenceRenderTypes.Publication memory p) private view {
-        if (
-            p.collectionId == 0 || p.referenceId == 0 || p.reasonHash == 0 || p.effectiveAt == 0
-                || p.effectiveAt > block.timestamp || block.timestamp > type(uint64).max
-                || p.expectedRevision == type(uint64).max || _ids[p.collectionId][p.referenceId]
-        ) {
-            revert StreamReferenceRenderTypes.InvalidReferenceRender();
-        }
-        if (
-            _head(p.collectionId) != p.expectedHead
-                || _history[p.collectionId].length != p.expectedRevision
-        ) {
-            revert StreamReferenceRenderTypes.ReferenceLineage(
-                p.expectedHead, _head(p.collectionId)
-            );
-        }
-        if (_locks[p.collectionId].actionId != 0) {
-            revert StreamReferenceRenderTypes.ReferenceLocked();
-        }
-        StreamMetadataRenderer.requireValidUtf8ContentUri(
-            "referenceManifestURI", p.manifestURI, 2048, true
-        );
+        StreamReferenceModeStateReads.candidate(p, _ids, _history, _locks);
     }
 
     function _definitions(StreamReferenceRenderTypes.Dependencies memory d) private view {

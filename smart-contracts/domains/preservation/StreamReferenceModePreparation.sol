@@ -78,6 +78,25 @@ library StreamReferenceModePreparation {
         return abi.encode(_evidence(saved), facts);
     }
 
+    /// @dev Original current-source comparison, in the same order, without transporting the
+    /// large Facts tuple back through the host solely to encode and compare it again.
+    function requireCurrent(
+        R.Dependencies memory d,
+        M.Dependencies memory bindings,
+        Bytes.Manifest storage publication,
+        Bytes.Manifest storage evidence,
+        M.Facts storage savedFacts,
+        Bytes.Manifest storage payload,
+        R.Receipt storage receipt
+    ) public view {
+        (bytes32 sourcesHash, M.Facts memory mode) = current(d, bindings, publication, evidence);
+        if (
+            sourcesHash != receipt.sourcesHash
+                || keccak256(abi.encode(mode)) != keccak256(abi.encode(savedFacts))
+                || Bytes.requireIntact(payload) != receipt.payloadHash
+        ) revert M.InvalidModeEvidence();
+    }
+
     function _evidence(Bytes.Manifest storage saved) private view returns (M.Evidence memory e) {
         bytes memory raw = Bytes.read(saved);
         e = abi.decode(raw, (M.Evidence));

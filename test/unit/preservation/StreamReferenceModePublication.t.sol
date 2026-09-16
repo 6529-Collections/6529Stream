@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./PreservationReferenceFixture.sol";
+import "../../helpers/ArtistArtifactCreate.sol";
 import {
     StreamReferenceModePublication
 } from "../../../smart-contracts/domains/preservation/StreamReferenceModePublication.sol";
@@ -34,7 +35,7 @@ contract ReferenceModeInventoryProbe {
 /// @notice Actual publication/schema/archive/threshold Safe and typed finality consumer.
 /// @dev Inherited Core/Artist/governance/network assertions are explicit boundaries; metric scores
 /// are test-recorder assertions, not a claim that a browser or SSIM ran inside Ethereum.
-contract StreamReferenceModePublicationTest is PreservationReferenceFixture {
+contract StreamReferenceModePublicationTest is PreservationReferenceFixture, ArtistArtifactCreate {
     StreamReferenceModePublication private modes;
     Mode.Evidence private proof;
     PreservationReferenceConsumer private consumer;
@@ -78,7 +79,12 @@ contract StreamReferenceModePublicationTest is PreservationReferenceFixture {
         configs[2] = _gas("REFERENCE_SNAPSHOT_GAS", d.snapshotGas, 1);
         configs[3] = _gas("REFERENCE_ARCHIVE_GAS", d.archiveGas, 1);
         Mode.Dependencies memory empty;
-        modes = new StreamReferenceModePublication(d, address(executor), configs, empty);
+        modes = StreamReferenceModePublication(
+            _artistArtifactCreate(
+                "StreamReferenceModePublication.sol:StreamReferenceModePublication",
+                abi.encode(d, address(executor), configs, empty)
+            )
+        );
         modes.prepareFileInventory(terms.environment.packageFiles, true);
         modes.prepareFileInventory(terms.environment.platformPrerequisites, false);
         Mode.Metric memory metric = Mode.Metric(
@@ -167,25 +173,21 @@ contract StreamReferenceModePublicationTest is PreservationReferenceFixture {
         return modes.publishModeReference(terms, proof);
     }
 
-    function testActualModePublicationCurrentConsumerAndExactClassTwoLock() public {
+    function testHistoricalV1ModePublicationCannotClaimCompleteMetricFinality() public {
         bytes32 hash = _publishMode();
         StreamReferenceRenderTypes.Receipt memory r = modes.currentReference(1);
         require(
             r.recordHash == hash && r.schemaHash == Def.SCHEMA_HASH
                 && r.profileHash == Def.PROFILE_HASH
         );
-        require(consumer.read(_scope(), hash, 1, false).payloadHash == r.payloadHash);
+        require(modes.requireCurrent(1, hash, 1).payloadHash == r.payloadHash);
+        require(keccak256(modes.referencePayload(hash)) == r.payloadHash);
+        vm.expectRevert();
+        consumer.read(_scope(), hash, 1, false);
         vm.expectRevert();
         consumer.read(_scope(), hash, 1, true);
-        (bytes32 scope, bytes32 oldHash, bytes32 next) = modes.lockTransition(1);
-        cheat.mockCall(
-            address(executor),
-            abi.encodeCall(IStreamGovernedParameterAuthority.currentAction, ()),
-            abi.encode(true, keccak256("mode lock"), uint8(2), scope, oldHash, next)
-        );
-        vm.prank(address(executor));
-        modes.lockReference(1);
-        require(consumer.read(_scope(), hash, 1, true).locked);
+        vm.expectRevert();
+        modes.lockTransition(1);
         (Mode.Evidence memory saved, Mode.Facts memory facts) = modes.referenceModeEvidence(hash);
         require(
             keccak256(abi.encode(saved)) == keccak256(abi.encode(proof))
@@ -240,7 +242,7 @@ contract StreamReferenceModePublicationTest is PreservationReferenceFixture {
         require(referenceHost.currentReference(1).recordHash == exact);
     }
 
-    function testModeInventoryRetainsCompleteRegisteredDefinitionsAndMetric() public {
+    function testMissingExecutableSupplementCannotClaimCompleteModeInventory() public {
         bytes32 hash = _publishMode();
         Critical.Dependencies memory d;
         d.targets[2] = address(schemas);
@@ -254,19 +256,12 @@ contract StreamReferenceModePublicationTest is PreservationReferenceFixture {
         Critical.Context memory c;
         c.referenceRender = modes.currentReference(1);
         ReferenceModeInventoryProbe probe = new ReferenceModeInventoryProbe();
-        Inventory.Item[] memory rows = probe.items(d, c);
-        require(
-            rows.length == 8 && bytes32(rows[0].digest) == Def.SCHEMA_HASH
-                && rows[0].byteSize == Def.SCHEMA_BYTES
-        );
-        require(bytes32(rows[6].digest) == keccak256(abi.encode(proof.perceptual.metric)));
-        require(rows[5].sourceRecord == hash);
-        bytes memory code = address(store).code;
-        vm.etch(address(store), hex"fe");
         vm.expectRevert();
         probe.items(d, c);
-        vm.etch(address(store), code);
-        require(bytes32(probe.items(d, c)[0].digest) == Def.SCHEMA_HASH);
+        require(modes.referencePayload(hash).length != 0);
+        (Mode.Evidence memory saved, Mode.Facts memory facts) = modes.referenceModeEvidence(hash);
+        require(keccak256(abi.encode(saved)) == keccak256(abi.encode(proof)));
+        require(facts.interpretationHash == keccak256(abi.encode(proof.perceptual.metric)));
     }
 
     function testSafeLateArchiveFailureRollsBackAndRetriesIdenticalPublication() public {
