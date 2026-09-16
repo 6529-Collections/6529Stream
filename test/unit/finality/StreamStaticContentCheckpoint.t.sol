@@ -66,10 +66,11 @@ contract StreamStaticContentCheckpointTest is StaticMetadataRoutingFixture {
             _gas("STATIC_CONTENT_RENDER_GAS", 30000000)
         );
         _pointer();
+        // Canonical PNG signature admission fixture; no complete image-decoder claim.
         _admin(
             abi.encodeCall(
                 router.setCollectionMetadata,
-                (1, "Static work", "Exact source", "data:image/png;base64,AQID", "")
+                (1, "Static work", "Exact source", "data:image/png;base64,iVBORw0KGgo=", "")
             )
         );
     }
@@ -90,7 +91,7 @@ contract StreamStaticContentCheckpointTest is StaticMetadataRoutingFixture {
             require(
                 row.leaf.tokenId == i + 1
                     && row.leaf.metadataHash == keccak256(bytes(router.tokenJSON(i + 1)))
-                    && row.leaf.imageHash == keccak256(hex"010203")
+                    && row.leaf.imageHash == keccak256(hex"89504e470d0a1a0a")
                     && row.leaf.animationHash == keccak256(bytes(router.tokenHTML(i + 1)))
                     && row.leaf.contentHash == 0
                     && row.leaf.tokenDataHash == keccak256(core.tokenData(i + 1))
@@ -172,7 +173,7 @@ contract StreamStaticContentCheckpointTest is StaticMetadataRoutingFixture {
         bytes32 selection = _prepare(1, R.MetadataMode.OFFCHAIN);
         bytes32 id = outputs.begin(selection, 0);
         O.Payload[] memory payload = new O.Payload[](1);
-        payload[0] = O.Payload(1, hex"010203", bytes("not a full render"));
+        payload[0] = O.Payload(1, hex"89504e470d0a1a0a", bytes("not a full render"));
         vm.expectRevert();
         outputs.append(id, payload);
         require(outputs.checkpoint(id).nextIndex == 0);
@@ -335,7 +336,7 @@ contract StreamStaticContentCheckpointTest is StaticMetadataRoutingFixture {
     function _payloads(uint256 first, uint256 count) private view returns (O.Payload[] memory p) {
         p = new O.Payload[](count);
         for (uint256 i; i < count; ++i) {
-            p[i] = O.Payload(first + i, hex"010203", bytes(router.tokenHTML(first + i)));
+            p[i] = O.Payload(first + i, hex"89504e470d0a1a0a", bytes(router.tokenHTML(first + i)));
         }
     }
 
