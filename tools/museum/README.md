@@ -30,6 +30,11 @@ pinned native products, mint a local paid token and publish fresh token-subject
 media statements before building the scoped dossier. Local execution and full
 object-dossier acceptance remain separately reported.
 
+[Object-dossier inventory and partial assembly](../../docs/museum-object-dossier.md)
+account for the adopted requirements, retain supplied components without
+promoting their authority, and replay the actual token fixture into explicit
+partial diagnostics.
+
 Run from the repository root with Python 3.11 or later. Create an isolated
 environment and install the Museum dependency set; the repository's general
 tools lock alone does not include `rfc8785` or the JSON-LD processor. The full

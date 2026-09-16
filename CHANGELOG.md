@@ -5,6 +5,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add object-dossier requirement accounting, bounded supplied components and
+  replayable partial assembly from the retained actual-token capture, plus a
+  finite native render-inventory reader with complete segment reconstruction;
+  actual inventory capture and full object-dossier conformance remain required.
+
 - Add native primary offer clients with original buyer and seller signatures,
   executor-funded payments, buyer refunds, historical revocation and Safe CALL plans.
 
