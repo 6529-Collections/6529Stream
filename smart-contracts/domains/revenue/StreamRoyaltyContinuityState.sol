@@ -29,6 +29,10 @@ library StreamRoyaltyContinuityState {
         mapping(bytes32 => uint256) routeIndex;
         mapping(uint256 => uint256) electionIndex;
         C.ImportState transfer;
+        // Derived only from the actually selected source during the original governed begin.
+        // Appended fields leave every original ledger and import ABI/preimage unchanged.
+        address consumerOrigin;
+        bytes32 consumerOriginRuntimeHash;
     }
     event ProtectedEconomicRouteRecorded(
         uint16 schemaVersion,
