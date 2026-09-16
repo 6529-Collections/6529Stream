@@ -49,16 +49,16 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `40ae52f89cdf56c3861076d03d814a55b03131f1`; see the [16 September batch](#parallel-feature-batch-16-september) for scoped evidence and remaining joins |
+| Current integration source | `006a16bce0604067221c66ddaf2a856bc6a18ced`; see the [16 September batch](#parallel-feature-batch-16-september) for scoped evidence and remaining joins |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
 | Further integrated Artist handoff | `9ea144c85768050ec910cc8534af13bcac82e20d`, received during assembly: closed-origin dormancy/rotation extension on the preceding handoff; ART24 |
 | Integrated entropy client handoff | `642d017d9d0cd8ee9b6b813abbdbe10a4c6b1265`; client.entropy-authority |
 | Integrated OwnerRecords capture handoff | `57ac8d041c9adc479f1061fafec748c8330ac974`; MUSEUM-36 |
-| Latest broad cheap compilation evidence | 1,959-source ABI/type/storage check passes at 40ae52f8 in 17.015 seconds; no errors. This is not bytecode or full-system runtime evidence. |
+| Latest broad cheap compilation evidence | 1,969-source ABI/type/storage check passes at 006a16bc in 17.282 seconds; no errors. This is not bytecode or full-system runtime evidence. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
-| Latest focused native evidence | Separate captures: entropy 10, Royalty 11, mint 101, actual-Core 29, final burn 49 and later burn-credit 31 distinct cases pass. Repaired native-price 76 passes at 766c5dfd (root attestation in progress). Root clients 304 and museum authority 34 pass. Other museum cohorts overlap. No complete-system pass is inferred. |
+| Latest focused native evidence | Separate captures: entropy 10, Royalty 11, mint 101, actual-Core 29, final burn 49 and later burn-credit 31 distinct cases pass. Repaired native-price 76 passes at 766c5dfd with independent source/artifact attestation; STATIC output manifest 9 passes in a separate capture. Root clients 304 and museum authority 34 pass. Other museum cohorts overlap. No complete-system pass is inferred. |
 
 Earlier implementation notes use “integrated” to mean source merged. In this
 document, that is only **code location**; runtime integration has its own column.
@@ -124,7 +124,7 @@ These 163 rows are capabilities and delivery checks of different sizes. Row coun
 | --- | --- | --- | --- | --- |
 | [sales.phase-ledger](#salesphase-ledger-evidence) Current mint phases, admission and replay ledger | Built | Partly tested | Partial | Current Manager/ledger, admitted executors, gate protocol, counted prepared and single-step mint operations; not every gate implementation. **Remaining:** Latest full phase/operator/commercial combination and capacity validation; standard gate-kit row remains separate. |
 | [sales.standard-gates](#salesstandard-gates-evidence) Concrete allowlist and signed-ticket gate kit | Built | Tested* | Partial | Full-payload EOA/ERC1271 ticket and proof allowlist gates, optional batch-gate capability, replay and bounded result/gas handling integrated feda72d3. **Remaining:** Complete current-Core/Artist/operator admission and latest sale joins beyond the 87 scoped mint cases. |
-| [sales.merkle-prices](#salesmerkle-prices-evidence) Authenticated per-wallet prices across required sale profiles | In progress | Partly tested | Not integrated | Native immediate fixed/open-edition/free/PWYW consumption is integrated as e7eb51f0, size repair as 84145594 and callers as 837683ed. The repaired-source scoped cohort passes 76 cases; the adapter measures 24,560 bytes. **Remaining:** Dutch/clearing handoff integration/native acceptance, refund/ERC20 consumers and actual current graph. Original signing domains, replay and refund ownership remain unchanged. |
+| [sales.merkle-prices](#salesmerkle-prices-evidence) Authenticated per-wallet prices across required sale profiles | In progress | Partly tested | Not integrated | Native immediate fixed/open-edition/free/PWYW consumption is integrated as e7eb51f0, size repair as 84145594 and callers as 837683ed. The repaired-source scoped cohort passes 76 cases; the adapter measures 24,560 bytes. Dutch/clearing same-leaf consumers are integrated as fbacfc7d, with 26 authored tests and fitting selected products. **Remaining:** Their native acceptance, refund/ERC20 consumers and actual current graph. Original signing domains, replay and refund ownership remain unchanged. |
 | [sales.ticket-revocation](#salesticket-revocation-evidence) Complete signed mint authorization revocation | Built | Partly tested | Partial | Original authorization IDs and complete-ticket revocation, separate from a gate's positive admission. **Remaining:** Reproduce complete gate/operator/Safe workflows on the final graph; no positive gate implementation inferred. |
 | [sales.native-fixed](#salesnative-fixed-evidence) Native fixed-price and open-edition sales | Built | Partly tested | Partial | Current native paid immediate consumer, original Artist/platform signatures, exact settlement and phase accounting. **Remaining:** Latest actual-current transaction/receipt/reveal/capacity acceptance. Earlier accepted current graph captures do not validate all later code. |
 | [sales.free-pwyw](#salesfree-pwyw-evidence) Free phases and pay-what-you-want price programs | Built | Partly tested | Partial | Declared zero-price and native chosen-amount/minimum programs; original signature/payment rules retained. **Remaining:** Final actual-current paid/free/reveal/Safe matrix; do not infer arbitrary batch airdrops from a zero-price single mint. |
@@ -229,7 +229,7 @@ These 163 rows are capabilities and delivery checks of different sizes. Row coun
 
 | Feature | Build | Tests | Integration | Scope and remaining work |
 | --- | --- | --- | --- | --- |
-| [metadata.renderer-routing](#metadatarenderer-routing-evidence) Independently selectable, versioned token and collection renderers | In progress | Partly tested | Not integrated | Renderer/Registry, STATIC routing/configuration, ScopeMembership, raw Artist facts and complete selection checkpoint are source-integrated, including 01bc7081/099d8ba7. Fixed formatter/Metadata repairs and frozen-ONCHAIN full-output checkpoints 40ae52f8 are integrated. A low-parent-gas currentness error is repaired with two passing actual-Renderer regressions. **Remaining:** Router deployment-size repair, content/output artifact joins, exact genesis correspondence and combined runtime acceptance. The failed manual encoder measured 27,102 bytes; its proposed replacement is unapplied. |
+| [metadata.renderer-routing](#metadatarenderer-routing-evidence) Independently selectable, versioned token and collection renderers | In progress | Partly tested | Not integrated | Renderer/Registry, STATIC routing/configuration, ScopeMembership, raw Artist facts and complete selection checkpoint are source-integrated, including 01bc7081/099d8ba7. Fixed formatter/Metadata repairs and frozen-ONCHAIN full-output checkpoints 40ae52f8 are integrated. A low-parent-gas currentness error is repaired with two passing actual-Renderer regressions. The complete output-hash manifest/schema/coverage join is integrated as 006a16bc with nine scoped passes. **Remaining:** Router deployment-size repair, full output-byte retention/publication-authority joins, exact genesis correspondence and combined runtime acceptance. The failed manual encoder measured 27,102 bytes; its proposed replacement is unapplied. |
 | [MUSEUM-01](#museum-01-evidence) Canonical Core identity and metadata boundaries | Built | Partly tested | Integrated* | Current Core subjects, full record preimages and semantic tooling preserve work/token/file and protocol authority boundaries. This is the implemented boundary, not completion of all dependent museum features. **Remaining:** Whole adopted source-family and full-finality acceptance remain; source-preserving adapters do not grant new mint/finality authority. |
 | [MUSEUM-02](#museum-02-evidence) Immutable schema and interpretation document registry | Built | Tested* | Integrated* | Registered exact-name/version documents, ordered bounded chunks, full original bytes and canonicalization identity; actual delayed Executor and Safe capture uses these contracts. **Remaining:** Complete required genesis catalog registration and every maximum-size operational envelope remain separate. |
 | [MUSEUM-03](#museum-03-evidence) Current collection record writers and source history | Built | Partly tested | Integrated* | MetadataV1 generic class-scoped writers, full payload/receipt/history, independent author heads and one-use Artist publication; sealed complete successor consumption preserves the original host consumed map. **Remaining:** Generic byte admission is not typed meaning for every named record. The newest genuine post-cutover join remains in root native cohort, distinct from earlier demonstrated generic/RIGHTS writes. |
@@ -520,6 +520,33 @@ settlement behavior listed above.
 ## Feature evidence
 
 ### Parallel feature batch 16 September
+
+Latest integrated source `006a16bc` passes all 1,969 Solidity ABI/type/storage
+inputs (17.282 seconds, no errors). Client and museum counts remain the separate
+304 and 34 root-run cohorts recorded below.
+
+- Native Dutch and clearing same-leaf price consumers `2dc3ea7e` are integrated
+  as `fbacfc7d`. Independent join review is clear; 26 new cases are authored and
+  runtime-pending. Original signatures/ABI/storage prefixes remain, with one
+  appended mapping per host. Selected Dutch runtime is 22,239 bytes; clearing
+  is 24,099, execution worker 23,356 and registration worker 4,529. This does not
+  complete the separate refund-window or ERC20 price consumers.
+- STATIC output manifest `7ae0072c` is integrated as `006a16bc`. Root independently
+  matches all 194 captured sources to the commit (CRLF/LF only), reads all nine
+  passing results including two 256-input properties, and verifies all 75
+  compiled production products fit. The verifier is 14,789 runtime bytes.
+  Actual Renderer/content producer/SchemaRegistry/SSTORE2/ArtifactCoverage and
+  official Safe participate; Core/route/selection/Artist/archive-family/finality
+  authority remain explicit typed boundaries. This preserves every original
+  output row's hashes/commitments and canonical interpretation; full rendered
+  bytes and publication authority are separate remaining obligations.
+- The repaired immediate-price capture `766c5dfd` is independently attested:
+  all 312 raw captured sources match Git, all 351 artifact metadata source maps
+  match captured source hashes, all 76 tests pass and all 157 production products
+  fit. This supersedes the earlier attestation-pending statement below. No
+  additional native rerun was needed.
+
+Earlier checkpoints retain their original status and evidence boundaries:
 
 The final source checkpoint in this batch is `40ae52f8`: all 1,959 Solidity
 ABI/type/storage inputs pass (17.015 seconds, no errors). It adds the STATIC

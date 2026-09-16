@@ -5,6 +5,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add native Dutch and clearing same-leaf Merkle price consumers, preserving
+  original signatures, Dutch free-sale rules and clearing rebate accounting.
+- Add canonical complete STATIC output-hash manifests with exact registered
+  interpretation and current archival coverage; full-byte retention is separate.
+
 - Add frozen ONCHAIN STATIC full-output checkpoints and require complete gas
   budgets when validating current output, with reproduced low-gas regressions.
 

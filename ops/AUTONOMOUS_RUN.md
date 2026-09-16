@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `40ae52f8`: 1,959-source ABI/type/storage pass; root client304 and museum authority34 pass. Free-burn credits, Artist withdrawal61, native-price size repair, distribution/burn/price clients STATIC output/gas correction and expanded current-system tests are integrated. Separate native captures retain their exact source limits. Three Artist/STATIC size blockers, remaining price/authority profiles, Royalty successor consumption and final system acceptance remain. RC1 stays `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
+| Source checkpoint | `006a16bc`: 1,969-source ABI/type/storage pass; root client304 and museum authority34 pass. Free-burn credits, Artist withdrawal61, native-price size repair, distribution/burn/price clients STATIC output/gas correction, complete output-hash manifests, Dutch/clearing prices and expanded current-system tests are integrated. Separate native captures retain their exact source limits. Three Artist/STATIC size blockers, remaining price/authority profiles, Royalty successor consumption and final system acceptance remain. RC1 stays `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
