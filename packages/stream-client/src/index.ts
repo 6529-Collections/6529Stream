@@ -22,4 +22,5 @@ export * from "./current-royalty-continuity.js";
 export * from "./current-mint-continuity.js";
 export * from "./current-mint-gates.js";
 export * from "./current-distribution.js";
+export * from "./current-burn-mint.js";
 export * from "./current-entropy-authority.js";

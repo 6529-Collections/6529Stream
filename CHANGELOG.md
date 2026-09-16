@@ -36,6 +36,9 @@ the release policy in `docs/release-policy.md`.
 - Add reproducible selected-host current-graph acceptance captures with native
   compiler provenance, complete suite inventories and production size checks.
 
+- Add source-bound burn-to-mint callers with separate owner/gate approval checks,
+  original native purchase signing, explicit free reveal allowances and refund recovery.
+
 - Add ordered operator-distribution manifests, bounded slice callers and retained
   NFT claim recovery for direct and failure-isolated delivery.
 

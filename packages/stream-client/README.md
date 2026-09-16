@@ -352,3 +352,5 @@ contract profiles and outstanding larger-script work.
   delegated vault requests and canonical static allowlist proofs and commitments.
 - [Operator distributions](docs/current-distribution.md) preserve ordered artwork
   manifests, prepare committed slices and recover retained beneficiary NFTs.
+- [Burn-to-mint calls](docs/current-burn-mint.md) check source ownership and gate
+  approval, prepare free or native purchases and recover free-burn fee credits.
