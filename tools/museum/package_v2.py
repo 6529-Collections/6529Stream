@@ -239,6 +239,9 @@ def verify_package(directory, expected_manifest_hash):
     if isinstance(value, dict) and value.get("mode") == "recorded_condition_conservation_package":
         from .condition_package import verify_condition_package
         return verify_condition_package(directory, expected_manifest_hash)
+    if isinstance(value, dict) and value.get("mode") == "recorded_account_authority_package":
+        from .authority_package import verify_authority_package
+        return verify_authority_package(directory, expected_manifest_hash)
     if isinstance(value, dict) and value.get("mode") == "recorded_independent_exhibition_package":
         from .exhibition_package import verify_exhibition_package
         return verify_exhibition_package(directory, expected_manifest_hash)

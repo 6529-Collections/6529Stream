@@ -7,6 +7,10 @@ New bounded adapters cover [institutional owner documentation](../../docs/museum
 original recorded-source admission, synthetic controls and remaining actual
 evidence joins. They do not establish full museum conformance.
 
+[Authority reconciliation](../../docs/museum-authority-reconciliation.md) adds
+archived RDF/JSON snapshots, deterministic ambiguous/unresolved outcomes and
+qualified account-review derivatives, with explicit remaining profile coverage.
+
 Run from the repository root with Python 3.11 or later. Create an isolated
 environment and install the Museum dependency set; the repository's general
 tools lock alone does not include `rfc8785` or the JSON-LD processor. The full
