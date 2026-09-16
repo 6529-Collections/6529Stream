@@ -93,6 +93,53 @@ test("bounded source inventory reads verify values and raw nullifiers without cl
   await assert.rejects(inspectMintContinuitySourceInventory(provider, a, [0], [], { blockTag: 901 }), /exact reviewed snapshot/);
 });
 
+test("counter selection preserves its reviewed definition and interpretation during RPC reads", async () => {
+  const fixture = JSON.parse(await readFile(new URL("./fixtures/current-mint-continuity-abi.json", import.meta.url)));
+  const iface = new Interface(fixture.contracts.flatMap(item => item.abi));
+  let release;
+  const pendingRead = new Promise(resolve => { release = resolve; });
+  const reviewed = { ...definition };
+  const options = { blockTag: 123, expectedInterpretation: "defined" };
+  const provider = { call: async tx => {
+    assert.equal(tx.blockTag, 123);
+    const parsed = iface.parseTransaction({ data: tx.data });
+    await pendingRead;
+    return iface.encodeFunctionResult(parsed.fragment, [true, definition]);
+  } };
+  const pending = inspectCounterDefinitionSelection(provider, successorLedger, successorManager, reviewed, options);
+  reviewed.capRoot = h("changed while reading");
+  reviewed.scope = 2n;
+  options.expectedInterpretation = "legacy";
+  options.blockTag = 124;
+  release();
+  const result = await pending;
+  assert.equal(result.managerExists, true);
+  assert.equal(result.definitionHash, mintCounterDefinitionHash(definition));
+});
+
+test("counter selection rejects an invalid interpretation before RPC and cannot be changed to accept legacy", async () => {
+  const fixture = JSON.parse(await readFile(new URL("./fixtures/current-mint-continuity-abi.json", import.meta.url)));
+  const iface = new Interface(fixture.contracts.flatMap(item => item.abi));
+  let calls = 0, release;
+  const pendingRead = new Promise(resolve => { release = resolve; });
+  const options = { blockTag: 123, expectedInterpretation: "defined" };
+  const provider = { call: async tx => {
+    ++calls;
+    const parsed = iface.parseTransaction({ data: tx.data });
+    await pendingRead;
+    const values = parsed.name === "counterDefinition" ? [true, definition]
+      : [false, { scope: 2n, keyMode: 0n, capRoot: zero, metadataHash: zero }];
+    return iface.encodeFunctionResult(parsed.fragment, values);
+  } };
+  await assert.rejects(inspectCounterDefinitionSelection(provider, successorLedger, successorManager,
+    definition, { blockTag: 123, expectedInterpretation: "unknown" }), /must be defined or legacy/);
+  assert.equal(calls, 0);
+  const pending = inspectCounterDefinitionSelection(provider, successorLedger, successorManager, definition, options);
+  options.expectedInterpretation = "legacy";
+  release();
+  await assert.rejects(pending, /Manager effective definition interpretation differs/);
+});
+
 test("source inspection snapshots caller index arrays before any asynchronous RPC", async () => {
   const a = artifact(), f = JSON.parse(await readFile(new URL("./fixtures/current-mint-continuity-abi.json", import.meta.url))), iface = new Interface(f.contracts.flatMap(x => x.abi));
   let release; const gate = new Promise(resolve => { release = resolve; }), indexes = [0];

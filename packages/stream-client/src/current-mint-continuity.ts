@@ -179,10 +179,29 @@ export async function inspectMintContinuitySourceInventory(provider: Pick<Provid
   return Object.freeze({ blockTag, counterLeafHashes: Object.freeze(selectedCounters.map(i => a.counterLeafHashes[i]!)), nullifierLeafHashes: Object.freeze(selectedNullifiers.map(i => a.nullifierLeafHashes[i]!)), checked: Object.freeze(["canonical predecessor subject keys", "exact predecessor value-key values", "raw predecessor Manager nullifier use"]), completenessProven: false });
 }
 export async function inspectCounterDefinitionSelection(provider: Pick<Provider, "call">, ledger: Address, manager: Address, definition: MintCounterDefinition, options: { readonly blockTag: number; readonly expectedInterpretation: "defined" | "legacy" }): Promise<{ readonly definitionHash: Hex; readonly globalExists: boolean; readonly managerExists: boolean }> {
-  const blockTag = concreteBlock(options.blockTag), definitionHash = mintCounterDefinitionHash(definition); addr(ledger, "ledger"); addr(manager, "manager");
-  const [globalExists, global] = await read(provider, ledger, ledgerAbi, "counterDefinition", [definitionHash], blockTag), [managerExists, selected] = await read(provider, ledger, ledgerAbi, "counterDefinitionForManager", [manager, definitionHash], blockTag);
-  if (!globalExists || coder.encode([definitionTuple], [global]).toLowerCase() !== coder.encode([definitionTuple], [definition]).toLowerCase()) throw Error("Global counter definition differs from reviewed preimage");
-  if (options.expectedInterpretation === "defined" ? !managerExists || coder.encode([definitionTuple], [selected]).toLowerCase() !== coder.encode([definitionTuple], [definition]).toLowerCase() : managerExists || BigInt((selected as { scope: bigint }).scope) !== 2n) throw Error("Manager effective definition interpretation differs");
+  const blockTag = concreteBlock(options.blockTag);
+  const expectedInterpretation = options.expectedInterpretation;
+  if (expectedInterpretation !== "defined" && expectedInterpretation !== "legacy") {
+    throw Error("Expected counter interpretation must be defined or legacy");
+  }
+  const reviewedDefinition = Object.freeze({ ...definition });
+  const definitionHash = mintCounterDefinitionHash(reviewedDefinition);
+  const reviewedEncoding = coder.encode([definitionTuple], [reviewedDefinition]).toLowerCase();
+  const targetLedger = addr(ledger, "ledger");
+  const targetManager = addr(manager, "manager");
+  const [globalExists, global] = await read(
+    provider, targetLedger, ledgerAbi, "counterDefinition", [definitionHash], blockTag,
+  );
+  const [managerExists, selected] = await read(
+    provider, targetLedger, ledgerAbi, "counterDefinitionForManager", [targetManager, definitionHash], blockTag,
+  );
+  if (!globalExists || coder.encode([definitionTuple], [global]).toLowerCase() !== reviewedEncoding) {
+    throw Error("Global counter definition differs from reviewed preimage");
+  }
+  const selectionMatches = expectedInterpretation === "defined"
+    ? managerExists && coder.encode([definitionTuple], [selected]).toLowerCase() === reviewedEncoding
+    : !managerExists && BigInt((selected as { scope: bigint }).scope) === 2n;
+  if (!selectionMatches) throw Error("Manager effective definition interpretation differs");
   return Object.freeze({ definitionHash, globalExists: Boolean(globalExists), managerExists: Boolean(managerExists) });
 }
 export async function inspectMintContinuityReadiness(provider: Pick<Provider, "getNetwork" | "call">, artifact: MintContinuityArtifact, expected: { readonly successorLedgerOwner: Address; readonly successorManagerOwner: Address }, options: { readonly blockTag: number }): Promise<MintContinuityInspection> {
