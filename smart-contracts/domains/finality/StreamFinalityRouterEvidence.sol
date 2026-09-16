@@ -81,6 +81,9 @@ library StreamFinalityRouterEvidence {
             family == StreamFinalityDomains.COMPONENT_RENDER_CONTEXT
                 || family == StreamFinalityDomains.COMPONENT_DEPENDENCY_SOURCE
         ) {
+            // Even immutable legacy context/dependency tuples are inapplicable after explicit
+            // STATIC activation. Validate the selected collection profile before these fast paths.
+            serving(c, scope.collectionId);
             (bytes32 presentation, bytes32 context, bytes32 dependencies) = abi.decode(
                 read(
                     c.router,
