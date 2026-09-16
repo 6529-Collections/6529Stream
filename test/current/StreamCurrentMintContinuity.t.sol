@@ -96,6 +96,24 @@ contract CurrentContinuityEntitlementGate is IStreamMintBatchGate {
     }
 }
 
+/// @dev Caller-controlled delivery failure after real Manager/Ledger consumption.
+contract CurrentContinuityReceiver {
+    bool public accepts;
+
+    function accept() external {
+        accepts = true;
+    }
+
+    function onERC721Received(address, address, uint256, bytes calldata)
+        external
+        view
+        returns (bytes4)
+    {
+        require(accepts, "continuity receiver rejected");
+        return 0x150b7a02;
+    }
+}
+
 /// @notice Actual current Core, Artist, Manager/Ledger, registry, manifest and Safe governance.
 /// @dev The external entropy provider and lifetime eligibility gate are explicit test inputs.
 /// Native runtime acceptance is pending the coordinator's frozen current-graph capture.
@@ -1050,5 +1068,306 @@ contract StreamCurrentMintContinuityTest is StreamCurrentSafeGovernanceFixture {
         _ordinary(address(successor), _importCall());
         _assertImported();
         _complete();
+    }
+
+    function _raiseSuccessorArtistBudget(uint256 nextValue) private {
+        bytes32 parameter = successor.GGP_ARTIST_AUTHORITY_GAS_LIMIT();
+        (uint256 value, uint256 floor, uint8 failureClass, uint64 revision) =
+            successor.gasParameterInfo(parameter);
+        bytes32 scope = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_GAS_PARAMETER_SCOPE_V2"),
+                block.chainid,
+                address(successor),
+                parameter
+            )
+        );
+        bytes32 domain = keccak256("6529STREAM_GAS_PARAMETER_STATE_V2");
+        _govern(
+            _governanceRequest(
+                1,
+                address(successor),
+                abi.encodeCall(successor.raiseGasParameter, (parameter, nextValue)),
+                scope,
+                keccak256(abi.encode(domain, scope, value, floor, failureClass, revision)),
+                keccak256(abi.encode(domain, scope, nextValue, floor, failureClass, revision + 1))
+            )
+        );
+    }
+
+    function _literalPolicyDigest(
+        T.PolicyConsent memory policy,
+        T.Authorization memory auth,
+        address anchor
+    ) private view returns (bytes32) {
+        bytes32 domain = keccak256(
+            abi.encode(
+                keccak256(
+                    "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+                ),
+                keccak256("6529StreamArtistRegistry"),
+                keccak256("1"),
+                block.chainid,
+                address(artists)
+            )
+        );
+        bytes32 message = keccak256(
+            abi.encode(
+                keccak256(
+                    "StreamArtistPolicyConsent(address core,address mintManager,uint256 collectionId,bytes32 phaseId,bytes32 policyHash,uint256 nonce,uint64 deadline)"
+                ),
+                address(core),
+                anchor,
+                policy.collectionId,
+                policy.phaseId,
+                policy.policyHash,
+                auth.nonce,
+                auth.time
+            )
+        );
+        return keccak256(abi.encodePacked(hex"1901", domain, message));
+    }
+
+    function _recordSuccessorConsent(bytes32 policyHash) private {
+        T.PolicyConsent memory policy = T.PolicyConsent(1, CONTINUITY_PHASE, policyHash);
+        T.Authorization memory auth = _artistAuthorization(false);
+        bytes32 originalDigest = _literalPolicyDigest(policy, auth, address(manager));
+        require(
+            artists.policyConsentDigest(policy, auth) == originalDigest
+                && originalDigest != _literalPolicyDigest(policy, auth, address(successor)),
+            "new policy uses exact original Artist signature domain"
+        );
+        auth.signature = _artistProof(originalDigest);
+        artists.recordPolicyConsent(policy, auth);
+        (bool accepted, bytes32 evidence) =
+            artists.isPolicyConsented(1, CONTINUITY_PHASE, policyHash);
+        require(accepted && evidence != 0, "actual signed successor policy receipt");
+        vm.expectRevert();
+        artists.recordPolicyConsent(policy, auth);
+    }
+
+    function _configureSuccessorWithFreshConsent() private {
+        require(
+            artists.mintManager() == address(manager)
+                && nextLedger.isCompletedMintDescendant(
+                    address(ledger), address(manager), address(successor)
+                ),
+            "original Artist anchor and completed actual lineage"
+        );
+        _raiseSuccessorArtistBudget(300_000);
+        _raiseSuccessorArtistBudget(600_000);
+        (
+            IStreamMintManager.MintPhaseConfig memory config,
+            IStreamMintManager.MintGateConfig memory gateConfig,
+            bytes32[] memory ids,
+            IStreamMintManager.MintCounterConfig[] memory configs
+        ) = _phaseTerms();
+        bytes32 originalPolicy = manager.phasePolicyHash(1, CONTINUITY_PHASE);
+        (bool originalAccepted, bytes32 originalEvidence) =
+            artists.isPolicyConsented(1, CONTINUITY_PHASE, originalPolicy);
+        require(originalAccepted && originalEvidence != 0, "predecessor policy remains consented");
+        address[] memory enabled = new address[](0);
+        bytes32 newPolicy = successor.previewPhasePolicyHash(
+            1, CONTINUITY_PHASE, config, gateConfig, ids, configs, enabled
+        );
+        (bool alreadyAccepted,) = artists.isPolicyConsented(1, CONTINUITY_PHASE, newPolicy);
+        require(
+            !alreadyAccepted && newPolicy != originalPolicy, "lineage does not copy policy consent"
+        );
+        bytes memory data = abi.encodeCall(
+            successor.configurePhase, (1, CONTINUITY_PHASE, config, gateConfig, ids, configs)
+        );
+        GovernanceActionRequest memory request = _governanceRequest(
+            1,
+            address(successor),
+            data,
+            keccak256(abi.encode(address(successor), data)),
+            0,
+            keccak256(data)
+        );
+        bytes32 action = _scheduleAsGovernor(request);
+        vm.warp(request.notBefore);
+        vm.expectRevert();
+        this.executeCurrentGovernorCall(
+            address(executor), abi.encodeCall(executor.executeGovernanceAction, (action, data))
+        );
+        require(
+            !successor.hasRegisteredPhasePolicy(1)
+                && successor.phasePolicyHash(1, CONTINUITY_PHASE) == 0
+                && nextLedger.registeredPhasePolicyHash(address(successor), 1, CONTINUITY_PHASE)
+                    == 0,
+            "missing fresh consent rolls back phase and Ledger registration"
+        );
+        _recordSuccessorConsent(newPolicy);
+        _executeAsGovernor(action, data);
+        enabled = new address[](1);
+        enabled[0] = address(continuitySafe);
+        bytes32 executablePolicy = successor.previewPhasePolicyHash(
+            1, CONTINUITY_PHASE, config, gateConfig, ids, configs, enabled
+        );
+        require(
+            executablePolicy != newPolicy && executablePolicy != originalPolicy,
+            "executor admission requires its own exact policy"
+        );
+        _recordSuccessorConsent(executablePolicy);
+        _ordinary(
+            address(successor),
+            abi.encodeCall(
+                successor.setPhaseExecutor, (1, CONTINUITY_PHASE, address(continuitySafe), true)
+            )
+        );
+        (bool stillAccepted, bytes32 stillEvidence) =
+            artists.isPolicyConsented(1, CONTINUITY_PHASE, originalPolicy);
+        require(
+            stillAccepted && stillEvidence == originalEvidence
+                && successor.phasePolicyHash(1, CONTINUITY_PHASE) == executablePolicy,
+            "original receipt retained alongside fresh successor policy"
+        );
+        _assertImported();
+    }
+
+    function _signedSuccessorCall(IStreamMintManager.MintBatch memory batch, bytes memory gateData)
+        private
+        returns (bytes memory)
+    {
+        bytes memory data = abi.encodeCall(successor.executeSingleStepMint, (batch, gateData));
+        bytes32 digest = continuitySafe.getTransactionHash(
+            address(successor), 0, data, 0, 0, 0, 0, address(0), address(0), continuitySafe.nonce()
+        );
+        return abi.encodeCall(
+            continuitySafe.execTransaction,
+            (
+                address(successor),
+                0,
+                data,
+                uint8(0),
+                0,
+                0,
+                0,
+                address(0),
+                payable(address(0)),
+                safeThresholdSignature(signingKeys, digest)
+            )
+        );
+    }
+
+    function _assertSuccessorFailure(
+        IStreamMintManager.MintBatch memory batch,
+        bytes32 baseline,
+        uint256 safeNonce,
+        bytes32 unspentClaim
+    ) private view {
+        require(
+            _baseline() == baseline && continuitySafe.nonce() == safeNonce,
+            "failed signed Safe call leaves all mint and envelope state unchanged"
+        );
+        require(
+            !nextLedger.isManagerAuthorizationUsed(address(successor), batch.authorizationId),
+            "failed successor authorization not consumed"
+        );
+        if (unspentClaim != 0) {
+            require(
+                !nextLedger.isManagerNullifierUsed(
+                    address(successor), gate.claimNullifier(unspentClaim)
+                ),
+                "new claim remains available"
+            );
+        }
+    }
+
+    function _exerciseSuccessorMint(bool newLedger) private {
+        _exerciseCutover(newLedger);
+        _configureSuccessorWithFreshConsent();
+        (IStreamMintManager.MintBatch memory spent, bytes memory spentData) =
+            _mintRequest(successor, CLAIM, keccak256("new authorization for spent entitlement"));
+        require(
+            spent.authorizationId != originalAuthorization
+                && !nextLedger.isManagerAuthorizationUsed(address(successor), spent.authorizationId)
+                && nextLedger.isManagerNullifierUsed(
+                    address(successor), gate.claimNullifier(CLAIM)
+                ),
+            "fresh successor authorization with actually imported spent nullifier"
+        );
+        bytes32 before_ = _baseline();
+        uint256 safeNonce = continuitySafe.nonce();
+        (bool ok,) = address(continuitySafe).call(_signedSuccessorCall(spent, spentData));
+        require(!ok, "imported lifetime entitlement cannot be spent again");
+        _assertSuccessorFailure(spent, before_, safeNonce, 0);
+        _assertImported();
+
+        CurrentContinuityReceiver recipient = new CurrentContinuityReceiver();
+        bytes32 freshClaim = keccak256("remaining lifetime entitlement");
+        bytes32 freshNonce = keccak256("fresh successor authorization");
+        (IStreamMintManager.MintBatch memory fresh, bytes memory freshData) =
+            _mintRequest(successor, freshClaim, freshNonce);
+        // Counter subject remains the original beneficiary while initial delivery may fail.
+        fresh.initialRecipients[0] = address(recipient);
+        fresh.authorizationId = gate.authorization(
+            address(successor), address(continuitySafe), fresh, freshClaim, freshNonce
+        );
+        bytes memory savedCall = _signedSuccessorCall(fresh, freshData);
+        (ok,) = address(continuitySafe).call(savedCall);
+        require(!ok, "receiver rejection rolls back successor mint and prior accounting");
+        _assertSuccessorFailure(fresh, before_, safeNonce, freshClaim);
+        _assertImported();
+        recipient.accept();
+        (ok,) = address(continuitySafe).call(savedCall);
+        require(
+            ok && continuitySafe.nonce() == safeNonce + 1,
+            "byte-identical signed Safe retry succeeds"
+        );
+        require(
+            core.lastAllocatedTokenId() == 3 && core.collectionMintedEver(1) == 3
+                && core.totalSupply() == 3 && core.ownerOf(1) == BUYER && core.ownerOf(2) == BUYER
+                && core.ownerOf(3) == address(recipient),
+            "actual successor mint preserves lifetime IDs and prior owners"
+        );
+        (bool exists, uint256 collection, uint256 serial, bool burned) =
+            core.tokenCollectionIdentity(3);
+        require(
+            exists && collection == 1 && serial == 3 && !burned,
+            "original Core allocates next collection serial"
+        );
+        require(
+            manager.nextOperationNonce() == 2 && successor.nextOperationNonce() == 1
+                && nextLedger.isManagerAuthorizationUsed(address(successor), fresh.authorizationId)
+                && nextLedger.isManagerNullifierUsed(
+                    address(successor), gate.claimNullifier(freshClaim)
+                ) && wallet.balance == 0.01 ether,
+            "new Manager domain, retained proceeds and real replay consumption"
+        );
+        for (uint256 i; i < leaves.length; ++i) {
+            require(
+                _value(ledger, manager, leaves[i]) == 1, "retired predecessor counters never change"
+            );
+            require(
+                _value(nextLedger, successor, leaves[i]) == (i == 0 ? 1 : 2),
+                "imported global and collection floors increment without reset"
+            );
+        }
+
+        bytes32 excessClaim = keccak256("claim beyond remaining imported cap");
+        (IStreamMintManager.MintBatch memory excess, bytes memory excessData) =
+            _mintRequest(successor, excessClaim, keccak256("over-cap authorization"));
+        before_ = _baseline();
+        safeNonce = continuitySafe.nonce();
+        (ok,) = address(continuitySafe).call(_signedSuccessorCall(excess, excessData));
+        require(!ok, "imported two-token cap is exhausted after exactly one successor mint");
+        _assertSuccessorFailure(excess, before_, safeNonce, excessClaim);
+        for (uint256 i; i < leaves.length; ++i) {
+            require(
+                _value(ledger, manager, leaves[i]) == 1
+                    && _value(nextLedger, successor, leaves[i]) == (i == 0 ? 1 : 2),
+                "rejected excess leaves predecessor and successor floors unchanged"
+            );
+        }
+    }
+
+    function testSameLedgerActualArtistConsentSuccessorMintReplayAndSafeRetry() public {
+        _exerciseSuccessorMint(false);
+    }
+
+    function testNewLedgerActualArtistConsentSuccessorMintReplayAndSafeRetry() public {
+        _exerciseSuccessorMint(true);
     }
 }

@@ -13,7 +13,9 @@ the release policy in `docs/release-policy.md`.
   geography drafts; actual current-record joins remain explicit acceptance work.
 
 - Add actual Safe-governed mint succession import, pointer rollback and
-  accounting preservation cases; native execution and successor mint joins remain pending.
+  accounting preservation cases, plus original-Artist successor consent,
+  imported entitlement replay, remaining caps and exact Safe retry coverage;
+  native execution remains pending.
 
 - Add official Safe all-CALL batch tests for paid mint, entropy, custody,
   replay and cross-component rollback; native execution remains pending.

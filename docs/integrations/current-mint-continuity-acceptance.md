@@ -13,7 +13,7 @@ consumes global-recipient and collection-constant counters and a raw eligibility
 nullifier through the actual Manager and Ledger. No storage mutation, writer
 impersonation or substituted Artist supplies the recorded state.
 
-The six cases cover:
+The eight cases cover:
 
 - Same-Ledger and new-Ledger succession with the original paid NFT, lifetime
   supply, token IDs, operation receipts, wallet proceeds and counter floors
@@ -33,6 +33,17 @@ The six cases cover:
 - A corrupted third counter proof rolls back the earlier valid leaves and
   progress. A newly authorized corrected batch imports those same leaves and
   completes normally.
+- Same-Ledger and new-Ledger successors configure their first phase only after
+  completed import and governed activation. Missing fresh Artist consent rolls
+  back registration; a new signature under the original Artist/Manager domain
+  permits the identical governance action. Executor admission requires a second
+  exact policy receipt, and replaying either signed consent fails.
+- A fresh successor authorization cannot spend the imported raw entitlement
+  again. A different entitlement reaches a rejecting ERC-721 receiver and
+  rolls back counters, replay state, operation nonce and Safe nonce. Accepting
+  delivery permits the byte-identical signed Safe transaction to mint the next
+  lifetime token and serial. It consumes the one remaining global/collection
+  allowance; another fresh claim exceeds the imported cap and leaves it intact.
 
 The test reconstructs normalized counter subjects, value keys, double-hashed
 import leaves and the manifest descriptor independently. The retired onchain
@@ -53,12 +64,13 @@ Manager and Ledger inventory pointers change in one governed batch. Mint
 authority reads the selected Manager's immutable Ledger; the test does not
 invent a separate consumer of Core's Ledger inventory pointer.
 
-Successful post-replacement mint execution and replay of an imported entitlement
-remain pending the separately owned Artist/Manager compatibility join. The
-original Artist suite and original adapters are bound to their original
-Manager. Any admitted successor needs newly computed policy consent under the
-original Artist authorization domain; no previous policy hash or adapter is
-silently transferred.
+The original Artist suite and original adapters remain bound to their original
+Manager. The successor cases use the completed exact-pair lineage admission and
+newly computed policy consent under the original Artist authorization domain.
+They independently reconstruct that domain and retain the original policy
+receipt. No previous policy hash or adapter is silently transferred. Actual
+post-replacement mint execution and imported-entitlement rejection are authored
+assertions here; their native runtime acceptance remains pending the frozen run.
 
 ## Later frozen run
 
