@@ -18,13 +18,13 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 16 September parallel implementation batch
 
-Source through `8ba023dc` includes free-burn reveal credits, original Artist
+Source through `fdb00c77` includes free-burn reveal credits, original Artist
 withdrawal61, the native-price adapter size repair, distribution/burn/price
-clients, museum authority reconciliation and expanded actual-current test hosts.
+clients including saved refund-window purchase verification, museum authority reconciliation and expanded actual-current test hosts.
 The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
 records exact handoffs and evidence, superseding older queue descriptions.
 
-All 1,973 Solidity sources pass ABI/type/storage checking. Root passes all 327
+All 1,973 Solidity sources pass ABI/type/storage checking. Root passes all 347
 client tests with generation/build/types and 131 museum authority/profile tests.
 Separate native cohorts pass mint101, Royalty11, Core29, entropy10, final burn49
 and later burn-credit31 distinct cases. These captures have different sources
