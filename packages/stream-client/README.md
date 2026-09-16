@@ -350,3 +350,5 @@ contract profiles and outstanding larger-script work.
   reviewed inventory manifests and prepare bounded definition, ancestry and state imports.
 - [Mint gate inputs](docs/current-mint-gates.md) produce ticket signing packets,
   delegated vault requests and canonical static allowlist proofs and commitments.
+- [Operator distributions](docs/current-distribution.md) preserve ordered artwork
+  manifests, prepare committed slices and recover retained beneficiary NFTs.

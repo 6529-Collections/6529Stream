@@ -31,6 +31,9 @@ the release policy in `docs/release-policy.md`.
 - Add reproducible selected-host current-graph acceptance captures with native
   compiler provenance, complete suite inventories and production size checks.
 
+- Add ordered operator-distribution manifests, bounded slice callers and retained
+  NFT claim recovery for direct and failure-isolated delivery.
+
 - Add current ticket, delegated vault and static allowlist mint-gate input producers
   with exact signing and replay commitments and bounded proof encodings.
 
