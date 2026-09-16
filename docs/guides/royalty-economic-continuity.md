@@ -78,8 +78,9 @@ authority checks.
    must verify the same root, exact old source, saved manifest and
    `supportsEconomicContinuity(old,root,manifest)` before replacing the pointer.
 
-The first five steps do not themselves change Core. The Core guard is an
-integrator-owned dependency of the complete workflow. Deployment/copying alone
+The first five steps do not themselves change Core. The Core guard now rejects incomplete or mismatched replacements through
+its existing linked read worker; the complete actual import-and-cutover workflow
+still needs runtime acceptance. Deployment/copying alone
 does not constitute a completed or approved cutover.
 
 The manifest is `abi.encode` of the
@@ -127,3 +128,18 @@ recorded measurements: Import 13,815; State 5,450; AssignmentHash 2,334; Snapsho
 11,504 runtime bytes. The host has 295 bytes of runtime headroom; combined
 build sizing and cold read gas remain acceptance work. This is source/type/selected-size evidence, not deployment, runtime
 acceptance or a general protocol audit.
+
+### Core replacement regression evidence
+
+`StreamCoreRoyaltyContinuityAdmissionTest` executes seven actual-Core cases:
+partial import even with an empty old root; root/source/manifest/proof mismatches;
+reverted, short, oversized and noncanonical responses; source runtime drift;
+protected source changes; and a foreign Core or dirty address word. Failed
+updates retain pointer/revision and the same saved class-3 action retries after
+the boundary is repaired. The two existing Artist-history pointer cases and
+twelve permanent-target cases also pass in the same 21-case capture.
+
+Royalty producers, module admission and governance in this focused capture are
+typed boundaries. It does not establish a completed actual Resolver import or
+full current-governance cutover. First installation and same-address catalog
+refresh keep their original behavior. Marketplace royalty reads are unchanged.
