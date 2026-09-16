@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import "../helpers/CurrentDynamicRoyaltyCommerceFixture.sol";
+import "../helpers/CurrentRoyaltySuccessorMintFixture.sol";
 import "../../script/current/StreamGovernanceCatalogStagePlan.sol";
 import {
     StreamRoyaltyContinuityTypes as RC
@@ -8,7 +8,7 @@ import {
 
 /// @notice Actual Artist/Safe op15, paid current-Core snapshot and delayed governed Resolver cutover.
 /// @dev Source-authored integration; runtime/size acceptance is separate. No new mint authority is inferred from copied receipts.
-contract StreamCurrentRoyaltyEconomicContinuityTest is CurrentDynamicRoyaltyCommerceFixture {
+contract StreamCurrentRoyaltyEconomicContinuityTest is CurrentRoyaltySuccessorMintFixture {
     StreamRoyaltyResolver private nextRoyalty;
     bytes32 private constant POINTER = keccak256("ROYALTY_RESOLVER");
 
@@ -103,9 +103,8 @@ contract StreamCurrentRoyaltyEconomicContinuityTest is CurrentDynamicRoyaltyComm
         GovernanceCall[] memory calls = new GovernanceCall[](1);
         bytes[] memory data = new bytes[](1);
         data[0] = abi.encodeCall(nextRoyalty.beginEconomicContinuity, (address(royalties), r));
-        calls[0] = StreamCurrentStackPlan.call(
-            address(nextRoyalty), data[0], scope, before_, after_
-        );
+        calls[0] =
+            StreamCurrentStackPlan.call(address(nextRoyalty), data[0], scope, before_, after_);
         _run(1, calls, data);
         _joinedSafe(
             joinedCollector,
@@ -275,5 +274,356 @@ contract StreamCurrentRoyaltyEconomicContinuityTest is CurrentDynamicRoyaltyComm
             manager.nextOperationNonce() == 1 && core.lastAllocatedTokenId() == old.tokenId,
             "copying a receipt never repeats original mint or consumes another operation"
         );
+    }
+
+    // The following cases are authored for the explicitly proposed current royalty consumer.
+    // Their expected success is intentionally not replaced by a mock or a missing-feature skip.
+    function _admitExtraPolicy(address target, bytes4 selector) private {
+        GovernanceActionPolicyEntry[] memory rows = new GovernanceActionPolicyEntry[](1);
+        rows[0] = GovernanceActionPolicyEntry(
+            1,
+            target,
+            selector,
+            target.codehash,
+            keccak256(abi.encode(DEPLOYMENT_HASH, target)),
+            1,
+            0,
+            0,
+            0
+        );
+        StreamGovernanceCatalogStagePlan.Inventory memory saved =
+            StreamGovernanceCatalogStagePlan.inventory(executor, rows);
+        (address payload, StreamSystemManifestUpdate memory update) =
+            _discovery("successor exact operating selector");
+        (GenesisBatch memory batch, uint256 count) = StreamGovernanceCatalogStagePlan.nextBatch(
+            saved,
+            StreamGovernanceCatalogStagePlan.inventoryHash(saved),
+            0,
+            manifest,
+            payload,
+            update
+        );
+        require(count == 1, "one exact new operating policy");
+        _run(3, batch.calls, batch.callDatas);
+    }
+
+    function _cutoverSnapshot(uint8 sourceKind)
+        private
+        returns (IStreamRoyaltySnapshot.Snapshot memory old, bytes32 manifestHash)
+    {
+        old = _mintOriginal(sourceKind);
+        _deployNext();
+        manifestHash = _copy();
+        _install();
+        _admitExtraPolicy(address(nextRoyalty), nextRoyalty.configureDefaultRoyalty.selector);
+        _admitExtraPolicy(address(nextRoyalty), nextRoyalty.configureCollectionRoyalty.selector);
+        this.joinedGovern(
+            address(nextRoyalty),
+            abi.encodeCall(
+                nextRoyalty.configureDefaultRoyalty,
+                (sourceKind == 2 ? bytes32(0) : profile, sourceKind == 2 ? uint16(0) : uint16(600))
+            )
+        );
+    }
+
+    function _approveSuccessorSnapshot(uint8 sourceKind) private returns (bytes32 record) {
+        if (sourceKind == 1) {
+            _successorProspectiveZero(nextRoyalty);
+            record = _joinedConsentEvidence(
+                _successorPayload(nextRoyalty.currentArtistSnapshotRoyaltyAssignment(1))
+            );
+        } else {
+            record = _successorApprove(nextRoyalty.currentArtistSnapshotRoyaltyAssignment(1));
+        }
+    }
+
+    function _assertUnchangedSnapshot(
+        StreamRoyaltyResolver target,
+        IStreamRoyaltySnapshot.Snapshot memory old
+    ) private view {
+        require(
+            keccak256(abi.encode(target.royaltySnapshot(old.tokenId)))
+                == keccak256(abi.encode(old)),
+            "every old prepared field remains byte-exact after later mint"
+        );
+    }
+
+    function testActualSuccessorPositiveSnapshotFreshConsentNewPhaseAndMint() public {
+        (IStreamRoyaltySnapshot.Snapshot memory old, bytes32 manifestHash) = _cutoverSnapshot(0);
+        T.AssignmentFact memory fact = nextRoyalty.currentArtistSnapshotRoyaltyAssignment(1);
+        T.EconomicsConsent memory original =
+            T.EconomicsConsent(1, address(royalties), ROYALTY_CLASS, 1, 1, old.modeAssignmentHash);
+        bytes32 oldConsent = _joinedConsentEvidence(original);
+        (bool admitted,) = address(nextRoyalty)
+            .staticcall(abi.encodeCall(nextRoyalty.currentRoyaltySnapshotSource, (uint256(1))));
+        require(!admitted && oldConsent != 0, "real old op15 cannot authorize candidate source");
+        bytes32 newConsent = _approveSuccessorSnapshot(0);
+        require(
+            newConsent != oldConsent && fact.resolver == address(nextRoyalty),
+            "new original-domain op15 names current consumer"
+        );
+        Consumer.Receipt memory receipt =
+            _assertConsumer(nextRoyalty, address(royalties), address(royalties), manifestHash);
+        (IStreamRoyaltySnapshot.Snapshot memory current, uint256 token) =
+            _successorMint(nextRoyalty, keccak256("successor positive phase"), true);
+        require(
+            token == 2 && current.electionHash == old.electionHash
+                && current.modeAssignmentHash != old.modeAssignmentHash,
+            "retained election with fresh candidate source"
+        );
+        _assertUnchangedSnapshot(nextRoyalty, old);
+        require(
+            keccak256(abi.encode(Consumer(address(nextRoyalty)).royaltyConsumerContinuity()))
+                == keccak256(abi.encode(receipt)),
+            "later snapshots do not mutate completed lineage"
+        );
+        nextRoyalty.currentRoyaltySnapshotSource(1);
+        artists.requireMintConsent(
+            1,
+            keccak256("successor positive phase"),
+            manager.phasePolicyHash(1, keccak256("successor positive phase"))
+        );
+        (address receiver, uint256 due) = core.royaltyInfo(token, RESALE_PRICE);
+        require(
+            receiver == wallet && due == RESALE_PRICE * 600 / 10000, "new token actual Core quote"
+        );
+        bytes32 saleId = this.joinedConfigureResale(old.tokenId);
+        _joinedCustody(saleId, old.tokenId);
+        _joinedResale(saleId, old);
+    }
+
+    function testActualSuccessorCollectionConfiguredZeroSnapshotAfterPositiveDefault() public {
+        (IStreamRoyaltySnapshot.Snapshot memory old, bytes32 manifestHash) = _cutoverSnapshot(1);
+        _approveSuccessorSnapshot(1);
+        _assertConsumer(nextRoyalty, address(royalties), address(royalties), manifestHash);
+        (IStreamRoyaltySnapshot.Snapshot memory current, uint256 token) =
+            _successorMint(nextRoyalty, keccak256("successor collection zero phase"), true);
+        require(
+            token == 2 && nextRoyalty.defaultRoyalty().royaltyBps == 600
+                && nextRoyalty.collectionRoyalty(1).configured
+                && nextRoyalty.tokenRoyalty(token).configured
+                && nextRoyalty.tokenRoyalty(token).frozen
+                && nextRoyalty.tokenRoyalty(token).royaltyBps == 0
+                && current.tokenRoyaltyPolicyHash != 0,
+            "explicit zero is an actual captured policy, not absence"
+        );
+        (address receiver, uint256 due) = core.royaltyInfo(token, RESALE_PRICE);
+        require(
+            receiver == address(0) && due == 0,
+            "zero collection snapshot suppresses positive default"
+        );
+        (address assignmentOrigin, address electionOrigin) =
+            Consumer(address(nextRoyalty)).royaltyHashOrigins(2, token, 1);
+        require(
+            assignmentOrigin == address(nextRoyalty) && electionOrigin == address(royalties),
+            "new token and original election domains distinct"
+        );
+        _assertUnchangedSnapshot(nextRoyalty, old);
+    }
+
+    function testActualSuccessorZeroDefaultSnapshotDoesNotInventCollectionOverride() public {
+        (IStreamRoyaltySnapshot.Snapshot memory old,) = _cutoverSnapshot(2);
+        _approveSuccessorSnapshot(2);
+        (IStreamRoyaltySnapshot.Snapshot memory current, uint256 token) =
+            _successorMint(nextRoyalty, keccak256("successor default zero phase"), true);
+        require(
+            token == 2 && !nextRoyalty.collectionRoyalty(1).configured
+                && nextRoyalty.defaultRoyalty().configured && current.exists
+                && current.tokenAssignmentHash != 0,
+            "selected configured-zero default remains distinct from missing collection"
+        );
+        (address receiver, uint256 due) = core.royaltyInfo(token, RESALE_PRICE);
+        require(receiver == address(0) && due == 0, "actual configured-zero default snapshot");
+        _assertUnchangedSnapshot(nextRoyalty, old);
+    }
+
+    function _liveCutover(bool zero) private {
+        bytes32 templateId = this.joinedCreateTemplate();
+        this.joinedApproveTemplate(templateId);
+        this.joinedInstallTemplate(templateId);
+        if (zero) {
+            this.joinedGovern(
+                address(royalties),
+                abi.encodeCall(royalties.configureDefaultRoyalty, (bytes32(0), uint16(0)))
+            );
+        }
+        _admitExtraPolicy(address(royalties), royalties.freezeDefaultRoyalty.selector);
+        this.joinedGovern(address(royalties), abi.encodeCall(royalties.freezeDefaultRoyalty, ()));
+        T.AssignmentFact memory oldFact = royalties.currentArtistRoyaltyAssignment(1);
+        bytes32 oldConsent = _successorApprove(oldFact);
+        (, uint256 first) = _successorMint(royalties, keccak256("original live phase"), false);
+        require(
+            first == 1 && royalties.defaultRoyalty().frozen,
+            "real first live mint under protected terms"
+        );
+        _deployNext();
+        bytes32 manifestHash = _copy();
+        _install();
+        T.AssignmentFact memory current = nextRoyalty.currentArtistRoyaltyAssignment(1);
+        require(
+            current.assignmentHash == oldFact.assignmentHash
+                && current.resolver != oldFact.resolver,
+            "copy preserves protected hash but does not rename consumer"
+        );
+        (bool oldAccepted,) = address(artists)
+            .staticcall(
+                abi.encodeCall(
+                    artists.requireMintConsent,
+                    (
+                        uint256(1),
+                        keccak256("original live phase"),
+                        manager.phasePolicyHash(1, keccak256("original live phase"))
+                    )
+                )
+            );
+        require(!oldAccepted, "old live economics receipt does not authorize replacement");
+        bytes32 fresh = _successorApprove(current);
+        require(fresh != oldConsent, "candidate-specific live consent despite identical assignment");
+        _assertConsumer(nextRoyalty, address(royalties), address(royalties), manifestHash);
+        (, uint256 second) = _successorMint(nextRoyalty, keccak256("successor live phase"), false);
+        require(
+            second == 2 && !nextRoyalty.royaltySnapshot(first).exists
+                && !nextRoyalty.royaltySnapshot(second).exists,
+            "neither real live mint has a fabricated snapshot"
+        );
+        require(
+            keccak256(abi.encode(nextRoyalty.defaultRoyalty()))
+                == keccak256(abi.encode(royalties.defaultRoyalty())),
+            "complete protected live terms retained"
+        );
+        (address receiver, uint256 due) = core.royaltyInfo(second, RESALE_PRICE);
+        require(
+            receiver == (zero ? address(0) : wallet)
+                && due == (zero ? 0 : uint256(RESALE_PRICE) * 600 / 10000),
+            "actual current live quote after second paid mint"
+        );
+    }
+
+    function testActualSuccessorFrozenPositiveDefaultLiveNewMint() public {
+        _liveCutover(false);
+    }
+
+    function testActualSuccessorFrozenZeroDefaultLiveNewMint() public {
+        _liveCutover(true);
+    }
+
+    function testActualSuccessorPaidSafeFailureThenByteIdenticalRetry() public {
+        (IStreamRoyaltySnapshot.Snapshot memory old,) = _cutoverSnapshot(0);
+        _approveSuccessorSnapshot(0);
+        bytes32 phaseId = keccak256("successor saved Safe phase");
+        IStreamRoyaltySnapshot.Source memory source = _successorPhase(nextRoyalty, phaseId, true);
+        bytes32 id = _successorAuction(phaseId);
+        _joinedBid(id);
+        (uint64 end,,,) = joinedHouse.auctionDeadlines(id);
+        vm.warp(end);
+        this.joinedGovern(
+            address(nextRoyalty),
+            abi.encodeCall(nextRoyalty.configureDefaultRoyalty, (profile, uint16(500)))
+        );
+        bytes memory callData = abi.encodeCall(joinedHouse.settle, (id));
+        SuccessorCallCounts(address(vm)).expectCall(address(joinedHouse), 0, callData, 2);
+        (bytes memory signed, uint256 nonce) =
+            _savedSuccessorSafe(joinedCollector, address(joinedHouse), callData);
+        uint256 balance = address(joinedCollector).balance;
+        bytes32 header = keccak256(abi.encode(nextRoyalty.continuityHeader()));
+        (bool ok, bytes memory failed) = address(joinedCollector).call(signed);
+        require(
+            !ok && keccak256(failed) == keccak256(abi.encodeWithSignature("Error(string)", "GS013"))
+                && joinedCollector.nonce() == nonce && address(joinedCollector).balance == balance
+                && core.lastAllocatedTokenId() == 1 && core.pendingPreparedMintTokenId() == 0
+                && manager.nextOperationNonce() == 1 && !nextRoyalty.royaltySnapshot(2).exists
+                && joinedHouse.totalBuyerLiabilities() == JOINED_PRICE + 100
+                && joinedRecorder.totalOfficialSettled(address(0)) == JOINED_PRICE
+                && keccak256(abi.encode(nextRoyalty.continuityHeader())) == header,
+            "failed saved transaction rolls back Safe, allocation, snapshot, ledger and payments"
+        );
+        this.joinedGovern(
+            address(nextRoyalty),
+            abi.encodeCall(nextRoyalty.configureDefaultRoyalty, (profile, uint16(600)))
+        );
+        require(
+            nextRoyalty.currentRoyaltySnapshotSource(1).modeAssignmentHash
+                == source.modeAssignmentHash,
+            "restore the exact previously approved candidate preimage"
+        );
+        vm.recordLogs();
+        (ok,) = address(joinedCollector).call(signed);
+        require(
+            ok && joinedCollector.nonce() == nonce + 1, "identical signatures and CALL retry once"
+        );
+        _joinedReceipt(id, vm.getRecordedLogs());
+        _assertSuccessorMint(nextRoyalty, id, source, true);
+        _assertUnchangedSnapshot(nextRoyalty, old);
+        (ok,) = address(joinedCollector).call(signed);
+        require(
+            !ok && joinedCollector.nonce() == nonce + 1 && manager.nextOperationNonce() == 2,
+            "saved Safe replay cannot mint a third token"
+        );
+    }
+
+    function testActualSuccessorRejectsSignatureForOriginalResolverWithoutConsumingNonce() public {
+        _cutoverSnapshot(0);
+        T.EconomicsConsent memory p =
+            _successorPayload(nextRoyalty.currentArtistSnapshotRoyaltyAssignment(1));
+        T.Authorization memory a = _successorAuthorization();
+        T.EconomicsConsent memory wrong = T.EconomicsConsent(
+            p.collectionId, address(royalties), p.revenueClass, p.scope, p.scopeId, p.assignmentHash
+        );
+        a.signature = _joinedProof(joinedArtist, _successorDigest(wrong, a));
+        uint256 safeNonce = joinedArtist.nonce();
+        (bytes memory signed,) = _savedSuccessorSafe(
+            joinedArtist, address(artists), abi.encodeCall(artists.recordEconomicsConsent, (p, a))
+        );
+        (bool ok, bytes memory failed) = address(joinedArtist).call(signed);
+        require(
+            !ok && keccak256(failed) == keccak256(abi.encodeWithSignature("Error(string)", "GS013"))
+                && joinedArtist.nonce() == safeNonce && _successorAuthorization().nonce == a.nonce,
+            "wrong original-resolver signature is not candidate authority"
+        );
+        _successorApprove(nextRoyalty.currentArtistSnapshotRoyaltyAssignment(1));
+        _successorMint(nextRoyalty, keccak256("correct original domain successor phase"), true);
+    }
+
+    function testActualSuccessorMultiHopRetainsBothSnapshotsAndOriginalElectionOrigin() public {
+        (IStreamRoyaltySnapshot.Snapshot memory first,) = _cutoverSnapshot(0);
+        StreamRoyaltyResolver origin = royalties;
+        StreamRoyaltyResolver middle = nextRoyalty;
+        _approveSuccessorSnapshot(0);
+        (IStreamRoyaltySnapshot.Snapshot memory second,) =
+            _successorMint(middle, keccak256("middle successor phase"), true);
+        // Fixture references select the next source; no contract pointer or suite is forged here.
+        royalties = middle;
+        _deployNext();
+        bytes32 manifestHash = _copy();
+        _install();
+        _admitExtraPolicy(address(nextRoyalty), nextRoyalty.configureDefaultRoyalty.selector);
+        this.joinedGovern(
+            address(nextRoyalty),
+            abi.encodeCall(nextRoyalty.configureDefaultRoyalty, (profile, uint16(600)))
+        );
+        (bool oldAccepted,) = address(nextRoyalty)
+            .staticcall(abi.encodeCall(nextRoyalty.currentRoyaltySnapshotSource, (uint256(1))));
+        require(!oldAccepted, "middle consent never aliases final consumer");
+        _approveSuccessorSnapshot(0);
+        _assertConsumer(nextRoyalty, address(origin), address(middle), manifestHash);
+        (IStreamRoyaltySnapshot.Snapshot memory third, uint256 token) =
+            _successorMint(nextRoyalty, keccak256("final successor phase"), true);
+        require(
+            token == 3 && third.electionHash == first.electionHash
+                && third.electionHash == second.electionHash,
+            "three actual mints preserve original election provenance"
+        );
+        _assertUnchangedSnapshot(nextRoyalty, first);
+        _assertUnchangedSnapshot(nextRoyalty, second);
+        (address firstOrigin, address election) =
+            Consumer(address(nextRoyalty)).royaltyHashOrigins(2, 1, 1);
+        (address secondOrigin,) = Consumer(address(nextRoyalty)).royaltyHashOrigins(2, 2, 1);
+        (address thirdOrigin,) = Consumer(address(nextRoyalty)).royaltyHashOrigins(2, 3, 1);
+        require(
+            firstOrigin == address(origin) && secondOrigin == address(middle)
+                && thirdOrigin == address(nextRoyalty) && election == address(origin),
+            "exact per-token hash origins across hops"
+        );
+        nextRoyalty.currentRoyaltySnapshotSource(1);
     }
 }
