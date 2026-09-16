@@ -626,4 +626,144 @@ contract StreamCurrentRoyaltyEconomicContinuityTest is CurrentRoyaltySuccessorMi
         );
         nextRoyalty.currentRoyaltySnapshotSource(1);
     }
+
+    function _requireConsumerRefusal(address failedTarget) private view {
+        (bool ok, bytes memory reason) = address(artistCoordinator.reads())
+            .staticcall(abi.encodeWithSignature("currentAssignments(uint256)", uint256(1)));
+        require(
+            !ok
+                && keccak256(reason)
+                    == keccak256(abi.encodeWithSelector(T.ComponentChanged.selector, failedTarget)),
+            "consumer failure is terminal, with the actual failed component"
+        );
+    }
+
+    function _healthyConsumerAgain(IStreamRoyaltySnapshot.Snapshot memory old) private view {
+        (T.AssignmentFact memory primary, T.AssignmentFact memory royalty) =
+            artistCoordinator.reads().currentAssignments(1);
+        require(
+            primary.resolver == address(primaryResolver)
+                && royalty.resolver == address(nextRoyalty),
+            "restored actual graph selects only intended consumer"
+        );
+        nextRoyalty.currentRoyaltySnapshotSource(1);
+        _assertUnchangedSnapshot(nextRoyalty, old);
+    }
+
+    function testActualSuccessorRejectsIncompleteOrForeignReceiptFieldsAndRestores() public {
+        (IStreamRoyaltySnapshot.Snapshot memory old,) = _cutoverSnapshot(0);
+        _approveSuccessorSnapshot(0);
+        bytes memory original =
+            abi.encode(Consumer(address(nextRoyalty)).royaltyConsumerContinuity());
+        bytes memory callData = abi.encodeCall(Consumer.royaltyConsumerContinuity, ());
+        for (uint256 i; i < 12; ++i) {
+            Consumer.Receipt memory bad = abi.decode(original, (Consumer.Receipt));
+            if (i == 0) bad.status = 0;
+            else if (i == 1) bad.status = 1;
+            else if (i == 2) bad.core = address(primaryResolver);
+            else if (i == 3) bad.factory = address(primaryResolver);
+            else if (i == 4) bad.origin = address(nextRoyalty);
+            else if (i == 5) bad.originRuntimeHash = keccak256("wrong original runtime");
+            else if (i == 6) bad.source = address(0);
+            else if (i == 7) bad.source = address(nextRoyalty);
+            else if (i == 8) bad.sourceRuntimeHash = keccak256("wrong immediate runtime");
+            else if (i == 9) bad.manifestHash = 0;
+            else if (i == 10) bad.beginActionId = 0;
+            else bad.importedHeaderHash = 0;
+            SuccessorFaultVm(address(vm)).mockCall(address(nextRoyalty), callData, abi.encode(bad));
+            _requireConsumerRefusal(address(nextRoyalty));
+            // Stored original-token disclosure is deliberately independent of new-mint admission.
+            (address receiver, uint256 due) = core.royaltyInfo(old.tokenId, RESALE_PRICE);
+            require(
+                receiver == wallet && due == RESALE_PRICE * 600 / 10000,
+                "receipt refusal cannot erase frozen token money"
+            );
+            SuccessorFaultVm(address(vm)).clearMockedCalls();
+            _healthyConsumerAgain(old);
+        }
+    }
+
+    function testActualSuccessorRequiresExactReceiptWidthAndCanonicalCapabilityReplies() public {
+        (IStreamRoyaltySnapshot.Snapshot memory old,) = _cutoverSnapshot(0);
+        _approveSuccessorSnapshot(0);
+        bytes memory callData = abi.encodeCall(Consumer.royaltyConsumerContinuity, ());
+        bytes memory original =
+            abi.encode(Consumer(address(nextRoyalty)).royaltyConsumerContinuity());
+        require(original.length == 320, "ten-word complete fixed receipt");
+        for (uint256 i; i < 4; ++i) {
+            bytes memory bad = i == 3
+                ? bytes.concat(original, bytes32(0))
+                : new bytes(i == 0 ? 0 : i == 1 ? 32 : 319);
+            SuccessorFaultVm(address(vm)).mockCall(address(nextRoyalty), callData, bad);
+            _requireConsumerRefusal(address(nextRoyalty));
+            SuccessorFaultVm(address(vm)).clearMockedCalls();
+        }
+        for (uint256 field; field < 3; ++field) {
+            address target = field == 2 ? address(registry) : address(nextRoyalty);
+            bytes memory query = field == 0
+                ? abi.encodeWithSignature("supportsInterface(bytes4)", type(Consumer).interfaceId)
+                : field == 1
+                    ? abi.encodeCall(nextRoyalty.economicContinuityReady, ())
+                    : abi.encodeWithSignature(
+                        "isModuleEligible(address,bytes32,bytes4)",
+                        address(nextRoyalty),
+                        keccak256("REVENUE_RESOLVER"),
+                        type(IStreamRoyaltyResolver).interfaceId
+                    );
+            for (uint256 shape; shape < 4; ++shape) {
+                bytes memory bad = shape == 0
+                    ? abi.encode(uint256(0))
+                    : shape == 1
+                        ? abi.encode(uint256(2))
+                        : shape == 2 ? bytes(hex"01") : abi.encode(uint256(1), uint256(0));
+                SuccessorFaultVm(address(vm)).mockCall(target, query, bad);
+                _requireConsumerRefusal(shape >= 2 ? target : address(nextRoyalty));
+                SuccessorFaultVm(address(vm)).clearMockedCalls();
+            }
+        }
+        _healthyConsumerAgain(old);
+        _successorMint(nextRoyalty, keccak256("restored canonical views phase"), true);
+    }
+
+    function testActualSuccessorRuntimeDriftRefusesNewConsumerButExactRestorationWorks() public {
+        (IStreamRoyaltySnapshot.Snapshot memory old,) = _cutoverSnapshot(0);
+        _approveSuccessorSnapshot(0);
+        bytes memory original = address(royalties).code;
+        vm.etch(address(royalties), hex"60006000fd");
+        _requireConsumerRefusal(address(royalties));
+        vm.etch(address(royalties), original);
+        _healthyConsumerAgain(old);
+        original = address(nextRoyalty).code;
+        vm.etch(address(nextRoyalty), hex"60006000fd");
+        _requireConsumerRefusal(address(nextRoyalty));
+        vm.etch(address(nextRoyalty), original);
+        _healthyConsumerAgain(old);
+        _successorMint(nextRoyalty, keccak256("restored exact runtime phase"), true);
+    }
+
+    function testOriginalSelectedProviderDoesNotRequireAdditiveConsumerCapability() public {
+        IStreamRoyaltySnapshot.Snapshot memory old = _mintOriginal(0);
+        SuccessorFaultVm(address(vm))
+            .mockCallRevert(
+                address(royalties),
+                abi.encodeWithSignature("supportsInterface(bytes4)", type(Consumer).interfaceId),
+                hex"aabbccdd"
+            );
+        SuccessorFaultVm(address(vm))
+            .mockCallRevert(
+                address(royalties),
+                abi.encodeCall(Consumer.royaltyConsumerContinuity, ()),
+                hex"aabbccdd"
+            );
+        (T.AssignmentFact memory primary, T.AssignmentFact memory royalty) =
+            artistCoordinator.reads().currentAssignments(1);
+        require(
+            primary.resolver == address(primaryResolver) && royalty.resolver == address(royalties),
+            "original immutable providers do not enter replacement capability branch"
+        );
+        royalties.currentRoyaltySnapshotSource(1);
+        _successorMint(royalties, keccak256("original direct second mint phase"), true);
+        _assertUnchangedSnapshot(royalties, old);
+        SuccessorFaultVm(address(vm)).clearMockedCalls();
+    }
 }

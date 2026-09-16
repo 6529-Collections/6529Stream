@@ -9,6 +9,13 @@ interface SuccessorCallCounts {
     function expectCall(address target, uint256 value, bytes calldata data, uint64 count) external;
 }
 
+/// @dev Explicit negative-only corruption of a view boundary on the otherwise actual graph.
+interface SuccessorFaultVm {
+    function mockCall(address target, bytes calldata input, bytes calldata output) external;
+    function mockCallRevert(address target, bytes calldata input, bytes calldata output) external;
+    function clearMockedCalls() external;
+}
+
 /// @dev Test-only actual graph recipes. The pending consumer implementation is not supplied here.
 abstract contract CurrentRoyaltySuccessorMintFixture is CurrentDynamicRoyaltyCommerceFixture {
     function _successorAuthorization() internal view returns (T.Authorization memory) {
