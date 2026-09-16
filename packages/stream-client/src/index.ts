@@ -20,4 +20,5 @@ export * from "./current-inventory-workflow.js";
 export * from "./current-revenue.js";
 export * from "./current-royalty-continuity.js";
 export * from "./current-mint-continuity.js";
+export * from "./current-mint-gates.js";
 export * from "./current-entropy-authority.js";
