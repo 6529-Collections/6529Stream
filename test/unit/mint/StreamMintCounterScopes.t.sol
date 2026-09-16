@@ -257,6 +257,52 @@ contract StreamMintCounterScopesTest is MintEngineTestBase {
         return b;
     }
 
+    function _assertPriceOverrideUnsupported(bool hasPriceOverride, uint256 priceOverride) private {
+        IStreamMintCounterPolicy.AllowlistProof memory p = _proof(1);
+        p.hasPriceOverride = hasPriceOverride;
+        p.priceOverride = priceOverride;
+        bytes32 root =
+            StreamMintCounterPolicy.allowlistLeaf(address(manager), 1, A, COUNTER, signer, p);
+        bytes32 hash = _definition(
+            IStreamMintCounterPolicy.CounterScope.PHASE,
+            IStreamMintManager.CounterKeyMode.RECIPIENT,
+            root
+        );
+        _phase(
+            1,
+            A,
+            hash,
+            IStreamMintManager.CounterKeyMode.RECIPIENT,
+            IStreamMintLedger.CounterCapMode.MERKLE_STATIC,
+            1
+        );
+        IStreamMintManager.MintBatch memory b = _withProof(_request(1, A, signer, 1), p, false);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamMintCounterPolicy.MintAllowlistPriceOverrideUnsupported.selector,
+                COUNTER,
+                signer,
+                hasPriceOverride,
+                priceOverride
+            )
+        );
+        manager.executeSingleStepMint(b, "");
+        require(
+            core.minted() == 0 && manager.nextOperationNonce() == 0
+                && !manager.isAuthorizationUsed(b.authorizationId)
+                && _value(1, A, IStreamMintManager.CounterKeyMode.RECIPIENT, signer) == 0,
+            "priced proof wrote state"
+        );
+    }
+
+    function testMerkleFreePriceOverrideUnsupported() public {
+        _assertPriceOverrideUnsupported(true, 0);
+    }
+
+    function testMerkleInconsistentPricePayloadUnsupported() public {
+        _assertPriceOverrideUnsupported(false, 1);
+    }
+
     function testMerkleDifferentiatedCapsAndIndependentSubjectConsumption() public {
         IStreamMintCounterPolicy.AllowlistProof memory p = _proof(1);
         IStreamMintCounterPolicy.AllowlistProof memory q = _proof(3);
@@ -348,7 +394,15 @@ contract StreamMintCounterScopesTest is MintEngineTestBase {
         b.payer = signer;
         p.priceOverride = 1;
         b = _withProof(b, p, true);
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamMintCounterPolicy.MintAllowlistPriceOverrideUnsupported.selector,
+                COUNTER,
+                signer,
+                false,
+                uint256(1)
+            )
+        );
         manager.executeSingleStepMint(b, "");
         p.priceOverride = 0;
         b = _withProof(b, p, true);

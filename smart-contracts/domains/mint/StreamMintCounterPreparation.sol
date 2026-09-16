@@ -127,6 +127,7 @@ library StreamMintCounterPreparation {
         address account = config.keyMode == IStreamMintManager.CounterKeyMode.PAYER
             ? row.payer
             : row.recipient;
+        StreamMintCounterPolicy.validateSupportedPrice(row.counterId, account, proof);
         bytes32 leaf = StreamMintCounterPolicy.allowlistLeaf(
             manager, row.collectionId, row.phaseId, row.counterId, account, proof
         );

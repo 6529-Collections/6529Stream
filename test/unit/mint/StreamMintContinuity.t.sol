@@ -580,4 +580,98 @@ contract StreamMintContinuityTest is MintEngineTestBase, OfficialSafeFixture {
         );
         gate.validateMintBatch(address(successor), address(this), b, data);
     }
+
+    /// @dev These isolate consumer admission with the existing typed Artist/Core seams.
+    /// Actual Artist signatures and Core governance activation remain the current-stack suite.
+    function _typedArtistSuccessorBoundary(bool replaceLedger) private {
+        _setupSuccession(replaceLedger, true);
+        _commit();
+        artist.setManager(address(manager));
+        core.initialize(address(registry), address(artist), address(successor));
+        IStreamMintManager.MintBatch memory b = _request(successor);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamMintArtistConsent.ArtistAuthorityUnavailable.selector, address(artist)
+            )
+        );
+        successor.executeSingleStepMint(b, "");
+        require(
+            !successor.isAuthorizationUsed(b.authorizationId)
+                && successor.nextOperationNonce() == 0,
+            "pending ancestry has no mint residue"
+        );
+        successor.importMintState(_batchImport());
+        _seal();
+        // Re-registration and mint use the same current-selection/ancestry admission.
+        _configure(successor, nextLedger);
+        b.expectedPolicyHash = successor.phasePolicyHash(1, PHASE);
+        successor.executeSingleStepMint(b, "");
+        require(
+            core.minted() == 2
+                && nextLedger.counterValue(_key(address(successor), _subject(address(nextLedger))))
+                    == 2,
+            "typed boundary retains original Artist manager and imported floor"
+        );
+        require(
+            artist.mintManager() == address(manager), "Artist historical manager remains unchanged"
+        );
+    }
+
+    function testTypedArtistConsumerAcceptsCompletedSameLedgerCurrentSuccessor() public {
+        _typedArtistSuccessorBoundary(false);
+    }
+
+    function testTypedArtistConsumerAcceptsCompletedNewLedgerCurrentSuccessor() public {
+        _typedArtistSuccessorBoundary(true);
+    }
+
+    function configureSuccessorForBoundaryTest() external {
+        require(msg.sender == address(this), "test self-call");
+        _configure(successor, nextLedger);
+    }
+
+    function testTypedArtistConsumerRejectsInactiveWrongLedgerAndUnrelatedAncestor() public {
+        _setupSuccession(true, true);
+        _commit();
+        successor.importMintState(_batchImport());
+        _seal();
+        artist.setManager(address(manager));
+        IStreamMintManager.MintBatch memory b = _request(successor);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamMintArtistConsent.ArtistAuthorityUnavailable.selector, address(artist)
+            )
+        );
+        this.configureSuccessorForBoundaryTest();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamMintArtistConsent.ArtistAuthorityUnavailable.selector, address(artist)
+            )
+        );
+        successor.executeSingleStepMint(b, "");
+        core.initialize(address(registry), address(artist), address(successor));
+        MintEngineCoreFixture(address(core)).setMintLedger(address(ledger));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamMintArtistConsent.ArtistAuthorityUnavailable.selector, address(artist)
+            )
+        );
+        successor.executeSingleStepMint(b, "");
+        MintEngineCoreFixture(address(core)).setMintLedger(address(nextLedger));
+        StreamMintManager unrelated = _manager(address(nextLedger));
+        artist.setManager(address(unrelated));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamMintArtistConsent.ArtistAuthorityUnavailable.selector, address(artist)
+            )
+        );
+        successor.executeSingleStepMint(b, "");
+        require(
+            !successor.isAuthorizationUsed(b.authorizationId) && successor.nextOperationNonce() == 0
+                && core.minted() == 1,
+            "rejected consumers have no replay or Core residue"
+        );
+        artist.setManager(address(manager));
+        successor.executeSingleStepMint(b, "");
+    }
 }

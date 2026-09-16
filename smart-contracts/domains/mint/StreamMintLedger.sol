@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/mint/IStreamMintLedger.sol";
 import "../../interfaces/stream/mint/IStreamMintLedgerRevocation.sol";
+import "../../interfaces/stream/mint/IStreamMintLedgerContinuity.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 import "./StreamMintCounterPolicy.sol";
@@ -14,6 +15,7 @@ contract StreamMintLedger is
     IStreamMintLedgerRevocation,
     IStreamMintCounterPolicy,
     IStreamMintLedgerImport,
+    IStreamMintLedgerContinuity,
     Ownable,
     ERC165
 {
@@ -54,6 +56,10 @@ contract StreamMintLedger is
     mapping(address => bytes32[]) private _managerDefinitionHashes;
     mapping(bytes32 => uint256) private _importDefinitionCount;
     mapping(bytes32 => uint256) private _importDefinitionCursor;
+    mapping(address => MintManagerIdentity[]) private _mintAncestors;
+    mapping(address => mapping(address => mapping(address => bool))) private _mintAncestorKnown;
+    mapping(bytes32 => uint256) private _importAncestorCount;
+    mapping(bytes32 => uint256) private _importAncestorCursor;
 
     function registerCounterDefinition(Definition calldata definition)
         external
@@ -127,6 +133,7 @@ contract StreamMintLedger is
             || interfaceId == type(IStreamMintLedgerRevocation).interfaceId
             || interfaceId == type(IStreamMintCounterPolicy).interfaceId
             || interfaceId == type(IStreamMintLedgerImport).interfaceId
+            || interfaceId == type(IStreamMintLedgerContinuity).interfaceId
             || super.supportsInterface(interfaceId);
     }
 
@@ -182,6 +189,7 @@ contract StreamMintLedger is
         StreamMintImport.requireManagerPair(
             predecessorLedger, predecessorManager, successorManager, owner()
         );
+        _requireMintContinuitySource(predecessorLedger);
         ImportCommitment memory c = ImportCommitment(
             predecessorLedger,
             predecessorManager,
@@ -197,6 +205,9 @@ contract StreamMintLedger is
         _successorImportRoot[successorManager] = importRoot;
         _importDefinitionCount[importRoot] =
             IStreamMintCounterPolicy(predecessorLedger).managerDefinitionCount(predecessorManager);
+        _importAncestorCount[importRoot] =
+            IStreamMintLedgerContinuity(predecessorLedger).mintAncestorCount(predecessorManager);
+        _appendMintAncestor(importRoot, successorManager, predecessorLedger, predecessorManager);
         emit MintLedgerImportRootCommitted(
             SCHEMA_VERSION,
             importRoot,
@@ -227,6 +238,92 @@ contract StreamMintLedger is
         return c.complete && c.predecessorLedger == predecessorLedger
             && c.predecessorManager == predecessorManager && c.successorManager == successorManager
             && ledgerWriter[successorManager] && ledgerWriterRetiredAt[successorManager] == 0;
+    }
+
+    function mintAncestorCount(address manager) external view override returns (uint256) {
+        return _mintAncestors[manager].length;
+    }
+
+    function mintAncestorAt(address manager, uint256 index)
+        external
+        view
+        override
+        returns (address ledger, address ancestorManager)
+    {
+        MintManagerIdentity storage identity = _mintAncestors[manager][index];
+        return (identity.ledger, identity.manager);
+    }
+
+    function mintImportAncestryProgress(bytes32 root)
+        external
+        view
+        override
+        returns (uint256 imported, uint256 required)
+    {
+        return (_importAncestorCursor[root], _importAncestorCount[root]);
+    }
+
+    function isCompletedMintDescendant(
+        address ancestorLedger,
+        address ancestorManager,
+        address successorManager
+    ) external view override returns (bool) {
+        ImportCommitment storage c = _imports[_successorImportRoot[successorManager]];
+        return c.complete && c.successorManager == successorManager
+            && ledgerWriter[successorManager] && ledgerWriterRetiredAt[successorManager] == 0
+            && _mintAncestorKnown[successorManager][ancestorLedger][ancestorManager];
+    }
+
+    function importMintAncestors(bytes32 root, uint256 maxCount) external override {
+        ImportCommitment storage c = _imports[root];
+        if (
+            c.successorManager == address(0) || c.complete
+                || ledgerWriterRetiredAt[c.successorManager] != 0 || maxCount == 0 || maxCount > 32
+        ) revert MintImportInvalid();
+        uint256 cursor = _importAncestorCursor[root];
+        uint256 end = cursor + maxCount;
+        if (end > _importAncestorCount[root]) end = _importAncestorCount[root];
+        for (; cursor < end; ++cursor) {
+            (address ancestorLedger, address ancestorManager) = IStreamMintLedgerContinuity(
+                    c.predecessorLedger
+                ).mintAncestorAt(c.predecessorManager, cursor);
+            _appendMintAncestor(root, c.successorManager, ancestorLedger, ancestorManager);
+        }
+        _importAncestorCursor[root] = cursor;
+    }
+
+    function _appendMintAncestor(
+        bytes32 root,
+        address successorManager,
+        address ancestorLedger,
+        address ancestorManager
+    ) private {
+        if (
+            ancestorLedger == address(0) || ancestorManager == address(0)
+                || ancestorManager == successorManager
+        ) revert MintImportInvalid();
+        if (!_mintAncestorKnown[successorManager][ancestorLedger][ancestorManager]) {
+            _mintAncestorKnown[successorManager][ancestorLedger][ancestorManager] = true;
+            _mintAncestors[successorManager].push(
+                MintManagerIdentity(ancestorLedger, ancestorManager)
+            );
+            emit MintLedgerAncestorImported(root, successorManager, ancestorLedger, ancestorManager);
+        }
+    }
+
+    function _requireMintContinuitySource(address source) private view {
+        bytes memory input = abi.encodeCall(
+            IERC165.supportsInterface, (type(IStreamMintLedgerContinuity).interfaceId)
+        );
+        bool ok;
+        uint256 size;
+        uint256 word;
+        assembly ("memory-safe") {
+            ok := staticcall(30000, source, add(input, 32), mload(input), 0, 32)
+            size := returndatasize()
+            word := mload(0)
+        }
+        if (!ok || size != 32 || word != 1) revert MintImportInvalid();
     }
 
     function importCounterValue(
@@ -346,6 +443,7 @@ contract StreamMintLedger is
             c.successorManager == address(0) || c.complete || c.importedCounters != counterLeaves
                 || c.importedNullifiers != nullifierLeaves
                 || _importDefinitionCursor[root] != _importDefinitionCount[root]
+                || _importAncestorCursor[root] != _importAncestorCount[root]
         ) revert MintImportInvalid();
         bytes32 descriptor = StreamMintImport.descriptorLeaf(c, counterLeaves, nullifierLeaves);
         if (!StreamMintCounterPolicy.verify(root, descriptor, descriptorProof)) {

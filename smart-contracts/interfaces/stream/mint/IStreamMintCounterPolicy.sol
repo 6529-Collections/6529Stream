@@ -29,6 +29,9 @@ interface IStreamMintCounterPolicy is IERC165 {
     error InvalidCounterDefinition();
     error MintAllowlistProofInvalid(bytes32 counterId, address account);
     error MintAllowlistProofCountMismatch(uint256 supplied, uint256 required);
+    error MintAllowlistPriceOverrideUnsupported(
+        bytes32 counterId, address account, bool hasPriceOverride, uint256 priceOverride
+    );
 
     event MintCounterDefinitionRegistered(
         bytes32 indexed definitionHash,

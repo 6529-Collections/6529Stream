@@ -86,11 +86,17 @@ Put `abi.encode(AllowlistProof[][])` in the mint batch's `resolverData`:
 - Duplicate beneficiaries still require one occurrence per token and consume
   the same accumulated allowance.
 
-This proof path supplies accounting caps. The price fields are committed but
-do not themselves collect payment or change settlement. The concrete
-[allowlist gate](mint-allowlist-gate.md) also authenticates these fields; a
-sale/payment integration must explicitly enforce any price override. Executor,
-payer, initial recipient, beneficiary and authorizer remain distinct identities.
+This standard Manager proof path currently accepts only
+`hasPriceOverride = false` and `priceOverride = 0`. Any other combination,
+including the declared-free shape `true/0` and the inconsistent shape
+`false/nonzero`, reverts with `MintAllowlistPriceOverrideUnsupported` before
+counter, replay, operation-nonce, or Core state can be written. The price fields
+remain in the canonical leaf preimage so the Merkle schema does not change.
+They can be enabled only after an explicit sale/payment consumer authenticates
+the same leaf and applies the resulting price during settlement. Independent
+sale authorization types with their own price fields do not enable prices in
+this `MERKLE_STATIC` proof path. Executor, payer, initial recipient,
+beneficiary and authorizer remain distinct identities.
 
 ## Succession and evidence
 

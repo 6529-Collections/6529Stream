@@ -11,7 +11,9 @@ and [upgrade/redeployment ADR](../adr/0007-upgrade-redeployment.md).
 1. Deploy the successor Manager with its intended Ledger and the same Core.
    Admit the required modules and grant its Ledger writer permission through
    the authorized governance process.
-2. Permanently retire the predecessor writer with `retireLedgerWriter`. Disabling
+2. Resolve or cancel outstanding obligations that require the predecessor to
+   mint, then permanently retire its writer with `retireLedgerWriter`. Existing
+   sale and auction adapters retain their immutable Manager bindings. Disabling
    a writer alone is insufficient. Retirement cannot be undone and cannot occur
    while that writer has an incomplete import.
 3. Snapshot after retirement. Build the complete manifest of counter values,
@@ -25,15 +27,16 @@ and [upgrade/redeployment ADR](../adr/0007-upgrade-redeployment.md).
 5. Call `importCounterDefinitions(root, maxCount)` until the returned progress is
    complete; `maxCount` is 1 through 32. This permissionless operation copies the
    frozen predecessor's complete onchain list of pinned profile selections.
-   Configure successor phases after copying profiles. A successor already pinned
-   to a conflicting interpretation cannot complete; use a fresh successor.
+   A successor already pinned to a conflicting interpretation cannot complete;
+   use a fresh successor. Also call `importMintAncestors(root, maxCount)` until
+   ancestry copying is complete; each call copies at most 32 historical pairs.
 6. The successor Manager owner calls `importMintState(abi.encode(batch))` in
    batches of at most 32 total counter and nullifier leaves. A Safe owner uses an
    ordinary Safe CALL. Each leaf is single use. Counter values merge by maximum.
 7. Call `completeCounterImport(root, counterCount, nullifierCount, descriptorProof)`.
-   Exact leaf counts and complete profile copying are required. While an import
-   is pending the Ledger rejects ordinary successor consumption.
-8. Core now enforces replacement continuity before its original class-3 pointer
+   Exact leaf counts, complete profile copying and complete ancestry copying are
+   required. While an import is pending the Ledger rejects ordinary successor consumption.
+8. Core enforces replacement continuity before its original class-3 pointer
    transition. It reads each Manager's exact Core and immutable Ledger binding,
    verifies the predecessor's pinned runtime and the successor Ledger's normal
    catalog/interface/runtime admission, then requires canonical true from that
@@ -41,19 +44,60 @@ and [upgrade/redeployment ADR](../adr/0007-upgrade-redeployment.md).
    to same-Ledger replacement too. Initial installation and same-address catalog
    refresh retain their original behavior. A separate Core Ledger inventory
    pointer does not substitute for either Manager's actual binding.
+9. Record fresh Artist consent for each successor-bound policy, configure its
+   phases and executors, and establish explicitly successor-bound sale routes.
+   With a retained Artist suite, successor phase registration requires the
+   completed successor to be Core's currently selected Manager and Ledger.
+   Policy hashes can be previewed and Artist consent recorded before cutover.
 
-The actual Artist suite still pins its original Manager. Accounting completion
-and Core pointer admission do not by themselves authorize successor phase
-registration or minting. That consumer join is being implemented with fresh
-successor policy consent and authenticated lineage; old signatures are not
-reinterpreted. Do not treat the pointer guard as a completed live migration.
-During a pending prepared mint, the admitted replacement retains the original
-incident-abort route and cannot complete the predecessor's prepared operation.
+The Artist suite retains its original Manager and signing domains. The new
+consumer authenticates complete lineage from that original Manager/Ledger pair;
+old signatures are not reinterpreted. Source integration and the Core unit guard
+do not establish a completed actual-current live migration; that acceptance is
+still pending. During a pending prepared mint, the admitted replacement retains
+the original incident-abort route and cannot complete its predecessor's operation.
 
 Keep the predecessor deployed: import checks read its frozen values and replay
 state. Imported profiles are enumerable on the successor even if no current
 phase uses them, so a further succession retains inherited interpretations.
 Global definition registration never changes a pinned legacy selection.
+
+## Retained Artist consent and multiple replacements
+
+`IStreamMintLedgerContinuity` is a separate additive capability. Each commitment
+records its verified immediate predecessor. `importMintAncestors` copies the
+retired predecessor's complete frozen ancestry in bounded batches. Completion
+requires this copy, independently of counter-profile and Merkle-leaf counts.
+First-generation succession has no older ancestors to copy. The original
+`IStreamMintLedgerImport` identity and exact-pair readiness call are unchanged.
+
+For `A -> B -> C`, C retains both `(ledgerB, managerB)` and
+`(ledgerA, managerA)`. B's retirement does not erase its completed history.
+`isCompletedMintDescendant(ancestorLedger, ancestorManager, successorManager)`
+requires the exact queried ancestor pair, completed successor import, a live
+successor writer and no successor retirement. Mint-time consent performs one
+bounded membership read; it does not traverse historical contracts recursively.
+
+An Artist suite's immutable `mintManager` remains its signature and historical
+record anchor. Operation 60 hydration preserves that Manager; it is not a
+Manager-rebinding mechanism. A different consumer is admitted only if Core's
+current codehash-pinned Manager and Ledger are the candidate and its immutable
+Ledger, and that Ledger reports completed ancestry containing the Artist's
+exact original Manager/Ledger pair. Inactive sibling successors cannot consume
+consent merely because they share an ancestor.
+
+The Artist still checks the exact supplied policy and all existing accepted
+binding, economics, content, payout and attestation prerequisites. Its operation
+14 may record a new successor policy hash under the original signature domain.
+That policy hash commits the successor Manager and Ledger. Neither imported
+accounting nor a predecessor policy signature supplies consent for the new hash.
+
+Original acceptance signatures, deployment attestations, policy digest context,
+replay nonces and historical records remain unchanged. Artist live surfaces that
+explicitly read its original suite Manager, such as phase-policy attestations
+and platform declaration phase history, retain that behavior; this consumer
+admission does not silently retarget them. Retired Managers and their old sale
+obligations do not gain a route to mint through a successor.
 
 ## Commitment and tree
 

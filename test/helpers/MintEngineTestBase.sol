@@ -3,11 +3,16 @@ pragma solidity ^0.8.19;
 
 import "./MintRevocationTestBase.sol";
 
+interface MintEngineLedgerBinding {
+    function mintLedger() external view returns (address);
+}
+
 /// @dev Typed current Core boundary: only declared registry/artist pointers are populated.
 contract MintEngineCoreFixture {
     address public registry;
     address public artist;
     address public manager;
+    address public mintLedger;
     uint256 public minted;
     bool public rejectMint;
     mapping(uint256 => address) public ownerOf;
@@ -16,6 +21,11 @@ contract MintEngineCoreFixture {
         registry = r;
         artist = a;
         manager = m;
+        mintLedger = m == address(0) ? address(0) : MintEngineLedgerBinding(m).mintLedger();
+    }
+
+    function setMintLedger(address value) external {
+        mintLedger = value;
     }
 
     function setRejectMint(bool reject) external {
@@ -34,6 +44,8 @@ contract MintEngineCoreFixture {
         address selected;
         if (kind == keccak256("MODULE_REGISTRY")) selected = registry;
         else if (kind == keccak256("ARTIST_REGISTRY")) selected = artist;
+        else if (kind == keccak256("MINT_MANAGER")) selected = manager;
+        else if (kind == keccak256("MINT_LEDGER")) selected = mintLedger;
         return (
             selected,
             selected == address(0) ? bytes32(0) : selected.codehash,

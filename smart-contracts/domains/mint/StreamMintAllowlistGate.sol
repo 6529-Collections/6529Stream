@@ -272,6 +272,7 @@ contract StreamMintAllowlistGate is IStreamMintAllowlistGate {
         leaves = new bytes32[](count);
         for (uint256 i; i < count; ++i) {
             address account = payer ? batch.payer : batch.beneficiaries[i];
+            StreamMintCounterPolicy.validateSupportedPrice(counterId, account, proofs[i]);
             bytes32 leaf = StreamMintCounterPolicy.allowlistLeaf(
                 manager, batch.collectionId, batch.phaseId, counterId, account, proofs[i]
             );

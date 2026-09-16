@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../../helpers/MintEngineTestBase.sol";
 import "../../../smart-contracts/domains/mint/StreamMintAllowlistGate.sol";
+import "../../../smart-contracts/domains/mint/StreamMintGateValidator.sol";
 
 /// @notice Exercises the allowlist gate against the actual Manager, Ledger and module registry.
 contract StreamMintAllowlistGateTest is MintEngineTestBase {
@@ -81,6 +82,20 @@ contract StreamMintAllowlistGateTest is MintEngineTestBase {
         );
         gate = new StreamMintAllowlistGate(root, ALLOWLIST);
         _configure(gate, IStreamMintManager.CounterKeyMode.PAYER, cap);
+    }
+
+    function _pricedRecipientGate(bool hasPriceOverride, uint256 priceOverride)
+        private
+        returns (StreamMintAllowlistGate gate, IStreamMintCounterPolicy.AllowlistProof memory proof)
+    {
+        proof = _proof(1);
+        proof.hasPriceOverride = hasPriceOverride;
+        proof.priceOverride = priceOverride;
+        bytes32 root = StreamMintCounterPolicy.allowlistLeaf(
+            address(manager), COLLECTION, ALLOW_PHASE, ALLOWLIST, ALICE, proof
+        );
+        gate = new StreamMintAllowlistGate(root, ALLOWLIST);
+        _configure(gate, IStreamMintManager.CounterKeyMode.RECIPIENT, 1);
     }
 
     function _configure(
@@ -387,6 +402,52 @@ contract StreamMintAllowlistGateTest is MintEngineTestBase {
             _value(signer, IStreamMintManager.CounterKeyMode.PAYER) == 2,
             "one payer proof, two debits"
         );
+    }
+
+    function _assertPriceOverrideUnsupported(
+        bool hasPriceOverride,
+        uint256 priceOverride,
+        bytes32 nonce
+    ) private {
+        (StreamMintAllowlistGate gate, IStreamMintCounterPolicy.AllowlistProof memory proof) =
+            _pricedRecipientGate(hasPriceOverride, priceOverride);
+        IStreamMintManager.MintBatch memory b = _batch(_one(ALICE));
+        b.resolverData = _resolver(_singleProof(proof));
+        b.authorizationId = keccak256(
+            abi.encode("unsupported allowlist price", hasPriceOverride, priceOverride, nonce)
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamMintCounterPolicy.MintAllowlistPriceOverrideUnsupported.selector,
+                ALLOWLIST,
+                ALICE,
+                hasPriceOverride,
+                priceOverride
+            )
+        );
+        gate.previewAuthorizationId(address(manager), address(this), b, nonce);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamMintGateValidator.MintGateCallFailed.selector, address(gate)
+            )
+        );
+        manager.executeSingleStepMint(b, abi.encode(nonce));
+        require(
+            core.minted() == 0 && manager.nextOperationNonce() == 0
+                && !manager.isAuthorizationUsed(b.authorizationId)
+                && !manager.isNullifierUsed(_nullifier(gate, nonce))
+                && _value(ALICE, IStreamMintManager.CounterKeyMode.RECIPIENT) == 0,
+            "priced gate proof wrote state"
+        );
+    }
+
+    function testFreePriceOverrideFailsClosedWithoutReplayOrCounterWrites() public {
+        _assertPriceOverrideUnsupported(true, 0, keccak256("free override nonce"));
+    }
+
+    function testInconsistentPricePayloadFailsClosedWithoutReplayOrCounterWrites() public {
+        _assertPriceOverrideUnsupported(false, 1, keccak256("inconsistent price nonce"));
     }
 
     function testProofGroupsFollowConfiguredMerkleCounterOrder() public {

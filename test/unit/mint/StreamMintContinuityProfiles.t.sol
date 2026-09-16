@@ -196,6 +196,11 @@ contract StreamMintContinuityProfilesTest is CharacterizationTestBase {
     }
 
     function _sealProfiles(StreamMintLedger target, bytes32 root) private {
+        (uint256 imported, uint256 required) = target.mintImportAncestryProgress(root);
+        while (imported < required) {
+            target.importMintAncestors(root, 32);
+            (imported, required) = target.mintImportAncestryProgress(root);
+        }
         target.completeCounterImport(root, 0, 0, new bytes32[](0));
     }
 

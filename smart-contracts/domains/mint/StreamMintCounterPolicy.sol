@@ -115,6 +115,19 @@ library StreamMintCounterPolicy {
         );
     }
 
+    /// @notice Fails closed until a standard mint sale path consumes authenticated leaf prices.
+    function validateSupportedPrice(
+        bytes32 counterId,
+        address account,
+        IStreamMintCounterPolicy.AllowlistProof memory proof
+    ) internal pure {
+        if (proof.hasPriceOverride || proof.priceOverride != 0) {
+            revert IStreamMintCounterPolicy.MintAllowlistPriceOverrideUnsupported(
+                counterId, account, proof.hasPriceOverride, proof.priceOverride
+            );
+        }
+    }
+
     function verify(bytes32 root, bytes32 leaf, bytes32[] memory proof)
         internal
         pure

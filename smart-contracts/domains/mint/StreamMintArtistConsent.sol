@@ -5,8 +5,15 @@ import "../../interfaces/stream/artist/IStreamArtistPlatformWorks.sol";
 import "../../interfaces/stream/artist/IStreamArtistMintConsent.sol";
 import "../../interfaces/stream/core/IStreamCorePointers.sol";
 import "../../interfaces/stream/mint/IStreamMintGovernanceRegistry.sol";
+import "../../interfaces/stream/mint/IStreamMintLedgerContinuity.sol";
 import "../../interfaces/stream/modules/IStreamModuleRegistry.sol";
 import "../../vendor/openzeppelin/IERC165.sol";
+
+/// @dev Existing immutable Manager getters, used only to authenticate exact continuity pairs.
+interface IStreamMintArtistManagerBinding {
+    function core() external view returns (address);
+    function mintLedger() external view returns (address);
+}
 
 /// @notice Mandatory, bounded artist-authority reads shared by Manager registration and execution.
 library StreamMintArtistConsent {
@@ -126,12 +133,11 @@ library StreamMintArtistConsent {
     }
 
     function _authority(address core, uint256 cap) private view returns (address authority) {
-        (address selected, bytes32 codeHash,,,,,,,,) =
-            IStreamCorePointers(core).getSatellitePointer(keccak256("ARTIST_REGISTRY"));
-        authority = selected;
-        if (authority.code.length == 0 || codeHash != authority.codehash) {
-            revert ArtistAuthorityUnavailable(authority);
-        }
+        authority = _selected(core, keccak256("ARTIST_REGISTRY"), cap);
+        address originalManager = abi.decode(
+            _read(authority, abi.encodeCall(IStreamArtistMintConsent.mintManager, ()), 32, cap),
+            (address)
+        );
         if (
             abi.decode(
                         _read(
@@ -139,18 +145,84 @@ library StreamMintArtistConsent {
                         ),
                         (address)
                     ) != core
-                || abi.decode(
-                        _read(
-                            authority,
-                            abi.encodeCall(IStreamArtistMintConsent.mintManager, ()),
-                            32,
-                            cap
-                        ),
-                        (address)
-                    ) != address(this)
+                || (originalManager != address(this) && !_successor(core, originalManager, cap))
         ) {
             revert ArtistAuthorityUnavailable(authority);
         }
+    }
+
+    function _successor(address core, address originalManager, uint256 cap)
+        private
+        view
+        returns (bool)
+    {
+        // Historical Artist signatures retain their original immutable Manager domain.
+        // A different consumer needs both current Core selection and completed exact-pair ancestry.
+        if (
+            originalManager.code.length == 0
+                || _selected(core, keccak256("MINT_MANAGER"), cap) != address(this)
+        ) {
+            return false;
+        }
+        address ledger = abi.decode(
+            _read(
+                address(this),
+                abi.encodeCall(IStreamMintArtistManagerBinding.mintLedger, ()),
+                32,
+                cap
+            ),
+            (address)
+        );
+        if (_selected(core, keccak256("MINT_LEDGER"), cap) != ledger) return false;
+        address originalLedger = abi.decode(
+            _read(
+                originalManager,
+                abi.encodeCall(IStreamMintArtistManagerBinding.mintLedger, ()),
+                32,
+                cap
+            ),
+            (address)
+        );
+        if (
+            abi.decode(
+                    _read(
+                        originalManager,
+                        abi.encodeCall(IStreamMintArtistManagerBinding.core, ()),
+                        32,
+                        cap
+                    ),
+                    (address)
+                ) != core
+        ) {
+            return false;
+        }
+        return abi.decode(
+            _read(
+                ledger,
+                abi.encodeCall(
+                    IStreamMintLedgerContinuity.isCompletedMintDescendant,
+                    (originalLedger, originalManager, address(this))
+                ),
+                32,
+                cap
+            ),
+            (bool)
+        );
+    }
+
+    function _selected(address core, bytes32 kind, uint256 cap)
+        private
+        view
+        returns (address selected)
+    {
+        (address target, bytes32 codeHash) = abi.decode(
+            _read(core, abi.encodeCall(IStreamCorePointers.getSatellitePointer, (kind)), 320, cap),
+            (address, bytes32)
+        );
+        if (target.code.length == 0 || codeHash != target.codehash) {
+            revert ArtistAuthorityUnavailable(target);
+        }
+        return target;
     }
 
     function _read(address target, bytes memory data, uint256 expected, uint256 cap)

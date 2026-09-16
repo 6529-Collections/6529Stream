@@ -38,8 +38,13 @@ collection, phase, counter ID, account, cap, and optional price fields are
 hashed once and the resulting word is hashed again. Merkle nodes use sorted
 pair `keccak256(abi.encode(left, right))` hashing.
 
-The gate authenticates the optional price fields but does not collect payment
-or apply a settlement price override. A sale integration must enforce that policy.
+The canonical leaf retains both price fields, but the current standard gate and
+Manager path accepts only `hasPriceOverride = false` with `priceOverride = 0`.
+The declared-free `true/0` form and every nonzero price revert with
+`MintAllowlistPriceOverrideUnsupported` before replay, counter, operation-nonce,
+or Core state can be written. Price-bearing leaves remain unsupported until an
+explicit sale consumer verifies the same leaf and applies its price during
+settlement.
 
 `MintBatch.resolverData` is:
 
@@ -64,10 +69,11 @@ batch field except `authorizationId` has been filled, then copy the result into
 `batch.authorizationId`. Execute with `gateData = abi.encode(nonce)`.
 
 The authorization ID binds the chain, gate, Manager, Ledger, executor, complete
-batch payload, active or grace policy hash, nonce, and each Merkle proof's cap
-and price values. It intentionally excludes proof sibling arrays, which are
-verification witnesses rather than policy results. The gate result uses
-`authorizer = address(0)` and `AuthorizerKind.NONE`; no signature is involved.
+batch payload, active or grace policy hash, nonce, and each accepted Merkle
+proof's cap and disabled price values. It intentionally excludes proof sibling
+arrays, which are verification witnesses rather than policy results. The gate
+result uses `authorizer = address(0)` and `AuthorizerKind.NONE`; no signature is
+involved.
 
 The gate also returns one stable nonce nullifier scoped to the chain, gate,
 Manager, Ledger, collection, phase, and payer. The Manager consumes both the
