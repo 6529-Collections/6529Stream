@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add reproducible selected-host current-graph acceptance captures with native
+  compiler provenance, complete suite inventories and production size checks.
+
 - Add complete typed Artist authority hydration for original living, payout
   and direct-economics histories, preserving source records and replay guards.
 - Add historical native sale-credit enumeration and pinned offline export for

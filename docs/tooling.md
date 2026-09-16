@@ -81,6 +81,13 @@ with each compiler context recorded separately; original Forge outputs stay
 unchanged. CRLF-to-LF compiler transport is recorded explicitly. Preparation
 never substitutes an unadopted dependency emission for the cached creation owner.
 
+For a selected cohort, repeat `--host test/path.t.sol:ContractName` to bind
+every executed host explicitly. Missing selected hosts fail preparation; the
+presence of another cached suite cannot stand in for them. `--host` and
+`--campaign` are mutually exclusive. A build without full build-info or ASTs
+must be rebuilt with the current profile before preparation; granting file
+permissions alone cannot recover that compiler evidence.
+
 This requires no machine-specific snapshot directory. Re-run preparation after
 rebuilding changed contracts or graph fixtures. Its command lock protects the
 projection write; finish other builds before preparing or testing the same
@@ -88,6 +95,34 @@ output directory. The current profile's large aggregate fixture limits cover
 many deployments and calls. Native product checks still enforce the 24,576-byte
 runtime limit, and the fixture checks constructor and deployed products; these
 local allowances do not establish a shipping transaction's gas capacity.
+
+### Scoped acceptance captures
+
+To test a coherent graph increment while other work continues, capture a fresh
+import closure and run selected suites in its isolated project:
+
+```text
+python -m tools.development.run_current_acceptance --artifacts artifacts/current-graph/my-acceptance --host test/current/StreamCurrentStack.t.sol:StreamCurrentStackTest --host test/current/StreamCurrentSafe.t.sol:StreamCurrentSafeTest
+```
+
+The runner copies exact working-source bytes and data fixtures, records their
+hashes and source commit, then compiles with the current via-IR profile. It
+authenticates every named host with canonical graph preparation before running
+tests. `--solc` can select an already-installed native Solidity 0.8.19 executable.
+The source/configuration capture, full native compiler output, preparation log,
+production size inventory and actual test results remain in the new directory.
+Existing capture directories are never reused or overwritten. Unrelated Solidity
+data fixtures are excluded from the selected import closure.
+
+The run uses one Forge worker, seed `0x6529`, 256 input-fuzz runs and 32 invariant
+sequences of depth 64. It fails on missing suites, empty results, failed or skipped
+tests, incomplete property budgets, altered captured inputs/native artifacts
+and oversized production products. Expected cases come from each authenticated
+host ABI; configured test/path filters are rejected. Select the
+separate [campaign](#reproducible-fuzz-and-invariant-campaigns) command for extended
+budgets and retained-counterexample replay. A captured source may contain local
+edits; its file hashes identify the tested source more precisely than Git HEAD.
+This scoped run does not establish full-v1, collector-gas or release acceptance.
 
 ## Pick the relevant tests
 
