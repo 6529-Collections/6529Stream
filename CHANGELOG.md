@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Correct the STATIC renderer's exact script-bundle return length, with actual
+  metadata/dependency regression tests and a canonical PNG test fixture.
+
 - Add refund-window same-leaf price capture with immutable charged-price/proof
   facts, unchanged original signatures and saved-amount refunds/finalization.
 - Add versioned museum Type/declaration continuation and replayable local Safe

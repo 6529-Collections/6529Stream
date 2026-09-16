@@ -18,13 +18,13 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 16 September parallel implementation batch
 
-Source through `fdb00c77` includes free-burn reveal credits, original Artist
+Source through `df440372` includes free-burn reveal credits, original Artist
 withdrawal61, the native-price adapter size repair, distribution/burn/price
 clients including saved refund-window purchase verification, museum authority reconciliation and expanded actual-current test hosts.
 The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
 records exact handoffs and evidence, superseding older queue descriptions.
 
-All 1,973 Solidity sources pass ABI/type/storage checking. Root passes all 347
+All 1,975 Solidity sources pass ABI/type/storage checking. Root passes all 347
 client tests with generation/build/types and 131 museum authority/profile tests.
 Separate native cohorts pass mint101, Royalty11, Core29, entropy10, final burn49
 and later burn-credit31 distinct cases. These captures have different sources
@@ -59,10 +59,17 @@ Full rendered-byte retention and publication authority remain separate work.
 These changes are separate from the held Router patch. Museum Type/declaration/later-review records now have an actual local Safe
 capture and offline replay in 8ba023dc. Its RDF/JSON snapshot remains synthetic;
 qualified external authority, wider schema/conformance and archival export
-publication remain. The original nine content recipes have a test-fixture URI
-repair with eight passes; the remaining failure identifies three Renderer reads
-expecting 416 bytes from a 384-byte metadata return. A minimal correction and
-actual-contract regressions are in progress.
+publication remain. Renderer repair `df440372` corrects three exact return sizes
+from 416 to 384 bytes. Root attests all 226 frozen sources; four new actual
+Metadata/DependencyRegistry cases pass. The wider scoped capture has 27 passing
+cases and one remaining capacity failure: a 24,576-byte script needs about 46.7m
+gas for full JSON, exceeding the fixture's 30m render budget. Increasing a test
+budget is not target-chain acceptance. A separate pure-encoding optimization
+batch is underway with exact-output differential fuzzing.
+
+Sepolia enforces a 16,777,216 per-transaction gas limit; `eth_call` is separate.
+Therefore this measured workload cannot yet be used inside an onchain
+checkpoint transaction. [Ethereum Foundation gas-cap guidance](https://blog.ethereum.org/2025/10/21/fusaka-gascap-update).
 
 A specification/source reconciliation confirms a remaining implementation gap:
 fixed-price PUBLIC/COMMIT_REVEAL and buyer-bound private sales of selected

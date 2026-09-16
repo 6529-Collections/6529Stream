@@ -49,14 +49,14 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `fdb00c773b46efd8d38f60aded2f541e190b8767`; see the [16 September batch](#parallel-feature-batch-16-september) for scoped evidence and remaining joins |
+| Current integration source | `df4403722128d39c8ff832dc3dc1688bc5cfe513`; see the [16 September batch](#parallel-feature-batch-16-september) for scoped evidence and remaining joins |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
 | Further integrated Artist handoff | `9ea144c85768050ec910cc8534af13bcac82e20d`, received during assembly: closed-origin dormancy/rotation extension on the preceding handoff; ART24 |
 | Integrated entropy client handoff | `642d017d9d0cd8ee9b6b813abbdbe10a4c6b1265`; client.entropy-authority |
 | Integrated OwnerRecords capture handoff | `57ac8d041c9adc479f1061fafec748c8330ac974`; MUSEUM-36 |
-| Latest broad cheap compilation evidence | 1,973-source ABI/type/storage check passes at 8ba023dc in 16.688 seconds; no errors. This is not bytecode or full-system runtime evidence. |
+| Latest broad cheap compilation evidence | 1,975-source ABI/type/storage check passes at df440372 in 17.015 seconds; no errors. This is not bytecode or full-system runtime evidence. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
 | Latest focused native evidence | Separate captures: entropy 10, Royalty 11, mint 101, actual-Core 29, final burn 49 and later burn-credit 31 distinct cases pass. Repaired native-price 76 passes at 766c5dfd with independent source/artifact attestation; STATIC output manifest 9 passes in a separate capture. Root clients 347 and a museum authority/profile cohort of 131 pass. Other museum cohorts overlap. No complete-system pass is inferred. |
 
@@ -229,7 +229,7 @@ These 163 rows are capabilities and delivery checks of different sizes. Row coun
 
 | Feature | Build | Tests | Integration | Scope and remaining work |
 | --- | --- | --- | --- | --- |
-| [metadata.renderer-routing](#metadatarenderer-routing-evidence) Independently selectable, versioned token and collection renderers | In progress | Partly tested | Partial | Renderer/Registry, STATIC routing/configuration, ScopeMembership, raw Artist facts and complete selection checkpoint are source-integrated, including 01bc7081/099d8ba7. Fixed formatter/Metadata repairs and frozen-ONCHAIN full-output checkpoints 40ae52f8 are integrated. A low-parent-gas currentness error is repaired with two passing actual-Renderer regressions. The complete output-hash manifest/schema/coverage join is integrated as 006a16bc with nine scoped passes. **Remaining:** Router deployment-size repair, full output-byte retention/publication-authority joins, exact genesis correspondence and combined runtime acceptance. The failed manual encoder measured 27,102 bytes; its proposed replacement is unapplied. |
+| [metadata.renderer-routing](#metadatarenderer-routing-evidence) Independently selectable, versioned token and collection renderers | In progress | Partly tested | Partial | Renderer/Registry, STATIC routing/configuration, ScopeMembership, raw Artist facts and complete selection checkpoint are source-integrated, including 01bc7081/099d8ba7. Fixed formatter/Metadata repairs and frozen-ONCHAIN full-output checkpoints 40ae52f8 are integrated. A low-parent-gas currentness error is repaired with two passing actual-Renderer regressions. The complete output-hash manifest/schema/coverage join is integrated as 006a16bc with nine scoped passes. Exact bundle ABI repair df440372 has four new passing actual-contract regressions. **Remaining:** Full-render encoding gas optimization, Router deployment-size repair, full output-byte retention/publication-authority joins, exact genesis correspondence and combined runtime acceptance. The failed manual encoder measured 27,102 bytes; its proposed replacement is unapplied. |
 | [MUSEUM-01](#museum-01-evidence) Canonical Core identity and metadata boundaries | Built | Partly tested | Integrated* | Current Core subjects, full record preimages and semantic tooling preserve work/token/file and protocol authority boundaries. This is the implemented boundary, not completion of all dependent museum features. **Remaining:** Whole adopted source-family and full-finality acceptance remain; source-preserving adapters do not grant new mint/finality authority. |
 | [MUSEUM-02](#museum-02-evidence) Immutable schema and interpretation document registry | Built | Tested* | Integrated* | Registered exact-name/version documents, ordered bounded chunks, full original bytes and canonicalization identity; actual delayed Executor and Safe capture uses these contracts. **Remaining:** Complete required genesis catalog registration and every maximum-size operational envelope remain separate. |
 | [MUSEUM-03](#museum-03-evidence) Current collection record writers and source history | Built | Partly tested | Integrated* | MetadataV1 generic class-scoped writers, full payload/receipt/history, independent author heads and one-use Artist publication; sealed complete successor consumption preserves the original host consumed map. **Remaining:** Generic byte admission is not typed meaning for every named record. The newest genuine post-cutover join remains in root native cohort, distinct from earlier demonstrated generic/RIGHTS writes. |
@@ -521,8 +521,8 @@ settlement behavior listed above.
 
 ### Parallel feature batch 16 September
 
-The latest source is `fdb00c77`; its Solidity inputs are unchanged from `8ba023dc`.
-All 1,973 Solidity ABI/type/storage inputs pass in 16.688 seconds. Root runs pass
+The latest source is `df440372`. All 1,975 Solidity ABI/type/storage inputs pass
+in 17.015 seconds, including the canonical deployment script and new shape tests. Root runs pass
 all 347 client tests and 131 museum authority,
 profile and retained-capture tests; each includes its documented original-source
 limits. These results do not establish a complete current-system pass.
@@ -555,12 +555,18 @@ limits. These results do not establish a complete current-system pass.
   the other 17 products and all creation sizes fit. Its ten runtime bodies remain
   unexecuted. Read-only investigation found no credible sufficient pure-only
   extraction; held authorization/codec proposals remain unchanged.
-- The original nine content recipes first failed fixture setup on an invalid
-  PNG signature. A test-only supported-signature correction passes eight bodies;
-  the remaining actual chunked-render path exposed three Renderer reads expecting
-  416 bytes from the actual twelve-word (384-byte) metadata return. A minimal
-  correction and actual-contract regressions are in progress. Both failed
-  captures are preserved, and no production validation or assertion is weakened.
+- URI fixture repair `4af81efd` and Renderer shape fix `ee7bbb4b` are integrated
+  as `c1a0f2c9` and `df440372`. Exactly three expected lengths change from 416
+  to the actual twelve-word (384-byte) return; all 50 original ABI entries and
+  source/code pins remain. Root matches all 226 frozen sources. Four new actual
+  Metadata/DependencyRegistry cases pass, alongside retained cases: 27 distinct
+  passes and one large-render capacity failure. The original nine are 8/9.
+  Missing exact Safe input was restored and both affected cases pass; the failed
+  capture is retained. Full JSON for the 24,576-byte script measures 46.7m gas,
+  above the 30m fixture budget and the 16,777,216 transaction cap on Sepolia.
+  View-call limits are separate. Pure encoding optimization and full transaction
+  acceptance remain; no production budget or assertion was weakened.
+  [Target gas-cap guidance](https://blog.ethereum.org/2025/10/21/fusaka-gascap-update).
 
 The exact collaborator proposal is now complete and independently source-reviewed:
 21 paths, including eight authored/uncompiled tests. Its separate specific
