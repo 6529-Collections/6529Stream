@@ -354,3 +354,5 @@ contract profiles and outstanding larger-script work.
   manifests, prepare committed slices and recover retained beneficiary NFTs.
 - [Burn-to-mint calls](docs/current-burn-mint.md) check source ownership and gate
   approval, prepare free or native purchases and recover free-burn fee credits.
+- [Native allowlist prices](docs/current-native-allowlist-price.md) prepare explicit
+  price policies and proof-bearing purchases with the original signing domain.

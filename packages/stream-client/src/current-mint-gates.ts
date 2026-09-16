@@ -82,8 +82,8 @@ export interface DelegateMintRequest extends DelegateMintBatchInput {
 
 export interface MintAllowlistProof {
   readonly maxCount: bigint;
-  readonly hasPriceOverride: false;
-  readonly priceOverride: 0n;
+  readonly hasPriceOverride: boolean;
+  readonly priceOverride: bigint;
   readonly proof: readonly Hex[];
 }
 
@@ -95,8 +95,8 @@ export interface MintAllowlistLeafInput {
   readonly counterId: Hex;
   readonly account: Address;
   readonly maxCount: bigint;
-  readonly hasPriceOverride: false;
-  readonly priceOverride: 0n;
+  readonly hasPriceOverride: boolean;
+  readonly priceOverride: bigint;
 }
 
 export interface MintAllowlistAuthorizationBinding {
@@ -391,7 +391,9 @@ export function mintAllowlistGateConfigHash(root: Hex, counterId: Hex): Hex {
 
 function supportedPrice(maxCount: unknown, hasPriceOverride: unknown, priceOverride: unknown): bigint {
   const count = uint(maxCount, 64, "maxCount", true);
-  if (hasPriceOverride !== false || priceOverride !== 0n) throw new Error("Current mint allowlists do not support price overrides");
+  if (typeof hasPriceOverride !== "boolean") throw new Error("hasPriceOverride must be boolean");
+  const price = uint(priceOverride, 256, "priceOverride");
+  if (!hasPriceOverride && price !== 0n) throw new Error("A disabled allowlist price override must be zero");
   return count;
 }
 
@@ -400,15 +402,15 @@ export function mintAllowlistLeaf(input: MintAllowlistLeafInput): Hex {
   const inner = keccak256(coder.encode(["bytes32", "uint256", "address", "uint256", "bytes32", "bytes32", "address", "uint64", "bool", "uint256"],
     [domains.allowlistLeaf, uint(input.chainId, 256, "chainId", true), address(input.manager, "manager"),
       uint(input.collectionId, 256, "collectionId", true), bytes32(input.phaseId, "phaseId", false), bytes32(input.counterId, "counterId", false),
-      address(input.account, "account"), supportedPrice(input.maxCount, input.hasPriceOverride, input.priceOverride), false, 0n])) as Hex;
+      address(input.account, "account"), supportedPrice(input.maxCount, input.hasPriceOverride, input.priceOverride), input.hasPriceOverride, input.priceOverride])) as Hex;
   return keccak256(inner) as Hex;
 }
 
 function normalizeProof(value: MintAllowlistProof, name: string): MintAllowlistProof {
   exactKeys(value, ["maxCount", "hasPriceOverride", "priceOverride", "proof"], name);
   if (!Array.isArray(value.proof) || value.proof.length > MINT_GATE_CLIENT_MAX_PROOF_NODES) throw new Error(`${name}.proof exceeds the client boundary`);
-  return Object.freeze({ maxCount: supportedPrice(value.maxCount, value.hasPriceOverride, value.priceOverride), hasPriceOverride: false,
-    priceOverride: 0n, proof: freezeArray(value.proof.map((item, index) => bytes32(item, `${name}.proof[${index}]`))) });
+  return Object.freeze({ maxCount: supportedPrice(value.maxCount, value.hasPriceOverride, value.priceOverride), hasPriceOverride: value.hasPriceOverride,
+    priceOverride: value.priceOverride, proof: freezeArray(value.proof.map((item, index) => bytes32(item, `${name}.proof[${index}]`))) });
 }
 
 function sortedPair(a: Hex, b: Hex): Hex {

@@ -39,9 +39,9 @@ test("strict byte and integer boundaries reject coercion and malformed hex", () 
   assert.throws(() => gates.mintTicketGateData({ ...gates.mintTicketForBatch({ chainId, manager, ledger, executor,
     authorizerKind: 2n, nonce: id("nonce"), deadline: 1n }, batch), quantity: 2 }), /bigint/);
   assert.throws(() => gates.mintAllowlistLeaf({ chainId, manager, collectionId: 1n, phaseId: id("phase"), counterId: id("counter"),
-    account: payer, maxCount: 1n, hasPriceOverride: false, priceOverride: 1n }), /do not support price overrides/);
+    account: payer, maxCount: 1n, hasPriceOverride: false, priceOverride: 1n }), /disabled allowlist price override/);
   assert.throws(() => gates.mintAllowlistLeaf({ chainId, manager, collectionId: 1n, phaseId: id("phase"), counterId: id("counter"),
-    account: payer, maxCount: 1n, hasPriceOverride: true, priceOverride: 0n }), /do not support price overrides/);
+    account: payer, maxCount: 1n, hasPriceOverride: 1n, priceOverride: 0n }), /must be boolean/);
 });
 
 test("delegate request makes its retained narrow commitment boundary visible", () => {

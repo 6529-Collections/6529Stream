@@ -15,8 +15,9 @@ delegateMintRequest(address, address, batch, address, hash);
 mintTicketTypedData(1, address, ticket);
 // @ts-expect-error authorizer kind must not be rounded through a JS number
 mintTicketForBatch({ chainId: 1n, manager: address, ledger: address, executor: address, authorizerKind: 2, nonce: hash, deadline: 1n }, batch);
-// @ts-expect-error current allowlists statically disallow price overrides
-const unsupportedPrice: MintAllowlistLeafInput = { ...leaf, hasPriceOverride: true };
-// @ts-expect-error current allowlists require the literal zero price
-const nonzeroPrice: MintAllowlistLeafInput = { ...leaf, priceOverride: 1n };
-void unsupportedPrice; void nonzeroPrice;
+const authenticatedPrice: MintAllowlistLeafInput = { ...leaf, hasPriceOverride: true, priceOverride: 1n };
+// @ts-expect-error the price flag must be a boolean
+const invalidFlag: MintAllowlistLeafInput = { ...leaf, hasPriceOverride: 1n };
+// @ts-expect-error full-width authenticated prices must be bigint
+const roundedPrice: MintAllowlistLeafInput = { ...leaf, priceOverride: 1 };
+void authenticatedPrice; void invalidFlag; void roundedPrice;

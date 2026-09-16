@@ -1,8 +1,9 @@
 # Current mint gate inputs
 
 `current-mint-gates.ts` prepares exact inputs and hash commitments for the ticket,
-delegate registry, and static Merkle allowlist gates at source commit
-`bba738e9a9af3f12fdccd2e9cbc825aa555adb08`. It does not sign, send, deploy,
+delegate registry, and static Merkle allowlist gates. Ticket and delegate inputs
+retain source `bba738e9a9af3f12fdccd2e9cbc825aa555adb08`; authenticated price fields
+follow `f1745f33be3e601aca75a89ffe428f534a352615`. It does not sign, send, deploy,
 read live eligibility, or prove that Manager, Ledger, registry, counter, replay, or
 policy checks will accept a mint.
 
@@ -55,8 +56,10 @@ entrypoint must be called by the configured Manager.
 
 `mintAllowlistLeaf` implements the protocol's double hash. The flat input binds
 chain, Manager, collection, phase, counter, account, `uint64 maxCount`, and the
-retained price fields. Current source requires `hasPriceOverride: false` and
-`priceOverride: 0n`; every other combination is rejected.
+retained price fields. An enabled override authenticates a full-width `uint256`
+price, including zero. A disabled override requires `priceOverride: 0n`.
+Manager and the generic gate authenticate these fields without collecting
+payment; the selected sale consumer must enforce its own charging rules.
 
 `verifyMintAllowlistProof` uses sorted pairs. `mintAllowlistResolverData` ABI
 encodes one proof group for each `MERKLE_STATIC` counter in phase counter order.
@@ -89,3 +92,9 @@ input/output capture for `bba738e9`. It proves selected ABI and source provenanc
 Scoped runtime tests were completed later against separate test-only source; the
 fixture does not claim that this earlier compiler capture passed native runtime,
 nor that any live deployment or request is accepted.
+
+The separate native allowlist price fixture binds the changed shared counter
+policy and native consumer to the exact 159-source `f1745f33` compiler capture.
+The retained gate ABI shapes and preimages are unchanged. This later source
+qualification covers the enabled-price behavior; it does not relabel the older
+ABI capture as a later runtime result.

@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 import { AbiCoder, ZeroAddress, ZeroHash, concat, id, keccak256 } from "ethers";
 import * as gates from "../dist/current-mint-gates.js";
 
-// Independent literal encodings from bba738e9. These do not prove live eligibility,
+// Independent literal encodings from bba738e9, with the unchanged price-bearing
+// leaf layout enabled by f1745f33. These do not prove live eligibility,
 // signature acceptance, Manager admission, or counter/replay consumption.
 const coder = AbiCoder.defaultAbiCoder();
 const addr = n => `0x${BigInt(n).toString(16).padStart(40, "0")}`;
@@ -78,7 +79,7 @@ test("delegated request uses the retained narrow tuple and stable vault nonce", 
   assert.deepEqual(gates.delegateMintRequest(manager, executor, { ...b, tokenData: ["0x11", "0x22"], mintCommitments: [id("other"), id("other2")] }, vault, nonce), request);
 });
 
-test("allowlist leaves double hash exact uint64 caps, and current price overrides fail", () => {
+test("allowlist leaves double hash exact uint64 caps and authenticated full-width prices", () => {
   const input = { chainId: chain, manager, collectionId: batch.collectionId, phaseId: batch.phaseId,
     counterId: id("counter"), account: vault, maxCount: (1n << 64n) - 1n, hasPriceOverride: false, priceOverride: 0n };
   const expected = keccak256(keccak256(coder.encode(["bytes32", "uint256", "address", "uint256", "bytes32", "bytes32", "address", "uint64", "bool", "uint256"],
@@ -87,7 +88,13 @@ test("allowlist leaves double hash exact uint64 caps, and current price override
   const sibling = id("sibling"), root = keccak256(coder.encode(["bytes32", "bytes32"], BigInt(expected) < BigInt(sibling) ? [expected, sibling] : [sibling, expected]));
   assert.equal(gates.verifyMintAllowlistProof(root, expected, [sibling]), true);
   assert.equal(gates.verifyMintAllowlistProof(root, id("wrong"), [sibling]), false);
-  assert.throws(() => gates.mintAllowlistLeaf({ ...input, hasPriceOverride: true }));
+  const price = (1n << 255n) + 6529n;
+  const priced = { ...input, hasPriceOverride: true, priceOverride: price };
+  const pricedExpected = keccak256(keccak256(coder.encode(["bytes32", "uint256", "address", "uint256", "bytes32", "bytes32", "address", "uint64", "bool", "uint256"],
+    [id("6529STREAM_MINT_ALLOWLIST_LEAF_V1"), chain, manager, input.collectionId, input.phaseId, input.counterId, vault, input.maxCount, true, price])));
+  assert.equal(gates.mintAllowlistLeaf(priced), pricedExpected);
+  assert.notEqual(pricedExpected, expected);
+  assert.doesNotThrow(() => gates.mintAllowlistLeaf({ ...input, hasPriceOverride: true }));
   assert.throws(() => gates.mintAllowlistLeaf({ ...input, priceOverride: 1n }));
   assert.throws(() => gates.mintAllowlistLeaf({ ...input, maxCount: 1n << 64n }));
 });
@@ -122,4 +129,21 @@ test("allowlist authorization and nullifier independently bind their distinct st
   assert.equal(gates.mintAllowlistNullifier(chain, gate, manager, ledger, batch.collectionId, batch.phaseId, payer, nonce), keccak256(coder.encode(
     ["bytes32", "uint256", "address", "address", "address", "uint256", "bytes32", "address", "bytes32"],
     [id("6529STREAM_MINT_ALLOWLIST_GATE_NONCE_V1"), chain, gate, manager, ledger, batch.collectionId, batch.phaseId, payer, nonce])));
+});
+
+test("enabled zero and full-width allowlist prices survive resolver encoding and value commitments", () => {
+  const ids = [id("free tier"), id("priced tier")], amount = (1n << 255n) + 1n;
+  const groups = [[{ maxCount: 1n, hasPriceOverride: true, priceOverride: 0n, proof: [] }],
+    [{ maxCount: 2n, hasPriceOverride: true, priceOverride: amount, proof: [id("sibling")] }]];
+  const type = "tuple(uint64 maxCount,bool hasPriceOverride,uint256 priceOverride,bytes32[] proof)[][]";
+  assert.equal(gates.mintAllowlistResolverData(groups), coder.encode([type], [groups]));
+  const valueGroups = groups.map((rows, index) => keccak256(coder.encode(["bytes32", "bytes32[]"],
+    [ids[index], rows.map(row => keccak256(coder.encode(["uint64", "bool", "uint256"],
+      [row.maxCount, row.hasPriceOverride, row.priceOverride])))])));
+  const expected = keccak256(coder.encode(["bytes32", "bytes32[]"],
+    [id("6529STREAM_MINT_ALLOWLIST_GATE_PROOF_VALUES_V1"), valueGroups]));
+  assert.equal(gates.mintAllowlistProofValuesHash(ids, groups), expected);
+  const disabled = [[{ ...groups[0][0], hasPriceOverride: false }], groups[1]];
+  assert.notEqual(gates.mintAllowlistProofValuesHash(ids, disabled), expected);
+  assert.throws(() => gates.mintAllowlistResolverData([[{ ...groups[1][0], hasPriceOverride: false }]]));
 });
