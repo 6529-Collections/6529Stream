@@ -20,6 +20,8 @@ import "./StreamPreparedNativeContentExecution.sol";
 import "./StreamMintManagerTranscript.sol";
 import "./StreamMintManagerExecution.sol";
 import "./StreamMintManagerPolicy.sol";
+import "./StreamMintManagerViews.sol";
+import "./StreamMintImport.sol";
 import { StreamMintRoyaltyPolicy } from "./StreamMintRoyaltyPolicy.sol";
 import {
     IStreamMintRoyaltyPolicy
@@ -35,6 +37,7 @@ contract StreamMintManager is
     IStreamPreparedNativeRightsMint,
     IStreamMintAuthorizationRevocation,
     IStreamMintRoyaltyPolicy,
+    IStreamMintManagerImport,
     Ownable,
     ReentrancyGuard,
     ERC165,
@@ -166,6 +169,7 @@ contract StreamMintManager is
         mintLedger = mintLedger_;
         moduleRegistry = moduleRegistry_;
         _registerGasParameter(GasParameterConfig("ARTIST_AUTHORITY_GAS_LIMIT", 150_000, 150_000, 2));
+        _registerGasParameter(GasParameterConfig("MINT_GATE_GAS_LIMIT", 400_000, 400_000, 2));
         _registerGasParameter(
             GasParameterConfig("MINT_REVOCATION_ERC1271_GAS_LIMIT", 400_000, 350_000, 2)
         );
@@ -192,7 +196,12 @@ contract StreamMintManager is
             || interfaceId == type(IStreamPreparedNativeRightsMint).interfaceId
             || interfaceId == type(IStreamMintAuthorizationRevocation).interfaceId
             || interfaceId == type(IStreamMintRoyaltyPolicy).interfaceId
+            || interfaceId == type(IStreamMintManagerImport).interfaceId
             || super.supportsInterface(interfaceId);
+    }
+
+    function importMintState(bytes calldata encodedBatch) external override onlyOwner nonReentrant {
+        StreamMintImport.forward(address(mintLedger), encodedBatch);
     }
 
     function mintTicketAuthorizationId(
@@ -628,7 +637,7 @@ contract StreamMintManager is
                 authorizer: authorizer,
                 contextHash: contextHash
             });
-        return StreamMintOperationIdentity.subjectKey(keyMode, context);
+        return StreamMintManagerAccounting.previewSubject(keyMode, context);
     }
 
     /// @notice Previews the canonical ledger value key for a derived subject.
@@ -638,8 +647,8 @@ contract StreamMintManager is
         bytes32 counterId,
         bytes32 subjectKey
     ) external view override returns (bytes32) {
-        return mintLedger.deriveCounterValueKey(
-            address(this), collectionId, phaseId, counterId, subjectKey
+        return StreamMintManagerAccounting.previewValue(
+            address(mintLedger), collectionId, phaseId, counterId, subjectKey
         );
     }
 
@@ -743,25 +752,8 @@ contract StreamMintManager is
         MintCounterConfig[] calldata counterConfigs,
         address[] calldata executors
     ) external view returns (bytes32) {
-        if (
-            counterIds.length != counterConfigs.length || counterIds.length > MAX_PHASE_COUNTERS
-                || executors.length > MAX_PHASE_EXECUTORS
-        ) revert MintArrayLengthMismatch();
-        return StreamMintOperationIdentity.computePolicyHash(
-            config,
-            gateConfig,
-            counterIds,
-            counterConfigs,
-            executors,
-            StreamMintOperationIdentity.PolicyContext(
-                block.chainid,
-                address(this),
-                address(mintLedger),
-                address(moduleRegistry),
-                SCHEMA_VERSION,
-                collectionId,
-                phaseId
-            )
+        return StreamMintManagerViews.phasePolicy(
+            msg.data[4:], address(mintLedger), address(moduleRegistry)
         );
     }
 

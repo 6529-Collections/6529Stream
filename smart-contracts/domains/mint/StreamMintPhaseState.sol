@@ -5,6 +5,7 @@ import "../../interfaces/stream/mint/IStreamMintManager.sol";
 import "./StreamMintArtistConsent.sol";
 import "./StreamMintGateValidator.sol";
 import "./StreamMintOperationIdentity.sol";
+import "./StreamMintCounterPolicy.sol";
 
 /// @notice Linked configuration and bookkeeping for Manager-owned phase state.
 /// @dev Delegatecalls retain Manager storage, msg.sender and event emitter. Public
@@ -142,6 +143,9 @@ library StreamMintPhaseState {
         for (uint256 i = 0; i < counterIds.length; i++) {
             _requireNoDuplicateCounterId(counterIds, i);
             _requireStaticCounterConfig(counterIds[i], counterConfigs[i]);
+            StreamMintCounterPolicy.validateConfig(
+                context.policy.ledger, counterIds[i], counterConfigs[i]
+            );
             ledgerPolicies[i] = _ledgerPolicy(counterConfigs[i]);
         }
         IStreamMintManager.MintGateConfig memory validatedGateConfig =

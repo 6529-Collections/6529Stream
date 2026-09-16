@@ -5,9 +5,18 @@ import "../../interfaces/stream/mint/IStreamMintLedger.sol";
 import "../../interfaces/stream/mint/IStreamMintLedgerRevocation.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
+import "./StreamMintCounterPolicy.sol";
+import "./StreamMintImport.sol";
 
 /// @notice Durable outside-Core accounting ledger for launch mint counters.
-contract StreamMintLedger is IStreamMintLedger, IStreamMintLedgerRevocation, Ownable, ERC165 {
+contract StreamMintLedger is
+    IStreamMintLedger,
+    IStreamMintLedgerRevocation,
+    IStreamMintCounterPolicy,
+    IStreamMintLedgerImport,
+    Ownable,
+    ERC165
+{
     uint16 public constant SCHEMA_VERSION = 1;
     uint64 public constant MAX_POLICY_GRACE_SECONDS = 2_592_000;
     bytes32 public constant VALUE_KEY_DOMAIN = keccak256("6529STREAM_MINT_COUNTER_VALUE_KEY_V1");
@@ -34,6 +43,73 @@ contract StreamMintLedger is IStreamMintLedger, IStreamMintLedgerRevocation, Own
     mapping(address => mapping(bytes32 => bool)) private _authorizationUsed;
     mapping(address => mapping(bytes32 => bool)) private _nullifierUsed;
     mapping(address => mapping(bytes32 => bool)) private _operationRootUsed;
+    mapping(bytes32 => Definition) private _counterDefinitions;
+    mapping(bytes32 => bool) private _definitionExists;
+    // 0: unseen; 1: permanently legacy; 2: immutable registered definition.
+    mapping(address => mapping(bytes32 => uint8)) private _definitionSelection;
+    mapping(address => uint64) public override ledgerWriterRetiredAt;
+    mapping(bytes32 => ImportCommitment) private _imports;
+    mapping(address => bytes32) private _successorImportRoot;
+    mapping(bytes32 => mapping(bytes32 => bool)) private _importedLeaves;
+    mapping(address => bytes32[]) private _managerDefinitionHashes;
+    mapping(bytes32 => uint256) private _importDefinitionCount;
+    mapping(bytes32 => uint256) private _importDefinitionCursor;
+
+    function registerCounterDefinition(Definition calldata definition)
+        external
+        override
+        returns (bytes32 hash)
+    {
+        StreamMintCounterPolicy.validateDefinition(definition);
+        hash = StreamMintCounterPolicy.definitionHash(definition);
+        if (!_definitionExists[hash]) {
+            _definitionExists[hash] = true;
+            _counterDefinitions[hash] = definition;
+            emit MintCounterDefinitionRegistered(
+                hash,
+                definition.scope,
+                definition.keyMode,
+                definition.capRoot,
+                definition.metadataHash
+            );
+        }
+    }
+
+    function counterDefinition(bytes32 hash)
+        external
+        view
+        override
+        returns (bool, Definition memory)
+    {
+        return (_definitionExists[hash], _counterDefinitions[hash]);
+    }
+
+    function counterDefinitionForManager(address manager, bytes32 hash)
+        public
+        view
+        override
+        returns (bool, Definition memory d)
+    {
+        uint8 selected = _definitionSelection[manager][hash];
+        bool exists = selected == 2 || (selected == 0 && _definitionExists[hash]);
+        if (exists) d = _counterDefinitions[hash];
+        else d.scope = CounterScope.PHASE;
+        return (exists, d);
+    }
+
+    function managerDefinitionCount(address manager) external view override returns (uint256) {
+        return _managerDefinitionHashes[manager].length;
+    }
+
+    function managerDefinitionAt(address manager, uint256 index)
+        external
+        view
+        override
+        returns (bytes32 hash, bool defined, Definition memory d)
+    {
+        hash = _managerDefinitionHashes[manager][index];
+        (defined, d) = counterDefinitionForManager(manager, hash);
+    }
 
     /// @notice Returns true for deployment validation.
     function isStreamMintLedger() external pure override returns (bool) {
@@ -49,6 +125,8 @@ contract StreamMintLedger is IStreamMintLedger, IStreamMintLedgerRevocation, Own
     {
         return interfaceId == type(IStreamMintLedger).interfaceId
             || interfaceId == type(IStreamMintLedgerRevocation).interfaceId
+            || interfaceId == type(IStreamMintCounterPolicy).interfaceId
+            || interfaceId == type(IStreamMintLedgerImport).interfaceId
             || super.supportsInterface(interfaceId);
     }
 
@@ -57,11 +135,240 @@ contract StreamMintLedger is IStreamMintLedger, IStreamMintLedgerRevocation, Own
         if (writer == address(0)) {
             revert InvalidLedgerWriter(writer);
         }
-        if (allowed && writer.code.length == 0) {
+        if (allowed && (writer.code.length == 0 || ledgerWriterRetiredAt[writer] != 0)) {
             revert InvalidLedgerWriter(writer);
         }
         ledgerWriter[writer] = allowed;
         emit MintLedgerWriterUpdated(writer, allowed);
+    }
+
+    /// @notice Irreversibly stops this writer before a successor snapshot can be committed.
+    function retireLedgerWriter(address writer) external override onlyOwner {
+        if (
+            writer.code.length == 0 || ledgerWriterRetiredAt[writer] != 0 || block.number == 0
+                || block.number > type(uint64).max
+        ) {
+            revert MintImportInvalid();
+        }
+        bytes32 root = _successorImportRoot[writer];
+        if (root != 0 && !_imports[root].complete) revert MintImportNotReady(writer);
+        ledgerWriter[writer] = false;
+        ledgerWriterRetiredAt[writer] = uint64(block.number);
+        emit MintLedgerWriterUpdated(writer, false);
+        emit MintLedgerWriterRetired(writer, uint64(block.number));
+    }
+
+    function commitCounterImportRoot(
+        address predecessorLedger,
+        address predecessorManager,
+        address successorManager,
+        uint64 snapshotBlock,
+        bytes32 importRoot,
+        bytes32 manifestHash
+    ) external override onlyOwner {
+        if (
+            importRoot == 0 || manifestHash == 0 || predecessorLedger.code.length == 0
+                || predecessorManager == successorManager || successorManager.code.length == 0
+                || ledgerWriterRetiredAt[successorManager] != 0
+                || _imports[importRoot].successorManager != address(0)
+                || _successorImportRoot[successorManager] != 0 || snapshotBlock > block.number
+        ) revert MintImportInvalid();
+        uint64 retiredAt =
+            IStreamMintLedgerImport(predecessorLedger).ledgerWriterRetiredAt(predecessorManager);
+        if (
+            retiredAt == 0 || snapshotBlock < retiredAt
+                || IStreamMintLedger(predecessorLedger).ledgerWriter(predecessorManager)
+        ) revert MintImportInvalid();
+        StreamMintImport.requireManagerPair(
+            predecessorLedger, predecessorManager, successorManager, owner()
+        );
+        ImportCommitment memory c = ImportCommitment(
+            predecessorLedger,
+            predecessorManager,
+            successorManager,
+            snapshotBlock,
+            manifestHash,
+            0,
+            0,
+            false
+        );
+        bytes32 actionId = StreamMintImport.authenticateCommit(owner(), c, importRoot);
+        _imports[importRoot] = c;
+        _successorImportRoot[successorManager] = importRoot;
+        _importDefinitionCount[importRoot] =
+            IStreamMintCounterPolicy(predecessorLedger).managerDefinitionCount(predecessorManager);
+        emit MintLedgerImportRootCommitted(
+            SCHEMA_VERSION,
+            importRoot,
+            predecessorManager,
+            successorManager,
+            predecessorLedger,
+            snapshotBlock,
+            manifestHash
+        );
+        emit MintLedgerImportAction(importRoot, actionId);
+    }
+
+    function mintImportCommitment(bytes32 root)
+        external
+        view
+        override
+        returns (ImportCommitment memory)
+    {
+        return _imports[root];
+    }
+
+    function isMintSuccessorReady(
+        address predecessorLedger,
+        address predecessorManager,
+        address successorManager
+    ) external view override returns (bool) {
+        ImportCommitment storage c = _imports[_successorImportRoot[successorManager]];
+        return c.complete && c.predecessorLedger == predecessorLedger
+            && c.predecessorManager == predecessorManager && c.successorManager == successorManager
+            && ledgerWriter[successorManager] && ledgerWriterRetiredAt[successorManager] == 0;
+    }
+
+    function importCounterValue(
+        bytes32 root,
+        CounterImportLeaf calldata leaf,
+        bytes32 successorSubjectKey,
+        bytes32[] calldata proof
+    ) external override {
+        ImportCommitment storage c = _requireImportWriter(root);
+        bytes32 hash = StreamMintImport.counterLeaf(c, leaf);
+        _requireImportProof(root, hash, proof);
+        if (
+            leaf.predecessorSubjectKey != StreamMintImport.subject(c.predecessorLedger, leaf)
+                || successorSubjectKey != StreamMintImport.subject(address(this), leaf)
+        ) revert MintImportInvalid();
+        bytes32 predecessorKey = deriveCounterValueKey(
+            c.predecessorManager,
+            leaf.collectionId,
+            leaf.phaseId,
+            leaf.counterId,
+            leaf.predecessorSubjectKey
+        );
+        if (IStreamMintLedger(c.predecessorLedger).counterValue(predecessorKey) != leaf.value) {
+            revert MintImportInvalid();
+        }
+        bytes32 valueKey = deriveCounterValueKey(
+            msg.sender, leaf.collectionId, leaf.phaseId, leaf.counterId, successorSubjectKey
+        );
+        _importedLeaves[root][hash] = true;
+        c.importedCounters++;
+        uint64 current = counterValue[valueKey];
+        if (leaf.value > current) counterValue[valueKey] = leaf.value;
+        emit MintLedgerCounterImported(
+            SCHEMA_VERSION,
+            root,
+            valueKey,
+            successorSubjectKey,
+            leaf.collectionId,
+            leaf.phaseId,
+            leaf.counterId,
+            leaf.value,
+            counterValue[valueKey]
+        );
+    }
+
+    function importNullifier(bytes32 root, bytes32 nullifier, bytes32[] calldata proof)
+        external
+        override
+    {
+        ImportCommitment storage c = _requireImportWriter(root);
+        bytes32 hash = StreamMintImport.nullifierLeaf(c, nullifier);
+        _requireImportProof(root, hash, proof);
+        if (
+            nullifier == 0
+                || !IStreamMintLedger(c.predecessorLedger)
+                    .isManagerNullifierUsed(c.predecessorManager, nullifier)
+        ) revert MintImportInvalid();
+        _importedLeaves[root][hash] = true;
+        c.importedNullifiers++;
+        _nullifierUsed[msg.sender][nullifier] = true;
+        emit MintLedgerNullifierImported(SCHEMA_VERSION, root, nullifier, msg.sender);
+    }
+
+    function mintImportDefinitionProgress(bytes32 root)
+        external
+        view
+        override
+        returns (uint256 imported, uint256 required)
+    {
+        return (_importDefinitionCursor[root], _importDefinitionCount[root]);
+    }
+
+    function importCounterDefinitions(bytes32 root, uint256 maxCount) external override {
+        ImportCommitment storage c = _imports[root];
+        if (
+            c.successorManager == address(0) || c.complete
+                || ledgerWriterRetiredAt[c.successorManager] != 0 || maxCount == 0 || maxCount > 32
+        ) revert MintImportInvalid();
+        uint256 cursor = _importDefinitionCursor[root];
+        uint256 end = cursor + maxCount;
+        if (end > _importDefinitionCount[root]) end = _importDefinitionCount[root];
+        for (; cursor < end; ++cursor) {
+            (bytes32 hash, bool defined, Definition memory d) = IStreamMintCounterPolicy(
+                    c.predecessorLedger
+                ).managerDefinitionAt(c.predecessorManager, cursor);
+            uint8 selection = defined ? 2 : 1;
+            uint8 existing = _definitionSelection[c.successorManager][hash];
+            if (existing != 0 && existing != selection) revert MintImportInvalid();
+            if (defined) {
+                StreamMintCounterPolicy.validateDefinition(d);
+                if (StreamMintCounterPolicy.definitionHash(d) != hash) revert MintImportInvalid();
+                if (!_definitionExists[hash]) {
+                    _definitionExists[hash] = true;
+                    _counterDefinitions[hash] = d;
+                    emit MintCounterDefinitionRegistered(
+                        hash, d.scope, d.keyMode, d.capRoot, d.metadataHash
+                    );
+                }
+            }
+            if (existing == 0) {
+                _definitionSelection[c.successorManager][hash] = selection;
+                _managerDefinitionHashes[c.successorManager].push(hash);
+            }
+            emit MintLedgerImportProfileCopied(root, hash, defined);
+        }
+        _importDefinitionCursor[root] = cursor;
+    }
+
+    function completeCounterImport(
+        bytes32 root,
+        uint64 counterLeaves,
+        uint64 nullifierLeaves,
+        bytes32[] calldata descriptorProof
+    ) external override {
+        ImportCommitment storage c = _imports[root];
+        if (
+            c.successorManager == address(0) || c.complete || c.importedCounters != counterLeaves
+                || c.importedNullifiers != nullifierLeaves
+                || _importDefinitionCursor[root] != _importDefinitionCount[root]
+        ) revert MintImportInvalid();
+        bytes32 descriptor = StreamMintImport.descriptorLeaf(c, counterLeaves, nullifierLeaves);
+        if (!StreamMintCounterPolicy.verify(root, descriptor, descriptorProof)) {
+            revert MintImportProofInvalid(descriptor);
+        }
+        c.complete = true;
+        emit MintLedgerImportCompleted(root, c.successorManager, counterLeaves, nullifierLeaves);
+    }
+
+    function _requireImportWriter(bytes32 root) private view returns (ImportCommitment storage c) {
+        _requireLedgerWriter();
+        c = _imports[root];
+        if (c.successorManager != msg.sender || c.complete) revert MintImportInvalid();
+    }
+
+    function _requireImportProof(bytes32 root, bytes32 hash, bytes32[] calldata proof)
+        private
+        view
+    {
+        if (_importedLeaves[root][hash]) revert MintImportLeafAlreadyUsed(hash);
+        if (!StreamMintCounterPolicy.verify(root, hash, proof)) {
+            revert MintImportProofInvalid(hash);
+        }
     }
 
     /// @notice Permanently voids one authorization in this authorized manager's existing replay map.
@@ -153,6 +460,10 @@ contract StreamMintLedger is IStreamMintLedger, IStreamMintLedgerRevocation, Own
     ) external override {
         _requireLedgerWriter();
         bytes32 currentPolicyHash = registeredPhasePolicyHash[msg.sender][collectionId][phaseId];
+        bytes32 importRoot = _successorImportRoot[msg.sender];
+        if (importRoot != 0 && !_imports[importRoot].complete) {
+            revert MintImportNotReady(msg.sender);
+        }
         _requireBoundPolicy(msg.sender, collectionId, phaseId, currentPolicyHash, boundPolicyHash);
         _requireOperationRoot(operationRoot);
 
@@ -396,6 +707,23 @@ contract StreamMintLedger is IStreamMintLedger, IStreamMintLedgerRevocation, Own
         _requireNoDuplicateCounterId(counterIds, index, counterId);
         LedgerCounterPolicy calldata policy = counterPolicies[index];
         _requireStaticCounterPolicy(counterId, policy);
+        bytes32 definitionId = policy.counterConfigHash;
+        if (_definitionSelection[manager][definitionId] == 0) {
+            _definitionSelection[manager][definitionId] = _definitionExists[definitionId] ? 2 : 1;
+            _managerDefinitionHashes[manager].push(definitionId);
+        }
+        (bool defined, Definition memory definition) =
+            counterDefinitionForManager(manager, definitionId);
+        if (
+            (policy.capMode == CounterCapMode.MERKLE_STATIC
+                    && (!defined || definition.capRoot == bytes32(0) || policy.staticCap == 0))
+                || (defined
+                    && (policy.capMode == CounterCapMode.NONE
+                        || (definition.capRoot != bytes32(0)
+                            && policy.capMode != CounterCapMode.MERKLE_STATIC)))
+        ) {
+            revert InvalidCounterPolicy(counterId);
+        }
         _registeredCounterPolicies[manager][collectionId][phaseId][counterId] = policy;
         _registeredCounterPolicyVersions[manager][collectionId][phaseId][counterId] = activeVersion;
         _emitCounterPolicyRegistered(manager, collectionId, phaseId, counterId, policy, policyHash);
@@ -487,12 +815,13 @@ contract StreamMintLedger is IStreamMintLedger, IStreamMintLedgerRevocation, Own
         ) {
             revert CounterPolicyMismatch(consumption.counterId);
         }
+        (, Definition memory definition) =
+            counterDefinitionForManager(msg.sender, policy.counterConfigHash);
+        (uint256 scopeCollection, bytes32 scopePhase) = StreamMintCounterPolicy.scopeIds(
+            definition.scope, consumption.collectionId, consumption.phaseId
+        );
         bytes32 expectedValueKey = deriveCounterValueKey(
-            msg.sender,
-            consumption.collectionId,
-            consumption.phaseId,
-            consumption.counterId,
-            consumption.subjectKey
+            msg.sender, scopeCollection, scopePhase, consumption.counterId, consumption.subjectKey
         );
         if (consumption.valueKey != expectedValueKey) {
             revert CounterValueKeyMismatch(consumption.valueKey, expectedValueKey);
@@ -503,14 +832,20 @@ contract StreamMintLedger is IStreamMintLedger, IStreamMintLedgerRevocation, Own
         if (policy.capMode == CounterCapMode.NONE && consumption.cap != 0) {
             revert CounterPolicyMismatch(consumption.counterId);
         }
+        if (
+            policy.capMode == CounterCapMode.MERKLE_STATIC
+                && (consumption.cap == 0 || consumption.cap > policy.staticCap)
+        ) {
+            revert CounterPolicyMismatch(consumption.counterId);
+        }
 
         uint64 currentValue = counterValue[consumption.valueKey];
         if (type(uint64).max - currentValue < consumption.increment) {
             revert CounterValueOverflow(consumption.valueKey);
         }
         uint64 newValue = currentValue + consumption.increment;
-        if (policy.capMode == CounterCapMode.STATIC && newValue > policy.staticCap) {
-            revert CounterCapExceeded(consumption.valueKey, newValue, policy.staticCap);
+        if (policy.capMode != CounterCapMode.NONE && newValue > consumption.cap) {
+            revert CounterCapExceeded(consumption.valueKey, newValue, consumption.cap);
         }
         counterValue[consumption.valueKey] = newValue;
         _emitCounterConsumed(consumption, newValue, boundPolicyHash, operationRoot);
