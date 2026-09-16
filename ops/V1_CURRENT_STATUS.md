@@ -18,21 +18,22 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 16 September parallel implementation batch
 
-Source through `837683ed` includes free-burn reveal credits, original Artist
+Source through `40ae52f8` includes free-burn reveal credits, original Artist
 withdrawal61, the native-price adapter size repair, distribution/burn/price
 clients, museum authority reconciliation and expanded actual-current test hosts.
 The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
 records exact handoffs and evidence, superseding older queue descriptions.
 
-All 1,954 Solidity sources pass ABI/type/storage checking. Root passes all 304
+All 1,959 Solidity sources pass ABI/type/storage checking. Root passes all 304
 client tests with generation/build/types and 34 new museum authority tests.
 Separate native cohorts pass mint101, Royalty11, Core29, entropy10, final burn49
 and later burn-credit31 distinct cases. These captures have different sources
 and component boundaries; counts must not be added into a complete-system claim.
 
-Native immediate prices pass 75 functional cases before the later size repair.
-The repaired adapter measures 24,560 runtime bytes, with its exact native rerun
-pending. Dutch, clearing, refund and ERC20 price consumers remain. Artist
+The exact repaired native-price adapter passes 76 scoped cases; root is
+independently attesting its capture. It measures 24,560 runtime bytes. Dutch and
+clearing have a separate reviewed builder handoff; integration and native
+acceptance remain, followed by refund and ERC20 consumers. Artist
 withdrawal has ten authored cases; Royalty successor tests and actual-governance
 burn/Safe tests are authored but await complete current-stack execution.
 
@@ -44,8 +45,8 @@ was also rejected and its complete reviewable proposal is being prepared.
 Other work continues under the owner's delivery authorization.
 
 Independent review reproduced a low-gas false-currentness error in the separate
-STATIC content producer. Its correction passes two isolated actual-Renderer
-regressions and awaits final independent source review before integration.
+STATIC content producer. The independently reviewed correction is integrated
+as 40ae52f8 and passes two isolated actual-Renderer regressions.
 This is separate from the held Router patch. Museum Type/actual positive-record
 joins and wider schema/conformance remain; authority fixture successes alone
 do not establish institutional acceptance.

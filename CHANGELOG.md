@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add frozen ONCHAIN STATIC full-output checkpoints and require complete gas
+  budgets when validating current output, with reproduced low-gas regressions.
+
 - Add original-opener Artist dispute withdrawal as additive operation 61, with
   canonical outcome/history records and authored Artist/Safe/Archive regressions.
 - Add free-burn maximum reveal allowances, executor-owned pull credits and
