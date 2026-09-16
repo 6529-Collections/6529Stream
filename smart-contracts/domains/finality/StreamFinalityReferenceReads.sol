@@ -5,6 +5,8 @@ import "../../interfaces/stream/finality/StreamFinalityReferenceTypes.sol";
 import "../../interfaces/stream/preservation/IStreamReferenceRenderPublication.sol";
 import "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
 import "../records/StreamReferenceRenderDefinitions.sol";
+import "../records/StreamReferenceModeDefinitions.sol";
+import "../../interfaces/stream/preservation/IStreamReferenceModePublication.sol";
 import "./StreamFinalityRouterEvidence.sol";
 
 /// @notice Fixed current reference publication consumption with an explicit local lock gate.
@@ -76,11 +78,26 @@ library StreamFinalityReferenceReads {
                 || (r.authorizationClass != 3 && r.authorizationClass != 8) || r.grantRevision == 0
                 || r.effectiveAt == 0 || r.recordedAt < r.effectiveAt
                 || r.recordedAt > block.timestamp || r.reasonHash == 0
-                || (revision == 1 ? r.predecessor != 0 : r.predecessor == 0)
-                || r.schemaHash != StreamReferenceRenderDefinitions.SCHEMA_HASH
-                || r.profileHash != StreamReferenceRenderDefinitions.PROFILE_HASH
-                || r.canonicalizationHash != StreamReferenceRenderDefinitions.CANON_HASH
+                || (revision == 1 ? r.predecessor != 0 : r.predecessor == 0) || !_profile(r)
         ) revert InvalidReferenceEvidence();
+        if (r.profileHash == StreamReferenceModeDefinitions.PROFILE_HASH) {
+            // requireCurrent above validates the full registered mode proof and original sources.
+            bytes memory modeRaw = StreamFinalityRouterEvidence.read(
+                d.referencePublisher,
+                abi.encodeCall(IStreamReferenceModePublication.referenceMode, (recordHash)),
+                64,
+                d.readGas
+            );
+            (StreamReferenceModeTypes.Mode mode, bytes32 evidenceHash) =
+                abi.decode(modeRaw, (StreamReferenceModeTypes.Mode, bytes32));
+            if (
+                keccak256(modeRaw) != keccak256(abi.encode(mode, evidenceHash)) || evidenceHash == 0
+                    || (mode != StreamReferenceModeTypes.Mode.PERCEPTUAL_TOLERANCE
+                        && mode != StreamReferenceModeTypes.Mode.CURATED_EQUIVALENCE)
+            ) {
+                revert InvalidReferenceEvidence();
+            }
+        }
         raw = StreamFinalityRouterEvidence.read(
             d.referencePublisher,
             abi.encodeCall(IStreamReferenceRenderPublication.referenceLock, (scope.collectionId)),
@@ -163,6 +180,15 @@ library StreamFinalityReferenceReads {
     ) public view returns (StreamFinalityReferenceEvidence memory e) {
         e = requireCurrent(d, scope, recordHash, revision);
         if (!e.locked) revert InvalidReferenceEvidence();
+    }
+
+    function _profile(StreamReferenceRenderTypes.Receipt memory r) private pure returns (bool) {
+        return (r.schemaHash == StreamReferenceRenderDefinitions.SCHEMA_HASH
+                && r.profileHash == StreamReferenceRenderDefinitions.PROFILE_HASH
+                && r.canonicalizationHash == StreamReferenceRenderDefinitions.CANON_HASH)
+            || (r.schemaHash == StreamReferenceModeDefinitions.SCHEMA_HASH
+                && r.profileHash == StreamReferenceModeDefinitions.PROFILE_HASH
+                && r.canonicalizationHash == StreamReferenceModeDefinitions.CANON_HASH);
     }
 
     function _word(Dependencies memory d, bytes memory input) private view returns (bytes32) {

@@ -1,0 +1,1 @@
+{"encoding":"STREAM_SOLIDITY_ABI_V1","name":"STREAM_REFERENCE_SIGNIFICANT_PROPERTIES_ABI_V1","scope":"Complete ordered bytes must match the selected original ARTIST_INTENT significantProperties HashRef;1..32 distinct nonzero IDs. An unrelated caller list cannot supply completeness.","tuple":"(bytes32 id,string name,string significantValue)[]","version":1}

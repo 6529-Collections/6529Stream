@@ -7,6 +7,8 @@ import "../../interfaces/stream/finality/IStreamFinalitySanctionReview.sol";
 import "../../interfaces/stream/preservation/IStreamExternalArtifactCoverage.sol";
 import "../../interfaces/stream/preservation/StreamExternalArtifactTypes.sol";
 import "../records/StreamReferenceRenderDefinitions.sol";
+import "../records/StreamReferenceModeDefinitions.sol";
+import "../../interfaces/stream/preservation/IStreamReferenceModePublication.sol";
 
 /// @notice Ordered original PNG content hashes for the admitted native finality statement.
 /// @dev The provider first validates all current inputs and the exact registered manifest.
@@ -33,7 +35,7 @@ library StreamFinalityNativeSanctionReview {
         _pin(c, 11);
         _pin(c, 21);
         bytes32 artistId = _artist(c, s.scope.collectionId);
-        StreamReferenceRenderTypes.Publication memory publication = _publication(c, s);
+        (StreamReferenceRenderTypes.Publication memory publication, bool exact) = _publication(c, s);
         uint256 count = publication.captures.length;
         if (count == 0 || count > 16) revert NativeReviewSource();
         if (count > 1) {
@@ -48,7 +50,8 @@ library StreamFinalityNativeSanctionReview {
         result.mediaContentHashes = new bytes32[](0);
         result.referenceRenderContentHashes = new bytes32[](count);
         for (uint256 i; i < count; ++i) {
-            result.referenceRenderContentHashes[i] = _capture(c, artistId, publication.captures[i]);
+            result.referenceRenderContentHashes[i] =
+                _capture(c, artistId, publication.captures[i], exact);
         }
     }
 
@@ -77,7 +80,7 @@ library StreamFinalityNativeSanctionReview {
     function _publication(
         StreamFinalityNativeProviderReads.Config memory c,
         StreamFinalityInputManifestTypes.Statement memory s
-    ) private view returns (StreamReferenceRenderTypes.Publication memory p) {
+    ) private view returns (StreamReferenceRenderTypes.Publication memory p, bool exact) {
         bytes memory raw = _dynamicRead(
             c.targets[9],
             abi.encodeCall(
@@ -104,6 +107,28 @@ library StreamFinalityNativeSanctionReview {
         ) {
             revert NativeReviewSource();
         }
+        exact = receipt.profileHash == StreamReferenceRenderDefinitions.PROFILE_HASH;
+        if (!exact) {
+            if (
+                receipt.profileHash != StreamReferenceModeDefinitions.PROFILE_HASH
+                    || receipt.schemaHash != StreamReferenceModeDefinitions.SCHEMA_HASH
+                    || receipt.canonicalizationHash != StreamReferenceModeDefinitions.CANON_HASH
+            ) revert NativeReviewSource();
+            // Full mode validation is part of the provider's original current-input admission.
+            bytes memory modeRaw = StreamFinalityBoundedReads.read(
+                c.targets[9],
+                abi.encodeCall(IStreamReferenceModePublication.referenceMode, (receipt.recordHash)),
+                64,
+                c.readGas
+            );
+            (StreamReferenceModeTypes.Mode mode, bytes32 evidenceHash) =
+                abi.decode(modeRaw, (StreamReferenceModeTypes.Mode, bytes32));
+            if (
+                keccak256(modeRaw) != keccak256(abi.encode(mode, evidenceHash)) || evidenceHash == 0
+                    || (mode != StreamReferenceModeTypes.Mode.PERCEPTUAL_TOLERANCE
+                        && mode != StreamReferenceModeTypes.Mode.CURATED_EQUIVALENCE)
+            ) revert NativeReviewSource();
+        }
         raw = StreamFinalityBoundedReads.read(
             c.targets[9],
             abi.encodeCall(
@@ -118,23 +143,22 @@ library StreamFinalityNativeSanctionReview {
     function _capture(
         StreamFinalityNativeProviderReads.Config memory c,
         bytes32 artistId,
-        StreamReferenceRenderTypes.Capture memory capture
+        StreamReferenceRenderTypes.Capture memory capture,
+        bool exact
     ) private view returns (bytes32) {
-        bytes memory raw =
-            StreamFinalityBoundedReads.read(
-                c.targets[21],
-                abi.encodeCall(
-                    IStreamExternalArtifactCoverage.objectIdentity, (capture.objectHash)
-                ),
-                320,
-                c.readGas
-            );
+        bytes memory raw = StreamFinalityBoundedReads.read(
+            c.targets[21],
+            abi.encodeCall(IStreamExternalArtifactCoverage.objectIdentity, (capture.objectHash)),
+            320,
+            c.readGas
+        );
         StreamExternalArtifactTypes.ObjectIdentity memory o =
             abi.decode(raw, (StreamExternalArtifactTypes.ObjectIdentity));
         if (
             keccak256(raw) != keccak256(abi.encode(o)) || o.artistId != artistId
                 || o.contentHash == 0 || o.sha256Digest == 0 || capture.repeatCaptureSha256[0] == 0
-                || capture.repeatCaptureSha256[0] != capture.repeatCaptureSha256[1]
+                || capture.repeatCaptureSha256[1] == 0
+                || (exact && capture.repeatCaptureSha256[0] != capture.repeatCaptureSha256[1])
                 || o.sha256Digest != capture.repeatCaptureSha256[0] || o.arweaveDataRoot == 0
                 || o.byteSize == 0 || capture.coverageHash == 0
                 || o.canonicalizationId != keccak256("RAW_BYTES")

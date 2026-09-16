@@ -18,6 +18,13 @@ import {
 import "../../interfaces/stream/preservation/IStreamReferenceRenderPublication.sol";
 import "../../interfaces/stream/preservation/IStreamExternalArtifactCoverage.sol";
 import "./StreamRenderCriticalSourceReads.sol";
+import { StreamReferenceModeInventory as Modes } from "./StreamReferenceModeInventory.sol";
+import {
+    StreamReferenceModeTypes as ModeTypes
+} from "../../interfaces/stream/preservation/StreamReferenceModeTypes.sol";
+import {
+    StreamReferenceModeDefinitions as ModeDefinitions
+} from "../records/StreamReferenceModeDefinitions.sol";
 import {
     StreamPreservationInventoryChains as Chains
 } from "./StreamPreservationInventoryChains.sol";
@@ -89,8 +96,18 @@ library StreamReferenceInventoryReads {
         ) {
             revert T.InventorySourceChanged();
         }
+        bool modeProfile = receipt.profileHash == ModeDefinitions.PROFILE_HASH;
+        ModeTypes.Evidence memory mode;
+        ModeTypes.Facts memory facts;
+        T.Item[] memory extra;
+        if (modeProfile) {
+            (mode, facts) = Modes.evidence(d, c);
+            if (mode.repeats.length != p.captures.length) revert T.InventorySourceChanged();
+            extra = Modes.items(d, c, mode, facts);
+        }
         uint256 count = 3 + p.environment.packageFiles.length
-            + p.environment.platformPrerequisites.length + p.captures.length * 2;
+            + p.environment.platformPrerequisites.length + p.captures.length * 2
+            + (modeProfile ? mode.repeats.length + extra.length : 0);
         // Each slot below receives a complete row before it is read or returned. Avoid
         // constructing default structs which those assignments would immediately replace.
         uint256 start;
@@ -109,8 +126,11 @@ library StreamReferenceInventoryReads {
             0,
             payload
         );
-        result[0].schemaId = keccak256("STREAM_NATIVE_REFERENCE_RENDER_V1");
-        result[0].canonicalizationId = keccak256("RFC8785_JCS");
+        result[0].schemaId = modeProfile
+            ? ModeDefinitions.SCHEMA_ID
+            : keccak256("STREAM_NATIVE_REFERENCE_RENDER_V1");
+        result[0].canonicalizationId =
+            modeProfile ? ModeDefinitions.CANON_ID : keccak256("RFC8785_JCS");
         result[1] = Items.bytesItem(
             T.Kind.NATIVE_BYTES,
             keccak256("REFERENCE_ENVIRONMENT_DECLARATION"),
@@ -154,6 +174,21 @@ library StreamReferenceInventoryReads {
                 i,
                 abi.encode(p.captures[i])
             );
+        }
+        if (modeProfile) {
+            for (uint256 i; i < mode.repeats.length; ++i) {
+                result[next++] = _external(
+                    d,
+                    c,
+                    i,
+                    keccak256("REFERENCE_REPEAT_CAPTURE"),
+                    mode.repeats[i].objectHash,
+                    mode.repeats[i].coverageHash
+                );
+            }
+            for (uint256 i; i < extra.length; ++i) {
+                result[next++] = extra[i];
+            }
         }
         if (next != count) revert T.InvalidInventoryItem();
     }

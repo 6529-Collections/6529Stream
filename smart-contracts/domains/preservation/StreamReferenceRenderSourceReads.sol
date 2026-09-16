@@ -160,6 +160,25 @@ library StreamReferenceRenderSourceReads {
         SourceInput memory p,
         bool current
     ) public view returns (StreamReferenceRenderTypes.SourceFacts memory f) {
+        return _requireSourceInputs(d, p, current, true);
+    }
+
+    /// @notice Distinct mode producer must also authenticate the second archived observation.
+    /// The original BYTE_EXACT entry above always retains its equality requirement.
+    function requireModeSourceInputs(
+        StreamReferenceRenderTypes.Dependencies memory d,
+        SourceInput memory p,
+        bool current
+    ) public view returns (StreamReferenceRenderTypes.SourceFacts memory f) {
+        return _requireSourceInputs(d, p, current, false);
+    }
+
+    function _requireSourceInputs(
+        StreamReferenceRenderTypes.Dependencies memory d,
+        SourceInput memory p,
+        bool current,
+        bool exact
+    ) private view returns (StreamReferenceRenderTypes.SourceFacts memory f) {
         StreamSnapshotTypes.Dependencies memory source = bindings(d);
         StreamFinalitySnapshotReads.Dependencies memory snapshot =
             StreamFinalitySnapshotReads.Dependencies(
@@ -224,7 +243,8 @@ library StreamReferenceRenderSourceReads {
                 index,
                 p.captures[i],
                 f.artistId,
-                current
+                current,
+                exact
             );
         }
     }
@@ -237,7 +257,8 @@ library StreamReferenceRenderSourceReads {
         uint256 index,
         StreamReferenceRenderTypes.Capture memory c,
         bytes32 artistId,
-        bool current
+        bool current,
+        bool exact
     ) private view returns (StreamReferenceRenderTypes.SampleFacts memory f) {
         bytes memory raw = _read(
             checkpoint,
@@ -254,7 +275,8 @@ library StreamReferenceRenderSourceReads {
                 || c.animationHTML.length != c.htmlBytes || keccak256(c.animationHTML) != c.htmlHash
                 || sha256(c.animationHTML) != c.sourceSha256 || c.capturedAt == 0
                 || c.capturedAt > block.timestamp || c.repeatCaptureSha256[0] == 0
-                || c.repeatCaptureSha256[0] != c.repeatCaptureSha256[1]
+                || c.repeatCaptureSha256[1] == 0
+                || (exact && c.repeatCaptureSha256[0] != c.repeatCaptureSha256[1])
         ) {
             revert StreamReferenceRenderTypes.InvalidReferenceRender();
         }
@@ -417,6 +439,13 @@ library StreamReferenceRenderSourceReads {
                 revert StreamReferenceRenderTypes.InvalidReferenceRender();
             }
         }
+    }
+
+    function requireCaptureObject(
+        StreamReferenceRenderTypes.Dependencies memory d,
+        E.Coverage memory e
+    ) public view {
+        _object(d, e, false);
     }
 
     function _object(
