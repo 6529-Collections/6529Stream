@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add official Safe all-CALL batch tests for paid mint, entropy, custody,
+  replay and cross-component rollback; native execution remains pending.
+
 - Correct the Artist entropy-recovery test fixture's canonical role-registry
   pin and add live-role revocation/regrant and registry-drift regressions.
 
