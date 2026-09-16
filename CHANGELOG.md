@@ -13,6 +13,8 @@ the release policy in `docs/release-policy.md`.
 
 - Add reproducible selected-host current-graph acceptance captures with native
   compiler provenance, complete suite inventories and production size checks.
+- Add ordered Safe CALL plans, exact primary-template CLEAR/FREEZE callers with
+  independent assignment reconstruction, and eight-family Artist ceremony packets.
 
 - Add complete typed Artist authority hydration for original living, payout
   and direct-economics histories, preserving source records and replay guards.

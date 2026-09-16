@@ -333,3 +333,12 @@ hashes and direct/relayed Safe preparation. These are client encoding checks;
 full current-stack workflow acceptance remains separate. See the
 [manifest profile](../../docs/collection-manifest-profile.md) for implemented
 contract profiles and outstanding larger-script work.
+
+## Current caller extensions
+
+- [Ordered Safe CALL plans](docs/safe-call-plans.md) preserve every supplied
+  state-changing selector, actual caller, value and readable arguments.
+- [Exact TEMPLATE CLEAR/FREEZE](docs/exact-template-mutations.md) covers original
+  Artist approval, independent assignment reconstruction and owner installation.
+- [Artist ceremony packets](docs/current-artist-ceremony.md) disclose all signed
+  fields for eight supported families and check their digest and replay lane.
