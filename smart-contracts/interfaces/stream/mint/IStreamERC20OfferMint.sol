@@ -24,6 +24,12 @@ interface IStreamERC20OfferMint {
 
 /// @notice Seller membership and live delegation reads; no native-refund capability is implied.
 interface IStreamERC20OfferSale {
+    /// @notice Immutable settlement facts from the same retained record as seller membership.
+    function primaryOfferSettlementBinding(bytes32 saleId)
+        external
+        view
+        returns (uint256 saleNonce, address poster, bytes32 saleConfigHash);
+
     function primaryOfferAuthorizationBinding(bytes32 saleId)
         external
         view

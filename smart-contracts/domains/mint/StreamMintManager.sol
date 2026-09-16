@@ -20,6 +20,10 @@ import "./StreamPreparedNativeContentExecution.sol";
 import "./StreamPreparedNativeContentPurchaseExecution.sol";
 import "./StreamPreparedNativeOfferExecution.sol";
 import "./StreamMintManagerOfferTranscript.sol";
+import { StreamMintManagerERC20OfferTranscript } from "./StreamMintManagerERC20OfferTranscript.sol";
+import { StreamERC20OfferReceipt } from "./StreamERC20OfferReceipt.sol";
+import { IStreamERC20OfferMint } from "../../interfaces/stream/mint/IStreamERC20OfferMint.sol";
+import { StreamERC20OfferMintTypes } from "../../interfaces/stream/mint/StreamERC20OfferMintTypes.sol";
 import "../../interfaces/stream/mint/IStreamMintSaleAuthorizationRevocation.sol";
 import "./StreamMintManagerTranscript.sol";
 import "./StreamMintManagerExecution.sol";
@@ -40,6 +44,7 @@ contract StreamMintManager is
     IStreamPreparedNativeContentMint,
     IStreamPreparedNativeContentPurchaseMint,
     IStreamPreparedNativeOfferMint,
+    IStreamERC20OfferMint,
     IStreamMintSaleAuthorizationRevocation,
     IStreamPreparedNativeRightsMint,
     IStreamMintAuthorizationRevocation,
@@ -203,6 +208,7 @@ contract StreamMintManager is
             || interfaceId == type(IStreamPreparedNativeContentMint).interfaceId
             || interfaceId == type(IStreamPreparedNativeContentPurchaseMint).interfaceId
             || interfaceId == type(IStreamPreparedNativeOfferMint).interfaceId
+            || interfaceId == type(IStreamERC20OfferMint).interfaceId
             || interfaceId == type(IStreamMintSaleAuthorizationRevocation).interfaceId
             || interfaceId == type(IStreamPreparedNativeRightsMint).interfaceId
             || interfaceId == type(IStreamMintAuthorizationRevocation).interfaceId
@@ -371,6 +377,36 @@ contract StreamMintManager is
             _phaseGateConfigs[batch.collectionId][batch.phaseId],
             batch,
             transcript
+        );
+    }
+
+    /// @notice Previews the independently authenticated original offer transcript.
+    function previewERC20OfferMintOperation(
+        MintBatch calldata batch,
+        StreamERC20OfferMintTypes.GateData calldata
+    ) external view override returns (bytes32 operationRoot, bytes32[] memory operationIds) {
+        OperationTranscript memory transcript = _erc20OfferOperationTranscript(batch, msg.data[4:]);
+        return (transcript.operationRoot, transcript.operationIds);
+    }
+
+    /// @notice Mints only after the official recorder has stored this exact ERC20 offer settlement.
+    function executeERC20OfferMint(
+        MintBatch calldata batch,
+        StreamERC20OfferMintTypes.GateData calldata,
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate calldata
+    ) external override nonReentrant returns (
+        uint256[] memory tokenIds, bytes32 operationRoot, bytes32[] memory operationIds
+    ) {
+        OperationTranscript memory transcript = _erc20OfferOperationTranscript(batch, msg.data[4:]);
+        // Strict decoding of the original typed offer/candidate stays in the fixed worker.
+        // The public wire ABI and original caller are retained while preserving runtime headroom.
+        StreamERC20OfferReceipt.requireReceiptArguments(
+            address(core), address(moduleRegistry), _preparedNative.recorder,
+            _preparedNative.recorderCodeHash, batch, msg.data[4:], transcript
+        );
+        _reserveOperationNonces(transcript.firstOperationNonce, transcript.quantity);
+        return StreamMintManagerExecution.singleStep(
+            _executionContext(), _phaseGateConfigs[batch.collectionId][batch.phaseId], batch, transcript
         );
     }
 
@@ -854,6 +890,29 @@ contract StreamMintManager is
                 _policyContext(batch.collectionId, batch.phaseId),
                 phasePolicyHash[batch.collectionId][batch.phaseId],
                 nextOperationNonce,
+                _gasParameterValue(GGP_ARTIST_AUTHORITY_GAS_LIMIT)
+            )
+        );
+    }
+
+    function _erc20OfferOperationTranscript(
+        MintBatch calldata batch,
+        bytes calldata arguments
+    ) private view returns (OperationTranscript memory transcript) {
+        StreamMintPhaseState.PhaseState storage phaseState = _requireExecutablePhase(batch);
+        StreamMintRoyaltyPolicy.requireCurrent(
+            _phaseRoyalties[batch.collectionId][batch.phaseId], _royaltyContext(),
+            batch.collectionId, batch.phaseId, phaseState.config.configHash, true
+        );
+        return StreamMintManagerERC20OfferTranscript.build(
+            batch, arguments, MINT_EXECUTION_PATH_SINGLE_STEP, phaseState,
+            _phaseGateConfigs[batch.collectionId][batch.phaseId],
+            _phaseCounterIds[batch.collectionId][batch.phaseId],
+            _counterConfigs[batch.collectionId][batch.phaseId],
+            _phaseExecutors[batch.collectionId][batch.phaseId],
+            StreamMintManagerERC20OfferTranscript.Context(
+                address(core), _policyContext(batch.collectionId, batch.phaseId),
+                phasePolicyHash[batch.collectionId][batch.phaseId], nextOperationNonce,
                 _gasParameterValue(GGP_ARTIST_AUTHORITY_GAS_LIMIT)
             )
         );
