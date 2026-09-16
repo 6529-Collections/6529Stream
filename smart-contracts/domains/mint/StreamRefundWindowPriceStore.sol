@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import {
-    IStreamNativeAllowlistRefundWindowSale as A
+    IStreamNativeAllowlistRefundWindowSale
 } from "../../interfaces/stream/mint/IStreamNativeAllowlistRefundWindowSale.sol";
 
 /// @notice Immutable sale price policies and captured purchase prices/proofs in host storage.
@@ -19,7 +19,7 @@ library StreamRefundWindowPriceStore {
     }
 
     struct State {
-        mapping(bytes32 => A.AllowlistPricePolicy) policies;
+        mapping(bytes32 => IStreamNativeAllowlistRefundWindowSale.AllowlistPricePolicy) policies;
         mapping(bytes32 => PurchasePrice) purchases;
     }
 
@@ -28,14 +28,21 @@ library StreamRefundWindowPriceStore {
         assembly ("memory-safe") { s.slot := slot }
     }
 
-    function policy(bytes32 saleId) internal view returns (A.AllowlistPricePolicy memory) {
+    function policy(bytes32 saleId)
+        internal
+        view
+        returns (IStreamNativeAllowlistRefundWindowSale.AllowlistPricePolicy memory)
+    {
         return _state().policies[saleId];
     }
 
-    function setPolicy(bytes32 saleId, A.AllowlistPricePolicy memory value) internal {
+    function setPolicy(
+        bytes32 saleId,
+        IStreamNativeAllowlistRefundWindowSale.AllowlistPricePolicy memory value
+    ) internal {
         State storage s = _state();
         if (saleId == 0 || value.counterId == 0 || s.policies[saleId].counterId != 0) {
-            revert A.InvalidAllowlistRefundPolicy();
+            revert IStreamNativeAllowlistRefundWindowSale.InvalidAllowlistRefundPolicy();
         }
         s.policies[saleId] = value;
     }
@@ -43,7 +50,7 @@ library StreamRefundWindowPriceStore {
     function capture(bytes32 purchaseId, uint256 amount, bytes memory proofData) internal {
         PurchasePrice storage p = _state().purchases[purchaseId];
         if (purchaseId == 0 || p.captured || proofData.length == 0) {
-            revert A.InvalidAllowlistRefundPolicy();
+            revert IStreamNativeAllowlistRefundWindowSale.InvalidAllowlistRefundPolicy();
         }
         p.captured = true;
         p.chargedPrice = amount;

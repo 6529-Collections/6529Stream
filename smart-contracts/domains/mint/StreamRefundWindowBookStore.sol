@@ -6,7 +6,10 @@ import {
     IStreamNativeRefundWindowSale
 } from "../../interfaces/stream/mint/IStreamNativeRefundWindowSale.sol";
 import "./StreamRefundClock.sol";
-import "./StreamRefundWindowPriceStore.sol";
+import { StreamRefundWindowPriceStore } from "./StreamRefundWindowPriceStore.sol";
+import {
+    IStreamNativeAllowlistRefundWindowSale
+} from "../../interfaces/stream/mint/IStreamNativeAllowlistRefundWindowSale.sol";
 import "../../interfaces/stream/revenue/StreamNativeSettlementTypes.sol";
 
 /// @notice Linked buyer-liability book; executes in the calling consumer's storage and balance context.
@@ -160,7 +163,7 @@ library StreamRefundWindowBookStore {
         bytes32 window,
         bytes32 baselinePolicyHash
     ) public returns (bytes32 id) {
-        A.AllowlistPricePolicy memory policy;
+        IStreamNativeAllowlistRefundWindowSale.AllowlistPricePolicy memory policy;
         return _configure(state, c, lifecycle, nonce, window, baselinePolicyHash, policy);
     }
 
@@ -171,10 +174,10 @@ library StreamRefundWindowBookStore {
         uint256 nonce,
         bytes32 window,
         bytes32 baselinePolicyHash,
-        A.AllowlistPricePolicy memory policy
+        IStreamNativeAllowlistRefundWindowSale.AllowlistPricePolicy memory policy
     ) public returns (bytes32 id) {
         if (policy.counterId == 0) {
-            revert A.InvalidAllowlistRefundPolicy();
+            revert IStreamNativeAllowlistRefundWindowSale.InvalidAllowlistRefundPolicy();
         }
         return _configure(state, c, lifecycle, nonce, window, baselinePolicyHash, policy);
     }
@@ -186,7 +189,7 @@ library StreamRefundWindowBookStore {
         uint256 nonce,
         bytes32 window,
         bytes32 baselinePolicyHash,
-        A.AllowlistPricePolicy memory policy
+        IStreamNativeAllowlistRefundWindowSale.AllowlistPricePolicy memory policy
     ) private returns (bytes32 id) {
         id = keccak256(
             abi.encode(
@@ -396,10 +399,13 @@ library StreamRefundWindowBookStore {
             revert IStreamNativeRefundWindowSale.InvalidRefundSale();
         }
         {
-            A.AllowlistPricePolicy memory policy = StreamRefundWindowPriceStore.policy(a.saleId);
-            if (allowlist != (policy.counterId != 0)) revert A.InvalidAllowlistRefundPolicy();
+            IStreamNativeAllowlistRefundWindowSale.AllowlistPricePolicy memory policy =
+                StreamRefundWindowPriceStore.policy(a.saleId);
+            if (allowlist != (policy.counterId != 0)) {
+                revert IStreamNativeAllowlistRefundWindowSale.InvalidAllowlistRefundPolicy();
+            }
             if (allowlist && chargedPrice == 0 && !policy.allowFree) {
-                revert A.RefundPriceOverrideZeroUndeclared(a.saleId);
+                revert IStreamNativeAllowlistRefundWindowSale.RefundPriceOverrideZeroUndeclared(a.saleId);
             }
         }
         uint64 purchasedAt = StreamRefundClock.now64();
