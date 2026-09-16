@@ -107,9 +107,10 @@ Evidence is retained locally under
 `native.json`, `native.stderr.log`, `run.json`, `result.json`, and the frozen
 project/artifacts. The exact Safe 1.4.1 fixture hash is in the capture manifest.
 The pure differential evidence is
-`D:/repos/6529Stream/.tmp-static-capacity-pure2/`; subsequent source formatting
-changed no tokens. Frozen-reference comparisons allow only library renames and
-import relocation. `codex-diff-check` passes.
+`D:/repos/6529Stream/.tmp-static-capacity-pure2/`; the three production files are token-exact after formatting. The parity harness
+formatter only reflows lines and braces its existing single-statement `_fill`
+loop; that test-only formatting is source-reviewed. Frozen-reference comparisons
+allow only library renames and import relocation. `codex-diff-check` passes.
 
 Earlier captures are retained. The 2m outer dependency budget could not satisfy
 the Selection producer's unchanged 2m child reservation. A 6m render budget fit
