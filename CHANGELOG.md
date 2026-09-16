@@ -5,6 +5,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add typed native dossier joins, MetadataV1 record enumeration and a current
+  registered-host roster, preserving original assemblies and record occurrences
+  while keeping global host coverage and genuine capture acceptance unresolved.
+
 - Add atomic ERC20 primary offers with original buyer/seller authorization,
   separate payer intents and exact paid-receipt admission before minting.
   Support selected and unselected work under a zero-native-reveal-fee profile;

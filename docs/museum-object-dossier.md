@@ -213,6 +213,11 @@ and block. No existing retained fixture is rewritten.
 
 ## Remaining required work
 
+[Typed native joins](museum-native-dossier-joins.md) add a separate V2 partial
+assembler, native MetadataV1 catalog and current-registry host roster. It replays
+concrete sources against the original block and retains all record occurrences,
+while reporting missing and non-exhaustive host/scope coverage explicitly.
+
 Full assembly needs concrete canonical adapters and a complete positive for
 the remaining sources. These include actual complete record-catalog and
 ownership captures, all remaining applicable native record hosts and scopes,
