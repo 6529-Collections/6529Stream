@@ -1,11 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import { StreamNativeSaleCreditIndex } from "./StreamNativeSaleCreditIndex.sol";
-import { StreamNativeSaleCreditHost, StreamNativeSaleCreditReads, IStreamNativeSaleCredits } from "./StreamNativeSaleCreditHost.sol";
-import { StreamNativeSurplusHost, StreamNativeSurplus, IStreamNativeSurplus } from "./StreamNativeSurplusHost.sol";
+import {
+    StreamNativeSaleCreditHost,
+    StreamNativeSaleCreditReads,
+    IStreamNativeSaleCredits
+} from "./StreamNativeSaleCreditHost.sol";
+import {
+    StreamNativeSurplusHost,
+    StreamNativeSurplus,
+    IStreamNativeSurplus
+} from "./StreamNativeSurplusHost.sol";
 import "./StreamNativeRefundDelegation.sol";
 
 import "./StreamDutchSaleSupport.sol";
+import "./StreamNativeDutchSaleWorker.sol";
 import "./StreamNativePriceProgram.sol";
 import "../revenue/StreamSettlementContext.sol";
 import "../revenue/StreamNativeSettlementAdmission.sol";
@@ -21,6 +30,7 @@ contract StreamNativeDutchSale is
     StreamNativeSurplusHost,
     StreamNativeSaleCreditHost,
     IStreamNativeDutchSale,
+    IStreamNativeAllowlistDutchSale,
     StreamSettlementContext,
     StreamGasParameterHost,
     StreamNativeRefundDelegation,
@@ -66,6 +76,10 @@ contract StreamNativeDutchSale is
     mapping(address => mapping(bytes32 => bool)) public authorizationUsed;
     mapping(bytes32 => mapping(uint256 => bytes32)) public executionIdByNonce;
     mapping(bytes32 => uint8) public executionStatus;
+    mapping(bytes32 => bytes32) public override allowlistPriceCounter;
+
+    /// @dev Retained ABI error; the original dependency check now executes in the linked worker.
+    error SettlementBindingInvalid(address target);
 
     event DutchSaleClosed(uint16 schemaVersion, bytes32 indexed saleId);
     event DutchAdapterPauseUpdated(
@@ -148,8 +162,11 @@ contract StreamNativeDutchSale is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return id == type(IStreamNativeSaleCredits).interfaceId || id == type(IStreamNativeSurplus).interfaceId || _refundDelegationSupported(id) || id == type(IStreamNativeDutchSale).interfaceId
+        return id == type(IStreamNativeSaleCredits).interfaceId
+            || id == type(IStreamNativeSurplus).interfaceId || _refundDelegationSupported(id)
+            || id == type(IStreamNativeDutchSale).interfaceId
             || id == type(IStreamArtistSaleFacts).interfaceId
+            || id == type(IStreamNativeAllowlistDutchSale).interfaceId
             || id == type(IStreamNativeSaleBinding).interfaceId || super.supportsInterface(id);
     }
 
@@ -182,35 +199,36 @@ contract StreamNativeDutchSale is
         nonReentrant
         returns (bytes32 id)
     {
+        return _registerDutchSale(config, bytes32(0));
+    }
+
+    function registerAllowlistDutchSale(DutchSaleConfig calldata config, bytes32 counterId)
+        external
+        override
+        onlyOwner
+        nonReentrant
+        returns (bytes32 id)
+    {
+        if (counterId == 0) revert InvalidAllowlistDutchPolicy();
+        return _registerDutchSale(config, counterId);
+    }
+
+    function _registerDutchSale(DutchSaleConfig calldata config, bytes32 counterId)
+        private
+        returns (bytes32 id)
+    {
         _requireRefundDelegationManifest();
         _requireNativeContext();
-        (bytes32 baseline, bytes32 assignment) =
-            StreamDutchSaleSupport.validateConfig(_support(), config);
-        StreamNativeSettlementTypes.SaleLifecycleBinding memory lifecycle =
-            StreamNativeSettlementAdmission.capture(moduleRegistry, address(this));
-        uint256 nonce = nextSaleNonce++;
-        id = saleIdFor(config.collectionId, config.phaseId, nonce);
-        bytes32 schedule =
-            StreamDutchPricing.scheduleHash(config.schedule, block.chainid, address(this), id);
-        bytes32 hash = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_NATIVE_DUTCH_CONFIG_V1"),
-                id,
-                config,
-                schedule,
-                baseline,
-                assignment,
-                uint8(0),
-                address(0)
-            )
+        id = StreamNativeDutchSaleWorker.registerSale(
+            _sales,
+            allowlistPriceCounter,
+            _support(),
+            moduleRegistry,
+            config,
+            counterId,
+            nextSaleNonce
         );
-        _sales[id] = DutchSaleRecord(
-            config, nonce, hash, schedule, baseline, assignment, lifecycle, 0, false, false
-        );
-        emit SaleConfigured(
-            1, id, config.collectionId, config.phaseId, 3, address(0), hash, baseline, 0
-        );
-        emit DutchSaleConfigured(1, id, nonce, schedule, assignment, config);
+        ++nextSaleNonce;
     }
 
     function saleIdFor(uint256 collectionId, bytes32 phaseId, uint256 nonce)
@@ -219,26 +237,18 @@ contract StreamNativeDutchSale is
         override
         returns (bytes32)
     {
-        return keccak256(
-            abi.encode(
-                keccak256("6529STREAM_SALE_V1"),
-                block.chainid,
-                address(this),
-                uint8(3),
-                collectionId,
-                phaseId,
-                nonce
-            )
-        );
+        return StreamNativeDutchSaleWorker.saleIdFor(collectionId, phaseId, nonce);
     }
 
     function saleRecord(bytes32 id) external view override returns (DutchSaleRecord memory) {
-        return _sales[id];
+        bytes memory encoded = StreamNativeDutchSaleWorker.encodedSale(_sales, id);
+        assembly ("memory-safe") {
+            return(add(encoded, 32), mload(encoded))
+        }
     }
 
     function currentPrice(bytes32 id) external view override returns (uint256) {
-        if (_sales[id].saleNonce == 0) revert DutchSaleUnavailable(id);
-        return StreamDutchPricing.price(_sales[id].config.schedule, block.timestamp);
+        return StreamNativeDutchSaleWorker.currentPrice(_sales, id);
     }
 
     function authorizationDigest(DutchAuthorization calldata a)
@@ -282,6 +292,26 @@ contract StreamNativeDutchSale is
         nonReentrant
         returns (DutchPurchaseResult memory r)
     {
+        return _purchase(d, "");
+    }
+
+    function purchaseWithAllowlist(DutchPurchaseData calldata d, bytes calldata resolverData)
+        external
+        payable
+        override
+        nonReentrant
+        returns (DutchPurchaseResult memory r)
+    {
+        if (allowlistPriceCounter[d.authorization.saleId] == 0) {
+            revert InvalidAllowlistDutchPolicy();
+        }
+        return _purchase(d, resolverData);
+    }
+
+    function _purchase(DutchPurchaseData calldata d, bytes memory resolverData)
+        private
+        returns (DutchPurchaseResult memory r)
+    {
         _requireNativeContext();
         if (paused) revert DutchSaleUnavailable(d.authorization.saleId);
         if (authorizationUsed[d.authorization.artist][d.authorization.nonce]) {
@@ -294,7 +324,9 @@ contract StreamNativeDutchSale is
             StreamNativeSettlementTypes.NativeSettlementCandidate memory c,
             IStreamMintManager.MintBatch memory batch,
             StreamDutchSaleSupport.Capture memory captured
-        ) = StreamDutchSaleSupport.prepare(_support(), _sales[d.authorization.saleId], d);
+        ) = StreamNativeDutchSaleWorker.prepare(
+            _sales, allowlistPriceCounter, _support(), d, resolverData
+        );
         if (msg.sender != c.sale.payer || msg.sender != c.executor) revert InvalidDutchSale();
         uint256 fee = captured.reveal.revealFeePerTokenWei;
         if (msg.value < fee) revert SaleRevealFeeBelowRequired(msg.value, fee);
@@ -447,17 +479,22 @@ contract StreamNativeDutchSale is
     }
 
     function _requireNativeContext() private view {
-        StreamSettlementAdmission.requireRegistry(
-            core, coreCodeHash, moduleRegistry, moduleRegistryCodeHash
+        StreamNativeDutchSaleWorker.requireContext(
+            StreamNativeDutchSaleWorker.Binding(
+                core,
+                coreCodeHash,
+                moduleRegistry,
+                moduleRegistryCodeHash,
+                address(revenueResolver),
+                resolverCodeHash,
+                address(splitFactory),
+                factoryCodeHash,
+                address(mintManager),
+                mintManagerCodeHash,
+                primarySaleSettlement,
+                settlementCodeHash
+            )
         );
-        if (
-            address(revenueResolver).codehash != resolverCodeHash
-                || address(splitFactory).codehash != factoryCodeHash
-                || address(mintManager).codehash != mintManagerCodeHash
-                || primarySaleSettlement.codehash != settlementCodeHash
-        ) {
-            revert InvalidDutchSale();
-        }
     }
 
     function _requireRetained(
@@ -518,11 +555,18 @@ contract StreamNativeDutchSale is
     }
 
     function sweepNativeSurplus(uint256 amount, bytes32 reasonHash)
-        external override nonReentrant returns (uint256)
+        external
+        override
+        nonReentrant
+        returns (uint256)
     {
         return _sweepNativeSurplus(amount, reasonHash);
     }
-    function _nativeSurplusOwed() internal view override returns (uint256) { return refundLiability; }
+
+    function _nativeSurplusOwed() internal view override returns (uint256) {
+        return refundLiability;
+    }
+
     function _nativeSaleCreditRead() internal view override returns (bytes memory) {
         return StreamNativeSaleCreditReads.dutchRead(_credits, refundLiability, msg.data);
     }

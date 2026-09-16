@@ -12,6 +12,8 @@ import "../../interfaces/stream/governance/IStreamRoleRegistry.sol";
 import "../revenue/StreamNativeSettlementSupport.sol";
 import "../revenue/StreamNativeSettlementHash.sol";
 import "./StreamDutchPricing.sol";
+import "./StreamMintSaleAllowlist.sol";
+import "../../interfaces/stream/mint/IStreamNativeAllowlistDutchSale.sol";
 
 /// @notice Linked reads and preparation for the standard native Dutch consumer.
 /// @dev The consumer owns immutable records, replay, quantity, credits and its call guard.
@@ -162,6 +164,45 @@ library StreamDutchSaleSupport {
             Capture memory capture
         )
     {
+        return _prepare(x, record, d, bytes32(0), "");
+    }
+
+    function prepareAllowlist(
+        Context memory x,
+        IStreamNativeDutchSale.DutchSaleRecord memory record,
+        IStreamNativeDutchSale.DutchPurchaseData memory d,
+        bytes32 counterId,
+        bytes memory resolverData
+    )
+        public
+        view
+        returns (
+            StreamNativeSettlementTypes.NativeSettlementCandidate memory c,
+            IStreamMintManager.MintBatch memory batch,
+            Capture memory capture
+        )
+    {
+        if (counterId == 0 || resolverData.length == 0) {
+            revert IStreamNativeAllowlistDutchSale.InvalidAllowlistDutchPolicy();
+        }
+        return _prepare(x, record, d, counterId, resolverData);
+    }
+
+    function _prepare(
+        Context memory x,
+        IStreamNativeDutchSale.DutchSaleRecord memory record,
+        IStreamNativeDutchSale.DutchPurchaseData memory d,
+        bytes32 counterId,
+        bytes memory resolverData
+    )
+        private
+        view
+        returns (
+            StreamNativeSettlementTypes.NativeSettlementCandidate memory c,
+            IStreamMintManager.MintBatch memory batch,
+            Capture memory capture
+        )
+    {
         IStreamNativeDutchSale.DutchAuthorization memory a = d.authorization;
         IStreamNativeDutchSale.DutchSaleConfig memory config = record.config;
         if (
@@ -180,6 +221,23 @@ library StreamDutchSaleSupport {
                 || block.timestamp > a.deadline || a.tokenDataHash != keccak256(d.tokenData)
         ) revert IStreamNativeDutchSale.InvalidDutchSale();
         uint256 charge = StreamDutchPricing.price(config.schedule, block.timestamp);
+        if (counterId != 0) {
+            (bool overridden, uint256 price) = StreamMintSaleAllowlist.price(
+                address(x.manager),
+                config.collectionId,
+                config.phaseId,
+                a.payer,
+                a.recipient,
+                resolverData,
+                counterId
+            );
+            if (overridden) {
+                if (price == 0 && !config.declaredFree) {
+                    revert IStreamNativeAllowlistDutchSale.SalePriceOverrideZeroUndeclared(a.saleId);
+                }
+                if (price < charge) charge = price;
+            }
+        }
         if (a.unitPrice < charge) {
             revert IStreamNativeDutchSale.DutchPaymentBelowPrice(a.unitPrice, charge);
         }
@@ -259,7 +317,8 @@ library StreamDutchSaleSupport {
                 rights.entriesHash
             );
         }
-        c.saleExecutionHash = keccak256(abi.encode(d));
+        c.saleExecutionHash =
+            counterId == 0 ? keccak256(abi.encode(d)) : keccak256(abi.encode(d, resolverData));
         batch.collectionId = config.collectionId;
         batch.phaseId = config.phaseId;
         batch.payer = a.payer;
@@ -275,6 +334,7 @@ library StreamDutchSaleSupport {
         batch.authorizationId =
             keccak256(abi.encode(keccak256("6529STREAM_MINT_TICKET_AUTHORIZATION_V1"), digest));
         batch.contextHash = digest;
+        batch.resolverData = resolverData;
         bytes32[] memory ids;
         (c.operationIdentityCommitment, ids) =
             IStreamMintReads(address(x.manager)).previewSingleStepMintOperation(batch, "");

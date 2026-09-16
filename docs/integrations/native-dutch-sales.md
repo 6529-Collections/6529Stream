@@ -16,6 +16,16 @@ failure class 2. The test values are planning inputs, not fully cold genesis
 measurements. The inherited raise route remains restricted to the exact
 governance executor and action context.
 
+The host links `StreamNativeDutchSaleWorker` for registration, dependency
+checks, schedule/record reads and purchase preparation. The worker uses the
+host's existing mappings and typed immutable bindings; owner/reentrancy guards,
+purchase effects, reveal forwarding and refund liabilities remain in the host.
+It adds no authority or generic call surface. Mutable direct calls to the worker
+reject under Solidity's library guard. Successful registration advances the
+host nonce once; all external admission reads precede record storage and that
+advance. Sale IDs, configuration domains, event schemas and record ABI remain
+unchanged by the extraction.
+
 The sale's full configuration commits the fixed mint policy, price schedule,
 time and quantity limits, declared-free flag, registration primary-policy
 baseline and primary assignment. Gas values are excluded. Registration is
@@ -51,6 +61,53 @@ liability. Claims remain independent of pause, close, provider availability and
 current artist state. Rejected receivers preserve the entire credit for retry.
 Forced surplus is excluded from buyer credit and is not swept by this profile.
 
+## Merkle price ceilings
+
+`IStreamNativeAllowlistDutchSale` adds three functions without changing the
+existing Dutch configuration tuple, authorization type, EIP-712 domain or
+ordinary sale entry:
+
+- `registerAllowlistDutchSale(config, counterId)` selects one configured
+  `MERKLE_STATIC` counter as the sale's price source.
+- `allowlistPriceCounter(saleId)` returns that immutable selection, or zero
+  for an ordinary sale.
+- `purchaseWithAllowlist(purchaseData, resolverData)` executes the signed
+  Dutch purchase with the canonical mint proof payload.
+
+Registration follows the existing owner, dependency, configuration and registry
+admission checks. The selected counter must have a pinned Manager-owned
+definition and use PAYER or RECIPIENT accounting. The configuration commitment
+is `keccak256(abi.encode(keccak256("6529STREAM_NATIVE_ALLOWLIST_DUTCH_CONFIG_V1"),
+originalConfigHash, counterId))`; `originalConfigHash` is the unchanged Dutch
+configuration calculation for this sale ID. `DutchAllowlistPricePolicy` exposes
+the counter, the existing `declaredFree` flag and the final configuration hash.
+Artist consent and buyer authorization bind that final hash. Registering the
+sale does not grant Artist consent.
+
+Encode `resolverData` as the same `AllowlistProof[][]` described in
+[mint counter profiles](mint-counter-profiles.md). Include one proof group per
+configured Merkle counter, in phase order, with one proof per group for this
+single-token consumer. The shared reader independently verifies every leaf
+against its pinned root and the purchase payer or recipient. Only the selected
+counter may enable a price override; a price on another counter rejects as
+ambiguous. The exact resolver bytes reach the Manager for cap verification and
+are included in the sale execution commitment.
+
+An enabled leaf replaces the charging ceiling: the charge is
+`min(currentSchedulePrice, priceOverride)`. An absent override keeps the schedule
+price. The original signed `unitPrice` remains an additional maximum on the
+actual charge; neither the signature nor the Manager authorization digest is
+rewritten. A full-width ceiling above the schedule still charges the schedule.
+`currentPrice(saleId)` remains the public schedule quote, before any buyer proof.
+
+A zero override requires `config.declaredFree = true` at registration, including
+when the schedule's resting price is positive. Otherwise execution reverts with
+`SalePriceOverrideZeroUndeclared(saleId)`. A declared zero override follows the
+existing free branch: no official settlement or primary-rights lookup, while
+the captured reveal fee remains owed and any excess becomes a payer pull credit.
+The normal `purchase` entry cannot bypass an allowlist sale's proof requirement;
+the new entry rejects ordinary sales. No additional gate is introduced.
+
 A zero resting price requires an immutable declared-free configuration;
 `startPrice = 0` always rejects. At the declared zero boundary, the result is
 FREE1 and there is no primary-rights lookup, materialization, official key,
@@ -80,7 +137,13 @@ The domain tests use real factory/wallet/escrow/recorder/ModuleRegistry/
 RoleRegistry and official Safe contracts. Core, Manager, artist facts,
 reveal-fee endpoint and governance-action context are explicit domain doubles.
 Actual current-stack composition, requester admission and fully cold gas sizing
-remain integration evidence. Universal ERC20 Dutch and permit paths, uniform
-clearing rebates, public/Merkle authorization, generalized content/quantity
+remain integration evidence. The Merkle consumer tests add explicit typed
+counter-read seams to the existing Manager fixture; they do not substitute for
+actual Manager/Ledger cap or whole-stack acceptance. ABI/type validation covers
+the new source. A targeted Solidity 0.8.19 via-IR, optimizer-200, Paris build
+measures the host at 22,239 runtime bytes and its worker at 9,771 bytes, leaving
+2,337 host bytes below EIP-170. Combined native execution and whole-stack size
+acceptance remain pending for this batch. Universal ERC20 Dutch and permit paths, uniform
+clearing rebates, public purchases without buyer signatures, generalized content/quantity
 profiles, delegated claims and governed surplus/export tooling remain separate
 delivery slices. A standard native Dutch test does not establish those branches.

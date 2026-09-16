@@ -1,7 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import { StreamNativeSaleCreditHost, StreamNativeSaleCreditReads, IStreamNativeSaleCredits } from "./StreamNativeSaleCreditHost.sol";
-import { StreamNativeSurplusHost, StreamNativeSurplus, IStreamNativeSurplus } from "./StreamNativeSurplusHost.sol";
+import {
+    StreamNativeSaleCreditHost,
+    StreamNativeSaleCreditReads,
+    IStreamNativeSaleCredits
+} from "./StreamNativeSaleCreditHost.sol";
+import {
+    StreamNativeSurplusHost,
+    StreamNativeSurplus,
+    IStreamNativeSurplus
+} from "./StreamNativeSurplusHost.sol";
 import "./StreamNativeRefundDelegation.sol";
 
 import "./StreamClearingSaleExecution.sol";
@@ -23,6 +31,7 @@ contract StreamNativeClearingSale is
     StreamNativeSurplusHost,
     StreamNativeSaleCreditHost,
     IStreamNativeClearingSale,
+    IStreamNativeAllowlistClearingSale,
     StreamSettlementContext,
     StreamGasParameterHost,
     StreamNativeRefundDelegation,
@@ -62,6 +71,7 @@ contract StreamNativeClearingSale is
     bytes32 public immutable roleRegistryCodeHash;
     uint256 public nextSaleNonce = 1;
     StreamClearingSaleState.State private _state;
+    mapping(bytes32 => bytes32) public override allowlistPriceCounter;
 
     constructor(DeploymentConfig memory deployment)
         StreamSettlementContext(
@@ -131,7 +141,10 @@ contract StreamNativeClearingSale is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return id == type(IStreamNativeSaleCredits).interfaceId || id == type(IStreamNativeSurplus).interfaceId || _refundDelegationSupported(id) || id == type(IStreamNativeClearingSale).interfaceId
+        return id == type(IStreamNativeSaleCredits).interfaceId
+            || id == type(IStreamNativeSurplus).interfaceId || _refundDelegationSupported(id)
+            || id == type(IStreamNativeClearingSale).interfaceId
+            || id == type(IStreamNativeAllowlistClearingSale).interfaceId
             || id == type(IStreamArtistSaleFacts).interfaceId
             || id == type(IStreamNativeSaleBinding).interfaceId
             || id == type(IStreamNativeClearingSaleBinding).interfaceId
@@ -171,6 +184,22 @@ contract StreamNativeClearingSale is
         return StreamClearingSaleExecution.registerClearingSale(
             _state, _executionContext(), config, nextSaleNonce++
         );
+    }
+
+    function registerAllowlistClearingSale(ClearingSaleConfig calldata config, bytes32 counterId)
+        external
+        override
+        onlyOwner
+        nonReentrant
+        returns (bytes32 id)
+    {
+        if (counterId == 0) revert InvalidClearingAllowlistPolicy();
+        _requireRefundDelegationManifest();
+        id = StreamClearingSaleExecution.registerConfiguredClearingSale(
+            _state, _executionContext(), config, nextSaleNonce++, counterId
+        );
+        allowlistPriceCounter[id] = counterId;
+        emit NativeClearingAllowlistPolicy(id, counterId, 1, _state.sales[id].configHash);
     }
 
     function saleIdFor(uint256 collectionId, bytes32 phaseId, uint256 nonce)
@@ -281,7 +310,23 @@ contract StreamNativeClearingSale is
         nonReentrant
         returns (ClearingPurchaseResult memory)
     {
-        return StreamClearingSaleExecution.purchase(_state, _executionContext(), data);
+        return StreamClearingSaleExecution.purchaseConfigured(
+            _state, _executionContext(), data, allowlistPriceCounter[data.authorization.saleId], ""
+        );
+    }
+
+    function purchaseWithAllowlist(ClearingPurchaseData calldata data, bytes calldata resolverData)
+        external
+        payable
+        override
+        nonReentrant
+        returns (ClearingPurchaseResult memory)
+    {
+        bytes32 counterId = allowlistPriceCounter[data.authorization.saleId];
+        if (counterId == 0) revert InvalidClearingAllowlistPolicy();
+        return StreamClearingSaleExecution.purchaseConfigured(
+            _state, _executionContext(), data, counterId, resolverData
+        );
     }
 
     function fixClearingPrice(bytes32 id) external override nonReentrant {
@@ -564,11 +609,18 @@ contract StreamNativeClearingSale is
     }
 
     function sweepNativeSurplus(uint256 amount, bytes32 reasonHash)
-        external override nonReentrant returns (uint256)
+        external
+        override
+        nonReentrant
+        returns (uint256)
     {
         return _sweepNativeSurplus(amount, reasonHash);
     }
-    function _nativeSurplusOwed() internal view override returns (uint256) { return _state.financial.totalBuyerLiability; }
+
+    function _nativeSurplusOwed() internal view override returns (uint256) {
+        return _state.financial.totalBuyerLiability;
+    }
+
     function _nativeSaleCreditRead() internal view override returns (bytes memory) {
         return StreamNativeSaleCreditReads.clearingRead(_state.financial, msg.data);
     }

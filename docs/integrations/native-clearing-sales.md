@@ -16,6 +16,10 @@ three gas rows. The consumer pins their runtime and same-Core bindings. The
 recorder must advertise both native primary and native supplemental settlement
 capabilities. Deploy the new linked clearing libraries and link each artifact
 using that compiler profile's link map; library addresses are deployment inputs.
+The fixed `StreamClearingSaleRegistration` worker owns registration in the
+consumer's storage context; link it into `StreamClearingSaleExecution`. It has no
+independent owner, configuration or custody. This keeps the execution library
+within the deployment size limit while preserving the host's guarded entrypoints.
 No existing recorder, payment adapter, immediate native, refund or Dutch source
 changes are required by this consumer.
 
@@ -189,6 +193,53 @@ through pause, close, provider failure, terminal unlock and ownership changes.
 Unsolicited surplus is excluded from all entitlements. Neither price fixing nor
 partial claims permit that surplus to become sale proceeds.
 
+## Merkle price ceilings
+
+`IStreamNativeAllowlistClearingSale` adds
+`registerAllowlistClearingSale(config, counterId)`, `allowlistPriceCounter(id)`
+and `purchaseWithAllowlist(data, resolverData)`. Registration retains one
+configured `MERKLE_STATIC` payer/recipient counter as the price source. Its
+counter definition and root remain bound by the existing mint policy. The new
+configuration hash wraps the original clearing configuration hash and counter:
+
+```solidity
+keccak256(abi.encode(
+    keccak256("6529STREAM_NATIVE_ALLOWLIST_CLEARING_CONFIG_V1"),
+    originalClearingConfigHash,
+    counterId
+))
+```
+
+Both original execution signatures and Artist sale consent bind this final
+hash. Original sale and authorization structs, domains and old sale hashes
+remain unchanged. `NativeClearingAllowlistPolicy` discloses the retained counter
+and final hash. No policy mutation method exists.
+
+Supply the canonical single-token `abi.encode(AllowlistProof[][])` groups,
+ordered by configured Merkle counters. The shared sale reader independently
+verifies every group and allows an enabled price only on the selected counter.
+The proven `hasPriceOverride` and full-width `priceOverride` must exactly match
+those already signed in `ClearingAuthorization`; mismatch rejects before any
+purchase, counter, replay or settlement write. The exact proof bytes also enter
+the Manager mint batch and new sale execution commitment. Missing proofs cannot
+be bypassed through the original purchase entrypoint. The proof entrypoint
+rejects ordinary records with no declared price counter.
+
+A valid ceiling charges `min(schedulePrice, priceOverride)` and must be at least
+the positive resting price. Zero remains invalid. A cap-only leaf requires the
+signed no-override shape `false/0`. The configured floor revenue, schedule-based
+clearing-price fixing, permanent buyer rebates, held supplements and refund
+credits keep their original accounting. For example, a 400 ceiling at schedule
+640 charges 400 but never makes 400 the sale's schedule reference for fixing.
+The original signed maximum still bounds the charged price. This is an inline
+Merkle counter consumer; a distinct gate authorization envelope is not supplied.
+
+These rules implement [MPA-MERKLE rule 5](../mint-policy-and-accounting.md) and
+[SSA-AUTH rule 3](../stream-sales-and-auctions.md)
+with the original clearing rules 3–4. Proof-level tests use actual Manager/Ledger;
+clearing-consumer tests retain the explicit domain doubles described below.
+Full current-stack acceptance remains separate.
+
 ## Evidence and remaining integration
 
 Focused tests use real recorder, factory, wallets, revenue escrow, ModuleRegistry,
@@ -203,7 +254,7 @@ the integrator's separate evidence.
 The paired-tree cost must be measured in the complete purchase, not inferred
 from a single-tree harness. Planning caps and partially cooled measurements do
 not establish fully cold worst-case genesis values. This profile leaves public
-or Merkle authorization, universal ERC20 clearing, generalized quantity/content,
+authorization, universal ERC20 clearing, generalized quantity/content,
 delegated claims, and governed surplus/export tooling to their explicit remaining
 delivery slices. It does not alter the creation-time retained rights of existing
 V2 auctions.

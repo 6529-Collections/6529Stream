@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamMintSaleAllowlist.sol";
+import "../../interfaces/stream/mint/IStreamNativeAllowlistClearingSale.sol";
 
 import "./StreamDutchSaleSupport.sol";
 import "./StreamClearingSaleBook.sol";
@@ -87,6 +89,31 @@ library StreamClearingSaleSupport {
         StreamClearingSaleBook.Sale memory financial,
         IStreamNativeClearingSale.ClearingPurchaseData memory d
     ) public view returns (Prepared memory p) {
+        return _prepare(x, sale, financial, d, bytes32(0), "");
+    }
+
+    function prepareConfigured(
+        StreamDutchSaleSupport.Context memory x,
+        IStreamNativeClearingSale.ClearingSaleRecord memory sale,
+        StreamClearingSaleBook.Sale memory financial,
+        IStreamNativeClearingSale.ClearingPurchaseData memory d,
+        bytes32 priceCounterId,
+        bytes memory resolverData
+    ) public view returns (Prepared memory p) {
+        if (priceCounterId == 0 && resolverData.length != 0) {
+            revert IStreamNativeAllowlistClearingSale.InvalidClearingAllowlistPolicy();
+        }
+        return _prepare(x, sale, financial, d, priceCounterId, resolverData);
+    }
+
+    function _prepare(
+        StreamDutchSaleSupport.Context memory x,
+        IStreamNativeClearingSale.ClearingSaleRecord memory sale,
+        StreamClearingSaleBook.Sale memory financial,
+        IStreamNativeClearingSale.ClearingPurchaseData memory d,
+        bytes32 priceCounterId,
+        bytes memory resolverData
+    ) private view returns (Prepared memory p) {
         IStreamNativeClearingSale.ClearingAuthorization memory a = d.authorization;
         IStreamNativeClearingSale.ClearingSaleConfig memory config = sale.config;
         if (
@@ -112,6 +139,22 @@ library StreamClearingSaleSupport {
                 || (a.hasPriceOverride && a.priceOverride < config.schedule.restingPrice)
         ) {
             revert IStreamNativeClearingSale.InvalidClearingSale();
+        }
+        if (priceCounterId != 0) {
+            (bool hasOverride, uint256 price) = StreamMintSaleAllowlist.price(
+                address(x.manager),
+                config.collectionId,
+                config.phaseId,
+                a.payer,
+                a.recipient,
+                resolverData,
+                priceCounterId
+            );
+            if (hasOverride != a.hasPriceOverride || price != a.priceOverride) {
+                revert IStreamNativeAllowlistClearingSale.ClearingAllowlistPriceMismatch(
+                    hasOverride, price, a.hasPriceOverride, a.priceOverride
+                );
+            }
         }
         p.schedulePrice = StreamDutchPricing.price(config.schedule, block.timestamp);
         p.chargedPrice = a.hasPriceOverride && a.priceOverride < p.schedulePrice
@@ -194,8 +237,10 @@ library StreamClearingSaleSupport {
             rights.assignmentHash,
             rights.entriesHash
         );
-        c.saleExecutionHash = keccak256(abi.encode(d));
+        c.saleExecutionHash =
+            priceCounterId == 0 ? keccak256(abi.encode(d)) : keccak256(abi.encode(d, resolverData));
         p.batch = _batch(a, config, d.tokenData, digest);
+        p.batch.resolverData = resolverData;
         bytes32[] memory ids;
         (c.operationIdentityCommitment, ids) =
             IStreamMintReads(address(x.manager)).previewSingleStepMintOperation(p.batch, "");

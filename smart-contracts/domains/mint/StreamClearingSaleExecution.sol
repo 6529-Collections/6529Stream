@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamClearingSaleState.sol";
+import "./StreamClearingSaleRegistration.sol";
 import "./StreamNativePriceProgram.sol";
 import "./StreamClearingUnlock.sol";
 import "../revenue/StreamNativeSettlementAdmission.sol";
@@ -40,6 +41,26 @@ library StreamClearingSaleExecution {
         StreamClearingSaleState.Context memory x,
         IStreamNativeClearingSale.ClearingPurchaseData calldata d
     ) public returns (IStreamNativeClearingSale.ClearingPurchaseResult memory result) {
+        return _purchase(state, x, d, bytes32(0), "");
+    }
+
+    function purchaseConfigured(
+        StreamClearingSaleState.State storage state,
+        StreamClearingSaleState.Context memory x,
+        IStreamNativeClearingSale.ClearingPurchaseData calldata d,
+        bytes32 priceCounterId,
+        bytes memory resolverData
+    ) public returns (IStreamNativeClearingSale.ClearingPurchaseResult memory result) {
+        return _purchase(state, x, d, priceCounterId, resolverData);
+    }
+
+    function _purchase(
+        StreamClearingSaleState.State storage state,
+        StreamClearingSaleState.Context memory x,
+        IStreamNativeClearingSale.ClearingPurchaseData calldata d,
+        bytes32 priceCounterId,
+        bytes memory resolverData
+    ) private returns (IStreamNativeClearingSale.ClearingPurchaseResult memory result) {
         _requireContext(x);
         IStreamNativeClearingSale.ClearingAuthorization memory a = d.authorization;
         if (StreamClearingSaleState.isPaused(state, a.saleId)) {
@@ -51,8 +72,13 @@ library StreamClearingSaleExecution {
         if (state.executionIdByNonce[a.saleId][a.executionNonce] != 0) {
             revert IStreamNativeClearingSale.ClearingExecutionUsed(a.saleId, a.executionNonce);
         }
-        StreamClearingSaleSupport.Prepared memory p = StreamClearingSaleSupport.prepare(
-            x.support, state.sales[a.saleId], state.financial.sales[a.saleId], d
+        StreamClearingSaleSupport.Prepared memory p = StreamClearingSaleSupport.prepareConfigured(
+            x.support,
+            state.sales[a.saleId],
+            state.financial.sales[a.saleId],
+            d,
+            priceCounterId,
+            resolverData
         );
         if (msg.sender != a.payer || msg.sender != a.executor) {
             revert IStreamNativeClearingSale.InvalidClearingSale();
@@ -377,54 +403,17 @@ library StreamClearingSaleExecution {
         IStreamNativeClearingSale.ClearingSaleConfig memory config,
         uint256 nonce
     ) public returns (bytes32 id) {
-        _requireContext(x);
-        bytes32 baseline = StreamClearingSaleSupport.validateConfig(x.support, config);
-        StreamNativeSettlementTypes.SaleLifecycleBinding memory lifecycle =
-            StreamNativeSettlementAdmission.capture(x.registry, address(this));
-        id = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_SALE_V1"),
-                block.chainid,
-                address(this),
-                uint8(4),
-                config.collectionId,
-                config.phaseId,
-                nonce
-            )
-        );
-        bytes32 schedule =
-            StreamDutchPricing.scheduleHash(config.schedule, block.chainid, address(this), id);
-        bytes32 windows = StreamClearingSaleSupport.windowPolicyHash(config);
-        bytes32 hash = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_NATIVE_CLEARING_CONFIG_V1"),
-                id,
-                config,
-                schedule,
-                windows,
-                baseline,
-                address(0)
-            )
-        );
-        IStreamNativeClearingSale.ClearingSaleRecord storage sale = state.sales[id];
-        sale.config = config;
-        sale.saleNonce = nonce;
-        sale.configHash = hash;
-        sale.priceScheduleHash = schedule;
-        sale.windowPolicyHash = windows;
-        sale.expectedPrimaryPolicyHash = baseline;
-        sale.lifecycle = lifecycle;
-        StreamClearingSaleBook.configure(
-            state.financial,
-            id,
-            config.schedule.startPrice,
-            config.schedule.restingPrice,
-            config.maxSaleQuantity
-        );
-        emit SaleConfigured(
-            1, id, config.collectionId, config.phaseId, 4, address(0), hash, baseline, 1
-        );
-        emit ClearingSaleConfigured(1, id, nonce, schedule, windows, config);
+        return StreamClearingSaleRegistration.register(state, x, config, nonce, bytes32(0));
+    }
+
+    function registerConfiguredClearingSale(
+        StreamClearingSaleState.State storage state,
+        StreamClearingSaleState.Context memory x,
+        IStreamNativeClearingSale.ClearingSaleConfig memory config,
+        uint256 nonce,
+        bytes32 priceCounterId
+    ) public returns (bytes32 id) {
+        return StreamClearingSaleRegistration.register(state, x, config, nonce, priceCounterId);
     }
 
     function claimRefund(StreamClearingSaleState.State storage state, bytes32 id, address recipient)
