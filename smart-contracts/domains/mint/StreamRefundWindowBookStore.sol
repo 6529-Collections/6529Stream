@@ -6,6 +6,7 @@ import {
     IStreamNativeRefundWindowSale
 } from "../../interfaces/stream/mint/IStreamNativeRefundWindowSale.sol";
 import "./StreamRefundClock.sol";
+import "./StreamRefundWindowPriceStore.sol";
 import "../../interfaces/stream/revenue/StreamNativeSettlementTypes.sol";
 
 /// @notice Linked buyer-liability book; executes in the calling consumer's storage and balance context.
@@ -102,6 +103,19 @@ library StreamRefundWindowBookStore {
     event SalePaymentExcessCredited(
         uint16 schemaVersion, bytes32 indexed saleId, address indexed payer, uint256 amount
     );
+    event NativeRefundAllowlistPricePolicy(
+        bytes32 indexed saleId,
+        bytes32 indexed counterId,
+        uint16 schemaVersion,
+        bool allowFree,
+        bytes32 saleConfigHash
+    );
+    event RefundPurchasePriceBound(
+        bytes32 indexed purchaseId,
+        uint256 chargedPrice,
+        bytes32 proofHash,
+        bytes32 purchaseRecordHash
+    );
 
     event RefundAdapterPauseUpdated(
         uint16 schemaVersion,
@@ -146,6 +160,34 @@ library StreamRefundWindowBookStore {
         bytes32 window,
         bytes32 baselinePolicyHash
     ) public returns (bytes32 id) {
+        A.AllowlistPricePolicy memory policy;
+        return _configure(state, c, lifecycle, nonce, window, baselinePolicyHash, policy);
+    }
+
+    function configureAllowlist(
+        State storage state,
+        IStreamNativeRefundWindowSale.RefundSaleConfig memory c,
+        StreamNativeSettlementTypes.SaleLifecycleBinding memory lifecycle,
+        uint256 nonce,
+        bytes32 window,
+        bytes32 baselinePolicyHash,
+        A.AllowlistPricePolicy memory policy
+    ) public returns (bytes32 id) {
+        if (policy.counterId == 0) {
+            revert A.InvalidAllowlistRefundPolicy();
+        }
+        return _configure(state, c, lifecycle, nonce, window, baselinePolicyHash, policy);
+    }
+
+    function _configure(
+        State storage state,
+        IStreamNativeRefundWindowSale.RefundSaleConfig memory c,
+        StreamNativeSettlementTypes.SaleLifecycleBinding memory lifecycle,
+        uint256 nonce,
+        bytes32 window,
+        bytes32 baselinePolicyHash,
+        A.AllowlistPricePolicy memory policy
+    ) private returns (bytes32 id) {
         id = keccak256(
             abi.encode(
                 keccak256("6529STREAM_SALE_V1"),
@@ -162,6 +204,12 @@ library StreamRefundWindowBookStore {
                 keccak256("6529STREAM_NATIVE_REFUND_SALE_CONFIG_V1"), id, c, baselinePolicyHash
             )
         );
+        if (policy.counterId != 0) {
+            hash = keccak256(
+                abi.encode(keccak256("6529STREAM_NATIVE_ALLOWLIST_REFUND_CONFIG_V1"), hash, policy)
+            );
+            StreamRefundWindowPriceStore.setPolicy(id, policy);
+        }
         state._refundSales[id] = IStreamNativeRefundWindowSale.RefundSaleRecord(
             c, nonce, hash, window, lifecycle, 0, baselinePolicyHash
         );
@@ -186,6 +234,9 @@ library StreamRefundWindowBookStore {
             lifecycle.saleCreatedAt,
             lifecycle.saleAdapterRegistryRevision
         );
+        if (policy.counterId != 0) {
+            emit NativeRefundAllowlistPricePolicy(id, policy.counterId, 1, policy.allowFree, hash);
+        }
     }
 
     function purchaseDeadlines(State storage state, bytes32 id)
@@ -230,7 +281,7 @@ library StreamRefundWindowBookStore {
             p.authorization.saleId,
             id,
             p.authorization.payer,
-            p.authorization.price + p.savedRevealFee
+            StreamRefundWindowPriceStore.chargedPrice(id, p.authorization.price) + p.savedRevealFee
         );
     }
 
@@ -290,6 +341,29 @@ library StreamRefundWindowBookStore {
         bytes32 digest,
         IStreamNativeRefundWindowSale.PurchaseCapture memory facts
     ) public returns (bytes32 id) {
+        return _capture(state, data, digest, facts, data.authorization.price, "", false);
+    }
+
+    function captureAllowlistPurchase(
+        State storage state,
+        IStreamNativeRefundWindowSale.RefundPurchaseData calldata data,
+        bytes32 digest,
+        IStreamNativeRefundWindowSale.PurchaseCapture memory facts,
+        uint256 chargedPrice,
+        bytes memory resolverData
+    ) public returns (bytes32 id) {
+        return _capture(state, data, digest, facts, chargedPrice, resolverData, true);
+    }
+
+    function _capture(
+        State storage state,
+        IStreamNativeRefundWindowSale.RefundPurchaseData calldata data,
+        bytes32 digest,
+        IStreamNativeRefundWindowSale.PurchaseCapture memory facts,
+        uint256 chargedPrice,
+        bytes memory resolverData,
+        bool allowlist
+    ) private returns (bytes32 id) {
         IStreamNativeRefundWindowSale.RefundPurchaseAuthorization calldata a = data.authorization;
         id = keccak256(
             abi.encode(
@@ -318,8 +392,15 @@ library StreamRefundWindowBookStore {
         }
         _requireSolvent(state);
         IStreamNativeRefundWindowSale.RefundSaleRecord storage sale = state._refundSales[a.saleId];
-        if (sale.saleNonce == 0 || a.price != sale.config.price || msg.value < a.price) {
+        if (sale.saleNonce == 0 || a.price != sale.config.price || msg.value < chargedPrice) {
             revert IStreamNativeRefundWindowSale.InvalidRefundSale();
+        }
+        {
+            A.AllowlistPricePolicy memory policy = StreamRefundWindowPriceStore.policy(a.saleId);
+            if (allowlist != (policy.counterId != 0)) revert A.InvalidAllowlistRefundPolicy();
+            if (allowlist && chargedPrice == 0 && !policy.allowFree) {
+                revert A.RefundPriceOverrideZeroUndeclared(a.saleId);
+            }
         }
         uint64 purchasedAt = StreamRefundClock.now64();
         uint64 refundDeadline = purchasedAt + sale.config.refundWindowSeconds;
@@ -327,10 +408,10 @@ library StreamRefundWindowBookStore {
         if (finalizeBy > a.maximumNominalFinalizeBy || finalizeBy > a.absoluteEscapeDeadline) {
             revert IStreamNativeRefundWindowSale.InvalidRefundSale();
         }
-        uint256 deposit = a.price + facts.savedRevealFee;
+        uint256 deposit = chargedPrice + facts.savedRevealFee;
         if (msg.value < deposit) {
             revert IStreamNativeRefundWindowSale.SaleRevealFeeBelowRequired(
-                msg.value - a.price, facts.savedRevealFee
+                msg.value - chargedPrice, facts.savedRevealFee
             );
         }
         uint64 baseline =
@@ -364,6 +445,19 @@ library StreamRefundWindowBookStore {
                 finalizeBy
             )
         );
+        if (allowlist) {
+            StreamRefundWindowPriceStore.capture(id, chargedPrice, resolverData);
+            bytes32 proofHash = keccak256(resolverData);
+            p.purchaseRecordHash = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_REFUND_ALLOWLIST_PURCHASE_RECORD_V1"),
+                    p.purchaseRecordHash,
+                    chargedPrice,
+                    proofHash
+                )
+            );
+            emit RefundPurchasePriceBound(id, chargedPrice, proofHash, p.purchaseRecordHash);
+        }
         state.purchaseAuthorizationUsed[a.artist][a.nonce] = true;
         state.lastPurchaseNonce[a.saleId][a.payer] = a.purchaseNonce;
         ++sale.purchasedQuantity;
@@ -384,7 +478,15 @@ library StreamRefundWindowBookStore {
         IStreamNativeRefundWindowSale.RefundPurchaseRecord storage p
     ) private {
         IStreamNativeRefundWindowSale.RefundPurchaseAuthorization storage a = p.authorization;
-        emit RefundWindowPurchase(1, a.saleId, id, a.payer, 1, a.price, p.nominalRefundDeadline);
+        emit RefundWindowPurchase(
+            1,
+            a.saleId,
+            id,
+            a.payer,
+            1,
+            StreamRefundWindowPriceStore.chargedPrice(id, a.price),
+            p.nominalRefundDeadline
+        );
         emit RefundPurchaseEnvelopeBound(
             1,
             id,
@@ -412,7 +514,8 @@ library StreamRefundWindowBookStore {
         (,, uint64 toll) = purchaseDeadlines(state, id);
         p.terminalToll = toll;
         p.status = status;
-        uint256 amount = p.authorization.price + p.savedRevealFee;
+        uint256 amount =
+            StreamRefundWindowPriceStore.chargedPrice(id, p.authorization.price) + p.savedRevealFee;
         state.totalPendingDeposits -= amount;
         state.refundCredit[p.authorization.payer] += amount;
         state.saleRefundCredit[p.authorization.saleId][p.authorization.payer] += amount;
@@ -432,7 +535,8 @@ library StreamRefundWindowBookStore {
         (,, uint64 toll) = purchaseDeadlines(state, id);
         p.terminalToll = toll;
         p.status = 2;
-        uint256 amount = p.authorization.price + p.savedRevealFee;
+        uint256 amount =
+            StreamRefundWindowPriceStore.chargedPrice(id, p.authorization.price) + p.savedRevealFee;
         state.totalPendingDeposits -= amount;
         state.totalBuyerLiabilities -= amount;
         // The concrete finalizer must spend price/fee and re-credit the unused saved fee.

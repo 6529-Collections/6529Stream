@@ -1,11 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import { StreamNativeSaleCreditHost, StreamNativeSaleCreditReads, IStreamNativeSaleCredits } from "./StreamNativeSaleCreditHost.sol";
-import { StreamNativeSurplusHost, StreamNativeSurplus, IStreamNativeSurplus } from "./StreamNativeSurplusHost.sol";
+import {
+    StreamNativeSaleCreditHost,
+    StreamNativeSaleCreditReads,
+    IStreamNativeSaleCredits
+} from "./StreamNativeSaleCreditHost.sol";
+import {
+    StreamNativeSurplusHost,
+    StreamNativeSurplus,
+    IStreamNativeSurplus
+} from "./StreamNativeSurplusHost.sol";
 import "./StreamNativeRefundDelegation.sol";
 
 import "./StreamRefundWindowBook.sol";
 import "./StreamRefundWindowSupport.sol";
+import "./StreamRefundWindowPriceStore.sol";
+import "./StreamNativeRefundWindowWorker.sol";
+import "../../interfaces/stream/mint/IStreamNativeAllowlistRefundWindowSale.sol";
 import "./StreamRefundUnlock.sol";
 import "./StreamDeferredNativeSettlementCall.sol";
 import "./StreamSaleConsent.sol";
@@ -27,6 +38,7 @@ contract StreamNativeRefundWindowSale is
     StreamGasParameterHost,
     StreamNativeRefundDelegation,
     IStreamArtistSaleFacts,
+    IStreamNativeAllowlistRefundWindowSale,
     Ownable,
     ERC165
 {
@@ -153,8 +165,10 @@ contract StreamNativeRefundWindowSale is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return id == type(IStreamNativeSaleCredits).interfaceId || id == type(IStreamNativeSurplus).interfaceId || _refundDelegationSupported(id)
+        return id == type(IStreamNativeSaleCredits).interfaceId
+            || id == type(IStreamNativeSurplus).interfaceId || _refundDelegationSupported(id)
             || id == type(IStreamNativeRefundWindowSale).interfaceId
+            || id == type(IStreamNativeAllowlistRefundWindowSale).interfaceId
             || id == type(IStreamDeferredNativeSaleBinding).interfaceId
             || id == type(IStreamArtistSaleFacts).interfaceId || super.supportsInterface(id);
     }
@@ -200,19 +214,49 @@ contract StreamNativeRefundWindowSale is
         nonReentrant
         returns (bytes32 id)
     {
+        return _registerRefundSale(c, AllowlistPricePolicy(bytes32(0), false));
+    }
+
+    function registerAllowlistRefundSale(
+        RefundSaleConfig calldata c,
+        AllowlistPricePolicy calldata policy
+    ) external override onlyOwner nonReentrant returns (bytes32 id) {
+        if (policy.counterId == 0) revert InvalidAllowlistRefundPolicy();
+        return _registerRefundSale(c, policy);
+    }
+
+    function _registerRefundSale(RefundSaleConfig calldata c, AllowlistPricePolicy memory policy)
+        private
+        returns (bytes32 id)
+    {
         _requireRefundDelegationManifest();
         _requireNativeContext();
-        bytes32 baseline = StreamRefundWindowSupport.validateConfig(_support(), c);
-        StreamNativeSettlementTypes.SaleLifecycleBinding memory lifecycle =
-            StreamDeferredNativeSettlementAdmission.capture(moduleRegistry, address(this));
-        id = StreamRefundWindowBookStore.configure(
-            _book,
-            c,
-            lifecycle,
-            nextSaleNonce++,
-            StreamRefundWindowSupport.windowPolicyHash(c),
-            baseline
+        id = StreamNativeRefundWindowWorker.registerSale(
+            _book, _support(), moduleRegistry, c, policy, nextSaleNonce
         );
+        ++nextSaleNonce;
+    }
+
+    function allowlistRefundSalePolicy(bytes32 id)
+        external
+        view
+        override
+        returns (AllowlistPricePolicy memory)
+    {
+        return StreamRefundWindowPriceStore.policy(id);
+    }
+
+    function refundPurchasePriceFacts(bytes32 id)
+        external
+        view
+        override
+        returns (bool captured, uint256 chargedPrice, bytes32 resolverDataHash)
+    {
+        return StreamRefundWindowPriceStore.facts(id);
+    }
+
+    function refundPurchaseResolverData(bytes32 id) external view override returns (bytes memory) {
+        return StreamRefundWindowPriceStore.resolverData(id);
     }
 
     function refundPurchaseAuthorizationDigest(RefundPurchaseAuthorization calldata a)
@@ -249,27 +293,26 @@ contract StreamNativeRefundWindowSale is
         nonReentrant
         returns (bytes32 id)
     {
+        return _purchaseRefundWindow(d, "");
+    }
+
+    function purchaseAllowlistRefundWindow(
+        RefundPurchaseData calldata d,
+        bytes calldata resolverData
+    ) external payable override nonReentrant returns (bytes32 id) {
+        if (StreamRefundWindowPriceStore.policy(d.authorization.saleId).counterId == 0) {
+            revert InvalidAllowlistRefundPolicy();
+        }
+        return _purchaseRefundWindow(d, resolverData);
+    }
+
+    function _purchaseRefundWindow(RefundPurchaseData calldata d, bytes memory resolverData)
+        private
+        returns (bytes32 id)
+    {
         _requireNativeContext();
-        RefundSaleRecord storage sale = _book._refundSales[d.authorization.saleId];
-        if (sale.saleNonce == 0) revert RefundSaleUnavailable(d.authorization.saleId);
-        if (_isPaused(d.authorization.saleId)) revert SaleEntryPaused();
-        _requireConsent(d.authorization.saleId, sale);
-        // New purchases require ACTIVE; retained finalization has its distinct grandfathering rule.
-        StreamDeferredNativeSettlementAdmission.capture(moduleRegistry, address(this));
-        (bytes32 digest, StreamRefundWindowSupport.ArtistAssociation memory a, uint256 fee) =
-            StreamRefundWindowSupport.validatePurchase(_support(), sale, d);
-        id = _capturePurchase(
-            d,
-            digest,
-            PurchaseCapture(
-                fee,
-                a.artistId,
-                a.generation,
-                a.bindingHash,
-                IStreamMintReads(address(mintManager))
-                .phaseGate(sale.config.collectionId, sale.config.phaseId)
-                .gate
-            )
+        return StreamNativeRefundWindowWorker.purchase(
+            _book, _support(), moduleRegistry, d, resolverData
         );
     }
 
@@ -310,9 +353,9 @@ contract StreamNativeRefundWindowSale is
         StreamRefundWindowSupport.preflightReveal(_support(), sale.config.collectionId, attemptGas);
         uint256 balanceBefore = address(this).balance;
         _beginFinalization(id, p);
-        _activeSettlement[id] =
-            StreamDeferredNativeSettlementHash.candidateCommitment(primarySaleSettlement, d);
-        {
+        if (d.execution.sale.amount != 0) {
+            _activeSettlement[id] =
+                StreamDeferredNativeSettlementHash.candidateCommitment(primarySaleSettlement, d);
             StreamPrimarySettlementTypes.PrimarySettlementResult memory settled =
                 StreamDeferredNativeSettlementCall.settle(primarySaleSettlement, d);
             r.settlementKey = settled.settlementKey;
@@ -337,7 +380,7 @@ contract StreamNativeRefundWindowSale is
         );
         _creditFeeRemainder(p, r.revealFeeRefunded);
         _requireRetained(d.execution, sale, p);
-        r.amount = p.authorization.price;
+        r.amount = d.execution.sale.amount;
         if (address(this).balance != balanceBefore - r.amount - r.revealFeeForwarded) {
             revert RefundAccountingMismatch();
         }
@@ -356,7 +399,7 @@ contract StreamNativeRefundWindowSale is
         if (reason == 0) {
             if (_timeUnlockable(id, p)) hash = keccak256("REFUND_FINALIZATION_DEADLINE");
         } else {
-            hash = StreamRefundUnlock.reasonHash(
+            hash = StreamRefundUnlock.reasonHashForPurchase(
                 StreamRefundUnlock.Context(
                     _support(),
                     moduleRegistry,
@@ -367,6 +410,7 @@ contract StreamNativeRefundWindowSale is
                 ),
                 _book._refundSales[p.authorization.saleId],
                 p,
+                id,
                 reason
             );
         }
@@ -440,6 +484,7 @@ contract StreamNativeRefundWindowSale is
             purchase.bindingHash
         );
         StreamDeferredNativeSettlementAdmission.requireAdmission(moduleRegistry, c);
+        if (c.sale.amount == 0) return;
         StreamNativeSettlementSupport.requireCurrent(
             revenueResolver,
             c.sale.collectionId,
@@ -477,11 +522,18 @@ contract StreamNativeRefundWindowSale is
     }
 
     function sweepNativeSurplus(uint256 amount, bytes32 reasonHash)
-        external override nonReentrant returns (uint256)
+        external
+        override
+        nonReentrant
+        returns (uint256)
     {
         return _sweepNativeSurplus(amount, reasonHash);
     }
-    function _nativeSurplusOwed() internal view override returns (uint256) { return _book.totalBuyerLiabilities; }
+
+    function _nativeSurplusOwed() internal view override returns (uint256) {
+        return _book.totalBuyerLiabilities;
+    }
+
     function _nativeSaleCreditRead() internal view override returns (bytes memory) {
         return StreamNativeSaleCreditReads.windowRead(_book, msg.data);
     }

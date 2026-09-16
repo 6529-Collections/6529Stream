@@ -86,9 +86,10 @@ current generic allowlist gate authenticates prices without charging them.
 This increment covers native immediate price-program kinds `0`, `1`, `12` and
 `13`. The original `registerSale`/`purchase`, burn-purchase callback and refund
 credit interfaces are preserved. [Dutch](native-dutch-sales.md) and [clearing](native-clearing-sales.md) expose
-separate proof-bearing ceiling consumers. Refund-window retained proof
-accounting and ERC20 proof-bearing payment/mint entrypoints remain subsequent
-consumer joins. No batch purchase, generic gate envelope or public unsigned sale
+separate proof-bearing ceiling consumers. [Refund-window sales](native-refund-window-sales.md)
+retain the charged price and proof bytes for deferred mint and refunds. ERC20
+proof-bearing payment/mint entrypoints remain subsequent consumer joins.
+No batch purchase, generic gate envelope or public unsigned sale
 is introduced here.
 
 Focused tests use actual Manager/Ledger for proof/accounting checks and actual

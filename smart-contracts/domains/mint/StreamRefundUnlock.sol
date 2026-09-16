@@ -22,6 +22,26 @@ library StreamRefundUnlock {
         IStreamNativeRefundWindowSale.RefundPurchaseRecord memory p,
         uint8 reasonCode
     ) public view returns (bytes32 hash) {
+        return _reasonHash(x, sale, p, bytes32(0), reasonCode);
+    }
+
+    function reasonHashForPurchase(
+        Context memory x,
+        IStreamNativeRefundWindowSale.RefundSaleRecord memory sale,
+        IStreamNativeRefundWindowSale.RefundPurchaseRecord memory p,
+        bytes32 id,
+        uint8 reasonCode
+    ) public view returns (bytes32 hash) {
+        return _reasonHash(x, sale, p, id, reasonCode);
+    }
+
+    function _reasonHash(
+        Context memory x,
+        IStreamNativeRefundWindowSale.RefundSaleRecord memory sale,
+        IStreamNativeRefundWindowSale.RefundPurchaseRecord memory p,
+        bytes32 id,
+        uint8 reasonCode
+    ) private view returns (bytes32 hash) {
         if (reasonCode == 1) {
             _manager(x);
             (bool exists, IStreamMintManager.MintPhaseConfig memory phase) = IStreamMintReads(
@@ -41,7 +61,7 @@ library StreamRefundUnlock {
                 return keccak256("REFUND_SUPPLY_EXHAUSTED");
             }
             _manager(x);
-            if (_counterExhausted(x.support.manager, sale.config, p)) {
+            if (_counterExhausted(x.support.manager, sale.config, p, id)) {
                 return keccak256("REFUND_COUNTER_EXHAUSTED");
             }
         } else if (reasonCode == 3) {
@@ -88,16 +108,49 @@ library StreamRefundUnlock {
     function _counterExhausted(
         IStreamMintManager target,
         IStreamNativeRefundWindowSale.RefundSaleConfig memory c,
-        IStreamNativeRefundWindowSale.RefundPurchaseRecord memory p
+        IStreamNativeRefundWindowSale.RefundPurchaseRecord memory p,
+        bytes32 purchaseId
     ) private view returns (bool) {
         IStreamMintReads manager = IStreamMintReads(address(target));
         bytes32[] memory ids = manager.phaseCounterIds(c.collectionId, c.phaseId);
+        if (ids.length > 16) {
+            revert StreamMintSaleAllowlist.SaleAllowlistCounterLimitExceeded(ids.length, 16);
+        }
+        (bool captured,,) = StreamRefundWindowPriceStore.facts(purchaseId);
+        bytes32 priceCounter = StreamRefundWindowPriceStore.policy(p.authorization.saleId).counterId;
+        if (purchaseId != 0 && priceCounter != 0 && !captured) {
+            revert IStreamNativeAllowlistRefundWindowSale.InvalidAllowlistRefundPolicy();
+        }
+        IStreamMintCounterPolicy.AllowlistProof[][] memory proofs;
+        if (captured) {
+            bytes memory resolverData = StreamRefundWindowPriceStore.resolverData(purchaseId);
+            // Authenticate the complete saved payload against current pinned definitions.
+            // Its price is deliberately ignored: only the captured charge is refundable.
+            // A missing, changed or malformed proof reverts; it is not an exhaustion fact.
+            StreamMintSaleAllowlist.price(
+                address(target),
+                c.collectionId,
+                c.phaseId,
+                p.authorization.payer,
+                p.authorization.recipient,
+                resolverData,
+                priceCounter
+            );
+            proofs = abi.decode(resolverData, (IStreamMintCounterPolicy.AllowlistProof[][]));
+        }
+        uint256 proofIndex;
         for (uint256 i; i < ids.length; ++i) {
             IStreamMintManager.MintCounterConfig memory counter =
                 manager.counterConfig(c.collectionId, c.phaseId, ids[i]);
+            uint64 cap = counter.staticCap;
+            if (counter.capMode == IStreamMintLedger.CounterCapMode.MERKLE_STATIC) {
+                if (!captured) continue;
+                cap = proofs[proofIndex++][0].maxCount;
+            } else if (counter.capMode != IStreamMintLedger.CounterCapMode.STATIC) {
+                continue;
+            }
             if (
-                !counter.enabled || counter.capMode != IStreamMintLedger.CounterCapMode.STATIC
-                    || counter.deltaMode != IStreamMintLedger.CounterDeltaMode.STATIC
+                !counter.enabled || counter.deltaMode != IStreamMintLedger.CounterDeltaMode.STATIC
                     || counter.staticIncrement == 0
             ) continue;
             // Gate-derived authorizers and resolver increments cannot be inferred from a failed callback.
@@ -107,10 +160,9 @@ library StreamRefundUnlock {
             ) continue;
             bytes32 subject = _subject(manager, c, p, ids[i], counter.keyMode);
             bytes32 key = manager.previewCounterValueKey(c.collectionId, c.phaseId, ids[i], subject);
-            if (
-                uint256(manager.mintLedger().counterValue(key)) + counter.staticIncrement
-                    > counter.staticCap
-            ) return true;
+            if (uint256(manager.mintLedger().counterValue(key)) + counter.staticIncrement > cap) {
+                return true;
+            }
         }
         return false;
     }

@@ -55,8 +55,8 @@ rejects explicitly. Refund windows range from 3,600 to 2,592,000 seconds and
 finalization windows from 86,400 to 7,776,000 seconds. Registration requires a
 Manager phase whose finite end, if present, contains the sale's last purchase
 and both windows.
-The configured price is positive. Zero/free purchases use the immediate price
-program, not a refundable official-revenue transcript.
+The configured public price is positive. The additive Merkle policy below can
+declare a zero-price tier; its deferred mint produces no official revenue.
 
 The `RefundPurchaseAuthorization` EIP-712 domain is
 `6529StreamNativeRefundWindowSale`, version `1`, with the actual chain and
@@ -84,6 +84,67 @@ credit. A missing or undeclared policy fails; a declared zero fee is valid.
 Purchase does not mint, materialize a profile, deposit to a split wallet or
 create official revenue. Forced ETH surplus remains outside buyer liabilities.
 
+## Captured Merkle prices
+
+`IStreamNativeAllowlistRefundWindowSale` adds
+`registerAllowlistRefundSale(config, AllowlistPricePolicy(counterId, allowFree))`
+and `purchaseAllowlistRefundWindow(data, resolverData)`. The selected inline
+`MERKLE_STATIC` payer/recipient counter follows the same canonical proof rules
+as the [immediate consumer](native-allowlist-price-programs.md). Every configured
+Merkle counter requires one proof, and only the selected counter may carry an
+enabled price. The sale independently verifies that exact leaf and captures
+either its exact override or the configured public price for a cap-only leaf.
+
+The original signed `RefundPurchaseAuthorization.price` remains the configured
+public price. Its tuple, digest, domain and nonce rules do not change. The new
+configuration hash binds the selected counter and free declaration:
+
+```solidity
+keccak256(abi.encode(
+    keccak256("6529STREAM_NATIVE_ALLOWLIST_REFUND_CONFIG_V1"),
+    originalRefundConfigHash,
+    AllowlistPricePolicy(counterId, allowFree)
+))
+```
+
+Artist sale consent and purchase signatures bind that final hash. Original
+configuration events and `NativeRefundAllowlistPricePolicy` disclose the same
+hash. The policy has no mutation entrypoint. The original purchase entrypoint
+cannot bypass proofs on a configured allowlist sale; the proof entrypoint
+rejects ordinary sale records.
+
+`refundPurchasePriceFacts(id)` returns an explicit capture flag, the charged
+price and the proof-byte hash. `refundPurchaseResolverData(id)` returns the exact
+saved bytes. These facts use separate namespaced storage, preserving the full
+inherited book layout and the original purchase record tuple. The captured
+purchase hash wraps the original record hash:
+
+```solidity
+keccak256(abi.encode(
+    keccak256("6529STREAM_REFUND_ALLOWLIST_PURCHASE_RECORD_V1"),
+    originalPurchaseRecordHash,
+    chargedPrice,
+    keccak256(resolverData)
+))
+```
+
+Both `RefundPurchaseEnvelopeBound` and `RefundPurchasePriceBound` emit the final
+hash. Pending deposits, purchase/refund amounts, excess credits and finalization
+use the saved charge plus the separately saved reveal fee. Finalization passes
+the saved proof bytes to Manager preview and mint and never reprices the
+purchase. The Manager still independently verifies its cap proof and current
+policy requirements. A changed or unusable proof cannot make a failed mint
+spend the buyer's deposit.
+
+An authenticated zero override requires creation-time `allowFree = true`.
+Purchase remains deferred and captures only the reveal fee as pending funds;
+any excess is an immediate pull credit. Free finalization preserves the original
+Artist, phase, admission, replay, mint and reveal rules, while skipping payout
+reads, profile materialization and the official recorder. It returns amount zero
+and no settlement key. A fee-only refund uses the same saved-liability path as
+a paid purchase. Ordinary refunds, claims and the time escape require no live
+Merkle, price, Artist or payout lookup.
+
 ## Deadlines, pauses and exits
 
 At purchase, the nominal refund deadline is inclusion time plus the refund
@@ -109,12 +170,15 @@ after the finalization window has elapsed cannot revive it.
 
 `unlockRefund(purchaseId, 0)` uses the time exit before any external dependency
 read. Earlier typed reasons are: phase ended strictly after its end (1), proven
-lifetime or supported static-counter exhaustion (2), original policy no longer
+lifetime or supported counter exhaustion (2), original policy no longer
 current or within inclusive previous-policy grace (3), the purchase's exact
 artist identity/generation/binding in attribution state DISPUTED or REVOKED (4),
 or canonical INCIDENT status on the adapter, recorder or purchase-captured gate
 (5). Dynamic counters and nonzero-gate AUTHORIZER subjects are excluded from the
-static-exhaustion inference. Unknown, malformed or failed reads are not proof.
+static-exhaustion inference. For a captured allowlist purchase, reason 2 can
+also authenticate its saved Merkle proof and compare the leaf cap against the
+current counter value and known static increment. Failed proof or dependency
+reads never establish exhaustion. Unknown, malformed or failed reads are not proof.
 Identity-authority contest is not attribution dispute, and a different binding
 generation cannot unlock an older purchase. These are current-state predicates;
 they do not promise future governance can never change a phase or cap.
@@ -153,7 +217,7 @@ materialized wallet. The recorder consumes both its independent
 `(adapter, purchaseId)` key and canonical execution key before materialization
 or funding. The adapter separately enforces its terminal purchase state.
 
-Exactly the purchase price enters recorder 9's native accounting and split
+For a positive charge, exactly the saved purchase price enters recorder 9's native accounting and split
 wallet or revenue-escrow fallback. Manager preview and execution must agree on
 the full-digest authorization ID, operation root and single operation ID. The
 reveal fee is excluded from official revenue: finalization forwards
@@ -182,6 +246,11 @@ Use the compiler's exact link maps for the recorder and refund consumer. The
 new recorder rights/emission libraries preserve its prior immediate interfaces
 and event layouts; the deferred purchase lane is appended storage. Refund book,
 support, unlock and typed settlement helpers execute in the consumer's context.
+The fixed `StreamNativeRefundWindowWorker` holds registration and purchase
+capture; the host retains finalization, value movement and entrypoint guards.
+Link the worker using the compiler's link map. The internal price store uses
+the distinct `6529STREAM_REFUND_WINDOW_PRICE_STORE_V1` namespace, adding no fields
+to the inherited book or shifting the host's original slots.
 Compiler-linked mutable library calls reject direct CALL; arbitrary external
 DELEGATECALL into a library's own caller context grants no consumer authority.
 

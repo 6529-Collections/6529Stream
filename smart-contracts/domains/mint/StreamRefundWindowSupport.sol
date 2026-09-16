@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/mint/IStreamNativeRefundWindowSale.sol";
+import "../../interfaces/stream/mint/IStreamNativeAllowlistRefundWindowSale.sol";
 import "../../interfaces/stream/mint/IStreamMintReads.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttribution.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionState.sol";
@@ -12,6 +13,8 @@ import "../../interfaces/stream/governance/IStreamRoleRegistry.sol";
 import "../revenue/StreamNativeSettlementSupport.sol";
 import "../revenue/StreamDeferredNativeSettlementHash.sol";
 import "./StreamSaleConsent.sol";
+import "./StreamRefundWindowPriceStore.sol";
+import "./StreamMintSaleAllowlist.sol";
 import { StreamMintRoyaltyPolicy } from "./StreamMintRoyaltyPolicy.sol";
 import {
     IStreamMintRoyaltyPolicy
@@ -199,6 +202,43 @@ library StreamRefundWindowSupport {
         IStreamNativeRefundWindowSale.RefundSaleRecord memory record,
         IStreamNativeRefundWindowSale.RefundPurchaseData memory d
     ) public view returns (bytes32 digest, ArtistAssociation memory association, uint256 fee) {
+        (digest, association, fee,) = _validatePurchase(x, record, d, "", false);
+    }
+
+    function validateAllowlistPurchase(
+        Context memory x,
+        IStreamNativeRefundWindowSale.RefundSaleRecord memory record,
+        IStreamNativeRefundWindowSale.RefundPurchaseData memory d,
+        bytes memory resolverData
+    )
+        public
+        view
+        returns (
+            bytes32 digest,
+            ArtistAssociation memory association,
+            uint256 fee,
+            uint256 chargedPrice
+        )
+    {
+        return _validatePurchase(x, record, d, resolverData, true);
+    }
+
+    function _validatePurchase(
+        Context memory x,
+        IStreamNativeRefundWindowSale.RefundSaleRecord memory record,
+        IStreamNativeRefundWindowSale.RefundPurchaseData memory d,
+        bytes memory resolverData,
+        bool allowlist
+    )
+        private
+        view
+        returns (
+            bytes32 digest,
+            ArtistAssociation memory association,
+            uint256 fee,
+            uint256 chargedPrice
+        )
+    {
         IStreamNativeRefundWindowSale.RefundPurchaseAuthorization memory a = d.authorization;
         IStreamNativeRefundWindowSale.RefundSaleConfig memory c = record.config;
         if (
@@ -239,13 +279,36 @@ library StreamRefundWindowSupport {
             )) {
             revert IStreamNativeRefundWindowSale.RefundPurchaseSignatureInvalid(a.artist);
         }
-        StreamSaleTemplate.Selection memory rights =
-            StreamNativeSettlementSupport.rights(x.resolver, c.collectionId);
-        if (
-            StreamSaleTemplate.policyHash(x.resolver, c.collectionId, rights)
-                != a.expectedPrimaryPolicyHash
-        ) {
-            revert IStreamNativeRefundWindowSale.InvalidRefundSale();
+        chargedPrice = a.price;
+        if (allowlist) {
+            IStreamNativeAllowlistRefundWindowSale.AllowlistPricePolicy memory policy =
+                StreamRefundWindowPriceStore.policy(a.saleId);
+            if (policy.counterId == 0 || resolverData.length == 0) {
+                revert IStreamNativeAllowlistRefundWindowSale.InvalidAllowlistRefundPolicy();
+            }
+            (bool hasOverride, uint256 overridePrice) = StreamMintSaleAllowlist.price(
+                address(x.manager),
+                c.collectionId,
+                c.phaseId,
+                a.payer,
+                a.recipient,
+                resolverData,
+                policy.counterId
+            );
+            if (hasOverride) chargedPrice = overridePrice;
+            if (chargedPrice == 0 && !policy.allowFree) {
+                revert IStreamNativeAllowlistRefundWindowSale.RefundPriceOverrideZeroUndeclared(a.saleId);
+            }
+        }
+        if (!allowlist || chargedPrice != 0) {
+            StreamSaleTemplate.Selection memory rights =
+                StreamNativeSettlementSupport.rights(x.resolver, c.collectionId);
+            if (
+                StreamSaleTemplate.policyHash(x.resolver, c.collectionId, rights)
+                    != a.expectedPrimaryPolicyHash
+            ) {
+                revert IStreamNativeRefundWindowSale.InvalidRefundSale();
+            }
         }
         (bool exists, IStreamMintManager.MintPhaseConfig memory phase) =
             IStreamMintReads(address(x.manager)).phase(c.collectionId, c.phaseId);
@@ -383,11 +446,17 @@ library StreamRefundWindowSupport {
             abi.encode(keccak256("6529STREAM_MINT_TICKET_AUTHORIZATION_V1"), p.authorizationDigest)
         );
         b.contextHash = p.authorizationDigest;
+        b.resolverData = StreamRefundWindowPriceStore.resolverData(id);
+        uint256 chargedPrice = StreamRefundWindowPriceStore.chargedPrice(id, a.price);
         StreamNativeSettlementTypes.NativeSettlementCandidate memory c;
         c.saleAdapter = address(this);
         c.executor = msg.sender;
-        StreamSaleTemplate.Selection memory rights =
-            StreamNativeSettlementSupport.rights(x.resolver, b.collectionId);
+        StreamSaleTemplate.Selection memory rights;
+        bytes32 policyHash;
+        if (chargedPrice != 0) {
+            rights = StreamNativeSettlementSupport.rights(x.resolver, b.collectionId);
+            policyHash = StreamSaleTemplate.policyHash(x.resolver, b.collectionId, rights);
+        }
         c.sale = StreamPrimarySettlementTypes.PrimarySale(
             a.saleId,
             keccak256("PRIMARY_SALE"),
@@ -398,8 +467,8 @@ library StreamRefundWindowSupport {
             a.payer,
             address(0),
             a.recipient,
-            a.price,
-            StreamSaleTemplate.policyHash(x.resolver, b.collectionId, rights)
+            chargedPrice,
+            policyHash
         );
         c.lifecycleBinding = sale.lifecycle;
         c.executionBinding = StreamPrimarySettlementTypes.SaleExecutionBinding(
