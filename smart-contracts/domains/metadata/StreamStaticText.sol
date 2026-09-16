@@ -15,7 +15,7 @@ library StreamStaticText {
             let destination := start
             let hexDigits := 0x3031323334353637383961626364656600000000000000000000000000000000
             for { } lt(cursor, end) { cursor := add(cursor, 1) } {
-                let character := byte(0, mload(cursor))
+                let character := byte(and(cursor, 31), mload(and(cursor, not(31))))
                 let escaped := 0
                 switch character
                 case 0x22 { escaped := 0x22 }
@@ -54,13 +54,16 @@ library StreamStaticText {
     }
 
     function isValidUtf8(string memory raw) internal pure returns (bool valid) {
+        // Each load stays inside the allocated string word; only the indexed byte is used.
+        // Keep the original optimizer posture: enabling its optional memory guard enlarged
+        // two measured products beyond EIP-170. The aligned reads are retained unchanged.
         assembly {
             let cursor := add(raw, 0x20)
             let end := add(cursor, mload(raw))
             valid := 1
 
             for { } lt(cursor, end) { cursor := add(cursor, 1) } {
-                let lead := byte(0, mload(cursor))
+                let lead := byte(and(cursor, 31), mload(and(cursor, not(31))))
 
                 if iszero(lt(lead, 0x80)) {
                     if or(lt(lead, 0xc2), gt(lead, 0xf4)) {
@@ -74,7 +77,7 @@ library StreamStaticText {
                         break
                     }
 
-                    let second := byte(0, mload(cursor))
+                    let second := byte(and(cursor, 31), mload(and(cursor, not(31))))
                     if iszero(eq(and(second, 0xc0), 0x80)) {
                         valid := 0
                         break
@@ -97,7 +100,9 @@ library StreamStaticText {
                         valid := 0
                         break
                     }
-                    if iszero(eq(and(byte(0, mload(cursor)), 0xc0), 0x80)) {
+                    if iszero(
+                        eq(and(byte(and(cursor, 31), mload(and(cursor, not(31)))), 0xc0), 0x80)
+                    ) {
                         valid := 0
                         break
                     }
@@ -119,7 +124,9 @@ library StreamStaticText {
                         valid := 0
                         break
                     }
-                    if iszero(eq(and(byte(0, mload(cursor)), 0xc0), 0x80)) {
+                    if iszero(
+                        eq(and(byte(and(cursor, 31), mload(and(cursor, not(31)))), 0xc0), 0x80)
+                    ) {
                         valid := 0
                         break
                     }

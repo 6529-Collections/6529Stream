@@ -43,12 +43,17 @@ library StreamRenderContextV1 {
             '","collectionId":"',
             Strings.toString(r.collectionId),
             '","collectionSerial":"',
-            Strings.toString(r.collectionSerial),
-            '","collectionSupplyMode":"',
-            supply(r.collectionSupplyMode),
-            '","collectionStatus":"',
-            status(r.collectionStatus),
-            '"'
+            Strings.toString(r.collectionSerial)
+        );
+        out = bytes.concat(
+            out,
+            abi.encodePacked(
+                '","collectionSupplyMode":"',
+                supply(r.collectionSupplyMode),
+                '","collectionStatus":"',
+                status(r.collectionStatus),
+                '"'
+            )
         );
         if (r.state != R.TokenRenderState.PENDING_RANDOMNESS) {
             out = bytes.concat(

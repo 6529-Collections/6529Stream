@@ -25,7 +25,7 @@ import {
 } from "./StreamStaticAttributionCompanion.sol";
 import { StreamGasParameterHost } from "../parameters/StreamGasParameterHost.sol";
 import { Strings } from "../../vendor/openzeppelin/Strings.sol";
-import { Base64 } from "../../vendor/openzeppelin/Base64.sol";
+import { StreamStaticRenderEncoding as Encoding } from "./StreamStaticRenderEncoding.sol";
 
 /// @notice Versioned STATIC rendering API and full executable reads from exact pinned sources.
 /// @dev RenderRequest is an input, not a claim of token existence. The actual Router builds it
@@ -61,18 +61,22 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
         RendererManifest manifest;
     }
 
-    struct Prepared {
-        S.RawSource source;
-        MetadataConfig config;
-        Context.Facts facts;
-        bytes32 bundle;
-        B.Facts bundleFacts;
-        bytes artist;
-    }
     Sources private _sources;
     bytes32[6] private _codeHashes;
     RendererManifest private _manifest;
+    bytes32 private immutable _encodingCodeHash;
+
+    function encodingBinding() external view returns (address, bytes32) {
+        return (address(Encoding), _encodingCodeHash);
+    }
+
+    function _encodingPin() private view {
+        if (address(Encoding).code.length == 0 || address(Encoding).codehash != _encodingCodeHash) {
+            revert InvalidStaticRender();
+        }
+    }
     error InvalidStaticRender();
+    error InvalidRenderContext(); // Original pure-context error remains in the Renderer ABI.
     error StaticOutputTooLarge();
 
     constructor(Deployment memory d) StreamGasParameterHost(d.executor) {
@@ -93,6 +97,8 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
             Attribution(d.sources.attribution).core() != d.sources.core
                 || Attribution(d.sources.attribution).router() != d.sources.router
         ) revert InvalidStaticRender();
+        if (address(Encoding).code.length == 0) revert InvalidStaticRender();
+        _encodingCodeHash = address(Encoding).codehash;
         _sources = d.sources;
         address[6] memory a = [
             d.sources.core,
@@ -145,7 +151,7 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
         if (mode > 3 || r.core != _sources.core || r.viewId != 0 || r.viewManifestHash != 0) {
             revert InvalidStaticRender();
         }
-        Prepared memory p = _prepare(r);
+        Encoding.Prepared memory p = _prepare(r);
         if (mode == 1 && p.config.mode == MetadataMode.OFFCHAIN) {
             if (
                 r.state == TokenRenderState.PENDING_RANDOMNESS
@@ -159,7 +165,9 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
                 .toString()
             );
         }
-        if (mode == 3 && r.state == TokenRenderState.PENDING_RANDOMNESS) revert InvalidStaticRender();
+        if (mode == 3 && r.state == TokenRenderState.PENDING_RANDOMNESS) {
+            revert InvalidStaticRender();
+        }
         bool full = mode >= 2;
         string memory script = p.source.script;
         if (p.bundle != 0 && full) {
@@ -173,30 +181,16 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
                     string(_payload(p.bundleFacts.libraryBundle, libraryFacts));
             }
         }
-        string memory context = Context.json(r, p.facts, ID, VERSION);
-        string memory html;
-        if (
-            r.state != TokenRenderState.PENDING_RANDOMNESS && p.config.mode != MetadataMode.OFFCHAIN
-                && (full || p.bundle == 0)
-        ) {
-            html = Context.html(context, p.facts.dependencyScript, script);
-            if (bytes(html).length > MAX_FULL_BYTES) revert StaticOutputTooLarge();
-        }
-        if (mode == 3) return bytes(html).length == 0 ? Context.html(context, "", "") : html;
-        // A large program is available at the actual full methods. Its compact reference is
-        // never described as a complete executable export. No external URI is executed here.
-        bytes memory json = _json(r, p, context, html, full);
-        if (!full && (p.bundle != 0 || json.length > 18000)) json = _compact(r, p);
-        if (json.length > (full ? MAX_FULL_BYTES : 18000)) revert StaticOutputTooLarge();
-        if (mode == 1) {
-            string memory uri = string.concat("data:application/json;base64,", Base64.encode(json));
-            if (bytes(uri).length > MAX_DEFAULT_URI_BYTES) revert StaticOutputTooLarge();
-            return uri;
-        }
-        return string(json);
+        _encodingPin();
+        bytes memory input =
+            abi.encodeWithSelector(Encoding.render.selector, r, p, script, _sources.router, mode);
+        uint256 maximum = mode == 1 ? MAX_DEFAULT_URI_BYTES : mode == 0 ? 18000 : MAX_FULL_BYTES;
+        bytes memory raw =
+            Calls.fixedCode(address(Encoding), input, 64 + ((maximum + 31) / 32) * 32, gasleft());
+        return Calls.stringResult(raw, maximum);
     }
 
-    function _prepare(RenderRequest memory r) private view returns (Prepared memory p) {
+    function _prepare(RenderRequest memory r) private view returns (Encoding.Prepared memory p) {
         _pin(0, _sources.core);
         _pin(1, _sources.router);
         bytes memory raw = _read(
@@ -286,151 +280,6 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
             p.facts.mediaManifestHash = selected.manifestHash;
         }
         p.artist = _attribution(r.collectionId, r.tokenId);
-    }
-
-    function _json(
-        RenderRequest memory r,
-        Prepared memory p,
-        string memory context,
-        string memory html,
-        bool full
-    ) private view returns (bytes memory) {
-        string memory fullPrefix = string.concat(
-            "web3://",
-            uint256(uint160(_sources.router)).toHexString(20),
-            ":",
-            p.source.chainId.toString()
-        );
-        string memory animation;
-        if (bytes(html).length != 0) {
-            animation = string.concat("data:text/html;base64,", Base64.encode(bytes(html)));
-        } else if (bytes(p.source.animationBaseURI).length != 0) {
-            animation = string.concat(p.source.animationBaseURI, r.tokenId.toString());
-        }
-        bytes memory out = abi.encodePacked(
-            '{"name":"',
-            Context.escape(bytes(p.source.name).length == 0 ? "6529 Stream" : p.source.name),
-            " #",
-            r.collectionSerial.toString(),
-            '","description":"',
-            Context.escape(p.source.description),
-            '","image":"',
-            Context.escape(p.source.imageURI),
-            '","animation_url":"',
-            Context.escape(animation),
-            '","metadata_state":"',
-            _renderState(r.state),
-            '","metadata_schema_version":"6529stream-static-v1","token_data_base64":"',
-            Base64.encode(p.facts.tokenData),
-            '","properties":{"stream":',
-            context,
-            ',"provenance":{"attribution":',
-            p.artist,
-            '},"render_mode":"',
-            full ? "full" : "marketplace",
-            '","config_record_hash":"',
-            uint256(r.metadataSnapshotHash).toHexString(32),
-            '","views":{"tokenJSON":"',
-            fullPrefix,
-            "/tokenJSON/",
-            r.tokenId.toString(),
-            '","tokenHTML":"',
-            fullPrefix,
-            "/tokenHTML/",
-            r.tokenId.toString(),
-            '"}'
-        );
-        if (p.config.mode != MetadataMode.ONCHAIN) {
-            out = bytes.concat(
-                out,
-                abi.encodePacked(
-                    ',"offchain_metadata_uri":"',
-                    Context.escape(
-                        string.concat(
-                            p.config.baseURI,
-                            (p.config.offchainURIIdMode == OffchainURIIdMode.TOKEN_ID
-                                    ? r.tokenId
-                                    : r.collectionSerial)
-                            .toString()
-                        )
-                    ),
-                    '"'
-                )
-            );
-        }
-        return bytes.concat(out, bytes("}}"));
-    }
-
-    function _renderState(R.TokenRenderState state) private pure returns (string memory) {
-        return state == R.TokenRenderState.BURNED
-            ? "burned"
-            : state == R.TokenRenderState.PENDING_RANDOMNESS
-                ? "pending"
-                : state == R.TokenRenderState.FROZEN ? "frozen" : "active";
-    }
-
-    function _compact(RenderRequest memory r, Prepared memory p)
-        private
-        view
-        returns (bytes memory)
-    {
-        string memory root = string.concat(
-            "web3://",
-            uint256(uint160(_sources.router)).toHexString(20),
-            ":",
-            p.source.chainId.toString()
-        );
-        bytes memory artist = p.artist;
-        if (artist.length > 8192) {
-            // The complete object begins with the canonical state field. Retain that actual
-            // state while linking the full object; truncation is never mislabeled unavailable.
-            bytes memory prefix = bytes('{"state":"');
-            uint256 end = prefix.length;
-            if (artist.length < prefix.length) revert InvalidStaticRender();
-            for (uint256 i; i < prefix.length; ++i) {
-                if (artist[i] != prefix[i]) revert InvalidStaticRender();
-            }
-            while (end < artist.length && artist[end] != 0x22 && end < 64) ++end;
-            if (end == artist.length || end == 64) revert InvalidStaticRender();
-            bytes memory state = new bytes(end);
-            for (uint256 i; i < end; ++i) {
-                state[i] = artist[i];
-            }
-            artist = abi.encodePacked(state, '","details_location":"tokenJSON"}');
-        }
-        return abi.encodePacked(
-            '{"name":"',
-            Context.escape(p.source.name),
-            " #",
-            r.collectionSerial.toString(),
-            '","image":"',
-            Context.escape(p.source.imageURI),
-            '","metadata_state":"',
-            _renderState(r.state),
-            '","metadata_schema_version":"6529stream-static-v1","token_data_location":"tokenJSON:token_data_base64","properties":{"render_mode":"compact","renderer_id":"',
-            uint256(ID).toHexString(32),
-            '","renderer_version":"',
-            uint256(VERSION).toHexString(32),
-            '","context_version":"',
-            uint256(CONTEXT).toHexString(32),
-            '","config_record_hash":"',
-            uint256(r.metadataSnapshotHash).toHexString(32),
-            '","script_hash":"',
-            uint256(p.facts.scriptHash).toHexString(32),
-            '","dependency_hash":"',
-            uint256(p.facts.dependencyHash).toHexString(32),
-            '","provenance":{"attribution":',
-            artist,
-            '},"views":{"tokenJSON":"',
-            root,
-            "/tokenJSON/",
-            r.tokenId.toString(),
-            '","tokenHTML":"',
-            root,
-            "/tokenHTML/",
-            r.tokenId.toString(),
-            '"}}}'
-        );
     }
 
     function _bundleFacts(bytes32 id) private view returns (B.Facts memory f) {
@@ -586,10 +435,9 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
             if (part.length != c.length || keccak256(part) != c.hash) revert InvalidStaticRender();
             uint256 words = part.length & ~uint256(31);
             assembly ("memory-safe") {
-                for { let j := 0 } lt(j, words) { j := add(j, 32) } { mstore(
-                    add(add(out, 32), add(offset, j)),
-                    mload(add(add(part, 32), j))
-                ) }
+                for { let j := 0 } lt(j, words) { j := add(j, 32) } {
+                    mstore(add(add(out, 32), add(offset, j)), mload(add(add(part, 32), j)))
+                }
             }
             for (uint256 j = words; j < part.length; ++j) {
                 out[offset + j] = part[j];
@@ -666,7 +514,9 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
     }
 
     function _manifestPin(M.Selection memory s) private view {
-        if (s.host != _sources.metadata || s.codeHash != _codeHashes[2]) revert InvalidStaticRender();
+        if (s.host != _sources.metadata || s.codeHash != _codeHashes[2]) {
+            revert InvalidStaticRender();
+        }
         _pin(2, s.host);
     }
 

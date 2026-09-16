@@ -4,6 +4,10 @@ import {
     IStreamScriptBundles as B
 } from "../../interfaces/stream/metadata/IStreamScriptBundles.sol";
 
+import { StreamCollectionRecordHashes } from "../records/StreamCollectionRecordHashes.sol";
+import {
+    IStreamPreservationRecords
+} from "../../interfaces/stream/preservation/IStreamPreservationRecords.sol";
 import { StreamCollectionMetadataV1 } from "./StreamCollectionMetadataV1.sol";
 import { StreamMetadataGovernance } from "./StreamMetadataGovernance.sol";
 import { StreamRecordFamilies } from "../records/StreamRecordFamilies.sol";
@@ -63,6 +67,61 @@ library StreamCollectionManifestExecution {
         address router,
         bytes32 servingSourceHash
     );
+
+    event CollectionRecordRecorded(
+        uint256 indexed collectionId,
+        bytes32 indexed recordType,
+        bytes32 indexed subjectId,
+        IStreamPreservationRecords.CollectionRecord record,
+        bytes32 recordHash,
+        bytes32 recordChainHash,
+        address recorder,
+        bytes32 authorizationClass,
+        uint16 schemaVersion
+    );
+
+    function commitRecord(
+        mapping(bytes32 => StreamCollectionMetadataV1.StoredRecord) storage _records,
+        mapping(uint256 => mapping(bytes32 => bytes32[])) storage _history,
+        mapping(uint256 => mapping(bytes32 => bytes32)) storage _chains,
+        mapping(bytes32 => bytes32) storage _latest,
+        bytes32 hash,
+        IStreamPreservationRecords.CollectionRecord calldata record,
+        V.RecordReceipt memory receipt
+    ) public {
+        uint256 collectionId = receipt.collectionId;
+        uint256 count = _history[collectionId][record.recordType].length;
+        if (count == type(uint64).max) revert V.InvalidMetadataRecord();
+        receipt.recordIndex = uint64(count);
+        receipt.recordChainHash = StreamCollectionRecordHashes.nextChain(
+            collectionId,
+            record.recordType,
+            _chains[collectionId][record.recordType],
+            hash,
+            uint64(count)
+        );
+        StreamCollectionMetadataV1.StoredRecord storage s = _records[hash];
+        s.record = record;
+        s.receipt = receipt;
+        _history[collectionId][record.recordType].push(hash);
+        _chains[collectionId][record.recordType] = receipt.recordChainHash;
+        _latest[
+            keccak256(
+                abi.encode(collectionId, record.recordType, record.subjectId, receipt.recorder)
+            )
+        ] = hash;
+        emit CollectionRecordRecorded(
+            collectionId,
+            record.recordType,
+            record.subjectId,
+            record,
+            hash,
+            receipt.recordChainHash,
+            receipt.recorder,
+            bytes32(uint256(receipt.authorizationClass)),
+            1
+        );
+    }
 
     function recordTypeTransition(
         mapping(bytes32 => V.RecordPolicy) storage _policies,

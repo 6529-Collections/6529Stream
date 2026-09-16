@@ -30,6 +30,34 @@ library StreamRendererCalls {
         assembly ("memory-safe") { returndatacopy(add(result, 32), 0, size) }
     }
 
+    /// @dev Fixed linked-code extraction, not a selectable source. The caller supplies a
+    /// bound derived from its unchanged per-source/render budgets. Failed code keeps its
+    /// original small custom error; neither success nor failure copies unbounded data.
+    function fixedCode(address target, bytes memory input, uint256 maximum, uint256 cap)
+        internal
+        view
+        returns (bytes memory result)
+    {
+        uint256 left = gasleft();
+        if (target.code.length == 0 || left <= RESERVE || cap == 0) {
+            revert RendererReadFailed(target, bytes4(input));
+        }
+        uint256 available = (left - RESERVE) * 63 / 64;
+        if (cap > available) cap = available;
+        bool ok;
+        uint256 size;
+        assembly ("memory-safe") {
+            ok := staticcall(cap, target, add(input, 32), mload(input), 0, 0)
+            size := returndatasize()
+        }
+        if (size > (ok ? maximum : 4096) || (!ok && size == 0)) {
+            revert RendererReadFailed(target, bytes4(input));
+        }
+        result = new bytes(size);
+        assembly ("memory-safe") { returndatacopy(add(result, 32), 0, size) }
+        if (!ok) assembly ("memory-safe") { revert(add(result, 32), mload(result)) }
+    }
+
     function stringResult(bytes memory result, uint256 maximum)
         internal
         pure

@@ -726,45 +726,8 @@ contract StreamCollectionMetadataV1 is
         receipt.authorizationClass = authClass;
         receipt.recordedAt = uint64(block.timestamp);
         receipt.artistAuthorization = authorization;
-        _commitRecord(hash, record, receipt);
-    }
-
-    function _commitRecord(
-        bytes32 hash,
-        IStreamPreservationRecords.CollectionRecord calldata record,
-        RecordReceipt memory receipt
-    ) private {
-        uint256 collectionId = receipt.collectionId;
-        uint256 count = _history[collectionId][record.recordType].length;
-        if (count == type(uint64).max) revert InvalidMetadataRecord();
-        receipt.recordIndex = uint64(count);
-        receipt.recordChainHash = StreamCollectionRecordHashes.nextChain(
-            collectionId,
-            record.recordType,
-            _chains[collectionId][record.recordType],
-            hash,
-            uint64(count)
-        );
-        StoredRecord storage s = _records[hash];
-        s.record = record;
-        s.receipt = receipt;
-        _history[collectionId][record.recordType].push(hash);
-        _chains[collectionId][record.recordType] = receipt.recordChainHash;
-        _latest[
-            keccak256(
-                abi.encode(collectionId, record.recordType, record.subjectId, receipt.recorder)
-            )
-        ] = hash;
-        emit CollectionRecordRecorded(
-            collectionId,
-            record.recordType,
-            record.subjectId,
-            record,
-            hash,
-            receipt.recordChainHash,
-            receipt.recorder,
-            bytes32(uint256(receipt.authorizationClass)),
-            1
+        StreamCollectionManifestExecution.commitRecord(
+            _records, _history, _chains, _latest, hash, record, receipt
         );
     }
 
