@@ -379,6 +379,7 @@ contract StreamCurrentCuratedPurchaseSettlementTest is NativeCuratedSaleFixture 
         );
         entropy.configure(125, 1, false, false);
         vm.warp(current.windows.revealOpen);
+        vm.roll(block.number + 1);
         vm.recordLogs();
         vm.prank(payer);
         Curated.ExecutionRecord memory e =

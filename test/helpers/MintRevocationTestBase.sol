@@ -35,6 +35,10 @@ contract MintRevocationCoreMock {
         returns (address, bytes32, bool, bytes32, bytes4, address, uint8, bytes32, bytes32, uint64)
     {
         require(!unavailable, "core unavailable");
+        // This typed Core fixture has no royalty resolver installed.
+        if (kind == keccak256("ROYALTY_RESOLVER")) {
+            return (address(0), bytes32(0), false, kind, 0, address(0), 0, 0, 0, 0);
+        }
         address selected = kind == keccak256("MODULE_REGISTRY") ? registry : artist;
         return (selected, selected.codehash, false, kind, 0, selected, 1, 0, 0, 1);
     }
