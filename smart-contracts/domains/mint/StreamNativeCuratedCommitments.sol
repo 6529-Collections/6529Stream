@@ -138,11 +138,12 @@ library StreamNativeCuratedCommitments {
         bytes32 selectionCommitment,
         C.Admission memory admission
     ) public returns (bool newlyCredited, uint256 amount) {
+        C.CommitRecord storage r = s._records[saleId][buyer][selectionCommitment];
+        // Permanent buyer credit does not depend on later changes to the sale's live windows.
+        if (r.status == C.Status.REFUND_CREDITED) return (false, 0);
         // An absolute escape can cap commitClose, revealOpen and revealClose to the same second.
         // The trusted host's terminal admission keeps that recovery independent of entry windows.
         if (!admission.refundMatured) validateWindows(admission.windows);
-        C.CommitRecord storage r = s._records[saleId][buyer][selectionCommitment];
-        if (r.status == C.Status.REFUND_CREDITED) return (false, 0);
         r = _pending(s, saleId, buyer, selectionCommitment);
         if (!admission.refundMatured && block.timestamp < admission.windows.revealClose) {
             revert C.ContentRefundNotReady(selectionCommitment);

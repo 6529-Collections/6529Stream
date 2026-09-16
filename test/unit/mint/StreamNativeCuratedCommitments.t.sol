@@ -986,6 +986,43 @@ contract StreamNativeCuratedCommitmentsTest {
         _assertLiabilities(0, 0);
     }
 
+    function testEarlyRefundRepeatedAfterClockCollapseStaysIdempotentBeforeAndAfterClaim() public {
+        bytes32 value = _commit(SALE, ALICE, SALT);
+        vm.warp(1040);
+        C.Admission memory early = C.Admission(C.Windows(1000, 1100, 1200, 1400), false, true);
+        host.setAdmission(SALE, early);
+        (bool changed, uint256 amount) = host.unlock(SALE, ALICE, value);
+        assertTrue(changed);
+        assertEq(amount, PRICE);
+
+        CuratedCommitmentClockSource clockSource = new CuratedCommitmentClockSource();
+        Clock.Schedule memory schedule = Clock.Schedule(1000, 1100, 1200, 1400, 1500);
+        vm.warp(1050);
+        clockSource.stop();
+        vm.warp(1499);
+        C.Admission memory collapsed = clockSource.admission(SALE, schedule);
+        assertEq(collapsed.windows.commitClose, 1500);
+        assertEq(collapsed.windows.revealOpen, 1500);
+        assertEq(collapsed.windows.revealClose, 1500);
+        assertFalse(collapsed.refundMatured);
+        host.setAdmission(SALE, collapsed);
+        provider.configure(100, true);
+
+        (changed, amount) = host.unlock(SALE, ALICE, value);
+        assertFalse(changed);
+        assertEq(amount, 0);
+        assertEq(host.refundableBalance(SALE, ALICE), PRICE);
+        _assertLiabilities(0, PRICE);
+        vm.prank(ALICE);
+        assertEq(host.claim(SALE, ALICE, ALICE), PRICE);
+        (changed, amount) = host.unlock(SALE, ALICE, value);
+        assertFalse(changed);
+        assertEq(amount, 0);
+        assertEq(host.refundableBalance(SALE, ALICE), 0);
+        assertEq(address(host).balance, 0);
+        _assertLiabilities(0, 0);
+    }
+
     function testForcedSurplusCannotReplaceOrConsumeTrackedDepositsAndCredits() public {
         bytes32 value = _commit(SALE, ALICE, SALT);
         new CuratedForcedValue{ value: 77 }(payable(address(host)));
