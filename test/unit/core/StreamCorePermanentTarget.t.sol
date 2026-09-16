@@ -184,7 +184,38 @@ contract PermanentTargetCoreHarness is StreamCore {
     }
 }
 
+/// @dev Exact typed Ledger completion for the prepared-abort Core regression.
+contract PermanentTargetMintContinuityLedger {
+    address private immutable _predecessor;
+    address private immutable _successor;
+
+    constructor(address predecessor_, address successor_) {
+        _predecessor = predecessor_;
+        _successor = successor_;
+    }
+
+    function supportsInterface(bytes4 id) external pure returns (bool) {
+        return id == type(IStreamMintLedger).interfaceId || id == type(IERC165).interfaceId;
+    }
+
+    function isMintSuccessorReady(address ledger_, address predecessor_, address successor_)
+        external
+        view
+        returns (bool)
+    {
+        return ledger_ == address(this) && predecessor_ == _predecessor && successor_ == _successor;
+    }
+}
+
 contract PermanentTargetMintManager {
+    address public core;
+    address public mintLedger;
+
+    function configureContinuity(address core_, address ledger_) external {
+        core = core_;
+        mintLedger = ledger_;
+    }
+
     function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
         return interfaceId == type(IStreamMintManager).interfaceId || interfaceId == 0x01ffc9a7;
     }
@@ -562,6 +593,17 @@ contract StreamCorePermanentTargetTest is CharacterizationTestBase {
         require(tokenId == 1 && serial == 1, "prepared identity");
 
         PermanentTargetMintManager replacement = new PermanentTargetMintManager();
+        PermanentTargetMintContinuityLedger ledger =
+            new PermanentTargetMintContinuityLedger(address(_manager), address(replacement));
+        _manager.configureContinuity(address(_core), address(ledger));
+        replacement.configureContinuity(address(_core), address(ledger));
+        _registry.setRecord(
+            address(ledger),
+            keccak256("MINT_LEDGER"),
+            type(IStreamMintLedger).interfaceId,
+            keccak256("ledger module"),
+            keccak256("ledger deployment")
+        );
         _installPointer(
             _POINTER_MINT_MANAGER,
             address(replacement),
@@ -573,6 +615,10 @@ contract StreamCorePermanentTargetTest is CharacterizationTestBase {
         );
         _manager.abort(_core, tokenId, operationId);
 
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.PreparedMintMismatch.selector));
+        replacement.complete(
+            _core, tokenId, address(0xBEEF), operationId, keccak256("replacement cannot complete")
+        );
         replacement.abort(_core, tokenId, operationId);
         require(_core.pendingPreparedMintTokenId() == 0, "pending identity");
         require(_core.lastAllocatedTokenId() == 0, "dense token allocation");

@@ -10,6 +10,8 @@ import "../interfaces/stream/entropy/IStreamEntropyCoordinator.sol";
 import "../interfaces/stream/metadata/IStreamMetadataRouter.sol";
 import "../interfaces/stream/mint/IStreamMintLedger.sol";
 import "../interfaces/stream/mint/IStreamMintManager.sol";
+import "../interfaces/stream/mint/IStreamMintReads.sol";
+import "../interfaces/stream/mint/IStreamMintLedgerImport.sol";
 import "../interfaces/stream/modules/IStreamModuleRegistry.sol";
 import "../interfaces/stream/revenue/IStreamRoyaltyResolver.sol";
 import "../interfaces/stream/revenue/IStreamRoyaltyEconomicContinuity.sol";
@@ -274,6 +276,14 @@ library StreamCoreExternalReads {
             pointerType == _POINTER_ROYALTY_RESOLVER && current.target != address(0)
                 && target != current.target
                 && !_royaltySuccessorAdmitted(current.target, current.codeHash, target)
+        ) return (StreamCoreValidationStatus.INVALID_TARGET, plan);
+
+        if (
+            pointerType == _POINTER_MINT_MANAGER && current.target != address(0)
+                && target != current.target
+                && !_mintSuccessorAdmitted(
+                    registryPointer, current.target, current.codeHash, target
+                )
         ) return (StreamCoreValidationStatus.INVALID_TARGET, plan);
 
         plan.candidate.revision = nextRevision;
@@ -695,6 +705,47 @@ library StreamCoreExternalReads {
             )
         );
         return ok && word == bytes32(uint256(1));
+    }
+
+    /// @dev The candidate's own immutable Ledger must have completed this exact migration.
+    /// Sharing the predecessor Ledger does not waive Manager-namespaced counter/replay import.
+    function _mintSuccessorAdmitted(
+        StreamCorePointerState memory registryPointer,
+        address previous,
+        bytes32 previousCode,
+        address candidate
+    ) private view returns (bool) {
+        if (!_isValidContract(previous) || previousCode == 0 || previous.codehash != previousCode) {
+            return false;
+        }
+        (bool ok, bytes32 word) =
+            _continuityWord(previous, abi.encodeCall(IStreamMintReads.core, ()));
+        bytes32 expectedCore = bytes32(uint256(uint160(address(this))));
+        if (!ok || word != expectedCore) return false;
+        (ok, word) = _continuityWord(candidate, abi.encodeCall(IStreamMintReads.core, ()));
+        if (!ok || word != expectedCore) return false;
+        address oldLedger = _mintLedgerOf(previous);
+        address newLedger = _mintLedgerOf(candidate);
+        if (oldLedger == address(0) || newLedger == address(0)) return false;
+        (StreamCoreValidationStatus ledgerStatus,) = eligiblePointer(
+            registryPointer, newLedger, _POINTER_MINT_LEDGER, type(IStreamMintLedger).interfaceId
+        );
+        if (ledgerStatus != StreamCoreValidationStatus.VALID) return false;
+        (ok, word) = _continuityWord(
+            newLedger,
+            abi.encodeCall(
+                IStreamMintLedgerImport.isMintSuccessorReady, (oldLedger, previous, candidate)
+            )
+        );
+        return ok && word == bytes32(uint256(1));
+    }
+
+    function _mintLedgerOf(address manager) private view returns (address ledger) {
+        (bool ok, bytes32 word) =
+            _continuityWord(manager, abi.encodeCall(IStreamMintReads.mintLedger, ()));
+        if (!ok || uint256(word) > type(uint160).max) return address(0);
+        ledger = address(uint160(uint256(word)));
+        if (!_isValidContract(ledger)) return address(0);
     }
 
     function _continuityWord(address target, bytes memory data)

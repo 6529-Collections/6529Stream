@@ -33,11 +33,22 @@ and [upgrade/redeployment ADR](../adr/0007-upgrade-redeployment.md).
 7. Call `completeCounterImport(root, counterCount, nullifierCount, descriptorProof)`.
    Exact leaf counts and complete profile copying are required. While an import
    is pending the Ledger rejects ordinary successor consumption.
-8. Before activating a replacement, Core's pointer transition must verify the
-   exact predecessor Ledger, predecessor Manager and successor Manager through
-   `isMintSuccessorReady`. The Ledger import capability alone cannot enforce a
-   Core pointer transition. Its actual Core integration is a separate acceptance
-   requirement owned by the integration coordinator.
+8. Core now enforces replacement continuity before its original class-3 pointer
+   transition. It reads each Manager's exact Core and immutable Ledger binding,
+   verifies the predecessor's pinned runtime and the successor Ledger's normal
+   catalog/interface/runtime admission, then requires canonical true from that
+   Ledger's `isMintSuccessorReady(oldLedger, oldManager, newManager)`. This applies
+   to same-Ledger replacement too. Initial installation and same-address catalog
+   refresh retain their original behavior. A separate Core Ledger inventory
+   pointer does not substitute for either Manager's actual binding.
+
+The actual Artist suite still pins its original Manager. Accounting completion
+and Core pointer admission do not by themselves authorize successor phase
+registration or minting. That consumer join is being implemented with fresh
+successor policy consent and authenticated lineage; old signatures are not
+reinterpreted. Do not treat the pointer guard as a completed live migration.
+During a pending prepared mint, the admitted replacement retains the original
+incident-abort route and cannot complete the predecessor's prepared operation.
 
 Keep the predecessor deployed: import checks read its frozen values and replay
 state. Imported profiles are enumerable on the successor even if no current
@@ -136,3 +147,19 @@ failures, and old-ticket rejection. `StreamMintContinuityProfiles.t.sol` covers
 bounded profile copying and successive generations. Core, Artist and governance
 context fixtures in these scoped suites do not establish production deployment
 readiness or whole-stack governance/pointer activation acceptance.
+
+
+## Core replacement regression evidence
+
+The separate 57-source native capture passes all 29 tests: eight actual-Core
+mint replacement cases, seven royalty cases, two Artist history cases and twelve
+permanent-target regressions. The mint cases cover same/new Ledger completion,
+exact predecessor/successor identity, foreign Core, missing/delegated code,
+malformed/noncanonical replies, catalog and runtime drift, unchanged pointer
+state on failure and retry of the same saved governance action. The prepared
+mint case preserves replacement abort and rejects replacement completion.
+
+Manager/Ledger import and governance replies in this Core cohort are typed
+boundaries. The mint builder's separate 87-case capture uses actual Manager,
+Ledger, ModuleRegistry and Safe with typed Core/Artist/governance/registry seams.
+These complementary results do not establish whole-current-stack succession.
