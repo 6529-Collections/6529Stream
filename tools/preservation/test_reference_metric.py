@@ -1,6 +1,8 @@
 """Actual byte measurement controls, independent of publication/source authority."""
 import copy
 import hashlib
+from fractions import Fraction
+import random
 import json
 from pathlib import Path
 import struct
@@ -55,6 +57,39 @@ class ReferenceMetricTests(unittest.TestCase):
         expected = m.SCALE * (20000 * a * b + 65025) // (10000 * (a * a + b * b) + 65025)
         self.assertEqual(m.score(first, second, 11, 11), expected)
         self.assertEqual(m.score(second, first, 11, 11), expected)
+
+    def test_nonconstant_rgb_matches_independent_two_dimensional_fraction_oracle(self):
+        # Direct normalized 2-D population moments; independent of the production
+        # separable scan and integer-expanded formula. Preserve per-window flooring.
+        weights = (1, 8, 38, 114, 222, 277, 222, 114, 38, 8, 1)
+        total_weight = sum(weights) ** 2
+        rng = random.Random(6529)
+        width, height = 13, 12
+        first = [[tuple(rng.randrange(256) for _ in range(3)) for _ in range(width)] for _ in range(height)]
+        nearby = [[tuple(max(0, min(255, c + rng.randrange(-17, 18))) for c in pixel) for pixel in row] for row in first]
+        inverse = [[tuple(255 - c for c in pixel) for pixel in row] for row in first]
+        for second in (nearby, inverse):
+            scores = []
+            for channel in range(3):
+                for top in range(height - 10):
+                    for left in range(width - 10):
+                        values = [(Fraction(wy * wx, total_weight),
+                                   first[top + dy][left + dx][channel],
+                                   second[top + dy][left + dx][channel])
+                                  for dy, wy in enumerate(weights) for dx, wx in enumerate(weights)]
+                        ux = sum(w * x for w, x, _ in values)
+                        uy = sum(w * y for w, _, y in values)
+                        vx = sum(w * (x - ux) ** 2 for w, x, _ in values)
+                        vy = sum(w * (y - uy) ** 2 for w, _, y in values)
+                        covariance = sum(w * (x - ux) * (y - uy) for w, x, y in values)
+                        c1, c2 = Fraction(65025, 10000), Fraction(585225, 10000)
+                        exact = ((2 * ux * uy + c1) * (2 * covariance + c2)
+                                 / ((ux * ux + uy * uy + c1) * (vx + vy + c2)))
+                        scaled = exact * 1_000_000_000
+                        scores.append(scaled.numerator // scaled.denominator)
+            expected = sum(scores) // len(scores)
+            self.assertEqual(m.score(png(first, 3), png(second, 4), width, height), expected)
+            self.assertEqual(m.score(png(second), png(first), width, height), expected)
 
     def test_inverted_structure_has_negative_score_not_unsigned_wrap(self):
         other = [[tuple(255 - c for c in p) for p in row] for row in self.pixels]
