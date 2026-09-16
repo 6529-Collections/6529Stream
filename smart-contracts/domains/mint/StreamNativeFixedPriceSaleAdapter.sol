@@ -459,34 +459,18 @@ contract StreamNativeFixedPriceSaleAdapter is
             IStreamMintManager.MintBatch memory batch
         )
     {
-        _requireSaleContext();
-        if (_pricePrograms[e.authorization.saleId].saleNonce == 0) {
-            revert NativePriceProgramUnavailable(e.authorization.saleId);
-        }
-        _requireConsent(e.authorization.saleId);
-        if (authorizationUsed[e.authorization.artist][e.authorization.nonce]) {
-            revert NativeAuthorizationUsed(e.authorization.artist, e.authorization.nonce);
-        }
-        if (executionIdByNonce[e.authorization.saleId][e.authorization.executionNonce] != 0) {
-            revert NativeExecutionUsed(e.authorization.saleId, e.authorization.executionNonce);
-        }
-        AllowlistPricePolicy memory policy = _allowlistPricePolicies[e.authorization.saleId];
-        if (policy.counterId == 0) {
-            if (resolverData.length != 0) revert InvalidAllowlistPricePolicy();
-            (c, batch) = StreamNativePriceProgram.prepare(
-                _priceProgramContext(), _pricePrograms[e.authorization.saleId], e, paused
-            );
-        } else {
-            (c, batch) = StreamNativePriceProgram.prepareAllowlist(
-                _priceProgramContext(),
-                _pricePrograms[e.authorization.saleId],
-                e,
-                paused,
-                policy,
-                resolverData
-            );
-        }
-        StreamNativeSettlementAdmission.requireAdmission(moduleRegistry, c);
+        return StreamNativeImmediateSaleWorker.prepareProgram(
+            _sales,
+            _pricePrograms,
+            _allowlistPricePolicies,
+            authorizationUsed,
+            executionIdByNonce,
+            StreamNativeImmediateSaleWorker.ProgramContext(
+                _priceProgramContext(), core, moduleRegistry, paused
+            ),
+            e,
+            resolverData
+        );
     }
 
     function _priceProgramResult(StreamNativeSettlementTypes.NativeSettlementCandidate memory c)

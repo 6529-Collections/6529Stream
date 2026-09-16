@@ -16,6 +16,68 @@ import "../revenue/StreamNativeSettlementAdmission.sol";
 /// @dev Registration has no external call after its final admission read: final writes/events
 /// use that coordinate, and the host advances its scalar immediately after return. Views alone return raw bytes.
 library StreamNativeImmediateSaleWorker {
+    struct ProgramContext {
+        StreamNativePriceProgram.Context price;
+        address core;
+        address modules;
+        bool paused;
+    }
+
+    /// @notice Host-owned program admission and preparation; execution writes remain in the host.
+    function prepareProgram(
+        mapping(bytes32 => F.SaleRecord) storage sales,
+        mapping(bytes32 => P.PriceProgramRecord) storage programs,
+        mapping(
+            bytes32 => IStreamNativeAllowlistPricePrograms.AllowlistPricePolicy
+        ) storage policies,
+        mapping(address => mapping(bytes32 => bool)) storage used,
+        mapping(bytes32 => mapping(uint256 => bytes32)) storage executions,
+        ProgramContext memory x,
+        P.PriceProgramExecution calldata e,
+        bytes memory resolverData
+    )
+        public
+        view
+        returns (
+            StreamNativeSettlementTypes.NativeSettlementCandidate memory c,
+            IStreamMintManager.MintBatch memory batch
+        )
+    {
+        requireContext();
+        if (programs[e.authorization.saleId].saleNonce == 0) {
+            revert P.NativePriceProgramUnavailable(e.authorization.saleId);
+        }
+        requireConsent(
+            sales,
+            programs,
+            x.core,
+            address(x.price.artists),
+            x.price.artistHash,
+            e.authorization.saleId
+        );
+        if (used[e.authorization.artist][e.authorization.nonce]) {
+            revert F.NativeAuthorizationUsed(e.authorization.artist, e.authorization.nonce);
+        }
+        if (executions[e.authorization.saleId][e.authorization.executionNonce] != 0) {
+            revert F.NativeExecutionUsed(e.authorization.saleId, e.authorization.executionNonce);
+        }
+        IStreamNativeAllowlistPricePrograms.AllowlistPricePolicy memory policy =
+            policies[e.authorization.saleId];
+        if (policy.counterId == 0) {
+            if (resolverData.length != 0) {
+                revert IStreamNativeAllowlistPricePrograms.InvalidAllowlistPricePolicy();
+            }
+            (c, batch) = StreamNativePriceProgram.prepare(
+                x.price, programs[e.authorization.saleId], e, x.paused
+            );
+        } else {
+            (c, batch) = StreamNativePriceProgram.prepareAllowlist(
+                x.price, programs[e.authorization.saleId], e, x.paused, policy, resolverData
+            );
+        }
+        StreamNativeSettlementAdmission.requireAdmission(x.modules, c);
+    }
+
     event NativeSaleConfigured(
         bytes32 indexed saleId,
         uint256 indexed collectionId,
