@@ -18,13 +18,14 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 16 September parallel implementation batch
 
-Source through `7d5ba35c` includes free-burn reveal credits, original Artist
+Source through `2314878c` includes free-burn reveal credits, original Artist
 withdrawal61, the native-price adapter size repair, distribution/burn/price
 clients including saved refund-window purchase verification, museum authority reconciliation and expanded actual-current test hosts.
 The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
 records exact handoffs and evidence, superseding older queue descriptions.
 
-All 2,069 Solidity sources pass ABI/type/storage checking at 7d5ba35c. Root passes all 398
+All 2,098 Solidity sources pass ABI/type/storage checking at 2e0fca1a.
+The later one-file preservation fixture correction has separate 351-source ABI evidence. Root passes all 398
 client tests with generation/build/types, including the new curated callers, 131 museum authority/profile tests and
 a separate 27-case archival export/publication cohort. The offline dossier and
 legacy BagIt/hydration cohort also passes all 44 cases at a0d71d2.
@@ -183,8 +184,26 @@ and all seventy distinct cases pass across the independently verified 45-case
 shared seam and 25-case carrier/current cohorts. Actual Core/Manager/Ledger and
 2-of-2 Safe are included; typed Artist/entropy/governance remain explicit.
 Offer clients 1c101938 pass all 398 root package tests and exact ABI fixture
-regeneration. Complete full-graph/current/Safe acceptance remains pending. ERC20 offers retain their explicit
-payer-intent implementation requirement.
+regeneration. Complete full-graph/current/Safe acceptance remains pending. The ERC20 implementation and its pending execution are described below.
+
+ERC20 primary offers are now source-integrated as d07d9537/42ab5d2d/2e0fca1a.
+The positive-token-price, PROFILE/order-one path delivers directly to the buyer,
+uses original buyer/seller signatures and separate payer intent, and requires
+the exact official payment receipt before minting. Existing payment and native
+sale contracts are unchanged. Nonzero native reveal fees are rejected; the held
+native-fee allowance patch remains separate. Independent joined source review
+is clear. All eight shared and seven carrier runtime products fit; Manager is
+24,174 bytes and the carrier is 22,873. Root independently checks their changed
+production source pins and compiler settings. Carrier creation size is not
+emitted by the selected preflight and awaits native-artifact checks. The 71-case
+shared and 42-case carrier/current captures are running; only the earlier 27
+focused carrier signature/revocation cases have passed. Full current execution,
+Safe/permit acceptance and matching clients remain pending.
+
+Test-only 2314878c admits the preservation fixture's provider through its actual
+lifecycle before configuration. The previous joined metric export failed during
+that setup; its trace is preserved. The corrected cached capture is running,
+with no production changes or successful metric export claimed yet.
 
 Full current-stack/Safe/fuzz acceptance follows deployable integrated source.
 The optional primary graph-transition proposal is not an adopted launch

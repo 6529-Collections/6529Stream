@@ -5,6 +5,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add atomic ERC20 primary offers with original buyer/seller authorization,
+  separate payer intents and exact paid-receipt admission before minting.
+  Support selected and unselected work under a zero-native-reveal-fee profile;
+  current-stack, Safe and permit execution acceptance remains pending.
+
 - Bind full perceptual finality to retained metric source, runtime and replay
   evidence through an additive original-record supplement and staged byte
   retention. Preserve historical interfaces and storage; joined publication,

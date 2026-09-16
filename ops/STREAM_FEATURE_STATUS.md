@@ -52,14 +52,14 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `7d5ba35cecad1f6d824332c07de1cb79612da59d`; see the [16 September batch](#parallel-feature-batch-16-september) for scoped evidence and remaining joins |
+| Current integration source | `2314878c59ba762b70a4fc65d069fb439dd6ec83`; see the [16 September batch](#parallel-feature-batch-16-september) for scoped evidence and remaining joins |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
 | Further integrated Artist handoff | `9ea144c85768050ec910cc8534af13bcac82e20d`, received during assembly: closed-origin dormancy/rotation extension on the preceding handoff; ART24 |
 | Integrated entropy client handoff | `642d017d9d0cd8ee9b6b813abbdbe10a4c6b1265`; client.entropy-authority |
 | Integrated OwnerRecords capture handoff | `57ac8d041c9adc479f1061fafec748c8330ac974`; MUSEUM-36 |
-| Latest broad cheap compilation evidence | 2,069-source ABI/type/storage check passes at 7d5ba35c in 17.485 seconds; no errors. This is not bytecode or full-system runtime evidence. |
+| Latest broad cheap compilation evidence | 2,098-source ABI/type/storage check passes at 2e0fca1a in 18.015 seconds; later test-only provider setup has separate 351-source ABI evidence; no errors. This is not bytecode or full-system runtime evidence. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
 | Latest focused native evidence | Separate captures: entropy 10, Royalty 11, mint 101, actual-Core 29, final burn 49 and later burn-credit 31 distinct cases pass. Repaired native-price 76 passes at 766c5dfd with independent source/artifact attestation; STATIC output manifest 9 passes in a separate capture. Root clients 398 and a museum authority/profile cohort of 131 pass. Other museum cohorts overlap. No complete-system pass is inferred. |
 
@@ -136,7 +136,7 @@ These 163 rows are capabilities and delivery checks of different sizes. Row coun
 | [sales.dutch](#salesdutch-evidence) Native descending-price Dutch sales | Built | Partly tested | Partial | Linear/stepped native schedule and signed maximum/current paid price. **Remaining:** Latest current-core/Safe paid/reveal/royalty composition and collector gas; no generic ERC20 Dutch implementation claimed. |
 | [sales.clearing](#salesclearing-evidence) Uniform-clearing Dutch and buyer rebates | Built | Partly tested | Partial | Native clearing book, price fixing, sparse/compressed purchase records, permanent rebates and supplements. **Remaining:** Latest complete conservation/clock/rights/escape runtime. Retained consumer gas measurements exceed 500,000; old 8,755,856 trace was warm-up preceded, not all-cold/current. |
 | [sales.refund-window](#salesrefund-window-evidence) Native refund-window sales and unconditional escape | Built | Partly tested | Partial | Original held deposits, finalization/refund/escape clocks and own-account credits. **Remaining:** Final graph settlement/delegation/export/surplus and timing/callback invariant execution; native-only scope explicit. |
-| [sales.private-offer](#salesprivate-offer-evidence) Native private sales and atomic offers | Built | Partly tested | Partial | Custody private/offer purchases, royalty-itemized secondary receipts and buyer-bound primary private selections are built. Canonical native primary mint OFFER_SALE (tokenId=0, optionally selected) is source-integrated in 364ec9e2/9945d612 with original dual-digest replay/revocation and independently reviewed source. Seventy distinct complementary cases pass, including actual Core/Manager/Ledger and 2-of-2 Safe, with typed Artist/entropy/governance. **Remaining:** Final full-graph/current/Safe acceptance. ERC20 offer payer-intent obligations remain required; existing generic fixed settlement is not this offer family. |
+| [sales.private-offer](#salesprivate-offer-evidence) Private sales and atomic native/ERC20 offers | Built | Partly tested | Partial | Custody private/offer purchases, royalty-itemized secondary receipts and buyer-bound primary private selections are built. Canonical native primary mint OFFER_SALE (tokenId=0, optionally selected) is source-integrated in 364ec9e2/9945d612 with original dual-digest replay/revocation and independently reviewed source. Seventy distinct complementary cases pass, including actual Core/Manager/Ledger and 2-of-2 Safe, with typed Artist/entropy/governance. **Remaining:** Final full-graph/current/Safe acceptance. ERC20 primary-offer shared/carrier source 42ab5d2d/2e0fca1a now preserves separate payer intent and direct-to-buyer minting under zero native fees; independent source review is clear, 71/42-case native captures and clients remain pending. Nonzero native-fee support remains held separately. |
 | [sales.inventory-consignment](#salesinventory-consignment-evidence) Secondary inventory and declared consigned resale | Built | Tests written | Not integrated | Immutable sorted original-owner inventory; per-token sale/replay/royalty, genuine previously delivered token resale profile and proceeds claims. **Remaining:** Independent 017172a0 source/oracle review clear; seven authored cases require combined native execution. Prior delivery cannot be inferred merely from MINTED. |
 | [sales.prepared-custody](#salesprepared-custody-evidence) Original prepared acquisition and same-NFT custody sale | Built | Partly tested | Partial | Snapshot created at original acquisition; original config/origin/acquisition grants retained and later payment transfers the same NFT. **Remaining:** Final whole current graph plus new rights activations and royalty/reveal invariants; earlier source cohorts are not latest runtime. |
 | [sales.token-rights](#salestoken-rights-evidence) Known-token PROFILE/TEMPLATE and default rights activation | Built | Tests written | Not integrated | Pre-bid append-only scoped activation, exact original auction/acquisition IDs and shared consumed/replay; old bid route excluded after activation. **Remaining:** ba0db85d seven actual Artist/Core/Safe source cases integrated as f0e651ef; native execution pending. Do not list token overrides/default templates as absent. |
@@ -524,8 +524,8 @@ settlement behavior listed above.
 
 ### Parallel feature batch 16 September
 
-The latest source is `7d5ba35c`. All 2,069 Solidity inputs pass ABI/type/storage
-checking in 17.485 seconds, including the metric supplement and Museum URI cases,
+The latest source is `2314878c`. All 2,098 Solidity inputs at `2e0fca1a` pass
+ABI/type/storage checking in 18.015 seconds, including complete ERC20 offer source,
 without bytecode or runtime acceptance. Root client 375, museum authority 131, archive 27 and
 dossier 44 results retain their original source scopes. The following new batches supersede older queue notes.
 
@@ -546,8 +546,28 @@ dossier 44 results retain their original source scopes. The following new batche
   production. The carrier uses actual Core/Manager/Ledger/recorder and 2-of-2
   Safe; Artist/entropy/governance remain typed, so full-graph acceptance is separate. Eleven import-only test/deployment
   corrections preserve all other tokens; the whole 2,061-source ABI/type/storage
-  check passes at `fbd9dcec`. ERC20 offer payer-intent implementation remains
-  distinct. See [native primary offers](../docs/integrations/native-primary-offers.md).
+  check passes at `fbd9dcec`. The separate ERC20 offer batch below now implements its payer-intent profile. See [native primary offers](../docs/integrations/native-primary-offers.md).
+- ERC20 primary offers `4bb37e53`/`1d4e7236`/`94eaedc3` are integrated as
+  `d07d9537`/`42ab5d2d`/`2e0fca1a`. Independent joined source review is clear.
+  The original buyer/seller signatures, three independent replay owners,
+  actual contract20 payer/intent boundary and exact recorded settlement before
+  minting are preserved. The buyer receives the NFT directly. This nonpayable
+  positive-price PROFILE/order-one profile rejects nonzero native reveal fees;
+  no held allowance implementation is included. All eight shared and seven
+  carrier runtime products fit, including Manager 24,174 and carrier 22,873;
+  root verifies changed production source pins and compiler settings. Carrier
+  creation output is absent from the selected preflight and remains unverified.
+  Seventy-one shared and forty-two carrier/current cases are authored and their
+  frozen native captures are running. The prior focused carrier authorization/
+  revocation cohort passes 27 cases; it is not the actual-current result.
+  Clients and final current/Safe/fuzz acceptance remain. See
+  [ERC20 primary offers](../docs/integrations/erc20-primary-offers.md).
+- Preservation fixture `a64a2e97` is integrated as `2314878c`. Its provider now
+  follows the actual ACTIVE lifecycle transition before configuration, while
+  governance remains the existing named typed boundary. The original failed
+  metric-export setup trace is preserved; corrected cached runtime is pending.
+  Production is unchanged and its 351-source ABI check passes separately.
+
 - Primary-offer clients `dc4828b7` are integrated as `1c101938`. Root passes
   all 398 package tests including generation, build and TypeScript checks;
   the complete 396-source compiler fixture also regenerates exactly in check
@@ -664,7 +684,7 @@ dossier 44 results retain their original source scopes. The following new batche
   including a selected unminted work, is an explicit genesis capability, now
   source-integrated in the native offer batch above. Existing custody offers
   alone did not satisfy this mint path.
-  ERC20 offers retain their expressly required payer-intent obligations.
+  The ERC20 source batch above now implements those separate payer-intent obligations for its stated zero-native-fee profile; actual-current acceptance remains pending.
 
 - Actual-token museum capture `fe176620` is integrated as `1db47ad9`. Root
   passes all 62 new tests; independent review verifies 305 selected products
