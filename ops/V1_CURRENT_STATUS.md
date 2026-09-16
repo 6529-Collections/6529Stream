@@ -18,17 +18,17 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 16 September parallel implementation batch
 
-Source through `a0d71d2` includes free-burn reveal credits, original Artist
+Source through `3fb128d6` includes free-burn reveal credits, original Artist
 withdrawal61, the native-price adapter size repair, distribution/burn/price
 clients including saved refund-window purchase verification, museum authority reconciliation and expanded actual-current test hosts.
 The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
 records exact handoffs and evidence, superseding older queue descriptions.
 
-All 1,989 Solidity sources pass ABI/type/storage checking. Root passes all 347
+All 2,035 Solidity sources pass ABI/type/storage checking at 3fb128d6. Root passes all 347
 client tests with generation/build/types, 131 museum authority/profile tests and
 a separate 27-case archival export/publication cohort. The offline dossier and
-legacy BagIt/hydration cohort also passes all 44 cases at a0d71d2; no Solidity
-source changed after the 33ddd132 broad check.
+legacy BagIt/hydration cohort also passes all 44 cases at a0d71d2.
+These earlier cohorts do not automatically validate later Solidity increments.
 Separate native cohorts pass mint101, Royalty11, Core29, entropy10, final burn49
 and later burn-credit31 distinct cases. These captures have different sources
 and component boundaries; counts must not be added into a complete-system claim.
@@ -89,21 +89,29 @@ bytes. Root verifies all 14 captured sources. The joined Renderer/checkpoint
 run passes all nine behavior cases plus a scope diagnostic under the high-gas
 harness, but its 24,576-byte append/current paths still cost 35.33m/21.41m gas.
 Every bounded transaction attempt rejects at the complete read-budget guard.
-Pure byte-scan improvements are now assigned; the guard remains unchanged.
+The later byte-scan optimization 849bfd68/3fb128d6 preserves that guard and exact
+outputs. Thirteen focused composition/gas and fifteen pure tests pass, including
+five 256-input parity properties. Named cold 24 KB append/current transactions
+now cost 9,512,309/6,072,737 gas including intrinsic cost; six rows work in 4+2
+batches. Eight rows still refuse admission. These scopes meet the 16,777,216 gas
+envelope, but the unchanged captured Router is 39,393 bytes and remains a
+deployment blocker; complete-current gas acceptance is separate.
 
-Sepolia enforces a 16,777,216 per-transaction gas limit; `eth_call` is separate.
-The measured joined workload still exceeds that limit; full checkpoint
-transaction capacity remains unfinished. [Ethereum Foundation gas-cap guidance](https://blog.ethereum.org/2025/10/21/fusaka-gascap-update).
+The selected-work fixed PUBLIC/COMMIT_REVEAL and buyer-bound private native
+carriers are built and integrated as 161cda75, with actual recorder cases 2c9effb4.
+Both fit deployment size (24,081/23,545 runtime bytes), and independent source
+reviews are clear after refund repeat-unlock correction b25b3d16. Original 97
+unit cases and overlapping corrected Book 35 pass. The separate 55-case actual
+current-contract/Safe capture is running on frozen pre-correction source;
+wallet callers are being built. Remaining required sale profiles stay visible.
 
-A specification/source reconciliation confirms a remaining implementation gap:
-fixed-price PUBLIC/COMMIT_REVEAL and buyer-bound private sales of selected
-unminted works. The existing curated auction path does not supply these sale
-flows. Shared per-purchase settlement and full historical private revocation
-are now integrated as 33ddd132, with independent source/ABI/storage review clear.
-All ten selected products fit (Manager 22,694 runtime bytes; recorder 20,128).
-Ten focused cases are authored; runtime remains pending. Parallel sale carriers,
-actual paid-purchase tests and wallet calls continue. Original creation identity,
-purchase/execution domains and auction replay remain intact.
+Versioned PERCEPTUAL_TOLERANCE/CURATED_EQUIVALENCE source is integrated 2351111e.
+Its eleven Solidity cases are authored only: five products fail deployment size.
+The builder is correcting those overages, missing condition institution/credential
+inventory rows and incomplete ABI enum descriptions found by independent review.
+Root's 11 metric tests pass, including an independent rational SSIM oracle.
+Original BYTE_EXACT remains unchanged. Full curated composition, executable-byte
+closure and institution-signer alternatives still need completion.
 
 Full current-stack/Safe/fuzz acceptance follows deployable integrated source.
 The optional primary graph-transition proposal is not an adopted launch

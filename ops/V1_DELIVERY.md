@@ -32,7 +32,16 @@ evidence preparation are reported as enabling work, not additional completed
 features. Scope changes must be stated explicitly; they do not silently change
 the denominator. The integrator owns this reporting correction and delivery.
 
-## Latest integration: 14 September
+## Latest integration: 16 September
+
+The current source checkpoint is 3fb128d6. Native curated fixed/private sales,
+actual recorder/Safe tests, repeat-refund correction, STATIC scan capacity and
+initial additional finality modes are integrated. The 2,035-source ABI check
+passes. The [current status](V1_CURRENT_STATUS.md) and
+[feature batch](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
+record distinct test scopes and remaining size/runtime/closure work.
+
+## Earlier integration: 14 September
 
 Dynamic poster/collaborator primary templates are integrated as `217c996a` after
 all 98 focused cases and one 256-input property passed. Resolver runtime is

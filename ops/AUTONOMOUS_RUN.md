@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `a0d71d2`: scoped museum dossier integrated with 44 new/legacy tests passing. Solidity unchanged since the 1,989-source ABI/type/storage pass at 33ddd132, including curated per-purchase settlement, exact bundle-return and pure-encoding repairs; root client 347, museum authority/profile 131 and archival export 27 pass. Free-burn credits, Artist withdrawal61, native-price size repair, distribution/burn/price clients STATIC output/gas correction, complete output-hash manifests, Dutch/clearing/refund prices, typed authority capture and expanded current-system tests are integrated. Separate native captures retain their exact source limits. Three Artist/STATIC size blockers, remaining price/authority profiles, Royalty successor consumption and final system acceptance remain. RC1 stays `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
+| Source checkpoint | `3fb128d6`: native curated fixed/private carriers, recorder/Safe tests, reviewed refund idempotency fix, STATIC byte-scan capacity and initial additional finality modes integrated. All 2,035 sources pass ABI/type/storage; focused results and pending current-runtime, five new mode-size repairs and independent mode findings are explicit in V1_CURRENT_STATUS. RC1 stays `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -40,9 +40,9 @@ ownership assignments where it transfers a queue.
 
 | Lead | Owned feature group and next queue | Shared boundaries |
 | --- | --- | --- |
-| Artist authority | Held Artist proposals remain isolated; pure encoding is integrated, and full STATIC checkpoint capacity is the active build | Own coordinated ContentBytes, Context.scriptText and StaticText byte scans; preserve exact outputs and the full read-budget guard. |
-| Commerce and revenue | Shared curated admission/settlement and revocation are integrated as 33ddd132; complete actual recorder/carrier replay and rollback tests next | Own shared revenue/prepared-content libraries and interfaces; coordinate selected-work sale carriers with the mint task. Held Royalty proposal remains unapplied. |
-| Metadata, records and museum | Onchain STATIC rendering, metadata/records/preservation and finality producers | Own onchain metadata interfaces/contracts/tests; the visible museum task owns offchain semantics. |
+| Artist authority | Held Artist proposals isolated; pure STATIC scan capacity integrated 3fb128d6 with 13 focused and 15 pure passes | Preserve exact outputs and full read-budget guard; Router deployment repair remains separate. |
+| Commerce and revenue | Curated shared seam and actual recorder tests integrated; independent carrier review complete; assess metric implementation-byte closure | Own revenue boundaries, fixed transport review and original identities; held Royalty proposal remains unapplied. |
+| Metadata, records and museum | Initial reference modes integrated 2351111e; fix five size overages and reviewed archive/schema omissions | Own onchain producer/consumer contracts; coordinate new frozen capture and independent review. |
 | Root integrator | Shared Core/entropy interfaces, economic pointer checks, integrated source and final candidate acceptance | Coordinate all feature tasks, independent review, release and testnet. |
 
 Each lead owns requirements through source, tests and usable public entrypoints.

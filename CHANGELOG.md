@@ -5,6 +5,15 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add native selected-work fixed and buyer-bound private sale carriers, with
+  pause-aware commitments, original purchase/settlement identities and pull
+  refunds; keep repeated credited refunds idempotent after clock collapse.
+- Reduce STATIC field/script/UTF-8 scan gas with exact output parity and measured
+  bounded checkpoint workloads; complete deployment acceptance remains pending.
+- Add initial versioned perceptual and curated reference producers/consumers and
+  a deterministic image metric. Independent review corrections, size repairs and
+  current-contract acceptance remain in progress.
+
 - Add offline scoped semantic-evidence dossiers from authenticated museum
   exports, with required local media bytes, original dependency closure and
   BagIt/OCFL reconstruction; full token object-dossier acceptance stays explicit.
