@@ -34,6 +34,7 @@ deployment evidence.
 | Integrate the new native/ERC-20 funding boundary | [Sale funding](sale-funding.md) |
 | Prepare a token and settle its native payment atomically | [Prepared native settlement](prepared-native-settlement.md) |
 | Accept a signed native offer for a new token or selected work | [Native primary offers](native-primary-offers.md) |
+| Accept a signed ERC20 offer through the sole payer verifier | [ERC20 primary offers](erc20-primary-offers.md) |
 | Integrate auction V2 and retained proceeds rights | [Auction funding](auction-funding.md) |
 | Mint and pay atomically at native auction settlement | [Native deferred auctions](native-deferred-auctions.md) |
 | Deploy and activate the native recorder and auction house through a Safe root | [Native commerce deployment](native-commerce-deployment.md) |

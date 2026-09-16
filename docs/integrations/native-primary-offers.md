@@ -16,8 +16,8 @@ The primary assignment must be a collection PROFILE with `STRICT_MATCH`
 (`primaryPolicyMode = 0`). The immutable sale has one buyer, one positive native
 price, one original offer digest, a nominal start/end window and a historical
 seller membership record. Both signatures require `finalizeBy = 0`; there is
-no escrowed-offer or deferred finalization path. ERC-20 offers require their
-separate payer-intent implementation and are outside this native carrier.
+no escrowed-offer or deferred finalization path. ERC20 offers use the separate
+[ERC20 primary-offer carrier](erc20-primary-offers.md) and payer-intent boundary.
 
 1. Deploy and link the carrier and its fixed libraries against the actual
    Manager, recorder, Artist facade, governance RoleRegistry and revenue graph.
