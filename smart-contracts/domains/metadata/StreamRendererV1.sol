@@ -285,7 +285,7 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
     function _bundleFacts(bytes32 id) private view returns (B.Facts memory f) {
         _pin(2, _sources.metadata);
         (f,) = abi.decode(
-            _read(_sources.metadata, abi.encodeCall(Raw.staticBundle, (id)), 416, true),
+            _read(_sources.metadata, abi.encodeCall(Raw.staticBundle, (id)), 384, true),
             (B.Facts, B.RegistrySource)
         );
         if (
@@ -321,7 +321,7 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
         B.RegistrySource memory source;
         if (f.sourceType == M.PayloadSourceType.DEPENDENCY_REGISTRY) {
             (, source) = abi.decode(
-                _read(_sources.metadata, abi.encodeCall(Raw.staticBundle, (bundleId)), 416, true),
+                _read(_sources.metadata, abi.encodeCall(Raw.staticBundle, (bundleId)), 384, true),
                 (B.Facts, B.RegistrySource)
             );
             if (source.registry != _sources.dependencyRegistry || source.codeHash != _codeHashes[4])
@@ -395,7 +395,7 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
         B.RegistrySource memory source;
         if (f.sourceType == M.PayloadSourceType.DEPENDENCY_REGISTRY) {
             (, source) = abi.decode(
-                _read(_sources.metadata, abi.encodeCall(Raw.staticBundle, (id)), 416, true),
+                _read(_sources.metadata, abi.encodeCall(Raw.staticBundle, (id)), 384, true),
                 (B.Facts, B.RegistrySource)
             );
             if (source.registry != _sources.dependencyRegistry || source.codeHash != _codeHashes[4])
