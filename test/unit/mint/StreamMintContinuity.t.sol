@@ -10,6 +10,7 @@ contract StreamMintContinuityTest is MintEngineTestBase, OfficialSafeFixture {
     bytes32 private constant COUNTER = keccak256("continuity-recipient");
     bytes32 private constant NULLIFIER = keccak256("spent-burn-proof");
     bytes32 private constant MANIFEST = keccak256("full-snapshot-artifact");
+    bytes32 private constant SUCCESSOR_PHASE = keccak256("new-successor-phase");
     StreamMintLedger private nextLedger;
     StreamMintManager private successor;
     IStreamMintLedgerImport.CounterImportLeaf private leaf;
@@ -21,6 +22,10 @@ contract StreamMintContinuityTest is MintEngineTestBase, OfficialSafeFixture {
     uint256 private nonce;
 
     function _configure(StreamMintManager m, StreamMintLedger l) private {
+        _configurePhase(m, l, PHASE);
+    }
+
+    function _configurePhase(StreamMintManager m, StreamMintLedger l, bytes32 phase) private {
         bytes32 hash = l.registerCounterDefinition(
             IStreamMintCounterPolicy.Definition(
                 IStreamMintCounterPolicy.CounterScope.GLOBAL,
@@ -45,20 +50,20 @@ contract StreamMintContinuityTest is MintEngineTestBase, OfficialSafeFixture {
         IStreamMintManager.MintGateConfig memory gate;
         m.configurePhase(
             1,
-            PHASE,
+            phase,
             IStreamMintManager.MintPhaseConfig(false, 0, 0, 10, keccak256("config"), 0),
             gate,
             ids,
             counters
         );
-        m.setPhaseExecutor(1, PHASE, address(this), true);
+        m.setPhaseExecutor(1, phase, address(this), true);
         address[] memory executors = new address[](1);
         executors[0] = address(this);
         require(
-            m.phasePolicyHash(1, PHASE)
+            m.phasePolicyHash(1, phase)
                 == m.previewPhasePolicyHash(
                     1,
-                    PHASE,
+                    phase,
                     IStreamMintManager.MintPhaseConfig(false, 0, 0, 10, keccak256("config"), 0),
                     gate,
                     ids,
@@ -602,9 +607,10 @@ contract StreamMintContinuityTest is MintEngineTestBase, OfficialSafeFixture {
         );
         successor.importMintState(_batchImport());
         _seal();
-        // Re-registration and mint use the same current-selection/ancestry admission.
-        _configure(successor, nextLedger);
-        b.expectedPolicyHash = successor.phasePolicyHash(1, PHASE);
+        // Fresh phase registration and mint use the same current-selection/ancestry admission.
+        _configurePhase(successor, nextLedger, SUCCESSOR_PHASE);
+        b.phaseId = SUCCESSOR_PHASE;
+        b.expectedPolicyHash = successor.phasePolicyHash(1, SUCCESSOR_PHASE);
         successor.executeSingleStepMint(b, "");
         require(
             core.minted() == 2
@@ -627,7 +633,7 @@ contract StreamMintContinuityTest is MintEngineTestBase, OfficialSafeFixture {
 
     function configureSuccessorForBoundaryTest() external {
         require(msg.sender == address(this), "test self-call");
-        _configure(successor, nextLedger);
+        _configurePhase(successor, nextLedger, SUCCESSOR_PHASE);
     }
 
     function testTypedArtistConsumerRejectsInactiveWrongLedgerAndUnrelatedAncestor() public {
@@ -672,6 +678,9 @@ contract StreamMintContinuityTest is MintEngineTestBase, OfficialSafeFixture {
             "rejected consumers have no replay or Core residue"
         );
         artist.setManager(address(manager));
+        this.configureSuccessorForBoundaryTest();
+        b.phaseId = SUCCESSOR_PHASE;
+        b.expectedPolicyHash = successor.phasePolicyHash(1, SUCCESSOR_PHASE);
         successor.executeSingleStepMint(b, "");
     }
 }
