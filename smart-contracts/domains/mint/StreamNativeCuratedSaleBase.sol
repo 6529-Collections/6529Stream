@@ -475,7 +475,7 @@ abstract contract StreamNativeCuratedSaleBase is
         );
     }
 
-    function _runtime() private view returns (StreamNativeCuratedSaleRuntime.Context memory x) {
+    function _runtime() internal view returns (StreamNativeCuratedSaleRuntime.Context memory x) {
         x.base = StreamNativeCuratedSaleSupport.Context(
             core,
             moduleRegistry,
