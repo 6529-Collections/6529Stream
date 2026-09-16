@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import { IStreamRenderer as R } from "../../interfaces/stream/metadata/IStreamRenderer.sol";
+import { IStreamRenderer as R } from "../../../../smart-contracts/interfaces/stream/metadata/IStreamRenderer.sol";
 import {
     IStreamStaticMetadataRouter as S
-} from "../../interfaces/stream/metadata/IStreamStaticMetadataRouter.sol";
+} from "../../../../smart-contracts/interfaces/stream/metadata/IStreamStaticMetadataRouter.sol";
 import {
     IStreamScriptBundles as B
-} from "../../interfaces/stream/metadata/IStreamScriptBundles.sol";
-import { StreamRenderContextV1 as Context } from "./StreamRenderContextV1.sol";
-import { Strings } from "../../vendor/openzeppelin/Strings.sol";
-import { Base64 } from "../../vendor/openzeppelin/Base64.sol";
+} from "../../../../smart-contracts/interfaces/stream/metadata/IStreamScriptBundles.sol";
+import { FrozenRenderContextV1 as Context } from "./FrozenRenderContextV1.sol";
+import { Strings } from "../../../../smart-contracts/vendor/openzeppelin/Strings.sol";
+import { Base64 } from "../../../../smart-contracts/vendor/openzeppelin/Base64.sol";
 
 /// @notice Fixed pure Metadata companion; consumes authenticated renderer input and makes no external read.
 /// @dev Its address/runtime/selector belong to the version's transitive declared read set.
-library StreamStaticRenderEncoding {
+library FrozenStaticRenderEncoding {
     using Strings for uint256;
     bytes32 private constant ID = keccak256("6529STREAM_RENDERER_V1");
     bytes32 private constant VERSION = keccak256("6529STREAM_STATIC_RENDERER_V1");
@@ -76,11 +76,9 @@ library StreamStaticRenderEncoding {
         );
         string memory animation;
         if (bytes(html).length != 0) {
-            // The fixed prefix and Base64 alphabet contain no JSON escape characters.
             animation = string.concat("data:text/html;base64,", Base64.encode(bytes(html)));
         } else if (bytes(p.source.animationBaseURI).length != 0) {
-            animation =
-                Context.escape(string.concat(p.source.animationBaseURI, r.tokenId.toString()));
+            animation = string.concat(p.source.animationBaseURI, r.tokenId.toString());
         }
         bytes memory out = abi.encodePacked(
             '{"name":"',
@@ -92,7 +90,7 @@ library StreamStaticRenderEncoding {
             '","image":"',
             Context.escape(p.source.imageURI),
             '","animation_url":"',
-            animation,
+            Context.escape(animation),
             '","metadata_state":"',
             _renderState(r.state),
             '","metadata_schema_version":"6529stream-static-v1","token_data_base64":"',
