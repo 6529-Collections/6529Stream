@@ -44,6 +44,7 @@ deployment evidence.
 | Discover, publish or challenge a state export | [State exports](state-exports.md) |
 | Build both signatures | [Wallets and EIP-712](wallets-and-signatures.md) |
 | Review all-CALL Safe atomicity and its current execution boundary | [Current Safe batches](current-safe-batches.md) |
+| Review actual governed mint import and pointer cutover coverage | [Current mint continuity acceptance](current-mint-continuity-acceptance.md) |
 | Approve fixed-profile economics and freeze royalties on the modular artist line | [Artist economics](artist-economics.md) |
 | Integrate developing content consent and defensive artist freezes | [Artist content](artist-content.md) |
 | Register and discover immutable split profiles on the new factory line | [Split profiles](split-profiles.md) |

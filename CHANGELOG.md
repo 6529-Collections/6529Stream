@@ -12,6 +12,9 @@ the release policy in `docs/release-policy.md`.
 - Add source-bound institutional and condition museum adapters and qualified
   geography drafts; actual current-record joins remain explicit acceptance work.
 
+- Add actual Safe-governed mint succession import, pointer rollback and
+  accounting preservation cases; native execution and successor mint joins remain pending.
+
 - Add official Safe all-CALL batch tests for paid mint, entropy, custody,
   replay and cross-component rollback; native execution remains pending.
 
