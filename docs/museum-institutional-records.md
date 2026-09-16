@@ -101,9 +101,48 @@ keys to safe relative file paths beneath that index's directory.
 Verification replays every source read and rebuilds the semantic output. It
 rejects modified output even if a caller recomputes the package checksum table.
 The command never registers a schema, posts a record, downloads an instrument
-or broadcasts a transaction. Independent institutional authority, validated
-Transfer joins, notarization, acquisition-packet completeness and real deployment
+or broadcasts a transaction. Independent institutional authority,
+notarization, acquisition-packet completeness and real deployment
 capture remain separate acceptance work.
+
+## Optional original token Transfer evidence
+
+`TitleTransferCapture` in `tools/museum/institutional_transfers.py` checks the
+receipt correspondence separately from the source documentation. Pass a
+concrete reconstructed institutional source, a canonical hint document, a
+read-only `RpcTransport` or externally pinned `ReplayTransport`, the external
+owner snapshot hash and hint hash. Hints contain `profile` equal to
+`STREAM_MUSEUM_INSTITUTIONAL_TRANSFER_RECEIPTS_V1`, `ownerSourceHash` and selected
+accession/deaccession `records`.
+
+The capture requires a successful receipt with the exact original Core address,
+four ERC-721 Transfer topics, empty data, token/from/to and specified log index.
+It joins the receipt's block and transaction position through parent-linked
+headers to the original pinned anchor. The transfer timestamp must not exceed
+the recorded publication timestamp; equal timestamps do not prove ordering
+within a block, because the owner publication transaction is not joined here.
+This bounded profile accepts at most 64 selected records
+and an ancestor span of 256 blocks. Older transfers fail explicitly and need a
+separately qualified capture profile; no partial ancestry is reported verified.
+
+Retain `capture.reader.transcript()` after `capture.capture()`, externally pin
+its hash, and build the separate derivative:
+
+```text
+python -m tools.museum.institutional_transfer_package build INSTITUTIONAL_PACKAGE HINTS TRANSCRIPT OUTPUT --source-manifest-hash HASH --hints-hash HASH --transcript-hash HASH --profile-hash HASH
+python -m tools.museum.institutional_transfer_package verify OUTPUT --manifest-hash HASH
+python -m unittest tools.museum.test_institutional_transfers -v
+```
+
+The derivative retains the entire original institutional package and exact
+receipt transcript, and independently rebuilds the correspondence report.
+Its `selectedOriginalTokenTransfersChecked` claim identifies the successful
+receipt join. It never upgrades legal title, physical custody, institution
+identity or full transfer-history claims. Trusted RPC consistency is the
+boundary; Ethereum receipt/state trie proofs are not implemented. Current tests
+use synthetic original-wire/receipt replies, including failed/wrong token, wrong
+Core, altered block ancestry and checksum-rehashed output controls. They do not
+prove a genuine current-chain Transfer capture was executed.
 
 The normative boundaries are
 [owner records and citations](collection-metadata-contract.md#owner-records-and-the-object-dossier)
