@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `e7eb51f0`: 1,944-source ABI/type/storage pass; mint lineage and Artist consumer, burn, STATIC selection/codec repairs, royalty/mint clients and museum Transfer/package/authoring source integrated. Mint 101, Royalty 11, Core 29 and entropy 10 scoped cases pass; root clients 268, exact burn 49 and separate museum 72/22/19 cohorts pass. Three size blockers, remaining Merkle sale profiles, Royalty successor consumption and final system acceptance remain. See STREAM_FEATURE_STATUS.md. RC1 stays `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
+| Source checkpoint | `837683ed`: 1,954-source ABI/type/storage pass; root client304 and museum authority34 pass. Free-burn credits, Artist withdrawal61, native-price size repair, distribution/burn/price clients and expanded current-system tests are integrated. Separate native captures retain their exact source limits. Three Artist/STATIC size blockers, remaining price/authority profiles, Royalty successor consumption and final system acceptance remain. RC1 stays `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -40,7 +40,7 @@ ownership assignments where it transfers a queue.
 
 | Lead | Owned feature group and next queue | Shared boundaries |
 | --- | --- | --- |
-| Artist authority | Artist contracts: remaining repudiation/withdrawal, collaborator policies, delegated consent, succession/recovery, hydration and raw STATIC display transport | Own Artist contracts/interfaces/tests; publish exact ABI to the client task. |
+| Artist authority | Artist contracts: collaborator policies, delegated consent, succession/recovery, hydration and raw STATIC display transport | Own Artist contracts/interfaces/tests; publish exact ABI to the client task. |
 | Commerce and revenue | Economic Resolver continuity, escrow/runtime contracts and remaining supported sale/settlement behavior | Own revenue contracts; coordinate the burn task's specific native adapter entry and publish ABI to clients. |
 | Metadata, records and museum | Onchain STATIC rendering, metadata/records/preservation and finality producers | Own onchain metadata interfaces/contracts/tests; the visible museum task owns offchain semantics. |
 | Root integrator | Shared Core/entropy interfaces, economic pointer checks, integrated source and final candidate acceptance | Coordinate all feature tasks, independent review, release and testnet. |

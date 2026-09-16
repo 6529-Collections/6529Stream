@@ -5,6 +5,13 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add original-opener Artist dispute withdrawal as additive operation 61, with
+  canonical outcome/history records and authored Artist/Safe/Archive regressions.
+- Add free-burn maximum reveal allowances, executor-owned pull credits and
+  governed surplus recovery; extend actual Safe-governance recovery tests.
+- Add source-preserving external museum authority snapshots and reconciliation,
+  retaining original reviews, qualified uncertainty and append-only corrections.
+
 - Add native same-leaf Merkle price programs with explicit price-counter and
   free-tier policy, retaining original sale signatures, replay and refund ownership.
 

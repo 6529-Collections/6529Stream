@@ -18,35 +18,40 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 16 September parallel implementation batch
 
-Source through `e7eb51f0` includes mint successor lineage and Artist consumption,
-Core migration guards, burn-to-mint free/prepared/native-paid paths, STATIC raw
-facts/selection/formatting repairs, royalty and mint clients, and museum Transfer,
-condition-package and semantic-authoring tools. The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
-records exact source/evidence boundaries and supersedes older queue descriptions.
+Source through `837683ed` includes free-burn reveal credits, original Artist
+withdrawal61, the native-price adapter size repair, distribution/burn/price
+clients, museum authority reconciliation and expanded actual-current test hosts.
+The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
+records exact handoffs and evidence, superseding older queue descriptions.
 
-All 1,944 Solidity sources pass ABI/type/storage checking at `e7eb51f0`.
-Scoped native captures pass mint 101, Royalty 11, Core 29 and entropy 10 cases.
-Root clients pass all 268 tests with mint continuity, gate input producers and
-the async-input correction; generation, build and types also pass. Separate museum cohorts pass 72, 22 and 19 checks
-with overlap; they must not be totaled as unique tests. Eight actual-current
-mint cutover/consent/Safe cases are authored, with combined execution pending.
-The exact final burn cohort passes 49 cases, with all 306 sources independently
-matched to 57d70b58 and all 301 production artifacts fitting. It excludes later
-price and allowance changes. These separate results are not a full-system pass. Native4's recorded failures
-and the interrupted acceptance-b run remain historical, qualified evidence.
+All 1,954 Solidity sources pass ABI/type/storage checking. Root passes all 304
+client tests with generation/build/types and 34 new museum authority tests.
+Separate native cohorts pass mint101, Royalty11, Core29, entropy10, final burn49
+and later burn-credit31 distinct cases. These captures have different sources
+and component boundaries; counts must not be added into a complete-system claim.
 
-Native immediate Merkle sale-price consumption is integrated with native tests
-running; Dutch, clearing, refund and ERC20 profiles remain. Remaining work includes
-free-burn maximum reveal allowance/refunds, ERC20 paid burn, Artist authority
-profiles, Royalty future mint after replacement, and museum conformance. Three
-measured products still exceed deployment limits: Artist Attribution, Identity
-deployment and STATIC Router. Automatic review rejected specific Artist size,
-Router cache and Royalty consumer patches; exact inert diffs are under independent
-review for one consolidated specific approval request. None has been applied.
-Independent implementation continues while these tool restrictions are resolved.
+Native immediate prices pass 75 functional cases before the later size repair.
+The repaired adapter measures 24,560 runtime bytes, with its exact native rerun
+pending. Dutch, clearing, refund and ERC20 price consumers remain. Artist
+withdrawal has ten authored cases; Royalty successor tests and actual-governance
+burn/Safe tests are authored but await complete current-stack execution.
+
+Artist Attribution, Identity deployment and STATIC Router have prior measured
+oversize failures. Four exact repair/consumer patches are preserved and their
+specific approval question is pending after automatic review rejection; rejected
+production changes remain unapplied. A separate collaborator co-signing mutation
+was also rejected and its complete reviewable proposal is being prepared.
+Other work continues under the owner's delivery authorization.
+
+Independent review reproduced a low-gas false-currentness error in the separate
+STATIC content producer. Its correction passes two isolated actual-Renderer
+regressions and awaits final independent source review before integration.
+This is separate from the held Router patch. Museum Type/actual positive-record
+joins and wider schema/conformance remain; authority fixture successes alone
+do not establish institutional acceptance.
 
 Full current-stack/Safe/fuzz acceptance follows deployable integrated source.
-The optional primary graph-transition proposal is not an adopted new launch
+The optional primary graph-transition proposal is not an adopted launch
 requirement. RC1/main/Sepolia remain unchanged.
 
 The tables and sections below retain earlier demonstrated workflows and history.
