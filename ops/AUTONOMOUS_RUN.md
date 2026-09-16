@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `88cf4522`: parallel mint/royalty/distribution/Artist/STATIC/client/museum source batch; mint87, royalty11, Core29, entropy10 scoped cases pass; root client220/museum72/harness21 pass. Actual Artist Manager replacement, joined Artist/STATIC capacity, burn and final system acceptance remain. See STREAM_FEATURE_STATUS.md. RC1 stays569bf87f1fa808787d324f6e1582924b5ccf1d40. |
+| Source checkpoint | `3520bbb4`: 1,940-source ABI/type/storage pass; mint lineage and Artist consumer, burn, STATIC selection/codec repairs, royalty/mint clients and museum Transfer/package/authoring source integrated. Mint 101, Royalty 11, Core 29 and entropy 10 scoped cases pass; root clients 256 and separate museum 72/22/19 cohorts pass. Three size blockers, mandatory Merkle prices, Royalty successor consumption and final system acceptance remain. See STREAM_FEATURE_STATUS.md. RC1 stays `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -139,9 +139,9 @@ pending checks. The immutable RC1 remains the released baseline.
 | Owner | Implementation batch |
 | --- | --- |
 | Integrator | Coordinate the five visible tasks and three local leads; integrate reviewed handoffs. Own shared Core/entropy STATIC interfaces, economic pointer continuity checks and final candidate acceptance. Harness, entropy fixture, mint/gate/counter and burn/distribution work is assigned in the visible roster above. |
-| Artist builder | Disputes44–50 and native4 fixture repairs integrated. Finish measured joined Artist size repairs and STATIC raw reads; then withdrawal, collaborator policy, delegated consent and remaining Artist queue. |
-| Revenue builder | Royalty continuity producer/source integrated with11 scoped passing cases; Core guard integrated. Review Artist codec repairs, then actual-current Royalty import/cutover consumer joins. Primary graph proposal remains unadopted and is not a new launch gate. |
-| Fourth engineer | STATIC Renderer/Registry/routing source integrated. Repair measured Router/Renderer sizes; complete selection/content/output finality and current-graph tests. Metadata host selected-size repair is reported fitting; final combined evidence pending. |
+| Artist builder | Disputes44–50 and native4 fixture repairs integrated. STATIC raw reads and ordinary codec repairs integrated; two denied size proposals remain inert. Continue withdrawal, collaborator policy, delegated consent and remaining Artist queue. |
+| Revenue builder | Royalty continuity producer/source integrated with11 scoped passing cases; Core guard integrated. Required future-mint consumer proposal is inert after automatic-review denial; independent review and actual-current tests continue. Primary graph proposal remains unadopted and is not a new launch gate. |
+| Fourth engineer | STATIC Renderer/Registry/routing source integrated. Renderer/Metadata formatting and selection repairs integrated; denied Router cache proposal remains inert. Complete content/output finality and current-graph tests; final combined evidence pending. |
 
 Comprehensive current-stack/Safe integration, fuzz and stateful campaigns, gas
 conformance, complete genesis inventory, CI and matching new testnet evidence

@@ -18,27 +18,34 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 16 September parallel implementation batch
 
-Source through `88cf4522` now includes mint eligibility/shared counters/imports,
-Core migration guards, royalty economic continuity, operator distribution,
-repudiation47–50, STATIC routing prerequisites, broader clients and museum
-adapters. The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
+Source through `3520bbb4` includes mint successor lineage and Artist consumption,
+Core migration guards, burn-to-mint free/prepared/native-paid paths, STATIC raw
+facts/selection/formatting repairs, royalty and mint clients, and museum Transfer,
+condition-package and semantic-authoring tools. The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
 records exact source/evidence boundaries and supersedes older queue descriptions.
 
-All1,909 Solidity sources pass ABI/type/storage checking at88cf4522.
-Scoped captures pass mint87, royalty11, Core29 and entropy10 cases. Root client
-package220, museum72 and harness21 checks pass. These are separate cohorts with
-explicit typed seams, not a complete-system result. The old native4 failed cases
-have fixture/harness repairs integrated; their combined rerun remains pending.
-The interrupted acceptance-b run produced no retained runtime evidence.
+All 1,940 Solidity sources pass ABI/type/storage checking at `a45c566c`;
+the later two-file client fix leaves Solidity unchanged.
+Scoped native captures pass mint 101, Royalty 11, Core 29 and entropy 10 cases.
+Root clients pass all 256 tests with mint continuity and the async-input
+correction; generation, build and types also pass. Separate museum cohorts pass 72, 22 and 19 checks
+with overlap; they must not be totaled as unique tests. Eight actual-current
+mint cutover/consent/Safe cases are authored, with combined execution pending.
+These separate results are not a full-system pass. Native4's recorded failures
+and the interrupted acceptance-b run remain historical, qualified evidence.
 
-Concrete remaining integration work: the real Artist suite still pins the old
-Manager; the mint task is implementing an authenticated lineage consumer while
-preserving original signatures and requiring fresh successor policy consent.
-Artist and STATIC joined builds have measured oversize products; their owners
-are extracting fixed helpers. Burn adapter, remaining Artist/museum profiles,
-actual Royalty cutover and full Safe/fuzz/current-graph acceptance continue in
-parallel. The optional primary graph-transition proposal is not an adopted new
-launch requirement. RC1/main/Sepolia remain unchanged.
+Remaining implementation includes required Merkle sale-price consumption,
+free-burn maximum reveal allowance/refunds, ERC20 paid burn, Artist authority
+profiles, Royalty future mint after replacement, and museum conformance. Three
+measured products still exceed deployment limits: Artist Attribution, Identity
+deployment and STATIC Router. Automatic review rejected specific Artist size,
+Router cache and Royalty consumer patches; exact inert diffs are under independent
+review for one consolidated specific approval request. None has been applied.
+Independent implementation continues while these tool restrictions are resolved.
+
+Full current-stack/Safe/fuzz acceptance follows deployable integrated source.
+The optional primary graph-transition proposal is not an adopted new launch
+requirement. RC1/main/Sepolia remain unchanged.
 
 The tables and sections below retain earlier demonstrated workflows and history.
 
