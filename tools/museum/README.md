@@ -1,8 +1,9 @@
 # Museum offline tooling
 
 New bounded adapters cover [institutional owner documentation](../../docs/museum-institutional-records.md),
-[condition and conservation](../../docs/museum-condition.md) and
-[public geography drafts](../../docs/museum-geography.md). Their guides distinguish
+[condition and conservation](../../docs/museum-condition.md),
+[public geography drafts](../../docs/museum-geography.md) and
+[semantic authoring drafts](../../docs/museum-semantic-authoring.md). Their guides distinguish
 original recorded-source admission, synthetic controls and remaining actual
 evidence joins. They do not establish full museum conformance.
 
