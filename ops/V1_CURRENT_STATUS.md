@@ -18,7 +18,7 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 16 September parallel implementation batch
 
-Source through `33ddd132` includes free-burn reveal credits, original Artist
+Source through `a0d71d2` includes free-burn reveal credits, original Artist
 withdrawal61, the native-price adapter size repair, distribution/burn/price
 clients including saved refund-window purchase verification, museum authority reconciliation and expanded actual-current test hosts.
 The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
@@ -26,7 +26,9 @@ records exact handoffs and evidence, superseding older queue descriptions.
 
 All 1,989 Solidity sources pass ABI/type/storage checking. Root passes all 347
 client tests with generation/build/types, 131 museum authority/profile tests and
-a separate 27-case archival export/publication cohort.
+a separate 27-case archival export/publication cohort. The offline dossier and
+legacy BagIt/hydration cohort also passes all 44 cases at a0d71d2; no Solidity
+source changed after the 33ddd132 broad check.
 Separate native cohorts pass mint101, Royalty11, Core29, entropy10, final burn49
 and later burn-credit31 distinct cases. These captures have different sources
 and component boundaries; counts must not be added into a complete-system claim.
@@ -68,8 +70,14 @@ qualified external authority and wider schema/conformance remain. Archival
 export 23477832 now retains all selected source claims in a compact immutable V3
 manifest and publishes it through the actual local governed Metadata ARCHIVE
 route. All 27 root tests pass; independent review also rebuilds its 24 original
-inputs offline. Complete object dossiers, media and institutional acceptance
-remain separate. Renderer repair `df440372` corrects three exact return sizes
+inputs offline. Scoped dossier a0d71d2 now packages that authenticated
+collection export and its selected local media, verifies complete original
+inputs and dependency bytes offline, and preserves immutable OCFL versions.
+Independent source review is clear and all 44 new/legacy tests pass. It uses a
+distinct collection profile; full token object dossiers, authoritative render
+inventory and institutional acceptance remain required. The next token capture
+will use one explicitly validated mint/metadata deployment, not combine
+unrelated historical chain states. Renderer repair `df440372` corrects three exact return sizes
 from 416 to 384 bytes. Root attests all 226 frozen sources; four new actual
 Metadata/DependencyRegistry cases pass. The wider scoped capture has 27 passing
 cases and one remaining capacity failure: a 24,576-byte script needs about 46.7m
