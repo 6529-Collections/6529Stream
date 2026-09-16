@@ -1,4 +1,4 @@
-# Artist attribution disputes (operations 44–46)
+# Artist attribution disputes (operations 44–46 and 61)
 
 This implementation supplies the original OPEN, COUNTER_STATEMENT and governed
 resolution recipes from [AA-DISPUTE](stream-artist-authority.md#disputed-and-revoked-attribution-aa-dispute).
@@ -27,8 +27,13 @@ payload and `6529StreamArtistRegistry` / `1` domain. The signer does not sign a
 new transport-specific payload.
 
 `Filing.disputeAction` is exactly 1 for operation 44 and exactly 3 for operation
-45. Action 2 (withdrawal) is not silently accepted by OPEN. Its compatible
-transport recipe is a separate remaining feature. Original operations 47–50
+45. Action 2 is accepted only by the additive operation-61
+`IStreamArtistDisputeWithdrawal.withdrawAttributionDispute(Filing, Standing, Authorization)`
+selector; OPEN continues to reject it. The immutable signed opener must still be
+authorized in its original standing and current authority/delegation lane.
+`attributionDisputeWithdrawal(openingRecordHash)` returns the immutable outcome
+with the latest counterstatement and restored state. See the
+[withdrawal recipe](adr/0050-attribution-dispute-withdrawal.md). Original operations 47–50
 now have the separate [staged repudiation implementation](artist-attribution-repudiation.md),
 with its own explicit source and validation scope.
 
@@ -147,7 +152,7 @@ native receipts in their original owner lane. Resolution appends its original
 operation Archive evidence and immutable action-keyed read without claiming a
 new signed record hash.
 
-Existing operation-60 profiles do not import dispute storage or its dependency
+Existing operation-60 profiles do not import dispute/withdrawal storage or its dependency
 history. They must continue to reject those source receipts/revisions. Complete
 dispute hydration is a remaining explicit profile, not inferred from lane proof.
 

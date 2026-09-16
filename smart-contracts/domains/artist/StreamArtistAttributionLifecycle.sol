@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistDisputeWithdrawalState.sol";
 import {
     StreamArtistAttributionPlatformTransport as PlatformTransport
 } from "./StreamArtistAttributionPlatformTransport.sol";
@@ -704,6 +705,22 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         returns (AD.Resolution memory)
     {
         _returnAttribution(StreamArtistDisputeState.readEncoded(msg.data));
+    }
+
+    function attributionDisputeWithdrawal(bytes32 opening) external view
+        returns (StreamArtistDisputeWithdrawalTypes.Outcome memory) {
+        return StreamArtistDisputeWithdrawalState.outcome(opening);
+    }
+
+    function applyDisputeWithdrawal(T.ActionContext calldata c, AD.Filing calldata p,
+        AD.Admission calldata a, uint256 nonce) external returns (bytes32) {
+        _check(c, 61);
+        AD.Mutation memory m = StreamArtistDisputeWithdrawalState.applyEncoded(_attestationStore(), _environment(), msg.data);
+        bytes32 consumed = _consume(keccak256("attribution_lifecycle.replay.dispute_withdrawal_key"),
+            m.replayScope, m.replayCommitment);
+        _commit(c, m.action, m.state, consumed, m.record);
+        _native(61, m.record, a.binding_.artistId, p.collectionId);
+        return m.record;
     }
 
     function applyDispute(

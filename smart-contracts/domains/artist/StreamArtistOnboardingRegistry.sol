@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistDisputeWithdrawal.sol";
 import { StreamArtistRegistryAuxiliaryEncoding } from "./StreamArtistRegistryAuxiliaryEncoding.sol";
 import { StreamArtistStaticProjectionTransport } from "./StreamArtistStaticProjectionTransport.sol";
 import { StreamArtistStaticDisplay } from "./StreamArtistStaticDisplay.sol";
@@ -1976,6 +1977,12 @@ contract StreamArtistOnboardingRegistry is
     ) external returns (bytes32) {
         _forwardRegistryWriter();
     }
+
+    function withdrawAttributionDispute(AD.Filing calldata p, AD.Standing calldata standing,
+        T.Authorization calldata a) external returns (bytes32) { _forwardRegistryWriter(); }
+
+    function attributionDisputeWithdrawal(bytes32 opening) external view
+        returns (StreamArtistDisputeWithdrawalTypes.Outcome memory) { _forwardRegistryRead(); }
 
     function openAttributionDispute(
         AD.Filing calldata p,

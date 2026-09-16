@@ -151,7 +151,7 @@ library StreamArtistHistoryState {
         for (uint256 i; i < rows.length; ++i) {
             H.Receipt memory r = rows[i];
             if (
-                r.recordHash == 0 || r.operation == 0 || r.operation > 59
+                r.recordHash == 0 || r.operation == 0 || (r.operation > 59 && r.operation != 61)
                     || (r.artistId == 0 && r.collectionId == 0)
             ) revert InvalidArtistHistory();
             if (r.artistId != 0) _append(core, registry, 1, r.artistId, r.recordHash, gasCap);

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "kind": "normative typed operation extension",
+  "operationId": 61,
+  "write": "withdrawAttributionDispute",
+  "preservedOperations": [
+    1,
+    60
+  ],
+  "recipeId": "6529stream.artist.operation-recipe.v2.61.withdrawAttributionDispute",
+  "coordinator": "coordinateWithdrawAttributionDispute",
+  "typedInterface": "smart-contracts/interfaces/stream/artist/IStreamArtistDisputeWithdrawal.sol",
+  "authority": "exact immutable signed opener and full standing, authenticated again through original current Identity or same live CAP_DISPUTE grant; no governed opening",
+  "payload": "original StreamArtistAttributionDispute; disputeAction exactly2",
+  "recordDomain": "DISPUTE_RECORD_DOMAIN",
+  "snapshotOwnerMask": "0x15",
+  "readOwnerMask": "0x15",
+  "writeOwnerMask": "0x14",
+  "producerIds": [
+    "operation_61.identity_authority.apply",
+    "operation_61.attribution_lifecycle.apply"
+  ],
+  "identityCallback": "consumeAttributionDispute",
+  "attributionCallback": "applyDisputeWithdrawal",
+  "replay": [
+    "original Identity nonce/digest/revocation/delegation guards",
+    "attribution_lifecycle.replay.dispute_withdrawal_key scoped to opening record hash"
+  ],
+  "events": [
+    "AttributionDisputeWithdrawn",
+    "ArtistAttributionStateChanged",
+    "AttributionDisputeRecordContext"
+  ],
+  "eventSchemaVersion": 1,
+  "archive": "original operation evidenceV1; full before/after snapshots and filing/standing/authorization/admission/proof/open-head/coverage facts, followed by atomic original lane/payload sync",
+  "history": "one original record/native receipt in Attribution; allow61 explicitly, keep60 excluded; existing hydration profiles reject incomplete dispute histories",
+  "validation": "ten authored actual Artist/Safe/Archive cases and cheap ABI; native/size/current governance acceptance pending"
+}

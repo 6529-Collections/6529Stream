@@ -21,9 +21,10 @@ library StreamArtistDisputeIdentityMutation {
         T.Authorization calldata a,
         T.SignerApproval calldata proof
     ) public returns (StreamArtistIdentityState.Mutation memory m, bytes32 record) {
-        StreamArtistDisputeHashes.validate(p);
+        if (p.disputeAction == 2) StreamArtistDisputeHashes.validateWithdrawal(p);
+        else StreamArtistDisputeHashes.validate(p);
         if (
-            c.operationId != (p.disputeAction == 1 ? 44 : 45) || b.generation != p.bindingGeneration
+            c.operationId != (p.disputeAction == 2 ? 61 : p.disputeAction == 1 ? 44 : 45) || b.generation != p.bindingGeneration
                 || b.artistId == 0 || standing.artistId == 0 || block.timestamp > type(uint64).max
                 || (!proof.direct && (a.time == 0 || block.timestamp > a.time))
                 || (proof.direct && a.time != 0 && block.timestamp > a.time)

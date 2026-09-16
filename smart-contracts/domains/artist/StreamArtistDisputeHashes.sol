@@ -17,12 +17,18 @@ library StreamArtistDisputeHashes {
         ) revert AD.InvalidAttributionDispute(p.collectionId);
     }
 
+    function validateWithdrawal(AD.Filing memory p) internal pure {
+        if (p.collectionId == 0 || p.bindingGeneration == 0 || p.disputeAction != 2
+            || p.evidenceHash == 0 || p.reasonHash == 0) revert AD.InvalidAttributionDispute(p.collectionId);
+    }
+
     function digest(
         StreamArtistHashes.Environment memory e,
         AD.Filing memory p,
         T.Authorization memory a
     ) public pure returns (bytes32) {
-        validate(p);
+        if (p.disputeAction == 2) validateWithdrawal(p);
+        else validate(p);
         return StreamArtistHashes.typed(
             e,
             keccak256(

@@ -563,7 +563,7 @@ contract StreamArtistIdentityWriterExtension is
         T.Authorization calldata a,
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32) {
-        _check(c, p.disputeAction == 1 ? 44 : 45);
+        _check(c, p.disputeAction == 2 ? 61 : p.disputeAction == 1 ? 44 : 45);
         (StreamArtistIdentityState.Mutation memory m, bytes32 record) = StreamArtistIdentityWriterTransport.disputeEncoded(
             _identity,
             _replay,

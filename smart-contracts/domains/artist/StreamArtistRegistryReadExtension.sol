@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistDisputeWithdrawal.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
 import {
     StreamArtistRepudiationTypes as RP
@@ -1068,6 +1069,12 @@ contract StreamArtistRegistryReadExtension {
         _returnRegistryEncoded(
             StreamArtistRegistryHistoryEncoding.read(_contentSuite().owners[2], msg.data)
         );
+    }
+
+    function attributionDisputeWithdrawal(bytes32 opening) external view onlyHost
+        returns (StreamArtistDisputeWithdrawalTypes.Outcome memory) {
+        T.SuiteConfiguration memory s = StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
+        return IStreamArtistDisputeWithdrawalOwner(s.owners[4]).attributionDisputeWithdrawal(opening);
     }
 
     function attributionDispute(uint256 id, uint64 generation)

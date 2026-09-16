@@ -137,3 +137,8 @@ artist capability exclusions.
 [ADR 0048: Original repudiation Identity effects](0048-attribution-repudiation-identity-effects.md)
 records the necessary Identity writes for original 48/49, canonical contest/cause
 composition, authenticated cancellation activity and unchanged original domains.
+
+[ADR 0050: Original attribution dispute withdrawal](0050-attribution-dispute-withdrawal.md)
+
+defines additive operation 61 for the existing signed action 2, immutable opener
+standing, original authority/replay guards and atomic withdrawal history.

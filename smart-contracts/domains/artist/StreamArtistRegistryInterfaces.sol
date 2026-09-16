@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistDisputeWithdrawal.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
 import {
     StreamArtistRepudiationTypes as RP
@@ -175,6 +176,7 @@ import {
 library StreamArtistRegistryInterfaces {
     function supportsArtistInterface(bytes4 id) public pure returns (bool) {
         return id == type(IStreamArtistAttributionRepudiation).interfaceId
+            || id == type(IStreamArtistDisputeWithdrawal).interfaceId
             || id == type(IStreamArtistAttributionDisputes).interfaceId
             || id == type(IStreamArtistEntropyFindingHydration).interfaceId
             || id == type(IStreamArtistPublicationAuthorityHydration).interfaceId

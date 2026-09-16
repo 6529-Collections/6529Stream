@@ -386,7 +386,7 @@ library StreamArtistIdentityState {
             !b.accepted || b.consentMode != 1
                 || (item.status != 1
                     && item.status != 2
-                    && !((c.operationId == 20 || c.operationId == 44 || c.operationId == 45)
+                    && !((c.operationId == 20 || c.operationId == 44 || c.operationId == 45 || c.operationId == 61)
                         && item.status == 4)) || item.authorityClass != 1
                 || item.authorityAddress == address(0)
         ) revert T.InvalidIdentity(b.artistId);

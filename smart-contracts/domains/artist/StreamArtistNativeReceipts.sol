@@ -23,7 +23,7 @@ library StreamArtistNativeReceipts {
 
     function record(uint16 operation, bytes32 hash, bytes32 artistId, uint256 collectionId) public {
         if (hash == 0) return;
-        if (operation == 0 || operation > 59 || (artistId == 0 && collectionId == 0)) {
+        if (operation == 0 || (operation > 59 && operation != 61) || (artistId == 0 && collectionId == 0)) {
             revert T.InvalidRecord();
         }
         _state().rows.push(H.Receipt(operation, artistId, collectionId, hash));
