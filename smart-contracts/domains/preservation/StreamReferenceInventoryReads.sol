@@ -97,17 +97,14 @@ library StreamReferenceInventoryReads {
             revert T.InventorySourceChanged();
         }
         bool modeProfile = receipt.profileHash == ModeDefinitions.PROFILE_HASH;
-        ModeTypes.Evidence memory mode;
-        ModeTypes.Facts memory facts;
+        ModeTypes.Repeat[] memory repeats;
         T.Item[] memory extra;
         if (modeProfile) {
-            (mode, facts) = Modes.evidence(d, c);
-            if (mode.repeats.length != p.captures.length) revert T.InventorySourceChanged();
-            extra = Modes.items(d, c, mode, facts);
+            (repeats, extra) = Modes.stage(d, c, p.captures.length);
         }
         uint256 count = 3 + p.environment.packageFiles.length
             + p.environment.platformPrerequisites.length + p.captures.length * 2
-            + (modeProfile ? mode.repeats.length + extra.length : 0);
+            + (modeProfile ? repeats.length + extra.length : 0);
         // Each slot below receives a complete row before it is read or returned. Avoid
         // constructing default structs which those assignments would immediately replace.
         uint256 start;
@@ -176,14 +173,14 @@ library StreamReferenceInventoryReads {
             );
         }
         if (modeProfile) {
-            for (uint256 i; i < mode.repeats.length; ++i) {
+            for (uint256 i; i < repeats.length; ++i) {
                 result[next++] = _external(
                     d,
                     c,
                     i,
                     keccak256("REFERENCE_REPEAT_CAPTURE"),
-                    mode.repeats[i].objectHash,
-                    mode.repeats[i].coverageHash
+                    repeats[i].objectHash,
+                    repeats[i].coverageHash
                 );
             }
             for (uint256 i; i < extra.length; ++i) {

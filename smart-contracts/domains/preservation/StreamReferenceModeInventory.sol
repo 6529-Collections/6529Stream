@@ -21,12 +21,26 @@ import {
     StreamPreservationDocumentReads as Documents
 } from "./StreamPreservationDocumentReads.sol";
 import { StreamReferenceModeDefinitions as D } from "../records/StreamReferenceModeDefinitions.sol";
+import {
+    StreamConservationRecordTypes
+} from "../../interfaces/stream/metadata/StreamConservationRecordTypes.sol";
 
 /// @notice Interpretation, second capture and signed-condition closure for the new mode profile.
 /// @dev The parent current-context reader authenticates the producer before this inventory stage.
 library StreamReferenceModeInventory {
-    function evidence(S.Dependencies memory d, S.Context memory c)
+    function stage(S.Dependencies memory d, S.Context memory c, uint256 captureCount)
         public
+        view
+        returns (M.Repeat[] memory repeats, T.Item[] memory rows)
+    {
+        (M.Evidence memory e, M.Facts memory facts) = evidence(d, c);
+        if (e.repeats.length != captureCount) revert T.InventorySourceChanged();
+        repeats = e.repeats;
+        rows = items(d, c, e, facts);
+    }
+
+    function evidence(S.Dependencies memory d, S.Context memory c)
+        private
         view
         returns (M.Evidence memory e, M.Facts memory facts)
     {
@@ -51,11 +65,14 @@ library StreamReferenceModeInventory {
         S.Context memory c,
         M.Evidence memory e,
         M.Facts memory facts
-    ) public view returns (T.Item[] memory rows) {
+    ) private view returns (T.Item[] memory rows) {
         bool curated = e.mode == M.Mode.CURATED_EQUIVALENCE;
         if (!curated && e.mode != M.Mode.PERCEPTUAL_TOLERANCE) revert T.InventorySourceChanged();
         // Every added registered interpretation document is retained, not just its hash.
-        rows = new T.Item[](curated ? 12 : 7);
+        rows = new T.Item[](curated ? 15 : 8);
+        // The original V1 bytes remain immutable. This additive definition supplies a
+        // standalone standard-ABI decoder and every enum value without rewriting V1.
+        rows[curated ? 14 : 7] = Documents.item(d, D.DECODE_ID, D.DECODE_HASH);
         bytes32[5] memory ids =
             [D.SCHEMA_ID, D.PROFILE_ID, D.CONDITION_ID, D.PROPERTIES_ID, D.CANON_ID];
         bytes32[5] memory hashes =
@@ -165,5 +182,35 @@ library StreamReferenceModeInventory {
         );
         rows[11].schemaId = D.PROPERTIES_ID;
         rows[11].canonicalizationId = D.CANON_ID;
+        rows[12] = _reference(
+            keccak256("CURATED_EXAMINER_INSTITUTION"),
+            bindings.attestations,
+            e.curated.conditionRecordHash,
+            e.curated.condition.institution
+        );
+        rows[13] = _reference(
+            keccak256("CURATED_EXAMINER_CREDENTIALS"),
+            bindings.attestations,
+            e.curated.conditionRecordHash,
+            e.curated.condition.credentials
+        );
+    }
+
+    function _reference(
+        bytes32 role,
+        address host,
+        bytes32 record,
+        StreamConservationRecordTypes.Reference memory ref
+    ) private pure returns (T.Item memory row) {
+        row.kind = T.Kind.EXTERNAL_REFERENCE;
+        row.role = role;
+        row.source = host;
+        row.sourceRecord = record;
+        row.algorithm = ref.algorithm;
+        row.canonicalizationId = ref.canonicalizationId;
+        row.digest = ref.digest;
+        row.uri = ref.uri;
+        // The source supplies no byte size or coverage receipt for these external references.
+        // Their inclusion creates the archive obligation; it does not assert its fulfillment.
     }
 }

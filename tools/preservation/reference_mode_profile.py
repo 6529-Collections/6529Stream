@@ -2,11 +2,13 @@
 import argparse
 import json
 from pathlib import Path
+from tools.museum.canonical import keccak256
 
 ROOT = Path(__file__).resolve().parents[2]
 DOCUMENTS = {
     "SCHEMA": "STREAM_REFERENCE_MODE_ABI_V1",
     "PROFILE": "STREAM_REFERENCE_MODE_PROFILE_V1",
+    "DECODE": "STREAM_REFERENCE_MODE_ABI_V2",
     "CONDITION": "STREAM_REFERENCE_CURATED_CONDITION_ABI_V1",
     "PROPERTIES": "STREAM_REFERENCE_SIGNIFICANT_PROPERTIES_ABI_V1",
     "CANON": "STREAM_SOLIDITY_ABI_V1",
@@ -25,7 +27,7 @@ def generated():
         literal = json.dumps(raw.decode(), ensure_ascii=True)
         lines += [f'    bytes32 internal constant {name}_ID = keccak256("{identity}");',
                   f"    string internal constant {name}_DOCUMENT = {literal};",
-                  f"    bytes32 internal constant {name}_HASH = keccak256(bytes({name}_DOCUMENT));",
+                  f"    bytes32 internal constant {name}_HASH = {keccak256(raw)};",
                   f"    uint32 internal constant {name}_BYTES = {len(raw)};"]
     return "\n".join(lines + ["}", ""])
 

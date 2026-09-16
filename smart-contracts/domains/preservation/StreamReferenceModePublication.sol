@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/preservation/IStreamReferenceModePublication.sol";
+import { StreamReferenceModePreparation } from "./StreamReferenceModePreparation.sol";
 import { StreamReferenceModeProof } from "./StreamReferenceModeProof.sol";
 import { StreamReferenceModeDefinitionsRead } from "./StreamReferenceModeDefinitionsRead.sol";
 import { StreamReferenceModeDefinitions } from "../records/StreamReferenceModeDefinitions.sol";
@@ -176,24 +177,11 @@ contract StreamReferenceModePublication is
         _candidate(p);
         StreamReferenceRenderTypes.Receipt memory r = _receipt(p, recorder);
         StreamReferenceRenderTypes.Dependencies memory d = dependencies();
-        StreamReferenceRenderTypes.SourceFacts memory f =
-            StreamReferenceRenderSourceReads.requireModeSourceInputs(
-                d, StreamReferenceRenderSourceReads.project(p), false
+        StreamReferenceModePreparation.Prepared memory result =
+            StreamReferenceModePreparation.prepare(
+                d, _modeBindings, p, r, _fileInventories, msg.data, false
             );
-        StreamReferenceModeTypes.Facts memory mode = StreamReferenceModeProof.requireEvidence(
-            d, _modeBindings, p, f, originalEvidence, false
-        );
-        sourceHash = StreamReferenceModeProof.sourceHash(d, _modeBindings, f, mode);
-        p.expectedSourcesHash = sourceHash;
-        r.sourcesHash = sourceHash;
-        canonical = StreamReferenceModeProof.payload(
-            p,
-            r,
-            f,
-            originalEvidence,
-            mode,
-            StreamReferenceRenderPreparation.environment(_fileInventories, p.environment)
-        );
+        return (result.sourcesHash, result.canonical);
     }
 
     function publishModeReference(
@@ -201,29 +189,17 @@ contract StreamReferenceModePublication is
         StreamReferenceModeTypes.Evidence calldata originalEvidence
     ) external override guarded returns (bytes32 hash) {
         StreamReferenceRenderTypes.Publication memory p = original;
-        StreamReferenceModeTypes.Evidence memory evidence = originalEvidence;
         _candidate(p);
         StreamReferenceRenderTypes.Receipt memory r = _receipt(p, msg.sender);
         StreamReferenceRenderTypes.Dependencies memory d = dependencies();
         _definitions(d);
-        StreamReferenceRenderTypes.SourceFacts memory f =
-            StreamReferenceRenderSourceReads.requireModeSourceInputs(
-                d, StreamReferenceRenderSourceReads.project(p), false
+        StreamReferenceModePreparation.Prepared memory result =
+            StreamReferenceModePreparation.prepare(
+                d, _modeBindings, p, r, _fileInventories, msg.data, true
             );
-        StreamReferenceModeTypes.Facts memory mode =
-            StreamReferenceModeProof.requireEvidence(d, _modeBindings, p, f, evidence, false);
-        r.sourcesHash = StreamReferenceModeProof.sourceHash(d, _modeBindings, f, mode);
-        if (p.expectedSourcesHash == 0 || p.expectedSourcesHash != r.sourcesHash) {
-            revert StreamReferenceRenderTypes.InvalidReferenceRender();
-        }
-        bytes memory canonical = StreamReferenceModeProof.payload(
-            p,
-            r,
-            f,
-            evidence,
-            mode,
-            StreamReferenceRenderPreparation.environment(_fileInventories, p.environment)
-        );
+        StreamReferenceModeTypes.Facts memory mode = result.mode;
+        r.sourcesHash = result.sourcesHash;
+        bytes memory canonical = result.canonical;
         r.payloadHash = keccak256(canonical);
         r.payloadBytes = uint32(canonical.length);
         r.recordedAt = uint64(block.timestamp);
@@ -253,14 +229,12 @@ contract StreamReferenceModePublication is
         );
         StreamSnapshotManifestBytes.retain(_payloads[hash], d.targets[3], canonical);
         StreamSnapshotManifestBytes.retain(_publications[hash], d.targets[3], abi.encode(p));
-        StreamSnapshotManifestBytes.retain(_modeEvidence[hash], d.targets[3], abi.encode(evidence));
+        StreamSnapshotManifestBytes.retain(_modeEvidence[hash], d.targets[3], result.evidence);
         _modeFacts[hash] = mode;
         _receipts[hash] = r;
         _history[p.collectionId].push(hash);
         _ids[p.collectionId][p.referenceId] = true;
-        emit ReferenceModePublished(
-            1, hash, evidence.mode, mode.evidenceHash, mode.interpretationHash
-        );
+        emit ReferenceModePublished(1, hash, mode.mode, mode.evidenceHash, mode.interpretationHash);
         emit ReferenceRenderPublished(hash, p.collectionId, p.referenceId, r, p.manifestURI);
     }
 
@@ -335,19 +309,11 @@ contract StreamReferenceModePublication is
             revert StreamReferenceRenderTypes.ReferenceLineage(hash, _head(cid));
         }
         StreamReferenceRenderTypes.Dependencies memory d = dependencies();
-        StreamReferenceRenderTypes.Publication memory p = abi.decode(
-            StreamSnapshotManifestBytes.read(_publications[hash]),
-            (StreamReferenceRenderTypes.Publication)
+        (bytes32 sourcesHash, StreamReferenceModeTypes.Facts memory mode) = StreamReferenceModePreparation.current(
+            d, _modeBindings, _publications[hash], _modeEvidence[hash]
         );
-        StreamReferenceModeTypes.Evidence memory evidence = _evidence(hash);
-        StreamReferenceRenderTypes.SourceFacts memory f =
-            StreamReferenceRenderSourceReads.requireModeSourceInputs(
-                d, StreamReferenceRenderSourceReads.project(p), true
-            );
-        StreamReferenceModeTypes.Facts memory mode =
-            StreamReferenceModeProof.requireEvidence(d, _modeBindings, p, f, evidence, true);
         if (
-            StreamReferenceModeProof.sourceHash(d, _modeBindings, f, mode) != r.sourcesHash
+            sourcesHash != r.sourcesHash
                 || keccak256(abi.encode(mode)) != keccak256(abi.encode(_modeFacts[hash]))
                 || StreamSnapshotManifestBytes.requireIntact(_payloads[hash]) != r.payloadHash
         ) {
@@ -572,7 +538,9 @@ contract StreamReferenceModePublication is
         returns (StreamReferenceModeTypes.Evidence memory, StreamReferenceModeTypes.Facts memory)
     {
         _known(hash);
-        return (_evidence(hash), _modeFacts[hash]);
+        bytes memory raw =
+            StreamReferenceModePreparation.evidenceEncoded(_modeEvidence[hash], _modeFacts[hash]);
+        assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
     }
 
     function referenceMode(bytes32 hash)
@@ -583,18 +551,6 @@ contract StreamReferenceModePublication is
     {
         _known(hash);
         return (_modeFacts[hash].mode, _modeFacts[hash].evidenceHash);
-    }
-
-    function _evidence(bytes32 hash)
-        private
-        view
-        returns (StreamReferenceModeTypes.Evidence memory e)
-    {
-        bytes memory raw = StreamSnapshotManifestBytes.read(_modeEvidence[hash]);
-        e = abi.decode(raw, (StreamReferenceModeTypes.Evidence));
-        if (keccak256(raw) != keccak256(abi.encode(e))) {
-            revert StreamReferenceModeTypes.InvalidModeEvidence();
-        }
     }
 
     function _head(uint256 cid) private view returns (bytes32) {

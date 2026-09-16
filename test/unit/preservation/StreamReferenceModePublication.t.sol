@@ -26,9 +26,8 @@ contract ReferenceModeInventoryProbe {
         view
         returns (Inventory.Item[] memory)
     {
-        (Mode.Evidence memory e, Mode.Facts memory facts) =
-            StreamReferenceModeInventory.evidence(d, c);
-        return StreamReferenceModeInventory.items(d, c, e, facts);
+        (, Inventory.Item[] memory rows) = StreamReferenceModeInventory.stage(d, c, 2);
+        return rows;
     }
 }
 
@@ -56,6 +55,11 @@ contract StreamReferenceModePublicationTest is PreservationReferenceFixture {
             "STREAM_REFERENCE_MODE_PROFILE_V1",
             IStreamSchemaRegistry.DocumentKind.CATALOG,
             bytes(Def.PROFILE_DOCUMENT)
+        );
+        _snapshotDocument(
+            "STREAM_REFERENCE_MODE_ABI_V2",
+            IStreamSchemaRegistry.DocumentKind.SCHEMA,
+            bytes(Def.DECODE_DOCUMENT)
         );
         _snapshotDocument(
             "STREAM_REFERENCE_CURATED_CONDITION_ABI_V1",
@@ -252,7 +256,7 @@ contract StreamReferenceModePublicationTest is PreservationReferenceFixture {
         ReferenceModeInventoryProbe probe = new ReferenceModeInventoryProbe();
         Inventory.Item[] memory rows = probe.items(d, c);
         require(
-            rows.length == 7 && bytes32(rows[0].digest) == Def.SCHEMA_HASH
+            rows.length == 8 && bytes32(rows[0].digest) == Def.SCHEMA_HASH
                 && rows[0].byteSize == Def.SCHEMA_BYTES
         );
         require(bytes32(rows[6].digest) == keccak256(abi.encode(proof.perceptual.metric)));
@@ -274,8 +278,7 @@ contract StreamReferenceModePublicationTest is PreservationReferenceFixture {
         _curator(address(account), 3, true);
         bytes memory input = _prepared(address(account));
         uint256 nonce = account.nonce();
-        bytes32 digest =
-            account.getTransactionHash(
+        bytes32 digest = account.getTransactionHash(
             address(modes), 0, input, 0, 0, 0, 0, address(0), address(0), nonce
         );
         bytes memory signatures = safeThresholdSignature(keys, digest);

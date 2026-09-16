@@ -6,6 +6,7 @@ import random
 import json
 from pathlib import Path
 import struct
+import re
 import unittest
 import zlib
 
@@ -171,15 +172,24 @@ class ReferenceMetricTests(unittest.TestCase):
     def test_complete_schema_and_generated_solidity_literals_match(self):
         path = m.ROOT / "smart-contracts/domains/records/StreamReferenceModeDefinitions.sol"
         self.assertEqual(path.read_text(encoding="utf8"), generated())
-        schema = json.loads((m.ROOT / "schemas/records/STREAM_REFERENCE_MODE_ABI_V1.json").read_bytes())
+        schema = json.loads((m.ROOT / "schemas/records/STREAM_REFERENCE_MODE_ABI_V2.json").read_bytes())
         self.assertEqual(len(schema["abi"]), 7)
         def complete(row):
+            self.assertRegex(row["type"], r"^(?:tuple|u?int\d+|bytes\d*|string|address|bool)(?:\[\d*\])*$")
+            if "enum" in row:
+                self.assertEqual(row["type"], "uint8")
+                self.assertIn(row["enum"], schema["enums"])
             if row["type"].startswith("tuple"):
                 self.assertTrue(row["components"])
                 for item in row["components"]:
                     complete(item)
         for row in schema["abi"]:
             complete(row)
+        self.assertEqual(schema["enums"], {
+            "StreamReferenceModeTypes.Mode": {"INVALID": 0, "PERCEPTUAL_TOLERANCE": 1, "CURATED_EQUIVALENCE": 2},
+            "StreamConservationRecordTypes.StatementOrigin": {"ARTIST_INTENT": 0, "ESTATE_STATEMENT": 1},
+            "StreamConservationRecordTypes.InterviewStatus": {"PRESENT": 0, "WAIVED": 1},
+        })
 
 
 if __name__ == "__main__":

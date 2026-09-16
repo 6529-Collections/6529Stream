@@ -21,28 +21,31 @@ library StreamReferenceModeDefinitionsRead {
     function requireDefinitions(StreamReferenceRenderTypes.Dependencies memory d) public view {
         // The original environment, PNG and runtime catalog meanings remain pinned unchanged.
         StreamReferenceRenderDefinitionReads.requireDefinitions(d);
-        bytes32[5] memory ids = [
+        bytes32[6] memory ids = [
             StreamReferenceModeDefinitions.SCHEMA_ID,
             StreamReferenceModeDefinitions.PROFILE_ID,
             StreamReferenceModeDefinitions.CONDITION_ID,
             StreamReferenceModeDefinitions.PROPERTIES_ID,
-            StreamReferenceModeDefinitions.CANON_ID
+            StreamReferenceModeDefinitions.CANON_ID,
+            StreamReferenceModeDefinitions.DECODE_ID
         ];
-        bytes32[5] memory hashes = [
+        bytes32[6] memory hashes = [
             StreamReferenceModeDefinitions.SCHEMA_HASH,
             StreamReferenceModeDefinitions.PROFILE_HASH,
             StreamReferenceModeDefinitions.CONDITION_HASH,
             StreamReferenceModeDefinitions.PROPERTIES_HASH,
-            StreamReferenceModeDefinitions.CANON_HASH
+            StreamReferenceModeDefinitions.CANON_HASH,
+            StreamReferenceModeDefinitions.DECODE_HASH
         ];
-        uint32[5] memory sizes = [
+        uint32[6] memory sizes = [
             StreamReferenceModeDefinitions.SCHEMA_BYTES,
             StreamReferenceModeDefinitions.PROFILE_BYTES,
             StreamReferenceModeDefinitions.CONDITION_BYTES,
             StreamReferenceModeDefinitions.PROPERTIES_BYTES,
-            StreamReferenceModeDefinitions.CANON_BYTES
+            StreamReferenceModeDefinitions.CANON_BYTES,
+            StreamReferenceModeDefinitions.DECODE_BYTES
         ];
-        for (uint256 i; i < 5; ++i) {
+        for (uint256 i; i < 6; ++i) {
             StreamWorkRecordContext.definition(
                 context(d),
                 ids[i],

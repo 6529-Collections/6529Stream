@@ -117,7 +117,7 @@ capture PNGs, all filters, independent constant-image SSIM formula, negative
 scores, exact report offsets and schema generation. They measure actual bytes;
 they do not create new source authority or institutional acceptance.
 
-Eleven authored Solidity cases use actual Schema/Store/Archive/publication,
+Twelve authored Solidity cases use actual Schema/Store/Archive/publication,
 Metadata intent selection, independent signature receipts and official threshold
 Safe fixtures at explicit inherited Core/Artist/governance observation
 boundaries. They cover the typed lock consumer, exact interpretation inventory,
@@ -126,9 +126,26 @@ DIRECT assertions and whole Safe rollback/retry. The curated test exercises the
 actual source proof independently; a single full curated snapshot → publication
 → finality deployment remains to be run.
 
-The joined source has ABI/storage typechecking. Native execution, deployed size,
+The joined source has ABI/storage typechecking. The original registered V1
+definition bytes remain unchanged. `STREAM_REFERENCE_MODE_ABI_V2` is an additive
+standalone decoder for that same payload: all enums use ABI `uint8`, with complete
+Mode, StatementOrigin and InterviewStatus value tables. Its bytes also enter the
+inventory. CURATED inventory includes the exact signed institution and credential
+HashRefs as external obligations, without inventing their sizes or coverage. The
+new case checks both references and rejects omission/substitution by the resulting
+finite archive commitment.
+
+Selected production sizing exposed oversized tuple encoders. Fixed preparation,
+dependency-read and inventory transports reduce those code paths without changing
+the stored receipt, original hash, authorization or write ordering. The first
+passing selected capture had all 17 products below the limit; the exact final
+source is frozen again before native acceptance. Native execution, final sizes,
 cold budgets, complete current-graph finality, curator/human measurement truth
 and archive executable reproduction remain separate acceptance work. No
 transaction-capacity claim follows from the STATIC renderer's separate capacity
 campaign. No held Router proposal or blocked retained-output feature is part of
 this batch.
+
+Full PERCEPTUAL executable closure is still being extended by an additive
+original-record-bound metric supplement and restored offline replay. The V1
+implementation hash and report alone do not establish that complete closure.

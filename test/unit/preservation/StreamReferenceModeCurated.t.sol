@@ -19,8 +19,56 @@ import {
 import {
     IStreamCollectionAttestations as Independent
 } from "../../../smart-contracts/interfaces/stream/metadata/IStreamCollectionAttestations.sol";
+import {
+    StreamReferenceModeInventory
+} from "../../../smart-contracts/domains/preservation/StreamReferenceModeInventory.sol";
+import {
+    StreamPreservationInventoryChains
+} from "../../../smart-contracts/domains/preservation/StreamPreservationInventoryChains.sol";
+import {
+    StreamRenderCriticalSourceTypes as Critical
+} from "../../../smart-contracts/interfaces/stream/preservation/StreamRenderCriticalSourceTypes.sol";
+import {
+    StreamPreservationInventoryTypes as Inventory
+} from "../../../smart-contracts/interfaces/stream/preservation/StreamPreservationInventoryTypes.sol";
+import {
+    IStreamReferenceModePublication as ModeHost
+} from "../../../smart-contracts/interfaces/stream/preservation/IStreamReferenceModePublication.sol";
+import {
+    StreamExternalArtifactTypes as E
+} from "../../../smart-contracts/interfaces/stream/preservation/StreamExternalArtifactTypes.sol";
 
 contract CuratedModeSourceProbe {
+    bytes private _evidence;
+    Mode.Dependencies private _bindings;
+
+    function observe(Mode.Evidence memory e, Mode.Facts memory f, Mode.Dependencies memory b)
+        external
+    {
+        _evidence = abi.encode(e, f);
+        _bindings = b;
+    }
+
+    function referenceModeEvidence(bytes32)
+        external
+        view
+        returns (Mode.Evidence memory, Mode.Facts memory)
+    {
+        return abi.decode(_evidence, (Mode.Evidence, Mode.Facts));
+    }
+
+    function modeDependencies() external view returns (Mode.Dependencies memory) {
+        return _bindings;
+    }
+
+    function inventory(Critical.Dependencies memory d, Critical.Context memory c)
+        external
+        view
+        returns (Inventory.Item[] memory rows)
+    {
+        (, rows) = StreamReferenceModeInventory.stage(d, c, 1);
+    }
+
     function validate(
         Ref.Dependencies memory d,
         Mode.Dependencies memory bindings,
@@ -69,6 +117,12 @@ contract StreamReferenceModeCuratedTest is ConservationSelectionFixture {
             bytes(Def.PROPERTIES_DOCUMENT),
             schemas.RAW_BYTES()
         );
+        _registerDocument(
+            "STREAM_REFERENCE_MODE_ABI_V2",
+            IStreamSchemaRegistry.DocumentKind.SCHEMA,
+            bytes(Def.DECODE_DOCUMENT),
+            schemas.RAW_BYTES()
+        );
         StreamCollectionAttestations.Configuration memory c;
         c.core = address(core);
         c.schemas = address(schemas);
@@ -104,8 +158,7 @@ contract StreamReferenceModeCuratedTest is ConservationSelectionFixture {
             StreamArtistIntentJson.serialize(witness.intent),
             1
         );
-        IStreamConservationRecordSelection.Selection memory picked =
-            selection.adoptIntent(
+        IStreamConservationRecordSelection.Selection memory picked = selection.adoptIntent(
             1, subject, original, 0, 0, _intentWitness(original, witness.intent)
         );
         witness.intentRecordHash = original;
@@ -197,6 +250,101 @@ contract StreamReferenceModeCuratedTest is ConservationSelectionFixture {
         require(
             selected == witness.condition.intentSelectionHash
                 && originalReceipt == keccak256(abi.encode(receipt))
+        );
+    }
+
+    function testCuratedInventoryRetainsBothSignedReferencesAndOmissionChangesCommitment() public {
+        _setupCurated();
+        _signAndRecord(1);
+        (bytes32 selected, bytes32 receiptHash) = _validate(witness);
+        _registerDocument(
+            "STREAM_REFERENCE_MODE_ABI_V1",
+            IStreamSchemaRegistry.DocumentKind.SCHEMA,
+            bytes(Def.SCHEMA_DOCUMENT),
+            schemas.RAW_BYTES()
+        );
+        _registerDocument(
+            "STREAM_REFERENCE_MODE_PROFILE_V1",
+            IStreamSchemaRegistry.DocumentKind.CATALOG,
+            bytes(Def.PROFILE_DOCUMENT),
+            schemas.RAW_BYTES()
+        );
+
+        // Only the mode-publication observation is a typed boundary here. The condition,
+        // signed references, original receipt/payload/signature and definitions are actual.
+        Mode.Evidence memory evidence;
+        evidence.mode = Mode.Mode.CURATED_EQUIVALENCE;
+        evidence.curated = witness;
+        evidence.repeats = new Mode.Repeat[](1);
+        Mode.Facts memory mode;
+        mode.mode = evidence.mode;
+        mode.evidenceHash = keccak256(abi.encode(evidence));
+        mode.conditionRecordHash = witness.conditionRecordHash;
+        mode.conditionReceiptHash = receiptHash;
+        mode.intentSelectionHash = selected;
+        mode.repeats = new E.Coverage[](1);
+        Critical.Dependencies memory d;
+        d.targets[2] = address(schemas);
+        d.targets[3] = address(store);
+        d.targets[6] = address(probe);
+        d.targets[9] = address(selection);
+        d.codeHashes[2] = address(schemas).codehash;
+        d.codeHashes[3] = address(store).codehash;
+        d.codeHashes[9] = address(selection).codehash;
+        d.readGas = 1000000;
+        d.sourceGas = 3000000;
+        d.referenceGas = 3000000;
+        Critical.Context memory c;
+        c.referenceRender.recordHash = keccak256("typed original mode reference");
+        c.conservation.selectionHash = selected;
+        c.conservation.record.recordHash = witness.intentRecordHash;
+        probe.observe(evidence, mode, bindings);
+        Inventory.Item[] memory rows = probe.inventory(d, c);
+        require(rows.length == 15);
+        for (uint256 i; i < 2; ++i) {
+            Inventory.Item memory row = rows[12 + i];
+            StreamConservationRecordTypes.Reference memory ref =
+                i == 0 ? witness.condition.institution : witness.condition.credentials;
+            require(row.kind == Inventory.Kind.EXTERNAL_REFERENCE);
+            require(
+                row.source == address(independent)
+                    && row.sourceRecord == witness.conditionRecordHash
+            );
+            require(
+                row.algorithm == ref.algorithm && row.canonicalizationId == ref.canonicalizationId
+            );
+            require(
+                keccak256(row.digest) == keccak256(ref.digest)
+                    && keccak256(bytes(row.uri)) == keccak256(bytes(ref.uri))
+            );
+            require(
+                row.role
+                    == (i == 0
+                            ? keccak256("CURATED_EXAMINER_INSTITUTION")
+                            : keccak256("CURATED_EXAMINER_CREDENTIALS"))
+            );
+            require(row.byteSize == 0 && row.originalCoverageHash == 0);
+        }
+        bytes32 key = keccak256("REFERENCE");
+        Inventory.Segment memory complete =
+            StreamPreservationInventoryChains.segment(key, mode.evidenceHash, rows);
+        Inventory.Item[] memory omitted = new Inventory.Item[](13);
+        for (uint256 i; i < 12; ++i) {
+            omitted[i] = rows[i];
+        }
+        omitted[12] = rows[14];
+        Inventory.Segment memory missing =
+            StreamPreservationInventoryChains.segment(key, mode.evidenceHash, omitted);
+        require(
+            complete.itemCount == 15 && missing.itemCount == 13
+                && complete.firstLink != missing.firstLink
+        );
+        rows[13].digest = abi.encode(keccak256("substituted credential"));
+        Inventory.Segment memory substituted =
+            StreamPreservationInventoryChains.segment(key, mode.evidenceHash, rows);
+        require(
+            substituted.itemCount == complete.itemCount
+                && substituted.firstLink != complete.firstLink
         );
     }
 
