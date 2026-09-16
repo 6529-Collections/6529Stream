@@ -18,7 +18,7 @@ import tempfile
 import time
 import zipfile
 
-from tools.museum.chain_abi import Array, encode
+from tools.museum.chain_abi import Array, encode, decode
 from tools.museum.canonical import keccak256
 from tools.preservation.reference_package import safe_name, _write_zip
 from tools.preservation.reference_archive import inspect
@@ -47,6 +47,7 @@ RUNTIME_ABI = ("bytes32", "bytes32", "string", "string", "string", "string",
                Array("string", 4), Array(FILE_ABI, 2048))
 SOURCE_ABI = ("string", "bytes")
 REPLAY_ABI = ("bytes32", "bytes32", "bytes32", "bytes32", "bytes", "bytes", "uint64", "uint32")
+TRANSCRIPT_ABI = ("bytes32", "bytes32", "bytes32", "bytes32", "bytes32", "uint64", "uint32", "bytes")
 
 
 def canonical(value):
@@ -318,10 +319,39 @@ def verify_archive(archive: Path, environment, coverage, destination=None):
     return observed
 
 
-def verify_replay_receipt(supplement, environment, environment_bytes, metric, inputs, expected_report_hash):
+def wrap_transcript(receipt, raw_json):
+    return encode(TRANSCRIPT_ABI, (keccak256(b"6529STREAM_METRIC_TRANSCRIPT_V1"),
+                  receipt["runtimeHash"], receipt["contextHash"], receipt["reportHash"],
+                  receipt["inputsHash"], receipt["executedAt"], receipt["exitCode"], raw_json))
+
+
+def unwrap_transcript(receipt):
+    raw = blob(receipt["transcript"])
+    fields = decode(TRANSCRIPT_ABI, raw, maximum=MAX_TRANSCRIPT)
+    if wrap_transcript(receipt, fields[-1]) != raw:
+        raise ValueError("transcript ABI envelope differs from receipt")
+    return fields[-1]
+
+
+def verify_inputs(inputs, environment_bytes):
+    if set(inputs) != {"contextHash", "environmentHash", "threshold", "evaluatedAt", "captures"}:
+        raise ValueError("closed replay input manifest")
+    if inputs["environmentHash"] != keccak256(environment_bytes) or len(blob(inputs["contextHash"])) != 32:
+        raise ValueError("replay input/environment join")
+    if type(inputs["threshold"]) is not int or not 0 <= inputs["threshold"] <= 1000000000 or type(inputs["evaluatedAt"]) is not int or not 0 < inputs["evaluatedAt"] < 2**64 or type(inputs["captures"]) is not list or not 1 <= len(inputs["captures"]) <= 2:
+        raise ValueError("replay input profile")
+    for row in inputs["captures"]:
+        if set(row) != {"firstSha256", "secondSha256", "width", "height"} or any(type(row[key]) is not int or not 11 <= row[key] <= 512 for key in ("width", "height")) or any(len(blob(row[key])) != 32 for key in ("firstSha256", "secondSha256")):
+            raise ValueError("replay original capture profile")
+    if len(canonical(inputs)) > 65536:
+        raise ValueError("replay input byte bound")
+
+
+def verify_replay_receipt(supplement, environment, environment_bytes, metric, inputs, expected_report_hash, *, legacy_json=False):
     """Check retained execution claims, not whether anyone actually ran the program."""
     from tools.preservation.reference_metric import report_preimage, METRIC_ABI
     bound = verify_declaration(supplement, environment, environment_bytes, metric)
+    verify_inputs(inputs, environment_bytes)
     receipt = supplement["replay"]
     if set(receipt) != {"runtimeHash", "contextHash", "reportHash", "inputsHash", "inputManifest", "transcript", "executedAt", "exitCode"}:
         raise ValueError("closed replay receipt")
@@ -333,7 +363,7 @@ def verify_replay_receipt(supplement, environment, environment_bytes, metric, in
     raw = blob(receipt["transcript"])
     if not 0 < len(raw) <= MAX_TRANSCRIPT:
         raise ValueError("retained replay transcript bound")
-    transcript = read_json(raw)
+    transcript = read_json(raw if legacy_json else unwrap_transcript(receipt))
     if set(transcript) != {"runtimeHash", "contextHash", "reportHash", "inputsHash", "executedAt", "exitCode", "result"} or any(transcript[key] != receipt[key] for key in transcript if key != "result"):
         raise ValueError("transcript/receipt association differs")
     result = transcript["result"]
@@ -372,6 +402,27 @@ def verify_replay_receipt(supplement, environment, environment_bytes, metric, in
                            (keccak256(b"6529STREAM_METRIC_REPLAY_V1"), replay_value)))
 
 
+def write_supplement(final, output):
+    if output.exists():
+        raise ValueError("fresh supplement output required")
+    receipt = final["replay"]
+    transcript = unwrap_transcript(receipt)
+    source_values = tuple((r["path"], blob(r["content"])) for r in final["sources"])
+    abi = encode((("bytes", "bytes", (SOURCE_ABI,) * 4, RUNTIME_ABI, REPLAY_ABI),),
+                 ((blob(final["implementationIndex"]), blob(final["parameters"]), source_values,
+                   runtime_value(final["runtime"]), (receipt["runtimeHash"], receipt["contextHash"],
+                   receipt["reportHash"], receipt["inputsHash"], blob(receipt["inputManifest"]),
+                   blob(receipt["transcript"]), receipt["executedAt"], receipt["exitCode"])),))
+    if len(abi) > MAX_SUPPLEMENT:
+        raise ValueError("supplement ABI byte bound")
+    output.mkdir(parents=True)
+    (output / "supplement.json").write_bytes(canonical(final))
+    (output / "supplement.abi").write_bytes(abi)
+    (output / "transcript.json").write_bytes(transcript)
+    (output / "transcript.abi").write_bytes(blob(receipt["transcript"]))
+    chunk_payload(abi, output / "chunks")
+
+
 def chunk_payload(payload: bytes, output: Path):
     """Exact existing Store.publishChunk(bytes) calls; no transaction is sent."""
     if not 0 < len(payload) <= MAX_SUPPLEMENT:
@@ -403,9 +454,8 @@ def replay(supplement, environment, environment_bytes, metric, archive, coverage
     if output.exists():
         raise ValueError("fresh replay output required")
     bound = verify_declaration(supplement, environment, environment_bytes, metric)
+    verify_inputs(inputs, environment_bytes)
     inputs_bytes = canonical(inputs)
-    if len(inputs_bytes) > 65536 or inputs["environmentHash"] != keccak256(environment_bytes):
-        raise ValueError("input/environment bound")
     job = {"runtime": supplement["runtime"], "parameters": supplement["parameters"],
            "implementationIndex": supplement["implementationIndex"], "manifest": inputs,
            "environment": "0x" + environment_bytes.hex(),
@@ -450,22 +500,11 @@ def replay(supplement, environment, environment_bytes, metric, archive, coverage
         raise ValueError("retained replay transcript bound")
     receipt = {"runtimeHash": bound, "contextHash": inputs["contextHash"], "reportHash": expected_report_hash,
                "inputsHash": keccak256(inputs_bytes), "inputManifest": "0x" + inputs_bytes.hex(),
-               "transcript": "0x" + transcript.hex(), "executedAt": executed, "exitCode": 0}
+               "executedAt": executed, "exitCode": 0}
+    receipt["transcript"] = "0x" + wrap_transcript(receipt, transcript).hex()
     final = {**supplement, "replay": receipt}
     verify_replay_receipt(final, environment, environment_bytes, metric, inputs, expected_report_hash)
-    # The fixed [4] tuple is encoded explicitly; the generic Array helper represents dynamic arrays.
-    source_values = tuple((r["path"], blob(r["content"])) for r in final["sources"])
-    abi = encode((("bytes", "bytes", (SOURCE_ABI,) * 4, RUNTIME_ABI, REPLAY_ABI),),
-                 ((blob(final["implementationIndex"]), blob(final["parameters"]), source_values,
-                   runtime_value(final["runtime"]), (bound, inputs["contextHash"], expected_report_hash,
-                   receipt["inputsHash"], inputs_bytes, transcript, executed, 0)),))
-    if len(abi) > MAX_SUPPLEMENT:
-        raise ValueError("supplement ABI byte bound")
-    output.mkdir(parents=True)
-    (output / "supplement.json").write_bytes(canonical(final))
-    (output / "supplement.abi").write_bytes(abi)
-    (output / "transcript.json").write_bytes(transcript)
-    chunk_payload(abi, output / "chunks")
+    write_supplement(final, output)
     return final
 
 
@@ -488,13 +527,16 @@ def main():
     chunks_parser = commands.add_parser("chunks")
     chunks_parser.add_argument("--payload", type=Path, required=True)
     chunks_parser.add_argument("--output", type=Path, required=True)
-    for name in ("verify", "replay"):
+    for name in ("verify", "replay", "wrap"):
         command = commands.add_parser(name)
         command.add_argument("--context", type=Path, required=True)
         command.add_argument("--supplement", type=Path, required=True)
-        command.add_argument("--archive", type=Path, required=True)
+        if name != "wrap":
+            command.add_argument("--archive", type=Path, required=True)
         if name == "replay":
             command.add_argument("--pair", nargs=2, action="append", type=Path, required=True)
+            command.add_argument("--output", type=Path, required=True)
+        elif name == "wrap":
             command.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "stage":
@@ -524,6 +566,14 @@ def main():
                     verify_replay_receipt(supplement, environment, environment_bytes, context["metric"],
                                           context["inputs"], context["expectedReportHash"])
                 print("Exact bytes and any supplied replay receipt verified; execution not performed.")
+            elif args.command == "wrap":
+                verify_replay_receipt(supplement, environment, environment_bytes, context["metric"],
+                                      context["inputs"], context["expectedReportHash"], legacy_json=True)
+                receipt = supplement["replay"]
+                receipt["transcript"] = "0x" + wrap_transcript(receipt, blob(receipt["transcript"])).hex()
+                verify_replay_receipt(supplement, environment, environment_bytes, context["metric"],
+                                      context["inputs"], context["expectedReportHash"])
+                write_supplement(supplement, args.output)
             else:
                 replay(supplement, environment, environment_bytes, context["metric"], args.archive,
                        context["coverage"], context["inputs"],

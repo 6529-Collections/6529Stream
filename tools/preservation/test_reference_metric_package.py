@@ -183,6 +183,60 @@ class MetricPackageTests(unittest.TestCase):
                 self.assertEqual(row["chunkHash"], p.keccak256(raw))
                 self.assertEqual(row["value"], "0")
 
+    def _attributed_receipt(self):
+        # A deliberately synthetic execution assertion tests verification only;
+        # it must never be counted as an actual process/native acceptance case.
+        image = png([[(90, 90, 90)] * 11] * 11)
+        inputs = {"contextHash": "0x" + "12" * 32, "environmentHash": p.keccak256(self.raw),
+                  "threshold": 999999999, "evaluatedAt": 1,
+                  "captures": [{"firstSha256": p.sha(image), "secondSha256": p.sha(image), "width": 11, "height": 11}]}
+        report = metric.measure(inputs, self.raw, [(image, image)])
+        receipt = {"runtimeHash": p.runtime_hash(self.supplement["runtime"]), "contextHash": inputs["contextHash"],
+                   "reportHash": report["reportHash"], "inputsHash": p.keccak256(p.canonical(inputs)),
+                   "inputManifest": "0x" + p.canonical(inputs).hex(), "executedAt": 2, "exitCode": 0}
+        result = {"profile": "STREAM_METRIC_RESTORED_REPLAY_V1", "report": report,
+                  "pythonModules": [{"name": "synthetic", "path": p.ENTRYPOINT, "origin": "file"}],
+                  "nativeMembers": [p.INTERPRETER], "platformPrerequisites": [],
+                  "disabledFallbackProbes": ["network", "process"], "qualification": "Synthetic attributed assertion; not executed."}
+        transcript = {k: v for k, v in receipt.items() if k != "inputManifest"}
+        transcript["result"] = result
+        receipt["transcript"] = "0x" + p.wrap_transcript(receipt, p.canonical(transcript)).hex()
+        return {**self.supplement, "replay": receipt}, inputs, report["reportHash"]
+
+    def test_rehashed_cross_environment_assertion_cannot_reuse_original_report(self):
+        supplement, inputs, report_hash = self._attributed_receipt()
+        p.verify_replay_receipt(supplement, self.env, self.raw, metric.metric(), inputs, report_hash)
+        original_preimage = json.loads(p.unwrap_transcript(supplement["replay"]))["result"]["report"]["reportPreimageABI"]
+        inputs["environmentHash"] = "0x" + "99" * 32
+        receipt = supplement["replay"]
+        transcript = json.loads(p.unwrap_transcript(receipt))
+        receipt["inputsHash"] = p.keccak256(p.canonical(inputs))
+        receipt["inputManifest"] = "0x" + p.canonical(inputs).hex()
+        transcript["inputsHash"] = receipt["inputsHash"]
+        transcript["result"]["report"]["inputs"] = inputs
+        receipt["transcript"] = "0x" + p.wrap_transcript(receipt, p.canonical(transcript)).hex()
+        self.assertEqual(transcript["result"]["report"]["reportPreimageABI"], original_preimage)
+        self.assertEqual(transcript["result"]["report"]["reportHash"], report_hash)
+        with self.assertRaisesRegex(ValueError, "input/environment join"):
+            p.verify_replay_receipt(supplement, self.env, self.raw, metric.metric(), inputs, report_hash)
+
+    def test_transcript_envelope_cannot_shift_domain_identity_or_canonical_offsets(self):
+        supplement, inputs, report_hash = self._attributed_receipt()
+        for offset in (0, 32, 64, 96, 128, 224):
+            candidate = copy.deepcopy(supplement)
+            raw = bytearray(p.blob(candidate["replay"]["transcript"]))
+            raw[offset + 31] ^= 1
+            candidate["replay"]["transcript"] = "0x" + raw.hex()
+            with self.assertRaises(ValueError):
+                p.verify_replay_receipt(candidate, self.env, self.raw, metric.metric(), inputs, report_hash)
+
+    def test_input_shape_and_integer_geometry_are_closed(self):
+        supplement, inputs, report_hash = self._attributed_receipt()
+        for candidate in ({**inputs, "unknown": 1}, {**inputs, "threshold": True},
+                          {**inputs, "captures": [{**inputs["captures"][0], "width": 513}]}):
+            with self.assertRaises(ValueError):
+                p.verify_inputs(candidate, self.raw)
+
 
 @unittest.skipUnless(os.name == "nt" and os.environ.get("STREAM_METRIC_RUNTIME_TEST") == "1",
                      "explicit restored Windows runtime acceptance")
@@ -233,7 +287,7 @@ class RestoredMetricRuntimeTests(unittest.TestCase):
             p.pack(tree, archive)
             finished = p.replay(supplement, env, raw, metric.metric(), archive, coverage(archive, env),
                                 inputs, [(image, second)], work / "result", expected["reportHash"])
-            transcript = json.loads(p.blob(finished["replay"]["transcript"]))
+            transcript = json.loads(p.unwrap_transcript(finished["replay"]))
             self.assertEqual(transcript["result"]["report"]["reportHash"], expected["reportHash"])
             self.assertEqual(transcript["result"]["disabledFallbackProbes"], ["network", "process"])
             self.assertTrue(all(not r["path"].startswith(("C:", "D:")) for r in transcript["result"]["pythonModules"]))

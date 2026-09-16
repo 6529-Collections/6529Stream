@@ -93,7 +93,17 @@ network isolation against malicious native code follows from Python audit hooks.
 The final report must reproduce the original Metric tuple, input and report hash.
 The replay transcript retains runtime/context/report/input hashes, time, exit
 code, import/native footprint, OS prerequisite hashes and measured output.
-Outputs are `supplement.json`, exact `supplement.abi`, and `transcript.json`.
+`Replay.transcript` is the canonical ABI envelope `(bytes32 domain, bytes32
+runtimeHash, bytes32 contextHash, bytes32 reportHash, bytes32 inputsHash, uint64
+executedAt, uint32 exitCode, bytes diagnosticJSON)`, where the domain is
+`keccak256("6529STREAM_METRIC_TRANSCRIPT_V1")`. The inner canonical JSON stays
+byte-exact. This binds the retained diagnostic carrier to the same replay fields;
+it does not establish execution.
+Outputs are `supplement.json`, exact `supplement.abi`, `transcript.abi` and the
+original `transcript.json`. To derive the envelope from an already validated
+pre-envelope local replay without rerunning it, use `wrap --context context.json
+--supplement old-supplement.json --output fresh-output`. It checks all original
+JSON bindings first and preserves the original observation time and JSON bytes.
 The `chunks/` directory also contains the exact ordered 8,192-byte segments,
 their Keccak hashes and zero-value `publishChunk(bytes)` calldata. Send those
 calls separately to the reference producer's original pinned
