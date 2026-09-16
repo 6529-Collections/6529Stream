@@ -37,6 +37,8 @@ contract StreamCurrentStackInvariantTest is StreamCurrentStackFixture {
             StreamCurrentStackHandler.Config(
                 core,
                 manager,
+                entropy,
+                revenueEscrow,
                 sale,
                 erc20Sale,
                 auction,
@@ -171,10 +173,23 @@ contract StreamCurrentStackInvariantTest is StreamCurrentStackFixture {
     }
 
     function testHandlerOpeningCycleExercisesEveryRequiredOperation() public {
-        for (uint256 i; i < 12; ++i) {
+        for (uint256 i; i < 15; ++i) {
             handler.step(i * 101 + 7);
             handler.assertInvariants();
         }
         handler.assertCampaignActivity();
+    }
+
+    function testGhostModelRejectsWrongNativePayerEvenWhenAggregateIsUnchanged() public {
+        address first = vm.addr(0xC011EC70);
+        address second = vm.addr(0xC011EC71);
+        uint256 sum = first.balance + second.balance;
+        vm.prank(first);
+        (bool ok,) = payable(second).call{ value: 1 }("");
+        require(ok && first.balance + second.balance == sum, "native aggregate changed");
+        vm.expectRevert(
+            abi.encodeWithSignature("Error(string)", "intended native payer debit and refund")
+        );
+        handler.assertInvariants();
     }
 }

@@ -15,6 +15,11 @@ the release policy in `docs/release-policy.md`.
 - Add source-bound institutional and condition museum adapters and qualified
   geography drafts; actual current-record joins remain explicit acceptance work.
 
+- Extend the current-stack stateful driver with mandatory phase-counter and
+  per-payer native conservation, persistent mint/cancellation receipts, original
+  entropy registrations and exact native receiver-failure retry. Expanded
+  campaign execution remains pending the frozen current graph.
+
 - Add actual Safe-governed mint succession import, pointer rollback and
   accounting preservation cases, plus original-Artist successor consent,
   imported entitlement replay, remaining caps and exact Safe retry coverage;

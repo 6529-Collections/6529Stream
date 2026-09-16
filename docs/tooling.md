@@ -219,6 +219,11 @@ corpora remain beside the logs. Working source hashes may differ from the Git
 commit when the checkout has edits; a focused copied fixture is not full-repo
 or current-export validation.
 
+The [current sale conservation campaign](testing/current-sale-conservation.md)
+documents the handler's fifteen required opening actions, independent payer and
+Ledger counter models, cancellation transitions and late-mint rollback checks.
+Its expanded source remains native-pending until the frozen current-graph run.
+
 `--replay-from` copies a prior run's retained failure corpus into a new run before
 Foundry replays it and starts the campaign. It never modifies the prior run.
 Keep its manifest, log and source revision when sharing a counterexample. If a

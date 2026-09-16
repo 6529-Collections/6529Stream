@@ -7,16 +7,37 @@ import "../../smart-contracts/domains/mint/StreamMintManager.sol";
 import "../../smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol";
 import "../../smart-contracts/domains/mint/StreamERC20FixedPriceSaleAdapter.sol";
 import "../../smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol";
+import {
+    StreamEntropyCoordinator
+} from "../../smart-contracts/domains/entropy/StreamEntropyCoordinator.sol";
+import {
+    StreamEntropyStatus
+} from "../../smart-contracts/interfaces/stream/entropy/IStreamEntropyView.sol";
+import { StreamRevenueEscrow } from "../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
 import "../../smart-contracts/interfaces/stream/revenue/IStreamSplitWallet.sol";
 import "../mocks/MockStreamPaymentToken.sol";
 
 contract InvariantRejectingReceiver is IERC721Receiver {
+    address private immutable controller = msg.sender;
+    bool private accepting;
+
+    function setAccepting(bool value) external {
+        require(msg.sender == controller, "receiver controller");
+        accepting = value;
+    }
+
+    function deliver(StreamCore core, uint256 tokenId, address recipient) external {
+        require(msg.sender == controller, "receiver controller");
+        core.transferFrom(address(this), recipient, tokenId);
+    }
+
     function onERC721Received(address, address, uint256, bytes calldata)
         external
-        pure
+        view
         returns (bytes4)
     {
-        revert("invariant receiver rejects");
+        require(accepting, "invariant receiver rejects");
+        return IERC721Receiver.onERC721Received.selector;
     }
 }
 
@@ -26,6 +47,8 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
     struct Config {
         StreamCore core;
         StreamMintManager manager;
+        StreamEntropyCoordinator entropy;
+        StreamRevenueEscrow revenueEscrow;
         StreamFixedPriceSaleAdapter nativeSale;
         StreamERC20FixedPriceSaleAdapter erc20Sale;
         StreamEnglishAuctionHouse auction;
@@ -49,7 +72,9 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
     uint256 private constant PLATFORM_KEY = 0x6529;
     uint256 private constant ACTOR_KEY = 0xC011EC70;
     uint256 private constant INITIAL_TOKENS = 1_000_000;
+    uint256 private constant INITIAL_NATIVE = 1000 ether;
     bytes32 private constant NATIVE_PHASE = keccak256("current-stack fixed price");
+    bytes32 private constant ERC20_PHASE = keccak256("stateful ERC20 phase");
     bytes32 private constant AUCTION_PHASE = keccak256("current-stack auction");
     bytes private constant DATA = "stateful current-stack artwork";
     Config private system;
@@ -61,6 +86,12 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
     uint256[2] private nativeReleased;
     uint256[2] private erc20Released;
     uint256[3] private actorTokenSpent;
+    mapping(address => uint256) private actorNativeSpent;
+    mapping(address => uint256) private actorNativeRefunded;
+    uint256[2] private beneficiaryNativeBefore;
+    uint256[2] private beneficiaryTokensBefore;
+    bytes32[] private consumedAuthorizations;
+    bytes32[] private cancelledNativeNonces;
     uint256 private nextConsent = 1;
     bytes private nativeReplay;
     address private nativeReplayPayer;
@@ -83,6 +114,9 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
     uint256 public nativeReplayChecks;
     uint256 public erc20ReplayChecks;
     uint256 public rollbackChecks;
+    uint256 public nativeRollbackRetries;
+    uint256 public wrongCancellationChecks;
+    uint256 public artistCancellationChecks;
     uint256 public nativeRevenue;
     uint256 public auctionRevenue;
     uint256 public erc20Revenue;
@@ -95,18 +129,22 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
         rejector = new InvariantRejectingReceiver();
         for (uint256 i; i < actors.length; ++i) {
             actors[i] = vm.addr(ACTOR_KEY + i);
-            vm.deal(actors[i], 1000 ether);
+            vm.deal(actors[i], INITIAL_NATIVE);
             config.token.mint(actors[i], INITIAL_TOKENS);
             vm.prank(actors[i]);
             config.token.approve(address(config.erc20Sale), type(uint256).max);
         }
+        beneficiaryNativeBefore[0] = config.artist.balance;
+        beneficiaryNativeBefore[1] = config.protocol.balance;
+        beneficiaryTokensBefore[0] = config.token.rawBalance(config.artist);
+        beneficiaryTokensBefore[1] = config.token.rawBalance(config.protocol);
     }
 
-    /// @dev The first twelve fuzzed inputs exercise each dependency in order. Later choices
+    /// @dev The first fifteen fuzzed inputs exercise each dependency in order. Later choices
     ///      are randomized. State-dependent alternatives perform a valid operation, never catch
     ///      an arbitrary revert. Replay/receiver failures are explicitly asserted below.
     function step(uint256 seed) external {
-        uint256 action = steps < 12 ? steps : seed % 12;
+        uint256 action = steps < 15 ? steps : seed % 15;
         ++steps;
         if (action == 0) _nativeBuy(seed);
         else if (action == 1) _erc20Buy(seed);
@@ -118,7 +156,10 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
         else if (action == 8) _transfer(seed);
         else if (action == 9) _replay(false);
         else if (action == 10) _replay(true);
-        else _rejectReceiver(seed);
+        else if (action == 11) _rejectReceiver(seed);
+        else if (action == 12) _nativeReceiverRetry(seed);
+        else if (action == 13) _wrongCancellation(seed);
+        else _artistCancellation(seed);
     }
 
     function _primaryPolicyHash() private view returns (bytes32 hash) {
@@ -130,10 +171,11 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
         return abi.encodePacked(r, s, v);
     }
 
-    function _recordMint(uint256 tokenId, address owner) private {
+    function _recordMint(uint256 tokenId, address owner, bytes32 authorization) private {
         require(tokenId == minted + 1, "nonsequential mint identity");
         ++minted;
         owners[tokenId] = owner;
+        consumedAuthorizations.push(authorization);
     }
 
     function _nativeBuy(uint256 seed) private {
@@ -144,13 +186,21 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
         address payer = actors[seed % 3];
         uint256 price = 10_000 + (seed % 10_000) * 10;
         bytes32 nonce = bytes32(nextConsent++);
+        bytes memory payload = _nativePayload(payer, payer, nonce, price);
+        _submitNative(payer, payer, nonce, price, payload);
+    }
+
+    function _nativePayload(address payer, address recipient, bytes32 nonce, uint256 price)
+        private
+        returns (bytes memory)
+    {
         (bytes32 primaryPolicy,,) = system.nativeSale.primaryPolicy(1);
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory auth =
             IStreamFixedPriceSaleAdapter.SaleAuthorization(
                 1,
                 NATIVE_PHASE,
                 payer,
-                payer,
+                recipient,
                 system.artist,
                 system.profile,
                 primaryPolicy,
@@ -163,17 +213,28 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
                 system.nativeSale.signerEpoch()
             );
         bytes32 digest = system.nativeSale.authorizationDigest(auth);
-        bytes memory payload = abi.encodeCall(
+        return abi.encodeCall(
             system.nativeSale.buy,
             (auth, DATA, _sign(PLATFORM_KEY, digest), _sign(ARTIST_KEY, digest))
         );
+    }
+
+    function _submitNative(
+        address payer,
+        address recipient,
+        bytes32 nonce,
+        uint256 price,
+        bytes memory payload
+    ) private returns (uint256 tokenId) {
         vm.prank(payer);
         (bool ok, bytes memory returned) = address(system.nativeSale).call{ value: price }(payload);
         if (!ok) assembly ("memory-safe") { revert(add(returned, 32), mload(returned)) }
-        (uint256 tokenId, bytes32 root) = abi.decode(returned, (uint256, bytes32));
+        bytes32 root;
+        (tokenId, root) = abi.decode(returned, (uint256, bytes32));
         require(system.manager.isOperationRootUsed(root), "native root not consumed");
-        _recordMint(tokenId, payer);
+        _recordMint(tokenId, recipient, _nativeAuthorization(nonce));
         nativeRevenue += price;
+        actorNativeSpent[payer] += price;
         ++nativeBuys;
         nativeReplay = payload;
         nativeReplayPayer = payer;
@@ -240,7 +301,13 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
         require(
             system.erc20Sale.isPaymentIntentNonceUsed(actors[index], nonce), "intent not consumed"
         );
-        _recordMint(tokenId, actors[index]);
+        _recordMint(
+            tokenId,
+            actors[index],
+            _authorization(
+                keccak256("6529STREAM_ERC20_SALE_NONCE_V1"), address(system.erc20Sale), nonce
+            )
+        );
         erc20Revenue += 100;
         actorTokenSpent[index] += 100;
         ++erc20Buys;
@@ -277,7 +344,13 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
         bytes32 digest = system.auction.authorizationDigest(auth);
         uint256 tokenId = system.auction
             .createAuction(auth, DATA, _sign(PLATFORM_KEY, digest), _sign(ARTIST_KEY, digest));
-        _recordMint(tokenId, address(system.auction));
+        _recordMint(
+            tokenId,
+            address(system.auction),
+            _authorization(
+                keccak256("6529STREAM_ENGLISH_AUCTION_NONCE_V1"), address(system.auction), nonce
+            )
+        );
         auctions.push(AuctionModel(tokenId, auth.endTime, 0, address(0), false));
         ++auctionCreates;
     }
@@ -317,6 +390,7 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
         item.highestBid = amount;
         item.highestBidder = bidder;
         bidDeposits += amount;
+        actorNativeSpent[bidder] += amount;
         ++bids;
     }
 
@@ -331,6 +405,7 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
             require(account.balance == beforeBalance + amount, "refund amount");
             refunds[account] = 0;
             refundPayments += amount;
+            actorNativeRefunded[account] += amount;
             ++refundWithdrawals;
             return;
         }
@@ -398,6 +473,47 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
         }
     }
 
+    function _authorization(bytes32 domain, address adapter, bytes32 nonce)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(abi.encode(domain, block.chainid, adapter, system.artist, nonce));
+    }
+
+    function _nativeAuthorization(bytes32 nonce) private view returns (bytes32) {
+        return _authorization(
+            keccak256("6529STREAM_NATIVE_SALE_NONCE_V1"), address(system.nativeSale), nonce
+        );
+    }
+
+    /// @dev Literal launch CONSTANT/PHASE keys; no Manager preview supplies the expected key.
+    function _ledgerSupply(bytes32 phase) private view returns (uint64) {
+        bytes32 counter = keccak256("supply");
+        bytes32 subject = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_MINT_COUNTER_SUBJECT_V1"),
+                block.chainid,
+                address(system.manager.mintLedger()),
+                uint8(1),
+                uint256(1),
+                phase,
+                counter
+            )
+        );
+        bytes32 valueKey = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_MINT_COUNTER_VALUE_KEY_V1"),
+                address(system.manager),
+                uint256(1),
+                phase,
+                counter,
+                subject
+            )
+        );
+        return system.manager.mintLedger().counterValue(valueKey);
+    }
+
     function _fingerprint(address payer, bytes32 nonce) private view returns (bytes32) {
         bytes32 mintState = keccak256(
             abi.encode(
@@ -425,10 +541,35 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
             abi.encode(
                 system.nativeSale.authorizationUsed(system.artist, nonce),
                 system.erc20Sale.authorizationUsed(system.artist, nonce),
-                system.erc20Sale.isPaymentIntentNonceUsed(payer, nonce)
+                system.erc20Sale.isPaymentIntentNonceUsed(payer, nonce),
+                system.manager.mintLedger()
+                    .isManagerAuthorizationUsed(
+                        address(system.manager), _nativeAuthorization(nonce)
+                    ),
+                system.manager.mintLedger()
+                    .isManagerAuthorizationUsed(
+                        address(system.manager),
+                        _authorization(
+                            keccak256("6529STREAM_ERC20_SALE_NONCE_V1"),
+                            address(system.erc20Sale),
+                            nonce
+                        )
+                    )
             )
         );
-        return keccak256(abi.encode(mintState, paymentState, consentState));
+        bytes32 downstreamState = keccak256(
+            abi.encode(
+                _ledgerSupply(NATIVE_PHASE),
+                _ledgerSupply(ERC20_PHASE),
+                _ledgerSupply(AUCTION_PHASE),
+                system.entropy.tokenEntropyStatus(minted + 1),
+                system.entropy.nonterminalTokenCount(1),
+                system.entropy.pendingRequestCount(),
+                system.revenueEscrow.totalOwed(address(0)),
+                system.revenueEscrow.totalOwed(address(system.token))
+            )
+        );
+        return keccak256(abi.encode(mintState, paymentState, consentState, downstreamState));
     }
 
     function _replay(bool erc20) private {
@@ -488,6 +629,89 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
         ++rollbackChecks;
     }
 
+    function _nativeReceiverRetry(uint256 seed) private {
+        if (minted == system.supplyLimit) {
+            _replay(false);
+            return;
+        }
+        address payer = actors[seed % 3];
+        bytes32 nonce = bytes32(nextConsent++);
+        uint256 price = 2 + seed % 100_001;
+        bytes memory payload = _nativePayload(payer, address(rejector), nonce, price);
+        bytes32 beforeState = _fingerprint(payer, nonce);
+        vm.prank(payer);
+        (bool ok, bytes memory reason) = address(system.nativeSale).call{ value: price }(payload);
+        require(
+            !ok
+                && keccak256(reason)
+                    == keccak256(
+                        abi.encodeWithSignature("Error(string)", "invariant receiver rejects")
+                    ),
+            "native paid mint reaches actual late receiver rejection"
+        );
+        require(_fingerprint(payer, nonce) == beforeState, "late native failure leaves no residue");
+        rejector.setAccepting(true);
+        uint256 tokenId = _submitNative(payer, address(rejector), nonce, price, payload);
+        require(
+            system.core.ownerOf(tokenId) == address(rejector), "exact retry delivers to receiver"
+        );
+        // The real receiving contract transfers its own token; no contract-caller impersonation.
+        rejector.deliver(system.core, tokenId, payer);
+        rejector.setAccepting(false);
+        owners[tokenId] = payer;
+        ++transfers;
+        ++nativeRollbackRetries;
+    }
+
+    function _wrongCancellation(uint256 seed) private {
+        if (minted == system.supplyLimit) {
+            _replay(false);
+            return;
+        }
+        address payer = actors[seed % 3];
+        address stranger = actors[(seed % 3 + 1) % 3];
+        bytes32 nonce = bytes32(nextConsent++);
+        uint256 price = 2 + seed % 100_001;
+        bytes memory payload = _nativePayload(payer, payer, nonce, price);
+        bytes32 beforeState = _fingerprint(payer, nonce);
+        vm.prank(stranger);
+        system.nativeSale.cancelAuthorization(nonce);
+        require(
+            system.nativeSale.authorizationUsed(stranger, nonce)
+                && !system.nativeSale.authorizationUsed(system.artist, nonce)
+                && _fingerprint(payer, nonce) == beforeState,
+            "another caller cancels only its own authorization namespace"
+        );
+        _submitNative(payer, payer, nonce, price, payload);
+        ++wrongCancellationChecks;
+    }
+
+    function _artistCancellation(uint256 seed) private {
+        address payer = actors[seed % 3];
+        bytes32 nonce = bytes32(nextConsent++);
+        uint256 price = 2 + seed % 100_001;
+        bytes memory payload = _nativePayload(payer, payer, nonce, price);
+        vm.prank(system.artist);
+        system.nativeSale.cancelAuthorization(nonce);
+        cancelledNativeNonces.push(nonce);
+        bytes32 beforeState = _fingerprint(payer, nonce);
+        vm.prank(payer);
+        (bool ok, bytes memory reason) = address(system.nativeSale).call{ value: price }(payload);
+        require(
+            !ok
+                && keccak256(reason)
+                    == keccak256(
+                        abi.encodeWithSelector(
+                            IStreamFixedPriceSaleAdapter.SaleAlreadyConsumed.selector,
+                            system.artist,
+                            nonce
+                        )
+                    ) && _fingerprint(payer, nonce) == beforeState,
+            "actual artist cancellation prevents mint without payment or replay residue"
+        );
+        ++artistCancellationChecks;
+    }
+
     function assertInvariants() external view {
         require(
             system.core.totalSupply() == minted && system.core.collectionMintedEver(1) == minted
@@ -499,8 +723,40 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
             system.manager.nextOperationNonce() == minted && minted <= system.supplyLimit,
             "mint nonce or supply cap"
         );
+        require(
+            _ledgerSupply(NATIVE_PHASE) == nativeBuys && _ledgerSupply(ERC20_PHASE) == erc20Buys
+                && _ledgerSupply(AUCTION_PHASE) == auctionCreates
+                && nativeBuys + erc20Buys + auctionCreates == minted,
+            "mandatory phase counters equal successful original operations"
+        );
+        require(consumedAuthorizations.length == minted, "one authorization per actual mint");
         for (uint256 id = 1; id <= minted; ++id) {
             require(system.core.ownerOf(id) == owners[id], "ownership model");
+            (bool exists, uint256 collection, uint256 serial, bool burned) =
+                system.core.tokenCollectionIdentity(id);
+            require(exists && collection == 1 && serial == id && !burned, "lifetime token identity");
+            require(
+                system.manager.mintLedger()
+                    .isManagerAuthorizationUsed(
+                        address(system.manager), consumedAuthorizations[id - 1]
+                    ),
+                "every accepted authorization remains consumed"
+            );
+            require(
+                system.entropy.tokenEntropyStatus(id) == StreamEntropyStatus.REGISTERED,
+                "each accepted mint retains actual entropy registration"
+            );
+        }
+        for (uint256 i; i < cancelledNativeNonces.length; ++i) {
+            bytes32 nonce = cancelledNativeNonces[i];
+            require(
+                system.nativeSale.authorizationUsed(system.artist, nonce)
+                    && !system.manager.mintLedger()
+                        .isManagerAuthorizationUsed(
+                            address(system.manager), _nativeAuthorization(nonce)
+                        ),
+                "cancellation stays durable without a fictitious Ledger mint"
+            );
         }
         uint256 escrow;
         for (uint256 i; i < auctions.length; ++i) {
@@ -522,6 +778,12 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
             uint256 actualActorTokens = system.token.rawBalance(actors[i]);
             require(
                 actualActorTokens == INITIAL_TOKENS - actorTokenSpent[i], "intended payer debit"
+            );
+            require(
+                actors[i].balance
+                    == INITIAL_NATIVE + actorNativeRefunded[actors[i]]
+                        - actorNativeSpent[actors[i]],
+                "intended native payer debit and refund"
             );
             actorTokens += actualActorTokens;
             require(system.auction.refundCredit(actors[i]) == refunds[actors[i]], "refund ledger");
@@ -557,8 +819,16 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
         );
         require(
             address(system.nativeSale).balance == 0
-                && system.token.rawBalance(address(system.erc20Sale)) == 0,
+                && system.token.rawBalance(address(system.erc20Sale)) == 0
+                && system.revenueEscrow.totalOwed(address(0)) == 0
+                && system.revenueEscrow.totalOwed(address(system.token)) == 0,
             "adapter retained proceeds"
+        );
+        require(
+            system.entropy.tokenEntropyStatus(minted + 1) == StreamEntropyStatus.NONE
+                && system.entropy.nonterminalTokenCount(1) == minted
+                && system.entropy.pendingRequestCount() == 0,
+            "no phantom mint or entropy request"
         );
         IStreamSplitWallet split = IStreamSplitWallet(system.wallet);
         require(
@@ -573,15 +843,22 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
                     && split.accountReleased(address(system.token), account) == erc20Released[i],
                 "split account model"
             );
+            require(
+                account.balance == beneficiaryNativeBefore[i] + nativeReleased[i]
+                    && system.token.rawBalance(account)
+                        == beneficiaryTokensBefore[i] + erc20Released[i],
+                "actual beneficiary receives exactly recorded releases"
+            );
         }
     }
 
     function assertCampaignActivity() external view {
         require(
-            steps >= 12 && nativeBuys > 0 && erc20Buys > 0 && auctionCreates > 0 && bids >= 2
+            steps >= 15 && nativeBuys > 0 && erc20Buys > 0 && auctionCreates > 0 && bids >= 2
                 && refundWithdrawals > 0 && settlements > 0 && nativeReleases > 0
                 && erc20Releases > 0 && transfers > 0 && nativeReplayChecks > 0
-                && erc20ReplayChecks > 0 && rollbackChecks > 0,
+                && erc20ReplayChecks > 0 && rollbackChecks > 0 && nativeRollbackRetries > 0
+                && wrongCancellationChecks > 0 && artistCancellationChecks > 0,
             "campaign lacked required successful activity"
         );
     }
