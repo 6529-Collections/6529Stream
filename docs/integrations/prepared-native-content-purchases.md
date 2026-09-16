@@ -85,3 +85,16 @@ The earlier oversized Manager capture is retained separately. These are selected
 code-generation results, not execution results. The satellite carrier and
 actual-current composed purchase tests are separate coordinated work. No native
 runtime result is claimed here yet.
+
+The separate `StreamCurrentCuratedPurchaseSettlement` suite now has four authored
+current-Core cases: two works from one immutable sale, duplicate-content rollback
+under a fresh purchase nonce, identical signed Safe retry after late receiver and
+post-delivery consent failures, and strict original-policy refusal alongside a
+committed ALLOW_CURRENT purchase paying the replacement collection PROFILE.
+The last case pays the separately updated live reveal fee at mint. These cases
+use the carrier task's `NativeCuratedSaleFixture` unchanged: Core, Manager, Ledger,
+recorder, Resolver, split wallet and Safe are actual products; Artist, entropy and
+governance retain the explicitly typed fixture boundaries. The focused 362-source
+ABI capture includes the exact upstream carrier/fixture work-in-progress bytes.
+That capture is type evidence only. Integrate the corresponding carrier fixture
+before running this dependent suite; no native result is claimed for it.
