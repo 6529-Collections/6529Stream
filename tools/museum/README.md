@@ -25,6 +25,11 @@ those exports and explicitly supplied selected media into BagIt/OCFL, with
 offline source reconstruction and byte fixity. Collection scope stays distinct
 from the required token-bound object-dossier acceptance.
 
+[Actual token captures](../../docs/museum-token-capture.md) compose explicitly
+pinned native products, mint a local paid token and publish fresh token-subject
+media statements before building the scoped dossier. Local execution and full
+object-dossier acceptance remain separately reported.
+
 Run from the repository root with Python 3.11 or later. Create an isolated
 environment and install the Museum dependency set; the repository's general
 tools lock alone does not include `rfc8785` or the JSON-LD processor. The full

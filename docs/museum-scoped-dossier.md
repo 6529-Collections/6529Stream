@@ -103,7 +103,7 @@ without the block qualifier. It is explicitly not a token work citation. A
 token-scoped export retains its original token citation and chain-head
 qualifier. The tool never manufactures a token ID from a collection ID.
 
-## Retained positive and remaining token acceptance
+## Retained collection and token positives
 
 The existing [archive fixture](../schemas/museum/archival-export/local-fixture/manifest.json)
 rebuilds the actual collection export at block 851. Its admitted media claims
@@ -113,21 +113,20 @@ The dossier regression supplies matching bytes explicitly and verifies source
 replay, unchanged dependency bytes, media fixity, separate publication
 evidence, missing-media rejection and OCFL preservation offline.
 
-No retained capture currently binds an actual token subject, its selected
-media assertions, the registered semantic profile and local media bytes at
-one source block. Token-scoped positive acceptance requires a coordinated
-capture that reuses the actual mint fixture, records typed media assertions
-under that token subject, exports that single subject/lane with exact profile
-and selection joins, and checks the full required byte inventory against its
-authenticated size, SHA-256 and content URI. Collection assertions and the
-older generic token fixture cannot be re-rooted or combined to manufacture
-this join. Required preservation roles and performed fixity need their own
-explicit token-to-media evidence; matching collection IDs are insufficient.
+The separate [actual token capture](museum-token-capture.md) joins a paid mint,
+15 fresh token-subject Safe records, registered semantic profiles and these
+exact PNG bytes at source block 1311. Core token data and actual `tokenURI`
+identify the same token and media. Its V3 export, scoped BagIt dossier and OCFL
+object verify offline. This is a new explicitly pinned native composition;
+it preserves the collection capture and older generic token fixture unchanged.
+Required preservation roles and performed historical fixity still need their
+own evidence. The token positive covers this selected presentation-media
+inventory, not the full render inventory.
 
 The full adopted object-dossier acceptance remains a separate required target.
 It includes the authoritative render inventory and applicable archival,
-snapshot, dependency and qualification evidence. No native contracts were
-rebuilt or recaptured for this collection packaging bridge.
+snapshot, dependency and qualification evidence. The token capture reused
+pinned binaries; no native contracts were rebuilt for it.
 
 ```powershell
 python -m tools.museum.dossier definitions --check

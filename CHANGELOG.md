@@ -5,6 +5,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add an explicitly pinned local paid-token capture with actual Safe consent,
+  token-subject media records, source-block metadata reads and offline scoped
+  dossier replay; full object-dossier acceptance remains separate.
+
 - Add curated manifest, fixed and private sale callers with original content and
   authorization hashes, commit/reveal refunds, historical revocation and Safe CALL plans.
 
