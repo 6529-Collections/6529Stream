@@ -20,6 +20,12 @@ import {
     IStreamGasParameterHost
 } from "../../interfaces/stream/parameters/IStreamGasParameterHost.sol";
 import { StreamImmediateSaleReveal } from "./StreamImmediateSaleReveal.sol";
+import { StreamBurnMintCredits } from "./StreamBurnMintCredits.sol";
+import { StreamNativeSurplusHost } from "./StreamNativeSurplusHost.sol";
+import { IStreamNativeSurplus } from "../../interfaces/stream/mint/IStreamNativeSurplus.sol";
+import {
+    IStreamNativeSaleCredits
+} from "../../interfaces/stream/mint/IStreamNativeSaleCredits.sol";
 import {
     IStreamImmediateSaleReveal
 } from "../../interfaces/stream/mint/IStreamImmediateSaleReveal.sol";
@@ -38,10 +44,13 @@ import {
 contract StreamBurnMintGate is
     B,
     IStreamBurnMintNativeExecutor,
+    IStreamImmediateSaleReveal,
+    IStreamNativeSaleCredits,
     Ownable,
     ReentrancyGuard,
     StreamModuleBase,
-    StreamGasParameterHost
+    StreamGasParameterHost,
+    StreamNativeSurplusHost
 {
     struct Configuration {
         address core;
@@ -72,6 +81,13 @@ contract StreamBurnMintGate is
         bytes32[] nullifiers;
     }
 
+    struct FreeFunding {
+        RevealQuote quote;
+        uint256 cap;
+        uint256 excess;
+        uint256 originalBalance;
+    }
+
     bytes32 public constant BURN_MINT_GATE = keccak256("BURN_MINT_GATE");
     bytes32 public constant STREAM_BURN_NULLIFIER_V1 = keccak256("6529STREAM_BURN_NULLIFIER_V1");
     bytes32 public constant DEPENDENCY_READ_GAS =
@@ -86,6 +102,7 @@ contract StreamBurnMintGate is
     bytes32 public immutable registryCodeHash;
     mapping(uint256 => Program) private _programs;
     ActiveProof private _active;
+    StreamBurnMintCredits.State private _credits;
 
     constructor(Configuration memory c)
         StreamModuleBase(
@@ -136,6 +153,9 @@ contract StreamBurnMintGate is
     {
         return id == type(B).interfaceId || id == type(IStreamMintGate).interfaceId
             || id == type(IStreamBurnMintNativeExecutor).interfaceId
+            || id == type(IStreamImmediateSaleReveal).interfaceId
+            || id == type(IStreamNativeSaleCredits).interfaceId
+            || id == type(IStreamNativeSurplus).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId || super.supportsInterface(id);
     }
 
@@ -206,6 +226,9 @@ contract StreamBurnMintGate is
             c.manager.codehash,
             c.nativeSaleAdapter == address(0) ? bytes32(0) : c.nativeSaleAdapter.codehash
         );
+        if (c.nativeSaleAdapter == address(0)) {
+            _credits.targetByProgram[hash] = c.targetCollectionId;
+        }
         emit BurnMintProgramConfigured(1, c.targetCollectionId, c.manager, c.phaseId, hash, c);
     }
 
@@ -261,14 +284,7 @@ contract StreamBurnMintGate is
                 revert BurnMintPolicyMismatch();
             }
         }
-        IStreamImmediateSaleReveal.RevealQuote memory quote =
-            StreamImmediateSaleReveal.quote(core, batch.collectionId);
-        uint256 revealCap = _gasParameterValue(REVEAL_GAS);
-        uint256 quantity = batch.beneficiaries.length;
-        if (msg.value != quote.policy.revealFeePerTokenWei * quantity) {
-            revert BurnMintPolicyMismatch();
-        }
-        StreamImmediateSaleReveal.preflight(quote, quote.policy.revealFeePerTokenWei, revealCap);
+        FreeFunding memory funding = _freeFunding(batch.collectionId, batch.beneficiaries.length);
         address[] memory owners = _burnAndOpen(p, batch, sources, address(this), msg.sender);
         if (p.config.prepared) {
             (tokens, root, ids) = M(p.config.manager).executePreparedMint(batch, "");
@@ -280,10 +296,90 @@ contract StreamBurnMintGate is
         delete _active;
         for (uint256 i; i < tokens.length; ++i) {
             StreamImmediateSaleReveal.fundAndAttempt(
-                core, batch.collectionId, tokens[i], quote, revealCap
+                core, batch.collectionId, tokens[i], funding.quote, funding.cap
             );
         }
+        if (address(this).balance < funding.originalBalance + funding.excess) {
+            revert SaleRevealAccountingMismatch();
+        }
+        StreamBurnMintCredits.credit(_credits, p.configHash, msg.sender, funding.excess);
         _emitBurnMint(p, root, msg.sender, sources, owners, tokens);
+    }
+
+    function _freeFunding(uint256 collectionId, uint256 quantity)
+        private
+        view
+        returns (FreeFunding memory f)
+    {
+        f.quote = StreamImmediateSaleReveal.quote(core, collectionId);
+        f.cap = _gasParameterValue(REVEAL_GAS);
+        uint256 required = f.quote.policy.revealFeePerTokenWei * quantity;
+        if (msg.value < required) revert SaleRevealFeeBelowRequired(msg.value, required);
+        StreamImmediateSaleReveal.preflight(f.quote, f.quote.policy.revealFeePerTokenWei, f.cap);
+        f.originalBalance = address(this).balance - msg.value;
+        if (f.originalBalance < _credits.liability) revert SaleRevealAccountingMismatch();
+        f.excess = msg.value - required;
+    }
+
+    /// @notice Free programs use their configHash as the shared reveal/refund saleId.
+    function saleRevealQuote(bytes32) external view override returns (RevealQuote memory) {
+        bytes memory out = StreamBurnMintCredits.read(_credits, core, msg.data);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
+    }
+
+    function refundableBalance(bytes32, address) external view override returns (uint256) {
+        bytes memory out = StreamBurnMintCredits.read(_credits, core, msg.data);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
+    }
+
+    function refundLiability() external view override returns (uint256) {
+        return _credits.liability;
+    }
+
+    /// @dev Earned caller credits survive expiry, revocation and changed dependencies.
+    function claimRefund(bytes32 programHash, address recipient) external override nonReentrant {
+        StreamBurnMintCredits.claim(_credits, programHash, msg.sender, recipient);
+    }
+
+    function refundAccountCount() external view override returns (uint256) {
+        return _credits.accounts.length;
+    }
+
+    function refundAccountAt(uint256) external view override returns (bytes32, address) {
+        bytes memory out = StreamBurnMintCredits.read(_credits, core, msg.data);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
+    }
+
+    function nativeSaleCreditState() external view override returns (CreditState memory) {
+        bytes memory out = StreamBurnMintCredits.read(_credits, core, msg.data);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
+    }
+
+    function nativeSaleCreditPage(uint256, uint256, uint256)
+        external
+        view
+        override
+        returns (CreditPage memory)
+    {
+        bytes memory out = StreamBurnMintCredits.read(_credits, core, msg.data);
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
+    }
+
+    function _nativeSurplusPrivateRegistry() internal pure override returns (bool) {
+        return true;
+    }
+
+    function _nativeSurplusOwed() internal view override returns (uint256) {
+        return _credits.liability;
+    }
+
+    function sweepNativeSurplus(uint256 amount, bytes32 reasonHash)
+        external
+        override
+        nonReentrant
+        returns (uint256)
+    {
+        return _sweepNativeSurplus(amount, reasonHash);
     }
 
     /// @notice Only the program's immutable native adapter can supply its authenticated original buyer.

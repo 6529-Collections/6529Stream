@@ -55,11 +55,33 @@ normal nonzero authorization and expected Manager policy hash. The gate calls
 `executeSingleStepMint` or `executePreparedMint` according to the immutable
 program. The prepared route retains the Manager's royalty-snapshot obligations.
 
-Supply exactly the current per-token reveal fee times batch quantity as
-`msg.value`. The gate captures the quote, mints through Manager/Ledger, funds
-the reveal escrow and attempts the normal request. Fee-funding failure reverts
-the entire burn and mint. A provider request failure retains the minted token
-and funded reveal escrow under the existing reveal retry rules.
+Supply a maximum native reveal allowance as `msg.value`. Read the live quote
+using `saleRevealQuote(program(target).configHash)` before submitting. The gate
+captures the live per-token fee at execution and rejects an allowance below
+that fee times batch quantity before burning. It mints through Manager/Ledger,
+funds exactly the captured fee and attempts the normal request. A fee change
+within the supplied allowance does not require exact-value resubmission.
+Fee-funding failure reverts the entire burn and mint. A provider request
+failure retains the minted token and funded reveal escrow under the existing
+reveal retry rules.
+
+Unused wei becomes a pull credit owned by the actual burn caller/funder, which
+can differ from both source owners and output beneficiaries. A Safe CALL owns
+its credit; its signers and transaction relayer do not. Free programs use
+`program(target).configHash` as the `saleId` in `IStreamImmediateSaleReveal`:
+read `refundableBalance(programHash, caller)` and have that caller invoke
+`claimRefund(programHash, recipient)`. Claims remain available after program
+expiry, gate revocation or dependency replacement. Only the credited caller
+chooses a nonzero destination other than the gate.
+
+`refundAccountCount`/`refundAccountAt` and `IStreamNativeSaleCredits` enumerate
+every historical credit key, including zero balances after claims. Credit
+pages start at cursor zero with a limit of 1 through 64 and are terminal in one
+page. `SalePaymentExcessCredited`, `SaleRefundClaimed` and
+`NativeSaleCreditAccountIndexed` expose credit transitions. The shared native
+surplus interface reports forced ETH separately from liabilities; only an
+exact delayed governance action may sweep that surplus to the current
+emergency recipient. Claims and sweeps share the burn execution guard.
 
 ## Native paid execution
 
@@ -93,6 +115,8 @@ wrappers are external functions; there are no internal host callers.
 
 Use the repository's current via-IR build profile for deployable products and
 include both new linked libraries in deployment and manifest generation.
+The gate additionally links `StreamBurnMintCredits` for free allowance custody
+and uses the existing `StreamNativeSurplus` governance implementation.
 Successful default code generation alone is not evidence that the non-IR
 adapter meets the runtime size limit.
 
@@ -136,6 +160,8 @@ Core's burn block, freeze, supply or finality checks.
 The focused [gate suite](../../test/unit/mint/StreamBurnMintGate.t.sol) uses the
 actual current Manager and Ledger and real Safe 1.4.1 bytecode, with explicit
 Core, Artist, registry and entropy test boundaries. The
+[credit suite](../../test/unit/mint/StreamBurnMintCredits.t.sol) adds live fee
+allowances, funder ownership, perpetual claims and liability accounting. The
 [native callback suite](../../test/unit/mint/StreamNativeBurnCallback.t.sol)
 uses the actual adapter, recorder, Resolver, factory and escrow, with a hostile
 typed gate and a Manager boundary. Neither substitutes for the authored

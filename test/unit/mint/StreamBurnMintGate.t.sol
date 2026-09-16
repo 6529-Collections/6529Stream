@@ -204,18 +204,18 @@ contract StreamBurnMintGateTest is OfficialSafeFixture {
         address redeemer
     );
     BurnVm private constant vm = BurnVm(address(uint160(uint256(keccak256("hevm cheat code")))));
-    BurnCoreBoundary private core;
-    BurnRegistryBoundary private registry;
-    DistributionArtistBoundary private artists;
-    DistributionEntropyBoundary private entropy;
-    StreamMintManager private manager;
+    BurnCoreBoundary internal core;
+    BurnRegistryBoundary internal registry;
+    DistributionArtistBoundary internal artists;
+    DistributionEntropyBoundary internal entropy;
+    StreamMintManager internal manager;
     StreamMintLedger private ledger;
-    StreamBurnMintGate private gate;
+    StreamBurnMintGate internal gate;
     mapping(uint256 => bytes32) private policies;
     bytes32 private constant PHASE = keccak256("burn phase");
     bytes32 private constant COUNTER = keccak256("burn supply");
-    address private constant HOLDER = address(0xB0B);
-    address private constant RECIPIENT = address(0xCAFE);
+    address internal constant HOLDER = address(0xB0B);
+    address internal constant RECIPIENT = address(0xCAFE);
 
     function setUp() public {
         vm.warp(1000);
@@ -256,7 +256,7 @@ contract StreamBurnMintGateTest is OfficialSafeFixture {
         core.setApprovalForAll(address(gate), true);
     }
 
-    function _configure(uint256 target, uint8 ratio, bool prepared, uint64 cap) private {
+    function _configure(uint256 target, uint8 ratio, bool prepared, uint64 cap) internal {
         uint256[] memory sources = new uint256[](1);
         sources[0] = 1;
         bytes32 hash = gate.configureProgram(
@@ -298,7 +298,7 @@ contract StreamBurnMintGateTest is OfficialSafeFixture {
     }
 
     function _batch(uint256 target, address recipient, uint256 quantity)
-        private
+        internal
         view
         returns (IStreamMintManager.MintBatch memory b)
     {
@@ -319,7 +319,7 @@ contract StreamBurnMintGateTest is OfficialSafeFixture {
         b.contextHash = keccak256("context");
     }
 
-    function _sources() private pure returns (uint256[] memory ids) {
+    function _sources() internal pure returns (uint256[] memory ids) {
         ids = new uint256[](2);
         ids[0] = 1;
         ids[1] = 2;
@@ -333,7 +333,7 @@ contract StreamBurnMintGateTest is OfficialSafeFixture {
         return gate.burnAndMint(b, ids);
     }
 
-    function _unchanged() private view {
+    function _unchanged() internal view {
         require(
             core.ownerOf(1) == HOLDER && core.ownerOf(2) == HOLDER && core.minted() == 100,
             "all token changes rolled back"
@@ -547,7 +547,7 @@ contract StreamBurnMintGateTest is OfficialSafeFixture {
         );
     }
 
-    function testRevealFeeIsExactAndFailedFundingRollsBackBurn() public {
+    function testRevealFeeRequiredAndFailedFundingRollsBackBurn() public {
         entropy.setFee(10);
         IStreamMintManager.MintBatch memory b = _batch(2, RECIPIENT, 1);
         vm.expectRevert();
@@ -594,6 +594,8 @@ contract StreamBurnMintGateTest is OfficialSafeFixture {
         keys[1] = 0xB0B;
         OfficialSafe safe =
             createOfficialSafe(deploySafeComponents("1.4.1"), safeOwnerAddresses(keys), 2, 987);
+        entropy.setFee(10);
+        vm.deal(address(safe), 25);
         vm.prank(HOLDER);
         core.transferFrom(HOLDER, address(safe), 1);
         vm.prank(HOLDER);
@@ -614,13 +616,13 @@ contract StreamBurnMintGateTest is OfficialSafeFixture {
         bytes memory callData =
             abi.encodeCall(gate.burnAndMint, (_batch(2, address(receiver), 1), _sources()));
         bytes32 digest = safe.getTransactionHash(
-            address(gate), 0, callData, 0, 0, 0, 0, address(0), address(0), safe.nonce()
+            address(gate), 25, callData, 0, 0, 0, 0, address(0), address(0), safe.nonce()
         );
         bytes memory signedCall = abi.encodeCall(
             safe.execTransaction,
             (
                 address(gate),
-                0,
+                25,
                 callData,
                 uint8(0),
                 0,
@@ -634,12 +636,34 @@ contract StreamBurnMintGateTest is OfficialSafeFixture {
         (bool ok,) = address(safe).call(signedCall);
         require(!ok, "failed Safe transaction");
         require(
-            core.ownerOf(1) == address(safe) && manager.nextOperationNonce() == 0,
+            core.ownerOf(1) == address(safe) && manager.nextOperationNonce() == 0
+                && address(safe).balance == 25 && gate.refundLiability() == 0,
             "Safe inner rollback"
         );
         receiver.configure(false, address(0), "");
         (ok,) = address(safe).call(signedCall);
         require(ok, "byte identical signed Safe retry");
         require(core.ownerOf(101) == address(receiver), "Safe executes actual Manager burn mint");
+        bytes32 programHash = gate.program(2).configHash;
+        require(
+            gate.refundableBalance(programHash, address(safe)) == 15, "Safe owns unused allowance"
+        );
+        require(gate.refundableBalance(programHash, address(this)) == 0, "relayer has no credit");
+        uint256 beforeBalance = HOLDER.balance;
+        require(
+            executeSafe(
+                safe,
+                keys,
+                address(gate),
+                0,
+                abi.encodeCall(gate.claimRefund, (programHash, HOLDER)),
+                0
+            ),
+            "Safe refund"
+        );
+        require(
+            HOLDER.balance == beforeBalance + 15 && gate.refundLiability() == 0,
+            "Safe directs exact credit"
+        );
     }
 }

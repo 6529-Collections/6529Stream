@@ -75,7 +75,8 @@ interface IStreamBurnMintGate is IStreamMintGate {
 
     /// @notice Caller must own or be approved for every source; this host separately needs burn approval.
     /// @dev Sorted distinct source IDs; no preburns, external sources or token-custody substitution.
-    ///      msg.value is exactly the captured reveal fee for the entire free batch.
+    ///      msg.value is a maximum reveal allowance for the entire free batch. Excess is a
+    ///      caller-owned pull credit, keyed by program.configHash through IStreamImmediateSaleReveal.
     function burnAndMint(
         IStreamMintManager.MintBatch calldata batch,
         uint256[] calldata sourceTokenIds

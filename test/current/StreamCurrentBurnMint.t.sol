@@ -68,9 +68,8 @@ contract StreamCurrentBurnMintTest is StreamCurrentStackFixture, OfficialSafeFix
     }
 
     function _deployAdditionalProducts() internal override {
-        recorder = new StreamPrimarySaleSettlement(
-            primaryResolver, address(registry), revenueEscrow
-        );
+        recorder =
+            new StreamPrimarySaleSettlement(primaryResolver, address(registry), revenueEscrow);
         nativeSale = new StreamNativeFixedPriceSaleAdapter(
             manager,
             recorder,
@@ -338,7 +337,7 @@ contract StreamCurrentBurnMintTest is StreamCurrentStackFixture, OfficialSafeFix
                 buyerSafe,
                 keys,
                 address(burnGate),
-                0,
+                25,
                 abi.encodeCall(burnGate.burnAndMint, (_batch(BURN_PHASE, address(buyerSafe)), ids)),
                 0
             ),
@@ -356,6 +355,27 @@ contract StreamCurrentBurnMintTest is StreamCurrentStackFixture, OfficialSafeFix
             "actual mint"
         );
         require(recorder.totalOfficialSettled(address(0)) == 0, "free no settlement");
+        bytes32 programHash = burnGate.program(1).configHash;
+        require(
+            burnGate.refundableBalance(programHash, address(buyerSafe)) == 25
+                && burnGate.refundLiability() == 25,
+            "zero declared fee leaves Safe maximum allowance refundable"
+        );
+        require(
+            executeSafe(
+                buyerSafe,
+                keys,
+                address(burnGate),
+                0,
+                abi.encodeCall(burnGate.claimRefund, (programHash, address(buyerSafe))),
+                0
+            ),
+            "Safe claims free burn allowance"
+        );
+        require(
+            address(buyerSafe).balance == 1 ether && burnGate.refundLiability() == 0,
+            "zero fee burns no buyer value"
+        );
     }
 
     function testCurrentNativeBurnPaymentRefundOwnerAndReceiverRollbackSafeRetry() public {
