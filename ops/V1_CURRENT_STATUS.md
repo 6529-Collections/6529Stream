@@ -18,7 +18,7 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 16 September parallel implementation batch
 
-Source through `5e6c6140` includes free-burn reveal credits, original Artist
+Source through `2b333b74` includes free-burn reveal credits, original Artist
 withdrawal61, the native-price adapter size repair, distribution/burn/price
 clients including saved refund-window purchase verification, museum authority reconciliation and expanded actual-current test hosts.
 The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
@@ -75,9 +75,16 @@ collection export and its selected local media, verifies complete original
 inputs and dependency bytes offline, and preserves immutable OCFL versions.
 Independent source review is clear and all 44 new/legacy tests pass. It uses a
 distinct collection profile; full token object dossiers, authoritative render
-inventory and institutional acceptance remain required. The next token capture
-will use one explicitly validated mint/metadata deployment, not combine
-unrelated historical chain states. Renderer repair `df440372` corrects three exact return sizes
+inventory and institutional acceptance remain required. Actual-token capture
+1db47ad9 now joins a fresh paid mint, 15 Safe-authorized
+token records and exact source-block image bytes through one validated local
+graph. Root passes all 62 tests; independent review verifies 305 selected
+products and 27 original inputs. Offline export/BagIt/OCFL replay succeeds.
+Controlled entropy, synthetic authority and trusted local RPC remain explicit;
+complete record/ownership histories, authoritative render inventory and the
+full OBJECT_DOSSIER remain active work.
+
+Renderer repair `df440372` corrects three exact return sizes
 from 416 to 384 bytes. Root attests all 226 frozen sources; four new actual
 Metadata/DependencyRegistry cases pass. The wider scoped capture has 27 passing
 cases and one remaining capacity failure: a 24,576-byte script needs about 46.7m
@@ -116,10 +123,20 @@ Versioned PERCEPTUAL_TOLERANCE/CURATED_EQUIVALENCE source now includes
 correction 5e6c6140: exact signed condition references, an additive standard ABI
 V2 document and fixed transport workers. Independent extraction and schema/closure
 reviews are clear. Original V1 definitions and BYTE_EXACT are unchanged. Root's 11
-metric tests pass. A pre-final capture fits 17 products, but six production files
-changed afterward; exact final sizes are being checked before 12 authored native
-cases run. Complete executable supplement/offline replay, full curated composition
-and institution-signer alternatives remain.
+metric tests pass. The exact 0a72dec4 preflight reports all 17 products within
+size limits. Its native test compilation then stops with a Yul stack-layout
+error after 1,682.74 seconds; none of the 12 authored cases execute. The original
+inputs/log are retained and test code generation is being isolated. Complete
+joined supplement/finality runtime, curated composition and institution-signer
+alternatives remain.
+
+Metric packaging dffb8444/2b333b74 now retains original source and the copied
+interpreter/dependencies. Root passes 81 offline preservation checks and a
+separate actual restored-runtime test in 56.516 seconds. The 46.27 MB package
+executes without host import fallback and binds its typed transcript to exact
+inputs, environment and original report. The fixture has synthetic PNG/context
+inputs; combined browser execution and onchain finality joins remain separate.
+Offline preservation checks are included in the existing Windows/Linux CI.
 
 The status table's earlier moving-price selection gap was incorrect: it is an
 explicit future extension. Free/Merkle families already exist; the specification

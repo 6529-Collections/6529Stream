@@ -5,6 +5,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Preserve exact reference-metric source and runtime archives, verify restored
+  execution with typed transcripts and exact environment joins, and run offline
+  preservation controls in the existing Windows/Linux CI workflow.
+
 - Add an explicitly pinned local paid-token capture with actual Safe consent,
   token-subject media records, source-block metadata reads and offline scoped
   dossier replay; full object-dossier acceptance remains separate.

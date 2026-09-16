@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `5e6c6140`: curated sales and callers integrated; root 375 package tests and 55 distinct current contract cases pass on their recorded source scopes. Exact finality archive/schema/codec corrections integrated and independently reviewed; 2,037-source ABI/type/storage pass. Exact final-mode size/native and full-system acceptance remain. Primary mint OFFER_SALE is assigned; moving-price selection explicitly deferred by spec. RC1 stays `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
+| Source checkpoint | `2b333b74`: Museum actual-token replay passes 62 root tests; metric tooling passes 81 offline controls and one restored-runtime execution. Full object dossier and joined browser/finality acceptance remain. Earlier curated sales and callers integrated; root 375 package tests and 55 distinct current contract cases pass on their recorded source scopes. Exact finality archive/schema/codec corrections integrated and independently reviewed; 2,037-source ABI/type/storage pass. Final-mode size preflight passes; native compilation fails with a Yul stack-layout error, with no tests run. Diagnosis and full-system acceptance remain. Primary mint OFFER_SALE is assigned; moving-price selection explicitly deferred by spec. RC1 stays `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -41,8 +41,8 @@ ownership assignments where it transfers a queue.
 | Lead | Owned feature group and next queue | Shared boundaries |
 | --- | --- | --- |
 | Artist authority | Held Artist proposals isolated; STATIC scan capacity and curated-client/finality-worker reviews complete; requirements reconciliation complete | Independent source review; preserve exact outputs and full gas guard; Router deployment repair remains separate. |
-| Commerce and revenue | Curated shared seam and actual recorder tests integrated; independent carrier review complete; assess metric implementation-byte closure | Own revenue boundaries, fixed transport review and original identities; held Royalty proposal remains unapplied. |
-| Metadata, records and museum | Finality corrections integrated 5e6c6140; exact final-size/native run and new metric supplement underway | Own onchain schema/inventory/admission; revenue lead owns metric runtime packaging/replay; visible museum owns token archive. |
+| Commerce and revenue | Curated shared seam and actual recorder tests integrated; independent carrier review complete; metric runtime packaging/replay integrated; actual combined browser package join underway | Own revenue boundaries, fixed transport review and original identities; held Royalty proposal remains unapplied. |
+| Metadata, records and museum | Finality corrections integrated 5e6c6140; size preflight passes, test-codegen failure isolated in parallel with new metric supplement | Own onchain schema/inventory/admission; revenue lead owns metric runtime packaging/replay; visible museum owns native object-dossier evidence adapters and assembly. |
 | Root integrator | Shared Core/entropy interfaces, economic pointer checks, integrated source and final candidate acceptance | Coordinate all feature tasks, independent review, release and testnet. |
 
 Each lead owns requirements through source, tests and usable public entrypoints.
@@ -70,8 +70,8 @@ can inspect any task, while the coordinator manages handoffs and decisions.
 | Task | ID | Owned feature group |
 | --- | --- | --- |
 | Stream — mint eligibility and continuity | `01a0a68e-6aa9-74d0-9c5d-b7883c5d0c7c` | Manager/Ledger, proof-bound caps, phase/collection/global counters, non-burn gates and replacement continuity |
-| Stream — burn mint and distribution | `01a0a68e-7594-7be0-b7bb-15849febcae4` | Burn-to-mint executor/gate, current batch distribution and the coordinated native purchase-with-burn entry |
-| Stream — museum records and semantics | `01a0a68e-81ad-73f1-98f4-1ce2ecdb1350` | Offchain museum source adapters, schemas, institutional/condition/conservation/authority/geography semantics and authoring |
+| Stream — burn mint and distribution | `01a0a68e-7594-7be0-b7bb-15849febcae4` | Burn-to-mint/distribution and required native primary OFFER_SALE carrier, coordinated with the mint task |
+| Stream — museum records and semantics | `01a0a68e-81ad-73f1-98f4-1ce2ecdb1350` | Offchain museum source adapters and full object-dossier inventory/history/assembly; preserve completed scoped token replay |
 | Stream — developer clients and Safe workflows | `01a0a68e-8f38-7a33-95b6-45d8ac943569` | Client package, typed ceremonies, Safe CALL plans, exact-template and commerce/operator caller recipes |
 | Stream — integration and fuzz testing | `01a0a68e-9941-7b13-aff3-d559e39613c4` | Canonical current-graph harness, entropy-join fixture repair, actual component/Safe tests and fuzz/stateful campaigns |
 

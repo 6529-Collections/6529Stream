@@ -33,7 +33,16 @@ dependencies and independent Windows/Linux CI workflow. Its tests and
 deterministic schema/fixture checks run without compiling Solidity. Use the
 documented isolated environment; the general tools lock does not include the
 JSON-LD dependencies. These tests cover the implemented offline tools and do
-not establish complete museum conformance.
+not establish complete museum conformance. The same CI job runs the offline
+preservation package, image-metric and replay-receipt controls on both platforms:
+
+```bash
+python -B -m unittest discover -s tools/preservation -t . -p "test_*.py" -v
+```
+
+The copied Windows runtime execution test is opt-in; follow the
+[retained metric package guide](integrations/reference-metric-package.md) for
+that separately retained acceptance run. Ordinary CI does not execute archives.
 
 The [typed record tools](../tools/metadata/README.md) share that isolated Python
 environment for independent JSON Schema and canonical-byte tests. Run

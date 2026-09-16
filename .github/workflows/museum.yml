@@ -6,6 +6,10 @@ on:
       - ".github/workflows/museum.yml"
       - "tools/museum/**"
       - "tools/metadata/**"
+      - "tools/preservation/**"
+      - "test/fixtures/preservation/**"
+      - "smart-contracts/domains/records/StreamReferenceModeDefinitions.sol"
+      - "docs/integrations/reference-metric-package.md"
       - "schemas/museum/**"
       - "schemas/records/**"
       - "test/fixtures/metadata/**"
@@ -16,6 +20,10 @@ on:
       - ".github/workflows/museum.yml"
       - "tools/museum/**"
       - "tools/metadata/**"
+      - "tools/preservation/**"
+      - "test/fixtures/preservation/**"
+      - "smart-contracts/domains/records/StreamReferenceModeDefinitions.sol"
+      - "docs/integrations/reference-metric-package.md"
       - "schemas/museum/**"
       - "schemas/records/**"
       - "test/fixtures/metadata/**"
@@ -67,6 +75,8 @@ jobs:
           python -m tools.metadata.rights_definitions --check
           python -m tools.metadata.work_definitions --check
           python -m tools.metadata.owner_notice_profile --check
+      - name: Test offline preservation packages and reference metrics
+        run: python -B -m unittest discover -s tools/preservation -t . -p "test_*.py" -v
       - name: Test offline validation and export
         run: python -m unittest discover -s tools/museum -t . -p "test_*.py" -v
       - name: Check schema generation
