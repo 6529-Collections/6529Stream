@@ -29,6 +29,17 @@ library StreamArtistAttestationHydration {
         ) revert T.InvalidRecord();
     }
 
+    /// @dev Original owner arguments decoded once in the fixed read worker.
+    function exportEncoded(
+        AS.State storage s,
+        StreamArtistHashes.Environment memory e,
+        bytes calldata data
+    ) public view returns (bytes memory) {
+        (AH.Query memory q, RH.AttestationInput[] memory inputs) =
+            abi.decode(data[4:], (AH.Query, RH.AttestationInput[]));
+        return exportState(s, e, q, inputs);
+    }
+
     function exportState(
         AS.State storage s,
         StreamArtistHashes.Environment memory e,

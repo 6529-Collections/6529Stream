@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistAttributionPlatformTransport as PlatformTransport
+} from "./StreamArtistAttributionPlatformTransport.sol";
+import {
+    IStreamArtistStaticFacts as SF
+} from "../../interfaces/stream/artist/IStreamArtistStaticFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
 import {
     StreamArtistAttributionDisputeTypes as AD
@@ -12,6 +18,7 @@ import {
 import { StreamArtistAttributionCommitEncoding } from "./StreamArtistAttributionCommitEncoding.sol";
 import { StreamArtistAttestationTransport } from "./StreamArtistAttestationTransport.sol";
 import "./StreamArtistAttestationHydration.sol";
+import "./StreamArtistAttributionHydrationTransport.sol";
 import "./StreamArtistPublicationHydration.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 import "./StreamArtistAttributionBindingMutation.sol";
@@ -49,6 +56,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
     error UnsupportedProfile();
     error InvalidSanctionConfirmation();
     error InvalidAttribution(uint256 collectionId);
+    error InvalidPlatformWorks(uint256 collectionId);
     mapping(uint256 => AttrState.Attribution) private _attributions;
     mapping(bytes32 => T.AttestationRecord) private _attestations;
     mapping(bytes32 => T.AttestationRecord) private _records;
@@ -66,6 +74,71 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes32 indexed artistId,
         address signer
     );
+
+    function staticAttributionState(uint256 id) external view returns (uint8, uint64) {
+        AttrState.Attribution storage a = _attributions[id];
+        return (a.state, a.generation);
+    }
+
+    function staticPlatformWorksState(uint256 id) external view returns (PW.State memory) {
+        PW.State storage p = _platform.collections[id];
+        // Exact twenty fixed ABI words from the original typed State root.
+        assembly ("memory-safe") {
+            let output := mload(0x40)
+            let root := p.slot
+            let addressMask := sub(shl(160, 1), 1)
+            let uint64Mask := sub(shl(64, 1), 1)
+            mstore(output, sload(root))
+            mstore(add(output, 32), sload(add(root, 1)))
+            let declaration := sload(add(root, 2))
+            mstore(add(output, 64), and(declaration, addressMask))
+            mstore(add(output, 96), and(shr(160, declaration), uint64Mask))
+            mstore(add(output, 128), and(sload(add(root, 3)), 255))
+            mstore(add(output, 160), sload(add(root, 4)))
+            mstore(add(output, 192), sload(add(root, 5)))
+            mstore(add(output, 224), sload(add(root, 6)))
+            mstore(add(output, 256), sload(add(root, 7)))
+            mstore(add(output, 288), sload(add(root, 8)))
+            mstore(add(output, 320), and(sload(add(root, 9)), addressMask))
+            mstore(add(output, 352), sload(add(root, 10)))
+            mstore(add(output, 384), sload(add(root, 11)))
+            mstore(add(output, 416), sload(add(root, 12)))
+            mstore(add(output, 448), sload(add(root, 13)))
+            mstore(add(output, 480), sload(add(root, 14)))
+            let approval := sload(add(root, 15))
+            mstore(add(output, 512), and(approval, uint64Mask))
+            mstore(add(output, 544), and(shr(64, approval), uint64Mask))
+            mstore(add(output, 576), iszero(iszero(and(shr(128, approval), 255))))
+            mstore(add(output, 608), sload(add(root, 16)))
+            return(output, 640)
+        }
+    }
+
+    function staticAttributionClaims(uint256 id) external view returns (uint256, bytes32) {
+        PW.State storage p = _platform.collections[id];
+        uint256 count = _attributionClaims.counts[id];
+        if (count == 0) return (p.claimCount, p.latestClaim);
+        return (p.claimCount + count, _latestDisplayClaim[id]);
+    }
+
+    function staticAttestation(uint256 id, uint8 kind, bytes32 subject)
+        external
+        view
+        returns (SF.Attestation memory result)
+    {
+        T.AttestationRecord storage r = _attestations[keccak256(abi.encode(id, kind, subject))];
+        uint8 class_;
+        if (r.recordHash != 0 && _records[r.recordHash].recordHash == r.recordHash) {
+            class_ = _attestationClasses[r.recordHash];
+            if (
+                class_ == 0
+                    && _publications[r.recordHash].evidence.attestationRecordHash == r.recordHash
+            ) {
+                class_ = _publications[r.recordHash].evidence.authorityClass;
+            }
+        }
+        return SF.Attestation(r.recordHash, r.generation, r.subjectStateHash, class_, r.signedAt);
+    }
 
     function recordPreimageBytes(bytes32 hash) external view returns (bytes memory) {
         return StreamArtistPayloadStore.recordBytes(hash);
@@ -85,9 +158,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         returns (Attest.Association memory)
     {
         _returnAttribution(
-            StreamArtistAttributionReadEncoding.attestationAssociation(
-                _attestationStore(), core, record
-            )
+            StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
     }
 
@@ -168,33 +239,25 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         returns (PW.Admission memory)
     {
         _returnAttribution(
-            StreamArtistAttributionReadEncoding.platformWorksAdmission(
-                _attestationStore(), core, collectionId
-            )
+            StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
     }
 
     function platformWorksState(uint256 collectionId) external view returns (PW.State memory) {
         _returnAttribution(
-            StreamArtistAttributionReadEncoding.platformWorksState(
-                _attestationStore(), core, collectionId
-            )
+            StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
     }
 
     function platformWorksClaimRecord(bytes32 hash) external view returns (PW.Claim memory) {
         _returnAttribution(
-            StreamArtistAttributionReadEncoding.platformWorksClaimRecord(
-                _attestationStore(), core, hash
-            )
+            StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
     }
 
     function platformWorksContestRecord(bytes32 hash) external view returns (PW.Contest memory) {
         _returnAttribution(
-            StreamArtistAttributionReadEncoding.platformWorksContestRecord(
-                _attestationStore(), core, hash
-            )
+            StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
     }
 
@@ -203,14 +266,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         uint256 collectionId,
         bytes32 statementHash
     ) external returns (bytes32 hash) {
-        _check(c, 8);
-        if (_attributions[collectionId].generation != 0 || _attributions[collectionId].state != 0) {
-            revert PW.InvalidPlatformWorks(collectionId);
-        }
-        hash = StreamArtistPlatformState.declare(
-            _platform, artistRegistry, core, c.actor, collectionId, statementHash
-        );
-        _platformCommit(c, collectionId, hash, bytes32(collectionId), hash);
+        return _platformTransport(c, 8);
     }
 
     function filePlatformWorksClaim(
@@ -221,26 +277,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         string calldata reasonURI,
         address proposedArtist
     ) external returns (bytes32 hash) {
-        _check(c, 9);
-        hash = StreamArtistPlatformState.claim(
-            _platform,
-            artistRegistry,
-            core,
-            c.actor,
-            collectionId,
-            evidenceHash,
-            reasonHash,
-            reasonURI,
-            proposedArtist
-        );
-        _latestDisplayClaim[collectionId] = hash;
-        _platformCommit(
-            c,
-            collectionId,
-            hash,
-            keccak256(abi.encode(collectionId, c.actor, evidenceHash, reasonHash)),
-            hash
-        );
+        return _platformTransport(c, 9);
     }
 
     function setPlatformWorksContest(
@@ -253,13 +290,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes32 actionId,
         address adjudicatedArtist
     ) external returns (bytes32 hash) {
-        _check(c, 11);
-        hash = StreamArtistPlatformState.contest(
-            _platform, collectionId, state, claim_, evidence, reason, actionId, adjudicatedArtist
-        );
-        _platformCommit(
-            c, collectionId, hash, keccak256(abi.encode(collectionId, actionId)), bytes32(0)
-        );
+        return _platformTransport(c, 11);
     }
 
     function approvePlatformWorksCorrection(
@@ -270,31 +301,26 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes32 reason,
         bytes32 actionId
     ) external returns (bytes32 hash) {
-        _check(c, 53);
-        hash = StreamArtistPlatformState.correct(
-            _platform, artistRegistry, core, collectionId, claim_, evidence, reason, actionId
-        );
-        _platformCommit(c, collectionId, hash, keccak256(abi.encode(collectionId, actionId)), hash);
+        return _platformTransport(c, 53);
     }
 
-    function _platformCommit(
-        T.ActionContext calldata c,
-        uint256 id,
-        bytes32 hash,
-        bytes32 scope,
-        bytes32 primary
-    ) private {
+    function _platformTransport(T.ActionContext calldata c, uint16 op) private returns (bytes32) {
+        _check(c, op);
+        PlatformTransport.Result memory m =
+            PlatformTransport.applyEncoded(_attestationStore(), _environment(), msg.data);
         bytes32 replay = _consume(
-            keccak256(abi.encode("PLATFORM_WORKS", c.operationId)), scope, hash
+            op == 10
+                ? keccak256("attribution_lifecycle.replay.claim_record_hash_uniqueness")
+                : keccak256(abi.encode("PLATFORM_WORKS", c.operationId)),
+            m.scope,
+            m.record
         );
-        _commit(
-            c,
-            hash,
-            StreamArtistAttributionCommitEncoding.platformState(_platform, id),
-            replay,
-            primary
-        );
-        _native(c.operationId, hash, bytes32(0), id);
+        bytes32 state = op == 10
+            ? StreamArtistAttributionCommitEncoding.claimState(_attributionClaims, m.record)
+            : StreamArtistAttributionCommitEncoding.platformState(_platform, m.id);
+        _commit(c, m.action, state, replay, m.primary);
+        _native(c.operationId, m.record, bytes32(0), m.id);
+        return m.record;
     }
 
     function fileAttributionClaim(
@@ -305,37 +331,12 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         string calldata uri,
         address proposedArtist
     ) external returns (bytes32 record) {
-        _check(c, 10);
-        record = StreamArtistAttributionClaimState.file(
-            _attributionClaims,
-            artistRegistry,
-            core,
-            c.actor,
-            id,
-            evidence,
-            reason,
-            uri,
-            proposedArtist
-        );
-        _latestDisplayClaim[id] = record;
-        bytes32 replay = _consume(
-            keccak256("attribution_lifecycle.replay.claim_record_hash_uniqueness"),
-            keccak256(abi.encode(id, c.actor, evidence, reason)),
-            record
-        );
-        _commit(
-            c,
-            keccak256(abi.encode(id, c.actor, evidence, reason, uri, proposedArtist)),
-            StreamArtistAttributionCommitEncoding.claimState(_attributionClaims, record),
-            replay,
-            record
-        );
-        _native(c.operationId, record, bytes32(0), id);
+        return _platformTransport(c, 10);
     }
 
     function attributionClaims(uint256 id) external view returns (uint256, bytes32) {
         _returnAttribution(
-            StreamArtistAttributionReadEncoding.attributionClaims(_attestationStore(), core, id)
+            StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
     }
 
@@ -345,17 +346,13 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         returns (StreamArtistAttributionClaimTypes.Claim memory)
     {
         _returnAttribution(
-            StreamArtistAttributionReadEncoding.attributionClaimRecord(
-                _attestationStore(), core, hash
-            )
+            StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
     }
 
     function attestationAuthorityClass(bytes32 hash) public view returns (uint8) {
         _returnAttribution(
-            StreamArtistAttributionReadEncoding.attestationAuthorityClass(
-                _attestationStore(), core, hash
-            )
+            StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
     }
 
@@ -365,23 +362,19 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         returns (uint8 status, bytes32 record, bytes32 attested, uint8 class_, uint64 signedAt)
     {
         _returnAttribution(
-                StreamArtistAttributionReadEncoding.artistAttestationStatus(
-                    _attestationStore(), core, id, kind, subjectId, currentHash
-                )
+                StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
             );
     }
 
     function deploymentAttestation(uint256 id) external view returns (bytes32, uint8, uint64) {
         _returnAttribution(
-            StreamArtistAttributionReadEncoding.deploymentAttestation(_attestationStore(), core, id)
+            StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
     }
 
     function attributionState(uint256 collectionId) external view returns (uint8, uint64) {
         _returnAttribution(
-            StreamArtistAttributionReadEncoding.attributionState(
-                _attestationStore(), core, collectionId
-            )
+            StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
     }
 
@@ -391,21 +384,19 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         returns (T.AttestationRecord memory)
     {
         _returnAttribution(
-            StreamArtistAttributionReadEncoding.attestation(
-                _attestationStore(), core, collectionId, kind, subjectId
-            )
+            StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
     }
 
     function attestationRecord(bytes32 record) external view returns (T.AttestationRecord memory) {
         _returnAttribution(
-            StreamArtistAttributionReadEncoding.attestationRecord(_attestationStore(), core, record)
+            StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
     }
 
     function statementBytes(bytes32 hash) external view returns (bytes memory) {
         _returnAttribution(
-            StreamArtistAttributionReadEncoding.statementBytes(_attestationStore(), core, hash)
+            StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
     }
 
@@ -415,9 +406,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         returns (IStreamArtistRecordPublicationOwner.Record memory)
     {
         _returnAttribution(
-            StreamArtistAttributionReadEncoding.publicationAttestation(
-                _attestationStore(), core, recordHash
-            )
+            StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
     }
 
@@ -670,8 +659,8 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         AH.Query calldata q,
         StreamArtistReadinessHydrationTypes.AttestationInput[] calldata inputs
     ) external view returns (bytes memory) {
-        return StreamArtistAttestationHydration.exportState(
-            _attestationStore(), _environment(), q, inputs
+        return StreamArtistAttestationHydration.exportEncoded(
+            _attestationStore(), _environment(), msg.data
         );
     }
 
@@ -679,30 +668,15 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         AH.Query calldata q,
         StreamArtistReadinessHydrationTypes.AttestationInput[] calldata inputs
     ) external view returns (bytes memory) {
-        return StreamArtistPublicationHydration.exportState(
-            _attestationStore(), _environment(), q, inputs
+        return StreamArtistPublicationHydration.exportEncoded(
+            _attestationStore(), _environment(), msg.data
         );
     }
 
-    function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
-        if (StreamArtistPublicationHydration.isState(p.typedState)) {
-            if (p.nonces.length != 0) revert T.InvalidRecord();
-            StreamArtistPublicationHydration.importState(
-                _attestationStore(), _environment(), q, p.typedState
-            );
-            return;
-        }
-        if (StreamArtistAttestationHydration.isState(p.typedState)) {
-            if (p.nonces.length != 0) revert T.InvalidRecord();
-            StreamArtistAttestationHydration.importState(
-                _attestationStore(), _environment(), q, p.typedState
-            );
-            return;
-        }
-        if (_attributions[q.collectionId].generation != 0 || p.nonces.length != 0) {
-            revert T.InvalidRecord();
-        }
-        _attributions[q.collectionId] = abi.decode(p.typedState, (AttrState.Attribution));
+    function _hydrateAuthority(AH.Query calldata, AH.OwnerData calldata) internal override {
+        StreamArtistAttributionHydrationTransport.importEncoded(
+            _attestationStore(), _environment(), msg.data
+        );
     }
 
     function attributionDispute(uint256 id, uint64 generation)

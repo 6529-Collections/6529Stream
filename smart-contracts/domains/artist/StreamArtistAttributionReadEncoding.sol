@@ -28,6 +28,79 @@ import {
 
 /// @notice Canonical encoded reads over the fixed Attribution owner storage.
 library StreamArtistAttributionReadEncoding {
+    /// @dev Original owner read selectors; each branch invokes the unchanged typed encoder.
+    function readEncoded(AttrState.State storage s, address core_, bytes calldata data)
+        public
+        view
+        returns (bytes memory)
+    {
+        bytes4 selector = bytes4(data[:4]);
+        if (selector == bytes4(keccak256("attestationAssociation(bytes32)"))) {
+            bytes32 record = abi.decode(data[4:], (bytes32));
+            return attestationAssociation(s, core_, record);
+        }
+        if (selector == bytes4(keccak256("platformWorksAdmission(uint256)"))) {
+            uint256 collectionId = abi.decode(data[4:], (uint256));
+            return platformWorksAdmission(s, core_, collectionId);
+        }
+        if (selector == bytes4(keccak256("platformWorksState(uint256)"))) {
+            uint256 collectionId = abi.decode(data[4:], (uint256));
+            return platformWorksState(s, core_, collectionId);
+        }
+        if (selector == bytes4(keccak256("platformWorksClaimRecord(bytes32)"))) {
+            bytes32 hash = abi.decode(data[4:], (bytes32));
+            return platformWorksClaimRecord(s, core_, hash);
+        }
+        if (selector == bytes4(keccak256("platformWorksContestRecord(bytes32)"))) {
+            bytes32 hash = abi.decode(data[4:], (bytes32));
+            return platformWorksContestRecord(s, core_, hash);
+        }
+        if (selector == bytes4(keccak256("attributionClaims(uint256)"))) {
+            uint256 id = abi.decode(data[4:], (uint256));
+            return attributionClaims(s, core_, id);
+        }
+        if (selector == bytes4(keccak256("attributionClaimRecord(bytes32)"))) {
+            bytes32 hash = abi.decode(data[4:], (bytes32));
+            return attributionClaimRecord(s, core_, hash);
+        }
+        if (selector == bytes4(keccak256("attestationAuthorityClass(bytes32)"))) {
+            bytes32 hash = abi.decode(data[4:], (bytes32));
+            return attestationAuthorityClass(s, core_, hash);
+        }
+        if (selector == bytes4(keccak256("artistAttestationStatus(uint256,uint8,bytes32,bytes32)")))
+        {
+            (uint256 id, uint8 kind, bytes32 subjectId, bytes32 currentHash) =
+                abi.decode(data[4:], (uint256, uint8, bytes32, bytes32));
+            return artistAttestationStatus(s, core_, id, kind, subjectId, currentHash);
+        }
+        if (selector == bytes4(keccak256("deploymentAttestation(uint256)"))) {
+            uint256 id = abi.decode(data[4:], (uint256));
+            return deploymentAttestation(s, core_, id);
+        }
+        if (selector == bytes4(keccak256("attributionState(uint256)"))) {
+            uint256 collectionId = abi.decode(data[4:], (uint256));
+            return attributionState(s, core_, collectionId);
+        }
+        if (selector == bytes4(keccak256("attestation(uint256,uint8,bytes32)"))) {
+            (uint256 collectionId, uint8 kind, bytes32 subjectId) =
+                abi.decode(data[4:], (uint256, uint8, bytes32));
+            return attestation(s, core_, collectionId, kind, subjectId);
+        }
+        if (selector == bytes4(keccak256("attestationRecord(bytes32)"))) {
+            bytes32 record = abi.decode(data[4:], (bytes32));
+            return attestationRecord(s, core_, record);
+        }
+        if (selector == bytes4(keccak256("statementBytes(bytes32)"))) {
+            bytes32 hash = abi.decode(data[4:], (bytes32));
+            return statementBytes(s, core_, hash);
+        }
+        if (selector == bytes4(keccak256("publicationAttestation(bytes32)"))) {
+            bytes32 recordHash = abi.decode(data[4:], (bytes32));
+            return publicationAttestation(s, core_, recordHash);
+        }
+        revert T.InvalidRecord();
+    }
+
     function _authorityClass(AttrState.State storage s, bytes32 hash) private view returns (uint8) {
         if (hash == 0 || s.records[hash].recordHash != hash) return 0;
         uint8 class_ = s.attestationClasses[hash];

@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistStaticIdentityProjection as StaticIdentity
+} from "./StreamArtistStaticIdentityProjection.sol";
+import {
+    IStreamArtistStaticIdentityProjection as StaticProjection
+} from "../../interfaces/stream/artist/IStreamArtistStaticIdentityProjection.sol";
+
 import "../../interfaces/stream/artist/IStreamArtistAttributionDisputes.sol";
 import {
     StreamArtistAttributionDisputeTypes as AD
@@ -630,6 +637,103 @@ contract StreamArtistIdentityAuthority is
         string calldata displayName
     ) external returns (bytes32) {
         _forwardIdentityWriter();
+    }
+
+    function staticAuthorityState(bytes32 artistId)
+        external
+        view
+        returns (address, uint8, uint8, bytes32)
+    {
+        T.Identity storage r = _identity.identities[artistId];
+        return (r.authorityAddress, r.authorityClass, r.status, r.identityRecordHash);
+    }
+
+    /// @dev Exact original operative document selection, with direct reads throughout.
+    function staticIdentityMetadata(bytes32 artistId)
+        external
+        view
+        returns (string memory, bytes32)
+    {
+        T.Identity storage original = _identity.identities[artistId];
+        if (original.identityRecordHash == 0) revert T.InvalidIdentity(artistId);
+        bytes32 candidate = _identityRevisions.pendingRecord[artistId];
+        bytes32 selected = _identityRevisions.latestRecord[artistId];
+        if (candidate != 0) {
+            StaticIdentity.Context memory context = _staticIdentityContext(artistId, candidate);
+            if (!StaticIdentity.recorded(StaticIdentity.key(artistRegistry, context))) {
+                revert StaticProjection.StaticIdentityMaturityUnavailable(artistId, candidate);
+            }
+            selected = candidate;
+        }
+        if (selected == 0) return (original.displayName, original.identityRecordHash);
+        StreamArtistIdentityRevisionTypes.Record storage r = _identityRevisions.records[selected];
+        return (r.displayName, r.revisedRecordHash);
+    }
+
+    function checkpointStaticIdentityMaturity(bytes32 artistId) external returns (bytes32) {
+        if (block.chainid != deploymentChainId) revert T.InvalidBinding();
+        bytes32 candidate = _identityRevisions.pendingRecord[artistId];
+        if (candidate == 0 || _identity.identities[artistId].identityRecordHash == 0) {
+            revert StaticProjection.StaticIdentityMaturityUnavailable(artistId, candidate);
+        }
+        StaticIdentity.Context memory context = _staticIdentityContext(artistId, candidate);
+        if (block.timestamp < context.association.windowEndsAt) {
+            revert StaticProjection.StaticIdentityMaturityUnavailable(artistId, candidate);
+        }
+        return StaticIdentity.record(artistRegistry, context);
+    }
+
+    function _staticIdentityContext(bytes32 artistId, bytes32 candidate)
+        private
+        view
+        returns (StaticIdentity.Context memory c)
+    {
+        T.Identity storage original = _identity.identities[artistId];
+        c.artistId = artistId;
+        c.candidate = candidate;
+        c.documentHash = _identityRevisions.records[candidate].revisedRecordHash;
+        c.latestExecution = _rotations.latestExecution[artistId];
+        c.authority = original.authorityAddress;
+        c.authorityClass = original.authorityClass;
+        c.status = original.status;
+        c.association = _identityRevisions.associations[candidate];
+        R.ProvisionalAssociation memory a = c.association;
+        if (a.transitionRecordHash == 0) {
+            if (a.windowEndsAt != 0) {
+                revert StaticProjection.StaticIdentityMaturityUnavailable(artistId, candidate);
+            }
+            return c;
+        }
+        bytes32 record = a.transitionRecordHash;
+        R.TransitionState memory t;
+        // Original Rotation-first selection and original same-owner fallback order.
+        if (_rotations.rotations[record].recordHash != 0) {
+            t = _rotations.rotations[record].transition;
+        } else if (_dormancy.transitions[record].recordHash != 0) {
+            t = _dormancy.transitions[record];
+        } else {
+            bool rotation = _rotations.rotations[record].recordHash == record;
+            bool estate = _estate.requests[record].recordHash == record;
+            bool recovered = _identityRecovery.records[record].recordHash == record;
+            if ((rotation ? 1 : 0) + (estate ? 1 : 0) + (recovered ? 1 : 0) != 1) revert R.InvalidRotation(record);
+            t = rotation
+                ? _rotations.rotations[record].transition
+                : estate ? _estate.transitions[record] : _identityRecovery.transitions[record];
+            if (recovered && t.artistId != _identityRecovery.records[record].fields.artistId) {
+                revert R.InvalidRotation(record);
+            }
+        }
+        if (t.recordHash != record || t.artistId == 0 || t.phase == 0) {
+            revert R.InvalidRotation(record);
+        }
+        if (
+            t.artistId != artistId || t.phase != 2 || t.executedAt == 0
+                || t.postWindowEndsAt != a.windowEndsAt
+                || (t.contestedAt != 0 && t.contestedAt < a.windowEndsAt)
+        ) {
+            revert StaticProjection.StaticIdentityMaturityUnavailable(artistId, candidate);
+        }
+        c.transition = t;
     }
 
     function operativeIdentityRecord(bytes32 artistId) public view returns (bytes32) {

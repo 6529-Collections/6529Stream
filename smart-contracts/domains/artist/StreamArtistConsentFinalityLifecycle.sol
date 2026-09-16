@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+
 import "./StreamArtistContentHydration.sol";
 import "./StreamArtistEconomicsHydration.sol";
 import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
@@ -100,6 +101,16 @@ contract StreamArtistConsentFinalityLifecycle is
         bytes calldata signature
     ) external returns (bytes32) {
         _forwardConsentWriter();
+    }
+
+    /// @notice Direct immutable record lookup; current binding/scope admission remains the reader's duty.
+    function staticSanctionRecord(bytes32 associationKey)
+        external
+        view
+        returns (bytes32, S.Record memory)
+    {
+        bytes32 hash = _sanctions.latest[associationKey];
+        return (hash, _sanctions.records[hash]);
     }
 
     function sanctionRecord(bytes32 recordHash) external view returns (S.Record memory) {
