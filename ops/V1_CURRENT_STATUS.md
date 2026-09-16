@@ -1,6 +1,6 @@
 # Full-v1 current delivery status
 
-Updated 15 September 2026. The [feature status checklist](STREAM_FEATURE_STATUS.md)
+Updated 16 September 2026. The [feature status checklist](STREAM_FEATURE_STATUS.md)
 records every feature family with separate build, testing and integration status.
 Use it for the common delivery scope and remaining work. This file retains the
 current narrative and historical evidence boundaries.
@@ -15,6 +15,32 @@ local inherited/global primary-freeze implementation pending a more specific
 owner approval. The separate ERC-20 payable reveal-fee implementation is also
 blocked by automatic review even after the owner explicitly approved that local
 implementation. The exact unapplied patch is prepared and an artifact-specific approval is pending; other work continues.
+
+## 16 September parallel implementation batch
+
+Source through `88cf4522` now includes mint eligibility/shared counters/imports,
+Core migration guards, royalty economic continuity, operator distribution,
+repudiation47–50, STATIC routing prerequisites, broader clients and museum
+adapters. The [feature table](STREAM_FEATURE_STATUS.md#parallel-feature-batch-16-september)
+records exact source/evidence boundaries and supersedes older queue descriptions.
+
+All1,909 Solidity sources pass ABI/type/storage checking at88cf4522.
+Scoped captures pass mint87, royalty11, Core29 and entropy10 cases. Root client
+package220, museum72 and harness21 checks pass. These are separate cohorts with
+explicit typed seams, not a complete-system result. The old native4 failed cases
+have fixture/harness repairs integrated; their combined rerun remains pending.
+The interrupted acceptance-b run produced no retained runtime evidence.
+
+Concrete remaining integration work: the real Artist suite still pins the old
+Manager; the mint task is implementing an authenticated lineage consumer while
+preserving original signatures and requiring fresh successor policy consent.
+Artist and STATIC joined builds have measured oversize products; their owners
+are extracting fixed helpers. Burn adapter, remaining Artist/museum profiles,
+actual Royalty cutover and full Safe/fuzz/current-graph acceptance continue in
+parallel. The optional primary graph-transition proposal is not an adopted new
+launch requirement. RC1/main/Sepolia remain unchanged.
+
+The tables and sections below retain earlier demonstrated workflows and history.
 
 | Workflow | Demonstrated or integrated | Next acceptance / remaining implementation |
 | --- | --- | --- |
@@ -46,7 +72,7 @@ to the Artist lead; root owns the five entropy-dependency failures and three
 current-graph artifact harness failures. The failed capture is retained.
 These results do not cover newer source or establish full-v1 acceptance.
 
-Reviewed repudiation 47–50 handoff `d95e8aaa` awaits integration/native execution.
+Repudiation 47–50 handoff `d95e8aaa` is now integrated as `582b9181`; native execution remains pending.
 The metadata lead is building mandatory selectable STATIC rendering; the revenue
 lead is building frozen economic Resolver continuity. Root continues the missing
 mint/gate/counter/burn-to-mint features and owns combined delivery. The shared

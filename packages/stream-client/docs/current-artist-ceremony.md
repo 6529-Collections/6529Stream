@@ -78,5 +78,5 @@ node scripts/generate-current-artist-ceremony-fixture.mjs \
 
 The generator hashes the exact compiler input/output bytes and the source text
 embedded in the compiler input. The retained source text uses the same bytes as
-the current checkout (`sha256:d662c96043e4fd1809bba76da045e05ce8df921b2e8c6dc2fe05b05ed22fe994`),
+the captured `0d7c1b57` source (`sha256:d662c96043e4fd1809bba76da045e05ce8df921b2e8c6dc2fe05b05ed22fe994`),
 so no CRLF-normalized surrogate is used for provenance.

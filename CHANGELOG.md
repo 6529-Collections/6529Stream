@@ -5,6 +5,13 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add scoped/Merkle mint accounting, concrete eligibility gates, authenticated
+  Ledger import and Core replacement admission, preserving prepared-mint abort.
+- Add protected Royalty import and Core continuity admission, Artist repudiation,
+  operator distribution and the initial versioned STATIC rendering source.
+- Add source-bound institutional and condition museum adapters and qualified
+  geography drafts; actual current-record joins remain explicit acceptance work.
+
 - Add official Safe all-CALL batch tests for paid mint, entropy, custody,
   replay and cross-component rollback; native execution remains pending.
 

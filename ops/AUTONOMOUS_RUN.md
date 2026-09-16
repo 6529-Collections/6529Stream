@@ -7,7 +7,7 @@ For current progress and the next acceptance targets, read
 [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md). Historical checkpoints below retain
 their original scope and are not a current completion score.
 
-Updated 15 September 2026. The owner authorizes autonomous completion of the
+Updated 16 September 2026. The owner authorizes autonomous completion of the
 remaining full v1 features, independent adversarial review and matching testnet
 delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
@@ -21,11 +21,11 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `0be87be5`: CollectionViews, disputes 44–46, runtime/escrow recovery and burn redemption integrated.1,841-source ABI/type check passes at preceding 0d7c1b57; 17 burn,9 Views and 17 corrected escrow focused tests pass. Older native4 completed 167 passed /39 failed; repairs assigned. Immutable RC1 remains 569bf87f1fa808787d324f6e1582924b5ccf1d40. |
+| Source checkpoint | `88cf4522`: parallel mint/royalty/distribution/Artist/STATIC/client/museum source batch; mint87, royalty11, Core29, entropy10 scoped cases pass; root client220/museum72/harness21 pass. Actual Artist Manager replacement, joined Artist/STATIC capacity, burn and final system acceptance remain. See STREAM_FEATURE_STATUS.md. RC1 stays569bf87f1fa808787d324f6e1582924b5ccf1d40. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-09-15 UTC` |
+| Last updated | `2026-09-16 UTC` |
 
 ## Autonomous feature-group leads
 
@@ -139,9 +139,9 @@ pending checks. The immutable RC1 remains the released baseline.
 | Owner | Implementation batch |
 | --- | --- |
 | Integrator | Coordinate the five visible tasks and three local leads; integrate reviewed handoffs. Own shared Core/entropy STATIC interfaces, economic pointer continuity checks and final candidate acceptance. Harness, entropy fixture, mint/gate/counter and burn/distribution work is assigned in the visible roster above. |
-| Artist builder | Disputes44–46 integrated; reviewed 47–50 handoff d95e8aaa awaits integration. Repair native4 authority/hydration/URI and recovery fixture failures, then continue withdrawal, multi-party policy, delegated consent and remaining Artist queue. |
-| Revenue builder | Runtime/factory lifecycle and incident escrow recovery integrated; 17 corrected focused tests pass. Build frozen economic Resolver continuity, then remaining commerce/client/distribution queue. Actual-governance and complete paid-flow acceptance remain. |
-| Fourth engineer | CollectionViews integrated with 9 focused tests passing. Build actual selectable STATIC route and transitive raw-source reads; renderer prerequisite c0369e0b awaits review/integration. Continue preservation/museum queue. |
+| Artist builder | Disputes44–50 and native4 fixture repairs integrated. Finish measured joined Artist size repairs and STATIC raw reads; then withdrawal, collaborator policy, delegated consent and remaining Artist queue. |
+| Revenue builder | Royalty continuity producer/source integrated with11 scoped passing cases; Core guard integrated. Review Artist codec repairs, then actual-current Royalty import/cutover consumer joins. Primary graph proposal remains unadopted and is not a new launch gate. |
+| Fourth engineer | STATIC Renderer/Registry/routing source integrated. Repair measured Router/Renderer sizes; complete selection/content/output finality and current-graph tests. Metadata host selected-size repair is reported fitting; final combined evidence pending. |
 
 Comprehensive current-stack/Safe integration, fuzz and stateful campaigns, gas
 conformance, complete genesis inventory, CI and matching new testnet evidence
@@ -623,7 +623,7 @@ not complete that join.
 | Owner | Next deliverable |
 | --- | --- |
 | Integrator | Shared Artist/Registry/Coordinator size repairs integrated; owner accumulator five cases plus 256 fuzz inputs pass. Complete 1,767-source type check passes; 737-source size preflight passes all 50 selected products and the eight-suite Artist native run is active. |
-| Artist builder | Building attribution dispute operations44–46. Both designated-dormancy rotation recovery batches are source-integrated; multi-party policy and delegated consent gaps are explicit in the feature checklist. |
+| Artist builder | Disputes44–50 and native4 fixture repairs integrated. Finish measured joined Artist size repairs and STATIC raw reads; then withdrawal, collaborator policy, delegated consent and remaining Artist queue. |
 | Preservation builder | External bulk archives, runnable reference render, original publication and current finality consumption |
 | Independent reviewer | Challenge exact implementations, real-contract composition and integration evidence |
 

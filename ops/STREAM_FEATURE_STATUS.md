@@ -1,20 +1,22 @@
 # Stream feature status
 
-Updated **15 September 2026 (UTC)**. This is the shared feature checklist for
+Updated **16 September 2026 (UTC)**. This is the shared feature checklist for
 the **complete v1 contract system and the adopted museum proposal**, including
 the agreed additions. It replaces informal percentage estimates. The integrator
 owns the whole result; domain builders supply implementation and evidence.
 
 **Where we stand:** the supported RC1 is already on Sepolia. The expanded v1
-has substantial working code and several demonstrated contract workflows, but
-it is not feature-complete or fully integrated. Missing implementation includes
-standard mint/delegation gates, shared mint counters and ledger continuity,
-burn-to-mint, remaining Artist authority/migration/recovery profiles, frozen
-economic Resolver continuity and parts of the museum profile. Burn-to-redeem,
-CollectionViews and incident escrow recovery are now built and pass focused
-tests. Dispute operations 44–46 are source-integrated; 47–50 have a reviewed
-handoff awaiting integration, and withdrawal remains. Separately, recently
-written code still needs execution against the complete current system.
+is not yet feature-complete or accepted as a combined system. Standard mint
+gates, Merkle allowances, shared counters and ledger imports are now built and
+source-integrated, with 87 scoped builder tests passing. Core enforces exact
+migration before Manager replacement; its separate 29-case cohort passes. The
+actual Artist-to-successor-Manager consumption join is still being completed.
+Royalty continuity, distribution, PLATFORM clients and additional museum source
+adapters are also integrated. Remaining work includes burn-to-mint completion,
+Artist authority profiles, STATIC deployment-size repairs and content/finality
+composition, actual component joins, complete museum conformance and final
+acceptance. The rows below distinguish source completion from demonstrated
+runtime integration.
 
 ## How to read this document
 
@@ -48,16 +50,16 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `0be87be5620f1a68cae2257ee38365ba5341c83a`; reviewed CollectionViews, attribution disputes 44–46, runtime/escrow recovery, burn-to-redeem and the focused Safe test correction are integrated |
+| Current integration source | `88cf45222b89bbd26a7cabc3c1940f5b325a76c5`; see the [16 September batch](#parallel-feature-batch-16-september) for scoped evidence and remaining joins |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
 | Further integrated Artist handoff | `9ea144c85768050ec910cc8534af13bcac82e20d`, received during assembly: closed-origin dormancy/rotation extension on the preceding handoff; ART24 |
 | Integrated entropy client handoff | `642d017d9d0cd8ee9b6b813abbdbe10a4c6b1265`; client.entropy-authority |
 | Integrated OwnerRecords capture handoff | `57ac8d041c9adc479f1061fafec748c8330ac974`; MUSEUM-36 |
-| Latest broad cheap compilation evidence | 1,841-source ABI/type check passes at `0d7c1b57`, including the four explicit import fixes; 14.61 seconds. Later `0be87be5` changes only the escrow test helper, whose 37-source focused compile/run passes. Compilation is not a runtime test. |
+| Latest broad cheap compilation evidence | 1,909-source ABI/type/storage check passes at 88cf4522 in17.906seconds; no errors. This is not bytecode or full-system runtime evidence. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
-| Latest focused native evidence | Burn-to-redeem 17/17, CollectionViews 9/9 and escrow recovery 17/17 pass. These are separate component cohorts; the full current-system joins remain pending. |
+| Latest focused native evidence | Separate captures: entropy10, Royalty11, mint87 and actual-Core29 pass. Current clients220 and museum72 Python tests also pass. Counts overlap or cover different seams; no complete-system pass is inferred. |
 
 Earlier implementation notes use “integrated” to mean source merged. In this
 document, that is only **code location**; runtime integration has its own column.
@@ -68,9 +70,9 @@ is explicitly named. The snapshot is fixed even while builders continue working.
 
 | Area | Missing implementation / incomplete product | Accountable delivery owner |
 | --- | --- | --- |
-| Mint eligibility and distribution | Concrete ticket/allowlist and vault-delegation gates, differentiated Merkle caps, collection/global counters, replacement continuity, burn-to-mint and full airdrop product; burn-to-redeem now needs actual-Core/operator acceptance | Integrator; Revenue builder for sale consumers |
-| Artist authority | Integrate reviewed repudiation 47–50 and complete withdrawal; collaborator quorum and delegated policy/sale consent; advanced rotation/dormancy/recovery, broad history migration, C2PA and complete signing ceremonies; repair current native fixtures | Artist builder; integrator owns final integration |
-| Revenue | Executor ETH allowance with ERC20 payments, inherited/global freeze and frozen Resolver replacement continuity; runtime/incident recovery is built with 17 focused tests passing, full paid-sale/governance join pending | Revenue builder; integrator |
+| Mint eligibility and distribution | Complete actual Artist successor-Manager join; finish burn adapter; demonstrate integrated gates, imports, distribution and new sale consumers | Mint and burn visible tasks; integrator owns Core |
+| Artist authority | Complete withdrawal and joined deployment-size repairs; collaborator quorum and delegated policy/sale consent; advanced rotation/dormancy/recovery, broad history migration, C2PA and complete signing ceremonies; repair current native fixtures | Artist builder; integrator owns final integration |
+| Revenue | Executor ETH allowance with ERC20 payments, inherited/global freeze and actual Royalty import/cutover; runtime/incident recovery is built with 17 focused tests passing, full paid-sale/governance join pending | Revenue builder; integrator |
 | Metadata and permanence | Mandatory selectable/versioned STATIC rendering is in progress; remaining required preservation/finality scopes and exact genesis correspondence. CollectionViews is built with 9 passing tests; actual full activation remains | Metadata/museum builder; integrator |
 | Museum | Remaining owner/institutional and conservation mappings, external authority reconciliation, rich geography, semantic authoring, complete schema/profile coverage and institutional conformance | Museum builder; integrator |
 | Final delivery | Latest real component joins, all-call Safe inventory, fuzz/stateful campaigns, gas/capacity, complete genesis activation, final CI/source freeze and matching new testnet deployment | Integrator |
@@ -112,17 +114,17 @@ These 162 rows are capabilities and delivery checks of different sizes. Row coun
 | [core.prepared](#coreprepared-evidence) Prepare, complete and abort a mint atomically | Built | Partly tested | Partial | Manager-only preparation and settlement; entropy registration and receiver failure roll back together. Earlier current tests pass on their recorded source. **Remaining:** Recheck all latest sale, snapshot and reveal combinations. |
 | [core.pointers](#corepointers-evidence) Governed modules, permanent Core boundaries and bounded external calls | Built | Partly tested | Partial | Interface/codehash admission, pointer selection, metadata/royalty hooks and gas budgets. **Remaining:** Latest dependency replacement, fallback and full gas acceptance. |
 | [mint.static](#mintstatic-evidence) Static caps, counter subjects and phase-policy grace windows | Built | Partly tested | Partial | Static increment/cap engine and recipient, payer, executor, constant and context subjects; phase-bound counters and prior-policy grace. **Remaining:** Final combined policy/replay fuzz campaign; expanded scopes below are not implemented by this row. |
-| [mint.merkle-caps](#mintmerkle-caps-evidence) Different wallet allowances from a pinned Merkle root | Not started | Not tested | Not integrated | Mandatory MERKLE_STATIC counter cap mode, distinct from a generic eligibility gate. Current enum has NONE/STATIC/RESOLVER only. **Remaining:** Add proof-bound caps and acceptance through actual Manager and Ledger. |
-| [mint.cross-scope](#mintcross-scope-evidence) Collection-wide and global shared mint counters | Not started | Not tested | Not integrated | Mandatory counters shared across phases/collections. Current value-key derivation always binds manager, collection and phase. **Remaining:** Implement explicit collection/GLOBAL scopes, with cross-phase and cross-collection consumption/replay cases. |
-| [mint.continuity](#mintcontinuity-evidence) Preserve mint allowances and replay state across replacement | Not started | Not tested | Not integrated | Mandatory Merkle-proofed Manager/Ledger succession. Ordinary policy grace and a new authorized writer are narrower capabilities. **Remaining:** Implement authenticated continuity/import and prove no allowance reset or authorization reuse. |
-| [mint.delegate-registry](#mintdelegate-registry-evidence) Hot-wallet minting for a vault through a pinned delegation registry | Not started | Not tested | Not integrated | Mandatory genesis DelegateRegistryGate: bounded live registry checks, hot payer, vault recipient/beneficiary and recipient counters. Sale-side delegated offers do not implement it. **Remaining:** Build gate, pinned registry/configuration, revocation/use-case checks and actual vault/Safe mint scenarios. |
+| [mint.merkle-caps](#mintmerkle-caps-evidence) Different wallet allowances from a pinned Merkle root | Built | Tested* | Partial | Canonical inline MERKLE_STATIC proofs bind differentiated allowances and projected batch consumption. Integrated feda72d3; included in the 87-case mint cohort. **Remaining:** Actual Core/Artist/sale integration and full batch gas limits; authenticated price fields do not imply a supported settlement override. |
+| [mint.cross-scope](#mintcross-scope-evidence) Collection-wide and global shared mint counters | Built | Tested* | Partial | PHASE/COLLECTION/GLOBAL accounting, immutable first-use definitions including legacy selection, and projected duplicate checks. Integrated feda72d3; scoped actual Manager/Ledger tests pass. **Remaining:** Latest actual paid-sale/current-Core composition and capacity. |
+| [mint.continuity](#mintcontinuity-evidence) Preserve mint allowances and replay state across replacement | In progress | Partly tested | Partial | Same/new Ledger imports preserve counter floors, nullifiers and enumerable definitions; feda72d3 passes scoped tests. Core guard 88cf4522 requires the exact admitted pair, with 29 Core regressions passing. **Remaining:** Actual Artist successor-Manager consumer and ancestry join, real delayed-governance cutover and successful post-replacement mint. Typed seams in the separate cohorts are explicit. |
+| [mint.delegate-registry](#mintdelegate-registry-evidence) Hot-wallet minting for a vault through a pinned delegation registry | Built | Tested* | Partial | Concrete pinned v2 delegation gate delivers to the vault while the hot wallet pays; scoped actual Manager/Ledger/gate/Safe tests are included in the 87-case cohort. **Remaining:** Actual external registry and complete current-Core/Artist/Safe workflow; existing external registry responses are typed fixtures. |
 
 ### Sales, auctions and distribution
 
 | Feature | Build | Tests | Integration | Scope and remaining work |
 | --- | --- | --- | --- | --- |
 | [sales.phase-ledger](#salesphase-ledger-evidence) Current mint phases, admission and replay ledger | Built | Partly tested | Partial | Current Manager/ledger, admitted executors, gate protocol, counted prepared and single-step mint operations; not every gate implementation. **Remaining:** Latest full phase/operator/commercial combination and capacity validation; standard gate-kit row remains separate. |
-| [sales.standard-gates](#salesstandard-gates-evidence) Concrete allowlist and signed-ticket gate kit | In progress | Partly tested | Not integrated | Generic closed-world gate validation, nullifier/replay transport and original ticket hashes exist. A current deployable standard eligibility allowlist/ticket gate was not found; auction content selection is a different gate. **Remaining:** Implement/identify actual standard gate producers and their current Core/Safe admission/negative cases. Do not treat typed test gates or signature-hash utilities as the product. |
+| [sales.standard-gates](#salesstandard-gates-evidence) Concrete allowlist and signed-ticket gate kit | Built | Tested* | Partial | Full-payload EOA/ERC1271 ticket and proof allowlist gates, optional batch-gate capability, replay and bounded result/gas handling integrated feda72d3. **Remaining:** Complete current-Core/Artist/operator admission and latest sale joins beyond the 87 scoped mint cases. |
 | [sales.ticket-revocation](#salesticket-revocation-evidence) Complete signed mint authorization revocation | Built | Partly tested | Partial | Original authorization IDs and complete-ticket revocation, separate from a gate's positive admission. **Remaining:** Reproduce complete gate/operator/Safe workflows on the final graph; no positive gate implementation inferred. |
 | [sales.native-fixed](#salesnative-fixed-evidence) Native fixed-price and open-edition sales | Built | Partly tested | Partial | Current native paid immediate consumer, original Artist/platform signatures, exact settlement and phase accounting. **Remaining:** Latest actual-current transaction/receipt/reveal/capacity acceptance. Earlier accepted current graph captures do not validate all later code. |
 | [sales.free-pwyw](#salesfree-pwyw-evidence) Free phases and pay-what-you-want price programs | Built | Partly tested | Partial | Declared zero-price and native chosen-amount/minimum programs; original signature/payment rules retained. **Remaining:** Final actual-current paid/free/reveal/Safe matrix; do not infer arbitrary batch airdrops from a zero-price single mint. |
@@ -138,9 +140,9 @@ These 162 rows are capabilities and delivery checks of different sizes. Row coun
 | [sales.platform-rights](#salesplatform-rights-evidence) PLATFORM_WORKS template/custody/known-token rights | Built | Tests written | Not integrated | Explicit declaration-bound families 8–13, actual original poster, uncontested/correction admission and current actual-token policy; no fake Artist0 consent. **Remaining:** Independently reviewed source; latest native and real declaration/current transaction joining still required. Typed platform client flow remains incomplete. |
 | [sales.erc20-immediate](#saleserc20-immediate-evidence) ERC20 immediate sales, PaymentIntent and permits | Built | Partly tested | Partial | Universal original ERC20 payer/executor separation, exact token delta, EIP-2612/Permit2/Safe authorization and settlement; not every native sale-family variant. **Remaining:** Final actual-current ERC20 wallet/asset/full-Safe matrix; reveal fee route below is absent. Do not use old ERC20 fixed-adapter guide's narrower permit boundary as current Universal status. |
 | [sales.erc20-reveal](#saleserc20-reveal-evidence) Executor-funded native reveal allowance for ERC20 immediate sales | Not started | Not tested | Not integrated | Separate wei allowance/excess executor credit; token PaymentIntent/Permit2 quantities stay token-only. **Remaining:** Exact inert source/test patch remains unapplied under automatic-review restriction. Owner approved local intent; do not imply shipped or apply denied artifact. |
-| [sales.burn-mint](#salesburn-mint-evidence) Current Stream-token burn-to-mint consumer | Not started | Not tested | Not integrated | Required genesis gate/adapter product; current low-level Core burn is not the complete atomic burn/mint/finality/payment workflow. **Remaining:** Root now owns implementation. No current deployable burn-to-mint consumer found in inspected current mint source. |
+| [sales.burn-mint](#salesburn-mint-evidence) Current Stream-token burn-to-mint consumer | In progress | Partly tested | Not integrated | Burn task implements atomic native purchase-with-burn, canonical source/context commitments and independent burn approval. Builder reports 16 gate cases including Safe rollback/retry. **Remaining:** Finish adapter size extraction and focused callback/price-program regressions; source handoff, actual current graph and finality/payment composition remain. |
 | [sales.burn-redeem](#salesburn-redeem-evidence) Current burn-to-redeem / physical redemption consumer | Built | Tested* | Not integrated | Canonical same-transaction Stream burn, original redemption/events and append-only fulfillment history.17 focused tests pass, including a 256-input property and real threshold Safe. **Remaining:** Actual current Core/module/governance/operator workflow, cold gas and full acceptance. Focused Core identity/governance/registry boundaries are typed substitutes; burn-to-mint remains separate. |
-| [sales.airdrop](#salesairdrop-evidence) Current operator batch distribution product | In progress | Partly tested | Not integrated | Current Manager supports batched recipient/accounting primitives, but no dedicated current airdrop product/complete operator recipe was identified; legacy airdrop code is excluded. **Remaining:** Resolve supported operator batch path and build/execute complete authorized current distribution; generic primitives alone do not finish SSA-AIRDROP. |
+| [sales.airdrop](#salesairdrop-evidence) Current operator batch distribution product | Built | Tested* | Partial | Committed ordered operator distribution and account-directed owed-NFT claims integrated d8f39826. Builder reports 21 focused cases, including real Safe and 64-input fuzz; independent source review is clear. **Remaining:** Execute authored actual-current governance/Artist/Manager case, genesis activation and capacity. STATIC collection distribution is outside this implemented entropy-backed profile. |
 | [sales.delegated-authority](#salesdelegated-authority-evidence) Native delegated offers, claims and refunds | Built | Tests written | Not integrated | Exact immutable/live NFTDelegation witness; principal remains payer/owner for offers; delegated claim/refund destination fixed to credited account; own exits remain independent. **Remaining:** Independent source reviews efd5336d/d3d293ec/77222cc clear. Later13 refund +6 offer/Safe authored cases await combined native; no generic delegated spending authority. |
 | [sales.surplus](#salessurplus-evidence) Native six-host surplus recovery | Built | Tests written | Not integrated | Only native balance above all liabilities, including forced ETH; exact current Executor action and dynamic emergency recipient; no ERC20/NFT sweep or owed-credit diversion. **Remaining:** 9db00712 nine authored cases and fixed-worker source review clear; full paid private/English liabilities and final callback/capacity execution remain. |
 | [sales.owed-export](#salesowed-export-evidence) Complete historical sale-credit keys and canonical export | Built | Tests written | Not integrated | Producer-owned six-host historical key enumeration reads original ledgers, preserves zeroed keys/retired producers and liabilities; canonical native credit leaf/tree transcript. **Remaining:** 1dcbb865 source/index/client reviews clear;8 authored current recipes pending native. Offchain registry enumeration and anchored full key/owed reconciliation remain required for each export. |
@@ -156,9 +158,9 @@ These 162 rows are capabilities and delivery checks of different sizes. Row coun
 | [revenue.snapshots](#revenuesnapshots-evidence) Original-mint royalty snapshots including configured-zero/default | Built | Partly tested | Partial | Collection-specific source-0 consent wrapper, positive/zero frozen token disclosure and original acquisition-time snapshots. **Remaining:** ec06 five actual Artist/Core dynamic/snapshot/same-NFT authored cases are integrated and await native. Prior complementary Artist/Core cohorts passed; not absent product. |
 | [revenue.primary-templates](#revenueprimary-templates-evidence) Static, poster and paid-collaborator primary materialization | Built | Partly tested | Partial | Exact source identity, original poster, current Artist/collaborator payouts, per-row coverage and concrete profile/escrow materialization; max64 entries/8 dynamic sources. **Remaining:** dynamic148 accepted98 cases plus one256 property on its exact earlier source; five newer actual-Core/actual-Artist joined cases authored, latest gas/native/capacity pending. |
 | [revenue.artist-economics](#revenueartist-economics-evidence) Artist-approved low-take and exact scoped economics | Built | Partly tested | Partial | Original Safe op15 profile/template approval, exact collection/token/default coordinates, low-take and current binding/payout/collaborator requirements. **Remaining:** Execute final fully joined scoped consent/owner installation/settlement tests; Artist consent does not grant owner/global mutation authority. |
-| [revenue.exact-mutations](#revenueexact-mutations-evidence) Exact-key TEMPLATE CLEAR and freeze | Built | Tests written | Not integrated | Original exact-key clear/freeze selectors, separate prospective freeze approval and existing precedence after clear. **Remaining:** Final native execution and typed end-to-end CLEAR/exact-FREEZE client recipe. This is not inherited/global freezing. |
+| [revenue.exact-mutations](#revenueexact-mutations-evidence) Exact-key TEMPLATE CLEAR and freeze | Built | Partly tested | Partial | Original exact-key TEMPLATE clear/freeze selectors and independent client assignment reconstruction integrated 571371e0. Current client package passes 220 tests including retained exact-mutation cases. **Remaining:** Complete actual contract/Safe native execution; inherited/global freeze is a separate feature. |
 | [revenue.inherited-freeze](#revenueinherited-freeze-evidence) Inherited/global primary freeze and descendant mutability | Not started | Not tested | Not integrated | Distinct INHERITED/global freeze modes with required mutable lower-scope accounting; cannot be represented by the existing exact frozen bit. **Remaining:** Specific local implementation remains blocked awaiting exact approval. Do not apply denied source artifacts or call exact-key freeze full conformance. |
-| [revenue.resolver-continuity](#revenueresolver-continuity-evidence) Frozen economic continuity on Resolver replacement | Not started | Not tested | Not integrated | Spec's IStreamRevenueResolverContinuity for frozen/snapshot route preservation across replacement; distinct from a retained Resolver following an Artist successor. **Remaining:** No current interface/producer named IStreamRevenueResolverContinuity or equivalent economic continuity manifest found in inspected contracts; implement/prove this dedicated replacement guarantee. |
+| [revenue.resolver-continuity](#revenueresolver-continuity-evidence) Frozen economic continuity on Resolver replacement | In progress | Partly tested | Partial | Protected Royalty inventory/import, original hash origins and canonical governance are integrated 43da6f0e/fc6c5a32; fixture c80b68ca passes 11 unit/Safe cases. Core guard c010f9ec passes seven cases again within the latest 29-case Core cohort. **Remaining:** Execute actual-current import/cutover/continued use and remaining separately required freeze profiles. Proposed primary graph replacement is not an adopted requirement or completed authority feature. |
 | [revenue.artist-lineage](#revenueartist-lineage-evidence) Retained revenue consumer follows authenticated Artist successor | Built | Partly tested | Partial | Original immutable Resolver origin and approval state retained; current facade requires authenticated one-predecessor completed seven-owner lineage/current suite and runtime pins. **Remaining:** Root native3 passed all12 ResolverSuccessor cases including8new+4inherited; other joined compact-source fixture paths failed setup and were repaired separately. Final combined successor/current paths remain pending. |
 | [revenue.escrow-flush](#revenueescrow-flush-evidence) Captured owed revenue escrow and ordinary flush | Built | Partly tested | Partial | Exact native/ERC20 credit key and captured factory/runtime, normal/verified-wallet flush, producer admission and liability conservation. **Remaining:** Final full native/ERC20 callback/gas/conservation graph; no incident routing or successor factory capability in this base primitive. |
 | [revenue.escrow-recovery](#revenueescrow-recovery-evidence) Incident-revoked escrow recovery and successor routing | Built | Tested* | Partial | Common runtime/factory lifecycle, pinned binding, exact original recovery manifest, affected-account consent, terminal-delay and atomic execution are integrated.17/17 focused tests pass after correcting only the expected-revert Safe helper. **Remaining:** The two authored actual-governance/Safe cases, full paid-sale-to-recovery join and operational notice delivery acceptance; typed governance in the focused cohort does not prove those paths. |
@@ -167,12 +169,12 @@ These 162 rows are capabilities and delivery checks of different sizes. Row coun
 
 | Feature | Build | Tests | Integration | Scope and remaining work |
 | --- | --- | --- | --- | --- |
-| [ART01](#art01-evidence) Fixed Artist module, seven owners, governed parameters and deployment | Built | Partly tested | Partial | Fixed facade/Coordinator/seven owners/Archive; original EIP-165/domain/storage pins, GGP and implemented rotation/estate/dormancy/unavailability windows. **Remaining:** Latest composed deployment sizes/cold gas and complete manifest/window coverage; repudiation window belongs to the missing dispute family. No full-v1 deployability claim. |
+| [ART01](#art01-evidence) Fixed Artist module, seven owners, governed parameters and deployment | Built | Partly tested | Partial | Fixed facade/Coordinator/seven owners/Archive and original domain/storage pins, with dispute/repudiation windows now implemented. **Remaining:** Joined Artist capacity repair, cold gas and complete manifest/window coverage. Five products exceeded limits in the pending STATIC plus repudiation branch measurement; no latest full deployability claim. |
 | [ART02](#art02-evidence) Identity registration, documents, revision and personhood/deployment prerequisites | Built | Partly tested | Partial | Canonical identity ID, stored document/display name, revision chain, direct/contract-wallet signatures and original personhood/deployment attestation checks. **Remaining:** Historical authority/import permutations are separate rows; institutional identity truth is intentionally not proved. |
 | [ART03](#art03-evidence) Two-sided binding proposal, acceptance, refusal and withdrawal | Built | Partly tested | Partial | Actual primary acceptance; claimed/refused/withdrawn lifecycle and generation/hash pinning, with explicit acceptance prerequisites. **Remaining:** Post-acceptance dispute/revocation/repudiation writes are missing ART06; migration of multiple generations is ART34. |
 | [ART04](#art04-evidence) Collaborator identity and complete collaborator acceptance | Built | Tests written | Not integrated | Original collaborator identity, roles/hash arrays and separate acceptance are implemented under the admitted PRIMARY_ONLY policy. **Remaining:** Multi-party ALL_COLLABORATORS/THRESHOLD/COLLABORATOR_QUORUM policy creation and use are missing ART41; actual-current dynamic commerce execution and collaborator migration remain pending. |
-| [ART05](#art05-evidence) Permissionless artist-bound attribution claims | Built | Tests written | Not integrated | Append-only permissionless evidence claims, combined Artist/Platform claim reads; filing does not itself adjudicate attribution. **Remaining:** Claims are not the missing adjudicated dispute/repudiation workflow. |
-| [ART06](#art06-evidence) Attribution dispute, counterstatement, resolution, revocation and repudiation | In progress | Tests written | Not integrated | Operations44–46 and CAP_DISPUTE are source-integrated with 14 authored cases. Reviewed47–50 handoff `d95e8aaa` adds revocation, delayed repudiation, veto/cancel/execute and 16 authored cases; integration and native execution are pending. **Remaining:** Withdrawal recipe, all seven operations in the actual current graph and complete delegated/Safe acceptance. |
+| [ART05](#art05-evidence) Permissionless artist-bound attribution claims | Built | Tests written | Not integrated | Append-only permissionless claims and combined Artist/Platform claim reads; filing alone does not adjudicate attribution. **Remaining:** Latest native acceptance; the separate dispute/repudiation recipes and withdrawal are tracked in ART06. |
+| [ART06](#art06-evidence) Attribution dispute, counterstatement, resolution, revocation and repudiation | In progress | Tests written | Not integrated | Operations 44–46 are source-integrated with 14 authored cases; 47–50 are now integrated as 582b9181 with 16 authored cases. **Remaining:** Withdrawal recipe, combined deployment-size repair, native execution of all seven operations and actual delegated/Safe acceptance. |
 | [ART07](#art07-evidence) Live attribution display and exact attestation/deployment reads | Built | Tests written | Not integrated | Five-value O(1) attestation status, exact historical signing class, raw binding and sanction reads, deployment reference and combined claim count; Metadata renderer owns projection. **Remaining:** Full live renderer/current-Core matrix and C2PA reconciliation ART38 remain; unknown historical class never defaults to Artist. |
 | [ART08](#art08-evidence) Typed EOA/Safe signatures, nonce/replay and authorization revocation | Built | Partly tested | Partial | Original typed domains, bounded ERC1271, retained full signatures, per-identity/acceptance/delegate nonce guards and explicit nonce/digest revocation. **Remaining:** All wallet classes/full negative matrix and carried complex-history guards need remaining profiles; historical passing Safe paths do not validate every signature family. |
 | [ART09](#art09-evidence) Delegation grant, revoke and authenticated delegated writes | Built | Tests written | Not integrated | Delegation grant/revoke, attestation, economics, royalty-freeze, intent and CAP_DISPUTE 16 are source-integrated. **Remaining:** ARTIST_DELEGATED policy/sale-consent mode is missing ART42; full latest delegated Safe execution remains pending. |
@@ -205,8 +207,8 @@ These 162 rows are capabilities and delivery checks of different sizes. Row coun
 | [ART36](#art36-evidence) Migration of sanctions, sale/freeze/recovery approval and mixed finding histories | Not started | Not tested | Not integrated | Complete other original record families and host dependencies, including artwork-finality findings or mixed finality/entropy findings, changed timing-action histories. **Remaining:** Current complete inventory admits only original1/2/14/15/17/18/23(entropy)/24/52/54 rows. It does not silently discard unsupported receipts or copy external one-use guards. |
 | [ART37](#art37-evidence) Repeated successor migration and larger complete hydration capacity | Not started | Not tested | Not integrated | Source that itself contains imported predecessor state, multiple history generations, complete lazy/bulk or chunked authority hydration beyond current finite envelope. **Remaining:** Current target must have no earlier hydration/native records; explicit128-receipt/512-cell/256-prefix and inline Archive bounds apply. No partial activation to evade limits. |
 | [ART38](#art38-evidence) C2PA credential/key-history authorship reconciliation | Not started | Not tested | Not integrated | Operative Artist credential enumeration and validation outcome consistent/divergent/unevaluated against binding and authority history. **Remaining:** Current smart-contracts contain only the generic C2PA record family/metadata references; no actual reconciliation producer/consumer or current attribution outcome. Generic attestations do not supply this rule. |
-| [ART39](#art39-evidence) Complete Artist signing/recomputation client and measured ceremony rehearsal | In progress | Partly tested | Not integrated | Typed current Artist SDK and activation scripts include the integrated exact entropy-finding/op60 workflow helpers. Full named all-family human-readable signing and independent recomputation tool are not complete. **Remaining:** Resolve all signing facts, explicit stale-consent churn, supported-wallet disclosures, complete record/sanction hash recomputation, actual onboarding→mint→sanction rehearsal with per-ceremony latency and required acknowledgments/runbooks. |
-| [ART40](#art40-evidence) Full Artist current-graph conformance, limits and operational acceptance | In progress | Partly tested | Partial | Retained exact current Core/Executor/Safe subsets and typed-unit history/recovery cohorts. Expanded native4 completed 167 passed /39 failed; all 647 production products fit at its frozen source. **Remaining:** Repair and rerun the failed fixtures/harness/joins, then latest combined runtime, individual cold gas, full limit/fuzz/stateful matrix and actual-governance/testnet acceptance. |
+| [ART39](#art39-evidence) Complete Artist signing/recomputation client and measured ceremony rehearsal | In progress | Partly tested | Partial | Eight-family Artist ceremony packets, independent hash reconstruction and ordered Safe CALL plans are integrated 571371e0; current package passes 220 tests. **Remaining:** All-family signing coverage, current-authority/consent decisions, stale-consent behavior and measured actual onboarding/mint/sanction rehearsal. |
+| [ART40](#art40-evidence) Full Artist current-graph conformance, limits and operational acceptance | In progress | Partly tested | Partial | Earlier native4 completed 167 passed /39 failed on its frozen source. Fixture and harness repairs are now integrated, with 21 Python harness checks passing. **Remaining:** Rerun affected native cases on the selected combined source after capacity repair; cold gas, full fuzz/stateful limits and actual-governance/testnet acceptance. |
 | [ART41](#art41-evidence) Multi-party collaborator approval policies | Not started | Not tested | Not integrated | ALL_COLLABORATORS, THRESHOLD, COLLABORATOR_QUORUM and capability-policy overrides are specified, but BindingLifecycle admits only PRIMARY_ONLY with zero threshold and no overrides. **Remaining:** Implement policy creation and consumption through the affected consent/authority families, with real multi-party Safe and quorum tests. |
 | [ART42](#art42-evidence) Delegated mint-policy and sale-consent mode | Not started | Not tested | Not integrated | ARTIST_DELEGATED mode2 has no current binding producer; current policy/content/consent paths generally require ARTIST_SIGNED_POLICY mode1. **Remaining:** Implement exact mode2 admission, CAP_POLICY_CONSENT/CAP_SALE_CONSENT grants and current consumer joins; dispute delegation does not supply this mode. |
 
@@ -220,14 +222,14 @@ These 162 rows are capabilities and delivery checks of different sizes. Row coun
 | [entropy.lifecycle](#entropylifecycle-evidence) Admit, suspend, incident-revoke and restore providers | Built | Tested* | Partial | Focused capture at 3481e8fd passes 41 native cases and three 256-input fuzz properties. Separate actual Safe lifecycle plan passes 12 cases. **Remaining:** Repeat affected lifecycle cases in the latest complete graph; freeze deployment-specific provider policy. |
 | [entropy.funding](#entropyfunding-evidence) Reveal fees, quotations, sponsors and pull refunds | Built | Partly tested | Partial | Coordinator-hosted reveal-fee escrow and provider quote validation with native sale funding; dedicated focused suite included in the 100-case entropy capture. **Remaining:** Latest fee/callback/escrow conservation acceptance. ERC20 executor allowance is separately absent. |
 | [entropy.incidents](#entropyincidents-evidence) Timeouts, service-level findings and precommitted fresh recovery | Built | Tested* | Partial | Frozen incident/recovery policies, epochs and collection/token fresh recovery. Recorded focused run passes 100 cases across ten suites, including eight 256-input properties. **Remaining:** Complete latest actual Artist/governance/upstream-provider transaction composition. |
-| [entropy.artist-join](#entropyartist-join-evidence) Real Artist consent and unavailability findings in reveal recovery | Built | Partly tested | Partial | Actual Artist/Safe/Archive joins and explicit operation 23 unavailable-finding source exist. Native4 completed: five recovery-join cases fail InvalidDependency and the unavailable suite has a removed testFail-prefix naming failure. **Remaining:** Repair and rerun, then later complete finding hydration and actual mint/Executor/provider composition. |
+| [entropy.artist-join](#entropyartist-join-evidence) Real Artist consent and unavailability findings in reveal recovery | Built | Partly tested | Partial | Actual Artist/Safe/Archive tests and operation23 finding source exist. Canonical role-registry/role grant and test-name fixes are integrated 5104173c/2c39c316. **Remaining:** Execute the repaired recovery/unavailability joins, then complete actual mint/Executor/provider composition and finding hydration acceptance. |
 | [entropy.fallback-continuity](#entropyfallback-continuity-evidence) Coordinator replacement, retained old reads and distinct safe-mode fallback | In progress | Partly tested | Not integrated | Core pins entropy provenance and fallback roles are specified. The complete distinct-instance safe-mode activation/continuity product is not demonstrated. **Remaining:** Implement or establish the full safe-mode profile, deploy the distinct fallback, and prove old-token reads and fresh-token routing through real cutover. |
 
 ### Metadata and records
 
 | Feature | Build | Tests | Integration | Scope and remaining work |
 | --- | --- | --- | --- | --- |
-| [metadata.renderer-routing](#metadatarenderer-routing-evidence) Independently selectable, versioned token and collection renderers | In progress | Tests written | Not integrated | Versioned IStreamRenderer/Registry prerequisite handoff `c0369e0b` has 21-source ABI checking and 14 authored cases; independent review/integration/native acceptance pending. Actual STATIC router, recorded defaults and transitive raw-source readsets are in progress. **Remaining:** Complete the current route, byte reconstruction, selection/lock/consent and exact genesis/finality correspondence. |
+| [metadata.renderer-routing](#metadatarenderer-routing-evidence) Independently selectable, versioned token and collection renderers | In progress | Tests written | Not integrated | Renderer/Registry, STATIC routing/configuration and direct ScopeMembership source are integrated 0525753d/6743e859/93c63379. Direct entropy STATIC facts separately pass 10 tests. **Remaining:** Artist raw-source integration, measured Router/Renderer size repair, selection/content/output finality, exact genesis correspondence and runtime acceptance. Selection checkpoint96f2d6c9 remains an unintegrated handoff. |
 | [MUSEUM-01](#museum-01-evidence) Canonical Core identity and metadata boundaries | Built | Partly tested | Integrated* | Current Core subjects, full record preimages and semantic tooling preserve work/token/file and protocol authority boundaries. This is the implemented boundary, not completion of all dependent museum features. **Remaining:** Whole adopted source-family and full-finality acceptance remain; source-preserving adapters do not grant new mint/finality authority. |
 | [MUSEUM-02](#museum-02-evidence) Immutable schema and interpretation document registry | Built | Tested* | Integrated* | Registered exact-name/version documents, ordered bounded chunks, full original bytes and canonicalization identity; actual delayed Executor and Safe capture uses these contracts. **Remaining:** Complete required genesis catalog registration and every maximum-size operational envelope remain separate. |
 | [MUSEUM-03](#museum-03-evidence) Current collection record writers and source history | Built | Partly tested | Integrated* | MetadataV1 generic class-scoped writers, full payload/receipt/history, independent author heads and one-use Artist publication; sealed complete successor consumption preserves the original host consumed map. **Remaining:** Generic byte admission is not typed meaning for every named record. The newest genuine post-cutover join remains in root native cohort, distinct from earlier demonstrated generic/RIGHTS writes. |
@@ -240,8 +242,8 @@ These 162 rows are capabilities and delivery checks of different sizes. Row coun
 | [MUSEUM-10](#museum-10-evidence) Typed Artist intent, waiver and interview | Built | Partly tested | Partial | Full typed intent/waiver/interview and format interpretation, selected original authority/binding/record and interview checks exist in fixed consumers; estate statements remain distinct. **Remaining:** Complete interview/instrument/participant/transcript semantic dossier projection and all admissible source/archival variants remain; raw source schemas and selectors are built. |
 | [MUSEUM-11](#museum-11-evidence) Typed RIGHTS interpretation, selection and museum source | Built | Tested* | Integrated* | Exact full RIGHTS JSON, class/family/subject/registered-definition selection and immutable historical receipt capture; separate six-use-class PREMIS/semantic rights output keeps independent links distinct from grants. **Remaining:** Full initialized Artist/Metadata-to-museum positive capture and all later-current selection cases remain separate. Test-fixture legal statements never prove real legal ownership/permission. |
 | [MUSEUM-12](#museum-12-evidence) Steward designation and recovery response/notice records | Built | Partly tested | Partial | Typed steward/response schemas and original owner notice/action consumers exist, including bounded incremental endpoint publication and original 72-hour clock. Publisher delivery claims remain claims. **Remaining:** Museum semantic/dossier adapter for these notices and complete operational delivery evidence remain; do not conflate protocol publication with receipt by an institution. |
-| [MUSEUM-13](#museum-13-evidence) Remaining named owner/institutional record semantic adapters | Not started | Not tested | Not integrated | No complete museum typed adapter for ACCESSION/TITLE_BINDING, DEACCESSION, REDEMPTION_CLAIM, citation records and their authoritative instruments. Generic record storage does not implement those semantic workflows. **Remaining:** Implement schema/actual-source admission, instrument and original actor binding, exact typed projections and reconstruction; retain title, physical custody, token ownership and accession as separate facts. |
-| [MUSEUM-14](#museum-14-evidence) Full condition report and conservation-treatment mapping | Not started | Not tested | Not integrated | Loan adapter retains condition references and bytes; the new local condition fixture deliberately uses an opaque test schema. It is not the required protocol-state/render/fixity/recovery-linked CONDITION_REPORT core. **Remaining:** Implement exact full condition/examination and treatment semantics, actual citation/route/fixity/render/recovery joins, independent and owner evidence, outbound-return comparisons. |
+| [MUSEUM-13](#museum-13-evidence) Remaining named owner/institutional record semantic adapters | In progress | Partly tested | Not integrated | Source-bound ACCESSION/TITLE_BINDING, DEACCESSION and first-claim REDEMPTION_CLAIM adapters and retained institutional instruments integrated7079aa30. **Remaining:** Actual current token records, authenticated Transfer receipt/institution/title proof and full institutional conformance. Passing controls are synthetic. |
+| [MUSEUM-14](#museum-14-evidence) Full condition report and conservation-treatment mapping | In progress | Partly tested | Partial | Typed condition/conservation candidates, original owner and frozen independent-source admission, and outbound/return comparison integrated438cfd00. **Remaining:** Actual examination-time/fixity/render/recovery joins and positive current independent capture; opaque historic same-name schemas remain unsupported. |
 | [MUSEUM-15](#museum-15-evidence) Native reference render and render-critical archival inventory | Built | Tested* | Partial | Finite actual original native onchain COLLECTION plus STATIC/BYTE_EXACT reference publication, executable archive/environment/captures, source inventory and dual-family coverage. Exact raw payload versus artifact/list commitments stay distinct. **Remaining:** PERCEPTUAL_TOLERANCE and CURATED_EQUIVALENCE finality acceptance evidence, supported script/environment closure, noncollection families and additional actual correspondence methods remain; all-program/all-size gas and institutional acceptance absent. DYNAMIC renderer implementation is a later excluded extension. |
 | [MUSEUM-16](#museum-16-evidence) Script/media manifests, large bundles and full snapshot export | Built | Partly tested | Partial | Typed current manifests, logical32x24576 script chunks, bounded SSTORE2 append/finalize/full-read and frozen source reconstruction; explicit chunked snapshot embedded JSON and offline export preserve original inline domains. **Remaining:** Full actual upper-bound executable/frozen-route joined acceptance and additional renderer/dependency profiles remain; compact references never count as complete executable export. |
 | [MUSEUM-17](#museum-17-evidence) Complete object dossier, acquisition packet and canonical citation adapter | In progress | Partly tested | Partial | Versioned source-bound package builders and many typed derivatives are implemented; they retain exact supplied dossiers and citations. Full canonical acquisition packet/all required dossier item gathering is not complete. **Remaining:** Implement complete actual canonical citation qualifiers, all packet source/attestation/identity/provenance/rights/finality items and their dossier relationships; externally supplied descriptors do not establish completeness. |
@@ -266,7 +268,7 @@ These 162 rows are capabilities and delivery checks of different sizes. Row coun
 | [MUSEUM-20](#museum-20-evidence) Field-level crosswalk, semantic validation and full coverage accounting | In progress | Partly tested | Partial | Closed schema inventory, exact scalar/array/null/absence accounting, pinned class/domain/range, v2 abstract/visual/linguistic/E73 distinctions and explicit unsupported sidecars. Full requirements are larger than this implemented subset. **Remaining:** All named source families, physical realizations, complete dimensions/media and geographic patterns, exact reverse mapping and named vectors for every required crosswalk entry remain. |
 | [MUSEUM-21](#museum-21-evidence) Attributed assertions, review and conflict selection | In progress | Partly tested | Integrated* | Immutable assertion/revision/profile/field selectors, exact earlier review targets, source-selected conflict withholding, provenance indexes and explicit same-account SELF review. Actual independent-account recorded profile works. **Remaining:** General independent institutional reviewer eligibility and cross-authority actual source policy, not just SELF/account lanes, remain. No arbitrary reviewer label/list grants authority. |
 | [MUSEUM-22](#museum-22-evidence) External authority matching and archived reconciliation | Not started | Partly tested | Not integrated | Schemas and generic attributed assertion machinery exist, but no complete typed Getty TGN/ULAN/VIAF/AAT/Wikidata match production/admission/reconciliation adapter is implemented. **Remaining:** Implement authority concept versus focus IRI, exact snapshot bytes/reuse terms, entity/context checks, unreviewed-to-reviewed proof, matchKind projection, historical rename/merge/split and non-escalation. Fixture scaffolding is not authority implementation. |
-| [MUSEUM-23](#museum-23-evidence) Historical, uncertain and role-specific place semantics | Not started | Partly tested | Not integrated | Explicit exhibition Place/venue nodes and generic disputed-geography fixtures exist. Complete required geographic role and historical geometry policy is absent. **Remaining:** Implement all9 baseline roles, names/dates/context, spatial versus catalog/political hierarchy, CRS/uncertainty/source/date, fictional/unknown/broad places and intentional public precision. |
+| [MUSEUM-23](#museum-23-evidence) Historical, uncertain and role-specific place semantics | In progress | Partly tested | Not integrated | Nine-role qualified geography draft projection integrated87f844eb, with historic/uncertainty/precision controls. **Remaining:** Authenticated authority/reviewer and recorded-source joins. Unverified draft matches cannot emit equivalence. |
 | [MUSEUM-24](#museum-24-evidence) File roles, observed ingest and physical-event relationships | In progress | Partly tested | Partial | Distinct carriers, original/derived resources and named activities; explicit local preservation observations and evidence links. Planned/cancelled/unknown activities are withheld from performed graph output. **Remaining:** Complete software/dependency/reference-render and physical production/custody/accession/title relations, described/received/verified evidence for every source kind, and actual website safety-scan path parity remain. |
 | [MUSEUM-25](#museum-25-evidence) Deterministic recorded export and database-free offline replay | In progress | Tested* | Integrated* | Bounded deterministic package partitions, exact original source/transcript/schema bytes, pinned block/read scope, hashes, dependency resolution, whole-package recomputation, public-disclosure refusal and immutable derivatives work for named finite profiles. **Remaining:** Full canonical STREAM_SEMANTIC_EXPORT_V1 source-family coverage and actual ARCHIVE_SEMANTIC_EXPORT publication/admission/reconstruction remain; current finite manifests are explicit derivative profiles, not complete normative record acceptance. |
 | [MUSEUM-26](#museum-26-evidence) Linked Art and CRM projection | Built | Tested* | Integrated* | Pinned offline JSON-LD expansion and finite Linked Art/CRM entity projection with extension sidecars, complete input/output correspondence for supported profiles. **Remaining:** Complete adopted crosswalk and all real record-family source adapters remain. Archival URNs and data-model validity do not claim optional HTTP API conformance. |
@@ -302,7 +304,7 @@ These 162 rows are capabilities and delivery checks of different sizes. Row coun
 
 | Feature | Build | Tests | Integration | Scope and remaining work |
 | --- | --- | --- | --- | --- |
-| [client.commerce](#clientcommerce-evidence) Typed native/revenue/secondary and saved inventory workflows | Built | Tested* | Partial | Actual compiler-selected original signing, bigint values, Safe CALLs, secondary/delegate/inventory saved workflow and Artist revenue/snapshot/template helper. **Remaining:** PLATFORM_WORKS families8–13 and exact-key template CLEAR/freeze still need complete typed operator recipes; full live RPC/deployment/actual Safe execution not established by offline suite. |
+| [client.commerce](#clientcommerce-evidence) Typed native/revenue/secondary and saved inventory workflows | Built | Tested* | Partial | Exact TEMPLATE CLEAR/FREEZE and PLATFORM families8–13 operator clients are integrated 571371e0/d013c623; package generation, type/build and 220 tests pass on integration. **Remaining:** Current live RPC/contract/Safe execution, remaining royalty/mint workflows and all-call inventory closure. Synthetic RPC tests are not deployed acceptance. |
 | [client.entropy-authority](#cliententropy-authority-evidence) Explicit entropy finding and op60 hydration Safe client | Built | Tested* | Not integrated | Complete original entropy finding/target/intent context and typed operation60 hydration with seven owner commitments. Source 642d017d is merged as 50c553c9; independent source review is clear. **Remaining:** All 175 package tests and generation/build/type checks pass on the integration checkout; real deployed Safe/provider composition remains pending. |
 | [operator.commerce](#operatorcommerce-evidence) Saved governance, mint setup and native surplus plans | Built | Partly tested | Partial | Current deployment/catalog activation primitives and saved phase/surplus/lifecycle plans with exact current call/state checks. **Remaining:** Final full product graph deployment/activation and all caller-compatible saved workflows. Earlier deployment productsActivated=false is not a launch. c9d0353d six new surplus-plan tests are authored/source reviewed; root owns native acceptance. |
 | [conformance.commerce-gas](#conformancecommerce-gas-evidence) Collector gas, capacity and complete cross-mode conservation | In progress | Partly tested | Not integrated | Required conformance across public paid/current Safe paths and complete liabilities; this is not a new sale feature. **Remaining:** Do not waive500,000 paid single-step ceiling. Retained partial-cold/warm clearing measurements exceed it;8,755,856 historical trace is not current/all-cold. Final all-cold collector, worst-case capacity/stateful fuzz, six-host financial conservation and final-source native campaigns remain integrator-owned. |
@@ -313,8 +315,8 @@ These 162 rows are capabilities and delivery checks of different sizes. Row coun
 | --- | --- | --- | --- | --- |
 | [quality.repo](#qualityrepo-evidence) Developer layout, domain interfaces and contributor documentation | Built | Partly tested | Partial | Current Core/domain/interface split, explicit legacy reference area, current-stack guides, tooling and examples. **Remaining:** Keep public docs aligned with this feature register and finish examples for remaining features. A tidy layout is not product completeness. |
 | [quality.fuzz](#qualityfuzz-evidence) Modern Foundry unit, negative, fuzz and stateful testing system | Built | Partly tested | Partial | Current integration, Safe, fuzz and invariant suites exist. Multiple scoped 256-input campaigns have passed; newer batches remain pending. **Remaining:** Run meaningful broad fuzz/stateful campaigns on the final combined feature set and resolve failures. |
-| [quality.safe](#qualitysafe-evidence) Safe compatibility for every supported call | In progress | Partly tested | Partial | Actual threshold-two Safe workflows across minting, custody, payment, Artist and governance are covered in several captures. **Remaining:** Reconcile every final public/external ABI selector, overload, read, receive/fallback and callback with a successful Safe flow or tested protocol-only restriction. |
-| [quality.capacity](#qualitycapacity-evidence) Full-system gas, deployment size and transaction capacity | In progress | Partly tested | Partial | Native4 measures 647 production products with zero oversized; the later Views/escrow48-product and burn6-product cohorts also fit, and the corrected escrow cohort has 15 fitting products.1,841-source ABI/type check passes at 0d7c1b57. **Remaining:** Latest combined production bytecode, full ceremonies, batch limits and collector transaction ceilings. Counts overlap across captures and are not additive. |
+| [quality.safe](#qualitysafe-evidence) Safe compatibility for every supported call | In progress | Partly tested | Partial | Actual Safe cohorts cover selected mint, custody, payment, Artist and governance flows; generic ordered CALL plans are integrated. Four new actual all-CALL batch tests are authored in53658f79 but native-pending. **Remaining:** Every final ABI selector/overload/read/receive/fallback/callback needs its supported Safe path or a tested protocol-only restriction. |
+| [quality.capacity](#qualitycapacity-evidence) Full-system gas, deployment size and transaction capacity | In progress | Partly tested | Partial | Current individual Core, entropy, mint, royalty and distribution captures fit. Manager has 38 bytes and entropy Coordinator 5 bytes of measured runtime margin. **Remaining:** Joined Artist and STATIC products have measured oversize failures being repaired; complete latest graph, cold gas, ceremonies and transaction limits. Older native4 sizing does not cover this source. |
 | [quality.ci](#qualityci-evidence) Complete conformance, generated artifacts and CI for the new candidate | In progress | Partly tested | Not integrated | Deterministic tooling/checkers and release pipeline exist, with partial spec-rule and feature evidence coverage. **Remaining:** Refresh after implementation stabilizes: exact ABI/storage, complete requirement mapping, generators, notes/manifests, checksum bundle and full CI. |
 | [release.rc1](#releaserc1-evidence) Supported RC1 contract release and Sepolia deployment | Built | Tested* | Integrated* | Existing frozen supported release at 569bf87f1fa808787d324f6e1582924b5ccf1d40, with recorded Sepolia evidence. **Remaining:** No full-v1 completeness is implied by this earlier release. |
 | [release.full-v1](#releasefull-v1-evidence) Freeze and launch the complete expanded v1 candidate on testnet | In progress | Partly tested | Not integrated | Active implementation branch contains the expanded candidate, plus separately authored handoffs listed below. **Remaining:** Finish missing features, integrate and test the final system, freeze its source and deploy matching testnet evidence. |
@@ -376,10 +378,10 @@ as `recordSuccessorDesignation` in the current facade.
 | 44 | `openAttributionDispute` | Built; 14-case dispute cohort authored, native pending | [ART06](#art06-evidence) |
 | 45 | `recordCounterStatement` | Built; 14-case dispute cohort authored, native pending | [ART06](#art06-evidence) |
 | 46 | `resolveAttributionDispute` | Built; 14-case dispute cohort authored, native pending | [ART06](#art06-evidence) |
-| 47 | `revokeAttribution` | Source handoff d95e8aaa reviewed; integration/native pending | [ART06](#art06-evidence) |
-| 48 | `vetoAttributionRepudiation` | Source handoff d95e8aaa reviewed; integration/native pending | [ART06](#art06-evidence) |
-| 49 | `cancelAttributionRepudiation` | Source handoff d95e8aaa reviewed; integration/native pending | [ART06](#art06-evidence) |
-| 50 | `executeAttributionRepudiation` | Source handoff d95e8aaa reviewed; integration/native pending | [ART06](#art06-evidence) |
+| 47 | `revokeAttribution` | Source integrated582b9181; native/combined capacity pending | [ART06](#art06-evidence) |
+| 48 | `vetoAttributionRepudiation` | Source integrated582b9181; native/combined capacity pending | [ART06](#art06-evidence) |
+| 49 | `cancelAttributionRepudiation` | Source integrated582b9181; native/combined capacity pending | [ART06](#art06-evidence) |
+| 50 | `executeAttributionRepudiation` | Source integrated582b9181; native/combined capacity pending | [ART06](#art06-evidence) |
 | 51 | `revokePriorAddressStanding` | Built; bounded profiles | [ART18](#art18-evidence) |
 | 52 | `recordContentRatification` | Built; bounded profiles | [ART10](#art10-evidence), [ART42](#art42-evidence) |
 | 53 | `approvePlatformWorksCorrection` | Built; bounded profiles | [ART11](#art11-evidence) |
@@ -413,17 +415,17 @@ in the complete final deployment; this table is not a list of deployed addresses
 | 10 | `CLAIM_ROUTER` | [revenue.claims](#revenueclaims-evidence) | Source/profile status is in the linked rows; complete final manifest, interface/codehash and activation acceptance remain. |
 | 11 | `MINT_MANAGER` | [sales.phase-ledger](#salesphase-ledger-evidence), [mint.static](#mintstatic-evidence) | Source/profile status is in the linked rows; complete final manifest, interface/codehash and activation acceptance remain. |
 | 12 | `MINT_LEDGER` | [mint.static](#mintstatic-evidence), [mint.cross-scope](#mintcross-scope-evidence), [mint.continuity](#mintcontinuity-evidence) | Source/profile status is in the linked rows; complete final manifest, interface/codehash and activation acceptance remain. |
-| 13 | `MINT_TICKET_GATE` | [sales.standard-gates](#salesstandard-gates-evidence) | Concrete required gate not built. |
+| 13 | `MINT_TICKET_GATE` | [sales.standard-gates](#salesstandard-gates-evidence) | Concrete Ticket gate integratedfeda72d3; scoped tests pass, full genesis/current-system acceptance pending. |
 | 14 | `FIXED_PRICE_SALE_ADAPTER` | [sales.native-fixed](#salesnative-fixed-evidence) | Source/profile status is in the linked rows; complete final manifest, interface/codehash and activation acceptance remain. |
 | 15 | `ENGLISH_AUCTION_HOUSE` | [sales.english](#salesenglish-evidence) | Source/profile status is in the linked rows; complete final manifest, interface/codehash and activation acceptance remain. |
 | 16 | `DUTCH_AUCTION_ADAPTER` | [sales.dutch](#salesdutch-evidence) | Source/profile status is in the linked rows; complete final manifest, interface/codehash and activation acceptance remain. |
 | 17 | `PRIVATE_SALE_ADAPTER` | [sales.private-offer](#salesprivate-offer-evidence) | Source/profile status is in the linked rows; complete final manifest, interface/codehash and activation acceptance remain. |
 | 18 | `BURN_MINT_GATE` | [sales.burn-mint](#salesburn-mint-evidence) | Current burn consumer not built. |
-| 19 | `DELEGATE_REGISTRY_GATE` | [mint.delegate-registry](#mintdelegate-registry-evidence) | Concrete required vault-delegation gate not built. |
+| 19 | `DELEGATE_REGISTRY_GATE` | [mint.delegate-registry](#mintdelegate-registry-evidence) | Concrete vault-delegation gate integratedfeda72d3; scoped tests pass, actual external registry and full genesis acceptance pending. |
 | 20 | `ERC20_PRIMARY_SETTLEMENT_ADAPTER` | [sales.erc20-immediate](#saleserc20-immediate-evidence), [sales.erc20-reveal](#saleserc20-reveal-evidence) | Source/profile status is in the linked rows; complete final manifest, interface/codehash and activation acceptance remain. |
 | 21 | `ARTIST_REGISTRY` | [ART01](#art01-evidence), [ART06](#art06-evidence), [ART34](#art34-evidence) | Source/profile status is in the linked rows; complete final manifest, interface/codehash and activation acceptance remain. |
 | 22 | `METADATA_ROUTER` | [MUSEUM-01](#museum-01-evidence), [MUSEUM-16](#museum-16-evidence) | Source/profile status is in the linked rows; complete final manifest, interface/codehash and activation acceptance remain. |
-| 23 | `RENDERER_V1` | [metadata.renderer-routing](#metadatarenderer-routing-evidence), [MUSEUM-15](#museum-15-evidence), [MUSEUM-39](#museum-39-evidence) | Exact required StreamRendererV1 has no approved alias. Current fixed StreamMetadataTokenRenderer/StreamMetadataBundleRenderer and Router helpers do not implement its selectable/versioned interface; reference-render evidence is separate. |
+| 23 | `RENDERER_V1` | [metadata.renderer-routing](#metadatarenderer-routing-evidence), [MUSEUM-15](#museum-15-evidence), [MUSEUM-39](#museum-39-evidence) | Actual StreamRendererV1 and selectable Registry source are integrated. Measured capacity repairs, raw Artist sources, genesis activation and full STATIC/finality acceptance remain. |
 | 24 | `COLLECTION_METADATA` | [MUSEUM-03](#museum-03-evidence), [MUSEUM-09](#museum-09-evidence) | Legacy StreamCollectionMetadata/IStreamCollectionMetadata and current StreamCollectionMetadataV1 have different interfaces; exact genesis correspondence remains unresolved. |
 | 25 | `SCHEMA_REGISTRY` | [MUSEUM-02](#museum-02-evidence), [MUSEUM-40](#museum-40-evidence) | Source/profile status is in the linked rows; complete final manifest, interface/codehash and activation acceptance remain. |
 | 26 | `OWNER_RECORDS` | [MUSEUM-05](#museum-05-evidence), [MUSEUM-36](#museum-36-evidence) | Source/profile status is in the linked rows; complete final manifest, interface/codehash and activation acceptance remain. |
@@ -516,6 +518,53 @@ settlement behavior listed above.
 
 ## Feature evidence
 
+### Parallel feature batch 16 September
+
+Source through `88cf4522`; all1,909 Solidity sources pass ABI/type/storage checking. All behavioral results below have explicit component boundaries.
+The five visible tasks and three local leads remain active; root owns integration.
+
+- Mint source `20cc16a9` integrated `feda72d3`: 87/87 tests across nine suites,
+  128 captured sources exactly attested to the commit. Actual Manager/Ledger,
+  ModuleRegistry and Safe; typed Core/Artist/governance/external registry. All
+  measured products fit; Manager runtime24,538. See [migration](../docs/integrations/mint-continuity.md),
+  [counter profiles](../docs/integrations/mint-counter-profiles.md),
+  [ticket](../docs/integrations/mint-ticket-gate.md),
+  [allowlist](../docs/integrations/mint-allowlist-gate.md) and
+  [delegation](../docs/integrations/mint-delegate-registry.md).
+- Root Core guard `88cf4522`: eight mint, seven royalty, two Artist-history and
+  twelve permanent-target cases pass (29/29,57 sources). Core runtime19,275;
+  external-read worker10,971. Real Core with typed producer/governance boundaries;
+  exact migration and retained prepared-mint abort behavior are covered.
+- Royalty producer fixture `1a9670b8` integrated `c80b68ca`: 11/11 focused cases,
+  77 exact captured sources; actual Resolver/Factory/Safe with typed Core/Artist/
+  governance. All21 products fit. Failed initial2/9 capture is preserved. Actual
+  import/cutover cases remain pending; see [continuity guide](../docs/guides/royalty-economic-continuity.md).
+- Entropy direct STATIC getter `8f030e02`:10/10 cases; actual storage fact parity
+  and unavailable old-reader independence, all measured products fit. Runtime
+  Coordinator24,571 leaves five bytes of headroom.
+- Distribution `292cb0f3` integrated `d8f39826`: builder21/21 scoped cases,
+  real Safe and64-input fuzz; independent source review clear. Actual-current
+  test is authored but native-pending; see [distribution](../docs/guides/operator-distribution.md).
+- Client `6a928cda`/`49fda215` integrated `571371e0`/`d013c623`: root220/220 package
+  tests, generation, build and type checks pass. Includes exact revenue mutation,
+  eight Artist families, generic Safe CALL plans and PLATFORM8–13; no runtime
+  Safe acceptance inferred from mocked RPC or independent digest vectors.
+- Museum `faa58a49`/`19e64cf3`/`da1a01d8` integrated `7079aa30`/`438cfd00`/`87f844eb`:
+  root72/72 institutional, condition, geography, retained loan and owner-capture
+  checks pass. New controls are synthetic; actual institutional/title/examination
+  joins remain. See [institutional](../docs/museum-institutional-records.md),
+  [condition](../docs/museum-condition.md) and [geography](../docs/museum-geography.md).
+- Harness source `0b78d6d6` plus entropy repair `2c39c316` and Safe batch `53658f79`
+  are integrated. Root21/21 Python checks pass. Interrupted acceptance-20260915-b
+  retained no completed compilation/runtime result; it is not acceptance evidence.
+
+Known implementation work: Artist combined-size repair; STATIC Router/Renderer
+size repair and content/finality completion; actual Artist successor-Manager
+consumption; burn adapter completion; remaining Artist/museum profiles. The
+proposed primary graph-transition ADR has not been adopted into launch scope.
+The required economic pointer check is the RSR Royalty replacement guarantee.
+
+
 The following is the audit trail for the tables, not a new test run. Repository
 paths identify source and tests; recorded execution evidence identifies the
 accepted source separately. Native compilation pending, a written test and a
@@ -567,6 +616,8 @@ passing Python/synthetic control are deliberately kept distinct.
 
 ### mint.merkle-caps evidence
 
+Latest source and validation: [16 September batch](#parallel-feature-batch-16-september). Older source inventories below retain their original date and do not override the updated table.
+
 **Different wallet allowances from a pinned Merkle root**. Owner: Integrator. Requirements: [mint-policy-and-accounting.md](../docs/mint-policy-and-accounting.md) — Protocol v1 Scope.
 
 - [IStreamMintLedger.sol](../smart-contracts/interfaces/stream/mint/IStreamMintLedger.sol). Source `b2fc0c3c`. Source inventory; execution claims are limited to the evidence notes in this row.
@@ -575,6 +626,8 @@ passing Python/synthetic control are deliberately kept distinct.
 
 ### mint.cross-scope evidence
 
+Latest source and validation: [16 September batch](#parallel-feature-batch-16-september). Older source inventories below retain their original date and do not override the updated table.
+
 **Collection-wide and global shared mint counters**. Owner: Integrator. Requirements: [mint-policy-and-accounting.md](../docs/mint-policy-and-accounting.md) — Protocol v1 Scope.
 
 - [StreamMintLedger.sol](../smart-contracts/domains/mint/StreamMintLedger.sol). Source `b2fc0c3c`. Source inventory; execution claims are limited to the evidence notes in this row.
@@ -582,6 +635,8 @@ passing Python/synthetic control are deliberately kept distinct.
 
 
 ### mint.continuity evidence
+
+Latest source and validation: [16 September batch](#parallel-feature-batch-16-september). Older source inventories below retain their original date and do not override the updated table.
 
 **Preserve mint allowances and replay state across replacement**. Owner: Integrator. Requirements: [mint-policy-and-accounting.md](../docs/mint-policy-and-accounting.md) — Protocol v1 Scope.
 
@@ -858,6 +913,8 @@ passing Python/synthetic control are deliberately kept distinct.
 
 ### mint.delegate-registry evidence
 
+Latest source and validation: [16 September batch](#parallel-feature-batch-16-september). Older source inventories below retain their original date and do not override the updated table.
+
 **Hot-wallet minting for a vault through a pinned delegation registry**. Owner: Integrator. Requirements: [stream-sales-and-auctions.md](../docs/stream-sales-and-auctions.md) — SSA-DELEGATE.
 
 - [IStreamMintGate.sol](../smart-contracts/interfaces/stream/mint/IStreamMintGate.sol). Source `b2fc0c3c`. Source inventory; execution claims are limited to the evidence notes in this row.
@@ -873,6 +930,8 @@ passing Python/synthetic control are deliberately kept distinct.
 
 
 ### metadata.renderer-routing evidence
+
+Latest source and validation: [16 September batch](#parallel-feature-batch-16-september). Older source inventories below retain their original date and do not override the updated table.
 
 **Independently selectable, versioned token and collection renderers**. Owner: Integrator. Requirements: [metadata-router-and-renderer.md](../docs/metadata-router-and-renderer.md); [launch-conformance-matrix.md](../docs/launch-conformance-matrix.md) — RENDERER_V1.
 
@@ -921,10 +980,12 @@ passing Python/synthetic control are deliberately kept distinct.
 
 ### ART06 evidence
 
+Latest source and validation: [16 September batch](#parallel-feature-batch-16-september). Older source inventories below retain their original date and do not override the updated table.
+
 **Attribution disputes and repudiation**. Owner: Artist lead; integrator. Requirements: [Artist authority](../docs/stream-artist-authority.md), original operations 44–50.
 
 - Integrated `6c8bb4ea` from `63ecfc24`: [dispute guide](../docs/artist-attribution-disputes.md), [interface](../smart-contracts/interfaces/stream/artist/IStreamArtistAttributionDisputes.sol), [admission](../smart-contracts/domains/artist/StreamArtistDisputeAdmission.sol), [operations](../smart-contracts/domains/artist/StreamArtistDisputeOperations.sol) and [14 authored cases](../test/unit/artist/StreamArtistAttributionDisputes.t.sol). Original authority, original records/events and permanent replay state are preserved; CAP_DISPUTE is16. Independent source review is clear; 758-source ABI checking and retained ABI/storage checks do not establish runtime acceptance.
-- Separate `d95e8aaa2359baa3fde2ae23dd846e86ccb68ab5` handoff adds47–50 with 16 authored cases, guardian veto/current liveness and permanent reason 3 revocation. 767-source ABI check passes and independent source review is clear. It is not in the current integration source; native and size acceptance remain pending. Withdrawal remains a distinct missing recipe.
+- Separate `d95e8aaa2359baa3fde2ae23dd846e86ccb68ab5` handoff adds47–50 with 16 authored cases, guardian veto/current liveness and permanent reason 3 revocation. 767-source ABI check passes and independent source review is clear. Integrated as582b9181; native and joined size acceptance remain pending. Withdrawal remains a distinct missing recipe.
 
 ### ART07 evidence
 
@@ -1185,6 +1246,8 @@ passing Python/synthetic control are deliberately kept distinct.
 
 ### sales.standard-gates evidence
 
+Latest source and validation: [16 September batch](#parallel-feature-batch-16-september). Older source inventories below retain their original date and do not override the updated table.
+
 **Concrete allowlist and signed-ticket gate kit**. Owner: Revenue builder; integrator. Requirements: [stream-sales-and-auctions.md](../docs/stream-sales-and-auctions.md) — [SSA-AUTH]; [mint-policy-and-accounting.md](../docs/mint-policy-and-accounting.md) — [MPA-GATES, MPA-TICKET].
 
 - [StreamMintGateValidator.sol](../smart-contracts/domains/mint/StreamMintGateValidator.sol). Source `b2fc0c3c`. Source inspected at integration b2fc0c3c; no new native execution in this inventory.
@@ -1343,6 +1406,8 @@ passing Python/synthetic control are deliberately kept distinct.
 
 ### sales.airdrop evidence
 
+Latest source and validation: [16 September batch](#parallel-feature-batch-16-september). Older source inventories below retain their original date and do not override the updated table.
+
 **Current operator batch distribution product**. Owner: Revenue builder; integrator. Requirements: [stream-sales-and-auctions.md](../docs/stream-sales-and-auctions.md) — [SSA-AIRDROP].
 
 - [IStreamMintManager.sol](../smart-contracts/interfaces/stream/mint/IStreamMintManager.sol). Source `b2fc0c3c`. Source inspected at integration b2fc0c3c; no new native execution in this inventory.
@@ -1425,6 +1490,8 @@ passing Python/synthetic control are deliberately kept distinct.
 
 ### revenue.resolver-continuity evidence
 
+Latest source and validation: [16 September batch](#parallel-feature-batch-16-september). Older source inventories below retain their original date and do not override the updated table.
+
 **Frozen economic continuity on Resolver replacement**. Owner: Revenue builder; integrator. Requirements: [revenue-splits-and-royalties.md](../docs/revenue-splits-and-royalties.md) — Resolver Replacement And Frozen Economic Continuity.
 
 - [revenue-splits-and-royalties.md](../docs/revenue-splits-and-royalties.md). Source `b2fc0c3c`. Source inspected at integration b2fc0c3c; no new native execution in this inventory.
@@ -1485,6 +1552,8 @@ passing Python/synthetic control are deliberately kept distinct.
 
 
 ### client.commerce evidence
+
+Latest source and validation: [16 September batch](#parallel-feature-batch-16-september). Older source inventories below retain their original date and do not override the updated table.
 
 **Typed native/revenue/secondary and saved inventory workflows**. Owner: Revenue builder; integrator. Requirements: [stream-sales-and-auctions.md](../docs/stream-sales-and-auctions.md) — [SSA-GATES]; [revenue-splits-and-royalties.md](../docs/revenue-splits-and-royalties.md) — Operator UX.
 
@@ -1608,12 +1677,16 @@ passing Python/synthetic control are deliberately kept distinct.
 
 ### MUSEUM-13 evidence
 
+Latest source and validation: [16 September batch](#parallel-feature-batch-16-september). Older source inventories below retain their original date and do not override the updated table.
+
 **Remaining named owner/institutional record semantic adapters**. Owner: Museum/metadata builder; integrator. Requirements: `CMC-OWNER-RECORDS 8-9,13`; `CMC-GENESIS-SCHEMAS`; `MSM-MAPPING 3`; `MSM-RELATIONS 5`.
 
 - [collection-metadata-contract.md](../docs/collection-metadata-contract.md); [owner_record_source.py](../tools/museum/owner_record_source.py). Source `7209675bfb1787bd3e6a73927120dce21cbed585`. Current source inspected; no new test or compilation run for this register. Specific historic evidence remains qualified by its original source.
 
 
 ### MUSEUM-14 evidence
+
+Latest source and validation: [16 September batch](#parallel-feature-batch-16-september). Older source inventories below retain their original date and do not override the updated table.
 
 **Full condition report and conservation-treatment mapping**. Owner: Museum/metadata builder; integrator. Requirements: `CMC-GENESIS-SCHEMAS 3`; `CMC-EXHIBITION-LOAN 2`; `MSM-MAPPING 3`; `MSM-RELATIONS 3-6`.
 
@@ -1677,6 +1750,8 @@ passing Python/synthetic control are deliberately kept distinct.
 
 
 ### MUSEUM-23 evidence
+
+Latest source and validation: [16 September batch](#parallel-feature-batch-16-september). Older source inventories below retain their original date and do not override the updated table.
 
 **Historical, uncertain and role-specific place semantics**. Owner: Museum/metadata builder; integrator. Requirements: `MSM-PLACES 1-7`; `MSM-07-PLACES`.
 
