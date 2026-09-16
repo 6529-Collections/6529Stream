@@ -41,7 +41,7 @@ import {
 import {
     IStreamArtistRecordPublicationOwner
 } from "../../smart-contracts/interfaces/stream/artist/IStreamArtistRecordPublicationOwner.sol";
-import "../../smart-contracts/domains/mint/StreamMintManager.sol";
+import { StreamMintManager } from "../../smart-contracts/domains/mint/StreamMintManager.sol";
 import "../../smart-contracts/domains/mint/StreamMintLedger.sol";
 import "../../smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol";
 import "../../smart-contracts/domains/revenue/StreamSplitFactory.sol";

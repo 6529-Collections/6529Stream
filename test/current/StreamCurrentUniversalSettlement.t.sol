@@ -6,7 +6,9 @@ import "../helpers/StreamCurrentAssetPolicy.sol";
 import "../helpers/OfficialSafeFixture.sol";
 import { StreamArtistSaleTypes as SaleTerms } from "../../smart-contracts/interfaces/stream/artist/StreamArtistSaleTypes.sol";
 import "../mocks/MockStreamPaymentToken.sol";
-import "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
+import {
+    StreamPrimarySaleSettlement
+} from "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
 import "../../smart-contracts/domains/revenue/StreamERC20PrimarySettlementAdapter.sol";
 import "../../smart-contracts/domains/mint/StreamUniversalFixedPriceSaleAdapter.sol";
 

@@ -20,7 +20,7 @@ import "../../smart-contracts/domains/governance/StreamGovernanceExecutor.sol";
 import "../../smart-contracts/domains/governance/StreamGovernanceActor.sol";
 import "../../smart-contracts/domains/governance/StreamRoleRegistry.sol";
 import "../../smart-contracts/domains/governance/StreamSystemManifest.sol";
-import "../../smart-contracts/domains/mint/StreamMintManager.sol";
+import { StreamMintManager } from "../../smart-contracts/domains/mint/StreamMintManager.sol";
 import "../../smart-contracts/domains/mint/StreamMintLedger.sol";
 import "../../smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol";
 import "../../smart-contracts/domains/mint/StreamERC20FixedPriceSaleAdapter.sol";

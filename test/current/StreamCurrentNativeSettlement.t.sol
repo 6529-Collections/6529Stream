@@ -3,7 +3,9 @@ pragma solidity ^0.8.19;
 
 import "../helpers/StreamCurrentStackFixture.sol";
 import "../helpers/OfficialSafeFixture.sol";
-import "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
+import {
+    StreamPrimarySaleSettlement
+} from "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
 import "../../smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol";
 import {
     StreamArtistSaleTypes as SaleTerms

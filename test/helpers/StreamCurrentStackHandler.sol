@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../regression/legacy/helpers/CharacterizationTestBase.sol";
 import "../../smart-contracts/core/StreamCore.sol";
-import "../../smart-contracts/domains/mint/StreamMintManager.sol";
+import { StreamMintManager } from "../../smart-contracts/domains/mint/StreamMintManager.sol";
 import "../../smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol";
 import "../../smart-contracts/domains/mint/StreamERC20FixedPriceSaleAdapter.sol";
 import "../../smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol";

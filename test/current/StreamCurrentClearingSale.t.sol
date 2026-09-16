@@ -3,7 +3,9 @@ pragma solidity ^0.8.19;
 
 import "../helpers/StreamCurrentSafeGovernanceFixture.sol";
 import "../../smart-contracts/domains/mint/StreamNativeClearingSale.sol";
-import "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
+import {
+    StreamPrimarySaleSettlement
+} from "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
 import {
     StreamArtistSaleTypes as ClearingConsent
 } from "../../smart-contracts/interfaces/stream/artist/StreamArtistSaleTypes.sol";

@@ -2,7 +2,13 @@
 pragma solidity ^0.8.19;
 
 import "../helpers/StreamCurrentSafeGovernanceFixture.sol";
-import "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
+import { IStreamMintGate } from "../../smart-contracts/interfaces/stream/mint/IStreamMintGate.sol";
+import {
+    StreamMintGateValidator
+} from "../../smart-contracts/domains/mint/StreamMintGateValidator.sol";
+import {
+    StreamPrimarySaleSettlement
+} from "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
 import "../../smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol";
 import { StreamBurnMintGate } from "../../smart-contracts/domains/mint/StreamBurnMintGate.sol";
 import {

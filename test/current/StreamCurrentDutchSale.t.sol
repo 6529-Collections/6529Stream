@@ -3,7 +3,9 @@ pragma solidity ^0.8.19;
 
 import "../helpers/StreamCurrentSafeGovernanceFixture.sol";
 import "../../smart-contracts/domains/mint/StreamNativeDutchSale.sol";
-import "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
+import {
+    StreamPrimarySaleSettlement
+} from "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
 import "../../smart-contracts/domains/entropy/StreamEntropyProviderARRNG.sol";
 import "../../smart-contracts/interfaces/stream/artist/IStreamArtistIdentityContest.sol";
 import {

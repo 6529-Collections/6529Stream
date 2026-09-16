@@ -14,7 +14,9 @@ import "./ArtistSanctionFinalityFixture.sol";
 import "./ArtistIdentityReadEncodingFixture.sol";
 import "./ArtistRecoveryIntentFixture.sol";
 import "../../../smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol";
-import "../../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
+import {
+    StreamPrimarySaleSettlement
+} from "../../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
 import { StreamRevenueEscrow } from "../../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
 import "../../../smart-contracts/domains/artist/StreamArtistOnboardingRegistry.sol";
 import "../../../smart-contracts/domains/artist/StreamArtistArchiveV2.sol";
@@ -29,7 +31,7 @@ import "../../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
 import "../../../smart-contracts/domains/revenue/StreamRoyaltyResolver.sol";
 import "../../../smart-contracts/domains/revenue/StreamSplitFactory.sol";
 import "../../../smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol";
-import "../../../smart-contracts/domains/mint/StreamMintManager.sol";
+import { StreamMintManager } from "../../../smart-contracts/domains/mint/StreamMintManager.sol";
 import "../../../smart-contracts/domains/mint/StreamMintLedger.sol";
 
 interface ArtistTestVm {
