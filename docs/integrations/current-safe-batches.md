@@ -21,6 +21,9 @@ delegate directly into a protocol contract.
 | Downstream failure after purchase, request or transfer | Revert prior Core allocation/counters, Manager nonce, sale consumption, split value, entropy/provider state and the outer Safe nonce; byte-identical batch succeeds after the caller repairs its postcondition |
 | Same authorization twice in a batch | Second use rejects and rolls back the first purchase; original authorization remains usable |
 | Inner delegatecall following a purchase | Official call-only wrapper rejects it and rolls back payment, mint and Safe nonce |
+| Buyer identity | A Safe owner EOA and another threshold Safe with identical owners cannot substitute the signed payer; the intended Safe can still use that authorization |
+| Artist payout redirection and downstream failure | Only the Artist Safe can redirect its entitlement; a later rejection rolls back payment and release accounting, then the exact signed Safe transaction succeeds once |
+| NFT delivery to a Safe without a receiver handler | A late safe transfer rolls back purchase, request and approval; installing the official handler on the recipient permits the exact signed buyer transaction, and transfer clears approval |
 
 The downstream-failure property varies the failure position and signed payment
 amount, including zero and integer-rounding dust. Assertions compare against
@@ -28,12 +31,21 @@ independent before/after balances, identities and counters. The deterministic
 provider models EVM request state and rollback; no live randomness-service
 delivery or gas-conformance claim follows.
 
+The payout property varies the actual sale amount, including integer-rounding
+dust, and independently computes the Artist's 900,000-ppm entitlement. It checks
+recipient balances, unreleased value, cumulative receipts and release counters,
+then rejects replay of the consumed Safe envelope. Both role-negative cases use
+the actual distinct Safe identities despite shared signing keys.
+
 ## Execution boundary
 
-The four cases are authored and pass an 874-source Solidity 0.8.19 ABI/type
-check. Their native execution remains pending. They are later than the frozen
-six-suite `acceptance-20260915-b` capture. That capture was interrupted before
-native compiler completion and produced no runtime or production-size results.
+The seven cases are authored, with Solidity 0.8.19 ABI/type checking only.
+Their native execution remains pending. They are later than the frozen six-suite
+`acceptance-20260915-b` capture. That capture was interrupted before native
+compiler completion and produced no runtime or production-size results. These
+cases use two-owner, threshold-two Safe 1.4.1; the complete selector inventory,
+other versions, thresholds, nesting and transaction capacity remain separate
+acceptance obligations.
 
 After building and preparing the current graph, run:
 

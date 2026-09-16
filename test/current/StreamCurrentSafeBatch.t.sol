@@ -31,11 +31,13 @@ contract StreamCurrentSafeBatchTest is StreamCurrentStackFixture, OfficialSafeFi
     OfficialSafe private buyerSafe;
     address private multiSend;
     uint256[] private keys;
+    SafeComponents private safeComponents;
 
     function setUp() public {
         keys.push(0x5AFE01);
         keys.push(0x5AFE02);
         SafeComponents memory components = deploySafeComponents("1.4.1");
+        safeComponents = components;
         multiSend = components.multiSend;
         artistSafe = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 301);
         buyerSafe = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 302);
@@ -83,14 +85,17 @@ contract StreamCurrentSafeBatchTest is StreamCurrentStackFixture, OfficialSafeFi
         private
         returns (bytes memory)
     {
+        return _call(address(sale), a.price, _buyData(a));
+    }
+
+    function _buyData(IStreamFixedPriceSaleAdapter.SaleAuthorization memory a)
+        private
+        returns (bytes memory)
+    {
         bytes32 digest = sale.authorizationDigest(a);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(PLATFORM_KEY, digest);
-        return _call(
-            address(sale),
-            a.price,
-            abi.encodeCall(
-                sale.buy, (a, TOKEN_DATA, abi.encodePacked(r, s, v), _artistProof(digest))
-            )
+        return abi.encodeCall(
+            sale.buy, (a, TOKEN_DATA, abi.encodePacked(r, s, v), _artistProof(digest))
         );
     }
 
@@ -156,12 +161,19 @@ contract StreamCurrentSafeBatchTest is StreamCurrentStackFixture, OfficialSafeFi
         private
         view
     {
+        _assertPurchasedAt(a, SECOND_OWNER);
+    }
+
+    function _assertPurchasedAt(
+        IStreamFixedPriceSaleAdapter.SaleAuthorization memory a,
+        address recipient
+    ) private view {
         require(buyerSafe.nonce() == 1, "one outer Safe transaction");
         require(
             address(buyerSafe).balance == 20 ether - a.price, "payer charged exact signed amount"
         );
         require(core.totalSupply() == 1 && core.collectionMintedEver(1) == 1, "one permanent mint");
-        require(core.ownerOf(1) == SECOND_OWNER, "later CALL transferred actual custody");
+        require(core.ownerOf(1) == recipient, "later CALL transferred actual custody");
         require(
             manager.nextOperationNonce() == 1 && sale.authorizationUsed(artist, a.nonce),
             "one authorization consumed"
@@ -296,5 +308,191 @@ contract StreamCurrentSafeBatchTest is StreamCurrentStackFixture, OfficialSafeFi
             "same target and calldata succeed with CALL"
         );
         _assertPurchased(a);
+    }
+
+    function _signedBatch(OfficialSafe account, bytes memory transactions)
+        private
+        returns (bytes memory)
+    {
+        bytes memory data = abi.encodeCall(CurrentCallOnlyMultiSend.multiSend, (transactions));
+        bytes32 digest = account.getTransactionHash(
+            multiSend, 0, data, 1, 0, 0, 0, address(0), address(0), account.nonce()
+        );
+        return abi.encodeCall(
+            account.execTransaction,
+            (
+                multiSend,
+                0,
+                data,
+                uint8(1),
+                0,
+                0,
+                0,
+                address(0),
+                payable(address(0)),
+                safeThresholdSignature(keys, digest)
+            )
+        );
+    }
+
+    function testSafeOwnerAndIdenticallyOwnedSafeCannotImpersonateBuyer() public {
+        IStreamFixedPriceSaleAdapter.SaleAuthorization memory a = _authorization(0.01 ether);
+        bytes memory data = _buyData(a);
+        address owner = vm.addr(keys[0]);
+        vm.deal(owner, a.price);
+        vm.prank(owner);
+        (bool ok, bytes memory reason) = address(sale).call{ value: a.price }(data);
+        require(
+            !ok
+                && keccak256(reason)
+                    == keccak256(abi.encodeWithSignature("InvalidSaleAuthorization()")),
+            "owner EOA is not the signed Safe payer"
+        );
+        require(owner.balance == a.price, "rejected owner keeps value");
+        _assertRollback(a);
+
+        // Both Safes have the same keys and threshold. Their protocol identities still differ.
+        vm.deal(address(artistSafe), a.price);
+        (ok, reason) = address(artistSafe).call(_signedBatch(artistSafe, _buy(a)));
+        require(
+            !ok && keccak256(reason) == keccak256(abi.encodeWithSignature("Error(string)", "GS013"))
+                && artistSafe.nonce() == 0 && address(artistSafe).balance == a.price,
+            "another valid Safe cannot substitute its own caller identity"
+        );
+        _assertRollback(a);
+        require(
+            this.executeBuyerBatch(bytes.concat(_buy(a), _request(), _transfer())),
+            "exact signed authorization remains available to its actual Safe payer"
+        );
+        _assertPurchased(a);
+    }
+
+    function testFuzzAllCallArtistRedirectRollbackAndExactSignedRetry(uint96 amount) public {
+        uint256 price = uint256(amount) % (10 ether) + 2;
+        IStreamFixedPriceSaleAdapter.SaleAuthorization memory a = _authorization(price);
+        require(
+            this.executeBuyerBatch(bytes.concat(_buy(a), _request(), _transfer())),
+            "paid mint creates actual split entitlement"
+        );
+        _assertPurchased(a);
+        IStreamSplitWallet split = IStreamSplitWallet(wallet);
+        uint256 entitlement = price * 900_000 / 1_000_000;
+        uint256 recipientBefore = SECOND_OWNER.balance;
+        bytes memory release = abi.encodeCall(
+            split.release, (address(0), address(artistSafe), payable(SECOND_OWNER))
+        );
+        address owner = vm.addr(keys[0]);
+        vm.prank(owner);
+        (bool ok, bytes memory reason) = wallet.call(release);
+        require(
+            !ok
+                && keccak256(reason)
+                    == keccak256(
+                        abi.encodeWithSelector(
+                            IStreamSplitWallet.UnauthorizedReleaseRecipient.selector,
+                            owner,
+                            address(artistSafe),
+                            SECOND_OWNER
+                        )
+                    ),
+            "owner EOA cannot redirect its Safe's entitlement"
+        );
+        (ok, reason) = address(buyerSafe).call(_signedBatch(buyerSafe, _call(wallet, 0, release)));
+        require(
+            !ok && keccak256(reason) == keccak256(abi.encodeWithSignature("Error(string)", "GS013"))
+                && buyerSafe.nonce() == 1,
+            "identically owned buyer Safe cannot redirect Artist entitlement"
+        );
+        CurrentBatchPostcondition condition = new CurrentBatchPostcondition();
+        bytes memory batch = bytes.concat(
+            _call(wallet, 0, release),
+            _call(address(condition), 0, abi.encodeCall(condition.check, ()))
+        );
+        bytes memory savedCall = _signedBatch(artistSafe, batch);
+        (ok, reason) = address(artistSafe).call(savedCall);
+        require(
+            !ok && keccak256(reason) == keccak256(abi.encodeWithSignature("Error(string)", "GS013"))
+                && artistSafe.nonce() == 0 && wallet.balance == price
+                && SECOND_OWNER.balance == recipientBefore
+                && split.accountReleased(address(0), artist) == 0
+                && split.totalReleased(address(0)) == 0
+                && split.releasable(address(0), artist) == entitlement,
+            "later CALL rolls back payout, released accounting and Artist Safe nonce"
+        );
+        condition.accept();
+        (ok, reason) = address(artistSafe).call(savedCall);
+        require(ok && abi.decode(reason, (bool)), "identical signed Artist batch retries");
+        require(
+            artistSafe.nonce() == 1 && buyerSafe.nonce() == 1
+                && SECOND_OWNER.balance == recipientBefore + entitlement
+                && wallet.balance == price - entitlement
+                && split.accountReleased(address(0), artist) == entitlement
+                && split.totalReleased(address(0)) == entitlement
+                && split.releasable(address(0), artist) == 0
+                && split.observedReceived(address(0)) == price && core.ownerOf(1) == SECOND_OWNER
+                && core.collectionMintedEver(1) == 1 && sale.totalNativeProceeds() == price
+                && revenueEscrow.totalOwed(address(0)) == 0,
+            "one exact entitlement transfer conserves paid mint proceeds and NFT custody"
+        );
+        (ok,) = address(artistSafe).call(savedCall);
+        require(
+            !ok && artistSafe.nonce() == 1 && wallet.balance == price - entitlement
+                && SECOND_OWNER.balance == recipientBefore + entitlement,
+            "consumed Safe envelope cannot replay the release"
+        );
+    }
+
+    function testAllCallMissingSafeReceiverHandlerRollsBackAndExactSignedRetry() public {
+        SafeComponents memory components = safeComponents;
+        address handler = components.handler;
+        components.handler = address(0);
+        OfficialSafe recipient = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 303);
+        IStreamFixedPriceSaleAdapter.SaleAuthorization memory a = _authorization(0.01 ether);
+        bytes memory batch = bytes.concat(
+            _buy(a),
+            _request(),
+            _call(address(core), 0, abi.encodeCall(core.approve, (SECOND_OWNER, uint256(1)))),
+            _call(
+                address(core),
+                0,
+                abi.encodeWithSignature(
+                    "safeTransferFrom(address,address,uint256)",
+                    address(buyerSafe),
+                    address(recipient),
+                    uint256(1)
+                )
+            )
+        );
+        bytes memory savedCall = _signedBatch(buyerSafe, batch);
+        (bool ok, bytes memory result) = address(buyerSafe).call(savedCall);
+        require(
+            !ok
+                && keccak256(result)
+                    == keccak256(abi.encodeWithSignature("Error(string)", "GS013")),
+            "missing receiver handler rejects late custody delivery"
+        );
+        _assertRollback(a);
+        require(
+            recipient.nonce() == 0 && core.balanceOf(address(recipient)) == 0, "recipient unchanged"
+        );
+        require(
+            executeSafe(
+                recipient,
+                keys,
+                address(recipient),
+                0,
+                abi.encodeWithSignature("setFallbackHandler(address)", handler),
+                0
+            ),
+            "recipient configures its actual official compatibility handler"
+        );
+        (ok, result) = address(buyerSafe).call(savedCall);
+        require(ok && abi.decode(result, (bool)), "identical signed buyer batch retries");
+        _assertPurchasedAt(a, address(recipient));
+        require(
+            recipient.nonce() == 1 && core.balanceOf(address(recipient)) == 1
+                && core.getApproved(1) == address(0),
+            "real Safe receives NFT and transfer clears approval"
+        );
     }
 }

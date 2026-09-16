@@ -18,7 +18,9 @@ the release policy in `docs/release-policy.md`.
   native execution remains pending.
 
 - Add official Safe all-CALL batch tests for paid mint, entropy, custody,
-  replay and cross-component rollback; native execution remains pending.
+  replay and cross-component rollback, including payer/beneficiary caller
+  isolation, payout redirection and receiver-handler repair with exact signed
+  retries; native execution remains pending.
 
 - Correct the Artist entropy-recovery test fixture's canonical role-registry
   pin and add live-role revocation/regrant and registry-drift regressions.
