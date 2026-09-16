@@ -407,9 +407,15 @@ contract StreamNativeAllowlistRefundWindowSaleTest is RefundWindowTestBase {
         require(
             !recorder.deferredPurchaseConsumed(
                     recorder.deferredPurchaseKey(address(refundSale), id)
-                ) && refundSale.activeDeferredNativeSettlement(id) == 0,
-            "recorder and active binding rollback"
+                ),
+            "recorder replay rollback"
         );
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamNativeRefundWindowSale.RefundPurchaseUnavailable.selector, id
+            )
+        );
+        refundSale.activeDeferredNativeSettlement(id);
         refundManager.setMode(0);
         IStreamNativeRefundWindowSale.RefundFinalizationResult memory r =
             refundSale.finalizeRefundWindow(id);
