@@ -119,6 +119,16 @@ contract StreamCurrentERC20PrimaryOfferTest is NativeCuratedSaleFixture, Officia
         uint256 price,
         address asset
     );
+    event ImmediateRevealAttempt(
+        uint16 schemaVersion,
+        uint256 indexed collectionId,
+        uint256 indexed tokenId,
+        bool succeeded,
+        bytes32 requestKey,
+        uint256 providerRequestId,
+        uint256 returnDataSize,
+        bytes failurePrefix
+    );
 
     struct Plan {
         bytes32 id;
@@ -147,6 +157,7 @@ contract StreamCurrentERC20PrimaryOfferTest is NativeCuratedSaleFixture, Officia
     }
 
     function testSelectedDirectPayerFundsActualRevenueAndMintsOriginalWork() public {
+        entropy.configure(0, 0, false, false);
         vm.expectRevert(
             abi.encodeWithSelector(StreamERC20PrimaryOfferSale.InvalidERC20PrimaryOffer.selector)
         );
@@ -366,7 +377,10 @@ contract StreamCurrentERC20PrimaryOfferTest is NativeCuratedSaleFixture, Officia
         payment.settleERC20PrimarySaleWithIntent(c, intent, proof, abi.encode(q));
         _assertUnused(p, q, c, intent.nonce);
         require(token.transferCalls() == 0, "fee incompatibility fails before token effects");
-        entropy.configure(0, 1, false, true);
+        entropy.configure(0, 0, false, true);
+        bytes memory failure = abi.encodeWithSignature("Error(string)", "provider rejected");
+        CurrentERC20OfferEventVm(address(vm)).expectEmit(true, true, false, true, address(offers));
+        emit ImmediateRevealAttempt(1, 1, 1, false, 0, 0, failure.length, failure);
         vm.prank(payer);
         Primary.PrimarySettlementResult memory r =
             payment.settleERC20PrimarySaleWithIntent(c, intent, proof, abi.encode(q));
