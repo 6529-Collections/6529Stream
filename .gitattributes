@@ -27,6 +27,9 @@ deployments/current/sepolia-2026-09-10/SHA256SUMS text eol=lf
 # Keep generated client projections identical on Windows and Linux.
 packages/stream-client/** text eol=lf
 
+# Retain canonical metric ABI payload bytes without newline conversion.
+packages/stream-client/test/fixtures/current-reference-metric-replay.abi -text
+
 # Preserve the official Safe package license bytes in Windows checkouts.
 test/fixtures/safe/LICENSE-1.3.0 text eol=lf
 test/fixtures/safe/LICENSE-1.4.1 text eol=lf

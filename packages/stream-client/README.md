@@ -338,6 +338,9 @@ contract profiles and outstanding larger-script work.
 
 - [Ordered Safe CALL plans](docs/safe-call-plans.md) preserve every supplied
   state-changing selector, actual caller, value and readable arguments.
+- [Metric supplement bytes](docs/current-reference-metric.md) retain original
+  source, runtime and replay identities; the [publication workflow](docs/current-reference-metric-workflow.md)
+  stages permissionless uploads before writer publication and receipt readback.
 - [Exact TEMPLATE CLEAR/FREEZE](docs/exact-template-mutations.md) covers original
   Artist approval, independent assignment reconstruction and owner installation.
 - [Artist ceremony packets](docs/current-artist-ceremony.md) disclose all signed

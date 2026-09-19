@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add retained metric source, runtime and replay clients with staged chunk uploads,
+  writer publication, distinct receipt identities and ordinary Safe CALL plans.
+
 - Add typed native dossier joins, MetadataV1 record enumeration and a current
   registered-host roster, preserving original assemblies and record occurrences
   while keeping global host coverage and genuine capture acceptance unresolved.
