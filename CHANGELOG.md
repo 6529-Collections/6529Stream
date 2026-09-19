@@ -5,6 +5,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add an externally pinned read-only native dossier capture runner with a
+  six-source minimum, complete supported registered scopes and offline result
+  reconstruction; actual native graph execution remains separately required.
+
 - Add retained metric source, runtime and replay clients with staged chunk uploads,
   writer publication, distinct receipt identities and ordinary Safe CALL plans.
 

@@ -44,6 +44,8 @@ genuine native capture and full dossier acceptance remain separate.
 [Typed native dossier joins](../../docs/museum-native-dossier-joins.md) add
 MetadataV1 enumeration, the current registered-host roster and a V2 partial
 assembly that checks common source reads and preserves the unchanged V1 output.
+The same guide includes a coordinated read-only capture runner with externally
+pinned same-block anchors, paired independent scopes and offline reconstruction.
 
 Run from the repository root with Python 3.11 or later. Create an isolated
 environment and install the Museum dependency set; the repository's general
