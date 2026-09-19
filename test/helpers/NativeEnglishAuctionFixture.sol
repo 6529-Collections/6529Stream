@@ -5,6 +5,7 @@ import "../helpers/RevenueV1TestBase.sol";
 import "../helpers/OfficialSafeFixture.sol";
 import "../unit/revenue/PreparedNativeSaleFixture.sol";
 import "./NativeEnglishAuctionMocks.sol";
+import "./ArtistArtifactCreate.sol";
 import "../../smart-contracts/domains/governance/StreamRoleRegistry.sol";
 import "../../smart-contracts/core/StreamCore.sol";
 import "../../smart-contracts/core/StreamCoreExternalReads.sol";
@@ -18,7 +19,11 @@ import "../../smart-contracts/interfaces/stream/entropy/IStreamEntropyCoordinato
 /// @notice Real Core/Manager/Ledger/Registry/9, wallet/escrow, roles and Safe.
 /// @dev Setup/registry helpers copied from native-first6 with explicit house and semantic
 /// Artist/entropy additions. The Executor is a target-side context fixture, not full governance.
-abstract contract NativeEnglishAuctionFixture is RevenueV1TestBase, OfficialSafeFixture {
+abstract contract NativeEnglishAuctionFixture is
+    RevenueV1TestBase,
+    OfficialSafeFixture,
+    ArtistArtifactCreate
+{
     bytes32 internal constant PHASE = keccak256("actual paid prepared phase");
     bytes32 internal constant COUNTER = keccak256("prepared payer counter");
     bytes32 internal constant CLASS = keccak256("PRIMARY_SALE");
@@ -48,8 +53,15 @@ abstract contract NativeEnglishAuctionFixture is RevenueV1TestBase, OfficialSafe
         vm.warp(1000);
         payer = vm.addr(PAYER_KEY);
         revenueAuthority = new NativeAuctionAuthority();
-        registry = new StreamModuleRegistry(
-            IStreamGovernanceExecutor(address(revenueAuthority)), MANIFEST, "urn:prepared:registry"
+        registry = StreamModuleRegistry(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/modules/StreamModuleRegistry.sol:StreamModuleRegistry",
+                    abi.encode(
+                        IStreamGovernanceExecutor(address(revenueAuthority)),
+                        MANIFEST,
+                        "urn:prepared:registry"
+                    )
+                ))
         );
         StreamCore.GasParameterGenesisConfig[] memory gasRows =
             new StreamCore.GasParameterGenesisConfig[](4);
@@ -65,17 +77,32 @@ abstract contract NativeEnglishAuctionFixture is RevenueV1TestBase, OfficialSafe
         gasRows[3] = StreamCore.GasParameterGenesisConfig(
             keccak256("6529STREAM_GGP_ENTROPY_REGISTRATION_GAS_LIMIT"), 120000, 120000, 2
         );
-        core = new StreamCore(
-            "Prepared Current",
-            "PPC",
-            address(revenueAuthority),
-            StreamCore.GenesisModuleRegistryConfig(
-                address(registry), address(registry).codehash, MANIFEST, MANIFEST
-            ),
-            gasRows
+        core = StreamCore(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/core/StreamCore.sol:StreamCore",
+                    abi.encode(
+                        "Prepared Current",
+                        "PPC",
+                        address(revenueAuthority),
+                        StreamCore.GenesisModuleRegistryConfig(
+                            address(registry), address(registry).codehash, MANIFEST, MANIFEST
+                        ),
+                        gasRows
+                    )
+                ))
         );
-        ledger = new StreamMintLedger();
-        manager = new StreamMintManager(core, ledger, IERC165(address(registry)));
+        ledger = StreamMintLedger(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/mint/StreamMintLedger.sol:StreamMintLedger",
+                    abi.encode()
+                ))
+        );
+        manager = StreamMintManager(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/mint/StreamMintManager.sol:StreamMintManager",
+                    abi.encode(core, ledger, IERC165(address(registry)))
+                ))
+        );
         ledger.setLedgerWriter(address(manager), true);
         _register(
             address(registry),
@@ -107,18 +134,33 @@ abstract contract NativeEnglishAuctionFixture is RevenueV1TestBase, OfficialSafe
         );
         _pointer(keccak256("ENTROPY_COORDINATOR"), address(entropy));
         _collection();
-        policy = new StreamAssetPolicyRegistry(address(revenueAuthority));
+        policy = StreamAssetPolicyRegistry(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry",
+                    abi.encode(address(revenueAuthority))
+                ))
+        );
         IStreamGasParameterHost.GasParameterConfig[3] memory config = _walletGasConfigs();
         config[2].genesisValue = 500000;
-        factory = new StreamSplitFactory(policy, address(revenueAuthority), config);
-        resolver = new StreamRevenueResolver(
-            core,
-            factory,
-            address(revenueAuthority),
-            artists,
-            IStreamGasParameterHost.GasParameterConfig(
-                "ARTIST_BENEFICIARY_READ_GAS", 200000, 50000, 2
-            )
+        factory = StreamSplitFactory(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/revenue/StreamSplitFactory.sol:StreamSplitFactory",
+                    abi.encode(policy, address(revenueAuthority), config)
+                ))
+        );
+        resolver = StreamRevenueResolver(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/revenue/StreamRevenueResolver.sol:StreamRevenueResolver",
+                    abi.encode(
+                        core,
+                        factory,
+                        address(revenueAuthority),
+                        artists,
+                        IStreamGasParameterHost.GasParameterConfig(
+                            "ARTIST_BENEFICIARY_READ_GAS", 200000, 50000, 2
+                        )
+                    )
+                ))
         );
         vm.prank(address(revenueAuthority));
         resolver.transferOwnership(address(this));
@@ -128,12 +170,24 @@ abstract contract NativeEnglishAuctionFixture is RevenueV1TestBase, OfficialSafe
         (profile, wallet) = factory.createProfile(entries, keccak256("prepared rights"));
         resolver.setPrimaryProfileAssignment(CLASS, 1, 1, profile, 0);
         artists.accept(vm.addr(SIGNER_KEY));
-        escrow = new StreamRevenueEscrow(
-            factory,
-            address(revenueAuthority),
-            IStreamGasParameterHost.GasParameterConfig("FLUSH_GAS_FLOOR", 12000000, 12000000, 3)
+        escrow = StreamRevenueEscrow(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/revenue/StreamRevenueEscrow.sol:StreamRevenueEscrow",
+                    abi.encode(
+                        factory,
+                        address(revenueAuthority),
+                        IStreamGasParameterHost.GasParameterConfig(
+                            "FLUSH_GAS_FLOOR", 12000000, 12000000, 3
+                        )
+                    )
+                ))
         );
-        recorder = new StreamPrimarySaleSettlement(resolver, address(registry), escrow);
+        recorder = StreamPrimarySaleSettlement(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+                    abi.encode(resolver, address(registry), escrow)
+                ))
+        );
         _register(
             address(recorder),
             keccak256("PRIMARY_SALE_SETTLEMENT"),
@@ -146,7 +200,12 @@ abstract contract NativeEnglishAuctionFixture is RevenueV1TestBase, OfficialSafe
         vm.prank(address(revenueAuthority));
         escrow.setCreditProducer(address(recorder), true);
         _clearContext();
-        auctionRoles = new StreamRoleRegistry(address(revenueAuthority));
+        auctionRoles = StreamRoleRegistry(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/governance/StreamRoleRegistry.sol:StreamRoleRegistry",
+                    abi.encode(address(revenueAuthority))
+                ))
+        );
         NativeAuctionAuthority(address(revenueAuthority)).setRoleRegistry(address(auctionRoles));
         _grantAuctionRole(keccak256("ROLE_PAUSE_GUARDIAN"), address(0xA11));
         _grantAuctionRole(keccak256("ROLE_UNPAUSE"), address(0xB22));
@@ -170,7 +229,12 @@ abstract contract NativeEnglishAuctionFixture is RevenueV1TestBase, OfficialSafe
             "SALE_NFT_DELIVERY_GAS_LIMIT", 300000, 100000, 2
         );
         _prepareHouseConfiguration(d);
-        house = new StreamNativeEnglishAuction(d);
+        house = StreamNativeEnglishAuction(
+            payable(_artistArtifactCreate(
+                    "smart-contracts/domains/auctions/StreamNativeEnglishAuction.sol:StreamNativeEnglishAuction",
+                    abi.encode(d)
+                ))
+        );
         _register(
             address(house),
             keccak256("NATIVE_PREPARED_SALE_ADAPTER"),
