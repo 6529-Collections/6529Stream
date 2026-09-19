@@ -36,4 +36,7 @@ export * from "./current-primary-offer-content.js";
 export * from "./current-primary-offer.js";
 export * from "./current-reference-metric.js";
 export * from "./current-reference-metric-workflow.js";
+export * from "./current-erc20-primary-offer-signing.js";
+export * from "./current-erc20-primary-offer-content.js";
+export * from "./current-erc20-primary-offer.js";
 export * from "./current-entropy-authority.js";

@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add atomic ERC20 primary offer clients with original Sales signatures, separate
+  payer intent, four nonpayable funding routes and complete user-entry Safe CALL plans.
+
 - Add an externally pinned read-only native dossier capture runner with a
   six-source minimum, complete supported registered scopes and offline result
   reconstruction; actual native graph execution remains separately required.

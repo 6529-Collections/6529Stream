@@ -336,6 +336,9 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [ERC20 primary offers](docs/current-erc20-primary-offer.md) preserve original
+  Sales signatures and separate token-payer consent; [Safe calls](docs/current-erc20-primary-offer-safe.md)
+  cover all user-entry writes with zero native value.
 - [Ordered Safe CALL plans](docs/safe-call-plans.md) preserve every supplied
   state-changing selector, actual caller, value and readable arguments.
 - [Metric supplement bytes](docs/current-reference-metric.md) retain original
