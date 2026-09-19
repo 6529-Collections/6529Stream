@@ -1,6 +1,6 @@
 # Full-v1 current delivery status
 
-Updated 16 September 2026. The [feature status checklist](STREAM_FEATURE_STATUS.md)
+Updated 19 September 2026. The [feature status checklist](STREAM_FEATURE_STATUS.md)
 records every feature family with separate build, testing and integration status.
 Use it for the common delivery scope and remaining work. This file retains the
 current narrative and historical evidence boundaries.
@@ -15,6 +15,41 @@ local inherited/global primary-freeze implementation pending a more specific
 owner approval. The separate ERC-20 payable reveal-fee implementation is also
 blocked by automatic review even after the owner explicitly approved that local
 implementation. The exact unapplied patch is prepared and an artifact-specific approval is pending; other work continues.
+
+## 19 September recovery and integration
+
+Development resumed after the host reboot. The 16 September usage-limit
+interruption left the previous source and completed compiler logs intact.
+Existing builders are active again; no new chain or funding was needed.
+
+- Museum typed native joins are integrated as `97e2bf70`, with independent
+  functional review clear. Test-only `f01e62e4` follows the existing Metadata
+  host-to-library extraction. All 90 affected/compatibility tests, three
+  profile checks and 17 documentation tests pass. Genuine complete same-block
+  captures and global dossier completeness remain outstanding.
+- Metric supplement clients and staged Safe CALL workflows are integrated as
+  `c3e19568`. Root passes all 415 package tests, generation/build/type checks
+  and the exact retained ABI/replay-fixture generator check. This proves the
+  client scope; full publisher/contract/Safe runtime acceptance remains open.
+- ERC20 offer source remains independently reviewed. The completed original
+  shared run has 70/71 passes; the carrier run has 41/42. Their failures were
+  test setup: invalid asset deprecation grace and OWNER_WINDOW configuration
+  in an AT_MINT test. Test-only corrections `f90f103f`/`a14d9e35` also add
+  explicit negative/positive controls. Cached 40/15-case retries are pending.
+- The preservation publication run failed during setup because the fixture
+  saved a different original finality anchor from Router's durable anchor.
+  The production check correctly refused that graph. A default-preserving
+  fixture correction is independently source-reviewed and a cached successor
+  is being prepared; no joined export or metric replay is accepted yet.
+- Required ERC20 paid burn-to-mint and ERC20 offer clients are being built in
+  parallel. The separate Merkle-price host/worker rewrite hit a new automatic
+  review rejection over its broad settlement/storage-alias changes. The
+  rejected command remains unapplied; concrete narrower-design review continues.
+
+The original immutable RC1 remains the only supported deployed candidate.
+Current source integration, scoped execution and complete-system acceptance
+remain separate. The complete latest-stack Safe/fuzz/gas/CI/testnet pass follows
+completion of the coherent feature batches.
 
 ## 16 September parallel implementation batch
 

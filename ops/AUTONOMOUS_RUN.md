@@ -7,7 +7,7 @@ For current progress and the next acceptance targets, read
 [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md). Historical checkpoints below retain
 their original scope and are not a current completion score.
 
-Updated 16 September 2026. The owner authorizes autonomous completion of the
+Updated 19 September 2026. The owner authorizes autonomous completion of the
 remaining full v1 features, independent adversarial review and matching testnet
 delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
@@ -21,11 +21,28 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `2314878c`: Museum actual-token replay passes 62 root tests; metric tooling passes 81 offline controls and one restored-runtime execution. Full object dossier and joined browser/finality acceptance remain. Earlier curated sales and callers integrated; root 398 package tests and 55 distinct current contract cases pass on their recorded source scopes. Exact finality archive/schema/codec corrections integrated and independently reviewed; 2,098-source ABI/type/storage passes at2e0fca1a; later test-only provider setup has separate351-source ABI evidence. Metric supplement 5562bdb0 is source-integrated and independently reviewed; seven proof cases plus 256 parity fuzz pass, full publisher/replay acceptance remains. CI jobs now overlap with original gates preserved; root 49 orchestration tests pass, frozen release checksums still need final regeneration. Final-mode size preflight passes; native compilation fails with a Yul stack-layout error, with no tests run. Diagnosis and full-system acceptance remain. Native primary OFFER_SALE is source-integrated and independently reviewed, with 70 distinct verified passes across seam/current/Safe scopes and 398 client passes; object-dossier native adapter/partial assembly passes 60 root tests; complete owner/independent catalogs and ownership-history readers pass 111 root compatibility tests plus three profile checks with independent source review, genuine captures/assembler joins and full conformance still pending; Dutch/clearing 26 pass; ERC20offer shared/carrier42ab5d2d/2e0fca1a source and independent review complete,71/42native captures and clients pending, all15selected runtime products fit; preservation fixture2314878c fixes provider lifecycle setup with corrected cached capture pending; moving-price selection explicitly deferred by spec. RC1 stays `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
+| Source checkpoint | `f01e62e4`: recovered Museum joins and metric/Safe clients integrated; root 90 Museum and 415 client tests pass. Two ERC20 offer fixture corrections are integrated with cached native retries pending. See the [19 September report](V1_CURRENT_STATUS.md#19-september-recovery-and-integration) for source/runtime boundaries and active blockers. Immutable RC1 stays `569bf87f1fa808787d324f6e1582924b5ccf1d40`. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-09-16 UTC` |
+| Last updated | `2026-09-19 UTC` |
+
+## Reboot recovery assignments: 19 September
+
+All existing feature tasks have resumed; preserve their worktrees and finished
+captures. Mint owns the 40-case asset-fixture retry. Burn owns the 15-case
+reveal-fixture retry and the dedicated ERC20 paid-burn implementation, with
+unchanged shared payment/mint components. Clients finished the metric batch and
+now own ERC20 offer calls and Safe plans. Museum finished the typed joins and
+now builds the explicit-pin same-block capture recipe without starting a chain.
+Testing independently reviews the payment corrections and native evidence.
+
+The local metadata lead fixes the preservation fixture's inconsistent original
+anchor and completes publication/replay/lock acceptance; the revenue lead has
+source-reviewed that correction and awaits its genuine metric context. The
+price lead prepares a concrete narrower design after automatic review rejected
+a broad storage-alias/settlement rewrite. No rejected production delta is applied.
+Root owns integration, source publication and complete candidate acceptance.
 
 ## Autonomous feature-group leads
 

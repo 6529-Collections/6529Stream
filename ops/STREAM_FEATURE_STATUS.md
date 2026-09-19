@@ -1,6 +1,6 @@
 # Stream feature status
 
-Updated **16 September 2026 (UTC)**. This is the shared feature checklist for
+Updated **19 September 2026 (UTC)**. This is the shared feature checklist for
 the **complete v1 contract system and the adopted museum proposal**, including
 the agreed additions. It replaces informal percentage estimates. The integrator
 owns the whole result; domain builders supply implementation and evidence.
@@ -19,6 +19,18 @@ boundaries. Remaining work includes other required price-sale profiles,
 Artist authority profiles, three measured Artist/STATIC deployment-size blockers,
 Royalty successor consumption, complete component joins and final acceptance.
 Build and runtime integration remain separate facts in the rows below.
+
+## Latest integration checkpoint: 19 September
+
+The [recovery and integration report](V1_CURRENT_STATUS.md#19-september-recovery-and-integration)
+supersedes pending-run statements in the historical 16 September evidence.
+Museum native joins plus the extracted-helper parity correction pass 90 root
+tests; metric/Safe clients pass 415 root tests and exact fixture checks.
+Original ERC20 offer runs completed 70/71 shared and 41/42 carrier checks;
+the integrated test-only corrections have focused cached retries underway.
+The remaining paid ERC20 burn profile and offer clients are actively being built.
+Preservation still needs the corrected actual joined graph. No full-system
+acceptance, complete museum conformance or new testnet release is claimed.
 
 ## How to read this document
 
@@ -136,7 +148,7 @@ These 163 rows are capabilities and delivery checks of different sizes. Row coun
 | [sales.dutch](#salesdutch-evidence) Native descending-price Dutch sales | Built | Partly tested | Partial | Linear/stepped native schedule and signed maximum/current paid price. **Remaining:** Latest current-core/Safe paid/reveal/royalty composition and collector gas; no generic ERC20 Dutch implementation claimed. |
 | [sales.clearing](#salesclearing-evidence) Uniform-clearing Dutch and buyer rebates | Built | Partly tested | Partial | Native clearing book, price fixing, sparse/compressed purchase records, permanent rebates and supplements. **Remaining:** Latest complete conservation/clock/rights/escape runtime. Retained consumer gas measurements exceed 500,000; old 8,755,856 trace was warm-up preceded, not all-cold/current. |
 | [sales.refund-window](#salesrefund-window-evidence) Native refund-window sales and unconditional escape | Built | Partly tested | Partial | Original held deposits, finalization/refund/escape clocks and own-account credits. **Remaining:** Final graph settlement/delegation/export/surplus and timing/callback invariant execution; native-only scope explicit. |
-| [sales.private-offer](#salesprivate-offer-evidence) Private sales and atomic native/ERC20 offers | Built | Partly tested | Partial | Custody private/offer purchases, royalty-itemized secondary receipts and buyer-bound primary private selections are built. Canonical native primary mint OFFER_SALE (tokenId=0, optionally selected) is source-integrated in 364ec9e2/9945d612 with original dual-digest replay/revocation and independently reviewed source. Seventy distinct complementary cases pass, including actual Core/Manager/Ledger and 2-of-2 Safe, with typed Artist/entropy/governance. **Remaining:** Final full-graph/current/Safe acceptance. ERC20 primary-offer shared/carrier source 42ab5d2d/2e0fca1a now preserves separate payer intent and direct-to-buyer minting under zero native fees; independent source review is clear, 71/42-case native captures and clients remain pending. Nonzero native-fee support remains held separately. |
+| [sales.private-offer](#salesprivate-offer-evidence) Private sales and atomic native/ERC20 offers | Built | Partly tested | Partial | Custody private/offer purchases, royalty-itemized secondary receipts and buyer-bound primary private selections are built. Canonical native primary mint OFFER_SALE (tokenId=0, optionally selected) is source-integrated in 364ec9e2/9945d612 with original dual-digest replay/revocation and independently reviewed source. Seventy distinct complementary cases pass, including actual Core/Manager/Ledger and 2-of-2 Safe, with typed Artist/entropy/governance. **Remaining:** Final full-graph/current/Safe acceptance. ERC20 primary-offer shared/carrier source 42ab5d2d/2e0fca1a now preserves separate payer intent and direct-to-buyer minting under zero native fees; independent source review is clear, original native runs completed 70/71 shared and 41/42 carrier cases. Test-only fixture corrections f90f103f/a14d9e35 are integrated with cached retries pending; clients are being built. Nonzero native-fee support remains held separately. |
 | [sales.inventory-consignment](#salesinventory-consignment-evidence) Secondary inventory and declared consigned resale | Built | Tests written | Not integrated | Immutable sorted original-owner inventory; per-token sale/replay/royalty, genuine previously delivered token resale profile and proceeds claims. **Remaining:** Independent 017172a0 source/oracle review clear; seven authored cases require combined native execution. Prior delivery cannot be inferred merely from MINTED. |
 | [sales.prepared-custody](#salesprepared-custody-evidence) Original prepared acquisition and same-NFT custody sale | Built | Partly tested | Partial | Snapshot created at original acquisition; original config/origin/acquisition grants retained and later payment transfers the same NFT. **Remaining:** Final whole current graph plus new rights activations and royalty/reveal invariants; earlier source cohorts are not latest runtime. |
 | [sales.token-rights](#salestoken-rights-evidence) Known-token PROFILE/TEMPLATE and default rights activation | Built | Tests written | Not integrated | Pre-bid append-only scoped activation, exact original auction/acquisition IDs and shared consumed/replay; old bid route excluded after activation. **Remaining:** ba0db85d seven actual Artist/Core/Safe source cases integrated as f0e651ef; native execution pending. Do not list token overrides/default templates as absent. |
