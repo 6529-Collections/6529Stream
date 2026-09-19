@@ -570,8 +570,37 @@ contract StreamERC20OfferReceiptTest is NativeEnglishAuctionFixture {
     }
 
     function testAssetMustRemainActive() public {
-        _setAssetPolicy(policy, address(token), 3, keccak256("revoked token"), 0);
-        _reject();
+        _check();
+        uint8 inactive = policy.ASSET_STATUS_INACTIVE();
+        _setAssetPolicy(policy, address(token), inactive, keccak256("inactive token"), 0);
+        _rejectAssetReceipt(inactive);
+
+        uint8 active = policy.ASSET_STATUS_ACTIVE();
+        _setAssetPolicy(policy, address(token), active, keccak256("active token"), 0);
+        _check();
+
+        uint8 deprecated = policy.ASSET_STATUS_DEPRECATED();
+        uint64 grace = uint64(block.timestamp + 180 days);
+        _setAssetPolicy(policy, address(token), deprecated, keccak256("deprecated token"), grace);
+        require(policy.assetReleaseGraceUntil(address(token)) == grace, "retained release grace");
+        _rejectAssetReceipt(deprecated);
+
+        uint8 unsupported = policy.ASSET_STATUS_UNSUPPORTED();
+        _setAssetPolicy(policy, address(token), unsupported, keccak256("unsupported token"), grace);
+        _rejectAssetReceipt(unsupported);
+
+        // Restoring acceptance keeps the exit grace; the original receipt remains otherwise valid.
+        _setAssetPolicy(policy, address(token), active, keccak256("reactivated token"), grace);
+        _check();
+    }
+
+    function _rejectAssetReceipt(uint8 expectedStatus) private {
+        require(policy.assetStatus(address(token)) == expectedStatus, "policy transition applied");
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamERC20OfferReceipt.InvalidERC20OfferReceipt.selector)
+        );
+        vm.prank(address(offerSale));
+        verifier.check(batch, data, candidate, transcript);
     }
 
     function testAlteredCreationLifecycleRejectsEvenWithMatchingReceipt() public {
