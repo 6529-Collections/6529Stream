@@ -347,7 +347,19 @@ class SourceParityTests(unittest.TestCase):
         self.assertIn('keccak256("6529stream.collection-metadata.full-bytes.v1")', source)
         self.assertIn("collectionId == 0", source)
         self.assertIn("abi.encode(family, contentHash)", source)
-        self.assertIn("abi.encode(collectionId, record.recordType, record.subjectId, receipt.recorder)", source)
+        compact_source = re.sub(r"\s+", "", source)
+        self.assertIn(
+            "StreamCollectionManifestExecution.commitRecord("
+            "_records,_history,_chains,_latest,hash,record,receipt);", compact_source,
+        )
+        execution = (root / "domains/metadata/StreamCollectionManifestExecution.sol").read_text(encoding="utf-8")
+        compact_execution = re.sub(r"\s+", "", execution)
+        self.assertIn("uint256collectionId=receipt.collectionId;", compact_execution)
+        self.assertIn(
+            "_latest[keccak256(abi.encode("
+            "collectionId,record.recordType,record.subjectId,receipt.recorder))]=hash;",
+            compact_execution,
+        )
 
 
 if __name__ == "__main__":
