@@ -18,6 +18,50 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 20 September integrated batch
 
+Latest source checkpoint: `ed4d5572`. All 2,241 sources pass the combined
+ABI/type/storage check in 20.406 seconds. This does not generate bytecode or
+establish complete-system acceptance. Original RC1 remains unchanged.
+
+- Delegated policy/sale clients (`b99b3781`) and mint-grace governance callers
+  (`9ac63a11`) pass all 773 root package tests, generation, build and strict
+  types. The exact ABI52 fixture check also passes. These callers explicitly
+  retain their historical `44af244e` source; refreshing grace callers for the
+  later mode-2 Manager consumer is a separate pending join.
+- The Manager/fallback size repair (`83606e32`) moves unchanged policy and
+  preview work into existing workers. Exact accepted-profile sizing of the
+  subsequent mode-2 consent fix (`7badbff5`) reports 24,331/24,452-byte runtimes;
+  all seven selected products fit the original limits. Fifteen new consent
+  boundary/current-Safe cases are authored; native acceptance is pending.
+- Original Artist C2PA credentials and reconciliation (`142a3cdb`, `22095475`)
+  now retain standing conflicts independently of report currentness. Only the
+  exact covered original op46 disposition clears a conflict. Root passes 47
+  related offline tests. Thirteen narrow native cases and 256 fuzz inputs pass
+  on the retained worker/typed-boundary capture; complete actual Artist and
+  Renderer execution remains pending. All six selected new products fit;
+  the existing Artist host size blocker remains.
+- Genuine C2PA composition and read plans (`2aed78f5`, `a86febaa`) include 17
+  incremental serving/audit reads and 20 composed fixture rows. Thirteen
+  current cases are authored. This is not complete STATIC admission evidence.
+- Living recovery followed by designated dormancy (`ed4d5572`) preserves the
+  original recovery, authority epoch, guardians, receipts and cause/resolution
+  history. Seventeen new actual-owner recipes are authored and source-reviewed.
+  Active-notice dismissal histories remain a separate required build.
+- Direct retained-file PREMIS projection (`a69c377e`) passes 53 root cases and
+  its exact profile check. Missing or mismatched files cannot produce a positive
+  subset. Supplied bytes and current local measurements do not invent historical
+  fixity events or establish institutional conformance.
+- Publication capacity is still unresolved. The staged successor's first
+  preflight passes seven cases and fails two: full publication preparation uses
+  10,802,236 execution gas, but final payload retention exhausts its bounded
+  allowance. A separately reviewed memory-copy repair is under focused test;
+  no transaction cap has changed. The original full-publisher failures below
+  remain valid for their recorded source.
+- Seven inactive worktrees were removed after exact cleanliness and process
+  checks. Every named branch and commit was retained. Active tasks, evidence,
+  dirty worktrees and the Museum runtime were preserved; no tasks were archived.
+
+Earlier scoped captures in this batch retain their own source boundaries:
+
 - Version-4 split wallets now use genuine deterministic clones with a pinned,
   locked implementation (`5e1b3902`). Independent source review is clear and
   84 focused wallet/authorization/clone cases pass, including real Safe
@@ -156,7 +200,7 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   dormancy-origin recovery is now source-integrated as `0c5de0d9`, preserving
   the original43 capability/epoch and later35/32 proofs; 14 further cases
   are authored and independently source-reviewed. Later living-recovery
-  then dormancy histories and native execution remain open.
+  then dormancy histories are now source-integrated as `ed4d5572`; native execution remains open.
 - TOKEN/RELEASE/SEASON STATIC source snapshots are integrated as `17e299ba`.
   They bind complete membership, original selected sources, retained bytes,
   writer grants and exact scope history. Independent production review and
@@ -183,13 +227,13 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   callers (`be596707`) pass all 719 root client package tests, generation,
   build, strict types and their exact retained ABI49 fixture check. These
   clients explicitly target their frozen original producer; delegated-mode
-  and policy-grace caller additions are still being built against ABI52.
+  and policy-grace additions now pass 773 package tests as recorded above against ABI52.
 - Mint policy grace is source-integrated as `8c60b099`, with root's exact
   delayed-governance selector catalogs in `9dd5aeaa`. Sixteen focused and
   five actual-Safe cases are authored. Exact accepted-profile sizing finds
   Manager/fallback runtime 25,030/25,166 bytes, above the 24,576 limit.
-  The two-path extraction into the existing policy worker is active;
-  complete native acceptance is pending and no limit is relaxed.
+  The subsequent `83606e32` extraction repairs both sizes; final `7badbff5`
+  remains 24,331/24,452 bytes. Native acceptance is pending; no limit is relaxed.
 - Full-v1 activation helpers (`9ad53bd4`) add original delayed module and
   policy plans, recorder/binding/provider setup and explicit ordered schema
   admission inputs. Eleven current Governor-Safe cases are authored and
@@ -206,20 +250,20 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   all19 source files and28 retained artifact/cache hashes. All eight emitted
   production products fit. Actual Artist transitive analysis/admission remains
   separate from this synthetic-target unit cohort.
-  ART38 remains in its isolated branch while a standing-conflict correction
-  is built. Mandatory live provenance can stale historical full-output
+  ART38 and its standing-conflict correction are now integrated as
+  `142a3cdb`/`22095475`. Mandatory live provenance can stale historical full-output
   evidence; existing hashes are not rewritten or silently reinterpreted.
 
 The historical Museum C2PA reader (`06df6ce3`) consumes exact frozen `3f1a0680`
 credential/report/selection bytes with independent personhood and historical
 Display observations. Its 13 focused tests pass; the combined 28-case catalog
 and C2PA cohort passes after a test-only source assertion follows the already
-extracted Metadata pointer-index worker. Original ART38 production integration
-and the new standing-conflict seam remain pending.
+extracted Metadata pointer-index worker. Original ART38 and standing conflicts
+are now source-integrated; the additive Museum Standing consumer remains pending.
 
-The latest combined-source ABI/type/storage pass at `0c5de0d9` covers 2,214
-sources in 20.031 seconds with no errors, including the finite Renderer roles
-and repeated dormancy recovery. Earlier ABI52 at `44af244e` is retained for
+The latest combined-source ABI/type/storage pass at `ed4d5572` covers 2,241
+sources in 20.406 seconds with no errors, including the new C2PA and recovery
+joins. Earlier ABI52 at `44af244e` is retained for
 clients explicitly pinned to that source. It does not generate bytecode or
 prove whole-system execution. Earlier paid-burn acceptance remains 39 distinct
 scoped cases, owner-notice adapters 93 affected root cases, and the populated
