@@ -53,6 +53,11 @@ the release policy in `docs/release-policy.md`.
 
 ## LOW_SECURITY instant entropy
 
+- Add COLLECTION V2 finality statement, source, metadata and Artist-review
+  adapters with exact full-policy commitments and a shared scoped/COLLECTION
+  reference component entry. Seventeen focused manifest tests pass; actual
+  combined-provider and complete finality acceptance remain separate work.
+
 - Add a distinct explicit-policy current-output checkpoint and covered manifest,
   plus V2 canonical Router CONTENT_ROOT adoption using original Artist consent,
   one-use consumption, lineage, evolution and freeze behavior. Original V1

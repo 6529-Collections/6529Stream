@@ -16,7 +16,9 @@ import {
     IStreamReferenceEnvironmentPreparation
 } from "../../interfaces/stream/preservation/IStreamReferenceEnvironmentPreparation.sol";
 import {
+    IStreamArtworkFinalityComponent,
     IStreamArtworkScopedFinalityComponent,
+    StreamFinalityScopeType,
     StreamFinalityComponentState,
     StreamFinalityScope,
     StreamFinalityDomains
@@ -59,6 +61,7 @@ contract StreamPolicyReferencePublicationV2 is
     IStreamReferenceInventoryPreparation,
     IStreamReferenceEnvironmentPreparation,
     IStreamArtworkScopedFinalityComponent,
+    IStreamArtworkFinalityComponent,
     IStreamModule,
     StreamGasParameterHost
 {
@@ -140,6 +143,7 @@ contract StreamPolicyReferencePublicationV2 is
             || id == type(IStreamReferenceInventoryPreparation).interfaceId
             || id == type(IStreamReferenceEnvironmentPreparation).interfaceId
             || id == type(IStreamArtworkScopedFinalityComponent).interfaceId
+            || id == type(IStreamArtworkFinalityComponent).interfaceId
             || id == type(IStreamModule).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId;
     }
@@ -224,7 +228,7 @@ contract StreamPolicyReferencePublicationV2 is
         );
     }
 
-    function currentReference(StreamFinalityScope calldata scope)
+    function currentReference(StreamFinalityScope memory scope)
         public
         view
         override
@@ -304,7 +308,7 @@ contract StreamPolicyReferencePublicationV2 is
         return _locks[_subject(scope)];
     }
 
-    function requireCurrent(StreamFinalityScope calldata scope, bytes32 hash, uint64 revision)
+    function requireCurrent(StreamFinalityScope memory scope, bytes32 hash, uint64 revision)
         public
         view
         override
@@ -388,10 +392,32 @@ contract StreamPolicyReferencePublicationV2 is
         emit PolicyReferenceLocked(2, r.scopeSubject, value);
     }
 
+    /// @notice COLLECTION discovery uses the original component selector and interface ID.
+    /// @dev The exact V2 receipt/lock/domain commitment is shared with the scoped entry.
+    function finalityState(uint256 cid)
+        external
+        view
+        override
+        returns (StreamFinalityComponentState memory)
+    {
+        return _component(
+            StreamFinalityScope(StreamFinalityScopeType.COLLECTION, cid, 0, 0),
+            type(IStreamArtworkFinalityComponent).interfaceId
+        );
+    }
+
     function finalityStateForScope(StreamFinalityScope calldata scope)
         external
         view
         override
+        returns (StreamFinalityComponentState memory)
+    {
+        return _component(scope, type(IStreamArtworkScopedFinalityComponent).interfaceId);
+    }
+
+    function _component(StreamFinalityScope memory scope, bytes4 componentInterface)
+        private
+        view
         returns (StreamFinalityComponentState memory)
     {
         T.Receipt memory r = currentReference(scope);
@@ -407,7 +433,7 @@ contract StreamPolicyReferencePublicationV2 is
             true,
             StreamFinalityDomains.COMPONENT_REFERENCE_RENDER,
             address(this),
-            type(IStreamArtworkScopedFinalityComponent).interfaceId,
+            componentInterface,
             address(this).codehash,
             streamModuleVersion(),
             D.PROFILE_HASH,
