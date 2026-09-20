@@ -264,6 +264,12 @@ the release policy in `docs/release-policy.md`.
 - Fit the joined Artist Payout owner by factoring six original structured reads
   into a fixed typed encoder, preserving its ABI, storage and mutation bodies.
 
+- Add acquisition packet V5 with all 19 required field groups and exact native
+  personhood authority/scope, DIRECT floor and conservation context fragments.
+  Bind source-preserving packet assemblies to current RIGHTS and captured
+  attribution fields, export validated supplied packet bytes, and report remaining
+  source coverage separately. V1–V4 and institutional acceptance remain unchanged.
+
 - Add standalone native tier/selection context and six-source DIRECT acquisition
   composition. Join completed-mint chronology, original sale tier, saved provider
   selection dependencies and first-sale intent/interview history. Preserve current

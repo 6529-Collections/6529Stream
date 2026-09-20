@@ -42,6 +42,12 @@ Use Python 3.12. The schema and RFC8785 tests share the existing pinned offline
 dependencies in `tools/museum/requirements-jsonld.txt`; no new dependency is
 introduced here.
 
+[Packet V5](../../docs/museum-acquisition-packet-v5.md) keeps all 19 required
+packet field groups and embeds the standalone native personhood, DIRECT floor
+and conservation context definitions. Check it with
+`python -m tools.metadata.acquisition_packet_v5 --check`. Supplied-data
+validation does not authenticate source coverage; V1–V4 remain unchanged.
+
 The standalone [native conservation context](../../docs/museum-direct-conservation-composition.md)
 represents current tier/default and all four collection/token Artist/estate
 selection lanes independently of the sale-floor family. Generate/check it with

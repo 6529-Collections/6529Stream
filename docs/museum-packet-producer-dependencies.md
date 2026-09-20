@@ -9,6 +9,15 @@ These dependencies remain required implementation, not waivable qualifications.
 
 ## Later source and consumer implementations
 
+[Packet V5](museum-acquisition-packet-v5.md) supplies the full-packet native
+authority/scope and DIRECT representation. All 19 field groups are required;
+the new assembler binds native personhood, DIRECT, conservation context,
+current RIGHTS and supported current attribution fields to the six-source
+assembly. It separately reports unjoined supplied fields. The remaining
+[producer map](museum-packet-v5-producer-map.md) identifies attribution/sanction,
+master, archive and reference APIs at source `905bbe2a`; those source joins
+remain required and no source-complete or institutional claim is made.
+
 The [DIRECT tier and selection composition](museum-direct-conservation-composition.md)
 adds the existing tier/default and four-lane selection captures to the earlier
 DIRECT personhood assembly. It reconciles six actual source transcripts, joins

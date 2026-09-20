@@ -1,5 +1,11 @@
 # Museum offline tooling
 
+[Packet V5](../../docs/museum-acquisition-packet-v5.md) represents all 19
+requirements with native personhood, DIRECT and conservation fragments.
+Its assembler binds those fragments, current RIGHTS and supported attribution
+fields to the six-source capture assembly. Supplied-data export and per-item
+source coverage remain separate; full source-complete export is unavailable.
+
 [DIRECT tier and selection composition](../../docs/museum-direct-conservation-composition.md)
 adds original tier/default and four-lane selection captures to the native DIRECT
 assembly. It checks six-source observations, original provider selector pins,

@@ -218,6 +218,10 @@ def verify_package(directory, expected_manifest_hash):
     if path.stat().st_size > MAX_MANIFEST:
         raise MuseumError("multiformat manifest bound exceeded")
     value = loads(path.read_bytes(), maximum=MAX_MANIFEST, canonical=True)
+    if isinstance(value, dict) and value.get("mode") == "acquisition_packet_v5_assembly":
+        from .acquisition_packet_v5 import verify
+        from .bagit import read_tree
+        return verify(read_tree(directory), expected_manifest_hash)
     if isinstance(value, dict) and value.get("mode") == "acquisition_direct_conservation_assembly":
         from .acquisition_direct_conservation import verify
         from .bagit import read_tree
