@@ -34,7 +34,8 @@ is `recordSuccessorDesignation`. Delegated policy and sale consent retain the
 original operation IDs 14 and 16. C2PA callers remain pending.
 
 The additive [authority hydration callers](current-artist-authority-hydration.md)
-cover operation 60's approved baseline, multiple and single-delegation profiles.
+cover operation 60's approved baseline, multiple, single-delegation and combined
+multiple-delegation profiles.
 Their newer compiler fixture preserves the coverage register's earlier source
 snapshot and does not imply support for every hydration combination.
 

@@ -8,12 +8,15 @@ import {
   artistAuthorityHydrationCommitment, artistAuthorityHydrationReplayKey, artistAuthorityHydrationReplayDelta,
   artistAuthorityHydrationOwnerAfter, artistAuthorityHydrationEvidenceId, encodeArtistAuthorityHydrationProfileEvidence,
   decodeArtistAuthorityHydrationProfileEvidence, encodeArtistAuthorityHydrationEvidence, decodeArtistAuthorityHydrationEvidence,
+  encodeArtistHydrationDelegationIdentity, decodeArtistHydrationDelegationIdentity,
   type ArtistHydrationSnapshot, type ArtistHydrationCheckpoint, type ArtistHydrationSuite, type ArtistHydrationQuery,
   type ArtistHydrationOwnerData, type ArtistHydrationNonceWord, type ArtistSingleHydrationRequest, type ArtistMultipleHydrationRequest,
   type ArtistHydrationIdentity, type ArtistHydrationBinding, type ArtistHydrationDelegationIdentity, type ArtistHydrationDelegationConsent,
   type ArtistHydrationMultipleBundle, type ArtistAuthorityHydrationCoordinates, type ArtistHydrationOwnerEnvironment,
   type ArtistAuthorityHydrationRequest, type ArtistAuthorityHydrationCall, type ArtistHydrationSeven,
-  type ArtistAuthorityHydrationEvidence, type ArtistAuthorityHydrationProfileEvidence
+  type ArtistAuthorityHydrationEvidence, type ArtistAuthorityHydrationProfileEvidence, type ArtistHydrationMultipleDelegationIdentities,
+  type ArtistHydrationMultipleDelegationBinding, type ArtistHydrationMultipleDelegationAcceptance,
+  type ArtistHydrationMultipleDelegationAttribution, type ArtistHydrationMultipleDelegationConsent
 } from "../src/current-artist-authority-hydration.js";
 
 declare const actor: Address, bytes: Hex;
@@ -29,7 +32,8 @@ normalizeArtistHydrationSnapshot(before[0]); normalizeArtistHydrationCheckpoint(
 normalizeArtistHydrationNativeReceipt({ operation: 60n, artistId: bytes, collectionId: (1n << 230n) + 1n, recordHash: bytes });
 normalizeArtistHydrationNonceWord(word); normalizeArtistHydrationQuery(query); normalizeArtistHydrationOwnerData(data);
 const requests: readonly ArtistAuthorityHydrationRequest[] = [
-  { kind: "baseline", request: single }, { kind: "delegation", request: single }, { kind: "multiple", request: multiple }
+  { kind: "baseline", request: single }, { kind: "delegation", request: single }, { kind: "multiple", request: multiple },
+  { kind: "multiple-delegation", request: multiple }
 ];
 for (const input of requests) {
   const normalized: ArtistAuthorityHydrationRequest = normalizeArtistAuthorityHydrationRequest(input);
@@ -47,7 +51,7 @@ for (const input of requests) {
   rebuilt.caller = coordinates.registry;
   // @ts-expect-error Source-readiness verification cannot be asserted by a pure plan.
   const live: true = rebuilt.factsVerified;
-  if (normalized.kind === "multiple") {
+  if (normalized.kind === "multiple" || normalized.kind === "multiple-delegation") {
     const allArtists: readonly Hex[] = normalized.request.artistIds;
     // @ts-expect-error Multiple request is not a caller-picked single Artist anchor.
     normalized.request.artistId;
@@ -79,8 +83,8 @@ const archiveEvidence: ArtistAuthorityHydrationEvidence = { schemaVersion: 1n, c
 const archiveBytes: Hex = encodeArtistAuthorityHydrationEvidence(archiveEvidence, 24_575n);
 const archiveBack: ArtistAuthorityHydrationEvidence = decodeArtistAuthorityHydrationEvidence(archiveBytes);
 
-// @ts-expect-error Combined multiple+delegation is deliberately excluded.
-normalizeArtistAuthorityHydrationRequest({ kind: "multiple-delegation", request: multiple });
+// @ts-expect-error Unknown combinations do not introduce a new profile flag or request format.
+normalizeArtistAuthorityHydrationRequest({ kind: "multiple-delegation-extra", request: multiple });
 // @ts-expect-error Advanced single profiles are outside this closed family.
 normalizeArtistAuthorityHydrationRequest({ kind: "readiness", request: single });
 // @ts-expect-error The multiple profile requires its original five-field request.
@@ -118,3 +122,34 @@ archiveBack.before[0].revision = 0n;
 // @ts-expect-error The source-derived identity is not an EIP712 payload.
 identityBack.digest;
 void [baselineRaw, bindingBack, consentBack, emptyOwner, bundleBack, key, delta, after, profileBack];
+
+declare const compactIdentities: ArtistHydrationMultipleDelegationIdentities;
+declare const compactBindings: readonly ArtistHydrationMultipleDelegationBinding[];
+declare const compactAcceptances: readonly ArtistHydrationMultipleDelegationAcceptance[];
+declare const compactAttributions: readonly ArtistHydrationMultipleDelegationAttribution[];
+declare const compactConsents: readonly ArtistHydrationMultipleDelegationConsent[];
+const combined = prepareArtistAuthorityHydrationCall(coordinates.registry, actor, { kind: "multiple-delegation", request: multiple });
+const nestedDH: ArtistHydrationDelegationIdentity = decodeArtistHydrationDelegationIdentity(encodeArtistHydrationDelegationIdentity(delegation));
+const compactIdentityRaw: Hex = encodeArtistHydrationOwnerState("multiple-delegation", 2, compactIdentities);
+const compactIdentityBack: ArtistHydrationMultipleDelegationIdentities = decodeArtistHydrationOwnerState("multiple-delegation", 2, compactIdentityRaw);
+const compactBindingBack: readonly ArtistHydrationMultipleDelegationBinding[] = decodeArtistHydrationOwnerState("multiple-delegation", 0,
+  encodeArtistHydrationOwnerState("multiple-delegation", 0, compactBindings));
+const compactAcceptanceBack: readonly ArtistHydrationMultipleDelegationAcceptance[] = decodeArtistHydrationOwnerState("multiple-delegation", 3,
+  encodeArtistHydrationOwnerState("multiple-delegation", 3, compactAcceptances));
+encodeArtistHydrationOwnerState("multiple-delegation", 4, compactAttributions);
+encodeArtistHydrationOwnerState("multiple-delegation", 6, compactConsents);
+// @ts-expect-error Compact combined Identity contains rows+collectionIds, not an old MH.Bundle.
+encodeArtistHydrationOwnerState("multiple-delegation", 2, rows);
+// @ts-expect-error Combined acceptance rows bind bindingHash and state; no caller-invented collectionId.
+encodeArtistHydrationOwnerState("multiple-delegation", 3, [{ ...compactAcceptances[0]!, collectionId: 1n }]);
+// @ts-expect-error Combined request remains original MH.Request, never single AH.Request.
+prepareArtistAuthorityHydrationCall(coordinates.registry, actor, { kind: "multiple-delegation", request: single });
+// @ts-expect-error No on-chain profile or authority flag can be appended to the original request.
+prepareArtistAuthorityHydrationCall(coordinates.registry, actor, { kind: "multiple-delegation", request: { ...multiple, profile: "multiple-delegation" } });
+// @ts-expect-error Combined compact rows preserve immutable nested nonce evidence.
+compactIdentityBack.rows[0]!.nonces[0]!.words.push(0n);
+// @ts-expect-error A combined owner tuple cannot be substituted into the original multiple bundle codec.
+encodeArtistHydrationMultipleBundle(2, compactIdentities);
+// @ts-expect-error Full registration allocator remains in the nested DH baseline bytes.
+compactIdentityBack.registrationCount;
+void [combined, nestedDH, compactBindingBack, compactAcceptanceBack];

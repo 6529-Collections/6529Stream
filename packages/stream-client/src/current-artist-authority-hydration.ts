@@ -2,7 +2,7 @@ import { AbiCoder, Interface, ParamType, ZeroAddress, ZeroHash, getAddress, id, 
 import type { Address, Hex } from "./generated/contracts.js";
 import type { UnsignedCall } from "./binding.js";
 
-export type ArtistHydrationProfile = "baseline" | "multiple" | "delegation";
+export type ArtistHydrationProfile = "baseline" | "multiple" | "delegation" | "multiple-delegation";
 export type ArtistHydrationOwnerIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 export type ArtistHydrationSeven<T> = readonly [T, T, T, T, T, T, T];
 export interface ArtistHydrationSnapshot { readonly domainId: Hex; readonly revision: bigint; readonly stateRoot: Hex; readonly recordChainTip: Hex }
@@ -32,8 +32,10 @@ export interface ArtistMultipleHydrationRequest {
   readonly expectedSource: ArtistHydrationSeven<ArtistHydrationCheckpoint>; readonly replayOrigins: ArtistHydrationSeven<readonly ArtistHydrationOrigin[]>;
 }
 export type ArtistAuthorityHydrationRequest =
-  | { readonly kind: "baseline" | "delegation"; readonly request: ArtistSingleHydrationRequest }
-  | { readonly kind: "multiple"; readonly request: ArtistMultipleHydrationRequest };
+  | { readonly kind: "baseline"; readonly request: ArtistSingleHydrationRequest }
+  | { readonly kind: "delegation"; readonly request: ArtistSingleHydrationRequest }
+  | { readonly kind: "multiple"; readonly request: ArtistMultipleHydrationRequest }
+  | { readonly kind: "multiple-delegation"; readonly request: ArtistMultipleHydrationRequest };
 export interface ArtistHydrationQuery {
   readonly artistId: Hex; readonly collectionId: bigint; readonly bindingHash: Hex;
   readonly policies: readonly ArtistHydrationPolicyKey[]; readonly records: readonly Hex[];
@@ -84,6 +86,14 @@ export interface ArtistHydrationSale {
     readonly bindingGeneration: bigint; readonly bindingHash: Hex }; readonly grant: Hex; readonly current: Hex;
 }
 export interface ArtistHydrationDelegationConsent { readonly policies: readonly { readonly recordHash: Hex; readonly grant: Hex }[]; readonly sales: readonly ArtistHydrationSale[] }
+export interface ArtistHydrationMultipleDelegationIdentityRow {
+  readonly artistId: Hex; readonly records: readonly Hex[]; readonly state: Hex; readonly nonces: readonly ArtistHydrationNonceWord[];
+}
+export interface ArtistHydrationMultipleDelegationIdentities { readonly rows: readonly ArtistHydrationMultipleDelegationIdentityRow[]; readonly collectionIds: readonly bigint[] }
+export interface ArtistHydrationMultipleDelegationBinding { readonly collectionId: bigint; readonly state: ArtistHydrationBinding }
+export interface ArtistHydrationMultipleDelegationAcceptance { readonly bindingHash: Hex; readonly state: ArtistHydrationAcceptance }
+export interface ArtistHydrationMultipleDelegationAttribution { readonly collectionId: bigint; readonly state: bigint; readonly generation: bigint }
+export interface ArtistHydrationMultipleDelegationConsent { readonly collectionId: bigint; readonly policies: readonly ArtistHydrationPolicyKey[]; readonly state: ArtistHydrationDelegationConsent }
 export interface ArtistHydrationOwnerStates {
   readonly baseline: { readonly 0: ArtistHydrationBinding; readonly 1: null; readonly 2: ArtistHydrationIdentity; readonly 3: ArtistHydrationAcceptance;
     readonly 4: ArtistHydrationAttribution; readonly 5: null; readonly 6: readonly Hex[] };
@@ -91,6 +101,9 @@ export interface ArtistHydrationOwnerStates {
     readonly 3: ArtistHydrationMultipleBundle; readonly 4: ArtistHydrationMultipleBundle; readonly 5: null; readonly 6: ArtistHydrationMultipleBundle };
   readonly delegation: { readonly 0: ArtistHydrationBinding; readonly 1: null; readonly 2: ArtistHydrationDelegationIdentity; readonly 3: ArtistHydrationAcceptance;
     readonly 4: ArtistHydrationAttribution; readonly 5: null; readonly 6: ArtistHydrationDelegationConsent };
+  readonly "multiple-delegation": { readonly 0: readonly ArtistHydrationMultipleDelegationBinding[]; readonly 1: null;
+    readonly 2: ArtistHydrationMultipleDelegationIdentities; readonly 3: readonly ArtistHydrationMultipleDelegationAcceptance[];
+    readonly 4: readonly ArtistHydrationMultipleDelegationAttribution[]; readonly 5: null; readonly 6: readonly ArtistHydrationMultipleDelegationConsent[] };
 }
 export type ArtistHydrationOwnerState<P extends ArtistHydrationProfile = ArtistHydrationProfile, O extends ArtistHydrationOwnerIndex = ArtistHydrationOwnerIndex> = ArtistHydrationOwnerStates[P][O];
 export interface ArtistAuthorityHydrationCoordinates {
@@ -114,8 +127,9 @@ export interface ArtistAuthorityHydrationEvidence {
 }
 
 export const ARTIST_HYDRATION_PROFILES = Object.freeze({ baseline: id("6529STREAM_ARTIST_LIVING_BASELINE_HYDRATION_V1") as Hex,
-  multiple: id("6529STREAM_ARTIST_MULTIPLE_LIVING_HYDRATION_V1") as Hex, delegation: id("6529STREAM_ARTIST_LIVING_DELEGATION_HYDRATION_V1") as Hex });
-export const ARTIST_HYDRATION_CAPABILITY_IDS = Object.freeze({ baseline: "0x1f51c336", multiple: "0x4739d03d", delegation: "0xe17666b4" } as const);
+  multiple: id("6529STREAM_ARTIST_MULTIPLE_LIVING_HYDRATION_V1") as Hex, delegation: id("6529STREAM_ARTIST_LIVING_DELEGATION_HYDRATION_V1") as Hex,
+  "multiple-delegation": id("6529STREAM_ARTIST_MULTIPLE_LIVING_DELEGATION_V1") as Hex });
+export const ARTIST_HYDRATION_CAPABILITY_IDS = Object.freeze({ baseline: "0x1f51c336", multiple: "0x4739d03d", delegation: "0xe17666b4", "multiple-delegation": "0x4739d03d" } as const);
 export const ARTIST_HYDRATION_CHECKPOINT_SCHEMA = id("6529STREAM_ARTIST_GUARD_CHECKPOINT_V1") as Hex;
 export const ARTIST_HYDRATION_MAX_EVIDENCE_BYTES = 24_575n;
 export const ARTIST_HYDRATION_SNAPSHOT_TUPLE = "tuple(bytes32 domainId,uint64 revision,bytes32 stateRoot,bytes32 recordChainTip)";
@@ -141,10 +155,19 @@ const revision = "tuple(tuple(bytes32 recordHash,bytes32 artistId,bytes32 previo
 const grant = "tuple(bytes32 recordHash,tuple(tuple(bytes32 artistId,address delegate,uint256 collectionId,uint32 capabilities,uint64 notBefore,uint64 expiresAt,uint64 maxUses,bytes32 constraintsHash) grant,address grantor,uint256 nonce,uint256 uses,bool revoked,bytes32 revocationRecordHash) item,uint64 epoch,bytes32 current)";
 export const ARTIST_HYDRATION_DELEGATION_IDENTITY_TUPLE = `tuple(bytes baseline,uint64 epoch,${revision}[] revisions,${grant}[] grants,tuple(bytes32 key,uint256 hint,${ARTIST_HYDRATION_NONCE_WORD_TUPLE}[] words)[] delegateNonces)`;
 export const ARTIST_HYDRATION_DELEGATION_CONSENT_TUPLE = "tuple(tuple(bytes32 recordHash,bytes32 grant)[] policies,tuple(tuple(bytes32 recordHash,tuple(uint256 collectionId,address saleAdapter,bytes32 saleId,bytes32 saleConfigHash) terms,bytes32 artistId,address signer,uint8 authorityClass,uint256 nonce,uint64 signedAt,uint64 bindingGeneration,bytes32 bindingHash) item,bytes32 grant,bytes32 current)[] sales)";
+export const ARTIST_HYDRATION_MULTIPLE_DELEGATION_IDENTITIES_TUPLE = `tuple(tuple(bytes32 artistId,bytes32[] records,bytes state,${ARTIST_HYDRATION_NONCE_WORD_TUPLE}[] nonces)[] rows,uint256[] collectionIds)`;
+export const ARTIST_HYDRATION_MULTIPLE_DELEGATION_BINDINGS_TUPLE = `tuple(uint256 collectionId,${ARTIST_HYDRATION_BINDING_TUPLE} state)[]`;
+export const ARTIST_HYDRATION_MULTIPLE_DELEGATION_ACCEPTANCES_TUPLE = `tuple(bytes32 bindingHash,${ARTIST_HYDRATION_ACCEPTANCE_TUPLE} state)[]`;
+export const ARTIST_HYDRATION_MULTIPLE_DELEGATION_ATTRIBUTIONS_TUPLE = "tuple(uint256 collectionId,uint8 state,uint64 generation)[]";
+export const ARTIST_HYDRATION_MULTIPLE_DELEGATION_CONSENTS_TUPLE = `tuple(uint256 collectionId,${ARTIST_HYDRATION_POLICY_TUPLE}[] policies,${ARTIST_HYDRATION_DELEGATION_CONSENT_TUPLE} state)[]`;
 const multipleTag = id("6529STREAM_ARTIST_MULTIPLE_LIVING_STATE_V1");
 const delegationTags: Readonly<Partial<Record<ArtistHydrationOwnerIndex, string>>> = Object.freeze({
   0: id("6529STREAM_ARTIST_LIVING_DELEGATION_BINDING_V1"), 2: id("6529STREAM_ARTIST_LIVING_DELEGATION_IDENTITY_V1"), 6: id("6529STREAM_ARTIST_LIVING_DELEGATION_CONSENT_V1") });
-const methods = Object.freeze({ baseline: "hydrateArtistAuthority", multiple: "hydrateMultipleArtistAuthority", delegation: "hydrateArtistAuthorityWithDelegations" });
+const multipleDelegationTags: Readonly<Partial<Record<ArtistHydrationOwnerIndex, string>>> = Object.freeze({
+  0: id("6529STREAM_ARTIST_MULTIPLE_DELEGATION_BINDINGS_V1"), 2: id("6529STREAM_ARTIST_MULTIPLE_DELEGATION_IDENTITIES_V1"),
+  3: id("6529STREAM_ARTIST_MULTIPLE_DELEGATION_ACCEPTANCES_V1"), 4: id("6529STREAM_ARTIST_MULTIPLE_DELEGATION_ATTRIBUTIONS_V1"),
+  6: id("6529STREAM_ARTIST_MULTIPLE_DELEGATION_CONSENTS_V1") });
+const methods = Object.freeze({ baseline: "hydrateArtistAuthority", multiple: "hydrateMultipleArtistAuthority", delegation: "hydrateArtistAuthorityWithDelegations", "multiple-delegation": "hydrateMultipleArtistAuthority" });
 export const CURRENT_ARTIST_AUTHORITY_HYDRATION_ABI: readonly string[] = Object.freeze([
   `function hydrateArtistAuthority(${ARTIST_HYDRATION_SINGLE_REQUEST_TUPLE} request) returns(bytes32)`,
   `function hydrateMultipleArtistAuthority(${ARTIST_HYDRATION_MULTIPLE_REQUEST_TUPLE} request) returns(bytes32)`,
@@ -213,14 +236,14 @@ export function normalizeArtistHydrationOwnerData(input: ArtistHydrationOwnerDat
 }
 export function normalizeArtistAuthorityHydrationRequest(input: ArtistAuthorityHydrationRequest): ArtistAuthorityHydrationRequest {
   exact(input, ["kind", "request"]); const kind = profile(input.kind);
-  const r = kind === "multiple" ? normalize(ARTIST_HYDRATION_MULTIPLE_REQUEST_TUPLE, input.request as ArtistMultipleHydrationRequest)
+  const r = kind === "multiple" || kind === "multiple-delegation" ? normalize(ARTIST_HYDRATION_MULTIPLE_REQUEST_TUPLE, input.request as ArtistMultipleHydrationRequest)
     : normalize(ARTIST_HYDRATION_SINGLE_REQUEST_TUPLE, input.request as ArtistSingleHydrationRequest);
   if (r.bindingIndex !== 0n) throw Error("Only first predecessor binding is supported");
   for (let i = 0; i < 7; i++) {
     const h = r.expectedSource[i]!; if (h.schema !== ARTIST_HYDRATION_CHECKPOINT_SCHEMA || h.replayCount > 512n || h.nonceIndexCount > (kind === "baseline" ? 1n : 128n)) throw Error("Unsupported source checkpoint");
     list(r.replayOrigins[i], 512, Number(h.replayCount));
   }
-  if (kind === "multiple") {
+  if (kind === "multiple" || kind === "multiple-delegation") {
     const m = r as ArtistMultipleHydrationRequest; list(m.artistIds, 128); list(m.collections, 128);
     if (!m.artistIds.length || !m.collections.length) throw Error("Empty multiple profile");
     let total = 0;
@@ -265,6 +288,9 @@ function validateBinding(b: ArtistHydrationBinding, delegated: boolean): void {
 }
 function stateType(p: ArtistHydrationProfile, i: ArtistHydrationOwnerIndex): string | null {
   if (i === 1 || i === 5) return null;
+  if (p === "multiple-delegation") return i === 0 ? ARTIST_HYDRATION_MULTIPLE_DELEGATION_BINDINGS_TUPLE
+    : i === 2 ? ARTIST_HYDRATION_MULTIPLE_DELEGATION_IDENTITIES_TUPLE : i === 3 ? ARTIST_HYDRATION_MULTIPLE_DELEGATION_ACCEPTANCES_TUPLE
+      : i === 4 ? ARTIST_HYDRATION_MULTIPLE_DELEGATION_ATTRIBUTIONS_TUPLE : ARTIST_HYDRATION_MULTIPLE_DELEGATION_CONSENTS_TUPLE;
   if (p === "multiple") return ARTIST_HYDRATION_MULTIPLE_BUNDLE_TUPLE;
   if (i === 0) return ARTIST_HYDRATION_BINDING_TUPLE;
   if (i === 2) return p === "delegation" ? ARTIST_HYDRATION_DELEGATION_IDENTITY_TUPLE : ARTIST_HYDRATION_IDENTITY_TUPLE;
@@ -273,15 +299,23 @@ function stateType(p: ArtistHydrationProfile, i: ArtistHydrationOwnerIndex): str
   return p === "delegation" ? ARTIST_HYDRATION_DELEGATION_CONSENT_TUPLE : "bytes32[]";
 }
 function validateState(p: ArtistHydrationProfile, i: ArtistHydrationOwnerIndex, value: any): void {
+  if (p === "multiple-delegation") { validateMultipleDelegationState(i, value); return; }
   if (p === "multiple") { validateMultiple(i, value); return; }
   if (i === 0) validateBinding(value, p === "delegation");
   if (i === 2 && p === "baseline") validateIdentity(value, true);
   if (i === 3 && (value.record === ZeroHash || value.acceptedAt === 0n)) throw Error("Invalid acceptance state");
   if (i === 4 && (value.state !== 2n || value.generation !== 1n)) throw Error("Unsupported attribution state");
   if (i === 6 && p === "baseline") { list(value, 128); value.forEach(v => nonzero(hex(v, 32))); }
-  if (i === 2 && p === "delegation") {
-    const v = value as ArtistHydrationDelegationIdentity;
-    const [baseline] = decode<[ArtistHydrationIdentity]>([ARTIST_HYDRATION_IDENTITY_TUPLE], v.baseline); validateIdentity(baseline, true);
+  if (i === 2 && p === "delegation") validateDelegationIdentity(value, true);
+  if (i === 6 && p === "delegation") {
+    const v = value as ArtistHydrationDelegationConsent; list(v.policies, 128); list(v.sales, 128);
+    if (v.policies.length + v.sales.length > 128) throw Error("Too many native consent records");
+    v.policies.forEach(row => nonzero(row.recordHash));
+    for (const row of v.sales) if (row.item.bindingGeneration !== 1n || row.item.signedAt === 0n || (row.item.authorityClass !== 1n && row.item.authorityClass !== 2n)) throw Error("Unsupported sale authority history");
+  }
+}
+function validateDelegationIdentity(v: ArtistHydrationDelegationIdentity, single: boolean): void {
+    const [baseline] = decode<[ArtistHydrationIdentity]>([ARTIST_HYDRATION_IDENTITY_TUPLE], v.baseline); validateIdentity(baseline, single);
     if (v.epoch !== 0n) throw Error("Only original living delegation epoch is supported");
     list(v.revisions, 128); list(v.grants, 128); list(v.delegateNonces, 127);
     for (const row of v.revisions) if (row.document === "0x" || keccak256(row.document) !== row.item.revisedRecordHash || row.item.authorityClass !== 1n || row.item.signedAt === 0n) throw Error("Invalid original identity revision");
@@ -290,12 +324,42 @@ function validateState(p: ArtistHydrationProfile, i: ArtistHydrationOwnerIndex, 
         || g.expiresAt <= g.notBefore || (g.maxUses !== 0n && row.item.uses > g.maxUses) || row.item.revoked !== (row.item.revocationRecordHash !== ZeroHash)) throw Error("Invalid historical grant"); }
     let prefixes = 0; for (const lane of v.delegateNonces) { list(lane.words, 256); if (!lane.words.length) throw Error("Empty delegate nonce lane"); prefixes += lane.words.length; }
     if (prefixes > 256) throw Error("Too many delegate nonce prefixes");
+}
+/** Original DH.IDENTITY bytes; combined rows keep their global registration allocator here. */
+export function encodeArtistHydrationDelegationIdentity(input: ArtistHydrationDelegationIdentity): Hex {
+  const value = normalize(ARTIST_HYDRATION_DELEGATION_IDENTITY_TUPLE, input); validateDelegationIdentity(value, false);
+  return coder.encode(["bytes32", ARTIST_HYDRATION_DELEGATION_IDENTITY_TUPLE], [delegationTags[2], value]) as Hex;
+}
+export function decodeArtistHydrationDelegationIdentity(raw: Hex): ArtistHydrationDelegationIdentity {
+  const [tag, value] = decode<[Hex, ArtistHydrationDelegationIdentity]>(["bytes32", ARTIST_HYDRATION_DELEGATION_IDENTITY_TUPLE], raw);
+  if (tag !== delegationTags[2]) throw Error("Wrong delegation Identity tag"); validateDelegationIdentity(value, false); return value;
+}
+function validateMultipleDelegationState(i: ArtistHydrationOwnerIndex, value: any): void {
+  if (i === 2) {
+    const b = value as ArtistHydrationMultipleDelegationIdentities; list(b.rows, 128); list(b.collectionIds, 128);
+    if (!b.rows.length || !b.collectionIds.length) throw Error("Empty combined inventory");
+    b.collectionIds.forEach((c, j) => { if (c === 0n || (j && c <= b.collectionIds[j - 1]!)) throw Error("Unordered combined collection IDs"); });
+    let prefixes = 0, lanes = 0; const nonceKeys = new Set<Hex>();
+    b.rows.forEach((row, j) => {
+      nonzero(row.artistId); list(row.records, 896); row.records.forEach(nonzero); list(row.nonces, 256);
+      if ((j && BigInt(row.artistId) <= BigInt(b.rows[j - 1]!.artistId)) || !row.nonces.length) throw Error("Invalid combined Identity order/nonces");
+      const d = decodeArtistHydrationDelegationIdentity(row.state), original = decodeArtistHydrationIdentity(d.baseline);
+      if (original.nextRegistrationNonce !== BigInt(b.rows.length) || original.signatures.length !== row.records.length) throw Error("Combined global allocator/signature inventory mismatch");
+      prefixes += row.nonces.length; lanes += 1 + d.delegateNonces.length;
+      for (const lane of d.delegateNonces) { if (nonceKeys.has(lane.key)) throw Error("Duplicate combined nonce lane"); nonceKeys.add(lane.key); prefixes += lane.words.length; }
+    });
+    if (prefixes > 256 || lanes > 128) throw Error("Combined nonce inventory exceeds original bounds");
+    return;
   }
-  if (i === 6 && p === "delegation") {
-    const v = value as ArtistHydrationDelegationConsent; list(v.policies, 128); list(v.sales, 128);
-    if (v.policies.length + v.sales.length > 128) throw Error("Too many native consent records");
-    v.policies.forEach(row => nonzero(row.recordHash));
-    for (const row of v.sales) if (row.item.bindingGeneration !== 1n || row.item.signedAt === 0n || (row.item.authorityClass !== 1n && row.item.authorityClass !== 2n)) throw Error("Unsupported sale authority history");
+  list(value, 128); if (!value.length) throw Error("Empty combined collection rows");
+  const bindingHashes = new Set<Hex>();
+  for (let j = 0; j < value.length; j++) {
+    const row = value[j] as any;
+    if (i !== 3 && (row.collectionId === 0n || (j && row.collectionId <= (value[j - 1] as any).collectionId))) throw Error("Unordered combined collection rows");
+    if (i === 0) validateBinding(row.state, true);
+    if (i === 3) { nonzero(row.bindingHash); if (bindingHashes.has(row.bindingHash)) throw Error("Duplicate combined acceptance binding"); bindingHashes.add(row.bindingHash); validateState("baseline", 3, row.state); }
+    if (i === 4) validateState("baseline", 4, { state: row.state, generation: row.generation });
+    if (i === 6) { policies(row.policies); validateState("delegation", 6, row.state); if (row.policies.length !== row.state.policies.length) throw Error("Combined policy selector count mismatch"); }
   }
 }
 function validateMultiple(i: ArtistHydrationOwnerIndex, b: ArtistHydrationMultipleBundle): void {
@@ -327,13 +391,13 @@ export function encodeArtistHydrationOwnerState<P extends ArtistHydrationProfile
   profile(p); owner(i); const type = stateType(p, i);
   if (type === null) { if (input !== null) throw Error("Empty profile owner must be null"); return "0x"; }
   const value = normalize(type, input); validateState(p, i, value);
-  const tag = p === "multiple" ? multipleTag : p === "delegation" ? delegationTags[i] : undefined;
+  const tag = p === "multiple" ? multipleTag : p === "delegation" ? delegationTags[i] : p === "multiple-delegation" ? multipleDelegationTags[i] : undefined;
   return coder.encode(tag ? ["bytes32", type] : [type], tag ? [tag, value] : [value]) as Hex;
 }
 export function decodeArtistHydrationOwnerState<P extends ArtistHydrationProfile, O extends ArtistHydrationOwnerIndex>(p: P, i: O, raw: Hex): ArtistHydrationOwnerState<P, O> {
   profile(p); owner(i); const type = stateType(p, i);
   if (type === null) { if (hex(raw) !== "0x") throw Error("Unsupported state in empty profile owner"); return null as ArtistHydrationOwnerState<P, O>; }
-  const tag = p === "multiple" ? multipleTag : p === "delegation" ? delegationTags[i] : undefined;
+  const tag = p === "multiple" ? multipleTag : p === "delegation" ? delegationTags[i] : p === "multiple-delegation" ? multipleDelegationTags[i] : undefined;
   const values = decode<readonly unknown[]>(tag ? ["bytes32", type] : [type], raw);
   if (tag && values[0] !== tag) throw Error("Wrong hydration owner-state tag");
   const state = values[tag ? 1 : 0] as ArtistHydrationOwnerState<P, O>; validateState(p, i, state); return state;
@@ -347,7 +411,7 @@ function coordinates(input: ArtistAuthorityHydrationCoordinates): ArtistAuthorit
 }
 /** Original commitment anchor; multiple arrays remain bound in the original tagged owner bundles. */
 export function artistAuthorityHydrationBaseRequest(input: ArtistAuthorityHydrationRequest): ArtistSingleHydrationRequest {
-  const p = normalizeArtistAuthorityHydrationRequest(input); if (p.kind !== "multiple") return p.request;
+  const p = normalizeArtistAuthorityHydrationRequest(input); if (p.kind !== "multiple" && p.kind !== "multiple-delegation") return p.request;
   const first = p.request.collections[0]!;
   return Object.freeze({ bindingIndex: 0n, artistId: first.artistId, collectionId: first.collectionId,
     expectedSource: p.request.expectedSource, replayOrigins: p.request.replayOrigins, policies: first.policies });
@@ -355,11 +419,12 @@ export function artistAuthorityHydrationBaseRequest(input: ArtistAuthorityHydrat
 function ownerData(profile: ArtistHydrationProfile, data: readonly ArtistHydrationOwnerData[]): ArtistHydrationSeven<ArtistHydrationOwnerData> {
   list(data, 7, 7); const result = data.map((v, i) => {
     const d = normalizeArtistHydrationOwnerData(v); decodeArtistHydrationOwnerState(profile, i as ArtistHydrationOwnerIndex, d.typedState);
-    if ((i !== 2 || profile === "multiple") && d.nonces.length) throw Error("Nonce words on wrong owner/profile"); return d;
+    if ((i !== 2 || profile === "multiple" || profile === "multiple-delegation") && d.nonces.length) throw Error("Nonce words on wrong owner/profile"); return d;
   });
   return Object.freeze(result) as unknown as ArtistHydrationSeven<ArtistHydrationOwnerData>;
 }
 function profileJoins(p: ArtistAuthorityHydrationRequest, q: ArtistHydrationQuery, d: ArtistHydrationSeven<ArtistHydrationOwnerData>): void {
+  if (p.kind === "multiple-delegation") { combinedJoins(p.request, q, d); return; }
   if (p.kind === "multiple") {
     const identities = decodeArtistHydrationMultipleBundle(2, d[2].typedState), r = p.request;
     if (coder.encode(["bytes32[]", "uint256[]"], [identities.artistIds, identities.collectionIds])
@@ -389,13 +454,89 @@ function profileJoins(p: ArtistAuthorityHydrationRequest, q: ArtistHydrationQuer
     if (d[2].nonces.length + state.delegateNonces.reduce((total, lane) => total + lane.words.length, 0) > 256) throw Error("Too many total nonce prefixes");
   }
 }
+function combinedJoins(r: ArtistMultipleHydrationRequest, q: ArtistHydrationQuery, d: ArtistHydrationSeven<ArtistHydrationOwnerData>): void {
+  const identities = decodeArtistHydrationOwnerState("multiple-delegation", 2, d[2].typedState);
+  const bindings = decodeArtistHydrationOwnerState("multiple-delegation", 0, d[0].typedState);
+  const acceptances = decodeArtistHydrationOwnerState("multiple-delegation", 3, d[3].typedState);
+  const attributions = decodeArtistHydrationOwnerState("multiple-delegation", 4, d[4].typedState);
+  const consents = decodeArtistHydrationOwnerState("multiple-delegation", 6, d[6].typedState);
+  if (identities.rows.length !== r.artistIds.length || identities.collectionIds.length !== r.collections.length
+    || [bindings, acceptances, attributions, consents].some(rows => rows.length !== r.collections.length)) throw Error("Incomplete combined inventory");
+  const states = identities.rows.map(row => decodeArtistHydrationDelegationIdentity(row.state));
+  const originals = states.map(state => decodeArtistHydrationIdentity(state.baseline));
+  const uses = states.map(state => state.grants.map(() => 0n));
+  const authorities = new Set<Address>(); let sourceNonces = 0n, selected = false, nativeConsents = 0;
+  identities.rows.forEach((row, a) => {
+    if (row.artistId !== r.artistIds[a]) throw Error("Combined Artist inventory differs from request");
+    const state = states[a]!, original = originals[a]!; sourceNonces += 1n + BigInt(state.delegateNonces.length);
+    if (authorities.has(original.item.authorityAddress)) throw Error("Duplicate active Artist authority"); authorities.add(original.item.authorityAddress);
+    selected ||= state.revisions.length !== 0 || state.grants.length !== 0;
+    const grantIds = new Set<Hex>();
+    state.grants.forEach((g, n) => {
+      if (g.item.grant.artistId !== row.artistId || g.item.grantor !== original.item.authorityAddress || grantIds.has(g.recordHash)) throw Error("Foreign or duplicate combined grant");
+      grantIds.add(g.recordHash); nonzero(g.recordHash);
+      const latest = state.grants.slice(n + 1).filter(next => next.item.grant.delegate === g.item.grant.delegate).at(-1)?.recordHash ?? g.recordHash;
+      if (g.current !== latest) throw Error("Combined current grant head mismatch");
+    });
+    let prior = ZeroHash as Hex, document = original.item.identityRecordHash;
+    for (const revision of state.revisions) {
+      const item = revision.item;
+      if (item.artistId !== row.artistId || item.signer !== original.item.authorityAddress || item.previousRevisionRecord !== prior
+        || item.previousRecordHash !== document || item.revisedRecordHash === document || !item.displayName.length) throw Error("Combined revision chain mismatch");
+      prior = item.recordHash; document = item.revisedRecordHash;
+    }
+    const delegates = new Set(state.grants.filter(g => state.grants.filter(other => other.item.grant.delegate === g.item.grant.delegate)
+      .reduce((sum, other) => sum + other.item.uses, 0n) > 0n).map(g => g.item.grant.delegate));
+    if (delegates.size !== state.delegateNonces.length) throw Error("Combined delegate nonce inventory mismatch");
+    for (const delegate of delegates) {
+      const key = hash(["bytes32", "bytes32", "address"], [id("6529STREAM_ARTIST_DELEGATE_NONCE_LANE_V1"), row.artistId, delegate]);
+      if (state.delegateNonces.filter(lane => lane.key === key).length !== 1) throw Error("Combined delegate nonce lane mismatch");
+    }
+  });
+  if (sourceNonces !== r.expectedSource[2].nonceIndexCount || r.expectedSource.some((cp, i) => i !== 2 && cp.nonceIndexCount !== 0n)) throw Error("Combined nonce header mismatch");
+  function grant(a: number, record: Hex, cid: bigint, mode: bigint, capability: bigint): ArtistHydrationGrant {
+    if (mode !== 2n) throw Error("Delegated consent requires original binding mode2");
+    const index = states[a]!.grants.findIndex(g => g.recordHash === record); if (index === -1) throw Error("Foreign historical grant association");
+    const g = states[a]!.grants[index]!;
+    if ((g.item.grant.collectionId !== 0n && g.item.grant.collectionId !== cid) || (g.item.grant.capabilities & capability) === 0n) throw Error("Historical grant scope/capability mismatch");
+    uses[a]![index] = uses[a]![index]! + 1n; return g;
+  }
+  r.collections.forEach((c, j) => {
+    const b = bindings[j]!, acceptance = acceptances[j]!, attribution = attributions[j]!, consent = consents[j]!;
+    if (identities.collectionIds[j] !== c.collectionId || b.collectionId !== c.collectionId || attribution.collectionId !== c.collectionId || consent.collectionId !== c.collectionId
+      || b.state.item.artistId !== c.artistId || acceptance.bindingHash !== b.state.item.bindingHash
+      || (j === 0 && b.state.item.bindingHash !== q.bindingHash)) throw Error("Combined collection/acceptance inventory mismatch");
+    const a = r.artistIds.indexOf(c.artistId), original = originals[a]!;
+    if (b.state.item.artistAddress !== original.item.authorityAddress || b.state.item.identityRecordHash !== original.item.identityRecordHash) throw Error("Combined binding/Identity mismatch");
+    if (coder.encode([`${ARTIST_HYDRATION_POLICY_TUPLE}[]`], [consent.policies]) !== coder.encode([`${ARTIST_HYDRATION_POLICY_TUPLE}[]`], [c.policies])) throw Error("Combined policy selectors differ from request");
+    selected ||= b.state.item.consentMode === 2n || consent.state.sales.length !== 0;
+    nativeConsents += consent.state.policies.length + consent.state.sales.length;
+    for (const policy of consent.state.policies) if (policy.grant !== ZeroHash) grant(a, policy.grant, c.collectionId, b.state.item.consentMode, 2n);
+    consent.state.sales.forEach((row, n) => {
+      const item = row.item;
+      if (item.artistId !== c.artistId || item.terms.collectionId !== c.collectionId || item.bindingHash !== b.state.item.bindingHash
+        || item.terms.saleAdapter === ZeroAddress || item.terms.saleId === ZeroHash || item.terms.saleConfigHash === ZeroHash) throw Error("Combined sale/binding mismatch");
+      if (row.grant === ZeroHash) {
+        if (item.authorityClass !== 1n || item.signer !== original.item.authorityAddress) throw Error("Combined direct sale signer mismatch");
+      } else {
+        const g = grant(a, row.grant, c.collectionId, b.state.item.consentMode, 1024n);
+        if (item.authorityClass !== 2n || item.signer !== g.item.grant.delegate) throw Error("Combined delegated sale signer mismatch");
+      }
+      const latest = consent.state.sales.slice(n + 1).filter(next => next.item.terms.saleId === item.terms.saleId && next.item.terms.saleConfigHash === item.terms.saleConfigHash).at(-1)?.item.recordHash ?? item.recordHash;
+      if (row.current !== latest) throw Error("Combined sale head mismatch");
+    });
+  });
+  if (!selected) throw Error("Original source facts do not select the combined profile");
+  if (nativeConsents > 128) throw Error("Too many combined native consent records");
+  states.forEach((state, a) => state.grants.forEach((g, n) => { if (g.item.uses !== uses[a]![n]) throw Error("Combined cross-collection grant use count mismatch"); }));
+}
 /** Pure supplied-facts recomputation. It cannot establish source completeness or authorize hydration. */
 export function artistAuthorityHydrationCommitment(input: ArtistAuthorityHydrationCoordinates, request: ArtistAuthorityHydrationRequest,
   query: ArtistHydrationQuery, data: readonly ArtistHydrationOwnerData[]): Hex {
   const c = coordinates(input), p = normalizeArtistAuthorityHydrationRequest(request), base = artistAuthorityHydrationBaseRequest(p), q = normalizeArtistHydrationQuery(query), d = ownerData(p.kind, data);
   if (q.artistId !== base.artistId || q.collectionId !== base.collectionId || q.bindingHash === ZeroHash
     || coder.encode([`${ARTIST_HYDRATION_POLICY_TUPLE}[]`], [q.policies]) !== coder.encode([`${ARTIST_HYDRATION_POLICY_TUPLE}[]`], [base.policies])
-    || (p.kind === "multiple" && q.records.length)) throw Error("Hydration query differs from request anchor");
+    || ((p.kind === "multiple" || p.kind === "multiple-delegation") && q.records.length)) throw Error("Hydration query differs from request anchor");
   for (let i = 0; i < 7; i++) if (coder.encode([`${ARTIST_HYDRATION_ORIGIN_TUPLE}[]`], [d[i]!.origins]) !== coder.encode([`${ARTIST_HYDRATION_ORIGIN_TUPLE}[]`], [base.replayOrigins[i]])) throw Error("Replay origins differ from request");
   profileJoins(p, q, d);
   return hash(["bytes32", "uint256", "address", "address", "address", "address", ARTIST_HYDRATION_SINGLE_REQUEST_TUPLE, ARTIST_HYDRATION_QUERY_TUPLE, `${ARTIST_HYDRATION_OWNER_DATA_TUPLE}[7]`],

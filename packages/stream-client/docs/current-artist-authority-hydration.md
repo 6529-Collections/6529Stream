@@ -13,38 +13,46 @@ operations or establish mint readiness.
 | Baseline single Artist | `hydrateArtistAuthority` | `0x1f51c336` |
 | Multiple Artists and collections | `hydrateMultipleArtistAuthority` | `0x4739d03d` |
 | Single Artist with delegation history | `hydrateArtistAuthorityWithDelegations` | `0xe17666b4` |
+| Multiple Artists with delegation history | `hydrateMultipleArtistAuthority` | `0x4739d03d` |
 
-Each is a separate ERC-165 interface with its original selector. All use
+The three selectors retain their original ERC-165 interfaces. All profiles use
 operation 60 and the seven-owner mask `0x7f`. Hydration is permissionless; the
 caller supplies verifiable selectors and source headers, not a new signature
 or an assertion of authority.
 
-Baseline and multiple profiles admit original registration/proposal (1),
+For the multiple selector, authenticated source history determines the profile.
+Identity operation 25, 26 or 27, Consent operation 16, or a mode-2 binding selects
+`6529STREAM_ARTIST_MULTIPLE_LIVING_DELEGATION_V1`. Otherwise the original multiple
+profile applies. The client uses `kind: "multiple-delegation"` to make the
+expected profile explicit and checks it against that source selection. The
+on-chain request has no profile flag. A failed combined-profile check never
+falls back to the original profile.
+
+Baseline and original multiple profiles admit registration/proposal (1),
 acceptance (2), direct policy consent (14) and authorization revocation (54).
-The delegation profile additionally carries living identity revisions (25),
+The delegation profiles additionally carry living identity revisions (25),
 delegation grants (26), revocations (27) and sale consent (16), including their
 original historical grant associations. Exact revision totals also exclude
 unsupported changes that did not append native records.
 
-All three profiles require original living class-1/status-1 Artists, accepted
+All four profiles require original living class-1/status-1 Artists, accepted
 generation-one collections and `PRIMARY_ONLY` collaborator policy. Baseline and
-multiple use signed consent mode 1; delegation allows modes 1 and 2 and the
-original delegation epoch zero. The multiple profile includes collections that
+original multiple use signed consent mode 1; delegation allows modes 1 and 2 and
+the original delegation epoch zero. The multiple profiles include collections that
 share one Artist identity. Its ordered Artist and collection lists must account
 for the whole admitted source.
 
 The separate payout, economics, readiness, publication and entropy-finding
 selectors are not composed implicitly into these profiles. The existing
-entropy-authority helper retains its explicit entropy-finding path. Combined
-multiple-Artist delegation, corrected or pending bindings, collaborator
-policies, advanced authority histories and repeated imports require their own
-accepted profiles.
+entropy-authority helper retains its explicit entropy-finding path. Corrected
+or pending bindings, collaborator policies, advanced authority histories and
+repeated imports require their own accepted profiles.
 
 ## Plan, revalidate and inspect
 
 ```js
 const prepared = prepareArtistAuthorityHydrationCall(registry, caller, {
-  kind: "baseline", // or "multiple" / "delegation"
+  kind: "baseline", // or "multiple" / "delegation" / "multiple-delegation"
   request: originalRequest,
 });
 const captured = await captureArtistAuthorityHydration(
@@ -124,6 +132,20 @@ Replacement grants share the original delegate nonce lane. Fresh successor
 writes still require their original current authorization checks and successor
 signature domain.
 
+For combined multiplicity, the fixed source journals are read completely before
+their records are partitioned by Artist and collection. A per-Artist export alone
+cannot establish complete source coverage. Every principal nonce index and every
+used delegate lane must match its original source entry; one delegate address
+under two Artists has two separate nonce namespaces. Global grant use counts
+include all supported policy and sale records across every selected collection.
+
+The combined profile uses five compact, owner-specific tagged envelopes for
+Binding, Identity, Acceptance, Attribution and Consent. Identity rows retain the
+original nested delegation bytes, their complete record list and principal nonce
+words. Acceptance rows are keyed by binding hash. Collaborator and Payout remain
+explicitly empty. These envelopes are distinct from the earlier multiple-profile
+bundles and reject another owner's tag or trailing bytes.
+
 ## Original commitments and receipts
 
 The common hydration commitment binds the profile, chain, successor Registry
@@ -163,7 +185,9 @@ after inspection.
 
 Receipt inspection also reconstructs the retained Identity document and
 signature payload inventory, including empty bundles, duplicates and delegation
-revision documents. It checks the expected new catalog entries, events and
+revision documents. Combined profiles retain each Artist's document, signatures
+and revision documents before proceeding to the next Artist. It checks the
+expected new catalog entries, events and
 immutable carrier bytes in both Identity and Archive. Omitting both copies of
 an expected payload event does not pass. Later owner state may have advanced;
 the exact hydration transition remains the one recorded in its Archive evidence.
@@ -196,9 +220,18 @@ state envelopes without a compiler ABI witness are explicitly derived from
 the retained Solidity declarations. Earlier fixtures and the operation coverage
 snapshot retain their original source pins.
 
+The combined profile adds a separate `parallel-feature-batch69-20260920` fixture
+at `1647c5c03113e2406d44793417608321f77b552a`. All 2,328 literal inputs match that
+Git commit. Its 180 ABI entries, 388 dependency hashes and 73 source texts include
+compiler return-type witnesses for all five compact owner envelopes. The ABI67
+fixture remains unchanged.
+
 ```sh
 node scripts/generate-current-artist-authority-hydration-fixture.mjs \
   /path/to/abi-input.json /path/to/abi-output.json --check
+
+node scripts/generate-current-artist-multiple-delegation-fixture.mjs \
+  /path/to/abi69-input.json /path/to/abi69-output.json --check
 ```
 
 Client and mocked-RPC tests do not establish native current-stack, actual Safe,

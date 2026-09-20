@@ -150,6 +150,9 @@ the release policy in `docs/release-policy.md`.
   continuity admission and a configured ordinary backup deployment/plan helper.
   Preserve original host history and fulfillment; actual-current Safe cutover
   recipes are authored and await coordinated runtime verification.
+- Extend Artist authority hydration callers to the source-selected combined
+  multiple-Artist delegation profile, retaining complete per-Artist evidence.
+
 - Add original Artist authority hydration callers for baseline, multiple and
   delegation profiles, with complete source evidence and atomic receipt checks.
 

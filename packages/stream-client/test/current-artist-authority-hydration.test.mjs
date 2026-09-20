@@ -69,8 +69,113 @@ test("three public original requests and capability IDs match exact compiler ABI
     assert.equal(call.profile, h.ARTIST_HYDRATION_PROFILES[input.kind]); assert.deepEqual(h.normalizeArtistAuthorityHydrationCall(call), call);
   }
   assert.throws(() => h.prepareArtistAuthorityHydrationCall(coords.registry, ZeroAddress, cases[0][0]), /nonzero/);
-  for (const kind of ["multiple-delegation", "payout", "readiness", "entropyFindings"])
+  for (const kind of ["unknown-profile", "payout", "readiness", "entropyFindings"])
     assert.throws(() => h.normalizeArtistAuthorityHydrationRequest({ kind, request: single() }), /Unsupported/);
+});
+
+function combined() {
+  const artistIds = [toBeHex(1, 32), toBeHex(2, 32)], delegate = addr(31), grantId = id("combined-grant");
+  const collections = [1n, 2n, 3n].map((cid, j) => ({ collectionId: cid, artistId: artistIds[j === 1 ? 0 : 1],
+    policies: j === 1 ? [] : [{ phaseId: id(`phase${cid}`), policyHash: id(`policy${cid}`) }] }));
+  const request = { kind: "multiple-delegation", request: { bindingIndex: 0n, artistIds, collections, expectedSource: headers(), replayOrigins: seven(() => []) } };
+  request.request.expectedSource[2].nonceIndexCount = 3n;
+  const principals = artistIds.map((_, a) => ({ ...identity(2n, 1), item: { ...identity().item, authorityAddress: addr(50 + a) } }));
+  const grant = { recordHash: grantId, item: { grant: { artistId: artistIds[1], delegate, collectionId: 0n, capabilities: 1026n,
+    notBefore: 1n, expiresAt: 2n, maxUses: 0n, constraintsHash: ZeroHash }, grantor: principals[1].item.authorityAddress,
+    nonce: (1n << 120n) + 1n, uses: 3n, revoked: true, revocationRecordHash: id("combined-revocation") }, epoch: 0n, current: grantId };
+  const identities = { rows: artistIds.map((a, j) => ({ artistId: a, records: [a], nonces: [nonce()],
+    state: h.encodeArtistHydrationDelegationIdentity({ baseline: h.encodeArtistHydrationIdentity(principals[j]), epoch: 0n, revisions: [],
+      grants: j === 0 ? [] : [grant], delegateNonces: j === 0 ? [] : [{ key: hash(["bytes32", "bytes32", "address"], [id("6529STREAM_ARTIST_DELEGATE_NONCE_LANE_V1"), a, delegate]), hint: 3n, words: [nonce()] }] }) })),
+    collectionIds: collections.map(c => c.collectionId) };
+  const bindings = collections.map((c, j) => { const a = artistIds.indexOf(c.artistId), state = binding(c.artistId, id(`combined-binding${j}`), a === 1 ? 2n : 1n);
+    state.item.artistAddress = principals[a].item.authorityAddress; return { collectionId: c.collectionId, state }; });
+  const acceptances = bindings.map(b => ({ bindingHash: b.state.item.bindingHash, state: { record: id(`accepted${b.collectionId}`), acceptedAt: 1n } }));
+  const attributions = collections.map(c => ({ collectionId: c.collectionId, state: 2n, generation: 1n }));
+  const consents = collections.map((c, j) => ({ collectionId: c.collectionId, policies: c.policies,
+    state: { policies: c.policies.map(() => ({ recordHash: id(`consent${j}`), grant: grantId })), sales: j === 0 ? [{
+      item: { recordHash: id("combined-sale"), terms: { collectionId: c.collectionId, saleAdapter: addr(88), saleId: id("sale"), saleConfigHash: id("saleconfig") },
+        artistId: c.artistId, signer: delegate, authorityClass: 2n, nonce: 0n, signedAt: 1n, bindingGeneration: 1n, bindingHash: bindings[j].state.item.bindingHash },
+      grant: grantId, current: id("combined-sale") }] : [] } }));
+  const states = [bindings, null, identities, acceptances, attributions, null, consents];
+  const data = states.map((state, i) => ({ typedState: h.encodeArtistHydrationOwnerState("multiple-delegation", i, state), origins: [], sourceKeys: [], cells: [], nonces: [] }));
+  return { request, data, states, query: { ...collections[0], bindingHash: bindings[0].state.item.bindingHash, records: [] } };
+}
+
+test("combined profile preserves original public selector and MH request with no on-chain profile flag", () => {
+  const c = combined(), selected = h.prepareArtistAuthorityHydrationCall(coords.registry, actor, c.request);
+  const old = h.prepareArtistAuthorityHydrationCall(coords.registry, actor, { ...c.request, kind: "multiple" });
+  assert.equal(selected.call.data, old.call.data); assert.equal(selected.capabilityId, "0x4739d03d");
+  assert.equal(selected.profile, id("6529STREAM_ARTIST_MULTIPLE_LIVING_DELEGATION_V1")); assert.notEqual(selected.profile, old.profile);
+  assert.equal(selected.call.data, original.encodeFunctionData("hydrateMultipleArtistAuthority", [c.request.request]));
+  assert.equal(h.artistAuthorityHydrationBaseRequest(c.request).artistId, c.request.request.collections[0].artistId);
+  assert.notEqual(h.artistAuthorityHydrationBaseRequest(c.request).artistId, c.request.request.artistIds[0]);
+  assert.doesNotThrow(() => h.artistAuthorityHydrationCommitment(coords, c.request, c.query, c.data));
+  assert.throws(() => h.artistAuthorityHydrationCommitment(coords, { ...c.request, kind: "multiple" }, c.query, c.data));
+});
+
+test("combined compact five owner states match new compiler outputs and preserve nested DH bytes", () => {
+  const capture = JSON.parse(readFileSync(new URL("./fixtures/current-artist-multiple-delegation-abi.json", import.meta.url), "utf8"));
+  const md = new Interface(capture.abis.multipleDelegationCodec), c = combined();
+  for (const [i, name, tag] of [[0, "bindings", "BINDINGS"], [2, "identity", "IDENTITIES"], [3, "acceptances", "ACCEPTANCES"], [4, "attributions", "ATTRIBUTIONS"], [6, "consents", "CONSENTS"]]) {
+    assert.equal(c.data[i].typedState, coder.encode(["bytes32", md.getFunction(name).outputs[0]], [id(`6529STREAM_ARTIST_MULTIPLE_DELEGATION_${tag}_V1`), c.states[i]]));
+    assert.deepEqual(h.decodeArtistHydrationOwnerState("multiple-delegation", i, c.data[i].typedState), c.states[i]);
+    assert.throws(() => h.decodeArtistHydrationOwnerState("multiple-delegation", i, `${c.data[i].typedState}00`), /Noncanonical/);
+  }
+  const nested = h.decodeArtistHydrationDelegationIdentity(c.states[2].rows[0].state);
+  assert.equal(h.decodeArtistHydrationIdentity(nested.baseline).nextRegistrationNonce, 2n);
+  assert.throws(() => h.decodeArtistHydrationOwnerState("delegation", 2, c.states[2].rows[0].state), /Identity/);
+  assert.equal(h.encodeArtistHydrationDelegationIdentity(nested), c.states[2].rows[0].state);
+});
+
+test("combined cross-collection historical grant tally, recorded associations and nonce lanes stay exact", () => {
+  const c = combined();
+  const change = (i, mutation) => {
+    const states = structuredClone(c.states), data = structuredClone(c.data); mutation(states[i]);
+    data[i].typedState = h.encodeArtistHydrationOwnerState("multiple-delegation", i, states[i]);
+    return () => h.artistAuthorityHydrationCommitment(coords, c.request, c.query, data);
+  };
+  assert.throws(change(6, rows => { rows[2].state.policies[0].grant = ZeroHash; }), /use count/);
+  assert.throws(change(6, rows => { rows[0].state.sales[0].grant = id("foreign grant"); }), /Foreign/);
+  assert.throws(change(6, rows => { rows[0].state.sales[0].item.signer = addr(99); }), /signer/);
+  assert.throws(change(3, rows => { [rows[0], rows[1]] = [rows[1], rows[0]]; }), /acceptance/);
+  assert.throws(change(0, rows => { rows[0].state.item.artistAddress = addr(98); }), /Identity/);
+  assert.throws(change(2, identities => {
+    const state = structuredClone(h.decodeArtistHydrationDelegationIdentity(identities.rows[1].state));
+    state.delegateNonces[0].key = id("foreign lane"); identities.rows[1].state = h.encodeArtistHydrationDelegationIdentity(state);
+  }), /nonce lane/);
+  assert.throws(change(2, identities => {
+    const state = structuredClone(h.decodeArtistHydrationDelegationIdentity(identities.rows[1].state));
+    state.grants[0].item.grant.collectionId = 1n; identities.rows[1].state = h.encodeArtistHydrationDelegationIdentity(state);
+  }), /scope/);
+  const incomplete = structuredClone(c.request); incomplete.request.expectedSource[2].nonceIndexCount = 2n;
+  assert.throws(() => h.artistAuthorityHydrationCommitment(coords, incomplete, c.query, c.data), /nonce header/);
+});
+
+test("combined mode2-only one-Artist one-collection profile is supported and baseline facts do not select it", () => {
+  const input = { kind: "multiple-delegation", request: { bindingIndex: 0n, artistIds: [artistId], collections: [{ artistId, collectionId, policies: [] }], expectedSource: headers(), replayOrigins: seven(() => []) } };
+  const states = [[{ collectionId, state: binding(artistId, bindingHash, 2n) }], null,
+    { rows: [{ artistId, records: [], state: h.encodeArtistHydrationDelegationIdentity({ baseline: h.encodeArtistHydrationIdentity(identity(1n, 0)), epoch: 0n, revisions: [], grants: [], delegateNonces: [] }), nonces: [nonce()] }], collectionIds: [collectionId] },
+    [{ bindingHash, state: { record: id("accept"), acceptedAt: 1n } }], [{ collectionId, state: 2n, generation: 1n }], null, [{ collectionId, policies: [], state: { policies: [], sales: [] } }]];
+  const data = states.map((state, i) => ({ typedState: h.encodeArtistHydrationOwnerState("multiple-delegation", i, state), origins: [], sourceKeys: [], cells: [], nonces: [] }));
+  const q = { artistId, collectionId, bindingHash, policies: [], records: [] };
+  assert.doesNotThrow(() => h.artistAuthorityHydrationCommitment(coords, input, q, data));
+  states[0][0].state.item.consentMode = 1n; data[0].typedState = h.encodeArtistHydrationOwnerState("multiple-delegation", 0, states[0]);
+  assert.throws(() => h.artistAuthorityHydrationCommitment(coords, input, q, data), /do not select/);
+});
+
+test("combined evidence keeps original seven owners and full canonical carrier; no legacy nonce outer slots", () => {
+  const c = combined(), commitment = h.artistAuthorityHydrationCommitment(coords, c.request, c.query, c.data);
+  const profile = { profile: h.ARTIST_HYDRATION_PROFILES["multiple-delegation"], predecessorRegistry: coords.predecessorRegistry,
+    sourceCoordinator: coords.sourceCoordinator, expectedSource: c.request.request.expectedSource, query: c.query, ownerData: c.data };
+  const bytes = h.encodeArtistAuthorityHydrationProfileEvidence(profile);
+  assert.deepEqual(h.decodeArtistAuthorityHydrationProfileEvidence(bytes), profile);
+  const evidence = { schemaVersion: 1n, configurationHash: id("configuration"), operationId: 60n, actor, commitment, before: snapshots(), after: snapshots(), profileData: bytes };
+  const full = h.encodeArtistAuthorityHydrationEvidence(evidence); assert.deepEqual(h.decodeArtistAuthorityHydrationEvidence(full), evidence);
+  const wrong = structuredClone(c.data); wrong[2].nonces = [nonce()];
+  assert.throws(() => h.artistAuthorityHydrationCommitment(coords, c.request, c.query, wrong), /wrong owner/);
+  const compact = h.decodeArtistHydrationOwnerState("multiple-delegation", 2, c.data[2].typedState);
+  assert.ok(Object.isFrozen(compact.rows[0].nonces[0].words));
+  assert.throws(() => h.encodeArtistHydrationOwnerState("multiple-delegation", 2, { ...compact, registrationCount: 2n }), /exact/);
 });
 
 test("frozen requests preserve replay insertion and policy receipt order with profile-specific bounds", () => {

@@ -5,6 +5,7 @@ import {
   artistAuthorityHydrationEvidenceId, artistAuthorityHydrationOwnerAfter,
   artistAuthorityHydrationReplayKey, decodeArtistAuthorityHydrationEvidence,
   decodeArtistAuthorityHydrationProfileEvidence, decodeArtistHydrationOwnerState,
+  decodeArtistHydrationDelegationIdentity, encodeArtistHydrationOwnerState,
   encodeArtistAuthorityHydrationEvidence, encodeArtistAuthorityHydrationProfileEvidence,
   encodeArtistHydrationMultipleBundle,
   ARTIST_HYDRATION_SNAPSHOT_TUPLE, ARTIST_HYDRATION_CHECKPOINT_TUPLE,
@@ -94,6 +95,7 @@ const abi = new Interface([
   "function archiveV2() view returns(address)", "function deploymentChainId() view returns(uint256)",
   "function domainId() view returns(bytes32)", "function configurationHash() view returns(bytes32)",
   `function authorityHydrationSuite() view returns(${ARTIST_HYDRATION_SUITE_TUPLE})`,
+  "function binding(uint256) view returns((bytes32 artistId,address artistAddress,bytes32 identityRecordHash,bytes32 bindingHash,uint64 generation,uint8 consentMode,uint8 saleConsentScope,uint8 registryImmutabilityElection,address proposer,bool accepted))",
   "function supportsInterface(bytes4) view returns(bool)",
   "function gasParameterInfo(bytes32) view returns(uint256,uint256,uint8,uint64)",
   "function getSatellitePointer(bytes32) view returns(address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64)",
@@ -274,8 +276,8 @@ async function lane(p: Reader, source: ArtistHydrationSuite, destination: Artist
 }
 async function inventory(p: Reader, source: ArtistHydrationSuite, destination: ArtistHydrationSuite, input: any, tag: number) {
   const request = input.request;
-  const multiple = input.kind === "multiple";
-  const delegation = input.kind === "delegation";
+  const multiple = input.kind === "multiple" || input.kind === "multiple-delegation";
+  const delegation = input.kind === "delegation" || input.kind === "multiple-delegation";
   const checkpoints: ArtistHydrationCheckpoint[] = [];
   const before: ArtistHydrationSnapshot[] = [];
   const journals: ArtistHydrationNativeReceipt[][] = [];
@@ -299,7 +301,8 @@ function queryFor(artistId: Hex, collectionId = 0n, policies: any[] = []): Artis
   return { artistId, collectionId, bindingHash: ZeroHash as Hex, policies, records: [] };
 }
 function queries(input: any, journals: readonly (readonly ArtistHydrationNativeReceipt[])[], cp: readonly ArtistHydrationCheckpoint[]) {
-  const r = input.request, multiple = input.kind === "multiple", delegation = input.kind === "delegation";
+  const r = input.request, combined = input.kind === "multiple-delegation";
+  const multiple = input.kind === "multiple" || combined, delegation = input.kind === "delegation" || combined;
   const artistIds: Hex[] = multiple ? [...r.artistIds] : [r.artistId];
   const collections: any[] = multiple ? r.collections : [{ artistId: r.artistId, collectionId: r.collectionId, policies: r.policies }];
   const artists: any[] = artistIds.map(a => queryFor(a));
@@ -323,8 +326,11 @@ function queries(input: any, journals: readonly (readonly ArtistHydrationNativeR
         if (receipt.operation === 1n) {
           if (registrations.has(receipt.artistId) || !same(receipt.recordHash, receipt.artistId) || (!multiple && j !== 0)) throw Error("Invalid registration receipt");
           registrations.add(receipt.artistId);
-        } else if (receipt.operation === 54n) ++revocations;
-        else if (!delegation || ![25n, 26n, 27n].includes(receipt.operation)) throw Error("Unsupported Identity history");
+        } else {
+          if (combined && !registrations.has(receipt.artistId)) throw Error("Identity history precedes registration");
+          if (receipt.operation === 54n) ++revocations;
+          else if (!delegation || ![25n, 26n, 27n].includes(receipt.operation)) throw Error("Unsupported Identity history");
+        }
       } else {
         const collection = rows.find(c => c.collectionId === receipt.collectionId && same(c.artistId, receipt.artistId));
         if (!collection) throw Error("Receipt collection not selected");
@@ -341,7 +347,7 @@ function queries(input: any, journals: readonly (readonly ArtistHydrationNativeR
     || (policyCounts.get(row.collectionId.toString()) ?? 0) !== row.policies.length) throw Error("Incomplete binding/acceptance/policy inventory");
   for (let i = 0; i < 7; ++i) {
     const expected = i === 0 || i === 4 ? BigInt(2 * rows.length)
-      : i === 2 ? (delegation ? BigInt(2 + journals[2]!.length + journals[6]!.length) : BigInt(artists.length + rows.length + totalPolicies + revocations + 1))
+      : i === 2 ? (delegation ? BigInt((combined ? rows.length + 1 : 2) + journals[2]!.length + journals[6]!.length) : BigInt(artists.length + rows.length + totalPolicies + revocations + 1))
       : i === 3 ? BigInt(rows.length) : i === 6 ? BigInt(journals[6]!.length) : 0n;
     if (cp[i]!.ownerState.revision !== expected) throw Error("Unsupported source revision history");
   }
@@ -372,7 +378,7 @@ async function guards(p: Reader, d: ArtistAuthorityHydrationDeployment, source: 
   for (let i = 0; i < boundedCount(cp[2]!.nonceIndexCount, input.kind === "baseline" ? 1 : 128, "nonce indexes"); ++i) {
     const n = (await read(p, source.owners[2]!, "authorityNonceIndexAt", [BigInt(i)], tag))[0];
     const key = `${n.kind}:${n.key}`;
-    if (seen.has(key) || n.prefixCount === 0n || (n.kind !== 1n && !(input.kind === "delegation" && n.kind === 2n))) throw Error("Unsupported or duplicate nonce index");
+    if (seen.has(key) || n.prefixCount === 0n || (n.kind !== 1n && !(["delegation", "multiple-delegation"].includes(input.kind) && n.kind === 2n))) throw Error("Unsupported or duplicate nonce index");
     seen.add(key);
     const count = boundedCount(n.prefixCount, 256, "nonce prefixes"); prefixes += count;
     if (prefixes > 256) throw Error("Excessive total nonce prefixes");
@@ -401,7 +407,120 @@ function multipleIdentity(raw: Hex): any {
   if (!same(coder.encode([t], decoded), raw)) throw Error("Noncanonical living identity");
   return plain(t, decoded[0]);
 }
-async function states(p: Reader, source: ArtistHydrationSuite, input: any, journal: readonly (readonly ArtistHydrationNativeReceipt[])[], q: ReturnType<typeof queries>, data: any[], indexes: readonly ArtistHydrationNonceInventory[], tag: number) {
+async function selectedMultipleProfile(p: Reader, source: ArtistHydrationSuite, input: any, journal: readonly (readonly ArtistHydrationNativeReceipt[])[], tag: number) {
+  if (input.kind !== "multiple" && input.kind !== "multiple-delegation") return;
+  let required = journal[2]!.some(r => [25n, 26n, 27n].includes(r.operation)) || journal[6]!.some(r => r.operation === 16n);
+  for (const receipt of journal[0]!) {
+    const binding = (await read(p, source.owners[0]!, "binding", [receipt.collectionId], tag))[0];
+    if (binding.consentMode === 2n) required = true;
+  }
+  if (required !== (input.kind === "multiple-delegation")) throw Error("Requested multiple profile differs from authenticated source selection");
+}
+function combinedIdentityFacts(chainId: bigint, source: ArtistHydrationSuite, receipts: readonly ArtistHydrationNativeReceipt[], artistId: Hex, state: any, original: any) {
+  let ordinal = 0n, registered = false, revisionIndex = 0, grantIndex = 0, revoked = 0;
+  let document = original.item.identityRecordHash, previousRevision = ZeroHash;
+  for (const receipt of receipts) {
+    if (receipt.operation === 1n) {
+      if (same(receipt.artistId, artistId)) {
+        const expected = keccak256(coder.encode(["bytes32", "uint256", "address", "address", "bytes32", "uint256"],
+          [id("6529STREAM_ARTIST_ID_V1"), chainId, source.registry, original.item.authorityAddress, document, ordinal]));
+        if (registered || !same(expected, artistId)) throw Error("Original registration ordinal differs");
+        registered = true;
+      }
+      ++ordinal;
+    }
+    if (!same(receipt.artistId, artistId)) continue;
+    if (receipt.operation === 25n) {
+      const row = state.revisions[revisionIndex++];
+      if (!row) throw Error("Missing original revision");
+      const r = row.item;
+      const expected = keccak256(coder.encode(["bytes32", "uint256", "address", "bytes32", "bytes32", "bytes32", "address", "uint8", "uint256", "uint64"],
+        ["0x1b7518e9d16da358d15957ec43218eb0b017fbd017e60c75b3126110006034a4", chainId, source.registry, artistId, document, r.revisedRecordHash, r.signer, 1n, r.nonce, r.signedAt]));
+      if (!same(r.recordHash, receipt.recordHash) || !same(r.artistId, artistId) || !same(r.previousRevisionRecord, previousRevision)
+        || !same(r.previousRecordHash, document) || same(r.revisedRecordHash, document) || !same(r.signer, original.item.authorityAddress)
+        || r.authorityClass !== 1n || r.signedAt === 0n || !r.displayName.length || !same(keccak256(row.document), r.revisedRecordHash)
+        || !same(expected, receipt.recordHash)) throw Error("Original revision chain/hash differs");
+      previousRevision = r.recordHash; document = r.revisedRecordHash;
+    } else if (receipt.operation === 26n) {
+      const row = state.grants[grantIndex++];
+      if (!row) throw Error("Missing original grant");
+      const g = row.item.grant;
+      const expected = keccak256(coder.encode(["bytes32", "uint256", "address", "bytes32", "address", "uint256", "uint32", "uint64", "uint64", "uint64", "bytes32", "uint256"],
+        [id("6529STREAM_ARTIST_DELEGATION_RECORD_V1"), chainId, source.registry, g.artistId, g.delegate, g.collectionId, g.capabilities, g.notBefore, g.expiresAt, g.maxUses, g.constraintsHash, row.item.nonce]));
+      if (!same(row.recordHash, receipt.recordHash) || !same(row.item.grantor, original.item.authorityAddress) || !same(g.artistId, artistId)
+        || !same(expected, row.recordHash)) throw Error("Original grant record/hash differs");
+      let latest = row.recordHash;
+      for (const later of state.grants.slice(grantIndex)) if (same(later.item.grant.delegate, g.delegate)) latest = later.recordHash;
+      if (!same(row.current, latest)) throw Error("Original grant head differs");
+    } else if (receipt.operation === 27n) {
+      if (state.grants.slice(0, grantIndex).filter((g: any) => same(g.item.revocationRecordHash, receipt.recordHash)).length !== 1) throw Error("Grant revocation does not follow its original grant");
+      ++revoked;
+    }
+  }
+  if (!registered || ordinal !== original.nextRegistrationNonce || revisionIndex !== state.revisions.length || grantIndex !== state.grants.length
+    || revoked !== state.grants.filter((g: any) => g.item.revoked).length) throw Error("Incomplete original Identity journal partition");
+}
+function combinedSaleFacts(chainId: bigint, source: ArtistHydrationSuite, query: ArtistHydrationQuery, sales: readonly any[], receipts: readonly ArtistHydrationNativeReceipt[]) {
+  const original = receipts.filter(r => r.collectionId === query.collectionId && r.operation === 16n);
+  if (!equal(sales.map(s => s.item.recordHash), original.map(r => r.recordHash))) throw Error("Sales differ from complete collection journal");
+  for (let i = 0; i < sales.length; ++i) {
+    const row = sales[i]!, r = row.item, t = r.terms;
+    const expected = keccak256(coder.encode(["bytes32", "uint256", "address", "address", "address", "uint256", "bytes32", "bytes32", "bytes32", "address", "uint8", "uint256", "uint64"],
+      [id("6529STREAM_ARTIST_SALE_CONSENT_RECORD_V1"), chainId, source.registry, t.saleAdapter, source.core, t.collectionId, t.saleId, t.saleConfigHash, r.artistId, r.signer, r.authorityClass, r.nonce, r.signedAt]));
+    if (!same(expected, r.recordHash) || !same(r.artistId, query.artistId) || t.collectionId !== query.collectionId || !same(r.bindingHash, query.bindingHash)
+      || r.bindingGeneration !== 1n || same(t.saleAdapter, ZeroAddress) || same(t.saleId, ZeroHash) || same(t.saleConfigHash, ZeroHash)) throw Error("Original sale record/hash differs");
+    let latest = r.recordHash;
+    for (const later of sales.slice(i + 1)) if (later.item.terms.collectionId === t.collectionId && same(later.item.terms.saleId, t.saleId) && same(later.item.terms.saleConfigHash, t.saleConfigHash)) latest = later.item.recordHash;
+    if (!same(row.current, latest)) throw Error("Original sale head differs");
+  }
+}
+async function combinedStates(p: Reader, chainId: bigint, source: ArtistHydrationSuite, journal: readonly (readonly ArtistHydrationNativeReceipt[])[], q: ReturnType<typeof queries>, data: any[], indexes: readonly ArtistHydrationNonceInventory[], tag: number) {
+  const identities: any[] = [], decoded: any[] = [];
+  const delegates: any[] = [];
+  for (const query of q.artists) {
+    const principal = indexes.filter(n => n.kind === 1n && same(n.key, query.artistId));
+    if (principal.length !== 1) throw Error("Incomplete combined principal nonce inventory");
+    const raw = hex((await read(p, source.owners[2]!, "authorityDelegationHydrationState", [query], tag))[0], MAX_EVIDENCE);
+    const state = decodeArtistHydrationDelegationIdentity(raw);
+    const original = multipleIdentity(state.baseline);
+    if (original.nextRegistrationNonce !== BigInt(q.artists.length) || original.signatures.length !== query.records.length) throw Error("Combined allocator/signature inventory differs");
+    combinedIdentityFacts(chainId, source, journal[2]!, query.artistId, state, original);
+    for (const lane of state.delegateNonces) delegates.push(lane);
+    identities.push({ artistId: query.artistId, records: query.records, state: raw, nonces: principal[0]!.words });
+    decoded.push(original);
+  }
+  if (indexes.length !== identities.length + delegates.length || indexes.filter(n => n.kind === 1n).length !== identities.length
+    || indexes.filter(n => n.kind === 2n).length !== delegates.length) throw Error("Combined nonce index count differs");
+  for (const index of indexes.filter(n => n.kind === 2n)) {
+    const matched = delegates.filter(n => same(n.key, index.key));
+    if (matched.length !== 1 || !equal(matched[0].words, index.words)) throw Error("Combined delegate lane partition differs");
+  }
+  const bindings: any[] = [], acceptances: any[] = [], attributions: any[] = [], consents: any[] = [];
+  for (const query of q.collections) {
+    const b = await typedState(p, source.owners[0]!, "authorityDelegationHydrationState", query, "delegation", 0, tag);
+    const a = await typedState(p, source.owners[3]!, "authorityHydrationState", query, "baseline", 3, tag);
+    const t = await typedState(p, source.owners[4]!, "authorityHydrationState", query, "baseline", 4, tag);
+    const c = await typedState(p, source.owners[6]!, "authorityDelegationHydrationState", query, "delegation", 6, tag);
+    const original = decoded[q.artists.findIndex(v => same(v.artistId, query.artistId))];
+    if (!same(b.decoded.item.artistId, query.artistId) || !same(b.decoded.item.bindingHash, query.bindingHash)
+      || !same(b.decoded.item.artistAddress, original.item.authorityAddress) || !same(b.decoded.item.identityRecordHash, original.item.identityRecordHash)
+      || !equal(b.decoded.item, (await read(p, source.owners[0]!, "binding", [query.collectionId], tag))[0])) throw Error("Combined binding/identity differs");
+    if (!same(a.decoded.record, journal[3]!.find(r => r.collectionId === query.collectionId)!.recordHash)) throw Error("Combined acceptance differs");
+    if (!equal(c.decoded.policies.map((v: any) => v.recordHash), journal[6]!.filter(r => r.collectionId === query.collectionId && r.operation === 14n).map(r => r.recordHash))) throw Error("Combined policy order differs");
+    combinedSaleFacts(chainId, source, query, c.decoded.sales, journal[6]!);
+    bindings.push({ collectionId: query.collectionId, state: b.decoded });
+    acceptances.push({ bindingHash: query.bindingHash, state: a.decoded });
+    attributions.push({ collectionId: query.collectionId, state: t.decoded.state, generation: t.decoded.generation });
+    consents.push({ collectionId: query.collectionId, policies: query.policies, state: c.decoded });
+  }
+  data[0].typedState = encodeArtistHydrationOwnerState("multiple-delegation", 0, bindings);
+  data[2].typedState = encodeArtistHydrationOwnerState("multiple-delegation", 2, { rows: identities, collectionIds: q.collections.map(c => c.collectionId) });
+  data[3].typedState = encodeArtistHydrationOwnerState("multiple-delegation", 3, acceptances);
+  data[4].typedState = encodeArtistHydrationOwnerState("multiple-delegation", 4, attributions);
+  data[6].typedState = encodeArtistHydrationOwnerState("multiple-delegation", 6, consents);
+}
+async function states(p: Reader, chainId: bigint, source: ArtistHydrationSuite, input: any, journal: readonly (readonly ArtistHydrationNativeReceipt[])[], q: ReturnType<typeof queries>, data: any[], indexes: readonly ArtistHydrationNonceInventory[], tag: number) {
+  if (input.kind === "multiple-delegation") return combinedStates(p, chainId, source, journal, q, data, indexes, tag);
   if (input.kind !== "multiple") {
     const principal = indexes.filter(n => n.kind === 1n && same(n.key, q.query.artistId));
     if (principal.length !== 1 || (input.kind === "baseline" && indexes.length !== 1)) throw Error("Incomplete principal nonce lane");
@@ -506,13 +625,14 @@ export async function captureArtistAuthorityHydration(p: Reader, rawDeployment: 
   const c = await context(p, d, tag, true);
   await history(p, d, c.source, c.destination, tag);
   const inv = await inventory(p, c.source, c.destination, input, tag);
+  await selectedMultipleProfile(p, c.source, input, inv.journals, tag);
   const q = queries(input, inv.journals, inv.checkpoints);
   const g = await guards(p, d, c.source, input, inv.checkpoints, tag);
   const lanes: ArtistHydrationLane[] = [];
   for (const a of q.artists) lanes.push(await lane(p, c.source, c.destination, 1n, a.artistId, BigInt(a.records.length), tag));
   for (const a of q.collections) lanes.push(await lane(p, c.source, c.destination, 2n, coder.encode(["uint256"], [a.collectionId]) as Hex,
     BigInt(inv.journals.flat().filter(r => r.collectionId === a.collectionId).length), tag));
-  await states(p, c.source, input, inv.journals, q, g.data, g.nonceIndexes, tag);
+  await states(p, d.chainId, c.source, input, inv.journals, q, g.data, g.nonceIndexes, tag);
   const payloadCatalogs = await catalogs(p, c.destination, tag);
   const commitment = artistAuthorityHydrationCommitment(coordinates(d), input, q.query, g.data);
   const after = inv.before.map((s, i) => artistAuthorityHydrationOwnerAfter(ownerEnvironment(d, c.destination, i), s, prepared.caller, q.query, g.data[i]!, commitment));
@@ -581,7 +701,14 @@ async function payloads(p: Reader, c: ArtistAuthorityHydrationCapture, logs: rea
     append("ARTIST_IDENTITY_DOCUMENT", decoded.document);
     for (const signature of decoded.signatures) append("ARTIST_SIGNATURE_BUNDLE", signature);
   }
-  if (c.prepared.input.kind === "multiple") {
+  if (c.prepared.input.kind === "multiple-delegation") {
+    const state = decodeArtistHydrationOwnerState("multiple-delegation", 2, c.ownerData[2]!.typedState);
+    for (const row of state.rows) {
+      const delegated = decodeArtistHydrationDelegationIdentity(row.state);
+      identity(delegated.baseline);
+      for (const revision of delegated.revisions) append("ARTIST_IDENTITY_DOCUMENT", revision.document);
+    }
+  } else if (c.prepared.input.kind === "multiple") {
     const state = decodeArtistHydrationOwnerState("multiple", 2, c.ownerData[2]!.typedState);
     for (const row of state.rows) identity(row.state);
   } else if (c.prepared.input.kind === "delegation") {
@@ -702,7 +829,7 @@ export async function inspectArtistAuthorityHydrationReceipt(p: ReceiptReader, r
     || !same(profile.sourceCoordinator, c.deployment.source.coordinator.address) || !equal(profile.expectedSource, c.checkpoints)
     || !equal(profile.query, c.query) || !equal(profile.ownerData, c.ownerData)) throw Error("Atomic operation/profile evidence differs");
   let lastHydration = h.log.index;
-  if (c.prepared.input.kind === "multiple") {
+  if (c.prepared.input.kind === "multiple" || c.prepared.input.kind === "multiple-delegation") {
     const m = only(c.deployment.destination.coordinator.address, "MultipleArtistAuthorityHydrated");
     if (m.log.index <= h.log.index || !same(m.values[0], c.sourceSuite.registry) || !same(m.values[1], c.commitment)
       || !equal(m.values[2], c.prepared.input.request.artistIds) || !equal(m.values[3], c.prepared.input.request.collections.map(r => r.collectionId))) throw Error("Multiple profile event differs");

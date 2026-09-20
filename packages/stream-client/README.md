@@ -338,7 +338,8 @@ contract profiles and outstanding larger-script work.
 ## Current caller extensions
 
 - [Artist authority hydration](docs/current-artist-authority-hydration.md)
-  preserves the three approved living profiles and atomic seven-owner evidence.
+  preserves the four approved living profiles and atomic seven-owner evidence,
+  including source-selected multiple-Artist delegation.
 - [Mint counter accounting reads](docs/current-mint-counter-reads.md) preserve
   scoped keys, original proof presentation and remaining counter units.
 - [Mint phase freeze](docs/current-mint-phase-freeze.md) retains original terminal

@@ -1,6 +1,7 @@
 import type { Provider } from "ethers";
 import type { Address, Hex } from "../src/generated/contracts.js";
-import type { ArtistAuthorityHydrationCall } from "../src/current-artist-authority-hydration.js";
+import { prepareArtistAuthorityHydrationCall, decodeArtistHydrationOwnerState, decodeArtistHydrationDelegationIdentity,
+  type ArtistAuthorityHydrationCall, type ArtistMultipleHydrationRequest } from "../src/current-artist-authority-hydration.js";
 import { captureArtistAuthorityHydration, simulateArtistAuthorityHydration, inspectArtistAuthorityHydrationReceipt,
   type ArtistAuthorityHydrationDeployment, type ArtistAuthorityHydrationCapture } from "../src/current-artist-authority-hydration-workflow.js";
 import { createSafeCallPlan } from "../src/safe-plan.js";
@@ -33,3 +34,22 @@ capture.prepared.caller = safe;
 // @ts-expect-error Payload catalog rows are immutable.
 capture.payloadCatalogs[0]!.rows[0]!.pointer = safe;
 void createSafeCallPlan;
+
+declare const multipleRequest: ArtistMultipleHydrationRequest;
+const combinedCall = prepareArtistAuthorityHydrationCall(deployment.destination.registry.address, safe,
+  { kind: "multiple-delegation", request: multipleRequest });
+const combined = await captureArtistAuthorityHydration(provider, deployment, combinedCall, { blockTag: 14 });
+const combinedReceipt = await inspectArtistAuthorityHydrationReceipt(provider, combined, hash, { execution: "safe" });
+const identities = decodeArtistHydrationOwnerState("multiple-delegation", 2, combinedReceipt.capture.ownerData[2]!.typedState);
+const identity = decodeArtistHydrationDelegationIdentity(identities.rows[0]!.state);
+const delegateLane: Hex = identity.delegateNonces[0]!.key;
+const principalNonceWord: bigint = identities.rows[0]!.nonces[0]!.words[0]!;
+void delegateLane; void principalNonceWord;
+// @ts-expect-error The combined profile still requires the original complete multiple request.
+prepareArtistAuthorityHydrationCall(safe, safe, { kind: "multiple-delegation", request: { artistId: hash, collectionId: 1n } });
+// @ts-expect-error Canonical per-Artist record inventory is immutable.
+identities.rows[0]!.records.push(hash);
+// @ts-expect-error Nested historical grant uses cannot be edited through decoded observations.
+identity.grants[0]!.item.uses = 2n;
+// @ts-expect-error There is no independently selectable multiple/delegation boolean override.
+prepareArtistAuthorityHydrationCall(safe, safe, { kind: "multiple", request: multipleRequest, withDelegations: true });
