@@ -203,8 +203,9 @@ the release policy in `docs/release-policy.md`.
   original fixed Payment entries and layout; add maximum permits with exact
   actual pulls and truthful declared-free outcomes without official zero revenue.
 - Retain original Artist/Manager checks, atomic funding and mint, reveal allowance
-  and executor refund semantics. Author 26 focused cases; ABI/type checks and
-  selected production sizes pass. New-source runtime acceptance remains pending.
+  and executor refund semantics. All 26 focused native cases pass with exact
+  source/artifact verification and original production size limits; full current
+  graph, cold-budget and deployment acceptance remain separate.
 
 ## Same-leaf ERC20 price carrier
 

@@ -93,6 +93,18 @@ use actual current Core/Manager/Ledger, carrier/Payment/Recorder, Registry, wall
 conservation floor, Metadata and upstream Safe/Permit2 with typed Artist, entropy,
 ERC20 fault and target-side governance boundaries. Five finite controls exercise
 the original fixed Payment entrypoints and closed transport with their original
-typed fixture. Runtime execution of this new source remains pending. Earlier price
-or original ERC20 run results do not establish acceptance of this new Payment.
+typed fixture. All 26 pass in the frozen native2 capture (3.38 seconds), with all
+512 source texts bound to commit `62674723` and 195 genuine artifacts verified.
+All 193 selected production products fit; this full test graph measures Dutch at
+24,538 runtime / 30,855 creation bytes and Payment at 19,589 / 22,758. The earlier
+eight-product capture above remains separate evidence for its exact input.
+
+The first capture passed the five Payment controls but stopped Dutch setup on an
+inherited unsupported metadata URI. The successor uses the existing integrated
+fixture URI correction, preserves all production bytes and limits, and compiles
+only the affected three fixture/test files. Original cached artifacts remain
+authenticated against their original native output; changed test output is
+authenticated against the new native output. The cached test run invokes no
+compiler and leaves every artifact unchanged. The initial failure is retained.
+Earlier price or original ERC20 results are not used to accept this new Payment.
 Full current-stack, cold-budget and deployment acceptance are separate work.
