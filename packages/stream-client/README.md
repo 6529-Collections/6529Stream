@@ -338,7 +338,8 @@ contract profiles and outstanding larger-script work.
 ## Current caller extensions
 
 - [Current Artist operation callers](docs/current-artist-operation.md) add eight
-  original principal calls with pinned authority, replay, simulation and receipt review;
+  principal calls and delegated policy/sale consent with pinned authority,
+  replay, simulation and receipt review;
   the [coverage register](docs/current-artist-operation-coverage.json) tracks all 61 operations and variants.
 - [Complete reference environment preparation](docs/current-reference-environment.md)
   retains original typed identities and canonical bytes after both full file inventories.

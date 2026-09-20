@@ -27,6 +27,8 @@ function request(kind, change = {}) {
   };
   const document = '0x7b22617274697374223a226e6577227d';
   const messages = {
+    delegatedPolicyConsent: { ...base, mintManager: A(11), phaseId: id('phase'), policyHash: id('policy') },
+    delegatedSaleConsent: { ...base, saleAdapter: A(90), saleId: id('sale'), saleConfigHash: id('config') },
     identityRevision: {
       artistId: artist, previousRecordHash: id('identity'), revisedRecordHash: keccak256(document), nonce: 1n, signedAt: 0n
     },
@@ -51,11 +53,29 @@ function request(kind, change = {}) {
   return {
     kind, chainId: d.chainId, registry: d.registry.address, caller: signer, signer, artistId: artist, mode: 'direct', signature: '0x', message: messages[kind], details: kind === 'bindingRefusal' ? { reasonURI: 'ipfs://reviewed-but-not-signed' } : kind === 'identityRevision' ? {
       identityRecordURI: 'ipfs://unsigned-revision-uri', document, displayName: 'Updated Artist'
-    } : {}, ...change
+    } : kind.startsWith("delegated") ? { grant: grantHash(creationGrant({ kind, artistId: artist, signer })) } : {}, ...change
   };
 }
 function binding(q) {
-  return [q.artistId, A(101), id('identity'), id('binding'), 2n, 1n, 1n, 0n, A(102), q.kind !== 'bindingRefusal'];
+  return [q.artistId, A(101), id('identity'), id('binding'), 2n, isDelegated(q) ? 2n : 1n, 1n, 0n, A(102), q.kind !== 'bindingRefusal'];
+}
+function isDelegated(q) {
+  return q.kind === 'delegatedPolicyConsent' || q.kind === 'delegatedSaleConsent';
+}
+function creationGrant(q) {
+  return {
+    grant: { artistId: q.artistId, delegate: q.signer, collectionId: 7n,
+      capabilities: q.kind === 'delegatedPolicyConsent' ? 2n : 1024n,
+      notBefore: 1000n, expiresAt: 2000n, maxUses: 5n, constraintsHash: id('uninterpreted-constraints') },
+    grantor: A(201), nonce: 6n, uses: 1n, revoked: false, revocationRecordHash: ZeroHash
+  };
+}
+function grantState(record, timestamp, valid = true) {
+  const g = record.grant;
+  const active = valid && !record.revoked && timestamp >= g.notBefore && timestamp < g.expiresAt
+    && (g.maxUses === 0n || record.uses < g.maxUses);
+  return [active, g.delegate, g.collectionId, g.capabilities, g.notBefore, g.expiresAt,
+    valid ? g.maxUses === 0n ? (1n << 64n) - 1n : g.maxUses - record.uses : 0n];
 }
 function defaultGrant() {
   return {
@@ -167,10 +187,22 @@ function provider(q, opt = {}) {
           value = [id('identity')];
           break;
         case 'delegationRecord':
-          value = [defaultGrant()];
+          value = [isDelegated(q) ? creationGrant(q) : defaultGrant()];
+          break;
+        case 'delegationEpochState':
+          value = [true, 2n, 2n];
+          break;
+        case 'delegationState':
+          value = grantState(creationGrant(q), BigInt(1000 + tag));
+          break;
+        case 'delegatedNonceState':
+          value = [false, 1n];
+          break;
+        case 'replayCell':
+          value = [[ZeroHash, 0n, 0n, 0n]];
           break;
         case 'authorityState':
-          value = [q.signer, 1, 1, id('identity')];
+          value = [isDelegated(q) ? A(200) : q.signer, 1, 1, id('identity')];
           break;
         case 'gasParameterInfo':
           value = [90000, 90000, 2, 1];
@@ -208,7 +240,7 @@ function record(c, time) {
   const q = c.action.request;
   const m = q.message;
   const core = A(10);
-  const cl = c.authority.authorityClass;
+  const cl = isDelegated(q) ? 2n : c.authority.authorityClass;
   const n = m.nonce;
   const common = [d.chainId, A(8)];
   if (q.kind === 'delegationGrant') {
@@ -218,6 +250,10 @@ function record(c, time) {
     });
   }
   const maps = {
+    delegatedPolicyConsent: [['bytes32','uint256','address','address','uint256','bytes32','bytes32','bytes32','address','uint8','uint256','uint64'],
+      [id('6529STREAM_ARTIST_POLICY_CONSENT_RECORD_V1'),...common,A(11),m.collectionId,m.phaseId,m.policyHash,q.artistId,q.signer,2,n,time]],
+    delegatedSaleConsent: [['bytes32','uint256','address','address','address','uint256','bytes32','bytes32','bytes32','address','uint8','uint256','uint64'],
+      [id('6529STREAM_ARTIST_SALE_CONSENT_RECORD_V1'),...common,m.saleAdapter,core,m.collectionId,m.saleId,m.saleConfigHash,q.artistId,q.signer,2,n,time]],
     identityRevision: [
       ['bytes32', 'uint256', 'address', 'bytes32', 'bytes32', 'bytes32', 'address', 'uint8', 'uint256', 'uint64'],
       ['0x1b7518e9d16da358d15957ec43218eb0b017fbd017e60c75b3126110006034a4', ...common,
@@ -240,10 +276,12 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead } = 
   const m = q.message;
   const tag = 11;
   const time = 1011n;
-  const cl = c.authority.authorityClass;
+  const cl = isDelegated(q) ? 2n : c.authority.authorityClass;
   const rh = record(c, time);
   const fn = abi.getFunction(c.action.method);
-  const [t, auth] = abi.decodeFunctionData(fn, c.action.call.data);
+  const decodedCall = abi.decodeFunctionData(fn, c.action.call.data);
+  const t = decodedCall[0];
+  const auth = decodedCall[isDelegated(q) ? 2 : 1];
   let types = q.kind === 'authorizationRevocation' ? [fn.inputs[0], fn.inputs[1], P] : [B, fn.inputs[0], fn.inputs[1], P];
   let values = q.kind === 'authorizationRevocation' ? [t, auth, [q.signer, c.action.payload.digest, q.mode === 'direct']] : [binding(q), t, auth, [q.signer, c.action.payload.digest, q.mode === 'direct']];
   const effectiveTime = q.kind === 'identityRevision' ? (m.signedAt === 0n ? time : m.signedAt) : time;
@@ -264,6 +302,13 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead } = 
         values = [c.delegation, t, auth, proof];
       }
     }
+  }
+  if (isDelegated(q)) {
+    types = [B,fn.inputs[0],fn.inputs[2],P,'bytes32',abi.getFunction('delegationRecord').outputs[0],'bytes'];
+    const facts = q.kind === 'delegatedPolicyConsent' ? '0x'
+      : coder.encode(['address','bytes32','bytes32','bytes32','bytes4','uint256','bytes32'],
+        [A(80),id('registrycode'),id('adaptercode'),id('kind'),'0x12345678',m.collectionId,m.saleConfigHash]);
+    values = [binding(q),t,auth,proof,q.details.grant,c.delegation,facts];
   }
   if (['bindingRefusal', 'saleConsent'].includes(q.kind)) {
     types.push(F);
@@ -298,8 +343,12 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead } = 
     case 'bindingRefusal':
       specs.push([A(5), 'ArtistAttributionStateChanged', [1, m.collectionId, 5, 2, 1, q.caller, cl, rh, m.reasonHash, q.details.reasonURI]], [A(5), 'ArtistBindingTerminationContext', [1, m.collectionId, 2, rh, m.bindingHash, artist, q.signer, m.nonce, time]]);
       break;
+    case 'delegatedSaleConsent':
     case 'saleConsent':
       specs.push([A(7), 'ArtistSaleConsentRecorded', [1, m.collectionId, m.saleConfigHash, q.signer, m.saleId, cl, m.nonce, time, rh]]);
+      break;
+    case 'delegatedPolicyConsent':
+      specs.push([A(7),'ArtistPolicyConsentRecorded',[1,m.collectionId,m.policyHash,q.signer,m.phaseId,2,m.nonce,time,rh]]);
       break;
     case 'royaltyFreeze':
       specs.push([A(7), 'ArtistRoyaltyFreezeAuthorized', [1, m.collectionId, m.expectedAssignmentHash, q.signer, cl, m.nonce, time, rh]]);
@@ -308,6 +357,9 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead } = 
       specs.push([A(7), 'ArtistContentFreezeAuthorized', [1, m.collectionId, q.signer, m.lockClasses, m.expectedStateHash, cl, m.nonce, time, rh]], [A(7), 'ArtistContentRecordContext', [1, rh, m.metadataContract, artist]]);
       break;
     case 'authorizationRevocation': specs.push([A(3), 'ArtistAuthorizationRevoked', [1, artist, m.revokedDigest, m.revokedNonce, m.nonce, time, rh]]);
+  }
+  if (isDelegated(q)) {
+    specs.push([A(7),'ArtistConsentDelegationRecorded',[1,rh,q.details.grant,q.artistId,c.action.operationId]]);
   }
   specs.push([A(9), 'ArtistArchiveEvidenceAppendedV2', [eid, 1, keccak256(raw), A(201), (raw.length - 2) / 2]]);
   const txHash = id('tx' + q.kind);
@@ -327,7 +379,7 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead } = 
     hash: txHash, from: tx.from, to: tx.to, status: 1, blockNumber: tag, blockHash: bh(tag), logs
   };
   const rpc = provider(q, {
-    authorityClass: cl, read(name, args, call) {
+    authorityClass: c.authority.authorityClass, read(name, args, call) {
       if (call.blockTag !== tag) {
         if (name === 'delegationRecord' && c.delegation) {
           return [c.delegation];
@@ -336,10 +388,10 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead } = 
           return [c.revision.operativeDocumentHash];
         }
         if (name === 'authorityState') {
-          return [c.authority.address, cl, c.authority.status, c.authority.identityRecordHash];
+          return [c.authority.address, c.authority.authorityClass, c.authority.status, c.authority.identityRecordHash];
         }
         if (name === 'currentAuthorityCapabilities') {
-          return [[c.authority.address, cl, c.authority.status, 2047, id('activation')]];
+          return [[c.authority.address, c.authority.authorityClass, c.authority.status, 2047, id('activation')]];
         }
         return;
       }
@@ -353,12 +405,16 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead } = 
         case 'identityDocumentBytes':
           return [q.details.document];
         case 'delegationRecord':
+          if (isDelegated(q)) return [{ ...c.delegation, uses: c.delegation.uses + 1n }];
           return q.kind === 'delegationGrant' ? [{
               grant: t, grantor: q.signer, nonce: m.nonce, uses: 0n, revoked: false, revocationRecordHash: ZeroHash
             }]
             : [{
                 ...c.delegation, revoked: true, revocationRecordHash: rh
               }];
+        case 'delegatedNonceState': return [true, 2n];
+        case 'recordDelegation': return [q.details.grant];
+        case 'policyRecord': return [rh];
         case 'artistEvidenceMetadataV2': return [keccak256(raw), A(201), BigInt((raw.length - 2) / 2), 11n];
         case 'artistEvidenceBytesV2': return [raw];
         case 'artistAuthorizationState': return [[args[1] === digest, args[1] === m.revokedDigest && m.revokedDigest !== ZeroHash, true, args[2] === m.revokedNonce, 10n]];
@@ -1019,4 +1075,302 @@ test('new timing and delegation snapshots are copied before awaits and reject co
   const revoke = request('delegationRevocation');
   const encoded = abi.encodeFunctionResult('delegationRecord', [defaultGrant()]);
   await assert.rejects(flow.captureCurrentArtistOperation(provider(revoke, { read: name => name === 'delegationRecord' ? { raw: encoded + '00' } : undefined }), d, revoke, { blockTag: 10 }), /Noncanonical|invalid length/);
+});
+
+test('delegated policy and sale use mode2, the living principal and the independent delegate nonce lane', async () => {
+  for (const kind of ['delegatedPolicyConsent', 'delegatedSaleConsent']) {
+    const q = request(kind);
+    const rpc = provider(q, { read: name => name === 'artistAuthorizationState' ? [[true, false, true, true, 999n]] : undefined });
+    const c = await flow.captureCurrentArtistOperation(rpc, d, q, { blockTag: 10 });
+    assert.equal(c.authority.address, A(200));
+    assert.equal(c.authority.authorityClass, 1n);
+    assert.equal(c.delegation.grantor, A(201));
+    assert.equal(c.delegation.grant.delegate, q.signer);
+    assert.equal(c.binding.consentMode, 2n);
+    assert.equal(c.delegated.nextUnusedNonce, 1n);
+    assert.equal(c.replay.nextUnusedNonce, 999n);
+    assert.equal(c.action.operationId, kind === 'delegatedPolicyConsent' ? 14n : 16n);
+    const result = await flow.simulateCurrentArtistCall(rpc, c, { blockTag: 10 });
+    assert.equal(result.recordHash, record(c, 1010n));
+    assert.equal(rpc.calls.at(-1).from, q.caller);
+  }
+});
+
+test('delegated class2 receipts bind the original record, Consent association, Archive, and consumed delegate lane', async () => {
+  for (const kind of ['delegatedPolicyConsent', 'delegatedSaleConsent']) {
+    const q = request(kind);
+    const c = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+    for (const mode of ['direct', 'safe0', 'safe1']) {
+      const r = mined(c, { safe: mode !== 'direct', indexed: mode === 'safe1', afterRead: name => name === 'artistAuthorizationState'
+        ? [[true, false, false, true, 999n]] : undefined });
+      const out = await flow.inspectCurrentArtistReceipt(r.rpc, c, { transactionHash: r.txHash, execution: mode === 'direct' ? 'direct' : 'safe' });
+      assert.equal(out.recordHash, r.rh);
+      assert.equal(out.observedDelegated.nonceUsed, true);
+      assert.equal(out.observedReplay.nonceConsumed, false);
+      assert.equal(out.events[1].event, 'ArtistConsentDelegationRecorded');
+      assert.equal(out.events[1].address, A(7));
+    }
+  }
+});
+
+function grantProvider(q, grant, extra) {
+  return provider(q, { read(name, args, tx) {
+    const value = extra?.(name, args, tx);
+    if (value !== undefined) return value;
+    if (name === 'delegationRecord') return [grant];
+    if (name === 'delegationState') return grantState(grant, BigInt(1000 + tx.blockTag));
+  } });
+}
+
+test('delegated creation independently rejects grant window, scope, capability, epoch, and persistent lane failures', async () => {
+  for (const kind of ['delegatedPolicyConsent', 'delegatedSaleConsent']) {
+    for (const mutate of [
+      g => { g.grant.notBefore = 1011n; },
+      g => { g.grant.expiresAt = 1010n; },
+      g => { g.uses = g.grant.maxUses; },
+      g => { g.revoked = true; g.revocationRecordHash = id('revoked'); },
+      g => { g.grant.collectionId = 99n; },
+      g => { g.grant.capabilities = kind === 'delegatedPolicyConsent' ? 1024n : 2n; },
+    ]) {
+      const q = request(kind);
+      const grant = creationGrant(q);
+      mutate(grant);
+      q.details.grant = grantHash(grant);
+      await assert.rejects(flow.captureCurrentArtistOperation(grantProvider(q, grant), d, q, { blockTag: 10 }), /scope, capability or live window/);
+    }
+    const q = request(kind);
+    for (const [name, output, error] of [
+      ['delegationEpochState', [false, 2n, 3n], /epoch/],
+      ['delegationState', [true, signer, 7n, kind === 'delegatedPolicyConsent' ? 2n : 1024n, 1000n, 2000n, 999n], /state differs/],
+      ['delegatedNonceState', [true, 2n], /Delegate authorization/],
+      ['delegatedNonceState', [false, 2n], /direct nonce/],
+      ['replayCell', [[id('deny'), 1n, 1n, 2n]], /revoked/],
+      ['artistAuthorizationState', [[true, true, false, false, 1n]], /Artist authorization/],
+      ['authorityState', [A(200), 1n, 4n, id('identity')], /authority/],
+      ['authorityState', [A(200), 3n, 3n, id('identity')], /authority/],
+    ]) {
+      await assert.rejects(flow.captureCurrentArtistOperation(provider(q, { read: n => n === name ? output : undefined }), d, q, { blockTag: 10 }), error);
+    }
+  }
+});
+
+test('delegate replay derives the exact owner denial key and permits unused arbitrary relay nonce with empty ERC1271 proof', async () => {
+  const q = request('delegatedSaleConsent', { caller: A(110), mode: 'signature' });
+  q.message.nonce = 777n;
+  const rpc = provider(q);
+  const c = await flow.captureCurrentArtistOperation(rpc, d, q, { blockTag: 10 });
+  await flow.simulateCurrentArtistCall(rpc, c, { blockTag: 10 });
+  const lane = keccak256(coder.encode(['bytes32','bytes32','address'], [id('6529STREAM_ARTIST_DELEGATE_NONCE_LANE_V1'), artist, q.signer]));
+  const scope = keccak256(coder.encode(['bytes32','bytes32'], [lane, c.action.payload.digest]));
+  const expected = keccak256(coder.encode(['bytes32','uint256','address','address','address','address','bytes32','bytes32','bytes32'],
+    [id('6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2'), d.chainId, A(8), A(20), A(9), A(3), domains[2], id('identity_authority.replay.delegated_digest_revocation'), scope]));
+  const reads = rpc.calls.filter(tx => abi.parseTransaction({ data: tx.data }).name === 'replayCell');
+  assert(reads.every(tx => tx.to === A(3) && abi.decodeFunctionData('replayCell', tx.data)[0] === expected));
+  assert(c.replay.digestObserved === false);
+  assert.equal(c.delegated.nextUnusedNonce, 1n);
+});
+
+test('policy creation omits sale-only collaborator requirements, while principal sale/content accept modes1or2', async () => {
+  const policy = request('delegatedPolicyConsent');
+  const rpc = provider(policy, { read(name) {
+    if (name === 'bindingTerms' || name === 'acceptedCount') throw Error('Policy must not read collaborator terms');
+  } });
+  await flow.captureCurrentArtistOperation(rpc, d, policy, { blockTag: 10 });
+  const sale = request('delegatedSaleConsent');
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(sale, { read: name => name === 'bindingTerms' ? [[id('collaborators'), id('caps'), 1, 1, 1]] : undefined }), d, sale, { blockTag: 10 }), /Collaborator/);
+  for (const kind of ['saleConsent', 'contentFreeze']) {
+    const q = request(kind);
+    const b = binding(q);
+    b[5] = 2n;
+    const rpc = provider(q, { read: name => name === 'binding' ? [b] : undefined });
+    const c = await flow.captureCurrentArtistOperation(rpc, d, q, { blockTag: 10 });
+    await flow.simulateCurrentArtistCall(rpc, c, { blockTag: 10 });
+  }
+  const b = binding(policy);
+  b[5] = 1n;
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(policy, { read: name => name === 'binding' ? [b] : undefined }), d, policy, { blockTag: 10 }), /mode 2/);
+});
+
+test('delegated receipts reject wrong association, unused nonce, insufficient use increment and nonempty policy facts', async () => {
+  const q = request('delegatedPolicyConsent');
+  const c = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+  for (const [name, output, error] of [
+    ['recordDelegation', [id('other-grant')], /association/],
+    ['delegatedNonceState', [false, 1n], /delegate authorization/],
+    ['delegationRecord', [c.delegation], /consumption readback/],
+    ['policyRecord', [id('wrong-record')], /Historical policy/],
+  ]) {
+    const r = mined(c, { afterRead: n => n === name ? output : undefined });
+    await assert.rejects(flow.inspectCurrentArtistReceipt(r.rpc, c, { transactionHash: r.txHash, execution: 'direct' }), error);
+  }
+  let r = mined(c);
+  r.receipt.logs = r.receipt.logs.filter(log => log.topics[0] !== abi.getEvent('ArtistConsentDelegationRecorded').topicHash);
+  await assert.rejects(flow.inspectCurrentArtistReceipt(r.rpc, c, { transactionHash: r.txHash, execution: 'direct' }), /Expected one ArtistConsentDelegationRecorded/);
+  const fn = abi.getFunction(c.action.method);
+  const layout = [B, fn.inputs[0], fn.inputs[2], P, 'bytes32', abi.getFunction('delegationRecord').outputs[0], 'bytes'];
+  r = mined(c, { mutateArchive(v) {
+    const decoded = Array.from(coder.decode(layout, v[7]));
+    decoded[6] = '0x01';
+    v[7] = coder.encode(layout, decoded);
+  } });
+  await assert.rejects(flow.inspectCurrentArtistReceipt(r.rpc, c, { transactionHash: r.txHash, execution: 'direct' }), /facts must be empty/);
+});
+
+test('delegated receipt permits later uses/revocation and rejects swapped or nonlive original Archive grant', async () => {
+  const q = request('delegatedSaleConsent');
+  const c = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+  const later = { ...c.delegation, uses: 5n, revoked: true, revocationRecordHash: id('later-revocation') };
+  const r = mined(c, { afterRead: name => name === 'delegationRecord' ? [later] : name === 'delegationEpochState'
+    ? [false, 2, 3] : undefined });
+  await flow.inspectCurrentArtistReceipt(r.rpc, c, { transactionHash: r.txHash, execution: 'direct' });
+  const fn = abi.getFunction(c.action.method);
+  const layout = [B, fn.inputs[0], fn.inputs[2], P, 'bytes32', abi.getFunction('delegationRecord').outputs[0], 'bytes'];
+  for (const changed of [{ ...c.delegation, uses: 5n }, { ...c.delegation, grantor: A(444) }]) {
+    const bad = mined(c, { mutateArchive(v) {
+      const decoded = Array.from(coder.decode(layout, v[7]));
+      decoded[5] = changed;
+      v[7] = coder.encode(layout, decoded);
+    } });
+    await assert.rejects(flow.inspectCurrentArtistReceipt(bad.rpc, c, { transactionHash: bad.txHash, execution: 'direct' }), /Archive delegated consent grant/);
+  }
+});
+
+test('Safe plans distinguish Artist and delegate nonce lanes, retain digest denial across lanes and persist delegate lanes across grants', async () => {
+  const policy = request('delegatedPolicyConsent');
+  const pc = await flow.captureCurrentArtistOperation(provider(policy), d, policy, { blockTag: 10 });
+  const principal = request('authorizationRevocation');
+  const ac = await flow.captureCurrentArtistOperation(provider(principal), d, principal, { blockTag: 10 });
+  assert.equal(flow.createCurrentArtistSafePlan([pc, ac], 'Separate nonce lanes').steps.length, 2);
+  const sale = request('delegatedSaleConsent');
+  const sc = await flow.captureCurrentArtistOperation(provider(sale), d, sale, { blockTag: 10 });
+  assert.throws(() => flow.createCurrentArtistSafePlan([pc, sc], 'Same delegate lane'), /Duplicate/);
+  const other = request('delegatedSaleConsent', { caller: A(222), signer: A(222) });
+  other.details.grant = grantHash(creationGrant(other));
+  const oc = await flow.captureCurrentArtistOperation(provider(other), d, other, { blockTag: 10 });
+  assert.equal(flow.createCurrentArtistSafePlan([pc, oc], 'Different delegate lanes').steps.length, 2);
+  const deny = request('authorizationRevocation');
+  deny.message.revokedNonce = 0n;
+  deny.message.revokedDigest = pc.action.payload.digest;
+  const dc = await flow.captureCurrentArtistOperation(provider(deny), d, deny, { blockTag: 10 });
+  assert.throws(() => flow.createCurrentArtistSafePlan([pc, dc], 'Artist digest denial'), /Conflicting/);
+});
+
+test('Safe plans allow durable consent before grant revocation and reject the opposite order', async () => {
+  const q = request('delegatedPolicyConsent');
+  const grant = creationGrant(q);
+  const consent = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+  const revoke = request('delegationRevocation', { caller: grant.grantor, signer: grant.grantor });
+  revoke.message.delegate = q.signer;
+  revoke.message.delegationRecordHash = q.details.grant;
+  const revoked = await flow.captureCurrentArtistOperation(grantProvider(revoke, grant), d, revoke, { blockTag: 10 });
+  assert.equal(flow.createCurrentArtistSafePlan([consent, revoked], 'Consent remains durable').steps.length, 2);
+  assert.throws(() => flow.createCurrentArtistSafePlan([revoked, consent], 'Revoked before use'), /follows its grant revocation/);
+});
+
+function recordedRequest(c) {
+  const q = c.action.request;
+  const m = q.message;
+  return q.kind === 'delegatedPolicyConsent'
+    ? { kind: 'policy', collectionId: m.collectionId, phaseId: m.phaseId, policyHash: m.policyHash, recordHash: record(c, 1011n) }
+    : { kind: 'sale', collectionId: m.collectionId, saleAdapter: m.saleAdapter, saleId: m.saleId, saleConfigHash: m.saleConfigHash, recordHash: record(c, 1011n) };
+}
+function recordedProvider(c, override, mutate) {
+  const q = c.action.request;
+  const wanted = recordedRequest(c);
+  const terms = abi.decodeFunctionData(c.action.method, c.action.call.data)[0];
+  return provider(q, { mutate, read(name, args, tx) {
+    const value = override?.(name, args, tx);
+    if (value !== undefined) return value;
+    if (['delegationRecord','delegationState','delegationEpochState','delegatedNonceState','artistAuthorizationState'].includes(name)) {
+      throw Error('Recorded consent must not revalidate creation grant/replay');
+    }
+    if (name === 'policyRecord' || name === 'saleConsentAt') return [wanted.recordHash];
+    if (name === 'recordDelegation') return [isDelegated(q) ? q.details.grant : ZeroHash];
+    if (name === 'saleConsentRecord') return [[wanted.recordHash, terms, q.artistId, q.signer,
+      isDelegated(q) ? 2n : c.authority.authorityClass, q.message.nonce, 1011, 2, id('binding')]];
+    if (name === 'requireSaleConsent') {
+      assert.equal(tx.from, q.message.saleAdapter);
+      assert.equal(tx.to, A(8));
+      return [];
+    }
+  } });
+}
+
+test('recorded policy observation is explicitly record-only and recorded sale checks exact adapter caller without live grant reads', async () => {
+  for (const kind of ['delegatedPolicyConsent','delegatedSaleConsent']) {
+    const q = request(kind);
+    const c = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+    const rpc = recordedProvider(c);
+    const result = await flow.inspectCurrentArtistRecordedConsent(rpc, d, recordedRequest(c), { blockTag: 3000 });
+    assert.equal(result.delegationRecordHash, q.details.grant);
+    assert.equal(result.applicability, kind === 'delegatedPolicyConsent' ? 'policy-record-only' : 'sale-consent-checked-for-adapter');
+    if (kind === 'delegatedSaleConsent') assert.equal(result.checkedCall.from, q.message.saleAdapter);
+    else assert.equal(result.checkedCall, null);
+    assert(Object.isFrozen(result.request));
+    assert.equal(result.timestamp, 4000n);
+  }
+});
+
+test('recorded consent checks malformed void returns, missing association, mismatched identity and underlying current-admission failure', async () => {
+  const q = request('delegatedSaleConsent');
+  const c = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+  const req = recordedRequest(c);
+  for (const [name, output, pattern] of [
+    ['saleConsentAt', [id('wrong-consent')], /identity differs/],
+    ['recordDelegation', [ZeroHash], /delegation differ/],
+    ['requireSaleConsent', { raw: '0x00' }, /Noncanonical/],
+  ]) {
+    await assert.rejects(flow.inspectCurrentArtistRecordedConsent(recordedProvider(c, n => n === name ? output : undefined), d, req, { blockTag: 3000 }), pattern);
+  }
+  await assert.rejects(flow.inspectCurrentArtistRecordedConsent(recordedProvider(c, name => {
+    if (name === 'requireSaleConsent') throw Error('Original adapter admission rejects changed facts');
+  }), d, req, { blockTag: 3000 }), /Original adapter admission/);
+  const mutable = structuredClone(req);
+  const options = { blockTag: 3000 };
+  const result = await flow.inspectCurrentArtistRecordedConsent(recordedProvider(c, undefined, () => {
+    mutable.saleAdapter = A(444);
+    options.blockTag = 9000;
+  }), d, mutable, options);
+  assert.equal(result.request.saleAdapter, q.message.saleAdapter);
+  assert.equal(result.blockNumber, 3000);
+  await assert.rejects(flow.inspectCurrentArtistRecordedConsent(recordedProvider(c), d, { ...req, grant: q.details.grant }, { blockTag: 3000 }), /properties/);
+});
+
+test('recorded sale hashes bind every retained signer, class, nonce and time field', async () => {
+  const q = request('delegatedSaleConsent');
+  const c = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+  const req = recordedRequest(c);
+  const terms = abi.decodeFunctionData(c.action.method, c.action.call.data)[0];
+  const valid = [req.recordHash, terms, q.artistId, q.signer, 2n, q.message.nonce, 1011n, 2n, id('binding')];
+  for (const [index, value] of [[2, id('another-artist')], [3, A(777)], [4, 1n], [5, 999n], [6, 1012n]]) {
+    const forged = [...valid];
+    forged[index] = value;
+    const rpc = recordedProvider(c, name => name === 'saleConsentRecord' ? [forged] : undefined);
+    await assert.rejects(flow.inspectCurrentArtistRecordedConsent(rpc, d, req, { blockTag: 3000 }), /terms or delegation differ/);
+  }
+});
+
+test('recorded sale format supports principal classes with zero association; class4 scope0 read is not creation evidence', async () => {
+  const q = request('saleConsent');
+  const base = await flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 });
+  for (const authorityClass of [1n, 3n, 4n]) {
+    // This supplies historical record-format fixtures, not reachable native creation evidence.
+    const c = { ...base, authority: { ...base.authority, authorityClass } };
+    const req = recordedRequest(c);
+    const checked = await flow.inspectCurrentArtistRecordedConsent(recordedProvider(c), d, req, { blockTag: 3000 });
+    assert.equal(checked.delegationRecordHash, ZeroHash);
+    const associated = recordedProvider(c, name => name === 'recordDelegation' ? [id('spurious-grant')] : undefined);
+    await assert.rejects(flow.inspectCurrentArtistRecordedConsent(associated, d, req, { blockTag: 3000 }), /delegation differ/);
+    if (authorityClass === 4n) {
+      const scope1 = recordedProvider(c, name => {
+        if (name === 'requireSaleConsent') throw Error('Original scope1 rejects class4');
+      });
+      await assert.rejects(flow.inspectCurrentArtistRecordedConsent(scope1, d, req, { blockTag: 3000 }), /scope1 rejects class4/);
+    }
+  }
+  for (const authorityClass of [0n, 5n]) {
+    const malformed = { ...base, authority: { ...base.authority, authorityClass } };
+    await assert.rejects(flow.inspectCurrentArtistRecordedConsent(recordedProvider(malformed), d,
+      recordedRequest(malformed), { blockTag: 3000 }), /delegation differ/);
+  }
 });

@@ -67,6 +67,9 @@ the release policy in `docs/release-policy.md`.
   Preserve original host history and fulfillment; actual-current Safe cutover
   recipes are authored and await coordinated runtime verification.
 
+- Add delegated Artist policy and sale consent callers using original signatures,
+  persistent delegate nonces and durable consent evidence after grant expiry.
+
 - Add original Artist identity revision and delegation callers, preserving dated
   authorization, nonce-only grants and stored-grantor revocation evidence.
 

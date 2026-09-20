@@ -321,7 +321,7 @@ test('grant accepts original global, unlimited and zero constraints cases while 
   for (const capabilities of [1n,4n,16n,32n,64n,117n]) make({ capabilities });
   make({ collectionId: (1n << 256n) - 1n, maxUses: (1n << 64n) - 1n, nonce: (1n << 256n) - 1n });
   make({ collectionId: 0n, maxUses: 0n, constraintsHash: ZeroHash, nonce: 0n });
-  for (const capabilities of [0n,2n,8n,128n,1n << 32n,117]) assert.throws(() => make({ capabilities }));
+  for (const capabilities of [0n,8n,128n,512n,1n << 32n,117]) assert.throws(() => make({ capabilities }));
   for (const changes of [{ notBefore: 10n, expiresAt: 10n }, { notBefore: 11n, expiresAt: 10n }, { maxUses: 1n << 64n },
     { notBefore: 1n << 64n }, { expiresAt: 1n << 64n }, { expiresAt: 4 }, { collectionId: 1 }, { delegate: ZeroAddress }, { delegate: signer }]) assert.throws(() => make(changes));
   make({ notBefore: 0n, expiresAt: 1n }); // Expiry relative to now is a live guard, not a local clock guess.
@@ -360,4 +360,112 @@ test('three identity families snapshot all inputs and reject altered plans or lo
   assert.throws(() => { plan.request.details.displayName = 'mutated'; }, TypeError);
   const detached = structuredClone(plan), fresh = normalizeCurrentArtistAction(detached);
   detached.request.details.identityRecordURI = 'changed'; assert.notEqual(fresh.request.details.identityRecordURI, detached.request.details.identityRecordURI);
+});
+
+// Exact IStreamArtistDelegatedConsent source at 6d333842a3e827514702afa1d5e91415e5b21317.
+// The parent compiler oracle separately binds these projections to the retained joined capture.
+const delegatedSource = new Interface([
+  'function recordDelegatedPolicyConsent((uint256 collectionId,bytes32 phaseId,bytes32 policyHash),bytes32 grant,(uint256 nonce,uint64 time,bytes signature)) returns(bytes32)',
+  'function recordDelegatedSaleConsent((uint256 collectionId,address saleAdapter,bytes32 saleId,bytes32 saleConfigHash),bytes32 grant,(uint256 nonce,uint64 time,bytes signature)) returns(bytes32)',
+  'function policyConsentDigest((uint256 collectionId,bytes32 phaseId,bytes32 policyHash),(uint256 nonce,uint64 time,bytes signature)) view returns(bytes32)',
+  'function saleConsentDigest((uint256 collectionId,address saleAdapter,bytes32 saleId,bytes32 saleConfigHash),(uint256 nonce,uint64 time,bytes signature)) view returns(bytes32)',
+]);
+const delegatedMessages = {
+  delegatedPolicyConsent: { core, mintManager: a(602), collectionId, phaseId: h(603), policyHash: h(604), nonce, deadline },
+  delegatedSaleConsent: structuredClone(messages.saleConsent),
+};
+function delegatedRequest(kind, changes = {}) {
+  return { kind, chainId, registry, caller, signer: a(601), artistId, mode: 'signature', signature: '0x6789',
+    message: structuredClone(delegatedMessages[kind]), details: { grant: h(605) }, ...changes };
+}
+
+test('delegated consent reuses original policy and sale domains, schemas and full-width preimages', () => {
+  const policy = delegatedMessages.delegatedPolicyConsent, sale = delegatedMessages.delegatedSaleConsent;
+  const expected = {
+    delegatedPolicyConsent: body('StreamArtistPolicyConsent(address core,address mintManager,uint256 collectionId,bytes32 phaseId,bytes32 policyHash,uint256 nonce,uint64 deadline)',
+      ['address','address','uint256','bytes32','bytes32','uint256','uint64'], [core,policy.mintManager,collectionId,policy.phaseId,policy.policyHash,nonce,deadline]),
+    delegatedSaleConsent: body('StreamArtistSaleConsent(address core,address saleAdapter,uint256 collectionId,bytes32 saleId,bytes32 saleConfigHash,uint256 nonce,uint64 deadline)',
+      ['address','address','uint256','bytes32','bytes32','uint256','uint64'], [core,sale.saleAdapter,collectionId,sale.saleId,sale.saleConfigHash,nonce,deadline]),
+  };
+  for (const [kind, structHash] of Object.entries(expected)) {
+    const payload = currentArtistOperationTypedData(kind, chainId, registry, delegatedMessages[kind]);
+    assert.equal(payload.digest, typed(structHash));
+    assert.notEqual(payload.digest, typed(structHash, chainId + 1n));
+    assert.notEqual(payload.digest, typed(structHash, chainId, a(601)));
+  }
+  assert.deepEqual(currentArtistOperationTypedData('delegatedPolicyConsent', chainId, registry, policy), currentArtistTypedData('artistPolicyConsent', chainId, registry, policy));
+  assert.deepEqual(currentArtistOperationTypedData('delegatedSaleConsent', chainId, registry, sale), currentArtistOperationTypedData('saleConsent', chainId, registry, sale));
+});
+
+test('delegated writes insert the grant before authorization while original getter calls omit it', () => {
+  const local = new Interface(CURRENT_ARTIST_OPERATION_ABI), policy = delegatedMessages.delegatedPolicyConsent, sale = delegatedMessages.delegatedSaleConsent;
+  const rows = [
+    ['delegatedPolicyConsent', 14n, 'recordDelegatedPolicyConsent', 'policyConsentDigest', [collectionId,policy.phaseId,policy.policyHash], '0xeff0fffe'],
+    ['delegatedSaleConsent', 16n, 'recordDelegatedSaleConsent', 'saleConsentDigest', [collectionId,sale.saleAdapter,sale.saleId,sale.saleConfigHash], '0x2cee8313'],
+  ];
+  for (const [kind, operationId, method, getter, terms, selector] of rows) {
+    const plan = prepareCurrentArtistAction(delegatedRequest(kind));
+    assert.equal(plan.operationId, operationId); assert.equal(plan.method, method); assert.equal(plan.digestMethod, getter);
+    assert.equal(local.getFunction(method).selector, selector);
+    assert.deepEqual(plan.call, { to: registry, value: 0n, data: delegatedSource.encodeFunctionData(method, [terms,h(605),[nonce,deadline,'0x6789']]) });
+    assert.deepEqual(plan.digestCall, { to: registry, value: 0n, data: delegatedSource.encodeFunctionData(getter, [terms,[nonce,deadline,'0x']]) });
+    assert.equal(local.getFunction(method).format('minimal'), delegatedSource.getFunction(method).format('minimal'));
+  }
+  assert.equal(CURRENT_ARTIST_OPERATION_ABI.filter(item => item.startsWith('function saleConsentDigest(')).length, 1);
+});
+
+test('grant selection changes reviewed calldata without creating an invented delegated signed field', () => {
+  for (const kind of Object.keys(delegatedMessages)) {
+    const first = prepareCurrentArtistAction(delegatedRequest(kind));
+    const replacement = prepareCurrentArtistAction(delegatedRequest(kind, { details: { grant: h(606) } }));
+    assert.equal(first.payload.digest, replacement.payload.digest);
+    assert.equal(first.digestCall.data, replacement.digestCall.data);
+    assert.notEqual(first.call.data, replacement.call.data);
+    assert.throws(() => normalizeCurrentArtistAction({ ...first, request: replacement.request }), /reconstruction/);
+    for (const key of ['grant','artistId','delegate','consentMode']) assert.throws(() => currentArtistOperationTypedData(kind, chainId, registry, {
+      ...delegatedMessages[kind], [key]: key === 'consentMode' ? 2n : h(606),
+    }), /unexpected fields/);
+  }
+});
+
+test('delegated direct calls require the actual claimed delegate caller and preserve empty ERC-1271 relays', () => {
+  for (const kind of Object.keys(delegatedMessages)) {
+    const direct = prepareCurrentArtistAction(delegatedRequest(kind, { caller: a(601), mode: 'direct', signature: '0x' }));
+    assert.equal(delegatedSource.decodeFunctionData(direct.method, direct.call.data)[2].signature, '0x');
+    const relay = prepareCurrentArtistAction(delegatedRequest(kind, { signature: '0x' }));
+    assert.equal(relay.request.caller, caller); assert.equal(relay.request.signer, a(601));
+    assert.equal(relay.request.mode, 'signature');
+    assert.throws(() => prepareCurrentArtistAction(delegatedRequest(kind, { mode: 'direct', signature: '0x' })), /predicate/);
+    assert.throws(() => prepareCurrentArtistAction(delegatedRequest(kind, { caller: a(601), signature: '0x' })), /predicate/);
+    assert.throws(() => prepareCurrentArtistAction(delegatedRequest(kind, { caller: a(601), mode: 'direct' })), /predicate/);
+  }
+});
+
+test('new policy and sale grant capability bits extend the original mask without admitting other powers', () => {
+  const make = capabilities => prepareCurrentArtistAction(identityRequest('delegationGrant', {
+    message: { ...identityMessages.delegationGrant, capabilities },
+  }));
+  for (const capabilities of [2n,1024n,1026n,1143n,117n,1n,4n,16n,32n,64n]) {
+    const plan = make(capabilities);
+    assert.equal(plan.payload.message.capabilities, capabilities);
+    assert.equal(compiled.decodeFunctionData(plan.method, plan.call.data)[1].time, 0n);
+  }
+  assert.notEqual(make(2n).payload.digest, make(1024n).payload.digest);
+  for (const capabilities of [0n,8n,128n,256n,512n,2048n,1143n | 8n,1n << 32n,1143]) assert.throws(() => make(capabilities));
+});
+
+test('delegated requests reject missing grants, extra authorities, lossy widths and mutable derived packets', () => {
+  for (const kind of Object.keys(delegatedMessages)) {
+    for (const details of [{}, { grant: ZeroHash }, { grant: '0x12' }, { grant: h(605), capabilities: 2n }]) assert.throws(() => prepareCurrentArtistAction(delegatedRequest(kind, { details })));
+    for (const changes of [{ collectionId: 0n }, { nonce: 1 }, { nonce: 1n << 256n }, { deadline: 1 }, { deadline: 1n << 64n }, { core: ZeroAddress }]) assert.throws(() => prepareCurrentArtistAction(delegatedRequest(kind, { message: { ...delegatedMessages[kind], ...changes } })));
+    const input = delegatedRequest(kind), plan = prepareCurrentArtistAction(input);
+    assert.deepEqual(normalizeCurrentArtistAction(plan), plan);
+    input.message.nonce = 0n; input.details.grant = h(699); input.signer = signer;
+    assert.equal(plan.request.message.nonce, nonce); assert.equal(plan.request.details.grant, h(605));
+    assert.throws(() => { plan.request.details.grant = h(699); }, TypeError);
+    assert.throws(() => normalizeCurrentArtistAction({ ...plan, operationId: 26n }), /reconstruction/);
+    assert.throws(() => normalizeCurrentArtistAction({ ...plan, call: { ...plan.call, value: 1n } }), /reconstruction/);
+  }
+  for (const key of ['phaseId','policyHash']) assert.throws(() => currentArtistOperationTypedData('delegatedPolicyConsent', chainId, registry, { ...delegatedMessages.delegatedPolicyConsent, [key]: ZeroHash }), /nonzero/);
+  assert.throws(() => currentArtistOperationTypedData('delegatedPolicyConsent', chainId, registry, { ...delegatedMessages.delegatedPolicyConsent, mintManager: ZeroAddress }), /nonzero/);
 });

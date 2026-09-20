@@ -1,13 +1,13 @@
-// Project original Artist public calls and proof reads from retained ABI49; never compile Solidity.
+// Project original Artist public calls and proof reads from retained ABI52; never compile Solidity.
 import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import { posix, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Interface } from "ethers";
 
-const INPUT_SHA = "d72aaf4b8dd4af5db39420038b0c0655a85161071d11a8dc8c9e00f9bc372b64";
-const OUTPUT_SHA = "e21d5c31e1e10904cacc6577f27c3e036ac25d7c1999f8817d0b9cc6549fe15d";
-const SOURCE_COMMIT = "18be311bc33e8007841f963f218ac8290e271015";
+const INPUT_SHA = "94d4a931f6f2f1849e9d91506e6ac9c39d10982cc61d06c7fc2f4b35c17f0fde";
+const OUTPUT_SHA = "d299875f9ae1f03e1361dfba0795b908b4d0b45a480fe4e47deab5f78c173905";
+const SOURCE_COMMIT = "44af244ed576cc4b26632b800fe70a068d577940";
 const sha = raw => createHash("sha256").update(raw).digest("hex");
 const base = "smart-contracts/domains/artist/";
 const sharedOwner = ["artistRegistry", "operationCoordinator", "archiveV2", "core", "mintManager", "deploymentChainId", "domainId", "ownerStateSnapshotV2"];
@@ -21,12 +21,14 @@ const selections = {
     "operativeIdentityRecord", "identityRecordBytes", "identityDocumentBytes", "artistDisplayName", "identityRevisionRecord",
     "identityRevisionProvisionalAssociation", "delegationRecord", "delegationState", "delegatedNonceState", "recordDelegation",
     "operativeEstateDirective", "estateDirectiveRecord", "activeAuthorityWindow",
+    "recordDelegatedPolicyConsent", "recordDelegatedSaleConsent", "policyConsentDigest",
+    "isPolicyConsented", "requireMintConsent", "requireSaleConsent",
   ] },
   coordinator: { source: base + "StreamArtistOnboardingCoordinator.sol", contract: "StreamArtistOnboardingCoordinator",
     methods: ["suiteConfiguration", "deploymentChainId", "configurationHash"] },
   owner: { source: base + "StreamArtistOwner.sol", contract: "StreamArtistOwner", methods: sharedOwner },
   identity: { source: base + "StreamArtistIdentityAuthority.sol", contract: "StreamArtistIdentityAuthority",
-    methods: ["authorityState", "artistAuthorizationState", "currentAuthorityCapabilities", "delegationEpochState", "signatureBundle",
+    methods: ["authorityState", "artistAuthorizationState", "currentAuthorityCapabilities", "delegationEpochState", "signatureBundle", "replayCell",
       "identity", "operativeIdentityRecord", "identityRecordBytes", "identityDocumentBytes", "artistDisplayName", "identityRevisionRecord",
       "identityRevisionProvisionalAssociation", "delegationRecord", "activeAuthorityWindow"],
     events: ["ArtistAuthorizationRevoked", "ArtistIdentityRevisionRecorded", "ArtistIdentityDisplayNameStored", "ArtistDelegationGranted", "ArtistDelegationRevoked"] },
@@ -35,8 +37,12 @@ const selections = {
     methods: ["attributionState"], events: ["ArtistAttributionStateChanged", "ArtistBindingTerminationContext"] },
   collaborator: { source: base + "StreamArtistCollaboratorLifecycle.sol", contract: "StreamArtistCollaboratorLifecycle", methods: ["acceptedCount"] },
   consent: { source: base + "StreamArtistConsentFinalityLifecycle.sol", contract: "StreamArtistConsentFinalityLifecycle",
-    methods: ["saleConsentRecord", "saleConsentAt", "royaltyFreezeRecord", "contentFreezeRecord", "contentFreezeAt"],
-    events: ["ArtistSaleConsentRecorded", "ArtistRoyaltyFreezeAuthorized", "ArtistContentFreezeAuthorized", "ArtistContentRecordContext"] },
+    methods: ["saleConsentRecord", "saleConsentAt", "royaltyFreezeRecord", "contentFreezeRecord", "contentFreezeAt", "policyRecord", "recordDelegation"],
+    events: ["ArtistSaleConsentRecorded", "ArtistRoyaltyFreezeAuthorized", "ArtistContentFreezeAuthorized", "ArtistContentRecordContext", "ArtistPolicyConsentRecorded"] },
+  consentTransport: { source: base + "StreamArtistConsentTransport.sol", contract: "StreamArtistConsentTransport",
+    methods: [], events: ["ArtistConsentDelegationRecorded"] },
+  delegatedConsent: { source: "smart-contracts/interfaces/stream/artist/IStreamArtistDelegatedConsent.sol", contract: "IStreamArtistDelegatedConsent",
+    methods: ["recordDelegatedPolicyConsent", "recordDelegatedSaleConsent"] },
   archive: { source: base + "StreamArtistArchiveV2.sol", contract: "StreamArtistArchiveV2",
     methods: ["artistEvidenceBytesV2", "artistEvidenceMetadataV2", "artistRegistry", "operationCoordinator"], events: ["ArtistArchiveEvidenceAppendedV2"] },
   core: { source: "smart-contracts/interfaces/stream/core/IStreamCorePointers.sol", contract: "IStreamCorePointers", methods: ["getSatellitePointer"] },
@@ -45,13 +51,15 @@ const selections = {
 const oracleSources = ["StreamArtistHashes.sol", "StreamArtistBindingOperations.sol", "StreamArtistSaleHashes.sol",
   "StreamArtistContentHashes.sol", "StreamArtistAuthorizationState.sol", "StreamArtistEconomicsHashes.sol",
   "StreamArtistIdentityRevisionState.sol", "StreamArtistDelegationState.sol", "StreamArtistIdentityState.sol",
-  "StreamArtistIdentityOperations.sol", "StreamArtistEconomicOperations.sol"].map(name => base + name);
+  "StreamArtistIdentityOperations.sol", "StreamArtistEconomicOperations.sol", "StreamArtistDelegatedConsentOperations.sol",
+  "StreamArtistDelegatedMutation.sol", "StreamArtistConsentTransport.sol", "StreamArtistConsentState.sol",
+  "StreamArtistSaleOperations.sol", "StreamArtistOnboardingReads.sol"].map(name => base + name);
 
 export function artistOperationFixture(inputBytes, outputBytes) {
-  if (sha(inputBytes) !== INPUT_SHA || sha(outputBytes) !== OUTPUT_SHA) throw Error("Expected exact frozen Artist ABI49 compiler capture");
+  if (sha(inputBytes) !== INPUT_SHA || sha(outputBytes) !== OUTPUT_SHA) throw Error("Expected exact frozen Artist ABI52 compiler capture");
   const input = JSON.parse(inputBytes), output = JSON.parse(outputBytes);
-  if (input.language !== "Solidity" || Object.keys(input.sources ?? {}).length !== 2172
-    || output.errors?.some(row => row.severity === "error")) throw Error("Expected clean 2172-source capture");
+  if (input.language !== "Solidity" || Object.keys(input.sources ?? {}).length !== 2212
+    || output.errors?.some(row => row.severity === "error")) throw Error("Expected clean 2212-source capture");
   const sourceHashes = {}, sourceTexts = {}, abis = {};
   function visit(path) {
     if (Object.hasOwn(sourceHashes, path)) return;
@@ -79,9 +87,9 @@ export function artistOperationFixture(inputBytes, outputBytes) {
     name: row.name, signature: row.format("sighash"), selector: row.selector, stateMutability: row.stateMutability,
   }));
   return {
-    schemaVersion: 1, capture: "parallel-feature-batch49-20260920", compilerVersion: "0.8.19", sourceCommit: SOURCE_COMMIT,
-    sourceCount: 2172, inputSha256: INPUT_SHA, outputSha256: OUTPUT_SHA,
-    sourceBinding: "All 2172 literal input sources independently verified byte-for-byte against this Git commit. Selected production closure hashes and original hash-library texts follow.",
+    schemaVersion: 1, capture: "parallel-feature-batch52-20260920", compilerVersion: "0.8.19", sourceCommit: SOURCE_COMMIT,
+    sourceCount: 2212, inputSha256: INPUT_SHA, outputSha256: OUTPUT_SHA,
+    sourceBinding: "All 2212 literal input sources independently verified byte-for-byte against this Git commit. Selected production closure hashes and original hash-library texts follow.",
     qualification: "Frozen source and ABI evidence only; client tests do not establish deployed Artist, actual Safe, gas, genesis or release acceptance.",
     sourceHashes: Object.fromEntries(Object.entries(sourceHashes).sort(([a], [b]) => a.localeCompare(b))),
     sourceTexts, selections, publicMethods, abis,

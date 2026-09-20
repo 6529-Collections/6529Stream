@@ -51,13 +51,13 @@ function originalTerms(kind, message, details) {
   }
 }
 
-test("Artist operation fixture retains exact ABI49 provenance and original source texts", () => {
-  assert.equal(fixture.sourceCommit, "18be311bc33e8007841f963f218ac8290e271015");
-  assert.equal(fixture.sourceCount, 2172);
-  assert.equal(fixture.inputSha256, "d72aaf4b8dd4af5db39420038b0c0655a85161071d11a8dc8c9e00f9bc372b64");
-  assert.equal(fixture.outputSha256, "e21d5c31e1e10904cacc6577f27c3e036ac25d7c1999f8817d0b9cc6549fe15d");
-  assert.equal(Object.keys(fixture.sourceHashes).length, 298);
-  assert.equal(Object.keys(fixture.sourceTexts).length, 11);
+test("Artist operation fixture retains exact ABI52 provenance and original source texts", () => {
+  assert.equal(fixture.sourceCommit, "44af244ed576cc4b26632b800fe70a068d577940");
+  assert.equal(fixture.sourceCount, 2212);
+  assert.equal(fixture.inputSha256, "94d4a931f6f2f1849e9d91506e6ac9c39d10982cc61d06c7fc2f4b35c17f0fde");
+  assert.equal(fixture.outputSha256, "d299875f9ae1f03e1361dfba0795b908b4d0b45a480fe4e47deab5f78c173905");
+  assert.equal(Object.keys(fixture.sourceHashes).length, 316);
+  assert.equal(Object.keys(fixture.sourceTexts).length, 17);
   for (const [path, literal] of Object.entries(fixture.sourceTexts)) {
     assert.equal(createHash("sha256").update(literal).digest("hex"), fixture.sourceHashes[path]);
   }
@@ -73,7 +73,7 @@ test("coverage preserves all original IDs, successor facade naming, withdrawal a
   assert.equal(coverage.operations[60].operation, "withdrawAttributionDispute");
   assert.match(coverage.operations[60].scope, /outside original 1-60/);
   const methods = coverage.operations.flatMap(row => row.methods);
-  assert.equal(methods.length, 79); assert.equal(new Set(methods).size, methods.length);
+  assert.equal(methods.length, 81); assert.equal(new Set(methods).size, methods.length);
   for (const name of methods) assert.equal(fixture.publicMethods.filter(row => row.name === name).length, 1, name);
   const covered = new Set([...methods, ...coverage.additionalPublicMutations.map(row => row.method)]);
   assert.deepEqual(fixture.publicMethods.filter(row => !["view", "pure"].includes(row.stateMutability) && !covered.has(row.name)), []);
@@ -218,4 +218,71 @@ test("revision supplements are retained outside signing and submitted zero time 
   assert.notEqual(direct.payload.digest, originalDigest(identityOriginals.identityRevision[1], { ...direct.request.message, signedAt: 1010n }));
   assert.equal(abi.registry.decodeFunctionData("recordIdentityRevision", direct.call.data)[1].time, 0n);
   assert.throws(() => prepareCurrentArtistAction({ ...input, details: { ...input.details, document: "0x01" } }), /document|hash/i);
+});
+
+const delegatedSamples = {
+  delegatedPolicyConsent: { core, mintManager: address(21), collectionId, phaseId: id("original phase"), policyHash: id("original policy"), nonce, deadline },
+  delegatedSaleConsent: samples.saleConsent,
+};
+const delegatedOriginals = {
+  delegatedPolicyConsent: [14n, "StreamArtistPolicyConsent(address core,address mintManager,uint256 collectionId,bytes32 phaseId,bytes32 policyHash,uint256 nonce,uint64 deadline)", "recordDelegatedPolicyConsent", "policyConsentDigest", "0xeff0fffe"],
+  delegatedSaleConsent: [16n, originals.saleConsent[1], "recordDelegatedSaleConsent", "saleConsentDigest", "0x2cee8313"],
+};
+function delegatedRequest(kind) {
+  return { kind, chainId, registry, caller: address(40), signer: address(51), artistId, mode: "signature", signature: "0x",
+    message: delegatedSamples[kind], details: { grant: id("original scoped grant") } };
+}
+
+test("delegated policy and sale reuse permanent original hashes and compiled additive selectors", () => {
+  const texts = Object.values(fixture.sourceTexts).join("\n"), localAbi = new Interface(CURRENT_ARTIST_OPERATION_ABI);
+  for (const [kind, [operationId, declaration, method, digestMethod, selector]] of Object.entries(delegatedOriginals)) {
+    assert.ok(texts.includes(`"${declaration}"`), declaration);
+    const input = delegatedRequest(kind), prepared = prepareCurrentArtistAction(input), m = input.message;
+    const terms = kind === "delegatedPolicyConsent" ? [m.collectionId, m.phaseId, m.policyHash]
+      : [m.collectionId, m.saleAdapter, m.saleId, m.saleConfigHash];
+    assert.equal(prepared.operationId, operationId); assert.equal(prepared.method, method); assert.equal(prepared.digestMethod, digestMethod);
+    assert.equal(prepared.payload.digest, originalDigest(declaration, m));
+    assert.notEqual(prepared.payload.digest, originalDigest(declaration, m, address(99)));
+    assert.equal(abi.registry.getFunction(method).selector, selector);
+    assert.equal(localAbi.getFunction(method).format("sighash"), abi.registry.getFunction(method).format("sighash"));
+    assert.equal(localAbi.getFunction(method).stateMutability, "nonpayable");
+    assert.deepEqual(localAbi.getFunction(method).outputs.map(row => row.type), abi.registry.getFunction(method).outputs.map(row => row.type));
+    assert.deepEqual(prepared.call, { to: registry, value: 0n,
+      data: abi.registry.encodeFunctionData(method, [terms, input.details.grant, [nonce, deadline, "0x"]]) });
+    assert.deepEqual(prepared.digestCall, { to: registry, value: 0n,
+      data: abi.registry.encodeFunctionData(digestMethod, [terms, [nonce, deadline, "0x"]]) });
+  }
+  const companion = new Interface(fixture.abis.delegatedConsent);
+  assert.equal(`0x${(BigInt(companion.getFunction("recordDelegatedPolicyConsent").selector)
+    ^ BigInt(companion.getFunction("recordDelegatedSaleConsent").selector)).toString(16).padStart(8, "0")}`, "0xc31e7ced");
+});
+
+test("delegated consent keeps grant and Artist locator outside original signatures", () => {
+  for (const kind of Object.keys(delegatedOriginals)) {
+    const input = delegatedRequest(kind), prepared = prepareCurrentArtistAction(input);
+    const changedGrant = prepareCurrentArtistAction({ ...input, details: { grant: id("replacement grant") } });
+    const changedArtist = prepareCurrentArtistAction({ ...input, artistId: id("other artist locator") });
+    assert.equal(changedGrant.payload.digest, prepared.payload.digest); assert.notEqual(changedGrant.call.data, prepared.call.data);
+    assert.equal(changedArtist.payload.digest, prepared.payload.digest); assert.equal(changedArtist.call.data, prepared.call.data);
+    assert.equal(Object.hasOwn(prepared.payload.message, "grant"), false);
+    assert.equal(Object.hasOwn(prepared.payload.message, "artistId"), false);
+    assert.equal(prepared.request.mode, "signature"); assert.equal(prepared.request.signature, "0x");
+    assert.throws(() => prepareCurrentArtistAction({ ...input, details: { grant: ZeroHash } }), /grant|zero/i);
+  }
+});
+
+test("delegation receipt event and policy reads retain their exact original compiled shapes", () => {
+  const event = abi.consentTransport.getEvent("ArtistConsentDelegationRecorded");
+  assert.deepEqual(event.inputs.map(row => [row.name, row.type, row.indexed]), [
+    ["schemaVersion", "uint16", false], ["recordHash", "bytes32", true],
+    ["delegationRecordHash", "bytes32", true], ["artistId", "bytes32", true], ["operationId", "uint16", false],
+  ]);
+  assert.equal(abi.consent.getFunction("policyRecord").format("sighash"), "policyRecord(uint256,bytes32,bytes32)");
+  assert.equal(abi.consent.getFunction("recordDelegation").outputs[0].type, "bytes32");
+  assert.equal(abi.registry.getFunction("requireMintConsent").outputs.length, 0);
+  assert.equal(abi.registry.getFunction("requireSaleConsent").outputs.length, 0);
+  const source = fixture.sourceTexts["smart-contracts/domains/artist/StreamArtistDelegatedConsentOperations.sol"];
+  assert.match(source, /abi\.encode\(b, p, a, proof, grant, prior, facts\)/);
+  assert.match(source, /policyDigest\(_environment\(x\), p, a\)/);
+  assert.match(source, /StreamArtistSaleHashes\.digest\(_environment\(x\), p, a\)/);
 });

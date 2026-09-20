@@ -5,6 +5,8 @@ import {
   captureCurrentArtistOperation, simulateCurrentArtistCall, createCurrentArtistSafePlan,
   inspectCurrentArtistReceipt, type CurrentArtistCapture, type CurrentArtistDeployment,
   type CurrentArtistReceipt,
+  inspectCurrentArtistRecordedConsent, type CurrentArtistRecordedConsentRequest,
+  type CurrentArtistRecordedConsentObservation,
 } from "../src/current-artist-workflow.js";
 
 declare const provider: Provider;
@@ -56,3 +58,31 @@ capture.delegation!.grant.maxUses = 99n;
 // @ts-expect-error a prepared capture cannot promise signing-time zero is the mined digest
 const guaranteed: "submitted-digest-always-executed" = capture.timing.kind;
 void guaranteed;
+
+// A delegated creation retains its own nonce lane independently of Artist replay.
+const delegateNonce: bigint | undefined = capture.delegated?.nextUnusedNonce;
+const epoch: bigint | undefined = capture.delegated?.epochRecorded;
+const used: boolean | undefined = receipt.observedDelegated?.nonceUsed;
+void delegateNonce; void epoch; void used;
+// @ts-expect-error delegated replay evidence is immutable
+capture.delegated!.nextUnusedNonce = 99n;
+// @ts-expect-error receipt nonce evidence is immutable
+receipt.observedDelegated!.nonceUsed = false;
+
+declare const recordedRequest: CurrentArtistRecordedConsentRequest;
+declare const recorded: CurrentArtistRecordedConsentObservation;
+const durable: Promise<CurrentArtistRecordedConsentObservation> = inspectCurrentArtistRecordedConsent(
+  provider, deployment, recordedRequest, { blockTag: 100 }
+);
+const applicability: "policy-record-only" | "sale-consent-checked-for-adapter" = recorded.applicability;
+const adapterCaller: Address | undefined = recorded.checkedCall?.from;
+void durable; void applicability; void adapterCaller;
+// @ts-expect-error no live creation grant is accepted by the durable lookup
+inspectCurrentArtistRecordedConsent(provider, deployment, { ...recordedRequest, grant: hash }, { blockTag: 100 });
+// @ts-expect-error the observation is pinned to a concrete block
+inspectCurrentArtistRecordedConsent(provider, deployment, recordedRequest, { blockTag: "latest" });
+// @ts-expect-error observed association is immutable
+recorded.delegationRecordHash = hash;
+// @ts-expect-error policy existence does not promise full mint admission
+const mintReady: "mint-admission-verified" = recorded.applicability;
+void mintReady;

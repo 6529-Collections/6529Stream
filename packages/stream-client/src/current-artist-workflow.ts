@@ -64,6 +64,14 @@ export interface CurrentArtistDelegationRecord {
   readonly revoked: boolean;
   readonly revocationRecordHash: Hex;
 }
+export interface CurrentArtistDelegatedObservation {
+  readonly nonceUsed: boolean;
+  readonly nextUnusedNonce: bigint;
+  readonly digestRevoked: boolean;
+  readonly epochRecorded: bigint;
+  readonly epochCurrent: bigint;
+  readonly usesRemaining: bigint;
+}
 export interface CurrentArtistCapture {
   readonly deployment: CurrentArtistDeployment;
   readonly action: Action;
@@ -80,6 +88,7 @@ export interface CurrentArtistCapture {
     readonly operativeDocumentHash: Hex;
   } | null;
   readonly delegation: CurrentArtistDelegationRecord | null;
+  readonly delegated: CurrentArtistDelegatedObservation | null;
   /** Authority/replay observation only; exact write simulation performs operation-specific admission. */
   readonly simulationRequired: true;
   readonly captureHash: Hex;
@@ -100,6 +109,7 @@ export interface CurrentArtistReceipt {
   readonly evidenceId: Hex;
   readonly events: readonly CurrentArtistEventReference[];
   readonly observedReplay: CurrentArtistReplay;
+  readonly observedDelegated: { readonly nonceUsed: boolean; readonly nextUnusedNonce: bigint } | null;
   readonly effectiveDigest: Hex;
 }
 type Reader = Pick<Provider, "getNetwork" | "getBlock" | "getCode" | "call">;
@@ -120,10 +130,22 @@ const terms = {
   contentFreeze: "(uint256 collectionId,address metadataContract,bytes32[] lockClasses,bytes32 expectedStateHash)",
   authorizationRevocation: "(bytes32 artistId,bytes32 revokedDigest,uint256 revokedNonce)",
   identityRevision: "(bytes32 artistId,bytes32 previousRecordHash,bytes32 revisedRecordHash,string identityRecordURI)",
+  delegatedPolicyConsent: "(uint256 collectionId,bytes32 phaseId,bytes32 policyHash)",
+  delegatedSaleConsent: "(uint256 collectionId,address saleAdapter,bytes32 saleId,bytes32 saleConfigHash)",
   delegationGrant: G,
   delegationRevocation: "(bytes32 artistId,address delegate,bytes32 delegationRecordHash,bytes32 reasonHash)"
 } as const;
 const abi = new Interface([...CURRENT_ARTIST_OPERATION_ABI,
+  "function policyRecord(uint256,bytes32,bytes32) view returns(bytes32)",
+  "function recordDelegation(bytes32) view returns(bytes32)",
+  "function saleConsentAt(uint256,bytes32,bytes32) view returns(bytes32)",
+  "function requireSaleConsent(uint256,bytes32,bytes32) view",
+  "function delegationEpochState(bytes32) view returns(bool,uint64,uint64)",
+  "function delegatedNonceState(bytes32,address,uint256) view returns(bool,uint256)",
+  "function delegationState(bytes32) view returns(bool,address,uint256,uint32,uint64,uint64,uint64)",
+  "function replayCell(bytes32) view returns((bytes32 commitment,uint64 touchedRevision,uint8 kind,uint8 status))",
+  "event ArtistPolicyConsentRecorded(uint16 schemaVersion,uint256 indexed collectionId,bytes32 indexed policyHash,address indexed signer,bytes32 phaseId,uint8 authorityClass,uint256 nonce,uint64 signedAt,bytes32 consentRecordHash)",
+  "event ArtistConsentDelegationRecorded(uint16 schemaVersion,bytes32 indexed recordHash,bytes32 indexed delegationRecordHash,bytes32 indexed artistId,uint16 operationId)",
   "function operativeIdentityRecord(bytes32) view returns(bytes32)",
   "function identityDocumentBytes(bytes32) view returns(bytes)",
   "function identityRevisionRecord(bytes32) view returns((bytes32 recordHash,bytes32 artistId,bytes32 previousRecordHash,bytes32 revisedRecordHash,bytes32 previousRevisionRecord,address signer,uint8 authorityClass,uint256 nonce,uint64 signedAt,string identityRecordURI,string displayName))",
@@ -351,7 +373,7 @@ function captureHash(v: unknown): Hex {
   return keccak256(new TextEncoder().encode(stable(v))) as Hex;
 }
 function saved(v: CurrentArtistCapture): CurrentArtistCapture {
-  keys(v, ["deployment", "action", "blockNumber", "blockHash", "timestamp", "configurationHash", "authority", "binding", "replay", "revocationTarget", "timing", "revision", "delegation", "simulationRequired", "captureHash"]);
+  keys(v, ["deployment", "action", "blockNumber", "blockHash", "timestamp", "configurationHash", "authority", "binding", "replay", "revocationTarget", "timing", "revision", "delegation", "delegated", "simulationRequired", "captureHash"]);
   const d = deployment(v.deployment);
   const a = normalizeCurrentArtistAction(v.action);
   const c = copy(v);
@@ -362,6 +384,29 @@ function saved(v: CurrentArtistCapture): CurrentArtistCapture {
     throw Error("Captured Artist facts changed");
   }
   return freeze(c);
+}
+function delegatedConsent(q: CurrentArtistOperationRequest): q is Extract<CurrentArtistOperationRequest, { kind: "delegatedPolicyConsent" | "delegatedSaleConsent" }> {
+  return q.kind === "delegatedPolicyConsent" || q.kind === "delegatedSaleConsent";
+}
+function delegatedDenyKey(d: CurrentArtistDeployment, artistId: Hex, delegate: Address, digest: Hex): Hex {
+  const lane = keccak256(coder.encode(["bytes32", "bytes32", "address"],
+    [id("6529STREAM_ARTIST_DELEGATE_NONCE_LANE_V1"), artistId, delegate]));
+  const scope = keccak256(coder.encode(["bytes32", "bytes32"], [lane, digest]));
+  return keccak256(coder.encode(
+    ["bytes32", "uint256", "address", "address", "address", "address", "bytes32", "bytes32", "bytes32"],
+    [id("6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2"), d.chainId, d.registry.address,
+      d.coordinator.address, d.components[8]!.address, d.components[2]!.address, domains[2],
+      id("identity_authority.replay.delegated_digest_revocation"), scope]
+  )) as Hex;
+}
+async function delegatedReplay(p: Reader, d: CurrentArtistDeployment, q: CurrentArtistOperationRequest, digest: Hex, tag: number) {
+  const [nonceUsed, nextUnusedNonce] = await read(p, d.registry.address, "delegatedNonceState", [q.artistId, q.signer, q.message.nonce], tag);
+  const [deny] = await read(p, d.components[2]!.address, "replayCell", [delegatedDenyKey(d, q.artistId, q.signer, digest)], tag);
+  return { nonceUsed: nonceUsed as boolean, nextUnusedNonce: nextUnusedNonce as bigint, digestRevoked: deny.status !== 0n };
+}
+function liveDelegation(record: CurrentArtistDelegationRecord, timestamp: bigint): boolean {
+  return !record.revoked && timestamp >= record.grant.notBefore && timestamp < record.grant.expiresAt
+    && (record.grant.maxUses === 0n || record.uses < record.grant.maxUses);
 }
 function timing(action: Action, timestamp: bigint): CurrentArtistTiming {
   const q = action.request;
@@ -417,7 +462,7 @@ function validateDelegation(d: CurrentArtistDeployment, record: CurrentArtistDel
   address(record.grant.delegate);
   hash(record.grant.artistId);
   if (!same(delegationHash(d, record.grant, record.nonce), expected)
-    || record.grant.capabilities === 0n || (record.grant.capabilities & ~117n) !== 0n
+    || record.grant.capabilities === 0n || (record.grant.capabilities & ~1143n) !== 0n
     || record.grant.expiresAt <= record.grant.notBefore || same(record.grant.delegate, record.grantor)
     || (record.grant.maxUses !== 0n && record.uses > record.grant.maxUses)
     || record.revoked !== (record.revocationRecordHash !== ZeroHash)) {
@@ -438,12 +483,15 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
     throw Error("Action deployment differs");
   }
   const h = await context(p, d, tag, true);
+  if (m.mintManager !== undefined && !same(m.mintManager, d.components[10]!.address)) {
+    throw Error("Signed Mint Manager differs");
+  }
   if (m.core !== undefined && !same(m.core, d.components[9]!.address)) {
     throw Error("Signed Core differs");
   }
   const observedTiming = timing(action, h.timestamp);
   let b: CurrentArtistBinding | null = null;
-  if (["bindingRefusal", "saleConsent", "royaltyFreeze", "contentFreeze"].includes(q.kind) || (q.kind === "delegationGrant" && m.collectionId !== 0n)) {
+  if (["bindingRefusal", "saleConsent", "royaltyFreeze", "contentFreeze", "delegatedPolicyConsent", "delegatedSaleConsent"].includes(q.kind) || (q.kind === "delegationGrant" && m.collectionId !== 0n)) {
     if ((await read(p, d.components[9]!.address, "collectionExists", [m.collectionId], tag))[0] !== true) {
       throw Error("Unknown collection");
     }
@@ -466,9 +514,15 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
         throw Error("Binding is not eligible");
       }
     }
-    if (q.kind === "saleConsent" || q.kind === "contentFreeze") {
+    if ((q.kind === "saleConsent" || q.kind === "delegatedSaleConsent") && b.saleConsentScope > 1n) {
+      throw Error("Unsupported sale consent scope");
+    }
+    if (delegatedConsent(q) && b.consentMode !== 2n) {
+      throw Error("Delegated consent requires mode 2");
+    }
+    if (q.kind === "saleConsent" || q.kind === "contentFreeze" || q.kind === "delegatedSaleConsent") {
       const [t] = await read(p, d.components[0]!.address, "bindingTerms", [m.collectionId, b.generation], tag);
-      if (b.consentMode !== 1n || t.mode !== 0n || t.threshold !== 0n || t.count > 32n || (await read(p, d.components[1]!.address, "acceptedCount", [b.bindingHash], tag))[0] !== t.count) {
+      if (![1n, 2n].includes(b.consentMode) || t.mode !== 0n || t.threshold !== 0n || t.count > 32n || (await read(p, d.components[1]!.address, "acceptedCount", [b.bindingHash], tag))[0] !== t.count) {
         throw Error("Collaborator/consent profile is not ready");
       }
     }
@@ -479,6 +533,7 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
   };
   let revision: CurrentArtistCapture["revision"] = null;
   let delegation: CurrentArtistDelegationRecord | null = null;
+  let delegated: CurrentArtistDelegatedObservation | null = null;
   if (q.kind === "identityRevision") {
     const operativeDocumentHash = hash((await read(p, d.components[2]!.address, "operativeIdentityRecord", [q.artistId], tag))[0]);
     if (!same(operativeDocumentHash, q.message.previousRecordHash)) {
@@ -494,9 +549,32 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
       throw Error("Stored delegation grantor or target differs");
     }
   }
-  const expectedSigner = delegation?.grantor ?? authority.address;
+  if (delegatedConsent(q)) {
+    delegation = delegationRecord((await read(p, d.components[2]!.address, "delegationRecord", [q.details.grant], tag))[0]);
+    validateDelegation(d, delegation, q.details.grant);
+    const capability = q.kind === "delegatedPolicyConsent" ? 2n : 1024n;
+    if (!same(delegation.grant.artistId, q.artistId) || !same(delegation.grant.delegate, q.signer)
+      || (delegation.grant.collectionId !== 0n && delegation.grant.collectionId !== q.message.collectionId)
+      || (delegation.grant.capabilities & capability) !== capability || !liveDelegation(delegation, h.timestamp)) {
+      throw Error("Delegation scope, capability or live window unavailable");
+    }
+    const [valid, recorded, current] = await read(p, d.components[2]!.address, "delegationEpochState", [q.details.grant], tag);
+    if (!valid || recorded !== current) {
+      throw Error("Delegation epoch changed");
+    }
+    const remaining = delegation.grant.maxUses === 0n ? (1n << 64n) - 1n : delegation.grant.maxUses - delegation.uses;
+    const status = await read(p, d.registry.address, "delegationState", [q.details.grant], tag);
+    equal(Array.from(status), [true, delegation.grant.delegate, delegation.grant.collectionId,
+      delegation.grant.capabilities, delegation.grant.notBefore, delegation.grant.expiresAt, remaining], "Delegation state differs");
+    const replay = await delegatedReplay(p, d, q, observedTiming.effectiveDigest, tag);
+    if (replay.nonceUsed || replay.digestRevoked || (q.mode === "direct" && replay.nextUnusedNonce !== q.message.nonce)) {
+      throw Error("Delegate authorization consumed/revoked or direct nonce differs");
+    }
+    delegated = { ...replay, epochRecorded: recorded, epochCurrent: current, usesRemaining: remaining };
+  }
+  const expectedSigner = delegatedConsent(q) ? delegation!.grant.delegate : delegation?.grantor ?? authority.address;
   if (!same(expectedSigner, q.signer) || !ordinary(authority, [20, 21, 27, 54].includes(Number(action.operationId)))
-    || (q.kind === "delegationGrant" && authority.authorityClass !== 1n)) {
+    || ((q.kind === "delegationGrant" || delegatedConsent(q)) && authority.authorityClass !== 1n)) {
     throw Error("Current Artist authority differs");
   }
   if (authority.authorityClass !== 1n) {
@@ -521,10 +599,10 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
     }
   }
   const state = await replayRead(p, d, q.artistId, observedTiming.effectiveDigest, m.nonce, tag);
-  if (state.nonceConsumed || state.nonceRevoked || state.digestRevoked) {
+  if (state.digestRevoked || (!delegatedConsent(q) && (state.nonceConsumed || state.nonceRevoked))) {
     throw Error("Artist authorization consumed/revoked");
   }
-  if (q.mode === "direct" && m.nonce !== state.nextUnusedNonce) {
+  if (!delegatedConsent(q) && q.mode === "direct" && m.nonce !== state.nextUnusedNonce) {
     throw Error("Direct nonce differs from current hint");
   }
   if (q.mode === "signature") {
@@ -542,7 +620,7 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
   }
   await unchanged(p, h);
   const body = {
-    deployment: d, action, ...h, authority, binding: b, replay: state, revocationTarget, timing: observedTiming, revision, delegation, simulationRequired: true as const
+    deployment: d, action, ...h, authority, binding: b, replay: state, revocationTarget, timing: observedTiming, revision, delegation, delegated, simulationRequired: true as const
   };
   return freeze({
     ...body, captureHash: captureHash(body)
@@ -568,6 +646,7 @@ export async function simulateCurrentArtistCall(p: Reader, input: CurrentArtistC
   equal(fresh.authority, c.authority, "Authority changed; capture again");
   equal(fresh.revision, c.revision, "Identity revision state changed; capture again");
   equal(fresh.delegation, c.delegation, "Delegation state changed; capture again");
+  equal(fresh.delegated, c.delegated, "Delegate replay or epoch changed; capture again");
   const raw = await p.call({
     ...c.action.call, from: c.action.request.caller, blockTag: tag
   });
@@ -600,7 +679,8 @@ export function createCurrentArtistSafePlan(captures: readonly CurrentArtistCapt
   const delegationRevocations = new Set<string>();
   const lane = (c: CurrentArtistCapture) => c.action.request.registry.toLowerCase() + ":" + c.action.request.artistId.toLowerCase();
   for (const c of items) {
-    const nonceKey = lane(c) + ":nonce:" + c.action.request.message.nonce.toString();
+    const nonceLane = delegatedConsent(c.action.request) ? lane(c) + ":delegate:" + c.action.request.signer.toLowerCase() : lane(c);
+    const nonceKey = nonceLane + ":nonce:" + c.action.request.message.nonce.toString();
     if (authorizations.has(nonceKey)) {
       throw Error("Duplicate Artist authorization nonce in Safe plan");
     }
@@ -613,6 +693,9 @@ export function createCurrentArtistSafePlan(captures: readonly CurrentArtistCapt
   }
   for (const c of items) {
     const q = c.action.request;
+    if (delegatedConsent(q) && delegationRevocations.has(q.registry.toLowerCase() + ":" + q.details.grant.toLowerCase())) {
+      throw Error("Delegated consent follows its grant revocation in Safe plan");
+    }
     if (q.kind === "delegationRevocation") {
       const target = q.registry.toLowerCase() + ":" + q.message.delegationRecordHash.toLowerCase();
       if (delegationRevocations.has(target)) {
@@ -644,7 +727,7 @@ function originalRecord(c: CurrentArtistCapture, time: bigint): Hex {
   const core = c.deployment.components[9]!.address;
   const artist = q.artistId;
   const signer = q.signer;
-  const cl = c.authority.authorityClass;
+  const cl = delegatedConsent(q) ? 2n : c.authority.authorityClass;
   const n = m.nonce;
   const common = [chain, host];
   let types: string[];
@@ -654,9 +737,15 @@ function originalRecord(c: CurrentArtistCapture, time: bigint): Hex {
       types = ["bytes32", "uint256", "address", "address", "uint256", "uint64", "bytes32", "bytes32", "address", "uint8", "bytes32", "uint256", "uint64"];
       values = ["0x61e2c527c98d65328522fa0ac36862f52a59a2035e3e2ca4a0bfd5da13ee95ed", ...common, core, t.collectionId, t.generation, t.bindingHash, artist, signer, cl, t.reasonHash, n, time];
       break;
+    case "delegatedSaleConsent":
     case "saleConsent":
       types = ["bytes32", "uint256", "address", "address", "address", "uint256", "bytes32", "bytes32", "bytes32", "address", "uint8", "uint256", "uint64"];
       values = [id("6529STREAM_ARTIST_SALE_CONSENT_RECORD_V1"), ...common, t.saleAdapter, core, t.collectionId, t.saleId, t.saleConfigHash, artist, signer, cl, n, time];
+      break;
+    case "delegatedPolicyConsent":
+      types = ["bytes32", "uint256", "address", "address", "uint256", "bytes32", "bytes32", "bytes32", "address", "uint8", "uint256", "uint64"];
+      values = [id("6529STREAM_ARTIST_POLICY_CONSENT_RECORD_V1"), chain, host, c.deployment.components[10]!.address,
+        t.collectionId, t.phaseId, t.policyHash, artist, signer, cl, n, time];
       break;
     case "royaltyFreeze":
       types = ["bytes32", "uint256", "address", "address", "uint256", "bytes32", "bytes32", "bytes32", "address", "uint8", "uint256", "uint64"];
@@ -697,6 +786,16 @@ function decode(types: readonly string[], raw: string): any {
 function bindingArray(b: CurrentArtistBinding): readonly unknown[] {
   return [b.artistId, b.artistAddress, b.identityRecordHash, b.bindingHash, b.generation, b.consentMode, b.saleConsentScope, b.registryImmutabilityElection, b.proposer, b.accepted];
 }
+function saleFacts(raw: Hex, terms: any): void {
+  const facts = decode(["address", "bytes32", "bytes32", "bytes32", "bytes4", "uint256", "bytes32"], raw);
+  if (facts[5] !== terms.collectionId || !same(facts[6], terms.saleConfigHash) || facts[4] === "0x00000000" || facts[4] === "0xffffffff") {
+    throw Error("Archive sale facts differ");
+  }
+  address(facts[0]);
+  hash(facts[1]);
+  hash(facts[2]);
+  hash(facts[3]);
+}
 /** Verify a singleton direct or ordinary Safe CALL, original owner records and exact Archive evidence. */
 export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: CurrentArtistCapture, evidence: {
   readonly transactionHash: Hex;
@@ -713,7 +812,9 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
   const a = c.action;
   const q = a.request;
   const m = q.message as any;
-  const [t, auth] = abi.decodeFunctionData(a.method, a.call.data);
+  const decodedCall = abi.decodeFunctionData(a.method, a.call.data);
+  const t = decodedCall[0];
+  const auth = decodedCall[delegatedConsent(q) ? 2 : 1];
   equal(await captureCurrentArtistOperation(p, d, q, { blockTag: c.blockNumber }), c, "Historical capture differs");
   const [tx, r] = await Promise.all([p.getTransaction(transactionHash), p.getTransactionReceipt(transactionHash)]);
   if (!tx || !r || !same(tx.hash, transactionHash) || !same(r.hash, transactionHash) || r.status !== 1 || tx.chainId !== d.chainId || tx.blockNumber === null || r.blockNumber !== tx.blockNumber || !same(tx.blockHash, r.blockHash) || !same(tx.from, r.from) || !same(tx.to, r.to) || tx.value !== 0n || r.blockNumber <= c.blockNumber) {
@@ -774,7 +875,7 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
     });
     return l.index;
   };
-  const cl = c.authority.authorityClass;
+  const cl = delegatedConsent(q) ? 2n : c.authority.authorityClass;
   const n = m.nonce;
   const at = h.timestamp;
   const owner = d.components[6]!.address;
@@ -848,12 +949,20 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
       equal(Array.from(terminal), [1n, t.reasonHash, recordHash], "Historical binding refusal differs");
       break;
     }
+    case "delegatedSaleConsent":
     case "saleConsent": {
       event(owner, "ArtistSaleConsentRecorded", [1, t.collectionId, t.saleConfigHash, q.signer, t.saleId, cl, n, at, recordHash]);
       const [v] = await read(p, d.registry.address, "saleConsentRecord", [recordHash], tag);
       const expected = [recordHash, t, q.artistId, q.signer, cl, n, at, c.binding!.generation, c.binding!.bindingHash];
       if (!same(coder.encode([abi.getFunction("saleConsentRecord")!.outputs![0]!], [v]), coder.encode([abi.getFunction("saleConsentRecord")!.outputs![0]!], [expected]))) {
         throw Error("Historical sale consent differs");
+      }
+      break;
+    }
+    case "delegatedPolicyConsent": {
+      event(owner, "ArtistPolicyConsentRecorded", [1, t.collectionId, t.policyHash, q.signer, t.phaseId, cl, n, at, recordHash]);
+      if (!same((await read(p, owner, "policyRecord", [t.collectionId, t.phaseId, t.policyHash], tag))[0], recordHash)) {
+        throw Error("Historical policy consent differs");
       }
       break;
     }
@@ -879,6 +988,13 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
     case "authorizationRevocation":
       event(d.components[2]!.address, "ArtistAuthorizationRevoked", [1, q.artistId, t.revokedDigest, t.revokedNonce, n, at, recordHash]);
       break;
+  }
+  if (delegatedConsent(q)) {
+    const previous = refs[refs.length - 1]!.logIndex;
+    const association = event(owner, "ArtistConsentDelegationRecorded", [1, recordHash, q.details.grant, q.artistId, a.operationId]);
+    if (association <= previous || !same((await read(p, owner, "recordDelegation", [recordHash], tag))[0], q.details.grant)) {
+      throw Error("Consent delegation association differs");
+    }
   }
   const evidenceId = keccak256(coder.encode(["bytes32", "uint256", "address", "address", "uint16", "address", "bytes32"], [id("6529STREAM_ARTIST_ONBOARDING_OPERATION_EVIDENCE_V1"), d.chainId, d.registry.address, d.coordinator.address, a.operationId, q.caller, recordHash])) as Hex;
   const archive = d.components[8]!.address;
@@ -927,7 +1043,32 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
   const authority = [q.artistId, q.signer, cl, c.authority.status];
   let payloadTypes: string[];
   let payloadValues: unknown[];
-  if (q.kind === "identityRevision") {
+  if (delegatedConsent(q)) {
+    payloadTypes = [B, terms[q.kind], A, P, "bytes32", D, "bytes"];
+    const decoded = decode(payloadTypes, v[7]);
+    const prior = delegationRecord(decoded[5]);
+    validateDelegation(d, prior, q.details.grant);
+    if (!liveDelegation(prior, h.timestamp) || prior.uses < c.delegation!.uses
+      || !same(prior.grantor, c.delegation!.grantor) || prior.nonce !== c.delegation!.nonce
+      || !same(coder.encode([G], [prior.grant]), coder.encode([G], [c.delegation!.grant]))) {
+      throw Error("Archive delegated consent grant differs");
+    }
+    const after = delegationRecord((await read(p, identityOwner, "delegationRecord", [q.details.grant], tag))[0]);
+    validateDelegation(d, after, q.details.grant);
+    if (after.uses < prior.uses + 1n || !same(after.grantor, prior.grantor) || after.nonce !== prior.nonce
+      || !same(coder.encode([G], [after.grant]), coder.encode([G], [prior.grant]))) {
+      throw Error("Delegation consumption readback differs");
+    }
+    if (q.kind === "delegatedPolicyConsent") {
+      if (decoded[6] !== "0x") {
+        throw Error("Policy consent facts must be empty");
+      }
+    } else {
+      saleFacts(decoded[6], t);
+    }
+    payloadValues = [bindingArray(c.binding!), t, auth, proof, q.details.grant, prior, decoded[6]];
+  }
+  else if (q.kind === "identityRevision") {
     payloadTypes = [terms.identityRevision, A, "bytes", "string", P, A];
     payloadValues = [t, auth, q.details.document, q.details.displayName, proof,
       [auth.nonce, executedTiming.effectiveTime, auth.signature]];
@@ -960,14 +1101,7 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
         if (q.kind === "saleConsent") {
           payloadTypes.push("bytes");
           const decoded = decode(payloadTypes, v[7]);
-          const facts = decode(["address", "bytes32", "bytes32", "bytes32", "bytes4", "uint256", "bytes32"], decoded[5]);
-          if (facts[5] !== t.collectionId || !same(facts[6], t.saleConfigHash) || facts[4] === "0x00000000" || facts[4] === "0xffffffff") {
-            throw Error("Archive sale facts differ");
-          }
-          address(facts[0]);
-          hash(facts[1]);
-          hash(facts[2]);
-          hash(facts[3]);
+          saleFacts(decoded[5], t);
           payloadValues.push(decoded[5]);
         }
       }
@@ -977,7 +1111,16 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
     throw Error("Archive request/authority/proof differs");
   }
   const observedReplay = await replayRead(p, d, q.artistId, executedTiming.effectiveDigest, m.nonce, tag);
-  if (!observedReplay.digestObserved || !observedReplay.nonceConsumed || observedReplay.digestRevoked || observedReplay.nonceRevoked) {
+  let observedDelegated: CurrentArtistReceipt["observedDelegated"] = null;
+  if (delegatedConsent(q)) {
+    const state = await delegatedReplay(p, d, q, executedTiming.effectiveDigest, tag);
+    if (!state.nonceUsed || state.digestRevoked) {
+      throw Error("Executed delegate authorization not consumed");
+    }
+    observedDelegated = { nonceUsed: state.nonceUsed, nextUnusedNonce: state.nextUnusedNonce };
+  }
+  if (!observedReplay.digestObserved || observedReplay.digestRevoked
+    || (!delegatedConsent(q) && (!observedReplay.nonceConsumed || observedReplay.nonceRevoked))) {
     throw Error("Executed Artist authorization not consumed");
   }
   if (q.kind === "authorizationRevocation") {
@@ -1003,6 +1146,122 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
   }
   await unchanged(p, h);
   return freeze({
-    capture: c, transactionHash, blockNumber: tag, blockHash, recordHash, evidenceId, events: refs.sort((a, b) => a.logIndex - b.logIndex), observedReplay, effectiveDigest: executedTiming.effectiveDigest
+    capture: c, transactionHash, blockNumber: tag, blockHash, recordHash, evidenceId, events: refs.sort((a, b) => a.logIndex - b.logIndex), observedReplay, observedDelegated, effectiveDigest: executedTiming.effectiveDigest
+  });
+}
+
+export type CurrentArtistRecordedConsentRequest = {
+  readonly kind: "policy";
+  readonly collectionId: bigint;
+  readonly phaseId: Hex;
+  readonly policyHash: Hex;
+  readonly recordHash: Hex;
+} | {
+  readonly kind: "sale";
+  readonly collectionId: bigint;
+  readonly saleAdapter: Address;
+  readonly saleId: Hex;
+  readonly saleConfigHash: Hex;
+  readonly recordHash: Hex;
+};
+export interface CurrentArtistRecordedConsentObservation {
+  readonly deployment: CurrentArtistDeployment;
+  readonly request: CurrentArtistRecordedConsentRequest;
+  readonly blockNumber: number;
+  readonly blockHash: Hex;
+  readonly timestamp: bigint;
+  readonly configurationHash: Hex;
+  readonly recordHash: Hex;
+  /** Zero for an original principal consent; nonzero binds the creation grant without rereading its liveness. */
+  readonly delegationRecordHash: Hex;
+  readonly applicability: "policy-record-only" | "sale-consent-checked-for-adapter";
+  readonly checkedCall: {
+    readonly to: Address;
+    readonly data: Hex;
+    readonly value: 0n;
+    readonly from: Address;
+  } | null;
+}
+function recordedRequest(input: CurrentArtistRecordedConsentRequest): CurrentArtistRecordedConsentRequest {
+  if (input.kind === "policy") {
+    keys(input, ["kind", "collectionId", "phaseId", "policyHash", "recordHash"]);
+    const result = {
+      kind: "policy" as const, collectionId: uint(input.collectionId), phaseId: hash(input.phaseId),
+      policyHash: hash(input.policyHash), recordHash: hash(input.recordHash)
+    };
+    if (result.collectionId === 0n) {
+      throw Error("Expected nonzero collection");
+    }
+    return freeze(result);
+  }
+  if (input.kind === "sale") {
+    keys(input, ["kind", "collectionId", "saleAdapter", "saleId", "saleConfigHash", "recordHash"]);
+    const result = {
+      kind: "sale" as const, collectionId: uint(input.collectionId), saleAdapter: address(input.saleAdapter),
+      saleId: hash(input.saleId), saleConfigHash: hash(input.saleConfigHash), recordHash: hash(input.recordHash)
+    };
+    if (result.collectionId === 0n) {
+      throw Error("Expected nonzero collection");
+    }
+    return freeze(result);
+  }
+  throw Error("Unsupported recorded consent kind");
+}
+/**
+ * Observe the exact durable consent independently of its creation grant.
+ * Policy is a record lookup only, not complete mint admission. Sale invokes the original caller-sensitive
+ * requireSaleConsent from the supplied adapter and verifies its stored terms and delegation association.
+ */
+export async function inspectCurrentArtistRecordedConsent(
+  p: Reader,
+  input: CurrentArtistDeployment,
+  request: CurrentArtistRecordedConsentRequest,
+  options: { readonly blockTag: number }
+): Promise<CurrentArtistRecordedConsentObservation> {
+  keys(options, ["blockTag"]);
+  const d = deployment(input);
+  const q = recordedRequest(request);
+  const tag = number(options.blockTag);
+  const h = await context(p, d, tag, true);
+  const owner = d.components[6]!.address;
+  const recordHash = hash((await read(p, owner, q.kind === "policy" ? "policyRecord" : "saleConsentAt",
+    q.kind === "policy" ? [q.collectionId, q.phaseId, q.policyHash] : [q.collectionId, q.saleId, q.saleConfigHash], tag))[0]);
+  if (!same(recordHash, q.recordHash)) {
+    throw Error("Recorded consent identity differs");
+  }
+  const delegationRecordHash = hash((await read(p, owner, "recordDelegation", [recordHash], tag))[0], true);
+  let checkedCall: CurrentArtistRecordedConsentObservation["checkedCall"] = null;
+  if (q.kind === "sale") {
+    const [record] = await read(p, owner, "saleConsentRecord", [recordHash], tag);
+    const term = [q.collectionId, q.saleAdapter, q.saleId, q.saleConfigHash];
+    const expectedHash = keccak256(coder.encode(
+      ["bytes32", "uint256", "address", "address", "address", "uint256", "bytes32", "bytes32", "bytes32", "address", "uint8", "uint256", "uint64"],
+      [id("6529STREAM_ARTIST_SALE_CONSENT_RECORD_V1"), d.chainId, d.registry.address, record.terms.saleAdapter,
+        d.components[9]!.address, record.terms.collectionId, record.terms.saleId, record.terms.saleConfigHash,
+        record.artistId, record.signer, record.authorityClass, record.nonce, record.signedAt]
+    ));
+    const associationValid = record.authorityClass === 2n
+      ? delegationRecordHash !== ZeroHash
+      : [1n, 3n, 4n].includes(record.authorityClass) && delegationRecordHash === ZeroHash;
+    if (!same(record.recordHash, recordHash)
+      || !same(expectedHash, recordHash)
+      || !same(coder.encode([terms.saleConsent], [record.terms]), coder.encode([terms.saleConsent], [term]))
+      || !associationValid) {
+      throw Error("Recorded sale consent terms or delegation differ");
+    }
+    checkedCall = {
+      to: d.registry.address,
+      data: abi.encodeFunctionData("requireSaleConsent", [q.collectionId, q.saleId, q.saleConfigHash]) as Hex,
+      value: 0n, from: q.saleAdapter
+    };
+    const raw = bytes(await p.call({ ...checkedCall, blockTag: tag }), 32);
+    if (raw !== "0x") {
+      throw Error("Noncanonical requireSaleConsent return");
+    }
+  }
+  await unchanged(p, h);
+  return freeze({
+    deployment: d, request: q, ...h, recordHash, delegationRecordHash,
+    applicability: q.kind === "policy" ? "policy-record-only" : "sale-consent-checked-for-adapter", checkedCall
   });
 }

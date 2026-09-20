@@ -1,13 +1,15 @@
 # Current Artist operation callers
 
-The ART39 extension adds the following principal public calls. Existing acceptance,
+The ART39 extension adds the following public calls. Existing acceptance,
 collaborator, policy, economics, payout, attestation, content-consent and
 ratification payloads remain in their original client modules.
 
 | Original operation | Public facade method | Purpose |
 | --- | --- | --- |
 | 3 | `refuseArtistBinding` | Refuse an exact pending generation and binding hash. |
+| 14 | `recordDelegatedPolicyConsent` | Record exact policy consent using a scoped delegation. |
 | 16 | `recordSaleConsent` | Record approval of an exact current sale configuration. |
+| 16 | `recordDelegatedSaleConsent` | Record exact sale consent using a scoped delegation. |
 | 20 | `authorizeArtistRoyaltyFreeze` | Authorize the specified royalty assignment freeze. |
 | 21 | `authorizeArtistContentFreeze` | Authorize specified metadata locks at an exact state. |
 | 25 | `recordIdentityRevision` | Extend the operative document with exact document bytes. |
@@ -24,8 +26,8 @@ original operation 1–60, the existing operation 61 dispute withdrawal, current
 method variants, and three additional public configuration/checkpoint methods.
 An operation ID is not a claim that all its variants have client workflows.
 Operation 36 is historically named `designateSuccessor`; its actual facade method
-is `recordSuccessorDesignation`. New C2PA and delegated policy/sale interfaces
-remain outside this frozen source until their source handoffs.
+is `recordSuccessorDesignation`. Delegated policy and sale consent retain the
+original operation IDs 14 and 16. C2PA callers remain pending.
 
 ## Payload and caller review
 
@@ -35,7 +37,8 @@ original write calldata and read-only digest call. Its exact request contains
 `kind`, `chainId`, `registry`, `caller`, `signer`, `artistId`, `mode`, `signature`,
 `message` and `details`. The kind names are `bindingRefusal`, `saleConsent`,
 `royaltyFreeze`, `contentFreeze`, `authorizationRevocation`, `identityRevision`,
-`delegationGrant` and `delegationRevocation`.
+`delegationGrant`, `delegationRevocation`, `delegatedPolicyConsent` and
+`delegatedSaleConsent`.
 
 The signing domain is `6529StreamArtistRegistry`, version `1`, with the actual
 chain and `StreamArtistOnboardingRegistry` facade address. Coordinator, owner,
@@ -44,7 +47,8 @@ extension and configuration-directory addresses are not signing hosts.
 Every integer is a bigint. Refusal, consent, freezes and both revocation schemas
 use a deadline; their records use the transaction block timestamp. Refusal's `details.reasonURI` is reviewed
 calldata outside the signed schema, limited to 2,048 UTF-8 bytes. Identity revision
-details are described below; the other details objects are empty. This client accepts Unicode URI text; it does not represent
+details are described below; delegated consent details contain the nonzero
+`grant` record hash, and the other details objects are empty. This client accepts Unicode URI text; it does not represent
 arbitrary non-UTF-8 Solidity string bytes. Content-freeze lock classes retain their supplied order and
 must be 1–16 strictly increasing, nonzero bytes32 values. Their signed commitment
 hashes packed words; the record preimage retains the original dynamic array.
@@ -79,20 +83,55 @@ maximum uses, constraints and nonce. The Artist ID remains in the original
 request and record; it is not added to the permanent signature. Authorization
 time is exactly zero, with no invented deadline. Collection zero is global,
 maximum uses zero is unlimited, and zero constraints hash is permitted. The
-original capability mask is `117` (`1 | 4 | 16 | 32 | 64`). A future grant still
+accepted capability mask is `1143` (`1 | 2 | 4 | 16 | 32 | 64 | 1024`), including
+policy consent (`2`) and sale consent (`1024`). A future grant still
 reserves its Artist/delegate key until revoked, expired or exhausted.
 
 Grant revocation resolves the stored grantor independently from current Artist
 authority. An expired, exhausted or replaced historical grant may still be
 explicitly revoked if it is not already revoked. Zero reason hash is permitted.
-These three operations consume the shared Artist nonce lane; delegated action
-consumption uses a separate lane and remains a pending extension.
+These three operations consume the shared Artist nonce lane. Delegated consent
+uses the persistent Artist/delegate nonce lane described below.
 
 Receipt verification preserves the original storage and event formats. Revision
 storage reports authority class `1` even where its record hash and event use the
 actual class. The delegation-revoked event omits the resulting revocation hash,
 so verification joins the original preimage, Archive and grant record. Later
 document revisions, grant uses or revocation do not erase the historical action.
+
+## Delegated policy and sale consent
+
+The additive methods reuse the permanent policy and sale EIP-712 schemas, digest
+getters and actual Registry domain. The grant hash and client Artist locator
+are outside those signatures. Both methods retain the original authorization
+tuple and deadline. Creation requires an accepted binding in consent mode 2,
+current living authority, an eligible grant epoch, collection scope and the
+specific policy or sale capability. The grant must be active with a use available;
+successful creation consumes one use and a nonce in the Artist/delegate lane.
+Replacing a grant does not reset that nonce lane.
+
+Principal sale and content-freeze calls also admit consent mode 2. A principal
+authorization continues to consume its ordinary Artist nonce. Captures keep
+these lanes distinct and exact-call simulation checks the original contracts'
+remaining prerequisites.
+
+Consent creation and later consumption have different checks. The stored
+class-2 consent retains its original grant association after the grant expires,
+is revoked or exhausts its uses. Receipt inspection verifies the original
+class-2 record, Consent-owner association event and Archive payload, including
+the full grant before execution. Later applicability depends on the original
+policy or sale checks and current ordinary prerequisites; it does not require
+the grant to remain live. Sale verification uses the actual sale adapter as the
+caller because the original Registry read derives the adapter from `msg.sender`.
+
+`inspectCurrentArtistRecordedConsent(provider, deployment, request, { blockTag })`
+reads a supplied policy or sale record independently from a creation capture.
+Its policy result is explicitly `policy-record-only`: the exact retained policy
+record does not establish full mint readiness. Its sale result is
+`sale-consent-checked-for-adapter` and includes the exact checked call with the
+adapter as `from`. Sale readback also reconstructs the original stored record
+hash and checks its authority class and grant association. Neither result rechecks the grant's lifetime. Refresh the
+relevant ordinary prerequisites before a later mint or sale.
 
 ## Authority and execution
 
@@ -123,6 +162,9 @@ a nonce.
 zero-value Safe CALLs. It accepts only supported original public methods through
 reconstructed requests. It rejects repeated authorization nonces, repeated grant
 revocation targets and known authorization-revocation conflicts in the same lane.
+A delegated consent cannot follow revocation of its grant in the supplied plan;
+consent followed by revocation remains permitted. Principal and delegate nonce
+lanes stay separate.
 The future effective digest of a direct zero-time revision is unknown and is not
 treated as a known digest conflict. Refresh timing and replay before execution.
 Each entry is a separate transaction. When one action
@@ -152,10 +194,10 @@ validation. Protocol-only owner/Coordinator methods are not user-call targets.
 
 ## Frozen source and limits
 
-The fixture uses the retained `parallel-feature-batch49-20260920` ABI capture at
-commit `18be311bc33e8007841f963f218ac8290e271015`. All 2,172 literal input sources
-were verified byte-for-byte against that commit. It retains 298 production
-closure hashes, selected original ABI entries and eleven original source
+The fixture uses the retained `parallel-feature-batch52-20260920` ABI capture at
+commit `44af244ed576cc4b26632b800fe70a068d577940`. All 2,212 literal input sources
+were verified byte-for-byte against that commit. It retains 316 production
+closure hashes, selected original ABI entries and seventeen original source
 texts for independent preimage tests. Verify without compiling Solidity:
 
 ```sh

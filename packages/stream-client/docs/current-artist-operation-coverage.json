@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "18be311bc33e8007841f963f218ac8290e271015",
-  "clientAuditCommit": "0601aba31b343d51421a421a07303831bf4885ad",
-  "scope": "Original operations 1-60 plus existing operation 61. Method variants are separate caller requirements; operation membership is not a claim of implemented workflow coverage. New unpublished C2PA and delegated policy/sale methods are deferred until source handoff.",
+  "sourceCommit": "44af244ed576cc4b26632b800fe70a068d577940",
+  "clientAuditCommit": "718e257abe609467d12c9fe6be3ecbaadbfa412e",
+  "scope": "Original operations 1-60 plus existing operation 61. Method variants are separate caller requirements; operation membership is not a claim of implemented workflow coverage. Additive delegated policy/sale methods retain IDs14/16. C2PA callers remain pending.",
   "signingHost": "StreamArtistOnboardingRegistry",
   "signingDomain": {
     "name": "6529StreamArtistRegistry",
@@ -13,7 +13,8 @@
   "statusMeaning": {
     "partial-existing": "Some payload/call/read helpers exist; does not prove complete variants, authority, simulation or receipts.",
     "pending": "No complete client workflow in this audit.",
-    "principal-implemented": "The named principal method has source/ABI, client and mocked workflow coverage; other listed variants remain pending. No deployed runtime acceptance."
+    "principal-implemented": "The named principal method has source/ABI, client and mocked workflow coverage; other listed variants remain pending. No deployed runtime acceptance.",
+    "methods-implemented": "Every listed method has source/ABI, client and mocked workflow coverage. No deployed runtime acceptance."
   },
   "operations": [
     {
@@ -131,10 +132,13 @@
       "id": 14,
       "operation": "recordPolicyConsent",
       "methods": [
-        "recordPolicyConsent"
+        "recordPolicyConsent",
+        "recordDelegatedPolicyConsent"
       ],
       "coverage": "partial-existing",
-      "existingModules": "current-artist; current-artist-ceremony"
+      "existingModules": "current-artist; current-artist-ceremony; current-artist-operation; current-artist-workflow",
+      "implementedMethods": ["recordDelegatedPolicyConsent"],
+      "pendingMethods": ["recordPolicyConsent"]
     },
     {
       "id": 15,
@@ -154,10 +158,12 @@
       "id": 16,
       "operation": "recordSaleConsent",
       "methods": [
-        "recordSaleConsent"
+        "recordSaleConsent",
+        "recordDelegatedSaleConsent"
       ],
-      "coverage": "principal-implemented",
+      "coverage": "methods-implemented",
       "implementedPrincipalMethod": "recordSaleConsent",
+      "implementedMethods": ["recordSaleConsent", "recordDelegatedSaleConsent"],
       "pendingMethods": []
     },
     {
@@ -571,9 +577,9 @@
     }
   ],
   "validation": {
-    "scope": "Eight principal methods:3,16,20,21,25,26,27,54; old ceremony empty ERC-1271 proof correction",
-    "packageTestsPassed": 719,
-    "independentlyObservedFocusedTestsPassed": 76,
+    "scope": "Eight principal methods:3,16,20,21,25,26,27,54; delegated policy/sale variants14/16 and durable consent reads; old ceremony empty ERC-1271 proof correction",
+    "packageTestsPassed": 741,
+    "independentlyObservedFocusedTestsPassed": 98,
     "contractRuntimeAcceptance": false
   }
 }

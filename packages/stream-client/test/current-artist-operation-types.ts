@@ -2,7 +2,8 @@ import type { Address, Hex } from "../src/generated/contracts.js";
 import { currentArtistOperationTypedData, normalizeCurrentArtistAction, normalizeCurrentArtistOperationRequest,
   prepareCurrentArtistAction, type CurrentArtistOperationRequest, type CurrentArtistContentFreeze,
   type CurrentArtistSaleConsent, type PreparedCurrentArtistAction, type CurrentArtistIdentityRevision,
-  type CurrentArtistDelegationGrant, type CurrentArtistDelegationRevocation } from "../src/current-artist-operation.js";
+  type CurrentArtistDelegationGrant, type CurrentArtistDelegationRevocation,
+  type CurrentArtistDelegatedPolicyConsent, type CurrentArtistDelegatedSaleConsent } from "../src/current-artist-operation.js";
 
 declare const address: Address;
 declare const hash: Hex;
@@ -81,3 +82,28 @@ prepareCurrentArtistAction({ ...request, kind: "delegationGrant", message: grant
 revisionPlan.request.details.displayName = "changed";
 // @ts-expect-error revocation's message differs from the three-field authorization revocation target
 currentArtistOperationTypedData("delegationRevocation", 1n, address, { artistId: hash, revokedDigest: hash, revokedNonce: 0n, nonce: 1n, deadline: 1n });
+
+declare const delegatedPolicy: CurrentArtistDelegatedPolicyConsent;
+const delegatedSale: CurrentArtistDelegatedSaleConsent = sale;
+const delegatedPolicyRequest: CurrentArtistOperationRequest<"delegatedPolicyConsent"> = {
+  ...request, kind: "delegatedPolicyConsent", message: delegatedPolicy, details: { grant: hash },
+};
+const policyPlan = prepareCurrentArtistAction(delegatedPolicyRequest);
+const policyManager: Address = policyPlan.payload.message.mintManager;
+const grantHash: Hex = policyPlan.request.details.grant;
+prepareCurrentArtistAction({ ...request, kind: "delegatedSaleConsent", message: delegatedSale, details: { grant: hash } });
+void policyManager; void grantHash;
+// @ts-expect-error a grant is required to select the delegated public variant
+prepareCurrentArtistAction({ ...delegatedPolicyRequest, details: {} });
+// @ts-expect-error delegation does not introduce a signed grant field
+currentArtistOperationTypedData("delegatedPolicyConsent", 1n, address, { ...delegatedPolicy, grant: hash });
+// @ts-expect-error original sale schema is not the policy schema
+currentArtistOperationTypedData("delegatedPolicyConsent", 1n, address, delegatedSale);
+// @ts-expect-error original policy schema is not the sale schema
+currentArtistOperationTypedData("delegatedSaleConsent", 1n, address, delegatedPolicy);
+// @ts-expect-error scope mode is not an extra signed sale field
+currentArtistOperationTypedData("delegatedSaleConsent", 1n, address, { ...delegatedSale, consentMode: 2n });
+// @ts-expect-error grant details do not carry unverified authorization capabilities
+prepareCurrentArtistAction({ ...delegatedPolicyRequest, details: { grant: hash, capabilities: 2n } });
+// @ts-expect-error the reviewed grant selection is immutable
+policyPlan.request.details.grant = hash;
