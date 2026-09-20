@@ -8,7 +8,7 @@ import {
     IStreamPrivateSaleAdapter as Private
 } from "../../smart-contracts/interfaces/stream/mint/IStreamPrivateSaleAdapter.sol";
 import {
-    IStreamNativeInventorySale as Inventory
+    IStreamNativeInventorySale as SecondaryInventory
 } from "../../smart-contracts/interfaces/stream/mint/IStreamNativeInventorySale.sol";
 import {
     StreamPrivateSaleTypes as PT
@@ -161,7 +161,7 @@ contract StreamCurrentSecondaryInventoryTest is NativePlatformCustodyFixture {
         }
     }
 
-    function _inventoryConfig(uint32 cap) internal view returns (Inventory.Config memory c) {
+    function _inventoryConfig(uint32 cap) internal view returns (SecondaryInventory.Config memory c) {
         c.collectionId = 2;
         c.consignor = address(collector);
         c.unitPrice = 1000;
@@ -295,7 +295,7 @@ contract StreamCurrentSecondaryInventoryTest is NativePlatformCustodyFixture {
         external
     {
         uint256[] memory ids = _delivered(2);
-        Inventory.Config memory config = _inventoryConfig(0);
+        SecondaryInventory.Config memory config = _inventoryConfig(0);
         uint256 nonce = inventory.nextSaleNonce();
         bytes32 id = inventory.registerInventory(config, ids);
         bytes32 manifest = keccak256(abi.encode(ids));
@@ -310,7 +310,7 @@ contract StreamCurrentSecondaryInventoryTest is NativePlatformCustodyFixture {
                 manifest
             )
         );
-        Inventory.Inventory memory saved = inventory.inventoryDetails(id);
+        SecondaryInventory.SecondaryInventory memory saved = inventory.inventoryDetails(id);
         require(
             saved.configHash == configHash && saved.inventoryHash == manifest
                 && keccak256(abi.encode(saved.tokenIds)) == keccak256(abi.encode(ids)),
@@ -318,7 +318,7 @@ contract StreamCurrentSecondaryInventoryTest is NativePlatformCustodyFixture {
         );
         _deposit(id, ids[0]);
         vm.expectRevert(
-            abi.encodeWithSelector(Inventory.InventoryTokenUnavailable.selector, id, ids[1])
+            abi.encodeWithSelector(SecondaryInventory.InventoryTokenUnavailable.selector, id, ids[1])
         );
         inventory.openInventory(id);
         PT.SaleCustodyGrant memory direct = _grant(id, ids[1]);
@@ -433,18 +433,18 @@ contract StreamCurrentSecondaryInventoryTest is NativePlatformCustodyFixture {
 
     function testManifestCustodyAndOldPrivateSelectorsCannotSubstituteForInventory() external {
         uint256[] memory ids = _delivered(2);
-        Inventory.Config memory c = _inventoryConfig(0);
+        SecondaryInventory.Config memory c = _inventoryConfig(0);
         uint256 first = ids[0];
         ids[0] = ids[1];
-        vm.expectRevert(abi.encodeWithSelector(Inventory.InvalidInventory.selector));
+        vm.expectRevert(abi.encodeWithSelector(SecondaryInventory.InvalidInventory.selector));
         inventory.registerInventory(c, ids);
         ids[0] = first;
         c.expectedPrimaryPolicyHash = keccak256("forbidden primary");
-        vm.expectRevert(abi.encodeWithSelector(Inventory.InvalidInventory.selector));
+        vm.expectRevert(abi.encodeWithSelector(SecondaryInventory.InvalidInventory.selector));
         inventory.registerInventory(c, ids);
         c.expectedPrimaryPolicyHash = 0;
         c.secondaryConsignment = false;
-        vm.expectRevert(abi.encodeWithSelector(Inventory.InvalidInventory.selector));
+        vm.expectRevert(abi.encodeWithSelector(SecondaryInventory.InvalidInventory.selector));
         inventory.registerInventory(c, ids);
         c.secondaryConsignment = true;
         bytes32 id = inventory.registerInventory(c, ids);
@@ -461,19 +461,19 @@ contract StreamCurrentSecondaryInventoryTest is NativePlatformCustodyFixture {
         require(!inventory.digestConsumed(_digest(g)), "old entry cannot consume new grant");
         inventory.depositInventoryCustody(id, g, 2, sig);
         vm.expectRevert(
-            abi.encodeWithSelector(Inventory.InventoryTokenUnavailable.selector, id, first)
+            abi.encodeWithSelector(SecondaryInventory.InventoryTokenUnavailable.selector, id, first)
         );
         inventory.depositInventoryCustody(id, g, 2, sig);
         _deposit(id, ids[1]);
         inventory.openInventory(id);
         bytes32 hash = inventory.inventoryDetails(id).configHash;
         vm.expectRevert(
-            abi.encodeWithSelector(Inventory.InventoryTokenUnavailable.selector, id, first)
+            abi.encodeWithSelector(SecondaryInventory.InventoryTokenUnavailable.selector, id, first)
         );
         inventory.purchaseInventory{ value: 1000 }(id, first, bytes32(uint256(hash) ^ 1));
         _buy(id, first, 1000);
         vm.expectRevert(
-            abi.encodeWithSelector(Inventory.InventoryTokenUnavailable.selector, id, first)
+            abi.encodeWithSelector(SecondaryInventory.InventoryTokenUnavailable.selector, id, first)
         );
         inventory.purchaseInventory{ value: 1000 }(id, first, hash);
         require(
@@ -661,7 +661,7 @@ contract StreamCurrentSecondaryInventoryTest is NativePlatformCustodyFixture {
         bytes32 hash = inventory.inventoryDetails(id).configHash;
         vm.prank(address(customer));
         vm.expectRevert(
-            abi.encodeWithSelector(Inventory.InventoryBuyerCap.selector, id, address(customer))
+            abi.encodeWithSelector(SecondaryInventory.InventoryBuyerCap.selector, id, address(customer))
         );
         inventory.purchaseInventory{ value: 1000 }(id, ids[1], hash);
         _grantAuctionRole(keccak256("ROLE_PAUSE_GUARDIAN"), address(this));

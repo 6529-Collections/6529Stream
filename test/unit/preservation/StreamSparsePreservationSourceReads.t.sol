@@ -9,7 +9,7 @@ import {
     StreamRenderCriticalSourceTypes as S
 } from "../../../smart-contracts/interfaces/stream/preservation/StreamRenderCriticalSourceTypes.sol";
 import {
-    StreamPreservationInventoryTypes as Inventory
+    StreamPreservationInventoryTypes as PreservationInventory
 } from "../../../smart-contracts/interfaces/stream/preservation/StreamPreservationInventoryTypes.sol";
 import {
     StreamReferenceRenderSourceReads as ReferenceSources
@@ -89,9 +89,9 @@ contract SparseSourceArchiveBoundary {
     }
 }
 
-/// @notice Real Inventory/Router/checkpoint/leaf manifest/Snapshot with retained IDs/serials 2,5.
+/// @notice Real PreservationInventory/Router/checkpoint/leaf manifest/Snapshot with retained IDs/serials 2,5.
 /// @dev The Core boundary has two completed mints and allocation frontier 5. The gaps model
-/// incident-aborted identities; the Core incident itself is covered by Core/Inventory tests.
+/// incident-aborted identities; the Core incident itself is covered by Core/PreservationInventory tests.
 contract StreamSparsePreservationSourceReadsTest is ReferenceSourceExportFixture {
     S.Dependencies private nativeDependencies;
     S.Context private nativeContext;
@@ -115,7 +115,7 @@ contract StreamSparsePreservationSourceReadsTest is ReferenceSourceExportFixture
     function tokenRead(uint64 index, IStreamOnchainContentCheckpoint.TokenPayload memory payload)
         external
         view
-        returns (Inventory.Item[] memory)
+        returns (PreservationInventory.Item[] memory)
     {
         return TokenSources.tokenItems(nativeDependencies, nativeContext, index, payload);
     }
@@ -133,8 +133,8 @@ contract StreamSparsePreservationSourceReadsTest is ReferenceSourceExportFixture
         require(inventory.collectionTokenBySerial(1, 1) == 0);
         require(inventory.collectionTokenBySerial(1, 3) == 0);
         require(core.collectionMintedEver(1) == 2 && core.lastAllocatedTokenId() == 5);
-        Inventory.Item[] memory firstRows = this.tokenRead(0, _payload(2));
-        Inventory.Item[] memory lastRows = this.tokenRead(1, _payload(5));
+        PreservationInventory.Item[] memory firstRows = this.tokenRead(0, _payload(2));
+        PreservationInventory.Item[] memory lastRows = this.tokenRead(1, _payload(5));
         require(firstRows.length == 4 && lastRows.length == 4, "both actual completed members");
         require(firstRows[0].sourceIndex == 2 && lastRows[0].sourceIndex == 5);
         core.setToken(5, address(0), 3);

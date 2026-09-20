@@ -15,7 +15,7 @@ import {
     StreamRenderCriticalSourceTypes as S
 } from "../../../smart-contracts/interfaces/stream/preservation/StreamRenderCriticalSourceTypes.sol";
 import {
-    StreamPreservationInventoryTypes as Inventory
+    StreamPreservationInventoryTypes as PreservationInventory
 } from "../../../smart-contracts/interfaces/stream/preservation/StreamPreservationInventoryTypes.sol";
 
 /// @dev These unused families are explicit boundaries; this cohort tests native bytes only.
@@ -39,7 +39,7 @@ contract StreamRenderCriticalNativeTest is ReferenceSourceExportTest {
     function nativeRead(S.Dependencies memory d, S.Context memory c)
         external
         view
-        returns (Inventory.Item[] memory)
+        returns (PreservationInventory.Item[] memory)
     {
         return NativeSources.nativeItems(d, c);
     }
@@ -49,7 +49,7 @@ contract StreamRenderCriticalNativeTest is ReferenceSourceExportTest {
         S.Context memory c,
         uint64 index,
         IStreamOnchainContentCheckpoint.TokenPayload memory p
-    ) external view returns (Inventory.Item[] memory) {
+    ) external view returns (PreservationInventory.Item[] memory) {
         return TokenSources.tokenItems(d, c, index, p);
     }
 
@@ -101,7 +101,7 @@ contract StreamRenderCriticalNativeTest is ReferenceSourceExportTest {
     }
 
     function testActualNativeInventoryKeepsFullBytesAndEveryOriginalCoordinator() public view {
-        Inventory.Item[] memory rows = NativeSources.nativeItems(nativeDependencies, nativeContext);
+        PreservationInventory.Item[] memory rows = NativeSources.nativeItems(nativeDependencies, nativeContext);
         require(rows.length == 18, "fourteen native roles plus both original policies and runtimes");
         StreamSnapshotTypes.NativeFacts memory n =
             StreamSnapshotSourceReads.requireCurrent(_dependencies(), 1);
@@ -123,7 +123,7 @@ contract StreamRenderCriticalNativeTest is ReferenceSourceExportTest {
             "full actual snapshot bytes"
         );
         require(
-            rows[13].kind == Inventory.Kind.ONCHAIN_OBJECT
+            rows[13].kind == PreservationInventory.Kind.ONCHAIN_OBJECT
                 && rows[13].objectHash == n.leafManifest.artifactHash
                 && rows[13].originalCoverageHash == n.leafManifest.coverageHash,
             "leaf list is its own archival object"
@@ -141,10 +141,10 @@ contract StreamRenderCriticalNativeTest is ReferenceSourceExportTest {
 
     function testActualTokenRowsRetainBurnedEndpointAndRejectSubstitution() public {
         IStreamOnchainContentCheckpoint.TokenPayload memory p = _tokenPayload(2);
-        Inventory.Item[] memory before_ =
+        PreservationInventory.Item[] memory before_ =
             TokenSources.tokenItems(nativeDependencies, nativeContext, 1, p);
         require(
-            before_.length == 4 && before_[2].kind == Inventory.Kind.ABSENT,
+            before_.length == 4 && before_[2].kind == PreservationInventory.Kind.ABSENT,
             "actual declared no-image branch"
         );
         require(
@@ -152,7 +152,7 @@ contract StreamRenderCriticalNativeTest is ReferenceSourceExportTest {
             "full data and HTML"
         );
         core.setToken(2, address(0), 3);
-        Inventory.Item[] memory burned =
+        PreservationInventory.Item[] memory burned =
             TokenSources.tokenItems(nativeDependencies, nativeContext, 1, p);
         require(
             keccak256(abi.encode(burned)) == keccak256(abi.encode(before_)),
@@ -175,7 +175,7 @@ contract StreamRenderCriticalNativeTest is ReferenceSourceExportTest {
     }
 
     function testCurrentNativePlansAndRuntimePinsFailClosedWithoutChangingOriginals() public {
-        Inventory.Item[] memory saved = NativeSources.nativeItems(nativeDependencies, nativeContext);
+        PreservationInventory.Item[] memory saved = NativeSources.nativeItems(nativeDependencies, nativeContext);
         S.Context memory changed = nativeContext;
         changed.nativeHash = bytes32(uint256(1));
         (bool ok,) =

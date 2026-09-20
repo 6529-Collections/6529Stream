@@ -29,7 +29,7 @@ import {
     StreamRenderCriticalSourceTypes as Critical
 } from "../../../smart-contracts/interfaces/stream/preservation/StreamRenderCriticalSourceTypes.sol";
 import {
-    StreamPreservationInventoryTypes as Inventory
+    StreamPreservationInventoryTypes as PreservationInventory
 } from "../../../smart-contracts/interfaces/stream/preservation/StreamPreservationInventoryTypes.sol";
 import {
     IStreamReferenceModePublication as ModeHost
@@ -63,7 +63,7 @@ contract CuratedModeSourceProbe {
     function inventory(Critical.Dependencies memory d, Critical.Context memory c)
         external
         view
-        returns (Inventory.Item[] memory rows)
+        returns (PreservationInventory.Item[] memory rows)
     {
         (, rows) = StreamReferenceModeInventory.stage(d, c, 1);
     }
@@ -298,13 +298,13 @@ contract StreamReferenceModeCuratedTest is ConservationSelectionFixture {
         c.conservation.selectionHash = selected;
         c.conservation.record.recordHash = witness.intentRecordHash;
         probe.observe(abi.encode(evidence, mode), bindings);
-        Inventory.Item[] memory rows = probe.inventory(d, c);
+        PreservationInventory.Item[] memory rows = probe.inventory(d, c);
         require(rows.length == 15);
         for (uint256 i; i < 2; ++i) {
-            Inventory.Item memory row = rows[12 + i];
+            PreservationInventory.Item memory row = rows[12 + i];
             StreamConservationRecordTypes.Reference memory ref =
                 i == 0 ? witness.condition.institution : witness.condition.credentials;
-            require(row.kind == Inventory.Kind.EXTERNAL_REFERENCE);
+            require(row.kind == PreservationInventory.Kind.EXTERNAL_REFERENCE);
             require(
                 row.source == address(independent)
                     && row.sourceRecord == witness.conditionRecordHash
@@ -325,21 +325,21 @@ contract StreamReferenceModeCuratedTest is ConservationSelectionFixture {
             require(row.byteSize == 0 && row.originalCoverageHash == 0);
         }
         bytes32 key = keccak256("REFERENCE");
-        Inventory.Segment memory complete =
+        PreservationInventory.Segment memory complete =
             StreamPreservationInventoryChains.segment(key, mode.evidenceHash, rows);
-        Inventory.Item[] memory omitted = new Inventory.Item[](13);
+        PreservationInventory.Item[] memory omitted = new PreservationInventory.Item[](13);
         for (uint256 i; i < 12; ++i) {
             omitted[i] = rows[i];
         }
         omitted[12] = rows[14];
-        Inventory.Segment memory missing =
+        PreservationInventory.Segment memory missing =
             StreamPreservationInventoryChains.segment(key, mode.evidenceHash, omitted);
         require(
             complete.itemCount == 15 && missing.itemCount == 13
                 && complete.firstLink != missing.firstLink
         );
         rows[13].digest = abi.encode(keccak256("substituted credential"));
-        Inventory.Segment memory substituted =
+        PreservationInventory.Segment memory substituted =
             StreamPreservationInventoryChains.segment(key, mode.evidenceHash, rows);
         require(
             substituted.itemCount == complete.itemCount
