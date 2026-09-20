@@ -129,6 +129,26 @@ canonical registry's existing available-gas, exact-32-byte read convention.
 They require ERC-165 and the served interface, and reject `0xffffffff` support;
 DEPRECATED admission cannot use the registry's ACTIVE-only eligibility shortcut.
 
+### Retained Artist sale consent
+
+An existing matched Artist sale-consent record may remain applicable while its
+original adapter is ACTIVE or DEPRECATED. The consent writer records the block
+timestamp in `Record.signedAt`; a supplied signing time cannot establish earlier
+consent. For a DEPRECATED adapter, that stored timestamp must strictly precede
+the registry's `statusUpdatedAt`. Equal timestamps and INCIDENT_REVOKED or
+unknown adapters fail closed. Current authority and binding checks, exact sale
+configuration, live registered role/version/interface/runtime, and the existing
+bounded read budget remain in force. The canonical record read copies only its
+fixed header and validates its URI-tail shape without allocating that tail.
+
+New `record()` and `saleFacts()` admission remains ACTIVE-only. Retained consent
+does not replace the sale, Recorder or Payment's independent original creation
+and revision checks, or relax delegation-manifest admission. The six cases in
+`StreamCurrentSettlementContinuity.t.sol` join these rules to actual current
+Artist, governed registry transitions, original threshold Safes, prepared native
+and ERC20 settlement, and conservation receipts. Source/ABI validation is
+available; native execution, gas and deployment capacity remain pending.
+
 ## Funding phase and rollback
 
 Contract 20 locks before its first external read or signature verification:

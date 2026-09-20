@@ -244,6 +244,15 @@ the release policy in `docs/release-policy.md`.
   guide; missing policy does not grant a reveal exemption. Combined current
   execution and transaction-capacity acceptance remain separate.
 
+## Retained Artist sale consent through module retirement
+
+- Preserve eligible existing Artist sale consent when its original adapter is
+  DEPRECATED, while new consent remains ACTIVE-only. Require the actual stored
+  consent timestamp to precede deprecation and recheck live module identity.
+- Add six actual-current Safe settlement continuity cases, including incident
+  rollback, original Payment binding and the equal-timestamp rejection. ABI and
+  storage compatibility checks pass; native execution and capacity remain pending.
+
 ## ERC20 executor-funded native reveal allowance
 
 - Keep token prices, payer intents and permits in token units while the bound

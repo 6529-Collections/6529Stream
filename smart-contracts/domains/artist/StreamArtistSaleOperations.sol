@@ -26,7 +26,7 @@ library StreamArtistSaleOperations {
         T.Binding memory b = _binding(x.suite, p.collectionId, true);
         R.AuthorityFact memory authority =
             StreamArtistCurrentAuthorityFacts.read(x.suite.owners[2], b.artistId, false);
-        bytes memory facts = _adapter(x.suite, p);
+        bytes memory facts = _adapter(x.suite, p, 0);
         bytes32 digest = StreamArtistSaleHashes.digest(_environment(x.suite), p, a);
         bool direct = actor == authority.authorityAddress && a.signature.length == 0;
         if (actor == address(0)) revert T.InvalidSignature();
@@ -90,7 +90,7 @@ library StreamArtistSaleOperations {
         view
         returns (bytes memory)
     {
-        return _adapter(suite, p);
+        return _adapter(suite, p, 0);
     }
 
     function scope(T.SuiteConfiguration memory suite, uint256 collectionId)
@@ -128,7 +128,8 @@ library StreamArtistSaleOperations {
         Sale.Record memory item =
             owner.saleConsentRecord(owner.saleConsentAt(collectionId, saleId, config));
         if (
-            item.recordHash == bytes32(0) || item.artistId != b.artistId
+            item.recordHash == bytes32(0) || item.artistId != b.artistId || item.signedAt == 0
+                || item.signedAt > block.timestamp
                 || (item.authorityClass != 1
                     && item.authorityClass != 3
                     && !(item.authorityClass == 2
@@ -140,7 +141,9 @@ library StreamArtistSaleOperations {
         ) {
             revert Sale.SaleConsentUnavailable(collectionId, saleId, config);
         }
-        _adapter(suite, p);
+        // The stored timestamp is the consent writer's observed block time, not a supplied
+        // signing time. New consent still uses ACTIVE-only admission through the zero mode.
+        _adapter(suite, p, item.signedAt);
     }
 
     /// @notice Exact independent attribution and authority states, never inferred from missing acceptance.
@@ -214,7 +217,7 @@ library StreamArtistSaleOperations {
         }
     }
 
-    function _adapter(T.SuiteConfiguration memory suite, Sale.Consent memory p)
+    function _adapter(T.SuiteConfiguration memory suite, Sale.Consent memory p, uint64 consentAt)
         private
         view
         returns (bytes memory evidence)
@@ -242,17 +245,20 @@ library StreamArtistSaleOperations {
         );
         if (
             kind == bytes32(0) || interfaceId == bytes4(0) || interfaceId == bytes4(0xffffffff)
-                || !abi.decode(
-                    _read(
-                        registry,
-                        abi.encodeCall(
-                            IStreamModuleRegistry.isModuleEligible, (adapter, kind, interfaceId)
-                        ),
-                        32,
-                        cap
-                    ),
-                    (bool)
-                )
+                || !(consentAt == 0
+                        ? abi.decode(
+                            _read(
+                                registry,
+                                abi.encodeCall(
+                                    IStreamModuleRegistry.isModuleEligible,
+                                    (adapter, kind, interfaceId)
+                                ),
+                                32,
+                                cap
+                            ),
+                            (bool)
+                        )
+                        : _retainedAdapter(registry, adapter, kind, interfaceId, consentAt, cap))
                 || !abi.decode(
                     _read(
                         adapter,
@@ -283,6 +289,65 @@ library StreamArtistSaleOperations {
         }
         return abi.encode(
             registry, registry.codehash, adapter.codehash, kind, interfaceId, collectionId, config
+        );
+    }
+
+    /// @dev Consent is only one retained prerequisite. The sale and payment boundaries still
+    /// validate their original immutable creation timestamps and registry revisions separately.
+    function _retainedAdapter(
+        address registry,
+        address adapter,
+        bytes32 kind,
+        bytes4 interfaceId,
+        uint64 consentAt,
+        uint256 cap
+    ) private view returns (bool) {
+        if (adapter.code.length == 23) {
+            bytes3 prefix;
+            assembly ("memory-safe") {
+                extcodecopy(adapter, 0, 0, 3)
+                prefix := mload(0)
+            }
+            if (prefix == 0xef0100) return false;
+        }
+        bytes memory input = abi.encodeCall(IStreamModuleRegistry.moduleRecord, (adapter));
+        uint256[14] memory w;
+        bool ok;
+        uint256 size;
+        _parentGas(cap);
+        assembly ("memory-safe") {
+            ok := staticcall(cap, registry, add(input, 32), mload(input), w, 448)
+            size := returndatasize()
+        }
+        // Canonical single dynamic tuple: twelve-word head and a URI of at most 2048 bytes.
+        // Copy only the fixed header; never allocate or bubble the registry's URI/revert tail.
+        if (
+            !ok || size < 448 || w[0] != 32 || w[9] != 384 || w[13] > 2048
+                || size - 448 != ((w[13] + 31) / 32) * 32 || (w[1] != 1 && w[1] != 2)
+                || bytes32(w[2]) != kind || w[3] == 0 || w[4] != uint256(uint32(interfaceId)) << 224
+                || w[5] > type(uint32).max || bytes32(w[6]) != adapter.codehash || w[7] == 0
+                || w[8] == 0 || w[10] == 0 || w[10] > type(uint64).max || w[10] > consentAt
+                || w[11] < w[10] || w[11] > block.timestamp || w[11] > type(uint64).max
+                || w[12] == 0 || w[12] > type(uint64).max
+                || (w[1] == 2 && (consentAt >= w[11] || w[12] < 2))
+        ) return false;
+        return bytes32(w[3])
+                == abi.decode(
+                _read(adapter, abi.encodeCall(IStreamModule.streamModuleVersion, ()), 32, cap),
+                (bytes32)
+            ) && _retainedInterface(adapter, type(IERC165).interfaceId, cap) == 1
+            && _retainedInterface(adapter, bytes4(0xffffffff), cap) == 0
+            && _retainedInterface(adapter, interfaceId, cap) == 1;
+    }
+
+    function _retainedInterface(address adapter, bytes4 interfaceId, uint256 cap)
+        private
+        view
+        returns (uint256)
+    {
+        return abi.decode(
+            _read(adapter, abi.encodeCall(IERC165.supportsInterface, (interfaceId)), 32, cap),
+            (uint256)
         );
     }
 
@@ -321,13 +386,7 @@ library StreamArtistSaleOperations {
         view
         returns (bytes memory result)
     {
-        uint256 available = gasleft();
-        // Includes a cold account access, fixed buffer and instructions before STATICCALL.
-        if (cap > (type(uint256).max - 10_000) / 64 * 63) {
-            revert Sale.SaleFactsParentGas(available, cap);
-        }
-        uint256 required = cap + cap / 63 + 10_000;
-        if (available < required) revert Sale.SaleFactsParentGas(available, required);
+        _parentGas(cap);
         result = new bytes(length);
         bool ok;
         uint256 size;
@@ -343,6 +402,16 @@ library StreamArtistSaleOperations {
             size := returndatasize()
         }
         if (!ok || size != length) revert Sale.SaleFactsReadFailed(target, bytes4(callData));
+    }
+
+    function _parentGas(uint256 cap) private view {
+        uint256 available = gasleft();
+        // Includes a cold account access, fixed buffer and instructions before STATICCALL.
+        if (cap > (type(uint256).max - 10_000) / 64 * 63) {
+            revert Sale.SaleFactsParentGas(available, cap);
+        }
+        uint256 required = cap + cap / 63 + 10_000;
+        if (available < required) revert Sale.SaleFactsParentGas(available, required);
     }
 
     function _chain(T.SuiteConfiguration memory suite) private view {
