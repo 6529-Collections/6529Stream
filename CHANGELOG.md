@@ -45,6 +45,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Require complete source-bound entropy policy import evidence at Core replacement,
+  alongside original pending-request coverage. Add canonical bounded inventory/readiness
+  checks and fault/fuzz regressions; full successor activation remains separate.
+
 - Connect explicit INSTANT and terminal entropy modes to immediate, Dutch,
   clearing and deferred sale completion, preserving original ASYNC fees,
   credits, request events and public sale signatures.

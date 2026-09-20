@@ -3,6 +3,9 @@ pragma solidity ^0.8.19;
 import {
     IStreamEntropyCoordinatorContinuity
 } from "../interfaces/stream/entropy/IStreamEntropyCoordinatorContinuity.sol";
+import {
+    IStreamEntropyPolicyContinuity
+} from "../interfaces/stream/entropy/IStreamEntropyPolicyContinuity.sol";
 import "../interfaces/stream/artist/IStreamArtistHistory.sol";
 
 import "../vendor/openzeppelin/IERC165.sol";
@@ -258,6 +261,7 @@ library StreamCoreExternalReads {
         bytes32 oldCodeHash,
         address successor,
         bytes32 nextCodeHash,
+        uint64 pointerRevision,
         uint256 cap,
         uint256 completionBuffer
     ) public view returns (bool) {
@@ -277,7 +281,49 @@ library StreamCoreExternalReads {
             cap,
             completionBuffer
         );
-        return ok && word == 0;
+        if (!ok || word != 0) return false;
+        uint256 count;
+        uint64 serial;
+        bytes32 idDigest;
+        (ok, count, serial, idDigest) = _entropyInventory(previous, cap, completionBuffer);
+        if (!ok) return false;
+        (ok, word) = _entropyWord(
+            successor,
+            abi.encodeCall(
+                IStreamEntropyPolicyContinuity.entropyPolicyImportReady,
+                (previous, oldCodeHash, pointerRevision, count, serial, idDigest)
+            ),
+            cap,
+            completionBuffer
+        );
+        // Exact true only. Missing/legacy-only exports cannot imply an empty inventory.
+        return ok && word == 1;
+    }
+
+    function _entropyInventory(address target, uint256 cap, uint256 buffer)
+        private
+        view
+        returns (bool ok, uint256 count, uint64 serial, bytes32 idDigest)
+    {
+        if (!StreamCoreReadBuffer.hasSufficientParentGas(gasleft(), cap, buffer)) {
+            return (false, 0, 0, bytes32(0));
+        }
+        bytes memory data =
+            abi.encodeCall(IStreamEntropyPolicyContinuity.entropyPolicyInventory, ());
+        bytes memory result = new bytes(96);
+        uint256 size;
+        uint256 serialWord;
+        assembly ("memory-safe") {
+            ok := staticcall(cap, target, add(data, 32), mload(data), add(result, 32), 96)
+            size := returndatasize()
+            count := mload(add(result, 32))
+            serialWord := mload(add(result, 64))
+            idDigest := mload(add(result, 96))
+        }
+        if (!ok || size != 96 || serialWord > type(uint64).max) {
+            return (false, 0, 0, bytes32(0));
+        }
+        return (true, count, uint64(serialWord), idDigest);
     }
 
     function _entropyWord(address target, bytes memory data, uint256 cap, uint256 buffer)

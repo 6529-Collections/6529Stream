@@ -146,3 +146,7 @@ composition, authenticated cancellation activity and unchanged original domains.
 
 defines additive operation 61 for the existing signed action 2, immutable opener
 standing, original authority/replay guards and atomic withdrawal history.
+
+[ADR 0052: Entropy policy succession](0052-entropy-policy-succession.md)
+defines complete legacy/explicit imports, the bounded Core cutover gate, atomic
+activation and authenticated ultimate-origin provider relay.

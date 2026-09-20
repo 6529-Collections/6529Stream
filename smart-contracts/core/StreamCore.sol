@@ -706,6 +706,7 @@ contract StreamCore is ERC721, IStreamCore {
                     previous.codeHash,
                     newTarget,
                     plan.candidate.codeHash,
+                    previous.revision,
                     _gasParameters[_GGP_ENTROPY_REGISTRATION_GAS_LIMIT].value,
                     _ENTROPY_PARENT_GAS_RESERVE + _ENTROPY_CALL_UPFRONT_GAS
                 )
