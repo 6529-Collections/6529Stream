@@ -42,6 +42,17 @@ the release policy in `docs/release-policy.md`.
   grants, economics, sale and content histories. Add ten focused authored
   regression cases; combined runtime and full-current acceptance remain pending.
 
+## Canonical signed and public native Dutch sales
+
+- Add the kind-3 standard Dutch carrier using the original Sales authorization,
+  immutable linear/stepped schedules, explicit free tiers and singleton mints.
+- Apply proven Merkle ceilings without rewriting signed payloads. Capture the
+  reveal fee once, charge the execution-time price and credit all native excess
+  to the payer. Stops extend closing windows while the price keeps decaying.
+- Author focused real Core/Manager/Recorder/Floor regressions. Scoped native
+  execution, actual-current composition, full capacity and release evidence
+  remain pending.
+
 ## Current burn-redemption acceptance recipes
 
 - Add actual current Core, Manager, Artist, registry and delayed-governance

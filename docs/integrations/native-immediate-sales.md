@@ -28,6 +28,10 @@ Prepared per-token royalty snapshots, arbitrary gate composition, batches,
 ALLOW_CURRENT primary economics, zero-price/PWYW and ERC20 payment are outside
 this adapter's first profile.
 
+The separate [canonical native Dutch carrier](canonical-native-dutch-sales.md)
+uses the same authorization domain and setup with immutable schedules,
+maximum-price funding and optional declared free tiers.
+
 ## Configure, register, obtain consent
 
 1. Deploy against the intended current Manager, recorder, Artist registry and
