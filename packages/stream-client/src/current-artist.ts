@@ -136,7 +136,7 @@ const operations = new Interface([
 
 /**
  * Prepare an unsigned transaction and the exact read-only digest call before wallet submission.
- * Empty signature explicitly selects direct-authority execution; a Safe must itself send that CALL.
+ * Empty proof selects direct execution only when the actual caller is the authority; this pure helper does not know the caller.
  * Nonempty signatures remain opaque ERC-1271/EOA bytes. No nonce reservation or transaction is performed.
  */
 export function prepareCurrentArtistOperation<K extends CurrentArtistSigningKind>(

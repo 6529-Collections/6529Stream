@@ -169,9 +169,9 @@ represented as decimal strings. The kinds are the keys of
 
 `prepareCurrentArtistOperation` returns the signing payload, transaction
 calldata and matching digest-getter calldata together. Its submission details
-include an explicit signature: `"0x"` selects direct execution by the actual
-authorized account, including a Safe; a nonempty value contains the EOA or
-ERC-1271 authorization bytes for a relayed call.
+include explicit signature bytes. Direct execution requires `"0x"` and the actual
+authorized account as caller, including a Safe. Relayed EOA or ERC-1271 proofs
+are opaque; a contract wallet may admit an empty proof from a distinct caller.
 
 ```js
 import {
@@ -317,8 +317,9 @@ const metadataTransaction = toSafeCall(manifest.call);
 The Artist approves the Router's previewed content-family state, not the raw
 script hash or the manifest record hash. `prepareManifestContentConsent` keeps
 the original operation-17 signing domain and includes Core, Router, collection,
-family, state, nonce and deadline. Empty signature selects direct Artist
-execution; relayers supply the Artist's EOA or ERC-1271 signature bytes. Use
+family, state, nonce and deadline. Empty signature with the actual Artist as
+caller selects direct execution. Relayers supply the Artist's EOA or ERC-1271
+proof, which may be empty when the contract wallet admits it. Use
 `assertCurrentArtistDigest` before signing and simulate each call from its actual
 sender. A successful encoding or digest comparison does not reserve a nonce,
 prove authority, or permit bypassing content locks. Both prepared transactions
@@ -336,6 +337,9 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Current Artist operation callers](docs/current-artist-operation.md) add five
+  original principal calls with pinned authority, replay, simulation and receipt review;
+  the [coverage register](docs/current-artist-operation-coverage.json) tracks all 61 operations and variants.
 - [Complete reference environment preparation](docs/current-reference-environment.md)
   retains original typed identities and canonical bytes after both full file inventories.
 - [Current split profiles and clone wallets](docs/current-split-factory.md) bind

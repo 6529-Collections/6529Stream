@@ -288,7 +288,12 @@ export function prepareCurrentArtistCeremonySubmission<K extends CurrentArtistSi
 ): PreparedCurrentArtistOperation<CurrentArtistSigningMessages[K]> {
   recomputeCurrentArtistCeremony(ceremony);
   if (typeof signature !== "string" || !isHexString(signature, true)) throw new Error("signature must contain complete hex bytes");
-  if ((ceremony.executionMode === "direct") !== (signature === "0x")) throw new Error("Signature bytes differ from the reviewed execution mode");
+  if (ceremony.executionMode === "direct" && signature !== "0x") throw new Error("Signature bytes differ from the reviewed execution mode");
+  // This packet declares a mode without an actual caller. Empty ERC-1271 proofs
+  // are relayed only when the actual caller differs from the resolved authority.
+  if (ceremony.executionMode === "relayed" && signature === "0x" && ceremony.walletClass !== "safe-erc1271") {
+    throw new Error("Empty relayed proof requires the reviewed ERC-1271 wallet class");
+  }
   return prepareCurrentArtistOperation(ceremony.kind, BigInt(ceremony.payload.domain.chainId ?? 0),
     ceremony.payload.domain.verifyingContract as Address, ceremony.payload.message,
     { ...ceremony.details, signature } as unknown as CurrentArtistSubmissions[K]);

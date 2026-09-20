@@ -1,0 +1,573 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "18be311bc33e8007841f963f218ac8290e271015",
+  "clientAuditCommit": "0601aba31b343d51421a421a07303831bf4885ad",
+  "scope": "Original operations 1-60 plus existing operation 61. Method variants are separate caller requirements; operation membership is not a claim of implemented workflow coverage. New unpublished C2PA and delegated policy/sale methods are deferred until source handoff.",
+  "signingHost": "StreamArtistOnboardingRegistry",
+  "signingDomain": {
+    "name": "6529StreamArtistRegistry",
+    "version": "1",
+    "verifyingContract": "actual facade address",
+    "chainId": "actual deployment chain"
+  },
+  "statusMeaning": {
+    "partial-existing": "Some payload/call/read helpers exist; does not prove complete variants, authority, simulation or receipts.",
+    "pending": "No complete client workflow in this audit.",
+    "principal-implemented": "The named principal method has source/ABI, client and mocked workflow coverage; other listed variants remain pending. No deployed runtime acceptance."
+  },
+  "operations": [
+    {
+      "id": 1,
+      "operation": "proposeArtistBinding",
+      "methods": [
+        "proposeArtistBinding"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 2,
+      "operation": "acceptArtistBinding",
+      "methods": [
+        "acceptArtistBinding",
+        "acceptArtistBindingExpected"
+      ],
+      "coverage": "partial-existing",
+      "existingModules": "current-artist; current-artist-ceremony"
+    },
+    {
+      "id": 3,
+      "operation": "refuseArtistBinding",
+      "methods": [
+        "refuseArtistBinding"
+      ],
+      "coverage": "principal-implemented",
+      "implementedPrincipalMethod": "refuseArtistBinding",
+      "pendingMethods": []
+    },
+    {
+      "id": 4,
+      "operation": "withdrawArtistBinding",
+      "methods": [
+        "withdrawArtistBinding"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 5,
+      "operation": "proposeCollaboratorIdentity",
+      "methods": [
+        "proposeCollaboratorIdentity"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 6,
+      "operation": "acceptCollaboratorIdentity",
+      "methods": [
+        "acceptCollaboratorIdentity"
+      ],
+      "coverage": "partial-existing",
+      "existingModules": "current-artist; current-artist-ceremony"
+    },
+    {
+      "id": 7,
+      "operation": "acceptCollaborator",
+      "methods": [
+        "acceptCollaborator"
+      ],
+      "coverage": "partial-existing",
+      "existingModules": "current-artist; current-artist-ceremony"
+    },
+    {
+      "id": 8,
+      "operation": "declarePlatformWorks",
+      "methods": [
+        "declarePlatformWorks"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 9,
+      "operation": "filePlatformWorksClaim",
+      "methods": [
+        "filePlatformWorksClaim"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 10,
+      "operation": "fileAttributionClaim",
+      "methods": [
+        "fileAttributionClaim"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 11,
+      "operation": "setPlatformWorksContest",
+      "methods": [
+        "setPlatformWorksContest"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 12,
+      "operation": "recordArtistSanction",
+      "methods": [
+        "recordArtistSanction",
+        "prepareArtistSanction"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 13,
+      "operation": "confirmSanctionFinalized",
+      "methods": [
+        "confirmSanctionFinalized"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 14,
+      "operation": "recordPolicyConsent",
+      "methods": [
+        "recordPolicyConsent"
+      ],
+      "coverage": "partial-existing",
+      "existingModules": "current-artist; current-artist-ceremony"
+    },
+    {
+      "id": 15,
+      "operation": "recordEconomicsConsent",
+      "methods": [
+        "recordEconomicsConsent",
+        "recordProspectiveEconomicsConsent",
+        "recordProspectiveTemplateEconomicsConsent",
+        "recordProspectiveTemplateFreezeConsent",
+        "recordDelegatedEconomicsConsent",
+        "recordDelegatedProspectiveEconomicsConsent"
+      ],
+      "coverage": "partial-existing",
+      "existingModules": "current-artist; current-artist-ceremony; current-revenue"
+    },
+    {
+      "id": 16,
+      "operation": "recordSaleConsent",
+      "methods": [
+        "recordSaleConsent"
+      ],
+      "coverage": "principal-implemented",
+      "implementedPrincipalMethod": "recordSaleConsent",
+      "pendingMethods": []
+    },
+    {
+      "id": 17,
+      "operation": "recordContentConsent",
+      "methods": [
+        "recordContentConsent"
+      ],
+      "coverage": "partial-existing",
+      "existingModules": "current-manifests"
+    },
+    {
+      "id": 18,
+      "operation": "recordPayoutDesignation",
+      "methods": [
+        "recordPayoutDesignation"
+      ],
+      "coverage": "partial-existing",
+      "existingModules": "current-artist; current-artist-ceremony"
+    },
+    {
+      "id": 19,
+      "operation": "recordStewardSanctionGrant",
+      "methods": [
+        "recordStewardSanctionGrant"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 20,
+      "operation": "authorizeArtistRoyaltyFreeze",
+      "methods": [
+        "authorizeArtistRoyaltyFreeze",
+        "authorizeDelegatedRoyaltyFreeze"
+      ],
+      "coverage": "principal-implemented",
+      "implementedPrincipalMethod": "authorizeArtistRoyaltyFreeze",
+      "pendingMethods": [
+        "authorizeDelegatedRoyaltyFreeze"
+      ]
+    },
+    {
+      "id": 21,
+      "operation": "authorizeArtistContentFreeze",
+      "methods": [
+        "authorizeArtistContentFreeze"
+      ],
+      "coverage": "principal-implemented",
+      "implementedPrincipalMethod": "authorizeArtistContentFreeze",
+      "pendingMethods": []
+    },
+    {
+      "id": 22,
+      "operation": "recordRecoveryApproval",
+      "methods": [
+        "recordRecoveryApproval"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 23,
+      "operation": "recordUnavailabilityFinding",
+      "methods": [
+        "recordUnavailabilityFinding",
+        "recordEntropyUnavailabilityFinding"
+      ],
+      "coverage": "partial-existing",
+      "existingModules": "current-entropy-authority (entropy-specific finding)"
+    },
+    {
+      "id": 24,
+      "operation": "recordArtistAttestation",
+      "methods": [
+        "recordArtistAttestation",
+        "recordArtistScopedAttestation",
+        "recordDelegatedArtistAttestation",
+        "recordDelegatedArtistScopedAttestation"
+      ],
+      "coverage": "partial-existing",
+      "existingModules": "current-artist; current-artist-ceremony"
+    },
+    {
+      "id": 25,
+      "operation": "recordIdentityRevision",
+      "methods": [
+        "recordIdentityRevision"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 26,
+      "operation": "grantArtistDelegation",
+      "methods": [
+        "grantArtistDelegation"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 27,
+      "operation": "revokeArtistDelegation",
+      "methods": [
+        "revokeArtistDelegation"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 28,
+      "operation": "setArtistGuardians",
+      "methods": [
+        "setArtistGuardians"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 29,
+      "operation": "rotateArtistAddress",
+      "methods": [
+        "rotateArtistAddress"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 30,
+      "operation": "approveArtistRotation",
+      "methods": [
+        "approveArtistRotation"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 31,
+      "operation": "vetoArtistRotation",
+      "methods": [
+        "vetoArtistRotation"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 32,
+      "operation": "executeArtistRotation",
+      "methods": [
+        "executeArtistRotation"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 33,
+      "operation": "contestArtistIdentity",
+      "methods": [
+        "contestArtistIdentity"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 34,
+      "operation": "vetoIdentityRecovery",
+      "methods": [
+        "vetoIdentityRecovery"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 35,
+      "operation": "recoverArtistIdentity",
+      "methods": [
+        "recoverArtistIdentity",
+        "registerIdentityRecoveryAction"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 36,
+      "operation": "designateSuccessor",
+      "methods": [
+        "recordSuccessorDesignation"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 37,
+      "operation": "recordEstateDirective",
+      "methods": [
+        "recordEstateDirective"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 38,
+      "operation": "requestEstateActivation",
+      "methods": [
+        "requestEstateActivation"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 39,
+      "operation": "cancelEstateActivation",
+      "methods": [
+        "cancelEstateActivation"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 40,
+      "operation": "executeEstateActivation",
+      "methods": [
+        "executeEstateActivation"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 41,
+      "operation": "initiateArtistDormancy",
+      "methods": [
+        "initiateArtistDormancy"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 42,
+      "operation": "cancelArtistDormancy",
+      "methods": [
+        "cancelArtistDormancy"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 43,
+      "operation": "completeArtistDormancy",
+      "methods": [
+        "completeArtistDormancy"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 44,
+      "operation": "openAttributionDispute",
+      "methods": [
+        "openAttributionDispute"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 45,
+      "operation": "recordCounterStatement",
+      "methods": [
+        "recordCounterStatement"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 46,
+      "operation": "resolveAttributionDispute",
+      "methods": [
+        "resolveAttributionDispute"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 47,
+      "operation": "revokeAttribution",
+      "methods": [
+        "revokeAttribution"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 48,
+      "operation": "vetoAttributionRepudiation",
+      "methods": [
+        "vetoAttributionRepudiation"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 49,
+      "operation": "cancelAttributionRepudiation",
+      "methods": [
+        "cancelAttributionRepudiation"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 50,
+      "operation": "executeAttributionRepudiation",
+      "methods": [
+        "executeAttributionRepudiation"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 51,
+      "operation": "revokePriorAddressStanding",
+      "methods": [
+        "revokePriorAddressStanding"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 52,
+      "operation": "recordContentRatification",
+      "methods": [
+        "recordContentRatification"
+      ],
+      "coverage": "partial-existing",
+      "existingModules": "current-artist; current-artist-ceremony"
+    },
+    {
+      "id": 53,
+      "operation": "approvePlatformWorksCorrection",
+      "methods": [
+        "approvePlatformWorksCorrection"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 54,
+      "operation": "revokeArtistAuthorization",
+      "methods": [
+        "revokeArtistAuthorization"
+      ],
+      "coverage": "principal-implemented",
+      "implementedPrincipalMethod": "revokeArtistAuthorization",
+      "pendingMethods": []
+    },
+    {
+      "id": 55,
+      "operation": "commitArtistHistoryImportRoot",
+      "methods": [
+        "commitArtistHistoryImportRoot"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 56,
+      "operation": "verifyImportedLaneTip",
+      "methods": [
+        "verifyImportedLaneTip"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 57,
+      "operation": "observeRegistryCutover",
+      "methods": [
+        "observeRegistryCutover"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 58,
+      "operation": "dismissArtistIdentityContest",
+      "methods": [
+        "dismissArtistIdentityContest"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 59,
+      "operation": "grantStewardCapabilities",
+      "methods": [
+        "grantStewardCapabilities"
+      ],
+      "coverage": "pending"
+    },
+    {
+      "id": 60,
+      "operation": "hydrateArtistAuthority",
+      "methods": [
+        "hydrateArtistAuthority",
+        "hydrateArtistAuthorityWithPayout",
+        "hydrateArtistAuthorityWithEconomics",
+        "hydrateArtistAuthorityWithReadiness",
+        "hydrateArtistAuthorityWithPublications",
+        "hydrateArtistAuthorityWithEntropyFindings"
+      ],
+      "coverage": "partial-existing",
+      "existingModules": "current-entropy-authority (entropy-finding hydration only)"
+    },
+    {
+      "id": 61,
+      "operation": "withdrawAttributionDispute",
+      "methods": [
+        "withdrawAttributionDispute"
+      ],
+      "coverage": "pending",
+      "scope": "Additional existing public operation; outside original 1-60 register."
+    }
+  ],
+  "additionalPublicMutations": [
+    {
+      "method": "checkpointStaticIdentityMaturity",
+      "coverage": "pending",
+      "lane": "permissionless maturity checkpoint; no new operation ID"
+    },
+    {
+      "method": "raiseGasParameter",
+      "coverage": "pending",
+      "lane": "governance gas configuration; no new operation ID"
+    },
+    {
+      "method": "setArtistWindow",
+      "coverage": "pending",
+      "lane": "governance window configuration; no new operation ID"
+    }
+  ],
+  "validation": {
+    "scope": "First five principal methods and old ceremony empty ERC-1271 proof correction",
+    "packageTestsPassed": 694,
+    "independentlyObservedFocusedTestsPassed": 51,
+    "contractRuntimeAcceptance": false
+  }
+}

@@ -48,7 +48,10 @@ const reviewed = await reviewCurrentArtistCeremony(provider, {
 ```
 
 The disclosed wallet classes are `eoa` and `safe-erc1271`; both may use direct
-or relayed authorization where the current contract permits it. For policy and
+or relayed authorization where the current contract permits it. A relayed
+ERC-1271 proof may be empty if that wallet admits it. Direct execution requires
+the actual caller to equal the resolved authority and use an empty proof;
+signature length alone does not identify that lane. For policy and
 economics consent, call `assertCurrentArtistConsentCurrent` with a freshly
 recomputed `policyHash` or `assignmentHash` immediately before signing. If it
 changed, discard the packet and present the changed facts as a new ceremony.

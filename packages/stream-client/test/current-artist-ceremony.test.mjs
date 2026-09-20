@@ -124,7 +124,7 @@ test("all eight supported families capture named facts, independently recompute 
     const prepared = prepareCurrentArtistCeremonySubmission(ceremony, "0x1234");
     assert.equal(operations.parseTransaction(prepared.call).name, prepared.method);
     assert.equal(prepared.payload.digest, ceremony.payload.digest);
-    assert.throws(() => prepareCurrentArtistCeremonySubmission(ceremony, "0x"), /execution mode/);
+    assert.throws(() => prepareCurrentArtistCeremonySubmission(ceremony, "0x"), /ERC-1271 wallet class/);
   }
 });
 
@@ -224,6 +224,14 @@ test("policy and economics churn requires a newly presented ceremony", () => {
   assert.doesNotThrow(() => assertCurrentArtistConsentCurrent(economics, economics.payload.message.assignmentHash));
   assert.throws(() => assertCurrentArtistConsentCurrent(economics, id("changed assignment")), /discard the stale ceremony/);
   assert.throws(() => assertCurrentArtistConsentCurrent(capture("artistAcceptance"), id("unused")), /not a policy/);
+});
+
+test("declared ERC-1271 relayed mode permits an empty wallet proof without asserting actual caller authority", () => {
+  const contract = capture("artistPolicyConsent", {walletClass:"safe-erc1271",executionMode:"relayed"});
+  const prepared = prepareCurrentArtistCeremonySubmission(contract,"0x");
+  assert.equal(operations.parseTransaction(prepared.call).args[1].signature,"0x");
+  assert.throws(()=>prepareCurrentArtistCeremonySubmission(capture("artistPolicyConsent"),"0x"),/ERC-1271 wallet class/);
+  assert.throws(()=>prepareCurrentArtistCeremonySubmission(capture("artistPolicyConsent",{executionMode:"direct"}),"0x1234"),/execution mode/);
 });
 
 test("example returns a wallet payload plus read-only observation and preserves reviewed signature attachment", async () => {

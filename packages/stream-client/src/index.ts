@@ -10,6 +10,8 @@ export * from "./current-signing.js";
 export * from "./current-platform.js";
 export * from "./current-artist.js";
 export * from "./current-artist-ceremony.js";
+export * from "./current-artist-operation.js";
+export * from "./current-artist-workflow.js";
 export * from "./current-custody.js";
 export * from "./current-native-sales.js";
 export * from "./current-manifests.js";
