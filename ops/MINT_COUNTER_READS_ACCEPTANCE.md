@@ -74,9 +74,19 @@ passes both the original recipe and literal-deadline control; its different
 test compilation context does not reproduce the original optimizer behavior.
 The decisive evidence is the original failing artifact's generated code.
 
-The corrected full 36-case native retry, full-current/Safe/fuzz/gas acceptance
-and release artifacts are pending. Source/ABI compilation does not establish
-runtime correctness or production readiness.
+The corrected full 36-case native retry on immutable `82f41c88` passes all 36
+cases, exit zero in 305.890 seconds. Capture
+`mint-counter-reads-native-82f41c88-1` retains 194 exact sources, the original
+compiler/test profile, ordinary cache invalidation and separate production
+size checks. Native JSON SHA-256 is
+`bfaebb1c96bec8b4fcef199ebc70f754562b740f062195a66386c7d04813a930`;
+the log is empty. All 15 counter-read, 15 preview and six configuration-codec
+cases pass, including the unchanged 30,000-gas replay/grace calls and both
+deadline boundaries. Independent verification matches all 194 Git/captured
+sources and 221 artifacts to their metadata and cache-selected compiler outputs,
+including 4,470 source Keccaks and 941 link slots. All 90 production products
+fit; six outside-closure cached artifacts are excluded. Full-current/Safe/fuzz/gas acceptance and release artifacts
+remain pending; this focused result does not establish production readiness.
 
 ## Selected size evidence
 
