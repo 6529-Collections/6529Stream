@@ -78,7 +78,95 @@ def _files(rows, relative):
         previous = name
         aliases.add(name.casefold())
 
-def validate(raw: bytes):
+def _checkpoint_commitments(leaves, chain, core):
+    """Original StreamTokenContentTree and checkpoint order, including odd promotion."""
+    leaf_domain = bytes.fromhex("61d75cd1a57d24657b860f99f77c15e5f8556fb725b56a96dd770205f9352b0d")
+    node_domain = bytes.fromhex("7239fc0713b7ccc92b7eef3087150a1f32037aff6ab05f5bf78db4f8ab71a6ea")
+    chain_domain = bytes.fromhex(kh(b"6529STREAM_CONTENT_CHECKPOINT_LEAVES_V1")[2:])
+    context = leaf_domain + chain.to_bytes(32, "big") + int(core, 16).to_bytes(32, "big")
+    level = []
+    previous = 0
+    chain_hash = bytes(32)
+    for index, leaf in enumerate(leaves):
+        token = int.from_bytes(leaf[:32], "big")
+        if token <= previous or leaf[32:64] == bytes(32):
+            raise ValueError("strictly ordered complete checkpoint leaves")
+        previous = token
+        leaf_hash = bytes.fromhex(kh(context + leaf)[2:])
+        level.append(leaf_hash)
+        chain_hash = bytes.fromhex(kh(chain_domain + chain_hash + index.to_bytes(32, "big") + leaf_hash)[2:])
+    while len(level) > 1:
+        level = [bytes.fromhex(kh(node_domain + level[i] + level[i + 1])[2:])
+                 if i + 1 < len(level) else level[i] for i in range(0, len(level), 2)]
+    return "0x" + chain_hash.hex(), "0x" + level[0].hex()
+
+
+def _checkpoint_endpoints(value, snapshot_bytes, leaf_manifest_bytes):
+    """Join retained endpoints to the original snapshot; no live Core identity read."""
+    # Metric packages also import this module solely for PNG parsing. Load the
+    # repository snapshot verifier only when checking a complete reference bundle.
+    from tools.metadata import snapshot_profile
+
+    binding = value["snapshot"]
+    if kh(snapshot_bytes) != binding["manifestHash"]:
+        raise ValueError("original snapshot manifest anchor")
+    snapshot = snapshot_profile.validate(snapshot_bytes)
+    if (any(snapshot[key] != value[key] for key in ("chainId", "collectionId", "subject"))
+            or snapshot["sources"][:5] != value["sources"][:5]):
+        raise ValueError("snapshot collection and source context")
+    if (any(binding[key] != snapshot[key] for key in ("schemaHash", "profileHash"))
+            or binding["revision"] != snapshot["publication"]["revision"]
+            or binding["inventoryPlan"] != snapshot["entropy"]["planId"]
+            or binding["canonicalizationHash"] != kh((snapshot_profile.ROOT / "schemas/museum/account-profile/RFC8785_JCS.json").read_bytes())):
+        raise ValueError("snapshot interpretation and inventory binding")
+    if snapshot["metadata"]["artist"]["artistId"] != value["environmentCoverage"]["artistId"]:
+        raise ValueError("snapshot archive artist")
+    root = snapshot["contentRoot"]
+    checkpoint = root["checkpoint"]
+    count = uint(value["mintedEver"], 64, True)
+    if count != uint(checkpoint["tokenCount"], 64, True):
+        raise ValueError("complete checkpoint count")
+    length = 320 + 192 * count
+    if (length > MAX_BYTES or len(leaf_manifest_bytes) != length
+            or length != uint(root["leafManifest"]["byteLength"], 64, True)):
+        raise ValueError("complete canonical leaf manifest length")
+    if kh(leaf_manifest_bytes) != root["manifestHash"]:
+        raise ValueError("original leaf manifest anchor")
+    header = (
+        int(kh(b"STREAM_TOKEN_CONTENT_LEAF_MANIFEST_V1"), 16),
+        uint(value["chainId"], positive=True), int(value["sources"][0]["address"], 16),
+        int(snapshot["sources"][6]["address"], 16), int(checkpoint["planHash"], 16),
+        uint(value["collectionId"], positive=True), int(checkpoint["contentRoot"], 16), count, 288, count,
+    )
+    if leaf_manifest_bytes[:320] != b"".join(word.to_bytes(32, "big") for word in header):
+        raise ValueError("canonical leaf manifest header")
+    leaves = [leaf_manifest_bytes[i:i + 192] for i in range(320, length, 192)]
+    chain_hash, content_root = _checkpoint_commitments(leaves, uint(value["chainId"]), value["sources"][0]["address"])
+    if chain_hash != checkpoint["leafChainHash"] or content_root != checkpoint["contentRoot"]:
+        raise ValueError("complete ordered checkpoint commitments")
+    captures = value["captures"]
+    endpoints = [leaves[0]] if count == 1 else [leaves[0], leaves[-1]]
+    if len(captures) != len(endpoints):
+        raise ValueError("first/last complete inventory")
+    for capture, leaf in zip(captures, endpoints):
+        if (uint(capture["tokenId"], positive=True) != int.from_bytes(leaf[:32], "big")
+                or capture["metadataJSONHash"] != "0x" + leaf[32:64].hex()
+                or capture["htmlHash"] != "0x" + leaf[96:128].hex()
+                or capture["tokenDataHash"] != "0x" + leaf[160:192].hex()):
+            raise ValueError("exact checkpoint endpoint sample")
+    # Serial/lifecycle are not fields of a content leaf. Their original Core check
+    # belongs to the independently anchored reference publication, not this join.
+    serials = [uint(capture["collectionSerial"], positive=True) for capture in captures]
+    if any(left >= right for left, right in zip(serials, serials[1:])):
+        raise ValueError("ordered retained endpoint serials")
+
+
+def validate(raw: bytes, *, snapshot_bytes: bytes, leaf_manifest_bytes: bytes):
+    """Validate retained bytes; callers must independently anchor the original raw manifest.
+
+    Endpoint token IDs/content are joined to the complete checkpoint. Serial and
+    lifecycle authenticity still rely on the publication's original Core checks.
+    """
     if not 0 < len(raw) <= MAX_BYTES:
         raise ValueError("manifest bytes")
     value = json.loads(raw.decode("utf8"), object_pairs_hook=_pairs,
@@ -141,11 +229,7 @@ def validate(raw: bytes):
     _coverage(value["environmentCoverage"])
     if env["runtimeObjectHash"]!=value["environmentCoverage"]["objectHash"]:
         raise ValueError("runtime object")
-    count=uint(value["mintedEver"],positive=True)
     captures=value["captures"]
-    expected_serials=[1] if count==1 else [1,count]
-    if [uint(c["collectionSerial"],positive=True) for c in captures]!=expected_serials:
-        raise ValueError("first/last complete inventory")
     if len({c["tokenId"] for c in captures})!=len(captures):
         raise ValueError("duplicate sample")
     for c in captures:
@@ -165,6 +249,7 @@ def validate(raw: bytes):
             raise ValueError("archive artist")
         if c["repeatCaptureSha256"] != [c["coverage"]["sha256Digest"]]*2:
             raise ValueError("repeat capture commitment")
+    _checkpoint_endpoints(value, snapshot_bytes, leaf_manifest_bytes)
     return value
 
 def _coverage(row):
@@ -306,6 +391,8 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest",type=Path,required=True)
     parser.add_argument("--expected-manifest-keccak",required=True)
+    parser.add_argument("--snapshot-manifest",type=Path,required=True)
+    parser.add_argument("--leaf-manifest",type=Path,required=True)
     parser.add_argument("--runtime-zip",type=Path,required=True)
     parser.add_argument("--runtime-root",type=Path,required=True)
     parser.add_argument("--metadata",type=Path,action="append",required=True)
@@ -314,7 +401,8 @@ def main():
     args=parser.parse_args();raw=args.manifest.read_bytes()
     if kh(raw)!=args.expected_manifest_keccak:
         raise ValueError("externally supplied original manifest anchor")
-    value=validate(raw)
+    snapshot_bytes=args.snapshot_manifest.read_bytes();leaf_manifest_bytes=args.leaf_manifest.read_bytes()
+    value=validate(raw,snapshot_bytes=snapshot_bytes,leaf_manifest_bytes=leaf_manifest_bytes)
     if len(args.metadata)!=len(value["captures"]) or len(args.capture_directory)!=len(value["captures"]):
         raise ValueError("complete sample bundle")
     controls=package_bytes(value,args.runtime_zip)
@@ -322,8 +410,9 @@ def main():
     result={"manifestHash":kh(raw),"manifestBytes":len(raw),"runtimeObjectHash":value["environmentCoverage"]["objectHash"],
             "runtimeSHA256":value["environmentCoverage"]["sha256Digest"],"runtimeBytes":value["environmentCoverage"]["byteSize"],
             "packageFileCount":len(value["environment"]["packageFiles"]),"platformPrerequisiteCount":len(value["environment"]["platformPrerequisites"]),
+            "snapshotManifestHash":kh(snapshot_bytes),"leafManifestHash":kh(leaf_manifest_bytes),"retainedCheckpointEndpointsMatch":True,
             "captures":captures,"localByteConsistency":True,"liveAuthorityOrArchiveEstablished":False,
-            "qualification":"Exact provided manifest, full ZIP/native/flat hashes, actual source and repeat bytes plus declared reports; no independent network/authority/execution attestation or licensing inference."}
+            "qualification":"Exact provided manifest, pinned snapshot and complete checkpoint leaf bytes, full ZIP/native/flat hashes, actual source and repeat bytes plus declared reports; serial/lifecycle rely on original anchored publication, with no independent Core/network/authority/execution attestation or licensing inference."}
     args.output.write_bytes(canonical(result)+b"\n")
     print(json.dumps({k:result[k] for k in ("manifestHash","runtimeBytes","packageFileCount","platformPrerequisiteCount")}))
 

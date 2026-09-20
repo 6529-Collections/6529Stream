@@ -88,7 +88,8 @@ full-object observations are explicit trust boundaries, not Ethereum recomputing
 all external file bytes or verifying native network consensus.
 
 `tools.preservation.reference_manifest` validates canonical declared manifest
-consistency, every actual ZIP member and whole-object digest/native root, actual
+consistency, the pinned original native snapshot and complete preserved leaf
+manifest, every actual ZIP member and whole-object digest/native root, actual
 Router JSON to HTML to both capture files, and recorded loaded-module inventories.
 It does not infer a live writer grant from local files or authenticate that an
 observation was made by an independent human. The existing packaged capture tool
@@ -169,11 +170,32 @@ or complete runtime portability.
 
 The offline command is `python -m tools.preservation.reference_manifest`. Its
 required inputs are the original manifest and an independently retained expected
-Keccak anchor, complete runtime ZIP, the report's restored runtime root, and one
-`--metadata` / `--capture-directory` pair per required sample. It reads the archived
-tool's literal controls without executing that source during validation. Its
+Keccak anchor, `--snapshot-manifest` containing the original native snapshot JSON,
+`--leaf-manifest` containing the complete canonical binary
+[content leaf manifest](../integrations/content-leaf-manifests.md), complete runtime
+ZIP, the report's restored runtime root, and one `--metadata` /
+`--capture-directory` pair per required sample. The Python API likewise requires
+`validate(raw, snapshot_bytes=..., leaf_manifest_bytes=...)`; its caller must
+independently anchor `raw`. It reads the archived tool's literal controls without
+executing that source during validation. Its
 output explicitly reports local byte consistency separately from live authority,
 network inclusion and execution attestation.
+
+The reference pins the snapshot bytes, which pin the leaf bytes, checkpoint
+producer, plan, count, ordered leaf chain and content root. The offline verifier
+recomputes both commitments from every leaf, rejects repeated, missing or reordered
+leaves, and matches captures to the exact first and last token IDs and their
+metadata, HTML and token-data hashes. A singleton has one capture. Token IDs and
+collection serials may have gaps after incident abort; `mintedEver` is an inventory
+count, not the last serial. Burned completed tokens remain in this historical
+inventory and need no live owner lookup.
+
+The six-word content leaf does not contain a collection serial or lifecycle flag.
+Those facts remain committed statements from the independently anchored reference,
+whose original publication checked Core identity. After authenticating endpoint
+membership, the offline verifier checks positive, increasing declared serials; it
+does not independently verify Core serials or whether an endpoint was burned.
+Changing a capture's serial changes the original manifest anchor.
 
 ## Validation and explicit fixture boundaries
 

@@ -15,6 +15,7 @@ declaration or a complete analysis of unreachable code.
 
 ```powershell
 python -m unittest tools.preservation.test_reference_package tools.preservation.test_reference_archive -v
+python -m unittest tools.preservation.test_reference_manifest -v
 node tools/preservation/generate_native_vectors.mjs --check
 python -m tools.preservation.reference_capture --engine <engine.exe> --html <original.html> --width 64 --height 64 --output <new-directory>
 ```
@@ -55,6 +56,16 @@ Windows is an external named platform prerequisite, not an included OS image.
 ```powershell
 python -m tools.preservation.reference_archive --object <complete-runtime.zip> --output <whole-file-observation.json>
 ```
+
+`reference_manifest` requires the independently anchored original reference JSON,
+the pinned native snapshot JSON (`--snapshot-manifest`), and the complete binary
+content leaf manifest (`--leaf-manifest`), alongside runtime and capture inputs.
+It verifies all checkpoint leaves before selecting first/last retained tokens;
+aborted allocation gaps do not renumber serials, and burned endpoints remain
+applicable. Leaf records do not contain serial or lifecycle fields: these remain
+statements checked by the original onchain publication, not independent offline
+Core observations. See the full [reference-render validation inputs and trust
+boundary](../../docs/guides/native-reference-render.md#publication-sequence).
 
 Fixity streams the same original bytes through flat SHA256, Keccak256 and native
 Arweave chunk reconstruction. The native root is distinct from flat SHA256 and
