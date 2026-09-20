@@ -112,6 +112,99 @@ library StreamScopeMembershipReads {
         );
     }
 
+    /// @notice Same authenticated publication grammar for the actual Metadata host's self-read.
+    /// @dev Only the enclosing recordPayload self-call budget differs. Its Store dependency cap,
+    /// all other external-read caps and original publication entrypoint remain unchanged.
+    function publicationFromMetadata(Inputs memory b, bytes32 recordHash)
+        public
+        view
+        returns (
+            StreamScopeMembershipManifest memory m,
+            IStreamFinalityScopeMembership.Publication memory p
+        )
+    {
+        // This linked entry is exclusively a self-read of the actual Metadata host.
+        // Its recordPayload getter still forwards the unchanged governed dependency cap
+        // to Store. The enclosing self-call needs room for that budget and its own frames.
+        if (b.metadataHost != address(this) || b.readGas > (type(uint256).max - 50000) / 2)
+            revert IStreamFinalityScopeMembership.InvalidScopeMembershipConfiguration();
+        bytes memory raw = read(
+            b.metadataHost,
+            abi.encodeCall(IStreamCollectionMetadataV1.collectionRecord, (recordHash)),
+            4096,
+            b.readGas,
+            false
+        );
+        (
+            IStreamPreservationRecords.CollectionRecord memory record,
+            IStreamCollectionMetadataV1.RecordReceipt memory receipt
+        ) = abi.decode(
+            raw,
+            (IStreamPreservationRecords.CollectionRecord, IStreamCollectionMetadataV1.RecordReceipt)
+        );
+        if (
+            keccak256(raw) != keccak256(abi.encode(record, receipt))
+                || receipt.recorder == address(0)
+                || (receipt.authorizationClass != 7 && receipt.authorizationClass != 8)
+                || receipt.recordedAt == 0 || receipt.recordChainHash == 0
+                || receipt.artistAuthorization != 0 || record.recordType != RECORD_TYPE
+                || record.schemaId != StreamScopeMembershipEncoding.SCHEMA_ID
+                || record.contentHash.algorithm != 1 || record.contentHash.digest.length != 32
+                || record.contentHash.canonicalizationId
+                    != StreamScopeMembershipEncoding.CANONICALIZATION_ID
+                || record.signatureScheme != 0 || record.signatureHash.algorithm != 0
+                || record.signatureHash.digest.length != 0
+                || record.signatureHash.canonicalizationId != 0 || record.effectiveAt == 0
+                || receipt.schemaDefinitionHash != SCHEMA_HASH
+                || receipt.canonicalizationDefinitionHash != CANON_HASH
+                || _recordHash(b, record, receipt) != recordHash
+        ) revert IStreamFinalityScopeMembership.InvalidScopeMembershipRecord(recordHash);
+        _policyAndIndex(b, receipt, recordHash);
+        _definitions(b);
+        raw = read(
+            b.metadataHost,
+            abi.encodeCall(IStreamCollectionMetadataV1.recordPayload, (recordHash)),
+            8352,
+            2 * b.readGas + 50000,
+            false
+        );
+        (address pointer, bytes memory payload) = abi.decode(raw, (address, bytes));
+        bytes32 manifestHash = bytes32(record.contentHash.digest);
+        if (
+            keccak256(raw) != keccak256(abi.encode(pointer, payload))
+                || keccak256(payload) != manifestHash
+        ) {
+            revert IStreamFinalityScopeMembership.InvalidScopeMembershipRecord(recordHash);
+        }
+        (address nativePointer, uint256 nativeLength) =
+            chunkPointer(b.chunkStore, manifestHash, b.readGas);
+        if (pointer != nativePointer || payload.length != nativeLength) {
+            revert IStreamFinalityScopeMembership.InvalidScopeMembershipRecord(recordHash);
+        }
+        m = StreamScopeMembershipEncoding.decode(payload);
+        if (
+            m.chainId != b.chainId || m.core != b.core || m.collectionId != receipt.collectionId
+                || record.subjectId
+                    != StreamMetadataSubjects.scopeSubject(
+                        b.chainId,
+                        b.core,
+                        StreamFinalityScope(
+                            StreamFinalityScopeType.COLLECTION, m.collectionId, 0, 0
+                        )
+                    )
+        ) revert IStreamFinalityScopeMembership.InvalidScopeMembershipRecord(recordHash);
+        p = IStreamFinalityScopeMembership.Publication(
+            recordHash,
+            manifestHash,
+            record.schemaId,
+            record.contentHash.canonicalizationId,
+            pointer,
+            pointer.codehash,
+            record.effectiveAt,
+            receipt
+        );
+    }
+
     function _recordHash(
         Inputs memory b,
         IStreamPreservationRecords.CollectionRecord memory r,

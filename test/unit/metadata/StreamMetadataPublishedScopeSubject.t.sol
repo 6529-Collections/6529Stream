@@ -147,6 +147,26 @@ contract StreamMetadataPublishedScopeSubjectTest is
         );
     }
 
+    function testTokenPathPreservesLiveBurnedAndInvalidLifecycleBehavior() public {
+        for (uint8 lifecycle; lifecycle <= 4; ++lifecycle) {
+            core.setToken(11, 1, 1, lifecycle);
+            if (lifecycle == 2 || lifecycle == 3) {
+                bytes32 subject = metadata.registerTokenSubject(11);
+                require(
+                    subject
+                        == _subject(StreamFinalityScope(StreamFinalityScopeType.TOKEN, 1, 11, 0))
+                );
+            } else {
+                vm.expectRevert(
+                    abi.encodeWithSelector(
+                        IStreamCollectionMetadataV1.InvalidMetadataRecord.selector
+                    )
+                );
+                metadata.registerTokenSubject(11);
+            }
+        }
+    }
+
     function testSafe130CanRegisterAndUseExistingWriterGrant() public {
         _safeFlow("1.3.0");
     }

@@ -2,6 +2,11 @@
 
 ## Canonical metadata subjects for published scopes
 
+- Keep Metadata deployable by extracting only typed subject writes; preserve the
+  original token behavior and dependency budgets. All twelve focused native
+  cases pass, including both Safe versions, with 54 emitted production products
+  fitting the size checks. Complete current-stack acceptance remains separate.
+
 - Register RELEASE, SEASON and VIEW subjects from the Metadata host's authenticated
   original scope records. Preserve all writer permissions, membership validation,
   old interface identifiers and existing storage. See the

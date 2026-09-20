@@ -26,8 +26,18 @@ Repeated registration of the same valid record is idempotent. Each successful
 call emits `MetadataScopeSubjectRegistered` with the derived subject and source
 record.
 
-The focused regression source contains eleven cases using actual Metadata,
+The focused regression source contains twelve cases using actual Metadata,
 schema, Store, inventory and membership contracts. Core and governance are
 explicit test boundaries. Two cases use original Safe 1.3.0 and 1.4.1 bytecode
-and real threshold-signed calls. The 114-source type check passes; native
-execution and full current-stack acceptance remain separate pending checks.
+and real threshold-signed calls. All twelve native cases pass on the recorded
+114-source capture. All 54 emitted production products fit the runtime and
+creation-code checks; Metadata is 23,896 runtime bytes and its subject worker is
+3,509 bytes. This is focused execution with named Core/governance boundaries;
+full current-stack and transaction-gas acceptance remain separate.
+
+Both token and published-scope writes use a fixed linked worker with the original
+declared subject mapping. The original token identity/lifecycle checks, storage
+and error semantics are preserved. The new local publication reader reserves
+space around Metadata's `recordPayload` self-call for that getter's nested Store
+read. The Store and every other external dependency retain their original
+governed gas caps. The original membership reader entrypoint is unchanged.

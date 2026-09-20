@@ -524,28 +524,7 @@ contract StreamCollectionMetadataV1 is
 
     /// @notice Registers a canonical minted/burned token subject without granting record authority.
     function registerTokenSubject(uint256 tokenId) external override returns (bytes32 subjectId) {
-        _requireCode(core, coreCodeHash);
-        (bool exists, uint256 collectionId,,) = abi.decode(
-            _read(
-                core,
-                abi.encodeCall(IStreamCoreIdentity.tokenCollectionIdentity, (tokenId)),
-                128,
-                false
-            ),
-            (bool, uint256, uint256, bool)
-        );
-        uint8 lifecycle = abi.decode(
-            _read(core, abi.encodeCall(IStreamCoreIdentity.tokenLifecycle, (tokenId)), 32, false),
-            (uint8)
-        );
-        if (!exists || (lifecycle != 2 && lifecycle != 3)) revert InvalidMetadataRecord();
-        _requireCollection(collectionId);
-        subjectId = StreamMetadataSubjects.scopeSubject(
-            block.chainid,
-            core,
-            StreamFinalityScope(StreamFinalityScopeType.TOKEN, collectionId, tokenId, 0)
-        );
-        _subjects[subjectId] = Subject(collectionId, tokenId);
+        return PublishedScope.registerToken(_subjects, _subjectContext(), tokenId);
     }
 
     /// @notice Derive a canonical scope name from this host's authenticated original publication.
@@ -553,19 +532,12 @@ contract StreamCollectionMetadataV1 is
     function registerScopeSubject(bytes32 membershipRecordHash)
         external override returns (bytes32 subjectId)
     {
-        _requireCode(core, coreCodeHash);
-        _requireCode(schemaRegistry, schemaRegistryCodeHash);
-        _requireCode(chunkStore, chunkStoreCodeHash);
-        StreamFinalityScope memory scope;
-        (subjectId, scope) = PublishedScope.derive(
-            core, schemaRegistry, chunkStore, _gasParameterValue(DEPENDENCY_READ_GAS),
-            membershipRecordHash
-        );
-        _requireCollection(scope.collectionId);
-        _subjects[subjectId] = Subject(scope.collectionId, 0);
-        emit MetadataScopeSubjectRegistered(
-            subjectId, scope.collectionId, membershipRecordHash, uint8(scope.scopeType), scope.scopeId
-        );
+        return PublishedScope.registerPublished(_subjects, _subjectContext(), membershipRecordHash);
+    }
+
+    function _subjectContext() private view returns (PublishedScope.Context memory) {
+        return PublishedScope.Context(core, coreCodeHash, schemaRegistry, schemaRegistryCodeHash,
+            chunkStore, chunkStoreCodeHash, _gasParameterValue(DEPENDENCY_READ_GAS));
     }
 
     function deriveCollectionRecordHashFor(
