@@ -18,7 +18,10 @@ different milestones.
 
 The [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch) records
 source-specific evidence. Root passes 719 client tests and 89 new Museum catalog
-tests. The combined ABI/type/storage check covers 2,212 sources at `44af244e`.
+tests. The latest combined ABI/type/storage check covers 2,214 sources at `0c5de0d9`.
+The finite Renderer Registry also passes13 scoped native cases, with all eight
+emitted production products fitting limits. Root independently matches19 sources
+and28 artifact/cache hashes; this is not full Artist/STATIC admission.
 These are scoped checks, not complete-system acceptance.
 
 Delegated consent (`6d333842`) has 20 authored cases; first designated-dormancy
@@ -72,14 +75,14 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `53c21f0f843352221245bc8127783174c1bca1db`; see the [20 September batch](#latest-integration-checkpoint-20-september) for bounded evidence and remaining joins |
+| Current integration source | `0c5de0d92db1e0ede8f5f445ad210b29090b8d8f`; see the [20 September batch](#latest-integration-checkpoint-20-september) for bounded evidence and remaining joins |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
 | Further integrated Artist handoff | `9ea144c85768050ec910cc8534af13bcac82e20d`, received during assembly: closed-origin dormancy/rotation extension on the preceding handoff; ART24 |
 | Integrated entropy client handoff | `642d017d9d0cd8ee9b6b813abbdbe10a4c6b1265`; client.entropy-authority |
 | Integrated OwnerRecords capture handoff | `57ac8d041c9adc479f1061fafec748c8330ac974`; MUSEUM-36 |
-| Latest broad cheap compilation evidence | 2,212-source ABI/type/storage pass at `44af244e` in 20.203 seconds. Later finite-role change has its own 19-source ABI check; neither establishes runtime acceptance. |
+| Latest broad cheap compilation evidence | 2,214-source ABI/type/storage pass at `0c5de0d9` in20.031 seconds. ABI52 at44af remains the client-pinned capture; neither establishes whole-system runtime acceptance. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
 | Latest focused native evidence | Separate captures: entropy 10, Royalty 11, mint 101, actual-Core 29, final burn 49 and later burn-credit 31 distinct cases pass. Repaired native-price 76 passes at 766c5dfd with independent source/artifact attestation; STATIC output manifest 9 passes in a separate capture. Root clients 398 and a museum authority/profile cohort of 131 pass. Other museum cohorts overlap. No complete-system pass is inferred. |
 
@@ -218,7 +221,7 @@ These 163 rows are capabilities and delivery checks of different sizes. Row coun
 | [ART24](#art24-evidence) Closed original dormancy followed by executed rotation and first recovery | Built | Tests written | Not integrated | The original appointed-principal closure is authenticated separately from terminal/current authority. Source 9ea144c8 is merged as 5ff709dc; bounded production and integrator test-source review are clear. **Remaining:** Five new authored cases, native execution and changed-product size acceptance pending. |
 | [ART25](#art25-evidence) Remaining executed-rotation recovery combinations | Built; bounded profiles | Tests written | Not integrated | Source-integrated `7a274c04`: latest35 followed by one or more32 rotations, and original closed40 followed by rotations; original/terminal closures remain distinct. Complete admitted history uses original writer/epoch invariants without a caller-selected prefix. Independent source review and ABI checks pass; 27 cases are authored. **Remaining:** Native execution, sizes and real intervening40/43 composition; broader dormancy/recovery histories are tracked in ART27. |
 | [ART26](#art26-evidence) Adjudicated steward-origin identity recovery | Not started | Not tested | Not integrated | Explicit adjudicated class4-origin recovery to proved living authority or non-superseded rightful designated class3 successor. **Remaining:** Current elected recovery admits classes1/3, not class4 source. Steward-to-living proposal was blocked by automatic approval review and remains unapplied; no default class relabeling. |
-| [ART27](#art27-evidence) Dormancy-origin supersession and expanded adjudication histories | In progress | Tests written | Not integrated | First designated43 guardian supersession (`91e223f5`) uses the actual current vesting cutoff and original APPEAL/ARBITER/Archive rules; 16 cases are authored and source review is clear. **Remaining:** Repeated43-to35 recovery and later living35-to43 histories are separate active/queued origin proofs; native acceptance and class4 ART26 remain. |
+| [ART27](#art27-evidence) Dormancy-origin supersession and expanded adjudication histories | In progress | Tests written | Not integrated | First designated43 guardian supersession (`91e223f5`) uses the actual current vesting cutoff and original APPEAL/ARBITER/Archive rules; 16 cases are authored and source review is clear. Repeated43-to35 recovery is now source-integrated (`0c5de0d9`), with14 further authored cases preserving the original43 capability/epoch. **Remaining:** Later living35-to43 origin proof, native acceptance and separate class4 ART26. |
 | [ART28](#art28-evidence) Archive, canonical record preimages, payload catalog and event reconstruction | Built | Partly tested | Not integrated | Original Archive atomicity; permanent retained payloads, recordPreimageBytes/count/at; exact32/35/40/43 preimages; original19/41–43/59 and execution-context event companions; native receipts include op31/33 Causes. **Remaining:** Complete all-family independent event fold/public recomputation client and imported advanced records remain incomplete; bytes never retained are not reconstructed. |
 | [ART29](#art29-evidence) History lanes, original55–57 and narrow Core successor admission | Built | Partly tested | Not integrated | Canonical ordered Artist/collection lanes, committed predecessor root, exact tip proofs, completed seal and immutable read-through prefix; replacement-only Core pin seam. Lane membership alone grants no authority. **Remaining:** Native3 passed scoped actual two-registry tests with typed Core; real-current cutover plus all imported-authority consumer profiles still required. |
 | [ART30](#art30-evidence) Seven-owner complete checkpoint and nonce/replay export | Built | Tested* | Not integrated | Current owner headers, enumerated original replay surfaces/origins, typed nonce prefixes and exact dependency checkpoints; rolling roots are not reconstructed from current cells alone. **Remaining:** Passed four exact native3 cases at b60ae515; current later source not independently rerun. Advanced authority exports/imports remain separate. |

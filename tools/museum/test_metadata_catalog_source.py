@@ -346,8 +346,15 @@ class SourceParityTests(unittest.TestCase):
         source = (root / "domains/metadata/StreamCollectionMetadataV1.sol").read_text(encoding="utf-8")
         self.assertIn('keccak256("6529stream.collection-metadata.full-bytes.v1")', source)
         self.assertIn("collectionId == 0", source)
-        self.assertIn("abi.encode(family, contentHash)", source)
         compact_source = re.sub(r"\s+", "", source)
+        self.assertIn(
+            "RecordPayloads.index(_recordPayloads,_pointers,_pointerSeen,chunkStore,"
+            "chunkStoreCodeHash,collectionId,family,payload);", compact_source,
+        )
+        payloads = (root / "domains/metadata/StreamMetadataRecordPayloads.sol").read_text(encoding="utf-8")
+        compact_payloads = re.sub(r"\s+", "", payloads)
+        self.assertIn("bytes32key=keccak256(abi.encode(family,hash));", compact_payloads)
+        self.assertIn("pointers[cid].push(Host.Pointer(pointer,family,hash));", compact_payloads)
         self.assertIn(
             "StreamCollectionManifestExecution.commitRecord("
             "_records,_history,_chains,_latest,hash,record,receipt);", compact_source,

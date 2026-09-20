@@ -153,7 +153,10 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   ABI checks pass, while native execution and changed-product sizes remain
   pending. First designated-dormancy guardian supersession is now source-integrated
   as `91e223f5`, with 16 actual-Artist/Archive/Safe cases authored. Repeated
-  dormancy-origin recovery and later mixed histories remain active work.
+  dormancy-origin recovery is now source-integrated as `0c5de0d9`, preserving
+  the original43 capability/epoch and later35/32 proofs; 14 further cases
+  are authored and independently source-reviewed. Later living-recovery
+  then dormancy histories and native execution remain open.
 - TOKEN/RELEASE/SEASON STATIC source snapshots are integrated as `17e299ba`.
   They bind complete membership, original selected sources, retained bytes,
   writer grants and exact scope history. Independent production review and
@@ -198,15 +201,26 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   and the prospective plan's 51 documents/78 ordered chunks. Full admission,
   institutional semantics and Museum conformance remain separate work.
 - Finite named Artist/C2PA Renderer roles (`8ba14f65`, clarified `48f229f5`)
-  preserve existing target/read bounds and admission evidence. Five tests are
-  authored; actual transitive analysis and native admission remain pending.
+  preserve existing target/read bounds and admission evidence. All 13
+  focused Registry tests pass on an exact 19-source closure; root verifies
+  all19 source files and28 retained artifact/cache hashes. All eight emitted
+  production products fit. Actual Artist transitive analysis/admission remains
+  separate from this synthetic-target unit cohort.
   ART38 remains in its isolated branch while a standing-conflict correction
   is built. Mandatory live provenance can stale historical full-output
   evidence; existing hashes are not rewritten or silently reinterpreted.
 
-The combined-source ABI/type/storage pass at `44af244e` covers 2,212
-sources in 20.203 seconds with no errors. Later finite Renderer role labels
-have a separate 19-source ABI check; later source is not covered implicitly. It does not generate bytecode or
+The historical Museum C2PA reader (`06df6ce3`) consumes exact frozen `3f1a0680`
+credential/report/selection bytes with independent personhood and historical
+Display observations. Its 13 focused tests pass; the combined 28-case catalog
+and C2PA cohort passes after a test-only source assertion follows the already
+extracted Metadata pointer-index worker. Original ART38 production integration
+and the new standing-conflict seam remain pending.
+
+The latest combined-source ABI/type/storage pass at `0c5de0d9` covers 2,214
+sources in 20.031 seconds with no errors, including the finite Renderer roles
+and repeated dormancy recovery. Earlier ABI52 at `44af244e` is retained for
+clients explicitly pinned to that source. It does not generate bytecode or
 prove whole-system execution. Earlier paid-burn acceptance remains 39 distinct
 scoped cases, owner-notice adapters 93 affected root cases, and the populated
 Museum recipe 150 affected cases. Those counts overlap or use different

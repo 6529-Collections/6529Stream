@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `53c21f0f`: delegated consent, dormancy guardian supersession, mint grace, full37 activation helpers, scoped content roots, Museum catalog and original Artist callers are source-integrated. See [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch) for exact passing checks, size/gas failures and pending runtime acceptance. |
+| Source checkpoint | `0c5de0d9`: repeated recovery, delegated consent, dormancy guardian supersession, mint grace, full37 activation helpers, scoped content roots, Museum catalog and original Artist callers are source-integrated. See [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch) for exact passing checks, size/gas failures and pending runtime acceptance. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,8 +29,9 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 20 September
 
-- Root owns architecture, integration and delivery. ABI52 covers all2,212 sources
-  at `44af244e`; source integration remains separate from native acceptance.
+- Root owns architecture, integration and delivery. ABI53 covers all2,214 sources
+  at `0c5de0d9`; ABI52 remains the client-pinned capture. Source integration
+  remains separate from native acceptance.
 - The Artist lead finishes ART38 standing-conflict retention against exact
   original op46 evidence. Live adverse provenance stays live; historical
   full-output checks stale on changed annotation bytes. No blanket freeze rewrite.
@@ -46,19 +47,24 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
   into the existing policy worker to repair Manager/fallback25,030/25,166-byte
   runtimes. Earlier actual Artist mint/offer recipes await native execution.
 - Burn delivered ART25 rotations and first dormancy guardian supersession
-  (`91e223f5`,16 cases authored). It builds repeated dormancy-origin recovery,
-  then repairs three retained active-action test mocks separately and continues
+  (`91e223f5`,16 cases authored). Repeated dormancy-origin recovery (`0c5de0d9`,14 authored cases) is now
+  integrated. It repairs retained compromise/dismissal action mocks separately
+  and continues
   the later mixed-history gap. Class4/held changes remain separate.
 - Museum delivered all29 genesis schemas (`8b3f01f8`): root89 tests, six
   generators and complete catalog checks pass. Its historical ART38 decoder
-  handoff is under integration review; broader PREMIS/source joins continue.
+  is integrated (`06df6ce3`), with root13 focused and28 combined catalog/reader
+  checks passing after an existing-source test assertion correction. Broader
+  PREMIS/source joins continue.
 - Clients delivered original principal and identity/delegation workflows
   (`92a0a687`, `be596707`): root719 package tests and exact ABI49 fixture pass.
   Delegated mode and mint grace now use retained ABI52 for the next batch.
 - Testing delivered full37 construction and original activation helpers
   (`24d3c0f1`, `9ad53bd4`) with15 and11 cases authored. Finite Renderer roles
-  (`8ba14f65`, `48f229f5`) preserve bounds and evidence requirements. Actual
-  C2PA composition/read inventory and complete joined acceptance remain.
+  (`8ba14f65`, `48f229f5`) preserve bounds and evidence requirements. All13 scoped Registry native
+  cases pass with19 sources independently matched and all eight production
+  products fitting. Actual C2PA composition/read inventory and complete joined
+  acceptance remain.
 
 Keep builders implementing while frozen tests run. No duplicate broad compilers
 or competing source writers. Exact rejected artifacts remain unapplied. Preserve
