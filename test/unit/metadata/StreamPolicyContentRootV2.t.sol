@@ -362,14 +362,26 @@ contract StreamPolicyContentRootV2Test is ContentRootPublicationFixture {
                 && current != beforeState
         );
         bytes32[] memory locks = new bytes32[](1);
-        locks[0] = FAMILY;
+        // CONTENT_ROOT is not an original Artist freeze lock class. Preserve the
+        // supported SCRIPT lock, then exercise the original Core root freeze gate.
+        locks[0] = keccak256("SCRIPT");
         artist.setFreeze(router.artistContentFreezeState(1), locks);
         router.applyArtistContentFreeze(1, keccak256("freeze"));
+        (bool supported, bool locked) = router.artistContentLockState(1, locks[0]);
+        require(supported && locked, "original Artist SCRIPT lock");
         p.expectedPredecessor = router.collectionContentRootHead(1);
         _approvePolicy(p, address(this), keccak256("third"));
+        core.setFrozen(true);
         vm.expectRevert();
         router.publishVerifiedPolicyContentRoot(p);
-        require(!router.consumedArtistContentConsent(keccak256("third")));
+        require(
+            !router.consumedArtistContentConsent(keccak256("third"))
+                && router.collectionContentRootHead(1) == p.expectedPredecessor,
+            "Core freeze preserves approval and root"
+        );
+        core.setFrozen(false);
+        router.publishVerifiedPolicyContentRoot(p);
+        require(router.consumedArtistContentConsent(keccak256("third")), "exact approval retry");
     }
 
     function testPolicyRootActualSafeLateRollbackIdenticalSignedRetry() public {

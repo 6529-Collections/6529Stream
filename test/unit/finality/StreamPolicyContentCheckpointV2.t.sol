@@ -498,7 +498,11 @@ contract StreamPolicyContentCheckpointV2Test is StaticMetadataRoutingFixture {
             address(outputs),
             address(coverage),
             address(executor),
-            _gas("STATIC_OUTPUT_MANIFEST_READ_GAS", 8000000, 2)
+            // Fund the existing 16m render cap (the 8m cap is only dependency reads),
+            // its full EIP-150/parent reserve, and the preceding one-row validation work.
+            // The retained 10m negative stops at StaticContentParentGas before tokenJSON.
+            // This 20m focused-fixture cap is not a production or transaction-cap claim.
+            _gas("STATIC_OUTPUT_MANIFEST_READ_GAS", 20000000, 2)
         );
         O.Plan memory p = outputs.requireCurrentCheckpoint(id);
         O.Output[] memory rows = new O.Output[](1);
