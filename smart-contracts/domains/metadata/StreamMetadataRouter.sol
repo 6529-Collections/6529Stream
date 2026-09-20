@@ -48,9 +48,6 @@ import "./StreamMetadataTokenReads.sol";
 import "./StreamMetadataImageURI.sol";
 import "./StreamMetadataContentRoot.sol";
 import {
-    StreamMetadataPolicyContentRootV2 as PolicyRoot
-} from "./StreamMetadataPolicyContentRootV2.sol";
-import {
     IStreamPolicyContentRootPublicationV2 as PolicyRootInterface
 } from "../../interfaces/stream/metadata/IStreamPolicyContentRootPublicationV2.sol";
 import { StreamMetadataScopedContent } from "./StreamMetadataScopedContent.sol";
@@ -68,7 +65,6 @@ import {
     IStreamGasParameterHost
 } from "../../interfaces/stream/parameters/IStreamGasParameterHost.sol";
 import { StreamArtistDisplayReads } from "./StreamArtistDisplayReads.sol";
-import { StreamArtistDisplayJSON } from "./StreamArtistDisplayJSON.sol";
 import {
     StreamArtistDisplayTypes
 } from "../../interfaces/stream/metadata/StreamArtistDisplayTypes.sol";
@@ -578,7 +574,7 @@ contract StreamMetadataRouter is
     function selectedCollectionManifest(uint256 collectionId, uint8 kind)
         external
         view
-        returns (M.Selection memory)
+        returns (M.Selection calldata)
     {
         bytes memory result =
             StreamMetadataRouterContent.read(_contentLayout(), _contentContext(), msg.data);
@@ -597,7 +593,7 @@ contract StreamMetadataRouter is
     function collectionMetadata(uint256 collectionId)
         external
         view
-        returns (CollectionMetadata memory)
+        returns (CollectionMetadata calldata)
     {
         _collectionRead();
     }
@@ -628,14 +624,14 @@ contract StreamMetadataRouter is
 
     function _requirePresentationAuthority(uint256 collectionId) private view {
         if (msg.sender != authority) revert Unauthorized(msg.sender);
-        if (!core.collectionExists(collectionId)) revert InvalidCollection(collectionId);
+        _requireCollection(collectionId);
     }
 
     function artistPresentation(uint256 collectionId)
         external
         view
         override
-        returns (ArtistPresentation memory)
+        returns (ArtistPresentation calldata)
     {
         _collectionRead();
     }
@@ -644,7 +640,7 @@ contract StreamMetadataRouter is
         external
         view
         override
-        returns (ServingFacts memory result)
+        returns (ServingFacts calldata result)
     {
         _collectionRead();
     }
@@ -652,20 +648,20 @@ contract StreamMetadataRouter is
     function collectionScriptBundle(uint256 collectionId)
         external
         view
-        returns (B.Selection memory)
+        returns (B.Selection calldata)
     {
         _collectionRead();
     }
 
-    function _scriptBundle(uint256 collectionId) private view returns (B.Selection memory) {
-        return StreamMetadataBundleRenderer.selection(_selectedManifests[collectionId][2]);
+    function _scriptBundleId(uint256 collectionId) private view returns (bytes32) {
+        return StreamMetadataBundleRenderer.selectedBundleId(_selectedManifests[collectionId][2]);
     }
 
     function collectionServingSource(uint256 collectionId)
         external
         view
         override
-        returns (ServingSource memory)
+        returns (ServingSource calldata)
     {
         _collectionRead();
     }
@@ -674,7 +670,7 @@ contract StreamMetadataRouter is
         external
         view
         override
-        returns (LiveArtistStatus memory)
+        returns (LiveArtistStatus calldata)
     {
         _collectionRead();
     }
@@ -700,14 +696,14 @@ contract StreamMetadataRouter is
         override
         returns (address metadataContract, bytes32 contentStateHash)
     {
-        if (!core.collectionExists(collectionId)) revert InvalidCollection(collectionId);
+        _requireCollection(collectionId);
         _requireSelectedArtistRegistry();
         CollectionMetadata storage metadata = _collections[collectionId];
         if (
             !metadata.configured
                 || (!StaticState.activated(collectionId)
                     && bytes(metadata.animationScript).length == 0
-                    && _scriptBundle(collectionId).bundleId == 0)
+                    && _scriptBundleId(collectionId) == 0)
         ) {
             revert UnconfiguredOnchainContent(collectionId);
         }
@@ -736,7 +732,7 @@ contract StreamMetadataRouter is
         if (lockClass == LOCK_DEPENDENCIES) {
             return (
                 true,
-                _scriptBundle(collectionId).bundleId == 0
+                _scriptBundleId(collectionId) == 0
                     || _artistContentLocks[collectionId][CONTENT_SCRIPT]
             );
         }
@@ -791,8 +787,12 @@ contract StreamMetadataRouter is
     }
 
     function _requireContentCollection(uint256 collectionId) private view {
-        if (!core.collectionExists(collectionId)) revert InvalidCollection(collectionId);
+        _requireCollection(collectionId);
         _requireSelectedArtistRegistry();
+    }
+
+    function _requireCollection(uint256 collectionId) private view {
+        if (!core.collectionExists(collectionId)) revert InvalidCollection(collectionId);
     }
 
     function _contentState(uint256 collectionId) private view returns (bytes32) {
@@ -829,14 +829,8 @@ contract StreamMetadataRouter is
         address publisher
     ) external view returns (bytes32) {
         _requireContentCollection(publication.collectionId);
-        (Record memory prepared,) = PolicyRoot.prepare(
-            _contentRoots,
-            StreamMetadataContentRoot.Context(address(core), address(artistRegistry)),
-            publication,
-            publisher
-        );
-        return StreamMetadataScopedContentState.familyCurrent(
-            address(core), publication.collectionId, prepared.stateHash
+        return StreamMetadataRouterRootCodec.preview(
+            _contentRoots, _scopedContentRoots, _contentLayout(), _contentContext(), msg.data
         );
     }
 
@@ -845,27 +839,17 @@ contract StreamMetadataRouter is
         returns (bytes32 recordHash)
     {
         _requireContentCollection(publication.collectionId);
-        StreamMetadataContentRoot.Context memory ctx =
-            StreamMetadataContentRoot.Context(address(core), address(artistRegistry));
-        (Record memory prepared, PolicyRootInterface.Binding memory binding) =
-            PolicyRoot.prepare(_contentRoots, ctx, publication, msg.sender);
-        (bytes32 consent, bytes32 ratification) = _authorizeContentWrite(
-            publication.collectionId,
-            CONTENT_ROOT,
-            StreamMetadataScopedContentState.familyCurrent(
-                address(core), publication.collectionId, prepared.stateHash
-            )
+        return StreamMetadataRouterRootCodec.publish(
+            _contentRoots, _scopedContentRoots, _contentLayout(), _contentContext(), msg.data
         );
-        recordHash = PolicyRoot.publish(_contentRoots, ctx, publication, prepared, binding, consent);
-        _recordContentApplication(publication.collectionId, CONTENT_ROOT, consent, ratification);
     }
 
     function policyContentRootBinding(bytes32 recordHash)
         external
         view
-        returns (PolicyRootInterface.Binding memory)
+        returns (PolicyRootInterface.Binding calldata)
     {
-        return PolicyRoot.readBinding(recordHash);
+        _rootRead();
     }
 
     function previewScopedContentRootPublication(
@@ -894,7 +878,7 @@ contract StreamMetadataRouter is
         assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
-    function scopedContentRootRecord(bytes32) external view returns (ScopedRoot.Record memory) {
+    function scopedContentRootRecord(bytes32) external view returns (ScopedRoot.Record calldata) {
         bytes memory out =
             StreamMetadataScopedContent.read(_scopedContentRoots, address(core), msg.data);
         assembly ("memory-safe") { return(add(out, 32), mload(out)) }
@@ -931,8 +915,12 @@ contract StreamMetadataRouter is
         );
     }
 
-    function contentRootRecord(bytes32 hash) external view override returns (Record memory) {
-        bytes memory result = StreamMetadataRouterRootCodec.readRecord(_contentRoots, hash);
+    function contentRootRecord(bytes32 hash) external view override returns (Record calldata) {
+        _rootRead();
+    }
+
+    function _rootRead() private view {
+        bytes memory result = StreamMetadataRouterRootCodec.read(_contentRoots, msg.data);
         assembly ("memory-safe") { return(add(result, 32), mload(result)) }
     }
 
@@ -1124,7 +1112,7 @@ contract StreamMetadataRouter is
     function contractURIForCore(address core_) external view override returns (string memory) {
         _requireCore(core_);
         if (bytes(_contractMetadataURI).length != 0) return _contractMetadataURI;
-        return _dataURI('{"name":"6529 Stream","description":"6529 Stream NFT collections."}');
+        return StreamMetadataRenderPreparation.defaultContractURI();
     }
 
     function contractURIForCollection(address core_, uint256 collectionId)
@@ -1134,7 +1122,7 @@ contract StreamMetadataRouter is
         returns (string memory)
     {
         _requireCore(core_);
-        if (!core.collectionExists(collectionId)) revert InvalidCollection(collectionId);
+        _requireCollection(collectionId);
         (bool frozen, string memory resolved) = StreamMetadataFinalityServing.collection(
             _artistPresentation,
             originalFinalityAnchor,
@@ -1146,29 +1134,13 @@ contract StreamMetadataRouter is
         );
         if (frozen) return resolved;
         PreparedMetadata storage metadata = _prepared[collectionId];
-        return _dataURI(
-            string(
-                abi.encodePacked(
-                    '{"name":"',
-                    metadata.name,
-                    '","description":"',
-                    metadata.description,
-                    '","image":"',
-                    metadata.image,
-                    '"',
-                    StreamArtistDisplayJSON.nested(_liveAttribution(collectionId, 0)),
-                    "}"
-                )
-            )
+        return StreamMetadataRenderPreparation.attributedCollectionURI(
+            metadata.name, metadata.description, metadata.image, _liveAttribution(collectionId, 0)
         );
     }
 
     function _requireCore(address supplied) private view {
         if (supplied != address(core)) revert InvalidCore(supplied);
-    }
-
-    function _dataURI(string memory json) private pure returns (string memory) {
-        return StreamMetadataRenderPreparation.dataURI(json);
     }
 
     /// @dev Retain the existing derived-contract preparation hook.

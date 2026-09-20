@@ -7,6 +7,9 @@ import {
 import {
     StreamRendererCalls
 } from "../../../smart-contracts/domains/metadata/StreamRendererCalls.sol";
+import {
+    StreamMetadataBundleRenderer
+} from "../../../smart-contracts/domains/metadata/StreamMetadataBundleRenderer.sol";
 
 contract StaticBundleDependencyAdmin {
     function retrieveFunctionAdmin(address, address, bytes4) external pure returns (bool) {
@@ -86,6 +89,17 @@ contract StreamStaticBundleReturnShapeTest is StaticMetadataRoutingFixture {
             true
         );
         _admin(abi.encodeCall(router.setCollectionScriptManifest, (1, manifest)));
+        M.Selection memory selected = router.selectedCollectionManifest(1, 2);
+        require(
+            StreamMetadataBundleRenderer.selectedBundleId(selected) == id
+                && StreamMetadataBundleRenderer.selection(selected).bundleId == id,
+            "original checked scalar projection"
+        );
+        selected.codeHash = keccak256("wrong bundle host runtime");
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamMetadataBundleRenderer.InvalidBundleRendering.selector)
+        );
+        StreamMetadataBundleRenderer.selectedBundleId(selected);
         _activate();
         _mint();
         string memory html = router.tokenHTML(91);

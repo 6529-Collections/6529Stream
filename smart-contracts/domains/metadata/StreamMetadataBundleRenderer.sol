@@ -38,6 +38,11 @@ library StreamMetadataBundleRenderer {
         );
     }
 
+    /// @notice Scalar projection after all original capability, runtime and bounded-read checks.
+    function selectedBundleId(M.Selection memory manifest) public view returns (bytes32) {
+        return selection(manifest).bundleId;
+    }
+
     function selection(M.Selection memory manifest) public view returns (B.Selection memory s) {
         if (manifest.manifestHash == 0) return s;
         if (manifest.host.code.length == 0 || manifest.host.codehash != manifest.codeHash) {

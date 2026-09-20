@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamContentRootPublication.t.sol";
+import { RouterCodecReference } from "../../helpers/RouterCodecReference.sol";
 import {
     IStreamPolicyOutputManifestV2 as PM
 } from "../../../smart-contracts/interfaces/stream/finality/IStreamPolicyOutputManifestV2.sol";
@@ -20,6 +21,9 @@ import {
 interface PolicyRootVm {
     function mockCall(address target, bytes calldata input, bytes calldata result) external;
     function clearMockedCalls() external;
+    function snapshotState() external returns (uint256);
+    function revertToState(uint256 snapshot) external returns (bool);
+    function etch(address target, bytes calldata code) external;
 }
 
 contract PolicyRootCheckpointBoundary is RootCheckpointBoundary {
@@ -422,6 +426,87 @@ contract StreamPolicyContentRootV2Test is ContentRootPublicationFixture {
         require(
             account.nonce() == nonce + 1 && r.publisher == address(account)
                 && r.authorizationClass == 8 && r.artistConsent == consent
+        );
+    }
+
+    function testPolicyCodecMatchesOriginalFieldsWithDistinctRuntimeCommitments() public {
+        bytes memory referenceCode =
+            address(
+            new RouterCodecReference(
+                address(core),
+                address(executor),
+                keccak256("deployment"),
+                "ipfs://router",
+                keccak256("manifest"),
+                IStreamArtistAttribution(address(artist))
+            )
+        )
+        .code;
+        IStreamContentRootPublication.Publication memory p = _publication();
+        bytes32 consent = keccak256("paired V2 publication");
+        bytes32 preview = _approvePolicy(p, address(this), consent);
+        PolicyRootVm snapshots = PolicyRootVm(address(vm));
+        uint256 snapshot = snapshots.snapshotState();
+        snapshots.etch(address(router), referenceCode);
+        // The original route commits this facade's runtime hash. An etched reference must
+        // obtain its own exact approval; pretending the old approval still applies is invalid.
+        bytes32 oldPreview = _approvePolicy(p, address(this), consent);
+        require(oldPreview != preview, "facade runtime remains in approved state");
+        bytes32 oldHash = router.publishVerifiedPolicyContentRoot(p);
+        IStreamContentRootPublication.Record memory oldRecord = router.contentRootRecord(oldHash);
+        bytes memory oldBinding = abi.encode(router.policyContentRootBinding(oldHash));
+        require(
+            oldHash
+                == keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_POLICY_CONTENT_ROOT_RECORD_V2"),
+                        block.chainid,
+                        address(router),
+                        oldRecord,
+                        router.policyContentRootBinding(oldHash)
+                    )
+                ),
+            "original independent record preimage"
+        );
+        require(oldRecord.stateHash == oldPreview);
+        require(router.consumedArtistContentConsent(consent));
+        require(snapshots.revertToState(snapshot), "restore original comparison");
+        bytes32 hash = router.publishVerifiedPolicyContentRoot(p);
+        IStreamContentRootPublication.Record memory current = router.contentRootRecord(hash);
+        require(
+            hash
+                == keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_POLICY_CONTENT_ROOT_RECORD_V2"),
+                        block.chainid,
+                        address(router),
+                        current,
+                        router.policyContentRootBinding(hash)
+                    )
+                ),
+            "current independent record preimage"
+        );
+        require(
+            hash != oldHash && current.routeHash != oldRecord.routeHash
+                && current.stateHash == preview
+        );
+        // Only the route/runtime-dependent commitments differ. Compare every other encoded field.
+        oldRecord.routeHash = 0;
+        oldRecord.stateHash = 0;
+        current.routeHash = 0;
+        current.stateHash = 0;
+        require(keccak256(abi.encode(current)) == keccak256(abi.encode(oldRecord)));
+        require(
+            keccak256(abi.encode(router.policyContentRootBinding(hash))) == keccak256(oldBinding)
+        );
+        require(
+            router.collectionContentRootHead(1) == hash
+                && router.consumedArtistContentConsent(consent)
+        );
+        PV.Binding memory empty;
+        require(
+            keccak256(abi.encode(router.policyContentRootBinding(bytes32(uint256(42)))))
+                == keccak256(abi.encode(empty))
         );
     }
 

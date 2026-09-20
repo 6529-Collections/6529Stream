@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamMetadataRenderer.sol";
+import { StreamArtistDisplayJSON } from "./StreamArtistDisplayJSON.sol";
 import "../../interfaces/stream/metadata/IStreamMetadataServingFacts.sol";
 import "../../vendor/openzeppelin/Strings.sol";
 import "../../vendor/openzeppelin/Base64.sol";
@@ -10,6 +11,35 @@ import "../../vendor/openzeppelin/Base64.sol";
 library StreamMetadataRenderPreparation {
     using Strings for uint256;
     error MetadataJSONLimitExceeded(uint256 bytes_, uint256 maximum);
+
+    function defaultContractURI() public pure returns (string memory) {
+        return dataURI('{"name":"6529 Stream","description":"6529 Stream NFT collections."}');
+    }
+
+    /// @notice Encode the existing prepared collection fields and already-read live attribution.
+    /// @dev Pure byte preparation only; the Router retains every collection/finality/live read.
+    function attributedCollectionURI(
+        string memory name,
+        string memory description,
+        string memory image,
+        bytes memory attribution
+    ) public pure returns (string memory) {
+        return dataURI(
+            string(
+                abi.encodePacked(
+                    '{"name":"',
+                    name,
+                    '","description":"',
+                    description,
+                    '","image":"',
+                    image,
+                    '"',
+                    StreamArtistDisplayJSON.nested(attribution),
+                    "}"
+                )
+            )
+        );
+    }
 
     function collectionURI(string memory name, string memory description, string memory image)
         public

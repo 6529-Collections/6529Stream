@@ -21,6 +21,9 @@ import {
     IStreamScopedContentRootPublication as Scoped
 } from "../../../smart-contracts/interfaces/stream/metadata/IStreamScopedContentRootPublication.sol";
 import {
+    IStreamPolicyContentRootPublicationV2 as PolicyRoot
+} from "../../../smart-contracts/interfaces/stream/metadata/IStreamPolicyContentRootPublicationV2.sol";
+import {
     IStreamMetadataServingFacts as Facts
 } from "../../../smart-contracts/interfaces/stream/metadata/IStreamMetadataServingFacts.sol";
 import {
@@ -63,6 +66,23 @@ contract StreamRouterCodecParityTest is StaticMetadataRoutingFixture {
         for (uint8 kind; kind < 4; ++kind) {
             _corpus(_root(kind));
         }
+    }
+
+    function testPolicyRootMalformedCalldataBothRefuseAtomically() public {
+        _corpus(_root(4));
+        _corpus(_root(5));
+        core.setPointer(keccak256("ARTIST_REGISTRY"), address(0));
+        _sameFailure(_root(4));
+        _sameFailure(_root(5));
+    }
+
+    function testFuzzCanonicalPolicyRootFieldsKeepExactError(
+        bool publish,
+        uint256 collectionId,
+        bytes32 previous,
+        string calldata uri
+    ) public {
+        _sameFailure(_encodeRoot(publish ? 5 : 4, collectionId, previous, uri));
     }
 
     function testPairedInvalidCollectionTokenAndArtistPreserveFirstError() public {
@@ -233,6 +253,14 @@ contract StreamRouterCodecParityTest is StaticMetadataRoutingFixture {
         view
         returns (bytes memory)
     {
+        if (kind >= 4) {
+            Root.Publication memory value = Root.Publication(collectionId, previous, 0, uri);
+            return kind == 4
+                ? abi.encodeCall(
+                    PolicyRoot.previewPolicyContentRootPublication, (value, address(this))
+                )
+                : abi.encodeCall(PolicyRoot.publishVerifiedPolicyContentRoot, (value));
+        }
         if (kind < 2) {
             Root.Publication memory value = Root.Publication(collectionId, previous, 0, uri);
             return kind == 0

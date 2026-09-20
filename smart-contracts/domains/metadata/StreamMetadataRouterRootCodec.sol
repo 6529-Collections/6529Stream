@@ -6,6 +6,12 @@ import {
 import {
     IStreamScopedContentRootPublication as S
 } from "../../interfaces/stream/metadata/IStreamScopedContentRootPublication.sol";
+import {
+    IStreamPolicyContentRootPublicationV2 as V
+} from "../../interfaces/stream/metadata/IStreamPolicyContentRootPublicationV2.sol";
+import {
+    StreamMetadataPolicyContentRootV2 as PolicyRoot
+} from "./StreamMetadataPolicyContentRootV2.sol";
 import { StreamMetadataRouterContent as Content } from "./StreamMetadataRouterContent.sol";
 import { StreamMetadataContentRoot as Root } from "./StreamMetadataContentRoot.sol";
 import { StreamMetadataScopedContent as Scoped } from "./StreamMetadataScopedContent.sol";
@@ -41,6 +47,17 @@ library StreamMetadataRouterRootCodec {
                 abi.decode(input[4:], (S.Publication, address));
             return Scoped.preview(scoped, layout, context, publication, publisher);
         }
+        if (selector == V.previewPolicyContentRootPublication.selector) {
+            (R.Publication memory publication, address publisher) =
+                abi.decode(input[4:], (R.Publication, address));
+            (R.Record memory prepared,) = PolicyRoot.prepare(
+                roots, Root.Context(context.core, context.artist), publication, publisher
+            );
+            return
+                ScopedState.familyCurrent(
+                    context.core, publication.collectionId, prepared.stateHash
+                );
+        }
         revert R.InvalidContentRootPublication();
     }
 
@@ -75,10 +92,42 @@ library StreamMetadataRouterRootCodec {
             S.Publication memory publication = abi.decode(input[4:], (S.Publication));
             return Scoped.publish(scoped, layout, context, publication);
         }
+        if (selector == V.publishVerifiedPolicyContentRoot.selector) {
+            R.Publication memory publication = abi.decode(input[4:], (R.Publication));
+            Root.Context memory ctx = Root.Context(context.core, context.artist);
+            (R.Record memory prepared, V.Binding memory binding) =
+                PolicyRoot.prepare(roots, ctx, publication, msg.sender);
+            (bytes32 consent, bytes32 ratification) = Content.authorize(
+                layout,
+                context,
+                publication.collectionId,
+                FAMILY,
+                ScopedState.familyCurrent(
+                    context.core, publication.collectionId, prepared.stateHash
+                )
+            );
+            recordHash = PolicyRoot.publish(roots, ctx, publication, prepared, binding, consent);
+            Content.recordApplication(
+                layout, context, publication.collectionId, FAMILY, consent, ratification
+            );
+            return recordHash;
+        }
         revert R.InvalidContentRootPublication();
     }
 
-    function readRecord(Root.State storage roots, bytes32 hash) public view returns (bytes memory) {
-        return abi.encode(Root.readRecord(roots, hash));
+    function read(Root.State storage roots, bytes calldata input)
+        public
+        view
+        returns (bytes memory)
+    {
+        bytes4 selector = bytes4(input[:4]);
+        bytes32 hash = abi.decode(input[4:], (bytes32));
+        if (selector == R.contentRootRecord.selector) {
+            return abi.encode(Root.readRecord(roots, hash));
+        }
+        if (selector == V.policyContentRootBinding.selector) {
+            return abi.encode(PolicyRoot.readBinding(hash));
+        }
+        revert R.InvalidContentRootPublication();
     }
 }

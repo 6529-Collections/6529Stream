@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamMetadataPolicyContentRootV2 as PolicyRoot
+} from "../../smart-contracts/domains/metadata/StreamMetadataPolicyContentRootV2.sol";
+import {
+    IStreamPolicyContentRootPublicationV2 as PolicyRootInterface
+} from "../../smart-contracts/interfaces/stream/metadata/IStreamPolicyContentRootPublicationV2.sol";
+import {
     IStreamMetadataFullViews,
     IStreamMetadataHistoricalFullView
 } from "../../smart-contracts/interfaces/stream/metadata/IStreamMetadataFullViews.sol";
@@ -441,6 +447,52 @@ contract RouterCodecReference is StreamModuleBase {
         recordHash =
             StreamMetadataContentRoot.publish(_contentRoots, ctx, publication, prepared, consent);
         _recordContentApplication(publication.collectionId, CONTENT_ROOT, consent, ratification);
+    }
+
+    // V2 method bodies frozen from integration 13be0020; only type qualification differs.
+    function previewPolicyContentRootPublication(
+        IStreamContentRootPublication.Publication calldata publication,
+        address publisher
+    ) external view returns (bytes32) {
+        _requireContentCollection(publication.collectionId);
+        (IStreamContentRootPublication.Record memory prepared,) = PolicyRoot.prepare(
+            _contentRoots,
+            StreamMetadataContentRoot.Context(address(core), address(artistRegistry)),
+            publication,
+            publisher
+        );
+        return StreamMetadataScopedContentState.familyCurrent(
+            address(core), publication.collectionId, prepared.stateHash
+        );
+    }
+
+    function publishVerifiedPolicyContentRoot(
+        IStreamContentRootPublication.Publication calldata publication
+    ) external returns (bytes32 recordHash) {
+        _requireContentCollection(publication.collectionId);
+        StreamMetadataContentRoot.Context memory ctx =
+            StreamMetadataContentRoot.Context(address(core), address(artistRegistry));
+        (
+            IStreamContentRootPublication.Record memory prepared,
+            PolicyRootInterface.Binding memory binding
+        ) = PolicyRoot.prepare(_contentRoots, ctx, publication, msg.sender);
+        (bytes32 consent, bytes32 ratification) = _authorizeContentWrite(
+            publication.collectionId,
+            CONTENT_ROOT,
+            StreamMetadataScopedContentState.familyCurrent(
+                address(core), publication.collectionId, prepared.stateHash
+            )
+        );
+        recordHash = PolicyRoot.publish(_contentRoots, ctx, publication, prepared, binding, consent);
+        _recordContentApplication(publication.collectionId, CONTENT_ROOT, consent, ratification);
+    }
+
+    function policyContentRootBinding(bytes32 recordHash)
+        external
+        view
+        returns (PolicyRootInterface.Binding memory)
+    {
+        return PolicyRoot.readBinding(recordHash);
     }
 
     function previewScopedContentRootPublication(
