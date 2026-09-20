@@ -1,5 +1,8 @@
 # Current sale conservation campaign
 
+For the separate non-WAIVED original documentary producer fixture, see
+[current documentary conservation](current-documentary-conservation.md).
+
 `test/current/StreamCurrentStackInvariant.t.sol:StreamCurrentStackInvariantTest`
 targets only `StreamCurrentStackHandler.step` against the sealed current stack.
 Core, Manager, Ledger, Artist, delayed governance, split wallet, escrow, entropy,
