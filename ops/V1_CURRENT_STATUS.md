@@ -26,8 +26,8 @@ The full-v1 candidate remains unfinished.
 - **Preservation root publication:** the frozen standard batch at `ae540f10`
   passes all 24 cases, including 256 fuzz inputs. Its trace joins 2,150 native
   CREATE observations and 122 exact retained-byte carriers; all 79 production
-  coordinates actually created fit the deployment limits. Final evidence sealing
-  is in progress. These results do not cover later source changes or the full
+  coordinates actually created fit the deployment limits. The evidence packet is sealed
+  after independent readback. These results do not cover later source or the full
   Artist/Safe ceremony.
 - **VIEW preservation:** the first producer/checkpoint/manifest batch at
   `7701ad89` passes all 46 cases, including 256 fuzz inputs. All 47 captured

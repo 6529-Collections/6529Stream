@@ -57,7 +57,7 @@ Keep builders implementing while bounded frozen test batches run.
   passes root55. Complete original scoped inventory/archive callers and Safe
   reconciliation; keep historical ABI129 and newer profiles explicit.
 - Testing `01a0a68e-9941-7b13-aff3-d559e39613c4`: standard24 passed with exact
-  actual CREATE and retained-byte joins; finish independent seal/readback.
+  actual CREATE and retained-byte joins; independent seal/readback is complete.
   Launch the reviewed frozen metric48 next, one bounded capture, original caps.
 - Capacity `01a0be37-2432-7a63-8820-fc42f159eb1d`: Rights8 passed; graph-reader
   review and eight test-only cases integrated. Prepare the exact root16 native
