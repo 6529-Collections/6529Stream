@@ -23,7 +23,8 @@ ABI/type/storage check in 20.359 seconds. This does not generate bytecode or
 establish complete-system acceptance. Original RC1 remains unchanged.
 
 - Delegated policy/sale clients (`b99b3781`) and mint-grace governance callers
-  (`9ac63a11`) pass all 773 root package tests, generation, build and strict
+  (`9ac63a11`), followed by delegated economics15/royalty-freeze20 callers
+  (`6b71507e`), pass all 797 root package tests, generation, build and strict
   types. The exact ABI52 fixture check also passes. These callers explicitly
   retain their historical `44af244e` source; refreshing grace callers for the
   later mode-2 Manager consumer is a separate pending join.
@@ -235,7 +236,7 @@ Earlier scoped captures in this batch retain their own source boundaries:
   callers (`be596707`) pass all 719 root client package tests, generation,
   build, strict types and their exact retained ABI49 fixture check. These
   clients explicitly target their frozen original producer; delegated-mode
-  and policy-grace additions now pass 773 package tests as recorded above against ABI52.
+  and policy-grace/economics additions now pass 797 package tests as recorded above against ABI52.
 - Mint policy grace is source-integrated as `8c60b099`, with root's exact
   delayed-governance selector catalogs in `9dd5aeaa`. Sixteen focused and
   five actual-Safe cases are authored. Exact accepted-profile sizing finds

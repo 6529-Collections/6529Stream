@@ -58,8 +58,9 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
   snapshot is integrated (`e290dc4a`,37 root tests and profile/example checks),
   followed by the additive frozen Standing consumer now being built.
 - Clients delivered delegated Artist consent (`b99b3781`) and grace workflow
-  (`9ac63a11`,root773 tests plus exact ABI52 check). Remaining work includes
-  delegated economics15/freeze20, joined-source grace refresh and other original
+  (`9ac63a11`), then economics15/royalty-freeze20 (`6b71507e`): root797 tests
+  plus exact ABI52 check pass. Remaining work includes original attestation24,
+  joined-source grace refresh and other original
   families. Simulated Safe plans do not prove actual Safe execution.
 - Testing delivered full37 construction/activation and genuine C2PA composition
   (`2aed78f5`, `a86febaa`); Registry13 scoped native cases pass. It now fills
