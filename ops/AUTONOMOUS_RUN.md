@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `014d252c`: Museum floor capture, completed-burn provider fix, direct receipt interfaces and Attribution partial size repair. ABI97: 2,579 sources/zero errors. Museum/Core47 and floor/provider47 pass on separate exact captures; root clients1,286 and Museum floor43 pass. |
+| Source checkpoint | `4bf06b80`: DIRECT products/ledger, fitting Router, V2 inventory/factory and Museum clients. ABI99: 2,619 sources/zero errors; root clients1,332. Native evidence remains source-specific. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,42 +29,45 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 20 September
 
-Latest intake is `014d252c`; ABI97 passes all 2,579 Solidity sources at
-`b82a4bd1` in 24.688 seconds. Later capture code changes no Solidity.
-Museum/Core master47 and floor/provider47 pass on their separate source captures;
-joined Router86 passes but remains oversized. Root clients1,286 and Museum
-floor43 pass. The new independent review task is visible in Stream delivery.
+Latest source is `4bf06b80`. ABI99 checks 2,619 sources at `9755630d` with zero
+errors. Root clients now pass 1,332 tests. DIRECT ledger73 and original-auction11
+pass on separate exact captures; the Router fits but its corrected focused run
+and actual current/Safe acceptance remain pending. See V1_CURRENT_STATUS for
+source-specific measurements and limitations.
 
 Current ownership supersedes historical assignments below:
 
-- A: creation-carrier8 accepted; Attribution read repair integrated `323625be`
-  but still 4,420 bytes over. Refreshed inert admission/codec01/02 packet is in
-  independent review; improve personhood v4 test oracles without applying held code.
-- B: cached V2 snapshot/reference22 retry; finish complete V2 COLLECTION inventory,
-  actual V2 factory and STATIC projection. Original V1 factory/provider unchanged.
-- C: metric immutable-byte32 test retry; finish prospective reference and scoped
-  finality/STATIC worker. Coordinate exact V2 source/factory roles with B.
-- Mint: finish the original three DIRECT products, actual callback cases and
-  shared caller/floor joins. Preserve original APIs, funding and signature domains.
-- Burn: finish recovered-authority profile10 across seven owners, original history
-  and continuation/replay domains. Capability flags remain zero until implemented.
-- Museum: floor capture integrated `014d252c`, root43 passes. Build coherent native
-  tier/floor/intent packet composition, retaining all 19 requirement statuses.
-  Frozen profiles remain unchanged; DIRECT needs distinct typed history support.
-- Clients: entropy package integrated/root1,286. Finish native Museum anchor/master
-  callers on exact `e558addd`/ABI94; later paid-floor/DIRECT is a separate profile.
-- Conservation/native `01a0be37-2432-7a63-8820-fc42f159eb1d`: two separate47 cohorts
-  pass. Finish DIRECT consumer canonical admission correction and 464-byte size
-  excess; finish burn-provider14 retry and actual current6/Artist3 artifact assembly.
-- Testing: finish Router V2 codec capacity repair (isolated candidate 461 bytes
-  over), then current Terminal10/INSTANT8/Safe. Build explicit Core floor binding
-  and genuine WAIVED commerce fixture alongside this work; no global exemption.
-- Independent review `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: personhood v3 and Museum
-  capture reviews complete; review current inert Artist admission/codec packet.
+- A: isolated reviewed Artist admission/codec patch is locally allowed and
+  applied in D:/repos/6529Stream-artist-admission-reviewed. Owner7 passes and
+  original ABI/layout is preserved. Finish capacity and coherent handoff;
+  personhood v5 stays inert pending its separate review.
+- B: collection inventory/factory/projection integrated `9755630d`. Finish typed
+  V2 provider, statement and sanction consumers with C. Correct only the diagnosed
+  reference fixture gas ordering; preserve the original 10-pass/12-fail capture.
+- C: actual metric-publication native15 is running. Finish prospective reference
+  and scoped finality/STATIC plus the actual combined provider dispatch.
+- Mint: original DIRECT products are integrated; typed auction11 passes. Own the
+  sole frozen actual-current DIRECT7 run and its follow-up diagnosis.
+- Burn: freeze the reviewed recovered-authority profile10 batch across seven
+  concrete owners. Capability31 is bounded to its implemented first graph;
+  broader histories and runtime acceptance remain explicit. Coordinate A's exact
+  Owner/error-declaration changes at function level.
+- Museum: finish additive native tier/floor/intent packet composition. Preserve
+  frozen profiles and all 19 statuses; unresolved evidence remains explicit.
+- Clients: Museum callers and readable modules integrated, root1,332 passes.
+  Build separate DIRECT/floor profile on exact `8bb6dfe2`/ABI98.
+- Conservation/native `01a0be37-2432-7a63-8820-fc42f159eb1d`: DIRECT ledger73
+  passes. Finish the genuine selective compiler/cache proof, then reuse Mint's
+  exact current graph for the six additional cases. Artist3 awaits fitting
+  Attribution. Do not duplicate the running DIRECT7 compiler.
+- Testing: own Router corrected100 retry, current Terminal/INSTANT20 and the
+  next five commerce fixture groups. Keep genuine floor binding and explicit
+  declarations; free-only controls stay unbound. Do not change production caps.
+- Independent review `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: inspect only the
+  personhood v5 test/doc delta against the recorded v4 late-failure oracle finding.
 
 Root owns architecture, shared interfaces, integration and final closure.
-Preparation remains optional; the whole-purchase gas target remains open.
-No funding or onchain action is needed. Held artifacts stay unapplied.
+No funding or onchain action is needed. All other held artifacts remain unapplied.
 
 
 - Root owns architecture, integration and delivery. ABI70 covers all 2,329

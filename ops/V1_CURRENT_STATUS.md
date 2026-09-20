@@ -18,60 +18,61 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 20 September integrated batch
 
-Latest source checkpoint: `014d252c`. Whole-source ABI97 checks all 2,579
-sources with zero errors in 24.688 seconds at `b82a4bd1`; the later Museum
-capture changes no Solidity. These are type/storage checks. Runtime evidence
-below applies only to its recorded source. Original RC1 is unchanged.
+Latest source checkpoint: `4bf06b80`. Whole-source ABI99 checks all 2,619
+Solidity sources with zero errors in 25.187 seconds at `9755630d`; the later
+change is signing documentation only. This is type/storage evidence, not runtime
+acceptance. Original RC1 remains unchanged.
 
-- Museum/Core floor, master selection, master-waiver JSON and SaleRights now
-  pass all 47 focused cases after two test-only harness fixes (`7ce22d00`).
-  The 198-source capture has 88 nonempty production products within limits;
-  it excludes later floor/provider/DIRECT changes. Earlier tier/catalog51
-  remains separate evidence on its original source.
-- The official paid conservation floor (`98fcd45f`) and native provider pass
-  34 + 13 focused cases on frozen `7d9040dc`; all 77 nonempty production
-  products fit. These use typed surrounding boundaries. The six actual-current
-  and three actual-Artist cases, whole-purchase gas and DIRECT remain pending.
-  Optional preparation preserves one-transaction buying. Historical identical
-  releases reuse genuine evidence. Completed-burn collection identity is
-  corrected in `766a5f3c`; its changed provider has a separate runtime retry.
-- Shared direct-sale receipt interfaces (`13be0020`) are integrated. Mint and
-  Conservation are joining the three original native/ERC20 fixed-price and
-  English-auction products. Original APIs, signatures and funding remain;
-  universal and DIRECT histories are distinct. Review caught extra admission
-  methods absent on the original products; correction and size repair are active.
-- Joined Router factoring (`31ecbf80`, guide `b82a4bd1`) passes 86/86 focused
-  tests, including six properties with 256 fuzz inputs. Its exact V2 capture
-  is 28,600 runtime bytes, 4,024 over the unchanged limit. A newer isolated
-  candidate reduces that to 25,037, still 461 over; it is not yet integrated
-  or runtime accepted. Actual Terminal10/INSTANT8/Safe integration awaits fit.
-- Artist creation carriers pass eight actual Factory/child cases on `ee91a1e9`.
-  The Attribution terminal-read repair (`323625be`) preserves ABI/storage and
-  removes 1,522 bytes, but remains 28,996 bytes (4,420 over). Its six original
-  read-oracle cases are authored, not executed. Held changes remain unapplied.
-- Compact metric transport (`50bf39d5`) passes 25 scoped cases/three fuzz
-  properties, with 18.20m/17.22m isolated write/read costs still over budget.
-  A further immutable-byte reader has 31 passes and one diagnosed test-oracle
-  failure; its test-only retry is running. No full-current gas acceptance yet.
-- Museum floor capture (`014d252c`) passes 43 root Python cases in 4.273 seconds,
-  covering exact historical receipts, optional preparation and tier compatibility.
-  Independent source and capture reviews are clear. Earlier tier38, condition36
-  and conservation100 cohorts overlap and must not be summed. Positive captures
-  are synthetic; DIRECT, supplemental and complete packet composition remain.
-- Entropy-succession clients (`f5f24974`) pass 1,286 root checks including build,
-  generation and strict types. Their frozen profile remains separate from actual
-  full-current Safe execution. Native Museum anchor/master callers are building.
-  Actual foundation entropy cutover16 passes; actual Artist successor7 is source
-  integrated (`cfcedb8e`). Production AUTH1 (`02d4fc0e`) is a storage-cooled,
-  typed-boundary measurement, not a fresh-transaction release floor.
-- V2 snapshot/reference source (`4730cf01`) has a test-only 22-case retry underway.
-  V2 inventory/factory, scoped finality, genuine prospective reference and recovered
-  Artist authority profile10 continue in parallel. Personhood v3 has bounded
-  independent source clearance; missing test oracles are being added to an inert
-  successor. That does not lift its recorded application denial.
+- The integrated conservation ledger now passes 73 focused cases on frozen
+  `844d5f32`: 34 universal, 25 DIRECT and 14 native-provider cases. All 82
+  nonempty production products fit; the floor is 24,535 runtime bytes. These
+  tests use typed surrounding boundaries. Actual current/Safe purchases,
+  actual Artist flows and the whole-purchase gas target remain pending.
+- The original native/ERC20 fixed-price and English-auction products now produce
+  distinct authenticated DIRECT receipts (`e3ff6308`). Original signing and
+  funding rules are preserved. Eleven original-auction tests pass on their
+  67-source capture; all 18 production outputs fit. The seven actual-current
+  DIRECT cases are compiling separately. Optional preparation remains optional.
+- Router factoring (`8bb6dfe2`) now fits at 24,290 runtime bytes with unchanged
+  original ABI/storage. Its first 100-case run passes 98 and exposes two new
+  test-fixture defects. Test-only corrections (`73592f66`) are running on a
+  separate frozen capture. The 20 current Terminal/INSTANT/Safe cases now have
+  genuine Core floor binding and explicit WAIVED declarations (`fecac47b`);
+  their runtime acceptance remains pending.
+- The immutable-byte metric reader (`97cbf65e`) passes 32 scoped cases, including
+  four properties with 256 fuzz inputs. Isolated fresh-frame/shared-warm costs
+  are 14,883,823 write and 10,655,194 read gas, excluding transaction intrinsic
+  cost. The original actual-publisher nine-case retry is running; this does not
+  establish full-current gas acceptance.
+- Collection V2 inventory, matched source factory and nonrecursive STATIC source
+  projection are integrated (`9755630d`). Independent source reviews are clear;
+  19 selected products fit and 20 cases are authored. Actual provider dispatch,
+  complete materialization and runtime acceptance are still being built. The
+  separate snapshot/reference22 capture passes all ten snapshot cases but fails
+  all twelve reference cases at a fixture constructor gas-order check. A fixture
+  correction is underway; production caps are unchanged.
+- Native Museum anchor/tier/master clients and their readability follow-up
+  (`ceba25d6`, `af50468c`) pass all 1,332 root package tests in 123.992 seconds,
+  including generation, build and strict types. Their exact ABI94 fixture also
+  passes regeneration check. This is client evidence, not actual Safe execution.
+  DIRECT/floor callers are the next separate source profile.
+- Museum floor capture (`014d252c`) retains 43 root Python passes. Native
+  tier/floor/intent packet composition is being completed with all 19 evidence
+  requirements explicit. Positive controls are synthetic; incomplete documentary,
+  personhood, media and archive joins cannot count as a complete packet.
+- Artist admission/codec repair is now applied only in an isolated checkout after
+  a renewed automatic review allowed the exact independently reviewed patch.
+  Seven Owner tests pass and paired ABI/layout checks preserve the original
+  surface; selected capacity and integration remain pending. This allowance does
+  not apply to other held patches. Personhood v5 remains inert under review.
+  Recovered-authority profile10 is nearing source handoff, not runtime acceptance.
+- Earlier Museum/Core master47 and Artist carrier8 passes remain bounded to their
+  recorded sources. Attribution is still 28,996 runtime bytes in the integrated
+  source; the isolated repair has not yet established joined deployment capacity.
 
 Complete current-stack/Safe, stateful/fuzz/gas/CI acceptance, source freeze and
 matching testnet demonstration remain required. Expanded v1 is incomplete.
+
 
 - LOW_SECURITY INSTANT entropy and direct original-policy reads (`4010ec2a`)
   pass 47 focused native cases on the producer's recorded source. Sale handling
