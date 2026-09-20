@@ -337,6 +337,8 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Mint phase freeze](docs/current-mint-phase-freeze.md) retains original terminal
+  governance, permanent Ledger constraints and bounded successor copying.
 - [Reference Mode payload preparation](docs/current-reference-mode-payload.md)
   preserves complete original payloads, preview identities and staged byte retention.
 - [Mint executor policy grace](docs/current-mint-policy-grace.md) preserves original
