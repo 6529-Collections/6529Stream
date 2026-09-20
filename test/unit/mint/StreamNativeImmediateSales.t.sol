@@ -957,17 +957,25 @@ contract StreamNativeImmediateSalesTest is NativeImmediateSalesFixture {
         returns (bytes32)
     {
         bytes32 key = recorder.settlementKey(address(immediate), c.executionBinding.executionId);
-        return keccak256(
+        bytes32 balances = keccak256(
             abi.encode(
                 p.payer.balance,
                 wallet.balance,
                 address(escrow).balance,
                 address(immediate).balance,
                 recorder.totalOfficialSettled(address(0)),
-                recorder.settlementConsumed(key),
+                recorder.settlementConsumed(key)
+            )
+        );
+        bytes32 receipts = keccak256(
+            abi.encode(
                 immediateFloor.settlementReceipt(key),
                 immediateFloor.firstSale(1),
-                immediate.executionReceipt(c.executionBinding.executionId),
+                immediate.executionReceipt(c.executionBinding.executionId)
+            )
+        );
+        bytes32 counters = keccak256(
+            abi.encode(
                 immediate.nextExecutionNonce(p.saleId, p.payer),
                 immediate.saleRecord(p.saleId).soldQuantity,
                 immediate.refundLiability(),
@@ -980,6 +988,7 @@ contract StreamNativeImmediateSalesTest is NativeImmediateSalesFixture {
                 _payerCount(p.payer)
             )
         );
+        return keccak256(abi.encode(balances, receipts, counters));
     }
 
     function _id(bytes32 digest) internal pure returns (bytes32) {
@@ -1145,18 +1154,26 @@ contract StreamNativeImmediateSalesLateFloorTest is NativeImmediateSalesFixture 
             address(0),
             0
         );
-        return keccak256(
+        bytes32 balances = keccak256(
             abi.encode(
                 p.payer.balance,
                 wallet.balance,
                 address(escrow).balance,
                 address(immediate).balance,
-                recorder.totalOfficialSettled(address(0)),
+                recorder.totalOfficialSettled(address(0))
+            )
+        );
+        bytes32 receipts = keccak256(
+            abi.encode(
                 recorder.settlementResult(key),
                 immediateFloor.settlementReceipt(key),
                 immediateFloor.firstSale(1),
                 immediate.executionReceipt(c.executionBinding.executionId),
-                immediate.executionStatus(c.executionBinding.executionId),
+                immediate.executionStatus(c.executionBinding.executionId)
+            )
+        );
+        bytes32 counters = keccak256(
+            abi.encode(
                 immediate.nextExecutionNonce(p.saleId, p.payer),
                 immediate.saleRecord(p.saleId).soldQuantity,
                 immediate.refundLiability(),
@@ -1168,5 +1185,6 @@ contract StreamNativeImmediateSalesLateFloorTest is NativeImmediateSalesFixture 
                 ledger.counterValue(manager.previewCounterValueKey(1, PHASE, COUNTER, subject))
             )
         );
+        return keccak256(abi.encode(balances, receipts, counters));
     }
 }
