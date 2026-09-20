@@ -1,5 +1,12 @@
 # Changelog
 
+## Canonical metadata subjects for published scopes
+
+- Register RELEASE, SEASON and VIEW subjects from the Metadata host's authenticated
+  original scope records. Preserve all writer permissions, membership validation,
+  old interface identifiers and existing storage. See the
+  [integration guide](docs/integrations/published-scope-metadata-subjects.md).
+
 ## Closed VIEW root history and required consent
 
 - Add an explicit VIEW-only state path sharing the original scoped root history,
