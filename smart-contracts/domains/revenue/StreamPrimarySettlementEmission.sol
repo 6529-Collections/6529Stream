@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/revenue/StreamPrimarySettlementTypes.sol";
+import "./StreamPrimarySaleFloorCall.sol";
 
 /// @notice Canonical official settlement events emitted in the recorder's linked call context.
 /// @dev Immediate calls supply equal expected/current hashes; deferred calls retain the purchase hash.
@@ -83,6 +84,26 @@ library StreamPrimarySettlementEmission {
         address paymentAdapter,
         bytes32 expectedPolicyHash
     ) public {
+        StreamPrimarySaleFloorCall.record(c, r);
+        _emitSettlement(c, r, paymentAdapter, expectedPolicyHash);
+    }
+
+    function emitSupplementalSettlement(
+        StreamNativeSupplementalTypes.NativeSupplementalCandidate memory original,
+        StreamNativeSupplementalTypes.NativeSupplementalResult memory supplemental,
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate memory context,
+        StreamPrimarySettlementTypes.PrimarySettlementResult memory result
+    ) public {
+        StreamPrimarySaleFloorCall.supplemental(original, supplemental);
+        _emitSettlement(context, result, address(0), supplemental.originalExpectedPrimaryPolicyHash);
+    }
+
+    function _emitSettlement(
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c,
+        StreamPrimarySettlementTypes.PrimarySettlementResult memory r,
+        address paymentAdapter,
+        bytes32 expectedPolicyHash
+    ) private {
         emit PrimaryRevenueSettled(
             r.settlementKey,
             _CLASS,

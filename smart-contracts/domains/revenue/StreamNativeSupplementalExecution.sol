@@ -111,9 +111,7 @@ library StreamNativeSupplementalExecution {
         context.executor = r.executor;
         context.executionBinding.executionId = r.executionId;
         context.orchestrationOrder = 0; // No new mint order: events reference the original mint identity.
-        StreamPrimarySettlementEmission.emitSettlement(
-            context, common, address(0), r.originalExpectedPrimaryPolicyHash
-        );
+        StreamPrimarySettlementEmission.emitSupplementalSettlement(c, r, context, common);
         emit NativeSupplementalRevenueSettled(
             1, c.originalFloor.sale.settlementId, c.purchaseId, c.originalFloor.sale.payer, r
         );
