@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `12f6d341`: paid burn c717a3e1, Museum recipe ace7eb95 and burn/finality clients integrated; root150 Museum/463 client tests pass. Whole2,108-source ABI clean; focused burn21 accepted, current18 pending. Artifact-based fixture pilot40 passes; no compile speedup established. See the [20 September batch](V1_CURRENT_STATUS.md#20-september-integrated-batch); immutable RC1 remains unchanged. |
+| Source checkpoint | `e9af0d34`: paid-burn clients0466f9d3, Core incident-abort6e21e932, Museum notices62dc2990 and inventory serialization integrated. Root502 client/93 Museum tests pass; independently verified paid-burn39 and genuine metric replay pass. Full publication still fails gas; full-v1 remains unfinished. See [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch). |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,24 +29,39 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 20 September
 
-Both payment retry captures are complete and independently verified. Testing
-completed the warmed receipt-fixture artifact pilot: 40 tests pass, with no
-compile speedup established. It now verifies the prepared burn closure and
-prepares the agreed current/Safe/fuzz group without launching another compiler. Paid burn source is integrated as c717a3e1, with 21 focused gate
-tests passing and eighteen current-stack cases pending. Root's combined
-2,108-source ABI/type/storage check passes. Burn prepares the one current-stack
-successor, now authorized after the passing fixture pilot; original capture
-inputs remain immutable.
-Clients finished offer calls and prefreeze/finality warnings; they now build
-ERC20 paid-burn callers and Safe plans from frozen batch38 ABI. Museum's
-populated six-source recipe is integrated, with 150 root tests and independent
-source review clear. Museum prepares the exact missing/stale native product
-request; root owns the subsequent coordinated build and local chain launch. Metadata completes the corrected publication
-fixture after its duplicate-image setup failure; revenue independently reviews
-exact proposals and runs the combined metric replay only after valid export.
-The price lead's reviewed, fitting dedicated-carrier proposal is complete and
-awaits exact local approval after automatic application rejection; no alternate
-application path or implicit approval is used. Root owns integrations.
+The active owners and next coherent batches are:
+
+- Root: shared architecture, source integration, independent review, full
+  acceptance and delivery. Core incident-abort high-water fix is integrated;
+  Burn owns its focused runtime and affected inventory consumers.
+- Artist/protocol lead: exact frozen V2 entropy successor permission, pending
+  request coverage and configured role34 fallback, preserving historical
+  coordinator binding. Selected products fit after fixed-worker extraction;
+  regression/activation source remains in progress.
+- Revenue lead: genuine fixed-runtime split-wallet clones and pinned singleton
+  implementation for role6, with a distinct wallet version and unchanged
+  original profile-domain structure. Existing RC1 identities remain historical.
+- Metadata lead: staged authenticated file-inventory preparation and redundant
+  publication-copy removal under the actual transaction cap; noncollection
+  preservation scopes follow. No gas guard or original identity is waived.
+- Mint task: distinct ordinary/incident-capable role35 fallback, real same-Ledger
+  snapshot/import and one-way writer retirement, exact governed abort and Safe
+  activation. Shared Core/entropy and old launch script remain outside its scope.
+- Burn task: Core incident-gap acceptance and gap-aware CollectionTokenInventory,
+  four finality/render readers and offchain reference manifest. Paid-burn39 is
+  accepted only for its recorded source.
+- Museum task: remaining Artist/general/notarized attestation source and semantic
+  mappings. Owner-notice batch is integrated; native compile packet stays fixed.
+- Client task: exact staged inventory preparation and Safe callers from the
+  metadata lead's frozen interface; paid-burn502 package checks are complete.
+- Testing task: isolated full37 genesis composition/helpers and current/Safe
+  cases. Source-only30 current/Safe/fuzz preparation is complete and preserved;
+  a new freeze/build follows stabilization and resolution of size blockers.
+
+Do not duplicate owned source or launch competing broad compilers. All pending
+exact approval-review denials remain in force; no rejected patch is applied.
+Preserve RC1 and original evidence, and label implementation separately from
+matching runtime acceptance.
 
 ## Reboot recovery assignments: 19 September
 
