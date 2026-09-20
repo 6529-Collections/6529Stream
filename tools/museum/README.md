@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Complete PREMIS authority-field accounting](../../docs/museum-premis-authority-coverage.md)
+adds a V2 package for all 35 enumerated profile fields, retained term evidence,
+explicit local/unresolved dispositions and unreviewed close-match proposals.
+The original profile and V1 snapshot bytes remain unchanged.
+
 [Artist C2PA standing conflicts](../../docs/museum-artist-c2pa-conflicts.md)
 adds a separate V2 consumer for complete supplied conflict prefixes, original
 historical acknowledgement guards and independent token/collection Standing.

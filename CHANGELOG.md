@@ -146,6 +146,11 @@ the release policy in `docs/release-policy.md`.
 
 - Add pinned, bounded burn-program discovery and source/target closure warnings;
   clarify Safe CALL capability versus EIP-2612 and Permit2 signature support.
+- Add complete offline PREMIS authority-field accounting across events, outcomes,
+  agent classes, rights bases and fixity algorithms. Retain original vocabulary
+  bytes and retrieval observations, with explicit unresolved/local fields and
+  prospective close matches while preserving all genesis schema definitions.
+
 - Add a V2 Museum Artist C2PA Standing consumer that retains complete supplied
   conflict histories and checks original historical acknowledgement guards.
   Preserve V1 bytes, independent token/collection scopes and live Display;

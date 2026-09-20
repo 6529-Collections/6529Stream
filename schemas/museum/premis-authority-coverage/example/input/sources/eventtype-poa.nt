@@ -1,0 +1,38 @@
+<http://id.loc.gov/vocabulary/preservation/eventType/poa> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.loc.gov/mads/rdf/v1#Authority> .
+<http://id.loc.gov/vocabulary/preservation/eventType/poa> <http://www.loc.gov/mads/rdf/v1#authoritativeLabel> "policy assignment" .
+<http://id.loc.gov/vocabulary/preservation/eventType/poa> <http://www.loc.gov/mads/rdf/v1#code> "poa" .
+<http://id.loc.gov/vocabulary/preservation/eventType/poa> <http://www.loc.gov/mads/rdf/v1#definitionNote> "The process of assigning a policy to an object."@en .
+<http://id.loc.gov/vocabulary/preservation/eventType/poa> <http://www.loc.gov/mads/rdf/v1#scopeNote> "Policies can be related to rights, preservation, access, etc."@en .
+<http://id.loc.gov/vocabulary/preservation/eventType/poa> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.loc.gov/premis/rdf/v3/Event> .
+<http://id.loc.gov/vocabulary/preservation/eventType/poa> <http://www.loc.gov/mads/rdf/v1#isMemberOfMADSScheme> <http://id.loc.gov/vocabulary/preservation> .
+<http://id.loc.gov/vocabulary/preservation/eventType/poa> <http://www.loc.gov/mads/rdf/v1#isMemberOfMADSScheme> <http://id.loc.gov/vocabulary/preservation/eventType> .
+<http://id.loc.gov/vocabulary/preservation/eventType/poa> <http://www.loc.gov/mads/rdf/v1#isMemberOfMADSCollection> <http://id.loc.gov/vocabulary/preservation/eventType/collection_PREMIS> .
+<http://id.loc.gov/vocabulary/preservation/eventType/poa> <http://www.loc.gov/mads/rdf/v1#adminMetadata> _:b17httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa .
+_:b17httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://id.loc.gov/ontologies/RecordInfo#RecordInfo> .
+_:b17httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa <http://id.loc.gov/ontologies/RecordInfo#recordStatus> "new"^^<http://www.w3.org/2001/XMLSchema#string> .
+_:b17httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa <http://id.loc.gov/ontologies/RecordInfo#recordChangeDate> "2017-09-07T00:00:01"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+_:b17httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa <http://id.loc.gov/ontologies/RecordInfo#recordContentSource> <dlc> .
+<http://id.loc.gov/vocabulary/preservation/eventType/poa> <http://www.loc.gov/mads/rdf/v1#adminMetadata> _:b30httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa .
+_:b30httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://id.loc.gov/ontologies/RecordInfo#RecordInfo> .
+_:b30httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa <http://id.loc.gov/ontologies/RecordInfo#recordStatus> "modified"^^<http://www.w3.org/2001/XMLSchema#string> .
+_:b30httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa <http://id.loc.gov/ontologies/RecordInfo#recordChangeDate> "2018-09-24T00:00:01"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+_:b30httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa <http://id.loc.gov/ontologies/RecordInfo#recordContentSource> <dlc> .
+<http://id.loc.gov/vocabulary/preservation/eventType/poa> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept> .
+<http://id.loc.gov/vocabulary/preservation/eventType/poa> <http://www.w3.org/2004/02/skos/core#prefLabel> "policy assignment" .
+<http://id.loc.gov/vocabulary/preservation/eventType/poa> <http://www.w3.org/2004/02/skos/core#scopeNote> "Policies can be related to rights, preservation, access, etc."@en .
+<http://id.loc.gov/vocabulary/preservation/eventType/poa> <http://www.w3.org/2004/02/skos/core#definition> "The process of assigning a policy to an object."@en .
+<http://id.loc.gov/vocabulary/preservation/eventType/poa> <http://www.w3.org/2004/02/skos/core#notation> "poa" .
+<http://id.loc.gov/vocabulary/preservation/eventType/poa> <http://www.w3.org/2004/02/skos/core#inScheme> <http://id.loc.gov/vocabulary/preservation> .
+<http://id.loc.gov/vocabulary/preservation/eventType/poa> <http://www.w3.org/2004/02/skos/core#inScheme> <http://id.loc.gov/vocabulary/preservation/eventType> .
+<http://id.loc.gov/vocabulary/preservation/eventType/poa> <http://www.w3.org/2004/02/skos/core#changeNote> _:b53httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa .
+_:b53httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/vocab/changeset/schema#ChangeSet> .
+_:b53httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa <http://purl.org/vocab/changeset/schema#subjectOfChange> <http://id.loc.gov/vocabulary/preservation/eventType/poa> .
+_:b53httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa <http://purl.org/vocab/changeset/schema#creatorName> <dlc> .
+_:b53httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa <http://purl.org/vocab/changeset/schema#createdDate> "2017-09-07T00:00:01"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+_:b53httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa <http://purl.org/vocab/changeset/schema#changeReason> "new"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://id.loc.gov/vocabulary/preservation/eventType/poa> <http://www.w3.org/2004/02/skos/core#changeNote> _:b61httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa .
+_:b61httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/vocab/changeset/schema#ChangeSet> .
+_:b61httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa <http://purl.org/vocab/changeset/schema#subjectOfChange> <http://id.loc.gov/vocabulary/preservation/eventType/poa> .
+_:b61httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa <http://purl.org/vocab/changeset/schema#creatorName> <dlc> .
+_:b61httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa <http://purl.org/vocab/changeset/schema#createdDate> "2018-09-24T00:00:01"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+_:b61httpc0liddOtlocdOtgovvocabularypreservationeventTypepoa <http://purl.org/vocab/changeset/schema#changeReason> "modified"^^<http://www.w3.org/2001/XMLSchema#string> .

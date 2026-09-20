@@ -1,0 +1,39 @@
+<http://id.loc.gov/vocabulary/preservation/eventType/mem> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.loc.gov/mads/rdf/v1#Authority> .
+<http://id.loc.gov/vocabulary/preservation/eventType/mem> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.loc.gov/premis/rdf/v3/Action> .
+<http://id.loc.gov/vocabulary/preservation/eventType/mem> <http://www.loc.gov/mads/rdf/v1#authoritativeLabel> "metadata modification" .
+<http://id.loc.gov/vocabulary/preservation/eventType/mem> <http://www.loc.gov/mads/rdf/v1#code> "mem" .
+<http://id.loc.gov/vocabulary/preservation/eventType/mem> <http://www.loc.gov/mads/rdf/v1#definitionNote> "The process of making changes to the metadata of an object."@en .
+<http://id.loc.gov/vocabulary/preservation/eventType/mem> <http://www.loc.gov/mads/rdf/v1#scopeNote> "The modification is of metadata, not an object. Compare with \"modification\" event."@en .
+<http://id.loc.gov/vocabulary/preservation/eventType/mem> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.loc.gov/premis/rdf/v3/Event> .
+<http://id.loc.gov/vocabulary/preservation/eventType/mem> <http://www.loc.gov/mads/rdf/v1#isMemberOfMADSScheme> <http://id.loc.gov/vocabulary/preservation> .
+<http://id.loc.gov/vocabulary/preservation/eventType/mem> <http://www.loc.gov/mads/rdf/v1#isMemberOfMADSScheme> <http://id.loc.gov/vocabulary/preservation/eventType> .
+<http://id.loc.gov/vocabulary/preservation/eventType/mem> <http://www.loc.gov/mads/rdf/v1#isMemberOfMADSCollection> <http://id.loc.gov/vocabulary/preservation/eventType/collection_PREMIS> .
+<http://id.loc.gov/vocabulary/preservation/eventType/mem> <http://www.loc.gov/mads/rdf/v1#adminMetadata> _:b18httpc0liddOtlocdOtgovvocabularypreservationeventTypemem .
+_:b18httpc0liddOtlocdOtgovvocabularypreservationeventTypemem <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://id.loc.gov/ontologies/RecordInfo#RecordInfo> .
+_:b18httpc0liddOtlocdOtgovvocabularypreservationeventTypemem <http://id.loc.gov/ontologies/RecordInfo#recordStatus> "new"^^<http://www.w3.org/2001/XMLSchema#string> .
+_:b18httpc0liddOtlocdOtgovvocabularypreservationeventTypemem <http://id.loc.gov/ontologies/RecordInfo#recordChangeDate> "2017-09-07T00:00:01"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+_:b18httpc0liddOtlocdOtgovvocabularypreservationeventTypemem <http://id.loc.gov/ontologies/RecordInfo#recordContentSource> <dlc> .
+<http://id.loc.gov/vocabulary/preservation/eventType/mem> <http://www.loc.gov/mads/rdf/v1#adminMetadata> _:b31httpc0liddOtlocdOtgovvocabularypreservationeventTypemem .
+_:b31httpc0liddOtlocdOtgovvocabularypreservationeventTypemem <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://id.loc.gov/ontologies/RecordInfo#RecordInfo> .
+_:b31httpc0liddOtlocdOtgovvocabularypreservationeventTypemem <http://id.loc.gov/ontologies/RecordInfo#recordStatus> "modified"^^<http://www.w3.org/2001/XMLSchema#string> .
+_:b31httpc0liddOtlocdOtgovvocabularypreservationeventTypemem <http://id.loc.gov/ontologies/RecordInfo#recordChangeDate> "2018-09-24T00:00:01"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+_:b31httpc0liddOtlocdOtgovvocabularypreservationeventTypemem <http://id.loc.gov/ontologies/RecordInfo#recordContentSource> <dlc> .
+<http://id.loc.gov/vocabulary/preservation/eventType/mem> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept> .
+<http://id.loc.gov/vocabulary/preservation/eventType/mem> <http://www.w3.org/2004/02/skos/core#prefLabel> "metadata modification" .
+<http://id.loc.gov/vocabulary/preservation/eventType/mem> <http://www.w3.org/2004/02/skos/core#scopeNote> "The modification is of metadata, not an object. Compare with \"modification\" event."@en .
+<http://id.loc.gov/vocabulary/preservation/eventType/mem> <http://www.w3.org/2004/02/skos/core#definition> "The process of making changes to the metadata of an object."@en .
+<http://id.loc.gov/vocabulary/preservation/eventType/mem> <http://www.w3.org/2004/02/skos/core#notation> "mem" .
+<http://id.loc.gov/vocabulary/preservation/eventType/mem> <http://www.w3.org/2004/02/skos/core#inScheme> <http://id.loc.gov/vocabulary/preservation> .
+<http://id.loc.gov/vocabulary/preservation/eventType/mem> <http://www.w3.org/2004/02/skos/core#inScheme> <http://id.loc.gov/vocabulary/preservation/eventType> .
+<http://id.loc.gov/vocabulary/preservation/eventType/mem> <http://www.w3.org/2004/02/skos/core#changeNote> _:b54httpc0liddOtlocdOtgovvocabularypreservationeventTypemem .
+_:b54httpc0liddOtlocdOtgovvocabularypreservationeventTypemem <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/vocab/changeset/schema#ChangeSet> .
+_:b54httpc0liddOtlocdOtgovvocabularypreservationeventTypemem <http://purl.org/vocab/changeset/schema#subjectOfChange> <http://id.loc.gov/vocabulary/preservation/eventType/mem> .
+_:b54httpc0liddOtlocdOtgovvocabularypreservationeventTypemem <http://purl.org/vocab/changeset/schema#creatorName> <dlc> .
+_:b54httpc0liddOtlocdOtgovvocabularypreservationeventTypemem <http://purl.org/vocab/changeset/schema#createdDate> "2017-09-07T00:00:01"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+_:b54httpc0liddOtlocdOtgovvocabularypreservationeventTypemem <http://purl.org/vocab/changeset/schema#changeReason> "new"^^<http://www.w3.org/2001/XMLSchema#string> .
+<http://id.loc.gov/vocabulary/preservation/eventType/mem> <http://www.w3.org/2004/02/skos/core#changeNote> _:b62httpc0liddOtlocdOtgovvocabularypreservationeventTypemem .
+_:b62httpc0liddOtlocdOtgovvocabularypreservationeventTypemem <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/vocab/changeset/schema#ChangeSet> .
+_:b62httpc0liddOtlocdOtgovvocabularypreservationeventTypemem <http://purl.org/vocab/changeset/schema#subjectOfChange> <http://id.loc.gov/vocabulary/preservation/eventType/mem> .
+_:b62httpc0liddOtlocdOtgovvocabularypreservationeventTypemem <http://purl.org/vocab/changeset/schema#creatorName> <dlc> .
+_:b62httpc0liddOtlocdOtgovvocabularypreservationeventTypemem <http://purl.org/vocab/changeset/schema#createdDate> "2018-09-24T00:00:01"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+_:b62httpc0liddOtlocdOtgovvocabularypreservationeventTypemem <http://purl.org/vocab/changeset/schema#changeReason> "modified"^^<http://www.w3.org/2001/XMLSchema#string> .
