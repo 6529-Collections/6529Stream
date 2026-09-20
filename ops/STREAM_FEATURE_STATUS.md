@@ -16,60 +16,65 @@ different milestones.
 
 ## Latest integration checkpoint: 20 September
 
-Latest source checkpoint: `75f963d4`. Whole-source ABI101 checks all 2,700
-Solidity sources at `350ae359` with zero errors in 26.484 seconds; the later
-change adds clients only. This is type/storage evidence, not runtime acceptance.
-Original RC1 remains unchanged.
+Latest source checkpoint: `421104a6`. Whole-source ABI103 checks all 2,776
+Solidity sources at `5a68721b` with zero errors in 27.515 seconds. The subsequent
+change adds an opt-in four-case curated-purchase fixture, separately type-checked.
+These checks do not establish runtime acceptance. Original RC1 remains unchanged.
 
-- Router factoring fits at 24,290 runtime bytes and passes all 100 focused cases,
-  including nine properties with 256 fuzz inputs, on frozen `3e43c38a`.
-  Original ABI/storage is preserved. Actual Terminal/INSTANT/Safe20 and the
-  additional current-commerce fixtures (`e7e9af4b`, `4353d528`, `530bad35`) await
-  the complete fitting Artist graph.
-- Conservation ledger73 and original-auction11 retain their separate successful
-  captures. The seven actual-current DIRECT cases require the oversized actual
-  Attribution owner: their old-source build is diagnostic, not an acceptance run
-  that can pass by excluding Artist. Six actual universal conservation cases run
-  separately with explicit typed Artist/metadata boundaries. Artist3 also waits
-  for the fitting owner. Whole-purchase cold gas remains open.
-- Artist admission/creation repair is integrated (`fed9fc01`) after renewed
-  automatic review allowed its exact reviewed patch. Owner7 passes; original
-  ABI/storage is preserved. Recovered class1/class3 history and repeated imports
-  (`a7ca4975`) plus direct economics and V3 continuations (`350ae359`) are source
-  integrated with independently reviewed authored cases. Delegation, personhood/
-  C2PA combinations and broader corrected/multiple graphs remain to complete.
-- Personhood evidence (`8972da42`) is now source integrated after a separate
-  automatic-review allowance. It retains original op24/op60 records, documentary
-  proofs and currentness; 28 regression cases are authored. Independent joined
-  review found no silent loss or stale-proof admission, but confirmed that the
-  recovered and attestation-capable profiles still cannot migrate their combined
-  history. The assigned builder is completing that composition. Native acceptance
-  and the separate conservation-provider consumer remain pending.
-- Artist capacity work continues on all joined features. The earlier isolated
-  Attribution split reaches 24,408 bytes, but adding recovery and personhood
-  requires further factoring. The joined repair is not yet source integrated or
-  deployable. No features or production limits are being removed to make it fit.
-- Snapshot/reference22 now passes all 22 cases after the precise fixture gas-order
-  correction, with original production artifacts preserved. V2 inventory/factory
-  (`9755630d`) is integrated; the full V2 provider/statement/sanction and scoped
-  finality/Discovery composition remains in build. These scoped captures do not
-  establish complete provider acceptance.
-- The metric immutable-reader32 capture remains passing. Actual native16 passes
-  seven of nine after independently regenerating the original replay context;
-  the two remaining failures are real downstream currentness/read-gas limits.
-  Original publication measures 15,664,908 gas including intrinsic cost. Complete
-  supplement read and finality consumption still need capacity work.
-- Native Museum packet composition (`f2d5f372`) passes 60 root checks and exact
-  generator verification. DIRECT source/capture (`4d683cf1`) passes 76 root
-  source, wrapper and compatibility checks in 7.323 seconds. All 19 requirements
-  stay explicit; synthetic positive controls are not an actual acquisition packet.
-  Historical RIGHTS and the remaining documentary joins are being completed.
-- DIRECT clients (`75f963d4`) join original native/ERC20 buys and English-auction
-  operations, immutable receipts and direct/legacy/indexed Safe transports.
-  Root package validation passes all 1,374 tests in 125.609 seconds, including
-  generation, build and strict types; the exact ABI98 fixture check also passes.
-  The next batch completes all 29 state-changing product variants, including
-  administrative calls. Real contract/Safe execution remains separate.
+- Recovered delegation is source integrated (`ccbaf41f`): original grants,
+  revocations, uses, mixed consent history and repeated imports, with 43 authored
+  cases. The explicitly supported seven-owner feature graph is now 127. Recovered
+  op24/personhood/C2PA composition is the next active batch; corrected, multiple
+  and collaborator combinations remain explicit missing profiles.
+- Original personhood proof production (`8972da42`) and its conservation consumer
+  (`abbf0cb7`) are source integrated. The consumer authenticates the actual selected
+  Artist graph and preserves distinct original RESOLVED-summary and WAIVER-record
+  hash domains, registration versus operative identity and imported origins.
+  All 16 focused reader tests pass on `fbff83a3` after a test-only chain restoration
+  correction; provider19 and actual Artist/current paid acceptance remain pending.
+  Its additive getter exposes the original ten configuration pins and original
+  gas configurations without rewriting historical provider evidence.
+- Scoped inventory, archive coverage, metadata, STATIC, V2 policy provider and
+  profile Discovery are source integrated (`94a987a8`, including both dependency
+  commits). The 85 authored cases have not run as a full scoped ceremony. Five
+  final selected products fit; the combined provider has only two bytes of runtime
+  margin at 24,574. Required VIEW and prospective pre-sale reference remain open.
+- Snapshot/reference22 passes its recorded capture. V2 manifest17, provider-read7
+  and actual Reference component3 pass separate source-specific captures. The last
+  uses actual Metadata/Schema/Store/Membership with documented typed surrounding
+  components; large fixture gas is not transaction-capacity acceptance.
+- Joined Artist read factoring is integrated (`f9f46535`), preserving original
+  ABI/storage. Attribution remains 25,369 runtime bytes on its capture. A joined
+  eight-product size check at `70c0d9c3` also found Identity26,351 and Payout25,800
+  over the limit. Independent read-only factoring is active for both. Payout's
+  first new selected gate fits at24,311; this repair is not yet integrated.
+  An automatic-review denial stopped a separate replay-write relocation before
+  execution. That exact proposal remains unapplied; original host writes remain.
+- Router24,290 passes all100 focused cases, including nine 256-input properties,
+  on frozen `3e43c38a`. Conservation73 and original-auction11 retain their separate
+  passing evidence. Frozen universal6 is entering runtime verification with typed
+  Artist/metadata boundaries. Actual DIRECT7, Artist3 and complete current/Safe
+  acceptance require the fitting joined graph. Cold whole-purchase gas remains open.
+- Actual metric native16 remains seven passes/two failures from downstream
+  currentness/read capacity. Original publication costs15,664,908 gas including
+  intrinsic cost. The next fixed byte/context reader retains all original fresh
+  checks and limits; no new acceptance or successful retry is claimed.
+- All29 original DIRECT mutable product calls, including administrative variants,
+  are supported by direct, legacy-Safe and indexed-Safe clients (`45eb2bfa`). Root
+  package validation passes1,390 tests, including generation/build/strict types,
+  in123.314seconds. Original ABI98 evidence remains pinned. Whole37-role/Artist60
+  caller coverage and additional op24 workflows are being built; RPC tests do not
+  establish actual contract/Safe execution.
+- Museum original RIGHTS history now joins first-sale evidence (`9c181e2e`), with
+  73 root checks passing. Prior native packet60 and DIRECT76 captures remain
+  separate and overlap other suites. The new immutable-provider configuration
+  profile is being built; all19 requirements and unavailable documentary joins
+  remain explicit. Synthetic controls are not a captured acquisition packet.
+- Current Safe/delegated and contract-signer fixtures (`46c27181`, `05e06c29`)
+  now construct one actual graph per recipe and explicitly bind the paid-sale
+  conservation floor where required. The curated4 fixture (`421104a6`) retains
+  explicit typed surrounding components. Source-reviewed recipes await execution.
+  Mint is extending actual-stateful/fuzz tests while this frozen testing proceeds.
 
 Complete current-stack/Safe, stateful/fuzz/gas/CI acceptance, source freeze and
 matching testnet demonstration remain required. Expanded v1 is incomplete.
@@ -106,14 +111,14 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `4bf06b8078cd95541ecc1e5dd8f8307e16066de0`; see the [20 September batch](#latest-integration-checkpoint-20-september) for bounded evidence and remaining joins |
+| Current integration source | `421104a6ed09c1909b8b3306f2ea10dd2c0cda5c`; see the [20 September batch](#latest-integration-checkpoint-20-september) for source-specific evidence and remaining work |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
 | Further integrated Artist handoff | `9ea144c85768050ec910cc8534af13bcac82e20d`, received during assembly: closed-origin dormancy/rotation extension on the preceding handoff; ART24 |
 | Integrated entropy client handoff | `642d017d9d0cd8ee9b6b813abbdbe10a4c6b1265`; client.entropy-authority |
 | Integrated OwnerRecords capture handoff | `57ac8d041c9adc479f1061fafec748c8330ac974`; MUSEUM-36 |
-| Latest broad cheap compilation evidence | 2,619-source ABI/type/storage pass at `9755630d` in 25.187 seconds (ABI99). Historical ABI52 and additive mode-2 ABI56 remain explicitly client-pinned; neither establishes whole-system runtime acceptance. |
+| Latest broad cheap compilation evidence | ABI103: 2,776 sources at `5a68721b`, zero errors in27.515seconds. Later curated4 fixture passes its scoped ABI check. Historical client fixtures retain their recorded source identities; none establishes whole-system runtime acceptance. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
 | Latest focused native evidence | Separate captures: entropy 10, Royalty 11, mint 101, actual-Core 29, final burn 49 and later burn-credit 31 distinct cases pass. Repaired native-price 76 passes at 766c5dfd with independent source/artifact attestation; STATIC output manifest 9 passes in a separate capture. Root clients 398 and a museum authority/profile cohort of 131 pass. Other museum cohorts overlap. No complete-system pass is inferred. |
 
@@ -228,7 +233,7 @@ These 164 rows are capabilities and delivery checks of different sizes. Row coun
 | Feature | Build | Tests | Integration | Scope and remaining work |
 | --- | --- | --- | --- | --- |
 | [ART01](#art01-evidence) Fixed Artist module, seven owners, governed parameters and deployment | Built | Partly tested | Partial | Fixed facade/Coordinator/seven owners/Archive and original domain/storage pins. Reviewed admission and explicit creation carriers are source integrated (`fed9fc01`); Owner7 and original ABI/layout checks pass. **Remaining:** Joined Attribution capacity after recovery/personhood, actual deployment, cold gas and complete manifest/window acceptance. Other held artifacts remain distinct. |
-| [ART02](#art02-evidence) Identity registration, documents, revision and personhood/deployment prerequisites | Built | Partly tested | Partial | Canonical identity, revisions and direct/contract-wallet signatures. Original op24-selected notarization proofs, retained summaries, currentness and prospective Artist prerequisites are source integrated (`8972da42`) after exact local allowance; 28 regression cases are authored. **Remaining:** Native/current/Safe acceptance, conservation-provider consumption and recovered personhood/C2PA history composition. Registration and operative identity hashes remain distinct; documentary verification does not establish institutional identity truth. |
+| [ART02](#art02-evidence) Identity registration, documents, revision and personhood/deployment prerequisites | Built | Partly tested | Partial | Original identity and op24-selected proof/summary/currentness production (`8972da42`) plus actual conservation consumer (`abbf0cb7`) are source integrated. Reader16 passes on `fbff83a3`; provider19 and original28 producer cases remain separately qualified. RESOLVED summary, WAIVER record, registration/operative identity and original imported registry stay distinct. **Remaining:** Actual producer/consumer/Safe and paid-current acceptance, recovered personhood/C2PA composition. |
 | [ART03](#art03-evidence) Two-sided binding proposal, acceptance, refusal and withdrawal | Built | Partly tested | Partial | Actual primary acceptance; claimed/refused/withdrawn lifecycle and generation/hash pinning, with explicit acceptance prerequisites. **Remaining:** Post-acceptance dispute/revocation/repudiation and withdrawal are built under ART06 but native-pending; migration of multiple generations is ART34. |
 | [ART04](#art04-evidence) Collaborator identity and complete collaborator acceptance | Built | Tests written | Not integrated | Original collaborator identity, roles/hash arrays and separate acceptance are implemented under the admitted PRIMARY_ONLY policy. **Remaining:** Multi-party ALL_COLLABORATORS/THRESHOLD/COLLABORATOR_QUORUM policy creation and use are missing ART41; actual-current dynamic commerce execution and collaborator migration remain pending. |
 | [ART05](#art05-evidence) Permissionless artist-bound attribution claims | Built | Tests written | Not integrated | Append-only permissionless claims and combined Artist/Platform claim reads; filing alone does not adjudicate attribution. **Remaining:** Latest native acceptance; the separate dispute/repudiation recipes and withdrawal are tracked in ART06. |
@@ -261,9 +266,9 @@ These 164 rows are capabilities and delivery checks of different sizes. Row coun
 | [ART32](#art32-evidence) Operation60 readiness and detached publication hydration/consumers | Built | Partly tested | Not integrated | Original52/17/24 direct class 1 kinds1–6/9/10 plus explicit 7/8 full publication evidence, catalog/signatures/latest heads; successor deployment needs fresh approval; same Metadata consumed map remains authoritative. **Remaining:** Native4 readiness6/publication7/join3 fail on missing guard preimages, invalid URI or Safe-wrapped join inputs. Artist lead repairs the source-backed fixture defects; rerun required. The earlier23-case typed-provider proof is a separate scope. |
 | [ART33](#art33-evidence) Operation60 complete entropy finding history hydration | Built | Tests written | Not integrated | Original ten-word findings plus exact entropy target/intent/admission/runtime, original-domain origin, complete ordered23 records/latest/activity and both replay cells; current selected intent/epoch still required. **Remaining:** fa688 integrated7209675b; nine source-reviewed tests /787-source ABI,15 distinct selected products fit across recorded captures; native4 predates this feature. Only default timing and complete single-collection living profiles. |
 | [ART34](#art34-evidence) Migration of multiple identities, collaborators and corrected binding generations | In progress | Tests written | Not integrated | Original-living generation-1 PRIMARY_ONLY multiple-Artist/multiple-collection hydration is source-integrated (`8cc47857`) with ten reviewed actual-owner/Safe cases. Complete per-Artist guards and seven-owner/Archive atomicity are preserved. The delegation successor (`48754d47`) repairs those new size overruns at its exact source; all eighteen selected products fit. Combined multiple-Artist delegation (`588341d2`) adds fourteen reviewed actual-owner/Safe recipes with complete global journal and grant-use accounting. Complete original living record combinations (`75ad082d`) now include exhaustive economics/attestation witnesses and atomic seven-owner imports, with twenty independently reviewed authored cases. Joined11-product capacity repair (`6d3e55df`) fits at its exact563-source capture. **Remaining:** Native acceptance, mixed record-family combinations, collaborator graphs, corrected/rebound generations, attribution disputes and Platform correction histories. |
-| [ART35](#art35-evidence) Migration of delegated, rotated, estate, dormancy and recovered authority | In progress | Tests written | Not integrated | Original living delegation and complete record combinations remain integrated. Recovered class1/class3 singleton generation-one PRIMARY_ONLY histories now preserve seven-owner original records, era clocks, replay/nonce guards, pending continuations and repeated imports (`a7ca4975`). Direct economics/V3 continuation extension (`350ae359`) has nineteen additional reviewed authored cases. **Remaining:** Runtime acceptance, recovered delegation and attestation/personhood combinations, corrected/multiple/collaborator graphs and complete authority-transition permutations. Unsupported combinations reject rather than partially import. |
+| [ART35](#art35-evidence) Migration of delegated, rotated, estate, dormancy and recovered authority | In progress | Tests written | Not integrated | Recovered singleton generation-one PRIMARY_ONLY class1/class3 histories, original seven-owner records, era/nonce/replay guards and economics/V3 continuation are integrated. Delegation (`ccbaf41f`) adds complete grants/revocations/uses and mixed14/15/16 consent history with43 authored cases and explicit feature127. **Remaining:** Runtime acceptance, recovered op24/personhood/C2PA combinations, corrected/multiple/collaborator graphs and complete authority-transition permutations. Unsupported combinations reject atomically. |
 | [ART36](#art36-evidence) Migration of sanctions, sale/freeze/recovery approval and mixed finding histories | Not started | Not tested | Not integrated | Complete other original record families and host dependencies, including artwork-finality findings or mixed finality/entropy findings, changed timing-action histories. **Remaining:** Current complete inventory admits only original1/2/14/15/17/18/23(entropy)/24/52/54 rows. It does not silently discard unsupported receipts or copy external one-use guards. |
-| [ART37](#art37-evidence) Repeated successor migration and larger complete hydration capacity | In progress | Tests written | Not integrated | Bounded repeated recovered imports now retain flat original provenance, native journals, replay aliases and consumed continuations (`a7ca4975`, `350ae359`). Actual class1/class3/V3 and economics repeated-import scenarios are authored. **Remaining:** Execution, broader complete histories, larger/chunked transport and full composed authority capacity. Original finite bounds remain; no partial activation to evade them. |
+| [ART37](#art37-evidence) Repeated successor migration and larger complete hydration capacity | In progress | Tests written | Not integrated | Bounded repeated recovery/economics/delegation imports preserve flat original provenance, native journals, replay aliases and consumed continuations (`a7ca4975`, `350ae359`, `ccbaf41f`). Actual class1/class3/V3/economics/delegation scenarios are authored. **Remaining:** Execution, broader complete histories, larger/chunked transport and full composed authority capacity. Original finite limits remain. |
 | [ART38](#art38-evidence) C2PA credential/key-history authorship reconciliation | Built; bounded profile | Partly tested | Not integrated | Original op24 credential history and typed reconciliation (`142a3cdb`) retain unresolved standing conflicts (`22095475`) until the exact covered original op46 disposition. Root47 related offline passes; scoped worker native13 plus256 fuzz inputs pass on retained sources. Current composition/read plans are source-integrated (`a86febaa`). Museum Standing V2 (`3f0967f`) passes 27 consumer cases and preserves original historical acknowledgement guards. **Remaining:** Authenticated history capture, actual Artist/Renderer/current-graph execution, complete STATIC admission and existing Artist host size repair. Live provenance can stale original full-output hashes; their semantics are unchanged. |
 | [ART39](#art39-evidence) Complete Artist signing/recomputation client and measured ceremony rehearsal | In progress | Partly tested | Partial | Original principal and identity/delegation callers, delegated14/16 (`b99b3781`) and mint-grace workflow (`9ac63a11`) and delegated economics15/royalty-freeze20 (`6b71507e`) are source-integrated. Mode-2 grace (`e5ec5fae`) and original delegated attestation24 (`122d2288`) add exact ABI56 support. The current full client package passes1,233 cases, generation/build/strict types, with source-specific fixture checks recorded above. Collection-policy/INSTANT clients are integrated with separate source fixtures; op35 V2 adjudication/notice (`3113e16c`) and V3 rewind (`68fb843a`) clients are integrated with separate frozen profiles. **Remaining:** Other original operation families and measured actual Safe ceremonies; simulated RPC is not native execution. |
 | [ART40](#art40-evidence) Full Artist current-graph conformance, limits and operational acceptance | In progress | Partly tested | Partial | Earlier native4 completed 167 passed /39 failed on its frozen source. Fixture and harness repairs are now integrated, with 21 Python harness checks passing. **Remaining:** Rerun affected native cases on the selected combined source after capacity repair; cold gas, full fuzz/stateful limits and actual-governance/testnet acceptance. |
@@ -315,7 +320,7 @@ These 164 rows are capabilities and delivery checks of different sizes. Row coun
 | [finality.collection](#finalitycollection-evidence) Freeze a collection artwork bundle with Artist sanction | Built | Partly tested | Partial | Registry, fixed native evidence provider, Artist sanction and finalization ceremony. An earlier actual graph demonstrates one supported collection ceremony. **Remaining:** Repeat on latest source with independent exported evidence and full gas limits. Collection evidence is not proof of other scope types. |
 | [finality.facts](#finalityfacts-evidence) Reconstruct content, description, conservation and entropy facts | Built | Partly tested | Partial | Typed source readers, input manifests, image review, provenance and immutable provider/discovery bindings. **Remaining:** Latest complete native source-set and off-chain reconstruction acceptance. |
 | [finality.membership](#finalitymembership-evidence) Publish and validate named token-scope membership | Built | Partly tested | Partial | Canonical membership publication, current-Core inventory and capacity tests exist. **Remaining:** Accept final membership producers and connect each supported scope to the full ceremony. |
-| [finality.all-scopes](#finalityall-scopes-evidence) Token, release, season and view finality ceremonies | In progress | Partly tested | Not integrated | TOKEN/RELEASE/SEASON source snapshots are integrated `17e299ba`, with exact membership/source/payload/history, independent production review, ABI checks and nine authored cases. Scoped BYTE_EXACT references (`a8a17f94`) now add original Metadata authorization, immutable scope-bound history and class-2 locks with seven reviewed authored cases. **Remaining:** Native execution, complete scoped inventory/provider, PERCEPTUAL/CURATED joins and VIEW with actual selected payload/adoption. Current collection evidence does not accept these scopes. |
+| [finality.all-scopes](#finalityall-scopes-evidence) Token, release, season and view finality ceremonies | In progress | Partly tested | Not integrated | TOKEN/RELEASE/SEASON snapshots and BYTE_EXACT references now join complete scoped inventory/archive, V2 provider/STATIC and profile Discovery source (`94a987a8`).85 scoped cases are authored; selected combined provider24,574 fits with only2bytes margin. **Remaining:** Actual complete scoped ceremony, joined runtime/capacity, required VIEW adopted-source and genuine prospective pre-sale reference. Collection evidence does not accept these profiles. |
 | [finality.recovery](#finalityrecovery-evidence) Recover frozen artwork state and switch serving components | Built | Partly tested | Partial | Recovery commitments, route validation, retired lifecycles and executor-only ownership primitives exist. **Remaining:** Accept every supported original scope through actual replacement, continuity/reconstruction and retry. |
 | [finality.hosts](#finalityhosts-evidence) Retain verifiable content on original or replacement serving hosts | Built | Partly tested | Partial | Core/finality adapters, current source inventory, on-chain content checkpoints and serving-host checks. **Remaining:** Final independent byte reconstruction and migration against all supported artwork profiles. |
 
@@ -364,7 +369,7 @@ These 164 rows are capabilities and delivery checks of different sizes. Row coun
 
 | Feature | Build | Tests | Integration | Scope and remaining work |
 | --- | --- | --- | --- | --- |
-| [client.commerce](#clientcommerce-evidence) Typed native/revenue/secondary and saved inventory workflows | Built | Tested* | Partial | Existing commerce clients plus native Museum and original DIRECT purchase/auction/floor workflows are source integrated through `75f963d4`. Root package has 1,374 passes with generation/build/strict types; sixteen DIRECT operational variants cover direct/legacy/indexed Safe transport. **Remaining:** Remaining thirteen product administrative variants, exhaustive all-call mapping and real current contract/Safe execution. RPC harnesses do not establish deployed acceptance. |
+| [client.commerce](#clientcommerce-evidence) Typed native/revenue/secondary and saved inventory workflows | Built | Tested* | Partial | All29 original DIRECT mutable product variants, including administration, use direct/legacy/indexed Safe transports (`45eb2bfa`). Root package1,390 passes with generation/build/strict types; ABI98 identity preserved. **Remaining:** Whole37-role/Artist60 selector coverage and missing typed workflows, plus real current contract/Safe execution. RPC tests are not deployed acceptance. |
 | [client.entropy-authority](#cliententropy-authority-evidence) Explicit entropy finding and op60 hydration Safe client | Built | Tested* | Not integrated | Complete original entropy finding/target/intent context and typed operation60 hydration with seven owner commitments. Source 642d017d is merged as 50c553c9; independent source review is clear. **Remaining:** All 175 package tests and generation/build/type checks pass on the integration checkout; real deployed Safe/provider composition remains pending. |
 | [operator.commerce](#operatorcommerce-evidence) Saved governance, mint setup and native surplus plans | Built | Partly tested | Partial | Current deployment/catalog activation primitives and saved phase/surplus/lifecycle plans with exact current call/state checks. **Remaining:** Final full product graph deployment/activation and all caller-compatible saved workflows. Earlier deployment productsActivated=false is not a launch. c9d0353d six new surplus-plan tests are authored/source reviewed; root owns native acceptance. |
 | [conformance.commerce-gas](#conformancecommerce-gas-evidence) Collector gas, capacity and complete cross-mode conservation | In progress | Partly tested | Not integrated | Required conformance across public paid/current Safe paths and complete liabilities; this is not a new sale feature. **Remaining:** Do not waive500,000 paid single-step ceiling. Retained partial-cold/warm clearing measurements exceed it;8,755,856 historical trace is not current/all-cold. Final all-cold collector, worst-case capacity/stateful fuzz, six-host financial conservation and final-source native campaigns remain integrator-owned. |
@@ -376,7 +381,7 @@ These 164 rows are capabilities and delivery checks of different sizes. Row coun
 | [quality.repo](#qualityrepo-evidence) Developer layout, domain interfaces and contributor documentation | Built | Partly tested | Partial | Current Core/domain/interface split, explicit legacy reference area, current-stack guides, tooling and examples. **Remaining:** Keep public docs aligned with this feature register and finish examples for remaining features. A tidy layout is not product completeness. |
 | [quality.fuzz](#qualityfuzz-evidence) Modern Foundry unit, negative, fuzz and stateful testing system | Built | Partly tested | Partial | Scoped 64/256-input fuzz campaigns pass on their recorded sources. The actual-current driver 2f917fef now asserts counters, original replay/entropy records, per-payer conservation and exact receiver-failure retry, with 15 mandatory opening actions and a one-wei model sensitivity case. **Remaining:** Execute the expanded stateful campaign and broad final combined feature set; resolve failures. |
 | [quality.safe](#qualitysafe-evidence) Safe compatibility for every supported call | In progress | Partly tested | Partial | Actual Safe cohorts cover selected mint, custody, payment, Artist and governance flows; generic ordered CALL plans are integrated. Seven actual all-CALL batch tests are authored through ebcff757 but native-pending. Three-version owner matrix9 (`f0c55176`/`fd7dc021`) and terminal mint/distribution10 (`3baa6c13`/`1a4858fd`) are reviewed/type-checked, native-pending. **Remaining:** Every final ABI selector/overload/read/receive/fallback/callback needs its supported Safe path or a tested protocol-only restriction. |
-| [quality.capacity](#qualitycapacity-evidence) Full-system gas, deployment size and transaction capacity | In progress | Partly tested | Partial | Router24,290 now fits and passes100 scoped cases. Recorded Artist admission/creation and prior owner captures remain source-specific. **Remaining:** Fitting joined Attribution including recovery/personhood, full current/Safe graph, cold collector and worst-case capacity. Actual metric native16 is7PASS/2FAIL: publication15,664,908 including intrinsic, downstream currentness/read limits unresolved. Full CI and matching candidate/testnet evidence remain. |
+| [quality.capacity](#qualitycapacity-evidence) Full-system gas, deployment size and transaction capacity | In progress | Partly tested | Partial | Router24,290 passes100 scoped cases. Joined Attribution25,369, Identity26,351 and Payout25,800 are recorded size blockers; Payout first read-factoring gate24,311 fits but is not yet integrated. Scoped V2 combined provider24,574 has2bytes margin. **Remaining:** Complete joined size/current/Safe/cold collector acceptance. Actual metric native16 remains7PASS/2FAIL with downstream limits; publication15,664,908 including intrinsic. Full CI and matching candidate/testnet evidence remain. |
 | [quality.ci](#qualityci-evidence) Complete conformance, generated artifacts and CI for the new candidate | In progress | Partly tested | Not integrated | Deterministic tooling/checkers and release pipeline exist, with partial spec-rule and feature evidence coverage. **Remaining:** Refresh after implementation stabilizes: exact ABI/storage, complete requirement mapping, generators, notes/manifests, checksum bundle and full CI. |
 | [release.rc1](#releaserc1-evidence) Supported RC1 contract release and Sepolia deployment | Built | Tested* | Integrated* | Existing frozen supported release at 569bf87f1fa808787d324f6e1582924b5ccf1d40, with recorded Sepolia evidence. **Remaining:** No full-v1 completeness is implied by this earlier release. |
 | [release.full-v1](#releasefull-v1-evidence) Freeze and launch the complete expanded v1 candidate on testnet | In progress | Partly tested | Not integrated | Active implementation branch contains the expanded candidate, plus separately authored handoffs listed below. **Remaining:** Finish missing features, integrate and test the final system, freeze its source and deploy matching testnet evidence. |
