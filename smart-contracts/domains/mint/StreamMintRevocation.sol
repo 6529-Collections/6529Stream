@@ -128,7 +128,9 @@ library StreamMintRevocation {
             authorization.chainId != block.chainid || authorization.mintManager != address(this)
                 || authorization.saleAdapter == address(0) || authorization.saleId == 0
                 || authorization.collectionId == 0 || authorization.phaseId == 0
-                || authorization.saleKind > 1
+                || (authorization.saleKind != 0 && authorization.saleKind != 1
+                    && authorization.saleKind != 3 && authorization.saleKind != 12
+                    && authorization.saleKind != 13)
                 || authorization.revenueClass != keccak256("PRIMARY_SALE")
                 || claimedAuthorizer == address(0)
         ) revert IStreamMintAuthorizationRevocation.MintRevocationInvalidBinding();

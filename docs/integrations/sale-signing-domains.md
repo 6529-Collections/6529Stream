@@ -11,8 +11,9 @@ Select the getter for the authorization family being signed:
 | `NativePriceProgramAuthorization` | The same native adapter | `priceProgramEip712Domain()` | `6529StreamNativePricePrograms` |
 | `UniversalSaleAuthorization` | `StreamUniversalFixedPriceSaleAdapter` | `eip712Domain()` | `6529StreamUniversalFixedPriceSaleAdapter` |
 | Original 24-field `SaleAuthorization` for fixed/open sales | `StreamNativeImmediateSales` | `eip712Domain()` | `6529Stream Sales` |
+| Original 24-field `SaleAuthorization` for free/PWYW claims | `StreamNativeClaimSales` | `eip712Domain()` | `6529Stream Sales` |
 
-All four return version `1`, the live chain ID and the consumer's own address.
+All five return version `1`, the live chain ID and the consumer's own address.
 The `fields` bitmap is `0x0f`: name, version, chain ID and verifying contract are
 present. Salt is zero and absent from the domain; the extensions array is empty.
 Check the chain and deployed consumer address before displaying a signature
@@ -29,7 +30,9 @@ Using the fixed domain for a price-program signature fails verification.
 The [canonical immediate adapter](native-immediate-sales.md) uses the complete
 original Sales tuple. Its unsigned public path has no seller signature or sale
 authorization digest. Select its explicit signed or public entry from the
-registered authority mode.
+registered authority mode. The [canonical claim adapter](native-claim-sales.md)
+uses that same original tuple at its own address; PWYW signs a minimum and
+binds the caller's chosen price into the complete mint request.
 
 Construct the EIP-712 domain from the declared fields, hash the exact named
 authorization fields, and compare the resulting digest with the matching

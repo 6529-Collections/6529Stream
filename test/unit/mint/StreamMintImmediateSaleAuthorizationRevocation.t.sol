@@ -318,6 +318,66 @@ contract StreamMintImmediateSaleAuthorizationRevocationTest is
         manager.voidMintImmediateSaleAuthorization(a, signer, 1, "");
     }
 
+    function testEveryWhitelistedImmediateKindDirectlyVoidsHistoricalPayload() public {
+        uint8[5] memory kinds = [uint8(0), 1, 3, 12, 13];
+        manager.setPhasePaused(1, PHASE, true);
+        core.setUnavailable(true);
+        vm.warp(5000);
+        for (uint256 i; i < kinds.length; ++i) {
+            StreamPrivateSaleTypes.SaleAuthorization memory a =
+                _sale(_adapter(signer, 1, kinds[i]), kinds[i], 100 + i);
+            if (kinds[i] == 12 || kinds[i] == 13) a.unitPrice = 0;
+            bytes32 id = _literalId(a);
+            vm.prank(signer);
+            require(
+                manager.voidMintImmediateSaleAuthorization(a, signer, 1, "") == id,
+                "same canonical digest"
+            );
+            require(
+                ledger.isManagerAuthorizationUsed(address(manager), id),
+                "each approved kind uses actual Ledger"
+            );
+        }
+        require(
+            core.minted() == 0 && manager.nextOperationNonce() == 0,
+            "historical void has no mint effects"
+        );
+    }
+
+    function testDutchZeroAndPWYWHistoricalRevocationRelaysOriginalSalesProof() public {
+        uint8[3] memory kinds = [uint8(3), 12, 13];
+        for (uint256 i; i < kinds.length; ++i) {
+            StreamPrivateSaleTypes.SaleAuthorization memory a =
+                _sale(_adapter(signer, 1, kinds[i]), kinds[i], 200 + i);
+            // Economic limits are historical signature inputs, never current revocation admission.
+            a.unitPrice = kinds[i] == 3 ? type(uint256).max : 0;
+            bytes32 id = _literalId(a);
+            bytes memory proof = _proof(a);
+            vm.warp(6000 + i);
+            manager.voidMintImmediateSaleAuthorization(a, signer, 1, proof);
+            require(manager.isAuthorizationUsed(id), "original domain proof voids new kind");
+            vm.expectRevert(
+                abi.encodeWithSelector(IStreamMintLedger.AuthorizationAlreadyConsumed.selector, id)
+            );
+            manager.voidMintImmediateSaleAuthorization(a, signer, 1, proof);
+        }
+    }
+
+    function testKindWhitelistRejectsAuctionPrivateDeferredReservedAndUnknownValues() public {
+        uint8[12] memory kinds = [uint8(2), 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, 255];
+        for (uint256 i; i < kinds.length; ++i) {
+            StreamPrivateSaleTypes.SaleAuthorization memory a =
+                _sale(_adapter(signer, 1, kinds[i]), kinds[i], 300 + i);
+            _expectBinding();
+            vm.prank(signer);
+            manager.voidMintImmediateSaleAuthorization(a, signer, 1, "");
+            require(
+                !manager.isAuthorizationUsed(_literalId(a)),
+                "matching historical binding cannot widen supported kinds"
+            );
+        }
+    }
+
     function testActualSafeIdenticalSignedCallRetriesAfterLedgerWriterRestoration() public {
         (OfficialSafe account, uint256[] memory keys) = _safe();
         StreamPrivateSaleTypes.SaleAuthorization memory a =

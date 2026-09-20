@@ -97,6 +97,154 @@ library StreamERC20PrimaryRecording {
         );
     }
 
+    function executeDutch(
+        Context memory x,
+        mapping(bytes32 => bool) storage settlementConsumed,
+        mapping(
+            bytes32 => StreamPrimarySettlementTypes.PrimarySettlementResult
+        ) storage results,
+        mapping(bytes32 => uint256) storage officialSettled,
+        mapping(address => uint256) storage totals,
+        address paymentAdapter,
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate calldata candidate
+    ) public returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory) {
+        return _executeDutch(
+            x,
+            settlementConsumed,
+            results,
+            officialSettled,
+            totals,
+            paymentAdapter,
+            candidate,
+            false
+        );
+    }
+
+    function executePublicDutch(
+        Context memory x,
+        mapping(bytes32 => bool) storage settlementConsumed,
+        mapping(
+            bytes32 => StreamPrimarySettlementTypes.PrimarySettlementResult
+        ) storage results,
+        mapping(bytes32 => uint256) storage officialSettled,
+        mapping(address => uint256) storage totals,
+        address paymentAdapter,
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate calldata candidate
+    ) public returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory) {
+        return _executeDutch(
+            x, settlementConsumed, results, officialSettled, totals, paymentAdapter, candidate, true
+        );
+    }
+
+    function _executeDutch(
+        Context memory x,
+        mapping(bytes32 => bool) storage settlementConsumed,
+        mapping(
+            bytes32 => StreamPrimarySettlementTypes.PrimarySettlementResult
+        ) storage results,
+        mapping(bytes32 => uint256) storage officialSettled,
+        mapping(address => uint256) storage totals,
+        address paymentAdapter,
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate calldata candidate,
+        bool publicSale
+    ) private returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result) {
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c = candidate;
+        bytes32 recordHash = _validateDutch(x, paymentAdapter, c, publicSale);
+        bytes32 key = StreamPrimarySettlementHash.settlementKey(
+            address(this), c.saleAdapter, c.executionBinding.executionId
+        );
+        if (settlementConsumed[key]) {
+            revert IStreamPrimarySaleSettlement.SettlementAlreadyConsumed(key);
+        }
+        StreamSaleTemplate.Selection memory rights = _resolve(x, c);
+        StreamSaleTemplate.materialize(x.revenueResolver, c.sale.collectionId, rights);
+        _requireWallet(x, rights);
+        settlementConsumed[key] = true;
+        uint256 cap = _gas(x, _DEPOSIT_GAS);
+        uint256 original = _balance(c.asset, address(this), cap);
+        bytes32 commitment =
+            StreamPrimarySettlementHash.candidateCommitment(paymentAdapter, address(this), c);
+        IStreamERC20PrimarySettlementAdapter(paymentAdapter)
+            .fundERC20PrimarySale(commitment, key, c.asset, c.sale.amount);
+        if (_balance(c.asset, address(this), cap) != original + c.sale.amount) {
+            revert StreamSettlementContext.SettlementAmountMismatch(c.asset);
+        }
+        _requireContext(x);
+        _requireActive(x, c.asset);
+        StreamSettlementAdmission.requireDutchAdmission(x.moduleRegistry, paymentAdapter, c);
+        if (
+            publicSale
+                && StreamPrimarySettlementValidation.erc20PublicBindings(
+                        _validationBindings(x), paymentAdapter, c
+                    ) != recordHash
+        ) {
+            revert IStreamPrimarySaleSettlement.InvalidPrimarySale();
+        }
+        _requireCurrent(x, c, rights);
+        bool escrowed = _route(x, c, rights, cap);
+        if (_balance(c.asset, address(this), cap) != original) {
+            revert StreamSettlementContext.SettlementAmountMismatch(c.asset);
+        }
+        _requireContext(x);
+        _requireActive(x, c.asset);
+        StreamSettlementAdmission.requireDutchAdmission(x.moduleRegistry, paymentAdapter, c);
+        if (
+            publicSale
+                && StreamPrimarySettlementValidation.erc20PublicBindings(
+                        _validationBindings(x), paymentAdapter, c
+                    ) != recordHash
+        ) {
+            revert IStreamPrimarySaleSettlement.InvalidPrimarySale();
+        }
+        _requireCurrent(x, c, rights);
+        result = StreamPrimarySettlementTypes.PrimarySettlementResult(
+            commitment,
+            key,
+            rights.profileId,
+            rights.wallet,
+            c.asset,
+            c.sale.amount,
+            c.executor,
+            c.executionBinding.executionId,
+            escrowed,
+            c.operationIdentityCommitment,
+            c.currentPolicyHash,
+            c.boundPolicyHash
+        );
+        results[key] = result;
+        officialSettled[
+            _totalKey(c.sale.revenueClass, rights.profileId, rights.wallet, c.asset)
+        ] += c.sale.amount;
+        totals[c.asset] += c.sale.amount;
+        StreamPrimarySettlementEmission.emitSettlement(
+            c, result, paymentAdapter, c.sale.expectedPrimaryPolicyHash
+        );
+    }
+
+    function _validateDutch(
+        Context memory x,
+        address paymentAdapter,
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c,
+        bool publicSale
+    ) private view returns (bytes32 recordHash) {
+        if (publicSale) {
+            StreamPrimarySettlementValidation.erc20PublicFields(
+                _validationBindings(x), paymentAdapter, c
+            );
+        } else {
+            StreamPrimarySettlementValidation.erc20Fields(_validationBindings(x), paymentAdapter, c);
+        }
+        _requireContext(x);
+        _requireActive(x, c.asset);
+        StreamSettlementAdmission.requireDutchAdmission(x.moduleRegistry, paymentAdapter, c);
+        if (publicSale) {
+            return StreamPrimarySettlementValidation.erc20PublicBindings(
+                _validationBindings(x), paymentAdapter, c
+            );
+        }
+        StreamPrimarySettlementValidation.erc20Bindings(_validationBindings(x), paymentAdapter, c);
+    }
+
     function _validate(
         Context memory x,
         address paymentAdapter,

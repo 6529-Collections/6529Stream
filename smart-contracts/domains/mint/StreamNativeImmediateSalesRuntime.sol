@@ -8,6 +8,7 @@ import "./StreamNativeCuratedSaleSupport.sol";
 import "./StreamMintSaleAllowlist.sol";
 import "./StreamMintTicketHash.sol";
 import "./StreamPrivateSaleSupport.sol";
+import { StreamCanonicalSaleAuthorization } from "./StreamCanonicalSaleAuthorization.sol";
 import "./StreamSaleConsent.sol";
 import "../revenue/StreamNativeSettlementSupport.sol";
 import "../revenue/StreamNativeSettlementAdmission.sol";
@@ -380,48 +381,36 @@ library StreamNativeImmediateSalesRuntime {
         address manager,
         uint256 gasCap
     ) private view returns (bytes32 digest) {
-        if (proof.authorizer != config.signer.authorizer || proof.kind != config.signer.kind) {
-            revert S.ImmediateSaleSignerUnavailable(proof.authorizer, proof.kind);
-        }
-        if (
-            a.chainId != block.chainid || a.saleAdapter != address(this) || a.mintManager != manager
-                || a.collectionId != config.collectionId || a.phaseId != config.phaseId
-                || a.saleId != p.saleId || a.saleKind != config.saleKind
-                || a.revenueClass != keccak256("PRIMARY_SALE")
-                || a.expectedPrimaryPolicyHash != config.expectedPrimaryPolicyHash
-                || a.primaryPolicyMode != 0
-                || a.initialRecipientsHash
-                    != keccak256(
-                        abi.encode(
-                            keccak256("6529STREAM_MINT_BATCH_RECIPIENTS_V1"), b.initialRecipients
-                        )
-                    )
-                || a.beneficiariesHash
-                    != keccak256(
-                        abi.encode(
-                            keccak256("6529STREAM_MINT_BATCH_BENEFICIARIES_V1"), b.beneficiaries
-                        )
-                    )
-                || a.tokenDataArrayHash
-                    != keccak256(
-                        abi.encode(keccak256("6529STREAM_MINT_BATCH_TOKEN_DATA_V1"), b.tokenData)
-                    )
-                || a.mintCommitmentsHash
-                    != keccak256(
-                        abi.encode(
-                            keccak256("6529STREAM_MINT_BATCH_COMMITMENTS_V1"), b.mintCommitments
-                        )
-                    ) || a.payer != p.payer || a.executor != p.executor || a.asset != address(0)
-                || a.unitPrice != config.unitPrice || a.quantity != 1 || a.contentSelectionHash != 0
-                || a.policyHash != config.mintPolicyHash || a.nonce == 0
-                || a.deadline < block.timestamp || a.finalizeBy != 0
-        ) revert S.InvalidImmediateSale();
-        digest = StreamPrivateSaleHash.digest(
-            block.chainid, address(this), StreamPrivateSaleHash.authorizationBody(a)
+        StreamPrivateSaleTypes.SaleAuthorization memory expected;
+        expected.chainId = block.chainid;
+        expected.saleAdapter = address(this);
+        expected.mintManager = manager;
+        expected.collectionId = config.collectionId;
+        expected.phaseId = config.phaseId;
+        expected.saleId = p.saleId;
+        expected.saleKind = config.saleKind;
+        expected.revenueClass = keccak256("PRIMARY_SALE");
+        expected.expectedPrimaryPolicyHash = config.expectedPrimaryPolicyHash;
+        expected.initialRecipientsHash = keccak256(
+            abi.encode(keccak256("6529STREAM_MINT_BATCH_RECIPIENTS_V1"), b.initialRecipients)
         );
-        if (!StreamPrivateSaleSupport.validSignature(
-                proof.authorizer, proof.kind, digest, proof.signature, gasCap
-            )) revert S.ImmediateSaleSignatureInvalid(proof.authorizer);
+        expected.beneficiariesHash = keccak256(
+            abi.encode(keccak256("6529STREAM_MINT_BATCH_BENEFICIARIES_V1"), b.beneficiaries)
+        );
+        expected.tokenDataArrayHash =
+            keccak256(abi.encode(keccak256("6529STREAM_MINT_BATCH_TOKEN_DATA_V1"), b.tokenData));
+        expected.mintCommitmentsHash = keccak256(
+            abi.encode(keccak256("6529STREAM_MINT_BATCH_COMMITMENTS_V1"), b.mintCommitments)
+        );
+        expected.payer = p.payer;
+        expected.executor = p.executor;
+        expected.unitPrice = config.unitPrice;
+        expected.quantity = 1;
+        expected.policyHash = config.mintPolicyHash;
+        // Original zero requirements: primaryPolicyMode, asset, contentSelectionHash, finalizeBy.
+        return StreamCanonicalSaleAuthorization.verify(
+            config.signer.authorizer, config.signer.kind, expected, a, proof, gasCap
+        );
     }
 
     function retained(

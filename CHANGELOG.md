@@ -61,6 +61,19 @@ the release policy in `docs/release-policy.md`.
   147,146 dependency-frame gas; complete current-graph acceptance remains separate.
   All82 concrete native-closure products fit, with both256-input fuzz oracles passing.
 
+## Canonical native claims and closed Dutch recording
+
+- Add original Sales v1 signed/public ZERO_PRICE_CLAIM and bounded PWYW
+  singleton execution. Zero choices mint without official revenue or a floor
+  receipt; positive choices settle the full chosen amount through the existing
+  strict native path. Preserve reveal credits and atomic Manager replay.
+- Share original full-payload seller verification and extend historical
+  immediate revocation only to kinds 0, 1, 3, 12 and 13. Existing fixed/open
+  execution eligibility and prior signing domains remain unchanged.
+- Add closed signed/public ERC20 Dutch recorder entries with original funding,
+  results and floor semantics, plus exact public witness rechecks. Author
+  focused regressions; combined native/current acceptance remains pending.
+
 ## Canonical signed and public native immediate sales
 
 - Add a separate fixed/open adapter for the original 24-field Sales v1

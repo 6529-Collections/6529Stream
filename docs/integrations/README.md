@@ -33,6 +33,8 @@ deployment evidence.
 | Elect and authorize royalties frozen at each prepared mint | [Artist snapshot consent](../artist-snapshot-royalty-consent.md) and [prepared snapshot decision](../adr/0044-prepared-royalty-snapshot-consent.md) |
 | Record artist approval of exact sale terms | [Sale-parameter consent](sale-parameter-consent.md) |
 | Execute canonical signed or public native fixed/open sales | [Canonical immediate sales](native-immediate-sales.md) |
+| Execute canonical free and pay-what-you-want native claims | [Canonical claims](native-claim-sales.md) |
+| Integrate the closed signed/public ERC20 Dutch recorder entries | [Dutch recorder](erc20-dutch-recorder.md) |
 | Integrate the new native/ERC-20 funding boundary | [Sale funding](sale-funding.md) |
 | Prepare a token and settle its native payment atomically | [Prepared native settlement](prepared-native-settlement.md) |
 | Accept a signed native offer for a new token or selected work | [Native primary offers](native-primary-offers.md) |

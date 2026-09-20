@@ -32,6 +32,8 @@ import "./StreamPreparedNativeOfferRecording.sol";
 import "../../interfaces/stream/revenue/IStreamDeferredNativePrimarySaleSettlement.sol";
 import "../../interfaces/stream/revenue/IStreamNativePrimarySaleSettlement.sol";
 import "../../interfaces/stream/revenue/IStreamNativePublicPrimarySaleSettlement.sol";
+import "../../interfaces/stream/revenue/IStreamERC20DutchPrimarySaleSettlement.sol";
+import "../../interfaces/stream/revenue/IStreamERC20PublicDutchPrimarySaleSettlement.sol";
 import "../mint/StreamSaleTemplate.sol";
 import "../../interfaces/stream/revenue/IStreamPrimarySaleSettlement.sol";
 import "../../vendor/openzeppelin/ReentrancyGuard.sol";
@@ -44,6 +46,8 @@ contract StreamPrimarySaleSettlement is
     IStreamPrimarySaleSettlement,
     IStreamNativePrimarySaleSettlement,
     IStreamNativePublicPrimarySaleSettlement,
+    IStreamERC20DutchPrimarySaleSettlement,
+    IStreamERC20PublicDutchPrimarySaleSettlement,
     IStreamDeferredNativePrimarySaleSettlement,
     IStreamPreparedNativePrimarySaleSettlement,
     IStreamPreparedNativeContentSettlement,
@@ -145,6 +149,8 @@ contract StreamPrimarySaleSettlement is
         return id == type(IStreamPrimarySaleSettlement).interfaceId
             || id == type(IStreamNativePrimarySaleSettlement).interfaceId
             || id == type(IStreamNativePublicPrimarySaleSettlement).interfaceId
+            || id == type(IStreamERC20DutchPrimarySaleSettlement).interfaceId
+            || id == type(IStreamERC20PublicDutchPrimarySaleSettlement).interfaceId
             || id == type(IStreamDeferredNativePrimarySaleSettlement).interfaceId
             || id == type(IStreamPreparedNativePrimarySaleSettlement).interfaceId
             || id == type(IStreamPreparedNativeContentSettlement).interfaceId
@@ -200,6 +206,46 @@ contract StreamPrimarySaleSettlement is
         returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
     {
         return StreamERC20PrimaryRecording.execute(
+            _erc20RecordingContext(),
+            settlementConsumed,
+            _results,
+            _officialSettled,
+            totalOfficialSettled,
+            paymentAdapter,
+            candidate
+        );
+    }
+
+    function settleERC20DutchPrimarySaleFromAdapter(
+        address paymentAdapter,
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate calldata candidate
+    )
+        external
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory)
+    {
+        return StreamERC20PrimaryRecording.executeDutch(
+            _erc20RecordingContext(),
+            settlementConsumed,
+            _results,
+            _officialSettled,
+            totalOfficialSettled,
+            paymentAdapter,
+            candidate
+        );
+    }
+
+    function settleERC20PublicDutchPrimarySaleFromAdapter(
+        address paymentAdapter,
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate calldata candidate
+    )
+        external
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory)
+    {
+        return StreamERC20PrimaryRecording.executePublicDutch(
             _erc20RecordingContext(),
             settlementConsumed,
             _results,

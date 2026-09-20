@@ -3,7 +3,8 @@ pragma solidity ^0.8.19;
 
 import "./StreamPrivateSaleTypes.sol";
 
-/// @notice Historical canonical FIXED_PRICE/OPEN_EDITION Sales-v1 authorization revocation.
+/// @notice Historical canonical Sales-v1 revocation for immediate kinds 0, 1, 3, 12 and 13.
+/// @dev FIXED_PRICE, OPEN_EDITION, DUTCH_AUCTION, ZERO_PRICE_CLAIM and PAY_WHAT_YOU_WANT.
 interface IStreamMintImmediateSaleAuthorizationRevocation {
     /// @dev Requires the immutable SIGNED sale binding to the claimed signer and kind (1/2).
     ///      The signer may call directly, or supply MintTicketRevocation under the original Sales
