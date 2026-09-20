@@ -3,6 +3,14 @@
 All notable release-impacting changes are recorded here. The project follows
 the release policy in `docs/release-policy.md`.
 
+## Artist original living multiplicity hydration
+
+- Add explicit complete multi-Artist/multi-collection operation-60 hydration,
+  preserving predecessor IDs/domains, complete per-Artist nonce/replay guards,
+  shared-Artist lane activation and one atomic seven-owner/Archive completion.
+- Add actual-owner/Safe completeness, evidence, forward-write and rollback
+  regression recipes. Runtime/current-stack and capacity validation remain separate.
+
 ## Unreleased
 
 - Add original-consent scoped CONTENT_ROOT publication and full-v1 activation

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistMultipleIdentityHydration.sol";
 import {
     StreamArtistStaticIdentityProjection as StaticIdentity
 } from "./StreamArtistStaticIdentityProjection.sol";
@@ -1692,6 +1693,17 @@ contract StreamArtistIdentityAuthority is
         );
     }
 
+    function authorityLivingIdentityHydrationState(AH.Query calldata q)
+        external
+        view
+        returns (bytes memory)
+    {
+        _baselineTiming();
+        return StreamArtistMultipleIdentityHydration.exportState(
+            _identity, _estate, _dormancy, _unavailability, q
+        );
+    }
+
     function authorityEntropyFindingHydrationState(AH.Query calldata q)
         external
         view
@@ -1709,6 +1721,12 @@ contract StreamArtistIdentityAuthority is
 
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
         _baselineTiming();
+        if (StreamArtistMultipleHydrationCodec.isState(p.typedState)) {
+            StreamArtistMultipleIdentityHydration.importEncoded(
+                _identity, _estate, _dormancy, _unavailability, msg.data[4:]
+            );
+            return;
+        }
         StreamArtistIdentityHydration.importEncoded(
             _identity, _estate, _dormancy, _unavailability, msg.data[4:]
         );

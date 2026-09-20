@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistMultipleHydrationOperations.sol";
 import "./StreamArtistAuthorityHydrationOperations.sol";
 import "./StreamArtistEntropyFindingHydrationOperations.sol";
 
@@ -30,6 +31,10 @@ library StreamArtistCoordinatorHydration {
         if (profile == 6) {
             (address actor, FH.Request memory p) = abi.decode(data[4:], (address, FH.Request));
             return StreamArtistEntropyFindingHydrationOperations.hydrate(x, actor, p);
+        }
+        if (profile == 7) {
+            (address actor, MH.Request memory p) = abi.decode(data[4:], (address, MH.Request));
+            return StreamArtistMultipleHydrationOperations.hydrate(x, actor, p);
         }
         revert T.UnsupportedProfile();
     }

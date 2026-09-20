@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistMultipleAuthorityHydration.sol";
 import "./StreamArtistReadinessHydrationFacts.sol";
 import {
     StreamArtistReadinessHydrationTypes as RH
@@ -45,6 +46,17 @@ library StreamArtistHydrationSourceGuards {
                 || keccak256(abi.encode(expected))
                     != keccak256(abi.encode(CP(owner).authorityCheckpoint()))
         ) revert T.InvalidRecord();
+    }
+
+    function _multipleHeader(address owner, CP.Checkpoint memory expected) public view {
+        if (
+            expected.schema != CHECKPOINT || expected.replayCount > 512
+                || expected.nonceIndexCount > 128
+                || keccak256(abi.encode(expected))
+                    != keccak256(abi.encode(CP(owner).authorityCheckpoint()))
+        ) {
+            revert T.InvalidRecord();
+        }
     }
 
     function _suite(

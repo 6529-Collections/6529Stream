@@ -215,6 +215,47 @@ library StreamArtistHistoryState {
         );
     }
 
+    /// @notice Completes each exact latched lane once, including shared-Artist collection sets.
+    function activateMultiple(bytes32[] memory artists, uint256[] memory collections, bytes32 value)
+        public
+    {
+        if (value == 0 || artists.length == 0 || collections.length == 0) {
+            revert InvalidArtistHistory();
+        }
+        State storage s = state();
+        if (s.cutover) revert InvalidArtistHistory();
+        for (uint256 i; i < artists.length; ++i) {
+            if (artists[i] == 0 || (i != 0 && artists[i] <= artists[i - 1])) {
+                revert InvalidArtistHistory();
+            }
+            _activateMultipleLane(s, 1, artists[i], value);
+        }
+        for (uint256 i; i < collections.length; ++i) {
+            if (collections[i] == 0 || (i != 0 && collections[i] <= collections[i - 1])) {
+                revert InvalidArtistHistory();
+            }
+            _activateMultipleLane(s, 2, bytes32(collections[i]), value);
+        }
+        s.commitment = keccak256(
+            abi.encode(
+                s.commitment,
+                uint16(60),
+                keccak256("6529STREAM_ARTIST_MULTIPLE_LIVING_HYDRATION_V1"),
+                artists,
+                collections,
+                value
+            )
+        );
+    }
+
+    function _activateMultipleLane(State storage s, uint8 kind, bytes32 id, bytes32 value) private {
+        bytes32 lane = key(kind, id);
+        if (!s.verified[lane].done || s.hydrated[lane] != 0 || s.lanes[lane].length != 0) {
+            revert InvalidArtistHistory();
+        }
+        s.hydrated[lane] = value;
+    }
+
     function bindingCount() public view returns (uint256) {
         return state().bindings.length;
     }

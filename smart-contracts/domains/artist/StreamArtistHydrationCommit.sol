@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistMultipleHydrationTypes as MH
+} from "../../interfaces/stream/artist/IStreamArtistMultipleAuthorityHydration.sol";
 import "./StreamArtistReadinessHydrationFacts.sol";
 import {
     StreamArtistReadinessHydrationTypes as RH
@@ -94,7 +97,13 @@ library StreamArtistHydrationCommit {
                 );
         }
         for (uint256 i; i < 7; ++i) {
-            StreamArtistHydrationSourceGuards._header(source.owners[i], p.expectedSource[i]);
+            if (profile == MH.PROFILE) {
+                StreamArtistHydrationSourceGuards._multipleHeader(
+                    source.owners[i], p.expectedSource[i]
+                );
+            } else {
+                StreamArtistHydrationSourceGuards._header(source.owners[i], p.expectedSource[i]);
+            }
         }
         // Recheck the selected source graph after every mutation, before the one atomic Archive append.
         if (

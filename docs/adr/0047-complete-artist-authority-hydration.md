@@ -136,3 +136,17 @@ or cross-profile finality reinterpretation is admitted. The default-timing,
 single-Artist/collection, first-predecessor and finite Archive bounds remain.
 See [the caller guide](../guides/artist-entropy-finding-hydration.md) for the exact
 request, retained state, unsupported histories and source/runtime distinction.
+
+## Original living multiplicity profile
+
+The additive `hydrateMultipleArtistAuthority` capability selects
+`6529STREAM_ARTIST_MULTIPLE_LIVING_HYDRATION_V1` without changing operation 60,
+its `0x7f` mask, original selectors or signature/record domains. Complete source
+registration ordinals, all native journals and revision totals authenticate
+multiple original living identities and accepted generation-one collections,
+including shared Artist identities. Every typed nonce index and replay cell is
+carried, each verified lane activates once, and all seven owner commits plus
+Archive composition remain atomic. The tagged envelope and finite remaining
+profiles are specified in the [multiplicity guide](../guides/artist-multiple-authority-hydration.md).
+No collaborator/delegated, corrected-generation or advanced-history authority
+is inferred from this baseline extension.
