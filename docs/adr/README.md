@@ -155,3 +155,9 @@ activation and authenticated ultimate-origin provider relay.
 
 keeps conservation declarations and the canonical condition-source denominator
 in Core across satellite replacement, with explicit downstream producer checks.
+
+[ADR 0054: Explicit non-sanction preservation rendering](0054-explicit-non-sanction-preservation-rendering.md)
+
+defines a separately identified public preservation output while retaining live
+sanction and adverse-provenance display, original locked profiles and complete
+currentness checks. Producer and composed-runtime acceptance remain in progress.

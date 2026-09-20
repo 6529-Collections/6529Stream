@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `b752f5bd`: full-policy construction, bounded multi-origin preservation, retained delegation, governed Artist correction, Museum governance and VIEW clients integrated. ABI130:3,289/zero errors. Native sales41 and typed retained16 pass on exact frozen sources; current integration and normative gas remain open. |
+| Source checkpoint | `8002ef1c`: Platform continuation, current-authority lineage, full publication ceremony, scoped client and Museum V7 source integrated. ABI134:3,394/zero errors. Sanction/render cycle and normative gas remain open. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -33,33 +33,38 @@ Use [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md) for source-specific results.
 Root owns integration, shared architecture, metric publication and release closure.
 Keep builders implementing while frozen tests execute.
 
-- A: finish consumed Platform correction lineage and complete histories, then
-  multiple-Artist composition; review Prepared's disjoint current-authority seam.
-- B: independent feature reviews, bounded Floor storage/gas optimization and
-  the shared collector-gas design; protected Royalty2 remains a separate recipe.
-- C: full-membership VIEW output checkpoints and manifests, plus finite Router
-  construction review; bounded checkpoint serving9 has passed.
-- Mint: native claim/PWYW and Dutch41 passed. Prepare current claim8 and native
-  construction/entry16; author missing success/callback assertions.
-- Burn: original scoped provider27 native continues; full-policy construction
-  is integrated. Build actual Archive/root/reference/inventory/finality ceremony
-  and private full-manifest reader regression.
-- Museum: scoped STATIC capture after governance50/V6; then policyV2/VIEW.
-- Clients: scoped publication workflows after tagged VIEW46 and builder1,772.
-- Testing: fresh d418 component46, then four actual Core/Safe migration recipes
-  frozen9bdabdf2; own canonical reached-product capacity join.
-- Capacity `01a0be37-2432-7a63-8820-fc42f159eb1d`: current migration frontier,
-  six governance libraries next; no duplicate test compiler.
-- ERC20 `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: three actual Safe callback
-  regressions; typed16 and current changed-source 52-product size closure pass.
-- Prepared `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: general current-authority
-  lineage, reciprocal Artist/Finality path and additive real A/B/C graph recipe;
-  bounded multi-origin batch integrated. Expanded24/scoped finality remain.
+- A: original52 ratification history import, corrected histories and multiple-Artist
+  composition; Platform continuation and grant-routing fixes are integrated.
+- B: explicit non-sanction preservation-render profile and independent reviews;
+  Floor paired6+6 passes. Preserve live provenance and old locked profiles.
+- C: VIEW snapshot/CONTENT_ROOT consumer design and complete staged freshness;
+  output12 and ordered-manifest13 pass on exact recorded sources.
+- Mint: Claim21 passes. Maintain actual-current24 assembly/capacity coordination;
+  no remaining unassigned Mint source was found in the bounded lane review.
+- Burn: actual full-policy ceremony source is integrated; preserve real failing
+  cycle/capacity assertions. Own the original scoped provider27 native process.
+- Museum: policyV2 and remaining source-family capture after scoped STATIC/V7.
+- Clients: checkpoint/output/root publication workflows after scoped47/root and
+  1,819/builder package passes; complete original Safe call coverage remains.
+- Testing: exact `9d232173` metric component50 with fresh original Proof source;
+  own current migration acceptance and reached-product capacity joins.
+- Capacity `01a0be37-2432-7a63-8820-fc42f159eb1d`: coherent groups of current
+  migration products. Artist20 plus five explicit helper outputs is next.
+- ERC20 `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: frozen actual retained25 runtime
+  campaign, including three Safe callback/rollback/retry cases at `a67c0071`.
+- Prepared `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: scoped current-authority
+  policy factory/provider and real recipe after integrated `64861e26`. Resolve
+  source-construction ordering with an explicit fail-closed deferred binding;
+  retain all legacy constructor and currentness guarantees.
+- Collector gas `01a0c063-c7fd-7022-a1af-a6ef785c10fb`: isolated authenticated
+  shared-receipt experiment; repair measured Dutch host size before acceptance.
+  Root owns any eventual Core/Manager integration. Original gas targets stand.
 
-Root owns original publication native20; native19 is eight passes/one gas failure.
-All nine original cases, seventeen fixtures and caps remain unchanged.
-Full current/Safe/stateful/fuzz/capacity/CI, candidate freeze and matching testnet
-remain. RC1 stays immutable. No funding or onchain action is needed.
+Root metric native20 is eight passes/one gas failure. No original21 duplicate
+is running; component50 measures the next repair first. All original nine cases,
+seventeen fixtures and caps remain unchanged. Full current/Safe/stateful/fuzz/
+capacity/CI, candidate freeze and matching testnet remain. RC1 stays immutable.
+No funding or onchain action is needed.
 
 ## Earlier source-specific assignments
 

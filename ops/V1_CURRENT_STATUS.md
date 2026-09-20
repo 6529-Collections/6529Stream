@@ -18,61 +18,56 @@ Other held proposals remain separate.
 
 ## 20 September integrated batch
 
-Integrated source checkpoint: `b752f5bd`. ABI130 checks all 3,289 Solidity
-sources with zero errors in 35.547 seconds and complete committed-source
-readback. This proves source compatibility; complete current-system execution
-remains open. Earlier failed captures retain their original outcomes.
+Integrated source checkpoint: `8002ef1c`. ABI134 checks all 3,394 Solidity
+sources with zero errors in 37.641 seconds and complete committed-source
+readback. This proves source compatibility. Combined-system execution and the
+remaining feature work are still open; earlier failed runs retain their results.
 
-- **Sales:** native claim/PWYW and Dutch pass all 41 focused cases on frozen
-  `9bdabdf2`, with all 187 reached production products fitting the captured
-  constructor profiles. These use actual Core, Manager, ledger, recorder,
-  metadata and Safe, with declared Artist/entropy/governance doubles. Separate
-  captures pass native Immediate25, ERC20 Dutch26 and construction helper13.
-  Native current-Artist construction/entry16 and current claim8 remain pending.
-  Retained primary and secondary delegation are integrated (`cf85595b`,
-  `6b18db67`); 16 typed cases and the 52-product changed-source deployment
-  closure pass at `896899f7`. Actual commercial Safe callback cases are in build.
-- **Artist:** governed post-revocation correction is integrated as `8df0ec7a`,
-  with 13 authored cases and nine selected products fitting. Consumed Platform
-  correction lineage is being completed. Four actual Core/Safe operation55-60
-  migration recipes remain frozen at `9bdabdf2`: their measured deployment
-  frontier has 117 fits and 66 unresolved products, with no measured current
-  overrun. The unresolved entries are missing measurements, not known failures.
-- **Preservation:** bounded original-domain multi-origin Archive receipts,
-  worker, coverage, lineage and inventory/provider source are integrated through
-  `210b12e6`, with 88 authored cases; runtime acceptance remains pending.
-  General current-authority A-to-B-to-unpredicted-C lineage is a separate active
-  build using an explicit new original Finality capability. Historical anchors
-  and previously locked deployments retain their meanings.
-- **Construction and VIEW:** the additive COLLECTION fixed-recipe factory,
-  distinct provider/discovery and actual 37-role construction helper are
-  integrated as `b752f5bd`, with 46 authored cases. Full publication and finality
-  ceremony source is next; graph creation alone does not complete it. The
-  predecessor scoped provider27 campaign remains running. Tagged VIEW passes
-  33 cases including two 256-input fuzz properties; bounded checkpoint serving
-  (`5ae72668`) passes nine. Full-membership VIEW output checkpoints are in review
-  and native testing; no old profile or finality anchor is relaxed.
-- **Clients:** Dutch workflows retain the root 1,739-test full-package pass at
-  `95cc0e0e`. Tagged VIEW clients are integrated as `896899f7`; root generation,
-  build, strict types, exact ABI125 fixture check and all 46 new focused cases
-  pass. The builder's package capture passes 1,772. The root first fixture check
-  rejected a different bridge; the exact pinned bridge passes unchanged.
-  Scoped publication clients are being built. All-call current Safe acceptance
-  remains separate from client and receipt fixtures.
-- **Museum:** original COLLECTION ONCHAIN finality/token-proof V6 passes 63
-  root cases. Governance schedule/execution transaction capture is integrated
-  as `04ad8242`; 50 root cases and its generated schema check pass at `896899f7`.
-  Complete authority remains false. Scoped STATIC capture is in build;
-  policyV2/VIEW and institutional conformance remain required.
-- **Gas:** original publication native19 passes eight of nine; the final
-  transaction exhausts memory gas after proof preparation. `d41855d1` reclaims
-  dead currentness hash buffers without changing payloads or limits; its
-  original native20 publication campaign and 46-case component campaign run.
-  The earlier compact35 campaign passes, including four 256-input properties.
-  A cached paid Dutch purchase at `9bdabdf2` consumes 2,904,763 gross frame gas
-  after same-test warming, already above the unchanged 500,000 all-cold target.
-  Storage/execution optimization remains required; this is diagnostic evidence,
-  not a passing cold transaction or a change to the specification.
+- **Sales and Safe:** the strengthened Claim suite passes all 21 cases at
+  `5f262491`, whose test source is integrated as `3264bced`. It verifies final
+  ownership/status and callback rejection with an independently passing control.
+  The earlier Claim/Dutch41 remains separate. These use actual Core, Manager,
+  ledger, recorder and Safe with declared Artist/entropy/governance doubles.
+  Three actual retained-offer Safe callback recipes are integrated (`5a25c386`);
+  their combined 25-case current-contract runtime capture is running.
+- **Artist and succession:** consumed Platform correction lineage is integrated
+  (`08365ec5`), with 15 authored cases and selected production size checks.
+  Grant-bearing generation validation routing is repaired (`43987159`).
+  Original op52 ratification history import and complete corrected histories
+  remain in build. General current-authority A/B/late-C preservation and original
+  Finality continuity are source-integrated (`64861e26`), with 74 authored cases.
+  Their actual composed execution remains unaccepted. The separate frozen9bd
+  migration capacity inventory now has 155 measured fits and 66 unresolved
+  products; newly discovered dependencies explain the changing denominator.
+- **Publication and VIEW:** the actual 37-role full-policy ceremony is authored
+  and integrated (`8002ef1c`). It exposed a real circular dependency: recording
+  sanction changes live STATIC JSON and invalidates the outputs committed
+  before sanction. The real assertions remain intact. The [explicit preservation-output profile](../docs/adr/0054-explicit-non-sanction-preservation-rendering.md)
+  is now in build; full-current rechecks remain.
+  The high-capacity fixture also exceeds the original transaction envelope.
+  VIEW output checkpoints pass 12 cases; complete ordered output parts/index
+  (`7c669a2c`) pass 13 cases plus a 256-input fuzz property on their exact source.
+  The 16,384-member vocabulary does not prove a maximum-size transaction fits.
+- **Clients:** scoped graph preparation is integrated (`afe44128`). The builder
+  passes all 1,819 package tests. Root generation, build, strict types, exact
+  ABI129 fixture verification and all 47 new cases pass at `8002ef1c`.
+  These are client/RPC/Safe receipt fixtures, separate from actual Safe execution.
+  Checkpoint, output, root and downstream publication callers are next.
+- **Museum:** original scoped STATIC capture and V7 acquisition export are
+  integrated (`729bfa4c`), with 98 builder passes, 98 root passes at `8002ef1c`, and four offline
+  replay/export examples. Original V5/V6 and governance profiles retain their
+  bytes; complete authority remains false. Root schema checks pass and all affected source files remain unchanged.
+  Policy V2/VIEW, remaining source-family joins and institutional conformance
+  remain in build.
+- **Gas and runtime:** original metric publication native20 remains eight passes
+  and one gas failure after proof preparation. The preceding component46 passes,
+  including six 256-input properties. New prefixed-context hashing (`9d232173`)
+  preserves the full original preimage while avoiding its temporary copy; a
+  fresh 50-case component capture owns its measurement. Original publication21
+  has not been launched. Floor sparse-write optimization (`a7f55d5e`) passes
+  paired six-case runs, each with 256 fuzz inputs. The shared collector-receipt
+  experiment remains isolated: its first Dutch host is 848 bytes oversized.
+  Component savings do not satisfy the unchanged 500,000 cold paid-call target.
 
 Complete current/Safe integration, fuzz/stateful campaigns, whole-graph size
 and gas, full CI, source freeze and matching testnet demonstration remain.

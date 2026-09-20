@@ -39,8 +39,9 @@ must remain in the inventory when C2PA edges are added.
 Live adverse provenance remains mandatory under MRR-ATTRIBUTION rules 3/5/6,
 AA-DISPLAY rule 7 and CMC-C2PA rules 10/11. This profile does not freeze those
 annotations. Preserve original full-output hashes as historical checkpoints:
-changed live annotation bytes make those checkpoints stale. Separating stable
-artwork bytes from live annotations would require an explicit separate profile.
+changed live annotation bytes make those checkpoints stale. The new [non-sanction preservation direction](../adr/0054-explicit-non-sanction-preservation-rendering.md)
+uses an explicit separate profile; it does not change this live profile or make
+its older full-output checkpoints current.
 Frozen Artist source `3f1a0680` also needs the pending conflict-history successor
 before the optional paired path can claim complete ART38 behavior. No STATIC
 admission, byte-exact finality, native execution or deployment-size acceptance
