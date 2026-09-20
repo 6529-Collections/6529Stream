@@ -17,6 +17,12 @@ import {
 import { StreamGasParameterHost } from "../parameters/StreamGasParameterHost.sol";
 import { StreamRendererCalls as Calls } from "./StreamRendererCalls.sol";
 import {
+    IStreamTerminalEntropyRegistry as Terminal
+} from "../../interfaces/stream/metadata/IStreamTerminalEntropyRegistry.sol";
+import {
+    StreamTerminalEntropyAdmission as TerminalAdmission
+} from "./StreamTerminalEntropyAdmission.sol";
+import {
     IStreamCurrentCitationRegistry as Current
 } from "../../interfaces/stream/metadata/IStreamCurrentCitationRegistry.sol";
 import {
@@ -28,7 +34,7 @@ import {
 /// remains available to historical pins after deprecation. The deployment's named allowlist is
 /// immutable. Gate reports are exact registered analysis assertions, not onchain proof of a
 /// program's reachable opcodes; genuine static analysis remains a release admission obligation.
-contract StreamRendererRegistry is V, Current, StreamGasParameterHost {
+contract StreamRendererRegistry is V, Current, Terminal, StreamGasParameterHost {
     bytes32 public constant ANALYSIS_PROFILE =
         keccak256("6529STREAM_STATIC_RENDERER_ANALYSIS_ABI_V1");
     bytes32 public constant READ_GAS = keccak256("6529STREAM_GGP_METADATA_DEPENDENCY_READ_GAS");
@@ -62,6 +68,11 @@ contract StreamRendererRegistry is V, Current, StreamGasParameterHost {
 
     function _citationState() private pure returns (CitationState storage s) {
         bytes32 slot = CITATION_SLOT;
+        assembly ("memory-safe") { s.slot := slot }
+    }
+
+    function _terminalState() private pure returns (CitationState storage s) {
+        bytes32 slot = keccak256("6529STREAM_RENDERER_REGISTRY_TERMINAL_ENTROPY_STORAGE_V1");
         assembly ("memory-safe") { s.slot := slot }
     }
 
@@ -100,7 +111,129 @@ contract StreamRendererRegistry is V, Current, StreamGasParameterHost {
     }
 
     function supportsInterface(bytes4 id) public pure virtual returns (bool) {
-        return id == type(V).interfaceId || id == type(Current).interfaceId || id == 0x01ffc9a7;
+        return id == type(V).interfaceId || id == type(Current).interfaceId
+            || id == type(Terminal).interfaceId || id == 0x01ffc9a7;
+    }
+
+    function registerTerminalEntropy(
+        Current.CurrentRegistration calldata r,
+        Read[] calldata declared
+    ) external override {
+        Version storage v = _versions[r.versionKey];
+        CitationState storage s = _terminalState();
+        if (!v.exists || v.deprecated || s.records[r.versionKey].registrationHash != 0) {
+            revert Terminal.TerminalEntropyProfileUnavailable(r.versionKey);
+        }
+        _retained(r.versionKey);
+        bytes32 declaration = _terminalDeclaration(r, declared);
+        bytes32 action =
+            _governed(_terminalScope(r.versionKey), _terminalHash(0), _terminalHash(declaration), 1);
+        bytes32 setHash = _readSet(declared);
+        bytes memory analysis = _document(r.analysisDocument);
+        bytes memory golden = _document(r.goldenDocument);
+        TerminalAdmission.validate(
+            r,
+            v,
+            declared,
+            _targets,
+            _reads[r.versionKey],
+            setHash,
+            analysis,
+            golden,
+            _gasParameterValue(READ_GAS),
+            _gasParameterValue(GOLDEN_GAS)
+        );
+        s.records[r.versionKey] = Current.CurrentRecord(
+            r, declaration, setHash, keccak256(analysis), keccak256(golden), action
+        );
+        for (uint256 i; i < declared.length; ++i) {
+            s.reads[r.versionKey].push(declared[i]);
+        }
+        emit TerminalEntropyProfileRegistered(
+            1, r.versionKey, v.renderer, action, declaration, r, declared
+        );
+    }
+
+    function terminalEntropyTransition(
+        Current.CurrentRegistration calldata r,
+        Read[] calldata declared
+    ) external view override returns (bytes32, bytes32, bytes32) {
+        return (
+            _terminalScope(r.versionKey),
+            _terminalHash(_terminalState().records[r.versionKey].registrationHash),
+            _terminalHash(_terminalDeclaration(r, declared))
+        );
+    }
+
+    function terminalEntropyRecord(bytes32 key)
+        external
+        view
+        override
+        returns (Current.CurrentRecord memory)
+    {
+        return _terminalState().records[key];
+    }
+
+    function terminalEntropyReads(bytes32 key) external view override returns (Read[] memory) {
+        return _terminalState().reads[key];
+    }
+
+    function requireTerminalEntropy(bytes32 key)
+        external
+        view
+        override
+        returns (address renderer, bytes32 runtimeHash, bytes32 profile, bytes4 selector)
+    {
+        CitationState storage s = _terminalState();
+        Current.CurrentRecord storage c = s.records[key];
+        if (c.registrationHash == 0 || deploymentChainId != block.chainid) {
+            revert Terminal.TerminalEntropyProfileUnavailable(key);
+        }
+        (renderer, runtimeHash) = _retained(key);
+        Read[] storage declared = s.reads[key];
+        for (uint256 i; i < declared.length; ++i) {
+            Target storage t = _targets[declared[i].targetIndex];
+            if (t.target.code.length == 0 || t.target.codehash != t.codeHash) {
+                revert Terminal.TerminalEntropyProfileUnavailable(key);
+            }
+        }
+        TerminalAdmission.bindings(c.registration, renderer, _gasParameterValue(READ_GAS));
+        return (renderer, runtimeHash, c.registration.profile, c.registration.selector);
+    }
+
+    function _terminalDeclaration(Current.CurrentRegistration calldata r, Read[] calldata declared)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_TERMINAL_ENTROPY_REGISTRATION_V1"),
+                deploymentChainId,
+                address(this),
+                schemaRegistry,
+                schemaRegistryCodeHash,
+                targetSetHash,
+                _versions[r.versionKey].registrationHash,
+                r,
+                declared
+            )
+        );
+    }
+
+    function _terminalScope(bytes32 key) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_TERMINAL_ENTROPY_SCOPE_V1"),
+                deploymentChainId,
+                address(this),
+                key
+            )
+        );
+    }
+
+    function _terminalHash(bytes32 value) private pure returns (bytes32) {
+        return keccak256(abi.encode(keccak256("6529STREAM_TERMINAL_ENTROPY_STATE_V1"), value));
     }
 
     /// @notice Additional class-1 evidence, never a replacement for the immutable original version.

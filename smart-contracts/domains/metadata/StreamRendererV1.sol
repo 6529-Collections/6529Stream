@@ -27,6 +27,18 @@ import { StreamGasParameterHost } from "../parameters/StreamGasParameterHost.sol
 import { Strings } from "../../vendor/openzeppelin/Strings.sol";
 import { StreamStaticRenderEncoding as Encoding } from "./StreamStaticRenderEncoding.sol";
 import {
+    StreamTerminalEntropyEncoding as TerminalEncoding
+} from "./StreamTerminalEntropyEncoding.sol";
+import {
+    StreamTerminalEntropyValidation as TerminalValidation
+} from "./StreamTerminalEntropyValidation.sol";
+import {
+    StreamEntropyPolicyConsumerTypes as EntropyTypes
+} from "../../interfaces/stream/entropy/StreamEntropyPolicyConsumerTypes.sol";
+import {
+    IStreamTerminalEntropyRenderer as Terminal
+} from "../../interfaces/stream/metadata/IStreamTerminalEntropyRenderer.sol";
+import {
     IStreamCurrentCitationRenderer as Current
 } from "../../interfaces/stream/metadata/IStreamCurrentCitationRenderer.sol";
 import {
@@ -78,6 +90,8 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
     bytes32[6] private _codeHashes;
     RendererManifest private _manifest;
     bytes32 private immutable _encodingCodeHash;
+    bytes32 private immutable _terminalEncodingCodeHash;
+    bytes32 private immutable _terminalValidationCodeHash;
     bool public immutable c2paAttributionEnabled;
     bool public immutable c2paConflictsEnabled;
 
@@ -114,6 +128,10 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
         ) revert InvalidStaticRender();
         if (address(Encoding).code.length == 0) revert InvalidStaticRender();
         _encodingCodeHash = address(Encoding).codehash;
+        if (address(TerminalEncoding).code.length == 0) revert InvalidStaticRender();
+        _terminalEncodingCodeHash = address(TerminalEncoding).codehash;
+        if (address(TerminalValidation).code.length == 0) revert InvalidStaticRender();
+        _terminalValidationCodeHash = address(TerminalValidation).codehash;
         c2paAttributionEnabled =
             _c2paCapability(d.sources.attribution, type(C2PAAttribution).interfaceId);
         c2paConflictsEnabled = c2paAttributionEnabled
@@ -134,7 +152,88 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
     }
 
     function supportsInterface(bytes4 id) external pure override returns (bool) {
-        return id == type(R).interfaceId || id == type(Current).interfaceId || id == 0x01ffc9a7;
+        return id == type(R).interfaceId || id == type(Current).interfaceId
+            || id == type(Terminal).interfaceId || id == 0x01ffc9a7;
+    }
+
+    function terminalEntropyProfile() external pure returns (bytes32) {
+        return keccak256("6529STREAM_TERMINAL_ENTROPY_RENDER_V1");
+    }
+
+    function terminalEncodingBinding() external view returns (address, bytes32) {
+        return (address(TerminalEncoding), _terminalEncodingCodeHash);
+    }
+
+    function terminalPolicyBinding() external view returns (address, address, bytes32) {
+        return (_sources.core, _sources.entropy, _codeHashes[3]);
+    }
+
+    function terminalValidationBinding() external view returns (address, bytes32) {
+        return (address(TerminalValidation), _terminalValidationCodeHash);
+    }
+
+    function renderTerminal(RenderRequest calldata r, uint8 mode)
+        external
+        view
+        returns (string memory)
+    {
+        if (
+            mode > 3 || r.core != _sources.core || r.tokenId == 0 || r.tokenHash != 0
+                || r.viewId != 0 || r.viewManifestHash != 0
+        ) revert InvalidStaticRender();
+        Encoding.Prepared memory p = _prepare(r);
+        if (
+            address(TerminalValidation).code.length == 0
+                || address(TerminalValidation).codehash != _terminalValidationCodeHash
+        ) revert InvalidStaticRender();
+        EntropyTypes.Terminal memory policy = abi.decode(
+            Calls.fixedCode(
+                address(TerminalValidation),
+                abi.encodeWithSelector(
+                    TerminalValidation.validate.selector,
+                    r,
+                    _sources.entropy,
+                    _codeHashes[3],
+                    p.config.frozen,
+                    _gasParameterValue(READ_GAS)
+                ),
+                480,
+                gasleft()
+            ),
+            (EntropyTypes.Terminal)
+        );
+        if (
+            p.facts.entropyStatus != policy.status || p.source.chainId != block.chainid
+                || p.config.mode != MetadataMode.ONCHAIN
+        ) revert InvalidStaticRender();
+        string memory script = p.source.script;
+        if (p.bundle != 0 && mode >= 2) {
+            script = string(_payload(p.bundle, p.bundleFacts));
+            if (p.bundleFacts.libraryBundle != 0) {
+                B.Facts memory libraryFacts = _bundleFacts(p.bundleFacts.libraryBundle);
+                if (!libraryFacts.libraryOnly || libraryFacts.libraryBundle != 0) {
+                    revert InvalidStaticRender();
+                }
+                p.facts.dependencyScript =
+                    string(_payload(p.bundleFacts.libraryBundle, libraryFacts));
+            }
+        }
+        if (
+            address(TerminalEncoding).codehash != _terminalEncodingCodeHash
+                || address(TerminalEncoding).code.length == 0
+        ) revert InvalidStaticRender();
+        uint256 maximum = mode == 1 ? MAX_DEFAULT_URI_BYTES : mode == 0 ? 18000 : MAX_FULL_BYTES;
+        return Calls.stringResult(
+            Calls.fixedCode(
+                address(TerminalEncoding),
+                abi.encodeWithSelector(
+                    TerminalEncoding.render.selector, r, p, policy, script, _sources.router, mode
+                ),
+                64 + ((maximum + 31) / 32) * 32,
+                gasleft()
+            ),
+            maximum
+        );
     }
 
     function currentCitationProfile() external pure returns (bytes32) {

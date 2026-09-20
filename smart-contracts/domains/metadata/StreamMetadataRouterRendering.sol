@@ -9,6 +9,13 @@ import { StreamMetadataTokenReads } from "./StreamMetadataTokenReads.sol";
 import { StreamMetadataDisplayParameters } from "./StreamMetadataDisplayParameters.sol";
 import { StreamArtistDisplayJSON } from "./StreamArtistDisplayJSON.sol";
 import { StreamMetadataTokenRenderer } from "./StreamMetadataTokenRenderer.sol";
+import { StreamTerminalEntropyJSON } from "./StreamTerminalEntropyJSON.sol";
+import {
+    StreamEntropyRenderPolicyReads as EntropyPolicy
+} from "../entropy/StreamEntropyRenderPolicyReads.sol";
+import {
+    StreamEntropyPolicyConsumerTypes as EntropyTypes
+} from "../../interfaces/stream/entropy/StreamEntropyPolicyConsumerTypes.sol";
 import {
     IStreamScriptBundles as B
 } from "../../interfaces/stream/metadata/IStreamScriptBundles.sol";
@@ -74,9 +81,15 @@ library StreamMetadataRouterRendering {
             );
         }
         if (frozen) return result;
-        StreamMetadataTokenReads.TokenFacts memory facts =
-            StreamMetadataTokenReads.facts(x.core, tokenId, allowBurned);
-        if (allowBurned && !facts.finalized) revert TokenEntropyNotFinalized(tokenId);
+        StreamMetadataTokenReads.TokenFacts memory facts;
+        bool terminal;
+        bool historical = (allowBurned && mode == 0) || mode == 4;
+        if (historical) {
+            facts = StreamMetadataTokenReads.facts(x.core, tokenId, allowBurned);
+        } else {
+            (facts, terminal) = StreamMetadataTokenReads.currentFacts(x.core, tokenId, allowBurned);
+        }
+        if (allowBurned && !facts.finalized && !terminal) revert TokenEntropyNotFinalized(tokenId);
         if (mode == 2 || mode == 3) {
             (,,, bool burned) = IStreamCore(x.core).tokenCollectionIdentity(tokenId);
             if (burned) facts.state = "burned";
@@ -98,6 +111,19 @@ library StreamMetadataRouterRendering {
         bytes memory artist = !nestedArtist
             ? StreamMetadataTokenReads.artistJSON(presentations, x.artist, facts.collectionId)
             : live(facts.collectionId, tokenId);
+        if (terminal) {
+            EntropyTypes.Terminal memory policy = EntropyPolicy.terminal(
+                x.core,
+                tokenId,
+                facts.collectionId,
+                StreamMetadataDisplayParameters.value(
+                    StreamMetadataDisplayParameters.BUNDLE_READ_GAS
+                )
+            );
+            return StreamTerminalEntropyJSON.render(
+                mode, token, metadata, artist, nestedArtist, block.chainid, x.core, policy
+            );
+        }
         B.Selection memory bundle =
             StreamMetadataBundleRenderer.selection(selections[facts.collectionId][2]);
         if (bundle.bundleId != 0) {

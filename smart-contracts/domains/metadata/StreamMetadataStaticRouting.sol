@@ -19,6 +19,12 @@ import { StreamMetadataStaticState as State } from "./StreamMetadataStaticState.
 import { StreamRendererCalls as Calls } from "./StreamRendererCalls.sol";
 import { StreamMetadataDisplayParameters as Gas } from "./StreamMetadataDisplayParameters.sol";
 import { StreamCurrentCitationRouting } from "./StreamCurrentCitationRouting.sol";
+import {
+    IStreamTerminalEntropyRegistry as TerminalRegistry
+} from "../../interfaces/stream/metadata/IStreamTerminalEntropyRegistry.sol";
+import {
+    IStreamTerminalEntropyRenderer as TerminalRenderer
+} from "../../interfaces/stream/metadata/IStreamTerminalEntropyRenderer.sol";
 
 /// @notice Internal-only Router route: every external call in this implementation is bounded STATICCALL.
 /// @dev Source finality adapters must bind this exact config record and source snapshot. This
@@ -71,12 +77,16 @@ library StreamMetadataStaticRouting {
         );
         if (entropyStatus > 7) revert S.InvalidStaticMetadataConfig();
         bool finalized = entropyStatus == 5;
-        if ((allowBurned || mode >= 2) && !finalized) revert TokenEntropyNotFinalized(token);
+        bool historical = (allowBurned && mode == 0) || mode == 4;
+        bool terminal = !historical && (entropyStatus == 1 || entropyStatus == 2);
+        if ((allowBurned || mode >= 2) && !finalized && !terminal) {
+            revert TokenEntropyNotFinalized(token);
+        }
         bool frozen = c.config.frozen
             || abi.decode(_read(core, abi.encodeCall(CV.collectionFreezeStatus, (id)), 32), (bool));
         R.TokenRenderState status = burned
             ? R.TokenRenderState.BURNED
-            : !finalized
+            : !finalized && !terminal
                 ? R.TokenRenderState.PENDING_RANDOMNESS
                 : frozen ? R.TokenRenderState.FROZEN : R.TokenRenderState.ACTIVE;
         R.RenderRequest memory request = R.RenderRequest(
@@ -97,15 +107,37 @@ library StreamMetadataStaticRouting {
         uint256 cap = Gas.value(mode >= 2 ? Gas.FULL_VIEW_GAS : Gas.BUNDLE_RENDER_GAS);
         // Explicit historical checkpoint entries retain the original renderer profile. Current
         // tokenJSON (mode 2, also burn-readable) is distinct from historicalFull... (mode 4).
-        bool historical = (allowBurned && mode == 0) || mode == 4;
-        bytes memory input = historical
-            ? abi.encodeCall(StreamRendererV1.renderView, (request, mode == 4 ? 2 : mode))
-            : StreamCurrentCitationRouting.input(
-                selected, request, mode, Gas.value(Gas.BUNDLE_READ_GAS)
-            );
+        bytes memory input = terminal
+            ? _terminalInput(selected, request, mode)
+            : historical
+                ? abi.encodeCall(StreamRendererV1.renderView, (request, mode == 4 ? 2 : mode))
+                : StreamCurrentCitationRouting.input(
+                    selected, request, mode, Gas.value(Gas.BUNDLE_READ_GAS)
+                );
         bytes memory raw =
             Calls.read(selected.renderer, input, 64 + ((maximum + 31) / 32) * 32, false, cap);
         return Calls.stringResult(raw, maximum);
+    }
+
+    function _terminalInput(S.Selection memory selected, R.RenderRequest memory request, uint8 mode)
+        private
+        view
+        returns (bytes memory)
+    {
+        (address renderer, bytes32 runtime, bytes32 profile, bytes4 selector) = abi.decode(
+            _read(
+                selected.registry,
+                abi.encodeCall(TerminalRegistry.requireTerminalEntropy, (selected.versionKey)),
+                128
+            ),
+            (address, bytes32, bytes32, bytes4)
+        );
+        if (
+            renderer != selected.renderer || runtime != selected.rendererCodeHash
+                || profile != keccak256("6529STREAM_TERMINAL_ENTROPY_RENDER_V1")
+                || selector != TerminalRenderer.renderTerminal.selector
+        ) revert S.InvalidStaticMetadataConfig();
+        return abi.encodeCall(TerminalRenderer.renderTerminal, (request, mode));
     }
 
     function _read(address a, bytes memory input, uint256 size)

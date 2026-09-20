@@ -20,6 +20,24 @@ library StreamMetadataTokenReads {
 
     error InvalidToken(uint256 tokenId);
 
+    /// @notice Current-only state vocabulary; the original facts selector remains unchanged.
+    function currentFacts(address coreAddress, uint256 tokenId, bool allowBurned)
+        public
+        view
+        returns (TokenFacts memory value, bool terminal)
+    {
+        value = facts(coreAddress, tokenId, allowBurned);
+        if (value.finalized) return (value, false);
+        StreamEntropyStatus status = IStreamEntropyView(
+                IStreamCore(coreAddress).coordinatorAtMint(tokenId)
+            ).tokenEntropyStatus(tokenId);
+        terminal =
+            status == StreamEntropyStatus.DISABLED || status == StreamEntropyStatus.NOT_REQUIRED;
+        if (terminal) {
+            value.state = status == StreamEntropyStatus.DISABLED ? "disabled" : "not_required";
+        }
+    }
+
     function artistJSON(
         mapping(uint256 => IStreamMetadataServingFacts.ArtistPresentation) storage snapshots,
         address registry,

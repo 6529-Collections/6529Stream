@@ -56,6 +56,13 @@ the release policy in `docs/release-policy.md`.
 - Include dedicated ERC-20 burn programs in collection freeze/finality warnings,
   with immutable gate/carrier bindings and source/target impact checks.
 
+
+- Add [truthful current metadata](docs/integrations/terminal-entropy-consumers.md)
+  for explicit DISABLED/NOT_REQUIRED entropy and
+  separately governed STATIC terminal rendering with a direct original-source
+  fact profile. Add complete V2 coordinator-policy/source-set and terminal
+  readiness adapters; V2 reference publication/output and full current-stack
+  acceptance remain separate required work.
 - Add the original chain/Core/global-token citation to current default metadata,
   with separate governed STATIC profile evidence and preserved historical render
   entries. Record-state qualifiers and full current-graph acceptance remain separate.
