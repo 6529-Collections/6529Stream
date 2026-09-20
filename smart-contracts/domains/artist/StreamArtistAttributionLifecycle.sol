@@ -187,7 +187,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
     function attestationAssociation(bytes32 record)
         external
         view
-        returns (Attest.Association memory)
+        returns (Attest.Association calldata)
     {
         _returnAttribution(
             StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
@@ -268,26 +268,26 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
     function platformWorksAdmission(uint256 collectionId)
         external
         view
-        returns (PW.Admission memory)
+        returns (PW.Admission calldata)
     {
         _returnAttribution(
             StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
     }
 
-    function platformWorksState(uint256 collectionId) external view returns (PW.State memory) {
+    function platformWorksState(uint256 collectionId) external view returns (PW.State calldata) {
         _returnAttribution(
             StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
     }
 
-    function platformWorksClaimRecord(bytes32 hash) external view returns (PW.Claim memory) {
+    function platformWorksClaimRecord(bytes32 hash) external view returns (PW.Claim calldata) {
         _returnAttribution(
             StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
     }
 
-    function platformWorksContestRecord(bytes32 hash) external view returns (PW.Contest memory) {
+    function platformWorksContestRecord(bytes32 hash) external view returns (PW.Contest calldata) {
         _returnAttribution(
             StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
@@ -375,7 +375,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
     function attributionClaimRecord(bytes32 hash)
         external
         view
-        returns (StreamArtistAttributionClaimTypes.Claim memory)
+        returns (StreamArtistAttributionClaimTypes.Claim calldata)
     {
         _returnAttribution(
             StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
@@ -413,20 +413,20 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
     function attestation(uint256 collectionId, uint8 kind, bytes32 subjectId)
         external
         view
-        returns (T.AttestationRecord memory)
+        returns (T.AttestationRecord calldata)
     {
         _returnAttribution(
             StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
     }
 
-    function attestationRecord(bytes32 record) external view returns (T.AttestationRecord memory) {
+    function attestationRecord(bytes32 record) external view returns (T.AttestationRecord calldata) {
         _returnAttribution(
             StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
     }
 
-    function statementBytes(bytes32 hash) external view returns (bytes memory) {
+    function statementBytes(bytes32 hash) external view returns (bytes calldata) {
         _returnAttribution(
             StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
@@ -435,7 +435,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
     function publicationAttestation(bytes32 recordHash)
         external
         view
-        returns (IStreamArtistRecordPublicationOwner.Record memory)
+        returns (IStreamArtistRecordPublicationOwner.Record calldata)
     {
         _returnAttribution(
             StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
@@ -714,19 +714,19 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
     function attributionDispute(uint256 id, uint64 generation)
         external
         view
-        returns (AD.Head memory)
+        returns (AD.Head calldata)
     {
         _returnAttribution(StreamArtistDisputeState.readEncoded(msg.data));
     }
 
-    function attributionDisputeRecord(bytes32 hash) external view returns (AD.Record memory) {
+    function attributionDisputeRecord(bytes32 hash) external view returns (AD.Record calldata) {
         _returnAttribution(StreamArtistDisputeState.readEncoded(msg.data));
     }
 
     function attributionDisputeResolution(bytes32 action)
         external
         view
-        returns (AD.Resolution memory)
+        returns (AD.Resolution calldata)
     {
         _returnAttribution(StreamArtistDisputeState.readEncoded(msg.data));
     }
@@ -819,14 +819,14 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         _returnAttribution(StreamArtistRepudiationState.readEncoded(msg.data));
     }
 
-    function attributionRepudiationRecord(bytes32 hash) external view returns (RP.Record memory) {
+    function attributionRepudiationRecord(bytes32 hash) external view returns (RP.Record calldata) {
         _returnAttribution(StreamArtistRepudiationState.readEncoded(msg.data));
     }
 
     function attributionRepudiationTerminal(bytes32 hash)
         external
         view
-        returns (RP.Terminal memory)
+        returns (RP.Terminal calldata)
     {
         _returnAttribution(StreamArtistRepudiationState.readEncoded(msg.data));
     }
