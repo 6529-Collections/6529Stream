@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../helpers/CurrentCommerceConservationFixture.sol";
 import "../helpers/StreamCurrentAssetPolicy.sol";
+import "../helpers/OfficialPermit2Fixture.sol";
 import { StreamArtistSaleTypes as SaleTerms } from "../../smart-contracts/interfaces/stream/artist/StreamArtistSaleTypes.sol";
 import "../mocks/MockStreamPaymentToken.sol";
 import {
@@ -85,9 +86,12 @@ contract CurrentUniversalObservedRecipient is IERC721Receiver {
 }
 
 /// @notice Official Safe artists/payers use universal settlement with the actual current owners.
-/// @dev Only the test ERC-20 and external entropy service are controlled boundaries. Permit2 is
-///      disabled in this fixture; its domain tests are separate from these current-stack flows.
-contract StreamCurrentUniversalSettlementTest is CurrentCommerceConservationFixture {
+/// @dev Only the test ERC-20 and external entropy service are controlled boundaries. Permit2
+///      is enabled only by the scenario that deploys and admits the exact upstream runtime.
+contract StreamCurrentUniversalSettlementTest is
+    CurrentCommerceConservationFixture,
+    OfficialPermit2Fixture
+{
     bytes32 private constant UNIVERSAL_PHASE = keccak256("current universal ERC20 phase");
     StreamPrimarySaleSettlement private recorder;
     StreamERC20PrimarySettlementAdapter private payment;
@@ -99,6 +103,8 @@ contract StreamCurrentUniversalSettlementTest is CurrentCommerceConservationFixt
     bytes32 private saleId;
     bool private requireSaleConsent;
 
+    bool private usePermit2;
+    address private currentPermit2;
     uint256 private nativeRevealFee;
     uint256 private constant NATIVE_FEE = 100;
     uint256 private constant PROVIDER_FEE = 60;
@@ -167,7 +173,10 @@ contract StreamCurrentUniversalSettlementTest is CurrentCommerceConservationFixt
         token.mint(address(payerSafe), 10_000);
         recorder =
             new StreamPrimarySaleSettlement(primaryResolver, address(registry), revenueEscrow);
-        payment = new StreamERC20PrimarySettlementAdapter(recorder, address(0), bytes32(0));
+        if (usePermit2) currentPermit2 = deployOfficialPermit2();
+        payment = new StreamERC20PrimarySettlementAdapter(
+            recorder, currentPermit2, usePermit2 ? currentPermit2.codehash : bytes32(0)
+        );
         universalSale = new StreamUniversalFixedPriceSaleAdapter(
             manager, recorder, vm.addr(PLATFORM_KEY), IStreamArtistAttribution(address(artists)),
             IStreamGasParameterHost.GasParameterConfig("REVEAL_ATTEMPT_GAS_LIMIT", 1_000_000, 100_000, 2)
@@ -253,6 +262,7 @@ contract StreamCurrentUniversalSettlementTest is CurrentCommerceConservationFixt
                     == ModuleRegistryStatus.ACTIVE,
             "actual governed universal admission"
         );
+        if (usePermit2) _configureCurrentPermit2();
         _configureMintPhase(UNIVERSAL_PHASE, address(universalSale));
         saleId = universalSale.registerSale(
             IStreamUniversalFixedPriceSaleAdapter.SaleConfig(
@@ -273,12 +283,53 @@ contract StreamCurrentUniversalSettlementTest is CurrentCommerceConservationFixt
                 keys,
                 address(token),
                 0,
-                abi.encodeCall(token.approve, (address(payment), uint256(10_000))),
+                abi.encodeCall(token.approve,
+                    (usePermit2 ? currentPermit2 : address(payment), uint256(10_000))),
                 0
             ),
             "Safe approves sole payer boundary"
         );
         universalSale.transferOwnership(address(executor));
+    }
+
+    function _configureCurrentPermit2() private {
+        (bytes32 permitScope, bytes32 oldPermit, bytes32 nextPermit) =
+            assetPolicy.assetPermitPolicyTransitionHashes(
+                address(token), 2, 1, currentPermit2, currentPermit2.codehash
+            );
+        bytes32 id = keccak256("6529STREAM_GGP_WALLET_DEPOSIT_GAS_LIMIT");
+        (uint256 value, uint256 floor, uint8 failureClass, uint64 revision) =
+            factory.gasParameterInfo(id);
+        require(value == 200_000, "preserved default whole-call budget before governed raise");
+        bytes32 scope = keccak256(abi.encode(
+            keccak256("6529STREAM_GAS_PARAMETER_SCOPE_V2"), block.chainid, address(factory), id
+        ));
+        bytes32 domain = keccak256("6529STREAM_GAS_PARAMETER_STATE_V2");
+        GovernanceCall[] memory calls = new GovernanceCall[](2);
+        bytes[] memory data = new bytes[](2);
+        data[0] = abi.encodeCall(assetPolicy.setAssetPermitPolicy,
+            (address(token), uint8(2), uint8(1), currentPermit2, currentPermit2.codehash));
+        calls[0] = StreamCurrentStackPlan.call(
+            address(assetPolicy), data[0], permitScope, oldPermit, nextPermit
+        );
+        data[1] = abi.encodeCall(factory.raiseGasParameter, (id, uint256(400_000)));
+        calls[1] = StreamCurrentStackPlan.call(
+            address(factory), data[1], scope,
+            keccak256(abi.encode(domain, scope, value, floor, failureClass, revision)),
+            keccak256(abi.encode(domain, scope, uint256(400_000), floor, failureClass, revision + 1))
+        );
+        // Actual class-1 scheduling, early-execution rejection, delay and semantic readback.
+        _executeGovernedBatch(calls, data);
+        IStreamAssetPermitPolicy.AssetPermitPolicy memory policy_ =
+            assetPolicy.assetPermitPolicy(address(token));
+        require(policy_.capabilities == 2 && policy_.permit2AllowanceMode == 1
+            && policy_.permit2 == currentPermit2 && policy_.permit2CodeHash == currentPermit2.codehash
+            && policy_.assetCodeHash == address(token).codehash
+            && policy_.assetPolicyHash == assetPolicy.assetPolicyHash(address(token))
+            && policy_.assetPolicyRevision == assetPolicy.assetPolicyRevision(address(token))
+            && policy_.revision == 1 && factory.gasParameter(id) == 400_000
+            && payment.permit2() == currentPermit2 && payment.permit2CodeHash() == currentPermit2.codehash,
+            "actual governed Permit2 admission and complete-call budget");
     }
 
     function _registration(address module, bytes32 kind, bytes4 capability)
@@ -577,6 +628,145 @@ contract StreamCurrentUniversalSettlementTest is CurrentCommerceConservationFixt
         require(ok && recipient.deliveries() == 1, "byte-identical signed Safe retry delivers");
         _assertNativeSafeSettlement(p);
         _finalizeAndClaimNativeExcess(p);
+    }
+
+    function testActualSafePermit2RestoresNativeMintThenRetriesExactPermitAndSafeEnvelope() public {
+        usePermit2 = true;
+        _deployNativeRevealScenario();
+        vm.deal(address(payerSafe), NATIVE_FEE + NATIVE_EXCESS);
+        CurrentUniversalObservedRecipient recipient = new CurrentUniversalObservedRecipient(
+            core, entropy, token, recorder, wallet
+        );
+        (IStreamUniversalFixedPriceSaleAdapter.SaleExecutionData memory e,
+            StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c) =
+            _execution(6, address(payerSafe), address(recipient));
+        StreamPrimarySettlementTypes.Permit2TransferAuthorization memory permit = _safePermit2(7);
+        bytes memory input = abi.encodeCall(payment.settleERC20PrimarySaleWithPermit2,
+            (c, permit, abi.encode(e)));
+        bytes memory envelope = _signedNativeSafeCall(
+            payerSafe, keys, address(payment), NATIVE_FEE + NATIVE_EXCESS, input
+        );
+        uint256 safeNonce = payerSafe.nonce();
+        uint256 requestId = provider.nextRequestId();
+        require(token.allowance(address(payerSafe), address(payment)) == 0
+            && token.allowance(address(payerSafe), currentPermit2) == 10_000,
+            "sole finite token approval targets official Permit2");
+        _expectTokenFunding(2);
+        _expectNativeRequest();
+        CurrentUniversalCallsVm(address(vm)).expectCall(
+            address(recipient), 0, abi.encodeWithSelector(IERC721Receiver.onERC721Received.selector), 2
+        );
+        CurrentUniversalCallsVm(address(vm)).expectCall(
+            currentPermit2, 0,
+            abi.encodeCall(IStreamPinnedPermit2.permitTransferFrom, (
+                IStreamPinnedPermit2.PermitTransferFrom(
+                    IStreamPinnedPermit2.TokenPermissions(address(token), 100), permit.nonce, permit.deadline),
+                IStreamPinnedPermit2.SignatureTransferDetails(address(payment), 100),
+                address(payerSafe), permit.signature
+            )), 2
+        );
+        (bool ok, bytes memory reason) = address(payerSafe).call(envelope);
+        _requireSafeFailure(ok, reason);
+        require(recipient.deliveries() == 0 && payerSafe.nonce() == safeNonce
+            && token.rawBalance(address(payerSafe)) == 10_000
+            && token.allowance(address(payerSafe), currentPermit2) == 10_000
+            && token.allowance(address(payerSafe), address(payment)) == 0
+            && IStreamPinnedPermit2(currentPermit2).nonceBitmap(address(payerSafe), 0) == 0,
+            "actual Safe nonce, Permit2 bitmap and finite approval all roll back");
+        require(core.totalSupply() == 0 && core.lastAllocatedTokenId() == 0
+            && core.collectionMintedEver(1) == 0 && core.coordinatorAtMint(1) == address(0)
+            && manager.nextOperationNonce() == 0
+            && !manager.isOperationRootUsed(c.operationIdentityCommitment)
+            && !manager.isAuthorizationUsed(_mintAuthorizationId(c))
+            && !universalSale.authorizationUsed(address(artistSafe), e.authorization.nonce)
+            && universalSale.executionIdByNonce(saleId, e.authorization.executionNonce) == 0
+            && universalSale.executionStatus(c.executionBinding.executionId) == 0
+            && payment.phase() == StreamERC20PrimarySettlementAdapter.Phase.IDLE,
+            "actual mint and sale consent roll back after Permit2 funding");
+        bytes32 key = recorder.settlementKey(address(universalSale), c.executionBinding.executionId);
+        require(!recorder.settlementConsumed(key) && recorder.totalOfficialSettled(address(token)) == 0
+            && token.rawBalance(wallet) == 0 && token.rawBalance(address(payment)) == 0
+            && token.rawBalance(address(recorder)) == 0,
+            "original token funding and official settlement roll back");
+        _assertNoCommerceFloorReceipt(key);
+        require(entropy.tokenEntropyStatus(1) == StreamEntropyStatus.NONE
+            && entropy.registeredAtBlock(1) == 0 && entropy.pendingRequestCount() == 0
+            && entropy.nonterminalTokenCount(1) == 0 && provider.nextRequestId() == requestId
+            && entropy.revealFeeEscrow(1) == 0 && entropy.totalRevealFeeEscrows() == 0
+            && entropy.totalFeeCredits() == 0 && address(entropy).balance == 0
+            && address(provider).balance == 0 && universalSale.refundLiability() == 0
+            && universalSale.refundableBalance(saleId, address(payerSafe)) == 0
+            && address(universalSale).balance == 0 && address(payment).balance == 0
+            && address(payerSafe).balance == NATIVE_FEE + NATIVE_EXCESS,
+            "actual entropy registration and native custody roll back before request");
+        recipient.accept();
+        // Reuse both original Permit2 proof and the complete original native-value Safe CALL.
+        (ok,) = address(payerSafe).call(envelope);
+        require(ok && recipient.deliveries() == 1, "exact Safe Permit2/native retry delivers");
+        _assertSettled(c, address(recipient));
+        require(payerSafe.nonce() == safeNonce + 1
+            && token.allowance(address(payerSafe), currentPermit2) == 9900
+            && token.allowance(address(payerSafe), address(payment)) == 0
+            && IStreamPinnedPermit2(currentPermit2).nonceBitmap(address(payerSafe), 0) == uint256(1) << 7
+            && payment.phase() == StreamERC20PrimarySettlementAdapter.Phase.IDLE,
+            "actual Safe Permit2 consumes exactly one nonce bit and token amount");
+        _assertPermit2NativeRequest(requestId);
+        provider.fulfill(requestId, keccak256("actual Safe Permit2 native reveal"));
+        (bytes32 seed, bool finalized) = entropy.tokenSeed(1);
+        require(finalized && seed != 0 && entropy.tokenEntropyStatus(1) == StreamEntropyStatus.FINALIZED
+            && entropy.pendingRequestCount() == 0 && entropy.nonterminalTokenCount(1) == 0
+            && bytes(core.tokenURI(1)).length != 0,
+            "actual Permit2-funded token finalizes through its selected Coordinator");
+        require(executeSafe(payerSafe, keys, address(universalSale), 0,
+            abi.encodeCall(universalSale.claimRefund, (saleId, address(payerSafe))), 0),
+            "actual payer-executor Safe claims its own native allowance excess");
+        (bytes32 refundSale, address refundOwner) = universalSale.refundAccountAt(0);
+        require(payerSafe.nonce() == safeNonce + 2 && address(payerSafe).balance == NATIVE_EXCESS
+            && universalSale.refundLiability() == 0 && address(universalSale).balance == 0
+            && universalSale.refundableBalance(saleId, address(payerSafe)) == 0
+            && universalSale.refundAccountCount() == 1 && refundSale == saleId
+            && refundOwner == address(payerSafe) && address(recipient).balance == 0
+            && entropy.revealFeeEscrow(1) == NATIVE_FEE - PROVIDER_FEE
+            && address(provider).balance == PROVIDER_FEE && token.rawBalance(wallet) == 100
+            && recorder.totalOfficialSettled(address(token)) == 100,
+            "Permit2 token proceeds stay separate from provider fee and native refund");
+    }
+
+    function _safePermit2(uint256 nonce)
+        private returns (StreamPrimarySettlementTypes.Permit2TransferAuthorization memory permit)
+    {
+        permit.nonce = nonce;
+        permit.deadline = block.timestamp + 1 days;
+        bytes32 permissions = keccak256(abi.encode(
+            keccak256("TokenPermissions(address token,uint256 amount)"), address(token), uint256(100)
+        ));
+        bytes32 transfer = keccak256(abi.encode(
+            keccak256("PermitTransferFrom(TokenPermissions permitted,address spender,uint256 nonce,uint256 deadline)TokenPermissions(address token,uint256 amount)"),
+            permissions, address(payment), permit.nonce, permit.deadline
+        ));
+        bytes32 digest = keccak256(abi.encodePacked(hex"1901", permit2Domain(currentPermit2), transfer));
+        permit.signature = safeThresholdSignature(keys, safeMessageDigest(payerSafe, abi.encode(digest)));
+    }
+
+    function _assertPermit2NativeRequest(uint256 providerRequest) private view {
+        (StreamEntropyStatus status, bytes32 seed, address selected,,, bytes32 requestKey,
+            uint256 requestId, uint16 attempt) = entropy.tokenEntropy(1);
+        require(status == StreamEntropyStatus.REQUESTED && seed == 0 && selected == address(provider)
+            && requestKey != 0 && requestId == providerRequest && attempt == 1
+            && provider.nextRequestId() == providerRequest + 1
+            && entropy.providerRequestKeys(address(provider), requestId) == requestKey
+            && entropy.pendingRequestCount() == 1 && entropy.nonterminalTokenCount(1) == 1
+            && core.coordinatorAtMint(1) == address(entropy),
+            "actual Permit2/native mint requests the original selected provider");
+        require(entropy.revealFeeEscrow(1) == NATIVE_FEE - PROVIDER_FEE
+            && entropy.totalRevealFeeEscrows() == NATIVE_FEE - PROVIDER_FEE
+            && address(entropy).balance == NATIVE_FEE - PROVIDER_FEE
+            && address(provider).balance == PROVIDER_FEE && entropy.totalFeeCredits() == 0
+            && universalSale.refundableBalance(saleId, address(payerSafe)) == NATIVE_EXCESS
+            && universalSale.refundLiability() == NATIVE_EXCESS
+            && address(universalSale).balance == NATIVE_EXCESS && address(payment).balance == 0
+            && address(payerSafe).balance == 0,
+            "Permit2 payer-executor owns only its native excess; token price stays 100");
     }
 
     function _deployNativeRevealScenario() private {
