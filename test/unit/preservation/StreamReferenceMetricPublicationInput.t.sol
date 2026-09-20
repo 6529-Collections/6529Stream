@@ -78,6 +78,38 @@ contract MetricPublicationInputProbe {
         return Input.contextHash(d, abi.decode(raw, (R.Publication)));
     }
 
+    function scratchReuse(
+        bytes memory raw,
+        R.Dependencies memory d,
+        M.Evidence memory e,
+        uint8 rounds
+    ) external view returns (bytes32 context, bytes32 evidence) {
+        require(rounds > 0 && rounds <= 4);
+        Encoded.Decoded memory decoded = Encoded.read(raw);
+        bytes32 live = keccak256(abi.encode(raw, d, e, decoded));
+        bytes32 expectedContext = keccak256(Encoded.contextPreimage(d, raw, decoded));
+        bytes32 expectedEvidence = keccak256(abi.encode(e));
+        uint256 overwriteSize = raw.length + abi.encode(e).length + 2048;
+        for (uint256 i; i < rounds; ++i) {
+            uint256 before;
+            uint256 afterHash;
+            assembly ("memory-safe") { before := mload(0x40) }
+            evidence = Encoded.evidenceHash(e);
+            context = Encoded.contextHash(d, raw, decoded);
+            assembly ("memory-safe") { afterHash := mload(0x40) }
+            require(before == afterHash, "temporary allocation escaped");
+            require(
+                context == expectedContext && evidence == expectedEvidence, "literal hash drift"
+            );
+            bytes memory overwrite = new bytes(overwriteSize);
+            for (uint256 j; j < overwrite.length; j += 32) {
+                assembly ("memory-safe") { mstore(add(add(overwrite, 32), j), not(add(i, j))) }
+            }
+            require(keccak256(overwrite) != 0, "overwrite retained");
+            require(keccak256(abi.encode(raw, d, e, decoded)) == live, "live input overwritten");
+        }
+    }
+
     function fresh(bytes memory raw, R.Dependencies memory d, M.Evidence memory e)
         external
         view
@@ -87,10 +119,10 @@ contract MetricPublicationInputProbe {
         Encoded.Decoded memory p = Encoded.read(raw);
         r.decodeGas = g - gasleft();
         g = gasleft();
-        bytes memory literal = Encoded.contextPreimage(d, raw, p);
-        r.context = keccak256(literal);
-        r.preimage = keccak256(literal);
+        r.context = Encoded.contextHash(d, raw, p);
         r.contextGas = g - gasleft();
+        r.preimage = keccak256(Encoded.contextPreimage(d, raw, p));
+        require(Encoded.evidenceHash(e) == keccak256(abi.encode(e)));
         g = gasleft();
         r.compact = keccak256(abi.encode(Encoded.compact(p, e, r.context)));
         r.foldGas = g - gasleft();
@@ -249,6 +281,40 @@ contract StreamReferenceMetricPublicationInputTest {
             a.reservedMemory,
             b.reservedMemory
         );
+    }
+
+    function testCompleteCorpusScratchReusePreservesLiveInputs() public view {
+        R.Publication memory p = _base();
+        string memory corpus =
+            vm.readFile("test/fixtures/preservation/reference-combined-native-v1.json");
+        p.environment.packageFiles =
+            abi.decode(vm.parseJsonBytes(corpus, ".packageFilesABI"), (R.PackageFile[]));
+        p.environment.platformPrerequisites =
+            abi.decode(vm.parseJsonBytes(corpus, ".platformPrerequisitesABI"), (R.PackageFile[]));
+        require(
+            p.environment.packageFiles.length == 1048
+                && p.environment.platformPrerequisites.length == 102
+        );
+        bytes memory raw = abi.encode(p);
+        (bytes32 context, bytes32 evidence) =
+            probe.scratchReuse(raw, _dependencies(), _evidence(), 4);
+        require(context == probe.originalContext(raw, _dependencies()));
+        require(evidence == keccak256(abi.encode(_evidence())));
+    }
+
+    function testFuzzScratchReuseRetainsEvidenceAndContext(bytes32 changed, uint8 rounds)
+        public
+        view
+    {
+        R.Publication memory p = _base();
+        p.environment.licenseNote = string(abi.encodePacked(changed));
+        M.Evidence memory e = _evidence();
+        e.perceptual.reportHash = changed;
+        bytes memory raw = abi.encode(p);
+        (bytes32 context, bytes32 evidence) =
+            probe.scratchReuse(raw, _dependencies(), e, uint8(uint256(rounds) % 4 + 1));
+        require(context == probe.originalContext(raw, _dependencies()));
+        require(evidence == keccak256(abi.encode(e)));
     }
 
     function testFuzzCanonicalPathsAndAllRowFields(

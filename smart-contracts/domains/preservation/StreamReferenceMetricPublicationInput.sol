@@ -154,6 +154,34 @@ library StreamReferenceMetricPublicationInput {
         hash = keccak256(abi.encode(frame[0], count));
     }
 
+    /// @dev All inputs precede the temporary canonical encoding. Only its digest escapes;
+    /// reclaim the dead bytes before subsequent current-source and mode reads allocate.
+    function evidenceHash(M.Evidence memory evidence) internal pure returns (bytes32 result) {
+        uint256 scratch;
+        assembly ("memory-safe") { scratch := mload(0x40) }
+        bytes memory encoded = abi.encode(evidence);
+        assembly ("memory-safe") {
+            result := keccak256(add(encoded, 32), mload(encoded))
+            mstore(0x40, scratch)
+        }
+    }
+
+    /// @dev Preserve the complete original preimage builder as the byte oracle. Its head
+    /// and output are temporary here; raw, decoded and dependencies remain live below scratch.
+    function contextHash(R.Dependencies memory d, bytes memory raw, Decoded memory v)
+        internal
+        view
+        returns (bytes32 result)
+    {
+        uint256 scratch;
+        assembly ("memory-safe") { scratch := mload(0x40) }
+        bytes memory encoded = contextPreimage(d, raw, v);
+        assembly ("memory-safe") {
+            result := keccak256(add(encoded, 32), mload(encoded))
+            mstore(0x40, scratch)
+        }
+    }
+
     function contextPreimage(R.Dependencies memory d, bytes memory raw, Decoded memory v)
         internal
         view

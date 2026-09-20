@@ -1,5 +1,13 @@
 # Changelog
 
+## Metric currentness temporary memory
+
+- Reclaim dead canonical evidence and complete context-preimage buffers after
+  hashing. Preserve original builders, currentness checks, receipt bytes and
+  transaction limits; add full-corpus memory-reuse and fuzz regressions.
+- Source/lifetime review is clear. Native publication acceptance remains pending;
+  the preceding native19 result is eight passes and one transaction gas failure.
+
 ## Retained secondary-offer delegation
 
 - Bind delegated secondary-offer buyer signatures to the original private

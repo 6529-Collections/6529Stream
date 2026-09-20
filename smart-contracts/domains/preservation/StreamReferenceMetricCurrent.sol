@@ -43,11 +43,11 @@ library StreamReferenceMetricCurrent {
         EncodedInput.Decoded memory decoded = EncodedInput.read(publicationBytes);
         bytes memory raw = MetricBytes.read(evidence);
         M.Evidence memory modeEvidence = abi.decode(raw, (M.Evidence));
-        if (keccak256(raw) != keccak256(abi.encode(modeEvidence))) {
+        if (keccak256(raw) != EncodedInput.evidenceHash(modeEvidence)) {
             revert M.InvalidModeEvidence();
         }
         R.SourceFacts memory source = Source.requireModeSourceInputs(d, decoded.source, true);
-        bytes32 context = keccak256(EncodedInput.contextPreimage(d, publicationBytes, decoded));
+        bytes32 context = EncodedInput.contextHash(d, publicationBytes, decoded);
         M.Facts memory mode = ModeProof.requireEvidenceProjected(
             d, bindings, EncodedInput.evidenceInput(decoded, context), source, modeEvidence, true
         );
