@@ -1,5 +1,9 @@
 # Museum offline tooling
 
+[Retained LoC PREMIS terms](../../docs/museum-premis-authority-snapshot.md)
+preserve original term-record bytes, dates and provenance and check explicit
+profile-field bindings with ambiguity and freshness diagnostics.
+
 [Native retained-file PREMIS](../../docs/museum-premis-retained.md) joins exact
 preservation-object records from the complete Independent catalogue to local
 retained bytes, with offline size/digest comparisons and replayable XML output.

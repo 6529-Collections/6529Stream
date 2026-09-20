@@ -119,6 +119,9 @@ the release policy in `docs/release-policy.md`.
 
 - Add pinned, bounded burn-program discovery and source/target closure warnings;
   clarify Safe CALL capability versus EIP-2612 and Permit2 signature support.
+- Add bounded offline LoC PREMIS term snapshots and prospective profile-field
+  bindings, retaining original bytes, dates, unresolved references and provenance
+  with explicit ambiguity and freshness checks.
 
 - Add a direct native Independent-catalogue PREMIS source adapter for typed
   preservation objects and retained files. Preserve original records while

@@ -50,3 +50,6 @@ schemas/museum/work-lido/** text eol=lf
 
 # Preserve generated native retained-file PREMIS XML bytes on every checkout.
 schemas/museum/premis-retained/example/expected/premis.xml text eol=lf
+
+# Original LoC response bytes are raw evidence, including their line endings.
+schemas/museum/premis-authority-snapshot/example/input/ing.nt -text
