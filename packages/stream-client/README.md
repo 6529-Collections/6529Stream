@@ -337,6 +337,8 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Mint counter accounting reads](docs/current-mint-counter-reads.md) preserve
+  scoped keys, original proof presentation and remaining counter units.
 - [Mint phase freeze](docs/current-mint-phase-freeze.md) retains original terminal
   governance, permanent Ledger constraints and bounded successor copying.
 - [Reference Mode payload preparation](docs/current-reference-mode-payload.md)

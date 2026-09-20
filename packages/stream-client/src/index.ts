@@ -31,6 +31,8 @@ export * from "./current-mint-policy-grace.js";
 export * from "./current-mint-policy-grace-workflow.js";
 export * from "./current-mint-phase-freeze.js";
 export * from "./current-mint-phase-freeze-workflow.js";
+export * from "./current-mint-counter-reads.js";
+export * from "./current-mint-counter-reads-workflow.js";
 export * from "./current-distribution.js";
 export * from "./current-burn-mint.js";
 export * from "./current-burn-finality.js";
