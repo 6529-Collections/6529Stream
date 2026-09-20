@@ -98,7 +98,13 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   An isolated actual-Store probe reproduces a Foundry setup snapshot defect
   after cooling newly created byte carriers. Moving that setup into the test
   body is a fixture-only correction; all transaction limits stay unchanged.
-  The corrected publication retry remains pending.
+  The corrected retry removes that fixture defect but still passes five
+  and fails four cases. Actual full inventory/environment preparation costs
+  12,820,216/13,942,210 gas including intrinsic. The complete publication
+  preview costs 35,360,587 gas; its preparation consumes 29,773,494.
+  Bounded publication exhausts memory gas before payload dispatch. This is
+  a production capacity failure, now assigned for structural copy/assembly
+  reduction; all original transaction limits remain unchanged.
 - Six genuine missing genesis products are composed in `a960a5b1`, with five
   actual-current/Safe tests authored. Remaining role composition includes the
   activation. Full 37-role construction is now source-integrated as
@@ -146,13 +152,21 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   Twenty-seven focused cases are authored; independent source review and
   ABI checks pass, while native execution and changed-product sizes remain
   pending. Dormancy-origin supersession is the next active recovery batch.
+- TOKEN/RELEASE/SEASON STATIC source snapshots are integrated as `17e299ba`.
+  They bind complete membership, original selected sources, retained bytes,
+  writer grants and exact scope history. Independent production review and
+  ABI checks pass; nine cases are authored and native remains pending.
+  This does not yet supply Artist-authorized scoped CONTENT_ROOT, retained
+  rendered output, VIEW or complete scoped finality; those joins are active.
+  A separate test-only correction (`a5493f0a`) checks the original 13-word
+  recovery receipt commitment instead of equating it to a semantic record.
 - Original STATIC renderer/companion/registry composition is integrated as
   `8d1672ac`, independently source-reviewed. Six current/Safe cases are authored;
   fixture analysis and partial direct read rosters are explicitly synthetic.
   Complete transitive analysis, goldens and joined runtime remain required.
 
-The latest complete-source ABI/type/storage pass at `770ccea5` covers 2,185
-sources in 19.578 seconds with no errors. It does not generate bytecode or
+The latest complete-source ABI/type/storage pass at `17e299ba` covers 2,191
+sources in 19.5 seconds with no errors. It does not generate bytecode or
 prove whole-system execution. Earlier paid-burn acceptance remains 39 distinct
 scoped cases, owner-notice adapters 93 affected root cases, and the populated
 Museum recipe 150 affected cases. Those counts overlap or use different

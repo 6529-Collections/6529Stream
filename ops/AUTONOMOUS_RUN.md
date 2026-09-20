@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `770ccea5`: recovery through rotations, full 37-role construction, actual Artist offer recipes, clone wallets, incident-gap consumers, entropy and mint fallbacks, full-byte records, current mint/Safe recipes, record-product composition and client fallback workflows are source-integrated. Focused passes and the entropy gas-profile measurement boundary are recorded in the [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch); full v1 remains unfinished. |
+| Source checkpoint | `17e299ba`: scoped STATIC source snapshots, recovery through rotations, full 37-role construction, actual Artist offer recipes, clone wallets, incident-gap consumers, entropy and mint fallbacks, full-byte records, current mint/Safe recipes, record-product composition and client fallback workflows are source-integrated. Focused passes and the entropy gas-profile measurement boundary are recorded in the [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch); full v1 remains unfinished. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -30,7 +30,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 ## Active continuation: 20 September
 
 - Root owns shared architecture, integration and final candidate delivery.
-  All 2,185 sources pass the ABI/type/storage check at `770ccea5`; complete
+  All 2,191 sources pass the ABI/type/storage check at `17e299ba`; complete
   native acceptance remains separate from focused and historical evidence.
 - The protocol lead is implementing C2PA credential/key-history reconciliation
   in an isolated Artist branch. Actual launch-budget entropy registration,
@@ -42,13 +42,17 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
   signing domains and the permanent effect of already-recorded exact consents.
 - The metadata lead completed staged inventories, publication transport and
   exact environment preparation (`5066ef97`). It owns the frozen actual
-  publisher capacity run and then remaining noncollection preservation scopes.
+  publisher capacity repair: five tests pass, four fail; complete preview
+  exceeds the transaction envelope. Scoped source snapshots (`17e299ba`)
+  are integrated; original scoped CONTENT_ROOT authority and VIEW follow.
 - The mint task completed 13 focused recovery cases and nine authored current
   Safe recipes. Six actual Artist ticket cases and ordinary-profile rollback
   are integrated in `262cc158`; seven curated auction/purchase cases follow in
   `5eeee268`. Seven actual-Artist native/ERC20 offer cases follow in
   `770ccea5`, closing the four authored entrypoint-family gaps. Native
-  runtime is pending; the task is checking remaining policy/gate joins.
+  runtime is pending. The task found the missing Manager policy-grace
+  producer and is adding it under original bounded Ledger semantics; root
+  owns its exact delayed-governance selector in the shared catalogs.
 - The burn task has 14 Core, 18 inventory and 49 finality/preservation
   consumer passes across recorded source closures. The original Router size
   blocker remains. ART25 rotation/recovery histories are source-integrated
