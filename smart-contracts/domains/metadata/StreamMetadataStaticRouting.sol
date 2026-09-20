@@ -18,6 +18,7 @@ import { StreamRendererV1 } from "./StreamRendererV1.sol";
 import { StreamMetadataStaticState as State } from "./StreamMetadataStaticState.sol";
 import { StreamRendererCalls as Calls } from "./StreamRendererCalls.sol";
 import { StreamMetadataDisplayParameters as Gas } from "./StreamMetadataDisplayParameters.sol";
+import { StreamCurrentCitationRouting } from "./StreamCurrentCitationRouting.sol";
 
 /// @notice Internal-only Router route: every external call in this implementation is bounded STATICCALL.
 /// @dev Source finality adapters must bind this exact config record and source snapshot. This
@@ -94,12 +95,16 @@ library StreamMetadataStaticRouting {
         );
         uint256 maximum = mode == 1 ? 24576 : mode == 0 ? 18000 : 16777216;
         uint256 cap = Gas.value(mode >= 2 ? Gas.FULL_VIEW_GAS : Gas.BUNDLE_RENDER_GAS);
-        bytes memory input = mode == 1
-            ? abi.encodeCall(R.tokenURI, (request))
-            : abi.encodeCall(StreamRendererV1.renderView, (request, mode == 4 ? 2 : mode));
-        bytes memory raw = Calls.read(
-            selected.renderer, input, 64 + ((maximum + 31) / 32) * 32, false, cap
-        );
+        // Explicit historical checkpoint entries retain the original renderer profile. Current
+        // tokenJSON (mode 2, also burn-readable) is distinct from historicalFull... (mode 4).
+        bool historical = (allowBurned && mode == 0) || mode == 4;
+        bytes memory input = historical
+            ? abi.encodeCall(StreamRendererV1.renderView, (request, mode == 4 ? 2 : mode))
+            : StreamCurrentCitationRouting.input(
+                selected, request, mode, Gas.value(Gas.BUNDLE_READ_GAS)
+            );
+        bytes memory raw =
+            Calls.read(selected.renderer, input, 64 + ((maximum + 31) / 32) * 32, false, cap);
         return Calls.stringResult(raw, maximum);
     }
 

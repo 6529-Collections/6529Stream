@@ -27,6 +27,9 @@ import { StreamGasParameterHost } from "../parameters/StreamGasParameterHost.sol
 import { Strings } from "../../vendor/openzeppelin/Strings.sol";
 import { StreamStaticRenderEncoding as Encoding } from "./StreamStaticRenderEncoding.sol";
 import {
+    IStreamCurrentCitationRenderer as Current
+} from "../../interfaces/stream/metadata/IStreamCurrentCitationRenderer.sol";
+import {
     IStreamStaticC2PAAttribution as C2PAAttribution
 } from "../../interfaces/stream/metadata/IStreamStaticC2PAAttribution.sol";
 import {
@@ -131,7 +134,19 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
     }
 
     function supportsInterface(bytes4 id) external pure override returns (bool) {
-        return id == type(R).interfaceId || id == 0x01ffc9a7;
+        return id == type(R).interfaceId || id == type(Current).interfaceId || id == 0x01ffc9a7;
+    }
+
+    function currentCitationProfile() external pure returns (bytes32) {
+        return keccak256("6529STREAM_CURRENT_BASE_CITATION_V1");
+    }
+
+    function renderCurrent(RenderRequest calldata r, uint8 mode)
+        external
+        view
+        returns (string memory)
+    {
+        return _render(r, mode, true);
     }
 
     function rendererVersion() external pure override returns (bytes32) {
@@ -151,7 +166,7 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
     }
 
     function tokenURI(RenderRequest calldata r) external view override returns (string memory) {
-        return _render(r, 1);
+        return _render(r, 1, false);
     }
 
     /// @param mode 0 compact JSON, 1 marketplace URI, 2 full JSON, 3 full executable HTML.
@@ -160,10 +175,14 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
         view
         returns (string memory)
     {
-        return _render(r, mode);
+        return _render(r, mode, false);
     }
 
-    function _render(RenderRequest memory r, uint8 mode) private view returns (string memory) {
+    function _render(RenderRequest memory r, uint8 mode, bool current)
+        private
+        view
+        returns (string memory)
+    {
         if (mode > 3 || r.core != _sources.core || r.viewId != 0 || r.viewManifestHash != 0) {
             revert InvalidStaticRender();
         }
@@ -198,8 +217,14 @@ contract StreamRendererV1 is R, StreamGasParameterHost {
             }
         }
         _encodingPin();
-        bytes memory input =
-            abi.encodeWithSelector(Encoding.render.selector, r, p, script, _sources.router, mode);
+        bytes memory input = abi.encodeWithSelector(
+            current ? Encoding.renderCurrent.selector : Encoding.render.selector,
+            r,
+            p,
+            script,
+            _sources.router,
+            mode
+        );
         uint256 maximum = mode == 1 ? MAX_DEFAULT_URI_BYTES : mode == 0 ? 18000 : MAX_FULL_BYTES;
         bytes memory raw =
             Calls.fixedCode(address(Encoding), input, 64 + ((maximum + 31) / 32) * 32, gasleft());

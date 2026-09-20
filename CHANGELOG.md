@@ -32,6 +32,9 @@ the release policy in `docs/release-policy.md`.
 - Include dedicated ERC-20 burn programs in collection freeze/finality warnings,
   with immutable gate/carrier bindings and source/target impact checks.
 
+- Add the original chain/Core/global-token citation to current default metadata,
+  with separate governed STATIC profile evidence and preserved historical render
+  entries. Record-state qualifiers and full current-graph acceptance remain separate.
 - Add original-consent scoped CONTENT_ROOT publication and full-v1 activation
   plans; current tests are authored and coordinated execution remains pending.
 - Name finite Artist/C2PA renderer source roles, preserving target/read bounds,

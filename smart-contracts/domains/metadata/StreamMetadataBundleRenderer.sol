@@ -20,6 +20,7 @@ import { StreamMetadataTokenRenderer } from "./StreamMetadataTokenRenderer.sol";
 import { Strings } from "../../vendor/openzeppelin/Strings.sol";
 import { IStreamCorePointers } from "../../interfaces/stream/core/IStreamCorePointers.sol";
 import { Base64 } from "../../vendor/openzeppelin/Base64.sol";
+import { StreamMetadataCitation as Citation } from "./StreamMetadataCitation.sol";
 
 /// @notice Explicit large-output views over finalized immutable bundles, with a compact default.
 /// @dev libraryURI is provenance only. Only locally verified, pinned library bytes execute.
@@ -171,7 +172,35 @@ library StreamMetadataBundleRenderer {
             s,
             viewHost,
             chainId,
-            BundleGas.value(BundleGas.BUNDLE_READ_GAS)
+            BundleGas.value(BundleGas.BUNDLE_READ_GAS),
+            address(0),
+            false
+        );
+    }
+
+    function renderCurrent(
+        uint8 mode,
+        T.Token memory token,
+        F.ServingSource memory metadata,
+        bytes memory artist,
+        bool nestedArtist,
+        B.Selection memory s,
+        address viewHost,
+        uint256 originalChainId,
+        address originalCore
+    ) public view returns (string memory) {
+        if (originalCore == address(0)) revert InvalidBundleRendering();
+        return _render(
+            mode,
+            token,
+            metadata,
+            artist,
+            s,
+            viewHost,
+            originalChainId,
+            BundleGas.value(BundleGas.BUNDLE_READ_GAS),
+            originalCore,
+            nestedArtist
         );
     }
 
@@ -183,11 +212,28 @@ library StreamMetadataBundleRenderer {
         B.Selection memory s,
         address viewHost,
         uint256 chainId,
-        uint256 cap
+        uint256 cap,
+        address originalCore,
+        bool nestedArtist
     ) private view returns (string memory) {
         if (mode > 3) revert InvalidBundleRendering();
         B.Facts memory f = _selectionFacts(s, cap);
-        if (mode < 2) return _compact(mode == 1, token, metadata, artist, s, f, viewHost, chainId);
+        if (mode < 2) {
+            return _compact(
+                mode == 1,
+                token,
+                metadata,
+                artist,
+                s,
+                f,
+                viewHost,
+                chainId,
+                originalCore == address(0)
+                    ? ""
+                    : Citation.work(chainId, originalCore, token.tokenId),
+                nestedArtist
+            );
+        }
         if (!token.finalized) revert InvalidBundleRendering();
         bytes memory script = payload(s.host, s.bundleId, cap);
         if (f.libraryBundle != 0) {
@@ -198,6 +244,11 @@ library StreamMetadataBundleRenderer {
         // Escape after complete reconstruction, including boundaries across chunks/libraries.
         metadata.script = StreamMetadataTokenRenderer.prepareScript(string(script));
         if (mode == 3) return StreamMetadataTokenRenderer.html(token, metadata);
+        if (originalCore != address(0)) {
+            return StreamMetadataTokenRenderer.renderCurrent(
+                2, token, metadata, artist, nestedArtist, chainId, originalCore
+            );
+        }
         return StreamMetadataTokenRenderer.fullJSON(token, metadata, artist);
     }
 
@@ -223,7 +274,7 @@ library StreamMetadataBundleRenderer {
         ) {
             revert InvalidBundleRendering();
         }
-        return _render(mode, token, metadata, artist, s, viewHost, chainId, cap);
+        return _render(mode, token, metadata, artist, s, viewHost, chainId, cap, address(0), false);
     }
 
     function _compact(
@@ -234,7 +285,9 @@ library StreamMetadataBundleRenderer {
         B.Selection memory s,
         B.Facts memory f,
         address host,
-        uint256 chainId
+        uint256 chainId,
+        string memory citation,
+        bool nestedArtist
     ) private pure returns (string memory) {
         string memory prefix = string(
             abi.encodePacked(
@@ -242,13 +295,15 @@ library StreamMetadataBundleRenderer {
             )
         );
         string memory suffix = string(abi.encodePacked("/", t.tokenId.toString()));
-        bytes memory json = _compactJSON(t, m, artist, s, f, prefix, suffix);
+        bytes memory json = _compactJSON(t, m, artist, s, f, prefix, suffix, citation, nestedArtist);
         // Large live attribution remains available in the full view; do not mislabel it unavailable.
-        if (json.length > 18000) json = _compactJSON(t, m, bytes(""), s, f, prefix, suffix);
+        if (json.length > 18000) {
+            json = _compactJSON(t, m, bytes(""), s, f, prefix, suffix, citation, false);
+        }
         if (json.length > 18000) {
             m.name = "6529 Stream";
             m.imageURI = "";
-            json = _compactJSON(t, m, bytes(""), s, f, prefix, suffix);
+            json = _compactJSON(t, m, bytes(""), s, f, prefix, suffix, citation, false);
         }
         if (json.length > 18000) revert DefaultMetadataTooLarge();
         return asURI ? StreamMetadataTokenRenderer.dataURI(string(json)) : string(json);
@@ -261,7 +316,9 @@ library StreamMetadataBundleRenderer {
         B.Selection memory s,
         B.Facts memory f,
         string memory prefix,
-        string memory suffix
+        string memory suffix,
+        string memory citation,
+        bool nestedArtist
     ) private pure returns (bytes memory) {
         return abi.encodePacked(
             '{"name":"',
@@ -280,7 +337,11 @@ library StreamMetadataBundleRenderer {
             uint256(t.seed).toHexString(32),
             '","token_data_location":"tokenJSON:token_data_base64","properties":{"render_mode":"compact","display_fields_location":"tokenJSON","stream":{"render_state":"',
             t.state,
-            '"},"views":{"tokenHTML":"',
+            '"',
+            bytes(citation).length == 0
+                ? bytes("")
+                : abi.encodePacked(',"citation":"', citation, '"'),
+            '},"views":{"tokenHTML":"',
             prefix,
             "/tokenHTML",
             suffix,
@@ -298,8 +359,12 @@ library StreamMetadataBundleRenderer {
             uint256(uint160(s.host)).toHexString(20),
             '","manifest_hash":"',
             uint256(s.manifestHash).toHexString(32),
-            '"}',
-            artist,
+            '"',
+            nestedArtist
+                ? abi.encodePacked(',"provenance":{"attribution":', artist, "}")
+                : bytes(""),
+            "}",
+            nestedArtist ? bytes("") : artist,
             "}"
         );
     }

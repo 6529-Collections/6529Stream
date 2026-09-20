@@ -56,7 +56,6 @@ contract StreamRendererRegistryModule is StreamRendererRegistry, StreamModuleBas
         override(StreamRendererRegistry, StreamModuleBase)
         returns (bool)
     {
-        return
-            id == type(V).interfaceId || id == type(IStreamModule).interfaceId || id == 0x01ffc9a7;
+        return StreamRendererRegistry.supportsInterface(id) || id == type(IStreamModule).interfaceId;
     }
 }

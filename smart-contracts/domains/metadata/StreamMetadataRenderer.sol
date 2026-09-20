@@ -7,6 +7,7 @@ import "../../interfaces/stream/dependencies/IDependencyRegistry.sol";
 import "../../interfaces/stream/access/IStreamAdmins.sol";
 import "../../interfaces/stream/legacy/entropy/IRandomizerLifecycle.sol";
 import "../../vendor/openzeppelin/Strings.sol";
+import { StreamMetadataCitation as Citation } from "./StreamMetadataCitation.sol";
 
 library StreamMetadataRenderer {
     using Strings for uint256;
@@ -52,7 +53,7 @@ library StreamMetadataRenderer {
     /// @dev Public library visibility keeps Base64 and decimal formatting out of Core runtime.
     function coreFallbackTokenURI(uint256 tokenId, uint8 status)
         public
-        pure
+        view
         returns (string memory)
     {
         bytes memory json = abi.encodePacked(
@@ -61,6 +62,8 @@ library StreamMetadataRenderer {
             '","description":"Stream metadata is temporarily unavailable.",',
             '"image":"","properties":{"stream":{"error":"',
             _coreRouterError(status),
+            '","citation":"',
+            Citation.work(block.chainid, address(this), tokenId),
             '"}}}'
         );
         return string(abi.encodePacked("data:application/json;base64,", Base64.encode(json)));

@@ -16,13 +16,19 @@ import {
 } from "../../interfaces/stream/parameters/IStreamGovernedParameterAuthority.sol";
 import { StreamGasParameterHost } from "../parameters/StreamGasParameterHost.sol";
 import { StreamRendererCalls as Calls } from "./StreamRendererCalls.sol";
+import {
+    IStreamCurrentCitationRegistry as Current
+} from "../../interfaces/stream/metadata/IStreamCurrentCitationRegistry.sol";
+import {
+    StreamCurrentCitationAdmission as CitationAdmission
+} from "./StreamCurrentCitationAdmission.sol";
 
 /// @notice Governance-admitted STATIC versions with immutable runtime, source set and evidence.
 /// @dev No removal, incident-disable, target substitution or reactivation entry exists. A version
 /// remains available to historical pins after deprecation. The deployment's named allowlist is
 /// immutable. Gate reports are exact registered analysis assertions, not onchain proof of a
 /// program's reachable opcodes; genuine static analysis remains a release admission obligation.
-contract StreamRendererRegistry is V, StreamGasParameterHost {
+contract StreamRendererRegistry is V, Current, StreamGasParameterHost {
     bytes32 public constant ANALYSIS_PROFILE =
         keccak256("6529STREAM_STATIC_RENDERER_ANALYSIS_ABI_V1");
     bytes32 public constant READ_GAS = keccak256("6529STREAM_GGP_METADATA_DEPENDENCY_READ_GAS");
@@ -45,6 +51,19 @@ contract StreamRendererRegistry is V, StreamGasParameterHost {
     mapping(bytes32 => Registration) private _registrations;
     mapping(bytes32 => Read[]) private _reads;
     bytes32[] private _keys;
+    // Fixed namespace keeps both the original registry and derived module storage unchanged.
+    bytes32 private constant CITATION_SLOT =
+        keccak256("6529STREAM_RENDERER_REGISTRY_CURRENT_CITATION_STORAGE_V1");
+
+    struct CitationState {
+        mapping(bytes32 => Current.CurrentRecord) records;
+        mapping(bytes32 => Read[]) reads;
+    }
+
+    function _citationState() private pure returns (CitationState storage s) {
+        bytes32 slot = CITATION_SLOT;
+        assembly ("memory-safe") { s.slot := slot }
+    }
 
     constructor(
         address executor,
@@ -81,7 +100,131 @@ contract StreamRendererRegistry is V, StreamGasParameterHost {
     }
 
     function supportsInterface(bytes4 id) public pure virtual returns (bool) {
-        return id == type(V).interfaceId || id == 0x01ffc9a7;
+        return id == type(V).interfaceId || id == type(Current).interfaceId || id == 0x01ffc9a7;
+    }
+
+    /// @notice Additional class-1 evidence, never a replacement for the immutable original version.
+    function registerCurrentCitation(
+        Current.CurrentRegistration calldata r,
+        Read[] calldata declared
+    ) external override {
+        Version storage v = _versions[r.versionKey];
+        CitationState storage citations = _citationState();
+        if (!v.exists || v.deprecated || citations.records[r.versionKey].registrationHash != 0) {
+            revert Current.CurrentCitationUnavailable(r.versionKey);
+        }
+        _retained(r.versionKey);
+        bytes32 declaration = _currentDeclaration(r, declared);
+        bytes32 action =
+            _governed(_currentScope(r.versionKey), _currentState(0), _currentState(declaration), 1);
+        bytes32 setHash = _readSet(declared);
+        bytes memory analysis = _document(r.analysisDocument);
+        bytes memory golden = _document(r.goldenDocument);
+        CitationAdmission.validate(
+            r,
+            v,
+            declared,
+            _targets,
+            _reads[r.versionKey],
+            setHash,
+            analysis,
+            golden,
+            _gasParameterValue(READ_GAS),
+            _gasParameterValue(GOLDEN_GAS)
+        );
+        citations.records[r.versionKey] = Current.CurrentRecord(
+            r, declaration, setHash, keccak256(analysis), keccak256(golden), action
+        );
+        for (uint256 i; i < declared.length; ++i) {
+            citations.reads[r.versionKey].push(declared[i]);
+        }
+        emit CurrentCitationRegistered(
+            1, r.versionKey, v.renderer, action, declaration, r, declared
+        );
+    }
+
+    function currentCitationTransition(
+        Current.CurrentRegistration calldata r,
+        Read[] calldata declared
+    ) external view override returns (bytes32 scope, bytes32 previous, bytes32 next) {
+        return (
+            _currentScope(r.versionKey),
+            _currentState(_citationState().records[r.versionKey].registrationHash),
+            _currentState(_currentDeclaration(r, declared))
+        );
+    }
+
+    function currentCitationRecord(bytes32 key)
+        external
+        view
+        override
+        returns (Current.CurrentRecord memory)
+    {
+        return _citationState().records[key];
+    }
+
+    function currentCitationReads(bytes32 key) external view override returns (Read[] memory) {
+        return _citationState().reads[key];
+    }
+
+    function requireCurrentCitation(bytes32 key)
+        external
+        view
+        override
+        returns (address renderer, bytes32 runtimeHash, bytes32 profile, bytes4 selector)
+    {
+        CitationState storage citations = _citationState();
+        Current.CurrentRecord storage c = citations.records[key];
+        if (c.registrationHash == 0 || deploymentChainId != block.chainid) {
+            revert Current.CurrentCitationUnavailable(key);
+        }
+        (renderer, runtimeHash) = _retained(key);
+        // Like the original retained profile, catalogue retirement/deprecation does not erase
+        // accepted evidence. Current executable dependencies must still match every declared pin.
+        Read[] storage declared = citations.reads[key];
+        for (uint256 i; i < declared.length; ++i) {
+            Target storage t = _targets[declared[i].targetIndex];
+            if (t.target.code.length == 0 || t.target.codehash != t.codeHash) {
+                revert Current.CurrentCitationUnavailable(key);
+            }
+        }
+        CitationAdmission.bindingsInternal(c.registration, renderer, _gasParameterValue(READ_GAS));
+        return (renderer, runtimeHash, c.registration.profile, c.registration.selector);
+    }
+
+    function _currentDeclaration(Current.CurrentRegistration calldata r, Read[] calldata declared)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_CURRENT_CITATION_REGISTRATION_V1"),
+                deploymentChainId,
+                address(this),
+                schemaRegistry,
+                schemaRegistryCodeHash,
+                targetSetHash,
+                _versions[r.versionKey].registrationHash,
+                r,
+                declared
+            )
+        );
+    }
+
+    function _currentScope(bytes32 key) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_CURRENT_CITATION_SCOPE_V1"),
+                deploymentChainId,
+                address(this),
+                key
+            )
+        );
+    }
+
+    function _currentState(bytes32 declaration) private pure returns (bytes32) {
+        return keccak256(abi.encode(keccak256("6529STREAM_CURRENT_CITATION_STATE_V1"), declaration));
     }
 
     function registerRenderer(Registration calldata r, Read[] calldata declared)

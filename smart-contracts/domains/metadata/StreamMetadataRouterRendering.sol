@@ -94,24 +94,30 @@ library StreamMetadataRouterRendering {
             IStreamCore(x.core).tokenData(tokenId),
             collections[facts.collectionId].configured
         );
-        bytes memory artist = allowBurned && presentations[facts.collectionId].locked
+        bool nestedArtist = !(allowBurned && presentations[facts.collectionId].locked);
+        bytes memory artist = !nestedArtist
             ? StreamMetadataTokenReads.artistJSON(presentations, x.artist, facts.collectionId)
-            : StreamArtistDisplayJSON.nested(live(facts.collectionId, tokenId));
+            : live(facts.collectionId, tokenId);
         B.Selection memory bundle =
             StreamMetadataBundleRenderer.selection(selections[facts.collectionId][2]);
         if (bundle.bundleId != 0) {
             StreamMetadataBundleRenderer.requireLive(bundle, x.core);
-            return StreamMetadataBundleRenderer.render(
-                mode == 4 ? 2 : mode, token, metadata, artist, bundle, address(this), block.chainid
+            return StreamMetadataBundleRenderer.renderCurrent(
+                mode == 4 ? 2 : mode,
+                token,
+                metadata,
+                artist,
+                nestedArtist,
+                bundle,
+                address(this),
+                block.chainid,
+                x.core
             );
         }
         if (mode == 3) return StreamMetadataTokenRenderer.html(token, metadata);
-        if (mode == 2 || mode == 4) {
-            return StreamMetadataTokenRenderer.fullJSON(token, metadata, artist);
-        }
-        return mode == 1
-            ? StreamMetadataTokenRenderer.renderURI(token, metadata, artist)
-            : StreamMetadataTokenRenderer.render(token, metadata, artist);
+        return StreamMetadataTokenRenderer.renderCurrent(
+            mode == 4 ? 2 : mode, token, metadata, artist, nestedArtist, block.chainid, x.core
+        );
     }
 
     function live(uint256 collectionId, uint256 tokenId) public view returns (bytes memory) {

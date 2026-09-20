@@ -14,6 +14,7 @@ import {
     IStreamC2PAReconciliation as C2PA
 } from "../../interfaces/stream/metadata/IStreamC2PAReconciliation.sol";
 import { StreamStaticC2PAJSON } from "./StreamStaticC2PAJSON.sol";
+import { StreamMetadataCitation as Citation } from "./StreamMetadataCitation.sol";
 import {
     IStreamC2PAConflicts as Conflicts
 } from "../../interfaces/stream/metadata/IStreamC2PAConflicts.sol";
@@ -67,6 +68,28 @@ library StreamStaticRenderEncoding {
         address router,
         uint8 mode
     ) public pure returns (string memory) {
+        return _render(r, p, script, router, mode, false);
+    }
+
+    /// @notice Separately admitted current JSON; original render remains byte-compatible.
+    function renderCurrent(
+        R.RenderRequest memory r,
+        Prepared memory p,
+        string memory script,
+        address router,
+        uint8 mode
+    ) public pure returns (string memory) {
+        return _render(r, p, script, router, mode, true);
+    }
+
+    function _render(
+        R.RenderRequest memory r,
+        Prepared memory p,
+        string memory script,
+        address router,
+        uint8 mode,
+        bool current
+    ) private pure returns (string memory) {
         bool full = mode >= 2;
         string memory context = Context.json(r, p.facts, ID, VERSION);
         string memory html;
@@ -80,8 +103,13 @@ library StreamStaticRenderEncoding {
         if (mode == 3) return bytes(html).length == 0 ? Context.html(context, "", "") : html;
         // A large program is available at the actual full methods. Its compact reference is
         // never described as a complete executable export. No external URI is executed here.
+        if (current) {
+            context = Citation.inObject(context, Citation.work(p.source.chainId, r.core, r.tokenId));
+        }
         bytes memory json = _json(r, p, context, html, full, router);
-        if (!full && (p.bundle != 0 || json.length > 18000)) json = _compact(r, p, router);
+        if (!full && (p.bundle != 0 || json.length > 18000)) {
+            json = _compact(r, p, router, current);
+        }
         if (json.length > (full ? MAX_FULL_BYTES : 18000)) revert StaticOutputTooLarge();
         if (mode == 1) {
             string memory uri = string.concat("data:application/json;base64,", Base64.encode(json));
@@ -173,7 +201,7 @@ library StreamStaticRenderEncoding {
                 : state == R.TokenRenderState.FROZEN ? "frozen" : "active";
     }
 
-    function _compact(R.RenderRequest memory r, Prepared memory p, address router)
+    function _compact(R.RenderRequest memory r, Prepared memory p, address router, bool current)
         private
         pure
         returns (bytes memory)
@@ -208,7 +236,15 @@ library StreamStaticRenderEncoding {
             Context.escape(p.source.imageURI),
             '","metadata_state":"',
             _renderState(r.state),
-            '","metadata_schema_version":"6529stream-static-v1","token_data_location":"tokenJSON:token_data_base64","properties":{"render_mode":"compact","renderer_id":"',
+            '","metadata_schema_version":"6529stream-static-v1","token_data_location":"tokenJSON:token_data_base64","properties":{',
+            current
+                ? abi.encodePacked(
+                    '"stream":{"citation":"',
+                    Citation.work(p.source.chainId, r.core, r.tokenId),
+                    '"},'
+                )
+                : bytes(""),
+            '"render_mode":"compact","renderer_id":"',
             uint256(ID).toHexString(32),
             '","renderer_version":"',
             uint256(VERSION).toHexString(32),

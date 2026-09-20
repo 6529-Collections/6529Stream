@@ -6,6 +6,7 @@ import "../../interfaces/stream/metadata/StreamMetadataRenderTypes.sol";
 import "../../vendor/openzeppelin/Strings.sol";
 import "../../vendor/openzeppelin/Base64.sol";
 import "./StreamMetadataRenderer.sol";
+import { StreamMetadataCitation as Citation } from "./StreamMetadataCitation.sol";
 
 /// @notice Exact deterministic Stream JSON/HTML serialization, not RFC8785/JCS canonicalization.
 /// @dev Prepared fields are escaped by the router's existing fixed helper. This pure linked helper
@@ -71,6 +72,44 @@ library StreamMetadataTokenRenderer {
 
     function dataURI(string memory json) public pure returns (string memory) {
         return string(abi.encodePacked("data:application/json;base64,", Base64.encode(bytes(json))));
+    }
+
+    /// @notice Current output carries the work's original identity explicitly.
+    /// @dev Old finality selectors and their Token tuple remain unchanged.
+    function renderCurrent(
+        uint8 mode,
+        StreamMetadataRenderTypes.Token memory token,
+        IStreamMetadataServingFacts.ServingSource memory metadata,
+        bytes memory artist,
+        bool nestedArtist,
+        uint256 originalChainId,
+        address originalCore
+    ) public pure returns (string memory) {
+        assert(mode <= 3);
+        if (mode == 3) return html(token, metadata);
+        bytes memory json = bytes(render(token, metadata, nestedArtist ? bytes("") : artist));
+        assembly ("memory-safe") { mstore(json, sub(mload(json), 1)) }
+        bytes memory fullData = mode == 2 && token.finalized && bytes(metadata.script).length != 0
+            ? abi.encodePacked(',"token_data_base64":"', Base64.encode(token.tokenData), '"')
+            : bytes("");
+        string memory result = string(
+            bytes.concat(
+                json,
+                fullData,
+                abi.encodePacked(
+                    ',"properties":{"stream":{"render_state":"',
+                    token.state,
+                    '","citation":"',
+                    Citation.work(originalChainId, originalCore, token.tokenId),
+                    '"}',
+                    nestedArtist
+                        ? abi.encodePacked(',"provenance":{"attribution":', artist, "}")
+                        : bytes(""),
+                    "}}"
+                )
+            )
+        );
+        return mode == 1 ? dataURI(result) : result;
     }
 
     function artistFields(address artist, bytes32 identityHash, bytes32 acceptanceHash)
