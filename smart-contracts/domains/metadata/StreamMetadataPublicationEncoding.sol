@@ -148,7 +148,8 @@ library StreamMetadataPublicationEncoding {
         if (
             (recordType == keccak256("ARTIST_STATEMENT")
                     && (schemaId == keccak256("STREAM_ARTIST_INTERVIEW_V1")
-                        || schemaId == keccak256("STREAM_ARTIST_STATEMENT_V1")))
+                        || schemaId == keccak256("STREAM_ARTIST_STATEMENT_V1")
+                        || schemaId == keccak256("STREAM_MASTER_WAIVER_V1")))
                 || (recordType == keccak256("ARTIST_SEMANTIC_ASSERTION")
                     && schemaId == keccak256("STREAM_SEMANTIC_ASSERTION_V1"))
                 || (recordType == keccak256("WORK_DESCRIPTION")
