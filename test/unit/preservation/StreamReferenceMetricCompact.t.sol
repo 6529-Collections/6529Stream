@@ -36,6 +36,10 @@ interface CompactVm {
 }
 
 contract CompactMetricProbe {
+    function currentTimestamp() external view returns (uint256) {
+        return block.timestamp;
+    }
+
     function compare(
         R.Publication memory p,
         M.Evidence memory e,
@@ -298,10 +302,13 @@ contract StreamReferenceMetricCompactTest {
         g = _guard();
         g.grantRevision = 0;
         _prepareFailure(g, raw, abi.encodeWithSelector(T.InvalidMetricSupplement.selector));
-        uint256 timestamp = block.timestamp;
+        // Restore the frozen fixture time; a timestamp opcode may be moved across a
+        // cheatcode call because ordinary EVM execution cannot change block.timestamp.
+        uint256 timestamp = supplement.replay.executedAt;
         vm.warp(uint256(type(uint64).max) + 1);
         _prepareFailure(_guard(), raw, abi.encodeWithSelector(T.InvalidMetricSupplement.selector));
         vm.warp(timestamp);
+        require(probe.currentTimestamp() == timestamp, "fixture timestamp restored");
         _prepareFailure(_guard(), raw, unavailable);
     }
 
