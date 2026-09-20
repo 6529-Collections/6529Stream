@@ -1362,16 +1362,7 @@ abstract contract StreamCurrentFullPreservationPolicyPublicationBase is
                     ),
             "actual fixed original authority capability"
         );
-        ViewPreservationBindingTypes.Transition memory transition_ =
-            binding_.viewPreservationBindingTransition(c, declaration);
-        bytes32 action = _assemblyGovernanceCall(
-            2,
-            address(binding_),
-            abi.encodeCall(ViewPreservationBinding.bindViewPreservation, (c, declaration)),
-            transition_.scopeHash,
-            transition_.oldValueHash,
-            transition_.newValueHash
-        );
+        bytes32 action = _executeFullPolicyViewBinding(c, declaration);
         ViewPreservationBindingTypes.Receipt memory receipt =
             binding_.viewPreservationBindingReceipt();
         require(
@@ -1387,17 +1378,6 @@ abstract contract StreamCurrentFullPreservationPolicyPublicationBase is
                     == keccak256(abi.encode(assemblyViewPreservationSnapshot.dependencies())),
             "exact one-time class2 VIEW receipt and complete dependencies"
         );
-        require(
-            keccak256(abi.encode(transition_))
-                == keccak256(
-                    abi.encode(
-                        ViewPreservationBindingTypes.transition(
-                            block.chainid, address(assemblyProvider), receipt
-                        )
-                    )
-                ),
-            "executed original scheduled proposal"
-        );
         ViewPreservationEvidence evidence = ViewPreservationEvidence(address(assemblyProvider));
         require(
             evidence.viewPreservationSnapshotHost() == c.snapshotHost
@@ -1412,6 +1392,38 @@ abstract contract StreamCurrentFullPreservationPolicyPublicationBase is
             "same provider exact original VIEW source capability"
         );
         _requireFullPolicyCompanionsUnchanged(original);
+    }
+
+    /// @dev A complete VIEW fixture can construct all fixed children before its single bind.
+    /// The default retains the exact original basic proposal and class2 action readback.
+    function _executeFullPolicyViewBinding(
+        ViewPreservationBindingTypes.Configuration memory c,
+        ViewAdoption.Binding memory declaration
+    ) internal virtual returns (bytes32 action) {
+        ViewPreservationBinding binding_ = ViewPreservationBinding(address(assemblyProvider));
+        ViewPreservationBindingTypes.Transition memory transition_ =
+            binding_.viewPreservationBindingTransition(c, declaration);
+        action = _assemblyGovernanceCall(
+            2,
+            address(binding_),
+            abi.encodeCall(ViewPreservationBinding.bindViewPreservation, (c, declaration)),
+            transition_.scopeHash,
+            transition_.oldValueHash,
+            transition_.newValueHash
+        );
+        require(
+            keccak256(abi.encode(transition_))
+                == keccak256(
+                    abi.encode(
+                        ViewPreservationBindingTypes.transition(
+                            block.chainid,
+                            address(assemblyProvider),
+                            binding_.viewPreservationBindingReceipt()
+                        )
+                    )
+                ),
+            "executed original scheduled proposal"
+        );
     }
 
     /// @dev Both extra roles name actual independent products in the immutable Registry roster.

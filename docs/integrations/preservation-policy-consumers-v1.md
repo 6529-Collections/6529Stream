@@ -243,8 +243,11 @@ current. No mutable currentness result is cached.
 The actual recipe must declare and adopt the VIEW and publish its snapshot/root
 before the original Artist STATIC lock and Core freeze. A separate genuinely
 admitted renderer Registry can include the late VIEW serving contract in its
-fixed roster; an earlier Registry's roster is not rewritten. Completed VIEW
-adoption, reference, inventory, finality and gas acceptance remain separate work.
+fixed roster; an earlier Registry's roster is not rewritten. The
+[actual current VIEW recipe](current-view-preservation-ceremony.md) authors this
+declaration/adoption, checkpoint, snapshot and root sequence, with an explicit
+supplied-observation reference entry. Runtime acceptance, complete inventory,
+finality and gas acceptance remain separate work.
 
 The original full-output ceremony remains intact as the sanction-cycle
 regression. A new ceremony must separately prove unchanged preservation

@@ -8,6 +8,14 @@
 - Add eight stored-state read cases and five further factory-pair cases;
   these are source and ABI checks pending native execution.
 
+## Actual current VIEW preservation ceremony
+
+- Add genuine declaration/adoption and complete output, snapshot and original
+  CONTENT_ROOT authorization fixtures on the once-bound combined provider.
+- Retain original budgets and add an explicit supplied-observation VIEW
+  reference entry. Source cases cover authority, lineage, complete coverage,
+  runtime drift and locking; execution and full finality remain pending.
+
 ## Current-authority COLLECTION publication reader
 
 - Join the distinct authority-bound preservation factory to the ordinary
