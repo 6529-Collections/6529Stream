@@ -16,6 +16,12 @@ import { StreamMetadataRouterContent as Content } from "./StreamMetadataRouterCo
 import { StreamMetadataContentRoot as Root } from "./StreamMetadataContentRoot.sol";
 import { StreamMetadataScopedContent as Scoped } from "./StreamMetadataScopedContent.sol";
 import {
+    StreamMetadataScopedPolicyContentV2 as ScopedPolicy
+} from "./StreamMetadataScopedPolicyContentV2.sol";
+import {
+    IStreamScopedPolicyContentRootPublicationV2 as SV
+} from "../../interfaces/stream/metadata/IStreamScopedPolicyContentRootPublicationV2.sol";
+import {
     StreamMetadataScopedContentState as ScopedState
 } from "./StreamMetadataScopedContentState.sol";
 
@@ -46,6 +52,11 @@ library StreamMetadataRouterRootCodec {
             (S.Publication memory publication, address publisher) =
                 abi.decode(input[4:], (S.Publication, address));
             return Scoped.preview(scoped, layout, context, publication, publisher);
+        }
+        if (selector == SV.previewScopedPolicyContentRootPublication.selector) {
+            (S.Publication memory publication, address publisher) =
+                abi.decode(input[4:], (S.Publication, address));
+            return ScopedPolicy.preview(scoped, layout, context, publication, publisher);
         }
         if (selector == V.previewPolicyContentRootPublication.selector) {
             (R.Publication memory publication, address publisher) =
@@ -92,6 +103,10 @@ library StreamMetadataRouterRootCodec {
             S.Publication memory publication = abi.decode(input[4:], (S.Publication));
             return Scoped.publish(scoped, layout, context, publication);
         }
+        if (selector == SV.publishScopedPolicyContentRootPublication.selector) {
+            S.Publication memory publication = abi.decode(input[4:], (S.Publication));
+            return ScopedPolicy.publish(scoped, layout, context, publication);
+        }
         if (selector == V.publishVerifiedPolicyContentRoot.selector) {
             R.Publication memory publication = abi.decode(input[4:], (R.Publication));
             Root.Context memory ctx = Root.Context(context.core, context.artist);
@@ -127,6 +142,9 @@ library StreamMetadataRouterRootCodec {
         }
         if (selector == V.policyContentRootBinding.selector) {
             return abi.encode(PolicyRoot.readBinding(hash));
+        }
+        if (selector == SV.scopedPolicyContentRootBinding.selector) {
+            return abi.encode(ScopedPolicy.readBinding(hash));
         }
         revert R.InvalidContentRootPublication();
     }

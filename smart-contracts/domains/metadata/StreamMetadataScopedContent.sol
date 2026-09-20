@@ -11,6 +11,15 @@ import {
 import { StreamMetadataRouterContent as Content } from "./StreamMetadataRouterContent.sol";
 import { StreamMetadataContentRoot } from "./StreamMetadataContentRoot.sol";
 import "../finality/StreamContentRootSchemas.sol";
+import {
+    StreamMetadataScopedPolicyContentStateV2 as PolicyState
+} from "./StreamMetadataScopedPolicyContentStateV2.sol";
+import {
+    StreamScopedPolicyContentRootSchemasV2 as PolicyRootSchemas
+} from "../finality/StreamScopedPolicyContentRootSchemasV2.sol";
+import {
+    StreamScopedPolicyOutputSchemasV2 as PolicyOutputSchemas
+} from "../finality/StreamScopedPolicyOutputSchemasV2.sol";
 
 /// @notice Fixed original-Router scoped write transport. Uses the original consent and
 /// ratification maps; the only new authority state is the compiler-owned scoped aggregate.
@@ -56,7 +65,9 @@ library StreamMetadataScopedContent {
         bytes4 selector = bytes4(input[:4]);
         if (selector == R.scopedContentRootHead.selector) {
             StreamFinalityScope memory scope = abi.decode(input[4:], (StreamFinalityScope));
-            return abi.encode(state.heads[State.subject(core, scope)]);
+            bytes32 hash = state.heads[State.subject(core, scope)];
+            _policyProfile(state, hash, scope);
+            return abi.encode(hash);
         }
         if (selector == R.scopedContentRootRecord.selector) {
             bytes32 hash = abi.decode(input[4:], (bytes32));
@@ -68,13 +79,29 @@ library StreamMetadataScopedContent {
             StreamFinalityScope memory scope = abi.decode(input[4:], (StreamFinalityScope));
             bytes32 hash = state.heads[State.subject(core, scope)];
             R.Record memory record = state.records[hash];
+            bytes32 profile = _policyProfile(state, hash, scope);
+            bytes32 schema = profile == PolicyRootSchemas.PROFILE
+                ? PolicyOutputSchemas.LEAF_SCHEMA
+                : StreamContentRootSchemas.LEAF_SCHEMA;
             return abi.encode(
-                record.contentRoot,
-                record.leafCount,
-                record.leafCount == 0 ? bytes32(0) : StreamContentRootSchemas.LEAF_SCHEMA
+                record.contentRoot, record.leafCount, record.leafCount == 0 ? bytes32(0) : schema
             );
         }
         revert R.InvalidScopedContentRoot();
+    }
+
+    function _policyProfile(
+        State.State storage state,
+        bytes32 hash,
+        StreamFinalityScope memory scope
+    ) private view returns (bytes32 profile) {
+        profile = PolicyState.state().bindings[hash].profileId;
+        if (profile == 0) return profile;
+        if (
+            profile != PolicyRootSchemas.PROFILE
+                || keccak256(abi.encode(state.records[hash].publication.scope))
+                    != keccak256(abi.encode(scope))
+        ) revert R.InvalidScopedContentRoot();
     }
 
     function _nextFamily(

@@ -51,6 +51,16 @@ the release policy in `docs/release-policy.md`.
   Add exact-signature underfunding/retry and proof regressions; full-current
   execution remains separate from the source batch.
 
+## Scoped full-policy snapshot and root publication
+
+- Add a distinct root-free TOKEN/RELEASE/SEASON snapshot that binds the actual
+  scoped source factory, complete original frozen policies and covered output.
+- Adopt that snapshot through additive Router methods using the existing scoped
+  heads, collection aggregate and original Artist CONTENT_ROOT consent path.
+  Preserve V1 bytes and use explicit V2 capabilities, schemas and profile tags.
+- Keep scope-specific reference, inventory, provider/discovery and native
+  execution as separate acceptance work.
+
 ## Scoped full-policy output prerequisite
 
 - Add distinct TOKEN/RELEASE/SEASON STATIC output checkpoint and preserved

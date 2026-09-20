@@ -61,6 +61,9 @@ import "./StreamMetadataContentRoot.sol";
 import {
     IStreamPolicyContentRootPublicationV2 as PolicyRootInterface
 } from "../../interfaces/stream/metadata/IStreamPolicyContentRootPublicationV2.sol";
+import {
+    IStreamScopedPolicyContentRootPublicationV2 as ScopedPolicyRootInterface
+} from "../../interfaces/stream/metadata/IStreamScopedPolicyContentRootPublicationV2.sol";
 import { StreamMetadataScopedContent } from "./StreamMetadataScopedContent.sol";
 import { StreamMetadataScopedContentState } from "./StreamMetadataScopedContentState.sol";
 import {
@@ -348,6 +351,7 @@ contract StreamMetadataRouter is
             || id == type(IStreamScriptBundleSelection).interfaceId
             || id == type(IStreamContentRootPublication).interfaceId
             || id == type(PolicyRootInterface).interfaceId || id == type(ScopedRoot).interfaceId
+            || id == type(ScopedPolicyRootInterface).interfaceId
             || id == type(IStreamMetadataServingFacts).interfaceId
             || id == type(IStreamArtistContentFacts).interfaceId
             || id == type(IStreamArtistContentMutationFacts).interfaceId
@@ -938,6 +942,34 @@ contract StreamMetadataRouter is
         return StreamMetadataRouterRootCodec.publish(
             _contentRoots, _scopedContentRoots, _contentLayout(), _contentContext(), msg.data
         );
+    }
+
+    function previewScopedPolicyContentRootPublication(
+        ScopedRoot.Publication calldata publication,
+        address publisher
+    ) external view returns (bytes32) {
+        _requireContentCollection(publication.scope.collectionId);
+        return StreamMetadataRouterRootCodec.preview(
+            _contentRoots, _scopedContentRoots, _contentLayout(), _contentContext(), msg.data
+        );
+    }
+
+    function publishScopedPolicyContentRootPublication(ScopedRoot.Publication calldata publication)
+        external
+        returns (bytes32 recordHash)
+    {
+        _requireContentCollection(publication.scope.collectionId);
+        return StreamMetadataRouterRootCodec.publish(
+            _contentRoots, _scopedContentRoots, _contentLayout(), _contentContext(), msg.data
+        );
+    }
+
+    function scopedPolicyContentRootBinding(bytes32 recordHash)
+        external
+        view
+        returns (ScopedPolicyRootInterface.Binding calldata)
+    {
+        _rootRead();
     }
 
     function scopedContentRootHead(StreamFinalityScope calldata) external view returns (bytes32) {
