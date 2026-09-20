@@ -182,6 +182,58 @@ library StreamReferenceMetricPublicationInput {
         }
     }
 
+    /// @dev Borrow only an explicitly allocated prefix. Save the complete overwritten range,
+    /// including raw's length word, and restore it before any Solidity memory read or call.
+    /// The full contextPreimage builder below remains the independent byte oracle.
+    function contextHashPrefixed(
+        R.Dependencies memory d,
+        bytes memory backing,
+        bytes memory raw,
+        Decoded memory v
+    ) internal view returns (bytes32 result) {
+        uint256 rawLength = raw.length;
+        uint256 backingPointer;
+        uint256 rawPointer;
+        assembly ("memory-safe") {
+            backingPointer := backing
+            rawPointer := raw
+        }
+        if (
+            rawLength > 524288 || backing.length != rawLength + 320
+                || rawPointer != backingPointer + 320 || v.capturesStart != 416
+                || v.environmentStart < 416 || v.manifestStart < v.environmentStart
+                || v.manifestStart > rawLength
+        ) _invalid();
+        uint256 capturesLength = v.environmentStart - 416;
+        uint256 hashLength = 320 + v.manifestStart;
+        bytes memory head = abi.encode(
+            keccak256("6529STREAM_REFERENCE_MODE_CONTEXT_V1"),
+            d.chainId,
+            address(this),
+            d.targets,
+            d.codeHashes,
+            v.source.collectionId,
+            v.referenceId,
+            v.source.snapshotRecordHash,
+            v.source.snapshotRevision,
+            uint256(736),
+            uint256(736 + capturesLength)
+        );
+        assert(head.length == 736);
+        bytes32[23] memory saved;
+        assembly ("memory-safe") {
+            let first := add(backing, 32)
+            for { let i := 0 } lt(i, 736) { i := add(i, 32) } {
+                mstore(add(saved, i), mload(add(first, i)))
+                mstore(add(first, i), mload(add(add(head, 32), i)))
+            }
+            result := keccak256(first, hashLength)
+            for { let i := 0 } lt(i, 736) { i := add(i, 32) } {
+                mstore(add(first, i), mload(add(saved, i)))
+            }
+        }
+    }
+
     function contextPreimage(R.Dependencies memory d, bytes memory raw, Decoded memory v)
         internal
         view

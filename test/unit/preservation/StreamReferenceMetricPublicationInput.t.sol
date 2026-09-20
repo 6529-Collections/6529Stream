@@ -110,6 +110,91 @@ contract MetricPublicationInputProbe {
         }
     }
 
+    function prefixed(bytes memory original, R.Dependencies memory d, uint8 rounds)
+        external
+        view
+        returns (bytes32 result, uint256 cost)
+    {
+        require(rounds > 0 && rounds <= 4);
+        bytes memory backing = new bytes(original.length + 320);
+        bytes memory raw;
+        assembly ("memory-safe") {
+            raw := add(backing, 320)
+            mstore(raw, mload(original))
+            for { let i := 0 } lt(i, mload(original)) { i := add(i, 32) } {
+                mstore(add(add(raw, 32), i), mload(add(add(original, 32), i)))
+            }
+        }
+        Encoded.Decoded memory decoded = Encoded.read(raw);
+        bytes32 live = keccak256(abi.encode(backing, raw, d, decoded));
+        bytes32 expected = Input.contextHash(d, abi.decode(original, (R.Publication)));
+        for (uint256 i; i < rounds; ++i) {
+            uint256 g = gasleft();
+            result = Encoded.contextHashPrefixed(d, backing, raw, decoded);
+            cost = g - gasleft();
+            require(result == expected, "original context mismatch");
+            bytes memory canary = new bytes(1024);
+            for (uint256 j; j < canary.length; j += 32) {
+                assembly ("memory-safe") { mstore(add(add(canary, 32), j), not(add(i, j))) }
+            }
+            require(keccak256(canary) != 0, "fresh allocation canary");
+            require(
+                keccak256(abi.encode(backing, raw, d, decoded)) == live, "borrowed bytes changed"
+            );
+        }
+    }
+
+    /// @dev Measure the first borrowed-header hash before full-preimage or parity allocations.
+    /// Calldata decoding and test backing construction are outside this diagnostic span.
+    function prefixedCost(bytes memory original, R.Dependencies memory d)
+        external
+        view
+        returns (bytes32 result, uint256 cost)
+    {
+        bytes memory backing = new bytes(original.length + 320);
+        bytes memory raw;
+        assembly ("memory-safe") {
+            raw := add(backing, 320)
+            mstore(raw, mload(original))
+            for { let i := 0 } lt(i, mload(original)) { i := add(i, 32) } {
+                mstore(add(add(raw, 32), i), mload(add(add(original, 32), i)))
+            }
+        }
+        Encoded.Decoded memory decoded = Encoded.read(raw);
+        uint256 g = gasleft();
+        result = Encoded.contextHashPrefixed(d, backing, raw, decoded);
+        cost = g - gasleft();
+        require(keccak256(raw) == keccak256(original), "first hash changed bytes");
+        require(
+            result == Input.contextHash(d, abi.decode(original, (R.Publication))),
+            "first original context"
+        );
+    }
+
+    function badPrefix(bytes memory original, R.Dependencies memory d, uint8 kind)
+        external
+        view
+        returns (bytes32)
+    {
+        bytes memory backing = new bytes(original.length + 320);
+        bytes memory raw;
+        assembly ("memory-safe") {
+            raw := add(backing, 320)
+            mstore(raw, mload(original))
+            for { let i := 0 } lt(i, mload(original)) { i := add(i, 32) } {
+                mstore(add(add(raw, 32), i), mload(add(add(original, 32), i)))
+            }
+        }
+        Encoded.Decoded memory decoded = Encoded.read(raw);
+        if (kind == 0) backing = new bytes(backing.length);
+        if (kind == 1) assembly ("memory-safe") { mstore(backing, sub(mload(backing), 1)) }
+        if (kind == 2) decoded.capturesStart = 384;
+        if (kind == 3) decoded.environmentStart = 384;
+        if (kind == 4) decoded.manifestStart = decoded.environmentStart - 1;
+        if (kind == 5) decoded.manifestStart = raw.length + 32;
+        return Encoded.contextHashPrefixed(d, backing, raw, decoded);
+    }
+
     function fresh(bytes memory raw, R.Dependencies memory d, M.Evidence memory e)
         external
         view
@@ -281,6 +366,50 @@ contract StreamReferenceMetricPublicationInputTest {
             a.reservedMemory,
             b.reservedMemory
         );
+    }
+
+    event PrefixedContextCost(uint256 gasUsed);
+
+    function testPrefixedCompleteCorpusRestoresBackingAndOriginalContext() public {
+        R.Publication memory p = _base();
+        string memory corpus =
+            vm.readFile("test/fixtures/preservation/reference-combined-native-v1.json");
+        p.environment.packageFiles =
+            abi.decode(vm.parseJsonBytes(corpus, ".packageFilesABI"), (R.PackageFile[]));
+        p.environment.platformPrerequisites =
+            abi.decode(vm.parseJsonBytes(corpus, ".platformPrerequisitesABI"), (R.PackageFile[]));
+        require(
+            p.environment.packageFiles.length == 1048
+                && p.environment.platformPrerequisites.length == 102
+        );
+        (bytes32 actual,) = probe.prefixed(abi.encode(p), _dependencies(), 4);
+        require(actual == probe.originalContext(abi.encode(p), _dependencies()));
+        (bytes32 first, uint256 cost) = probe.prefixedCost(abi.encode(p), _dependencies());
+        require(first == actual);
+        emit PrefixedContextCost(cost);
+    }
+
+    function testFuzzPrefixedContextRestoresEveryInput(bytes32 changed, uint8 count) public view {
+        R.Publication memory p = _base();
+        p.environment.licenseNote = string(abi.encodePacked(changed));
+        p.manifestURI = string(abi.encodePacked(changed, count));
+        R.Dependencies memory d = _dependencies();
+        d.codeHashes[0] = changed;
+        (bytes32 actual,) = probe.prefixed(abi.encode(p), d, uint8(uint256(count) % 4 + 1));
+        require(actual == probe.originalContext(abi.encode(p), d));
+    }
+
+    function testPrefixedCodecRejectsWrongAliasLengthAndBounds() public view {
+        bytes memory raw = abi.encode(_base());
+        for (uint8 kind; kind < 6; ++kind) {
+            (bool ok, bytes memory reason) = address(probe)
+                .staticcall(abi.encodeCall(probe.badPrefix, (raw, _dependencies(), kind)));
+            require(
+                !ok
+                    && keccak256(reason)
+                        == keccak256(abi.encodeWithSelector(M.InvalidModeEvidence.selector))
+            );
+        }
     }
 
     function testCompleteCorpusScratchReusePreservesLiveInputs() public view {

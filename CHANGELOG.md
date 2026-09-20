@@ -1,5 +1,15 @@
 # Changelog
 
+## Metric context hashing without the full temporary copy
+
+- Reserve a bounded prefix beside the original immutable publication bytes and
+  hash the exact existing context header and tail in place. Restore every borrowed
+  byte before further reads; preserve canonicalization, currentness, proof order,
+  storage, external interfaces and transaction limits.
+- Add full-corpus, fuzz, byte/error parity and invalid-alias regressions. Source
+  review and combined ABI checks pass; measured component and original publication
+  transaction acceptance remain pending.
+
 ## Fresh conservation-floor preparation storage
 
 - Avoid zero-to-zero writes in append-only native floor preparations while

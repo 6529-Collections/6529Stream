@@ -39,7 +39,8 @@ library StreamReferenceMetricCurrent {
     ) public view returns (Proof.CompactInput memory) {
         // Literal original currentness sequence, with only the immutable-byte transport
         // kept in this frame. The public full Preparation path remains the parity oracle.
-        bytes memory publicationBytes = MetricBytes.read(publication);
+        (bytes memory contextBuffer, bytes memory publicationBytes) =
+            MetricBytes.readContext(publication);
         EncodedInput.Decoded memory decoded = EncodedInput.read(publicationBytes);
         bytes memory raw = MetricBytes.read(evidence);
         M.Evidence memory modeEvidence = abi.decode(raw, (M.Evidence));
@@ -47,7 +48,8 @@ library StreamReferenceMetricCurrent {
             revert M.InvalidModeEvidence();
         }
         R.SourceFacts memory source = Source.requireModeSourceInputs(d, decoded.source, true);
-        bytes32 context = EncodedInput.contextHash(d, publicationBytes, decoded);
+        bytes32 context =
+            EncodedInput.contextHashPrefixed(d, contextBuffer, publicationBytes, decoded);
         M.Facts memory mode = ModeProof.requireEvidenceProjected(
             d, bindings, EncodedInput.evidenceInput(decoded, context), source, modeEvidence, true
         );

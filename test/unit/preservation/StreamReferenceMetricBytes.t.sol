@@ -48,6 +48,19 @@ contract MetricBytesProbe {
         return Fast.read(manifests[key]);
     }
 
+    function prefixed(bytes32 key) external view returns (bytes memory raw) {
+        (bytes memory backing, bytes memory payload) = Fast.readContext(manifests[key]);
+        require(backing.length == payload.length + 320, "prefix length");
+        uint256 a;
+        uint256 b;
+        assembly ("memory-safe") {
+            a := backing
+            b := payload
+        }
+        require(b == a + 320, "prefix alias");
+        return payload;
+    }
+
     function intact(bytes32 key) external view returns (bytes32) {
         return Fast.requireIntact(manifests[key]);
     }
@@ -108,6 +121,7 @@ contract StreamReferenceMetricBytesTest {
         bytes32 before_ = probe.fingerprint(key);
         require(keccak256(probe.original(key)) == keccak256(expected));
         require(keccak256(probe.current(key)) == keccak256(expected));
+        require(keccak256(probe.prefixed(key)) == keccak256(expected));
         require(probe.intact(key) == keccak256(expected));
         require(probe.fixedIntact(key) == keccak256(expected));
         require(
@@ -123,6 +137,9 @@ contract StreamReferenceMetricBytesTest {
             address(probe).staticcall(abi.encodeCall(probe.current, (key)));
         (bool fixedOk, bytes memory fixedError) =
             address(probe).staticcall(abi.encodeCall(probe.fixedIntact, (key)));
+        (bool prefixOk, bytes memory prefixError) =
+            address(probe).staticcall(abi.encodeCall(probe.prefixed, (key)));
+        require(!prefixOk && keccak256(prefixError) == keccak256(expected));
         require(
             !oldOk && !newOk && keccak256(oldError) == keccak256(expected)
                 && keccak256(newError) == keccak256(expected) && !fixedOk
