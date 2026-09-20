@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../helpers/StreamCurrentStackFixture.sol";
-import "../helpers/OfficialSafeFixture.sol";
+import "../helpers/CurrentCommerceConservationFixture.sol";
 import {
     StreamPrimarySaleSettlement
 } from "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
@@ -32,7 +31,7 @@ contract CurrentNativeRecipient is IERC721Receiver {
 /// @notice Actual current native settlement, artist records, governance and threshold Safes.
 /// @dev Only the external entropy service is a double. Positive user calls execute through
 ///      actual Safes; direct negative probes expose exact target revert data.
-contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, OfficialSafeFixture {
+contract StreamCurrentNativeSettlementTest is CurrentCommerceConservationFixture {
     bytes32 private constant NATIVE_PHASE = keccak256("current shared native phase");
     uint256 private constant PRICE = 1000;
     StreamPrimarySaleSettlement private recorder;
@@ -65,6 +64,16 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
         require(msg.sender == address(this), "fixture caller");
         useTemplate = template;
         requireSaleConsent = saleConsent;
+        _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
+        OfficialSafe governor =
+            createOfficialSafe(deploySafeComponents("1.4.1"), safeOwnerAddresses(keys), 2, 103);
+        _installGovernorSafe(governor, keys);
+        _enableWaivedCommerceFloor();
+    }
+
+    /// @dev The zero-price-only recipe remains unbound and undeclared; it never settles revenue.
+    function deployFreeNativeScenario() external {
+        require(msg.sender == address(this), "fixture caller");
         _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
     }
 
@@ -123,6 +132,7 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
         rows[2] = _nativePolicy(nativeSale.setPaused.selector);
         rows[3] = _nativePolicy(nativeSale.registerPriceProgram.selector);
         rows[4] = _nativePolicy(nativeSale.closePriceProgram.selector);
+        rows = _commerceFloorPolicies(rows);
     }
 
     function _nativePolicy(bytes4 selector)
@@ -340,7 +350,12 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
     }
 
     function testSafeZeroPriceProgramMintsWithoutOfficialRevenueAndCannotReplay() public {
-        this.deployNativeScenario(false, false);
+        this.deployFreeNativeScenario();
+        (address floor,) = core.conservationFloor();
+        require(
+            floor == address(0) && core.declaredConservationTier(1) == 0,
+            "free-only fixture has no implicit waiver"
+        );
         IStreamNativePricePrograms.PriceProgramExecution memory e =
             _programExecution(zeroProgram, 41, 0, 0);
         IStreamNativePricePrograms.PriceProgramResult memory expected =
@@ -714,6 +729,7 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
         bytes32 key = recorder.settlementKey(address(nativeSale), c.executionBinding.executionId);
         StreamPrimarySettlementTypes.PrimarySettlementResult memory result =
             recorder.settlementResult(key);
+        _assertWaivedCommerceReceipt(address(recorder), key);
         require(
             core.ownerOf(core.lastAllocatedTokenId()) == recipient && core.totalSupply() == 1,
             "actual native Core custody"

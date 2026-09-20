@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../helpers/StreamCurrentSafeGovernanceFixture.sol";
+import "../helpers/CurrentCommerceConservationFixture.sol";
 import { IStreamMintGate } from "../../smart-contracts/interfaces/stream/mint/IStreamMintGate.sol";
 import {
     StreamMintGateValidator
@@ -78,7 +78,7 @@ contract CurrentBurnMintReceiver is IERC721Receiver {
 
 /// @notice Whole current Core/Manager/Ledger/Artist/registry/recorder/native adapter joins and threshold Safes.
 /// @dev The shared fixture's external entropy provider remains the explicit service boundary.
-contract StreamCurrentBurnMintTest is StreamCurrentSafeGovernanceFixture {
+contract StreamCurrentBurnMintTest is CurrentCommerceConservationFixture {
     bytes32 private constant BURN_PHASE = keccak256("current burn mint phase");
     bytes32 private constant SEED_PHASE = keccak256("current burn sources");
     bytes32 private constant CAP = keccak256("burn supply");
@@ -110,6 +110,20 @@ contract StreamCurrentBurnMintTest is StreamCurrentSafeGovernanceFixture {
         require(msg.sender == address(this), "fixture only");
         nativeMode = paid;
         _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
+        if (paid) {
+            _installBurnCommerceGovernor();
+            _enableWaivedCommerceFloor();
+        }
+    }
+
+    function _installBurnCommerceGovernor() private {
+        uint256[] memory governanceKeys = new uint256[](2);
+        governanceKeys[0] = 0x6001;
+        governanceKeys[1] = 0x6002;
+        OfficialSafe next = createOfficialSafe(
+            deploySafeComponents("1.4.1"), safeOwnerAddresses(governanceKeys), 2, 203
+        );
+        _installGovernorSafe(next, governanceKeys);
     }
 
     function burnScenarioTime() external view returns (uint256) {
@@ -194,6 +208,7 @@ contract StreamCurrentBurnMintTest is StreamCurrentSafeGovernanceFixture {
             0,
             bytes32(0)
         );
+        rows = _commerceFloorPolicies(rows);
     }
 
     function _configureAdditionalProducts() internal override {
@@ -404,6 +419,11 @@ contract StreamCurrentBurnMintTest is StreamCurrentSafeGovernanceFixture {
 
     function testCurrentFreeBurnManagerLedgerAndSafeRecipient() public {
         this.deployBurnScenario(false);
+        (address floor,) = core.conservationFloor();
+        require(
+            floor == address(0) && core.declaredConservationTier(1) == 0,
+            "free burn has no implicit waiver"
+        );
         uint256[] memory ids = _seed();
         require(
             executeSafe(
@@ -531,13 +551,12 @@ contract StreamCurrentBurnMintTest is StreamCurrentSafeGovernanceFixture {
                 && burnGate.refundLiability() == 25,
             "actual buyer liability"
         );
-        uint256[] memory governanceKeys = new uint256[](2);
-        governanceKeys[0] = 0x6001;
-        governanceKeys[1] = 0x6002;
-        OfficialSafe next = createOfficialSafe(
-            deploySafeComponents("1.4.1"), safeOwnerAddresses(governanceKeys), 2, 203
+        if (address(governorSafe) == address(0)) _installBurnCommerceGovernor();
+        (address floor,) = core.conservationFloor();
+        require(
+            floor == address(0) && core.declaredConservationTier(1) == 0,
+            "free surplus recovery retains unbound undeclared collection"
         );
-        _installGovernorSafe(next, governanceKeys);
         recipient = new CurrentBurnSurplusRecipient(burnGate, key);
         while (roles.roleHolderCount(EMERGENCY) != 0) {
             this.setCurrentBurnEmergency(roles.roleHolderAt(EMERGENCY, 0), false);

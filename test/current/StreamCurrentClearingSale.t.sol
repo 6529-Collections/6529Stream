@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../helpers/StreamCurrentSafeGovernanceFixture.sol";
+import "../helpers/CurrentCommerceConservationFixture.sol";
 import "../../smart-contracts/domains/mint/StreamNativeClearingSale.sol";
 import {
     StreamPrimarySaleSettlement
@@ -13,7 +13,7 @@ import {
 /// @notice Current Core/Manager/artist/recorder clearing composition with actual 2-of-3 Safes.
 /// @dev External randomness uses the existing explicit provider double; this profile has zero reveal fee.
 ///      Functional integration does not satisfy the separately measured collector gas ceiling.
-contract StreamCurrentClearingSaleTest is StreamCurrentSafeGovernanceFixture {
+contract StreamCurrentClearingSaleTest is CurrentCommerceConservationFixture {
     bytes32 private constant CLEARING_PHASE = keccak256("current clearing phase");
     uint256[] internal signingKeys;
     OfficialSafe private artistSafe;
@@ -37,6 +37,7 @@ contract StreamCurrentClearingSaleTest is StreamCurrentSafeGovernanceFixture {
         OfficialSafe governor = createOfficialSafe(components, safeOwnerAddresses(owners), 2, 304);
         _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
         _installGovernorSafe(governor, signingKeys);
+        _enableWaivedCommerceFloor();
         clearing.transferOwnership(address(governor));
         IStreamNativeClearingSale.ClearingSaleConfig memory config =
             IStreamNativeClearingSale.ClearingSaleConfig(
@@ -62,6 +63,16 @@ contract StreamCurrentClearingSaleTest is StreamCurrentSafeGovernanceFixture {
             "actual 2-of-3 payer"
         );
         vm.deal(address(payerSafe), 1 ether);
+    }
+
+    function _additionalOperatingPolicies()
+        internal
+        view
+        virtual
+        override
+        returns (GovernanceActionPolicyEntry[] memory)
+    {
+        return _commerceFloorPolicies(new GovernanceActionPolicyEntry[](0));
     }
 
     function _artistProof(bytes32 digest) internal override returns (bytes memory) {

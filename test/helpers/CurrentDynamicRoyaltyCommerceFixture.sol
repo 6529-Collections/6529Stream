@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "./StreamCurrentSafeGovernanceFixture.sol";
+import "./CurrentCommerceConservationFixture.sol";
 import {
     StreamDynamicPrimaryBeneficiaries as DB
 } from "../../smart-contracts/domains/revenue/StreamDynamicPrimaryBeneficiaries.sol";
@@ -45,7 +45,7 @@ import {
 } from "../../smart-contracts/interfaces/stream/mint/IStreamMintRoyaltyPolicy.sol";
 
 /// @dev Real current graph and real Safe/Artist identities. Only the external entropy service is a double.
-abstract contract CurrentDynamicRoyaltyCommerceFixture is StreamCurrentSafeGovernanceFixture {
+abstract contract CurrentDynamicRoyaltyCommerceFixture is CurrentCommerceConservationFixture {
     bytes32 internal constant ROYALTY_CLASS = keccak256("ROYALTY_ERC2981");
     bytes32 internal constant JOINED_PHASE = keccak256("actual dynamic royalty commerce phase");
     bytes32 internal constant COLLAB_LABEL = keccak256("composer-share");
@@ -80,6 +80,7 @@ abstract contract CurrentDynamicRoyaltyCommerceFixture is StreamCurrentSafeGover
         OfficialSafe governor = createOfficialSafe(safe, owners, 2, 1405);
         _deployCurrentStack(address(joinedArtist), vm.addr(PLATFORM_KEY));
         _installGovernorSafe(governor, joinedKeys);
+        _enableWaivedCommerceFloor();
         vm.deal(address(joinedCollector), 10 ether);
         vm.deal(address(joinedBuyer), 10 ether);
         require(
@@ -217,6 +218,7 @@ abstract contract CurrentDynamicRoyaltyCommerceFixture is StreamCurrentSafeGover
         rows[5] =
             _joinedPolicy(address(joinedPrivate), joinedPrivate.configureCollectionSigner.selector);
         rows[6] = _joinedPolicy(address(joinedPrivate), joinedPrivate.registerSale.selector);
+        rows = _commerceFloorPolicies(rows);
     }
 
     function _joinedPolicy(address target, bytes4 selector)

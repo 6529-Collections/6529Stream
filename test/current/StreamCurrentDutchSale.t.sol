@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../helpers/StreamCurrentSafeGovernanceFixture.sol";
+import "../helpers/CurrentCommerceConservationFixture.sol";
 import "../../smart-contracts/domains/mint/StreamNativeDutchSale.sol";
 import {
     StreamPrimarySaleSettlement
@@ -53,7 +53,7 @@ contract CurrentDutchARRNGService {
 }
 
 /// @notice Actual Core/Manager/artist/settlement/entropy/Executor and threshold Safe composition.
-contract StreamCurrentDutchSaleTest is StreamCurrentSafeGovernanceFixture {
+contract StreamCurrentDutchSaleTest is CurrentCommerceConservationFixture {
     bytes32 private constant DUTCH_PHASE = keccak256("actual current Dutch phase");
     bytes32 private constant SALT = keccak256("actual current Dutch entropy salt");
     uint256 private constant PRICE = 1000;
@@ -79,6 +79,7 @@ contract StreamCurrentDutchSaleTest is StreamCurrentSafeGovernanceFixture {
         keeperSafe = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 214);
         _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
         _installGovernorSafe(operatorSafe, keys);
+        _enableWaivedCommerceFloor();
         vm.deal(address(payerSafe), 1 ether);
         _govern(
             _governanceRequest(
@@ -91,6 +92,7 @@ contract StreamCurrentDutchSaleTest is StreamCurrentSafeGovernanceFixture {
             )
         );
         require(entropy.requesters(address(dutchSale)), "actual admitted AT_MINT requester");
+        this.registerCurrentDutchSchedule();
         require(
             !roles.hasRole(keccak256("ROLE_ENTROPY_ADMIN"), address(keeperSafe))
                 && !roles.hasRole(keccak256("ROLE_ENTROPY_REVEAL_OWNER"), address(keeperSafe)),
@@ -201,6 +203,7 @@ contract StreamCurrentDutchSaleTest is StreamCurrentSafeGovernanceFixture {
             0,
             0
         );
+        rows = _commerceFloorPolicies(rows);
     }
 
     function _configureAdditionalProducts() internal override {
@@ -257,6 +260,11 @@ contract StreamCurrentDutchSaleTest is StreamCurrentSafeGovernanceFixture {
         vm.warp(request.notBefore);
         executor.executeGovernanceAction(abi.decode(scheduled, (bytes32)), configure);
         _configureMintPhase(DUTCH_PHASE, address(dutchSale));
+    }
+
+    /// @dev Read a fresh schedule timestamp after all delayed setup governance.
+    function registerCurrentDutchSchedule() external {
+        require(msg.sender == address(this), "fixture only");
         dutchId = dutchSale.registerDutchSale(
             IStreamNativeDutchSale.DutchSaleConfig(
                 1,

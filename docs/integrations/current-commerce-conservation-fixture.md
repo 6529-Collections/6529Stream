@@ -1,8 +1,9 @@
 # Explicit conservation setup for current commerce tests
 
-`CurrentCommerceConservationFixture` is an opt-in test helper for the actual
-Terminal and INSTANT commerce graph. It does not change the common current
-stack's default conservation tier or other commerce fixtures.
+`CurrentCommerceConservationFixture` is an opt-in test helper for actual current
+commerce graphs. It does not change the common current stack's default
+conservation tier. Terminal, INSTANT, native fixed settlement, clearing, Dutch,
+paid burn/mint and dynamic royalty commerce fixtures explicitly opt in.
 
 The helper deploys the actual `StreamConservationFloor`, schedules its original
 Core binding through class-1 delayed governance, and executes that binding with
@@ -32,15 +33,36 @@ recipient-callback failures also assert recorder and floor rollback. Successful
 paid paths require the actual ledger's first-sale and settlement receipt, with
 the original recorder/runtime, collection, token and explicit tier.
 
-Free operator distribution and configuration-only recipes do not install a
-waiver. The original required-ASYNC paid control installs the same explicit
-commerce setup and checks its actual floor receipt.
+Free operator distribution, configuration-only, zero-price-only native sale and
+free burn recipes do not install a waiver. Free burn surplus recovery installs
+its genuine Safe governor but leaves the floor unbound and the tier undeclared.
+The original required-ASYNC paid control installs the same explicit commerce
+setup and checks its actual floor receipt.
+
+Paid burn setup declares before seeding the first free source tokens. Native
+fixed settlement uses a separate threshold Safe governor while preserving the
+payer's NFT and refund ownership. Its surplus subclass inherits the same real
+governance helpers and retains that governor. Clearing and Dutch create their
+dated sale schedules after all delayed setup governance; Dutch observes the
+new timestamp through a self-only external call before registering the original
+price schedule and transferring ownership. Derived surplus policies retain the
+parent's floor-binding and metadata-writer policies.
+
+Dynamic royalty commerce descendants share this explicit setup, including
+curated auction/purchase, custody rights, native/ERC20 offers and successor
+royalty continuity. Typed native English-auction and direct-sale acceptance
+remain separate migrations.
 
 ## Evidence and limits
 
-The source passed a 1,315-source ABI/type check before integration. Native
-execution of the combined current graph remains pending. The original Terminal
-ten and INSTANT eight cases become eleven and nine with the new refusal recipes.
+The Terminal/INSTANT source passed a 1,315-source ABI/type check before
+integration. The later commerce migration passed a 1,463-source ABI/type check,
+including native surplus/refund/credit consumers and all dynamic royalty
+descendants. Independent source review retained all 27 existing test methods in
+the five changed test files. These are compilation and source-review results;
+native execution of the combined current graph remains pending. The original
+Terminal ten and INSTANT eight cases become eleven and nine with the new
+refusal recipes.
 
 The helper uses explicitly named **fixture** gas configuration: 300,000 for
 reads, 1,000,000 for producers and 6,000,000 for the floor call. These are not
