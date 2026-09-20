@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamArtistIdentityRecoveryOwner
+} from "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
 
 import {
     StreamArtistGuardianSupersessionTypes as S
@@ -558,11 +561,7 @@ library StreamArtistGuardianSupersession {
         C.Record memory c,
         bytes32 transition
     ) private view returns (bytes32) {
-        if (
-            cause.facts.authorityClass != 1
-                || (cause.facts.pendingTransitionHash == 0
-                    && c.terms.subjectRecordHash == transition)
-        ) {
+        if (cause.facts.pendingTransitionHash == 0 && c.terms.subjectRecordHash == transition) {
             _contest(e, p, cause, c, transition);
             return 0;
         }
@@ -571,13 +570,20 @@ library StreamArtistGuardianSupersession {
                 || c.terms.reasonHash != p.reasonHash || cause.facts.evidenceHash != p.evidenceHash
                 || cause.facts.reasonHash != p.reasonHash
         ) revert S.InvalidGuardianSupersession(c.recordHash);
-        Current.Facts memory current = Current.read(
-            address(this),
-            e.registry,
-            e.chainId,
-            cause,
-            IStreamArtistRotationReads(address(this)).artistTransitionState(transition)
-        );
+        bytes32 previous =
+            IStreamArtistIdentityRecoveryOwner(address(this)).latestIdentityRecovery(p.artistId);
+        bool legacyLiving = cause.facts.authorityClass == 1 && previous != 0
+            && IStreamArtistIdentityRecoveryOwner(address(this)).identityRecoveryRecord(previous)
+                    .fields.vestedAuthorityClass == 1
+            && (cause.facts.pendingTransitionHash == 0
+                || IStreamArtistRotationReads(address(this))
+                    .rotationRecord(cause.facts.pendingTransitionHash)
+                    .recordHash == cause.facts.pendingTransitionHash);
+        R.TransitionState memory executed =
+            IStreamArtistRotationReads(address(this)).artistTransitionState(transition);
+        Current.Facts memory current = legacyLiving
+            ? Current.read(address(this), e.registry, e.chainId, cause, executed)
+            : Current.readFamily(address(this), e.registry, e.chainId, cause, executed);
         if (keccak256(abi.encode(current.contest)) != keccak256(abi.encode(c))) {
             revert S.InvalidGuardianSupersession(c.recordHash);
         }

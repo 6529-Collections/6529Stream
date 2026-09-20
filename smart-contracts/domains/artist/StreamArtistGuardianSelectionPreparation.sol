@@ -260,7 +260,9 @@ contract StreamArtistGuardianSelectionPreparation {
             if (cause.facts.pendingTransitionHash != 0) {
                 // Selection remains anchored to the executed cohort. The current compromise
                 // may have aborted a later pending32, which never acquired a vested cutoff.
-                Current.read(owner, artistRegistry, deploymentChainId, cause, basis.transition);
+                Current.readFamily(
+                    owner, artistRegistry, deploymentChainId, cause, basis.transition
+                );
             }
         }
         if (rotation.recordHash != 0) {

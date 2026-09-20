@@ -5,6 +5,7 @@ import { StreamArtistGuardianHistory as History } from "./StreamArtistGuardianHi
 import { StreamArtistRotationState as RotationState } from "./StreamArtistRotationState.sol";
 import { StreamArtistRotationHashes } from "./StreamArtistRotationHashes.sol";
 import { StreamArtistHashes } from "./StreamArtistHashes.sol";
+import { StreamArtistLivingRecoveryReads as Living } from "./StreamArtistLivingRecoveryReads.sol";
 import {
     StreamArtistGuardianHistoryTypes as GH
 } from "../../interfaces/stream/artist/StreamArtistGuardianHistoryTypes.sol";
@@ -84,7 +85,7 @@ library StreamArtistRecoveryEstateGuardians {
             if (
                 entry.index > vesting.guardians.count
                     || entry.ownerRevision >= vesting.ownerRevision
-                    || !_livingAssociation(rotations, environment, artistId, vesting, g)
+                    || !_livingAssociation(rotations, environment, artistId, vesting, g, entry)
             ) {
                 revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
             }
@@ -202,7 +203,8 @@ library StreamArtistRecoveryEstateGuardians {
         StreamArtistHashes.Environment memory e,
         bytes32 artistId,
         V.Snapshot memory estate,
-        R.GuardianRecord memory g
+        R.GuardianRecord memory g,
+        GH.Entry memory entry
     ) private view returns (bool) {
         R.ProvisionalAssociation memory a = g.provisional;
         if (a.transitionRecordHash == 0) return a.windowEndsAt == 0;
@@ -210,6 +212,19 @@ library StreamArtistRecoveryEstateGuardians {
             return false;
         }
         R.RotationRecord memory r = rotations.rotations[a.transitionRecordHash];
+        if (r.recordHash == 0) {
+            // A retained class1 guardian may have been admitted during an original35 window,
+            // including an older recovery whose association survived a later living recovery.
+            Living.Facts memory recovered =
+                Living.read(address(this), e.registry, e.chainId, artistId, a.transitionRecordHash);
+            V.Snapshot memory v = recovered.vesting;
+            return v.newAddress == g.signer && v.executedAt <= g.signedAt
+                && g.signedAt < a.windowEndsAt
+                && recovered.transition.postWindowEndsAt == a.windowEndsAt
+                && v.executedAt <= estate.executedAt && v.ownerRevision < estate.ownerRevision
+                && v.ownerRevision < entry.ownerRevision && v.guardians.count < entry.index
+                && RotationState.eligible(rotations, artistId, a);
+        }
         return r.recordHash == a.transitionRecordHash && r.terms.artistId == artistId
             && r.terms.oldAddress != address(0) && r.terms.newAddress == g.signer
             && r.terms.oldAddress != r.terms.newAddress && r.transition.artistId == artistId

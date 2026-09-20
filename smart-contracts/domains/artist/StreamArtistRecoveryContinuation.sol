@@ -23,6 +23,15 @@ import {
 import { StreamArtistRotationHashes } from "./StreamArtistRotationHashes.sol";
 import { StreamArtistHashes } from "./StreamArtistHashes.sol";
 import {
+    StreamArtistRecoveryFamilyHistory as Family
+} from "./StreamArtistRecoveryFamilyHistory.sol";
+import {
+    StreamArtistCurrentCompromiseReads as Current
+} from "./StreamArtistCurrentCompromiseReads.sol";
+import {
+    IStreamArtistRotationReads
+} from "../../interfaces/stream/artist/IStreamArtistRotation.sol";
+import {
     StreamArtistRecoveryClosedContinuation as Closed
 } from "./StreamArtistRecoveryClosedContinuation.sol";
 import {
@@ -94,9 +103,9 @@ library StreamArtistRecoveryContinuation {
         if (
             p.artistId == 0 || previous == 0 || prior.recordHash != previous
                 || p.expectedCauseHash != cause.causeHash || cause.causeHash == 0
-                || cause.facts.artistId != p.artistId || cause.facts.kind != 1
+                || cause.facts.artistId != p.artistId
+                || (cause.facts.kind != 1 && cause.facts.kind != 2)
                 || cause.facts.executedTransitionHash != executed
-                || (cause.facts.pendingTransitionHash != 0 && cause.facts.authorityClass != 1)
                 || cause.facts.incumbent != principal.authorityAddress
                 || cause.facts.actor == address(0) || principal.status != 4
                 || principal.authorityClass != cause.facts.authorityClass
@@ -129,12 +138,19 @@ library StreamArtistRecoveryContinuation {
         bytes32 rotationProof;
         bytes32 closureProof;
         bytes32 livingHistory;
-        if (principal.authorityClass == 1) {
+        bytes32 family;
+        if (Family.required(s, rotations, resolutions, o.environment, cause)) {
+            V.Snapshot memory bridge;
+            R.TransitionState memory bridgeTransition;
+            family = Family.read(
+                s, rotations, resolutions, o.environment, cause, bridge, bridgeTransition
+            );
+        } else if (principal.authorityClass == 1) {
             LivingHistory.Facts memory history =
                 LivingHistory.read(s, rotations, resolutions, o.environment, prior, cause);
             if (!history.legacyCompatible) livingHistory = history.proof;
         }
-        if (livingHistory == 0) {
+        if (livingHistory == 0 && family == 0) {
             // Retain the original readers and exact wrappers for their supported shapes.
             if (rotated) {
                 rotationProof = Rotated.proof(
@@ -168,11 +184,21 @@ library StreamArtistRecoveryContinuation {
             o.environment,
             prior,
             rotated ? s.vestingHistory.snapshots[previous] : cutoff,
-            !rotated && livingHistory == 0
+            !rotated && livingHistory == 0 && family == 0
         );
         C.Record memory contest = IStreamArtistIdentityContestOwner(address(this))
             .identityContestRecord(cause.facts.referenceHash);
-        if (
+        if (family != 0) {
+            contest =
+            Current.readFamily(
+                address(this),
+                o.environment.registry,
+                o.environment.chainId,
+                cause,
+                IStreamArtistRotationReads(address(this)).artistTransitionState(executed)
+            )
+            .contest;
+        } else if (
             contest.recordHash == 0 || contest.recordHash != cause.facts.referenceHash
                 || contest.terms.artistId != p.artistId
                 || (livingHistory == 0 && contest.terms.subjectRecordHash != executed)
@@ -319,6 +345,15 @@ library StreamArtistRecoveryContinuation {
                     keccak256("6529STREAM_ARTIST_DORMANCY_REPEAT_RECOVERY_STATE_V1"),
                     c.oldValueHash,
                     dormancyOrigin
+                )
+            );
+        }
+        if (family != 0) {
+            c.oldValueHash = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_RECOVERY_STAGING_FAMILY_CONTEXT_V1"),
+                    c.oldValueHash,
+                    family
                 )
             );
         }

@@ -87,6 +87,54 @@ library StreamArtistRecoveryEstateRotation {
         Dismissal.Cause memory cause,
         Recovery.Request memory p
     ) public view returns (bytes32) {
+        return _afterRotation(
+            recovery, estate, rotations, resolutions, succession, contests, e, cause, p, bytes32(0)
+        );
+    }
+
+    /// @dev The fixed caller authenticates the full current cause and executed/staged suffix.
+    /// Keep the original estate source, capabilities and guardian prefix independent.
+    function afterRotationWithHistory(
+        RecoveryState.State storage recovery,
+        EstateState.State storage estate,
+        StreamArtistRotationState.State storage rotations,
+        Resolution.State storage resolutions,
+        StreamArtistSuccessionState.State storage succession,
+        ContestState.State storage contests,
+        StreamArtistHashes.Environment memory e,
+        Dismissal.Cause memory cause,
+        Recovery.Request memory p,
+        bytes32 historyProof
+    ) public view returns (bytes32) {
+        if (historyProof == 0) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
+        }
+        return _afterRotation(
+            recovery,
+            estate,
+            rotations,
+            resolutions,
+            succession,
+            contests,
+            e,
+            cause,
+            p,
+            historyProof
+        );
+    }
+
+    function _afterRotation(
+        RecoveryState.State storage recovery,
+        EstateState.State storage estate,
+        StreamArtistRotationState.State storage rotations,
+        Resolution.State storage resolutions,
+        StreamArtistSuccessionState.State storage succession,
+        ContestState.State storage contests,
+        StreamArtistHashes.Environment memory e,
+        Dismissal.Cause memory cause,
+        Recovery.Request memory p,
+        bytes32 historyProof
+    ) private view returns (bytes32) {
         bytes32 head = estate.authorityActivation[p.artistId];
         Origin memory f;
         f.request = estate.requests[head];
@@ -119,20 +167,29 @@ library StreamArtistRecoveryEstateRotation {
                 || rotations.pending[p.artistId] != 0 || terminal == 0 || terminal == head
                 || (!continued && rotations.retirement[p.artistId][f.request.incumbent] != head)
                 || cause.facts.executedTransitionHash != terminal
-                || cause.facts.pendingTransitionHash != 0
+                || (historyProof == 0 && cause.facts.pendingTransitionHash != 0)
                 || f.execution.activationRecordHash != head || f.execution.coverageRecordHash == 0
                 || f.execution.executedAt < f.request.requestedAt
                 || f.execution.delegationEpoch == 0
                 || f.execution.delegationEpoch != estate.delegationEpoch[p.artistId]
-                || recovery.latest[p.artistId] != 0 || f.transition.recordHash != head
-                || f.transition.artistId != p.artistId || f.transition.phase != 2
-                || f.transition.stagedAt != f.request.requestedAt
+                || (historyProof == 0 && recovery.latest[p.artistId] != 0)
+                || f.transition.recordHash != head || f.transition.artistId != p.artistId
+                || f.transition.phase != 2 || f.transition.stagedAt != f.request.requestedAt
                 || f.transition.contestEndsAt != f.request.noticeEndsAt
                 || f.transition.executedAt != f.execution.executedAt
                 || uint256(f.transition.postWindowEndsAt)
                     != uint256(f.execution.executedAt) + f.request.postContestSeconds
                 || block.timestamp < cause.facts.enteredAt
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
+        if (historyProof != 0) {
+            bytes32 previousRecovery = recovery.latest[p.artistId];
+            if (
+                previousRecovery != 0
+                    && (recovery.records[previousRecovery].fields.vestedAuthorityClass != 1
+                        || recovery.records[previousRecovery].delegationEpoch
+                            >= f.execution.delegationEpoch)
+            ) revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
+        }
         // Original operation40 already authenticated and consumed the historical accelerator.
         // Preserve its exact timing/witness shape without reauthorizing old governance or coverage.
         if (f.execution.executedAt < f.request.noticeEndsAt) {
@@ -152,7 +209,12 @@ library StreamArtistRecoveryEstateRotation {
                 || f.vesting.ownerRevision <= f.vesting.guardians.ownerRevision
                 || f.vesting.commitment == 0 || f.vesting.commitment != _vestingHash(e, f.vesting)
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
-        bytes32 ancestry = EstateHistory.previous(recovery, rotations, e, f.request, f.vesting);
+        bytes32 ancestry;
+        if (historyProof == 0) {
+            ancestry = EstateHistory.previous(recovery, rotations, e, f.request, f.vesting);
+        }
+        bool hasAncestry =
+            historyProof == 0 ? ancestry != 0 : f.vesting.previousTransitionRecordHash != 0;
         f.guardians = EstateGuardians.prefix(
             recovery.guardianHistory,
             rotations,
@@ -176,36 +238,41 @@ library StreamArtistRecoveryEstateRotation {
             revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         }
         Contest.Record memory contest = contests.records[cause.facts.referenceHash];
-        _contest(e, cause, p, contest, terminal);
+        if (historyProof == 0) _contest(e, cause, p, contest, terminal);
         // Only op32 preserves this original epoch. Every authority producer appends its actual
         // preceding vesting head atomically; no supplied prefix can omit an intervening 35/40/43.
         // The original closure belongs to the original successor, independently of today's head.
-        bytes32 originProof = RotationOrigin.proof(
-            rotations,
-            resolutions,
-            contests,
-            e,
-            f.transition,
-            f.request.terms.successor,
-            rotations.rotations[terminal].transition.stagedAt
-        );
-        bytes32 closureProof = EstateClosed.proof(
-            rotations, resolutions, contests, e, cause, rotations.rotations[terminal].transition
-        );
-        bytes32 terminalProof = continued
-            ? RotationHistory.terminal(
-                recovery,
+        bytes32 originProof;
+        bytes32 closureProof;
+        bytes32 terminalProof;
+        if (historyProof == 0) {
+            originProof = RotationOrigin.proof(
                 rotations,
                 resolutions,
                 contests,
                 e,
-                f.vesting,
                 f.transition,
-                cause,
-                terminal,
-                closureProof
-            )
-            : _terminal(recovery, rotations, e, cause, f, terminal, closureProof, originProof);
+                f.request.terms.successor,
+                rotations.rotations[terminal].transition.stagedAt
+            );
+            closureProof = EstateClosed.proof(
+                rotations, resolutions, contests, e, cause, rotations.rotations[terminal].transition
+            );
+            terminalProof = continued
+                ? RotationHistory.terminal(
+                    recovery,
+                    rotations,
+                    resolutions,
+                    contests,
+                    e,
+                    f.vesting,
+                    f.transition,
+                    cause,
+                    terminal,
+                    closureProof
+                )
+                : _terminal(recovery, rotations, e, cause, f, terminal, closureProof, originProof);
+        }
         f.designation = succession.designations[f.request.designationRecordHash];
         if (
             f.request.designationRecordHash == 0
@@ -220,9 +287,9 @@ library StreamArtistRecoveryEstateRotation {
                 || f.designation.terms.successor != f.request.terms.successor
                 || f.designation.terms.directiveHash != f.request.pairedDirectiveRecordHash
                 || f.designation.authorityClass != 1 || f.designation.signer == address(0)
-                || (ancestry == 0 && f.designation.signer != f.request.incumbent)
+                || (!hasAncestry && f.designation.signer != f.request.incumbent)
                 || f.designation.signedAt > f.request.requestedAt
-                || !_planAssociation(rotations, p.artistId, f.designation.provisional, ancestry)
+                || !_planAssociation(rotations, p.artistId, f.designation.provisional, hasAncestry)
                 || StreamArtistSuccessionHashes.designationRecord(
                         e,
                         f.designation.terms,
@@ -231,9 +298,16 @@ library StreamArtistRecoveryEstateRotation {
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         f.paired = succession.directives[f.request.pairedDirectiveRecordHash];
         f.forbidden = succession.directives[f.request.forbiddenDirectiveRecordHash];
-        _directive(rotations, e, f.request, f.paired, f.request.pairedDirectiveRecordHash, ancestry);
         _directive(
-            rotations, e, f.request, f.forbidden, f.request.forbiddenDirectiveRecordHash, ancestry
+            rotations, e, f.request, f.paired, f.request.pairedDirectiveRecordHash, hasAncestry
+        );
+        _directive(
+            rotations,
+            e,
+            f.request,
+            f.forbidden,
+            f.request.forbiddenDirectiveRecordHash,
+            hasAncestry
         );
         f.capabilities = EstateState.activationCapabilities(
             succession, f.request.designationRecordHash, f.request.forbiddenDirectiveRecordHash
@@ -266,12 +340,22 @@ library StreamArtistRecoveryEstateRotation {
                 )
             );
         }
-        if (originProof == 0) return factsHash;
+        if (originProof != 0) {
+            factsHash = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_RECOVERY_CLOSED_ORIGIN_ROTATED_ESTATE_FACTS_V1"),
+                    factsHash,
+                    originProof
+                )
+            );
+        }
+        if (historyProof == 0) return factsHash;
         return keccak256(
             abi.encode(
-                keccak256("6529STREAM_ARTIST_RECOVERY_CLOSED_ORIGIN_ROTATED_ESTATE_FACTS_V1"),
+                keccak256("6529STREAM_ARTIST_RECOVERY_ROTATED_ESTATE_WITH_HISTORY_FACTS_V1"),
                 factsHash,
-                originProof
+                cause,
+                historyProof
             )
         );
     }
@@ -386,7 +470,7 @@ library StreamArtistRecoveryEstateRotation {
         Estate.RequestRecord memory request,
         Succ.DirectiveRecord memory d,
         bytes32 hash,
-        bytes32 ancestry
+        bool hasAncestry
     ) private view {
         if (hash == 0) {
             Succ.DirectiveRecord memory empty;
@@ -398,9 +482,9 @@ library StreamArtistRecoveryEstateRotation {
         if (
             d.recordHash != hash || d.terms.artistId != request.terms.artistId
                 || d.authorityClass != 1 || d.signer == address(0)
-                || (ancestry == 0 && d.signer != request.incumbent)
+                || (!hasAncestry && d.signer != request.incumbent)
                 || d.signedAt > request.requestedAt
-                || !_planAssociation(rotations, request.terms.artistId, d.provisional, ancestry)
+                || !_planAssociation(rotations, request.terms.artistId, d.provisional, hasAncestry)
                 || StreamArtistSuccessionHashes.directiveRecord(
                         e, d.terms, T.Authorization(d.nonce, d.signedAt, bytes(""))
                     ) != hash
@@ -411,9 +495,9 @@ library StreamArtistRecoveryEstateRotation {
         StreamArtistRotationState.State storage rotations,
         bytes32 artistId,
         R.ProvisionalAssociation memory a,
-        bytes32 ancestry
+        bool hasAncestry
     ) private view returns (bool) {
-        if (ancestry == 0) {
+        if (!hasAncestry) {
             return a.transitionRecordHash == 0 && a.windowEndsAt == 0;
         }
         return StreamArtistRotationState.eligible(rotations, artistId, a);

@@ -81,8 +81,9 @@ Successful35 consumes the original current cause, advances the epoch once and
 replaces both transition heads. It leaves the aborted32 and its empty closure
 intact. The new35 saves that cause/resolution pair as its baseline, so a later
 recovery can authenticate it without inventing an intervening dismissal. This
-profile applies to repeated living recovery; first35 and class3 profiles retain
-their existing admission rules.
+profile applies to repeated living recovery. The
+[staging-family guide](artist-recovery-staging-family.md) describes its extension
+to first35, class3 causes and genuine cancelled estate staging predecessors.
 
 ## Context compatibility and execution
 

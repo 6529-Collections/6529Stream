@@ -40,6 +40,9 @@ import {
 import {
     StreamArtistRecoveryDormancyRotation as DormRotation
 } from "./StreamArtistRecoveryDormancyRotation.sol";
+import {
+    StreamArtistRecoveryFamilyHistory as FamilyHistory
+} from "./StreamArtistRecoveryFamilyHistory.sol";
 
 /// @notice First designated dormancy recovery, retaining original recipes for all earlier profiles.
 library StreamArtistDormancyRecovery {
@@ -215,7 +218,7 @@ library StreamArtistDormancyRecovery {
         // Original history joins the actual op33 evidence. Keep the caller's Appeal document
         // and supersession list unchanged for adjudication, registration and acceptance.
         Recovery.Request memory historical = p;
-        if (p.supersededRecordHashes.length != 0) {
+        if (cause.facts.kind == 1 && p.supersededRecordHashes.length != 0) {
             historical = Recovery.Request(
                 p.artistId,
                 p.newAddress,
@@ -227,7 +230,36 @@ library StreamArtistDormancyRecovery {
                 new bytes32[](0)
             );
         }
+        bool familyRequired = FamilyHistory.required(s, rotations, resolutions, e, cause);
+        bytes32 historyProof;
+        if (familyRequired) {
+            bytes32 activation = dormancy.activation[p.artistId];
+            historyProof = FamilyHistory.read(
+                s,
+                rotations,
+                resolutions,
+                e,
+                cause,
+                s.vestingHistory.snapshots[activation],
+                dormancy.transitions[activation]
+            );
+        }
         if (rotations.latestExecution[p.artistId] != dormancy.activation[p.artistId]) {
+            if (familyRequired) {
+                return DormRotation.factsWithHistory(
+                    s,
+                    dormancy,
+                    estate,
+                    rotations,
+                    resolutions,
+                    succession,
+                    contests,
+                    e,
+                    cause,
+                    historical,
+                    historyProof
+                );
+            }
             return DormRotation.facts(
                 s,
                 dormancy,
@@ -239,6 +271,21 @@ library StreamArtistDormancyRecovery {
                 e,
                 cause,
                 historical
+            );
+        }
+        if (familyRequired) {
+            return DormPredecessor.factsWithHistory(
+                s,
+                dormancy,
+                estate,
+                rotations,
+                resolutions,
+                succession,
+                contests,
+                e,
+                cause,
+                historical,
+                historyProof
             );
         }
         return DormPredecessor.facts(
@@ -264,9 +311,10 @@ library StreamArtistDormancyRecovery {
         if (
             p.artistId == bytes32(0) || cause.causeHash == bytes32(0)
                 || cause.causeHash != p.expectedCauseHash || cause.facts.artistId != p.artistId
-                || cause.facts.kind != 1 || cause.facts.referenceHash == bytes32(0)
-                || cause.facts.actor == address(0) || cause.facts.incumbent == address(0)
-                || principal.status != 4 || principal.authorityClass != cause.facts.authorityClass
+                || (cause.facts.kind != 1 && cause.facts.kind != 2)
+                || cause.facts.referenceHash == bytes32(0) || cause.facts.actor == address(0)
+                || cause.facts.incumbent == address(0) || principal.status != 4
+                || principal.authorityClass != cause.facts.authorityClass
                 || principal.authorityAddress != cause.facts.incumbent
                 || identity.activeIdentity[principal.authorityAddress] != p.artistId
                 || resolutions.latestResolution[p.artistId] != p.expectedResolutionHash
@@ -277,7 +325,6 @@ library StreamArtistDormancyRecovery {
         if (
             p.vestedAuthorityClass != 3 || cause.facts.authorityClass != 3
                 || cause.facts.priorStatus != 3 || rotations.pending[p.artistId] != bytes32(0)
-                || cause.facts.pendingTransitionHash != bytes32(0)
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         (bytes32 predecessor, R.GuardianRecord memory guardian) = _facts(
             s,

@@ -210,6 +210,67 @@ library StreamArtistRecoveryRotationClosure {
         );
     }
 
+    /// @notice The same immutable selected episode for living or designated class3 history.
+    /// @dev Profile, actual executed ancestry and the first closure are proved by the caller.
+    function selectedFamily(
+        StreamArtistRotationState.State storage rotations,
+        Resolution.State storage resolutions,
+        StreamArtistHashes.Environment memory e,
+        bytes32 artistId,
+        R.TransitionState memory previous,
+        address incumbent,
+        uint8 authorityClass,
+        uint64 boundaryAt,
+        bytes32 causeHash,
+        bytes32 resolutionHash
+    ) public view returns (bytes32) {
+        if (authorityClass == 1) {
+            return selectedHistory(
+                rotations,
+                resolutions,
+                e,
+                artistId,
+                previous,
+                incumbent,
+                boundaryAt,
+                causeHash,
+                resolutionHash
+            );
+        }
+        Dismissal.Cause memory cause = resolutions.causes[causeHash];
+        Dismissal.Record memory selected = resolutions.records[resolutionHash];
+        if (
+            authorityClass != 3 || causeHash == 0 || selected.terms.expectedCauseHash != causeHash
+                || previous.artistId != artistId || previous.recordHash == 0 || previous.phase != 2
+                || previous.executedAt == 0
+        ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+        Dismissal.CauseFacts memory boundary;
+        boundary.artistId = artistId;
+        boundary.authorityClass = authorityClass;
+        boundary.incumbent = incumbent;
+        boundary.enteredAt = boundaryAt;
+        if (cause.facts.kind == 2) {
+            return
+                _dismissed(rotations, resolutions, e, boundary, previous, selected, resolutionHash);
+        }
+        bytes32 episode = _selectedCompromisePending(
+            resolutions,
+            e,
+            boundary,
+            previous,
+            selected,
+            resolutionHash,
+            cause.facts.pendingTransitionHash
+        );
+        if (cause.facts.pendingTransitionHash == 0) return episode;
+        bytes32 pending = _abortedCompromise(rotations, resolutions, e, cause, selected, previous);
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_SELECTED_PENDING_COMPROMISE_V1"), episode, pending
+            )
+        );
+    }
+
     // Explicitly selected ACTIVE history may retain a zero or older op33 subject independently
     // from the actual execution captured by its cause. Original closure APIs keep their profile.
     /// @notice Read the actual ACTIVE compromise independently of any later dismissal.
@@ -252,9 +313,12 @@ library StreamArtistRecoveryRotationClosure {
                 || r.recordHash != expected || r.terms.artistId != current.artistId
                 || r.terms.evidenceHash == 0 || r.terms.reasonHash == 0 || r.executor == address(0)
                 || r.proposer == address(0) || (r.actionClass != 1 && r.actionClass != 2)
-                || r.actionId == 0 || r.incumbent != current.incumbent || r.authorityClass != 1
-                || r.restoredStatus != 1 || r.dismissedAt == 0 || r.dismissedAt > current.enteredAt
-                || r.cohortHash == 0 || r.governanceWitnessHash == 0
+                || r.actionId == 0 || r.incumbent != current.incumbent
+                || r.authorityClass != current.authorityClass
+                || (current.authorityClass != 1 && current.authorityClass != 3)
+                || r.restoredStatus != current.authorityClass || r.dismissedAt == 0
+                || r.dismissedAt > current.enteredAt || r.cohortHash == 0
+                || r.governanceWitnessHash == 0
                 || (r.terms.removePriorStanding
                         ? r.terms.expectedRetirementHash == 0
                         || r.terms.expectedRetirementHash != cause.facts.actorRetirementHash
@@ -271,7 +335,8 @@ library StreamArtistRecoveryRotationClosure {
                             cause.facts
                         )
                     ) || cause.facts.artistId != current.artistId || cause.facts.kind != 1
-                || cause.facts.authorityClass != 1 || cause.facts.priorStatus != 1
+                || cause.facts.authorityClass != current.authorityClass
+                || cause.facts.priorStatus != current.authorityClass
                 || cause.facts.executedTransitionHash != t.recordHash
                 || cause.facts.incumbent != current.incumbent || cause.facts.actor == address(0)
                 || cause.facts.referenceHash == 0 || cause.facts.enteredAt == 0
@@ -308,7 +373,8 @@ library StreamArtistRecoveryRotationClosure {
             c.recordHash != cause.facts.referenceHash || c.terms.artistId != cause.facts.artistId
                 || c.terms.evidenceHash != cause.facts.evidenceHash
                 || c.terms.reasonHash != cause.facts.reasonHash || c.contester != cause.facts.actor
-                || c.contestedAt != cause.facts.enteredAt || c.priorStatus != 1
+                || c.contestedAt != cause.facts.enteredAt
+                || c.priorStatus != cause.facts.priorStatus
                 || c.pendingTransitionRecordHash != pending
                 || c.executedTransitionRecordHash != execution
                 || c.recordHash

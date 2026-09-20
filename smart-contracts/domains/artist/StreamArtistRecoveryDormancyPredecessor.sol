@@ -83,6 +83,65 @@ library StreamArtistRecoveryDormancyPredecessor {
         Dismissal.Cause memory cause,
         Recovery.Request memory p
     ) public view returns (bytes32 proof, R.GuardianRecord memory guardian) {
+        return _facts(
+            recovery,
+            dormancy,
+            estate,
+            rotations,
+            resolutions,
+            succession,
+            contests,
+            e,
+            cause,
+            p,
+            bytes32(0)
+        );
+    }
+
+    /// @dev The fixed caller authenticates the complete current-cause/staging history.
+    /// Original notice, appointment, capabilities and guardian prefix remain local.
+    function factsWithHistory(
+        RecoveryState.State storage recovery,
+        StreamArtistDormancyState.State storage dormancy,
+        EstateState.State storage estate,
+        StreamArtistRotationState.State storage rotations,
+        Resolution.State storage resolutions,
+        StreamArtistSuccessionState.State storage succession,
+        ContestState.State storage contests,
+        StreamArtistHashes.Environment memory e,
+        Dismissal.Cause memory cause,
+        Recovery.Request memory p,
+        bytes32 historyProof
+    ) public view returns (bytes32 proof, R.GuardianRecord memory guardian) {
+        if (historyProof == 0) revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
+        return _facts(
+            recovery,
+            dormancy,
+            estate,
+            rotations,
+            resolutions,
+            succession,
+            contests,
+            e,
+            cause,
+            p,
+            historyProof
+        );
+    }
+
+    function _facts(
+        RecoveryState.State storage recovery,
+        StreamArtistDormancyState.State storage dormancy,
+        EstateState.State storage estate,
+        StreamArtistRotationState.State storage rotations,
+        Resolution.State storage resolutions,
+        StreamArtistSuccessionState.State storage succession,
+        ContestState.State storage contests,
+        StreamArtistHashes.Environment memory e,
+        Dismissal.Cause memory cause,
+        Recovery.Request memory p,
+        bytes32 historyProof
+    ) private view returns (bytes32 proof, R.GuardianRecord memory guardian) {
         bytes32 head = dormancy.activation[p.artistId];
         Facts memory f;
         f.terminal = dormancy.terminals[head];
@@ -132,9 +191,9 @@ library StreamArtistRecoveryDormancyPredecessor {
                 || rotations.pending[p.artistId] != 0
                 || rotations.latestExecution[p.artistId] != head
                 || cause.facts.executedTransitionHash != head
-                || cause.facts.pendingTransitionHash != 0 || f.transition.artistId != p.artistId
-                || f.transition.recordHash != head || f.transition.phase != 2
-                || f.transition.stagedAt != f.notice.initiatedAt
+                || (historyProof == 0 && cause.facts.pendingTransitionHash != 0)
+                || f.transition.artistId != p.artistId || f.transition.recordHash != head
+                || f.transition.phase != 2 || f.transition.stagedAt != f.notice.initiatedAt
                 || f.transition.contestEndsAt != f.notice.noticeEndsAt
                 || f.transition.executedAt != f.terminal.observedAt
                 || uint256(f.transition.postWindowEndsAt)
@@ -161,24 +220,28 @@ library StreamArtistRecoveryDormancyPredecessor {
         ) {
             revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         }
-        LivingBoundary.Facts memory boundary = LivingBoundary.facts(
-            recovery, rotations, resolutions, e, f.notice, f.terminal, f.vesting, cause
-        );
-        bytes32 closureProof = rotations.latestTransition[p.artistId] == head
-            ? DormClosure.proof(
-                resolutions, e, f.transition, cause, boundary.cause, boundary.resolution
-            )
-            : DormStanding.proof(
-                rotations,
-                resolutions,
-                contests,
-                e,
-                f.transition,
-                cause,
-                boundary.cause,
-                boundary.resolution
+        LivingBoundary.Facts memory boundary;
+        bytes32 closureProof;
+        if (historyProof == 0) {
+            boundary = LivingBoundary.facts(
+                recovery, rotations, resolutions, e, f.notice, f.terminal, f.vesting, cause
             );
-        if (recovery.latest[p.artistId] == 0) {
+            closureProof = rotations.latestTransition[p.artistId] == head
+                ? DormClosure.proof(
+                    resolutions, e, f.transition, cause, boundary.cause, boundary.resolution
+                )
+                : DormStanding.proof(
+                    rotations,
+                    resolutions,
+                    contests,
+                    e,
+                    f.transition,
+                    cause,
+                    boundary.cause,
+                    boundary.resolution
+                );
+        }
+        if (historyProof == 0 && recovery.latest[p.artistId] == 0) {
             _previous(recovery, rotations, e, f, boundary.proof != 0);
         } else {
             f.previous = recovery.vestingHistory.snapshots[f.vesting.previousTransitionRecordHash];
@@ -192,7 +255,7 @@ library StreamArtistRecoveryDormancyPredecessor {
             f.vesting
         );
         f.contest = contests.records[cause.facts.referenceHash];
-        _contest(e, cause, p, f.contest, head);
+        if (historyProof == 0) _contest(e, cause, p, f.contest, head);
         f.designation = succession.designations[f.terminal.plan.designation];
         if (
             StreamArtistSuccessionState.operativeDesignation(succession, rotations, p.artistId)
@@ -259,6 +322,16 @@ library StreamArtistRecoveryDormancyPredecessor {
                         : keccak256("6529STREAM_ARTIST_RECOVERED_LIVING_DORMANCY_FACTS_V1"),
                     proof,
                     boundary.proof
+                )
+            );
+        }
+        if (historyProof != 0) {
+            proof = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_RECOVERY_FIRST_DORMANCY_WITH_HISTORY_FACTS_V1"),
+                    proof,
+                    cause,
+                    historyProof
                 )
             );
         }

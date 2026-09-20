@@ -48,6 +48,35 @@ library StreamArtistDormancyNoticeHistory {
         bytes32 closureProof;
     }
 
+    /// @notice One original phase3-notice episode selected by a complete cross-origin walker.
+    /// @dev The caller authenticates the notice/completion origin and checks its first closure.
+    function selected(
+        Resolution.State storage resolutions,
+        StreamArtistHashes.Environment memory e,
+        Dorm.Notice memory notice,
+        Dorm.Terminal memory terminal,
+        V.Snapshot memory origin,
+        bytes32 causeHash,
+        bytes32 resolutionHash,
+        uint64 before
+    ) public view returns (bytes32 proof, Cont.Record memory contest) {
+        D.Cause memory cause = resolutions.causes[causeHash];
+        D.Record memory dismissal = resolutions.records[resolutionHash];
+        _cause(e, notice, origin, cause, causeHash);
+        _dismissal(e, cause, dismissal, resolutionHash, before);
+        contest = _contest(resolutions, e, cause);
+        (bytes32 savedNotice, uint8 phase, bytes32 savedTerminal) = IStreamArtistDormancyOwner(
+                address(this)
+            ).dormancyResolutionState(origin.artistId, causeHash);
+        if (
+            savedNotice != notice.recordHash || phase != 3 || savedTerminal != terminal.recordHash
+                || terminal.noticeHash != notice.recordHash
+                || origin.transitionRecordHash != terminal.recordHash
+                || before > terminal.observedAt
+        ) revert Recovery.UnsupportedIdentityRecoveryProfile(origin.artistId);
+        proof = keccak256(abi.encode(cause, dismissal, contest, savedNotice, phase, savedTerminal));
+    }
+
     function read(
         Resolution.State storage resolutions,
         StreamArtistHashes.Environment memory e,

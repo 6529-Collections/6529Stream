@@ -66,6 +66,12 @@ import { StreamArtistIdentityContestState } from "./StreamArtistIdentityContestS
 import {
     StreamArtistRecoveryContinuation as Continuation
 } from "./StreamArtistRecoveryContinuation.sol";
+import {
+    StreamArtistRecoveryFamilyHistory as Family
+} from "./StreamArtistRecoveryFamilyHistory.sol";
+import {
+    StreamArtistGuardianVestingTypes as V
+} from "../../interfaces/stream/artist/StreamArtistGuardianVestingTypes.sol";
 
 /// @notice One-way delegated recovery context; State is imported only for its storage type.
 library StreamArtistIdentityRecoveryContext {
@@ -103,12 +109,18 @@ library StreamArtistIdentityRecoveryContext {
         if (
             p.vestedAuthorityClass != 1 || cause.facts.authorityClass != 1
                 || cause.facts.priorStatus != 1 || rotations.pending[p.artistId] != bytes32(0)
-                || cause.facts.pendingTransitionHash != bytes32(0)
                 || s.latest[p.artistId] != bytes32(0)
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         bytes32 predecessor;
+        bytes32 family;
         bool historicalPredecessor;
-        if (rotations.latestExecution[p.artistId] == bytes32(0)) {
+        if (Family.required(s, rotations, resolutions, o.environment, cause)) {
+            V.Snapshot memory bridge;
+            R.TransitionState memory bridgeTransition;
+            family = Family.read(
+                s, rotations, resolutions, o.environment, cause, bridge, bridgeTransition
+            );
+        } else if (rotations.latestExecution[p.artistId] == bytes32(0)) {
             if (
                 rotations.latestTransition[p.artistId] != bytes32(0)
                     || rotations.provisionalGuardian[p.artistId] != bytes32(0)
@@ -212,6 +224,15 @@ library StreamArtistIdentityRecoveryContext {
                 )
             );
         }
+        if (family != 0) {
+            c.oldValueHash = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_RECOVERY_STAGING_FAMILY_CONTEXT_V1"),
+                    c.oldValueHash,
+                    family
+                )
+            );
+        }
         if (p.supersededRecordHashes.length != 0) {
             c.oldValueHash = keccak256(abi.encode(c.oldValueHash, supersessionContext));
         }
@@ -239,10 +260,12 @@ library StreamArtistIdentityRecoveryContext {
         Recovery.Request memory p,
         T.Authorization memory acceptance
     ) public view returns (Recovery.Context memory c) {
-        if (s.latest[p.artistId] != 0) {
-            return Continuation.context(
-                s, identity, rotations, resolutions, estate, o, p, acceptance
-            );
+        bool afterLiving = p.vestedAuthorityClass == 3 && s.latest[p.artistId] != 0
+            && s.records[s.latest[p.artistId]].fields.vestedAuthorityClass == 1
+            && estate.authorityActivation[p.artistId] != 0;
+        if (s.latest[p.artistId] != 0 && !afterLiving) {
+            return
+                Continuation.context(s, identity, rotations, resolutions, estate, o, p, acceptance);
         }
         if (p.vestedAuthorityClass != 3) {
             return context(s, identity, rotations, resolutions, estate, o, p, acceptance);
@@ -252,9 +275,10 @@ library StreamArtistIdentityRecoveryContext {
         if (
             p.artistId == bytes32(0) || cause.causeHash == bytes32(0)
                 || cause.causeHash != p.expectedCauseHash || cause.facts.artistId != p.artistId
-                || cause.facts.kind != 1 || cause.facts.referenceHash == bytes32(0)
-                || cause.facts.actor == address(0) || cause.facts.incumbent == address(0)
-                || principal.status != 4 || principal.authorityClass != cause.facts.authorityClass
+                || (cause.facts.kind != 1 && cause.facts.kind != 2)
+                || cause.facts.referenceHash == bytes32(0) || cause.facts.actor == address(0)
+                || cause.facts.incumbent == address(0) || principal.status != 4
+                || principal.authorityClass != cause.facts.authorityClass
                 || principal.authorityAddress != cause.facts.incumbent
                 || identity.activeIdentity[principal.authorityAddress] != p.artistId
                 || resolutions.latestResolution[p.artistId] != p.expectedResolutionHash
@@ -265,13 +289,12 @@ library StreamArtistIdentityRecoveryContext {
         if (
             p.vestedAuthorityClass != 3 || cause.facts.authorityClass != 3
                 || cause.facts.priorStatus != 3 || rotations.pending[p.artistId] != bytes32(0)
-                || cause.facts.pendingTransitionHash != bytes32(0)
-                || s.latest[p.artistId] != bytes32(0)
+                || (s.latest[p.artistId] != bytes32(0) && !afterLiving)
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(p.artistId);
         // Original history joins the actual op33 evidence. The unchanged caller request,
         // including an Appeal document reference, is independently authenticated below.
         Recovery.Request memory historical = p;
-        if (p.supersededRecordHashes.length != 0) {
+        if (cause.facts.kind == 1 && p.supersededRecordHashes.length != 0) {
             historical = Recovery.Request(
                 p.artistId,
                 p.newAddress,
@@ -286,29 +309,67 @@ library StreamArtistIdentityRecoveryContext {
         bytes32 activation = estate.authorityActivation[p.artistId];
         bytes32 terminal = rotations.latestExecution[p.artistId];
         bool rotated = terminal != activation;
-        bytes32 predecessor = rotated
-            ? EstateRotation.afterRotation(
+        bytes32 family;
+        if (afterLiving || Family.required(s, rotations, resolutions, o.environment, cause)) {
+            family = Family.read(
                 s,
-                estate,
                 rotations,
                 resolutions,
-                succession,
-                contests,
                 o.environment,
                 cause,
-                historical
-            )
-            : StreamArtistRecoveryEstatePredecessor.firstEstate(
-                s,
-                estate,
-                rotations,
-                resolutions,
-                succession,
-                contests,
-                o.environment,
-                cause,
-                historical
+                s.vestingHistory.snapshots[activation],
+                estate.transitions[activation]
             );
+        }
+        bytes32 predecessor = family != 0
+            ? (rotated
+                    ? EstateRotation.afterRotationWithHistory(
+                        s,
+                        estate,
+                        rotations,
+                        resolutions,
+                        succession,
+                        contests,
+                        o.environment,
+                        cause,
+                        historical,
+                        family
+                    )
+                    : StreamArtistRecoveryEstatePredecessor.firstEstateWithHistory(
+                        s,
+                        estate,
+                        rotations,
+                        resolutions,
+                        succession,
+                        contests,
+                        o.environment,
+                        cause,
+                        historical,
+                        family
+                    ))
+            : rotated
+                ? EstateRotation.afterRotation(
+                    s,
+                    estate,
+                    rotations,
+                    resolutions,
+                    succession,
+                    contests,
+                    o.environment,
+                    cause,
+                    historical
+                )
+                : StreamArtistRecoveryEstatePredecessor.firstEstate(
+                    s,
+                    estate,
+                    rotations,
+                    resolutions,
+                    succession,
+                    contests,
+                    o.environment,
+                    cause,
+                    historical
+                );
         if (identity.activeIdentity[p.newAddress] != bytes32(0)) {
             revert T.AddressAlreadyRegistered(p.newAddress);
         }

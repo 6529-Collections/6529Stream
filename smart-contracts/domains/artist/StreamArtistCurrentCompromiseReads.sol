@@ -3,6 +3,9 @@ pragma solidity ^0.8.19;
 
 import { StreamArtistHashes } from "./StreamArtistHashes.sol";
 import { StreamArtistRotationHashes } from "./StreamArtistRotationHashes.sol";
+import {
+    StreamArtistRecoveryStagingHistory as Stages
+} from "./StreamArtistRecoveryStagingHistory.sol";
 import { IStreamArtistOwner } from "../../interfaces/stream/artist/IStreamArtistOwner.sol";
 import {
     IStreamArtistIdentityContestOwner
@@ -17,6 +20,9 @@ import {
     IStreamArtistRotationReads
 } from "../../interfaces/stream/artist/IStreamArtistRotation.sol";
 import {
+    IStreamArtistEstateOwner
+} from "../../interfaces/stream/artist/IStreamArtistEstateOwner.sol";
+import {
     StreamArtistIdentityContestTypes as C
 } from "../../interfaces/stream/artist/StreamArtistIdentityContestTypes.sol";
 import {
@@ -25,6 +31,9 @@ import {
 import {
     StreamArtistRotationTypes as R
 } from "../../interfaces/stream/artist/StreamArtistRotationTypes.sol";
+import {
+    StreamArtistOnboardingTypes as T
+} from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 import {
     StreamArtistIdentityRecoveryOperationTypes as Recovery
 } from "../../interfaces/stream/artist/StreamArtistIdentityRecoveryOperationTypes.sol";
@@ -82,6 +91,210 @@ library StreamArtistCurrentCompromiseReads {
                 subject
             )
         );
+    }
+
+    /// @notice Read an original current compromise or standing veto for living or estate recovery.
+    /// @dev The caller authenticates the first/repeated recovery profile, actual authority origin,
+    /// ancestry and maturity. Only living authority may have no executed predecessor. Standing
+    /// vetoes retain an empty Contest: their original cause and rotation-veto replay are the proof.
+    function readFamily(
+        address owner,
+        address registry,
+        uint256 chainId,
+        D.Cause memory current,
+        R.TransitionState memory executed
+    ) public view returns (Facts memory f) {
+        bytes32 artistId = current.facts.artistId;
+        if (
+            owner.code.length == 0 || registry == address(0) || chainId != block.chainid
+                || IStreamArtistOwner(owner).deploymentChainId() != chainId
+                || IStreamArtistOwner(owner).artistRegistry() != registry
+        ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+        Environment memory e = Environment(owner, registry, chainId);
+        _familyCause(e, current, executed);
+        bytes32 subject;
+        bytes32 standing;
+        bytes32 estateProof;
+        if (current.facts.kind == 1) {
+            f.contest = IStreamArtistIdentityContestOwner(owner)
+                .identityContestRecord(current.facts.referenceHash);
+            subject = _contestClass(e, current, f.contest, current.facts.authorityClass);
+        } else {
+            standing = _standing(e, current);
+        }
+        if (current.facts.pendingTransitionHash != 0) {
+            if (
+                IStreamArtistRotationReads(owner)
+                    .rotationRecord(current.facts.pendingTransitionHash)
+                    .recordHash != 0
+            ) {
+                f.pending = _pendingRecord(e, current, executed, f.contest, current.facts.kind == 1);
+            } else {
+                estateProof = _pendingEstate(e, current, executed, f.contest);
+            }
+        }
+        f.proof = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_CURRENT_CAUSE_FAMILY_FACTS_V1"),
+                chainId,
+                registry,
+                owner,
+                current,
+                executed,
+                f.contest,
+                f.pending,
+                subject,
+                standing
+            )
+        );
+        // Only this new estate profile adds a wrapper. Existing family and original read()
+        // commitments retain their exact original encoding; S is never a RotationRecord.
+        if (estateProof != 0) {
+            f.proof = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_CURRENT_ESTATE_COMPROMISE_FACTS_V1"),
+                    f.proof,
+                    estateProof
+                )
+            );
+        }
+    }
+
+    function _pendingEstate(
+        Environment memory e,
+        D.Cause memory current,
+        R.TransitionState memory executed,
+        C.Record memory contest
+    ) private view returns (bytes32) {
+        bytes32 artistId = current.facts.artistId;
+        bytes32 hash = current.facts.pendingTransitionHash;
+        if (current.facts.kind != 1 || current.facts.authorityClass != 1 || hash == 0) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+        }
+        uint64 revision = Stages.compromiseRevision(
+            e.owner, e.registry, e.chainId, artistId, contest.recordHash
+        );
+        Stages.EstateFacts memory estate =
+            Stages.cancelledEstate(e.owner, e.registry, e.chainId, artistId, hash, revision);
+        (address successor, uint64 noticeEndsAt, bytes32 activation) =
+            IStreamArtistEstateOwner(e.owner).estateActivationState(artistId);
+        (address old_, address new_, uint64 ends, uint32 approvals, bytes32 pending) =
+            IStreamArtistRotationReads(e.owner).pendingRotation(artistId);
+        D.Closure memory closed =
+            IStreamArtistIdentityDismissalOwner(e.owner).identityTransitionClosure(artistId, hash);
+        D.Closure memory emptyClosure;
+        R.RotationRecord memory emptyRotation;
+        if (
+            hash == executed.recordHash
+                || IStreamArtistRotationReads(e.owner).lastArtistTransition(artistId) != hash
+                || estate.request.incumbent != current.facts.incumbent
+                || estate.request.requestedAt < executed.executedAt
+                || estate.request.requestedAt > current.facts.enteredAt
+                || estate.transition.contestedAt != current.facts.enteredAt
+                || estate.cancellationReplay.touchedRevision != revision
+                || contest.capturedGuardianSetRecordHash != estate.request.guardianRecordHash
+                || successor != address(0) || noticeEndsAt != 0 || activation != 0
+                || old_ != address(0) || new_ != address(0) || ends != 0 || approvals != 0
+                || pending != 0
+                || keccak256(abi.encode(closed)) != keccak256(abi.encode(emptyClosure))
+                || keccak256(abi.encode(IStreamArtistRotationReads(e.owner).rotationRecord(hash)))
+                    != keccak256(abi.encode(emptyRotation))
+        ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
+        return keccak256(abi.encode(estate.proof, revision, closed));
+    }
+
+    function _familyCause(
+        Environment memory e,
+        D.Cause memory current,
+        R.TransitionState memory executed
+    ) private view {
+        D.CauseFacts memory c = current.facts;
+        if (
+            c.artistId == 0 || current.causeHash == 0 || (c.kind != 1 && c.kind != 2)
+                || (c.authorityClass != 1 && c.authorityClass != 3)
+                || c.priorStatus != c.authorityClass || c.incumbent == address(0)
+                || c.actor == address(0) || c.referenceHash == 0
+                || (c.kind == 1
+                        ? c.evidenceHash == 0 || c.reasonHash == 0
+                        : c.evidenceHash != 0 || c.referenceHash != c.pendingTransitionHash)
+                || c.enteredAt == 0 || c.enteredAt > block.timestamp
+                || c.executedTransitionHash != executed.recordHash
+                || current.causeHash
+                    != keccak256(
+                        abi.encode(
+                            keccak256("6529STREAM_ARTIST_IDENTITY_CONTEST_CAUSE_V1"),
+                            e.chainId,
+                            e.registry,
+                            e.owner,
+                            c
+                        )
+                    )
+                || keccak256(abi.encode(current))
+                    != keccak256(
+                        abi.encode(
+                            IStreamArtistIdentityDismissalOwner(e.owner)
+                                .currentIdentityContestCause(c.artistId)
+                        )
+                    )
+                || keccak256(abi.encode(current))
+                    != keccak256(
+                        abi.encode(
+                            IStreamArtistIdentityDismissalOwner(e.owner)
+                                .identityContestCause(current.causeHash)
+                        )
+                    )
+                || keccak256(abi.encode(executed))
+                    != keccak256(
+                        abi.encode(
+                            IStreamArtistRotationReads(e.owner)
+                                .artistTransitionState(executed.recordHash)
+                        )
+                    )
+        ) revert Recovery.UnsupportedIdentityRecoveryProfile(c.artistId);
+        if (executed.recordHash == 0) {
+            R.TransitionState memory empty;
+            if (
+                c.authorityClass != 1
+                    || keccak256(abi.encode(executed)) != keccak256(abi.encode(empty))
+            ) {
+                revert Recovery.UnsupportedIdentityRecoveryProfile(c.artistId);
+            }
+        } else if (
+            executed.artistId != c.artistId || executed.phase != 2 || executed.executedAt == 0
+                || executed.executedAt > c.enteredAt
+        ) {
+            revert Recovery.UnsupportedIdentityRecoveryProfile(c.artistId);
+        }
+    }
+
+    function _standing(Environment memory e, D.Cause memory current)
+        private
+        view
+        returns (bytes32)
+    {
+        IStreamArtistOwner owner = IStreamArtistOwner(e.owner);
+        bytes32 key = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2"),
+                e.chainId,
+                e.registry,
+                owner.operationCoordinator(),
+                owner.archiveV2(),
+                e.owner,
+                owner.domainId(),
+                keccak256("identity_authority.replay.rotation_veto_key"),
+                current.facts.pendingTransitionHash
+            )
+        );
+        T.ReplayCell memory cell = owner.replayCell(key);
+        if (
+            cell.commitment != current.facts.pendingTransitionHash || cell.kind != 1
+                || cell.status != 2 || cell.touchedRevision == 0
+                || cell.touchedRevision > owner.ownerStateSnapshotV2().revision
+        ) revert Recovery.UnsupportedIdentityRecoveryProfile(current.facts.artistId);
+        // The fixed-owner canonical Cause authenticates the original actor and optional reason.
+        // The veto key commits P, not an independently stored Contest or a fresh role decision.
+        return keccak256(abi.encode(key, cell));
     }
 
     function _living(Environment memory e, bytes32 artistId) private view returns (bytes32 hash) {
@@ -146,11 +359,21 @@ library StreamArtistCurrentCompromiseReads {
         view
         returns (bytes32)
     {
+        return _contestClass(e, current, c, 1);
+    }
+
+    function _contestClass(
+        Environment memory e,
+        D.Cause memory current,
+        C.Record memory c,
+        uint8 authorityClass
+    ) private view returns (bytes32) {
         D.CauseFacts memory f = current.facts;
         if (
             c.recordHash != f.referenceHash || c.terms.artistId != f.artistId
                 || c.terms.evidenceHash != f.evidenceHash || c.terms.reasonHash != f.reasonHash
-                || c.contester != f.actor || c.contestedAt != f.enteredAt || c.priorStatus != 1
+                || c.contester != f.actor || c.contestedAt != f.enteredAt
+                || c.priorStatus != authorityClass
                 || c.pendingTransitionRecordHash != f.pendingTransitionHash
                 || c.executedTransitionRecordHash != f.executedTransitionHash
                 || c.recordHash
@@ -229,6 +452,16 @@ library StreamArtistCurrentCompromiseReads {
         R.TransitionState memory executed,
         C.Record memory contest
     ) private view returns (R.RotationRecord memory r) {
+        return _pendingRecord(e, current, executed, contest, true);
+    }
+
+    function _pendingRecord(
+        Environment memory e,
+        D.Cause memory current,
+        R.TransitionState memory executed,
+        C.Record memory contest,
+        bool hasContest
+    ) private view returns (R.RotationRecord memory r) {
         bytes32 hash = current.facts.pendingTransitionHash;
         bytes32 artistId = current.facts.artistId;
         r = IStreamArtistRotationReads(e.owner).rotationRecord(hash);
@@ -265,7 +498,8 @@ library StreamArtistCurrentCompromiseReads {
                 || keccak256(abi.encode(r.transition))
                     != keccak256(
                         abi.encode(IStreamArtistRotationReads(e.owner).artistTransitionState(hash))
-                    ) || contest.capturedGuardianSetRecordHash != r.guardianSetRecordHash
+                    )
+                || (hasContest && contest.capturedGuardianSetRecordHash != r.guardianSetRecordHash)
                 || keccak256(abi.encode(closed)) != keccak256(abi.encode(empty))
         ) revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
     }

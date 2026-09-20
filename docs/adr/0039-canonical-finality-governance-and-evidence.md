@@ -1981,3 +1981,40 @@ context bytes and every original operation33/35 record, write, event, replay,
 epoch, acceptance and receipt boundary remain intact. The aborted32 acquires no
 dismissal closure or execution during recovery. Authored actual-owner cases
 remain subject to coordinated native, size, gas, capacity and full-CI validation.
+
+### Complete unheld recovery staging family
+
+First living35 and class3 recovery use the same original current-cause,
+executed-ancestry and staging evidence as repeated living recovery. Operation31
+retains its own canonical cause and veto replay, with no fabricated Contest.
+Operation33 can capture either an aborted rotation or a cancelled estate
+request. Direct recovery consumes that current cause with its pending closure
+still empty; earlier dismissed captures retain their original closures.
+
+The family reader walks every32 through an optional original40/43 bridge to
+the actual latest35, or to the genuinely empty initial baseline. The latest35
+supplies its exact saved cause/resolution pair. Original40 supplies no synthetic
+pair: its predecessor history remains part of the same walk. Completed43 binds
+its original notice and terminal, checks eligibility at notice initiation and
+retains genuine challenges dismissed during the notice. Earlier cancelled
+notices retain their separate terminal and activity ordering.
+
+Cancelled estate requests are staging records, never vestings. Their original
+request and cancellation replay revisions prove order, including cancellation
+by the same living-action operation that stages a new rotation. Original native
+receipts identify the prior staging head independently of a rotation's saved
+pointer. Proofs exclude the growing owner revision and receipt count. No writer,
+storage layout, authority, record/signature domain or receipt format changes.
+
+The dispatcher preserves previously admitted contexts, including cancelled
+records already absorbed by supported original40/43 histories. Newly admitted
+profiles add a tagged proof. Guardian supersession still requires a real
+executed cutoff; neither a current rotation nor an estate request manufactures
+one for zero-execution first35. The existing original33 evidence profile also
+continues to exclude nonempty supersession for current standing vetoes. That
+implementation boundary does not imply a new normative restriction.
+
+The [staging-family guide](../guides/artist-recovery-staging-family.md) records
+the matrix and authored actual-owner recipes. Full native acceptance, linked
+size, owner-wide receipt-scan gas/capacity, complete current-stack validation,
+CI and release artifacts remain pending.
