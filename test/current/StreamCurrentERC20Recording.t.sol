@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import "../helpers/NativeEnglishAuctionFixture.sol";
+import "../helpers/CurrentERC20ConservationFixture.sol";
 import "../mocks/MockStreamPaymentToken.sol";
 import "../../smart-contracts/domains/revenue/StreamERC20PrimarySettlementAdapter.sol";
 import "../../smart-contracts/domains/mint/StreamUniversalFixedPriceSaleAdapter.sol";
@@ -14,7 +14,7 @@ interface RecordingFaultVM {
 
 /// @notice Actual current Core/Manager/Recorder regression for the extracted ERC20 worker.
 /// @dev Token and the inherited Artist/entropy/governance boundaries remain explicit fixtures.
-contract StreamCurrentERC20RecordingTest is NativeEnglishAuctionFixture {
+contract StreamCurrentERC20RecordingTest is CurrentERC20ConservationFixture {
     bytes32 private constant ERC_PHASE = keccak256("current extracted ERC20 phase");
     StreamERC20PrimarySettlementAdapter private payment;
     StreamUniversalFixedPriceSaleAdapter private sale;
@@ -25,6 +25,7 @@ contract StreamCurrentERC20RecordingTest is NativeEnglishAuctionFixture {
 
     function setUp() public override {
         super.setUp();
+        _enableCurrentERC20Floor();
         entropy.configure(0, 1, false, false); // Explicit zero-fee regression policy.
         token = new MockStreamPaymentToken();
         _setAssetPolicy(policy, address(token), 1, keccak256("actual current exact ERC20"), 0);

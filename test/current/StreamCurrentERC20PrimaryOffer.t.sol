@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "./helpers/NativeCuratedSaleFixture.sol";
+import "../helpers/NativeCuratedCommerceConservationFixture.sol";
 import { MockStreamPaymentToken } from "../mocks/MockStreamPaymentToken.sol";
 import { UniversalPermitToken } from "../helpers/UniversalSettlementTestMocks.sol";
 import { OfficialPermit2Fixture } from "../helpers/OfficialPermit2Fixture.sol";
@@ -99,7 +99,7 @@ contract CurrentERC20OfferBuyer is IERC721Receiver {
 
 /// @notice Actual current Core/Manager/Ledger/Registry/contract20/recorder/Resolver/wallet/escrow.
 /// @dev Token, Artist, entropy and target-context governance retain explicit fixture boundaries.
-contract StreamCurrentERC20PrimaryOfferTest is NativeCuratedSaleFixture, OfficialPermit2Fixture {
+contract StreamCurrentERC20PrimaryOfferTest is NativeCuratedCommerceConservationFixture, OfficialPermit2Fixture {
     StreamERC20PrimaryOfferSale private offers;
     StreamERC20PrimarySettlementAdapter private payment;
     MockStreamPaymentToken private token;
@@ -141,6 +141,7 @@ contract StreamCurrentERC20PrimaryOfferTest is NativeCuratedSaleFixture, Officia
 
     function setUp() public override {
         super.setUp();
+        _enableNativeCommerceFloor();
         entropy.configure(0, 1, false, false);
         token = new MockStreamPaymentToken();
         _setAssetPolicy(policy, address(token), 1, keccak256("current ERC20 offer exact token"), 0);

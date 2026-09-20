@@ -11,6 +11,7 @@ import "../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
 import "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
 import "../../smart-contracts/domains/revenue/StreamERC20PrimarySettlementAdapter.sol";
 import "../../smart-contracts/domains/mint/StreamUniversalFixedPriceSaleAdapter.sol";
+import "../../smart-contracts/domains/metadata/StreamConservationFloor.sol";
 
 abstract contract UniversalSettlementTestBase is
     RevenueV1TestBase,
@@ -34,6 +35,7 @@ abstract contract UniversalSettlementTestBase is
     UniversalManagerMock internal manager;
     UniversalPermitToken internal token;
     StreamPrimarySaleSettlement internal recorder;
+    StreamConservationFloor internal conservationFloor;
     StreamERC20PrimarySettlementAdapter internal payment;
     StreamUniversalFixedPriceSaleAdapter internal sale;
     address internal permit2;
@@ -98,6 +100,21 @@ abstract contract UniversalSettlementTestBase is
             keccak256("FIXED_PRICE_SALE_ADAPTER"),
             type(IStreamERC20SaleExecution).interfaceId
         );
+        _register(
+            address(recorder), keccak256("PRIMARY_SALE_SETTLEMENT"),
+            type(IStreamPrimarySaleSettlement).interfaceId
+        );
+        conservationFloor = new StreamConservationFloor(
+            address(core), address(revenueAuthority),
+            IStreamGasParameterHost.GasParameterConfig("CONSERVATION_FLOOR_READ_GAS", 300_000, 300_000, 2),
+            IStreamGasParameterHost.GasParameterConfig("CONSERVATION_FLOOR_PRODUCER_GAS", 1_000_000, 1_000_000, 2),
+            IStreamGasParameterHost.GasParameterConfig("CONSERVATION_FLOOR_CALL_GAS", 2_000_000, 2_000_000, 2)
+        );
+        core.configureConservationFloor(address(conservationFloor), keccak256("CONSERVATION_WAIVED"));
+        (address bound, bytes32 runtime) = core.conservationFloor();
+        require(bound == address(conservationFloor) && runtime == bound.codehash
+            && bound.code.length <= 24576 && core.declaredConservationTier(1) == keccak256("CONSERVATION_WAIVED")
+            && conservationFloor.firstSale(1).receiptHash == 0, "real floor bound before first fixture sale");
         _producer(true);
         token = new UniversalPermitToken();
         _setAssetPolicy(policy, address(token), 1, keccak256("exact permit token"), 0);

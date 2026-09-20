@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "./helpers/NativeCuratedSaleFixture.sol";
+import "../helpers/NativeCuratedCommerceConservationFixture.sol";
 import {
     StreamERC20BurnMintSale
 } from "../../smart-contracts/domains/mint/StreamERC20BurnMintSale.sol";
@@ -82,7 +82,7 @@ contract CurrentERC20BurnReceiver is IERC721Receiver {
 /// @notice Actual current Core, Manager, Ledger, Registry, contract20, recorder, Resolver and wallet.
 /// @dev Artist exact-consent, entropy and governance-context boundaries are inherited explicitly.
 ///      Source tokens are actually minted and burned on Core; no mint/burn/payment mocks are used.
-contract StreamCurrentERC20BurnMintTest is NativeCuratedSaleFixture, OfficialPermit2Fixture {
+contract StreamCurrentERC20BurnMintTest is NativeCuratedCommerceConservationFixture, OfficialPermit2Fixture {
     StreamERC20BurnMintSale private burnSale;
     StreamERC20BurnMintGate private burnGate;
     StreamERC20PrimarySettlementAdapter private payment;
@@ -104,6 +104,7 @@ contract StreamCurrentERC20BurnMintTest is NativeCuratedSaleFixture, OfficialPer
 
     function setUp() public override {
         super.setUp();
+        _enableNativeCommerceFloor();
         entropy.configure(0, 1, false, false);
         token = new MockStreamPaymentToken();
         _setAssetPolicy(policy, address(token), 1, keccak256("current ERC20 burn token"), 0);

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "./NativeEnglishAuctionFixture.sol";
+import "./CurrentERC20ConservationFixture.sol";
 import "./EntropyTimeTestMocks.sol";
 import "../../smart-contracts/interfaces/stream/entropy/IStreamEntropyCollectionPolicy.sol";
 import "../../smart-contracts/domains/entropy/StreamEntropyCoordinator.sol";
@@ -108,7 +108,7 @@ contract CurrentERC20EntropyReceiver is IERC721Receiver {
 /// @dev Reuses inherited deployment utilities, but selects the real Coordinator FIRST: replacing the
 /// base fixture's old entropy mock would fail genuine successor-continuity admission. Artist evidence
 /// and governance execution context remain typed fixtures. No production state is etched or stored.
-abstract contract CurrentERC20EntropyModesFixture is NativeEnglishAuctionFixture {
+abstract contract CurrentERC20EntropyModesFixture is CurrentERC20ConservationFixture {
     StreamEntropyCoordinator internal actualEntropy;
 
     function _deployAuctionArtist() internal override returns (NativeAuctionArtist) {
@@ -289,6 +289,7 @@ abstract contract CurrentERC20EntropyModesFixture is NativeEnglishAuctionFixture
         escrow.setCreditProducer(address(recorder), true);
         _clearContext();
         manager.bindPreparedNativeRecorder(address(recorder));
+        _enableCurrentERC20Floor();
         vm.roll(100);
         require(
             address(core).code.length <= 24576 && address(manager).code.length <= 24576

@@ -10,7 +10,29 @@ contract UniversalCoreMock {
     address public artists;
     address public registry;
     address public entropy;
+    address private immutable fixtureController = msg.sender;
+    address private floorLedger;
+    bytes32 private floorRuntime;
+    bytes32 private conservationTier;
     constructor() { entropy = address(new ImmediateRevealFixture(address(this))); }
+
+    /// @dev Explicit Core/Metadata seam; the production floor ledger and its receipts remain real.
+    function configureConservationFloor(address ledger, bytes32 tier) external {
+        require(msg.sender == fixtureController && floorLedger == address(0)
+            && ledger.code.length != 0 && tier == keccak256("CONSERVATION_WAIVED"),
+            "one explicit fixture floor and tier before sale");
+        floorLedger = ledger;
+        floorRuntime = ledger.codehash;
+        conservationTier = tier;
+    }
+
+    function conservationFloor() external view returns (address, bytes32) {
+        return (floorLedger, floorRuntime);
+    }
+
+    function declaredConservationTier(uint256 collectionId) external view returns (bytes32) {
+        return collectionId == 1 ? conservationTier : bytes32(0);
+    }
     function setEntropy(address value) external { entropy = value; }
 
     function configure(address a, address r) external {
