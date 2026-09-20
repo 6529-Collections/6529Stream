@@ -17,8 +17,8 @@ different milestones.
 ## Latest integration checkpoint: 20 September
 
 The [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch) records
-source-specific evidence. At `6187c0e0`, all 2,311 Solidity sources pass
-ABI/type/storage checks. Root passes 910 client cases and separate Museum
+source-specific evidence. At `701263db`, all 2,312 Solidity sources pass
+ABI/type/storage checks. Root passes 945 client cases and separate Museum
 cohorts, including 62 new/compatibility/documentation authority-coverage cases.
 These results overlap or have different source boundaries and are not a
 complete-system total.
@@ -37,8 +37,9 @@ Preparation fits the original transaction limit, but the final publication call
 runs out of gas rereading the payload. Fixed-worker immutable-manifest adoption
 is integrated (`717968e7`), passes 14 focused cases and fits all five selected
 products. Its actual-publisher retry also ends five passes/four failures: final
-adoption still exceeds the budget. A constant-size immutable carrier binding
-is being built with unchanged validation. Fourteen current gate/Safe recipes,
+adoption still exceeds the budget. Constant-size immutable carrier binding
+(`be359669`) now passes twenty focused cases/three 256-input fuzz properties
+and fits four affected products; the actual publisher native11 is running. Fourteen current gate/Safe recipes,
 eight stateful gate cases and nine recovery/auction campaign cases (`1cf4a74e`)
 are integrated, with execution pending.
 Remaining hydration profiles, Artist callers and
@@ -46,12 +47,13 @@ archival/finality joins continue. Exact held patches remain unapplied.
 
 Advisory mint preview (`dc0122af`) passes 21 focused cases; remaining original
 counter-read helpers are now source-integrated (`ea92b7d4`), independently
-reviewed and have fifteen authored tests. Focused36 finishes35passes/one grace-read assertion failure; diagnosis
-retains the original expected behavior and gas bound. Explicit-version Museum
+reviewed and have fifteen authored tests. Focused36 now passes all cases on exact `82f41c88` after a test-only
+fixed-deadline correction. Original behavior and gas bounds are unchanged. Explicit-version Museum
 export/import (`bee91ae5`) passes eleven root cases with exact-byte restore and
 full historical semantic replay. Owner exhibition source/package flow
 (`5d832333`) adds nineteen root passes; phase-freeze clients (`00fec435`) pass
-the complete 910-case package and exact ABI59 check. Actual-chain exhibition
+the complete 910-case package and exact ABI59 check. Counter-read clients
+(`1f47d711`) bring the root package to945 passes and exact ABI65 checks. Actual-chain exhibition
 capture and actual Safe workflow execution remain separate.
 
 Latest-stack Safe/fuzz/gas/CI acceptance, source freeze and matching new testnet
@@ -90,14 +92,14 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `6187c0e0d48ab4aefd19dc752493c06d5e1b591a`; see the [20 September batch](#latest-integration-checkpoint-20-september) for bounded evidence and remaining joins |
+| Current integration source | `701263db485329b35b894a557bd844601149a4eb`; see the [20 September batch](#latest-integration-checkpoint-20-september) for bounded evidence and remaining joins |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
 | Further integrated Artist handoff | `9ea144c85768050ec910cc8534af13bcac82e20d`, received during assembly: closed-origin dormancy/rotation extension on the preceding handoff; ART24 |
 | Integrated entropy client handoff | `642d017d9d0cd8ee9b6b813abbdbe10a4c6b1265`; client.entropy-authority |
 | Integrated OwnerRecords capture handoff | `57ac8d041c9adc479f1061fafec748c8330ac974`; MUSEUM-36 |
-| Latest broad cheap compilation evidence | 2,311-source ABI/type/storage pass at `6187c0e0` in21.610 seconds. Historical ABI52 and additive mode-2 ABI56 remain explicitly client-pinned; neither establishes whole-system runtime acceptance. |
+| Latest broad cheap compilation evidence | 2,312-source ABI/type/storage pass at `701263db` in21.484 seconds. Historical ABI52 and additive mode-2 ABI56 remain explicitly client-pinned; neither establishes whole-system runtime acceptance. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
 | Latest focused native evidence | Separate captures: entropy 10, Royalty 11, mint 101, actual-Core 29, final burn 49 and later burn-credit 31 distinct cases pass. Repaired native-price 76 passes at 766c5dfd with independent source/artifact attestation; STATIC output manifest 9 passes in a separate capture. Root clients 398 and a museum authority/profile cohort of 131 pass. Other museum cohorts overlap. No complete-system pass is inferred. |
 
@@ -154,7 +156,7 @@ These 164 rows are capabilities and delivery checks of different sizes. Row coun
 | [core.prepared](#coreprepared-evidence) Prepare, complete and abort a mint atomically | Built | Partly tested | Partial | Manager-only preparation and settlement; entropy registration and receiver failure roll back together. Incident-abort source6e21/2feb passes14 focused actual-Core cases including capped supply and fuzzing. Later entropy hook execution and measured genesis gas calibration remain separate. **Remaining:** Recheck all latest sale, snapshot and reveal combinations. |
 | [core.pointers](#corepointers-evidence) Governed modules, permanent Core boundaries and bounded external calls | Built | Partly tested | Partial | Interface/codehash admission, pointer selection, metadata/royalty hooks and gas budgets. **Remaining:** Latest dependency replacement, fallback and full gas acceptance. |
 | [mint.static](#mintstatic-evidence) Static caps, counter subjects and phase-policy grace windows | Built | Partly tested | Partial | Original grace and mode-2 consent consumers are source-integrated. One-way governed phase FreezePolicy (`0ab60204`) retains same-Ledger restrictions and executor ceilings; 23 focused tests pass on exact `8f2e9157`, independently verified. Final selected Manager/fallback runtimes fit at 24,396/24,513. **Remaining:** Actual-current governance/continuity, grace/rollback and combined fuzz acceptance; advisory reads are tracked separately below. |
-| [mint.reads](#mintreads-evidence) Advisory mint eligibility and counter read API | Built | Partly tested | Partial | canMint (`dc0122af`) returns explicit-executor gate eligibility and complete projected counter diagnostics. All 21 focused Manager/Ledger/Registry/gate cases pass on exact `b7378eeb`, with typed Core/Artist/governance. Original raw/derived values and proof-aware resolution/remaining reads are source-integrated (`ea92b7d4`), with fifteen reviewed cases and nine fitting selected products (Manager/fallback 24,211/24,328). **Remaining:** Resolve the one retained grace-read assertion failure (35/36 native cases pass), then actual-current/Safe acceptance. Earlier preview passes remain tied to `b7378eeb`. |
+| [mint.reads](#mintreads-evidence) Advisory mint eligibility and counter read API | Built | Partly tested | Partial | canMint (`dc0122af`) returns explicit-executor gate eligibility and complete projected counter diagnostics. All 21 focused Manager/Ledger/Registry/gate cases pass on exact `b7378eeb`, with typed Core/Artist/governance. Original raw/derived values and proof-aware resolution/remaining reads are source-integrated (`ea92b7d4`), with fifteen reviewed cases and nine fitting selected products (Manager/fallback 24,211/24,328). All36 combined read/preview/configuration cases now pass on exact `82f41c88` after a test-only fixed-deadline correction; all90 captured production products fit. **Remaining:** Actual-current/Safe acceptance. Earlier preview passes remain tied to `b7378eeb`. |
 | [mint.merkle-caps](#mintmerkle-caps-evidence) Different wallet allowances from a pinned Merkle root | Built | Tested* | Partial | Canonical inline MERKLE_STATIC proofs bind differentiated allowances and projected batch consumption. Integrated feda72d3; included in the 87-case mint cohort. **Remaining:** Actual Core/Artist/sale integration and full batch gas limits; required sale-price consumption is tracked separately under sales.merkle-prices; e7eb51f0 authenticates enabled prices and rejects undeclared nonzero values. |
 | [mint.cross-scope](#mintcross-scope-evidence) Collection-wide and global shared mint counters | Built | Tested* | Partial | PHASE/COLLECTION/GLOBAL accounting, immutable first-use definitions including legacy selection, and projected duplicate checks. Integrated feda72d3; scoped actual Manager/Ledger tests pass. **Remaining:** Latest actual paid-sale/current-Core composition and capacity. |
 | [mint.continuity](#mintcontinuity-evidence) Preserve mint allowances and replay state across replacement | Built | Tested* | Partial | Imports preserve counters, nullifiers, definitions and bounded exact-pair ancestry. Artist consumers accept the actual admitted descendant while preserving original signing domains and requiring fresh successor policy consent. Integrated 31a840cf/b172a016; 101 scoped cases pass. Core guard separately passes 29. **Remaining:** Execute the eight authored actual Artist/Core/delayed-governance cases, including post-replacement mint and original Safe retry; current scoped cohorts retain typed seams. |
@@ -249,7 +251,7 @@ These 164 rows are capabilities and delivery checks of different sizes. Row coun
 | [ART36](#art36-evidence) Migration of sanctions, sale/freeze/recovery approval and mixed finding histories | Not started | Not tested | Not integrated | Complete other original record families and host dependencies, including artwork-finality findings or mixed finality/entropy findings, changed timing-action histories. **Remaining:** Current complete inventory admits only original1/2/14/15/17/18/23(entropy)/24/52/54 rows. It does not silently discard unsupported receipts or copy external one-use guards. |
 | [ART37](#art37-evidence) Repeated successor migration and larger complete hydration capacity | Not started | Not tested | Not integrated | Source that itself contains imported predecessor state, multiple history generations, complete lazy/bulk or chunked authority hydration beyond current finite envelope. **Remaining:** Current target must have no earlier hydration/native records; explicit128-receipt/512-cell/256-prefix and inline Archive bounds apply. No partial activation to evade limits. |
 | [ART38](#art38-evidence) C2PA credential/key-history authorship reconciliation | Built; bounded profile | Partly tested | Not integrated | Original op24 credential history and typed reconciliation (`142a3cdb`) retain unresolved standing conflicts (`22095475`) until the exact covered original op46 disposition. Root47 related offline passes; scoped worker native13 plus256 fuzz inputs pass on retained sources. Current composition/read plans are source-integrated (`a86febaa`). Museum Standing V2 (`3f0967f`) passes 27 consumer cases and preserves original historical acknowledgement guards. **Remaining:** Authenticated history capture, actual Artist/Renderer/current-graph execution, complete STATIC admission and existing Artist host size repair. Live provenance can stale original full-output hashes; their semantics are unchanged. |
-| [ART39](#art39-evidence) Complete Artist signing/recomputation client and measured ceremony rehearsal | In progress | Partly tested | Partial | Original principal and identity/delegation callers, delegated14/16 (`b99b3781`) and mint-grace workflow (`9ac63a11`) and delegated economics15/royalty-freeze20 (`6b71507e`) are source-integrated. Mode-2 grace (`e5ec5fae`) and original delegated attestation24 (`122d2288`) add exact ABI56 support. The current full client package passes910 cases, generation/build/strict types, with source-specific fixture checks recorded above. **Remaining:** Other original operation families and measured actual Safe ceremonies; simulated RPC is not native execution. |
+| [ART39](#art39-evidence) Complete Artist signing/recomputation client and measured ceremony rehearsal | In progress | Partly tested | Partial | Original principal and identity/delegation callers, delegated14/16 (`b99b3781`) and mint-grace workflow (`9ac63a11`) and delegated economics15/royalty-freeze20 (`6b71507e`) are source-integrated. Mode-2 grace (`e5ec5fae`) and original delegated attestation24 (`122d2288`) add exact ABI56 support. The current full client package passes945 cases, generation/build/strict types, with source-specific fixture checks recorded above. **Remaining:** Other original operation families and measured actual Safe ceremonies; simulated RPC is not native execution. |
 | [ART40](#art40-evidence) Full Artist current-graph conformance, limits and operational acceptance | In progress | Partly tested | Partial | Earlier native4 completed 167 passed /39 failed on its frozen source. Fixture and harness repairs are now integrated, with 21 Python harness checks passing. **Remaining:** Rerun affected native cases on the selected combined source after capacity repair; cold gas, full fuzz/stateful limits and actual-governance/testnet acceptance. |
 | [ART41](#art41-evidence) Multi-party collaborator approval policies | In progress | Not tested | Not integrated | Immutable policy creation/read changes exist only in isolated incomplete builder work. Automatic approval review rejected the co-signed producer/transport/gate mutation; the exact 21-path inert patch is source-reviewed and its specific owner question is pending. Eight authored tests remain uncompiled. Integrated BindingLifecycle still admits only PRIMARY_ONLY with zero threshold and no overrides. **Remaining:** Complete atomic policy consumption across affected consent/authority families and real multi-party Safe/quorum tests. |
 | [ART42](#art42-evidence) Delegated mint-policy and sale-consent mode | Built | Tests written | Not integrated | Mode2 admission and delegated policy/sale-consent producers are source-integrated (`6d333842`), with original op14/16 domains/records, capability masks and durable exact consents. Independent source review and combined ABI pass; 16 Artist and four paid current-Safe cases are authored. **Remaining:** Native joins, complete clients and sizing, including the Estate deployment helper at24,765 bytes. |
@@ -1080,7 +1082,7 @@ passing Python/synthetic control are deliberately kept distinct.
 
 ### mint.static evidence
 
-`0ab60204` adds governed one-way phase freezes. Exact `8f2e9157` has 23 focused native passes (17 Ledger and six configuration), 159 exact sources and 72 fitting production products; current governance11/continuity11 (including three new cases) remain pending.
+`0ab60204` adds governed one-way phase freezes. Exact `8f2e9157` has 23 focused native passes (17 Ledger and six configuration), 159 exact sources and 72 fitting production products; current governance11/continuity11 (including three new cases) remain pending. `701263db` adds four reviewed actual snapshot-royalty freeze/successor cases with explicit governed fixture gas settings; their native execution remains pending.
 
 **Static caps, counter subjects and phase-policy grace windows**. Owner: Integrator. Requirements: [mint-policy-and-accounting.md](../docs/mint-policy-and-accounting.md) — Protocol v1 Scope.
 
@@ -1101,9 +1103,11 @@ fit. This does not validate later counter-read work or the complete current stac
 [counter-read acceptance](MINT_COUNTER_READS_ACCEPTANCE.md) describe `ea92b7d4`.
 All fifteen new cases, 194 ABI sources and 155 selected-size sources are reviewed;
 old host ABI and nineteen recursive storage roots are preserved. All nine
-selected products fit. The combined36 native run has35passes/one retained grace-read assertion failure;
-its exact expectation is being diagnosed. A successful call within the original
-gas bound is not yet a passing test.
+selected products fit. The corrected combined36 run passes all cases on exact `82f41c88` in305.890
+seconds. Root matches all194 source files,221 metadata artifacts and4,470
+source hashes; all90 captured production products fit. The original35/1 result
+and generated-code test-clock diagnosis are preserved. Actual-current/Safe
+acceptance remains separate.
 Original requirements remain in [Read API](../docs/mint-policy-and-accounting.md#read-api).
 
 ### mint.merkle-caps evidence

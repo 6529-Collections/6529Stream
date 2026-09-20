@@ -18,8 +18,8 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 20 September integrated batch
 
-Latest Solidity source checkpoint: `6187c0e0`. All 2,311 sources pass the combined
-ABI/type/storage check in 21.610 seconds. This does not generate bytecode or
+Latest Solidity source checkpoint: `701263db`. All 2,312 sources pass the combined
+ABI/type/storage check in 21.484 seconds. This does not generate bytecode or
 establish complete-system acceptance. Original RC1 remains unchanged.
 
 - Delegated policy/sale clients (`b99b3781`) and mint-grace governance callers
@@ -81,8 +81,13 @@ establish complete-system acceptance. Original RC1 remains unchanged.
   still fits at 13,014,541/13,677,066 gas including intrinsic cost, but final
   publication runs out of gas during manifest adoption. All 55 Store chunk
   reads finish; the call trace does not establish the final failing opcode.
-  A fixed immutable-manifest binding is being built to remove duplicate storage
-  copies while retaining validation. Full publication capacity remains open.
+  Fixed immutable-manifest binding is now integrated (`be359669`) and passes
+  all twenty focused cases, including three 256-input fuzz properties. Root
+  verifies all 55 sources, 62 artifacts and 588 source hashes. The same minimal
+  host uses 7,070,296 gas for binding versus 11,281,902 for the retained copying
+  control, including intrinsic gas. All four affected products fit; publisher
+  runtime is 22,688 bytes. Actual publisher native11 is running with the exact
+  four-source repair and original cases/caps; full publication capacity is open.
 - Museum Standing V2 (`3f0967f`) consumes original unresolved conflict history
   and historical acknowledgement guards without altering V1. Root passes 27
   consumer cases plus 17 documentation cases; both profiles and all seven source
@@ -149,7 +154,9 @@ establish complete-system acceptance. Original RC1 remains unchanged.
   package tests, generation/build/strict types and the exact ABI59 fixture
   check. Independent review covers the canonical policy encoding, governance,
   same-Ledger successor copying and ordinary Safe CALL receipts. These are
-  client/simulated-RPC results, not actual Safe execution.
+  client/simulated-RPC results, not actual Safe execution. Counter-read clients
+  (`1f47d711`) now bring the full root package to 945 passes in 37.927 seconds,
+  with generation/build/strict types and exact ABI65 fixture checks.
 - Owner-published exhibition packages (`5d832333`) pass all nineteen new root
   source/package/CLI/offline-restore cases in 58.336 seconds. Root independently
   reviews source, same-block consistency and the test oracles. Original owner
@@ -160,10 +167,18 @@ establish complete-system acceptance. Original RC1 remains unchanged.
   evidence. Independent review covers all fifteen new cases, the exact
   194-source ABI and 155-source size captures, preserved host ABI/storage and
   all nine fitting selected products. Manager/fallback are 24,211/24,328 bytes.
-  The frozen 36-case read/preview/configuration run finishes 35 passes/one
-  failure. The retained grace-read assertion fails despite a successful 64-byte
-  return within the original gas budget; its exact expectation is being
-  diagnosed. No complete counter-read runtime acceptance is claimed.
+  The frozen 36-case read/preview/configuration run initially finished
+  35 passes/one failure. Exact generated-code review identified a timestamp
+  expectation rematerialized after a test clock change. The test-only fix
+  (`4d629574`) preserves all production code and gas bounds; all 36 cases now
+  pass on `82f41c88`. Root verifies 194 sources, 221 metadata artifacts and
+  4,470 source hashes; all 90 captured production products fit. The actual
+  Manager/Ledger/Registry/gates retain typed Core/Artist/governance boundaries.
+- Actual snapshot-royalty mint succession (`701263db`) adds four reviewed
+  cases joining source snapshots, governed phase freeze, same-Ledger import,
+  fresh successor Artist consent and exact delivery rollback/retry. The fixture
+  uses explicit governed Artist gas settings; native/default-cap acceptance
+  remains pending.
 - Scoped BYTE_EXACT references (`a8a17f94`) add TOKEN/RELEASE/SEASON publication,
   complete scope binding, immutable history and original class-2 locks. Seven
   authored cases and all 174 ABI sources are independently reviewed. Native
