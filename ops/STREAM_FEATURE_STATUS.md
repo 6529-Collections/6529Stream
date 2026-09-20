@@ -17,7 +17,7 @@ different milestones.
 ## Latest integration checkpoint: 20 September
 
 The [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch) records
-source-specific evidence. At `ed4d5572`, all 2,241 sources pass ABI/type/storage
+source-specific evidence. At `9beafd1a`, all 2,248 sources pass ABI/type/storage
 checks. Root passes 773 client cases, 47 related C2PA/catalog cases and 53
 retained-file PREMIS cases; these overlap or have distinct source boundaries
 and must not be added into a complete-system total. The 13 scoped Renderer
@@ -29,9 +29,10 @@ consent and mint-grace clients. The final selected Manager/fallback runtimes
 are 24,331/24,452 bytes after repair; all seven selected products fit. Original
 Artist/Router and Estate deployment-size blockers remain.
 
-Full publication capacity still fails. Staged preparation and new payload
-retention have scoped evidence and a focused repair in progress; preparation
-success does not imply publication success. No original limit was raised.
+The staged publication repair (`9beafd1a`) passes 10 focused tests and two
+256-input fuzz properties. Both complete-package preparation transactions fit
+the original gas limit in the scoped worker setup. Actual publication/Safe/lock
+execution is now being retried; no full-current-graph success is claimed.
 Active-notice recovery, additional hydration profiles, remaining Artist callers
 and required archival/finality joins continue. Exact held patches remain unapplied.
 
@@ -71,14 +72,14 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `ed4d557246a98698167d6986bc4266d9e375d558`; see the [20 September batch](#latest-integration-checkpoint-20-september) for bounded evidence and remaining joins |
+| Current integration source | `9beafd1ab5e5a5c8403f24958e49801f34625e66`; see the [20 September batch](#latest-integration-checkpoint-20-september) for bounded evidence and remaining joins |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
 | Further integrated Artist handoff | `9ea144c85768050ec910cc8534af13bcac82e20d`, received during assembly: closed-origin dormancy/rotation extension on the preceding handoff; ART24 |
 | Integrated entropy client handoff | `642d017d9d0cd8ee9b6b813abbdbe10a4c6b1265`; client.entropy-authority |
 | Integrated OwnerRecords capture handoff | `57ac8d041c9adc479f1061fafec748c8330ac974`; MUSEUM-36 |
-| Latest broad cheap compilation evidence | 2,241-source ABI/type/storage pass at `ed4d5572` in20.406 seconds. ABI52 at44af remains the client-pinned capture; neither establishes whole-system runtime acceptance. |
+| Latest broad cheap compilation evidence | 2,248-source ABI/type/storage pass at `9beafd1a` in20.359 seconds. ABI52 at44af remains the client-pinned capture; neither establishes whole-system runtime acceptance. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
 | Latest focused native evidence | Separate captures: entropy 10, Royalty 11, mint 101, actual-Core 29, final burn 49 and later burn-credit 31 distinct cases pass. Repaired native-price 76 passes at 766c5dfd with independent source/artifact attestation; STATIC output manifest 9 passes in a separate capture. Root clients 398 and a museum authority/profile cohort of 131 pass. Other museum cohorts overlap. No complete-system pass is inferred. |
 
@@ -134,7 +135,7 @@ These 163 rows are capabilities and delivery checks of different sizes. Row coun
 | [core.collections](#corecollections-evidence) Fixed, capped-open and uncapped collections; global token IDs | Built | Partly tested | Partial | Collection lifecycle, bounded supply changes, monotonic global allocation, identity retained after burn and permanent consumed gaps after incident abort. **Remaining:** Final boundary and batch-capacity acceptance on the combined candidate. |
 | [core.prepared](#coreprepared-evidence) Prepare, complete and abort a mint atomically | Built | Partly tested | Partial | Manager-only preparation and settlement; entropy registration and receiver failure roll back together. Incident-abort source6e21/2feb passes14 focused actual-Core cases including capped supply and fuzzing. Later entropy hook execution and measured genesis gas calibration remain separate. **Remaining:** Recheck all latest sale, snapshot and reveal combinations. |
 | [core.pointers](#corepointers-evidence) Governed modules, permanent Core boundaries and bounded external calls | Built | Partly tested | Partial | Interface/codehash admission, pointer selection, metadata/royalty hooks and gas budgets. **Remaining:** Latest dependency replacement, fallback and full gas acceptance. |
-| [mint.static](#mintstatic-evidence) Static caps, counter subjects and phase-policy grace windows | In progress | Partly tested | Partial | Static counters and immediate-predecessor grace now have the original consent-gated Manager producer (`8c60b099`) and exact delayed-governance catalogs (`9dd5aeaa`). Sixteen focused and five actual-Safe cases are authored. The worker extraction (`83606e32`) and mode-2 consumer (`7badbff5`) now fit at 24,331/24,452 bytes; four genuine delegated-Safe and eleven boundary cases are added. **Remaining:** Native grace/rollback, one-way phase FreezePolicy and combined fuzz acceptance. |
+| [mint.static](#mintstatic-evidence) Static caps, counter subjects and phase-policy grace windows | In progress | Partly tested | Partial | Static counters and immediate-predecessor grace now have the original consent-gated Manager producer (`8c60b099`) and exact delayed-governance catalogs (`9dd5aeaa`). Sixteen focused and five actual-Safe cases are authored. The worker extraction (`83606e32`) and mode-2 consumer (`7badbff5`) now fit at 24,331/24,452 bytes; four genuine delegated-Safe cases are authored and all eleven scoped Manager/Ledger boundary cases pass. **Remaining:** Native grace/rollback, one-way phase FreezePolicy and combined fuzz acceptance. |
 | [mint.merkle-caps](#mintmerkle-caps-evidence) Different wallet allowances from a pinned Merkle root | Built | Tested* | Partial | Canonical inline MERKLE_STATIC proofs bind differentiated allowances and projected batch consumption. Integrated feda72d3; included in the 87-case mint cohort. **Remaining:** Actual Core/Artist/sale integration and full batch gas limits; required sale-price consumption is tracked separately under sales.merkle-prices; e7eb51f0 authenticates enabled prices and rejects undeclared nonzero values. |
 | [mint.cross-scope](#mintcross-scope-evidence) Collection-wide and global shared mint counters | Built | Tested* | Partial | PHASE/COLLECTION/GLOBAL accounting, immutable first-use definitions including legacy selection, and projected duplicate checks. Integrated feda72d3; scoped actual Manager/Ledger tests pass. **Remaining:** Latest actual paid-sale/current-Core composition and capacity. |
 | [mint.continuity](#mintcontinuity-evidence) Preserve mint allowances and replay state across replacement | Built | Tested* | Partial | Imports preserve counters, nullifiers, definitions and bounded exact-pair ancestry. Artist consumers accept the actual admitted descendant while preserving original signing domains and requiring fresh successor policy consent. Integrated 31a840cf/b172a016; 101 scoped cases pass. Core guard separately passes 29. **Remaining:** Execute the eight authored actual Artist/Core/delayed-governance cases, including post-replacement mint and original Safe retry; current scoped cohorts retain typed seams. |

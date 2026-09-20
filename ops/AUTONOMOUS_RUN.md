@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `ed4d5572`: C2PA standing conflicts/composition, delegated Manager consent, recovered-living dormancy, fitting mint size repair, grace clients and retained-file PREMIS are source-integrated. Exact runtime scope and remaining work are in [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch). |
+| Source checkpoint | `9beafd1a`: C2PA standing conflicts/composition, delegated Manager consent, recovered-living dormancy, fitting mint size repair, grace clients and retained-file PREMIS are source-integrated. Exact runtime scope and remaining work are in [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch). |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,8 +29,8 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 20 September
 
-- Root owns architecture, integration and delivery. ABI56 covers all 2,241
-  sources at `ed4d5572`; ABI52 remains the historical client-pinned capture.
+- Root owns architecture, integration and delivery. ABI57 covers all 2,248
+  sources at `9beafd1a`; ABI52 remains the historical client-pinned capture.
   Source integration remains separate from native acceptance.
 - Artist delivered C2PA credentials/standing conflicts (`142a3cdb`, `22095475`)
   and independently reviewed the genuine composition/recovery joins. It now
@@ -40,12 +40,13 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
   Estate/Artist size blockers remain. Seven inactive clean worktrees are removed
   with exact named branches retained; no separately completed task was archived.
 - Metadata owns staged full-publication capacity. Preflight1 is complete with
-  seven passes/two failures; direct staged retention correction is under the
-  sole focused successor run. Five selected products fit, but genuine complete
-  publication and Router size remain open. No cap has changed.
+  seven passes/two failures. The integrated staged successor (`9beafd1a`)
+  passes 10 focused tests and two 256-input fuzz properties; five products fit.
+  One actual-publisher retry runs on the exact native8 predecessor graph plus
+  reviewed changes. Current Router size/full-graph acceptance remain open.
 - Mint delivered the fitting worker extraction (`83606e32`) and original mode-2
   consent consumer (`7badbff5`). Final exact-source Manager/fallback sizes are
-  24,331/24,452. Eleven scoped boundary tests run separately. Its next build is
+  24,331/24,452. All eleven scoped boundary tests pass. Its next build is
   original one-way phase FreezePolicy, including class2 delayed governance and
   supported successor/Ledger durability; held Artist primary-freeze is separate.
 - Burn delivered living35-to43 histories (`ed4d5572`,17 cases authored) after
@@ -54,7 +55,8 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
   advanced hydration remain separate; native execution is pending.
 - Museum delivered the complete catalog, historical C2PA reader and direct
   retained-file PREMIS (`a69c377e`,root53 tests). Its new official-authority
-  snapshot is in review, followed by the additive frozen Standing consumer.
+  snapshot is integrated (`e290dc4a`,37 root tests and profile/example checks),
+  followed by the additive frozen Standing consumer now being built.
 - Clients delivered delegated Artist consent (`b99b3781`) and grace workflow
   (`9ac63a11`,root773 tests plus exact ABI52 check). Remaining work includes
   delegated economics15/freeze20, joined-source grace refresh and other original

@@ -18,8 +18,8 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 20 September integrated batch
 
-Latest source checkpoint: `ed4d5572`. All 2,241 sources pass the combined
-ABI/type/storage check in 20.406 seconds. This does not generate bytecode or
+Latest source checkpoint: `9beafd1a`. All 2,248 sources pass the combined
+ABI/type/storage check in 20.359 seconds. This does not generate bytecode or
 establish complete-system acceptance. Original RC1 remains unchanged.
 
 - Delegated policy/sale clients (`b99b3781`) and mint-grace governance callers
@@ -31,7 +31,9 @@ establish complete-system acceptance. Original RC1 remains unchanged.
   preview work into existing workers. Exact accepted-profile sizing of the
   subsequent mode-2 consent fix (`7badbff5`) reports 24,331/24,452-byte runtimes;
   all seven selected products fit the original limits. Fifteen new consent
-  boundary/current-Safe cases are authored; native acceptance is pending.
+  boundary/current-Safe cases are authored. All 11 boundary cases pass with
+  actual Manager/Ledger and typed surrounding authority; the four genuine
+  Artist/Safe cases remain pending.
 - Original Artist C2PA credentials and reconciliation (`142a3cdb`, `22095475`)
   now retain standing conflicts independently of report currentness. Only the
   exact covered original op46 disposition clears a conflict. Root passes 47
@@ -50,12 +52,18 @@ establish complete-system acceptance. Original RC1 remains unchanged.
   its exact profile check. Missing or mismatched files cannot produce a positive
   subset. Supplied bytes and current local measurements do not invent historical
   fixity events or establish institutional conformance.
-- Publication capacity is still unresolved. The staged successor's first
-  preflight passes seven cases and fails two: full publication preparation uses
-  10,802,236 execution gas, but final payload retention exhausts its bounded
-  allowance. A separately reviewed memory-copy repair is under focused test;
-  no transaction cap has changed. The original full-publisher failures below
-  remain valid for their recorded source.
+- Original LoC authority snapshots (`e290dc4a`) pass 37 root new/compatibility
+  tests and exact profile/example checks. Raw bytes, unresolved relative links,
+  caller-supplied provenance and explicit freshness remain distinct; the original
+  PREMIS profile is unchanged. The first root command named the compatibility
+  module incorrectly; the corrected command passes all cases.
+- Staged publication payloads (`9beafd1a`) now pass all 10 focused tests and
+  two 256-input fuzz properties. The 1,048/102-row package prepares in transactions
+  costing 12,915,482 and 13,461,538 gas including intrinsic cost, below the original
+  16,777,216 limit. All five selected products fit. This uses a minimal host and
+  real Store/workers with named cooling; the actual publication/Safe/lock retry
+  is running on its exact predecessor graph. Full latest-stack capacity remains
+  open, and the original failed captures are preserved.
 - Seven inactive worktrees were removed after exact cleanliness and process
   checks. Every named branch and commit was retained. Active tasks, evidence,
   dirty worktrees and the Museum runtime were preserved; no tasks were archived.
@@ -261,8 +269,8 @@ and C2PA cohort passes after a test-only source assertion follows the already
 extracted Metadata pointer-index worker. Original ART38 and standing conflicts
 are now source-integrated; the additive Museum Standing consumer remains pending.
 
-The latest combined-source ABI/type/storage pass at `ed4d5572` covers 2,241
-sources in 20.406 seconds with no errors, including the new C2PA and recovery
+The latest combined-source ABI/type/storage pass at `9beafd1a` covers 2,248
+sources in 20.359 seconds with no errors, including the new C2PA and recovery
 joins. Earlier ABI52 at `44af244e` is retained for
 clients explicitly pinned to that source. It does not generate bytecode or
 prove whole-system execution. Earlier paid-burn acceptance remains 39 distinct
