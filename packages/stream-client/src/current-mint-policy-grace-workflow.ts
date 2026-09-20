@@ -17,6 +17,8 @@ export interface MintPolicyGraceDeployment {
   readonly moduleRegistry: MintPolicyGraceCodePin;
   readonly governance: MintPolicyGraceCodePin;
   readonly artistRegistry: MintPolicyGraceCodePin;
+  /** Reviewed Manager runtime capability; not discoverable from its unchanged ABI. Omitted means false. */
+  readonly supportsDelegatedPolicyConsent?: boolean;
   /** Required only when the Artist facade retains a different original Manager domain. */
   readonly artistOrigin?: { readonly manager: MintPolicyGraceCodePin; readonly ledger: MintPolicyGraceCodePin };
 }
@@ -182,13 +184,17 @@ function pin(v: MintPolicyGraceCodePin): MintPolicyGraceCodePin {
   return { address: address(v.address), codeHash: hash(v.codeHash) };
 }
 function deployment(v: MintPolicyGraceDeployment): MintPolicyGraceDeployment {
-  keys(v, ["chainId", "core", "manager", "ledger", "moduleRegistry", "governance", "artistRegistry"], ["artistOrigin"]);
+  keys(v, ["chainId", "core", "manager", "ledger", "moduleRegistry", "governance", "artistRegistry"], ["artistOrigin", "supportsDelegatedPolicyConsent"]);
   const chainId = uint(v.chainId);
   if (!chainId) throw Error("Zero chain");
+  if (v.supportsDelegatedPolicyConsent !== undefined && typeof v.supportsDelegatedPolicyConsent !== "boolean") {
+    throw Error("Expected boolean delegated policy consent capability");
+  }
   const origin = v.artistOrigin;
   if (origin) keys(origin, ["manager", "ledger"]);
   const out = { chainId, core: pin(v.core), manager: pin(v.manager), ledger: pin(v.ledger),
     moduleRegistry: pin(v.moduleRegistry), governance: pin(v.governance), artistRegistry: pin(v.artistRegistry),
+    ...(v.supportsDelegatedPolicyConsent === undefined ? {} : { supportsDelegatedPolicyConsent: v.supportsDelegatedPolicyConsent }),
     ...(origin ? { artistOrigin: { manager: pin(origin.manager), ledger: pin(origin.ledger) } } : {}) };
   if (new Set([out.core, out.manager, out.ledger, out.moduleRegistry, out.governance, out.artistRegistry].map(p => p.address)).size !== 6) {
     throw Error("Deployment components must be distinct");
@@ -323,7 +329,7 @@ async function artistConsent(p: Reader, c: MintPolicyGraceCapture, plan: MintPol
   const consentMode = uint((await read(p, artist, "consentMode", [c.scope.collectionId], tag))[0], 8);
   const [consented, evidence] = await read(p, artist, "isPolicyConsented", args, tag);
   const evidenceHash = hash(evidence, true);
-  let registrationReady = (consentMode === 1n || consentMode === 3n) && consented && evidenceHash !== ZeroHash;
+  let registrationReady = consentModeSupported(d, consentMode) && consented && evidenceHash !== ZeroHash;
   if (consentMode === 3n) {
     const supported = (await read(p, artist, "supportsInterface", ["0x523cbf7c"], tag))[0];
     const [declared, declaration, declaredAt] = await read(p, artist, "platformWorksDeclaration", [c.scope.collectionId], tag);
@@ -331,6 +337,9 @@ async function artistConsent(p: Reader, c: MintPolicyGraceCapture, plan: MintPol
   }
   if (registrationReady) await read(p, artist, "requireMintConsent", args, tag, d.manager.address);
   return freeze({ artistRegistry: artist, signingManager, consentMode, consented, evidenceHash, registrationReady });
+}
+function consentModeSupported(d: MintPolicyGraceDeployment, mode: bigint): boolean {
+  return mode === 1n || mode === 3n || (mode === 2n && d.supportsDelegatedPolicyConsent === true);
 }
 function inspection(v: MintPolicyGraceInspection): MintPolicyGraceInspection {
   keys(v, ["capture", "plan", "artistConsent", "inspectionHash"]);
@@ -577,7 +586,7 @@ export async function inspectMintPolicyGraceOperationReceipt(p: ReceiptReader, i
       } else {
         assertMintPolicyGraceDeadline(i.plan.request.graceUntil, h.timestamp);
         const consent = found(d.manager.address, "MintPhaseConsentRecorded");
-        if (consent.length !== 1 || ![1n, 3n].includes(consent[0]!.args[4])) throw Error("Original Artist consent event unavailable");
+        if (consent.length !== 1 || !consentModeSupported(d, consent[0]!.args[4])) throw Error("Original Artist consent event unavailable");
         const evidence = hash(consent[0]!.args[5]);
         const consentIndex = one(d.manager.address, "MintPhaseConsentRecorded", [1n, c.scope.collectionId, c.scope.phaseId,
           i.plan.prospectivePolicyHash, consent[0]!.args[4], evidence]);

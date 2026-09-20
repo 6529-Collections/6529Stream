@@ -50,3 +50,11 @@ inspection.artistConsent!.registrationReady = true;
 // @ts-expect-error this observation does not prove full catalog row admission
 const proved: "catalog-row-verified" = capture.catalog.rowAdmission;
 void proved;
+
+const mode2: boolean | undefined = capture.deployment.supportsDelegatedPolicyConsent;
+const capable: MintPolicyGraceDeployment = { ...deployment, supportsDelegatedPolicyConsent: true };
+void mode2; void capable;
+// @ts-expect-error capability declarations use strict booleans
+captureMintPolicyGrace(provider, { ...deployment, supportsDelegatedPolicyConsent: "true" }, scope, { blockTag: 100 });
+// @ts-expect-error reviewed runtime capability is immutable once captured
+capture.deployment.supportsDelegatedPolicyConsent = false;

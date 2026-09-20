@@ -45,11 +45,26 @@ Its `factsVerified: false` distinguishes pure construction from live observation
 `inspectMintPolicyGraceChange` refreshes the captured facts and checks the
 prospective consent. Missing consent returns `registrationReady: false`, so
 the caller can prepare consent while scheduling the change. Execution simulation
-requires consent to be ready. In
-this frozen source, Manager registration admits mode 1 Artist consent or mode 3
-platform declaration evidence. It rejects mode 2 even though the Artist Registry
-has additive delegated policy-consent producers. Mode-2 Manager admission is a
-separate pending source change; this client does not infer it from record existence.
+requires consent to be ready. By default, registration admits mode 1 Artist
+consent or mode 3 platform declaration evidence, matching the historical ABI52
+source. Its Manager rejects mode 2 even though the Artist Registry has delegated
+policy-consent producers.
+
+For an independently reviewed Manager that includes the ABI56 mode-2 change, set
+`deployment.supportsDelegatedPolicyConsent: true`. This strict boolean is part of
+the captured deployment and review commitment. Omitted or false retains the
+original behavior. It describes the current consuming Manager, including when
+the Artist retains an earlier signing Manager. The unchanged selector and
+interface ID cannot discover this capability; setting the flag is a source-review
+assertion under the supplied runtime pin, not proof that a deployment supports it.
+Exact governance simulation still checks actual admission.
+
+With that capability enabled, mode 2 requires the exact retained policy record,
+nonzero evidence and the original `requireMintConsent` checks. Grant expiration,
+revocation or exhausted uses after recording consent do not independently revoke
+that record. The client does not add a live-grant check. Current Artist, payout,
+content and other mint prerequisites still apply. A mode-2 receipt event is
+accepted only with the reviewed capability enabled.
 
 Artist signatures retain the Registry's original immutable Manager coordinate.
 When the current consumer differs, the optional original Manager/Ledger pair
@@ -136,7 +151,7 @@ reason URI, 32,768 bytes per RPC return, 65,536 bytes per component runtime,
 additional protocol limits.
 
 The matching source tree's `docs/integrations/mint-policy-grace.md` describes the
-contract behavior. The client fixture uses retained
+contract behavior. The preserved historical client fixture uses retained
 `parallel-feature-batch52-20260920` at
 `44af244ed576cc4b26632b800fe70a068d577940`. All 2,212 literal input sources were
 independently verified byte-for-byte against that commit. The projection retains
@@ -146,6 +161,20 @@ Regenerate or check using the retained capture, without compiling Solidity:
 ```sh
 node scripts/generate-current-mint-policy-grace-fixture.mjs \
   /path/to/abi-input.json /path/to/abi-output.json --check
+```
+
+The separate mode-2 fixture uses `parallel-feature-batch56-20260920` at
+`ed4d557246a98698167d6986bc4266d9e375d558`. All 2,241 literal sources match that
+commit byte-for-byte. It retains 543 closure hashes and 15 original source texts;
+all 197 selected ABI entries equal the preserved ABI52 projection. The fixed
+linked policy worker preserves Manager storage, caller and event identity. The
+original policy hash, Ledger grace and governance preimages remain unchanged.
+The updated Artist's `requireMintConsent` also uses its current personhood read;
+the caller invokes that exact prerequisite without claiming C2PA authoring support.
+
+```sh
+node scripts/generate-current-mint-policy-grace-mode2-fixture.mjs \
+  /path/to/abi56-input.json /path/to/abi56-output.json --check
 ```
 
 Client encoding, source/ABI and mocked RPC checks do not establish native current

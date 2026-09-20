@@ -7,6 +7,8 @@ import * as flow from '../dist/current-mint-policy-grace-workflow.js';
 
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/current-mint-policy-grace-abi.json', import.meta.url), 'utf8'));
 const abi = new Interface(Object.values(fixture.abis).flat());
+const mode2Fixture = JSON.parse(readFileSync(new URL('./fixtures/current-mint-policy-grace-mode2-abi.json', import.meta.url), 'utf8'));
+const mode2Abi = new Interface(Object.values(mode2Fixture.abis).flat());
 const coder = AbiCoder.defaultAbiCoder();
 const A = n => getAddress('0x' + BigInt(n).toString(16).padStart(40, '0'));
 const code = n => '0x60' + n.toString(16).padStart(2, '0');
@@ -36,6 +38,7 @@ const counterFields = ['enabled', 'keyMode', 'capMode', 'deltaMode', 'staticCap'
 
 function provider(options = {}) {
   const calls = [], blocks = new Map();
+  const codec = options.abi ?? abi;
   return {
     calls,
     async getNetwork() { options.mutate?.(); return { chainId: options.chainId ?? d.chainId }; },
@@ -52,11 +55,11 @@ function provider(options = {}) {
     },
     async call(tx) {
       calls.push(tx);
-      const parsed = abi.parseTransaction({ data: tx.data });
+      const parsed = codec.parseTransaction({ data: tx.data });
       const name = parsed.name, args = parsed.args, tag = tx.blockTag;
       const replacement = options.read?.(name, args, tx);
       if (replacement?.raw !== undefined) return replacement.raw;
-      if (replacement !== undefined) return abi.encodeFunctionResult(name, replacement);
+      if (replacement !== undefined) return codec.encodeFunctionResult(name, replacement);
       const state = options.state?.(tag) ?? base;
       const currentGrace = options.grace?.(tag) ?? grace;
       let result;
@@ -116,7 +119,7 @@ function provider(options = {}) {
         }
         default: throw Error('Unhandled ' + name);
       }
-      return abi.encodeFunctionResult(name, result);
+      return codec.encodeFunctionResult(name, result);
     }
   };
 }
@@ -136,10 +139,11 @@ const safePlain = new Interface(['event ExecutionSuccess(bytes32 txHash,uint256 
 const safeIndexed = new Interface(['event ExecutionSuccess(bytes32 indexed txHash,uint256 payment)']);
 function mined(b, stage, options = {}) {
   const operation = op(b, stage), batch = b.prepared.batch, plan = b.inspection.plan;
+  const codec = b.options.abi ?? abi;
   const tag = options.receiptBlock ?? (stage === 'execute' ? 200001 : 11);
   const transactionHash = id(stage + JSON.stringify(options));
   const logs = [];
-  const emit = (address, name, values, iface = abi) => {
+  const emit = (address, name, values, iface = codec) => {
     const encoded = iface.encodeEventLog(iface.getEvent(name), values);
     logs.push({ address, ...encoded, index: logs.length, transactionHash, blockNumber: tag, blockHash: bh(tag), removed: false });
   };
@@ -151,7 +155,7 @@ function mined(b, stage, options = {}) {
       emit(A(5), 'GovernanceActionScheduled', [...common, window.notBefore, window.expiresAfter, batch.nonce, governor, window.reasonHash, window.reasonURI, window.manifestHash]);
     } else {
       if (plan.changed) {
-        emit(A(2), 'MintPhaseConsentRecorded', [1n, cid, phaseId, plan.prospectivePolicyHash, 1n, id('consent')]);
+        emit(A(2), 'MintPhaseConsentRecorded', [1n, cid, phaseId, plan.prospectivePolicyHash, options.consentMode ?? 1n, id('consent')]);
         emit(A(3), 'MintLedgerPolicyGraceSet', [1n, cid, phaseId, A(2), base.currentPolicyHash, plan.prospectivePolicyHash, plan.request.graceUntil]);
         emit(A(3), 'MintLedgerPhasePolicyRegistered', [A(2), cid, phaseId, plan.prospectivePolicyHash]);
         base.counterConfigs.forEach((c, n) => emit(A(3), 'MintLedgerCounterPolicyRegistered', [A(2), cid, phaseId,
@@ -172,7 +176,7 @@ function mined(b, stage, options = {}) {
   const afterGrace = !plan.changed ? grace : plan.request.graceUntil === 0n
     ? { previousPolicyHash: ZeroHash, previousPolicyRevision: 0n, graceUntil: 0n }
     : { previousPolicyHash: base.currentPolicyHash, previousPolicyRevision: 2n, graceUntil: plan.request.graceUntil };
-  const rpc = provider({ batch, state: n => stage === 'execute' && n >= tag ? after : base,
+  const rpc = provider({ batch, abi: codec, state: n => stage === 'execute' && n >= tag ? after : base,
     grace: n => stage === 'execute' && n >= tag ? afterGrace : grace,
     nonce: n => n >= tag && stage !== 'publish' ? 5n : 4n,
     status: n => options.status?.(n) ?? (n >= tag && stage === 'execute' ? 3n : 1n),
@@ -428,4 +432,107 @@ test('governance validation events follow scheduling/execution and class1 schedu
   for (const status of [0n, 3n, 4n, 5n]) {
     await assert.rejects(inspect(mined(b, 'schedule', { status: n => n === 11 ? status : 1n })), /action\/nonce/);
   }
+});
+
+const mode2Deployment = { ...d, supportsDelegatedPolicyConsent: true };
+const mode2Read = name => name === 'consentMode' ? [2n] : undefined;
+
+test('ABI56 mode2 requires explicit reviewed Manager capability; omitted/false preserve ABI52 behavior', async () => {
+  for (const [deployment, supported] of [[d, false], [{ ...d, supportsDelegatedPolicyConsent: false }, false], [mode2Deployment, true]]) {
+    const b = await bundle(request, { abi: mode2Abi, read: mode2Read }, deployment);
+    assert.equal(b.inspection.artistConsent.consentMode, 2n);
+    assert.equal(b.inspection.artistConsent.registrationReady, supported);
+    assert.equal(b.capture.deployment.supportsDelegatedPolicyConsent === true, supported);
+    const checks = b.rpc.calls.filter(tx => mode2Abi.parseTransaction(tx).name === 'requireMintConsent');
+    assert.equal(checks.length, supported ? 1 : 0);
+    if (supported) assert.equal(checks[0].from, d.manager.address);
+  }
+  for (const mode of [0n, 4n]) {
+    const b = await bundle(request, { abi: mode2Abi, read: n => n === 'consentMode' ? [mode] : undefined }, mode2Deployment);
+    assert.equal(b.inspection.artistConsent.registrationReady, false);
+  }
+  const original = await bundle();
+  assert.equal(Object.hasOwn(original.capture.deployment, 'supportsDelegatedPolicyConsent'), false);
+  assert(Object.isFrozen((await bundle(request, { abi: mode2Abi, read: mode2Read }, mode2Deployment)).capture.deployment));
+});
+
+test('mode2 still requires exact recorded evidence and original requireMintConsent without reading a live grant', async () => {
+  for (const returned of [[false, id('consent')], [true, ZeroHash]]) {
+    const b = await bundle(request, { abi: mode2Abi, read: n => n === 'isPolicyConsented' ? returned : mode2Read(n) }, mode2Deployment);
+    assert.equal(b.inspection.artistConsent.registrationReady, false);
+    await assert.rejects(flow.simulateMintPolicyGraceOperation(b.rpc, op(b, 'execute'), { blockTag: 200000 }), /Artist consent unavailable/);
+  }
+  await assert.rejects(bundle(request, { abi: mode2Abi, read: n => {
+    if (n === 'requireMintConsent') throw Error('Original current consent prerequisite rejected');
+    return mode2Read(n);
+  } }, mode2Deployment), /current consent prerequisite/);
+  await assert.rejects(bundle(request, { abi: mode2Abi, read: n => n === 'requireMintConsent' ? { raw: ZeroHash } : mode2Read(n) }, mode2Deployment), /Noncanonical/);
+  const b = await bundle(request, { abi: mode2Abi, read: mode2Read }, mode2Deployment);
+  await flow.simulateMintPolicyGraceOperation(b.rpc, op(b, 'execute'), { blockTag: 200000 });
+  const names = b.rpc.calls.map(tx => mode2Abi.parseTransaction(tx).name);
+  assert(names.includes('requireMintConsent'));
+  assert(names.includes('executeGovernanceBatch'));
+  assert(!names.some(n => /delegation|grant|epoch/i.test(n)));
+  b.options.read = n => {
+    if (n === 'executeGovernanceBatch') throw Error('Pinned Manager runtime rejected mode2');
+    return mode2Read(n);
+  };
+  await assert.rejects(flow.simulateMintPolicyGraceOperation(b.rpc, op(b, 'execute'), { blockTag: 200000 }), /Manager runtime rejected/);
+});
+
+test('mode2 capability is strictly typed, copied before awaits and part of capture reconstruction', async () => {
+  for (const value of [0, 1, 'true', null, {}, []]) {
+    await assert.rejects(flow.captureMintPolicyGrace(provider({ abi: mode2Abi }), {
+      ...d, supportsDelegatedPolicyConsent: value
+    }, scope, { blockTag: 10 }), /boolean.*capability/);
+  }
+  const input = structuredClone(mode2Deployment);
+  const capture = await flow.captureMintPolicyGrace(provider({ abi: mode2Abi, mutate() {
+    input.supportsDelegatedPolicyConsent = false;
+    input.manager.codeHash = id('different-runtime');
+  } }), input, scope, { blockTag: 10 });
+  assert.equal(capture.deployment.supportsDelegatedPolicyConsent, true);
+  assert.equal(capture.deployment.manager.codeHash, d.manager.codeHash);
+  const forged = structuredClone(capture);
+  forged.deployment.supportsDelegatedPolicyConsent = false;
+  await assert.rejects(flow.inspectMintPolicyGraceChange(provider({ abi: mode2Abi }), forged, request, { blockTag: 10 }), /capture facts changed/);
+  const fakeString = structuredClone(capture);
+  fakeString.deployment.supportsDelegatedPolicyConsent = 'true';
+  await assert.rejects(flow.inspectMintPolicyGraceChange(provider({ abi: mode2Abi }), fakeString, request, { blockTag: 10 }), /boolean.*capability/);
+});
+
+test('mode2 execution receipts require the capability for direct and both ordinary Safe event layouts', async () => {
+  const b = await bundle(request, { abi: mode2Abi, read: mode2Read }, mode2Deployment);
+  for (const options of [{}, { safe: true }, { safe: true, indexed: true }]) {
+    const r = mined(b, 'execute', { ...options, consentMode: 2 });
+    const result = await inspect(r, options.safe ? 'safe' : 'direct');
+    assert.equal(result.observedPolicy.deployment.supportsDelegatedPolicyConsent, true);
+    assert.equal(result.observedPolicy.snapshot.currentPolicyHash, b.inspection.plan.prospectivePolicyHash);
+    assert(result.events.some(e => e.event === 'MintPhaseConsentRecorded'));
+  }
+  for (const deployment of [d, { ...d, supportsDelegatedPolicyConsent: false }]) {
+    const legacy = await bundle(request, { abi: mode2Abi }, deployment);
+    await assert.rejects(inspect(mined(legacy, 'execute', { consentMode: 2 })), /consent event unavailable/);
+  }
+  for (const mode of [0, 4]) {
+    await assert.rejects(inspect(mined(b, 'execute', { consentMode: mode })), /consent event unavailable/);
+  }
+});
+
+test('mode2 capability does not widen zero-grace no-op admission or alter old ticket policy hashes', async () => {
+  const unchanged = { executor: A(10), allowed: true, graceUntil: 0n };
+  const b = await bundle(unchanged, { abi: mode2Abi, read: n => {
+    if (['consentMode', 'isPolicyConsented', 'requireMintConsent', 'ledgerWriter'].includes(n)) throw Error('No-op must skip consent');
+  } }, mode2Deployment);
+  assert.equal(b.inspection.artistConsent, null);
+  assert.equal(b.inspection.plan.prospectivePolicyHash, base.currentPolicyHash);
+  await flow.simulateMintPolicyGraceOperation(b.rpc, op(b, 'execute'), { blockTag: 200000 });
+  const result = await inspect(mined(b, 'execute', { safe: true }), 'safe');
+  assert.equal(result.events.some(e => e.event === 'MintPhaseConsentRecorded'), false);
+  assert.deepEqual(result.observedPolicy.grace, grace);
+  const legacy = await bundle();
+  const capable = await bundle(request, { abi: mode2Abi, read: mode2Read }, mode2Deployment);
+  assert.equal(capable.capture.snapshot.currentPolicyHash, legacy.capture.snapshot.currentPolicyHash);
+  assert.equal(capable.inspection.plan.prospectivePolicyHash, legacy.inspection.plan.prospectivePolicyHash);
+  assert.deepEqual(capable.prepared.batch.executionCall, legacy.prepared.batch.executionCall);
 });
