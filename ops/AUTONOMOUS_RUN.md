@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `5d1756eb`: full Import, pending-generation attestation, scoped factory, current Safe/Burn recipes and museum attribution integrated. ABI117:3,000 sources / zero errors, exact committed-source bridge. Clients1,588 and Museum31 pass; metric native17 eight pass / one fail. Every runtime result retains its recorded source boundary. |
+| Source checkpoint | `a8a36e0f`: canonical native/ERC20 Dutch and setup, Artist direct generation histories, current identity/migration recipes, scoped snapshot/root, retained consent and museum title joined. ABI123:3,064 / zero errors with exact Git bridge; clients1,678 pass, current identity22 pass. Metric native18 remains8/9. Source and runtime boundaries below remain distinct. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,43 +29,42 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 20 September
 
-Current source and scoped outcomes are in [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md).
-Root owns integration, shared interfaces and the remaining metric transaction
-gas failure. Builders continue coherent features while frozen tests run.
+Use [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md) for exact current evidence.
+Root owns integration, shared architecture, metric transaction gas and release
+closure. Builders continue coherent implementation while frozen tests run.
 
-- A: pending-generation plus original op24 attestation history composition;
-  existing attestation19 passes. Own only the coordinated preparation join.
-- B: canonical ERC20 standard Dutch and the corrected frozen price35 campaign;
-  original fixed/payment domains remain intact.
-- C: actual non-COLLECTION full-policy factory and VIEW current-source,
-  output/checkpoint/finality continuation. Adoption/STATIC21 already passes.
-- Mint: canonical native Dutch; corrected URI native25 run. Root integrated
-  claim/PWYW, verifier and proven Dutch/clearing price ceilings.
-- Burn: actual-current source/target policy and Safe rollback cases;
-  redemption12 and Merkle distribution are source-integrated. The distribution
-  attempt timed out before execution; no unchanged retry or fake pass.
-- Museum: actual attribution/sanction joins on additive V5; then historical
-  masters/archive joins. Frozen supplied schemas and source boundaries remain.
-- Clients: canonical native fixed/open/claim/PWYW callers against ABI113;
-  keep all earlier ABI snapshots. Root owns generated Safe inventory.
-- Testing: reviewed actual-current claims8 is integrated. Maintain the frozen
-  current82 plan and independently review root's metric gas optimization;
-  refresh the campaign once the next genuine linked graph stabilizes.
-- Capacity task `01a0be37-2432-7a63-8820-fc42f159eb1d`: Commit/Writer repair
-  integrated. Approved exact ABI115 three groups of 20 dependency coordinates,
-  sequential, one pass at most 480 seconds/group; preserve failures/timeouts.
-- ERC20 task `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: native-floor fixture repair
-  and three actual-current ERC20 Safe cases integrated. Build eight bounded
-  current revenue/Safe claim cases, separating official and passive receipts.
-- Prepared task `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: transport/export and
-  continuations integrated; original Identity Import split is integrated with six real-record rollback
-  passes. Prepare the exact actual-Artist operation60 construction/source plan. A owns the generation/attestation join.
+- A: pending-generation grants/mode2 composition; direct content and direct
+  no-content consent batches are integrated. Keep original codecs and writes.
+- B: complete the frozen canonical ERC20 Dutch26 verification/execution, then
+  separate helper13 acceptance. Helpers are source integrated; no broadcasts.
+- C: finish tagged full-policy VIEW serving size repairs, then the authenticated
+  bounded checkpoint adapter; preserve original Router FULL_VIEW_GAS.
+- Mint: complete the runnable canonical native companion entrypoint if missing;
+  earlier helper10 is integrated. Preserve known Immediate fixture repairs.
+- Burn: first scoped snapshot/root26 source is integrated; finish reference,
+  inventory, bundle and acyclic immutable recipe factory/provider/discovery.
+- Museum: title39 source is integrated after historical preservation97;
+  build original finality/manifest/token-proof capture with honest typed authority.
+- Clients: Merkle callers are integrated and root1,678 pass. Build original
+  canonical native/ERC20 Dutch workflows against exact ABI121 or later capture.
+- Testing: identity22 passes with all54 selected production products fitting.
+  Next frozen compact metric35 uses only Proof/test `a8a36e0f` over native2.
+  Retain current108 and its exact AST/dependency plans; no broad refreeze yet.
+- Capacity task `01a0be37-2432-7a63-8820-fc42f159eb1d`: wrapper and Scan/Finish
+  fit; finish handed-over RecordReads repair, then measured Continuations
+  overrun and one remaining reached LivingRecoveryReads. No repeated inventories.
+- ERC20 task `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: retained-consent fix and
+  six current settlement cases are integrated. Trace delegated retained-closeout
+  requirements separately; preserve ACTIVE-only new-admission routes.
+- Prepared task `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: actual55-60 four-case
+  recipe is integrated. Trace actual historical preservation/archive identity
+  joins after succession with real bytes, before proposing a producer repair.
 
-Root clients1,588 and Museum V5 31 pass on their recorded source. Metric native17
-is eight pass/one transaction-gas failure. Full actual current/Safe/stateful,
-whole-graph capacity, CI, final freeze and matching testnet remain. No funding
+The original metric9 remains8 pass/1 gas failure; the next scratch repair has
+source review/type checks, not runtime acceptance. Root clients1,678 and museum
+preservation97 pass; root title39 also passes. Full actual current/Safe/stateful,
+whole-graph capacity, CI, source freeze and matching testnet remain. No funding
 or onchain action is needed; RC1 remains immutable.
-
 
 ## Earlier source-specific assignments
 

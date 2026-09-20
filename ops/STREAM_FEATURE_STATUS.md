@@ -16,98 +16,78 @@ different milestones.
 
 ## Latest integration checkpoint: 20 September
 
-Latest integrated source: `5d1756eb`. ABI117 checks all 3,000 Solidity
-sources, method identifiers and storage layouts with zero errors in 31.125
-seconds. Exact committed-source readback has zero mismatches. Source integration
-is not combined runtime acceptance.
+Latest integrated source: `a8a36e0f`. ABI123 checks all 3,064 Solidity
+sources, method identifiers and storage layouts with zero errors in 32.469
+seconds. Complete committed-source readback has zero mismatches. This proves
+source compatibility, not combined runtime acceptance.
 
-The next joined additions are complete as source: original Identity Import
-(`e1fa284c`, nine selected products fit, six real-storage component cases pass),
-pending generations plus original op24 attestation history (`c686a29f`, eight
-selected products fit, ten new cases authored), and the genuine scoped full-policy
-entropy factory (`5ad8163c`, twelve cases authored). The factory is a prerequisite,
-not a complete finality provider. Actual-current Burn policy seven and Safe
-revenue claims eight are integrated (`0b2c1d6f`, `4cb8fef4`); execution is pending.
-The corrected actual-current Immediate/Claim recorder admission is `3c78cc5a`.
-Museum attribution/sanction joins (`b2f1459c`) pass all 51 focused root tests.
-The compact metric proof optimization (`5d1756eb`) is source-reviewed; its
-original 25 plus nine independent parity cases are compiling.
+- **Sales and setup:** canonical native fixed/open, claim/PWYW and Dutch, plus
+  canonical ERC20 Dutch, are source integrated. Native companion setup
+  (`b8711865`) and ERC20 construction/activation (`90ebdad9`) preserve the
+  original 37-role inventory and actual owner/Safe versus Executor routing.
+  Their ten and thirteen new recipe cases are authored; execution is pending.
+  The frozen Immediate cohort reached 24 passes and one bad gate-fixture
+  expectation; `542b274e` fixes that fixture, with successor execution pending.
+  ERC20 allowance retains its 93-case scoped pass; price validation now passes
+  all 35. The canonical ERC20 Dutch capture passes five existing Payment cases; its
+  21 purchase cases stopped in setup on a fixture URI already repaired in the
+  integration source. The builder is applying those exact existing fixes.
+- **Artist and settlement:** complete direct generation content consents
+  (`49bef7ee`) and no-content direct14/15/16 histories (`4fd038ba`) are source
+  integrated, each with ten fitting selected products. Broader grants/mode2
+  histories remain in progress. The real Core/Executor/Safe recovered migration
+  recipe (`3304683b`) has four authored cases; execution is pending. Current
+  identity selection (`6536c258`, tests `5f89ac8a`) passes all 22 component cases
+  and all 54 production products in its 85-source capture fit. These are typed
+  reader tests, not actual operation55-60 or complete migration acceptance.
+  Retained sale consent now permits properly bound pre-deprecation settlement
+  (`6d763053`) while new consent stays ACTIVE-only; six actual-current cases
+  are authored, with native acceptance pending.
+- **Deployment capacity:** Rewind wrapper and Scan/Finish factoring are
+  integrated (`b09a38eb`, `3ca04b2c`). Their measured runtimes are 23,227,
+  22,046 and 8,283 bytes. Two reached dependencies remain oversized:
+  RecordReads 28,598 and Continuations 29,901. RecordReads repair is handed
+  over for review; other reached tails remain explicitly tracked. A fitting
+  selected product never establishes a fitting complete deployment graph.
+- **Metadata and finality:** scoped full-policy output, factory, snapshot and
+  Router content-root publication are integrated (`1df4b763`, `5ad8163c`,
+  `f4bc4ad5`). The new snapshot/root batch has 26 authored cases; its native
+  acceptance and reference/inventory/bundle/provider chain remain unfinished.
+  Original VIEW/STATIC retains 21 passes and two 256-input fuzz properties;
+  genuine current-source reads add six passes. Tagged full-policy VIEW is
+  being finished, including two measured size repairs and a bounded serving
+  path for checkpoint transactions. No complete VIEW finality claim is made.
+- **Developer clients:** canonical sales and Merkle distribution clients are
+  integrated (`411f7b0e`, `611be306`). Root's combined package passes all
+  1,678 tests, zero failures/skips, plus generation, build and strict types.
+  The Safe inventory includes the new modules but deliberately retains its
+  original ABI102 evidence boundary. Dutch clients and complete actual
+  all-call Safe execution remain separate work.
+- **Museum:** historical preservation exports (`6fb3291e`) pass 97 root cases;
+  attribution retains its separate 51-case pass. Accession/title exports
+  (`e031ce6f`) derive a new packet from eleven reconciled sources while
+  retaining the original bytes. The builder passes 39 new cases, 59
+  compatibility cases and five offline CLI scenarios; root also passes all
+  39 new cases in 134.753 seconds. All 19 requirements remain. Native finality proofs, other authority
+  joins and institutional conformance remain incomplete.
+- **Metric publication:** compact proof parity passes 34 cases, including four
+  256-input fuzz properties. Actual native18 still passes eight of the nine
+  unchanged original cases; the final transaction exceeds its original gas
+  envelope. Its historical typed boundaries and oversized older Router remain
+  explicit. A cached successful trace measures 16,594,756 execution gas before
+  transaction data costs; it is not a cold transaction pass. The next compact
+  temporary-memory repair (`a8a36e0f`) is independently source reviewed and
+  type checked, with a new repeated-allocation regression. Its component
+  execution and original final-transaction retry are pending.
 
-- Canonical signed/public fixed and open sales, ZERO_PRICE_CLAIM and PWYW are
-  source-integrated (`b4d07ed0`, `65dc2b2b`). The original Sales-v1 signature
-  domain and full-payload historical revocation are retained. The separate
-  verifier passes 11 native cases and 256 fuzz inputs. The native-sales cohort
-  passes 20 revocation/recorder cases; 25 purchase cases stopped in setup on an
-  unsupported fixture URI. Corrected URI fixtures (`3eb4078a`, `b6457e38`) are
-  integrated. The frozen retry then found a second setup issue: its typed entropy
-  replacement triggers real Core continuity checks. A genesis-only fixture
-  binding repair is being built; the 25 purchase bodies remain unexecuted. Eight actual-current claim/Safe
-  cases are integrated (`45836680`), with execution pending. Standard Dutch
-  carriers remain an active build.
-- Proven native Dutch/clearing leaf ceilings now replace the signed price
-  ceiling as specified (`fb6f3bf5`). Thirty source cases cover these paths.
-  The native sale fixtures now bind the real conservation ledger (`75d787bc`),
-  preserving original production code and gas limits. Their ABI check covers
-  41 affected hosts and 149 authored cases; native execution remains pending.
-- ERC20 reveal allowance passes its frozen 93-case campaign at `5df9808e`,
-  independently checked against all 553 sources and recorded production sizes.
-  The separate price campaign reached 26 passes and nine failures caused by
-  test call ordering, error expectations and missing pinned Safe artifacts. The
-  corrected successor passes 34 of 35; its remaining obsolete refund-error
-  expectation is corrected in `307ed239` and a frozen retry is running. Three additional actual-current
-  two-Safe/ASYNC_REQUIRED/Permit2 rollback cases are source-integrated
-  (`316f1050`, `4cf9c6ed`), with combined execution pending.
-- Artist preparation, record/delegation, complete source decoding and pending
-  binding generations are integrated. Their separate scoped campaigns pass
-  19, 12, eight and 19 cases respectively, including the recorded fuzz inputs.
-  Attestation hydration (`c6528fcf`) now passes all 19 scoped cases and its
-  selected products fit. Commit/Registry writer splitting (`49ecbe4a`) fits
-  seven selected products, preserving original interfaces and write order;
-  its 25 cases are authored. Identity transport/export/continuations
-  (`e2713593`) fit 22 selected products; nonce/encoding components pass 13
-  cases. Full Import and generation-plus-attestation composition are now source
-  integrated as recorded above; broader direct content/consent combinations
-  remain an active build. These component results do not prove complete migration execution.
-- Canonical VIEW adoption, STATIC routing and rendering are source-integrated
-  (`b256a3c1`). Its 21 scoped cases and two 256-input fuzz properties pass;
-  Router and fixed read facade fit. Full VIEW output/finality and actual
-  Artist adoption remain separate integration work. Prospective COLLECTION
-  references retain their 11-case native pass.
-- Actual-current redemption adds 12 reviewed source cases (`452d0f17`).
-  Recipient Merkle distribution is integrated (`a2d38f50`) with 18 additional
-  cases alongside the earlier 27. Its bounded native attempt timed out before
-  execution; no pass is claimed. Seven current burn-policy rollback cases are now source-integrated
-  as recorded above.
-- Developer clients add 17 wallet/ClaimRouter/Escrow/governance calls
-  (`4fa32ae1`). Root's frozen combined package passes all 1,588 tests, zero
-  failures/skips, generation, build and strict types. The generated Safe
-  inventory includes their implementation files while retaining its explicit
-  older ABI snapshot. Canonical sale clients and actual all-call Safe
-  acceptance remain work in progress.
-- Museum V5 complete supplied packets and native partial-source joins are
-  integrated (`bb38b542`); root passes 31 cases. All 19 requirements remain.
-  Requirements 2/7/19 have source-derived joins; 5/6/10/13 are partial and the
-  rest remain supplied-only. Complete authoritative source export and
-  institutional conformance are not claimed. Attribution/sanction joins now pass the separate 51-case source/capture
-  campaign. Historical master/archive joins continue.
-- The actual metric-publication native17 capture now passes eight of nine
-  original cases, including full admission/consumer/class-two lock and
-  identical Safe retry. Final transaction binding still exceeds the original
-  gas envelope. The accepted parser change is the only source delta from
-  native16; original tests, fixtures, cooling and caps are unchanged. This
-  historical graph retains explicit typed boundaries and an oversized older
-  Router, so it is not current whole-system deployment evidence.
-
-Metadata's real-Owner fixture retains its 46-case pass under the original
-400,000 callback and single 150,000 dependency-frame limits. Content retains
-35 scoped passes. Bounded capacity discovery continues only on finite,
-non-overlapping dependency groups; selected fits never imply whole-graph fit.
-
-Still to finish: remaining sales families, required VIEW/finality behavior,
-broader Artist history combinations, remaining museum joins, all-call developer
-workflows and held proposals. Then complete actual current-stack/Safe/fuzz/gas/CI
-acceptance, freeze the source and demonstrate that candidate on testnet.
-RC1 at `569bf87f1fa808787d324f6e1582924b5ccf1d40` is unchanged.
+Actual-current escrow, revenue/Safe claims, Burn/redemption, terminal minting
+and complete deployment/activation recipes are source integrated with their
+recorded execution gaps. Metadata retains its separate 46-case real-owner
+pass under the original 400,000 callback and single 150,000 read-frame limits.
+Full latest-stack/Safe/stateful/fuzz/gas/CI acceptance, final source freeze and
+matching testnet demonstration remain. Held proposals stay unapplied. No new
+funding or onchain action is needed for this implementation batch; supported
+RC1 `569bf87f1fa808787d324f6e1582924b5ccf1d40` is unchanged.
 
 
 ## How to read this document
@@ -142,14 +122,14 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `c6528fcfa576143b8e6926970f666326c8037ca9`; see the [20 September batch](#latest-integration-checkpoint-20-september) for source-specific evidence and remaining work |
+| Current integration source | `a8a36e0f00e9326cd32006e93a1df17b7ec0bafe`; see the [20 September batch](#latest-integration-checkpoint-20-september) for source-specific evidence and remaining work |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
 | Further integrated Artist handoff | `9ea144c85768050ec910cc8534af13bcac82e20d`, received during assembly: closed-origin dormancy/rotation extension on the preceding handoff; ART24 |
 | Integrated entropy client handoff | `642d017d9d0cd8ee9b6b813abbdbe10a4c6b1265`; client.entropy-authority |
 | Integrated OwnerRecords capture handoff | `57ac8d041c9adc479f1061fafec748c8330ac974`; MUSEUM-36 |
-| Latest broad cheap compilation evidence | ABI110: 2,908 sources at `905bbe2a`, zero errors in 29.844 seconds. Historical fixtures retain their recorded sources; this is not whole-system runtime acceptance. |
+| Latest broad cheap compilation evidence | ABI123: 3,064 sources at `a8a36e0f`, zero errors in 32.469 seconds; exact committed-source bridge. Historical fixtures retain their recorded sources; this is not whole-system runtime acceptance. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
 | Latest focused native evidence | Separate captures: entropy 10, Royalty 11, mint 101, actual-Core 29, final burn 49 and later burn-credit 31 distinct cases pass. Repaired native-price 76 passes at 766c5dfd with independent source/artifact attestation; STATIC output manifest 9 passes in a separate capture. Root clients 398 and a museum authority/profile cohort of 131 pass. Other museum cohorts overlap. No complete-system pass is inferred. |
 
@@ -219,13 +199,13 @@ These 164 rows are capabilities and delivery checks of different sizes. Row coun
 | --- | --- | --- | --- | --- |
 | [sales.phase-ledger](#salesphase-ledger-evidence) Current mint phases, admission and replay ledger | Built | Partly tested | Partial | Current Manager/ledger, admitted executors, gate protocol, counted prepared and single-step mint operations; not every gate implementation. **Remaining:** Latest full phase/operator/commercial combination and capacity validation; standard gate-kit row remains separate. |
 | [sales.standard-gates](#salesstandard-gates-evidence) Concrete allowlist and signed-ticket gate kit | Built | Tested* | Partial | Full-payload EOA/ERC1271 ticket and proof allowlist gates, optional batch-gate capability, replay and bounded result/gas handling integrated feda72d3. **Remaining:** Complete current-Core/Artist/operator admission and latest sale joins beyond the 87 scoped mint cases. |
-| [sales.merkle-prices](#salesmerkle-prices-evidence) Authenticated per-wallet prices across required sale profiles | In progress | Partly tested | Not integrated | Native immediate fixed/open-edition/free/PWYW consumption is integrated as e7eb51f0, size repair as 84145594 and callers as 837683ed. The repaired-source scoped cohort passes 76 cases; the adapter measures 24,560 bytes. Dutch/clearing consumers fbacfc7d and captured-price refund windows 08775172 are integrated, with all 26 moving-price cases passing after test-only correction 963cfce8 and 14 passing refund retry cases. The refund cohort accepts 77 distinct cases across its original and corrected runs, and refund callers pass in the root client suite. **Remaining:** ERC20 consumers and actual current graph. Original signing domains, replay and refund ownership remain unchanged. ERC20 same-leaf carrier is source-integrated and its latest scoped run is34/35 with a test-only oracle retry. Native proven ceilings replace stale signed maxima in `fb6f3bf5`; genuine-floor fixtures are `75d787bc`. |
+| [sales.merkle-prices](#salesmerkle-prices-evidence) Authenticated per-wallet prices across required sale profiles | In progress | Partly tested | Not integrated | Native immediate fixed/open-edition/free/PWYW consumption is integrated as e7eb51f0, size repair as 84145594 and callers as 837683ed. The repaired-source scoped cohort passes 76 cases; the adapter measures 24,560 bytes. Dutch/clearing consumers fbacfc7d and captured-price refund windows 08775172 are integrated, with all 26 moving-price cases passing after test-only correction 963cfce8 and 14 passing refund retry cases. The refund cohort accepts 77 distinct cases across its original and corrected runs, and refund callers pass in the root client suite. **Remaining:** ERC20 consumers and actual current graph. Original signing domains, replay and refund ownership remain unchanged. ERC20 same-leaf carrier is source-integrated and its latest scoped run passes35/35 at `307ed239`. Native proven ceilings replace stale signed maxima in `fb6f3bf5`; genuine-floor fixtures are `75d787bc`. |
 | [sales.ticket-revocation](#salesticket-revocation-evidence) Complete signed mint authorization revocation | Built | Partly tested | Partial | Original authorization IDs and complete-ticket revocation, plus full-payload historical private-sale revocation in 33ddd132 with authored direct/relayed/Safe cases. **Remaining:** Reproduce complete gate/operator/Safe workflows on the final graph; no positive gate implementation inferred. |
-| [sales.native-fixed](#salesnative-fixed-evidence) Native fixed-price and open-edition sales | Built | Partly tested | Partial | Current native paid immediate consumer, original Artist/platform signatures, exact settlement and phase accounting. **Remaining:** Latest actual-current transaction/receipt/reveal/capacity acceptance. Earlier accepted current graph captures do not validate all later code. Canonical original Sales-v1 signed/public carrier is integrated; current three-case recorder admission is corrected in `3c78cc5a`. Unit purchase bodies remain blocked by the typed entropy replacement fixture. |
+| [sales.native-fixed](#salesnative-fixed-evidence) Native fixed-price and open-edition sales | Built | Partly tested | Partial | Current native paid immediate consumer, original Artist/platform signatures, exact settlement and phase accounting. **Remaining:** Latest actual-current transaction/receipt/reveal/capacity acceptance. Earlier accepted current graph captures do not validate all later code. Canonical original Sales-v1 signed/public carrier is integrated; current three-case recorder admission is corrected in `3c78cc5a`. The frozen Immediate cohort reached24/25; its sole bad gate-fixture expectation is fixed in `542b274e`, with the successor run pending. |
 | [sales.free-pwyw](#salesfree-pwyw-evidence) Free phases and pay-what-you-want price programs | Built | Partly tested | Partial | Declared zero-price and native chosen-amount/minimum programs; original signature/payment rules retained. **Remaining:** Final actual-current paid/free/reveal/Safe matrix; do not infer arbitrary batch airdrops from a zero-price single mint. Canonical kinds12/13 and original verifier are integrated in `65dc2b2b`; verifier11 passes and current claims8 source is corrected by `3c78cc5a`, with current runtime pending. |
 | [sales.english](#salesenglish-evidence) Native English auction lifecycle | Built | Partly tested | Partial | Reserve/minimum bid/anti-snipe/first-bid start, old exits, escrowed native bids and delayed settlement. **Remaining:** Latest full actual-Artist/Core authority, exits and transaction-capacity acceptance. ERC20 bidding is expressly non-genesis. |
 | [sales.curated](#salescurated-evidence) Chosen curated-work auction and content selection | Built | Partly tested | Partial | Existing curated auction plus native fixed PUBLIC/COMMIT_REVEAL and buyer-bound private carriers are integrated 161cda75; 55 distinct current-cohort cases pass on original 5605d019 plus test-only 301ccda9. Later refund correction b25b3d16 has separate 35-case coverage. Curated clients 2b93a187 pass root 375 package tests. Native primary offers with selected work are now source-integrated as 364ec9e2; exact source review is clear and 70 distinct complementary cases pass, with explicit typed Artist/entropy/governance boundaries. **Remaining:** Final current/Safe/cold acceptance and explicit supported-profile reconciliation. Moving-price selection is a future extension; unsupported free/Merkle/ERC20 selected combinations are not automatically separate genesis blockers. |
-| [sales.dutch](#salesdutch-evidence) Native descending-price Dutch sales | Built | Partly tested | Partial | Linear/stepped native schedule and signed maximum/current paid price. **Remaining:** Latest current-core/Safe paid/reveal/royalty composition and collector gas; no generic ERC20 Dutch implementation claimed. |
+| [sales.dutch](#salesdutch-evidence) Native descending-price Dutch sales | Built | Partly tested | Partial | Linear/stepped native schedule and signed maximum/current paid price. Canonical original Sales-v1 native Dutch (`41212e86`) and ERC20 Dutch (`0f199287`) are source-built with21/26 authored cases. **Remaining:** New-source execution, latest current-Core/Safe paid/reveal/royalty composition and collector gas; unsupported broader profiles are not inferred. |
 | [sales.clearing](#salesclearing-evidence) Uniform-clearing Dutch and buyer rebates | Built | Partly tested | Partial | Native clearing book, price fixing, sparse/compressed purchase records, permanent rebates and supplements. **Remaining:** Latest complete conservation/clock/rights/escape runtime. Retained consumer gas measurements exceed 500,000; old 8,755,856 trace was warm-up preceded, not all-cold/current. |
 | [sales.refund-window](#salesrefund-window-evidence) Native refund-window sales and unconditional escape | Built | Partly tested | Partial | Original held deposits, finalization/refund/escape clocks and own-account credits. **Remaining:** Final graph settlement/delegation/export/surplus and timing/callback invariant execution; native-only scope explicit. |
 | [sales.private-offer](#salesprivate-offer-evidence) Private sales and atomic native/ERC20 offers | Built | Partly tested | Partial | Custody private/offer purchases, royalty-itemized secondary receipts and buyer-bound primary private selections are built. Canonical native primary mint OFFER_SALE (tokenId=0, optionally selected) is source-integrated in 364ec9e2/9945d612 with original dual-digest replay/revocation and independently reviewed source. Seventy distinct complementary cases pass, including actual Core/Manager/Ledger and 2-of-2 Safe, with typed Artist/entropy/governance. Nine current native-offer economics campaign cases are source-integrated (`6187c0e0`) with independently reviewed conservation/nonce/rollback oracles; native execution is pending. **Remaining:** Final full-graph/current/Safe acceptance. ERC20 primary-offer shared/carrier source 42ab5d2d/2e0fca1a now preserves separate payer intent and direct-to-buyer minting under zero native fees; independent source review is clear, 71 shared and 42 carrier cases now pass across independently verified original/retry source unions after test-only f90f103f/a14d9e35. Clients 0d2b62ea are integrated with all 447 root package tests passing; full latest-graph acceptance remains. Nonzero native-fee support remains held separately. |
@@ -339,7 +319,7 @@ These 164 rows are capabilities and delivery checks of different sizes. Row coun
 | [MUSEUM-10](#museum-10-evidence) Typed Artist intent, waiver and interview | Built | Partly tested | Partial | Full typed intent/waiver/interview and format interpretation, selected original authority/binding/record and interview checks exist in fixed consumers; estate statements remain distinct. **Remaining:** Complete interview/instrument/participant/transcript semantic dossier projection and all admissible source/archival variants remain; raw source schemas and selectors are built. |
 | [MUSEUM-11](#museum-11-evidence) Typed RIGHTS interpretation, selection and museum source | Built | Tested* | Integrated* | Exact full RIGHTS JSON, class/family/subject/registered-definition selection and immutable historical receipt capture; separate six-use-class PREMIS/semantic rights output keeps independent links distinct from grants. **Remaining:** Full initialized Artist/Metadata-to-museum positive capture and all later-current selection cases remain separate. Test-fixture legal statements never prove real legal ownership/permission. |
 | [MUSEUM-12](#museum-12-evidence) Steward designation and recovery response/notice records | Built | Partly tested | Partial | Typed steward/response schemas and original owner notice/action consumers exist, including bounded incremental endpoint publication and original 72-hour clock. Publisher delivery claims remain claims. Source-preserving semantic/notice evidence and closed offline dossier adapters62dc2990 pass93 affected root tests with independent source review. **Remaining:** Positive actual capture, full dossier composition and complete operational delivery evidence; do not conflate protocol publication with receipt by an institution. |
-| [MUSEUM-13](#museum-13-evidence) Remaining named owner/institutional record semantic adapters | In progress | Partly tested | Not integrated | Source-bound ACCESSION/TITLE_BINDING, DEACCESSION and first-claim REDEMPTION_CLAIM adapters, retained institutional instruments and bounded exact Transfer receipt capture/replay are integrated. Root 22-case institutional/Transfer cohort passes. **Remaining:** Actual current token records, authenticated institutional/title evidence and full conformance. Synthetic Transfer controls do not establish legal title, physical custody or a receipt-trie proof. |
+| [MUSEUM-13](#museum-13-evidence) Remaining named owner/institutional record semantic adapters | In progress | Partly tested | Not integrated | Source-bound ACCESSION/TITLE_BINDING, DEACCESSION and first-claim REDEMPTION_CLAIM adapters, retained institutional instruments and bounded exact Transfer receipt capture/replay are integrated. Root22 institutional/Transfer cases pass. Accession/title V5 export `e031ce6f` adds11-source packet derivation, with39 builder cases and five offline CLI cases passing; legal/institutional authority is not inferred. **Remaining:** Actual current token records, authenticated institutional/title evidence and full conformance. Synthetic Transfer controls do not establish legal title, physical custody or a receipt-trie proof. |
 | [MUSEUM-14](#museum-14-evidence) Full condition report and conservation-treatment mapping | In progress | Partly tested | Partial | Typed condition/conservation, original owner/frozen independent-source admission, outbound/return comparison and exact-source offline dossier replay package are integrated, including 64cac28f. Five package cases pass within the root 19-case package/authoring cohort. Native canonical append-only source catalog (`2758868f`) is source-integrated; canonical current/source replay (`569be86d`) passes 36 root source/wrapper/compatibility cases. All matching original lanes remain complete; positive fixtures are synthetic and examination joins remain required. **Remaining:** Actual examination-time/fixity/render/recovery joins and positive current independent capture; opaque historic same-name schemas remain unsupported. |
 | [MUSEUM-15](#museum-15-evidence) Native reference render and render-critical archival inventory | Built | Tested* | Partial | Finite actual original native onchain COLLECTION plus STATIC/BYTE_EXACT reference publication, executable archive/environment/captures, source inventory and dual-family coverage. Exact raw payload versus artifact/list commitments stay distinct. **Remaining:** PERCEPTUAL_TOLERANCE and CURATED_EQUIVALENCE finality acceptance evidence, supported script/environment closure, noncollection families and additional actual correspondence methods remain; all-program/all-size gas and institutional acceptance absent. DYNAMIC renderer implementation is a later excluded extension. |
 | [MUSEUM-16](#museum-16-evidence) Script/media manifests, large bundles and full snapshot export | Built | Partly tested | Partial | Typed current manifests, logical32x24576 script chunks, bounded SSTORE2 append/finalize/full-read and frozen source reconstruction; explicit chunked snapshot embedded JSON and offline export preserve original inline domains. **Remaining:** Full actual upper-bound executable/frozen-route joined acceptance and additional renderer/dependency profiles remain; compact references never count as complete executable export. |
@@ -401,7 +381,7 @@ These 164 rows are capabilities and delivery checks of different sizes. Row coun
 
 | Feature | Build | Tests | Integration | Scope and remaining work |
 | --- | --- | --- | --- | --- |
-| [client.commerce](#clientcommerce-evidence) Typed native/revenue/secondary and saved inventory workflows | Built; bounded profiles | Tested* | Partial | DIRECT29, personhood, 37-role inventory and recovered 255/511 workflows are source integrated. Revenue17 callers `4fa32ae1` are integrated; root combined package passes1,588 tests. Historical ABI98/102/104/106 identities remain explicit. **Remaining:** Canonical immediate/claim caller completion and actual all-call current/Safe execution. |
+| [client.commerce](#clientcommerce-evidence) Typed native/revenue/secondary and saved inventory workflows | Built; bounded profiles | Tested* | Partial | DIRECT29, personhood, 37-role inventory and recovered 255/511 workflows are source integrated. Revenue17 callers `4fa32ae1` are integrated; canonical native and Merkle callers `411f7b0e`/`611be306` are integrated and root passes1,678 tests. Historical ABI identities remain explicit. **Remaining:** Canonical Dutch callers and actual all-call current/Safe execution. |
 | [client.entropy-authority](#cliententropy-authority-evidence) Explicit entropy finding and op60 hydration Safe client | Built | Tested* | Not integrated | Complete original entropy finding/target/intent context and typed operation60 hydration with seven owner commitments. Source 642d017d is merged as 50c553c9; independent source review is clear. **Remaining:** All 175 package tests and generation/build/type checks pass on the integration checkout; real deployed Safe/provider composition remains pending. |
 | [operator.commerce](#operatorcommerce-evidence) Saved governance, mint setup and native surplus plans | Built | Partly tested | Partial | Current deployment/catalog activation primitives and saved phase/surplus/lifecycle plans with exact current call/state checks. **Remaining:** Final full product graph deployment/activation and all caller-compatible saved workflows. Earlier deployment productsActivated=false is not a launch. c9d0353d six new surplus-plan tests are authored/source reviewed; root owns native acceptance. |
 | [conformance.commerce-gas](#conformancecommerce-gas-evidence) Collector gas, capacity and complete cross-mode conservation | In progress | Partly tested | Not integrated | Required conformance across public paid/current Safe paths and complete liabilities; this is not a new sale feature. **Remaining:** Do not waive500,000 paid single-step ceiling. Retained partial-cold/warm clearing measurements exceed it;8,755,856 historical trace is not current/all-cold. Final all-cold collector, worst-case capacity/stateful fuzz, six-host financial conservation and final-source native campaigns remain integrator-owned. |
