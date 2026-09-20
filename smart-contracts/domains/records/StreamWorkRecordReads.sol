@@ -211,7 +211,7 @@ library StreamWorkRecordReads {
             pins.targets[i] = d.artists[i];
             pins.codeHashes[i] = d.artistCodeHashes[i];
         }
-        bytes32 identity = StreamRecordArtistIdentityReads.knownIdentity(
+        bytes32 identity = StreamRecordArtistIdentityReads.knownCurrentIdentity(
             d.targets[1], d.targets[0], d.chainId, pins, b.artistId, d.readGas
         );
         if (identity != b.identityRecordHash) {

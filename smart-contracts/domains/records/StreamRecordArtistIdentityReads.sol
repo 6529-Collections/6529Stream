@@ -5,6 +5,9 @@ import "../../interfaces/stream/artist/IStreamArtistSuiteReads.sol";
 import "../../interfaces/stream/artist/IStreamArtistOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistIngressBinding.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityOwner.sol";
+import {
+    StreamMetadataArtistSelection as ArtistSelection
+} from "../metadata/StreamMetadataArtistSelection.sol";
 
 /// @notice Resolves the actual Identity owner behind the metadata host's artist facade.
 /// @dev The authenticated consumer supplies immutable metadata/Core/chain and its governed
@@ -42,6 +45,38 @@ library StreamRecordArtistIdentityReads {
         if (pins.codeHashes[0] != originalFacadeCodeHash) {
             revert ArtistIdentityDependencyChanged(pins.targets[0]);
         }
+        return _identityPins(pins, core, chainId, readGas);
+    }
+
+    /// @notice Resolve the currently selected Artist only after the original Metadata succession proof.
+    /// @dev Original immutable Metadata bindings remain the ancestry anchor. Existing op60,
+    /// predecessor and all-owner completion checks choose the current facade; no witness does.
+    function resolveCurrent(address metadata, address core, uint256 chainId, uint256 readGas)
+        public
+        view
+        returns (Pins memory pins)
+    {
+        if (
+            core == address(0) || block.chainid != chainId || readGas == 0
+                || readGas > type(uint64).max
+        ) revert InvalidArtistIdentityContext();
+        address original = _address(metadata, IStreamArtistOwner.artistRegistry.selector, readGas);
+        bytes32 originalHash = _word(
+            _read(metadata, abi.encodeWithSignature("artistRegistryCodeHash()"), 32, readGas), 0
+        );
+        ArtistSelection.Selected memory selected = ArtistSelection.selected(
+            ArtistSelection.Context(core, _code(core), original, originalHash, readGas)
+        );
+        pins.targets[0] = selected.registry;
+        pins.codeHashes[0] = selected.runtimeHash;
+        return _identityPins(pins, core, chainId, readGas);
+    }
+
+    function _identityPins(Pins memory pins, address core, uint256 chainId, uint256 readGas)
+        private
+        view
+        returns (Pins memory)
+    {
         if (_address(pins.targets[0], IStreamArtistOwner.core.selector, readGas) != core) {
             revert InvalidArtistIdentityContext();
         }
@@ -100,6 +135,7 @@ library StreamRecordArtistIdentityReads {
         ) {
             revert InvalidArtistIdentityContext();
         }
+        return pins;
     }
 
     /// @notice Immutable registration identity only; operative authority fields are not returned.
@@ -115,6 +151,30 @@ library StreamRecordArtistIdentityReads {
     ) public view returns (bytes32 identityRecordHash) {
         if (artistId == 0) revert UnknownRecordArtist(artistId);
         Pins memory current = resolve(metadata, core, chainId, readGas);
+        return _knownIdentity(current, expected, artistId, readGas);
+    }
+
+    /// @notice Read immutable registration identity through the authenticated current graph.
+    /// @dev Re-resolves current succession on each use and refuses previously pinned graphs.
+    function knownCurrentIdentity(
+        address metadata,
+        address core,
+        uint256 chainId,
+        Pins memory expected,
+        bytes32 artistId,
+        uint256 readGas
+    ) public view returns (bytes32 identityRecordHash) {
+        if (artistId == 0) revert UnknownRecordArtist(artistId);
+        Pins memory current = resolveCurrent(metadata, core, chainId, readGas);
+        return _knownIdentity(current, expected, artistId, readGas);
+    }
+
+    function _knownIdentity(
+        Pins memory current,
+        Pins memory expected,
+        bytes32 artistId,
+        uint256 readGas
+    ) private view returns (bytes32 identityRecordHash) {
         for (uint256 i; i < 3; ++i) {
             if (
                 current.targets[i] != expected.targets[i]

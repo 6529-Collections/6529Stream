@@ -3,6 +3,15 @@
 All notable release-impacting changes are recorded here. The project follows
 the release policy in `docs/release-policy.md`.
 
+## Current record selectors after Artist succession
+
+- Resolve the authenticated current Artist through the existing complete
+  succession proof for new WORK, CONSERVATION and RIGHTS selectors and current
+  personhood reads. Preserve the original historical identity resolver.
+- Retain original Metadata/runtime anchors, all seven hydration commitments,
+  fixed response checks, record meanings and read caps. Full-current migration
+  and finality execution remain separate acceptance work.
+
 ## Compact metric runtime proof
 
 - Reuse the exact four-word runtime prefix preimage and search required members

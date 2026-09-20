@@ -96,7 +96,7 @@ library StreamWorkRecordContext {
     }
 
     function pinArtists(Dependencies memory d) public view returns (Dependencies memory) {
-        StreamRecordArtistIdentityReads.Pins memory known = StreamRecordArtistIdentityReads.resolve(
+        StreamRecordArtistIdentityReads.Pins memory known = StreamRecordArtistIdentityReads.resolveCurrent(
             d.targets[1], d.targets[0], d.chainId, d.readGas
         );
         for (uint256 i; i < 3; ++i) {

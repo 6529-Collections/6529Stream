@@ -47,3 +47,7 @@ clients with adequate gas. Do not place them inside a 150,000-gas onchain read
 and assume every valid URI fits. The focused tests exercise actual maximum
 registration and record shapes, preserve all receipt fields and show bounded
 reads and record ingress succeeding under the existing cap.
+
+For current Artist resolution after completed migration, see
+[record selector succession](record-artist-succession.md). Historical identity
+resolution keeps the original Metadata-bound graph.

@@ -96,7 +96,7 @@ library StreamConservationRecordContext {
     }
 
     function pinArtists(Dependencies memory d) public view returns (Dependencies memory) {
-        StreamRecordArtistIdentityReads.Pins memory known = StreamRecordArtistIdentityReads.resolve(
+        StreamRecordArtistIdentityReads.Pins memory known = StreamRecordArtistIdentityReads.resolveCurrent(
             d.targets[1], d.targets[0], d.chainId, d.readGas
         );
         for (uint256 i; i < 3; ++i) {
@@ -170,7 +170,7 @@ library StreamConservationRecordContext {
             pins.targets[i] = d.artists[i];
             pins.codeHashes[i] = d.artistCodeHashes[i];
         }
-        bytes32 identity = StreamRecordArtistIdentityReads.knownIdentity(
+        bytes32 identity = StreamRecordArtistIdentityReads.knownCurrentIdentity(
             d.targets[1], d.targets[0], d.chainId, pins, b.artistId, d.readGas
         );
         if (identity != b.identityRecordHash) {

@@ -108,7 +108,7 @@ library StreamConservationPersonhoodReads {
         }
         _selected(d, keccak256("COLLECTION_METADATA"), 1);
         _selected(d, keccak256("ARTIST_REGISTRY"), 2);
-        StreamRecordArtistIdentityReads.Pins memory graph = StreamRecordArtistIdentityReads.resolve(
+        StreamRecordArtistIdentityReads.Pins memory graph = StreamRecordArtistIdentityReads.resolveCurrent(
             d.targets[1], d.targets[0], d.chainId, d.readGas
         );
         if (graph.targets[0] != d.targets[2] || graph.codeHashes[0] != d.codeHashes[2]) {

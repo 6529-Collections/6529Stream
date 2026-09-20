@@ -61,7 +61,7 @@ contract StreamRightsRecordSelection is
         // Complete definitions may be registered later by normal governance.
         StreamRightsRecordReads.Dependencies memory d = _baseContext();
         _artistPins =
-            StreamRecordArtistIdentityReads.resolve(metadata, core, deploymentChainId, d.readGas);
+            StreamRecordArtistIdentityReads.resolveCurrent(metadata, core, deploymentChainId, d.readGas);
     }
 
     function supportsInterface(bytes4 id) external pure override returns (bool) {
@@ -138,7 +138,7 @@ contract StreamRightsRecordSelection is
         selected.recorder = receipt.recorder;
         selected.recorderAuthorizationClass = receipt.authorizationClass;
         if (witness.licensor.kind == StreamRightsRecordTypes.LicensorKind.ARTIST) {
-            selected.artistIdentityRecordHash = StreamRecordArtistIdentityReads.knownIdentity(
+            selected.artistIdentityRecordHash = StreamRecordArtistIdentityReads.knownCurrentIdentity(
                 metadata, core, deploymentChainId, _artistPins, witness.licensor.artistId, d.readGas
             );
         }
@@ -297,7 +297,7 @@ contract StreamRightsRecordSelection is
             }
         }
         StreamRecordArtistIdentityReads.Pins memory current =
-            StreamRecordArtistIdentityReads.resolve(metadata, core, deploymentChainId, d.readGas);
+            StreamRecordArtistIdentityReads.resolveCurrent(metadata, core, deploymentChainId, d.readGas);
         for (uint256 i; i < 3; ++i) {
             if (
                 current.targets[i] != _artistPins.targets[i]
