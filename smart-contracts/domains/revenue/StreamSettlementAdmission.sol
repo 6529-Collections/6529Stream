@@ -6,6 +6,7 @@ import "../../interfaces/stream/modules/IStreamModuleRegistry.sol";
 import "../../interfaces/stream/revenue/IStreamERC20PrimarySettlementAdapter.sol";
 import "../../interfaces/stream/revenue/IStreamERC20SaleExecution.sol";
 import "../../interfaces/stream/revenue/IStreamSaleLifecycleBinding.sol";
+import "../../interfaces/stream/revenue/IStreamERC20DutchSaleResolution.sol";
 
 /// @notice Canonical registry admission and immutable creation binding, repeated by 9 and 20.
 /// @dev Only exact-code trusted infrastructure gets available-gas fixed-buffer reads.
@@ -125,6 +126,98 @@ library StreamSettlementAdmission {
         _requireLifecycle(
             payment, paymentAdapter, stored.saleCreatedAt, stored.paymentAdapterRegistryRevision
         );
+    }
+
+    /// @notice Closed standard-Dutch admission; legacy fixed-price admission is unchanged.
+    function captureDutch(address registry, address saleAdapter, address paymentAdapter)
+        public
+        view
+        returns (StreamPrimarySettlementTypes.SaleLifecycleBinding memory binding)
+    {
+        ModuleFacts memory sale = _record(
+            registry,
+            saleAdapter,
+            keccak256("DUTCH_AUCTION_ADAPTER"),
+            type(IStreamERC20SaleExecution).interfaceId
+        );
+        _requireDutchProfile(saleAdapter);
+        ModuleFacts memory payment = _record(
+            registry,
+            paymentAdapter,
+            PAYMENT_ROLE,
+            type(IStreamERC20PrimarySettlementAdapter).interfaceId
+        );
+        if (sale.status != 1) revert SettlementModuleNotAdmitted(saleAdapter);
+        if (payment.status != 1) revert SettlementModuleNotAdmitted(paymentAdapter);
+        if (block.timestamp == 0 || block.timestamp > type(uint64).max) {
+            revert SaleLifecycleMismatch(saleAdapter, bytes32(0));
+        }
+        return StreamPrimarySettlementTypes.SaleLifecycleBinding(
+            paymentAdapter, uint64(block.timestamp), sale.revision, payment.revision
+        );
+    }
+
+    function requireDutchAdmission(
+        address registry,
+        address paymentAdapter,
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c
+    ) public view {
+        ModuleFacts memory sale =
+            _record(
+                registry,
+                c.saleAdapter,
+                keccak256("DUTCH_AUCTION_ADAPTER"),
+                type(IStreamERC20SaleExecution).interfaceId
+            );
+        _requireDutchProfile(c.saleAdapter);
+        ModuleFacts memory payment = _record(
+            registry,
+            paymentAdapter,
+            PAYMENT_ROLE,
+            type(IStreamERC20PrimarySettlementAdapter).interfaceId
+        );
+        StreamPrimarySettlementTypes.SaleLifecycleBinding memory stored =
+            _lifecycle(c.saleAdapter, c.sale.settlementId);
+        if (
+            keccak256(abi.encode(stored)) != keccak256(abi.encode(c.lifecycleBinding))
+                || stored.paymentAdapter != paymentAdapter || stored.saleCreatedAt == 0
+                || stored.saleCreatedAt > block.timestamp
+        ) revert SaleLifecycleMismatch(c.saleAdapter, c.sale.settlementId);
+        _requireLifecycle(
+            sale, c.saleAdapter, stored.saleCreatedAt, stored.saleAdapterRegistryRevision
+        );
+        _requireLifecycle(
+            payment, paymentAdapter, stored.saleCreatedAt, stored.paymentAdapterRegistryRevision
+        );
+    }
+
+    function requireDutchResolver(address registry, address saleAdapter) public view {
+        _record(
+            registry,
+            saleAdapter,
+            keccak256("DUTCH_AUCTION_ADAPTER"),
+            type(IStreamERC20SaleExecution).interfaceId
+        );
+        _requireDutchProfile(saleAdapter);
+    }
+
+    function _requireDutchProfile(address saleAdapter) private view {
+        if (!_interface(saleAdapter, type(IStreamERC20DutchSaleResolution).interfaceId, true)) {
+            revert SettlementModuleNotAdmitted(saleAdapter);
+        }
+        bytes memory data =
+            abi.encodeCall(IStreamERC20DutchSaleResolution.dutchResolutionProfile, ());
+        bool ok;
+        uint256 size;
+        bytes32 profile;
+        assembly ("memory-safe") {
+            ok := staticcall(gas(), saleAdapter, add(data, 32), mload(data), 0, 32)
+            size := returndatasize()
+            profile := mload(0)
+        }
+        if (!ok || size != 32 || profile != keccak256("6529STREAM_ERC20_STANDARD_DUTCH_V1")) {
+            revert SettlementModuleNotAdmitted(saleAdapter);
+        }
     }
 
     function _requireLifecycle(
