@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `5ae32cdf`: Museum capture runner 6c029d59 and ERC20 clients 0d2b62ea integrated; root112 Museum/447 client tests pass. Independently verified payment unions accept71 shared/42 carrier checks. Artifact-based fixture pilot runtime/timing pending. See the [20 September batch](V1_CURRENT_STATUS.md#20-september-integrated-batch); immutable RC1 remains unchanged. |
+| Source checkpoint | `12f6d341`: paid burn c717a3e1, Museum recipe ace7eb95 and burn/finality clients integrated; root150 Museum/463 client tests pass. Whole2,108-source ABI clean; focused burn21 accepted, current18 pending. Artifact-based fixture pilot runtime/timing pending. See the [20 September batch](V1_CURRENT_STATUS.md#20-september-integrated-batch); immutable RC1 remains unchanged. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -35,10 +35,11 @@ is needed. Paid burn source is integrated as c717a3e1, with 21 focused gate
 tests passing and eighteen current-stack cases pending. Root's combined
 2,108-source ABI/type/storage check passes. Burn prepares the one current-stack
 successor after the fixture pilot; original capture inputs remain immutable.
-Clients finished ERC20 offer calls and now build prefreeze/finality operator
-warnings. Museum extends the actual-token recipe with six same-block sources,
-populated Owner/Metadata lanes and explicit source-bound artifacts; root owns
-any subsequent local chain launch. Metadata completes the corrected publication
+Clients finished offer calls and prefreeze/finality warnings; they now build
+ERC20 paid-burn callers and Safe plans from frozen batch38 ABI. Museum's
+populated six-source recipe is integrated, with 150 root tests and independent
+source review clear. Museum prepares the exact missing/stale native product
+request; root owns the subsequent coordinated build and local chain launch. Metadata completes the corrected publication
 fixture after its duplicate-image setup failure; revenue independently reviews
 exact proposals and runs the combined metric replay only after valid export.
 The price lead's reviewed, fitting dedicated-carrier proposal is complete and

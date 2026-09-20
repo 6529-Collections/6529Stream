@@ -18,6 +18,18 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 20 September integrated batch
 
+- Burn/finality operator warnings and precise Safe permit guidance are integrated
+  as `12f6d341`; all 463 root client tests, generation/build/types and the exact
+  retained ABI-fixture check pass. Independent source review verifies historical
+  program joins, source/target distinctions and explicit incomplete inventory.
+- The populated native Museum recipe is integrated as `ace7eb95`, with all 150
+  affected root tests passing against actual integrated source in 18.096 seconds.
+  Independent review is clear. It composes direct-owner, Safe curator and
+  deployment-scope independent records with six sources at one final block.
+  The actual chain demonstration awaits refreshed contract products: the old
+  selected set has 181 stale products and lacks OwnerRecords. No stale binary
+  or completed local recipe is claimed as current native acceptance.
+
 - ERC20 offer clients are integrated as `0d2b62ea`; all 447 root package tests,
   generation/build/types and the exact 2,098-source ABI-fixture check pass.
   The package includes the four funding routes, original signatures and payer

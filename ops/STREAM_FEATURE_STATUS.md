@@ -10,7 +10,7 @@ not yet feature-complete or accepted as a combined system. The integrated branch
 now includes mint eligibility/continuity, free and native-paid burn paths with
 free-entry reveal credits, Artist dispute withdrawal, wallet-specific native
 pricing and its clients, and bounded museum authority reconciliation. Root
-passes 447 client tests, a 131-case museum authority/profile cohort, 27 archival
+passes 463 client tests, a 131-case museum authority/profile cohort, 27 archival
 export/publication cases, 44 scoped-dossier/legacy packaging cases, 62 actual-token
 capture/replay cases, 60 object-dossier adapter/assembly cases, 111 complete
 record-catalog/history compatibility cases and 81 offline preservation checks. The copied metric
@@ -24,16 +24,19 @@ Build and runtime integration remain separate facts in the rows below.
 
 The [current integrated batch](V1_CURRENT_STATUS.md#20-september-integrated-batch)
 supersedes pending-run statements in the historical 16/19 September evidence.
-Museum typed joins and the read-only capture runner pass 112 root tests;
-metric/ERC20 offer/Safe clients pass 447 root tests and exact fixture checks.
+Museum typed joins, the read-only runner and populated native recipe pass 150
+root tests; metric/ERC20 offer/Safe clients and burn/finality warnings pass 463
+root tests and exact fixture checks. Both new batches have independent source
+review; the native Museum demonstration needs refreshed contract products.
 ERC20 offer acceptance is 71 shared and 42 carrier checks across independently
 verified original/retry source unions; the original failures remain retained.
 The deployment-artifact fixture pilot is source-integrated with runtime/timing
 pending. Paid ERC20 burn is source-integrated as c717a3e1: 21 focused gate tests
 pass, eighteen current-stack cases await execution, and all four measured
 production products fit. The combined 2,108-source ABI/type/storage check passes.
-The populated native museum recipe is being built. The reviewed, fitting
-allowlist-price proposal awaits exact local approval after automatic rejection.
+The populated native museum recipe is source-integrated as ace7eb95; its actual
+joined capture is pending. The reviewed, fitting allowlist-price proposal awaits
+exact local approval after automatic rejection.
 No full-system acceptance, complete museum conformance or new testnet release
 is claimed.
 
