@@ -86,6 +86,53 @@ library StreamPermitExecution {
         );
     }
 
+    function pullMaximum(
+        address payer,
+        address asset,
+        uint256 amount,
+        uint256 permittedAmount,
+        address permit2,
+        uint8 allowanceMode,
+        StreamPrimarySettlementTypes.Permit2TransferAuthorization memory p,
+        uint256 cap
+    ) public {
+        bytes memory nonceQuery =
+            abi.encodeCall(IStreamPinnedPermit2.nonceBitmap, (payer, p.nonce >> 8));
+        uint256 bitmap = _read(permit2, nonceQuery, cap);
+        uint256 bit = uint256(1) << (p.nonce & 255);
+        bytes memory allowanceQuery =
+            abi.encodeWithSignature("allowance(address,address)", payer, permit2);
+        uint256 approval = _read(asset, allowanceQuery, cap);
+        if (permittedAmount < amount || bitmap & bit != 0 || approval < amount) {
+            revert PermitAuthorizationFailed();
+        }
+        _call(permit2, _permit2DataMaximum(payer, asset, amount, permittedAmount, p), cap);
+        uint256 expectedApproval =
+            approval == type(uint256).max && allowanceMode == 2 ? approval : approval - amount;
+        if (
+            _read(permit2, nonceQuery, cap) != (bitmap | bit)
+                || _read(asset, allowanceQuery, cap) != expectedApproval
+        ) revert PermitAuthorizationFailed();
+    }
+
+    function _permit2DataMaximum(
+        address payer,
+        address asset,
+        uint256 amount,
+        uint256 permittedAmount,
+        StreamPrimarySettlementTypes.Permit2TransferAuthorization memory p
+    ) private view returns (bytes memory) {
+        IStreamPinnedPermit2.PermitTransferFrom memory permit =
+            IStreamPinnedPermit2.PermitTransferFrom(
+                IStreamPinnedPermit2.TokenPermissions(asset, permittedAmount), p.nonce, p.deadline
+            );
+        IStreamPinnedPermit2.SignatureTransferDetails memory details =
+            IStreamPinnedPermit2.SignatureTransferDetails(address(this), amount);
+        return abi.encodeCall(
+            IStreamPinnedPermit2.permitTransferFrom, (permit, details, payer, p.signature)
+        );
+    }
+
     function _call(address target, bytes memory data, uint256 cap) private {
         _admitGas(cap);
         bool ok;

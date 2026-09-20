@@ -98,6 +98,18 @@ the release policy in `docs/release-policy.md`.
   cross-slice and rollback regressions. Native execution, current-stack
   composition, gas checks and release evidence remain pending.
 
+## Standard ERC20 Dutch sales
+
+- Add a separate fixed-schedule Dutch carrier using the original 24-field Sales
+  authority or payer-executed public mode. Proven leaf prices replace the signed
+  price role; original PaymentIntent caps remain independent.
+- Resolve the current price only from the admitted, pinned carrier. Preserve
+  original fixed Payment entries and layout; add maximum permits with exact
+  actual pulls and truthful declared-free outcomes without official zero revenue.
+- Retain original Artist/Manager checks, atomic funding and mint, reveal allowance
+  and executor refund semantics. Author 26 focused cases; ABI/type checks and
+  selected production sizes pass. New-source runtime acceptance remains pending.
+
 ## Same-leaf ERC20 price carrier
 
 - Add a dedicated signed one-token price carrier using the original Manager's
