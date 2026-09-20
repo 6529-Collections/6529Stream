@@ -81,9 +81,14 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   13,936,415 gas including intrinsic; prepared-read callee cost is 7,749,281.
   These are minimal guarded-host/worker/Store measurements. The real publisher
   successor compiles with all 12 selected products within size limits. Its
-  first run exhausted the aggregate one-billion-gas test setup before any test
-  body; a cached retry increases only that harness allowance. Explicit per-call
-  transaction limits remain unchanged. Complete publication capacity is open.
+  first run exhausted aggregate setup gas. A cached retry with a larger setup
+  allowance passes five cases: actual inventory preparation costs 12,772,716
+  gas and environment preparation 13,939,710 including intrinsic costs.
+  Four publication/Safe/inventory/lock cases fail `SnapshotChunkChanged`.
+  An isolated actual-Store probe reproduces a Foundry setup snapshot defect
+  after cooling newly created byte carriers. Moving that setup into the test
+  body is a fixture-only correction; all transaction limits stay unchanged.
+  The corrected publication retry remains pending.
 - Six genuine missing genesis products are composed in `a960a5b1`, with five
   actual-current/Safe tests authored. Remaining role composition includes the
   final role assembly and activation. The narrow
@@ -112,8 +117,9 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   The successor (`2e0c3443`) now supports complete 24,576-byte general
   claims with ordered chunks and explicit V2 Museum replay; root passes 64
   affected reader/dossier/Linked Art checks. Its own frozen 66-source native
-  cohort passes all 25 cases with a 23,179-byte host runtime; final artifact
-  inventory is being recorded. This is separate from the preceding 15-case
+  cohort passes all 25 cases with a 23,179-byte host runtime. All ten linked
+  production products fit and the immutable 200-file artifact inventory is
+  recorded. This is separate from the preceding 15-case
   capture. Native Artist statements and typed notarizations retain separate
   8,192-byte bounds; complete current-graph and gas acceptance remain open.
 - Original STATIC renderer/companion/registry composition is integrated as
