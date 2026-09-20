@@ -126,6 +126,9 @@ the release policy in `docs/release-policy.md`.
   configurations, retain current gas separately, and match the saved floor
   source and RIGHTS dependencies without changing earlier capture formats or
   implying historical execution, personhood or paid Artist acceptance.
+- Allow original Metadata selection through complete repeated recovered Artist
+  ancestry, preserving the original seven-owner completion and publication
+  consumption checks. Add six typed regression recipes; native acceptance remains.
 
 - Add offline correspondence between frozen universal or DIRECT first-sale
   RIGHTS commitments and original public RIGHTS records, receipts and selected

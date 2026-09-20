@@ -71,3 +71,12 @@ consolidated validation. The existing inline Archive preflight remains absolute;
 an oversized complete profile fails before mutation. Collaborator, delegated,
 corrected, transitioned and repeated-import histories remain separate full-v1
 profiles. No recovery or freeze eligibility changes are included.
+
+## Repeated recovered successors
+
+The developing [same-Metadata repeated-selection consumer](../integrations/metadata-repeated-artist-selection.md)
+uses the exact original environment retained by complete recovered operation60,
+while preserving current seven-owner completion and original consumed publication
+IDs. This is a read-side continuation, not admission of otherwise unsupported
+publication/personhood history combinations. Its source and runtime qualification
+are separate from this original living-publication profile.

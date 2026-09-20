@@ -19,8 +19,11 @@ import {
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 
 import { StreamMetadataArtistConfiguration } from "./StreamMetadataArtistConfiguration.sol";
+import {
+    StreamMetadataRecoveredArtistSelection
+} from "./StreamMetadataRecoveredArtistSelection.sol";
 
-/// @notice Same-Metadata publication through its original Artist or one completely hydrated successor.
+/// @notice Same-Metadata publication through its original Artist or completely hydrated successor.
 /// @dev Reads only. Metadata retains its original authorization-use map and candidate domains.
 library StreamMetadataArtistSelection {
     struct Context {
@@ -60,36 +63,48 @@ library StreamMetadataArtistSelection {
             ),
             (bool, address, uint64)
         );
-        if (!sourceSealed || successor != s.registry || sealedAt == 0) {
+        if (!sourceSealed || successor == address(0) || sealedAt == 0) {
             revert M.MetadataHostNotSelected();
         }
-        if (
-            _word(
+        if (successor == s.registry) {
+            if (
+                _word(
+                        c,
+                        s.registry,
+                        abi.encodeCall(IStreamArtistHistory.importedHistoryBindingCount, ())
+                    ) != 1
+            ) revert M.MetadataHostNotSelected();
+            (address predecessor, uint64 snapshot, bytes32 root, bytes32 manifest) = abi.decode(
+                _read(
                     c,
                     s.registry,
-                    abi.encodeCall(IStreamArtistHistory.importedHistoryBindingCount, ())
-                ) != 1
-        ) revert M.MetadataHostNotSelected();
-        (address predecessor, uint64 snapshot, bytes32 root, bytes32 manifest) = abi.decode(
-            _read(
-                c, s.registry, abi.encodeCall(IStreamArtistHistory.importedHistoryBinding, (0)), 128
-            ),
-            (address, uint64, bytes32, bytes32)
-        );
-        (bool bound, bytes32 sourceHash, uint256 count) = abi.decode(
-            _read(
-                c,
-                s.registry,
-                abi.encodeCall(IStreamArtistHistory.artistHistoryPredecessorBinding, (c.original)),
-                96
-            ),
-            (bool, bytes32, uint256)
-        );
-        if (
-            predecessor != c.original || snapshot == 0 || snapshot > sealedAt || root == 0
-                || manifest == 0 || !bound || sourceHash != c.originalHash || count != 1
-        ) revert M.MetadataHostNotSelected();
+                    abi.encodeCall(IStreamArtistHistory.importedHistoryBinding, (0)),
+                    128
+                ),
+                (address, uint64, bytes32, bytes32)
+            );
+            (bool bound, bytes32 sourceHash, uint256 count) = abi.decode(
+                _read(
+                    c,
+                    s.registry,
+                    abi.encodeCall(
+                        IStreamArtistHistory.artistHistoryPredecessorBinding, (c.original)
+                    ),
+                    96
+                ),
+                (bool, bytes32, uint256)
+            );
+            if (
+                predecessor != c.original || snapshot == 0 || snapshot > sealedAt || root == 0
+                    || manifest == 0 || !bound || sourceHash != c.originalHash || count != 1
+            ) revert M.MetadataHostNotSelected();
+        }
         (address nextCoordinator, T.SuiteConfiguration memory next) = _suite(c, s.registry);
+        if (successor != s.registry) {
+            StreamMetadataRecoveredArtistSelection.requireAncestor(
+                c.core, c.original, s.registry, next, c.gasCap
+            );
+        }
         address priorCoordinator = abi.decode(
             _read(
                 c,

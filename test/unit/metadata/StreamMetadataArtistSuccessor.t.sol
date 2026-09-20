@@ -3,6 +3,12 @@ pragma solidity ^0.8.19;
 
 import "./StreamCollectionMetadataV1.t.sol";
 import {
+    StreamArtistRecoveredHydrationTypes as RH
+} from "../../../smart-contracts/interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
+import {
+    StreamMetadataRecoveredArtistSelection
+} from "../../../smart-contracts/domains/metadata/StreamMetadataRecoveredArtistSelection.sol";
+import {
     StreamMetadataArtistConfiguration
 } from "../../../smart-contracts/domains/metadata/StreamMetadataArtistConfiguration.sol";
 import {
@@ -188,6 +194,21 @@ contract MetadataHydratedOwnerBoundary {
     uint256 public deploymentChainId;
     bytes32 public domainId;
     bytes32 public authorityHydrationCommitment;
+    mapping(bytes32 => RH.OriginEnvironment) private _origins;
+
+    // Explicit immutable-prefix response boundary; actual op60 provenance execution is separate.
+    function setOrigin(bytes32 hash, RH.OriginEnvironment memory value) external {
+        _origins[hash] = value;
+    }
+
+    function recoveredHydrationOrigin(bytes32 hash)
+        external
+        view
+        returns (RH.OriginEnvironment memory)
+    {
+        require(_origins[hash].registry != address(0), "missing original prefix");
+        return _origins[hash];
+    }
 
     constructor(
         T.SuiteConfiguration memory s,
@@ -290,6 +311,8 @@ contract StreamMetadataArtistSuccessorTest is CollectionMetadataV1Fixture {
     MetadataHydrationCoordinatorBoundary private priorCoordinator;
     MetadataHydrationCoordinatorBoundary private nextCoordinator;
     T.SuiteConfiguration private nextSuite;
+    T.SuiteConfiguration private originalSuite;
+    MetadataSuccessorArtistBoundary private immediatePrior;
 
     function _newArtist(address c) internal override returns (MetadataArtistBoundary) {
         return new MetadataSuccessorArtistBoundary(c);
@@ -320,6 +343,7 @@ contract StreamMetadataArtistSuccessorTest is CollectionMetadataV1Fixture {
                 address(new MetadataHydratedOwnerBoundary(s, address(priorCoordinator), i, 0));
         }
         priorCoordinator.configure(s);
+        originalSuite = s;
         MetadataSuccessorArtistBoundary(address(artist))
             .configure(address(priorCoordinator), address(0));
         s.registry = address(next);
@@ -334,6 +358,191 @@ contract StreamMetadataArtistSuccessorTest is CollectionMetadataV1Fixture {
         next.configure(address(nextCoordinator), address(artist));
         MetadataSuccessorArtistBoundary(address(artist)).seal(address(next), true);
         core.setPointer(keccak256("ARTIST_REGISTRY"), address(next));
+    }
+
+    function _origin() private view returns (RH.OriginEnvironment memory value) {
+        value.chainId = block.chainid;
+        value.registry = address(artist);
+        value.coordinator = address(priorCoordinator);
+        value.archive = originalSuite.archive;
+        value.owners = originalSuite.owners;
+        for (uint256 i; i < 7; ++i) {
+            value.ownerCodeHashes[i] = originalSuite.owners[i].codehash;
+        }
+        value.core = address(core);
+        value.manager = originalSuite.mintManager;
+        value.suiteConfigurationHash = keccak256(abi.encode(originalSuite));
+    }
+
+    function _advance() private {
+        immediatePrior = next;
+        T.SuiteConfiguration memory s = nextSuite;
+        next = new MetadataSuccessorArtistBoundary(address(core));
+        nextCoordinator = new MetadataHydrationCoordinatorBoundary();
+        s.registry = address(next);
+        s.archive = address(new MetadataRouterForSuccessorBoundary(address(core)));
+        for (uint256 i; i < 7; ++i) {
+            s.owners[i] = address(
+                new MetadataHydratedOwnerBoundary(s, address(nextCoordinator), i, COMPLETION)
+            );
+        }
+        nextCoordinator.configure(s);
+        nextSuite = s;
+        next.configure(address(nextCoordinator), address(immediatePrior));
+        immediatePrior.seal(address(next), true);
+        RH.OriginEnvironment memory origin = _origin();
+        MetadataHydratedOwnerBoundary(s.owners[2]).setOrigin(RH.originHash(origin), origin);
+        core.setPointer(keccak256("ARTIST_REGISTRY"), address(next));
+    }
+
+    function _repeatedCandidate() private returns (P.Publication memory p) {
+        _graph();
+        _advance();
+        bytes memory payload = bytes("same original Metadata across repeated import");
+        store.publishChunk(payload);
+        (, p) = _terms(address(0xa11ce), payload);
+    }
+
+    function testRepeatedSelectionRequiresExactOriginalEnvironmentInCommittedPrefix() public {
+        P.Publication memory p = _repeatedCandidate();
+        (bytes32 candidate,) = metadata.requireArtistRecordCandidate(p);
+        require(candidate == p.candidateRecordHash, "original Metadata candidate at C");
+        RH.OriginEnvironment memory origin = _origin();
+        bytes32 hash = RH.originHash(origin);
+        MetadataHydratedOwnerBoundary owner = MetadataHydratedOwnerBoundary(nextSuite.owners[2]);
+        RH.OriginEnvironment memory missing;
+        owner.setOrigin(hash, missing);
+        _candidateFailure(p);
+        bytes memory raw = abi.encode(origin);
+        require(raw.length == 672, "all 21 original environment words");
+        for (uint256 i; i < 21; ++i) {
+            uint256 before_;
+            assembly ("memory-safe") {
+                let slot := add(add(raw, 32), mul(i, 32))
+                before_ := mload(slot)
+                mstore(slot, xor(before_, 1))
+            }
+            owner.setOrigin(hash, abi.decode(raw, (RH.OriginEnvironment)));
+            _candidateFailure(p);
+            assembly ("memory-safe") { mstore(add(add(raw, 32), mul(i, 32)), before_) }
+        }
+        owner.setOrigin(hash, origin);
+        metadata.requireArtistRecordCandidate(p);
+    }
+
+    function testRepeatedPrefixDoesNotReplaceCurrentImmediateCutoverProof() public {
+        P.Publication memory p = _repeatedCandidate();
+        next.setPrior(address(immediatePrior), bytes32(uint256(9)), true, 1);
+        _candidateFailure(p);
+        next.setPrior(address(immediatePrior), address(immediatePrior).codehash, true, 2);
+        _candidateFailure(p);
+        next.setPrior(address(immediatePrior), address(immediatePrior).codehash, true, 1);
+        immediatePrior.seal(address(next), false);
+        _candidateFailure(p);
+        immediatePrior.seal(address(0xbeef), true);
+        _candidateFailure(p);
+        immediatePrior.seal(address(next), true);
+        metadata.requireArtistRecordCandidate(p);
+    }
+
+    function testRepeatedPrefixStillRequiresAllSevenCompletionsAndOriginalRuntime() public {
+        P.Publication memory p = _repeatedCandidate();
+        for (uint256 i; i < 7; ++i) {
+            MetadataHydratedOwnerBoundary owner = MetadataHydratedOwnerBoundary(nextSuite.owners[i]);
+            owner.setCompletion(0);
+            _candidateFailure(p);
+            owner.setCompletion(keccak256(abi.encode("wrong completion", i)));
+            _candidateFailure(p);
+            owner.setCompletion(COMPLETION);
+        }
+        bytes memory code = originalSuite.owners[0].code;
+        vm.etch(originalSuite.owners[0], hex"00");
+        _candidateFailure(p);
+        vm.etch(originalSuite.owners[0], code);
+        metadata.requireArtistRecordCandidate(p);
+    }
+
+    function testRepeatedOriginalAuthorizationConsumptionPersistsAtThirdAndFourthRegistry() public {
+        address recorder = address(0xa11ce);
+        bytes memory payload = bytes("original consumption persists");
+        (IStreamPreservationRecords.CollectionRecord memory r, P.Publication memory p) =
+            _terms(recorder, payload);
+        bytes32 used = keccak256("original used at A");
+        artist.setSigner(recorder);
+        artist.permit(used, p);
+        bytes32 original =
+            metadata.recordArtistCollectionRecordWithPayload(recorder, 1, r, payload, used);
+        _graph();
+        _advance();
+        for (uint256 hop; hop < 2; ++hop) {
+            next.setSigner(recorder);
+            next.permit(used, p);
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    IStreamCollectionMetadataV1.MetadataAuthorizationConsumed.selector, used
+                )
+            );
+            metadata.recordArtistCollectionRecordWithPayload(recorder, 1, r, payload, used);
+            if (hop == 0) _advance();
+        }
+        r.effectiveAt = 2;
+        p = _publication(recorder, r);
+        bytes32 fresh = keccak256("fresh original op24 at D");
+        next.permit(fresh, p);
+        bytes32 saved =
+            metadata.recordArtistCollectionRecordWithPayload(recorder, 1, r, payload, fresh);
+        require(
+            saved == _oldRecordHash(recorder, r) && saved != original, "same Metadata record domain"
+        );
+        require(metadata.artistRegistry() == address(artist), "birth anchor unchanged at D");
+        (, IStreamCollectionMetadataV1.RecordReceipt memory receipt) =
+            metadata.collectionRecord(saved);
+        require(
+            receipt.artistAuthorization == fresh && receipt.recorder == recorder,
+            "original successor callback"
+        );
+    }
+
+    function testRepeatedSelectionRetainsOriginalChainAndRouterChecks() public {
+        P.Publication memory p = _repeatedCandidate();
+        MetadataSuccessorArtistBoundary(address(artist)).seal(address(immediatePrior), false);
+        _candidateFailure(p);
+        MetadataSuccessorArtistBoundary(address(artist)).seal(address(immediatePrior), true);
+        core.setPointer(
+            keccak256("METADATA_ROUTER"),
+            address(new MetadataRouterForSuccessorBoundary(address(core)))
+        );
+        _candidateFailure(p);
+        core.setPointer(keccak256("METADATA_ROUTER"), nextSuite.metadata);
+        uint256 chain = nextCoordinator.deploymentChainId();
+        vm.chainId(chain + 1);
+        _candidateFailure(p);
+        vm.chainId(chain);
+        metadata.requireArtistRecordCandidate(p);
+    }
+
+    function testRepeatedCandidateWorkerRetainsColdGenesis400kBudget() public {
+        P.Publication memory p = _repeatedCandidate();
+        MetadataPublicationBudgetProbe probe = new MetadataPublicationBudgetProbe();
+        (address payloadPointer,) =
+            store.chunk(keccak256(bytes("same original Metadata across repeated import")));
+        safeVm.cool(payloadPointer);
+        _coolSuite(originalSuite);
+        _coolSuite(nextSuite);
+        safeVm.cool(address(priorCoordinator));
+        safeVm.cool(address(nextCoordinator));
+        safeVm.cool(address(immediatePrior));
+        safeVm.cool(address(metadata));
+        safeVm.cool(address(store));
+        safeVm.cool(address(StreamMetadataArtistSelection));
+        safeVm.cool(address(StreamMetadataRecoveredArtistSelection));
+        safeVm.cool(address(StreamMetadataArtistConfiguration));
+        safeVm.cool(address(StreamRecordDocumentReads));
+        safeVm.cool(address(StreamMetadataPublicationEncoding));
+        safeVm.cool(address(StreamCollectionRecordHashes));
+        safeVm.cool(address(StreamArtistRecordPublicationReads));
+        bytes32 hash = probe.candidate(nextSuite, p);
+        require(hash == address(metadata).codehash, "actual publication worker original400k at C");
     }
 
     function _terms(address recorder, bytes memory payload)
