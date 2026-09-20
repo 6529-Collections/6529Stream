@@ -52,6 +52,14 @@ import {
     StreamArtistRecoveredPreparationGenerations as GenerationStage
 } from "./StreamArtistRecoveredPreparationGenerations.sol";
 
+import {
+    StreamArtistRecoveredRatificationStage as RatificationStage
+} from "./StreamArtistRecoveredRatificationStage.sol";
+
+import {
+    StreamArtistRecoveredPreparationConsentSelection as ConsentSelection
+} from "./StreamArtistRecoveredPreparationConsentSelection.sol";
+
 /// @notice Complete fixed typed recovered-authority preparation in original check order.
 library StreamArtistRecoveredPreparation {
     function encode(
@@ -118,76 +126,9 @@ library StreamArtistRecoveredPreparation {
         (context.hasDelegation, context.hasContent) =
             Selection.flagsForMode(consentMode, hasIdentityDelegations, c.provenance.journals[6]);
         if (context.hasDelegation) context.features |= RH.DELEGATED_CONSENT;
-        if (
-            context.hasContent
-                || (context.hasGenerations
-                    && (context.hasDelegation || context.economics.length != 0))
-        ) {
-            if (context.hasContent) context.features |= RH.CONTENT_CONSENTS;
-            if (context.hasGenerations) {
-                context.consent = GenerationStage.contentWithAuthority(
-                    c.source.owners[6],
-                    prepared.query,
-                    RH.ownerProvenance(c.provenance, 6),
-                    context.economics,
-                    royaltyFreezes,
-                    context.generations,
-                    hasIdentityDelegations
-                );
-                GenerationStage.contentFactsWithAuthority(
-                    context.identity,
-                    context.consent,
-                    prepared.query,
-                    c.provenance,
-                    attestationRecords,
-                    context.generations
-                );
-            } else {
-                context.consent = ConsentStage.content(
-                    c.source.owners[6],
-                    prepared.query,
-                    RH.ownerProvenance(c.provenance, 6),
-                    context.economics,
-                    royaltyFreezes
-                );
-                Joins.content(
-                    context.identity,
-                    context.consent,
-                    prepared.query,
-                    c.provenance,
-                    consentMode,
-                    attestationRecords
-                );
-            }
-        } else if (royaltyFreezes.length != 0) {
-            revert T.UnsupportedProfile();
-        } else if (context.hasDelegation) {
-            context.consent = ConsentStage.delegated(
-                c.source.owners[6],
-                prepared.query,
-                RH.ownerProvenance(c.provenance, 6),
-                context.economics
-            );
-            Joins.delegated(
-                context.identity,
-                context.consent,
-                prepared.query,
-                c.provenance,
-                consentMode,
-                attestationRecords,
-                context.hasAttestations
-            );
-        } else if (context.hasAttestations) {
-            if (context.hasGenerations) {
-                GenerationStage.attestations(
-                    context.identity, context.attestations, prepared.query, c.provenance
-                );
-            } else {
-                Joins.attestations(
-                    context.identity, attestationRecords, prepared.query, c.provenance
-                );
-            }
-        }
+        (context.consent, context.features) = ConsentSelection.complete(
+            context, royaltyFreezes, consentMode, hasIdentityDelegations, attestationRecords
+        );
         prepared.data = Owners.collect(context);
         return Seal.encode(prepared, requireInventory, request.expectedSemanticInventory);
     }

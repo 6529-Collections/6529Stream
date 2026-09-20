@@ -71,6 +71,17 @@
   reads and original receipts. Source/type checks pass; native execution,
   linked-library size and gas validation remain pending.
 
+
+## Added: recovered original content ratification histories
+
+- Retain complete original operation-52 maps, current head, journal/replay eras and
+  saved Identity signatures in an explicit seven-owner recovered hydration codec.
+- Compose supported base/content, economics, grant and attestation histories without
+  changing old profile bytes, original signing domains or owner storage layout.
+- Author actual Artist/Safe repeated-import, malformed inventory and late Archive
+  rollback/retry cases. Runtime and full-current capacity acceptance remain separate.
+
+
 ## Fixed: recovered generation grant validation routing
 
 - Route the explicit grant-bearing generation profile through additive grant-capable

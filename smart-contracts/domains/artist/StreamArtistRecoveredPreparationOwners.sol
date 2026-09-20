@@ -47,6 +47,10 @@ import {
     StreamArtistRecoveredPreparationGenerations as GenerationStage
 } from "./StreamArtistRecoveredPreparationGenerations.sol";
 
+import {
+    StreamArtistRecoveredRatificationStage as RatificationStage
+} from "./StreamArtistRecoveredRatificationStage.sol";
+
 /// @notice Original ordered seven-owner payload construction after complete source joins.
 library StreamArtistRecoveredPreparationOwners {
     struct Context {
@@ -89,6 +93,9 @@ library StreamArtistRecoveredPreparationOwners {
                 // The joined validator binds original Identity35/nonce admission and retained
                 // Payout continuations; an owner-local export alone is insufficient here.
                 payload.semanticState = PayoutStage.encode(c.payout, c.provenance);
+            } else if (i == 6 && (c.features & RH.RATIFICATIONS) != 0) {
+                payload.semanticState =
+                    RatificationStage.encode(c.consent, c.query, payload.provenance);
             } else if (
                 i == 6 && c.hasGenerations && !c.hasContent
                     && (c.hasDelegation || c.economics.length != 0)

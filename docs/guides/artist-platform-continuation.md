@@ -82,9 +82,10 @@ Exact source/type, selected sizes and scoped runtime belong to the handoff.
 Authored owner/consumer cases are not native or full-current acceptance. Initial
 oversized products remain evidence; compiler settings and limits are unchanged.
 
-Original operation52 ratification import for the actual current migration recipe
-is the next required hydration batch. Complete operation60 correction-history
-hydration follows: every Binding correction approval/action replay, complete original and
+Original operation52 import now has a separate
+[recovered ratification profile](artist-recovered-ratification-hydration.md), with
+native/current migration acceptance recorded independently. Complete operation60
+correction-history hydration remains next: every Binding correction approval/action replay, complete original and
 supplemental Platform lineage/acceptance, and accepted-generation records must be
 retained. Existing codecs are unchanged and cannot silently omit these histories.
 Complete multiple-Artist/collection composition follows. Held collaborator,

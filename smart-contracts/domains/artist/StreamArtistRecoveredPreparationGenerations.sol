@@ -90,7 +90,7 @@ library StreamArtistRecoveredPreparationGenerations {
             uint16 op = provenance.journals[6][i].receipt.operation;
             if (op == 15) needsWitness = true;
             if (op == 20) ++royalties;
-            if (op != 14 && op != 15 && op != 16 && op != 17 && op != 20 && op != 21) {
+            if (op != 14 && op != 15 && op != 16 && op != 17 && op != 20 && op != 21 && op != 52) {
                 revert T.UnsupportedProfile();
             }
         }

@@ -57,7 +57,7 @@ library StreamArtistRecoveredContentConsentFactRows {
         Scope memory q,
         RH.Provenance memory p
     ) public pure returns (uint256[] memory uses) {
-        return _validateRows(identity, consent, q, p, 1);
+        return _validateRows(identity, consent, q, p, 1, false);
     }
 
     function validateGenerationRows(
@@ -68,7 +68,7 @@ library StreamArtistRecoveredContentConsentFactRows {
         uint64 generation
     ) public pure returns (uint256[] memory uses) {
         if (generation < 2 || generation > 128 || identity.delegations.length != 0) _invalid();
-        return _validateRows(identity, consent, q, p, generation);
+        return _validateRows(identity, consent, q, p, generation, false);
     }
 
     /// @notice Explicit grant-bearing generation profile; original no-grant entry stays strict.
@@ -82,7 +82,19 @@ library StreamArtistRecoveredContentConsentFactRows {
         uint64 generation
     ) public pure returns (uint256[] memory uses) {
         if (generation < 2 || generation > 128) _invalid();
-        return _validateRows(identity, consent, q, p, generation);
+        return _validateRows(identity, consent, q, p, generation, false);
+    }
+
+    /// @dev The paired RatificationFacts validates every52 row against this same full journal.
+    function validateRatifiedRows(
+        IdentityRows memory identity,
+        ConsentRows memory consent,
+        Scope memory q,
+        RH.Provenance memory p,
+        uint64 generation
+    ) public pure returns (uint256[] memory) {
+        if (generation == 0 || generation > 128) _invalid();
+        return _validateRows(identity, consent, q, p, generation, true);
     }
 
     function _validateRows(
@@ -90,7 +102,8 @@ library StreamArtistRecoveredContentConsentFactRows {
         ConsentRows memory consent,
         Scope memory q,
         RH.Provenance memory p,
-        uint64 generation
+        uint64 generation,
+        bool ratified
     ) private pure returns (uint256[] memory uses) {
         if (
             q.artistId == 0 || q.collectionId == 0 || q.bindingHash == 0
@@ -104,7 +117,7 @@ library StreamArtistRecoveredContentConsentFactRows {
         for (uint256 i; i < p.journals[6].length; ++i) {
             RH.JournalEntry memory native_ = p.journals[6][i];
             uint16 op = native_.receipt.operation;
-            if (op == 14 || op == 15 || op == 16) continue;
+            if (op == 14 || op == 15 || op == 16 || (ratified && op == 52)) continue;
             if (op != 17 && op != 20 && op != 21) _invalid();
             if (
                 native_.receipt.artistId != q.artistId

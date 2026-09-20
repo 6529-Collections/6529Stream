@@ -61,6 +61,10 @@ import {
     StreamArtistRecoveredGenerationDelegatedConsents as GenerationDelegated
 } from "./StreamArtistRecoveredGenerationDelegatedConsents.sol";
 
+import {
+    StreamArtistRecoveredRatificationHydration as Ratified
+} from "./StreamArtistRecoveredRatificationHydration.sol";
+
 /// @notice Complete recovered singleton Consent14/15/16/17/20/21 history.
 /// @dev Original17/20/21 records omit signer/nonce/time. Their fixed-owner maps, native entries
 /// and replay admissions are retained without inventing missing preimages or current eligibility.
@@ -82,7 +86,8 @@ library StreamArtistRecoveredContentConsentHydration {
 
     function selected(bytes memory outer) public pure returns (bool) {
         (RH.ExportHeader memory h, Payload.Payload memory p) = Payload.decode(outer, 6);
-        return (h.requiredFeatures & RH.CONTENT_CONSENTS) != 0
+        return (h.requiredFeatures & RH.RATIFICATIONS) != 0
+            || (h.requiredFeatures & RH.CONTENT_CONSENTS) != 0
             || ((h.requiredFeatures & RH.BINDING_GENERATIONS) != 0
                 && (GenerationBase.tagged(p.semanticState)
                     || GenerationDelegated.tagged(p.semanticState)));
@@ -137,17 +142,31 @@ library StreamArtistRecoveredContentConsentHydration {
         bytes memory outer
     ) public returns (Bundle memory result) {
         (RH.ExportHeader memory header, Payload.Payload memory payload) = Payload.decode(outer, 6);
+        bool ratified = Ratified.tagged(payload.semanticState);
+        if (ratified != ((header.requiredFeatures & RH.RATIFICATIONS) != 0)) _invalid();
         bool delegatedGeneration = GenerationDelegated.tagged(payload.semanticState);
         bool baseOnly = GenerationBase.tagged(payload.semanticState);
         if (
             payload.nonces.length != 0
-                || (!delegatedGeneration
+                || (!ratified
+                    && !delegatedGeneration
                     && (baseOnly
                             ? (header.requiredFeatures & RH.CONTENT_CONSENTS) != 0
                             : (header.requiredFeatures & RH.CONTENT_CONSENTS) == 0))
         ) _invalid();
         uint64 generation = 1;
-        if (delegatedGeneration) {
+        if (ratified) {
+            Ratified.Bundle memory full;
+            uint8 mode;
+            (full, generation, mode) = Ratified.decode(q, payload.provenance, payload.semanticState);
+            result = full.consent;
+            if (
+                ((header.requiredFeatures & RH.BINDING_GENERATIONS) != 0) != (generation > 1)
+                    || ((header.requiredFeatures & RH.CONTENT_CONSENTS) != 0)
+                        != Ratified.hasContent(full)
+                    || (mode == 2 && (header.requiredFeatures & RH.DELEGATED_CONSENT) == 0)
+            ) _invalid();
+        } else if (delegatedGeneration) {
             if (
                 (header.requiredFeatures & (RH.BINDING_GENERATIONS | RH.DELEGATED_CONSENT))
                     != (RH.BINDING_GENERATIONS | RH.DELEGATED_CONSENT)

@@ -40,6 +40,10 @@ import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 
+import {
+    StreamArtistRecoveredRatificationHydration as RecoveredRatification
+} from "./StreamArtistRecoveredRatificationHydration.sol";
+
 /// @notice Sole owner of the onboarding policy/economics/content-ratification records.
 /// @dev State remains in this owner; the constructor-fixed writer executes its explicit callbacks.
 contract StreamArtistConsentFinalityLifecycle is
@@ -572,7 +576,7 @@ contract StreamArtistConsentFinalityLifecycle is
     }
 
     function _recoveredHydrationFeatures() internal pure override returns (uint256) {
-        return StreamArtistRecoveredHydrationTypes.BINDING_GRAPH_FEATURES;
+        return StreamArtistRecoveredHydrationTypes.RATIFICATION_GRAPH_FEATURES;
     }
 
     function recoveredAuthorityHydrationState(
@@ -608,6 +612,11 @@ contract StreamArtistConsentFinalityLifecycle is
                     _recordDelegation,
                     imported
                 );
+                if (RecoveredRatification.selected(p.typedState)) {
+                    RecoveredRatification.importRecords(
+                        _ratifications, _ratificationRecords, q, p.typedState
+                    );
+                }
                 return;
             }
             if (StreamArtistRecoveredDelegatedConsentHydration.selected(p.typedState)) {
