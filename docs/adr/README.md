@@ -150,3 +150,8 @@ standing, original authority/replay guards and atomic withdrawal history.
 [ADR 0052: Entropy policy succession](0052-entropy-policy-succession.md)
 defines complete legacy/explicit imports, the bounded Core cutover gate, atomic
 activation and authenticated ultimate-origin provider relay.
+
+[ADR 0053: Durable Museum anchors](0053-durable-museum-anchors.md)
+
+keeps conservation declarations and the canonical condition-source denominator
+in Core across satellite replacement, with explicit downstream producer checks.

@@ -59,6 +59,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add durable Core conservation-tier declarations and an exact one-time governed
+  condition-source catalog binding. Original interfaces/storage roots remain;
+  the new Metadata producer and actual sale-floor acceptance are separate work.
+
 - Require complete source-bound entropy policy import evidence at Core replacement,
   alongside original pending-request coverage. Add canonical bounded inventory/readiness
   checks and fault/fuzz regressions; full successor activation remains separate.

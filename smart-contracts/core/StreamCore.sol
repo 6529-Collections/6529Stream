@@ -6,12 +6,24 @@ import "../vendor/openzeppelin/IERC165.sol";
 import "../interfaces/stream/core/IStreamCore.sol";
 import "./StreamCoreReadBuffer.sol";
 import "./StreamCoreExternalReads.sol";
+import {
+    IStreamCoreConservationTier
+} from "../interfaces/stream/core/IStreamCoreConservationTier.sol";
+import {
+    IStreamCoreConditionSources
+} from "../interfaces/stream/core/IStreamCoreConditionSources.sol";
+import { StreamCoreMuseumReads } from "./StreamCoreMuseumReads.sol";
 import "../domains/metadata/StreamMetadataRenderer.sol";
 
 /// @notice Protocol-v1 ERC-721 Core with only the Permanent pre-genesis surface.
 /// @dev Display metadata, entropy state, mint policy, artist authority, revenue
 ///      policy, finality manifests, and module lifecycle state live in satellites.
-contract StreamCore is ERC721, IStreamCore {
+contract StreamCore is
+    ERC721,
+    IStreamCore,
+    IStreamCoreConservationTier,
+    IStreamCoreConditionSources
+{
     uint16 private constant _SCHEMA_VERSION = 1;
     uint16 private constant _GGP_SCHEMA_VERSION = 2;
 
@@ -183,6 +195,18 @@ contract StreamCore is ERC721, IStreamCore {
     mapping(bytes32 => StreamCoreGasParameterState) private _gasParameters;
     mapping(bytes32 => bytes32) private _lastGasParameterActionIds;
 
+    // Durable Museum anchors append after the original Core storage roots.
+    mapping(uint256 => bytes32) private _conservationTiers;
+    address private _conditionSources;
+    bytes32 private _conditionSourcesCodeHash;
+
+    event ConservationTierRecorded(
+        uint16 schemaVersion,
+        uint256 indexed collectionId,
+        bytes32 indexed tier,
+        address indexed metadataHost
+    );
+
     constructor(
         string memory name_,
         string memory symbol_,
@@ -223,7 +247,9 @@ contract StreamCore is ERC721, IStreamCore {
         override(ERC721, IERC165)
         returns (bool)
     {
-        return interfaceId == type(IERC2981).interfaceId || interfaceId == _INTERFACE_ERC4906
+        return interfaceId == type(IStreamCoreConservationTier).interfaceId
+            || interfaceId == type(IStreamCoreConditionSources).interfaceId
+            || interfaceId == type(IERC2981).interfaceId || interfaceId == _INTERFACE_ERC4906
             || interfaceId == _INTERFACE_ERC7572 || interfaceId == _INTERFACE_FINALITY_RECOVERY_CORE
             || super.supportsInterface(interfaceId);
     }
@@ -286,6 +312,85 @@ contract StreamCore is ERC721, IStreamCore {
 
     function collectionFreezeStatus(uint256 collectionId) public view override returns (bool) {
         return collectionExists(collectionId) && _collections[collectionId].frozenAtBlock != 0;
+    }
+
+    /// @notice Raw original declaration; zero means no explicit choice, never a waiver.
+    function declaredConservationTier(uint256 collectionId)
+        external
+        view
+        override
+        returns (bytes32)
+    {
+        return _conservationTiers[collectionId];
+    }
+
+    /// @dev Only the currently selected, code-pinned Metadata facade may attest its admin checks.
+    /// Allocation alone does not prevent declaration. The completion callback cannot change it.
+    function recordConservationTier(uint256 collectionId, bytes32 tier) external override {
+        StreamCorePointerState storage metadata = _satellitePointers[_POINTER_COLLECTION_METADATA];
+        if (msg.sender != metadata.target || !_pointerCodeIsLive(metadata)) {
+            revert ConservationTierAuthorityRequired();
+        }
+        if (_completionTokenId != 0) revert MintExecutionInProgress();
+        _requireCollection(collectionId);
+        if (_collections[collectionId].mintedEver != 0) {
+            revert ConservationTierAfterFirstMint(collectionId);
+        }
+        if (_conservationTiers[collectionId] != 0) {
+            revert ConservationTierAlreadyDeclared(collectionId);
+        }
+        if (
+            tier != keccak256("MUSEUM_GRADE") && tier != keccak256("MUSEUM_GRADE_LITE")
+                && tier != keccak256("CONSERVATION_WAIVED")
+        ) revert InvalidConservationTier(tier);
+        _conservationTiers[collectionId] = tier;
+        emit ConservationTierRecorded(_SCHEMA_VERSION, collectionId, tier, msg.sender);
+    }
+
+    function conditionSources()
+        external
+        view
+        override
+        returns (address catalog, bytes32 runtimeCodeHash)
+    {
+        return (_conditionSources, _conditionSourcesCodeHash);
+    }
+
+    function conditionSourcesTransition(address candidate)
+        public
+        view
+        override
+        returns (bytes32 scope, bytes32 oldHash, bytes32 newHash)
+    {
+        if (_conditionSources != address(0)) revert ConditionSourcesAlreadyBound();
+        if (!StreamCoreMuseumReads.isConditionSources(
+                candidate, address(this), _governanceExecutor
+            )) {
+            revert InvalidConditionSources(candidate);
+        }
+        scope = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_CORE_CONDITION_SOURCES_SCOPE_V1"),
+                block.chainid,
+                address(this)
+            )
+        );
+        bytes32 domain = keccak256("6529STREAM_CORE_CONDITION_SOURCES_STATE_V1");
+        oldHash = keccak256(abi.encode(domain, scope, address(0), bytes32(0)));
+        newHash = keccak256(abi.encode(domain, scope, candidate, candidate.codehash));
+    }
+
+    /// @notice Bind one immutable append-only source catalog under original delayed governance.
+    function bindConditionSources(address candidate) external override {
+        GovernanceContext memory context = _governanceContext();
+        _requireNoMintExecution();
+        (bytes32 scope, bytes32 oldHash, bytes32 newHash) = conditionSourcesTransition(candidate);
+        _requireGovernanceTransition(context, _ACTION_DELAYED_LOOSENING, scope, oldHash, newHash);
+        _conditionSources = candidate;
+        _conditionSourcesCodeHash = candidate.codehash;
+        emit ConditionSourcesBound(
+            _SCHEMA_VERSION, candidate, _conditionSourcesCodeHash, context.actionId
+        );
     }
 
     function createCollection(
