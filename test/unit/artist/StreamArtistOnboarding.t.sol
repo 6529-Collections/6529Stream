@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./ArtistOnboardingFixture.sol";
+import { StreamArtistIdentityEstateExtension } from "../../../smart-contracts/domains/artist/StreamArtistIdentityEstateExtension.sol";
 
 contract StreamArtistOnboardingTest is ArtistOnboardingFixture {
     function testUnavailabilityActualIdentityExactRecordReplayEventAndArchive() public {
