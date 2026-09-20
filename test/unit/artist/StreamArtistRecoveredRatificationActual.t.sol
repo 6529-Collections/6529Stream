@@ -84,6 +84,7 @@ contract StreamArtistRecoveredRatificationActualTest is
     RatificationVm private constant rv =
         RatificationVm(address(uint160(uint256(keccak256("hevm cheat code")))));
     T.RatificationRecord[] private retained;
+    mapping(bytes32 => bytes) private originalSignatures;
 
     function testRatificationMixedGrantHistoryUsesExplicitCodecAndExactOriginalHeads() external {
         _baseline();
@@ -462,6 +463,11 @@ contract StreamArtistRecoveredRatificationActualTest is
         _rhCandidate(
             6, "consent_finality.replay.ratification_key", keccak256(abi.encode(uint256(1), record))
         );
+        originalSignatures[record] = a.signature;
+        require(
+            keccak256(Identity(suite.owners[2]).signatureBundle(record)) == keccak256(a.signature),
+            "original52 exact signed or direct-empty evidence"
+        );
         retained.push(Consent(suite.owners[6]).ratificationRecord(record));
     }
 
@@ -486,10 +492,12 @@ contract StreamArtistRecoveredRatificationActualTest is
             "original Safe60"
         );
         _rhImported(next, p, HydrationOwner(next.identity).authorityHydrationCommitment());
+        _assertSignatures(next.coordinator.suiteConfiguration());
     }
 
     function _assert(T.SuiteConfiguration memory target) private view {
         _dcAssert(target);
+        _assertSignatures(target);
         for (uint256 i; i < retained.length; ++i) {
             require(
                 keccak256(
@@ -503,6 +511,17 @@ contract StreamArtistRecoveredRatificationActualTest is
                 == keccak256(abi.encode(retained[retained.length - 1])),
             "exact operative52 head"
         );
+    }
+
+    function _assertSignatures(T.SuiteConfiguration memory target) private view {
+        for (uint256 i; i < retained.length; ++i) {
+            bytes32 record = retained[i].recordHash;
+            require(
+                keccak256(Identity(target.owners[2]).signatureBundle(record))
+                    == keccak256(originalSignatures[record]),
+                "every original52 signature survives exact import"
+            );
+        }
     }
 
     function _firstPage(Successor memory next, RH.Request memory request, Commit.Prepared memory p)
