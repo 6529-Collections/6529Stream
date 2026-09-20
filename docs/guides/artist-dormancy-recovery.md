@@ -386,6 +386,52 @@ in for the completed original notice. The actual-host source scenarios are in
 `StreamArtistDormancyNoticeRecoveryActual.t.sol`; native execution and the
 combined current-stack validation remain pending.
 
+## An earlier notice was cancelled
+
+A cancelled notice remains a distinct phase2 record when a later notice reaches
+completed phase3. Recovery can retain the old notice's exact cause/dismissal
+history without an intervening living recovery. This covers initial authority,
+ordinary rotations and a prior living35, with each old episode joined to its own
+executed ancestor and incumbent. Later rotations do not replace those facts.
+
+The two cancellation orderings retain different original outcomes:
+
+- A dismissal before cancellation restored status2 and the original notice.
+  Cancellation then ended that notice.
+- Cancellation while contested retained status4. Its later dismissal restored
+  status1. That saved dismissal is never relabeled as a restored-status2 record.
+
+Several restored-status2 episodes may precede one final restored-status1 episode
+on the same cancelled notice. The exact cause-to-notice mapping, cancellation
+terminal and activity counter distinguish successive cancelled notices. Every
+original cancellation increments its notice's captured counter once; later
+notices may include additional cancelled notices between the recorded episodes.
+The reader preserves same-timestamp ordering through the saved links and statuses.
+
+Active-status dismissals between notices are authenticated individually. Each
+execution's first closure must be the earliest applicable dismissal in the
+original cause/resolution chain, even if later dismissals share its timestamp.
+An old cancelled-notice closure can authorize a subsequent rotation, including
+when the staging action itself cancels a restored notice. A closure created in
+the eventual completed notice cannot authorize a rotation staged before it.
+Historical subjects retain their original markers; no closure is invented for
+an older subject that was not the captured execution. Zero execution remains
+empty, including when a separate pending rotation was actually vetoed.
+
+The boundary ends at the exact saved pair in the latest living35, or the empty
+initial pair when no living35 exists. A fresh active-status contest followed by
+the **first** living35 could already absorb an older cancelled-notice history
+into that living35 baseline. That previously supported route is distinct from
+carrying the original cancelled history directly into a new notice without35.
+This increment does not claim support for every repeated living35 continuation.
+
+New history has its own tagged proof. Histories with no cancelled episode retain
+their previous proof encodings. Original owner/storage APIs, notice/contest/
+dismissal/cancellation hashes, status mutations, acceptance, replay, election and
+receipt producers remain unchanged. The actual-host source scenarios use
+`StreamArtistCancelledNoticeRecoveryActual.t.sol`; native and complete
+current-stack validation remain pending.
+
 ## Validation
 
 Eight new authored cases use actual Artist owners, threshold Safe acceptance,
@@ -434,6 +480,9 @@ For living recovery before dormancy use
 For dismissed challenges during the original notice use
 `--match-path test/unit/artist/StreamArtistDormancyNoticeRecoveryActual.t.sol --match-test '^testDormancyNotice'`.
 These authored ART27 cohorts still await native execution.
+
+For a cancelled old notice followed by a completed new notice use
+`--match-path test/unit/artist/StreamArtistCancelledNoticeRecoveryActual.t.sol --match-test '^testCancelledNotice'`.
 
 Include all reached fixture JSON data in frozen captures. The aggregate fixture's
 large gas/code limits do not establish deployable size or transaction capacity.

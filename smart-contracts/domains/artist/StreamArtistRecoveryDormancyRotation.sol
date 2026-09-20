@@ -194,7 +194,7 @@ library StreamArtistRecoveryDormancyRotation {
             closureProof
         );
         if (recovery.latest[p.artistId] == 0) {
-            _previous(recovery, rotations, e, f);
+            _previous(recovery, rotations, e, f, boundary.proof != 0);
         } else {
             f.previous = recovery.vestingHistory.snapshots[f.vesting.previousTransitionRecordHash];
         }
@@ -321,7 +321,8 @@ library StreamArtistRecoveryDormancyRotation {
         RecoveryState.State storage s,
         StreamArtistRotationState.State storage r,
         StreamArtistHashes.Environment memory e,
-        Facts memory f
+        Facts memory f,
+        bool resolvedBoundary
     ) private view {
         bytes32 prior = f.vesting.previousTransitionRecordHash;
         if (prior == 0) {
@@ -350,9 +351,10 @@ library StreamArtistRecoveryDormancyRotation {
                 || old.transition.artistId != f.vesting.artistId
                 || old.transition.recordHash != prior || old.transition.phase != 2
                 || old.transition.executedAt != f.previous.executedAt
-                || old.transition.postWindowEndsAt > f.notice.initiatedAt
-                || (old.transition.contestedAt != 0
-                    && old.transition.contestedAt < old.transition.postWindowEndsAt)
+                || (!resolvedBoundary
+                    && (old.transition.postWindowEndsAt > f.notice.initiatedAt
+                        || (old.transition.contestedAt != 0
+                            && old.transition.contestedAt < old.transition.postWindowEndsAt)))
                 || StreamArtistRotationHashes.rotationRecord(
                         e,
                         old.terms,

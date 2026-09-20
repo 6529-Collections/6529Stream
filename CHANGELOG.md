@@ -40,6 +40,11 @@ the release policy in `docs/release-policy.md`.
   preserving original small-record bytes, signatures, pointers and storage roots.
 - Compose the full-byte preservation and general attestation products with the
   original Artist/Metadata graph and explicit current Safe test recipes.
+- Preserve original cancelled-notice challenges through a later designated
+  notice and recovery, including mixed active dismissals and intervening
+  rotations. Original cancellation, restored status and first closures remain
+  independently authenticated; native acceptance is pending.
+
 - Preserve dismissed active-notice challenges through designated-dormancy
   recovery using original notice, cause, dismissal and closure history.
   The notice deadline and all original authority producers remain unchanged.

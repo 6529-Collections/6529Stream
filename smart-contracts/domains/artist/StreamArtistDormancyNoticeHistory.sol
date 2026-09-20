@@ -76,13 +76,16 @@ library StreamArtistDormancyNoticeHistory {
         bytes32 firstEpisode;
         while (resolutions.causes[f.previousCause].facts.priorStatus == 2) {
             D.Cause memory cause = resolutions.causes[f.previousCause];
+            (bytes32 savedNotice, uint8 phase, bytes32 savedTerminal) = IStreamArtistDormancyOwner(
+                    address(this)
+                ).dormancyResolutionState(origin.artistId, cause.causeHash);
+            // A cancelled earlier notice is a distinct historical episode. Leave the exact
+            // pair for the cancelled-notice boundary reader rather than relabeling it as43.
+            if (savedNotice != notice.recordHash && phase == 2) break;
             D.Record memory dismissal = resolutions.records[f.previousResolution];
             _cause(e, notice, origin, cause, f.previousCause);
             _dismissal(e, cause, dismissal, f.previousResolution, nextAt);
             Cont.Record memory contest = _contest(resolutions, e, cause);
-            (bytes32 savedNotice, uint8 phase, bytes32 savedTerminal) = IStreamArtistDormancyOwner(
-                    address(this)
-                ).dormancyResolutionState(origin.artistId, cause.causeHash);
             if (
                 savedNotice != notice.recordHash || phase != 3
                     || savedTerminal != terminal.recordHash
@@ -97,6 +100,7 @@ library StreamArtistDormancyNoticeHistory {
             f.previousResolution = cause.facts.previousResolutionHash;
             // Canonical immutable hash links cannot cycle. Same-block episodes remain valid.
         }
+        if (f.firstResolution == 0) return f;
         f.closureProof = _closure(resolutions, notice, origin, f.firstResolution, firstEpisode);
         f.proof = keccak256(
             abi.encode(
@@ -325,7 +329,11 @@ library StreamArtistDormancyNoticeHistory {
             // An earlier ACTIVE closure is authenticated by the caller's living boundary.
             // A NOTICE closure must be the first episode on this exact completed notice.
             if (first.facts.priorStatus == 2) {
-                revert Recovery.UnsupportedIdentityRecoveryProfile(origin.artistId);
+                (bytes32 oldNotice, uint8 phase,) = IStreamArtistDormancyOwner(address(this))
+                    .dormancyResolutionState(origin.artistId, first.causeHash);
+                if (oldNotice == notice.recordHash || phase != 2) {
+                    revert Recovery.UnsupportedIdentityRecoveryProfile(origin.artistId);
+                }
             }
             return 0;
         }

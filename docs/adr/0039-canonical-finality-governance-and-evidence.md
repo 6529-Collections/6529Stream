@@ -1886,3 +1886,36 @@ notice/completion/contest/dismissal/recovery domains, live authority checks,
 status mutation, acceptance/replay, elections and typed receipt producers remain
 unchanged. Source scenarios are in the [caller guide](../guides/artist-dormancy-recovery.md).
 Native and complete current-stack acceptance remain separately pending.
+
+### Cancelled notice history before a later completed notice
+
+The subsequent ART27 boundary authenticates prior-status2 episodes belonging to
+an earlier cancelled notice. The existing fixed-owner cause-to-notice read must
+return that original notice, phase2 and its exact cancellation terminal. Its
+canonical cancellation hash retains the original captured activity counter plus
+one, and completion-only terminal fields stay empty. The new completed notice
+remains a separate record with its own original43 provenance.
+
+Saved restored-status2 dismissals precede cancellation; a saved restored-status1
+dismissal follows cancellation while contested. Same-timestamp history follows
+the exact linked order and saved statuses. A cancelled notice can contain several
+restored-status2 episodes but at most one final restored-status1 episode. Distinct
+notice groups retain monotonic cancellation counters and original initiation times.
+
+A separate tagged boundary proves complete living35/32 or initial32/zero ancestry,
+each selected active or cancelled-notice episode against its own incumbent and
+execution, and every first closure against the earliest applicable saved dismissal.
+This permits a later active dismissal after an original cancelled-notice closure
+without forcing the first closure through an active-status-only reader. Actual
+pending closures remain separate; genuine zero execution stays wholly empty.
+Late historical subject markers must have an exact authenticated contest, and
+all original stage-time maturity or closure requirements still apply.
+
+The chain terminates at the unchanged latest living35 baseline or the empty
+initial pair. An already-supported fresh ACTIVE contest followed by FIRST35 can
+absorb earlier history into that baseline; this boundary covers continuation to
+a new notice without that intervening35. Existing proof encodings without a
+cancelled episode remain unchanged. No live writer, authority rule, owner API,
+storage layout, original record domain, acceptance/replay, election or typed
+receipt producer changes. Native, linked size, capacity and full-graph validation
+remain pending; the caller guide records the authored source scenarios.

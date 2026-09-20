@@ -49,6 +49,34 @@ library StreamArtistLivingDormancyReads {
         V.Snapshot memory v,
         bytes32 expectedLatestLiving
     ) public view returns (StreamArtistLivingRecoveryReads.Facts memory living, bytes32 proof) {
+        return _beforeDormancy(owner, registry, chainId, n, t, v, expectedLatestLiving, false);
+    }
+
+    /// @notice Full ancestry proof, including the original zero/rotation-only family.
+    /// @dev Only new cancelled-notice history uses this additional proof. Existing callers keep
+    /// the original zero result for that family through beforeDormancy().
+    function withInitialHistory(
+        address owner,
+        address registry,
+        uint256 chainId,
+        Dorm.Notice memory n,
+        Dorm.Terminal memory t,
+        V.Snapshot memory v,
+        bytes32 expectedLatestLiving
+    ) public view returns (StreamArtistLivingRecoveryReads.Facts memory living, bytes32 proof) {
+        return _beforeDormancy(owner, registry, chainId, n, t, v, expectedLatestLiving, true);
+    }
+
+    function _beforeDormancy(
+        address owner,
+        address registry,
+        uint256 chainId,
+        Dorm.Notice memory n,
+        Dorm.Terminal memory t,
+        V.Snapshot memory v,
+        bytes32 expectedLatestLiving,
+        bool includeInitial
+    ) private view returns (StreamArtistLivingRecoveryReads.Facts memory living, bytes32 proof) {
         bytes32 artistId = n.terms.artistId;
         Environment memory e = Environment(owner, registry, chainId);
         if (
@@ -109,7 +137,7 @@ library StreamArtistLivingDormancyReads {
             revert Recovery.UnsupportedIdentityRecoveryProfile(artistId);
         }
         // Old zero/rotation-only ancestry has no living-recovery wrapper.
-        return (living, bytes32(0));
+        return (living, includeInitial ? history : bytes32(0));
     }
 
     function _link(

@@ -15,6 +15,9 @@ import {
     StreamArtistDormancyNoticeHistory as NoticeHistory
 } from "./StreamArtistDormancyNoticeHistory.sol";
 import {
+    StreamArtistCancelledDormancyBoundary as CancelledBoundary
+} from "./StreamArtistCancelledDormancyBoundary.sol";
+import {
     StreamArtistRecoveryRotationClosure as Closed
 } from "./StreamArtistRecoveryRotationClosure.sol";
 import {
@@ -64,6 +67,30 @@ library StreamArtistLivingDormancyBoundary {
             first.facts.previousCauseHash,
             first.facts.previousResolutionHash
         );
+        if (CancelledBoundary.contains(
+                resolutions,
+                e,
+                origin.artistId,
+                noticeHistory.previousCause,
+                recovery.records[latest].terms.expectedCauseHash
+            )) {
+            return Facts(
+                CancelledBoundary.read(
+                    recovery,
+                    rotations,
+                    resolutions,
+                    e,
+                    notice,
+                    terminal,
+                    origin,
+                    noticeHistory,
+                    first.facts.previousCauseHash,
+                    first.facts.previousResolutionHash
+                ),
+                first.facts.previousCauseHash,
+                first.facts.previousResolutionHash
+            );
+        }
         if (latest == 0) {
             // Retain the original zero/rotation-only boundary when there was no notice episode.
             if (noticeHistory.proof == 0) return f;
