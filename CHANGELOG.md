@@ -59,6 +59,14 @@
   [correspondence guide](docs/integrations/canonical-archive-correspondence.md)
   for profile boundaries and remaining integrated acceptance.
 
+## Verify request-dependent Solidity import snapshots
+
+- Reproduce exported-symbol tables using the pinned compiler's source-root DFS
+  and import-snapshot rules when circular imports change those tables. Keep all
+  other selected AST fields exact and preserve both raw native outputs.
+- Extend explicit legacy-capture readmission to this verified snapshot difference;
+  unsupported declarations and unexplained AST changes still refuse acceptance.
+
 ## Bind native ABI entries through Forge serialization
 
 - Record exact top-level ABI entry permutations and omitted empty selector maps

@@ -33,6 +33,22 @@ Per-file AST still schedules every co-resident definition in that file. Embedded
 report lists both the scheduled definitions and their AST dependency closure.
 These are scheduling facts, not a measurement of elapsed-time savings.
 
+Solidity's import traversal also depends on the requested source roots. In a
+circular import graph, a source's `exportedSymbols` snapshot can differ between
+the two requests even when every declaration, resolved identifier and other AST
+field is identical. [CompilerStack::resolveImports](https://github.com/argotorg/solidity/blob/7dd6d404815651b2341ecae220709a88aaed4038/libsolidity/interface/CompilerStack.cpp#L1197)
+cuts DFS cycles; [NameAndTypeResolver::performImports](https://github.com/argotorg/solidity/blob/7dd6d404815651b2341ecae220709a88aaed4038/libsolidity/analysis/NameAndTypeResolver.cpp#L71)
+imports each scope once and snapshots its exported table immediately.
+
+When selected ASTs differ only in that root table, verification independently
+reproduces every analysis export table from all source roots and every selected
+native table from the actual bytecode request's roots. Every table must match
+exactly; all remaining selected AST fields must also match exactly. The bounded
+model supports contracts, structs, enums, pragmas and named/bare/unit imports.
+Other declaration kinds or conflicting declarations refuse this exception.
+The report records both root lists and each predicted difference. Neither AST
+is changed, and analysis declarations never replace native immutable evidence.
+
 ## Standalone retained pair
 
 Prepare a standard JSON input and a separate selection file. For example:
@@ -130,9 +146,10 @@ all original assertions.
 
 ## Admit a completed legacy capture without recompiling
 
-An early version of this tool rejected the generated library self-address field
-after both native passes completed. The explicit recovery path accepts only that
-exact legacy tool hash and error, with both original passes complete at integer
+An early version of this tool rejected generated library self-address fields or
+request-dependent import snapshots after both native passes completed. The explicit
+recovery path accepts only that exact legacy tool hash and one of those errors,
+with both original passes complete at integer
 exit code zero. It rechecks every retained file hash, input, output, source ID,
 AST and immutable reference under the repaired verifier. Other failures remain
 ineligible. The original directory, `FAILED` record and raw outputs stay unchanged.
@@ -175,7 +192,7 @@ products; this repair does not change the Solidity graph consumer.
 ## Validation and limits
 
 ```text
-python -B -m unittest tools.build.test_scoped_standard_json tools.build.test_scoped_library_address tools.build.test_forge_abi_transport tools.build.test_prepare_current_graph tools.build.test_native_artifact_storage tools.development.test_current_acceptance
+python -B -m unittest tools.build.test_scoped_standard_json tools.build.test_scoped_library_address tools.build.test_scoped_export_snapshots tools.build.test_forge_abi_transport tools.build.test_prepare_current_graph tools.build.test_native_artifact_storage tools.development.test_current_acceptance
 ```
 
 Synthetic tests exercise refusal and process cleanup. A separate bounded native

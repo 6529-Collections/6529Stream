@@ -105,6 +105,72 @@ def instruction_boundary(code: str, target: int) -> bool:
     return offset == target
 
 
+def source_order_exports(asts: dict, roots: set[str]) -> dict:
+    """Reproduce 0.8.19 import snapshots for a bounded set of declaration kinds.
+
+    CompilerStack resolves imports by root-filtered DFS, cutting cycles. The
+    resolver registers declarations first, then imports each scope once in that
+    order. It snapshots exportedSymbols immediately after that scope's imports.
+    """
+    seen = set(); order = []
+
+    def visit(source):
+        require(source in asts, "Import source missing from analysis AST")
+        if source in seen:
+            return
+        seen.add(source)
+        for node in asts[source]["nodes"]:
+            if node["nodeType"] == "ImportDirective":
+                target = node["absolutePath"]
+                require(target in asts and same_json(node["sourceUnit"], asts[target]["id"]),
+                        "Import source-unit identity differs")
+                visit(target)
+        order.append(source)
+
+    for source in sorted(roots):
+        visit(source)
+    scopes = {source: {} for source in order}
+
+    def add(source, name, ident):
+        require(isinstance(name, str) and bool(name) and type(ident) is int,
+                "Invalid source-scope declaration")
+        ids = scopes[source].setdefault(name, [])
+        require(not ids or same_json(ids, [ident]), "Unsupported source-scope declaration collision")
+        if not ids:
+            ids.append(ident)
+
+    for source in order:
+        for node in asts[source]["nodes"]:
+            kind = node["nodeType"]
+            if kind == "ImportDirective":
+                if node["unitAlias"]:
+                    add(source, node["unitAlias"], node["id"])
+            elif kind in ("ContractDefinition", "StructDefinition", "EnumDefinition"):
+                add(source, node["name"], node["id"])
+            else:
+                require(kind == "PragmaDirective", "Unsupported source-scope declaration kind: " + kind)
+    snapshots = {}
+    for source in order:
+        for node in asts[source]["nodes"]:
+            if node["nodeType"] != "ImportDirective":
+                continue
+            imported = scopes[node["absolutePath"]]
+            if node["symbolAliases"]:
+                for alias in node["symbolAliases"]:
+                    foreign = alias["foreign"]
+                    ids = imported.get(foreign["name"])
+                    require(bool(ids) and any(same_json(foreign["referencedDeclaration"], i) for i in ids),
+                            "Named import declaration differs")
+                    for ident in ids:
+                        add(source, alias.get("local") or foreign["name"], ident)
+            elif not node["unitAlias"]:
+                for name, ids in sorted(imported.items()):
+                    for ident in ids:
+                        add(source, name, ident)
+        snapshots[source] = copy.deepcopy(scopes[source])
+    return snapshots
+
+
 def verify_requested_fields(contract: dict, fields: list[str], coordinate: str) -> None:
     for field in fields:
         value = contract
@@ -140,7 +206,7 @@ def verify_pair(analysis_input: dict, analysis_output: dict,
     actual_contracts = {(s, n) for s, outputs in codegen_output.get("contracts", {}).items() for n in outputs}
     expected_contracts = {(s, n) for s, outputs in selected.items() for n in outputs if n}
     require(actual_contracts == expected_contracts, "Selected contract outputs missing or unexpected")
-    all_ids = set(); declarations = {}; definitions = {}; scheduled = set()
+    all_ids = set(); declarations = {}; definitions = {}; scheduled = set(); snapshot_sources = []
     for source in sorted(sources):
         analysis = analysis_output["sources"][source]
         native = codegen_output["sources"][source]
@@ -152,7 +218,11 @@ def verify_pair(analysis_input: dict, analysis_output: dict,
         require(isinstance(ast, dict) and ast.get("absolutePath") == source, f"Analysis AST missing: {source}")
         require(("ast" in native) == (source in selected), f"Unexpected native AST roster: {source}")
         if source in selected:
-            require(same_json(native["ast"], ast), f"Native AST differs from analysis: {source}")
+            if not same_json(native["ast"], ast):
+                require(same_json({k:v for k,v in native["ast"].items() if k != "exportedSymbols"},
+                                  {k:v for k,v in ast.items() if k != "exportedSymbols"}),
+                        f"Native AST differs from analysis: {source}")
+                snapshot_sources.append(source)
         contracts = [n for n in ast["nodes"] if n.get("nodeType") == "ContractDefinition"]
         for contract in contracts:
             ident = contract["id"]
@@ -171,6 +241,23 @@ def verify_pair(analysis_input: dict, analysis_output: dict,
                     ident = str(node["id"])
                     require(ident not in declarations, "Duplicate immutable AST ID")
                     declarations[ident] = {"source": source, "variable": node["name"]}
+    snapshot_joins = []
+    if snapshot_sources:
+        asts = {s: row["ast"] for s, row in analysis_output["sources"].items()}
+        all_exports = source_order_exports(asts, sources)
+        selected_exports = source_order_exports(asts, set(selected))
+        for source, ast in asts.items():
+            require(same_json(ast.get("exportedSymbols"), all_exports[source]),
+                    f"Analysis exported-symbol snapshot differs: {source}")
+        for source in selected:
+            require(same_json(codegen_output["sources"][source]["ast"].get("exportedSymbols"), selected_exports[source]),
+                    f"Native exported-symbol snapshot differs: {source}")
+        for source in snapshot_sources:
+            left, right = all_exports[source], selected_exports[source]
+            for name in sorted(set(left) | set(right)):
+                if not same_json(left.get(name), right.get(name)):
+                    snapshot_joins.append({"source": source, "symbol": name,
+                                           "analysis": left.get(name), "native": right.get(name)})
     joins = []; library_joins = []
     kinds = {(v["source"], v["name"]): v["kind"] for v in definitions.values()}
     for source, name in sorted(actual_contracts):
@@ -224,6 +311,10 @@ def verify_pair(analysis_input: dict, analysis_output: dict,
             "qualification": "Selector/AST/declaration verification only. Siblings and embedded dependencies still generate code; no deployment, runtime acceptance or speed claim."}
     if library_joins:
         result["librarySelfAddressJoins"] = library_joins
+    if snapshot_joins:
+        result["exportedSymbolSnapshots"] = {"analysisRoots": sorted(sources), "nativeRoots": sorted(selected),
+                                             "differences": snapshot_joins,
+                                             "qualification": "Both export tables reproduced from request-specific import order. All other selected AST fields remain exact; native AST is unchanged."}
     return result
 
 
@@ -295,9 +386,13 @@ def capture_pair(request_raw: bytes, selection: dict, compiler: Path, compiler_s
 
 def _read_capture(folder: Path, *, allow_library_revalidation: bool = False) -> tuple[dict, dict, dict, dict]:
     record = json.loads((folder / "record.json").read_bytes())
-    legacy_failure = (record.get("status") == "FAILED" and record.get("toolSha256") == LEGACY_SELECTOR_TOOL
-                      and re.fullmatch(r"Missing same-native immutable declaration library_deploy_address for .+; explicitly select its source",
-                                       record.get("error", "")) is not None)
+    legacy_kind = None
+    if record.get("status") == "FAILED" and record.get("toolSha256") == LEGACY_SELECTOR_TOOL:
+        if re.fullmatch(r"Missing same-native immutable declaration library_deploy_address for .+; explicitly select its source", record.get("error", "")):
+            legacy_kind = "librarySelfAddressJoins"
+        elif re.fullmatch(r"Native AST differs from analysis: .+", record.get("error", "")):
+            legacy_kind = "exportedSymbolSnapshots"
+    legacy_failure = legacy_kind is not None
     require(type(record.get("schema")) is int and record["schema"] == 1 and (record.get("status") == "VERIFIED"
             or (allow_library_revalidation and legacy_failure)), "Capture is not verified")
     actual = {p.name: sha(p.read_bytes()) for p in sorted(folder.iterdir()) if p.is_file() and p.name != "record.json"}
@@ -323,7 +418,7 @@ def _read_capture(folder: Path, *, allow_library_revalidation: bool = False) -> 
     if not legacy_failure:
         require(same_json(report, json.loads((folder / "verification.json").read_bytes())), "Capture verification differs")
     else:
-        require(bool(report.get("librarySelfAddressJoins")), "Known compiler library field was not verified")
+        require(bool(report.get(legacy_kind)), "Known compiler verifier difference was not verified")
     return analysis, codegen, record, report
 
 
@@ -333,7 +428,7 @@ def admission_value(folder: Path, record: dict, report: dict) -> dict:
             "originalCaptureStatus": record["status"], "originalError": record.get("error"),
             "originalCaptureFiles": record["files"], "verifierSha256": sha(Path(__file__).read_bytes()),
             "verification": report,
-            "qualification": "Readmission of unchanged completed native outputs after the specific legacy library-self-address verifier failure. No compiler rerun, artifact rewrite or runtime acceptance."}
+            "qualification": "Readmission of unchanged completed native outputs after a specific legacy library-self-address or import-snapshot verifier failure. No compiler rerun, artifact rewrite or runtime acceptance."}
 
 
 def admit_completed_capture(folder: Path, receipt: Path) -> dict:
