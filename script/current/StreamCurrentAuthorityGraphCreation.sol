@@ -27,6 +27,9 @@ import {
 import {
     StreamCurrentAuthorityRenderCriticalInventory
 } from "../../smart-contracts/domains/preservation/StreamCurrentAuthorityRenderCriticalInventory.sol";
+import {
+    StreamCurrentAuthorityRightsRecordSelection
+} from "../../smart-contracts/domains/metadata/StreamCurrentAuthorityRightsRecordSelection.sol";
 
 /// @notice Literal linked creation templates for the additive original-authority graph.
 /// @dev Simulation-only; no library instance is broadcast and no existing Kind value changes.
@@ -40,7 +43,8 @@ library StreamCurrentAuthorityGraphCreation {
         StreamFinalityLineageCurrentDiscovery,
         StreamCurrentAuthorityWorkRecordSelection,
         StreamCurrentAuthorityConservationRecordSelection,
-        StreamCurrentAuthorityRenderCriticalInventory
+        StreamCurrentAuthorityRenderCriticalInventory,
+        StreamCurrentAuthorityRightsRecordSelection
     }
 
     function name(Kind kind) internal pure returns (string memory) {
@@ -68,6 +72,9 @@ library StreamCurrentAuthorityGraphCreation {
         }
         if (kind == Kind.StreamCurrentAuthorityRenderCriticalInventory) {
             return "StreamCurrentAuthorityRenderCriticalInventory";
+        }
+        if (kind == Kind.StreamCurrentAuthorityRightsRecordSelection) {
+            return "StreamCurrentAuthorityRightsRecordSelection";
         }
         revert("unknown authority product template");
     }
@@ -99,6 +106,9 @@ library StreamCurrentAuthorityGraphCreation {
         }
         if (kind == Kind.StreamCurrentAuthorityRenderCriticalInventory) {
             return type(StreamCurrentAuthorityRenderCriticalInventory).creationCode;
+        }
+        if (kind == Kind.StreamCurrentAuthorityRightsRecordSelection) {
+            return type(StreamCurrentAuthorityRightsRecordSelection).creationCode;
         }
         revert("unknown authority product template");
     }

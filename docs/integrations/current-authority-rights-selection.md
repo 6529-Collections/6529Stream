@@ -64,6 +64,20 @@ Core role, signer authority or grant registry. A finality graph must bind this
 host's actual address and runtime from its original construction. Replacing an
 existing host address does not transfer its selections or seals.
 
+The [current-authority graph](../../script/current/StreamCurrentAuthorityFinalityGraph.sol)
+now binds this profile at its original `Late.RIGHTS` deployment. Its creation
+template, artifact name and all nine immutable runtime predictions use the new
+selector. The authority and native fixture creation enums append a distinct
+entry, preserving every existing ordinal and the original selector entry. The
+generic legacy graph continues to construct the original selector.
+
+The shared migration recipe retains the original Rights address, current head,
+indexed selection and permanent seal in its history commitment. At A, B and C,
+it requires the same genesis runtime, a current original selection, and the exact
+authenticated current Artist facade, Coordinator and Identity-owner tuple.
+These assertions accompany the existing actual succession and scoped sealing
+cases; they are source-authored pending native execution.
+
 ## Validation boundary
 
 The additive source is reviewed and ABI/type checked. Focused unit and genuine

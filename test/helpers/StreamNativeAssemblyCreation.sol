@@ -168,6 +168,9 @@ import {
     StreamRightsRecordSelection
 } from "../../smart-contracts/domains/metadata/StreamRightsRecordSelection.sol";
 import {
+    StreamCurrentAuthorityRightsRecordSelection
+} from "../../smart-contracts/domains/metadata/StreamCurrentAuthorityRightsRecordSelection.sol";
+import {
     StreamRoleRegistry
 } from "../../smart-contracts/domains/governance/StreamRoleRegistry.sol";
 import {
@@ -253,7 +256,8 @@ library StreamNativeAssemblyCreation {
         StreamPolicyPublicationFactoryV2,
         StreamScopedPolicyPublicationFactoryV2,
         StreamFinalityFullPolicyEvidenceProviderV2,
-        StreamFinalityFullPolicyDiscoveryV2
+        StreamFinalityFullPolicyDiscoveryV2,
+        StreamCurrentAuthorityRightsRecordSelection
     }
 
     function name(Kind kind) public pure returns (string memory) {
@@ -363,11 +367,17 @@ library StreamNativeAssemblyCreation {
         if (kind == Kind.StreamFinalityFullPolicyDiscoveryV2) {
             return "StreamFinalityFullPolicyDiscoveryV2";
         }
+        if (kind == Kind.StreamCurrentAuthorityRightsRecordSelection) {
+            return "StreamCurrentAuthorityRightsRecordSelection";
+        }
 
         revert("unknown original product template");
     }
 
     function creation(Kind kind) public pure returns (bytes memory) {
+        if (kind == Kind.StreamCurrentAuthorityRightsRecordSelection) {
+            return type(StreamCurrentAuthorityRightsRecordSelection).creationCode;
+        }
         if (kind == Kind.StreamArchivalCoverage) return type(StreamArchivalCoverage).creationCode;
         if (kind == Kind.StreamArtistAcceptanceLifecycle) {
             return type(StreamArtistAcceptanceLifecycle).creationCode;

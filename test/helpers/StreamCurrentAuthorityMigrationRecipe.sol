@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamCurrentAuthorityNativeAssemblyFixture.sol";
+import {
+    IStreamRightsRecordCurrentAuthority as MigrationRightsAuthority
+} from "../../smart-contracts/interfaces/stream/metadata/IStreamRightsRecordCurrentAuthority.sol";
 import { StreamCurrentAuthorityRecoveryRecipe } from "./StreamCurrentAuthorityRecoveryRecipe.sol";
 import {
     StreamCurrentAuthoritySuccessorCoordinatorGraph
@@ -594,6 +597,27 @@ abstract contract StreamCurrentAuthorityMigrationRecipe is StreamCurrentAuthorit
             "same-instance original selector history catalogs seals and hashes retained"
         );
         assemblyWork.requireCurrent(1, _assemblySubject(), assemblyWorkRecord, 1);
+        assemblyRights.requireCurrent(1, _assemblySubject(), assemblyRightsRecord, 1);
+        require(
+            assemblyRights.currentAuthorityProfile()
+                    == keccak256("6529STREAM_CURRENT_AUTHORITY_RIGHTS_SELECTION_V1")
+                && assemblyRights.supportsInterface(type(MigrationRightsAuthority).interfaceId)
+                && address(assemblyRights) == assemblyLate[uint256(Late.RIGHTS)]
+                && address(assemblyRights).codehash
+                    == keccak256(assemblyRuntimes[uint256(Late.RIGHTS)]),
+            "original graph bound the admitted current-authority RIGHTS runtime at genesis"
+        );
+        (address[3] memory rightsTargets, bytes32[3] memory rightsCodeHashes) =
+            assemblyRights.currentArtistIdentityContext();
+        address[3] memory expectedRightsTargets =
+            [address(assemblyArtists), address(assemblyCoordinator), assemblySuite.owners[2]];
+        for (uint256 i; i < 3; ++i) {
+            require(
+                rightsTargets[i] == expectedRightsTargets[i]
+                    && rightsCodeHashes[i] == expectedRightsTargets[i].codehash,
+                "same original RIGHTS selector authenticates actual current A/B/C identity"
+            );
+        }
         assemblyConservation.requireCurrent(
             1,
             _assemblySubject(),
@@ -610,10 +634,14 @@ abstract contract StreamCurrentAuthorityMigrationRecipe is StreamCurrentAuthorit
         value = keccak256(
             abi.encode(
                 address(assemblyWork),
+                address(assemblyRights),
                 address(assemblyConservation),
                 assemblyWork.currentWork(1, subject),
                 assemblyWork.workSelectionAt(1, subject, 1),
                 assemblyWork.selectionLock(1, subject),
+                assemblyRights.currentRights(1, subject),
+                assemblyRights.rightsSelectionAt(1, subject, 1),
+                assemblyRights.selectionLock(1, subject),
                 assemblyConservation.currentConservation(1, subject, origin),
                 assemblyConservation.conservationSelectionAt(1, subject, origin, 1),
                 assemblyConservation.intentLock(1, subject)

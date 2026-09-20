@@ -7,6 +7,15 @@
   full immutable binding and historical aggregate. Add three dispatch and
   corruption regressions; combined runtime acceptance remains pending.
 
+## Current-authority Rights graph deployment
+
+- Bind the additive Rights selector in the original current-authority graph,
+  including literal creation, artifact and immutable runtime prediction.
+  Preserve all legacy graph templates and existing creation enum ordinals.
+- Extend actual A/B/C migration assertions to retain original Rights selections
+  and seals while authenticating the current identity tuple. Combined ABI/source
+  checks remain separate from native execution and full ceremony acceptance.
+
 ## Preservation root facade integration
 
 - Expose separate COLLECTION and scoped preservation root interfaces through

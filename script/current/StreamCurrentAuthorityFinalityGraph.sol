@@ -133,7 +133,7 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
     StreamFinalityLineageCurrentDiscovery internal assemblyDiscovery;
     StreamLineageArtworkFinalityRegistry internal assemblyFinality;
     StreamCurrentAuthorityWorkRecordSelection internal assemblyWork;
-    StreamRightsRecordSelection internal assemblyRights;
+    StreamCurrentAuthorityRightsRecordSelection internal assemblyRights;
     StreamCurrentAuthorityConservationRecordSelection internal assemblyConservation;
     StreamCurrentAuthorityRenderCriticalInventory internal assemblyInventory;
     StreamCurrentAuthorityBundleArchiveCoverage internal assemblyBundle;
@@ -601,8 +601,10 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
             )
         );
         assemblyRuntimes[uint256(Late.RIGHTS)] = _selectorRuntime(
-            "StreamRightsRecordSelection",
-            _graphCreation(StreamCurrentGraphCreation.Kind.StreamRightsRecordSelection)
+            "StreamCurrentAuthorityRightsRecordSelection",
+            _authorityCreation(
+                StreamCurrentAuthorityGraphCreation.Kind.StreamCurrentAuthorityRightsRecordSelection
+            )
         );
         assemblyRuntimes[uint256(Late.CONSERVATION)] = _selectorRuntime(
             "StreamCurrentAuthorityConservationRecordSelection",
@@ -1270,10 +1272,13 @@ abstract contract StreamCurrentAuthorityFinalityGraph is StreamCurrentFinalityAr
                 selectorArgs
             )
         );
-        assemblyRights = StreamRightsRecordSelection(
+        assemblyRights = StreamCurrentAuthorityRightsRecordSelection(
             _deployAssemblyLate(
                 Late.RIGHTS,
-                _graphCreation(StreamCurrentGraphCreation.Kind.StreamRightsRecordSelection),
+                _authorityCreation(
+                    StreamCurrentAuthorityGraphCreation.Kind
+                    .StreamCurrentAuthorityRightsRecordSelection
+                ),
                 selectorArgs
             )
         );

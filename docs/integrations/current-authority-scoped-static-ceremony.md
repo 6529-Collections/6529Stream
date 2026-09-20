@@ -176,19 +176,32 @@ The later integration must include the completed Metadata subject-registration
 repair `0aee507bb0648a90ebc4e41059cc610a828d724c`, including its factored path and
 self-read budget. The initial `478c0824` API alone is not the final tested repair.
 
+The coordinated `e8a569b36927ed7f711a14a30ce5b09690694dd0` source base includes
+that repair, the additive current-authority Rights selector and exact scoped
+ABI byte correspondence. This recipe now deploys the new Rights profile at
+genesis, predicts and checks its exact runtime, and retains its original
+selection/seal through the same A/B/C migration assertions. The generic legacy
+graph and selector remain unchanged. These integrations remove the identified
+source mismatches; actual combined execution remains required.
+
 - The original STATIC attribution companion pins A. Its Artist reader rejects
   Core's B/C pointer, changing current JSON to an unavailable attribution. The
   old full-output checkpoint correctly becomes stale.
-- The original Rights selector's currentness path requires its constructor's
-  A Artist pins, including for ACCOUNT licensors. Publishing Rights earlier
-  does not repair a later current read or terminal seal under B/C.
-- Shared bundle correspondence admits RAW_BYTES/JCS for ordinary payload rows,
-  but scoped snapshot and reference rows retain their distinct ABI
-  canonicalization identifiers. Relabeling those rows would change evidence.
+- Existing deployments of the original Rights profile still require their
+  constructor's A Artist pins. The [new genesis profile](current-authority-rights-selection.md)
+  authenticates current authority without importing or rewriting old selections.
+- Shared bundle correspondence now admits the closed exact scoped Snapshot and
+  Reference ABI rows. The collector and coverage preserve their original schema
+  and canonicalization identifiers; no relabeling substitutes for byte proof.
 - Sanction changes live display bytes. The separate public preservation-render
   capability in [ADR 0054](../adr/0054-explicit-non-sanction-preservation-rendering.md)
   requires additive producer and consumer profiles. This existing full-output
   recipe must continue checking the complete live bytes it originally promised.
+
+A later current-authority STATIC profile may also expose legitimate provenance
+changes, including stale C2PA evidence. This full-output recipe must retain
+those checks and must not assert unchanged output across such changes merely
+because authority succession itself is valid.
 
 Fresh browser provenance, complete bundle admission, the original sanction and
 archive join, finalization, subsequent currentness, linked bytecode size and
