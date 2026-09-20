@@ -232,7 +232,7 @@ contract MetricExecutionProofProbe {
         bytes32 context,
         T.Supplement memory s
     ) external view returns (bytes32, bytes32) {
-        return Proof.requireProjected(Proof.project(p, e, context), s);
+        return Proof.requireCompact(Proof.compact(p, e, context), s);
     }
 }
 

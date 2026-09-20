@@ -34,6 +34,185 @@ library StreamReferenceMetricProof {
         bytes32[2][] repeatCaptureSha256;
     }
 
+    /// @dev Internal same-call transport, never independently authoritative evidence.
+    struct CompactInput {
+        M.Mode mode;
+        bytes32 implementationHash;
+        bytes32 parametersHash;
+        bytes32 reportHash;
+        int64 threshold;
+        uint64 evaluatedAt;
+        bytes32 context;
+        bytes32 environmentObjectHash;
+        bytes32 environmentManifestHash;
+        uint16 viewportWidth;
+        uint16 viewportHeight;
+        uint8 devicePixelRatio;
+        uint256 metricMemberCount;
+        bytes32 metricMemberHash;
+        uint256 captureCount;
+        bytes32[2][2] repeatCaptureSha256;
+    }
+
+    function compact(R.Publication memory p, M.Evidence memory e, bytes32 context)
+        internal
+        pure
+        returns (CompactInput memory input)
+    {
+        input.mode = e.mode;
+        input.implementationHash = e.perceptual.metric.implementationHash;
+        input.parametersHash = e.perceptual.metric.parametersHash;
+        input.reportHash = e.perceptual.reportHash;
+        input.threshold = e.perceptual.threshold;
+        input.evaluatedAt = e.perceptual.evaluatedAt;
+        input.context = context;
+        input.environmentObjectHash = p.environment.objectHash;
+        input.environmentManifestHash = p.environment.manifestHash;
+        input.viewportWidth = p.environment.viewportWidth;
+        input.viewportHeight = p.environment.viewportHeight;
+        input.devicePixelRatio = p.environment.devicePixelRatio;
+        (input.metricMemberCount, input.metricMemberHash) =
+            prefixCommitment(p.environment.packageFiles);
+        input.captureCount = p.captures.length;
+        for (uint256 i; i < p.captures.length && i < 2; ++i) {
+            input.repeatCaptureSha256[i] = p.captures[i].repeatCaptureSha256;
+        }
+    }
+
+    /// @dev Derive from every original row in order; do not move proof validation ahead of lock.
+    function prefixCommitment(R.PackageFile[] memory rows)
+        internal
+        pure
+        returns (uint256 count, bytes32 hash)
+    {
+        hash = keccak256("6529STREAM_METRIC_COMPLETE_PREFIX_V1");
+        for (uint256 i; i < rows.length; ++i) {
+            R.PackageFile memory row = rows[i];
+            if (!_metric(bytes(row.path))) continue;
+            hash = keccak256(
+                abi.encode(hash, keccak256(bytes(row.path)), row.byteSize, row.sha256Digest)
+            );
+            ++count;
+        }
+        hash = keccak256(abi.encode(hash, count));
+    }
+
+    function requireCompact(CompactInput memory input, T.Supplement memory s)
+        internal
+        view
+        returns (bytes32 runtimeHash, bytes32 replayHash)
+    {
+        if (input.mode != M.Mode.PERCEPTUAL_TOLERANCE) {
+            revert T.InvalidMetricSupplement();
+        }
+        bytes memory index = implementationIndex(s.sources);
+        if (
+            keccak256(index) != input.implementationHash
+                || keccak256(index) != keccak256(s.implementationIndex) || s.parameters.length == 0
+                || s.parameters.length > 65536 || keccak256(s.parameters) != input.parametersHash
+        ) {
+            revert T.InvalidMetricSupplement();
+        }
+        runtimeHash = _runtimeCompact(input, s);
+        T.Replay memory r = s.replay;
+        bytes memory manifest = _compactInputManifest(input);
+        if (
+            r.runtimeHash != runtimeHash || r.contextHash != input.context
+                || r.reportHash != input.reportHash || r.exitCode != 0
+                || r.executedAt < input.evaluatedAt || r.executedAt > block.timestamp
+                || r.transcript.length == 0 || r.transcript.length > 65536
+                || r.inputManifest.length > 65536 || r.inputsHash != keccak256(manifest)
+                || keccak256(r.inputManifest) != r.inputsHash
+        ) revert T.InvalidMetricSupplement();
+        _transcript(r);
+        replayHash = keccak256(abi.encode(keccak256("6529STREAM_METRIC_REPLAY_V1"), r));
+    }
+
+    function _compactInputManifest(CompactInput memory input) private pure returns (bytes memory) {
+        // Same position/error as original inputManifest, after runtime validation.
+        if (
+            input.captureCount == 0 || input.captureCount > 2 || input.devicePixelRatio != 1
+                || input.threshold < 0
+        ) revert T.InvalidMetricSupplement();
+        R.Publication memory p;
+        M.Perceptual memory m;
+        p.environment.viewportWidth = input.viewportWidth;
+        p.environment.viewportHeight = input.viewportHeight;
+        p.environment.devicePixelRatio = input.devicePixelRatio;
+        p.environment.manifestHash = input.environmentManifestHash;
+        p.captures = new R.Capture[](input.captureCount);
+        for (uint256 i; i < p.captures.length; ++i) {
+            p.captures[i].repeatCaptureSha256 = input.repeatCaptureSha256[i];
+        }
+        m.threshold = input.threshold;
+        m.evaluatedAt = input.evaluatedAt;
+        return inputManifest(p, m, input.context);
+    }
+
+    function _runtimeCompact(CompactInput memory input, T.Supplement memory s)
+        private
+        pure
+        returns (bytes32)
+    {
+        T.Runtime memory r = s.runtime;
+        if (
+            r.environmentObjectHash != input.environmentObjectHash
+                || r.environmentManifestHash != input.environmentManifestHash
+                || keccak256(bytes(r.entrypoint))
+                    != keccak256("metric/source/tools/preservation/reference_metric.py")
+                || keccak256(bytes(r.interpreter)) != keccak256("metric/python/python.exe")
+                || keccak256(bytes(r.launcher)) != keccak256("metric/launch.py")
+                || keccak256(bytes(r.sourceRoot)) != keccak256("metric/source")
+                || r.argv.length != 4 || keccak256(bytes(r.argv[0])) != keccak256("-I")
+                || keccak256(bytes(r.argv[1])) != keccak256("-S")
+                || keccak256(bytes(r.argv[2])) != keccak256("-B")
+                || keccak256(bytes(r.argv[3])) != keccak256("metric/launch.py")
+                || r.members.length == 0 || r.members.length > 2048
+        ) revert T.InvalidMetricSupplement();
+        // The fixed current worker derived this commitment from the complete fresh package.
+        // Independently retain original runtime strict order, count and all three row fields.
+        bytes32 hash = keccak256("6529STREAM_METRIC_COMPLETE_PREFIX_V1");
+        for (uint256 i; i < r.members.length; ++i) {
+            R.PackageFile memory row = r.members[i];
+            if (i != 0 && !pathLess(bytes(r.members[i - 1].path), bytes(row.path))) {
+                revert T.InvalidMetricSupplement();
+            }
+            hash = keccak256(
+                abi.encode(hash, keccak256(bytes(row.path)), row.byteSize, row.sha256Digest)
+            );
+        }
+        hash = keccak256(abi.encode(hash, r.members.length));
+        if (input.metricMemberCount != r.members.length || input.metricMemberHash != hash) {
+            revert T.InvalidMetricSupplement();
+        }
+        for (uint256 i; i < 4; ++i) {
+            _member(
+                r.members,
+                string.concat("metric/source/", s.sources[i].path),
+                uint64(s.sources[i].content.length),
+                sha256(s.sources[i].content),
+                true
+            );
+        }
+        _member(
+            r.members,
+            "metric/implementation.json",
+            uint64(s.implementationIndex.length),
+            sha256(s.implementationIndex),
+            true
+        );
+        _member(
+            r.members,
+            "metric/parameters.json",
+            uint64(s.parameters.length),
+            sha256(s.parameters),
+            true
+        );
+        _member(r.members, r.interpreter, 0, 0, false);
+        _member(r.members, r.launcher, 0, 0, false);
+        return keccak256(abi.encode(keccak256("6529STREAM_METRIC_RUNTIME_V1"), r));
+    }
+
     function project(R.Publication memory p, M.Evidence memory e, bytes32 context)
         internal
         pure

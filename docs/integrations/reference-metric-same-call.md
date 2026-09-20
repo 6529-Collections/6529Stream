@@ -1,5 +1,9 @@
 # Same-call metric supplement validation
 
+This page retains the first same-call transport's measurements. The additive
+[compact transport](reference-metric-compact.md) replaces its large internal
+proof projection while preserving the original public oracle paths.
+
 Metric supplement publication and the required-supplement reader reuse the full
 publication and mode evidence authenticated during the same call. The previous
 paths read, decode and hash those large immutable records again before checking

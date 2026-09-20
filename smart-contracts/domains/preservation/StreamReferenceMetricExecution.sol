@@ -16,8 +16,11 @@ import {
     StreamReferenceMetricTypes as T
 } from "../../interfaces/stream/preservation/StreamReferenceMetricTypes.sol";
 
+import { StreamReferenceMetricCurrent as Current } from "./StreamReferenceMetricCurrent.sol";
+import { StreamReferenceMetricProof as Proof } from "./StreamReferenceMetricProof.sol";
+
 /// @notice Fixed same-call metric execution. The actual host authenticates known/head/revision first.
-/// @dev No checked object crosses an external boundary or survives a call. Complete original
+/// @dev No checked object is accepted from a caller or survives a call. Complete original
 /// source/runtime/schema/currentness and payload checks precede the original lock and authority.
 library StreamReferenceMetricExecution {
     function publish(
@@ -32,16 +35,13 @@ library StreamReferenceMetricExecution {
         R.Lock storage lock,
         bytes calldata original
     ) public returns (bytes32) {
-        Preparation.CurrentDecoded memory decoded =
-            Preparation.requireCurrentDecoded(
-                d, bindings, publication, evidence, facts, payload, receipt
-            );
+        Proof.CompactInput memory input = Current.requireInput(
+            d, bindings, publication, evidence, facts, payload, receipt
+        );
         if (lock.actionId != 0) revert R.ReferenceLocked();
         (uint8 cls, uint64 revision) =
             StateReads.authority(d.targets[1], receipt.collectionId, msg.sender, d.readGas);
         Storage.Context memory c = Storage.Context(d, receipt, msg.sender, cls, revision);
-        return Storage.publishChecked(
-            state, c, decoded.publication, decoded.evidence, decoded.context, original
-        );
+        return Storage.publishCompact(state, c, input, original);
     }
 }

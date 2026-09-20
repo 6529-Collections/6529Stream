@@ -27,6 +27,10 @@ import { IStreamSchemaRegistry } from "../../interfaces/stream/metadata/IStreamS
 import { StreamReferenceModeProof } from "./StreamReferenceModeProof.sol";
 import { StreamReferenceMetricProof } from "./StreamReferenceMetricProof.sol";
 
+import {
+    StreamReferenceMetricEncodedProof as Encoded
+} from "./StreamReferenceMetricEncodedProof.sol";
+
 /// @notice Fixed supplement storage codec. Host guards source currentness, lock and writer authority.
 library StreamReferenceMetricStorage {
     struct State {
@@ -125,6 +129,61 @@ library StreamReferenceMetricStorage {
         Bytes.retain(state.payloads[key], c.dependencies.targets[3], canonical);
         state.receipts[key] = r;
         emit ReferenceMetricSupplementPublished(1, key, hash, r);
+    }
+
+    function publishCompact(
+        State storage state,
+        Context memory c,
+        StreamReferenceMetricProof.CompactInput memory input,
+        bytes calldata original
+    ) internal returns (bytes32 hash) {
+        Encoded.Guard memory guard = Encoded.Guard(
+            c.original.recordHash,
+            state.receipts[c.original.recordHash].supplementHash,
+            c.recorder,
+            c.authorizationClass,
+            c.grantRevision
+        );
+        (bytes32 key, bytes memory canonical, bytes32 runtimeHash, bytes32 replayHash) =
+            Encoded.prepare(c.dependencies, input, guard, original);
+        T.Receipt memory r;
+        r.referenceRecordHash = key;
+        r.payloadHash = keccak256(canonical);
+        r.payloadBytes = uint32(canonical.length);
+        r.runtimeHash = runtimeHash;
+        r.replayHash = replayHash;
+        r.schemaHash = D.SCHEMA_HASH;
+        r.profileHash = D.PROFILE_HASH;
+        r.canonicalizationHash = ModeD.CANON_HASH;
+        r.recorder = c.recorder;
+        r.authorizationClass = c.authorizationClass;
+        r.grantRevision = c.grantRevision;
+        r.recordedAt = uint64(block.timestamp);
+        hash = _hash(c.dependencies, r);
+        r.supplementHash = hash;
+        Bytes.retain(state.payloads[key], c.dependencies.targets[3], canonical);
+        state.receipts[key] = r;
+        emit ReferenceMetricSupplementPublished(1, key, hash, r);
+    }
+
+    function requireCompact(
+        State storage state,
+        R.Dependencies memory d,
+        bytes32 key,
+        StreamReferenceMetricProof.CompactInput memory input
+    ) internal view returns (T.Receipt memory r) {
+        r = state.receipts[key];
+        if (
+            r.supplementHash == 0 || r.referenceRecordHash != key || r.schemaHash != D.SCHEMA_HASH
+                || r.profileHash != D.PROFILE_HASH || r.canonicalizationHash != ModeD.CANON_HASH
+                || r.supplementHash != _hash(d, r)
+        ) revert T.InvalidMetricSupplement();
+        bytes memory canonical = Bytes.read(state.payloads[key]);
+        (bytes32 runtimeHash, bytes32 replayHash) =
+            Encoded.requireCanonical(d, input, canonical, r.payloadHash, r.payloadBytes);
+        if (r.runtimeHash != runtimeHash || r.replayHash != replayHash) {
+            revert T.InvalidMetricSupplement();
+        }
     }
 
     function encoded(State storage state, bytes32 key) public view returns (bytes memory) {
