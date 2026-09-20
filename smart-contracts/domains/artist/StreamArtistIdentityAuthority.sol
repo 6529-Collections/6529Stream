@@ -172,12 +172,12 @@ contract StreamArtistIdentityAuthority is
         external
         view
         override
-        returns (uint256 prefix, uint256[32] memory words, bool exhausted)
+        returns (uint256 prefix, uint256[32] calldata words, bool exhausted)
     {
         _forwardSupplementalRead();
     }
 
-    function recordPreimageBytes(bytes32 hash) external view returns (bytes memory) {
+    function recordPreimageBytes(bytes32 hash) external view returns (bytes calldata) {
         _forwardSupplementalRead();
     }
 
@@ -199,7 +199,7 @@ contract StreamArtistIdentityAuthority is
     function entropyUnavailabilityFindingContext(EU.Input calldata input)
         external
         view
-        returns (U.Context memory)
+        returns (U.Context calldata)
     {
         _forwardIdentityRead();
     }
@@ -207,7 +207,7 @@ contract StreamArtistIdentityAuthority is
     function entropyUnavailabilityFindingRecord(bytes32 hash)
         external
         view
-        returns (Recovery.FindingRecord memory, EU.Admission memory)
+        returns (Recovery.FindingRecord calldata, EU.Admission calldata)
     {
         _forwardIdentityRead();
     }
@@ -222,7 +222,7 @@ contract StreamArtistIdentityAuthority is
     function unavailabilityFindingRecord(bytes32 hash)
         external
         view
-        returns (Recovery.FindingRecord memory, U.Admission memory)
+        returns (Recovery.FindingRecord calldata, U.Admission calldata)
     {
         _forwardIdentityRead();
     }
@@ -238,7 +238,7 @@ contract StreamArtistIdentityAuthority is
     function unavailabilityFindingContext(U.Input calldata p)
         external
         view
-        returns (U.Context memory)
+        returns (U.Context calldata)
     {
         _forwardIdentityRead();
     }
@@ -307,7 +307,7 @@ contract StreamArtistIdentityAuthority is
     function estateRequestFacts(Estate.Request calldata p, bytes32 envelopeHash)
         external
         view
-        returns (Estate.RequestFacts memory)
+        returns (Estate.RequestFacts calldata)
     {
         _forwardIdentityRead();
     }
@@ -315,7 +315,7 @@ contract StreamArtistIdentityAuthority is
     function estateExecutionFacts(Estate.Execution calldata p, bytes32 envelopeHash)
         external
         view
-        returns (uint32, Estate.AccelerationContext memory)
+        returns (uint32, Estate.AccelerationContext calldata)
     {
         _forwardIdentityRead();
     }
@@ -442,7 +442,7 @@ contract StreamArtistIdentityAuthority is
         _forwardIdentityRead();
     }
 
-    function estateDirectivePayload(bytes32 record) external view returns (bytes memory) {
+    function estateDirectivePayload(bytes32 record) external view returns (bytes calldata) {
         _forwardIdentityRead();
     }
 
@@ -460,7 +460,7 @@ contract StreamArtistIdentityAuthority is
     function guardianRecordSupersession(bytes32 recordHash)
         external
         view
-        returns (GuardianSupersessionTypes.Status memory)
+        returns (GuardianSupersessionTypes.Status calldata)
     {
         _forwardIdentityRead();
     }
@@ -468,7 +468,7 @@ contract StreamArtistIdentityAuthority is
     function guardianRecoverySelection(bytes32 actionId)
         external
         view
-        returns (GuardianSelectionTypes.Result memory, R.GuardianRecord memory)
+        returns (GuardianSelectionTypes.Result calldata, R.GuardianRecord calldata)
     {
         _forwardIdentityRead();
     }
@@ -835,7 +835,7 @@ contract StreamArtistIdentityAuthority is
     function identityContestDismissalContext(Dismissal.Request calldata p)
         external
         view
-        returns (Dismissal.Context memory)
+        returns (Dismissal.Context calldata)
     {
         _forwardIdentityRead();
     }
@@ -843,19 +843,19 @@ contract StreamArtistIdentityAuthority is
     function currentIdentityContestCause(bytes32 artistId)
         external
         view
-        returns (Dismissal.Cause memory)
+        returns (Dismissal.Cause calldata)
     {
         _forwardIdentityRead();
     }
 
-    function identityContestCause(bytes32 hash) external view returns (Dismissal.Cause memory) {
+    function identityContestCause(bytes32 hash) external view returns (Dismissal.Cause calldata) {
         _forwardIdentityRead();
     }
 
     function identityContestDismissalRecord(bytes32 hash)
         external
         view
-        returns (Dismissal.Record memory)
+        returns (Dismissal.Record calldata)
     {
         _forwardIdentityRead();
     }
@@ -867,7 +867,7 @@ contract StreamArtistIdentityAuthority is
     function identityTransitionClosure(bytes32 artistId, bytes32 transition)
         external
         view
-        returns (Dismissal.Closure memory item)
+        returns (Dismissal.Closure calldata item)
     {
         _forwardIdentityRead();
     }
@@ -875,7 +875,7 @@ contract StreamArtistIdentityAuthority is
     function identityRevisionContinuation(bytes32 hash)
         external
         view
-        returns (Dismissal.RevisionContinuation memory)
+        returns (Dismissal.RevisionContinuation calldata)
     {
         _forwardIdentityRead();
     }
@@ -888,7 +888,7 @@ contract StreamArtistIdentityAuthority is
         _forwardEstateWriter();
     }
 
-    function identityContestRecord(bytes32 record) external view returns (Contest.Record memory) {
+    function identityContestRecord(bytes32 record) external view returns (Contest.Record calldata) {
         _forwardIdentityRead();
     }
 
@@ -1031,7 +1031,7 @@ contract StreamArtistIdentityAuthority is
         _forwardIdentityRead();
     }
 
-    function identityRecordBytes(bytes32 artistId) external view returns (bytes memory) {
+    function identityRecordBytes(bytes32 artistId) external view returns (bytes calldata) {
         _forwardSupplementalRead();
     }
 
@@ -1046,7 +1046,7 @@ contract StreamArtistIdentityAuthority is
     function operativeIdentityMetadata(bytes32 artistId)
         external
         view
-        returns (bytes32, string memory, string memory)
+        returns (bytes32, string calldata, string calldata)
     {
         _forwardIdentityRead();
     }
@@ -1054,7 +1054,7 @@ contract StreamArtistIdentityAuthority is
     function artistDisplayName(bytes32 artistId)
         external
         view
-        returns (string memory name, bytes32 hash)
+        returns (string calldata name, bytes32 hash)
     {
         _forwardIdentityRead();
     }
@@ -1081,7 +1081,7 @@ contract StreamArtistIdentityAuthority is
     function artistAuthorizationState(bytes32 artistId, bytes32 digest, uint256 nonce)
         external
         view
-        returns (StreamArtistAuthorizationTypes.State memory)
+        returns (StreamArtistAuthorizationTypes.State calldata)
     {
         _forwardIdentityRead();
     }
@@ -1219,7 +1219,7 @@ contract StreamArtistIdentityAuthority is
     function guardianSet(bytes32 artistId)
         external
         view
-        returns (address[] memory, uint32, uint64, bytes32)
+        returns (address[] calldata, uint32, uint64, bytes32)
     {
         _forwardIdentityRead();
     }
@@ -1240,18 +1240,18 @@ contract StreamArtistIdentityAuthority is
         _forwardSupplementalRead();
     }
 
-    function guardianSetRecord(bytes32 record) external view returns (R.GuardianRecord memory) {
+    function guardianSetRecord(bytes32 record) external view returns (R.GuardianRecord calldata) {
         _forwardIdentityRead();
     }
 
-    function rotationRecord(bytes32 record) external view returns (R.RotationRecord memory) {
+    function rotationRecord(bytes32 record) external view returns (R.RotationRecord calldata) {
         _forwardIdentityRead();
     }
 
     function standingRevocationRecord(bytes32 record)
         external
         view
-        returns (R.StandingRecord memory)
+        returns (R.StandingRecord calldata)
     {
         _forwardIdentityRead();
     }
@@ -1259,7 +1259,7 @@ contract StreamArtistIdentityAuthority is
     function artistTransitionState(bytes32 record)
         external
         view
-        returns (R.TransitionState memory)
+        returns (R.TransitionState calldata)
     {
         _forwardIdentityRead();
     }
@@ -1271,7 +1271,7 @@ contract StreamArtistIdentityAuthority is
     function identityRevisionProvisionalAssociation(bytes32 record)
         external
         view
-        returns (R.ProvisionalAssociation memory)
+        returns (R.ProvisionalAssociation calldata)
     {
         _forwardIdentityRead();
     }
@@ -1291,7 +1291,7 @@ contract StreamArtistIdentityAuthority is
     function provisionalAssociation(bytes32 artistId)
         external
         view
-        returns (R.ProvisionalAssociation memory)
+        returns (R.ProvisionalAssociation calldata)
     {
         _forwardSupplementalRead();
     }
@@ -1355,7 +1355,7 @@ contract StreamArtistIdentityAuthority is
         );
     }
 
-    function identity(bytes32 artistId) external view returns (T.Identity memory) {
+    function identity(bytes32 artistId) external view returns (T.Identity calldata) {
         _forwardIdentityRead();
     }
 
@@ -1373,11 +1373,11 @@ contract StreamArtistIdentityAuthority is
         _forwardSupplementalRead();
     }
 
-    function identityDocumentBytes(bytes32 documentHash) external view returns (bytes memory) {
+    function identityDocumentBytes(bytes32 documentHash) external view returns (bytes calldata) {
         _forwardIdentityRead();
     }
 
-    function signatureBundle(bytes32 recordHash) external view returns (bytes memory) {
+    function signatureBundle(bytes32 recordHash) external view returns (bytes calldata) {
         _forwardIdentityRead();
     }
 
@@ -1385,7 +1385,7 @@ contract StreamArtistIdentityAuthority is
         _forwardIdentityRead();
     }
 
-    function delegationRecord(bytes32 grant) external view returns (D.Record memory) {
+    function delegationRecord(bytes32 grant) external view returns (D.Record calldata) {
         _forwardIdentityRead();
     }
 
@@ -1764,7 +1764,7 @@ contract StreamArtistIdentityAuthority is
     function dormancyCompletionEvidence(Dorm.Completion calldata p)
         external
         view
-        returns (bytes memory)
+        returns (bytes calldata)
     {
         _forwardIdentityRead();
     }
@@ -1792,12 +1792,12 @@ contract StreamArtistIdentityAuthority is
     function stewardSanctionGrantRecord(bytes32 hash)
         external
         view
-        returns (SG.GrantRecord memory)
+        returns (SG.GrantRecord calldata)
     {
         _forwardIdentityRead();
     }
 
-    function stewardSanctionGrantSignature(bytes32 hash) external view returns (bytes memory) {
+    function stewardSanctionGrantSignature(bytes32 hash) external view returns (bytes calldata) {
         _forwardSupplementalRead();
     }
 
@@ -1820,12 +1820,12 @@ contract StreamArtistIdentityAuthority is
     function stewardCapabilityGrantContext(SC.Grant calldata p)
         external
         view
-        returns (SC.Context memory)
+        returns (SC.Context calldata)
     {
         _forwardIdentityRead();
     }
 
-    function stewardCapabilityGrantRecord(bytes32 hash) external view returns (SC.Record memory) {
+    function stewardCapabilityGrantRecord(bytes32 hash) external view returns (SC.Record calldata) {
         _forwardIdentityRead();
     }
 
@@ -1910,7 +1910,7 @@ contract StreamArtistIdentityAuthority is
         uint64 snapshot,
         bytes32 root,
         bytes32 manifest
-    ) external view returns (H.Context memory) {
+    ) external view returns (H.Context calldata) {
         _forwardSupplementalRead();
     }
 
@@ -2038,7 +2038,7 @@ contract StreamArtistIdentityAuthority is
     function recoveredIdentityHydrationRaw(
         AH.Query calldata,
         StreamArtistRecoveredHydrationTypes.OwnerProvenance calldata
-    ) external view returns (StreamArtistRecoveredIdentityHydrationTypes.Bundle memory) {
+    ) external view returns (StreamArtistRecoveredIdentityHydrationTypes.Bundle calldata) {
         _forwardRecoveredIdentityRead();
     }
 
@@ -2049,7 +2049,7 @@ contract StreamArtistIdentityAuthority is
     function recoveredAuthorityHydrationState(
         AH.Query calldata,
         StreamArtistRecoveredHydrationTypes.OwnerProvenance calldata
-    ) external view override returns (bytes memory) {
+    ) external view override returns (bytes calldata) {
         _forwardRecoveredIdentityRead();
     }
 
@@ -2061,7 +2061,7 @@ contract StreamArtistIdentityAuthority is
         external
         view
         override
-        returns (StreamArtistRecoveredHydrationTypes.Point memory)
+        returns (StreamArtistRecoveredHydrationTypes.Point calldata)
     {
         _forwardRecoveredIdentityRead();
     }
@@ -2069,7 +2069,7 @@ contract StreamArtistIdentityAuthority is
     function recoveredTimingCheckpoint()
         external
         view
-        returns (StreamArtistRecoveredTimingTypes.Checkpoint memory)
+        returns (StreamArtistRecoveredTimingTypes.Checkpoint calldata)
     {
         _forwardRecoveredIdentityRead();
     }
@@ -2077,7 +2077,7 @@ contract StreamArtistIdentityAuthority is
     function recoveredTimingEntryAt(uint256)
         external
         view
-        returns (StreamArtistRecoveredTimingTypes.Entry memory)
+        returns (StreamArtistRecoveredTimingTypes.Entry calldata)
     {
         _forwardRecoveredIdentityRead();
     }
