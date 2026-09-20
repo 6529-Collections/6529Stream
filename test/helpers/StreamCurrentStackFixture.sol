@@ -1079,7 +1079,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
 
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {
         GovernanceActionPolicyEntry[] memory additional = _additionalOperatingPolicies();
-        rows = new GovernanceActionPolicyEntry[](73 + additional.length);
+        rows = new GovernanceActionPolicyEntry[](74 + additional.length);
         rows[0] = _operatingPolicy(address(manager), manager.configurePhase.selector);
         rows[1] = _operatingPolicy(address(manager), manager.setPhaseExecutor.selector);
         rows[2] = _operatingPolicy(address(manager), manager.setPhasePaused.selector);
@@ -1189,6 +1189,8 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture, ArtistA
         rows[i++] = _operatingPolicy(address(entropy), entropy.activateEntropyProvider.selector);
         rows[i++] = _operatingPolicy(0, address(entropy), entropy.deprecateEntropyProvider.selector);
         rows[i++] = _operatingPolicy(0, address(entropy), entropy.revokeEntropyProvider.selector);
+        // Bounded predecessor grace remains an exact delayed-loosening CALL.
+        rows[i++] = _operatingPolicy(address(manager), manager.setPhaseExecutorWithGrace.selector);
         // Metadata, economics and entropy configuration are also collected from genesis.
         for (uint256 j; j < additional.length; ++j) {
             rows[i++] = additional[j];

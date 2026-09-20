@@ -526,7 +526,7 @@ contract StreamCurrentFullV1ActivationTest is StreamFullV1ActivationFixture {
     }
 
     /// @dev Exact matching rows already installed by this fixture's initial batches, its
-    /// 73 operating policies and the four explicit additional policies above. Not a live lookup.
+    /// 74 operating policies and the four explicit additional policies above. Not a live lookup.
     function _knownPolicies() private view returns (GovernanceActionPolicyEntry[] memory out) {
         GovernanceActionPolicyEntry[] memory wanted =
             StreamFullV1ActivationPolicies.desired(_context());
