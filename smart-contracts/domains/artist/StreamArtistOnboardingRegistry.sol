@@ -1296,6 +1296,16 @@ contract StreamArtistOnboardingRegistry is
         _returnAuxiliaryRead();
     }
 
+    function proposeArtistBindingAfterRevocation(
+        uint256 collectionId,
+        T.BindingProposal calldata p,
+        bytes calldata document,
+        string calldata displayName,
+        bytes32 repudiationRecord
+    ) external returns (bytes32, bytes32) {
+        _forwardRegistryWriter();
+    }
+
     function proposeArtistBinding(
         uint256 collectionId,
         T.BindingProposal calldata p,

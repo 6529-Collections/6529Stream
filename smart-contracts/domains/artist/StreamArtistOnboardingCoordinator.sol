@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistBindingCorrectionOperations.sol";
 import {
     StreamArtistRecoveredHydrationTypes as Recovered
 } from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
@@ -418,14 +419,20 @@ contract StreamArtistOnboardingCoordinator is
         );
     }
 
+    function _finalityReadGas() private view returns (uint256 cap) {
+        uint8 failure;
+        uint64 revision;
+        (cap,, failure, revision) = IStreamGasParameterHost(_suite.registry)
+            .gasParameterInfo(keccak256("6529STREAM_GGP_ARTIST_FINALITY_READ_GAS"));
+        if (cap == 0 || failure != 2 || revision == 0) revert T.InvalidBinding();
+    }
+
     function _recoveryApprovalPins()
         private
         view
         returns (StreamArtistRecoveryOriginalReads.Pins memory)
     {
-        (uint256 cap,, uint8 failure, uint64 revision) = IStreamGasParameterHost(_suite.registry)
-            .gasParameterInfo(keccak256("6529STREAM_GGP_ARTIST_FINALITY_READ_GAS"));
-        if (cap == 0 || failure != 2 || revision == 0) revert T.InvalidBinding();
+        uint256 cap = _finalityReadGas();
         return StreamArtistRecoveryOriginalReads.Pins(
             finalityRegistry, finalityRegistryCodeHash, _runtimeHashes[9], _runtimeHashes[7], cap
         );
@@ -512,9 +519,7 @@ contract StreamArtistOnboardingCoordinator is
         external
         operation
     {
-        (uint256 cap,, uint8 failure, uint64 revision) = IStreamGasParameterHost(_suite.registry)
-            .gasParameterInfo(keccak256("6529STREAM_GGP_ARTIST_FINALITY_READ_GAS"));
-        if (cap == 0 || failure != 2 || revision == 0) revert T.InvalidBinding();
+        uint256 cap = _finalityReadGas();
         StreamArtistSanctionConfirmationOperations.confirm(
             _economicContext(),
             StreamArtistSanctionConfirmationReads.Pins(
@@ -550,9 +555,7 @@ contract StreamArtistOnboardingCoordinator is
     }
 
     function _sanctionPins() private view returns (StreamArtistSanctionCandidate.Pins memory) {
-        (uint256 cap,, uint8 failure, uint64 revision) = IStreamGasParameterHost(_suite.registry)
-            .gasParameterInfo(keccak256("6529STREAM_GGP_ARTIST_FINALITY_READ_GAS"));
-        if (cap == 0 || failure != 2 || revision == 0) revert T.InvalidBinding();
+        uint256 cap = _finalityReadGas();
         return StreamArtistSanctionCandidate.Pins(
             finalityRegistry,
             finalityRegistryCodeHash,
@@ -733,6 +736,19 @@ contract StreamArtistOnboardingCoordinator is
     ) external operation {
         IStreamArtistWindowOwner(_suite.owners[2])
             .configureArtistWindow(actor, parameter, newValue, expectedRevision);
+    }
+
+    function coordinateProposeArtistBindingAfterRevocation(
+        address actor,
+        uint256 collectionId,
+        T.BindingProposal calldata p,
+        bytes calldata document,
+        string calldata displayName,
+        bytes32 repudiationRecord
+    ) external operation returns (bytes32, bytes32) {
+        return StreamArtistBindingCorrectionOperations.proposeStored(
+            _suite, address(reads), configurationHash, msg.data
+        );
     }
 
     function coordinateProposeArtistBinding(

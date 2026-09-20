@@ -12,6 +12,16 @@
   reads and original receipts. Source/type checks pass; native execution,
   linked-library size and gas validation remain pending.
 
+## Added: governed Artist binding corrections after revocation
+
+- Add a typed original-operation1 class2 arbiter correction with exact terminal,
+  full proposal and identity-allocation commitments. Ordinary proposal now starts
+  only a first generation; original operation2 remains independently Artist-authorized.
+- Retain immutable correction evidence/action replay and original native/Archive
+  atomicity; author actual Artist/Safe and current delayed-governance regressions.
+- New correction-history hydration and later consumed-Platform lineage composition
+  remain required follow-ups; native acceptance is separate from source validation.
+
 ## Added: recovered pending generations with complete delegation histories
 
 - Compose original mode1/mode2 pending generations with full grant, revision, revocation and

@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistBindingCorrection.sol";
+
 import {
     IStreamArtistRecoveredHydrationCoordinator
 } from "../../interfaces/stream/artist/IStreamArtistRecoveredHydration.sol";
@@ -518,6 +520,19 @@ contract StreamArtistRegistryWriterExtension {
     ) external onlyHost returns (bytes32) {
         return IStreamArtistDelegationCoordinator(operationCoordinator)
             .coordinateAuthorizeDelegatedRoyaltyFreeze(msg.sender, p, grant, a);
+    }
+
+    function proposeArtistBindingAfterRevocation(
+        uint256 collectionId,
+        T.BindingProposal calldata p,
+        bytes calldata document,
+        string calldata displayName,
+        bytes32 repudiationRecord
+    ) external onlyHost returns (bytes32, bytes32) {
+        return IStreamArtistBindingCorrectionCoordinator(operationCoordinator)
+            .coordinateProposeArtistBindingAfterRevocation(
+                msg.sender, collectionId, p, document, displayName, repudiationRecord
+            );
     }
 
     function proposeArtistBinding(

@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistBindingCorrection.sol";
+
 import {
     IStreamArtistRecoveredHydration
 } from "../../interfaces/stream/artist/IStreamArtistRecoveredHydration.sol";
@@ -188,7 +190,8 @@ import {
 /// @notice Fixed original ERC-165 inventory; the facade retains base module handling.
 library StreamArtistRegistryInterfaces {
     function supportsArtistInterface(bytes4 id) public pure returns (bool) {
-        return id == type(IStreamArtistAttributionRepudiation).interfaceId
+        return id == type(IStreamArtistBindingCorrection).interfaceId
+            || id == type(IStreamArtistAttributionRepudiation).interfaceId
             || id == type(IStreamArtistDisputeWithdrawal).interfaceId
             || id == type(IStreamArtistAttributionDisputes).interfaceId
             || id == type(IStreamArtistEntropyFindingHydration).interfaceId

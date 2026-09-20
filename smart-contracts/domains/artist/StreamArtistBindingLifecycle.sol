@@ -18,6 +18,10 @@ import "./StreamArtistDelegationCollectionHydration.sol";
 import "./StreamArtistCurrentAuthorityFacts.sol";
 
 import "./StreamArtistOwner.sol";
+import { StreamArtistBindingCorrectionState } from "./StreamArtistBindingCorrectionState.sol";
+import {
+    StreamArtistBindingCorrectionTypes as BC
+} from "../../interfaces/stream/artist/IStreamArtistBindingCorrection.sol";
 import "./StreamArtistBindingOperations.sol";
 import "./StreamArtistCollaboratorHashes.sol";
 import {
@@ -31,6 +35,9 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
     mapping(uint256 => mapping(uint64 => L.Terminal)) private _terminals;
     mapping(uint256 => mapping(uint64 => C.BindingTerms)) private _terms;
     mapping(uint256 => mapping(uint64 => T.CollaboratorRecord[])) private _collaborators;
+
+    mapping(bytes32 => StreamArtistBindingCorrectionState.Correction) private _corrections;
+
     event ArtistBindingProposed(
         uint16 schemaVersion,
         uint256 indexed collectionId,
@@ -94,15 +101,47 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
         T.BindingProposal calldata p
     ) external returns (T.Binding memory item) {
         _check(c, 1);
+        StreamArtistBindingCorrectionState.Summary memory empty;
+        return _propose(c, collectionId, artistId, p, empty);
+    }
+
+    function proposeAfterRevocation(
+        T.ActionContext calldata c,
+        uint256 collectionId,
+        bytes32 artistId,
+        T.BindingProposal calldata p,
+        BC.Approval calldata approval
+    ) external returns (T.Binding memory) {
+        _check(c, 1);
+        StreamArtistBindingCorrectionState.Summary memory summary =
+            StreamArtistBindingCorrectionState.validateEncoded(_bindings, msg.data);
+        return _propose(c, collectionId, artistId, p, summary);
+    }
+
+    function bindingCorrection(bytes32 bindingHash)
+        external
+        view
+        returns (BC.Approval calldata approval, bytes32 approvalHash)
+    {
+        bytes memory encoded = StreamArtistBindingCorrectionState.encoded(_corrections, bindingHash);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
+    }
+
+    function _propose(
+        T.ActionContext calldata c,
+        uint256 collectionId,
+        bytes32 artistId,
+        T.BindingProposal calldata p,
+        StreamArtistBindingCorrectionState.Summary memory approval
+    ) private returns (T.Binding memory item) {
         if (
             collectionId == 0 || artistId == bytes32(0) || p.artistAddress == address(0)
                 || p.identityRecordHash == bytes32(0)
         ) revert T.InvalidRecord();
         T.Binding storage previous = _bindings[collectionId];
-        if (
-            previous.generation != 0
-                && (previous.accepted || _terminals[collectionId][previous.generation].kind == 0)
-        ) revert T.InvalidAttribution(collectionId);
+        if (approval.cause == 0 ? previous.generation != 0 : previous.generation == 0) {
+            revert T.InvalidAttribution(collectionId);
+        }
         uint64 generation = previous.generation + 1;
         if (
             (p.consentMode != 1 && p.consentMode != 2) || p.saleConsentScope > 1
@@ -135,13 +174,43 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
             keccak256(abi.encode(collectionId, item.generation)),
             item.bindingHash
         );
-        _commit(
-            c,
-            keccak256(abi.encode(collectionId, artistId, p)),
-            keccak256(abi.encode(collectionId, item)),
-            keccak256(abi.encode(key, item.bindingHash)),
-            item.bindingHash
-        );
+        if (approval.cause == 0) {
+            _commit(
+                c,
+                keccak256(abi.encode(collectionId, artistId, p)),
+                keccak256(abi.encode(collectionId, item)),
+                keccak256(abi.encode(key, item.bindingHash)),
+                item.bindingHash
+            );
+        } else {
+            bytes32 record = StreamArtistBindingCorrectionState.hashEncoded(
+                _environment(), collectionId, item.bindingHash, msg.data
+            );
+            bytes32 actionKey = _consume(
+                keccak256("binding_lifecycle.replay.correction_action"), approval.actionId, record
+            );
+            StreamArtistBindingCorrectionState.saveEncoded(
+                _corrections, item.bindingHash, record, msg.data
+            );
+            _commit(
+                c,
+                keccak256(abi.encode(collectionId, artistId, p, record)),
+                keccak256(abi.encode(collectionId, item, record)),
+                keccak256(abi.encode(key, item.bindingHash, actionKey, record)),
+                item.bindingHash
+            );
+            emit BC.ArtistBindingCorrectionApproved(
+                1,
+                collectionId,
+                item.bindingHash,
+                record,
+                approval.previousGeneration,
+                approval.previousBindingHash,
+                approval.cause,
+                approval.causeRecord,
+                approval.actionId
+            );
+        }
         _native(c.operationId, item.bindingHash, artistId, collectionId);
         emit ArtistBindingProposed(
             1,
