@@ -167,6 +167,9 @@ the release policy in `docs/release-policy.md`.
   continuity admission and a configured ordinary backup deployment/plan helper.
   Preserve original host history and fulfillment; actual-current Safe cutover
   recipes are authored and await coordinated runtime verification.
+- Add current metadata citation admission and read clients with exact retained
+  evidence, original class-1 governance calls and Safe receipt verification.
+
 - Extend Artist authority hydration callers to the source-selected combined
   multiple-Artist delegation profile, retaining complete per-Artist evidence.
 

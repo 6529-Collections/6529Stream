@@ -337,6 +337,9 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Current metadata citation](docs/current-metadata-citation.md) preserves the
+  separate governed admission, retained evidence and current rendering profile.
+
 - [Artist authority hydration](docs/current-artist-authority-hydration.md)
   preserves the four approved living profiles and atomic seven-owner evidence,
   including source-selected multiple-Artist delegation.
