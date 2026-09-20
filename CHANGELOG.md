@@ -13,6 +13,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Artist personhood documentary references
 
+- Join the native conservation sale provider to current resolved personhood or
+  the original explicit waiver, preserving their distinct original hashes and
+  imported origins. Expose the exact original provider Configuration independently
+  of later governed gas increases. Focused source cases and ABI checks are
+  complete; behavioral and complete current-graph acceptance remain pending.
 - Link the original signed Artist personhood head to its exact General identity
   notarization, with immutable proof summaries, explicit currentness and full audit
   reads. Preserve original signatures, records, waivers and import domains.

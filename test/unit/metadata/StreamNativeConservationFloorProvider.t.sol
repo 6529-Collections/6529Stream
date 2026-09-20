@@ -4,6 +4,13 @@ pragma solidity ^0.8.19;
 import "./StreamConservationSelectionFixture.sol";
 import "../../../smart-contracts/domains/metadata/StreamRightsRecordSelection.sol";
 import "../../../smart-contracts/domains/metadata/StreamNativeConservationFloorProvider.sol";
+import {
+    StreamArtistPersonhoodTypes as Personhood,
+    IStreamArtistPersonhoodEvidence
+} from "../../../smart-contracts/interfaces/stream/artist/IStreamArtistPersonhoodEvidence.sol";
+import {
+    StreamArtistPersonhoodDefinitions as PersonhoodDefinitions
+} from "../../../smart-contracts/domains/artist/StreamArtistPersonhoodDefinitions.sol";
 
 /// @dev Explicit typed native Router and media-selector boundary. It does not produce archive proof.
 /// The empty inventory is the literal full empty native MediaManifest commitment, not bytes32(0).
@@ -476,6 +483,266 @@ contract StreamNativeConservationFloorProviderTest is ConservationSelectionFixtu
             )
         );
         new StreamNativeConservationFloorProvider(c);
+    }
+
+    function _artistFloorIntent() private returns (bytes32 hash) {
+        _platformDeclaration(false);
+        StreamConservationRecordTypes.Intent memory intent = _intent();
+        (hash,) = _publish(
+            IStreamConservationRecordSelection.RecordKind.INTENT,
+            StreamArtistIntentJson.serialize(intent),
+            1
+        );
+        selection.adoptIntent(1, subject, hash, 0, 0, _intentWitness(hash, intent));
+    }
+
+    function _typedPersonhood() private view returns (Personhood.Selection memory p) {
+        // Exact original owner read boundary only: this test does not execute verified op24.
+        p.nativeRecord.recordHash = keccak256("typed original personhood evidence record");
+        p.nativeRecord.subjectStateHash = keccak256("operative identity after registration");
+        p.nativeRecord.schemaId = PersonhoodDefinitions.EVIDENCE_SCHEMA;
+        p.nativeRecord.statementHash = keccak256("typed original retained personhood statement");
+        p.nativeRecord.generation = 1;
+        p.nativeRecord.signedAt = uint64(block.timestamp);
+        p.nativeRecord.signer = ORIGINAL;
+        p.sourceRegistry = address(0x011d); // Original imported origin differs from current facade.
+        p.evidenceReference = Personhood.Reference(
+            1,
+            PersonhoodDefinitions.PROFILE_HASH,
+            p.sourceRegistry,
+            ARTIST_ID,
+            p.nativeRecord.subjectStateHash,
+            address(store),
+            address(store).codehash,
+            keccak256("typed original notarization record")
+        );
+        p.notarizationType = keccak256("INSTITUTIONAL_VERIFICATION");
+        p.recorder = address(0x6529);
+        p.notarizationHead = p.evidenceReference.notarizationRecordHash;
+        p.identityCurrent = true;
+        p.notarizationCurrent = true;
+        p.status = Personhood.Status.RESOLVED;
+    }
+
+    function _mockPersonhood(address owner, Personhood.Selection memory p, bytes32 summary)
+        private
+    {
+        cvm.mockCall(
+            owner,
+            abi.encodeCall(
+                IStreamArtistPersonhoodEvidence.personhoodEvidence, (uint256(1), ARTIST_ID)
+            ),
+            abi.encode(p)
+        );
+        cvm.mockCall(
+            owner,
+            abi.encodeCall(
+                IStreamArtistPersonhoodEvidence.personhoodProofSummaryHash,
+                (p.nativeRecord.recordHash)
+            ),
+            abi.encode(summary)
+        );
+    }
+
+    function testProviderResolvedImportedPersonhoodPreservesOriginalRegistrationAndDiagnostics()
+        public
+        providerReady
+    {
+        bytes32 intentHash = _artistFloorIntent();
+        Personhood.Selection memory p = _typedPersonhood();
+        bytes32 summary = keccak256("typed original verified summary hash");
+        require(
+            p.nativeRecord.subjectStateHash != IDENTITY && p.sourceRegistry != address(facade),
+            "operative identity and imported origin deliberately differ from current registration graph"
+        );
+        _mockPersonhood(address(attributionOwner), p, summary);
+        StreamConservationFloorTypes.CollectionFacts memory lite =
+            provider.requireCollectionFloor(1, _LITE);
+        StreamConservationFloorTypes.CollectionFacts memory full =
+            provider.requireCollectionFloor(1, _FULL);
+        require(
+            lite.artistId == ARTIST_ID && lite.identityRecordHash == IDENTITY
+                && lite.personhoodEvidenceHash == summary && lite.intentRecordHash == intentHash
+                && lite.rightsRecordHash == rightsHash && lite.interviewEvidenceHash != 0
+                && keccak256(abi.encode(full)) == keccak256(abi.encode(lite)),
+            "collection floor adds original personhood commitment without changing registration identity"
+        );
+        StreamConservationFloorTypes.CollectionFacts memory diagnostic =
+            provider.currentCollectionRecords(1);
+        require(
+            diagnostic.personhoodEvidenceHash == 0 && diagnostic.identityRecordHash == IDENTITY
+                && diagnostic.intentRecordHash == intentHash,
+            "diagnostic remains zero personhood even when the separate floor is available"
+        );
+    }
+
+    function testProviderCurrentWaiverSupersedesProofAndStaleWaiverStillRejects()
+        public
+        providerReady
+    {
+        _artistFloorIntent();
+        Personhood.Selection memory p = _typedPersonhood();
+        bytes32 oldSummary = keccak256("previous typed verified summary");
+        _mockPersonhood(address(attributionOwner), p, oldSummary);
+        require(
+            provider.requireCollectionFloor(1, _LITE).personhoodEvidenceHash == oldSummary,
+            "initial proof"
+        );
+        p.nativeRecord.recordHash = keccak256("original selected native waiver");
+        p.nativeRecord.schemaId = PersonhoodDefinitions.WAIVER_SCHEMA;
+        p.nativeRecord.statementHash = keccak256("original selected waiver statement");
+        p.sourceRegistry = address(0);
+        Personhood.Reference memory empty;
+        p.evidenceReference = empty;
+        p.notarizationType = 0;
+        p.recorder = address(0);
+        p.notarizationHead = 0;
+        p.notarizationCurrent = false;
+        p.status = Personhood.Status.WAIVER;
+        _mockPersonhood(address(attributionOwner), p, 0);
+        require(
+            provider.requireCollectionFloor(1, _FULL).personhoodEvidenceHash
+                == p.nativeRecord.recordHash,
+            "selected original waiver succeeds with no documentary summary"
+        );
+        p.identityCurrent = false;
+        p.status = Personhood.Status.STALE;
+        _mockPersonhood(address(attributionOwner), p, 0);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamNativeConservationFloorProvider.NativePersonhoodVerificationUnavailable
+                .selector,
+                uint256(1),
+                ARTIST_ID,
+                IDENTITY
+            )
+        );
+        provider.requireCollectionFloor(1, _LITE);
+        require(
+            provider.currentCollectionRecords(1).personhoodEvidenceHash == 0,
+            "retained old summary and stale waiver do not change diagnostics"
+        );
+    }
+
+    function testProviderRetainedArtistPinsRejectCoherentAttributionOwnerReplacement()
+        public
+        providerReady
+    {
+        _artistFloorIntent();
+        Personhood.Selection memory p = _typedPersonhood();
+        bytes32 summary = keccak256("typed original summary");
+        _mockPersonhood(address(attributionOwner), p, summary);
+        require(
+            provider.requireCollectionFloor(1, _LITE).personhoodEvidenceHash == summary,
+            "initial exact graph"
+        );
+        ConservationSelectionOwnerBoundary replacement = new ConservationSelectionOwnerBoundary();
+        replacement.configure(address(core), address(facade), address(coordinator));
+        replacement.setBinding(bindingOwner.binding(1), 2);
+        _mockPersonhood(address(replacement), p, summary);
+        T.SuiteConfiguration memory original = coordinator.suiteConfiguration();
+        T.SuiteConfiguration memory changed = coordinator.suiteConfiguration();
+        changed.owners[4] = address(replacement);
+        coordinator.setSuite(changed);
+        vm.expectRevert();
+        provider.currentCollectionRecords(1);
+        vm.expectRevert();
+        provider.requireCollectionFloor(1, _LITE);
+        coordinator.setSuite(original);
+        require(
+            provider.requireCollectionFloor(1, _LITE).personhoodEvidenceHash == summary,
+            "original retained conservation graph restores floor"
+        );
+        bytes memory originalRuntime = address(attributionOwner).code;
+        vm.etch(address(attributionOwner), hex"00");
+        vm.expectRevert();
+        provider.currentCollectionRecords(1);
+        vm.etch(address(attributionOwner), originalRuntime);
+        require(
+            provider.requireCollectionFloor(1, _LITE).personhoodEvidenceHash == summary,
+            "restored original Attribution runtime, not newly sampled replacement"
+        );
+    }
+
+    function testProviderOriginalConfigurationRoundtripAndIndependentCommitment()
+        public
+        providerReady
+    {
+        StreamNativeConservationFloorProvider.Configuration memory expected = _configuration();
+        StreamNativeConservationFloorProvider.Configuration memory original =
+            provider.originalConfiguration();
+        require(
+            keccak256(abi.encode(original)) == keccak256(abi.encode(expected)),
+            "complete original targets, pins, executor and all gas configuration fields"
+        );
+        require(
+            provider.configurationHash()
+                == keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_NATIVE_CONSERVATION_PROVIDER_V1"),
+                        block.chainid,
+                        original
+                    )
+                ),
+            "original constructor tuple independently reconstructs immutable configuration hash"
+        );
+    }
+
+    function testProviderOriginalConfigurationRetainsGenesisAfterAllGovernedGasRaises()
+        public
+        providerReady
+    {
+        StreamNativeConservationFloorProvider.Configuration memory original =
+            provider.originalConfiguration();
+        bytes32 originalHash = provider.configurationHash();
+        _raiseProviderGas(provider.READ_GAS(), original.readGas.genesisValue + 1000);
+        _raiseProviderGas(provider.SOURCE_GAS(), original.sourceGas.genesisValue + 1000);
+        _raiseProviderGas(provider.REFERENCE_GAS(), original.referenceGas.genesisValue + 1000);
+        require(
+            provider.gasParameter(provider.READ_GAS()) == original.readGas.genesisValue + 1000
+                && provider.gasParameter(provider.SOURCE_GAS())
+                    == original.sourceGas.genesisValue + 1000
+                && provider.gasParameter(provider.REFERENCE_GAS())
+                    == original.referenceGas.genesisValue + 1000,
+            "actual governed current values raised independently"
+        );
+        StreamNativeConservationFloorProvider.Configuration memory after_ =
+            provider.originalConfiguration();
+        require(
+            keccak256(abi.encode(after_)) == keccak256(abi.encode(original))
+                && provider.configurationHash() == originalHash,
+            "getter retains original names, genesis values, floors, failure classes and pins"
+        );
+        require(
+            provider.requireCollectionFloor(1, _LITE).rightsRecordHash == rightsHash,
+            "original platform floor remains usable after governed raises"
+        );
+    }
+
+    function _raiseProviderGas(bytes32 parameter, uint256 nextValue) private {
+        (uint256 value, uint256 floor, uint8 failureClass, uint64 revision) =
+            provider.gasParameterInfo(parameter);
+        bytes32 scope = keccak256(
+            abi.encode(
+                bytes32(0x9533611d402c2b44cf950a4a8900d25f6829bfac541dc4d5353094f966bb1a71),
+                block.chainid,
+                address(provider),
+                parameter
+            )
+        );
+        bytes32 stateDomain = 0x5059a253d3f7dd63b5d9fd1f0568caf72967f501a3db678b31cefe911334159c;
+        bytes32 oldState =
+            keccak256(abi.encode(stateDomain, scope, value, floor, failureClass, revision));
+        bytes32 nextState = keccak256(
+            abi.encode(stateDomain, scope, nextValue, floor, failureClass, revision + uint64(1))
+        );
+        executor.execute(
+            address(provider),
+            abi.encodeCall(IStreamGasParameterHost.raiseGasParameter, (parameter, nextValue)),
+            scope,
+            oldState,
+            nextState
+        );
     }
 
     function _script(bytes32 receipt, bytes32 payloadHash, bool chunked, bytes32 libraryBundle)

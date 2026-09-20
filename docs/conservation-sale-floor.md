@@ -75,11 +75,39 @@ new capture for an identical release that already has a genuine successful
 receipt. Completed-token render samples never establish that receipt.
 
 The native provider reads original RIGHTS, intent/interview and master/waiver
-evidence. Documentary personhood verification remains explicitly unavailable;
-an opaque personhood schema head does not satisfy it. Artist collections cannot
-complete this provider's collection floor while that original verification is
-unavailable. Platform collection facts do not invent an artist identity, and
+evidence. For Artist collections, `requireCollectionFloor` also reads the actual
+current personhood head from the fixed Attribution owner. It first requires the
+current conservation selection, which authenticates its retained Artist facade,
+Coordinator, Identity, Binding and Attribution runtime pins. The personhood join
+then checks the configured Core/Metadata/Artist pins, current selected pointers,
+Metadata's original facade and the actual Coordinator suite and owner bindings.
+Newly sampled code hashes alone do not replace those retained graph pins.
+
+A RESOLVED selection must have both current identity and notarization, the exact
+original evidence schema and reference profile, and the original scoped report
+head and recorder. The provider retains the original authenticated
+`personhoodProofSummaryHash` in `personhoodEvidenceHash`. It uses the producer's
+bounded currentness and complete retained-summary authentication; it does not
+reparse documentary payloads or reauthorize historical signatures at payment.
+An explicit current WAIVER under the original native waiver schema instead
+retains its native `recordHash` in that field. These are distinct original hash
+domains. A waiver does not contain a documentary reference or proof summary.
+Missing, stale, opaque or malformed records never imply a waiver.
+
+The collection facts retain the immutable registration `identityRecordHash`.
+Personhood follows the current operative identity; those hashes need not be
+equal. Valid imported evidence keeps its original source registry and original
+hashes, even when the currently selected registry differs. The diagnostic
+`currentCollectionRecords` still returns zero personhood and does not certify
+the floor. Platform collection facts do not invent an artist identity, and
 platform media archives require their own genuine producer.
+
+`originalConfiguration()` returns the exact stored constructor `Configuration`:
+all ten addresses and code hashes, the executor, and the three original gas
+configurations. It exposes the original `configurationHash` preimage without
+changing that hash domain, constructor or existing interface IDs. Original gas
+genesis values remain in this getter after governance raises the live values;
+read `gasParameterInfo` for the current governed settings.
 
 ## Original direct sale receipts
 
@@ -144,3 +172,12 @@ batch adds preparation/history/freshness tests, actual-recorder integration
 cases, original native record tests and explicit typed source-boundary tests.
 Native execution, deployment sizes and paid marginal gas must be reported for
 their exact final source capture before claiming those checks passed.
+
+The personhood-consumer cases exercise the real helper and identity-graph reader
+against exact typed read boundaries, including proof/waiver selection, imported
+origins, currentness, malformed responses and changed dependency pins. They do
+not exercise actual operation-24 recording, its documentary proof producer or a
+complete paid Artist transaction. The configuration tests independently rebuild
+the original hash preimage and check all three gas configurations after actual
+governed increases. These source cases are separate from the earlier frozen
+native results; runtime and complete current-graph acceptance remain pending.

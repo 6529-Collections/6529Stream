@@ -16,10 +16,11 @@ import "../../interfaces/stream/core/IStreamCoreConservationTier.sol";
 import "../parameters/StreamGasParameterHost.sol";
 import "./StreamConservationSaleRights.sol";
 import "./StreamConservationTiers.sol";
+import { StreamConservationPersonhoodReads } from "./StreamConservationPersonhoodReads.sol";
 
 /// @notice Original native records and complete selected media slots for primary conservation.
-/// @dev Documentary personhood remains unavailable; FULL script sales require the original prospective reference host.
-/// This host never substitutes an opaque schema head for the held personhood verification.
+/// @dev Artist personhood uses the original current evidence or explicit waiver selected by
+/// Attribution. FULL script sales also require the original prospective reference host.
 contract StreamNativeConservationFloorProvider is
     StreamGasParameterHost,
     IStreamConservationFloorProvider,
@@ -98,6 +99,13 @@ contract StreamNativeConservationFloorProvider is
             || id == type(IStreamGasParameterHost).interfaceId || id == 0x01ffc9a7;
     }
 
+    /// @notice Exact original constructor preimage of configurationHash, including all ten pins.
+    /// @dev Gas configurations retain their original genesis values. Current governed values are
+    /// available through gasParameterInfo and never replace this stored deployment configuration.
+    function originalConfiguration() external view returns (Configuration memory) {
+        return _configuration;
+    }
+
     /// @notice Diagnostic original RIGHTS/intent/interview facts. Zero personhood means unavailable.
     /// @dev This diagnostic is not a successful floor proof and is never consumed as one by the ledger.
     function currentCollectionRecords(uint256 collectionId)
@@ -147,9 +155,31 @@ contract StreamNativeConservationFloorProvider is
         _tier(tier);
         f = currentCollectionRecords(collectionId);
         if (!f.platformWorks) {
-            revert NativePersonhoodVerificationUnavailable(
-                collectionId, f.artistId, f.identityRecordHash
-            );
+            // currentCollectionRecords has just authenticated the actual conservation selector's
+            // retained artist graph pins. Its registration identity remains unchanged; the
+            // original Attribution owner independently checks the current operative identity.
+            StreamConservationPersonhoodReads.Dependencies memory d;
+            d.targets = [core, metadata, _configuration.targets[8]];
+            d.codeHashes = [coreCodeHash, metadataCodeHash, _configuration.codeHashes[8]];
+            d.chainId = deploymentChainId;
+            d.readGas = _gasParameterValue(READ_GAS);
+            d.sourceGas = _gasParameterValue(SOURCE_GAS);
+            try StreamConservationPersonhoodReads.requireCurrent(
+                d, collectionId, f.artistId
+            ) returns (
+                bytes32 evidenceHash
+            ) {
+                if (evidenceHash == 0) {
+                    revert NativePersonhoodVerificationUnavailable(
+                        collectionId, f.artistId, f.identityRecordHash
+                    );
+                }
+                f.personhoodEvidenceHash = evidenceHash;
+            } catch {
+                revert NativePersonhoodVerificationUnavailable(
+                    collectionId, f.artistId, f.identityRecordHash
+                );
+            }
         }
     }
 
