@@ -297,8 +297,10 @@ contract StreamArtistOnboardingCoordinator is
         if (msg.sender != _suite.registry) revert T.Unauthorized(msg.sender);
         if (_entered != 0) revert T.ReentrantOperation();
         if (block.chainid != deploymentChainId) revert T.InvalidBinding();
-        for (uint256 i; i < 16; ++i) {
+        for (uint256 i; i < 16;) {
             if (_targets[i].codehash != _runtimeHashes[i]) revert T.ComponentChanged(_targets[i]);
+            // The constructor-fixed sixteen pins bound this loop.
+            unchecked { ++i; }
         }
         if (
             msg.sig != this.coordinateCommitArtistHistoryImportRoot.selector
@@ -492,8 +494,10 @@ contract StreamArtistOnboardingCoordinator is
     }
 
     function _unavailabilityPins() private view {
-        for (uint256 i; i < 16; ++i) {
+        for (uint256 i; i < 16;) {
             if (_targets[i].codehash != _runtimeHashes[i]) revert T.ComponentChanged(_targets[i]);
+            // The constructor-fixed sixteen pins bound this loop.
+            unchecked { ++i; }
         }
         if (
             _suite.core.codehash != _runtimeHashes[9]
@@ -1135,8 +1139,10 @@ contract StreamArtistOnboardingCoordinator is
 
     function authorityHydrationSuite() external view returns (T.SuiteConfiguration calldata) {
         if (block.chainid != deploymentChainId) revert T.InvalidBinding();
-        for (uint256 j; j < 16; ++j) {
+        for (uint256 j; j < 16;) {
             if (_targets[j].codehash != _runtimeHashes[j]) revert T.ComponentChanged(_targets[j]);
+            // The constructor-fixed sixteen pins bound this read-only loop.
+            unchecked { ++j; }
         }
         bytes memory encoded = StreamArtistCoordinatorRecoveryRead.suiteEncoded(_suite);
         assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
