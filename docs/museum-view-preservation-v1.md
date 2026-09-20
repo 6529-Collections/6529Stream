@@ -126,3 +126,45 @@ Verification reconstructs every file, including
 `view-preservation/evidence.json` and `view-preservation/target-proof.json`.
 Changing derived bytes and recomputing the outer file hashes does not make a
 valid capture.
+
+## Native component byte oracle
+
+The separate offline oracle compares actual native test execution with the
+frozen consumer ABI and hashing functions. Its native source is
+`7701ad897c27257e5f082b310d62a6e35526cd0a`; the consumer source remains
+`e8a569b36927ed7f711a14a30ce5b09690694dd0`. Fourteen directly relevant source
+blobs are identical between those commits. That equality does not establish
+runtime identity for the entire dependency graph.
+
+The checkpoint case retains raw Source5, producer configuration/admission and
+three 31-word output returns, including a retained-burned member. It compares
+actual test JSON/HTML bytes, row hashes, checkpoint ID, ordered output root and
+positional content root. Checkpoint configuration includes explicitly pinned
+test-fixture inputs; the completed Plan is derived, not a raw getter capture.
+
+The separate manifest case retains raw encoding and carrier returns, Store
+payloads and recorded event topics/data. It checks the 3,648-byte part, 960-byte
+index, descriptors, part hash, manifest plan and record. The initial empty
+descriptor index used by `beginManifest` is retained separately. Forge's
+pretty-printed structs are not used as ABI evidence.
+
+```bash
+python -m tools.museum.view_preservation_native_oracle_v1 --vectors
+python -m tools.museum.view_preservation_native_oracle_v1 \
+  --trace-directory <directory-containing-original-checkpoint.log-and-manifest.log>
+python -m unittest tools.museum.test_view_preservation_checkpoint_oracle_v1 \
+  tools.museum.test_view_preservation_manifest_oracle_v1
+```
+
+Vector mode checks the committed extracted bytes for consistency. Trace mode
+also authenticates the original log SHA-256 pins and re-extracts exactly the
+committed vectors. Neither command starts an EVM, compiler or network client.
+The [vector provenance](../tools/museum/fixtures/view-preservation-native-provenance-v1.json)
+records source blob and trace pins.
+
+These are two distinct native component cases: the manifest uses a typed
+checkpoint with its own roots. Their evidence does not join into one capture.
+The native Registry at `7701` predates preservation registration, which remains
+a typed test boundary here. Neither case verifies the later snapshot, Router
+root, governance or finality ceremony. The test render bytes do not recover an
+original public-chain render or establish historical authority.

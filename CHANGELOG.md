@@ -857,6 +857,10 @@ the release policy in `docs/release-policy.md`.
 - Fit the joined Artist Payout owner by factoring six original structured reads
   into a fixed typed encoder, preserving its ABI, storage and mutation bodies.
 
+- Add an offline native trace oracle for original VIEW preservation output and
+  manifest bytes, with separate source pins and explicit typed test boundaries.
+  It checks extracted native vectors without implying complete capture or finality.
+
 - Add a separate VIEW preservation capture with complete output Merkle trees,
   original root-free snapshot payloads and typed Router CONTENT_ROOT history.
   Exact offline replay joins distinct producer admission and retained source
