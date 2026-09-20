@@ -26,6 +26,7 @@ import { StreamWorkRecordContext } from "../records/StreamWorkRecordContext.sol"
 import { IStreamSchemaRegistry } from "../../interfaces/stream/metadata/IStreamSchemaRegistry.sol";
 import { StreamReferenceModeProof } from "./StreamReferenceModeProof.sol";
 import { StreamReferenceMetricProof } from "./StreamReferenceMetricProof.sol";
+import { StreamReferenceMetricRetention as Retention } from "./StreamReferenceMetricRetention.sol";
 
 import {
     StreamReferenceMetricEncodedProof as Encoded
@@ -144,12 +145,12 @@ library StreamReferenceMetricStorage {
             c.authorizationClass,
             c.grantRevision
         );
-        (bytes32 key, bytes memory canonical, bytes32 runtimeHash, bytes32 replayHash) =
-            Encoded.prepare(c.dependencies, input, guard, original);
+        (bytes32 key, Retention.Payload memory payload, bytes32 runtimeHash, bytes32 replayHash) =
+            Encoded.prepareRetention(c.dependencies, input, guard, original);
         T.Receipt memory r;
         r.referenceRecordHash = key;
-        r.payloadHash = keccak256(canonical);
-        r.payloadBytes = uint32(canonical.length);
+        r.payloadHash = payload.contentHash;
+        r.payloadBytes = payload.byteLength;
         r.runtimeHash = runtimeHash;
         r.replayHash = replayHash;
         r.schemaHash = D.SCHEMA_HASH;
@@ -161,7 +162,7 @@ library StreamReferenceMetricStorage {
         r.recordedAt = uint64(block.timestamp);
         hash = _hash(c.dependencies, r);
         r.supplementHash = hash;
-        Bytes.retain(state.payloads[key], c.dependencies.targets[3], canonical);
+        Retention.retain(state.payloads[key], c.dependencies.targets[3], payload);
         state.receipts[key] = r;
         emit ReferenceMetricSupplementPublished(1, key, hash, r);
     }

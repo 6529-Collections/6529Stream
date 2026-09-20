@@ -22,6 +22,10 @@ import {
     IStreamReferenceMetricSupplement as I
 } from "../../../smart-contracts/interfaces/stream/preservation/IStreamReferenceMetricSupplement.sol";
 
+import {
+    StreamReferenceMetricRetention as Retention
+} from "../../../smart-contracts/domains/preservation/StreamReferenceMetricRetention.sol";
+
 interface CompactVm {
     function readFileBinary(string calldata) external view returns (bytes memory);
     function readFile(string calldata) external view returns (string memory);
@@ -99,6 +103,17 @@ contract CompactMetricProbe {
     ) external view returns (bytes32, bytes memory, bytes32, bytes32) {
         R.Dependencies memory d;
         return Encoded.prepare(d, Proof.compact(p, e, context), g, raw);
+    }
+
+    function prepareRetention(
+        R.Publication memory p,
+        M.Evidence memory e,
+        bytes32 context,
+        Encoded.Guard memory g,
+        bytes calldata raw
+    ) external view returns (bytes32, Retention.Payload memory, bytes32, bytes32) {
+        R.Dependencies memory d;
+        return Encoded.prepareRetention(d, Proof.compact(p, e, context), g, raw);
     }
 
     function stored(
@@ -229,6 +244,119 @@ contract StreamReferenceMetricCompactTest {
             uint32(canonical.length)
         );
         require(a == c && b == d);
+    }
+
+    function testRetainedProofTransportMatchesCompleteCanonicalAndOriginalDigests() public view {
+        bytes memory raw = abi.encodeCall(I.publishMetricSupplement, (KEY, supplement));
+        _retentionParity(_guard(), raw);
+        Encoded.Guard memory g = _guard();
+        g.authorizationClass = 8;
+        _retentionParity(g, raw);
+    }
+
+    function testRetainedProofTransportPreservesUnknownSelectorMeaning() public view {
+        bytes memory raw = abi.encodeCall(I.publishMetricSupplement, (KEY, supplement));
+        // The original private transport deliberately decodes original[4:] without
+        // validating its selector. Public host dispatch remains a separate boundary.
+        raw[0] = 0xde;
+        raw[1] = 0xad;
+        raw[2] = 0xbe;
+        raw[3] = 0xef;
+        _retentionParity(_guard(), raw);
+    }
+
+    function testRetainedProofTransportMalformedAndGuardPrecedence() public {
+        _retentionFailure(_guard(), hex"");
+        _retentionFailure(_guard(), hex"010203");
+        _retentionFailure(_guard(), hex"deadbeef");
+        _retentionFailure(_guard(), abi.encodePacked(bytes4(0xdeadbeef), KEY));
+        bytes memory raw = abi.encodeCall(I.publishMetricSupplement, (KEY, supplement));
+        bytes memory unavailable = abi.encodeWithSignature("UnavailableDefinition()");
+        vm.mockCallRevert(
+            address(Definitions),
+            abi.encodeWithSelector(Definitions.definition.selector),
+            unavailable
+        );
+        Encoded.Guard memory g = _guard();
+        g.originalRecordHash ^= bytes32(uint256(1));
+        g.recorder = address(0);
+        _prepareFailure(
+            g, raw, abi.encodeWithSelector(T.MetricSupplementAlreadyPublished.selector, KEY)
+        );
+        g = _guard();
+        g.existingSupplementHash = bytes32(uint256(1));
+        g.authorizationClass = 0;
+        _prepareFailure(
+            g, raw, abi.encodeWithSelector(T.MetricSupplementAlreadyPublished.selector, KEY)
+        );
+        g = _guard();
+        g.recorder = address(0);
+        _prepareFailure(g, raw, abi.encodeWithSelector(T.InvalidMetricSupplement.selector));
+        g = _guard();
+        g.authorizationClass = 7;
+        _prepareFailure(g, raw, abi.encodeWithSelector(T.InvalidMetricSupplement.selector));
+        g = _guard();
+        g.grantRevision = 0;
+        _prepareFailure(g, raw, abi.encodeWithSelector(T.InvalidMetricSupplement.selector));
+        uint256 timestamp = block.timestamp;
+        vm.warp(uint256(type(uint64).max) + 1);
+        _prepareFailure(_guard(), raw, abi.encodeWithSelector(T.InvalidMetricSupplement.selector));
+        vm.warp(timestamp);
+        _prepareFailure(_guard(), raw, unavailable);
+    }
+
+    function testRetainedProofTransportReplayAndCanonicalMutantsMatchOriginal() public view {
+        bytes memory valid = abi.encodeCall(I.publishMetricSupplement, (KEY, supplement));
+        _retentionParity(_guard(), valid);
+        T.Supplement memory changed = supplement;
+        changed.replay.inputsHash ^= bytes32(uint256(1));
+        _retentionFailure(_guard(), abi.encodeCall(I.publishMetricSupplement, (KEY, changed)));
+        changed = supplement;
+        changed.runtime.members[20].sha256Digest ^= bytes32(uint256(1));
+        _retentionFailure(_guard(), abi.encodeCall(I.publishMetricSupplement, (KEY, changed)));
+        changed = supplement;
+        changed.parameters = hex"00";
+        _retentionFailure(_guard(), abi.encodeCall(I.publishMetricSupplement, (KEY, changed)));
+        // Decoding and re-encoding, including the historical ignored trailing bytes,
+        // remain the original canonicalization rule.
+        _retentionParity(_guard(), abi.encodePacked(valid, bytes32(uint256(123))));
+    }
+
+    function _retentionParity(Encoded.Guard memory g, bytes memory raw) private view {
+        bytes32 unchanged = keccak256(raw);
+        (bytes32 oldKey, bytes memory canonical, bytes32 oldRuntime, bytes32 oldReplay) =
+            probe.prepare(publication, evidence, context, g, raw);
+        (bytes32 key, Retention.Payload memory payload, bytes32 runtime, bytes32 replay) =
+            probe.prepareRetention(publication, evidence, context, g, raw);
+        require(key == oldKey && runtime == oldRuntime && replay == oldReplay, "original proofs");
+        require(
+            payload.contentHash == keccak256(canonical) && payload.byteLength == canonical.length,
+            "complete canonical identity"
+        );
+        require(
+            payload.chunkHashes.length == (canonical.length + 8191) / 8192, "complete inventory"
+        );
+        for (uint256 i; i < payload.chunkHashes.length; ++i) {
+            uint256 start = i * 8192;
+            uint256 size = canonical.length - start;
+            if (size > 8192) size = 8192;
+            bytes memory chunk = new bytes(size);
+            for (uint256 j; j < size; ++j) {
+                chunk[j] = canonical[start + j];
+            }
+            require(payload.chunkHashes[i] == keccak256(chunk), "ordered exact canonical slice");
+        }
+        require(keccak256(raw) == unchanged, "live input bytes retained");
+    }
+
+    function _retentionFailure(Encoded.Guard memory g, bytes memory raw) private view {
+        (bool oldOk, bytes memory oldError) = address(probe)
+            .staticcall(abi.encodeCall(probe.prepare, (publication, evidence, context, g, raw)));
+        (bool newOk, bytes memory newError) = address(probe)
+            .staticcall(
+                abi.encodeCall(probe.prepareRetention, (publication, evidence, context, g, raw))
+            );
+        require(!oldOk && !newOk && keccak256(oldError) == keccak256(newError), "original refusal");
     }
 
     function testCompletePrefixLiteralAndBoundaryPredicate() public view {
@@ -395,6 +523,7 @@ contract StreamReferenceMetricCompactTest {
         (bool ok, bytes memory result) = address(probe)
             .staticcall(abi.encodeCall(probe.prepare, (publication, evidence, context, g, raw)));
         require(!ok && keccak256(result) == keccak256(expected));
+        _retentionFailure(g, raw);
     }
 
     function _both(R.Publication memory p, T.Supplement memory s) private {

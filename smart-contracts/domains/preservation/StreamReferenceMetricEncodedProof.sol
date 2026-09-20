@@ -27,6 +27,7 @@ import { IStreamSchemaRegistry } from "../../interfaces/stream/metadata/IStreamS
 import { StreamReferenceModeProof } from "./StreamReferenceModeProof.sol";
 import { StreamReferenceMetricProof } from "./StreamReferenceMetricProof.sol";
 import { StreamReferenceMetricBytes as MetricBytes } from "./StreamReferenceMetricBytes.sol";
+import { StreamReferenceMetricRetention as Retention } from "./StreamReferenceMetricRetention.sol";
 
 /// @notice Fixed encoded supplement proof; no publication authority is granted by these codecs.
 library StreamReferenceMetricEncodedProof {
@@ -45,6 +46,41 @@ library StreamReferenceMetricEncodedProof {
         bytes calldata original
     )
         public
+        view
+        returns (bytes32 key, bytes memory canonical, bytes32 runtimeHash, bytes32 replayHash)
+    {
+        return _prepare(d, input, g, original);
+    }
+
+    /// @dev Build the complete original canonical payload in this proof frame. Only its
+    /// exact full hash, length and ordered chunk hashes cross the retention call boundary.
+    function prepareRetention(
+        R.Dependencies memory d,
+        StreamReferenceMetricProof.CompactInput memory input,
+        Guard memory g,
+        bytes calldata original
+    )
+        public
+        view
+        returns (
+            bytes32 key,
+            Retention.Payload memory payload,
+            bytes32 runtimeHash,
+            bytes32 replayHash
+        )
+    {
+        bytes memory canonical;
+        (key, canonical, runtimeHash, replayHash) = _prepare(d, input, g, original);
+        payload = Retention.describe(canonical);
+    }
+
+    function _prepare(
+        R.Dependencies memory d,
+        StreamReferenceMetricProof.CompactInput memory input,
+        Guard memory g,
+        bytes calldata original
+    )
+        private
         view
         returns (bytes32 key, bytes memory canonical, bytes32 runtimeHash, bytes32 replayHash)
     {

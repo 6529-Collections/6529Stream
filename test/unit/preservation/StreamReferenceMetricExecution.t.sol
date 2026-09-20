@@ -50,6 +50,14 @@ import {
 } from "../../../smart-contracts/interfaces/stream/preservation/IStreamReferenceMetricSupplement.sol";
 
 interface MetricExecutionVm {
+    struct Log {
+        bytes32[] topics;
+        bytes data;
+        address emitter;
+    }
+
+    function recordLogs() external;
+    function getRecordedLogs() external returns (Log[] memory);
     function readFileBinary(string calldata) external view returns (bytes memory);
     function readFile(string calldata) external view returns (string memory);
     function parseJsonBytes(string calldata, string calldata) external pure returns (bytes memory);
@@ -184,6 +192,18 @@ contract MetricExecutionHarness {
             out = Storage.requireEncoded(legacy, d, receipt.recordHash, publication, evidence);
         }
         used = before - gasleft();
+    }
+
+    function retentionState(bool fresh) external view returns (bytes32) {
+        return fresh
+            ? keccak256(
+                abi.encode(
+                    checked.payloads[receipt.recordHash], checked.receipts[receipt.recordHash]
+                )
+            )
+            : keccak256(
+                abi.encode(legacy.payloads[receipt.recordHash], legacy.receipts[receipt.recordHash])
+            );
     }
 
     function stored(bool fresh) external view returns (bytes memory) {
@@ -365,13 +385,24 @@ contract StreamReferenceMetricExecutionTest {
         require(
             b == keccak256(abi.encode(keccak256("6529STREAM_METRIC_REPLAY_V1"), supplement.replay))
         );
+        vm.recordLogs();
         (bytes32 oldHash,) = host.publish(false, original);
+        MetricExecutionVm.Log[] memory oldLogs = vm.getRecordedLogs();
+        vm.recordLogs();
         (bytes32 newHash,) = host.publish(true, original);
+        MetricExecutionVm.Log[] memory newLogs = vm.getRecordedLogs();
+        require(oldLogs.length == 1 && newLogs.length == 1, "one original publication event");
+        require(
+            keccak256(abi.encode(oldLogs)) == keccak256(abi.encode(newLogs)), "exact event parity"
+        );
+        require(newLogs[0].emitter == address(host) && newLogs[0].topics.length == 3, "host event");
+        require(newLogs[0].topics[1] == host.originalHash() && newLogs[0].topics[2] == newHash);
         require(oldHash == newHash && keccak256(host.stored(false)) == keccak256(host.stored(true)));
         (bytes memory oldReceipt,) = host.requireSupplement(false);
         (bytes memory newReceipt,) = host.requireSupplement(true);
         require(keccak256(oldReceipt) == keccak256(newReceipt));
         T.Receipt memory r = abi.decode(newReceipt, (T.Receipt));
+        require(keccak256(newLogs[0].data) == keccak256(abi.encode(uint16(1), r)), "event receipt");
         r.supplementHash = 0;
         require(
             newHash
@@ -482,6 +513,34 @@ contract StreamReferenceMetricExecutionTest {
         (bytes32 a,) = host.publish(false, original);
         (bytes32 b,) = host.publish(true, original);
         require(a == b);
+    }
+
+    function testLateRetainedChunkFailureRollsBackReceiptAndInventoryThenIdenticalRetry() public {
+        bytes memory canonical = abi.encode(supplement);
+        uint256 offset = ((canonical.length - 1) / 8192) * 8192;
+        bytes memory last = new bytes(canonical.length - offset);
+        for (uint256 i; i < last.length; ++i) {
+            last[i] = canonical[offset + i];
+        }
+        (address pointer,) = host.store().chunk(keccak256(last));
+        require(pointer != address(0) && offset > 8192, "late actual Store chunk");
+        bytes memory code = pointer.code;
+        bytes32 oldBefore = host.retentionState(false);
+        bytes32 newBefore = host.retentionState(true);
+        bytes32 originalHash = keccak256(original);
+        vm.etch(pointer, hex"00");
+        _bothFail(abi.encodeWithSelector(Bytes.SnapshotChunkChanged.selector, pointer));
+        require(!host.exists(false) && !host.exists(true), "no receipt survives failure");
+        require(
+            host.retentionState(false) == oldBefore && host.retentionState(true) == newBefore,
+            "all prior pointer/hash pushes rolled back"
+        );
+        vm.etch(pointer, code);
+        (bytes32 a,) = host.publish(false, original);
+        (bytes32 b,) = host.publish(true, original);
+        require(a == b && keccak256(original) == originalHash, "identical retry");
+        require(keccak256(host.stored(false)) == keccak256(host.stored(true)), "full retry bytes");
+        require(host.retentionState(false) == host.retentionState(true), "exact retained state");
     }
 
     function testReplayAndEnvironmentMutationMatchOriginalErrors() public {

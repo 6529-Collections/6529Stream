@@ -16,6 +16,15 @@
   and seals while authenticating the current identity tuple. Combined ABI/source
   checks remain separate from native execution and full ceremony acceptance.
 
+## Metric supplement retention transport
+
+- Derive the full canonical payload hash, length and ordered chunk hashes inside
+  the metric proof worker, reducing large copies across library calls. Retain
+  every original immutable chunk with one owned verification buffer.
+- Preserve receipt, schema, replay, storage, admission and generic retention
+  semantics. Add differential byte, error, event and rollback/retry coverage;
+  original cold transaction-cap acceptance remains a separate validation gate.
+
 ## Preservation root facade integration
 
 - Expose separate COLLECTION and scoped preservation root interfaces through
