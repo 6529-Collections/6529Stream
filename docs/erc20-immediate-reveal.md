@@ -77,6 +77,14 @@ the real payment route wraps. A funded hostile-token control requires two pulls
 across its failed and healthy attempts. These are authored boundary oracles;
 native results remain pending. The current shared reveal/entropy-policy implementation
 is retained, including DISABLED/INSTANT and terminal request-skipping checks.
-Its existing helper tests remain relevant; complete ERC-20 route coverage of
-those newer modes is still pending and is not claimed by these legacy-policy
-fixtures.
+Six additional regression sources compose the actual payment, Universal sale,
+Core, Manager, Ledger and Coordinator for DISABLED, INSTANT with either render
+requirement, and ASYNC NOT_REQUIRED. They cover exact token revenue, executor
+excess, terminal status without an at-mint request, a later-block production
+Instant draw, and real recipient rejection followed by identical signed payment
+retry. This fixture selects the production Coordinator first; it does not bypass
+Core successor continuity. Artist content evidence and the governance execution
+context remain explicitly typed boundaries. Its Core registration gas config is
+1,920,000 and sale reveal config is 2,000,000; these are fixture budgets, not a
+production gas-capacity claim. Native execution of these new regressions remains
+pending.
