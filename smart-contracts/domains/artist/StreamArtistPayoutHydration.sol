@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistMultipleRecordsTypes as MR
+} from "../../interfaces/stream/artist/IStreamArtistMultipleRecordsHydration.sol";
 import "./StreamArtistNativeReceipts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPayoutAuthorityHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistPayoutTransitionOwner.sol";
@@ -58,6 +61,28 @@ library StreamArtistPayoutHydration {
         bytes32 artistId,
         bytes memory raw
     ) public {
+        bytes32 tag;
+        if (raw.length >= 32) assembly ("memory-safe") { tag := mload(add(raw, 32)) }
+        if (tag == MR.PAYOUT) {
+            (, MR.PayoutRow[] memory rows) = abi.decode(raw, (bytes32, MR.PayoutRow[]));
+            if (rows.length == 0 || rows.length > 128) revert T.InvalidRecord();
+            for (uint256 j; j < rows.length; ++j) {
+                MR.PayoutRow memory row = rows[j];
+                if (
+                    row.artistId == 0 || (j != 0 && row.artistId <= rows[j - 1].artistId)
+                        || stable[row.artistId].recordHash != 0
+                        || stable[row.artistId].account != address(0)
+                ) revert T.InvalidRecord();
+                if (row.state.records.length != 0) {
+                    importState(stable, records, row.artistId, abi.encode(row.state));
+                } else if (
+                    row.state.current.recordHash != 0 || row.state.current.account != address(0)
+                ) {
+                    revert T.InvalidRecord();
+                }
+            }
+            return;
+        }
         if (raw.length == 0) return;
         PH.Bundle memory p = abi.decode(raw, (PH.Bundle));
         if (

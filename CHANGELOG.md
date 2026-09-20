@@ -3,6 +3,14 @@
 All notable release-impacting changes are recorded here. The project follows
 the release policy in `docs/release-policy.md`.
 
+## Artist complete living record combinations
+
+- Add one witness-bearing multiple-Artist operation-60 capability for complete
+  original payout, economics, readiness and publication histories, composed with
+  delegation/nonce/replay closure and atomic seven-owner Archive imports.
+- Preserve old profile encodings and original publication domains; retain global
+  C2PA key-history order. Focused cases are authored; native acceptance is pending.
+
 ## Artist combined multiplicity and delegation hydration
 
 - Extend the existing multiple-Artist operation-60 capability with complete

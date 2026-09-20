@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistMultipleRecordsHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistMultipleAuthorityHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistDisputeWithdrawal.sol";
 import { StreamArtistRegistryAuxiliaryEncoding } from "./StreamArtistRegistryAuxiliaryEncoding.sol";
@@ -1963,6 +1964,12 @@ contract StreamArtistOnboardingRegistry is
     }
 
     function observeRegistryCutover() external override {
+        _forwardRegistryWriter();
+    }
+
+    function hydrateMultipleArtistAuthorityWithRecords(
+        StreamArtistMultipleRecordsTypes.Request calldata p
+    ) external returns (bytes32) {
         _forwardRegistryWriter();
     }
 

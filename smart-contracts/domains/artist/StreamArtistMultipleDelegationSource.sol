@@ -182,7 +182,7 @@ library StreamArtistMultipleDelegationSource {
         }
     }
 
-    function _nonces(address owner, MH.Request memory p, MD.Identities memory b) private view {
+    function _nonces(address owner, MH.Request memory p, MD.Identities memory b) internal view {
         uint256 n = p.expectedSource[2].nonceIndexCount;
         bool[] memory seen = new bool[](p.artistIds.length);
         uint256 delegateCount;
@@ -242,7 +242,7 @@ library StreamArtistMultipleDelegationSource {
     }
 
     function _collections(T.SuiteConfiguration memory s, MD.Inventory memory v)
-        private
+        internal
         view
         returns (MD.Collections memory b)
     {

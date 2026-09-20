@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistMultipleRecordsHydration.sol";
+import "./StreamArtistMultipleRecordsOperations.sol";
 import "./StreamArtistMultipleHydrationOperations.sol";
 import "./StreamArtistDelegationHydrationOperations.sol";
 import "./StreamArtistAuthorityHydrationOperations.sol";
@@ -63,6 +65,12 @@ library StreamArtistCoordinatorHydration {
                     .selector
         ) {
             profile = 8;
+        } else if (
+            selector
+                == IStreamArtistMultipleRecordsHydrationCoordinator.coordinateHydrateMultipleArtistAuthorityWithRecords
+                    .selector
+        ) {
+            profile = 9;
         } else {
             revert T.UnsupportedProfile();
         }
@@ -73,6 +81,10 @@ library StreamArtistCoordinatorHydration {
         public
         returns (bytes32)
     {
+        if (profile == 9) {
+            (address actor, MR.Request memory p) = abi.decode(data[4:], (address, MR.Request));
+            return StreamArtistMultipleRecordsOperations.hydrate(x, actor, p);
+        }
         if (profile == 1 || profile == 2) {
             (address actor, AH.Request memory p) = abi.decode(data[4:], (address, AH.Request));
             return profile == 1

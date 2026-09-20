@@ -59,3 +59,22 @@ The original Owner and four authority/facade hosts are unchanged. Independent
 review and native/current-graph acceptance remain separate; handoff is source-only.
 Later required work remains corrected/pending bindings, other record families
 and authority histories, previous imports and larger evidence carriers.
+
+## Complete original living record combinations
+
+Branch `codex/artist-multiple-records-hydration`, base `6d2e2f62`. One additive
+MR.Request capability carries exhaustive ordered original15/24 witness arrays;
+complete payout, economics, readiness and publication records compose with the
+existing global multiplicity/delegation proof. Original journal/allocator/lane/
+nonce closure and seven-owner/Archive atomicity remain. Global op24 order retains
+cross-collection C2PA credential chains and independent personhood heads. Original
+profiles stay unchanged; the new entropy configuration dependency is explicitly
+refused. Twenty actual-owner/Safe cases are authored. Final ABI12 is clean
+across 902 sources; all 635 original ABI entries across ten changed products and
+recursive storage layouts remain intact. Original 460 facade/Coordinator/writer/
+source helper bodies retain identical tokens. Final size3 and size4-workers captures fit all 17
+new/changed/paired products (Registry 24,575, Coordinator 24,083, Writer 22,383), with only one byte
+of Registry headroom. The original Attribution blocker remains separate.
+Independent review and native acceptance remain pending. Larger carriers,
+corrected/pending bindings, advanced authorities, collaborator/other delegated
+record families and repeated imports remain required work.
