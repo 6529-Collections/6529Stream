@@ -15,6 +15,77 @@ import { Strings } from "../../vendor/openzeppelin/Strings.sol";
 /// @notice Exact source-byte, original package and replay-input joins for the closed metric profile.
 /// @dev This validates the recorded execution claim and its bytes, not execution of Python by EVM.
 library StreamReferenceMetricProof {
+    /// @dev Closed internal transport of every field used by this proof. The original full
+    /// Publication/Evidence and their context have already passed same-call source admission.
+    struct EvidenceInput {
+        M.Mode mode;
+        bytes32 implementationHash;
+        bytes32 parametersHash;
+        bytes32 reportHash;
+        int64 threshold;
+        uint64 evaluatedAt;
+        bytes32 context;
+        bytes32 environmentObjectHash;
+        bytes32 environmentManifestHash;
+        uint16 viewportWidth;
+        uint16 viewportHeight;
+        uint8 devicePixelRatio;
+        R.PackageFile[] packageFiles;
+        bytes32[2][] repeatCaptureSha256;
+    }
+
+    function project(R.Publication memory p, M.Evidence memory e, bytes32 context)
+        internal
+        pure
+        returns (EvidenceInput memory input)
+    {
+        input.mode = e.mode;
+        input.implementationHash = e.perceptual.metric.implementationHash;
+        input.parametersHash = e.perceptual.metric.parametersHash;
+        input.reportHash = e.perceptual.reportHash;
+        input.threshold = e.perceptual.threshold;
+        input.evaluatedAt = e.perceptual.evaluatedAt;
+        input.context = context;
+        input.environmentObjectHash = p.environment.objectHash;
+        input.environmentManifestHash = p.environment.manifestHash;
+        input.viewportWidth = p.environment.viewportWidth;
+        input.viewportHeight = p.environment.viewportHeight;
+        input.devicePixelRatio = p.environment.devicePixelRatio;
+        input.packageFiles = p.environment.packageFiles;
+        input.repeatCaptureSha256 = new bytes32[2][](p.captures.length);
+        for (uint256 i; i < p.captures.length; ++i) {
+            input.repeatCaptureSha256[i] = p.captures[i].repeatCaptureSha256;
+        }
+    }
+
+    function requireProjected(EvidenceInput memory input, T.Supplement memory s)
+        public
+        view
+        returns (bytes32 runtimeHash, bytes32 replayHash)
+    {
+        R.Publication memory p;
+        M.Evidence memory e;
+        e.mode = input.mode;
+        e.perceptual.metric.implementationHash = input.implementationHash;
+        e.perceptual.metric.parametersHash = input.parametersHash;
+        e.perceptual.reportHash = input.reportHash;
+        e.perceptual.threshold = input.threshold;
+        e.perceptual.evaluatedAt = input.evaluatedAt;
+        p.environment.objectHash = input.environmentObjectHash;
+        p.environment.manifestHash = input.environmentManifestHash;
+        p.environment.viewportWidth = input.viewportWidth;
+        p.environment.viewportHeight = input.viewportHeight;
+        p.environment.devicePixelRatio = input.devicePixelRatio;
+        p.environment.packageFiles = input.packageFiles;
+        p.captures = new R.Capture[](input.repeatCaptureSha256.length);
+        for (uint256 i; i < p.captures.length; ++i) {
+            p.captures[i].repeatCaptureSha256 = input.repeatCaptureSha256[i];
+        }
+        // Internal call to the byte-identical original complete-input proof below. No
+        // source admission is inferred by this stateless projection entry itself.
+        return requireEvidence(p, e, input.context, s);
+    }
+
     function requireEvidence(
         R.Publication memory p,
         M.Evidence memory e,

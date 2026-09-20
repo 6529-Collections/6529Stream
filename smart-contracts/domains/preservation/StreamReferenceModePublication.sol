@@ -8,6 +8,8 @@ import { StreamReferenceModePayloadPreparation } from "./StreamReferenceModePayl
 import {
     IStreamReferenceModePayloadPreparation
 } from "../../interfaces/stream/preservation/IStreamReferenceModePayloadPreparation.sol";
+import { StreamReferenceMetricExecution } from "./StreamReferenceMetricExecution.sol";
+import { StreamReferenceMetricReadExecution } from "./StreamReferenceMetricReadExecution.sol";
 import { StreamReferenceMetricStorage } from "./StreamReferenceMetricStorage.sol";
 import { StreamReferenceModeStateReads } from "./StreamReferenceModeStateReads.sol";
 import {
@@ -183,15 +185,18 @@ contract StreamReferenceModePublication is
     {
         _known(hash);
         StreamReferenceRenderTypes.Receipt memory r = _receipts[hash];
-        requireCurrent(r.collectionId, hash, r.revision);
-        if (_locks[r.collectionId].actionId != 0) {
-            revert StreamReferenceRenderTypes.ReferenceLocked();
-        }
-        (uint8 cls, uint64 rev) = _authority(r.collectionId, msg.sender);
-        StreamReferenceMetricStorage.Context memory c =
-            StreamReferenceMetricStorage.Context(dependencies(), r, msg.sender, cls, rev);
-        return StreamReferenceMetricStorage.publish(
-            _metricSupplements, c, _publicationForRecord(hash), _modeEvidence[hash], msg.data
+        _requireCurrentHeader(r.collectionId, hash, r.revision);
+        return StreamReferenceMetricExecution.publish(
+            _metricSupplements,
+            dependencies(),
+            _modeBindings,
+            _publicationForRecord(hash),
+            _modeEvidence[hash],
+            _modeFacts[hash],
+            _payloadForRecord(hash),
+            _receipts[hash],
+            _locks[r.collectionId],
+            msg.data
         );
     }
 
@@ -214,13 +219,16 @@ contract StreamReferenceModePublication is
     {
         _known(hash);
         StreamReferenceRenderTypes.Receipt memory r = _receipts[hash];
-        requireCurrent(r.collectionId, hash, r.revision);
-        bytes memory raw = StreamReferenceMetricStorage.requireEncoded(
+        _requireCurrentHeader(r.collectionId, hash, r.revision);
+        bytes memory raw = StreamReferenceMetricReadExecution.requireEncoded(
             _metricSupplements,
             dependencies(),
-            hash,
+            _modeBindings,
             _publicationForRecord(hash),
-            _modeEvidence[hash]
+            _modeEvidence[hash],
+            _modeFacts[hash],
+            _payloadForRecord(hash),
+            _receipts[hash]
         );
         assembly ("memory-safe") { return(add(raw, 32), mload(raw)) }
     }
@@ -476,11 +484,7 @@ contract StreamReferenceModePublication is
         override
         returns (StreamReferenceRenderTypes.Receipt memory r)
     {
-        _known(hash);
-        r = _receipts[hash];
-        if (_head(cid) != hash || r.collectionId != cid || r.revision != revision) {
-            revert StreamReferenceRenderTypes.ReferenceLineage(hash, _head(cid));
-        }
+        r = _requireCurrentHeader(cid, hash, revision);
         StreamReferenceRenderTypes.Dependencies memory d = dependencies();
         StreamReferenceModePreparation.requireCurrent(
             d,
@@ -491,6 +495,18 @@ contract StreamReferenceModePublication is
             _payloadForRecord(hash),
             _receipts[hash]
         );
+    }
+
+    function _requireCurrentHeader(uint256 cid, bytes32 hash, uint64 revision)
+        private
+        view
+        returns (StreamReferenceRenderTypes.Receipt memory r)
+    {
+        _known(hash);
+        r = _receipts[hash];
+        if (_head(cid) != hash || r.collectionId != cid || r.revision != revision) {
+            revert StreamReferenceRenderTypes.ReferenceLineage(hash, _head(cid));
+        }
     }
 
     function lockTransition(uint256 cid)

@@ -24,6 +24,13 @@ library StreamReferenceModePreparation {
         bytes evidence;
     }
 
+    /// @dev Same-call memory only. Never a persisted or externally supplied admission token.
+    struct CurrentDecoded {
+        R.Publication publication;
+        M.Evidence evidence;
+        bytes32 context;
+    }
+
     function prepare(
         R.Dependencies memory d,
         M.Dependencies memory bindings,
@@ -126,13 +133,32 @@ library StreamReferenceModePreparation {
         Bytes.Manifest storage publication,
         Bytes.Manifest storage saved
     ) public view returns (bytes32 sourcesHash, M.Facts memory facts) {
-        R.Publication memory p = abi.decode(Bytes.read(publication), (R.Publication));
-        M.Evidence memory evidence = _evidence(saved);
+        (sourcesHash, facts,) = currentDecoded(d, bindings, publication, saved);
+    }
+
+    function currentDecoded(
+        R.Dependencies memory d,
+        M.Dependencies memory bindings,
+        Bytes.Manifest storage publication,
+        Bytes.Manifest storage saved
+    )
+        internal
+        view
+        returns (bytes32 sourcesHash, M.Facts memory facts, CurrentDecoded memory decoded)
+    {
+        decoded.publication = abi.decode(Bytes.read(publication), (R.Publication));
+        decoded.evidence = _evidence(saved);
         R.SourceFacts memory source = StreamReferenceRenderSourceReads.requireModeSourceInputs(
-            d, StreamReferenceRenderSourceReads.project(p), true
+            d, StreamReferenceRenderSourceReads.project(decoded.publication), true
         );
+        decoded.context = Input.contextHash(d, decoded.publication);
         facts = StreamReferenceModeProof.requireEvidenceProjected(
-            d, bindings, Input.project(p, Input.contextHash(d, p)), source, evidence, true
+            d,
+            bindings,
+            Input.project(decoded.publication, decoded.context),
+            source,
+            decoded.evidence,
+            true
         );
         sourcesHash = StreamReferenceModeProof.sourceHash(d, bindings, source, facts);
     }
@@ -156,7 +182,21 @@ library StreamReferenceModePreparation {
         Bytes.Manifest storage payload,
         R.Receipt storage receipt
     ) public view {
-        (bytes32 sourcesHash, M.Facts memory mode) = current(d, bindings, publication, evidence);
+        requireCurrentDecoded(d, bindings, publication, evidence, savedFacts, payload, receipt);
+    }
+
+    function requireCurrentDecoded(
+        R.Dependencies memory d,
+        M.Dependencies memory bindings,
+        Bytes.Manifest storage publication,
+        Bytes.Manifest storage evidence,
+        M.Facts storage savedFacts,
+        Bytes.Manifest storage payload,
+        R.Receipt storage receipt
+    ) internal view returns (CurrentDecoded memory decoded) {
+        bytes32 sourcesHash;
+        M.Facts memory mode;
+        (sourcesHash, mode, decoded) = currentDecoded(d, bindings, publication, evidence);
         if (
             sourcesHash != receipt.sourcesHash
                 || keccak256(abi.encode(mode)) != keccak256(abi.encode(savedFacts))

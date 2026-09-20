@@ -87,6 +87,46 @@ library StreamReferenceMetricStorage {
         emit ReferenceMetricSupplementPublished(1, key, hash, r);
     }
 
+    function publishChecked(
+        State storage state,
+        Context memory c,
+        R.Publication memory publication,
+        M.Evidence memory modeEvidence,
+        bytes32 context,
+        bytes calldata original
+    ) internal returns (bytes32 hash) {
+        (bytes32 key, T.Supplement memory s) = abi.decode(original[4:], (bytes32, T.Supplement));
+        if (key != c.original.recordHash || state.receipts[key].supplementHash != 0) {
+            revert T.MetricSupplementAlreadyPublished(key);
+        }
+        if (
+            c.recorder == address(0) || (c.authorizationClass != 3 && c.authorizationClass != 8)
+                || c.grantRevision == 0 || block.timestamp > type(uint64).max
+        ) revert T.InvalidMetricSupplement();
+        (bytes32 runtimeHash, bytes32 replayHash) =
+            _proofChecked(c.dependencies, publication, modeEvidence, context, s);
+        bytes memory canonical = abi.encode(s);
+        if (canonical.length == 0 || canonical.length > 524288) revert T.InvalidMetricSupplement();
+        T.Receipt memory r;
+        r.referenceRecordHash = key;
+        r.payloadHash = keccak256(canonical);
+        r.payloadBytes = uint32(canonical.length);
+        r.runtimeHash = runtimeHash;
+        r.replayHash = replayHash;
+        r.schemaHash = D.SCHEMA_HASH;
+        r.profileHash = D.PROFILE_HASH;
+        r.canonicalizationHash = ModeD.CANON_HASH;
+        r.recorder = c.recorder;
+        r.authorizationClass = c.authorizationClass;
+        r.grantRevision = c.grantRevision;
+        r.recordedAt = uint64(block.timestamp);
+        hash = _hash(c.dependencies, r);
+        r.supplementHash = hash;
+        Bytes.retain(state.payloads[key], c.dependencies.targets[3], canonical);
+        state.receipts[key] = r;
+        emit ReferenceMetricSupplementPublished(1, key, hash, r);
+    }
+
     function encoded(State storage state, bytes32 key) public view returns (bytes memory) {
         if (state.receipts[key].supplementHash == 0) revert T.InvalidMetricSupplement();
         return abi.encode(Bytes.read(state.payloads[key]), state.receipts[key]);
@@ -137,6 +177,33 @@ library StreamReferenceMetricStorage {
         }
     }
 
+    function requireChecked(
+        State storage state,
+        R.Dependencies memory d,
+        bytes32 key,
+        R.Publication memory publication,
+        M.Evidence memory modeEvidence,
+        bytes32 context
+    ) internal view returns (T.Receipt memory r) {
+        r = state.receipts[key];
+        if (
+            r.supplementHash == 0 || r.referenceRecordHash != key || r.schemaHash != D.SCHEMA_HASH
+                || r.profileHash != D.PROFILE_HASH || r.canonicalizationHash != ModeD.CANON_HASH
+                || r.supplementHash != _hash(d, r)
+        ) revert T.InvalidMetricSupplement();
+        bytes memory canonical = Bytes.read(state.payloads[key]);
+        T.Supplement memory s = abi.decode(canonical, (T.Supplement));
+        if (
+            keccak256(abi.encode(s)) != r.payloadHash || keccak256(canonical) != r.payloadHash
+                || canonical.length != r.payloadBytes
+        ) revert T.InvalidMetricSupplement();
+        (bytes32 runtimeHash, bytes32 replayHash) =
+            _proofChecked(d, publication, modeEvidence, context, s);
+        if (r.runtimeHash != runtimeHash || r.replayHash != replayHash) {
+            revert T.InvalidMetricSupplement();
+        }
+    }
+
     function _proof(
         R.Dependencies memory d,
         Bytes.Manifest storage publication,
@@ -148,6 +215,19 @@ library StreamReferenceMetricStorage {
         M.Evidence memory e = abi.decode(Bytes.read(evidence), (M.Evidence));
         return StreamReferenceMetricProof.requireEvidence(
             p, e, StreamReferenceModeProof.contextHash(d, p), s
+        );
+    }
+
+    function _proofChecked(
+        R.Dependencies memory d,
+        R.Publication memory publication,
+        M.Evidence memory evidence,
+        bytes32 context,
+        T.Supplement memory s
+    ) private view returns (bytes32 runtimeHash, bytes32 replayHash) {
+        _definitions(d);
+        return StreamReferenceMetricProof.requireProjected(
+            StreamReferenceMetricProof.project(publication, evidence, context), s
         );
     }
 
