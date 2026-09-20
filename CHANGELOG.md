@@ -14,6 +14,16 @@
   full immutable binding and historical aggregate. Add three dispatch and
   corruption regressions; combined runtime acceptance remains pending.
 
+## Current-authority preservation publication graphs
+
+- Add separate COLLECTION and scoped preservation inventories with complete
+  authority captures, original receipt proofs and a mandatory sixth token phase.
+  Bind their archive coverage to the same capture and authenticated origin set.
+- Add distinct publication factories, provider reads, Artist review and lineage
+  discovery. Preserve original content types and all old full-output profiles.
+  See the [integration guide](docs/integrations/current-authority-preservation-graphs.md)
+  for constructor bindings, source boundaries and pending runtime acceptance.
+
 ## Current-authority Rights graph deployment
 
 - Bind the additive Rights selector in the original current-authority graph,

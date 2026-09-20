@@ -34,6 +34,16 @@ library StreamCurrentAuthorityBundleArchiveEnvironment {
             return
                 keccak256("6529STREAM_CURRENT_AUTHORITY_SCOPED_BUNDLE_IMMUTABLE_STOP_AGGREGATE_V1");
         }
+        if (profile == D.PRESERVATION_POLICY_INVENTORY_PROFILE) {
+            return keccak256(
+                "6529STREAM_CURRENT_AUTHORITY_PRESERVATION_POLICY_BUNDLE_IMMUTABLE_STOP_AGGREGATE_V1"
+            );
+        }
+        if (profile == D.SCOPED_PRESERVATION_POLICY_INVENTORY_PROFILE) {
+            return keccak256(
+                "6529STREAM_CURRENT_AUTHORITY_SCOPED_PRESERVATION_POLICY_BUNDLE_IMMUTABLE_STOP_AGGREGATE_V1"
+            );
+        }
         revert O.InvalidArchiveOrigin();
     }
 
