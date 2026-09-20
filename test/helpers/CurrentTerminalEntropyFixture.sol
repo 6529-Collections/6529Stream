@@ -5,7 +5,9 @@ import "./StreamCurrentSafeGovernanceFixture.sol";
 import "../../smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol";
 import "../../smart-contracts/domains/mint/StreamOperatorDistribution.sol";
 import "../../smart-contracts/domains/mint/StreamImmediateSaleEntropyPolicy.sol";
-import "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
+import {
+    StreamPrimarySaleSettlement
+} from "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
 import "../../smart-contracts/integrations/delegation/NFTdelegation.sol";
 import {
     IStreamEntropyCollectionPolicy as Policy
