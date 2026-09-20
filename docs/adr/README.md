@@ -42,6 +42,10 @@ Each ADR should include problem, current behavior, intended behavior,
 alternatives, security impact, release impact, test plan, rollout plan,
 non-goals, and accepted risks.
 
+[ADR 0051: Executed recovery citation namespace](0051-recovered-citation-namespace.md)
+adds the V2 `rec` qualifier for an executed recovery manifest content hash,
+preserving original work identity and every V1 qualifier and definition.
+
 [ADR 0032: Governance foundation before product activation](0032-governance-foundation-before-product-activation.md)
 defines the staged deployment needed by the archival provider's canonical role
 pin. Its historical foundation seal and complete activated release inventory

@@ -1,5 +1,11 @@
 # Museum offline tooling
 
+[Source-driven dossier gathering and V2 citations](../../docs/museum-dossier-gather.md)
+replay the actual token fixture plus native source captures, extract original
+record bytes and citation manifests, and export a 19-item acquisition examination.
+The additive executed-recovery `rec` qualifier preserves V1 definitions;
+unsupported complete-packet fields remain explicit.
+
 [Owner-published exhibitions](../../docs/museum-owner-exhibitions.md) join
 original owner receipts to the same-block Core collection mapping and produce
 source-preserving Linked Art packages for the existing BagIt/OCFL consumers.

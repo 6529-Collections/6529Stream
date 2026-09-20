@@ -184,6 +184,12 @@ the release policy in `docs/release-policy.md`.
 
 - Add pinned, bounded burn-program discovery and source/target closure warnings;
   clarify Safe CALL capability versus EIP-2612 and Permit2 signature support.
+- Add source-driven token examination gathering with complete admitted native
+  record extraction, exact offline replay and a 19-item acquisition evidence
+  index. Add the V2 executed-recovery citation namespace under ADR 0051,
+  preserving V1 profiles and original definitions. Complete packet, renderer,
+  source registration and institutional acceptance remain separate.
+
 - Add an owner-published exhibition consumer with original receipt/schema
   admission, same-block token/collection joins, attributed Linked Art resources
   and complete offline package replay through the BagIt/OCFL workflow.

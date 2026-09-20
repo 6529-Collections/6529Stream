@@ -218,6 +218,10 @@ def verify_package(directory, expected_manifest_hash):
     if path.stat().st_size > MAX_MANIFEST:
         raise MuseumError("multiformat manifest bound exceeded")
     value = loads(path.read_bytes(), maximum=MAX_MANIFEST, canonical=True)
+    if isinstance(value, dict) and value.get("mode") == "source_gathered_token_examination":
+        from .dossier_gather import verify
+        from .bagit import read_tree
+        return verify(read_tree(directory), expected_manifest_hash)
     if isinstance(value, dict) and value.get("mode") in ("recorded_account_resource_package", "recorded_account_premis_resource_package", "recorded_account_iiif_resource_package", "recorded_account_lido_resource_package"):
         from .package_recorded import verify_recorded_package
         return verify_recorded_package(directory, expected_manifest_hash)

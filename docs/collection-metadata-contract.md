@@ -3775,7 +3775,13 @@ Scholarly and registrar reference needs one blessed citation form
    `@chain:0x...` a record-chain head. Example:
    `eip155:1/erc721:0xabc...def/123@fin:0x5e4d...`. The three prefixes
    are the closed v1 qualifier vocabulary; an untyped `@0x...` qualifier
-   is nonconformant. The qualifier is mirrored in
+   is nonconformant. The additive current
+   `STREAM_CANONICAL_CITATION_PROFILE_V2` and
+   `STREAM_CANONICAL_CITATION_V2` schema retain those meanings and add
+   `@rec:0x...` for an executed recovery manifest content hash
+   ([ADR 0051](adr/0051-recovered-citation-namespace.md)). V1 schemas,
+   original genesis definitions and historical citations remain unchanged;
+   V1 consumers reject `rec`. The qualifier is mirrored in
    `properties.stream.citation` and covered by the renderer citation test
    ([`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)).
 3. Successor declarations never re-identify works: the original
@@ -3783,9 +3789,16 @@ Scholarly and registrar reference needs one blessed citation form
    and successor lines carry a cross-reference from the successor back to
    the original citation. A 2070 citation of a 2026 work cites the 2026
    contract.
-4. Recovered routes are cited as the original citation plus the recovery
-   manifest hash as the record state — a recovery never mints a new
-   citation identity.
+4. Under the additive V2 profile, recovered routes are cited as the
+   original work citation plus `@rec:` and the nonzero lowercase bytes32
+   content hash of the executed recovery's canonical manifest. Retain the
+   original finality record hash, recovery ID, predecessor, scope and route
+   hash separately; none substitutes for the manifest content hash.
+   Scheduled, prepared or unexecuted recoveries cannot qualify. Historical
+   execution remains separate from the currently selected serving route.
+   A recovery never mints a new citation identity. Candidate profile
+   registration is prospective, not a rewrite of existing registered bytes
+   ([ADR 0051](adr/0051-recovered-citation-namespace.md)).
 5. The default token JSON exposes the work citation as
    `properties.stream.citation`
    ([`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)),
