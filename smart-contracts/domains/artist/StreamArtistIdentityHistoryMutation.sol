@@ -8,6 +8,47 @@ import {
 
 /// @notice Exact original55–57 mutations; host retains operation admission and its single commit.
 library StreamArtistIdentityHistoryMutation {
+    function cutoverEncoded(
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        address artistWindowAuthority,
+        bytes calldata data
+    ) public returns (StreamArtistIdentityState.Mutation memory) {
+        T.ActionContext memory c = abi.decode(data[4:], (T.ActionContext));
+        return applyArtistRegistryCutover(replay, o, artistWindowAuthority, c);
+    }
+
+    function syncEncoded(address core, address registry, bytes calldata data) public {
+        (address source, uint256 first, H.Receipt[] memory rows) =
+            abi.decode(data[4:], (address, uint256, H.Receipt[]));
+        StreamArtistHistoryState.sync(
+            core, registry, source, first, rows, StreamArtistHistoryProof.cap(registry)
+        );
+    }
+
+    function importEncoded(
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        address artistWindowAuthority,
+        bytes calldata data
+    ) public returns (StreamArtistIdentityState.Mutation memory) {
+        (T.ActionContext memory c, H.Binding memory p, bytes32 actionId) =
+            abi.decode(data[4:], (T.ActionContext, H.Binding, bytes32));
+        return applyArtistHistoryImport(replay, o, artistWindowAuthority, c, p, actionId);
+    }
+
+    function verifyEncoded(
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        address artistWindowAuthority,
+        bytes calldata data
+    ) public returns (StreamArtistIdentityState.Mutation memory) {
+        (T.ActionContext memory c, uint256 index, H.Leaf memory p, bytes32[] memory proof) =
+            abi.decode(data[4:], (T.ActionContext, uint256, H.Leaf, bytes32[]));
+        return
+            applyArtistHistoryLaneVerification(replay, o, artistWindowAuthority, c, index, p, proof);
+    }
+
     function applyArtistHistoryImport(
         mapping(bytes32 => T.ReplayCell) storage replay,
         StreamArtistIdentityState.OwnerContext memory o,

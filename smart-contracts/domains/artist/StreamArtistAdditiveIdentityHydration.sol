@@ -6,8 +6,14 @@ import "./StreamArtistHistoryState.sol";
 import "./StreamArtistHydrationGuards.sol";
 import "./StreamArtistMultipleDelegationIdentityHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistDelegationAuthorityHydration.sol";
+import {
+    IStreamArtistAuthorityHydrationOwner
+} from "../../interfaces/stream/artist/IStreamArtistAuthorityHydration.sol";
+import {
+    IStreamArtistEntropyFindingHydrationOwner
+} from "../../interfaces/stream/artist/IStreamArtistEntropyFindingHydration.sol";
 
-/// @notice Fixed transport for the two additive original-living profiles only.
+/// @notice Fixed transport for original Identity hydration exports and additive imports.
 library StreamArtistAdditiveIdentityHydration {
     function exportEncoded(
         StreamArtistIdentityState.State storage identity,
@@ -18,6 +24,23 @@ library StreamArtistAdditiveIdentityHydration {
         StreamArtistUnavailabilityState.State storage findings,
         bytes calldata encoded
     ) public view returns (bytes memory) {
+        if (
+            bytes4(encoded[:4])
+                == IStreamArtistAuthorityHydrationOwner.authorityHydrationState.selector
+        ) {
+            return StreamArtistIdentityHydration.exportEncoded(
+                identity, estate, dormancy, findings, encoded[4:]
+            );
+        }
+        if (
+            bytes4(encoded[:4])
+                == IStreamArtistEntropyFindingHydrationOwner.authorityEntropyFindingHydrationState
+                .selector
+        ) {
+            return StreamArtistIdentityHydration.exportFindingEncoded(
+                identity, estate, dormancy, findings, encoded[4:]
+            );
+        }
         if (
             bytes4(encoded[:4])
                 == IStreamArtistDelegationHydrationOwner.authorityDelegationHydrationState.selector

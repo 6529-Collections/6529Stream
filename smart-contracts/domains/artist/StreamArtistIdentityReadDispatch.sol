@@ -1,5 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveryAdjudicationReads } from "./StreamArtistRecoveryAdjudicationReads.sol";
+import { StreamArtistRecoveryAdjudicationState } from "./StreamArtistRecoveryAdjudicationState.sol";
+import {
+    IStreamArtistIdentityRecoveryOwnerV2
+} from "../../interfaces/stream/artist/IStreamArtistIdentityRecoveryV2.sol";
+import {
+    IStreamArtistRecoverySelectionOwnerV2
+} from "../../interfaces/stream/artist/IStreamArtistRecoverySelectionPreparation.sol";
 import "./StreamArtistEntropyUnavailabilityState.sol";
 import "../../interfaces/stream/artist/IStreamArtistEntropyFindingHydration.sol";
 import {
@@ -80,6 +88,98 @@ import {
 
 /// @notice Fixed dispatch of original encoded Identity reads; explicit storage roots, no write route.
 library StreamArtistIdentityReadDispatch {
+    struct Input {
+        StreamArtistIdentityState.OwnerContext owner;
+        bytes data;
+    }
+
+    function read(
+        StreamArtistIdentityState.State storage _identity,
+        StreamArtistDelegationState.State storage _delegations,
+        StreamArtistIdentityRevisionState.State storage _identityRevisions,
+        StreamArtistRotationState.State storage _rotations,
+        StreamArtistIdentityContestState.State storage _identityContests,
+        StreamArtistSuccessionState.State storage _succession,
+        StreamArtistIdentityResolutionState.State storage _resolutions,
+        StreamArtistEstateState.State storage _estate,
+        StreamArtistUnavailabilityState.State storage _unavailability,
+        StreamArtistIdentityRecoveryState.State storage _identityRecovery,
+        StreamArtistDormancyState.State storage _dormancy,
+        StreamArtistStewardSanctionState.State storage _stewardGrants,
+        StreamArtistStewardCapabilityState.State storage _stewardCapabilityGrants,
+        mapping(bytes32 => T.ReplayCell) storage _replay,
+        StreamArtistRecoveryAdjudicationState.State storage _recoveryAdjudication,
+        Input calldata input
+    ) public view returns (bytes memory) {
+        StreamArtistIdentityState.OwnerContext memory o = input.owner;
+        bytes calldata call_ = input.data;
+        bytes4 selector = bytes4(call_[:4]);
+        if (selector == bytes4(keccak256("operativeIdentityRecord(bytes32)"))) {
+            bytes32 artistId = abi.decode(call_[4:], (bytes32));
+            return abi.encode(
+                StreamArtistIdentityRevisionState.operativeRead(
+                    _identityRevisions, _identity, _rotations, artistId
+                )
+            );
+        }
+        if (selector == bytes4(keccak256("nonceUsed(bytes32,uint256)"))) {
+            (bytes32 artistId, uint256 nonce) = abi.decode(call_[4:], (bytes32, uint256));
+            bytes32 key = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2"),
+                    o.environment.chainId,
+                    o.environment.registry,
+                    o.coordinator,
+                    o.archive,
+                    address(this),
+                    o.domain,
+                    keccak256("identity_authority.replay.nonce_allocator"),
+                    keccak256(abi.encode(artistId, nonce))
+                )
+            );
+            return abi.encode(_replay[key].status != 0);
+        }
+        if (
+            selector == IStreamArtistIdentityRecoveryOwnerV2.identityRecoveryContextV2.selector
+                || selector
+                    == IStreamArtistIdentityRecoveryOwnerV2.guardianRecoveryAuthorityRoleV2.selector
+                || selector
+                    == IStreamArtistIdentityRecoveryOwnerV2.identityRecoveryEvidenceState.selector
+                || selector
+                    == IStreamArtistRecoverySelectionOwnerV2.recoverySelectionBasisV2.selector
+        ) {
+            return StreamArtistRecoveryAdjudicationReads.read(
+                _identityRecovery,
+                _recoveryAdjudication,
+                _identity,
+                _rotations,
+                _resolutions,
+                _estate,
+                _dormancy,
+                o,
+                call_
+            );
+        }
+        return read(
+            _identity,
+            _delegations,
+            _identityRevisions,
+            _rotations,
+            _identityContests,
+            _succession,
+            _resolutions,
+            _estate,
+            _unavailability,
+            _identityRecovery,
+            _dormancy,
+            _stewardGrants,
+            _stewardCapabilityGrants,
+            _replay,
+            o,
+            call_
+        );
+    }
+
     function read(
         StreamArtistIdentityState.State storage _identity,
         StreamArtistDelegationState.State storage _delegations,

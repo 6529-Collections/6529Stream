@@ -187,6 +187,16 @@ library StreamArtistRecoveryAdjudicationOperations {
         _archive(x, actor, A.PREPARE_OPERATION, association, before_, payload);
     }
 
+    /// @dev Original host arguments decoded in the same fixed worker; host retains its operation lock.
+    function recoverEncoded(D.CoordinatorContext memory x, bytes calldata data)
+        public
+        returns (bytes32)
+    {
+        (address actor, R.Request memory p, T.Authorization memory a, bytes32 manifestHash) =
+            abi.decode(data[4:], (address, R.Request, T.Authorization, bytes32));
+        return recover(x, actor, p, a, manifestHash);
+    }
+
     function recover(
         D.CoordinatorContext memory x,
         address actor,

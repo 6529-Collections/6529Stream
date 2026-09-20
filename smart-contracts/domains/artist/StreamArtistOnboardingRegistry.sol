@@ -989,10 +989,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (R.ProvisionalAssociation memory)
     {
-        T.SuiteConfiguration memory s =
-            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
-        return IStreamArtistPayoutTransitionOwner(s.owners[5])
-            .payoutDesignationProvisionalAssociation(record);
+        _returnAuxiliaryRead();
     }
 
     function activeAuthorityWindow(bytes32 artistId) external view returns (bytes32, uint64, bool) {
@@ -1136,10 +1133,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bool, uint256)
     {
-        T.SuiteConfiguration memory s =
-            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
-        return IStreamArtistCollaboratorIdentityOwner(s.owners[2])
-            .collaboratorRegistrationNonceState(account, nonce);
+        _returnAuxiliaryRead();
     }
 
     function collaboratorCount(uint256 collectionId, uint64 generation)
@@ -1147,11 +1141,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (uint256)
     {
-        T.SuiteConfiguration memory s =
-            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
-        return IStreamArtistCollaboratorBindingOwner(s.owners[0])
-        .bindingTerms(collectionId, generation)
-        .count;
+        _returnAuxiliaryRead();
     }
 
     function collaboratorAt(uint256 collectionId, uint64 generation, uint256 index)
@@ -1258,10 +1248,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bool, uint256)
     {
-        T.SuiteConfiguration memory s =
-            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
-        return
-            IStreamArtistDelegationOwner(s.owners[2]).delegatedNonceState(artistId, delegate, nonce);
+        _returnAuxiliaryRead();
     }
 
     function recordDelegation(bytes32 record) external view returns (bytes32) {

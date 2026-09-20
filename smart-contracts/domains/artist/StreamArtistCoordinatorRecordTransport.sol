@@ -6,6 +6,11 @@ import { StreamArtistRecoveryActionOperations } from "./StreamArtistRecoveryActi
 import { StreamArtistAttestationOperations } from "./StreamArtistAttestationOperations.sol";
 import { StreamArtistIdentityOperations } from "./StreamArtistIdentityOperations.sol";
 import { StreamArtistSuccessionOperations } from "./StreamArtistSuccessionOperations.sol";
+import { StreamArtistCollaboratorOperations } from "./StreamArtistCollaboratorOperations.sol";
+import { StreamArtistRotationOperations } from "./StreamArtistRotationOperations.sol";
+import {
+    StreamArtistRotationTypes as R
+} from "../../interfaces/stream/artist/StreamArtistRotationTypes.sol";
 import {
     StreamArtistSuccessionTypes as Succ
 } from "../../interfaces/stream/artist/StreamArtistSuccessionTypes.sol";
@@ -28,6 +33,45 @@ import {
 
 /// @notice Fixed decoders for original variable-length Coordinator recipes.
 library StreamArtistCoordinatorRecordTransport {
+    function guardians(D.CoordinatorContext memory x, bytes calldata data)
+        public
+        returns (bytes32)
+    {
+        (address actor, R.GuardianSet memory p, T.Authorization memory a) =
+            abi.decode(data[4:], (address, R.GuardianSet, T.Authorization));
+        return StreamArtistRotationOperations.guardians(x, actor, p, a);
+    }
+
+    function stageRotation(D.CoordinatorContext memory x, bytes calldata data)
+        public
+        returns (bytes32)
+    {
+        (
+            address actor,
+            R.Rotation memory p,
+            T.Authorization memory oldAuthorization,
+            T.Authorization memory newAuthorization
+        ) = abi.decode(data[4:], (address, R.Rotation, T.Authorization, T.Authorization));
+        return StreamArtistRotationOperations.stage(x, actor, p, oldAuthorization, newAuthorization);
+    }
+
+    function acceptCollaboratorIdentity(D.CoordinatorContext memory x, bytes calldata data)
+        public
+        returns (bytes32)
+    {
+        (
+            address actor,
+            address account,
+            bytes32 identityRecordHash,
+            T.Authorization memory a,
+            bytes memory document,
+            string memory displayName
+        ) = abi.decode(data[4:], (address, address, bytes32, T.Authorization, bytes, string));
+        return StreamArtistCollaboratorOperations.acceptIdentity(
+            x, actor, account, identityRecordHash, a, document, displayName
+        );
+    }
+
     function propose(D.CoordinatorContext memory x, bytes calldata data)
         public
         returns (bytes32 artistId, bytes32 bindingHash)
@@ -120,8 +164,7 @@ library StreamArtistCoordinatorRecordTransport {
     ) public returns (bytes32) {
         (address actor, Recovery.FindingRequest memory request, U.Target memory target) =
             abi.decode(data[4:], (address, Recovery.FindingRequest, U.Target));
-        return StreamArtistUnavailabilityOperations.record(
-            x, originalFinality, actor, request, target
-        );
+        return
+            StreamArtistUnavailabilityOperations.record(x, originalFinality, actor, request, target);
     }
 }

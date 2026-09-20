@@ -595,19 +595,7 @@ contract StreamArtistIdentityAuthority is
     }
 
     function _forwardAdjudicationRead() private view {
-        _returnResolution(
-            StreamArtistRecoveryAdjudicationReads.read(
-                _identityRecovery,
-                _recoveryAdjudication,
-                _identity,
-                _rotations,
-                _resolutions,
-                _estate,
-                _dormancy,
-                _ownerContext(),
-                msg.data
-            )
-        );
+        _forwardIdentityRead();
     }
 
     function _forwardAdjudicationWriter() private {
@@ -854,9 +842,7 @@ contract StreamArtistIdentityAuthority is
     }
 
     function operativeIdentityRecord(bytes32 artistId) public view returns (bytes32) {
-        return StreamArtistIdentityRevisionState.operativeRead(
-            _identityRevisions, _identity, _rotations, artistId
-        );
+        _forwardIdentityRead();
     }
 
     function identityRecordBytes(bytes32 artistId) external view returns (bytes memory) {
@@ -1206,10 +1192,7 @@ contract StreamArtistIdentityAuthority is
     }
 
     function nonceUsed(bytes32 artistId, uint256 nonce) public view returns (bool) {
-        return _replay[_replayKey(
-                keccak256("identity_authority.replay.nonce_allocator"),
-                keccak256(abi.encode(artistId, nonce))
-            )].status != 0;
+        _forwardIdentityRead();
     }
 
     function delegationRecord(bytes32 grant) external view returns (D.Record memory) {
@@ -1478,8 +1461,8 @@ contract StreamArtistIdentityAuthority is
                 _stewardGrants,
                 _stewardCapabilityGrants,
                 _replay,
-                _ownerContext(),
-                msg.data
+                _recoveryAdjudication,
+                StreamArtistIdentityReadDispatch.Input(_ownerContext(), msg.data)
             )
         );
     }
@@ -1744,9 +1727,7 @@ contract StreamArtistIdentityAuthority is
         external
     {
         if (msg.sender != operationCoordinator) revert T.Unauthorized(msg.sender);
-        StreamArtistHistoryState.sync(
-            core, artistRegistry, source, first, rows, StreamArtistHistoryProof.cap(artistRegistry)
-        );
+        StreamArtistIdentityHistoryMutation.syncEncoded(core, artistRegistry, msg.data);
     }
 
     function applyArtistHistoryImport(
@@ -1756,8 +1737,8 @@ contract StreamArtistIdentityAuthority is
     ) external {
         _check(c, 55);
         StreamArtistIdentityState.Mutation memory m =
-            StreamArtistIdentityHistoryMutation.applyArtistHistoryImport(
-                _replay, _ownerContext(), artistWindowAuthority, c, p, actionId
+            StreamArtistIdentityHistoryMutation.importEncoded(
+                _replay, _ownerContext(), artistWindowAuthority, msg.data
             );
         _commit(c, m.action, m.state, m.replay, m.record);
     }
@@ -1770,8 +1751,8 @@ contract StreamArtistIdentityAuthority is
     ) external {
         _check(c, 56);
         StreamArtistIdentityState.Mutation memory m =
-            StreamArtistIdentityHistoryMutation.applyArtistHistoryLaneVerification(
-                _replay, _ownerContext(), artistWindowAuthority, c, index, p, proof
+            StreamArtistIdentityHistoryMutation.verifyEncoded(
+                _replay, _ownerContext(), artistWindowAuthority, msg.data
             );
         _commit(c, m.action, m.state, m.replay, m.record);
     }
@@ -1779,8 +1760,8 @@ contract StreamArtistIdentityAuthority is
     function applyArtistRegistryCutover(T.ActionContext calldata c) external {
         _check(c, 57);
         StreamArtistIdentityState.Mutation memory m =
-            StreamArtistIdentityHistoryMutation.applyArtistRegistryCutover(
-                _replay, _ownerContext(), artistWindowAuthority, c
+            StreamArtistIdentityHistoryMutation.cutoverEncoded(
+                _replay, _ownerContext(), artistWindowAuthority, msg.data
             );
         _commit(c, m.action, m.state, m.replay, m.record);
     }
@@ -1800,10 +1781,7 @@ contract StreamArtistIdentityAuthority is
         override
         returns (bytes memory)
     {
-        _baselineTiming();
-        return StreamArtistIdentityHydration.exportEncoded(
-            _identity, _estate, _dormancy, _unavailability, msg.data[4:]
-        );
+        return _additiveHydrationState();
     }
 
     function authorityDelegationHydrationState(AH.Query calldata q)
@@ -1840,10 +1818,7 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bytes memory)
     {
-        _baselineTiming();
-        return StreamArtistIdentityHydration.exportFindingEncoded(
-            _identity, _estate, _dormancy, _unavailability, msg.data[4:]
-        );
+        return _additiveHydrationState();
     }
 
     function entropyUnavailabilityFindingOrigin(bytes32 hash) external view returns (address) {

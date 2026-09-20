@@ -574,8 +574,8 @@ contract StreamArtistOnboardingCoordinator is
         T.Authorization calldata a,
         bytes32 manifestHash
     ) external operation returns (bytes32) {
-        return StreamArtistRecoveryAdjudicationOperations.recover(
-            _economicContext(), actor, p, a, manifestHash
+        return StreamArtistRecoveryAdjudicationOperations.recoverEncoded(
+            _economicContext(), msg.data
         );
     }
 
@@ -647,7 +647,7 @@ contract StreamArtistOnboardingCoordinator is
         R.GuardianSet calldata p,
         T.Authorization calldata a
     ) external operation returns (bytes32) {
-        return StreamArtistRotationOperations.guardians(_economicContext(), actor, p, a);
+        return StreamArtistCoordinatorRecordTransport.guardians(_economicContext(), msg.data);
     }
 
     function coordinateRotateArtistAddress(
@@ -656,9 +656,7 @@ contract StreamArtistOnboardingCoordinator is
         T.Authorization calldata oldAuthorization,
         T.Authorization calldata newAuthorization
     ) external operation returns (bytes32) {
-        return StreamArtistRotationOperations.stage(
-            _economicContext(), actor, p, oldAuthorization, newAuthorization
-        );
+        return StreamArtistCoordinatorRecordTransport.stageRotation(_economicContext(), msg.data);
     }
 
     function coordinateApproveArtistRotation(address actor, bytes32 artistId, bytes32 expected)
@@ -767,9 +765,9 @@ contract StreamArtistOnboardingCoordinator is
         bytes calldata document,
         string calldata displayName
     ) external operation returns (bytes32) {
-        return StreamArtistCollaboratorOperations.acceptIdentity(
-            _economicContext(), actor, account, identityRecordHash, a, document, displayName
-        );
+        return StreamArtistCoordinatorRecordTransport.acceptCollaboratorIdentity(
+                _economicContext(), msg.data
+            );
     }
 
     function coordinateAcceptCollaborator(
