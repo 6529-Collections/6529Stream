@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Scoped factory policy V2 finality and acquisition V9](../../docs/museum-scoped-policy-finality-v9.md)
+retains the original seven-child factory graph, TOKEN/RELEASE/SEASON membership,
+policy output rows and preservation records. It preserves title V5 inputs and
+keeps CurrentAuthority/Deferred, COLLECTION and VIEW profiles distinct.
+
 [COLLECTION policy V2 finality and acquisition V8](../../docs/museum-policy-finality-v8.md)
 retains original policy/readiness rows, complete inventory and output manifests,
 snapshot/reference payloads and six STATIC component preimages. It preserves

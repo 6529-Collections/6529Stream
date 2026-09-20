@@ -739,6 +739,12 @@ the release policy in `docs/release-policy.md`.
 - Fit the joined Artist Payout owner by factoring six original structured reads
   into a fixed typed encoder, preserving its ABI, storage and mutation bodies.
 
+- Add original scoped factory policy V2 capture and V9 acquisition exports for
+  TOKEN, RELEASE and SEASON. Retain the immutable seven-child factory graph,
+  complete membership, output rows and preservation records over unchanged title
+  V5 inputs. Historical authority, native execution and complete acquisition
+  coverage remain unresolved; newer factory variants use separate profiles.
+
 - Add original COLLECTION policy V2 capture and V8 acquisition exports with
   complete inventory/output/readiness rows, snapshot/reference records and six
   STATIC component preimages. Preserve title V5 inputs and reconcile twelve
