@@ -20,6 +20,17 @@
   consumption maps. Typed writer/producer and full publication acceptance remain
   separate; see the [state boundary](docs/integrations/view-content-root-state.md).
 
+## Explicit preservation snapshots
+
+- Add distinct COLLECTION and TOKEN/RELEASE/SEASON snapshot consumers for the
+  admitted preservation output profile. Preserve COLLECTION root-before-snapshot
+  and scoped snapshot-before-root ordering, complete membership and policy joins,
+  original grants, history and locks.
+- Add exact schema documents and closed publication graph/binding interfaces.
+  Twenty-three authored snapshot cases and combined ABI checks accompany the
+  source. Native execution, factory/provider construction and actual composed
+  ceremony acceptance remain pending.
+
 ## Explicit preservation checkpoint and output evidence
 
 - Add separate COLLECTION and TOKEN/RELEASE/SEASON checkpoints for admitted

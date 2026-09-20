@@ -1,6 +1,6 @@
 # Preservation policy consumers V1
 
-This additive source implements the checkpoint and covered-output-manifest part
+This additive source implements checkpoints, covered output manifests and snapshots
 of [ADR 0054](../adr/0054-explicit-non-sanction-preservation-rendering.md).
 Native execution, product size checks and the composed publication ceremony
 remain pending. Existing `Policy*V2` contracts, definitions and historical
@@ -91,9 +91,9 @@ identity; preservation serving does not assert current ERC-721 ownership. The
 original image, full HTML and token-data byte joins remain required. Parent gas
 starvation fails closed without reducing a configured dependency budget.
 
-## Remaining publication joins
+## Snapshots and publication order
 
-The next consumers must preserve both existing dependency orders:
+The snapshot consumers preserve both existing dependency orders:
 
 1. COLLECTION: output manifest → original Artist-authorized root → snapshot →
    reference → inventory → provider.
@@ -105,8 +105,24 @@ bindings commit the common Router and preservation profile, complete ordered
 output root and distinct schema/profile identities and retain the original operation-17 authorization, canonical
 histories and consumed-content rules. The output root commits every complete per-row producer binding and admission. No existing locked root or profile is reinterpreted.
 
-New snapshot sources must bind the complete new output manifest and its common
-Core, Router and preservation profile; the output root binds every producer row. Reference sources must nest that exact snapshot interpretation;
+`StreamPreservationPolicySnapshotPublicationV1` authenticates the current
+COLLECTION root and its complete 19-word preservation binding before publishing
+the snapshot. `StreamScopedPreservationPolicySnapshotPublicationV1` authenticates
+the complete current TOKEN, RELEASE or SEASON output and original scoped source
+factory before its subsequent root exists. Neither accepts the other scope
+family or an original full-output profile.
+
+Both retain the original dual SNAPSHOT/IDENTITY grants, per-subject history,
+immutable payload chunks and class-2 lock behavior. Their dependencies remain
+832 bytes and receipts remain 544 bytes; distinct capabilities, domains and
+schema bytes identify the new interpretation. The current manifest authenticates
+every producer row through the complete output root. Historical payload access
+does not imply that the same snapshot remains current.
+
+New factory and provider binding interfaces identify the matching preservation
+graph explicitly. Concrete factory/provider construction remains pending.
+
+Reference sources must nest that exact snapshot interpretation;
 sample readers must compare the actual preservation producer's full bytes.
 Inventory workers must enumerate producer/companion runtimes, all governed
 preservation reads and targets, analysis and golden documents, together with
