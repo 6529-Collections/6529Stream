@@ -4,6 +4,9 @@ import {
     IStreamConditionSources as Sources
 } from "../interfaces/stream/metadata/IStreamConditionSources.sol";
 import {
+    IStreamConservationFloor as Floor
+} from "../interfaces/stream/metadata/IStreamConservationFloor.sol";
+import {
     IStreamGasParameterHost
 } from "../interfaces/stream/parameters/IStreamGasParameterHost.sol";
 import { IERC165 } from "../vendor/openzeppelin/IERC165.sol";
@@ -18,6 +21,24 @@ library StreamCoreMuseumReads {
         view
         returns (bool)
     {
+        return _isSource(candidate, core, executor, type(Sources).interfaceId);
+    }
+
+    function isConservationFloor(address candidate, address core, address executor)
+        public
+        view
+        returns (bool)
+    {
+        return _isSource(candidate, core, executor, type(Floor).interfaceId);
+    }
+
+    // Both immutable source owners expose the same fixed identity/head selectors.
+    // The requested interface ID keeps the two admitted capabilities distinct.
+    function _isSource(address candidate, address core, address executor, bytes4 interfaceId)
+        private
+        view
+        returns (bool)
+    {
         if (candidate.code.length == 0) return false;
         // Delegated EOAs do not provide an immutable catalog implementation.
         if (candidate.code.length == 23) {
@@ -27,7 +48,7 @@ library StreamCoreMuseumReads {
         if (
             !_equals(
                     candidate,
-                    abi.encodeCall(IERC165.supportsInterface, (type(Sources).interfaceId)),
+                    abi.encodeCall(IERC165.supportsInterface, (interfaceId)),
                     1
                 ) || !_equals(candidate, abi.encodeCall(Sources.core, ()), uint256(uint160(core)))
                 || !_equals(

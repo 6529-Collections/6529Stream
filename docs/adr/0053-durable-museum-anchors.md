@@ -37,6 +37,27 @@ indices and equal timestamps cannot establish cross-host order. An unsupported
 newest record stays selected-but-unresolved; it never silently selects an older
 interpretable record. This decision adds no invented native global sequence.
 
+## Permanent sale-floor receipt owner
+
+A separate additive Core interface binds one immutable conservation-floor ledger
+with the same delayed class-1 transition and bounded identity/head checks. Its
+scope and state domains are distinct from the condition catalog. The pointer and
+runtime hash append after the other Museum storage roots; neither Metadata nor
+settlement-recorder replacement resets genuine first-sale or release receipts.
+
+The ledger must authenticate the currently selected primary settlement recorder
+and its already-written settlement result before recording a floor receipt.
+Supplemental payments must identify their genuine original receipt. Artist
+intent/interview, rights and documentary identity prerequisites are recorded on
+first sale; new releases still require their own complete media/reference facts.
+An undeclared tier enforces the LITE floor prospectively during first-sale
+settlement, even when mint completion is later in the atomic operation. This
+does not change the public effective-tier getter before first completed mint.
+
+Core binding only establishes the permanent owner. Native evidence producers,
+settlement integration, complete flow/capacity tests and the separately held
+personhood proposal remain explicit required work.
+
 ## Consequences and evidence
 
 The new Core interfaces are additive and original storage roots stay in place.

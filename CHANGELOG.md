@@ -59,6 +59,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Bind a permanent conservation-floor receipt ledger through an additive Core
+  interface and exact one-time delayed governance, preserving receipts across
+  Metadata/recorder replacement. Native floor enforcement remains in progress.
+
 - Add source capture and offline replay for native conservation selections,
   original op24 intent/interview evidence, separate Artist/estate histories,
   complete selected catalogs and intent locks. Keep tier and sale-floor inputs

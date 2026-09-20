@@ -12,6 +12,9 @@ import {
 import {
     IStreamCoreConditionSources
 } from "../interfaces/stream/core/IStreamCoreConditionSources.sol";
+import {
+    IStreamCoreConservationFloor
+} from "../interfaces/stream/core/IStreamCoreConservationFloor.sol";
 import { StreamCoreMuseumReads } from "./StreamCoreMuseumReads.sol";
 import "../domains/metadata/StreamMetadataRenderer.sol";
 
@@ -22,7 +25,8 @@ contract StreamCore is
     ERC721,
     IStreamCore,
     IStreamCoreConservationTier,
-    IStreamCoreConditionSources
+    IStreamCoreConditionSources,
+    IStreamCoreConservationFloor
 {
     uint16 private constant _SCHEMA_VERSION = 1;
     uint16 private constant _GGP_SCHEMA_VERSION = 2;
@@ -199,6 +203,8 @@ contract StreamCore is
     mapping(uint256 => bytes32) private _conservationTiers;
     address private _conditionSources;
     bytes32 private _conditionSourcesCodeHash;
+    address private _conservationFloor;
+    bytes32 private _conservationFloorCodeHash;
 
     event ConservationTierRecorded(
         uint16 schemaVersion,
@@ -249,6 +255,7 @@ contract StreamCore is
     {
         return interfaceId == type(IStreamCoreConservationTier).interfaceId
             || interfaceId == type(IStreamCoreConditionSources).interfaceId
+            || interfaceId == type(IStreamCoreConservationFloor).interfaceId
             || interfaceId == type(IERC2981).interfaceId || interfaceId == _INTERFACE_ERC4906
             || interfaceId == _INTERFACE_ERC7572 || interfaceId == _INTERFACE_FINALITY_RECOVERY_CORE
             || super.supportsInterface(interfaceId);
@@ -390,6 +397,52 @@ contract StreamCore is
         _conditionSourcesCodeHash = candidate.codehash;
         emit ConditionSourcesBound(
             _SCHEMA_VERSION, candidate, _conditionSourcesCodeHash, context.actionId
+        );
+    }
+
+    function conservationFloor()
+        external
+        view
+        override
+        returns (address ledger, bytes32 runtimeCodeHash)
+    {
+        return (_conservationFloor, _conservationFloorCodeHash);
+    }
+
+    function conservationFloorTransition(address candidate)
+        public
+        view
+        override
+        returns (bytes32 scope, bytes32 oldHash, bytes32 newHash)
+    {
+        if (_conservationFloor != address(0)) revert ConservationFloorAlreadyBound();
+        if (!StreamCoreMuseumReads.isConservationFloor(
+                candidate, address(this), _governanceExecutor
+            )) {
+            revert InvalidConservationFloor(candidate);
+        }
+        scope = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_CORE_CONSERVATION_FLOOR_SCOPE_V1"),
+                block.chainid,
+                address(this)
+            )
+        );
+        bytes32 domain = keccak256("6529STREAM_CORE_CONSERVATION_FLOOR_STATE_V1");
+        oldHash = keccak256(abi.encode(domain, scope, address(0), bytes32(0)));
+        newHash = keccak256(abi.encode(domain, scope, candidate, candidate.codehash));
+    }
+
+    /// @notice Bind one immutable sale-floor receipt ledger under original delayed governance.
+    function bindConservationFloor(address candidate) external override {
+        GovernanceContext memory context = _governanceContext();
+        _requireNoMintExecution();
+        (bytes32 scope, bytes32 oldHash, bytes32 newHash) = conservationFloorTransition(candidate);
+        _requireGovernanceTransition(context, _ACTION_DELAYED_LOOSENING, scope, oldHash, newHash);
+        _conservationFloor = candidate;
+        _conservationFloorCodeHash = candidate.codehash;
+        emit ConservationFloorBound(
+            _SCHEMA_VERSION, candidate, _conservationFloorCodeHash, context.actionId
         );
     }
 
