@@ -15,6 +15,9 @@ the release policy in `docs/release-policy.md`.
   counters and replay; focused and actual Safe recipes await native execution.
 
 
+
+- Replace the historical Artist API subset in its implementation introduction
+  with the source-pinned operation crosswalk and explicit coverage limits.
 - Correct Artist delegation documentation to the integrated capability mask,
   mode-2 policy/sale consent and consent-time grant checks, with current-state
   admission and pending validation limits retained.

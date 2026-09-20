@@ -8,12 +8,17 @@ remains the earlier immutable directory; it does not own these new records.
 The original onboarding profile is `ARTIST_SIGNED_POLICY`, `PRIMARY_ONLY`, up
 to 32 collaborator rows, no capability overrides, and operator-set sale
 parameters. The mode-2 policy/sale delegation increment is described below.
-Operations 1, 2, 3, 4, 5, 6, 7, 14, 15, 17, 18, 20, 21, 24, 25, 26, 27,
-28, 29, 30, 31, 32, 51, 52, and 54 have typed entrypoints.
-The full 57-operation API is not
-advertised, and this implementation does not provide recovery,
-estate administration, platform works, collaborator changes, or terminal
-finality operations.
+The [source-pinned operation crosswalk](../../../packages/stream-client/docs/current-artist-operation-coverage.json)
+lists operations 1–61 and their caller methods, including recovery, estate,
+platform works and collaborator operations. Extensions 58–61 cover identity
+contest dismissal, steward capability grants, authority hydration and attribution
+dispute withdrawal. The crosswalk records client coverage at its stated source
+commit; listing an operation does not establish complete method variants,
+supported authority profiles or runtime acceptance. See the
+[dormancy recovery](../../../docs/guides/artist-dormancy-recovery.md),
+[platform works](../../../docs/guides/artist-platform-works.md) and
+[authority hydration](../../../docs/guides/artist-authority-hydration.md) guides
+for their implementation and validation boundaries.
 
 Use the caller interfaces under `interfaces/stream/artist/`:
 
