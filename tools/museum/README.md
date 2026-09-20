@@ -1,5 +1,12 @@
 # Museum offline tooling
 
+[DIRECT floor and personhood](../../docs/museum-direct-personhood.md) adds two
+standalone native fragments over an unchanged provider-binding package and
+personhood capture. The assembly replays four original source transcripts and
+compares saved first-sale commitments while retaining native adapter authority.
+Run `python -m tools.museum.acquisition_direct_personhood --help`. V4 remains
+unchanged; tier/selection joins and complete packet export remain unresolved.
+
 [Native Artist personhood](../../docs/museum-personhood-source.md) captures the
 current schema-specific head, original operation-24 statement and signing domain,
 retained General notarization and same-recorder supersession. Its acquisition

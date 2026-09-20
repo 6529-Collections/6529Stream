@@ -9,6 +9,15 @@ These dependencies remain required implementation, not waivable qualifications.
 
 ## Later source and consumer implementations
 
+The [DIRECT personhood bridge](museum-direct-personhood.md) adds a separate
+native DIRECT floor fragment and joins the original provider-binding package
+to a personhood capture. It reconciles the four original floor, RIGHTS,
+provider and personhood transcripts before comparing saved first-sale facts.
+Both native fragments retain their actual authority and scope; V4 remains
+incompatible. Tier/default, attribution selection, intent/interview and other
+packet requirements remain unsupplied by this bridge. Items 6 and 13 remain
+partial, with no new native runtime or actual-chain acceptance claim.
+
 The [native personhood source and join](museum-personhood-source.md) follows
 source `68498f8d8fc95d9a96324426bf7c1e50976b8405`. It retains the current native
 head, original operation-24 statement/signing domain and General documentary

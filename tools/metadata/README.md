@@ -31,6 +31,13 @@ Generate/check its single definition with
 supplied native evidence; source replay remains the Museum assembler's job.
 It does not replace V4's personhood field or constitute a complete packet.
 
+The standalone [native DIRECT floor fragment](../../docs/museum-direct-personhood.md)
+preserves the original adapter bindings and paid receipt, shared first-sale and
+release receipts, source admissions and ledger discovery. Generate/check its
+definition with `python -m tools.metadata.acquisition_direct_floor_v1` and
+`--check`. Its supplied-data validator does not authenticate the input captures;
+the separate Museum assembler replays them. V4 has no DIRECT floor branch.
+
 Use Python 3.12. The schema and RFC8785 tests share the existing pinned offline
 dependencies in `tools/museum/requirements-jsonld.txt`; no new dependency is
 introduced here.

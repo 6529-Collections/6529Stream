@@ -182,6 +182,13 @@ the release policy in `docs/release-policy.md`.
 
 - Fit the joined Artist Payout owner by factoring six original structured reads
   into a fixed typed encoder, preserving its ABI, storage and mutation bodies.
+- Add a standalone native DIRECT floor schema and a two-input personhood
+  assembly that replays the original floor, RIGHTS, provider and personhood
+  evidence together. Preserve native adapter receipts and distinguish saved
+  personhood commitments from current evidence. V4 remains unchanged; tier,
+  selection, complete packet integration and actual-chain acceptance remain
+  separate requirements.
+
 - Add native Artist personhood capture, offline replay and acquisition
   correspondence with saved first-sale commitments and original provider pins.
   Reconstruct original operation-24 and General documentary evidence, distinguish
