@@ -563,6 +563,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add source-qualified scoped-policy source and publication graph preparation
+  callers with bounded child progress, Safe receipts and explicit currentness.
+
 - Add source-qualified tagged full-policy VIEW adoption callers with original
   Artist consent, shared V1/V2 history and current or historical rendering.
 

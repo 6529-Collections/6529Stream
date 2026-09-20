@@ -85,6 +85,11 @@ retains ABI125 for actual Router adoption and original current/historical
 serving. Nominal library methods remain separate from wallet call plans; this
 profile adds no VIEW publication or finality ceremony.
 
+The [scoped full-policy graph client](current-scoped-policy-graph-v2.md)
+separately retains ABI129 for the original scoped source factory and fixed
+seven-child publication factory. Graph preparation grants no publication or
+finality authority and preserves the separate COLLECTION and VIEW profiles.
+
 This retained inventory still records gaps for governance/control families,
 clone claims and escrow, original records/read surfaces, Core/mint controls, and broader
 Artist variants. It is an implementation queue and review register, not a

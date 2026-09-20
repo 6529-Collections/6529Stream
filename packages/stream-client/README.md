@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Scoped full-policy graph preparation](docs/current-scoped-policy-graph-v2.md)
+  covers genuine source sets, bounded seven-child graph preparation, direct/Safe
+  receipts and separate historical/current discovery under ABI129.
+
 - [Tagged full-policy VIEW adoption](docs/current-tagged-policy-view-v2.md)
   covers original Router adoption, stored Artist consent, closed V1/V2 history
   and current or historical rendering under the exact ABI125 source profile.
