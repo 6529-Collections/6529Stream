@@ -67,6 +67,12 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add native conservation-floor capture and offline replay with complete bounded
+  ledger discovery, retained source admissions, immutable receipt hashes and
+  original consumed settlement results/events. Preserve inline purchases and
+  optional preparation, historical replacements and candidate commitment limits;
+  keep tier/packet joins and native runtime acceptance explicitly separate.
+
 - Add durable Core conservation-tier capture and offline replay. Reconcile
   declarations with complete allocation and completed-mint history, preserving
   aborted and prepared identities and defaults after burns. Distinguish an

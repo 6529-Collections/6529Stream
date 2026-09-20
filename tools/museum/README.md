@@ -1,5 +1,11 @@
 # Museum offline tooling
 
+[Conservation floor receipts](../../docs/museum-conservation-floor-source.md)
+retain the permanent ledger, historical source admissions, exact first-sale and
+release facts, and original consumed settlement results. Preparation is optional;
+candidate commitments do not recover missing preimages. Tier and packet joins
+remain required, and item 13 remains partial.
+
 [Conservation tier provenance](../../docs/museum-conservation-tier-source.md)
 replays durable Core declarations and the first completed mint independently of
 Metadata replacement. A raw zero declaration before mint completion remains

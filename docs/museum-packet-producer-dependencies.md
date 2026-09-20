@@ -9,6 +9,18 @@ These dependencies remain required implementation, not waivable qualifications.
 
 ## Later source and consumer implementations
 
+The [floor receipt capture](museum-conservation-floor-source.md) now follows
+functional ledger source `7d9040dc700575027067b0cc4d822d06b7dff5f2`. It discovers
+the complete bounded ledger event history before collection filtering, retains
+every source admission, and checks immutable first-sale/release/settlement
+receipt hashes against getters and original consumed recorder results/events.
+Earlier preparation is optional; inline persistence produces the same paid
+receipts. Saved historical source facts survive replacement. Full candidate
+preimages are unavailable from this interface and remain commitments. This
+consumer does not claim supplemental or all-paid-route coverage, documentary
+personhood, native runtime acceptance or an assembled packet. One additive
+native tier/default and floor representation remains required.
+
 The [tier provenance capture](museum-conservation-tier-source.md) now reads the
 durable Core declaration and reconciles complete allocation, abort and completed
 mint history. It distinguishes raw zero, the post-completion LITE default, and
