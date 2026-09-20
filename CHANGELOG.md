@@ -79,6 +79,9 @@ the release policy in `docs/release-policy.md`.
   unsupported newest records as unresolved. Keep examination joins and complete
   acquisition packet requirements explicit.
 
+- Add canonical entropy policy succession callers with complete inventory checks,
+  original origin routes, staged catalog admission and atomic cutover receipts.
+
 - Add Artist recovery rewind V3 callers with typed exclusions, complete dual-owner
   selection, worker preparation seals and atomic Identity/Payout receipt checks.
 

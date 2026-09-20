@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Canonical entropy policy succession V1](docs/current-entropy-policy-succession.md)
+  adds complete policy imports, immutable origin routes, staged catalog admission
+  and atomic pointer, activation and manifest governance with Safe receipts.
+
 - [Artist recovery record rewinds V3](docs/current-artist-recovery-rewind.md)
   adds typed family exclusions, complete Identity/Payout selection, preparation
   seals and atomic recovery evidence with original governance and Safe calls.

@@ -75,3 +75,5 @@ export * from "./current-artist-recovery-adjudication.js";
 export * from "./current-artist-recovery-adjudication-workflow.js";
 export * from "./current-artist-recovery-rewind.js";
 export * from "./current-artist-recovery-rewind-workflow.js";
+export * from "./current-entropy-policy-succession.js";
+export * from "./current-entropy-policy-succession-workflow.js";
