@@ -51,8 +51,10 @@ Current ownership supersedes older historical next-batch statements below:
   original op17 and separate SNAPSHOT/IDENTITY versus CURATOR authority.
 - C: actual-publisher native13 is complete5PASS/4FAIL. Publication now fits
   at15,664,912 including intrinsic; failure moved to the supplement path.
-  Attest exact artifacts and trace one cached failure without compilation.
-  Keep scoped inventory/archive/multi-scope provider implementation moving.
+  Exact artifacts are attested. Source-unchanged native14, with one independently
+  regenerated replay fixture, passes7/9; remaining supplement currentness/read
+  paths exceed original budgets. Build same-call evidence reuse without a
+  persistent cache or cap increase, alongside scoped inventory/archive/provider.
 - Mint: faithful legacy and explicit policy import, complete inventory and
   ultimate-origin provider relay. Root owns Core admission and atomic activation.
 - Burn: V3rewinds898669 are integratede4ccdba4 with55 authored cases andABI81.

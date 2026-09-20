@@ -83,7 +83,11 @@ not whole-system runtime acceptance. Original RC1 remains unchanged.
   completes with five passes/four failures: all four previously blocked cases
   now publish within the original limit (15,664,912 gas including intrinsic),
   then fail in the supplement path. That later failure is being traced.
-  Exact source/artifact attestation is pending; complete-flow acceptance remains open.
+  Source/artifact attestation now matches360 sources and420 artifacts. Native14
+  changes only the independently regenerated replay fixture, reuses all compiled
+  artifacts, and passes7/9. Remaining failures are genuine downstream supplement
+  currentness/read-budget limits; same-call evidence reuse is being designed.
+  Complete-flow acceptance remains open.
 
 Active builds cover exact legacy/explicit entropy-policy successor import and
 origin relay, recovered-authority hydration, V2 output/finality, scoped inventories,
