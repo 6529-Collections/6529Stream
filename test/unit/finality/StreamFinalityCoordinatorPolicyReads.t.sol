@@ -78,9 +78,9 @@ contract StreamFinalityCoordinatorPolicyReadsTest is
                 keccak256("native manifest")
             )
         );
-        n.configureCollection(
-            1, address(new MockStreamEntropyProvider(address(n))), keccak256("salt"), true, 10
-        );
+        MockStreamEntropyProvider provider = new MockStreamEntropyProvider(address(n));
+        _admitEntropyProvider(address(n), address(provider));
+        n.configureCollection(1, address(provider), keccak256("salt"), true, 10);
         n.configureCollectionRevealPolicy(1, 0, keccak256("ROLE_ENTROPY_REVEAL_OWNER"), 10, 0);
         if (locked) n.registerEntropyScope(1, 1, keccak256("scope"));
     }

@@ -242,9 +242,7 @@ contract StreamScopeMembershipPublicationTest is ScopeMembershipPublicationFixtu
         );
         vm.expectRevert(
             abi.encodeWithSelector(
-                IStreamFinalityScopeMembership.ScopeMembershipReadFailed.selector,
-                address(inventory),
-                IStreamCollectionTokenInventory.collectionTokenAt.selector
+                IStreamFinalityScopeMembership.ScopeMembershipTokenInvalid.selector, ids[256]
             )
         );
         membership.continueScopeMembership(s, 1);

@@ -347,9 +347,9 @@ abstract contract ReferenceSourceExportFixture is
                 keccak256("native manifest")
             )
         );
-        c.configureCollection(
-            1, address(new MockStreamEntropyProvider(address(c))), keccak256("salt"), true, 10
-        );
+        MockStreamEntropyProvider provider = new MockStreamEntropyProvider(address(c));
+        _admitEntropyProvider(address(c), address(provider));
+        c.configureCollection(1, address(provider), keccak256("salt"), true, 10);
         c.configureCollectionRevealPolicy(1, 0, keccak256("ROLE_ENTROPY_REVEAL_OWNER"), 10, 0);
         c.registerEntropyScope(1, 1, keccak256("scope"));
     }
