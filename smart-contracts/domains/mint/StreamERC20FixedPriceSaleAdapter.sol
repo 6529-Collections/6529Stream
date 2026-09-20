@@ -5,6 +5,7 @@ import "./StreamSaleArtist.sol";
 import "./StreamLegacySaleConsent.sol";
 import "./StreamSaleFunding.sol";
 import "./StreamSaleTemplate.sol";
+import "../revenue/StreamDirectPrimaryReceipts.sol";
 
 import "../../interfaces/stream/mint/IStreamERC20FixedPriceSaleAdapter.sol";
 import "../../interfaces/stream/mint/IStreamMintReads.sol";
@@ -23,7 +24,8 @@ contract StreamERC20FixedPriceSaleAdapter is
     IStreamERC20FixedPriceSaleAdapter,
     StreamPaymentIntentVerifier,
     ERC165,
-    StreamSaleFunding
+    StreamSaleFunding,
+    StreamDirectPrimaryReceipts
 {
     bytes32 public constant SALE_AUTHORIZATION_TYPEHASH = keccak256(
         "ERC20SaleAuthorization(bytes32 saleId,bytes32 saleConfigHash,address payer,address recipient,address artist,bytes32 tokenDataHash,bytes32 mintCommitment,bytes32 nonce,uint64 deadline,uint64 signerEpoch)"
@@ -56,7 +58,12 @@ contract StreamERC20FixedPriceSaleAdapter is
         address platformSigner_,
         IStreamArtistAttribution artists_,
         IStreamRevenueEscrow escrow_
-    ) StreamSaleFunding(IStreamSplitFactory(resolver_.splitFactory()), escrow_) {
+    )
+        StreamSaleFunding(IStreamSplitFactory(resolver_.splitFactory()), escrow_)
+        StreamDirectPrimaryReceipts(
+            artists_.core(), address(manager_), StreamDirectPrimarySaleTypes.ERC20_FIXED_PRICE
+        )
+    {
         if (
             address(manager_).code.length == 0 || address(resolver_).code.length == 0
                 || platformSigner_ == address(0) || !resolver_.isStreamRevenueResolver()
@@ -91,6 +98,7 @@ contract StreamERC20FixedPriceSaleAdapter is
     {
         return interfaceId == type(IStreamERC20FixedPriceSaleAdapter).interfaceId
             || interfaceId == type(IStreamPaymentIntentVerifier).interfaceId
+            || interfaceId == type(IStreamDirectPrimarySaleReceipt).interfaceId
             || super.supportsInterface(interfaceId);
     }
 
@@ -239,6 +247,8 @@ contract StreamERC20FixedPriceSaleAdapter is
         bytes32 operationId;
         bool escrowed;
         StreamSaleTemplate.Selection selected;
+        uint64 createdAt;
+        uint64 registryRevision;
     }
 
     function buy(
@@ -272,6 +282,7 @@ contract StreamERC20FixedPriceSaleAdapter is
             revert SaleMintResultInvalid();
         }
         execution.operationId = expectedIds[0];
+        (execution.createdAt, execution.registryRevision) = _captureDirectPrimaryAdmission();
         _authorizePayment(
             PaymentTerms(
                 authorization.payer,
@@ -310,6 +321,7 @@ contract StreamERC20FixedPriceSaleAdapter is
             execution.config.collectionId,
             authorization.artist
         );
+        _retainDirectReceipt(authorization, execution, tokenId, operationRoot);
         _emitSale(authorization, execution, tokenId);
         emit SaleRevenueFunded(
             1,
@@ -321,6 +333,32 @@ contract StreamERC20FixedPriceSaleAdapter is
             execution.config.price,
             execution.escrowed
         );
+    }
+
+    function _retainDirectReceipt(
+        SaleAuthorization calldata authorization,
+        Execution memory e,
+        uint256 tokenId,
+        bytes32 operationRoot
+    ) private {
+        StreamDirectPrimarySaleTypes.Receipt memory receipt;
+        receipt.authorizationDigest = e.digest;
+        receipt.collectionId = e.config.collectionId;
+        receipt.tokenId = tokenId;
+        receipt.operationRoot = operationRoot;
+        receipt.operationId = e.operationId;
+        receipt.boundMintPolicyHash = e.config.mintPolicyHash;
+        receipt.expectedPrimaryPolicyHash = e.config.expectedPrimaryPolicyHash;
+        receipt.profileId = e.profileId;
+        receipt.wallet = e.wallet;
+        receipt.createdAt = e.createdAt;
+        receipt.escrowed = e.escrowed;
+        receipt.payer = authorization.payer;
+        receipt.registryRevision = e.registryRevision;
+        receipt.beneficiary = authorization.recipient;
+        receipt.asset = e.config.asset;
+        receipt.amount = e.config.price;
+        _recordDirectPrimarySale(e.authorizationId, receipt);
     }
 
     function _validate(

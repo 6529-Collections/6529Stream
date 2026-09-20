@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "../mint/StreamSaleArtist.sol";
 import "../mint/StreamLegacySaleConsent.sol";
 import "../mint/StreamSaleFunding.sol";
+import "../revenue/StreamDirectPrimaryReceipts.sol";
 
 import "../../interfaces/stream/mint/IStreamMintReads.sol";
 
@@ -26,7 +27,8 @@ contract StreamEnglishAuctionHouse is
     ERC165,
     Ownable,
     ReentrancyGuard,
-    StreamSaleFunding
+    StreamSaleFunding,
+    StreamDirectPrimaryReceipts
 {
     bytes32 public constant AUCTION_AUTHORIZATION_TYPEHASH = keccak256(
         "AuctionAuthorization(uint256 collectionId,bytes32 phaseId,address artist,bytes32 profileId,bytes32 expectedPrimaryPolicyHash,bytes32 tokenDataHash,bytes32 mintCommitment,bytes32 mintPolicyHash,uint256 reservePrice,uint64 startTime,uint64 endTime,uint32 extensionWindow,uint16 minBidIncrementBps,bytes32 nonce,uint64 deadline,uint64 signerEpoch)"
@@ -55,6 +57,18 @@ contract StreamEnglishAuctionHouse is
     uint256 public totalRefundOwed;
     uint256 public totalNativeProceeds;
 
+    /// @dev Immutable creation evidence; paid settlement retains the original mint and consent.
+    struct AuctionOrigin {
+        bytes32 authorizationDigest;
+        uint256 collectionId;
+        bytes32 operationId;
+        bytes32 boundMintPolicyHash;
+        uint64 createdAt;
+        uint64 registryRevision;
+    }
+
+    mapping(uint256 => AuctionOrigin) private _auctionOrigins;
+
     constructor(
         IStreamCore core_,
         IStreamMintManager mintManager_,
@@ -62,7 +76,12 @@ contract StreamEnglishAuctionHouse is
         address platformSigner_,
         IStreamArtistAttribution artistRegistry_,
         IStreamRevenueEscrow escrow_
-    ) StreamSaleFunding(IStreamSplitFactory(resolver_.splitFactory()), escrow_) {
+    )
+        StreamSaleFunding(IStreamSplitFactory(resolver_.splitFactory()), escrow_)
+        StreamDirectPrimaryReceipts(
+            address(core_), address(mintManager_), StreamDirectPrimarySaleTypes.ENGLISH_AUCTION
+        )
+    {
         IStreamSplitFactory splitFactory_ = IStreamSplitFactory(resolver_.splitFactory());
         if (
             address(core_).code.length == 0 || address(mintManager_).code.length == 0
@@ -87,7 +106,9 @@ contract StreamEnglishAuctionHouse is
     }
 
     function supportsInterface(bytes4 id) public view override(ERC165, IERC165) returns (bool) {
-        return id == type(IStreamEnglishAuctionHouse).interfaceId || super.supportsInterface(id);
+        return id == type(IStreamEnglishAuctionHouse).interfaceId
+            || id == type(IStreamDirectPrimarySaleReceipt).interfaceId
+            || super.supportsInterface(id);
     }
 
     function setPlatformSigner(address signer) external onlyOwner nonReentrant {
@@ -252,6 +273,11 @@ contract StreamEnglishAuctionHouse is
         if (expectedRoot == bytes32(0) || expectedIds.length != 1 || expectedIds[0] == bytes32(0)) {
             revert AuctionMintResultInvalid();
         }
+        AuctionOrigin memory origin;
+        (origin.createdAt, origin.registryRevision) = _captureDirectPrimaryAdmission();
+        origin.authorizationDigest = digest;
+        origin.collectionId = authorization.collectionId;
+        origin.boundMintPolicyHash = authorization.mintPolicyHash;
         authorizationUsed[authorization.artist][authorization.nonce] = true;
         _acceptingMint = true;
         uint256[] memory tokenIds;
@@ -266,6 +292,8 @@ contract StreamEnglishAuctionHouse is
         if (core.ownerOf(tokenId) != address(this) || _auctions[tokenId].artist != address(0)) {
             revert AuctionMintResultInvalid();
         }
+        origin.operationId = operationIds[0];
+        _auctionOrigins[tokenId] = origin;
     }
 
     function auction(uint256 tokenId) external view override returns (Auction memory) {
@@ -354,6 +382,7 @@ contract StreamEnglishAuctionHouse is
             escrowed = _fundNative(REVENUE_CLASS, item.profileId, item.wallet, amount);
         }
         core.safeTransferFrom(address(this), item.deliveryRecipient, tokenId);
+        if (amount != 0) _recordAuctionSale(tokenId, item, escrowed);
         emit AuctionSettled(
             tokenId, item.highestBidder, item.deliveryRecipient, item.wallet, amount
         );
@@ -369,6 +398,28 @@ contract StreamEnglishAuctionHouse is
                 escrowed
             );
         }
+    }
+
+    function _recordAuctionSale(uint256 tokenId, Auction storage item, bool escrowed) private {
+        AuctionOrigin storage origin = _auctionOrigins[tokenId];
+        StreamDirectPrimarySaleTypes.Receipt memory receipt;
+        receipt.authorizationDigest = origin.authorizationDigest;
+        receipt.collectionId = origin.collectionId;
+        receipt.tokenId = tokenId;
+        receipt.operationRoot = item.operationRoot;
+        receipt.operationId = origin.operationId;
+        receipt.boundMintPolicyHash = origin.boundMintPolicyHash;
+        receipt.expectedPrimaryPolicyHash = item.primaryPolicyHash;
+        receipt.profileId = item.profileId;
+        receipt.wallet = item.wallet;
+        receipt.createdAt = origin.createdAt;
+        receipt.escrowed = escrowed;
+        receipt.payer = item.highestBidder;
+        receipt.registryRevision = origin.registryRevision;
+        receipt.beneficiary = item.deliveryRecipient;
+        receipt.asset = address(0);
+        receipt.amount = item.highestBid;
+        _recordDirectPrimarySale(item.authorizationId, receipt);
     }
 
     /// @notice A signed artist controls delivery when an unsold NFT needs a contract receiver.

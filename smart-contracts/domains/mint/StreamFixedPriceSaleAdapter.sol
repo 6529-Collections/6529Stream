@@ -5,6 +5,7 @@ import "./StreamSaleArtist.sol";
 import "./StreamLegacySaleConsent.sol";
 import "./StreamSaleFunding.sol";
 import "./StreamSaleTemplate.sol";
+import "../revenue/StreamDirectPrimaryReceipts.sol";
 import "../../interfaces/stream/mint/IStreamMintReads.sol";
 
 import "../../interfaces/stream/mint/IStreamFixedPriceSaleAdapter.sol";
@@ -25,7 +26,8 @@ contract StreamFixedPriceSaleAdapter is
     ERC165,
     Ownable,
     ReentrancyGuard,
-    StreamSaleFunding
+    StreamSaleFunding,
+    StreamDirectPrimaryReceipts
 {
     bytes32 public constant SALE_AUTHORIZATION_TYPEHASH = keccak256(
         "SaleAuthorization(uint256 collectionId,bytes32 phaseId,address payer,address recipient,address artist,bytes32 profileId,bytes32 expectedPrimaryPolicyHash,bytes32 tokenDataHash,bytes32 mintCommitment,bytes32 mintPolicyHash,uint256 price,bytes32 nonce,uint64 deadline,uint64 signerEpoch)"
@@ -57,7 +59,14 @@ contract StreamFixedPriceSaleAdapter is
         address platformSigner_,
         IStreamArtistAttribution artistRegistry_,
         IStreamRevenueEscrow escrow_
-    ) StreamSaleFunding(IStreamSplitFactory(resolver_.splitFactory()), escrow_) {
+    )
+        StreamSaleFunding(IStreamSplitFactory(resolver_.splitFactory()), escrow_)
+        StreamDirectPrimaryReceipts(
+            artistRegistry_.core(),
+            address(mintManager_),
+            StreamDirectPrimarySaleTypes.NATIVE_FIXED_PRICE
+        )
+    {
         IStreamSplitFactory splitFactory_ = IStreamSplitFactory(resolver_.splitFactory());
         if (
             address(mintManager_).code.length == 0 || address(splitFactory_).code.length == 0
@@ -91,6 +100,7 @@ contract StreamFixedPriceSaleAdapter is
         returns (bool)
     {
         return interfaceId == type(IStreamFixedPriceSaleAdapter).interfaceId
+            || interfaceId == type(IStreamDirectPrimarySaleReceipt).interfaceId
             || super.supportsInterface(interfaceId);
     }
 
@@ -166,6 +176,8 @@ contract StreamFixedPriceSaleAdapter is
         bytes32 operationId;
         bool escrowed;
         StreamSaleTemplate.Selection selected;
+        uint64 createdAt;
+        uint64 registryRevision;
     }
 
     function primaryPolicy(uint256 collectionId)
@@ -252,6 +264,9 @@ contract StreamFixedPriceSaleAdapter is
         IStreamMintManager.MintBatch memory batch,
         Execution memory e
     ) private returns (uint256 tokenId, bytes32 operationRoot) {
+        if (msg.value != 0) {
+            (e.createdAt, e.registryRevision) = _captureDirectPrimaryAdmission();
+        }
         StreamSaleTemplate.materialize(revenueResolver, sale.collectionId, e.selected);
         authorizationUsed[sale.artist][sale.nonce] = true;
         nativeProceeds[sale.profileId] += msg.value;
@@ -275,10 +290,36 @@ contract StreamFixedPriceSaleAdapter is
         StreamLegacySaleConsent.requireNone(
             artistRegistry, artistRegistryCodeHash, sale.collectionId, sale.artist
         );
+        if (msg.value != 0) _retainDirectReceipt(sale, e, tokenId, operationRoot);
         _emitSale(sale, e.id, e.digest, tokenId, operationRoot, e.wallet);
         emit SaleRevenueFunded(
             1, e.id, operationRoot, sale.profileId, e.wallet, address(0), msg.value, e.escrowed
         );
+    }
+
+    function _retainDirectReceipt(
+        SaleAuthorization calldata sale,
+        Execution memory e,
+        uint256 tokenId,
+        bytes32 operationRoot
+    ) private {
+        StreamDirectPrimarySaleTypes.Receipt memory receipt;
+        receipt.authorizationDigest = e.digest;
+        receipt.collectionId = sale.collectionId;
+        receipt.tokenId = tokenId;
+        receipt.operationRoot = operationRoot;
+        receipt.operationId = e.operationId;
+        receipt.boundMintPolicyHash = sale.mintPolicyHash;
+        receipt.expectedPrimaryPolicyHash = sale.expectedPrimaryPolicyHash;
+        receipt.profileId = sale.profileId;
+        receipt.wallet = e.wallet;
+        receipt.createdAt = e.createdAt;
+        receipt.escrowed = e.escrowed;
+        receipt.payer = sale.payer;
+        receipt.registryRevision = e.registryRevision;
+        receipt.beneficiary = sale.recipient;
+        receipt.amount = msg.value;
+        _recordDirectPrimarySale(e.id, receipt);
     }
 
     function _validateSale(SaleAuthorization calldata sale, bytes calldata tokenData) private view {
