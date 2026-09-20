@@ -21,6 +21,12 @@ the release policy in `docs/release-policy.md`.
 
 ## LOW_SECURITY instant entropy
 
+- Add a distinct explicit-policy current-output checkpoint and covered manifest,
+  plus V2 canonical Router CONTENT_ROOT adoption using original Artist consent,
+  one-use consumption, lineage, evolution and freeze behavior. Original V1
+  records remain unchanged; V2 snapshot/reference and Router capacity remain
+  separate acceptance work.
+
 - Add a bounded synchronous entropy path with separate provider identity,
   zero-fee pull credits and mint-commitment exclusion. Scope entropy and fresh
   recovery remain ASYNC; runtime, consumer and deployment acceptance are separate.

@@ -18,27 +18,33 @@ import "../../interfaces/stream/metadata/IStreamCollectionMetadataV1.sol";
 import "../../interfaces/stream/parameters/IStreamGasParameterHost.sol";
 import "../../interfaces/stream/metadata/IStreamSchemaRegistry.sol";
 import "../records/StreamRecordFamilies.sol";
-import "../finality/StreamContentRootSchemas.sol";
+import { StreamMetadataContentRoot as Original } from "./StreamMetadataContentRoot.sol";
+import { StreamPolicyContentRootStateV2 as Stored } from "./StreamPolicyContentRootStateV2.sol";
+import {
+    IStreamPolicyContentRootPublicationV2 as V
+} from "../../interfaces/stream/metadata/IStreamPolicyContentRootPublicationV2.sol";
+import {
+    IStreamPolicyOutputManifestV2 as M
+} from "../../interfaces/stream/finality/IStreamPolicyOutputManifestV2.sol";
+import {
+    IStreamPolicyContentCheckpointV2 as P
+} from "../../interfaces/stream/finality/IStreamPolicyContentCheckpointV2.sol";
+import {
+    IStreamPolicyOutputEvidenceBindingV2 as Provider
+} from "../../interfaces/stream/finality/IStreamPolicyOutputEvidenceBindingV2.sol";
+import {
+    StreamPolicyOutputSchemasV2 as OutputSchemas
+} from "../finality/StreamPolicyOutputSchemasV2.sol";
+import {
+    StreamPolicyContentRootSchemasV2 as Schemas
+} from "../finality/StreamPolicyContentRootSchemasV2.sol";
+import { IERC165 } from "../../vendor/openzeppelin/IERC165.sol";
 import "./StreamMetadataSubjects.sol";
 import "./StreamMetadataRenderer.sol";
-import {
-    StreamPolicyContentRootStateV2 as PolicyRootState
-} from "./StreamPolicyContentRootStateV2.sol";
-import {
-    StreamPolicyOutputSchemasV2 as PolicyOutputSchemas
-} from "../finality/StreamPolicyOutputSchemasV2.sol";
 
-/// @notice Authoritative root state in Router storage, using its fixed library and artist consent.
-library StreamMetadataContentRoot {
-    struct State {
-        mapping(uint256 => bytes32) heads;
-        mapping(bytes32 => R.Record) records;
-    }
-
-    struct Context {
-        address core;
-        address artist;
-    }
+/// @notice V2 root admission through the original canonical Router state and Artist operation17.
+library StreamMetadataPolicyContentRootV2 {
+    bytes32 internal constant PROFILE = keccak256("6529STREAM_POLICY_CURRENT_FULL_CONTENT_V2");
 
     struct Route {
         address finality;
@@ -46,6 +52,7 @@ library StreamMetadataContentRoot {
         address metadata;
         address schemas;
         address manifest;
+        address checkpoint;
         address artifacts;
         uint256 readGas;
         bytes32 hash;
@@ -59,30 +66,19 @@ library StreamMetadataContentRoot {
         R.Record record
     );
 
-    function familyState(State storage state, address core, uint256 collectionId)
-        public
-        view
-        returns (bytes32)
-    {
-        bytes32 head = state.heads[collectionId];
-        if (head != 0) return state.records[head].stateHash;
-        return keccak256(
-            abi.encode(
-                keccak256("6529STREAM_EMPTY_CONTENT_ROOT_STATE_V1"),
-                block.chainid,
-                address(this),
-                core,
-                collectionId
-            )
-        );
-    }
+    event PolicyContentRootBindingPublished(
+        uint16 schemaVersion,
+        uint256 indexed collectionId,
+        bytes32 indexed recordHash,
+        V.Binding binding
+    );
 
     function prepare(
-        State storage state,
-        Context memory ctx,
+        Original.State storage state,
+        Original.Context memory ctx,
         R.Publication memory p,
         address publisher
-    ) public view returns (R.Record memory r) {
+    ) public view returns (R.Record memory r, V.Binding memory binding) {
         if (p.collectionId == 0 || p.verifiedManifestRecordHash == 0 || publisher == address(0)) revert R.InvalidContentRootPublication();
         bytes32 previous = state.heads[p.collectionId];
         if (p.expectedPredecessor != previous) {
@@ -131,22 +127,49 @@ library StreamMetadataContentRoot {
         r.artistId = artistId;
         r.bindingGeneration = generation;
         r.bindingHash = bindingHash;
-        IStreamContentLeafManifest.Manifest memory m = abi.decode(
-            _read(
-                route.manifest,
-                abi.encodeCall(
-                    IStreamContentLeafManifest.requireCurrentManifest,
-                    (p.verifiedManifestRecordHash, artistId)
-                ),
-                288,
-                route.readGas
-            ),
-            (IStreamContentLeafManifest.Manifest)
+        bytes memory manifestBytes = _read(
+            route.manifest,
+            abi.encodeCall(M.requireCurrentManifest, (p.verifiedManifestRecordHash, artistId)),
+            544,
+            route.readGas
         );
+        M.Manifest memory m = abi.decode(manifestBytes, (M.Manifest));
         if (
-            m.collectionId != p.collectionId || m.artistId != artistId || m.tokenCount == 0
-                || m.contentRoot == 0 || m.manifestHash == 0
+            keccak256(manifestBytes) != keccak256(abi.encode(m))
+                || m.scope.scopeType != StreamFinalityScopeType.COLLECTION
+                || m.scope.collectionId != p.collectionId || m.scope.tokenId != 0
+                || m.scope.scopeId != 0 || m.artistId != artistId || m.tokenCount == 0
+                || m.contentRoot == 0 || m.outputRoot == 0 || m.manifestHash == 0
+                || m.checkpointHash == 0 || m.checkpointStateHash == 0 || m.inventoryHash == 0
+                || m.policyChainHash == 0
+        ) {
+            revert R.InvalidContentRootPublication();
+        }
+        if (
+            m.entropySourceSet
+                    != _address(
+                        route.checkpoint, abi.encodeCall(P.entropySourceSet, ()), route.readGas
+                    ) || m.entropySourceSet.code.length == 0
         ) revert R.InvalidContentRootPublication();
+        binding = V.Binding(
+            PROFILE,
+            route.manifest,
+            route.manifest.codehash,
+            route.checkpoint,
+            route.checkpoint.codehash,
+            m.checkpointHash,
+            m.checkpointStateHash,
+            m.entropySourceSet,
+            m.entropySourceSet.codehash,
+            m.inventoryHash,
+            m.policyChainHash,
+            m.outputRoot,
+            Schemas.definitionHash(OutputSchemas.SCHEMA),
+            Schemas.definitionHash(OutputSchemas.CANON),
+            Schemas.definitionHash(OutputSchemas.LEAF_SCHEMA),
+            Schemas.definitionHash(Schemas.ROOT_SCHEMA),
+            Schemas.definitionHash(Schemas.ROOT_CANON)
+        );
         r.contentRoot = m.contentRoot;
         r.leafCount = m.tokenCount;
         r.manifestHash = m.manifestHash;
@@ -154,69 +177,60 @@ library StreamMetadataContentRoot {
         r.routeHash = route.hash;
         r.stateHash = keccak256(
             abi.encode(
-                keccak256("6529STREAM_CONTENT_ROOT_STATE_V1"), block.chainid, address(this), r
+                keccak256("6529STREAM_POLICY_CONTENT_ROOT_STATE_V2"),
+                block.chainid,
+                address(this),
+                r,
+                binding
             )
         );
     }
 
     function publish(
-        State storage state,
-        Context memory ctx,
+        Original.State storage state,
+        Original.Context memory ctx,
         R.Publication memory p,
         R.Record memory prepared,
+        V.Binding memory preparedBinding,
         bytes32 artistConsent
     ) public returns (bytes32 hash) {
         if (artistConsent == 0 || block.timestamp > type(uint64).max) {
             revert R.InvalidContentRootPublication();
         }
-        R.Record memory current = prepare(state, ctx, p, msg.sender);
-        if (keccak256(abi.encode(current)) != keccak256(abi.encode(prepared))) {
+        (R.Record memory current, V.Binding memory binding) = prepare(state, ctx, p, msg.sender);
+        if (
+            keccak256(abi.encode(current, binding))
+                != keccak256(abi.encode(prepared, preparedBinding))
+        ) {
             revert R.InvalidContentRootPublication();
         }
         current.artistConsent = artistConsent;
         current.publishedAt = uint64(block.timestamp);
         hash = keccak256(
             abi.encode(
-                keccak256("6529STREAM_CONTENT_ROOT_RECORD_V1"),
+                keccak256("6529STREAM_POLICY_CONTENT_ROOT_RECORD_V2"),
                 block.chainid,
                 address(this),
-                current
+                current,
+                binding
             )
         );
         if (state.records[hash].publisher != address(0)) revert R.InvalidContentRootPublication();
+        if (Stored.state().bindings[hash].profileId != 0) revert R.InvalidContentRootPublication();
+        Stored.state().bindings[hash] = binding;
         state.records[hash] = current;
         state.heads[p.collectionId] = hash;
         emit TokenContentRootPublished(
-            1, p.collectionId, _subject(ctx.core, p.collectionId), hash, current
+            2, p.collectionId, _subject(ctx.core, p.collectionId), hash, current
         );
+        emit PolicyContentRootBindingPublished(2, p.collectionId, hash, binding);
     }
 
-    function readRoot(State storage state, address core, uint256 collectionId, bytes32 subject)
-        public
-        view
-        returns (bytes32, uint64, bytes32)
-    {
-        if (subject != _subject(core, collectionId)) return (0, 0, 0);
-        R.Record storage r = state.records[state.heads[collectionId]];
-        return (
-            r.contentRoot,
-            r.leafCount,
-            r.leafCount == 0
-                ? bytes32(0)
-                : PolicyRootState.state().bindings[state.heads[collectionId]].profileId == 0
-                    ? StreamContentRootSchemas.LEAF_SCHEMA
-                    : PolicyOutputSchemas.LEAF_SCHEMA
-        );
+    function readBinding(bytes32 hash) public view returns (V.Binding memory) {
+        return Stored.state().bindings[hash];
     }
 
-    function readRecord(State storage state, bytes32 hash) public view returns (R.Record memory) {
-        if (hash == 0 || state.records[hash].publisher == address(0)) {
-            revert R.ContentRootRecordUnknown(hash);
-        }
-        return state.records[hash];
-    }
-
-    function _route(Context memory ctx) private view returns (Route memory r) {
+    function _route(Original.Context memory ctx) private view returns (Route memory r) {
         r.finality = _selected(ctx.core, keccak256("ARTWORK_FINALITY_REGISTRY"), 100_000);
         if (
             _address(
@@ -321,39 +335,46 @@ library StreamMetadataContentRoot {
                         r.readGas
                     ) != r.schemas
         ) revert R.InvalidContentRootPublication();
-        r.manifest = _address(
-            r.provider,
-            abi.encodeCall(IStreamContentRootEvidenceBinding.contentLeafManifest, ()),
-            r.readGas
-        );
+        if (
+            _word(
+                    r.provider,
+                    abi.encodeCall(IERC165.supportsInterface, (type(Provider).interfaceId)),
+                    r.readGas
+                ) != 1
+        ) {
+            revert R.InvalidContentRootPublication();
+        }
+        r.manifest =
+            _address(r.provider, abi.encodeCall(Provider.policyOutputManifestV2, ()), r.readGas);
         _pin(
             r.manifest,
             bytes32(
                 _word(
                     r.provider,
-                    abi.encodeCall(
-                        IStreamContentRootEvidenceBinding.contentLeafManifestCodeHash, ()
-                    ),
+                    abi.encodeCall(Provider.policyOutputManifestV2CodeHash, ()),
                     r.readGas
                 )
             )
         );
-        address checkpoint = _address(
-            r.manifest, abi.encodeCall(IStreamContentLeafManifest.contentCheckpoint, ()), r.readGas
-        );
+        address checkpoint =
+            _address(r.manifest, abi.encodeCall(M.contentCheckpoint, ()), r.readGas);
+        r.checkpoint = checkpoint;
         if (
-            _address(r.manifest, abi.encodeCall(IStreamContentLeafManifest.core, ()), r.readGas)
-                    != ctx.core
-                || _address(
-                        checkpoint,
-                        abi.encodeCall(IStreamOnchainContentCheckpoint.core, ()),
+            _word(
+                        r.manifest,
+                        abi.encodeCall(IERC165.supportsInterface, (type(M).interfaceId)),
                         r.readGas
-                    ) != ctx.core
-                || _address(
-                        checkpoint,
-                        abi.encodeCall(IStreamOnchainContentCheckpoint.metadataRouter, ()),
-                        r.readGas
-                    ) != address(this)
+                    ) != 1
+                || bytes32(_word(r.manifest, abi.encodeCall(M.outputProfile, ()), r.readGas))
+                    != PROFILE
+        ) {
+            revert R.InvalidContentRootPublication();
+        }
+        if (
+            _address(r.manifest, abi.encodeCall(M.core, ()), r.readGas) != ctx.core
+                || _address(checkpoint, abi.encodeCall(P.core, ()), r.readGas) != ctx.core
+                || _address(checkpoint, abi.encodeCall(P.metadataRouter, ()), r.readGas)
+                    != address(this)
                 || _selected(ctx.core, keccak256("METADATA_ROUTER"), r.readGas) != address(this)
         ) revert R.InvalidContentRootPublication();
         r.artifacts = _address(
@@ -362,11 +383,7 @@ library StreamMetadataContentRoot {
             r.readGas
         );
         if (
-            _address(
-                        r.manifest,
-                        abi.encodeCall(IStreamContentLeafManifest.artifactCoverage, ()),
-                        r.readGas
-                    ) != r.artifacts
+            _address(r.manifest, abi.encodeCall(M.artifactCoverage, ()), r.readGas) != r.artifacts
                 || _address(
                         r.artifacts,
                         abi.encodeCall(IStreamFinalityArtifactCoverage.schemaRegistry, ()),
@@ -391,7 +408,7 @@ library StreamMetadataContentRoot {
         }
         r.hash = keccak256(
             abi.encode(
-                keccak256("6529STREAM_CONTENT_ROOT_ROUTE_V1"),
+                keccak256("6529STREAM_POLICY_CONTENT_ROOT_ROUTE_V2"),
                 block.chainid,
                 ctx,
                 targets,
@@ -435,11 +452,12 @@ library StreamMetadataContentRoot {
     }
 
     function _schemas(Route memory r) private view {
-        bytes32[4] memory ids = [
-            StreamContentRootSchemas.LEAF_SCHEMA,
-            StreamContentRootSchemas.LEAF_CANON,
-            StreamContentRootSchemas.ROOT_SCHEMA,
-            StreamContentRootSchemas.ROOT_CANON
+        bytes32[5] memory ids = [
+            OutputSchemas.SCHEMA,
+            OutputSchemas.CANON,
+            OutputSchemas.LEAF_SCHEMA,
+            Schemas.ROOT_SCHEMA,
+            Schemas.ROOT_CANON
         ];
         for (uint256 i; i < ids.length; ++i) {
             bytes memory input = abi.encodeCall(IStreamSchemaRegistry.document, (ids[i]));
@@ -448,11 +466,10 @@ library StreamMetadataContentRoot {
                 abi.decode(out, (IStreamSchemaRegistry.DocumentView));
             if (
                 !d.exists || d.status != IStreamSchemaRegistry.DocumentStatus.ACTIVE
-                    || uint8(d.specification.kind) != i % 2
+                    || uint8(d.specification.kind) != ((i == 1 || i == 4) ? 1 : 0)
                     || keccak256(bytes(d.specification.name)) != ids[i]
                     || d.specification.canonicalizationId != keccak256("RAW_BYTES")
-                    || d.specification.contentHash
-                        != StreamContentRootSchemas.definitionHash(ids[i])
+                    || d.specification.contentHash != Schemas.definitionHash(ids[i])
             ) revert R.InvalidContentRootPublication();
         }
     }
