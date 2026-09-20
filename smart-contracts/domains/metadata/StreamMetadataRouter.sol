@@ -116,6 +116,11 @@ contract StreamMetadataRouter is
         bytes32 consent;
         bytes32 ratification;
     }
+    // Memory-backed flags avoid specializing the large serving path for each public selector.
+    struct TokenViewOptions {
+        bool allowBurned;
+        uint8 mode;
+    }
     uint256 private immutable _staticChainId = block.chainid;
     IStreamCore public immutable core;
     address public immutable authority;
@@ -1015,11 +1020,11 @@ contract StreamMetadataRouter is
 
     /// @notice Full executable output, including retained identities of burned tokens.
     function tokenHTML(uint256 tokenId) external view returns (string memory) {
-        return _serveTokenView(tokenId, true, 3);
+        return _serveTokenView(tokenId, TokenViewOptions(true, 3));
     }
 
     function tokenJSON(uint256 tokenId) external view returns (string memory) {
-        return _serveTokenView(tokenId, true, 2);
+        return _serveTokenView(tokenId, TokenViewOptions(true, 2));
     }
 
     function historicalFullTokenMetadataJSON(address core_, uint256 tokenId)
@@ -1028,7 +1033,7 @@ contract StreamMetadataRouter is
         returns (string memory)
     {
         _requireCore(core_);
-        return _serveTokenView(tokenId, true, 4);
+        return _serveTokenView(tokenId, TokenViewOptions(true, 4));
     }
 
     function _serveToken(uint256 tokenId, bool allowBurned, bool asURI)
@@ -1036,14 +1041,16 @@ contract StreamMetadataRouter is
         view
         returns (string memory)
     {
-        return _serveTokenView(tokenId, allowBurned, asURI ? 1 : 0);
+        return _serveTokenView(tokenId, TokenViewOptions(allowBurned, asURI ? 1 : 0));
     }
 
-    function _serveTokenView(uint256 tokenId, bool allowBurned, uint8 mode)
+    function _serveTokenView(uint256 tokenId, TokenViewOptions memory options)
         private
         view
         returns (string memory)
     {
+        bool allowBurned = options.allowBurned;
+        uint8 mode = options.mode;
         // Probe only dispatch identity. Unknown tokens retain the original legacy finality/
         // identity error path; the strict new config reads still use _staticCollection.
         bytes memory identity = StaticCalls.read(
