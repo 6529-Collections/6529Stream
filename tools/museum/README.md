@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Canonical condition capture](../../docs/museum-condition-source.md) reads the
+permanent Core-bound source catalog and all retained owner/independent lanes.
+Receipt order determines latest; unsupported newest originals remain selected.
+Examination-time protocol joins and complete packet assembly remain required.
+
 [Selected conservation capture](../../docs/museum-conservation-source.md)
 replays the existing selector's separate Artist/estate histories, exact original
 intent/interview records, catalogs and locks. Tier and sale-floor evidence remain

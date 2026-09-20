@@ -7,19 +7,36 @@ required by the [collection metadata specification](collection-metadata-contract
 especially CMC-MUSEUM-GRADE, CMC-ACQUISITION-PACKET and CMC acceptance case 56.
 These dependencies remain required implementation, not waivable qualifications.
 
+## Later source and consumer implementations
+
+The historical missing-producer table below describes its recorded source only.
+The canonical condition catalog is now frozen at
+`f7a05e0734b95f1e2ff1a038b73511c0d94b6f81`, with the permanent Core binding at
+`758572df4e7f3969f549dd58aef0c369202e2b27`. The
+[condition capture consumer](museum-condition-source.md) follows those exact
+interfaces: complete retained membership and lanes, original governance and
+publication receipts, and latest selection by block/transaction/log position.
+Replaced hosts and pre-admission records remain in scope. Unsupported newest
+records remain selected and unresolved; complete empty lanes establish only
+catalog-scoped absence. Packet item 15 still needs the examination and protocol
+joins listed by the capture. Producer/native runtime and joined current-stack
+acceptance are separate from synthetic Python replay validation.
+
 The later [conservation source adapter](museum-conservation-source.md) now
 captures and replays the existing selected intent/interview producers. That
 partial item-13 consumer does not supply the missing tier declaration/default or
 sale-floor inputs in this recorded dependency review. The additive
 [packet V3 schema](museum-acquisition-packet-v3.md) also permits zero optional
-condition captures; canonical condition selection and absence still require
-the authoritative source-set producers below.
+condition captures. The new condition consumer above now follows the frozen
+authoritative source-set producer; examination joins remain separate.
 
 Ownership follows [the autonomous run](../ops/AUTONOMOUS_RUN.md): the Metadata
 lead owns native metadata/records/preservation/finality; Root owns Core and
 shared-interface decisions; the Museum lead owns offchain source, schema and
 assembly work. Root coordinates settlement ownership where a sale gate joins
 these components.
+
+## Historical producer gaps at the recorded source
 
 | Requirement | Missing producer or consumer | Accountable owner | Required acceptance evidence |
 | --- | --- | --- | --- |

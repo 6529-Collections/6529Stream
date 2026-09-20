@@ -67,6 +67,12 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add canonical condition-source capture and offline replay against the permanent
+  Core-bound catalog. Retain replacement hosts and complete original lanes;
+  select the latest owner and independent reports by receipt position, preserving
+  unsupported newest records as unresolved. Keep examination joins and complete
+  acquisition packet requirements explicit.
+
 - Add Artist recovery rewind V3 callers with typed exclusions, complete dual-owner
   selection, worker preparation seals and atomic Identity/Payout receipt checks.
 
