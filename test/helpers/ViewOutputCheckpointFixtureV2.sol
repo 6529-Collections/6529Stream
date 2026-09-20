@@ -71,6 +71,7 @@ abstract contract ViewOutputCheckpointFixtureV2 is ViewCheckpointFixtureV2 {
 
     function _build(uint256 count, uint256 burnedToken) internal {
         records = new OutputViewRecordProbe(address(core), store);
+        _answer(attribution, "router()", "", abi.encode(address(records)));
         membership.tokenCount = count;
         membership.tokenListHash = count == 1
             ? keccak256(abi.encode(uint256(11)))
@@ -156,8 +157,7 @@ abstract contract ViewOutputCheckpointFixtureV2 is ViewCheckpointFixtureV2 {
             core, "coordinatorAtMint(uint256)", abi.encode(token), abi.encode(address(coordinator))
         );
         _answer(core, "tokenData(uint256)", abi.encode(token), abi.encode(hex"00f1ff00"));
-        uint8 status =
-            rule.collectionPolicy.renderRequirement == 0
+        uint8 status = rule.collectionPolicy.renderRequirement == 0
             ? 5
             : rule.collectionPolicy.mode == 0 ? 1 : 2;
         bytes32 seed =
