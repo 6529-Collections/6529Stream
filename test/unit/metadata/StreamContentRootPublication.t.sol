@@ -384,9 +384,13 @@ abstract contract ContentRootPublicationFixture is CharacterizationTestBase, Off
             address(core), address(artist), address(metadata), provider, artifacts
         );
         artist.configure(address(router), address(finality));
-        router.initializeOriginalFinalityAnchor();
+        _initializeOriginalFinalityAnchor();
         core.setPointer(keccak256("ARTWORK_FINALITY_REGISTRY"), address(finality));
         _grant(1, 7, address(this), true);
+    }
+
+    function _initializeOriginalFinalityAnchor() internal virtual {
+        router.initializeOriginalFinalityAnchor();
     }
 
     function _publication()

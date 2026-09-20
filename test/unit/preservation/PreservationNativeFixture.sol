@@ -164,6 +164,8 @@ abstract contract PreservationNativeFixture is
         finality.setReadGas(8000000);
         artist.configure(address(router), address(finality));
         core.setPointer(keccak256("ARTWORK_FINALITY_REGISTRY"), address(finality));
+        // This is the fixture's completed original graph, before any presentation lock.
+        router.initializeOriginalFinalityAnchor();
         router.lockArtistIdentity(1);
         // Historical Router rendering's original-finality absence is a precise read boundary.
         cheat.mockCall(
@@ -192,6 +194,10 @@ abstract contract PreservationNativeFixture is
         _root();
         snapshots = new StreamCollectionSnapshots(_dependencies(), address(executor), _configs());
     }
+
+    // The base graph's temporary boundary is replaced during this fixture's construction.
+    // Preserve the Router's once-only anchor for the final original boundary above.
+    function _initializeOriginalFinalityAnchor() internal override { }
 
     function _createArtifactCoverage() internal virtual returns (address) {
         archive = new PreservationSourceArchiveBoundary(address(core), address(schemas));
