@@ -7,6 +7,8 @@
 - Add literal receipt/event, rollback, optional-field and history parity tests;
   document the separate warmed Dutch profile and unresolved cold collector-gas
   requirement in the [integration guide](docs/integrations/conservation-floor-persistence-gas.md).
+- Paired original/successor focused runs pass six cases each with 256 fuzz runs;
+  measured preparation/inline savings remain separate from cold collector gas.
 
 
 ## Retained-offer callback regression recipes

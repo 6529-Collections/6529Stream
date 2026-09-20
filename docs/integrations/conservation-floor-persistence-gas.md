@@ -29,8 +29,19 @@ to the frozen `9bdabdf2` product. Paired Solidity 0.8.19, viaIR, optimizer 200,
 Paris, no-CBOR codegen over 55 sources measures runtime **24,535 to 24,498 bytes**
 and bare creation **26,707 to 26,670 bytes**. Its 736 constructor argument bytes
 remain unchanged. Original ABI, selectors and recursive storage layouts match.
-The six authored tests typecheck over 164 sources. Execution and gas savings
-remain pending at this source handoff; the size result is not a gas result.
+The same six tests pass against both the original and changed Floor, including
+256 fuzz runs per version. Each capture has 164 exact Git-matched sources, seven
+genuine native artifacts and 329 verified metadata source Keccaks; all six
+reached production products meet the original runtime and complete init-code
+limits. The cached EVM runs preserved every source, setting and artifact byte.
+
+The test-local preparation measurement falls from 456,416 to 422,887 gas
+(a 33,529 saving). The complete inline persistence/settlement measurement falls
+from 805,208 to 801,679 (3,529 saved). These are calls within test transactions,
+not all-cold external collector transactions; setup, commerce and intrinsic
+costs are outside these measured intervals. The smaller inline saving is
+consistent with subsequent reads paying cold-access costs for skipped slots;
+that explanation has not been separately established by an opcode trace.
 
 ## Collector transaction boundary
 
@@ -69,8 +80,8 @@ keeps one-transaction purchase valid and still authenticates current paid facts.
 The separate 700,000 `PREPARED_MINT` ceiling describes atomic mint orchestration;
 it is not an exemption for offloading conservation preparation.
 
-This bounded storage change is expected to save tens of thousands of gas, not
-the remaining roughly 2.4 million in the diagnostic. [ADR 0033](../adr/0033-engineering-rehearsals-and-collector-gas.md)
+This bounded storage change saves gas in the measured intervals and leaves
+the remaining roughly 2.4 million in the purchase diagnostic unresolved. [ADR 0033](../adr/0033-engineering-rehearsals-and-collector-gas.md)
 already requires an integrated storage/execution design for consumer, recorder,
 Manager and Core. Durable keyed reads, exact receipts and credit accounting,
 independent replay, and atomic rollback must survive that design. Replacing
