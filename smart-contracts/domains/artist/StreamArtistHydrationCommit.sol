@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamArtistDelegationHydrationTypes as DH
+} from "../../interfaces/stream/artist/IStreamArtistDelegationAuthorityHydration.sol";
+import {
     StreamArtistMultipleHydrationTypes as MH
 } from "../../interfaces/stream/artist/IStreamArtistMultipleAuthorityHydration.sol";
 import "./StreamArtistReadinessHydrationFacts.sol";
@@ -97,7 +100,7 @@ library StreamArtistHydrationCommit {
                 );
         }
         for (uint256 i; i < 7; ++i) {
-            if (profile == MH.PROFILE) {
+            if (profile == MH.PROFILE || profile == DH.PROFILE) {
                 StreamArtistHydrationSourceGuards._multipleHeader(
                     source.owners[i], p.expectedSource[i]
                 );

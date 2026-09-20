@@ -1036,16 +1036,26 @@ contract StreamArtistOnboardingCoordinator is
     function coordinateHydrateMultipleArtistAuthority(
         address actor,
         StreamArtistMultipleHydrationTypes.Request calldata p
-    ) external operation returns (bytes32) {
-        return StreamArtistCoordinatorHydration.execute(_economicContext(), msg.data, 7);
+    ) external returns (bytes32) {
+        return _coordinateHydration();
+    }
+
+    function coordinateHydrateArtistAuthorityWithDelegations(address actor, AH.Request calldata p)
+        external
+        returns (bytes32)
+    {
+        return _coordinateHydration();
+    }
+
+    function _coordinateHydration() private operation returns (bytes32) {
+        return StreamArtistCoordinatorHydration.executeSelected(_economicContext(), msg.data);
     }
 
     function coordinateHydrateArtistAuthority(address actor, AH.Request calldata p)
         external
-        operation
         returns (bytes32)
     {
-        return StreamArtistCoordinatorHydration.execute(_economicContext(), msg.data, 1);
+        return _coordinateHydration();
     }
 
     function authorityHydrationSuite() external view returns (T.SuiteConfiguration memory) {
@@ -1059,38 +1069,37 @@ contract StreamArtistOnboardingCoordinator is
 
     function coordinateHydrateArtistAuthorityWithPayout(address actor, AH.Request calldata p)
         external
-        operation
         returns (bytes32)
     {
-        return StreamArtistCoordinatorHydration.execute(_economicContext(), msg.data, 2);
+        return _coordinateHydration();
     }
 
     function coordinateHydrateArtistAuthorityWithEconomics(
         address actor,
         StreamArtistEconomicsHydrationTypes.Request calldata p
-    ) external operation returns (bytes32) {
-        return StreamArtistCoordinatorHydration.execute(_economicContext(), msg.data, 3);
+    ) external returns (bytes32) {
+        return _coordinateHydration();
     }
 
     function coordinateHydrateArtistAuthorityWithReadiness(
         address actor,
         StreamArtistReadinessHydrationTypes.Request calldata p
-    ) external operation returns (bytes32) {
-        return StreamArtistCoordinatorHydration.execute(_economicContext(), msg.data, 4);
+    ) external returns (bytes32) {
+        return _coordinateHydration();
     }
 
     function coordinateHydrateArtistAuthorityWithPublications(
         address actor,
         StreamArtistReadinessHydrationTypes.Request calldata p
-    ) external operation returns (bytes32) {
-        return StreamArtistCoordinatorHydration.execute(_economicContext(), msg.data, 5);
+    ) external returns (bytes32) {
+        return _coordinateHydration();
     }
 
     function coordinateHydrateArtistAuthorityWithEntropyFindings(
         address actor,
         StreamArtistEntropyFindingHydrationTypes.Request calldata p
-    ) external operation returns (bytes32) {
-        return StreamArtistCoordinatorHydration.execute(_economicContext(), msg.data, 6);
+    ) external returns (bytes32) {
+        return _coordinateHydration();
     }
 
     function coordinateWithdrawAttributionDispute(

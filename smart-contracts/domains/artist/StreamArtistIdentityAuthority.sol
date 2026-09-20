@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import "./StreamArtistMultipleIdentityHydration.sol";
+import "./StreamArtistAdditiveIdentityHydration.sol";
 import {
     StreamArtistStaticIdentityProjection as StaticIdentity
 } from "./StreamArtistStaticIdentityProjection.sol";
@@ -1693,14 +1693,32 @@ contract StreamArtistIdentityAuthority is
         );
     }
 
+    function authorityDelegationHydrationState(AH.Query calldata q)
+        external
+        view
+        returns (bytes memory)
+    {
+        return _additiveHydrationState();
+    }
+
     function authorityLivingIdentityHydrationState(AH.Query calldata q)
         external
         view
         returns (bytes memory)
     {
+        return _additiveHydrationState();
+    }
+
+    function _additiveHydrationState() private view returns (bytes memory) {
         _baselineTiming();
-        return StreamArtistMultipleIdentityHydration.exportState(
-            _identity, _estate, _dormancy, _unavailability, q
+        return StreamArtistAdditiveIdentityHydration.exportEncoded(
+            _identity,
+            _delegations,
+            _identityRevisions,
+            _estate,
+            _dormancy,
+            _unavailability,
+            msg.data
         );
     }
 
@@ -1721,17 +1739,14 @@ contract StreamArtistIdentityAuthority is
 
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
         _baselineTiming();
-        if (StreamArtistMultipleHydrationCodec.isState(p.typedState)) {
-            StreamArtistMultipleIdentityHydration.importEncoded(
-                _identity, _estate, _dormancy, _unavailability, msg.data[4:]
-            );
-            return;
-        }
-        StreamArtistIdentityHydration.importEncoded(
-            _identity, _estate, _dormancy, _unavailability, msg.data[4:]
-        );
-        StreamArtistHistoryState.activate(
-            q.artistId, q.collectionId, StreamArtistHydrationGuards.commitment()
+        StreamArtistAdditiveIdentityHydration.importEncoded(
+            _identity,
+            _delegations,
+            _identityRevisions,
+            _estate,
+            _dormancy,
+            _unavailability,
+            msg.data[4:]
         );
     }
 

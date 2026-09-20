@@ -9,6 +9,16 @@ import {
 
 /// @notice Fixed typed multiplicity import; the original identity domain and per-identity nonce trees remain distinct.
 library StreamArtistMultipleIdentityHydration {
+    function exportEncoded(
+        StreamArtistIdentityState.State storage s,
+        StreamArtistEstateState.State storage estate,
+        StreamArtistDormancyState.State storage dorm,
+        StreamArtistUnavailabilityState.State storage finding,
+        bytes calldata encoded
+    ) public view returns (bytes memory) {
+        return exportState(s, estate, dorm, finding, abi.decode(encoded, (AH.Query)));
+    }
+
     function exportState(
         StreamArtistIdentityState.State storage s,
         StreamArtistEstateState.State storage estate,

@@ -1973,6 +1973,13 @@ contract StreamArtistOnboardingRegistry is
         _forwardRegistryWriter();
     }
 
+    function hydrateArtistAuthorityWithDelegations(AH.Request calldata p)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
     function hydrateArtistAuthority(AH.Request calldata p) external returns (bytes32) {
         _forwardRegistryWriter();
     }

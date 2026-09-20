@@ -47,6 +47,24 @@
   "validationState": "source/type and authored actual two-registry/Safe/Archive scenarios; native behavior, sizes and current-stack acceptance pending",
   "additionalProfiles": [
     {
+      "profile": "6529STREAM_ARTIST_LIVING_DELEGATION_HYDRATION_V1",
+      "write": "hydrateArtistAuthorityWithDelegations",
+      "coordinator": "coordinateHydrateArtistAuthorityWithDelegations",
+      "typedInterface": "smart-contracts/interfaces/stream/artist/IStreamArtistDelegationAuthorityHydration.sol",
+      "request": "unchanged StreamArtistAuthorityHydrationTypes.Request",
+      "additionalOriginalOperations": [16, 25, 26, 27],
+      "source": "one original living identity and accepted generation-one PRIMARY_ONLY collection in mode1 or2; complete journals, original grant versions/revocations/use counts and exact historical consent associations; kind1/2 nonce trees and every replay cell",
+      "consumer": "original direct/delegated policy and sale records remain durable; fresh successor writes retain original current grant, mode, capability, nonce and signature guards",
+      "exclusions": [
+        "multi-identity or multi-collection delegation combinations",
+        "corrected, pending or collaborator bindings",
+        "provisional or prebinding revisions and advanced authority transitions",
+        "nonzero delegation epoch, other consumed delegated capabilities or timing changes",
+        "economics/readiness/publication/finding combinations and prior imports"
+      ],
+      "validation": "ten authored actual-owner/Safe/Archive cases; source/ABI and selected-size checks separate from native/current-stack acceptance"
+    },
+    {
       "profile": "6529STREAM_ARTIST_LIVING_PAYOUT_HYDRATION_V1",
       "write": "hydrateArtistAuthorityWithPayout",
       "coordinator": "coordinateHydrateArtistAuthorityWithPayout",

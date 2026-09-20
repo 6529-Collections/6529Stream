@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistMultipleCollectionHydration.sol";
+import "./StreamArtistDelegationCollectionHydration.sol";
 
 import "./StreamArtistContentHydration.sol";
 import "./StreamArtistEconomicsHydration.sol";
@@ -496,6 +497,16 @@ contract StreamArtistConsentFinalityLifecycle is
         }
     }
 
+    function authorityDelegationHydrationState(AH.Query calldata q)
+        external
+        view
+        returns (bytes memory)
+    {
+        return StreamArtistDelegationCollectionHydration.consentState(
+            _policies, _recordDelegation, _saleRecords, _latestSaleConsents, q
+        );
+    }
+
     function authorityHydrationState(AH.Query calldata q)
         external
         view
@@ -549,6 +560,13 @@ contract StreamArtistConsentFinalityLifecycle is
     }
 
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
+        if (StreamArtistDelegationHydrationCodec.tagged(p.typedState, DH.CONSENT)) {
+            if (p.nonces.length != 0) revert T.InvalidRecord();
+            StreamArtistDelegationCollectionHydration.importConsent(
+                _policies, _recordDelegation, _saleRecords, _latestSaleConsents, q, p.typedState
+            );
+            return;
+        }
         if (StreamArtistMultipleHydrationCodec.isState(p.typedState)) {
             if (p.nonces.length != 0) revert T.InvalidRecord();
             StreamArtistMultipleCollectionHydration.policies(_policies, p.typedState);

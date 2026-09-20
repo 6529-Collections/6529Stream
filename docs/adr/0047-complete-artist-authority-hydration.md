@@ -150,3 +150,18 @@ Archive composition remain atomic. The tagged envelope and finite remaining
 profiles are specified in the [multiplicity guide](../guides/artist-multiple-authority-hydration.md).
 No collaborator/delegated, corrected-generation or advanced-history authority
 is inferred from this baseline extension.
+
+## Original living delegation profile
+
+The additive `hydrateArtistAuthorityWithDelegations(Request)` selects
+`6529STREAM_ARTIST_LIVING_DELEGATION_HYDRATION_V1` under the same operation 60
+and seven-owner mask. One original living identity and accepted generation-one
+PRIMARY_ONLY collection may retain complete op25/26/27/54 identity history and
+direct or delegated op14/16 records in consent modes 1/2. Actual source journals
+and revision totals authenticate completeness. Both original principal and
+delegate nonce trees, all replay/revocation cells, grant versions, current heads,
+use counts and recorded historic grant associations survive the atomic import.
+Present grant liveness is never substituted for historical consent authority;
+fresh writes still use original current guards and the successor signature domain.
+See the [delegation profile guide](../guides/artist-delegation-authority-hydration.md)
+for the tagged owner codec, finite scope and remaining combinations.

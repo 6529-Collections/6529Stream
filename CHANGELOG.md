@@ -3,6 +3,14 @@
 All notable release-impacting changes are recorded here. The project follows
 the release policy in `docs/release-policy.md`.
 
+## Artist original living delegation hydration
+
+- Add a distinct complete operation-60 profile for original living delegation,
+  revision and revocation history, with exact historic policy/sale grant
+  associations, both nonce kinds and unchanged atomic seven-owner/Archive import.
+- Add actual-owner/Safe regression recipes and fixed hydration transports;
+  native execution and full current-stack acceptance remain separate.
+
 ## Artist original living multiplicity hydration
 
 - Add explicit complete multi-Artist/multi-collection operation-60 hydration,
