@@ -49,6 +49,8 @@ export * from "./current-reference-inventory.js";
 export * from "./current-reference-inventory-workflow.js";
 export * from "./current-reference-environment.js";
 export * from "./current-reference-environment-workflow.js";
+export * from "./current-reference-mode-payload.js";
+export * from "./current-reference-mode-payload-workflow.js";
 export * from "./current-collection-inventory.js";
 export * from "./current-collection-inventory-workflow.js";
 export * from "./current-erc20-primary-offer-signing.js";

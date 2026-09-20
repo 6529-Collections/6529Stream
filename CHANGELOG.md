@@ -110,6 +110,9 @@ the release policy in `docs/release-policy.md`.
   continuity admission and a configured ordinary backup deployment/plan helper.
   Preserve original host history and fulfillment; actual-current Safe cutover
   recipes are authored and await coordinated runtime verification.
+- Add reference Mode payload preparation callers preserving complete original
+  inputs, canonical bytes and distinct preview/preparation evidence.
+
 - Add delegated Artist attestation callers with original signatures, authenticated
   subject reads, scoped finality/economics and durable record evidence.
 

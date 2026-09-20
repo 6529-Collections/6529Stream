@@ -337,6 +337,8 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Reference Mode payload preparation](docs/current-reference-mode-payload.md)
+  preserves complete original payloads, preview identities and staged byte retention.
 - [Mint executor policy grace](docs/current-mint-policy-grace.md) preserves original
   policy hashes, predecessor deadlines and delayed governance calls.
 - [Current Artist operation callers](docs/current-artist-operation.md) add eight
