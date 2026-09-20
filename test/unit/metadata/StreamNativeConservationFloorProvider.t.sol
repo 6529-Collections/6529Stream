@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPlatformCorrectionLineageTypes as PL, IStreamArtistPlatformCorrectionLineage as PlatformLineage } from "../../../smart-contracts/interfaces/stream/artist/IStreamArtistPlatformCorrectionLineage.sol";
+import { IStreamStaticArtistSource } from "../../../smart-contracts/interfaces/stream/metadata/IStreamStaticArtistSource.sol";
+
 
 import "./StreamConservationSelectionFixture.sol";
 import "../../../smart-contracts/domains/metadata/StreamRightsRecordSelection.sol";
@@ -523,6 +526,34 @@ contract StreamNativeConservationFloorProviderTest is ConservationSelectionFixtu
         provider.saleRelease(_sale());
         vm.etch(address(sources), original);
         require(provider.saleRelease(_sale()).membershipHash != 0, "original runtime restored");
+    }
+
+    function testSupplementalAcceptedPlatformLineageRequiresActualArtistFloor() public providerReady {
+        _platformDeclaration(false);
+        StreamConservationRecordTypes.Intent memory intent = _intent();
+        (bytes32 h,) = _publish(IStreamConservationRecordSelection.RecordKind.INTENT,
+            StreamArtistIntentJson.serialize(intent),1);
+        selection.adoptIntent(1,subject,h,0,0,_intentWitness(h,intent));
+        StreamArtistPlatformTypes.State memory p;
+        p.declaration=StreamArtistPlatformTypes.Declaration(keccak256("original declaration"),keccak256("statement"),address(this),uint64(block.timestamp));
+        p.contestState=3;p.correction.collectionId=1;p.correction.correctiveGeneration=1;
+        p.correction.recordHash=keccak256("original consumed op53");
+        cvm.mockCall(address(facade),abi.encodeCall(IStreamArtistPlatformWorks.platformWorksState,(uint256(1))),abi.encode(p));
+        bytes memory query=abi.encodeCall(IStreamStaticArtistSource.staticDisplayRead,
+            (abi.encodeCall(PlatformLineage.platformCorrectionStatus,(uint256(1)))));
+        PL.Status memory status=PL.Status(p.correction.recordHash,keccak256("lineage2"),2,1,false,0);
+        cvm.mockCall(address(facade),query,abi.encode(abi.encode(status)));
+        require(provider.requireCollectionFloor(1,_LITE).platformWorks,"pending continuation keeps historical platform classification");
+        status.effectiveAccepted=true;status.latestAcceptanceRecord=keccak256("op2 acceptance");
+        cvm.mockCall(address(facade),query,abi.encode(abi.encode(status)));
+        StreamConservationFloorTypes.CollectionFacts memory f=provider.currentCollectionRecords(1);
+        require(!f.platformWorks && f.artistId==ARTIST_ID && f.intentRecordHash==h,"supplemental acceptance selects actual artist conservation");
+        vm.expectRevert(abi.encodeWithSelector(StreamNativeConservationFloorProvider.NativePersonhoodVerificationUnavailable.selector,uint256(1),ARTIST_ID,IDENTITY));
+        provider.requireCollectionFloor(1,_LITE);
+        status.originalCorrectionRecord=keccak256("foreign original");
+        cvm.mockCall(address(facade),query,abi.encode(abi.encode(status)));
+        vm.expectRevert(abi.encodeWithSelector(PL.InvalidPlatformContinuation.selector,uint256(1)));
+        provider.currentCollectionRecords(1);
     }
 
     function testProviderArtistDiagnosticNeverBecomesPersonhoodProof() public providerReady {

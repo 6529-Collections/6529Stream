@@ -53,6 +53,16 @@
   reads and original receipts. Source/type checks pass; native execution,
   linked-library size and gas validation remain pending.
 
+## Added: continued Platform correction generations
+
+- Append fresh class2-authorized lineage after consumed Platform proposals are
+  refused, withdrawn or revoked, preserving original op53 records and independent
+  Artist acceptance.
+- Add effective accepted-lineage status for current admission/display/sanction/
+  conservation and direct STATIC reads; original historical bytes stay intact.
+- Author Safe rollback/retry and exact history/consumer oracles. Complete
+  correction-history hydration and broad runtime acceptance remain required.
+
 ## Added: governed Artist binding corrections after revocation
 
 - Add a typed original-operation1 class2 arbiter correction with exact terminal,

@@ -5,6 +5,7 @@ import {
     StreamArtistAttributionStateTypes as AttrState
 } from "./StreamArtistAttributionStateTypes.sol";
 import "./StreamArtistPlatformState.sol";
+import { StreamArtistPlatformContinuation } from "./StreamArtistPlatformContinuation.sol";
 import {
     StreamArtistBindingLifecycleTypes as L
 } from "../../interfaces/stream/artist/StreamArtistBindingLifecycleTypes.sol";
@@ -48,12 +49,16 @@ library StreamArtistAttributionBindingMutation {
         if (a.state != 1 || a.generation != b.generation || record == bytes32(0)) {
             revert T.InvalidAttribution(collectionId);
         }
-        StreamArtistPlatformState.acceptBinding(s.platform, collectionId, b.generation);
+        bytes32 continuation = StreamArtistPlatformContinuation.accept(collectionId, b.generation, record);
+        if (continuation == 0) {
+            StreamArtistPlatformState.acceptBinding(s.platform, collectionId, b.generation);
+        }
         a.state = 2;
         m = AttrState.Mutation(
             bytes32(0),
             keccak256(abi.encode(collectionId, b, record)),
-            keccak256(abi.encode(collectionId, a))
+            continuation == 0 ? keccak256(abi.encode(collectionId, a))
+                : keccak256(abi.encode(collectionId, a, continuation))
         );
         emit ArtistAttributionStateChanged(
             1, collectionId, 2, b.generation, 1, signer, authorityClass, record, bytes32(0), ""

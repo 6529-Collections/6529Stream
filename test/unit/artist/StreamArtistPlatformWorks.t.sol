@@ -299,7 +299,7 @@ contract StreamArtistPlatformWorksTest is ArtistOnboardingFixture {
             "actual Safe refusal"
         );
         bytes32 before_ = _roots();
-        vm.expectRevert(abi.encodeWithSelector(PW.InvalidPlatformWorks.selector, uint256(2)));
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidAttribution.selector, uint256(2)));
         ingress.proposeArtistBinding(
             2, _proposal(artistId), bytes("unit identity document"), "Artist Safe"
         );
@@ -412,7 +412,7 @@ contract StreamArtistPlatformWorksTest is ArtistOnboardingFixture {
         return _pwResolve(state, claim_, correction, actionClass);
     }
 
-    function _pwInitialEconomics() private {
+    function _pwInitialEconomics() internal {
         IStreamRevenueResolver.ResolvedPrimaryAssignment memory first =
             primary.primaryEconomicsFacts(1, 1, 1);
         IStreamRoyaltyResolver.RoyaltyConfig memory second = royalty.collectionRoyalty(1);
@@ -422,7 +422,7 @@ contract StreamArtistPlatformWorksTest is ArtistOnboardingFixture {
         royalty.configureCollectionRoyalty(2, second.profileId, 500);
     }
 
-    function _pwFullConsent() private {
+    function _pwFullConsent() internal {
         (T.AssignmentFact memory first, T.AssignmentFact memory second) =
             coordinator.reads().currentAssignments(2);
         for (uint256 i; i < 2; ++i) {
@@ -479,14 +479,14 @@ contract StreamArtistPlatformWorksTest is ArtistOnboardingFixture {
         return manager.configurePhase(2, PHASE, _phaseConfig(), gate, ids, configs);
     }
 
-    function _pwClaim() private returns (bytes32) {
+    function _pwClaim() internal returns (bytes32) {
         ingress.declarePlatformWorks(2, keccak256("declaration"));
         (bytes32 e,) = _pwEvidence(address(artist), 0, keccak256("claim evidence"));
         return ingress.filePlatformWorksClaim(2, e, e, "urn:claim");
     }
 
     function _pwResolve(uint8 state, bytes32 claim_, bool correction, uint8 actionClass)
-        private
+        internal
         returns (bytes32)
     {
         (bytes32 evidence,) = _pwEvidence(
@@ -537,7 +537,7 @@ contract StreamArtistPlatformWorksTest is ArtistOnboardingFixture {
         return correction ? p.correction.recordHash : p.contestRecord;
     }
 
-    function _pwMetadata() private {
+    function _pwMetadata() internal {
         if (address(_pwStore) == address(0)) _pwStore = new StreamSchemaDocumentStore();
         avm.mockCall(
             address(metadata),
@@ -552,7 +552,7 @@ contract StreamArtistPlatformWorksTest is ArtistOnboardingFixture {
     }
 
     function _pwEvidence(address author, bytes32 claim_, bytes32 narrative)
-        private
+        internal
         returns (bytes32 evidence, bytes32 coverage)
     {
         _pwMetadata();

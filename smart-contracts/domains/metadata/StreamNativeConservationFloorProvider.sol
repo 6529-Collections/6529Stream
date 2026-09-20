@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPlatformCorrectionReads } from "../artist/StreamArtistPlatformCorrectionReads.sol";
+import { StreamArtistPlatformCorrectionLineageTypes as PL, IStreamArtistPlatformCorrectionLineage as PlatformLineage } from "../../interfaces/stream/artist/IStreamArtistPlatformCorrectionLineage.sol";
+import { IStreamStaticArtistSource } from "../../interfaces/stream/metadata/IStreamStaticArtistSource.sol";
 
 import "../../interfaces/stream/metadata/IStreamConservationFloorProvider.sol";
 import "../../interfaces/stream/metadata/IStreamConservationReleaseContext.sol";
@@ -484,8 +487,19 @@ contract StreamNativeConservationFloorProvider is
         if (keccak256(raw) != keccak256(abi.encode(p))) {
             revert NativeConservationScopeUnavailable();
         }
+        bool corrected = p.correction.accepted;
+        if (StreamArtistPlatformCorrectionReads.needed(p)) {
+            bytes memory outer = _read(_configuration.targets[8],
+                abi.encodeCall(IStreamStaticArtistSource.staticDisplayRead,
+                    (abi.encodeCall(PlatformLineage.platformCorrectionStatus, (collectionId)))),
+                256, _gasParameterValue(SOURCE_GAS));
+            bytes memory value = abi.decode(outer, (bytes));
+            if (value.length != 192 || keccak256(outer) != keccak256(abi.encode(value)))
+                revert NativeConservationScopeUnavailable();
+            corrected = StreamArtistPlatformCorrectionReads.effectiveEncoded(p, value);
+        }
         return p.declaration.recordHash != 0 && p.declaration.statementHash != 0
-            && p.declaration.declaredAt != 0 && !p.correction.accepted;
+            && p.declaration.declaredAt != 0 && !corrected;
     }
 
     function _collection(uint256 id) private view {

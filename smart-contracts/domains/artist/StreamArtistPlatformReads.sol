@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPlatformCorrectionReads } from "./StreamArtistPlatformCorrectionReads.sol";
+import { IStreamArtistPlatformCorrectionLineage as PlatformLineage } from "../../interfaces/stream/artist/IStreamArtistPlatformCorrectionLineage.sol";
 import "../../interfaces/stream/artist/IStreamArtistPlatformWorks.sol";
 import "../../interfaces/stream/artist/IStreamArtistFinalityBinding.sol";
 import "../../interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol";
@@ -20,6 +22,13 @@ library StreamArtistPlatformReads {
         returns (PW.Admission memory)
     {
         return IStreamArtistPlatformOwner(s.owners[4]).platformWorksAdmission(id);
+    }
+
+    function effectiveAccepted(T.SuiteConfiguration memory s, uint256 id, PW.State memory p)
+        public view returns (bool) {
+        if (!StreamArtistPlatformCorrectionReads.needed(p)) return p.correction.accepted;
+        return StreamArtistPlatformCorrectionReads.effective(p,
+            PlatformLineage(s.owners[4]).platformCorrectionStatus(id));
     }
 
     function mintAllowed(PW.Admission memory p, uint256 id) public pure {

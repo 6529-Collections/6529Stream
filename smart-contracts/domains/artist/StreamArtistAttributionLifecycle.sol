@@ -48,6 +48,10 @@ import {
 } from "./StreamArtistAttributionStateTypes.sol";
 import "./StreamArtistAttributionAttestations.sol";
 import "./StreamArtistPlatformState.sol";
+import { StreamArtistPlatformContinuation } from "./StreamArtistPlatformContinuation.sol";
+import { StreamArtistPlatformCorrectionState } from "./StreamArtistPlatformCorrectionState.sol";
+import { StreamArtistPlatformCorrectionLineageTypes as PL } from "../../interfaces/stream/artist/IStreamArtistPlatformCorrectionLineage.sol";
+import { StreamArtistBindingCorrectionTypes as BC } from "../../interfaces/stream/artist/IStreamArtistBindingCorrection.sol";
 import {
     StreamArtistAttestationTypes as Attest
 } from "../../interfaces/stream/artist/IStreamArtistAttestationWriter.sol";
@@ -500,6 +504,41 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         _returnAttribution(
             StreamArtistAttributionReadEncoding.readEncoded(_attestationStore(), core, msg.data)
         );
+    }
+
+    function platformCorrectionStatus(uint256 id) external view returns (PL.Status calldata) {
+        PL.Status storage h = StreamArtistPlatformCorrectionState.store().heads[id];
+        bytes32 original = _platform.collections[id].correction.recordHash;
+        bytes32 latest = h.latestLineageRecord;
+        uint64 generation = h.generation;
+        uint64 count = h.count;
+        bool accepted = _platform.collections[id].correction.accepted || h.effectiveAccepted;
+        bytes32 acceptance = h.latestAcceptanceRecord;
+        // Direct STATIC serving: compiler-derived field reads, then six canonical ABI words.
+        assembly ("memory-safe") {
+            let p := mload(0x40)
+            mstore(p, original)
+            mstore(add(p, 32), latest)
+            mstore(add(p, 64), and(generation, 0xffffffffffffffff))
+            mstore(add(p, 96), and(count, 0xffffffffffffffff))
+            mstore(add(p, 128), iszero(iszero(accepted)))
+            mstore(add(p, 160), acceptance)
+            return(p, 192)
+        }
+    }
+    function platformCorrectionLineage(bytes32 record) external view returns (PL.Record calldata) {
+        _returnAttribution(StreamArtistPlatformContinuation.readEncoded(msg.data));
+    }
+    function platformCorrectionAcceptance(bytes32 lineage) external view returns (PL.Acceptance calldata) {
+        _returnAttribution(StreamArtistPlatformContinuation.readEncoded(msg.data));
+    }
+    function claimPlatformContinuation(T.ActionContext calldata c, uint256 collectionId,
+        T.Binding calldata binding_, bytes32 reasonHash, string calldata reasonURI,
+        BC.Approval calldata approval) external {
+        _check(c, 1);
+        AttrState.Mutation memory m = StreamArtistPlatformContinuation.claimEncoded(
+            _attestationStore(), _environment(), msg.data);
+        _commit(c, m.action, m.stateDelta, 0, 0);
     }
 
     function claim(

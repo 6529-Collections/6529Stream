@@ -32,6 +32,8 @@ import {
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 
 import "./StreamArtistBindingCorrectionAdmission.sol";
+import { StreamArtistPlatformCorrectionState } from "./StreamArtistPlatformCorrectionState.sol";
+import { IStreamArtistPlatformCorrectionLineage } from "../../interfaces/stream/artist/IStreamArtistPlatformCorrectionLineage.sol";
 import {
     StreamArtistBindingCorrectionTypes as BC,
     IStreamArtistBindingCorrectionOwner,
@@ -115,8 +117,13 @@ library StreamArtistBindingCorrectionOperations {
                 _context(1, actor, before_[0]), collectionId, artistId, p, approval
             );
         bindingHash = b.bindingHash;
-        IStreamArtistAttributionOwner(x.suite.owners[4])
-            .claim(_context(1, actor, before_[4]), collectionId, b, p.reasonHash, p.reasonURI);
+        if (StreamArtistPlatformCorrectionState.tagged(approval.causeData)) {
+            IStreamArtistPlatformCorrectionLineage(x.suite.owners[4]).claimPlatformContinuation(
+                _context(1, actor, before_[4]), collectionId, b, p.reasonHash, p.reasonURI, approval);
+        } else {
+            IStreamArtistAttributionOwner(x.suite.owners[4])
+                .claim(_context(1, actor, before_[4]), collectionId, b, p.reasonHash, p.reasonURI);
+        }
         _archive(
             x,
             1,

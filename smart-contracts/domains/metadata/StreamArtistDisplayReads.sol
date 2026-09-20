@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPlatformCorrectionReads } from "../artist/StreamArtistPlatformCorrectionReads.sol";
+import { StreamArtistPlatformCorrectionLineageTypes as PL, IStreamArtistPlatformCorrectionLineage as PlatformLineage } from "../../interfaces/stream/artist/IStreamArtistPlatformCorrectionLineage.sol";
 import "./StreamArtistDisplayJSON.sol";
+import { IStreamStaticArtistSource } from "../../interfaces/stream/metadata/IStreamStaticArtistSource.sol";
 import { StreamMetadataDisplayParameters } from "./StreamMetadataDisplayParameters.sol";
 import {
     StreamFinalityNativeProviderReads
@@ -88,9 +91,14 @@ library StreamArtistDisplayReads {
             s.attribution > 5 || s.generation != b.generation || s.artistId != b.artistId
                 || s.bindingHash != b.bindingHash || platform.contestState > 3
         ) _fail();
-        f.platform = platform.declaration.recordHash != 0 && !platform.correction.accepted;
+        bool corrected = platform.correction.accepted;
+        if (StreamArtistPlatformCorrectionReads.needed(platform)) {
+            corrected = StreamArtistPlatformCorrectionReads.effectiveEncoded(
+                platform, _platformContinuation(artist, collection));
+        }
+        f.platform = platform.declaration.recordHash != 0 && !corrected;
         f.hasPlatformHistory = platform.declaration.recordHash != 0;
-        f.corrected = platform.correction.accepted;
+        f.corrected = corrected;
         f.contested = platform.contestState == 1 || platform.contestState == 3;
         f.contestRecord = platform.contestRecord;
         if (f.platform) {
@@ -468,6 +476,14 @@ library StreamArtistDisplayReads {
 
     function _pin(address target, bytes32 hash) private view {
         if (target.code.length == 0 || hash == 0 || target.codehash != hash) _fail();
+    }
+
+    function _platformContinuation(address artist, uint256 collection) private view returns (bytes memory) {
+        bytes memory raw = _read(artist, abi.encodeCall(IStreamStaticArtistSource.staticDisplayRead,
+            (abi.encodeCall(PlatformLineage.platformCorrectionStatus, (collection)))), 256);
+        bytes memory value = abi.decode(raw, (bytes));
+        if (value.length != 192 || keccak256(raw) != keccak256(abi.encode(value))) _fail();
+        return value;
     }
 
     function _address(address target, bytes memory input) private view returns (address) {

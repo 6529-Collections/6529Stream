@@ -81,10 +81,10 @@ accepted generations. Older pending-generation fixture captures remain evidence
 only for their original source; future fixture reclaims must use this governed
 ingress and the forthcoming complete correction-history codec.
 
-The original PLATFORM_WORKS consumed-correction guard is preserved. A previously
-consumed platform correction followed by another revocation needs a separate,
-fresh class2 action and append-only lineage extension; this remains required work.
-Neither resetting its consumed flag nor reusing its original operation53 approval
-is permitted. Multiple Artist/collection composition follows the complete
-single-history correction import. Held collaborator, global-freeze and replay
-refactor artifacts are unrelated and remain unchanged.
+The original PLATFORM_WORKS consumed-correction guard is preserved. The additive
+[Platform continuation](artist-platform-continuation.md) recipe now appends fresh
+class2-approved lineage after a consumed correction is revoked, including an
+original refused/withdrawn correction. It never resets the guard or reuses op53.
+Complete history import remains required alongside accepted-generation hydration,
+followed by multiple Artist/collection composition. Held collaborator,
+global-freeze and replay refactors remain unrelated and unchanged.

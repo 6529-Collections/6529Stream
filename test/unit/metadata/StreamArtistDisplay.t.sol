@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPlatformCorrectionLineageTypes as PL, IStreamArtistPlatformCorrectionLineage as PlatformLineage } from "../../../smart-contracts/interfaces/stream/artist/IStreamArtistPlatformCorrectionLineage.sol";
+import { IStreamStaticArtistSource } from "../../../smart-contracts/interfaces/stream/metadata/IStreamStaticArtistSource.sol";
+
 import {
     StreamFinalityNativeProviderReads
 } from "../../../smart-contracts/domains/finality/StreamFinalityNativeProviderReads.sol";
@@ -25,7 +28,7 @@ import {
     IStreamCollectionArtistRegistry
 } from "../../../smart-contracts/interfaces/stream/artist/IStreamArtistAttribution.sol";
 import {
-    PW
+    PW, IStreamArtistPlatformWorks
 } from "../../../smart-contracts/interfaces/stream/artist/IStreamArtistPlatformWorks.sol";
 import {
     C
@@ -398,7 +401,10 @@ contract DisplayOriginalBoundary {
 }
 
 /// @notice Actual Router/JSON and threshold Safe with explicitly typed source-read boundaries.
+interface PlatformDisplayVm { function mockCall(address,bytes calldata,bytes calldata) external; }
+
 contract StreamArtistDisplayTest is CharacterizationTestBase, OfficialSafeFixture {
+    PlatformDisplayVm private constant pdvm = PlatformDisplayVm(address(uint160(uint256(keccak256("hevm cheat code")))));
     PresentationCoreBoundary private core;
     PresentationEntropyBoundary private entropy;
     DisplayArtistBoundary private artist;
@@ -593,6 +599,42 @@ contract StreamArtistDisplayTest is CharacterizationTestBase, OfficialSafeFixtur
             ),
             "actual correction"
         );
+    }
+
+    function testSupplementalPlatformAcceptancePreservesOriginalCorrectedJSON() public {
+        artist.setPlatform(true);
+        string memory expected = _json();
+        PW.State memory p = artist.platformWorksState(1);
+        p.correction.accepted = false;
+        p.correction.correctiveGeneration = 1;
+        p.correction.recordHash = keccak256("unchanged original op53");
+        pdvm.mockCall(address(artist), abi.encodeCall(IStreamArtistPlatformWorks.platformWorksState,(uint256(1))),abi.encode(p));
+        bytes memory query = abi.encodeCall(IStreamStaticArtistSource.staticDisplayRead,
+            (abi.encodeCall(PlatformLineage.platformCorrectionStatus,(uint256(1)))));
+        PL.Status memory status = PL.Status(p.correction.recordHash,keccak256("later lineage"),2,1,true,keccak256("original op2 receipt"));
+        pdvm.mockCall(address(artist),query,abi.encode(abi.encode(status)));
+        require(keccak256(bytes(_json()))==keccak256(bytes(expected)),"effective accepted path has exact original corrected JSON");
+        require(abi.decode(vm.parseJson(_json(),".properties.provenance.attribution.contested"),(bool)),"sustained disclosure remains");
+        status.effectiveAccepted=false;status.latestAcceptanceRecord=0;
+        pdvm.mockCall(address(artist),query,abi.encode(abi.encode(status)));
+        _state("disputed");
+    }
+
+    function testSupplementalPlatformFailureIsUnavailableNeverInferredAcceptance() public {
+        artist.setPlatform(true);
+        PW.State memory p=artist.platformWorksState(1);
+        p.correction.accepted=false;p.correction.correctiveGeneration=1;p.correction.recordHash=keccak256("original");
+        pdvm.mockCall(address(artist),abi.encodeCall(IStreamArtistPlatformWorks.platformWorksState,(uint256(1))),abi.encode(p));
+        bytes memory query=abi.encodeCall(IStreamStaticArtistSource.staticDisplayRead,
+            (abi.encodeCall(PlatformLineage.platformCorrectionStatus,(uint256(1)))));
+        PL.Status memory status=PL.Status(keccak256("foreign"),keccak256("lineage"),2,1,true,keccak256("accepted"));
+        pdvm.mockCall(address(artist),query,abi.encode(abi.encode(status)));_state("attribution_unavailable");
+        status.originalCorrectionRecord=p.correction.recordHash;
+        pdvm.mockCall(address(artist),query,abi.encode(new bytes(191)));_state("attribution_unavailable");
+        status.count=2;
+        pdvm.mockCall(address(artist),query,abi.encode(abi.encode(status)));_state("attribution_unavailable");
+        status.count=1;
+        pdvm.mockCall(address(artist),query,abi.encode(abi.encode(status)));_state("artist_accepted");
     }
 
     function testReadFailuresMissingSnapshotAndUnknownClassUseOnlyUnavailableObject() public {

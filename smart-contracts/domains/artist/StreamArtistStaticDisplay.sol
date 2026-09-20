@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { IStreamArtistPlatformCorrectionLineage as PlatformLineage } from "../../interfaces/stream/artist/IStreamArtistPlatformCorrectionLineage.sol";
 import { StreamArtistStaticCalls as Calls } from "./StreamArtistStaticCalls.sol";
 import {
     StreamArtistOnboardingTypes as T
@@ -108,6 +109,11 @@ library StreamArtistStaticDisplay {
                     time
                 )
             );
+        }
+        if (sel == PlatformLineage.platformCorrectionStatus.selector) {
+            uint256 id = abi.decode(data[4:], (uint256));
+            _canonical(data, abi.encodeWithSelector(sel, id));
+            return _read(s.owners[4], abi.encodeCall(PlatformLineage.platformCorrectionStatus, (id)), 192);
         }
         if (sel == IStreamArtistPlatformWorks.platformWorksState.selector) {
             uint256 id = abi.decode(data[4:], (uint256));

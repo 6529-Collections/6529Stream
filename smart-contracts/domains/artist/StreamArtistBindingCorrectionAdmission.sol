@@ -11,6 +11,10 @@ import {
 import "../../interfaces/stream/artist/IStreamArtistAttributionOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistBindingOwner.sol";
 import "./StreamArtistGovernanceWitness.sol";
+import { StreamArtistPlatformTypes as PW } from "../../interfaces/stream/artist/StreamArtistPlatformTypes.sol";
+import { StreamArtistPlatformCorrectionState as PlatformState } from "./StreamArtistPlatformCorrectionState.sol";
+import { StreamArtistPlatformCorrectionLineageTypes as PL, IStreamArtistPlatformCorrectionLineage as PlatformLineage } from "../../interfaces/stream/artist/IStreamArtistPlatformCorrectionLineage.sol";
+import { IStreamArtistPlatformOwner } from "../../interfaces/stream/artist/IStreamArtistPlatformWorks.sol";
 import "./StreamArtistTimingState.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityOwner.sol";
 import { StreamArtistHashes as Hashes } from "./StreamArtistHashes.sol";
@@ -86,6 +90,12 @@ library StreamArtistBindingCorrectionAdmission {
             a.causeData = abi.encode(terminal, head, r, t);
         } else {
             revert BC.InvalidBindingCorrection(id);
+        }
+        PW.State memory platform = IStreamArtistPlatformOwner(s.owners[4]).platformWorksState(id);
+        if (platform.declaration.recordHash != 0 && platform.correction.correctiveGeneration != 0) {
+            PL.Status memory prior = PlatformLineage(s.owners[4]).platformCorrectionStatus(id);
+            a.causeData = abi.encode(PL.WITNESS,
+                PL.Witness(a.causeData, PlatformState.pins(platform), prior));
         }
         a.proposalHash = keccak256(abi.encode(id, proposal, document, displayName));
         a.proposedArtistId = proposal.artistId;

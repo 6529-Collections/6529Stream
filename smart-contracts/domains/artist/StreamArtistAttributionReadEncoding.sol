@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPlatformCorrectionState } from "./StreamArtistPlatformCorrectionState.sol";
 import {
     StreamArtistAttributionStateTypes as AttrState
 } from "./StreamArtistAttributionStateTypes.sol";
@@ -131,7 +132,7 @@ library StreamArtistAttributionReadEncoding {
                 p.declaration.recordHash,
                 p.contestState,
                 p.correction.correctiveGeneration,
-                p.correction.accepted
+                StreamArtistPlatformCorrectionState.effectiveAccepted(p, collectionId)
             )
         );
     }

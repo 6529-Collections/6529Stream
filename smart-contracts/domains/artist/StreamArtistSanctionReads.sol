@@ -69,7 +69,7 @@ library StreamArtistSanctionReads {
         PW.State memory p = StreamArtistPlatformReads.state(suite, scope.collectionId);
         bool recorded =
             p.declaration.recordHash != 0 && StreamArtistPlatformReads.finalized(suite, scope);
-        if (p.declaration.recordHash != 0 && (!p.correction.accepted || recorded)) {
+        if (p.declaration.recordHash != 0 && (!StreamArtistPlatformReads.effectiveAccepted(suite, scope.collectionId, p) || recorded)) {
             (, bytes32 manifest) = IStreamModule(suite.registry).streamModuleManifest();
             return StreamFinalityComponentState(
                 recorded || (p.contestState != 1 && p.contestState != 3),
@@ -109,7 +109,7 @@ library StreamArtistSanctionReads {
         PW.State memory p = StreamArtistPlatformReads.state(suite, collectionId);
         if (
             p.declaration.recordHash != 0
-                && (!p.correction.accepted
+                && (!StreamArtistPlatformReads.effectiveAccepted(suite, collectionId, p)
                     || StreamArtistPlatformReads.finalized(
                         suite,
                         StreamFinalityScope(StreamFinalityScopeType.COLLECTION, collectionId, 0, 0)

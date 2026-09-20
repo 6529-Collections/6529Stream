@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPlatformCorrectionReads } from "../artist/StreamArtistPlatformCorrectionReads.sol";
+import { StreamArtistPlatformCorrectionLineageTypes as PL, IStreamArtistPlatformCorrectionLineage as PlatformLineage } from "../../interfaces/stream/artist/IStreamArtistPlatformCorrectionLineage.sol";
 import {
     IStreamStaticArtistSource
 } from "../../interfaces/stream/metadata/IStreamStaticArtistSource.sol";
@@ -93,9 +95,14 @@ library StreamStaticArtistReads {
             s.attribution > 5 || s.generation != b.generation || s.artistId != b.artistId
                 || s.bindingHash != b.bindingHash || platform.contestState > 3
         ) _fail();
-        f.platform = platform.declaration.recordHash != 0 && !platform.correction.accepted;
+        bool corrected = platform.correction.accepted;
+        if (StreamArtistPlatformCorrectionReads.needed(platform)) {
+            corrected = StreamArtistPlatformCorrectionReads.effectiveEncoded(
+                platform, _platformContinuation(artist, collection));
+        }
+        f.platform = platform.declaration.recordHash != 0 && !corrected;
         f.hasPlatformHistory = platform.declaration.recordHash != 0;
-        f.corrected = platform.correction.accepted;
+        f.corrected = corrected;
         f.contested = platform.contestState == 1 || platform.contestState == 3;
         f.contestRecord = platform.contestRecord;
         if (f.platform) {
@@ -526,8 +533,13 @@ library StreamStaticArtistReads {
         }
     }
 
+    function _platformContinuation(address artist, uint256 collection) private view returns (bytes memory) {
+        return _read(artist, abi.encodeCall(PlatformLineage.platformCorrectionStatus, (collection)), 192);
+    }
+
     function _artistSelector(bytes4 s) private pure returns (bool) {
-        return s == IStreamArtistAttributionState.collectionArtistState.selector
+        return s == PlatformLineage.platformCorrectionStatus.selector
+            || s == IStreamArtistAttributionState.collectionArtistState.selector
             || s == IStreamArtistDisplayFacts.displayBinding.selector
             || s == IStreamArtistPlatformWorks.platformWorksState.selector
             || s == IStreamArtistAttribution.attribution.selector
