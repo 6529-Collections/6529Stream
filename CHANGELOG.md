@@ -161,6 +161,11 @@ the release policy in `docs/release-policy.md`.
 
 - Add pinned, bounded burn-program discovery and source/target closure warnings;
   clarify Safe CALL capability versus EIP-2612 and Permit2 signature support.
+- Add a complete offline Museum repository export/import workflow with explicit
+  historical-version and external hash selection, full declared semantic replay,
+  exact original bag restoration and atomic no-overwrite publication.
+  Preserve original profiles and separate recovery from current conformance.
+
 - Add complete offline PREMIS authority-field accounting across events, outcomes,
   agent classes, rights bases and fixity algorithms. Retain original vocabulary
   bytes and retrieval observations, with explicit unresolved/local fields and

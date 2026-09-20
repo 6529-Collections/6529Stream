@@ -75,6 +75,11 @@ or media retriever is introduced.
 
 ## OCFL mapping
 
+The [repository exchange workflow](museum-repository-exchange.md) adds public
+`export`, `inspect` and selected-version `import` commands over this mapping.
+It replays every declared semantic package across the complete object history
+and atomically restores the selected bag's exact original payloads and tags.
+
 `tools.museum.ocfl` creates a new object directory for each version operation;
 it never mutates an existing object, version or storage root. A successor takes
 the exact previous object and an external inventory hash. Its bag predecessor

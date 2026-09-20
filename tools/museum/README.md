@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Repository export and historical import](../../docs/museum-repository-exchange.md)
+adds an offline round trip for explicitly pinned OCFL versions, complete
+declared semantic replay and atomic publication of exact original bag bytes.
+It preserves original profiles and separates recovery from current conformance.
+
 [Complete PREMIS authority-field accounting](../../docs/museum-premis-authority-coverage.md)
 adds a V2 package for all 35 enumerated profile fields, retained term evidence,
 explicit local/unresolved dispositions and unreviewed close-match proposals.
