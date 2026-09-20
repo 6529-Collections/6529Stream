@@ -64,6 +64,15 @@ library StreamArtistIdentityRevisionState {
         return latest == bytes32(0) ? registration : s.records[latest].revisedRecordHash;
     }
 
+    function operativeRead(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        bytes32 artistId
+    ) public view returns (bytes32) {
+        return operative(s, identity, rotations, artistId);
+    }
+
     function metadata(
         State storage s,
         StreamArtistIdentityState.State storage identity,

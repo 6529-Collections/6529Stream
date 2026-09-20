@@ -81,7 +81,7 @@ library StreamArtistDelegationState {
     ) public returns (bytes32 record, bytes32 delta) {
         if (
             p.artistId == bytes32(0) || p.delegate == address(0) || p.delegate == grantor
-                || p.capabilities == 0 || (p.capabilities & ~uint32(117)) != 0
+                || p.capabilities == 0 || (p.capabilities & ~uint32(1143)) != 0
                 || p.expiresAt <= p.notBefore || block.timestamp >= p.expiresAt
         ) revert T.UnsupportedProfile();
         bytes32 scope = keccak256(abi.encode(p.artistId, p.delegate));

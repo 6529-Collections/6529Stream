@@ -796,7 +796,10 @@ contract StreamArtistOnboardingRegistry is
             bytes32 bindingHash
         )
     {
-        return StreamArtistSaleOperations.attributionState(_contentSuite(), collectionId);
+        bytes memory out = StreamArtistSaleOperations.attributionStateEncoded(
+            _contentSuite(), collectionId
+        );
+        assembly ("memory-safe") { return(add(out, 32), mload(out)) }
     }
 
     function recordIdentityRevision(
@@ -1135,6 +1138,22 @@ contract StreamArtistOnboardingRegistry is
         external
         returns (bytes32)
     {
+        _forwardRegistryWriter();
+    }
+
+    function recordDelegatedPolicyConsent(
+        T.PolicyConsent calldata p,
+        bytes32 grant,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function recordDelegatedSaleConsent(
+        Sale.Consent calldata p,
+        bytes32 grant,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
         _forwardRegistryWriter();
     }
 
@@ -1978,11 +1997,21 @@ contract StreamArtistOnboardingRegistry is
         _forwardRegistryWriter();
     }
 
-    function withdrawAttributionDispute(AD.Filing calldata p, AD.Standing calldata standing,
-        T.Authorization calldata a) external returns (bytes32) { _forwardRegistryWriter(); }
+    function withdrawAttributionDispute(
+        AD.Filing calldata p,
+        AD.Standing calldata standing,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
 
-    function attributionDisputeWithdrawal(bytes32 opening) external view
-        returns (StreamArtistDisputeWithdrawalTypes.Outcome memory) { _forwardRegistryRead(); }
+    function attributionDisputeWithdrawal(bytes32 opening)
+        external
+        view
+        returns (StreamArtistDisputeWithdrawalTypes.Outcome memory)
+    {
+        _forwardRegistryRead();
+    }
 
     function openAttributionDispute(
         AD.Filing calldata p,

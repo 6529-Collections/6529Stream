@@ -19,9 +19,10 @@ library StreamArtistIdentityRecoveryApprovalState {
         if (block.timestamp > type(uint64).max) revert T.InvalidTimestamp(type(uint64).max);
         if (block.timestamp > a.time) revert T.ExpiredAuthorization(a.time);
         if (
-            c.operationId != 22 || !b.accepted || b.consentMode != 1 || b.artistId == 0
-                || b.generation == 0 || b.bindingHash == 0 || p.finalityRegistry == address(0)
-                || p.collectionId == 0 || p.finalityRecordHash == 0 || p.recoveryManifestHash == 0
+            c.operationId != 22 || !b.accepted || (b.consentMode != 1 && b.consentMode != 2)
+                || b.artistId == 0 || b.generation == 0 || b.bindingHash == 0
+                || p.finalityRegistry == address(0) || p.collectionId == 0
+                || p.finalityRecordHash == 0 || p.recoveryManifestHash == 0
         ) revert Recovery.InvalidRecoveryApproval();
         Recovery.ApprovalRecord memory r;
         r.terms = p;

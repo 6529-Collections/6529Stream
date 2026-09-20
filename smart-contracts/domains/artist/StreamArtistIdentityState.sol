@@ -383,10 +383,15 @@ library StreamArtistIdentityState {
     ) public returns (Mutation memory) {
         T.Identity storage item = state.identities[b.artistId];
         if (
-            !b.accepted || b.consentMode != 1
+            !b.accepted || (b.consentMode != 1 && b.consentMode != 2)
+                || ((capability == D.POLICY_CONSENT || capability == D.SALE_CONSENT)
+                    && b.consentMode != 2)
                 || (item.status != 1
                     && item.status != 2
-                    && !((c.operationId == 20 || c.operationId == 44 || c.operationId == 45 || c.operationId == 61)
+                    && !((c.operationId == 20
+                            || c.operationId == 44
+                            || c.operationId == 45
+                            || c.operationId == 61)
                         && item.status == 4)) || item.authorityClass != 1
                 || item.authorityAddress == address(0)
         ) revert T.InvalidIdentity(b.artistId);

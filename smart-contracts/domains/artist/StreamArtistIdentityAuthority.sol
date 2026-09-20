@@ -719,7 +719,9 @@ contract StreamArtistIdentityAuthority is
             bool rotation = _rotations.rotations[record].recordHash == record;
             bool estate = _estate.requests[record].recordHash == record;
             bool recovered = _identityRecovery.records[record].recordHash == record;
-            if ((rotation ? 1 : 0) + (estate ? 1 : 0) + (recovered ? 1 : 0) != 1) revert R.InvalidRotation(record);
+            if ((rotation ? 1 : 0) + (estate ? 1 : 0) + (recovered ? 1 : 0) != 1) {
+                revert R.InvalidRotation(record);
+            }
             t = rotation
                 ? _rotations.rotations[record].transition
                 : estate ? _estate.transitions[record] : _identityRecovery.transitions[record];
@@ -741,7 +743,7 @@ contract StreamArtistIdentityAuthority is
     }
 
     function operativeIdentityRecord(bytes32 artistId) public view returns (bytes32) {
-        return StreamArtistIdentityRevisionState.operative(
+        return StreamArtistIdentityRevisionState.operativeRead(
             _identityRevisions, _identity, _rotations, artistId
         );
     }
@@ -1162,6 +1164,28 @@ contract StreamArtistIdentityAuthority is
         T.SignerApproval calldata proof
     ) external returns (bytes32 record) {
         _forwardIdentityWriter();
+    }
+
+    function consumeDelegatedPolicyConsent(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.PolicyConsent calldata p,
+        bytes32 grant,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external returns (bytes32) {
+        _forwardEstateWriter();
+    }
+
+    function consumeDelegatedSaleConsent(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Sale.Consent calldata p,
+        bytes32 grant,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external returns (bytes32) {
+        _forwardEstateWriter();
     }
 
     function consumeDelegatedEconomics(

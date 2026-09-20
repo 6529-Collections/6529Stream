@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistDelegatedConsentOwner.sol";
 import "./StreamArtistAttributionPolicy.sol";
 
 import "./StreamArtistContentOperations.sol";
@@ -75,6 +76,23 @@ library StreamArtistSaleOperations {
         if (!appended || hash != keccak256(evidence)) revert T.InvalidRecord();
     }
 
+    function delegatedBinding(T.SuiteConfiguration memory suite, uint256 collectionId)
+        public
+        view
+        returns (T.Binding memory b)
+    {
+        b = _binding(suite, collectionId, true);
+        if (b.consentMode != 2) revert T.UnsupportedProfile();
+    }
+
+    function saleFacts(T.SuiteConfiguration memory suite, Sale.Consent memory p)
+        public
+        view
+        returns (bytes memory)
+    {
+        return _adapter(suite, p);
+    }
+
     function scope(T.SuiteConfiguration memory suite, uint256 collectionId)
         public
         view
@@ -111,7 +129,12 @@ library StreamArtistSaleOperations {
             owner.saleConsentRecord(owner.saleConsentAt(collectionId, saleId, config));
         if (
             item.recordHash == bytes32(0) || item.artistId != b.artistId
-                || (item.authorityClass != 1 && item.authorityClass != 3)
+                || (item.authorityClass != 1
+                    && item.authorityClass != 3
+                    && !(item.authorityClass == 2
+                        && b.consentMode == 2
+                        && IStreamArtistDelegatedConsentOwner(suite.owners[6])
+                                .recordDelegation(item.recordHash) != 0))
                 || item.bindingGeneration != b.generation || item.bindingHash != b.bindingHash
                 || keccak256(abi.encode(item.terms)) != keccak256(abi.encode(p))
         ) {
@@ -121,6 +144,16 @@ library StreamArtistSaleOperations {
     }
 
     /// @notice Exact independent attribution and authority states, never inferred from missing acceptance.
+    function attributionStateEncoded(T.SuiteConfiguration memory suite, uint256 collectionId)
+        public
+        view
+        returns (bytes memory)
+    {
+        (uint8 state, uint64 generation, bytes32 artistId, uint8 status, bytes32 hash) =
+            attributionState(suite, collectionId);
+        return abi.encode(state, generation, artistId, status, hash);
+    }
+
     function attributionState(T.SuiteConfiguration memory suite, uint256 collectionId)
         public
         view
@@ -166,7 +199,7 @@ library StreamArtistSaleOperations {
             !b.accepted || !StreamArtistAttributionPolicy.acceptedOrSanctioned(state)
                 || generation != b.generation
                 || !StreamArtistAuthorityPolicy.ordinary(class_, status, false)
-                || authority == address(0) || b.consentMode != 1
+                || authority == address(0) || (b.consentMode != 1 && b.consentMode != 2)
         ) revert T.InvalidAttribution(collectionId);
         C.BindingTerms memory terms = IStreamArtistCollaboratorBindingOwner(suite.owners[0])
             .bindingTerms(collectionId, generation);

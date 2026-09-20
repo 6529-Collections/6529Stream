@@ -29,7 +29,7 @@ library StreamArtistCurrentAuthorityFacts {
         R.AuthorityFact memory a,
         bool defensive
     ) internal pure {
-        if (!b.accepted || b.consentMode != 1 || b.artistId == bytes32(0)) revert T.InvalidRecord();
+        if (!b.accepted || (b.consentMode != 1 && b.consentMode != 2) || b.artistId == bytes32(0)) revert T.InvalidRecord();
         requirePrincipal(b.artistId, signer, a, defensive);
     }
 

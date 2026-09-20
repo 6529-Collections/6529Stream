@@ -191,7 +191,7 @@ library StreamArtistContentOperations {
             !b.accepted
                 || (!StreamArtistAttributionPolicy.acceptedOrSanctioned(state)
                     && !(defensive && state == 4)) || generation != b.generation
-                || b.consentMode != 1
+                || (b.consentMode != 1 && b.consentMode != 2)
                 || !StreamArtistAuthorityPolicy.ordinary(class_, status, defensive)
                 || authority == address(0)
         ) revert T.InvalidAttribution(collectionId);

@@ -56,6 +56,22 @@ library StreamArtistPlatformOperations {
         _archive(x, 9, actor, record, prior, abi.encode(id, evidence, reason, uri, e, r, ep, rp));
     }
 
+    function contextEncoded(D.CoordinatorContext memory x, bytes calldata data)
+        public
+        view
+        returns (bytes memory)
+    {
+        (
+            uint256 id,
+            uint8 state,
+            bytes32 claim_,
+            bytes32 evidence,
+            bytes32 reason,
+            bool correction
+        ) = abi.decode(data, (uint256, uint8, bytes32, bytes32, bytes32, bool));
+        return abi.encode(context(x, id, state, claim_, evidence, reason, correction));
+    }
+
     function context(
         D.CoordinatorContext memory x,
         uint256 id,

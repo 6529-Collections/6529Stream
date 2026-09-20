@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistDelegatedConsent.sol";
 import "../../interfaces/stream/artist/IStreamArtistDisputeWithdrawal.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
 import {
@@ -402,6 +403,24 @@ contract StreamArtistRegistryWriterExtension {
             .coordinateRevokeArtistDelegation(msg.sender, p, a);
     }
 
+    function recordDelegatedPolicyConsent(
+        T.PolicyConsent calldata p,
+        bytes32 grant,
+        T.Authorization calldata a
+    ) external onlyHost returns (bytes32) {
+        return IStreamArtistDelegatedConsentCoordinator(operationCoordinator)
+            .coordinateRecordDelegatedPolicyConsent(msg.sender, p, grant, a);
+    }
+
+    function recordDelegatedSaleConsent(
+        Sale.Consent calldata p,
+        bytes32 grant,
+        T.Authorization calldata a
+    ) external onlyHost returns (bytes32) {
+        return IStreamArtistDelegatedConsentCoordinator(operationCoordinator)
+            .coordinateRecordDelegatedSaleConsent(msg.sender, p, grant, a);
+    }
+
     function recordDelegatedEconomicsConsent(
         T.EconomicsConsent calldata p,
         bytes32 grant,
@@ -713,8 +732,11 @@ contract StreamArtistRegistryWriterExtension {
             .coordinateHydrateArtistAuthorityWithEntropyFindings(msg.sender, p);
     }
 
-    function withdrawAttributionDispute(AD.Filing calldata p, AD.Standing calldata standing,
-        T.Authorization calldata a) external onlyHost returns (bytes32) {
+    function withdrawAttributionDispute(
+        AD.Filing calldata p,
+        AD.Standing calldata standing,
+        T.Authorization calldata a
+    ) external onlyHost returns (bytes32) {
         return IStreamArtistDisputeWithdrawalCoordinator(operationCoordinator)
             .coordinateWithdrawAttributionDispute(msg.sender, p, standing, a);
     }

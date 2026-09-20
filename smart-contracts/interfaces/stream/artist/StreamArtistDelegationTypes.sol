@@ -8,6 +8,8 @@ library StreamArtistDelegationTypes {
     uint32 internal constant ATTEST = 1;
     uint32 internal constant DISPUTE = 16;
     uint32 internal constant INTENT = 64;
+    uint32 internal constant POLICY_CONSENT = 2;
+    uint32 internal constant SALE_CONSENT = 1024;
     uint32 internal constant ECONOMICS = 4;
     uint32 internal constant ROYALTY_FREEZE = 32;
 

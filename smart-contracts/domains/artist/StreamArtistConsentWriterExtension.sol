@@ -156,6 +156,50 @@ contract StreamArtistConsentWriterExtension is StreamArtistConsentStorage {
         return _currentRecordEconomics(c, b, p, designation, signer, nonce, authority);
     }
 
+    function recordDelegatedPolicyConsent(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.PolicyConsent calldata p,
+        address signer,
+        uint256 nonce,
+        bytes32 grant
+    ) external onlyHost returns (bytes32) {
+        _check(c, 14);
+        _requireDelegated(b, signer, grant);
+        if (b.consentMode != 2) revert T.InvalidRecord();
+        StreamArtistConsentState.Mutation memory m = StreamArtistConsentTransport.policyEncoded(
+            _policies, _replay, _consentContext(), msg.data, 2
+        );
+        m = StreamArtistConsentTransport.noteDelegation(
+            _recordDelegation, m, grant, b.artistId, c.operationId
+        );
+        _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, b.artistId, p.collectionId);
+        return m.record;
+    }
+
+    function recordDelegatedSaleConsent(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Sale.Consent calldata p,
+        address signer,
+        uint256 nonce,
+        bytes32 grant
+    ) external onlyHost returns (bytes32) {
+        _check(c, 16);
+        _requireDelegated(b, signer, grant);
+        if (b.consentMode != 2) revert T.InvalidRecord();
+        StreamArtistConsentState.Mutation memory m = StreamArtistConsentTransport.saleEncoded(
+            _saleRecords, _latestSaleConsents, _replay, _consentContext(), msg.data, 2
+        );
+        m = StreamArtistConsentTransport.noteDelegation(
+            _recordDelegation, m, grant, b.artistId, c.operationId
+        );
+        _commit(c, m.action, m.state, m.replay, m.record);
+        _native(c.operationId, m.record, b.artistId, p.collectionId);
+        return m.record;
+    }
+
     function recordDelegatedEconomics(
         T.ActionContext calldata c,
         T.Binding calldata b,
@@ -489,14 +533,14 @@ contract StreamArtistConsentWriterExtension is StreamArtistConsentStorage {
 
     function _requireDelegated(T.Binding calldata b, address signer, bytes32 grant) private pure {
         if (
-            !b.accepted || b.consentMode != 1 || b.artistId == bytes32(0) || signer == address(0)
-                || grant == bytes32(0)
+            !b.accepted || (b.consentMode != 1 && b.consentMode != 2) || b.artistId == bytes32(0)
+                || signer == address(0) || grant == bytes32(0)
         ) revert T.InvalidRecord();
     }
 
     function _requireAccepted(T.Binding calldata b, address signer) private pure {
         if (
-            !b.accepted || b.consentMode != 1 || b.artistId == bytes32(0)
+            !b.accepted || (b.consentMode != 1 && b.consentMode != 2) || b.artistId == bytes32(0)
                 || signer != b.artistAddress
         ) revert T.InvalidRecord();
     }

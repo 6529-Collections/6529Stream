@@ -22,6 +22,29 @@ library StreamArtistConsentTransport {
         );
     }
 
+    event ArtistConsentDelegationRecorded(
+        uint16 schemaVersion,
+        bytes32 indexed recordHash,
+        bytes32 indexed delegationRecordHash,
+        bytes32 indexed artistId,
+        uint16 operationId
+    );
+
+    function noteDelegation(
+        mapping(bytes32 => bytes32) storage delegations,
+        StreamArtistConsentState.Mutation memory m,
+        bytes32 grant,
+        bytes32 artistId,
+        uint16 operation
+    ) public returns (StreamArtistConsentState.Mutation memory) {
+        if (grant == 0 || delegations[m.record] != 0) revert T.InvalidRecord();
+        delegations[m.record] = grant;
+        m.action = keccak256(abi.encode(m.action, grant));
+        m.state = keccak256(abi.encode(m.state, grant));
+        emit ArtistConsentDelegationRecorded(1, m.record, grant, artistId, operation);
+        return m;
+    }
+
     function policyEncoded(
         mapping(bytes32 => bytes32) storage records,
         mapping(bytes32 => T.ReplayCell) storage replay,

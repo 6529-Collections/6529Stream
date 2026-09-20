@@ -51,7 +51,7 @@ library StreamArtistRecordPublicationReads {
         if (
             collectionId == 0 || !b.accepted || b.bindingHash == 0 || b.artistId == 0
                 || !StreamArtistAttributionPolicy.acceptedOrSanctioned(state)
-                || generation != b.generation || b.consentMode != 1
+                || generation != b.generation || (b.consentMode != 1 && b.consentMode != 2)
         ) {
             revert T.InvalidAttribution(collectionId);
         }

@@ -25,6 +25,80 @@ library StreamArtistEstateEntryMutation {
         uint16 operation,
         bytes calldata encoded
     ) public returns (StreamArtistIdentityState.Mutation memory m, bytes32 record) {
+        if (operation == 14) {
+            (
+                T.ActionContext memory c,
+                T.Binding memory b,
+                T.PolicyConsent memory p,
+                bytes32 grant,
+                T.Authorization memory a,
+                T.SignerApproval memory proof
+            ) = abi.decode(
+                encoded,
+                (
+                    T.ActionContext,
+                    T.Binding,
+                    T.PolicyConsent,
+                    bytes32,
+                    T.Authorization,
+                    T.SignerApproval
+                )
+            );
+            return StreamArtistDelegatedMutation.consumeDelegatedPolicyConsent(
+                estate,
+                succession,
+                rotations,
+                identity,
+                delegations,
+                findings,
+                dormancy,
+                replay,
+                o,
+                c,
+                b,
+                p,
+                grant,
+                a,
+                proof
+            );
+        }
+        if (operation == 16) {
+            (
+                T.ActionContext memory c,
+                T.Binding memory b,
+                Sale.Consent memory p,
+                bytes32 grant,
+                T.Authorization memory a,
+                T.SignerApproval memory proof
+            ) = abi.decode(
+                encoded,
+                (
+                    T.ActionContext,
+                    T.Binding,
+                    Sale.Consent,
+                    bytes32,
+                    T.Authorization,
+                    T.SignerApproval
+                )
+            );
+            return StreamArtistDelegatedMutation.consumeDelegatedSaleConsent(
+                estate,
+                succession,
+                rotations,
+                identity,
+                delegations,
+                findings,
+                dormancy,
+                replay,
+                o,
+                c,
+                b,
+                p,
+                grant,
+                a,
+                proof
+            );
+        }
         if (operation == 24) {
             (
                 T.ActionContext memory c,

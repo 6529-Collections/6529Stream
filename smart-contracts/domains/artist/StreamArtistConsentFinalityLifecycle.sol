@@ -293,6 +293,28 @@ contract StreamArtistConsentFinalityLifecycle is
         _forwardConsentWriter();
     }
 
+    function recordDelegatedPolicyConsent(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.PolicyConsent calldata p,
+        address signer,
+        uint256 nonce,
+        bytes32 grant
+    ) external returns (bytes32) {
+        _forwardConsentWriter();
+    }
+
+    function recordDelegatedSaleConsent(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Sale.Consent calldata p,
+        address signer,
+        uint256 nonce,
+        bytes32 grant
+    ) external returns (bytes32) {
+        _forwardConsentWriter();
+    }
+
     function recordDelegatedEconomics(
         T.ActionContext calldata c,
         T.Binding calldata b,

@@ -4,7 +4,7 @@ pragma solidity ^0.8.19;
 import { StreamArtistOnboardingTypes as T } from "./StreamArtistOnboardingTypes.sol";
 import { StreamArtistDelegationTypes as D } from "./StreamArtistDelegationTypes.sol";
 
-/// @notice Artist grants and revokes scoped economics/freeze authority; delegates never gain payout or policy powers.
+/// @notice Artist grants and revokes scoped economics/freeze authority; delegates never gain payout powers; policy/sale consent require the additive mode-2 companion.
 interface IStreamArtistDelegation {
     /// @notice Grant from the current artist, directly or by its signature; authorization.time must be zero.
     function grantArtistDelegation(D.Grant calldata p, T.Authorization calldata a)

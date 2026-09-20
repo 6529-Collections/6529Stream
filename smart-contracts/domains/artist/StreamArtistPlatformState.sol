@@ -59,7 +59,9 @@ library StreamArtistPlatformState {
         bytes32 statement
     ) public returns (bytes32 hash) {
         PW.State storage p = s.collections[id];
-        if (id == 0 || statement == 0 || p.declaration.recordHash != 0) revert PW.InvalidPlatformWorks(id);
+        if (id == 0 || statement == 0 || p.declaration.recordHash != 0) {
+            revert PW.InvalidPlatformWorks(id);
+        }
         uint64 now_ = _time();
         hash = keccak256(
             abi.encode(
@@ -136,8 +138,7 @@ library StreamArtistPlatformState {
                             || p.contestState != 1
                             || p.contestClaim != claim_))
         ) revert PW.InvalidPlatformWorks(id);
-        PW.Contest memory r =
-            PW.Contest(
+        PW.Contest memory r = PW.Contest(
             id, author, state, claim_, evidence, reason, actionId, p.contestRecord, _time(), 0
         );
         hash = keccak256(
@@ -215,7 +216,7 @@ library StreamArtistPlatformState {
             p.contestState != 3 || p.correction.recordHash == 0
                 || p.correction.correctiveGeneration != 0
                 || b.artistAddress != p.correction.proposedArtist || b.generation == 0
-                || b.consentMode != 1
+                || (b.consentMode != 1 && b.consentMode != 2)
         ) revert PW.InvalidPlatformWorks(id);
         p.correction.correctiveGeneration = b.generation;
     }

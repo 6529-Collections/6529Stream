@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistDelegatedConsent.sol";
 import "../../interfaces/stream/artist/IStreamArtistDisputeWithdrawal.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
 import {
@@ -200,6 +201,7 @@ library StreamArtistRegistryInterfaces {
             || id == type(IStreamArtistAttestationWriter).interfaceId
             || id == type(IStreamArtistAttributionClaims).interfaceId
             || id == type(IStreamArtistDelegation).interfaceId
+            || id == type(IStreamArtistDelegatedConsent).interfaceId
             || id == type(IStreamArtistBindingLifecycle).interfaceId
             || id == type(IStreamArtistBeneficiaryFacts).interfaceId
             || id == type(IStreamArtistCollaboratorLifecycle).interfaceId

@@ -29,7 +29,7 @@ library StreamArtistDisputeAdmission {
         if (
             id == 0 || !IStreamCoreCollectionView(s.core).collectionExists(id) || generation == 0
                 || b.generation != generation || actual != generation || b.artistId == 0
-                || b.bindingHash == 0 || b.consentMode != 1
+                || b.bindingHash == 0 || (b.consentMode != 1 && b.consentMode != 2)
         ) revert AD.InvalidAttributionDispute(id);
         h = IStreamArtistAttributionDisputesOwner(s.owners[4]).attributionDispute(id, generation);
     }

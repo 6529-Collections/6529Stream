@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistSaleHashes.sol";
 import "./StreamArtistEconomicsHashes.sol";
 import { StreamArtistDormancyState } from "./StreamArtistDormancyState.sol";
 import "./StreamArtistEstateState.sol";
@@ -50,10 +51,9 @@ library StreamArtistDelegatedMutation {
             findings, b.artistId, proof.signer, 2, c.operationId
         );
         if (delta != 0) m.state = keccak256(abi.encode(m.state, delta));
-        (bytes32 liveDelta, bytes32 liveReplay) =
-            StreamArtistDormancyState.activity(
-                dormancy, identity, replay, o, b.artistId, proof.signer, 2
-            );
+        (bytes32 liveDelta, bytes32 liveReplay) = StreamArtistDormancyState.activity(
+            dormancy, identity, replay, o, b.artistId, proof.signer, 2
+        );
         if (liveDelta != 0) m.state = keccak256(abi.encode(m.state, liveDelta));
         if (liveReplay != 0) m.replay = keccak256(abi.encode(m.replay, liveReplay));
     }
@@ -187,6 +187,94 @@ library StreamArtistDelegatedMutation {
             a,
             proof,
             StreamArtistHashes.attestationDigest(o.environment, p, a),
+            record
+        );
+    }
+
+    function consumeDelegatedPolicyConsent(
+        StreamArtistEstateState.State storage estate,
+        StreamArtistSuccessionState.State storage succession,
+        StreamArtistRotationState.State storage rotations,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistDelegationState.State storage delegations,
+        StreamArtistUnavailabilityState.State storage findings,
+        StreamArtistDormancyState.State storage dormancy,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.PolicyConsent calldata p,
+        bytes32 grant,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) public returns (StreamArtistIdentityState.Mutation memory m, bytes32 record) {
+        _deadline(a.time);
+        if (b.consentMode != 2 || p.collectionId == 0) revert T.InvalidRecord();
+        record = StreamArtistHashes.policyRecordForAuthority(
+            o.environment, p, b.artistId, proof.signer, 2, a.nonce, _now()
+        );
+        m = authorize(
+            estate,
+            succession,
+            rotations,
+            identity,
+            delegations,
+            findings,
+            dormancy,
+            replay,
+            o,
+            c,
+            b,
+            p.collectionId,
+            D.POLICY_CONSENT,
+            grant,
+            a,
+            proof,
+            StreamArtistHashes.policyDigest(o.environment, p, a),
+            record
+        );
+    }
+
+    function consumeDelegatedSaleConsent(
+        StreamArtistEstateState.State storage estate,
+        StreamArtistSuccessionState.State storage succession,
+        StreamArtistRotationState.State storage rotations,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistDelegationState.State storage delegations,
+        StreamArtistUnavailabilityState.State storage findings,
+        StreamArtistDormancyState.State storage dormancy,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Sale.Consent calldata p,
+        bytes32 grant,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) public returns (StreamArtistIdentityState.Mutation memory m, bytes32 record) {
+        _deadline(a.time);
+        if (b.consentMode != 2 || p.collectionId == 0) revert T.InvalidRecord();
+        record = StreamArtistSaleHashes.record(
+            o.environment, p, b.artistId, proof.signer, 2, a.nonce, _now()
+        );
+        m = authorize(
+            estate,
+            succession,
+            rotations,
+            identity,
+            delegations,
+            findings,
+            dormancy,
+            replay,
+            o,
+            c,
+            b,
+            p.collectionId,
+            D.SALE_CONSENT,
+            grant,
+            a,
+            proof,
+            StreamArtistSaleHashes.digest(o.environment, p, a),
             record
         );
     }

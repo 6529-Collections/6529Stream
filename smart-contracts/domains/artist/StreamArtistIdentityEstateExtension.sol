@@ -132,6 +132,58 @@ contract StreamArtistIdentityEstateExtension is
         return outputRecord;
     }
 
+    function consumeDelegatedPolicyConsent(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.PolicyConsent calldata p,
+        bytes32 grant,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external onlyHost returns (bytes32) {
+        _check(c, 14);
+        (StreamArtistIdentityState.Mutation memory m, bytes32 record) = StreamArtistEstateEntryMutation.delegated(
+            _estate,
+            _succession,
+            _rotations,
+            _identity,
+            _delegations,
+            _unavailability,
+            _dormancy,
+            _replay,
+            _ownerContext(),
+            c.operationId,
+            msg.data[4:]
+        );
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return record;
+    }
+
+    function consumeDelegatedSaleConsent(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Sale.Consent calldata p,
+        bytes32 grant,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external onlyHost returns (bytes32) {
+        _check(c, 16);
+        (StreamArtistIdentityState.Mutation memory m, bytes32 record) = StreamArtistEstateEntryMutation.delegated(
+            _estate,
+            _succession,
+            _rotations,
+            _identity,
+            _delegations,
+            _unavailability,
+            _dormancy,
+            _replay,
+            _ownerContext(),
+            c.operationId,
+            msg.data[4:]
+        );
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return record;
+    }
+
     function consumeDelegatedEconomics(
         T.ActionContext calldata c,
         T.Binding calldata b,

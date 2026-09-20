@@ -6,6 +6,10 @@ import "../../interfaces/stream/artist/IStreamArtistUnavailability.sol";
 
 /// @notice Original unavailability-preview codec; the host retains every live pin check.
 library StreamArtistCoordinatorRecoveryRead {
+    function suiteEncoded(T.SuiteConfiguration storage suite) public view returns (bytes memory) {
+        return abi.encode(suite);
+    }
+
     function prepareEncoded(
         T.SuiteConfiguration memory suite,
         address finality,

@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistDelegatedConsentOperations.sol";
+import "../../interfaces/stream/artist/IStreamArtistDelegatedConsent.sol";
 import "./StreamArtistDisputeWithdrawalOperations.sol";
 import "./StreamArtistCoordinatorDisputeTransport.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
@@ -361,13 +363,15 @@ contract StreamArtistOnboardingCoordinator is
         bytes32 reason,
         bool correction
     ) external view returns (PW.Context memory) {
-        return StreamArtistPlatformOperations.context(
-            _economicContext(), id, state, claim_, evidence, reason, correction
+        bytes memory encoded = StreamArtistPlatformOperations.contextEncoded(
+            _economicContext(), msg.data[4:]
         );
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function suiteConfiguration() external view returns (T.SuiteConfiguration memory) {
-        return _suite;
+        bytes memory encoded = StreamArtistCoordinatorRecoveryRead.suiteEncoded(_suite);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function coordinateRecordArtistSanction(
@@ -831,6 +835,24 @@ contract StreamArtistOnboardingCoordinator is
         return StreamArtistEconomicOperations.revoke(_economicContext(), actor, p, a);
     }
 
+    function coordinateRecordDelegatedPolicyConsent(
+        address actor,
+        T.PolicyConsent calldata p,
+        bytes32 grant,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistDelegatedConsentOperations.policy(_economicContext(), actor, p, grant, a);
+    }
+
+    function coordinateRecordDelegatedSaleConsent(
+        address actor,
+        Sale.Consent calldata p,
+        bytes32 grant,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistDelegatedConsentOperations.sale(_economicContext(), actor, p, grant, a);
+    }
+
     function coordinateRecordDelegatedEconomicsConsent(
         address actor,
         T.EconomicsConsent calldata p,
@@ -1023,7 +1045,8 @@ contract StreamArtistOnboardingCoordinator is
         for (uint256 j; j < 16; ++j) {
             if (_targets[j].codehash != _runtimeHashes[j]) revert T.ComponentChanged(_targets[j]);
         }
-        return _suite;
+        bytes memory encoded = StreamArtistCoordinatorRecoveryRead.suiteEncoded(_suite);
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function coordinateHydrateArtistAuthorityWithPayout(address actor, AH.Request calldata p)
@@ -1062,8 +1085,12 @@ contract StreamArtistOnboardingCoordinator is
         return StreamArtistCoordinatorHydration.execute(_economicContext(), msg.data, 6);
     }
 
-    function coordinateWithdrawAttributionDispute(address actor, AD.Filing calldata p,
-        AD.Standing calldata standing, T.Authorization calldata a) external operation returns (bytes32) {
+    function coordinateWithdrawAttributionDispute(
+        address actor,
+        AD.Filing calldata p,
+        AD.Standing calldata standing,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
         return StreamArtistDisputeWithdrawalOperations.applyEncoded(_economicContext(), msg.data);
     }
 
