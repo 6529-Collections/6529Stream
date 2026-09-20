@@ -57,22 +57,24 @@ host remain eligible in the actual ModuleRegistry. See the
 ## Current-stack acceptance scope
 
 [`StreamCurrentRecordGenesisTest`](../../test/current/StreamCurrentRecordGenesis.t.sol)
-authors eight cases using the actual Core, Executor, ModuleRegistry,
+authors nine cases using the actual Core, Executor, ModuleRegistry,
 MetadataV1, SchemaRegistry/store, original modular Artist suite and official
 2-of-2 Safes. The inherited upstream entropy service is an explicit double.
 Cases cover constructors/admission, signed institution and estate claims,
 different-Safe/replay rejection, exact curator grants and revocation, a full
 24,576-byte three-chunk preservation record with event/history readback, actual
-op24 joining, typed notarization and changed dependency/product refusal.
+op24 joining, typed notarization, General v2's full 24,576-byte signed payload
+with ordered chunk readback, and changed dependency/product refusal.
 
 The generic and native op24 schema definitions in these tests are explicitly
 synthetic fixture documents. Only the notarization/schema/profile/JCS files are
 the original checked-in definition bytes. No institutional review or legal
 identity verification is asserted.
 
-At the composition base `8d1672ac`, preservation supports 24,576 bytes and
-general attestations support 8,192 bytes. The separately owned general and
-MetadataV1 capacity successors must be integrated and revalidated before a
-uniform 24,576-byte candidate claim. These tests do not imply full37 construction,
+The original composition base `8d1672ac` had 24,576-byte preservation and
+8,192-byte general attestations. The `2e0c3443` successor includes General v2
+and MetadataV1's 24,576-byte capacity. The added current-stack signed payload
+case targets that successor; earlier ABI evidence remains bound to its original
+source. These record tests do not imply full37 construction,
 complete publication capacity, final gas calibration, executed native acceptance,
 deployment-size acceptance, full CI, audit completion or testnet readiness.

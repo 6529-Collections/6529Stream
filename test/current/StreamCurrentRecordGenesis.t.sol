@@ -198,6 +198,49 @@ contract StreamCurrentRecordGenesisTest is StreamCurrentStackFixture, OfficialSa
         );
     }
 
+    function testCurrentGeneralV2SafeRetainsFull24576BytePayloadAndOrderedChunks() public {
+        (Independent.Subject memory subject, General.Request memory r) = _request(71);
+        r.payload = new bytes(24576);
+        for (uint256 i; i < r.payload.length; ++i) {
+            r.payload[i] = bytes1(uint8(i * 37 + i / 8192));
+        }
+        require(records.general.MAX_RECORD_PAYLOAD_BYTES() == 24576, "current full-byte General v2");
+        bytes memory signature = _signature(governor, r);
+        bytes32 hash = records.general.recordSignedAttestation(subject, r, signature);
+        (bytes32 contentHash, uint32 length, uint32 count) = records.general.recordPayloadInfo(hash);
+        require(
+            contentHash == keccak256(r.payload) && length == 24576 && count == 3,
+            "all three original signed chunks"
+        );
+        (address first, bytes memory payload) = records.general.recordPayload(hash);
+        require(
+            payload.length == 24576 && keccak256(payload) == contentHash,
+            "exact full historical bytes"
+        );
+        for (uint256 i; i < 3; ++i) {
+            (bytes32 chunkHash, address pointer, uint32 bytes_) =
+                records.general.recordPayloadChunkAt(hash, i);
+            bytes memory chunk = new bytes(8192);
+            for (uint256 j; j < 8192; ++j) {
+                chunk[j] = r.payload[i * 8192 + j];
+            }
+            require(
+                bytes_ == 8192 && chunkHash == keccak256(chunk)
+                    && pointer.codehash == keccak256(bytes.concat(hex"00", chunk)),
+                "ordered original chunk runtime"
+            );
+            if (i == 0) require(pointer == first, "backward-compatible first pointer");
+        }
+        (, General.Receipt memory receipt) = records.general.attestation(hash);
+        require(
+            receipt.recorder == address(governor)
+                && receipt.authorizationDigest == records.general.attestationDigest(r)
+                && receipt.authorityQualification
+                    == General.AuthorityQualification.GENERAL_SIGNER_CLAIM,
+            "full bytes preserve actual Safe claim authority"
+        );
+    }
+
     function testCuratorRequiresExactCollectionSafeGrantAndRevocationPreservesHistory() public {
         (Independent.Subject memory subject, General.Request memory r) = _request(31);
         r.attestationType = keccak256("CURATORIAL_STATEMENT");
