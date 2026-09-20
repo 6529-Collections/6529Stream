@@ -1050,7 +1050,7 @@ scope. An expanded import or writer must preserve and re-establish the invariant
 before this continuation can accept its state. A historical record or matching
 address alone cannot replace it.
 
-An original recovery or estate activation may have an actual operation-41
+An original recovery or estate activation may have an actual operation-58
 dismissal before the first later rotation. Its first closure is authenticated
 under the original appointed/recovered principal, independently from a later
 terminal closure under a different address. The original cause, dismissal,

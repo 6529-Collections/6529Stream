@@ -137,7 +137,7 @@ library StreamArtistRecoveryRotationContinuation {
                 revert Recovery.UnsupportedIdentityRecoveryProfile(prior.fields.artistId);
             }
         }
-        // op41 can close only its captured current execution. A later32 cannot rewrite this
+        // op58 can close only its captured current execution. A later32 cannot rewrite this
         // write-once closure; the producer chain proves closure preceded the first successor32.
         return Closed.beforeNext(
             rotations,

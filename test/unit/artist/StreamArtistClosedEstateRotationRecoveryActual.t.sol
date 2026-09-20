@@ -45,7 +45,7 @@ contract StreamArtistClosedEstateRotationRecoveryActualTest is
             c.dismissalRecordHash == crDismissal && c.abandoned == early
                 && c.windowEndsAt == crOriginWindow
                 && (standing ? c.contestedAt == 0 : c.contestedAt != 0),
-            "original op41 closes the original40 episode before any executed successor rotation"
+            "original op58 closes the original40 episode before any executed successor rotation"
         );
         crOriginal = _crOriginal();
         require(
