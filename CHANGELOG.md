@@ -88,6 +88,12 @@ the release policy in `docs/release-policy.md`.
 
 - Add pinned, bounded burn-program discovery and source/target closure warnings;
   clarify Safe CALL capability versus EIP-2612 and Permit2 signature support.
+
+- Add exact Museum decoding for native Artist C2PA credentials and selected
+  reconciliation reports, preserving separate personhood, history and display
+  observations. Supplied-byte and hash checks do not establish C2PA cryptography,
+  authenticated admission, freeze-safe output or full dossier conformance.
+
 - Add the complete 29-name Museum genesis source catalog, broad missing schema
   definitions, worked examples and ordered registry chunk inputs. Preserve
   existing definition bytes and distinguish profile/shape validation from

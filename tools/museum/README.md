@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Artist C2PA consumption](../../docs/museum-artist-c2pa.md) adds strict native
+credential, personhood and reconciliation decoders. It retains historical
+selected-verifier claims separately from current display observations and
+distinguishes supplied-byte agreement from cryptographic validation.
+
 New bounded adapters cover [institutional owner documentation](../../docs/museum-institutional-records.md),
 [condition and conservation](../../docs/museum-condition.md),
 [public geography drafts](../../docs/museum-geography.md) and
