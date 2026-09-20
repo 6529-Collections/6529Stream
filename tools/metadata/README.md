@@ -5,6 +5,14 @@ independent JSON fixtures for the developing typed record consumers. The
 definitions are proposed registration inputs; generated files are not evidence
 of onchain registration or accepted finality.
 
+[Scoped STATIC finality and packet V7](../../docs/museum-scoped-static-finality-v7.md)
+add a distinct TOKEN/RELEASE/SEASON branch with original snapshot, complete
+membership, selection and output hash rows. Generate/check the new definitions
+with `python -m tools.metadata.acquisition_scoped_static_finality_v1` and
+`python -m tools.metadata.acquisition_packet_v7`, each supporting `--check`.
+Earlier definition bytes remain unchanged; supplied consistency remains
+separate from source authenticity and historical execution.
+
 The standalone [original governance transaction fragment](../../docs/museum-governance-transaction-evidence.md)
 retains exact transaction/receipt/header observations and reconstructs ordered
 call and action-ID preimages. Generate/check only its new definition with

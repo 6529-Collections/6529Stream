@@ -84,6 +84,10 @@ jobs:
           python -m tools.metadata.acquisition_native_finality_v1 --check
           python -m tools.metadata.acquisition_packet_v6 --check
           python -m tools.metadata.acquisition_governance_transactions_v1 --check
+          python -m tools.metadata.acquisition_scoped_static_finality_v1 --check
+          python -m tools.metadata.acquisition_packet_v7 --check
+      - name: Test scoped STATIC finality and V7 schemas
+        run: python -m unittest tools.metadata.test_acquisition_scoped_static_finality_v1 tools.metadata.test_acquisition_packet_v7 -v
 
       - name: Test offline preservation packages and reference metrics
         run: python -B -m unittest discover -s tools/preservation -t . -p "test_*.py" -v

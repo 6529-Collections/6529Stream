@@ -81,10 +81,11 @@ hash-only, `completeAuthority` stays false, and acquisition item 3 remains
 partial. The original V5/V6 schemas, native fragment, source profiles and V6
 packet claims retain their published bytes.
 
-Scoped, STATIC, policy V2 and VIEW native finality semantics remain required
-following batches. The collection-only profile is a bounded first step, not a
-full-v1 exclusion. Wrapper-specific transaction capture and historical authority
-evidence also remain separate work.
+[Scoped STATIC finality and V7](museum-scoped-static-finality-v7.md) use a separate
+capture and packet branch for original TOKEN, RELEASE and SEASON evidence.
+Policy V2 and VIEW remain required following batches. The collection-only
+profile here is a bounded first step, not a full-v1 exclusion. Wrapper-specific
+transaction capture and historical authority evidence remain separate work.
 
 ## Capture and replay
 

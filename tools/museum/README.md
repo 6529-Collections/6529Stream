@@ -1,5 +1,11 @@
 # Museum offline tooling
 
+[Scoped STATIC finality and acquisition V7](../../docs/museum-scoped-static-finality-v7.md)
+retains original TOKEN/RELEASE/SEASON snapshots, complete membership and ordered
+output hash rows, with original governance inputs and a token proof. It preserves
+title V5 inputs and adds a distinct V7 branch. Historical execution and complete
+rendered-byte preservation remain unresolved.
+
 [Original governance transaction evidence](../../docs/museum-governance-transaction-evidence.md)
 recovers ordered call and action-ID preimages from original Executor inputs,
 receipts and events. It adds a separate evidence report while preserving the

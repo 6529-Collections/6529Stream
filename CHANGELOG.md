@@ -590,6 +590,12 @@ the release policy in `docs/release-policy.md`.
 - Fit the joined Artist Payout owner by factoring six original structured reads
   into a fixed typed encoder, preserving its ABI, storage and mutation bodies.
 
+- Add scoped STATIC finality capture and V7 acquisition exports for original
+  TOKEN, RELEASE and SEASON snapshots, complete membership and ordered output
+  hash manifests. Preserve title V5 inputs, reconcile twelve sources and retain
+  original governance inputs. Historical Core/render preimages, authority
+  execution and complete acquisition evidence remain unresolved.
+
 - Add original governance transaction capture and ordered call/action-ID
   reconstruction from original Executor inputs, receipts and events. Preserve
   the entire V6 package and exact packet bytes; retain missing or unsupported
