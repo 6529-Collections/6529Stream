@@ -89,8 +89,13 @@ The authored twelve cases use the actual new host, original full current reader
 and Documents, State/Store carriers, Renderer and exact-source adapter. Core,
 Artist, Metadata, Schema, Registry, Membership and factory/source set replies are
 explicit typed boundaries. They do not prove a real op17 signature, governed
-renderer admission or the current complete deployment graph. ABI type checking is
-available; native results and final product sizes must be recorded separately.
+renderer admission or the current complete deployment graph. The native2 capture
+passed all twelve cases after correcting a stale fixture attribution Router reply.
+The original native1 setup failure remains retained. All 107 source texts and 20
+artifacts were authenticated; all 19 reached production products fit, and every
+production bytecode remained identical across the fixture-only retry. The tests
+ran without compilation or artifact mutation. These results do not establish a
+complete governance ceremony or universal cold transaction capacity.
 
 The original Router FULL_VIEW_GAS and transaction limits are unchanged. This
 checkpoint supplies its own immutable serving budget to the pinned adapter. A
