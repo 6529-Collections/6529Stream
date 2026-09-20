@@ -37,11 +37,8 @@ contract StreamArtistConsentFinalityLifecycle is
 {
     // Retain the published host error ABI after callback implementation extraction.
     error BoundExceeded(uint256 actual, uint256 maximum);
-    error InvalidOperation(uint16 operationId);
     error InvalidRecord();
     error Replay(bytes32 replayKey);
-    error StaleOwnerSnapshot(bytes32 domainId);
-    error Unauthorized(address caller);
     address public immutable consentWriterExtension;
 
     function recordPreimageBytes(bytes32 hash) external view returns (bytes memory) {

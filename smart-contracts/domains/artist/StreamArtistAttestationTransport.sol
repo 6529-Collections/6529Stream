@@ -152,4 +152,37 @@ library StreamArtistAttestationTransport {
             s, c, b, p, savedSigner, savedAuthorityClass
         );
     }
+    function recordEncoded(
+        AttrState.State storage s,
+        StreamArtistHashes.Environment memory e,
+        bytes calldata encoded
+    ) public returns (AttrState.Mutation memory) {
+        bytes4 selector = bytes4(encoded[:4]);
+        if (
+            selector == bytes4(keccak256(
+                "recordAttestation((uint16,address,(bytes32,uint64,bytes32,bytes32)),(bytes32,address,bytes32,bytes32,uint64,uint8,uint8,uint8,address,bool),(uint256,uint8,bytes32,bytes32,bytes32,bytes32,string),address,uint256,uint64,bytes)"
+            ))
+        ) return recordAttestation(s, e, encoded);
+        if (
+            selector == bytes4(keccak256(
+                "recordIdentityAttestation((uint16,address,(bytes32,uint64,bytes32,bytes32)),(bytes32,address,bytes32,bytes32,uint64,uint8,uint8,uint8,address,bool),(uint256,uint8,bytes32,bytes32,bytes32,bytes32,string),bytes32,address,uint256,uint64,bytes)"
+            ))
+        ) return recordIdentityAttestation(s, e, encoded);
+        if (
+            selector == bytes4(keccak256(
+                "recordAuthenticatedAttestation((uint16,address,(bytes32,uint64,bytes32,bytes32)),(bytes32,address,bytes32,bytes32,uint64,uint8,uint8,uint8,address,bool),(uint256,uint8,bytes32,bytes32,bytes32,bytes32,string),((bytes32,address,uint8,uint8),address,uint256,uint64,bytes32,bytes32,(address,bytes32,bytes32,bytes32)),bytes)"
+            ))
+        ) return recordAuthenticatedAttestation(s, e, encoded);
+        if (
+            selector == bytes4(keccak256(
+                "recordAttestationWithAuthority((uint16,address,(bytes32,uint64,bytes32,bytes32)),(bytes32,address,bytes32,bytes32,uint64,uint8,uint8,uint8,address,bool),(uint256,uint8,bytes32,bytes32,bytes32,bytes32,string),bytes32,(bytes32,address,uint8,uint8),address,uint256,uint64,bytes)"
+            ))
+        ) return recordAttestationWithAuthority(s, e, encoded);
+        if (
+            selector == bytes4(keccak256(
+                "recordPublicationAttestation((uint16,address,(bytes32,uint64,bytes32,bytes32)),(bytes32,address,bytes32,bytes32,uint64,uint8,uint8,uint8,address,bool),(uint256,uint8,bytes32,bytes32,bytes32,bytes32,string),(bytes32,address,uint8,uint8),uint256,uint64,bytes,bytes32)"
+            ))
+        ) return recordPublicationAttestation(s, e, encoded);
+        revert T.InvalidOperation(24);
+    }
 }

@@ -148,8 +148,6 @@ contract StreamArtistIdentityAuthority is
     error InvalidTimestamp(uint64 timestamp);
     error InvalidRecord();
     error Replay(bytes32 replayKey);
-    error StaleOwnerSnapshot(bytes32 domainId);
-    error InvalidOperation(uint16 operationId);
     error ExpiredAuthorization(uint64 deadline);
     using StreamArtistNonceAvailability for StreamArtistNonceAvailability.Index;
     address public immutable artistWindowAuthority;

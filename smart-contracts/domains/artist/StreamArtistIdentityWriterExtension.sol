@@ -351,12 +351,7 @@ contract StreamArtistIdentityWriterExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32 record) {
         _check(c, 2);
-        StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentMutation.consume(
-            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
-        );
-        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
-        _commit(c, m.action, m.state, m.replay, m.record);
+        return _consumeAndCommit(c, b.artistId, proof.signer);
     }
 
     function consumeRefusal(
@@ -367,12 +362,7 @@ contract StreamArtistIdentityWriterExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32 record) {
         _check(c, 3);
-        StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentMutation.consume(
-            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
-        );
-        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
-        _commit(c, m.action, m.state, m.replay, m.record);
+        return _consumeAndCommit(c, b.artistId, proof.signer);
     }
 
     function consumeSaleConsent(
@@ -383,12 +373,7 @@ contract StreamArtistIdentityWriterExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32 record) {
         _check(c, 16);
-        StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentMutation.consume(
-            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
-        );
-        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
-        _commit(c, m.action, m.state, m.replay, m.record);
+        return _consumeAndCommit(c, b.artistId, proof.signer);
     }
 
     function consumePolicy(
@@ -399,12 +384,7 @@ contract StreamArtistIdentityWriterExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32 record) {
         _check(c, 14);
-        StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentMutation.consume(
-            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
-        );
-        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
-        _commit(c, m.action, m.state, m.replay, m.record);
+        return _consumeAndCommit(c, b.artistId, proof.signer);
     }
 
     function consumeEconomics(
@@ -416,12 +396,7 @@ contract StreamArtistIdentityWriterExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32 record) {
         _check(c, 15);
-        StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentMutation.consume(
-            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
-        );
-        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
-        _commit(c, m.action, m.state, m.replay, m.record);
+        return _consumeAndCommit(c, b.artistId, proof.signer);
     }
 
     function consumePayout(
@@ -431,12 +406,7 @@ contract StreamArtistIdentityWriterExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32 record) {
         _check(c, 18);
-        StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentMutation.consume(
-            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
-        );
-        _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, c.operationId, m);
-        _commit(c, m.action, m.state, m.replay, m.record);
+        return _consumeAndCommit(c, p.artistId, proof.signer);
     }
 
     function consumeDelegatedAttestation(
@@ -458,12 +428,7 @@ contract StreamArtistIdentityWriterExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32 record) {
         _check(c, 24);
-        StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentMutation.consume(
-            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
-        );
-        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
-        _commit(c, m.action, m.state, m.replay, m.record);
+        return _consumeAndCommit(c, b.artistId, proof.signer);
     }
 
     function consumeRatification(
@@ -474,12 +439,7 @@ contract StreamArtistIdentityWriterExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32 record) {
         _check(c, 52);
-        StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentMutation.consume(
-            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
-        );
-        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
-        _commit(c, m.action, m.state, m.replay, m.record);
+        return _consumeAndCommit(c, b.artistId, proof.signer);
     }
 
     function consumeRoyaltyFreeze(
@@ -490,12 +450,7 @@ contract StreamArtistIdentityWriterExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32 record) {
         _check(c, 20);
-        StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentMutation.consume(
-            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
-        );
-        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
-        _commit(c, m.action, m.state, m.replay, m.record);
+        return _consumeAndCommit(c, b.artistId, proof.signer);
     }
 
     function consumeContentConsent(
@@ -506,12 +461,7 @@ contract StreamArtistIdentityWriterExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32 record) {
         _check(c, 17);
-        StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentMutation.consume(
-            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
-        );
-        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
-        _commit(c, m.action, m.state, m.replay, m.record);
+        return _consumeAndCommit(c, b.artistId, proof.signer);
     }
 
     function consumeContentFreeze(
@@ -522,12 +472,7 @@ contract StreamArtistIdentityWriterExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32 record) {
         _check(c, 21);
-        StreamArtistIdentityState.Mutation memory m;
-        (m, record) = StreamArtistIdentityConsentMutation.consume(
-            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
-        );
-        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
-        _commit(c, m.action, m.state, m.replay, m.record);
+        return _consumeAndCommit(c, b.artistId, proof.signer);
     }
 
     function _authorize(
@@ -648,5 +593,15 @@ contract StreamArtistIdentityWriterExtension is
         m.state = keccak256(abi.encode(record.recordHash, uint8(3)));
         _noteLiving(_ownerContext(), _replay, record.artistId, c.actor, 49, m);
         _commit(c, m.action, m.state, m.replay, 0);
+    }
+    function _consumeAndCommit(T.ActionContext calldata c, bytes32 artistId, address signer)
+        private returns (bytes32 record)
+    {
+        StreamArtistIdentityState.Mutation memory m;
+        (m, record) = StreamArtistIdentityConsentMutation.consume(
+            _identity, _replay, _ownerContext(), c.operationId, msg.data[4:]
+        );
+        _noteLiving(_ownerContext(), _replay, artistId, signer, c.operationId, m);
+        _commit(c, m.action, m.state, m.replay, m.record);
     }
 }

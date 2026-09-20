@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistOwnerCheck } from "./StreamArtistOwnerCheck.sol";
 import { StreamArtistOwnerCommit } from "./StreamArtistOwnerCommit.sol";
 import "./StreamArtistHydrationGuards.sol";
 import { StreamArtistOwnerHydration } from "./StreamArtistOwnerHydration.sol";
@@ -22,6 +23,11 @@ import {
 /// @dev No owner may call another owner. The coordinator snapshots cross-domain facts
 ///      before mutations. Only typed concrete owner methods can advance this prefix.
 abstract contract StreamArtistOwner is IStreamArtistOwner {
+    // Retain original public ABI errors after moving the exact predicate to its fixed worker.
+    error Unauthorized(address caller);
+    error InvalidOperation(uint16 operationId);
+    error StaleOwnerSnapshot(bytes32 domainId);
+
     /// @dev All fields are static, preserving the original fourteen-word abi.encode preimage.
     struct StateTransitionPreimage {
         bytes32 tag;
@@ -208,20 +214,9 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
         internal
         view
     {
-        if (msg.sender != operationCoordinator) {
-            revert StreamArtistOnboardingTypes.Unauthorized(msg.sender);
-        }
-        if (context.actor == address(0)) {
-            revert StreamArtistOnboardingTypes.Unauthorized(context.actor);
-        }
-        if (context.operationId != operation) {
-            revert StreamArtistOnboardingTypes.InvalidOperation(context.operationId);
-        }
-        StreamArtistOnboardingTypes.Snapshot calldata prior = context.expected;
-        if (
-            prior.domainId != domainId || prior.revision != _revision
-                || prior.stateRoot != _stateRoot || prior.recordChainTip != _recordChainTip
-        ) revert StreamArtistOnboardingTypes.StaleOwnerSnapshot(domainId);
+        StreamArtistOwnerCheck.check(
+            _commitPrefix(), operationCoordinator, domainId, context, operation
+        );
     }
 
     function _replayKey(bytes32 surface, bytes32 scope) internal view returns (bytes32) {

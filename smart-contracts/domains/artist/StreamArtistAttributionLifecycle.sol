@@ -585,12 +585,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes calldata statement
     ) external returns (bytes32 record) {
         _check(c, 24);
-        AttrState.Mutation memory m = StreamArtistAttestationTransport.recordAttestation(
-            _attestationStore(), _environment(), msg.data
-        );
-        _commit(c, m.action, m.stateDelta, bytes32(0), m.record);
-        _native(c.operationId, m.record, b.artistId, p.collectionId);
-        return m.record;
+        return _recordAttestationEncoded(c, b.artistId, p.collectionId);
     }
 
     function recordIdentityAttestation(
@@ -604,12 +599,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes calldata statement
     ) external returns (bytes32) {
         _check(c, 24);
-        AttrState.Mutation memory m = StreamArtistAttestationTransport.recordIdentityAttestation(
-            _attestationStore(), _environment(), msg.data
-        );
-        _commit(c, m.action, m.stateDelta, bytes32(0), m.record);
-        _native(c.operationId, m.record, b.artistId, p.collectionId);
-        return m.record;
+        return _recordAttestationEncoded(c, b.artistId, p.collectionId);
     }
 
     function recordAuthenticatedAttestation(
@@ -620,12 +610,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes calldata statement
     ) external returns (bytes32 record) {
         _check(c, 24);
-        AttrState.Mutation memory m = StreamArtistAttestationTransport.recordAuthenticatedAttestation(
-            _attestationStore(), _environment(), msg.data
-        );
-        _commit(c, m.action, m.stateDelta, bytes32(0), m.record);
-        _native(c.operationId, m.record, b.artistId, p.collectionId);
-        return m.record;
+        return _recordAttestationEncoded(c, b.artistId, p.collectionId);
     }
 
     function recordAttestationWithAuthority(
@@ -640,12 +625,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes calldata statement
     ) external returns (bytes32) {
         _check(c, 24);
-        AttrState.Mutation memory m = StreamArtistAttestationTransport.recordAttestationWithAuthority(
-            _attestationStore(), _environment(), msg.data
-        );
-        _commit(c, m.action, m.stateDelta, bytes32(0), m.record);
-        _native(c.operationId, m.record, b.artistId, p.collectionId);
-        return m.record;
+        return _recordAttestationEncoded(c, b.artistId, p.collectionId);
     }
 
     function recordPublicationAttestation(
@@ -659,12 +639,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes32 metadataHostCodeHash
     ) external returns (bytes32) {
         _check(c, 24);
-        AttrState.Mutation memory m = StreamArtistAttestationTransport.recordPublicationAttestation(
-            _attestationStore(), _environment(), msg.data
-        );
-        _commit(c, m.action, m.stateDelta, bytes32(0), m.record);
-        _native(c.operationId, m.record, b.artistId, p.collectionId);
-        return m.record;
+        return _recordAttestationEncoded(c, b.artistId, p.collectionId);
     }
 
     /// @dev Exact declared storage root, not a computed or caller-supplied location.
@@ -887,5 +862,17 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
     {
         bytes32 key = _consume(surface, m.replayScope, m.replayCommitment);
         _commit(c, m.action, m.state, key, m.record);
+    }
+    function _recordAttestationEncoded(
+        T.ActionContext calldata c,
+        bytes32 artistId,
+        uint256 collectionId
+    ) private returns (bytes32) {
+        AttrState.Mutation memory m = StreamArtistAttestationTransport.recordEncoded(
+            _attestationStore(), _environment(), msg.data
+        );
+        _commit(c, m.action, m.stateDelta, bytes32(0), m.record);
+        _native(c.operationId, m.record, artistId, collectionId);
+        return m.record;
     }
 }
