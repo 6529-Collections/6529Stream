@@ -917,7 +917,8 @@ contract StreamMintCounterReadsTest is MintEngineTestBase {
         IStreamMintManager.MintBatch memory used = _batch(1, PHASE, 1, 1);
         (, bytes32 usedRoot,) = manager.executeSingleStepMint(used, "");
         bytes32 previous = manager.phasePolicyHash(1, PHASE);
-        uint64 until = uint64(block.timestamp + 100);
+        // setUp fixes time at 1000; keep this expectation stable across vm.warp.
+        uint64 until = 1100;
         manager.setPhaseExecutorWithGrace(1, PHASE, OTHER_EXECUTOR, true, until);
         bytes32 current = manager.phasePolicyHash(1, PHASE);
         require(current != previous, "real current policy rotation");

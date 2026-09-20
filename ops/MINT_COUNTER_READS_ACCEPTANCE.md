@@ -53,7 +53,28 @@ It has zero compiler errors. `mint-counter-reads-compatibility-1` retains all
 explicit errors. All 19 recursively normalized storage entries are unchanged.
 
 The native preview21 result remains evidence only for its frozen `b7378eeb`
-source. This new batch's focused runtime, full-current/Safe/fuzz/gas acceptance
+source. The frozen `3cbc67bc` counter-read capture executes all 36 cases: 35
+pass and the replay/grace deadline assertion fails. All 13 budgeted read calls
+succeed within 30,000 gas; the final grace call returns the correct 64-byte
+tuple and stored deadline 1100 in 6,630 gas. Independent disassembly of the
+exact test artifact shows `TIMESTAMP + 100` is recomputed after `vm.warp(1100)`,
+making the test expect 1200. The test now uses literal 1100 from its unchanged
+`setUp` time of 1000, preserving inclusive 1100, expired 1101 and every other
+assertion. No production source or gas allowance changes.
+
+The original negative capture `mint-counter-reads-native-3cbc67bc-1` is retained:
+412.441 seconds, exit one, native JSON SHA-256
+`8c7ac52e03907a243ed28663bee562a32ddbfcf374e36f57dc7325a1324c58fb`.
+Independent checks bind all 194 sources, 221 artifact metadata records and
+4,470 source Keccaks to their cache-selected compiler output. All 90 captured
+production runtime artifacts fit; fallback remains outside this native closure.
+The native Preview emission is 11,580/11,612 bytes, distinct from the selected
+emission below. A separate copied two-case diagnostic on unchanged `b7378eeb`
+passes both the original recipe and literal-deadline control; its different
+test compilation context does not reproduce the original optimizer behavior.
+The decisive evidence is the original failing artifact's generated code.
+
+The corrected full 36-case native retry, full-current/Safe/fuzz/gas acceptance
 and release artifacts are pending. Source/ABI compilation does not establish
 runtime correctness or production readiness.
 
