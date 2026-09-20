@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `836b9c64`: recovered511, ERC20 reveal allowance, fitted content/Universal/Coordinator, Museum personhood, prospective reference and recovered clients source integrated. ABI106:2,830/zero errors. Combined runtime remains pending. |
+| Source checkpoint | `905bbe2a`: canonical native sales, recovered source/preparation capacity, metadata cold-read fix, 511 clients and native DIRECT tier/selection are integrated. ABI110: 2,908 sources / zero errors. Root clients 1,525; Museum30; scoped native results remain source-qualified. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,46 +29,53 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 20 September
 
-Latest source `836b9c64`; ABI1062,830/zero errors. Root clients1,494, Museum72 and prospective
-offline7 pass. Distribution27/256fuzz and Payout17/two256fuzz pass their recorded
-native sources. All15 selected joined Artist products fit; Prepared remains the
-known linked deployment blocker. Root owns source integration and final closure.
+Current source and scoped outcomes are in [V1_CURRENT_STATUS.md](V1_CURRENT_STATUS.md).
+Root owns integration; builders continue coherent features while frozen tests run.
 
-- A: retain integrated f65038/1 evidence; finish genuinely single-frame actual
-  Owner cold-read repair at original150k/400k. Denied two-frame proposal is inert.
-- B: preserve inert ERC20 pricev6; correct masked oracles into exactv7 for renewed
-  application review. Payout source/native work is integrated and accepted only
-  within its recorded scope. Independently review C's narrow shared VIEW changes.
-- C: prospective a6c is integrated; selected7 fit, fix native fixture inventory and
-  complete eleven cases. Build approved canonical VIEW source/adoption/rendering
-  through original Router/op17 and versioned RENDERER_CONFIG aggregate.
-- Mint: distributionf0bd and documentarydcb/aa are integrated. Shared stateful
-  plans are ready; identify the next required SSA-AUTH/public-sale family without
-  duplicating B's separate same-leaf price carrier.
-- Burn: content02268 is integrated/fits. Run only its scoped35 codec/facts cases;
-  generationbcea is reviewed and awaits Prepared-stage composition. Keep its
-  Prepared delta coordinated with the dedicated owner, with no competing writes.
-- Museum: personhooda24b is integrated, root72 pass. Build separate native DIRECT
-  floor/personhood fragment/bridge; preserve V4 and explicit partial items6/13.
-- Clients: recovered1db1 is integrated; preserve exact ABI104/255 evidence and
-  build separate ART36/511 caller/receipt profile against root ABI106.
-- Testing: hold shared current47 plus three stateful hosts until genuine linked
-  closure fits. Refresh one exact joined source; no stubs or duplicate full build.
-- Conservation/native `01a0be37-2432-7a63-8820-fc42f159eb1d`: ERC20 production,
-  capacity and six-mode source review clear. Review inert price test oracles and
-  maintain actual five-personhood shared-capture plan.
-- Independent/ERC20 `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: source is integrated;
-  own the frozen87 and changed/new60 native captures, fixes and exact evidence.
-  No further duplicate compile while those two are active.
-- Prepared capacity `01a0bf2e-f3d6-7203-8d51-c530eda626c7`, worktree1318:
-  reduce original106,169-byte linked preparation graph through fixed typed
-  stages/canonical bytes, preserving six nominal selectors, complete inventory,
-  checks and order. Facade fits in a development capture; every linked worker
-  and focused parity acceptance are still required. Compose generation afterward.
+- A: metadata optimization/fidelity is integrated with 46 retained passes.
+  Repair AttestationHydration capacity and independently review C's VIEW seams.
+- B: external guards and price capacity are integrated; price35 is running.
+  Build canonical ERC20 standard Dutch, coordinating Payment/admission and the
+  original Sales signature domain with Mint. Existing Payment entries remain.
+- C: prospective native11 is complete. Finish canonical VIEW adoption/STATIC
+  routing/rendering; reduce the new Router transport to fit before source intake.
+- Mint: canonical signed/public native sales are integrated; frozen unit45 is
+  running and actual-current3 joins the shared plan. Build native ZERO_PRICE_CLAIM
+  and PWYW, including explicitly coordinated historical kind3/12/13 revocation.
+- Burn: finish the frozen content35 run and build actual-current redemption/Safe
+  acceptance source. Generation composition belongs to the Prepared lead. The
+  separate held burn-fee extension remains unapplied.
+- Museum: DIRECT floor/personhood and tier/selection are integrated, root35/30
+  pass. Build a separate complete-packet native authority/scope and DIRECT
+  representation; preserve frozen V4 and explicit remaining requirements.
+- Clients: recovered 511 is integrated. Build missing clone-wallet release,
+  ClaimRouter and Escrow flush/recovery workflows, preserving genuine governance
+  boundaries and all previous source snapshots.
+- Testing: run the approved bounded Artist linked-size discovery on pinned
+  `1fcbb349`: 112 initial outputs, fixed 710-source input, at most four native
+  invocations/1,200 seconds and only genuinely reached reserve outputs. This is
+  historical discovery, not current fit evidence. Then join the exact final
+  sources for current47 and the three stateful hosts; do not substitute stubs.
+- Conservation/native task `01a0be37-2432-7a63-8820-fc42f159eb1d`: independent
+  ERC20 fixture, Prepared and complete Identity source reviews are clear. Own
+  isolated HydrationCommit and RegistryWriterDeployment/WriterExtension capacity
+  repairs; preserve mutation/order/ABI/storage and obtain independent review.
+- ERC20 task `01a0be84-d88f-7e53-95ca-6b3de1ba8dc0`: own the frozen repaired
+  93-case capture at `5df9808e`; preserve older failures. Unit9 already passes.
+- Prepared task `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: first preparation and
+  record/delegation and complete source decoder repairs are integrated. Deliver
+  coherent binding-generation512 composition with Burn's source, then repair
+  the newly measured IdentityTransport with the same source-bound storage roots.
 
-No funding or onchain action is needed. Other held artifacts remain unapplied.
-The supported RC1 remains immutable. Final current/Safe/fuzz/capacity/CI evidence,
-source freeze and a matching testnet demonstration are still required.
+Root's combined client run completed: 1,525 passed, zero failed/skipped.
+The source-specific content35 and corrected metadata46 runs pass. No root
+native compiler is running. Remaining linked discovery runs in Testing's task.
+No funding or onchain action is needed. RC1 remains immutable. Full actual
+current/Safe/fuzz/capacity/CI, final source freeze and matching testnet remain.
+
+## Earlier source-specific assignments
+
+These retain historical context; current assignments above take precedence.
 
 - Root owns architecture, integration and delivery. ABI70 covers all 2,329
   sources at `822b0dc7`; clients retain explicit historical ABI52 and mode-2 ABI56.
