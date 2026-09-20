@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamViewRouteReadBudgetV1 as ViewBudget
+} from "../finality/StreamViewRouteReadBudgetV1.sol";
+import {
     StreamViewAdoptionTypes as V
 } from "../../interfaces/stream/metadata/StreamViewAdoptionTypes.sol";
 import "../../interfaces/stream/finality/IStreamViewSourceBinding.sol";
@@ -57,6 +60,8 @@ library StreamViewAdoptionReads {
             100000
         );
         if (cap < 50000 || cap > type(uint32).max) revert V.InvalidViewAdoption();
+        bool governedBudget;
+        (cap, governedBudget) = ViewBudget.select(r.finality, cap);
         (address router, bytes32 routerHash) = selected(core, keccak256("METADATA_ROUTER"), cap);
         if (
             router != address(this) || routerHash != address(this).codehash
@@ -97,14 +102,14 @@ library StreamViewAdoptionReads {
         ) {
             revert V.ViewAdoptionDependency(r.provider);
         }
-        bytes memory raw =
-            read(
+        bytes memory raw = read(
             r.provider, abi.encodeCall(IStreamViewSourceBinding.viewSourceBinding, ()), 192, cap
         );
         r.binding = abi.decode(raw, (V.Binding));
         if (
             keccak256(raw) != keccak256(abi.encode(r.binding)) || r.binding.readGas < 50000
                 || r.binding.sourceGas < r.binding.readGas
+                || (governedBudget && r.binding.readGas != cap)
         ) {
             revert V.InvalidViewAdoption();
         }
@@ -262,9 +267,9 @@ library StreamViewAdoptionReads {
             ok := staticcall(cap, target, add(input, 32), mload(input), 0, 0)
             size := returndatasize()
         }
-        if (!ok || size > limit || (exact && size != limit)) revert V.ViewAdoptionRead(
-            target, bytes4(input)
-        );
+        if (!ok || size > limit || (exact && size != limit)) {
+            revert V.ViewAdoptionRead(target, bytes4(input));
+        }
         out = new bytes(size);
         assembly ("memory-safe") { returndatacopy(add(out, 32), 0, size) }
     }

@@ -1,4 +1,11 @@
 # Changelog
+## Governed VIEW route-read budget
+
+- Add an explicitly governed VIEW budget shared by adoption, current-source
+  readers and preservation roots. The once-bound declaration remains the
+  authority; original global limits, complete fresh checks and legacy provider
+  behavior remain. Twenty focused native cases, including 256 fuzz inputs,
+  cover this kernel; complete route and ceremony acceptance is pending.
 
 ## VIEW preservation root facade
 

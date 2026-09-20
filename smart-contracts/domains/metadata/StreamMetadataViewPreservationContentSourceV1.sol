@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {
+    StreamViewRouteReadBudgetV1 as ViewBudget
+} from "../finality/StreamViewRouteReadBudgetV1.sol";
+import {
     IStreamScopedContentRootPublication as R
 } from "../../interfaces/stream/metadata/IStreamScopedContentRootPublication.sol";
 import {
@@ -277,6 +280,7 @@ library StreamMetadataViewPreservationContentSourceV1 {
             100000
         );
         if (r.readGas < 50000 || r.readGas > type(uint32).max) revert R.InvalidScopedContentRoot();
+        (r.readGas,) = ViewBudget.select(r.finality, r.readGas);
         if (
             _address(
                         r.finality,

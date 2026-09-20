@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamViewRouteReadBudgetV1 as ViewBudget } from "./StreamViewRouteReadBudgetV1.sol";
 import {
     StreamViewAdoptionTypes as V
 } from "../../interfaces/stream/metadata/StreamViewAdoptionTypes.sol";
@@ -244,6 +245,8 @@ library StreamFinalityViewPolicySourceReadsV2 {
             100000
         );
         if (cap < 50000 || cap > type(uint32).max) revert V.InvalidViewAdoption();
+        bool governedBudget;
+        (cap, governedBudget) = ViewBudget.select(r.finality, cap);
         (address router, bytes32 routerHash) =
             Read.selected(core, keccak256("METADATA_ROUTER"), cap);
         if (
@@ -292,6 +295,7 @@ library StreamFinalityViewPolicySourceReadsV2 {
         if (
             keccak256(raw) != keccak256(abi.encode(r.binding)) || r.binding.readGas < 50000
                 || r.binding.sourceGas < r.binding.readGas
+                || (governedBudget && r.binding.readGas != cap)
         ) {
             revert V.InvalidViewAdoption();
         }
