@@ -9,6 +9,17 @@
   requirement in the [integration guide](docs/integrations/conservation-floor-persistence-gas.md).
 
 
+## Retained-offer callback regression recipes
+
+- Add three current-stack Safe recipes for original selected native, selected
+  ERC20 and secondary custody offers: actual buyer-owned delegation revocation
+  during NFT delivery, atomic rollback and retry of the original Safe envelope.
+- Reenter the original sale or Payment entry through an authorized buyer Safe
+  module and assert its existing guard while preserving official Safe ERC1271
+  handling, original proofs, payment accounting and settlement receipts.
+- Source/type and test-instrument size checks pass. Current-stack execution,
+  callback gas acceptance and inner failure traces remain pending.
+
 ## Metric currentness temporary memory
 
 - Reclaim dead canonical evidence and complete context-preimage buffers after

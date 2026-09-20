@@ -233,6 +233,33 @@ repair can retry the exact buyer envelope. Earned claims retain their existing
 status-independent behavior. Native execution, codegen size and gas validation
 for the new secondary helper remain pending.
 
+### Callback-time delegation regression recipes
+
+Three current-stack recipes exercise selected native, selected ERC20 and
+secondary custody offers using a test-only receiver installed and enabled by
+the buyer's actual threshold Safe. The receiver forwards signature requests by
+delegatecall to the byte-pinned official Safe handler, preserving its original
+Safe message domain. During actual Core NFT delivery it reenters the original
+sale or Payment entry through the buyer's authorized Safe module, checks the
+original guard, and revokes the actual buyer-owned NFTDelegation row. Native
+and custody use `ReentrancyGuardReentrantCall`; the original ERC20 Payment entry
+uses `PaymentOperationActive`.
+
+Call expectations require the real receipt, module calls, provider revocation
+and a final receiver-selector checkpoint after the original row is absent.
+An earlier failure hidden behind Safe's `GS013` cannot satisfy that checkpoint.
+The first commercial transaction must roll back the grant mutation, callback
+observations, Safe nonce, funds, custody and original settlement state. A separate
+configuration Safe then disables mutation without changing the buyer or executor
+nonce; the exact original envelope retries with reentry still refused.
+
+The receiver keeps complete original calldata in bounded, immutable data-only
+code with exact length and hash checks. It supplies no production response or
+authority. These recipes have source/type validation and their test instruments
+fit ordinary runtime and complete init-code limits. Existing callback caps are
+unchanged. Actual current-stack execution, callback gas and the precise inner
+post-callback failure trace remain pending.
+
 ## Funding phase and rollback
 
 Contract 20 locks before its first external read or signature verification:
