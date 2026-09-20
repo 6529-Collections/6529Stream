@@ -523,6 +523,15 @@ contract RouterCodecReference is StreamModuleBase {
         return StreamMetadataContentRoot.readRecord(_contentRoots, hash);
     }
 
+    // Original self-read needed by successful V1/V2 family-current publication.
+    function scopedContentRootAggregate(uint256 collectionId)
+        external
+        view
+        returns (ScopedRoot.Aggregate memory)
+    {
+        return _scopedContentRoots.aggregates[collectionId];
+    }
+
     function _authorizeContentWrite(uint256 collectionId, bytes32 familyId, bytes32 newStateHash)
         private
         returns (bytes32 consent, bytes32 ratification)

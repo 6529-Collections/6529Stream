@@ -10,6 +10,27 @@ import {
 import {
     StreamMetadataBundleRenderer
 } from "../../../smart-contracts/domains/metadata/StreamMetadataBundleRenderer.sol";
+import {
+    StreamMetadataDisplayParameters
+} from "../../../smart-contracts/domains/metadata/StreamMetadataDisplayParameters.sol";
+
+/// @dev Both projections run under the original initialized gas namespace, just like the Router.
+contract BundleSelectionProjectionProbe {
+    constructor(address authority) {
+        StreamMetadataDisplayParameters.initialize(authority);
+    }
+
+    function compare(M.Selection memory selected)
+        external
+        view
+        returns (bytes32 scalar, bytes32 full)
+    {
+        return (
+            StreamMetadataBundleRenderer.selectedBundleId(selected),
+            StreamMetadataBundleRenderer.selection(selected).bundleId
+        );
+    }
+}
 
 contract StaticBundleDependencyAdmin {
     function retrieveFunctionAdmin(address, address, bytes4) external pure returns (bool) {
@@ -90,16 +111,17 @@ contract StreamStaticBundleReturnShapeTest is StaticMetadataRoutingFixture {
         );
         _admin(abi.encodeCall(router.setCollectionScriptManifest, (1, manifest)));
         M.Selection memory selected = router.selectedCollectionManifest(1, 2);
+        BundleSelectionProjectionProbe probe = new BundleSelectionProjectionProbe(address(executor));
+        (bytes32 scalar, bytes32 full) = probe.compare(selected);
         require(
-            StreamMetadataBundleRenderer.selectedBundleId(selected) == id
-                && StreamMetadataBundleRenderer.selection(selected).bundleId == id,
+            scalar == id && full == id && router.collectionScriptBundle(1).bundleId == id,
             "original checked scalar projection"
         );
         selected.codeHash = keccak256("wrong bundle host runtime");
         vm.expectRevert(
             abi.encodeWithSelector(StreamMetadataBundleRenderer.InvalidBundleRendering.selector)
         );
-        StreamMetadataBundleRenderer.selectedBundleId(selected);
+        probe.compare(selected);
         _activate();
         _mint();
         string memory html = router.tokenHTML(91);
