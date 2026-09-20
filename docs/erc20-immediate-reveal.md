@@ -2,8 +2,10 @@
 
 The local implementation accompanying ADR 0045 is applied. Solidity 0.8.19
 ABI/type and recursive storage checks pass, preserving original selectors,
-signing tuples and the existing storage prefix. Selected native contract-size
-checks pass; behavioral runtime and gas-capacity validation remain pending. This is not deployment or release acceptance.
+signing tuples and the existing storage prefix. All 93 focused native regression
+cases across 12 test contracts pass, with no skipped cases. Captured production
+bytecode sizes also pass. This is local behavioral evidence, not production gas
+capacity, full-graph release acceptance, an audit, or deployment approval.
 
 The four ERC-20 settlement entrypoints retain their selectors and all original
 PaymentIntent, EIP-2612, Permit2 and UniversalSaleAuthorization fields. Their
@@ -49,16 +51,15 @@ adapter ABI (including errors), and recursive storage are retained. Solidity
 0.8.19, via IR, optimizer 200, Paris and no CBOR metadata produce these selected
 runtime sizes: Payment 24,244; Universal 23,708; Offer 22,873; Burn 14,524; new
 admission library 5,475 bytes. Universal has 868 bytes of EIP-170 headroom. These
-measurements are a local size gate; genuine native behavioral tests are pending.
+measurements agree with the genuine native artifacts from the passing campaign.
 
-Regression sources cover zero-fee OWNER_WINDOW/AT_MINT, two distinct threshold
+The native campaign covers zero-fee OWNER_WINDOW/AT_MINT, two distinct threshold
 Safes, native funder refunds, live fee drift, complete signed Safe retry after a
 real late funding call, provider revert/large return/out-of-gas/malformed results,
 callback reentry and pointer drift, exact native/token deltas, failed refund
 recipients, and permit nonce/bitmap rollback. Actual Core/Manager/Ledger cases
-retain explicit typed Artist/entropy/governance boundaries. The original full
-current fixture separately checks actual coordinator AT_MINT delivery after
-real governed requester admission. Native execution of this source is pending.
+retain explicit typed Artist/entropy/governance boundaries. The actual
+Coordinator mode cases described below run in the same campaign.
 
 The shared callback ABI is payable, but the current primary-offer and burn-mint
 profiles still reject any nonzero value before their reentrancy guard and sale
@@ -74,8 +75,8 @@ one transferFrom across the underfunded attempt and repaired complete payment.
 A separate authenticated-callback probe asserts SaleRevealFeeBelowRequired;
 it explicitly impersonates the bound payment adapter to observe the error that
 the real payment route wraps. A funded hostile-token control requires two pulls
-across its failed and healthy attempts. These are authored boundary oracles;
-native results remain pending. The current shared reveal/entropy-policy implementation
+across its failed and healthy attempts. These boundary oracles pass in native
+execution. The current shared reveal/entropy-policy implementation
 is retained, including DISABLED/INSTANT and terminal request-skipping checks.
 Six additional regression sources compose the actual payment, Universal sale,
 Core, Manager, Ledger and Coordinator for DISABLED, INSTANT with either render
@@ -86,5 +87,13 @@ retry. This fixture selects the production Coordinator first; it does not bypass
 Core successor continuity. Artist content evidence and the governance execution
 context remain explicitly typed boundaries. Its Core registration gas config is
 1,920,000 and sale reveal config is 2,000,000; these are fixture budgets, not a
-production gas-capacity claim. Native execution of these new regressions remains
-pending.
+production gas-capacity claim. All six regressions pass in native execution.
+
+The settlement fixtures bind the actual conservation-floor ledger before a
+sale. Unit fixtures retain an explicit typed Core/Metadata WAIVED declaration
+boundary and register the real recorder. Current-Core fixtures select their
+Metadata writer, declare WAIVED before mint, and bind the real floor through
+Core governance checks. The floor validates the original recorder, candidate
+and stored settlement result; no receipt is seeded. Existing unset-floor and
+missing-tier negative fixtures remain separate and unchanged. These fixtures
+do not establish actual Artist/Metadata documentary authorization.
