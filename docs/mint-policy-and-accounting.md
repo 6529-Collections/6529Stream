@@ -2457,6 +2457,13 @@ Requirements [MPA-GRACE]:
 8. Operational guidance: issue long-lived tickets as late as practical;
    a change that must not honor old tickets sets `graceUntil = 0`.
 
+Current implementation: the additive `IStreamMintPolicyGrace` exposes
+`setPhaseExecutorWithGrace` for this Manager's supported executor-set rotations.
+It preserves initial-only phase/counter configuration and requires consent for
+the resulting current policy. The [integration guide](integrations/mint-policy-grace.md)
+defines deadline and no-op behavior, exact governance admission and the
+separate authored-versus-executed acceptance boundary.
+
 ## Mint Requests
 
 Batch mints should be first-class. The manager should not rely on callers to

@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "../../interfaces/stream/core/IStreamCore.sol";
 import "../../interfaces/stream/mint/IStreamMintLedger.sol";
 import "../../interfaces/stream/mint/IStreamMintManager.sol";
+import "../../interfaces/stream/mint/IStreamMintPolicyGrace.sol";
 import "../../interfaces/stream/mint/compatibility/IStreamMintModuleRegistry.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
 import "../../vendor/openzeppelin/ReentrancyGuard.sol";
@@ -50,6 +51,7 @@ contract StreamMintManager is
     IStreamMintAuthorizationRevocation,
     IStreamMintRoyaltyPolicy,
     IStreamMintManagerImport,
+    IStreamMintPolicyGrace,
     Ownable,
     ReentrancyGuard,
     ERC165,
@@ -214,6 +216,7 @@ contract StreamMintManager is
             || interfaceId == type(IStreamMintAuthorizationRevocation).interfaceId
             || interfaceId == type(IStreamMintRoyaltyPolicy).interfaceId
             || interfaceId == type(IStreamMintManagerImport).interfaceId
+            || interfaceId == type(IStreamMintPolicyGrace).interfaceId
             || super.supportsInterface(interfaceId);
     }
 
@@ -329,6 +332,27 @@ contract StreamMintManager is
         onlyOwner
         nonReentrant
     {
+        _setPhaseExecutor(collectionId, phaseId, executor, allowed, 0);
+    }
+
+    /// @inheritdoc IStreamMintPolicyGrace
+    function setPhaseExecutorWithGrace(
+        uint256 collectionId,
+        bytes32 phaseId,
+        address executor,
+        bool allowed,
+        uint64 graceUntil
+    ) external override onlyOwner nonReentrant {
+        _setPhaseExecutor(collectionId, phaseId, executor, allowed, graceUntil);
+    }
+
+    function _setPhaseExecutor(
+        uint256 collectionId,
+        bytes32 phaseId,
+        address executor,
+        bool allowed,
+        uint64 graceUntil
+    ) private {
         _requireConfiguredPhase(collectionId, phaseId);
         if (!StreamMintPhaseState.setExecutor(
                 phaseExecutor[collectionId][phaseId],
@@ -337,9 +361,12 @@ contract StreamMintManager is
                 executor,
                 allowed,
                 MAX_PHASE_EXECUTORS
-            )) return;
+            )) {
+            if (graceUntil != 0) revert IStreamMintLedger.InvalidPolicyGrace(graceUntil);
+            return;
+        }
 
-        bytes32 policyHash = _refreshLedgerPolicy(collectionId, phaseId);
+        bytes32 policyHash = _refreshLedgerPolicy(collectionId, phaseId, graceUntil);
         emit MintPhaseExecutorUpdated(
             collectionId, phaseId, executor, allowed, policyHash, msg.sender
         );
@@ -926,7 +953,7 @@ contract StreamMintManager is
         nextOperationNonce = firstOperationNonce + quantity;
     }
 
-    function _refreshLedgerPolicy(uint256 collectionId, bytes32 phaseId)
+    function _refreshLedgerPolicy(uint256 collectionId, bytes32 phaseId, uint64 graceUntil)
         private
         returns (bytes32 policyHash)
     {
@@ -937,7 +964,8 @@ contract StreamMintManager is
             _counterConfigs[collectionId][phaseId],
             _phaseExecutors[collectionId][phaseId],
             phasePolicyHash[collectionId],
-            StreamMintManagerPolicy.Context(_policyContext(collectionId, phaseId), address(core))
+            StreamMintManagerPolicy.Context(_policyContext(collectionId, phaseId), address(core)),
+            graceUntil
         );
     }
 

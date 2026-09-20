@@ -5,6 +5,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add consent-gated mint executor policy rotations with bounded predecessor
+  grace through an additive Manager capability. Preserve current authority,
+  counters and replay; focused and actual Safe recipes await native execution.
+
 - Retain complete 24,576-byte Metadata records through ordered immutable chunks,
   preserving original small-record bytes, signatures, pointers and storage roots.
 - Compose the full-byte preservation and general attestation products with the

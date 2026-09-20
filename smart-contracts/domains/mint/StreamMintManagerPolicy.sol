@@ -35,7 +35,8 @@ library StreamMintManagerPolicy {
         mapping(bytes32 => IStreamMintManager.MintCounterConfig) storage counters,
         address[] storage executors,
         mapping(bytes32 => bytes32) storage policyHashes,
-        Context memory x
+        Context memory x,
+        uint64 graceUntil
     ) external returns (bytes32 policyHash) {
         uint256 collectionId = x.policy.collectionId;
         bytes32 phaseId = x.policy.phaseId;
@@ -46,7 +47,7 @@ library StreamMintManagerPolicy {
         policyHashes[phaseId] = policyHash;
         IStreamMintLedger(x.policy.ledger)
             .registerPhasePolicy(
-                address(this), collectionId, phaseId, policyHash, ids, ledgerPolicies, 0
+                address(this), collectionId, phaseId, policyHash, ids, ledgerPolicies, graceUntil
             );
     }
 

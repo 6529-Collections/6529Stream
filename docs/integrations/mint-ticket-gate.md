@@ -112,6 +112,10 @@ or the exact immediate predecessor within its grace window. The deadline and
 grace boundary are inclusive. Gate admission, executor permission, pause/time
 checks, replay and actual counter consumption remain Manager/Ledger duties.
 
+The additive [executor policy grace](mint-policy-grace.md) path registers this
+window through an actual consented Manager policy rotation. Keep the original
+ticket, signature and batch hash; do not rewrite them to the new current hash.
+
 ## Replay and revocation
 
 The required ID is
