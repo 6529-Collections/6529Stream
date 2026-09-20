@@ -157,6 +157,19 @@ takes precedence over an older consumed V3 continuation when it genuinely
 reopens the same branch. Per-record continuation pointers authenticate later
 original writes without rewriting their record formats.
 
+The fixed [continuation reader](../../smart-contracts/domains/artist/StreamArtistRecoveryRewindContinuations.sol)
+keeps its six public methods. Its native and recovered payout methods forward
+through the compiler-linked [payout continuation reader](../../smart-contracts/domains/artist/StreamArtistRecoveryRewindPayoutContinuations.sol),
+which contains their original complete read and validation bodies. Identity and
+Payout retain separate chronology: raw revisions from different owners or
+imported environments are never compared as one clock. A nonzero continuation
+still requires the original recovery facts, immutable evidence, predecessor,
+and consumed replay admission; a zero head returns before those extra reads.
+Recovered reads additionally join the exact occurrence, origin and applied
+recovery point. The fixed helper preserves both evidence reads and their order,
+owns no state, and adds no caller-selected route. Deployment inventories must
+include its compiler link; size, runtime and gas acceptance remain separate.
+
 An old 51 exclusion cannot undo a newer retirement of that address. Original58
 standing judgments remain independent and unchanged, including when 51 is
 restored. The originally valid sequence can be 51, recovery restoring standing,
