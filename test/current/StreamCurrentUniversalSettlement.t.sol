@@ -28,6 +28,62 @@ contract CurrentUniversalRecipient is IERC721Receiver {
     }
 }
 
+interface CurrentUniversalCallsVm {
+    function expectCall(address target, uint256 value, bytes calldata data, uint64 count) external;
+}
+
+/// @dev Observes the actual registered/delivered state before a deliberate recipient rejection.
+contract CurrentUniversalObservedRecipient is IERC721Receiver {
+    StreamCore private immutable currentCore;
+    StreamEntropyCoordinator private immutable coordinator;
+    MockStreamPaymentToken private immutable paymentToken;
+    StreamPrimarySaleSettlement private immutable settlement;
+    address private immutable splitWallet;
+    address private immutable controller;
+    bool private accepting;
+    uint256 public deliveries;
+
+    error CurrentRecipientRejected(uint256 tokenId);
+
+    constructor(
+        StreamCore core_, StreamEntropyCoordinator coordinator_, MockStreamPaymentToken token_,
+        StreamPrimarySaleSettlement recorder_, address wallet_
+    ) {
+        currentCore = core_;
+        coordinator = coordinator_;
+        paymentToken = token_;
+        settlement = recorder_;
+        splitWallet = wallet_;
+        controller = msg.sender;
+    }
+
+    function accept() external {
+        require(msg.sender == controller, "recipient controller");
+        accepting = true;
+    }
+
+    function onERC721Received(address, address from, uint256 tokenId, bytes calldata)
+        external returns (bytes4)
+    {
+        require(msg.sender == address(currentCore) && from == address(0) && tokenId == 1,
+            "actual Core mint callback");
+        require(currentCore.ownerOf(tokenId) == address(this)
+            && currentCore.tokenLifecycle(tokenId) == 2
+            && currentCore.coordinatorAtMint(tokenId) == address(coordinator)
+            && coordinator.tokenEntropyStatus(tokenId) == StreamEntropyStatus.REGISTERED
+            && coordinator.registeredAtBlock(tokenId) == block.number
+            && coordinator.pendingRequestCount() == 0,
+            "actual entropy registration and delivery precede receiver");
+        require(paymentToken.rawBalance(splitWallet) == 100
+            && settlement.totalOfficialSettled(address(paymentToken)) == 100
+            && coordinator.revealFeeEscrow(1) == 0,
+            "token revenue precedes receiver; native funding follows Manager return");
+        ++deliveries;
+        if (!accepting) revert CurrentRecipientRejected(tokenId);
+        return IERC721Receiver.onERC721Received.selector;
+    }
+}
+
 /// @notice Official Safe artists/payers use universal settlement with the actual current owners.
 /// @dev Only the test ERC-20 and external entropy service are controlled boundaries. Permit2 is
 ///      disabled in this fixture; its domain tests are separate from these current-stack flows.
@@ -42,6 +98,34 @@ contract StreamCurrentUniversalSettlementTest is CurrentCommerceConservationFixt
     uint256[] private keys;
     bytes32 private saleId;
     bool private requireSaleConsent;
+
+    uint256 private nativeRevealFee;
+    uint256 private constant NATIVE_FEE = 100;
+    uint256 private constant PROVIDER_FEE = 60;
+    uint256 private constant NATIVE_EXCESS = 75;
+
+    struct NativeSafePacket {
+        OfficialSafe funder;
+        uint256[] funderKeys;
+        IStreamUniversalFixedPriceSaleAdapter.SaleExecutionData execution;
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate candidate;
+        StreamPrimarySettlementTypes.PaymentIntent intent;
+        bytes input;
+        bytes envelope;
+        uint256 funderNonce;
+        uint256 payerNonce;
+        uint256 providerRequest;
+    }
+
+    function _configureInitialRevealPolicy() internal override {
+        if (nativeRevealFee == 0) {
+            super._configureInitialRevealPolicy();
+            return;
+        }
+        entropy.configureCollectionRevealPolicy(
+            1, 0, keccak256("ROLE_ENTROPY_REVEAL_OWNER"), 100, nativeRevealFee
+        );
+    }
 
     function _fixtureSaleConsentScope() internal view override returns (uint8) {
         return requireSaleConsent ? 1 : 0;
@@ -458,6 +542,218 @@ contract StreamCurrentUniversalSettlementTest is CurrentCommerceConservationFixt
         (ok,) = address(payment).call(callData);
         require(ok, "identical calldata retries after recipient accepts");
         _assertSettled(c, address(recipient));
+    }
+
+    function testActualTwoSafesFundNativeRevealRequestAndOnlyExecutorClaimsExcess() public {
+        _deployNativeRevealScenario();
+        NativeSafePacket memory p = _nativeSafePacket(4, address(payerSafe));
+        _expectTokenFunding(1);
+        _expectNativeRequest();
+        (bool ok,) = address(p.funder).call(p.envelope);
+        require(ok, "actual funder Safe pays the token payer's signed intent");
+        _assertNativeSafeSettlement(p);
+        _finalizeAndClaimNativeExcess(p);
+    }
+
+    function testActualTwoSafesRestoreRegisteredMintAndRetryIdenticalNativeEnvelope() public {
+        _deployNativeRevealScenario();
+        CurrentUniversalObservedRecipient recipient = new CurrentUniversalObservedRecipient(
+            core, entropy, token, recorder, wallet
+        );
+        NativeSafePacket memory p = _nativeSafePacket(5, address(recipient));
+        CurrentUniversalCallsVm(address(vm)).expectCall(
+            address(recipient), 0, abi.encodeWithSelector(IERC721Receiver.onERC721Received.selector), 2
+        );
+        _expectTokenFunding(2);
+        // The rejected delivery must precede fee funding and the at-mint provider call.
+        _expectNativeRequest();
+        (bool ok, bytes memory reason) = address(p.funder).call(p.envelope);
+        _requireSafeFailure(ok, reason);
+        require(recipient.deliveries() == 0, "rejected recipient state rolls back");
+        _assertNativeSafeRollback(p);
+        recipient.accept();
+        // Retain the complete signatures, inner payment bytes, native value and Safe nonce.
+        (ok,) = address(p.funder).call(p.envelope);
+        require(ok && recipient.deliveries() == 1, "byte-identical signed Safe retry delivers");
+        _assertNativeSafeSettlement(p);
+        _finalizeAndClaimNativeExcess(p);
+    }
+
+    function _deployNativeRevealScenario() private {
+        nativeRevealFee = NATIVE_FEE;
+        this.deployUniversalScenario(false);
+        provider.setFee(PROVIDER_FEE);
+        IStreamEntropyCollectionPolicy.PolicyRecord memory policy_ =
+            entropy.collectionEntropyPolicy(1);
+        IStreamRevealFeeEscrow.CollectionRevealPolicy memory reveal = entropy.collectionRevealPolicy(1);
+        require(policy_.configured && !policy_.frozen
+            && policy_.mode == IStreamEntropyCollectionPolicy.Mode.ASYNC
+            && policy_.renderRequirement == IStreamEntropyCollectionPolicy.RenderRequirement.REQUIRED
+            && reveal.declared && reveal.requestMode == 0 && reveal.revealFeePerTokenWei == NATIVE_FEE
+            && entropy.requesters(address(universalSale))
+            && address(entropy.core()) == address(core),
+            "actual ASYNC REQUIRED policy and governed sale requester");
+    }
+
+    function _nativeSafePacket(uint256 nonce, address recipient)
+        private returns (NativeSafePacket memory p)
+    {
+        p.funderKeys = new uint256[](2);
+        p.funderKeys[0] = 0x5AFE03;
+        p.funderKeys[1] = 0x5AFE04;
+        p.funder = createOfficialSafe(
+            deploySafeComponents("1.4.1"), safeOwnerAddresses(p.funderKeys), 2, 840 + nonce
+        );
+        require(address(p.funder) != address(payerSafe) && payerSafe.getThreshold() == 2
+            && p.funder.getThreshold() == 2, "distinct actual threshold Safes");
+        vm.deal(address(p.funder), NATIVE_FEE + NATIVE_EXCESS);
+        vm.deal(address(payerSafe), 73);
+        (p.execution, p.candidate) = _execution(nonce, address(p.funder), recipient);
+        bytes memory proof;
+        (p.intent, proof) = _intent(nonce);
+        require(p.intent.maxAmount == 100 && p.intent.asset == address(token)
+            && p.intent.payer == address(payerSafe) && p.candidate.executor == address(p.funder),
+            "original token-only intent with separately bound native funder");
+        p.input = abi.encodeCall(
+            payment.settleERC20PrimarySaleWithIntent, (p.candidate, p.intent, proof, abi.encode(p.execution))
+        );
+        p.funderNonce = p.funder.nonce();
+        p.payerNonce = payerSafe.nonce();
+        p.providerRequest = provider.nextRequestId();
+        p.envelope = _signedNativeSafeCall(
+            p.funder, p.funderKeys, address(payment), NATIVE_FEE + NATIVE_EXCESS, p.input
+        );
+    }
+
+    function _signedNativeSafeCall(
+        OfficialSafe account, uint256[] memory signers, address target, uint256 value, bytes memory input
+    ) private returns (bytes memory) {
+        bytes32 digest = account.getTransactionHash(
+            target, value, input, 0, 0, 0, 0, address(0), address(0), account.nonce()
+        );
+        bytes memory signatures = safeThresholdSignature(signers, digest);
+        return abi.encodeCall(OfficialSafe.execTransaction,
+            (target, value, input, uint8(0), uint256(0), uint256(0), uint256(0),
+                address(0), payable(address(0)), signatures));
+    }
+
+    function _expectTokenFunding(uint64 count) private {
+        CurrentUniversalCallsVm(address(vm)).expectCall(
+            address(token), 0,
+            abi.encodeCall(token.transferFrom, (address(payerSafe), address(payment), uint256(100))), count
+        );
+        CurrentUniversalCallsVm(address(vm)).expectCall(
+            address(token), 0, abi.encodeCall(token.transfer, (address(recorder), uint256(100))), count
+        );
+        CurrentUniversalCallsVm(address(vm)).expectCall(
+            address(token), 0, abi.encodeCall(token.transfer, (wallet, uint256(100))), count
+        );
+    }
+
+    function _expectNativeRequest() private {
+        CurrentUniversalCallsVm(address(vm)).expectCall(
+            address(entropy), NATIVE_FEE, abi.encodeCall(entropy.fundRevealFeeEscrow, (uint256(1))), 1
+        );
+        CurrentUniversalCallsVm(address(vm)).expectCall(
+            address(provider), PROVIDER_FEE,
+            abi.encodeWithSelector(IStreamEntropyProvider.requestEntropy.selector), 1
+        );
+    }
+
+    function _requireSafeFailure(bool ok, bytes memory reason) private pure {
+        require(!ok && keccak256(reason) == keccak256(abi.encodeWithSignature("Error(string)", "GS013")),
+            "actual Safe reports reverted target call");
+    }
+
+    function _assertNativeSafeRollback(NativeSafePacket memory p) private view {
+        require(p.funder.nonce() == p.funderNonce && payerSafe.nonce() == p.payerNonce
+            && core.totalSupply() == 0 && core.lastAllocatedTokenId() == 0
+            && core.collectionMintedEver(1) == 0 && core.coordinatorAtMint(1) == address(0)
+            && manager.nextOperationNonce() == 0
+            && !manager.isOperationRootUsed(p.candidate.operationIdentityCommitment)
+            && !manager.isAuthorizationUsed(_mintAuthorizationId(p.candidate)),
+            "actual Safe Core Manager and Ledger state restored");
+        require(!payment.isPaymentIntentNonceUsed(address(payerSafe), p.intent.nonce)
+            && !universalSale.authorizationUsed(address(artistSafe), p.execution.authorization.nonce)
+            && universalSale.executionIdByNonce(saleId, p.execution.authorization.executionNonce) == 0
+            && universalSale.executionStatus(p.candidate.executionBinding.executionId) == 0
+            && recorder.totalOfficialSettled(address(token)) == 0
+            && token.rawBalance(address(payerSafe)) == 10_000 && token.rawBalance(wallet) == 0
+            && token.rawBalance(address(payment)) == 0 && token.rawBalance(address(recorder)) == 0
+            && token.allowance(address(payerSafe), address(payment)) == 10_000,
+            "token consent, finite allowance and original revenue restored");
+        bytes32 key = recorder.settlementKey(address(universalSale), p.candidate.executionBinding.executionId);
+        require(!recorder.settlementConsumed(key), "official receipt not consumed");
+        _assertNoCommerceFloorReceipt(key);
+        require(entropy.tokenEntropyStatus(1) == StreamEntropyStatus.NONE
+            && entropy.registeredAtBlock(1) == 0 && entropy.pendingRequestCount() == 0
+            && entropy.nonterminalTokenCount(1) == 0 && provider.nextRequestId() == p.providerRequest
+            && entropy.revealFeeEscrow(1) == 0 && entropy.totalRevealFeeEscrows() == 0
+            && entropy.totalFeeCredits() == 0 && address(entropy).balance == 0
+            && address(provider).balance == 0 && universalSale.refundLiability() == 0
+            && universalSale.refundableBalance(saleId, address(p.funder)) == 0
+            && address(universalSale).balance == 0 && address(payment).balance == 0
+            && address(p.funder).balance == NATIVE_FEE + NATIVE_EXCESS
+            && address(payerSafe).balance == 73,
+            "registration, requests and both native custody locations restored");
+    }
+
+    function _assertNativeSafeSettlement(NativeSafePacket memory p) private view {
+        _assertSettled(p.candidate, p.execution.authorization.recipient);
+        require(p.funder.nonce() == p.funderNonce + 1 && payerSafe.nonce() == p.payerNonce
+            && payment.isPaymentIntentNonceUsed(address(payerSafe), p.intent.nonce)
+            && token.allowance(address(payerSafe), address(payment)) == 9900,
+            "only funder Safe CALL nonce advances; exact token intent consumed");
+        (StreamEntropyStatus status, bytes32 seed, address selected,,, bytes32 requestKey,
+            uint256 requestId, uint16 attempt) = entropy.tokenEntropy(1);
+        require(status == StreamEntropyStatus.REQUESTED && seed == 0 && selected == address(provider)
+            && requestKey != 0 && requestId == p.providerRequest && attempt == 1
+            && provider.nextRequestId() == p.providerRequest + 1
+            && entropy.providerRequestKeys(address(provider), requestId) == requestKey
+            && entropy.pendingRequestCount() == 1 && entropy.nonterminalTokenCount(1) == 1
+            && core.coordinatorAtMint(1) == address(entropy),
+            "original actual Coordinator records the authorized provider request");
+        require(entropy.revealFeeEscrow(1) == NATIVE_FEE - PROVIDER_FEE
+            && entropy.totalRevealFeeEscrows() == NATIVE_FEE - PROVIDER_FEE
+            && address(entropy).balance == NATIVE_FEE - PROVIDER_FEE
+            && address(provider).balance == PROVIDER_FEE && entropy.totalFeeCredits() == 0
+            && universalSale.refundableBalance(saleId, address(p.funder)) == NATIVE_EXCESS
+            && universalSale.refundableBalance(saleId, address(payerSafe)) == 0
+            && universalSale.refundLiability() == NATIVE_EXCESS
+            && address(universalSale).balance == NATIVE_EXCESS && address(payment).balance == 0
+            && address(p.funder).balance == 0 && address(payerSafe).balance == 73,
+            "actual native escrow spend and executor-only excess exclude official token revenue");
+    }
+
+    function _finalizeAndClaimNativeExcess(NativeSafePacket memory p) private {
+        provider.fulfill(p.providerRequest, keccak256("actual two-Safe ERC20 reveal"));
+        (bytes32 seed, bool finalized) = entropy.tokenSeed(1);
+        require(finalized && seed != 0 && entropy.tokenEntropyStatus(1) == StreamEntropyStatus.FINALIZED
+            && entropy.pendingRequestCount() == 0 && entropy.nonterminalTokenCount(1) == 0
+            && bytes(core.tokenURI(1)).length != 0,
+            "actual provider result finalizes original token and metadata");
+        bytes memory wrongClaim = _signedNativeSafeCall(
+            payerSafe, keys, address(universalSale), 0,
+            abi.encodeCall(universalSale.claimRefund, (saleId, address(payerSafe)))
+        );
+        (bool ok, bytes memory reason) = address(payerSafe).call(wrongClaim);
+        _requireSafeFailure(ok, reason);
+        require(payerSafe.nonce() == p.payerNonce && address(payerSafe).balance == 73
+            && universalSale.refundableBalance(saleId, address(p.funder)) == NATIVE_EXCESS,
+            "token payer Safe cannot consume another executor's native credit");
+        require(executeSafe(p.funder, p.funderKeys, address(universalSale), 0,
+            abi.encodeCall(universalSale.claimRefund, (saleId, address(p.funder))), 0),
+            "actual native funder Safe claims its own excess");
+        (bytes32 refundSale, address refundOwner) = universalSale.refundAccountAt(0);
+        require(address(p.funder).balance == NATIVE_EXCESS && p.funder.nonce() == p.funderNonce + 2
+            && address(payerSafe).balance == 73 && universalSale.refundLiability() == 0
+            && universalSale.refundableBalance(saleId, address(p.funder)) == 0
+            && address(universalSale).balance == 0 && universalSale.refundAccountCount() == 1
+            && refundSale == saleId && refundOwner == address(p.funder)
+            && entropy.revealFeeEscrow(1) == NATIVE_FEE - PROVIDER_FEE
+            && address(provider).balance == PROVIDER_FEE && token.rawBalance(wallet) == 100
+            && recorder.totalOfficialSettled(address(token)) == 100,
+            "discoverable native refund closes without changing token revenue or provider accounting");
     }
 
     function _execution(uint256 nonce, address caller, address recipient)

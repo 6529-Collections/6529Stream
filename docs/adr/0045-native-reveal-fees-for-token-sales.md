@@ -2,9 +2,11 @@
 
 Status: Local implementation applied on 20 September 2026 following review of
 the exact source artifact, under the owner's adopted full-v1 implementation
-authority. ABI/type and recursive storage checks pass; native runtime, size
-and capacity validation remain pending. This decision does not authorize a
-live governance, deployment or funds operation.
+authority. ABI/type, recursive storage and selected size checks pass. The
+focused native cohort at source `5df9808e` passes all 93 cases without failures
+or skips. Consolidated current-stack and production gas-capacity validation
+remain pending. This decision does not authorize a live governance, deployment
+or funds operation.
 
 ## Mixed payment units
 
