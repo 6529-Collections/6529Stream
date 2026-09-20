@@ -77,3 +77,5 @@ export * from "./current-artist-recovery-rewind.js";
 export * from "./current-artist-recovery-rewind-workflow.js";
 export * from "./current-entropy-policy-succession.js";
 export * from "./current-entropy-policy-succession-workflow.js";
+export * from "./current-museum-anchor-master.js";
+export * from "./current-museum-anchor-master-workflow.js";

@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Native Museum anchors, tiers and media masters](docs/current-museum-anchor-master.md)
+  adds permanent governance bindings, durable tier reads and original master or
+  Artist waiver publication/adoption with ordinary Safe calls and receipts.
+
 - [Canonical entropy policy succession V1](docs/current-entropy-policy-succession.md)
   adds complete policy imports, immutable origin routes, staged catalog admission
   and atomic pointer, activation and manifest governance with Safe receipts.

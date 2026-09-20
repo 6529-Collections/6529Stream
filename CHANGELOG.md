@@ -85,6 +85,9 @@ the release policy in `docs/release-policy.md`.
   unsupported newest records as unresolved. Keep examination joins and complete
   acquisition packet requirements explicit.
 
+- Add native Museum anchor, tier and media-master clients with original Artist
+  waiver evidence, permanent governance bindings and Safe receipt verification.
+
 - Add canonical entropy policy succession callers with complete inventory checks,
   original origin routes, staged catalog admission and atomic cutover receipts.
 
