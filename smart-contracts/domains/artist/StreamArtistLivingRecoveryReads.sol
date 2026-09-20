@@ -1,16 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import {
+    StreamArtistLivingRecoveryAdmission as AdmissionReads
+} from "./StreamArtistLivingRecoveryAdmission.sol";
+
 import { IStreamArtistOwner } from "../../interfaces/stream/artist/IStreamArtistOwner.sol";
 import {
     IStreamArtistIdentityRecoveryOwner
 } from "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
-import {
-    IStreamArtistRecoveryActionOwner
-} from "../../interfaces/stream/artist/IStreamArtistRecoveryAction.sol";
-import {
-    IStreamArtistGuardianHistory
-} from "../../interfaces/stream/artist/IStreamArtistGuardianHistory.sol";
 import {
     IStreamArtistGuardianVestingHistory
 } from "../../interfaces/stream/artist/IStreamArtistGuardianVestingHistory.sol";
@@ -90,7 +88,7 @@ library StreamArtistLivingRecoveryReads {
         f.vesting = IStreamArtistGuardianVestingHistory(owner)
             .guardianVestingSnapshot(artistId, recordHash);
         _record(e, artistId, recordHash, f, false);
-        f.proof = _admission(e, f, false);
+        f.proof = AdmissionReads.read(e, f, false);
         if (e.imported) f.proof = _sourceProof(e, f);
     }
 
@@ -119,7 +117,8 @@ library StreamArtistLivingRecoveryReads {
         _record(e, artistId, recordHash, f, true);
         f.proof = keccak256(
             abi.encode(
-                keccak256("6529STREAM_ARTIST_ADMITTED_RECOVERY_FAMILY_V2"), _admission(e, f, true)
+                keccak256("6529STREAM_ARTIST_ADMITTED_RECOVERY_FAMILY_V2"),
+                AdmissionReads.read(e, f, true)
             )
         );
         if (e.imported) f.proof = _sourceProof(e, f);
@@ -200,171 +199,6 @@ library StreamArtistLivingRecoveryReads {
                 || (!e.imported && v.ownerRevision <= v.guardians.ownerRevision)
                 || v.commitment == 0 || v.commitment != _vestingHash(e, v)
         ) revert IdentityRecovery.UnsupportedIdentityRecoveryProfile(artistId);
-    }
-
-    function _admission(Environment memory e, Facts memory f, bool family)
-        private
-        view
-        returns (bytes32)
-    {
-        bytes32 artistId = f.record.fields.artistId;
-        bytes32 action = f.record.fields.governanceActionId;
-        Admission memory admitted;
-        bytes32 executed;
-        uint64 actualCount;
-        (admitted.association,, executed, actualCount) =
-            IStreamArtistRecoveryActionOwner(e.owner).identityRecoveryActionState(artistId, action);
-        admitted.frozen = _prefix(e, f.vesting, action, actualCount);
-        admitted.parent = _parent(e, f.vesting, actualCount, family);
-        address oldAddress;
-        uint64 tail;
-        (oldAddress, admitted.guardian, tail) = IStreamArtistIdentityRecoveryOwner(e.owner)
-            .recoveryTransitionStanding(f.record.recordHash);
-        if (oldAddress != f.record.fields.oldAddress || tail != f.record.standingTailSeconds) {
-            revert IdentityRecovery.UnsupportedIdentityRecoveryProfile(artistId);
-        }
-        A.Association memory a = admitted.association;
-        if (a.associationHash != 0) {
-            if (
-                executed != f.record.recordHash || a.artistId != artistId
-                    || a.requestHash != keccak256(abi.encode(f.record.terms))
-                    || a.contextHash != f.record.contextHash || a.action.actionId != action
-                    || a.action.proposer != f.record.proposer
-                    || a.action.executor != f.record.executor || a.ownerRevision == 0
-                    || (!e.imported && a.ownerRevision >= f.vesting.ownerRevision)
-                    || a.preparedAt == 0 || a.preparedAt > f.record.fields.recoveredAt
-                    || admitted.frozen.artistId != artistId
-                    || admitted.frozen.associationHash != a.associationHash
-                    || admitted.frozen.count != f.vesting.guardians.count
-                    || admitted.frozen.historyCommitment != f.vesting.guardians.commitment
-            ) revert IdentityRecovery.UnsupportedIdentityRecoveryProfile(artistId);
-            if (e.imported) {
-                Runtime.OriginFact memory prepared = Recovered.preparation(e.runtime, a);
-                Runtime.OriginFact memory vested = Recovered.vesting(e.runtime, f.vesting);
-                if (!Runtime.before(e.runtime, prepared.point, vested.point)) {
-                    revert IdentityRecovery.UnsupportedIdentityRecoveryProfile(artistId);
-                }
-            }
-        } else if (executed != 0 || admitted.guardian != 0 || f.vesting.guardians.count != 0) {
-            revert IdentityRecovery.UnsupportedIdentityRecoveryProfile(artistId);
-        }
-        // The standing getter authenticates a saved restored guardian (including zero) after
-        // supersession. It need not equal the pre-recovery association's original guardian.
-        (admitted.primary, admitted.occurrence, admitted.secondary) = IStreamArtistIdentityRecoveryOwner(
-                e.owner
-            ).identityRecoveryReceipts(f.record.recordHash);
-        if (
-            admitted.primary == 0 || admitted.occurrence == 0 || admitted.secondary == 0
-                || admitted.primary == admitted.secondary
-        ) revert IdentityRecovery.UnsupportedIdentityRecoveryProfile(artistId);
-        // Do not commit today's growing guardian head: all included evidence is original history.
-        return keccak256(
-            abi.encode(
-                keccak256("6529STREAM_ARTIST_ADMITTED_LIVING_RECOVERY_V1"),
-                f.record,
-                f.transition,
-                f.vesting,
-                admitted
-            )
-        );
-    }
-
-    function _parent(Environment memory e, V.Snapshot memory v, uint64 actualCount, bool family)
-        private
-        view
-        returns (V.Snapshot memory parent)
-    {
-        if (v.previousTransitionRecordHash == 0) {
-            if (v.previousCommitment != 0) {
-                revert IdentityRecovery.UnsupportedIdentityRecoveryProfile(v.artistId);
-            }
-            return parent;
-        }
-        parent = IStreamArtistGuardianVestingHistory(e.owner)
-            .guardianVestingSnapshot(v.artistId, v.previousTransitionRecordHash);
-        if (
-            parent.artistId != v.artistId
-                || parent.transitionRecordHash != v.previousTransitionRecordHash
-                || parent.commitment == 0 || parent.commitment != v.previousCommitment
-                || parent.commitment != _vestingHash(e, parent)
-                || parent.authorityClass != v.authorityClass
-                || (parent.operationId != 32
-                    && parent.operationId != 35
-                    && (!family || (parent.operationId != 40 && parent.operationId != 43)))
-                || parent.oldAddress == address(0) || parent.newAddress != v.oldAddress
-                || parent.oldAddress == parent.newAddress || parent.executedAt == 0
-                || parent.executedAt > v.executedAt || parent.ownerRevision == 0
-                || (!e.imported && parent.ownerRevision >= v.ownerRevision)
-                || (!e.imported && parent.ownerRevision <= parent.guardians.ownerRevision)
-                || parent.guardians.count > v.guardians.count
-                || (!e.imported && parent.guardians.ownerRevision > v.guardians.ownerRevision)
-        ) revert IdentityRecovery.UnsupportedIdentityRecoveryProfile(v.artistId);
-        if (e.imported) {
-            Runtime.OriginFact memory previous = Recovered.vesting(e.runtime, parent);
-            Runtime.OriginFact memory next_ = Recovered.vesting(e.runtime, v);
-            if (!Runtime.before(e.runtime, previous.point, next_.point)) {
-                revert IdentityRecovery.UnsupportedIdentityRecoveryProfile(v.artistId);
-            }
-        }
-        _prefix(e, parent, bytes32(0), actualCount);
-    }
-
-    function _prefix(Environment memory e, V.Snapshot memory v, bytes32 action, uint64 actualCount)
-        private
-        view
-        returns (GH.Snapshot memory frozen)
-    {
-        GH.Head memory head;
-        GH.Entry memory last;
-        (head, last, frozen,) = IStreamArtistGuardianHistory(e.owner)
-            .guardianHistoryState(v.artistId, v.guardians.count, address(0), action);
-        // The fixed getter requires the complete current history, then selects this exact saved
-        // prefix endpoint from its admitted index. Later admissions do not replace that prefix.
-        if (head.count != actualCount || v.guardians.count > head.count) {
-            revert IdentityRecovery.UnsupportedIdentityRecoveryProfile(v.artistId);
-        }
-        if (v.guardians.count == 0) {
-            if (v.guardians.ownerRevision != 0 || v.guardians.commitment != 0) {
-                revert IdentityRecovery.UnsupportedIdentityRecoveryProfile(v.artistId);
-            }
-        } else if (
-            v.guardians.ownerRevision == 0 || v.guardians.commitment == 0
-                || (!e.imported && v.guardians.ownerRevision > head.ownerRevision)
-                || last.artistId != v.artistId || last.index != v.guardians.count
-                || last.ownerRevision != v.guardians.ownerRevision
-                || last.commitment != v.guardians.commitment || last.recordHash == 0
-                || last.recordDataHash == 0
-                || (!e.imported
-                    && last.commitment
-                        != keccak256(
-                            abi.encode(
-                                keccak256("6529STREAM_ARTIST_GUARDIAN_ADMISSION_HISTORY_V1"),
-                                e.chainId,
-                                e.registry,
-                                e.owner,
-                                last.artistId,
-                                last.index,
-                                last.ownerRevision,
-                                last.recordHash,
-                                last.recordDataHash,
-                                last.previousCommitment
-                            )
-                        ))
-        ) {
-            revert IdentityRecovery.UnsupportedIdentityRecoveryProfile(v.artistId);
-        }
-        if (e.imported && v.guardians.count != 0) {
-            Recovered.guardianEntry(e.runtime, last);
-            if (v.guardians.count != head.count) {
-                (, GH.Entry memory current,,) = IStreamArtistGuardianHistory(e.owner)
-                    .guardianHistoryState(v.artistId, head.count, address(0), 0);
-                Runtime.OriginFact memory earlier = Recovered.guardianEntry(e.runtime, last);
-                Runtime.OriginFact memory later = Recovered.guardianEntry(e.runtime, current);
-                if (!Runtime.before(e.runtime, earlier.point, later.point)) {
-                    revert IdentityRecovery.UnsupportedIdentityRecoveryProfile(v.artistId);
-                }
-            }
-        }
     }
 
     function _vestingHash(Environment memory e, V.Snapshot memory v)

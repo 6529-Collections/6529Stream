@@ -92,6 +92,18 @@ include their fixed compiler links. The additional library calls require their
 own runtime and gas validation; source parity and size measurements do not
 establish that acceptance.
 
+The [living recovery reader](../../smart-contracts/domains/artist/StreamArtistLivingRecoveryReads.sol)
+keeps its original `read` and `readFamily` methods and fact types. It validates
+the fixed environment, original recovery record, transition and vesting before
+calling the compiler-linked [admission reader](../../smart-contracts/domains/artist/StreamArtistLivingRecoveryAdmission.sol).
+That helper preserves the original association, saved guardian prefix, parent,
+standing and receipt checks in their original order. Imported records still use
+their original domains and owner-local chronology; later guardian admissions
+do not replace the saved prefix committed by the proof. The outer reader retains
+the family and imported-source proof wrappers. Direct helper reads do not replace
+those outer checks. The helper adds a fixed deployment link and requires separate
+runtime and gas validation.
+
 ## Shared policy and source freshness
 
 The declared earliest vesting, NONE, provisional and hostile-guardian APPEAL
