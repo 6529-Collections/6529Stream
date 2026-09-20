@@ -18,16 +18,18 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 20 September integrated batch
 
-Latest source checkpoint: `9beafd1a`. All 2,248 sources pass the combined
-ABI/type/storage check in 20.359 seconds. This does not generate bytecode or
+Latest source checkpoint: `29cd8b2d`. All 2,251 sources pass the combined
+ABI/type/storage check in 20.391 seconds. This does not generate bytecode or
 establish complete-system acceptance. Original RC1 remains unchanged.
 
 - Delegated policy/sale clients (`b99b3781`) and mint-grace governance callers
   (`9ac63a11`), followed by delegated economics15/royalty-freeze20 callers
-  (`6b71507e`), pass all 797 root package tests, generation, build and strict
+  (`6b71507e`) and mode-2 grace (`e5ec5fae`), pass all 806 root package tests,
+  generation, build and strict
   types. The exact ABI52 fixture check also passes. These callers explicitly
-  retain their historical `44af244e` source; refreshing grace callers for the
-  later mode-2 Manager consumer is a separate pending join.
+  retain their historical `44af244e` source. The additive mode-2 fixture exactly
+  matches `ed4d5572`/ABI56 and passes its generator check. Its explicit caller
+  source-review assertion never replaces original Manager execution simulation.
 - The Manager/fallback size repair (`83606e32`) moves unchanged policy and
   preview work into existing workers. Exact accepted-profile sizing of the
   subsequent mode-2 consent fix (`7badbff5`) reports 24,331/24,452-byte runtimes;
@@ -69,6 +71,10 @@ establish complete-system acceptance. Original RC1 remains unchanged.
   and historical acknowledgement guards without altering V1. Root passes 27
   consumer cases plus 17 documentation cases; both profiles and all seven source
   pins match. Supplied-byte checks do not authenticate governance or chain history.
+- Canonical Museum schema admission (`29cd8b2d`) consumes the exact 51
+  documents and 78 chunks through original delayed governance and current Safe
+  recipes. All source hashes, dependencies and ordered chunk identities are
+  independently checked; eleven cases are authored, with native execution pending.
 - Seven inactive worktrees were removed after exact cleanliness and process
   checks. Every named branch and commit was retained. Active tasks, evidence,
   dirty worktrees and the Museum runtime were preserved; no tasks were archived.
@@ -275,8 +281,8 @@ extracted Metadata pointer-index worker. Original ART38 and standing conflicts
 are now source-integrated; the additive Museum Standing consumer (`3f0967f`)
 passes its scoped checks. Authenticated current/history capture remains pending.
 
-The latest combined-source ABI/type/storage pass at `9beafd1a` covers 2,248
-sources in 20.359 seconds with no errors, including the new C2PA and recovery
+The latest combined-source ABI/type/storage pass at `29cd8b2d` covers 2,251
+sources in 20.391 seconds with no errors, including the new C2PA and recovery
 joins. Earlier ABI52 at `44af244e` is retained for
 clients explicitly pinned to that source. It does not generate bytecode or
 prove whole-system execution. Earlier paid-burn acceptance remains 39 distinct

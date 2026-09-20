@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `9beafd1a`: C2PA standing conflicts/composition, delegated Manager consent, recovered-living dormancy, fitting mint size repair, grace clients and retained-file PREMIS are source-integrated. Exact runtime scope and remaining work are in [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch). |
+| Source checkpoint | `29cd8b2d`: C2PA standing conflicts/composition, delegated Manager consent, recovered-living dormancy, fitting mint size repair, grace clients and retained-file PREMIS are source-integrated. Exact runtime scope and remaining work are in [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch). |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,8 +29,8 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 20 September
 
-- Root owns architecture, integration and delivery. ABI57 covers all 2,248
-  sources at `9beafd1a`; ABI52 remains the historical client-pinned capture.
+- Root owns architecture, integration and delivery. ABI58 covers all 2,251
+  sources at `29cd8b2d`; clients retain explicit historical ABI52 and mode-2 ABI56.
   Source integration remains separate from native acceptance.
 - Artist delivered C2PA credentials/standing conflicts (`142a3cdb`, `22095475`)
   and independently reviewed the genuine composition/recovery joins. It now
@@ -60,13 +60,14 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
   independent Museum requirement batch is being selected; current-chain historical
   authentication remains distinct from supplied-byte agreement.
 - Clients delivered delegated Artist consent (`b99b3781`) and grace workflow
-  (`9ac63a11`), then economics15/royalty-freeze20 (`6b71507e`): root797 tests
-  plus exact ABI52 check pass. Remaining work includes original attestation24,
-  joined-source grace refresh and other original
+  (`9ac63a11`), economics15/royalty-freeze20 (`6b71507e`) and mode-2 grace
+  (`e5ec5fae`): root806 tests plus exact ABI52/56 checks pass. Remaining work
+  includes original attestation24 and other original
   families. Simulated Safe plans do not prove actual Safe execution.
 - Testing delivered full37 construction/activation and genuine C2PA composition
   (`2aed78f5`, `a86febaa`); Registry13 scoped native cases pass. It now fills
-  concrete genuine-current activation/acceptance recipe gaps. Complete STATIC
+  actual-current gate recipes. Canonical Museum admission (`29cd8b2d`) adds11
+  source-reviewed Safe cases, native pending. Complete STATIC
   admission, actual full37 launch and joined Safe/fuzz acceptance remain.
 
 Keep builders implementing while frozen tests run. No duplicate broad compilers
