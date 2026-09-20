@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "./StreamPrimaryOfferDelegationManifest.sol";
+import { StreamPrimaryOfferDelegationManifest } from "./StreamPrimaryOfferDelegationManifest.sol";
 
 import { StreamERC20OfferHash } from "./StreamERC20OfferHash.sol";
 import { StreamPrivateSaleSupport } from "./StreamPrivateSaleSupport.sol";
