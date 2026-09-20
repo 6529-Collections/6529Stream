@@ -294,7 +294,7 @@ abstract contract NativeImmediateSalesFixture is NativeEnglishAuctionFixture {
         c.artistRegistry = address(artists);
         c.deploymentManifestHash = MANIFEST;
         c.manifestHash = MANIFEST;
-        c.manifestURI = "urn:immediate:metadata";
+        c.manifestURI = "https://example.org/immediate";
         c.dependencyReadGas = IStreamGasParameterHost.GasParameterConfig(
             "METADATA_DEPENDENCY_READ_GAS", 150000, 100000, 2
         );
