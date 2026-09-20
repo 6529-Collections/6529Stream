@@ -38,6 +38,18 @@
   consumption maps. Typed writer/producer and full publication acceptance remain
   separate; see the [state boundary](docs/integrations/view-content-root-state.md).
 
+## Preservation references and complete admitted-source inventories
+
+- Add separate COLLECTION and TOKEN/RELEASE/SEASON reference publishers that
+  compare saved admitted producers and preserve exact environment, capture,
+  package, root and snapshot evidence.
+- Add matching render-critical inventories with a mandatory sixth per-token
+  stage for the complete preservation registration, reads, targets, runtimes
+  and interpretation documents. Original artwork and authority stages remain.
+- Fifty-three authored cases and combined ABI checks accompany source review.
+  Actual composed execution, complete inventory progression, gas and size
+  acceptance remain pending.
+
 ## Explicit preservation snapshots
 
 - Add distinct COLLECTION and TOKEN/RELEASE/SEASON snapshot consumers for the

@@ -1,6 +1,7 @@
 # Preservation policy consumers V1
 
-This additive source implements checkpoints, covered output manifests and snapshots
+This additive source implements checkpoints, covered output manifests, snapshots,
+references and render-critical inventories
 of [ADR 0054](../adr/0054-explicit-non-sanction-preservation-rendering.md).
 Native execution, product size checks and the composed publication ceremony
 remain pending. Existing `Policy*V2` contracts, definitions and historical
@@ -122,11 +123,29 @@ does not imply that the same snapshot remains current.
 New factory and provider binding interfaces identify the matching preservation
 graph explicitly. Concrete factory/provider construction remains pending.
 
-Reference sources must nest that exact snapshot interpretation;
-sample readers must compare the actual preservation producer's full bytes.
-Inventory workers must enumerate producer/companion runtimes, all governed
-preservation reads and targets, analysis and golden documents, together with
-the existing complete artwork, original policy and current-authority evidence.
+## References and inventories
+
+The new COLLECTION and scoped reference publishers retain the exact snapshot,
+current canonical root, original policies, runtime environment, ordered package
+members and external capture coverage. Each sample retains the full nine-word
+producer binding and seven-word admission. Its reader rejoins the original
+Registry admission and current producer binding before comparing that saved
+producer's JSON/HTML bytes. A reference sample is not complete membership.
+
+Both new inventories preserve all five original token stages: output,
+script, library, renderer and current citation/terminal profile. A mandatory
+sixth stage retains the preservation binding, admission, full registration,
+complete declared reads and original target roster, producer/attribution
+runtimes, schema/analysis/golden documents and every target runtime. The token
+cursor advances only after the last row of this stage. Roles identify the new
+preservation JSON, HTML and image interpretation explicitly.
+
+The original source, policy, membership, artwork, description, rights,
+conservation, Artist authorization and archive requirements remain present.
+Current reads and sealing retain complete current source checks and selected
+document facts. Neither a typed boundary test nor a passed ABI check proves
+the complete six-stage inventory or actual sanction ceremony.
+
 Provider and graph-factory profiles must select only these matching consumers.
 
 The original full-output ceremony remains intact as the sanction-cycle
