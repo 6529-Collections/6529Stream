@@ -106,7 +106,13 @@ abstract contract PolicyReferenceFixtureV2 is PolicySnapshotFixtureV2 {
             "POLICY_REFERENCE_SNAPSHOT_GAS", 8000000, 50000, 1
         );
         configs[3] = IStreamGasParameterHost.GasParameterConfig(
-            "POLICY_REFERENCE_ARCHIVE_GAS", 500000, 50000, 1
+            "POLICY_REFERENCE_ARCHIVE_GAS", 1000000, 50000, 1
+        );
+        require(
+            configs[1].genesisValue >= configs[0].genesisValue
+                && configs[2].genesisValue >= configs[1].genesisValue
+                && configs[3].genesisValue >= configs[0].genesisValue,
+            "fixture preserves original reference gas ordering"
         );
         // Fixture allowance covers Membership's own 500,000-gas forwarding admission.
         // It is not a production minimum or whole-operation capacity acceptance.

@@ -105,3 +105,11 @@ capacity result. The retained initial run stopped at one-chunk schema setup;
 the next run recorded 12 passes and 10 failures, diagnosed as a mis-scoped
 authority expectation and that nested read allowance. Corrected results must be
 reported against their own frozen capture; these earlier failures remain evidence.
+
+The third run passed all 10 snapshot cases. Its 12 reference cases stopped at
+the original constructor condition `archiveGas >= readGas`: the fixture raised
+the read allowance while retaining a 500,000 archive allowance. The successor
+sets both fixture allowances to 1,000,000 and explicitly checks the original
+ordering; floors, failure classes and production checks remain unchanged.
+Artifact loading did not shorten that run's 1,309-second compiler phase, so no
+compile-speed improvement is claimed.
