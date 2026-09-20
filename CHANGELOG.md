@@ -42,6 +42,14 @@
   [correspondence guide](docs/integrations/canonical-archive-correspondence.md)
   for profile boundaries and remaining integrated acceptance.
 
+## Preserve completed native captures with generated library references
+
+- Verify Solidity's generated library self-address field separately from
+  AST-declared immutables, with strict library, runtime and instruction checks.
+- Add explicit external readmission receipts and single-use Forge output replay
+  for the exact legacy verifier failure. Preserve original failed records and
+  native outputs; see the [recovery procedure](docs/reference/tooling/scoped-codegen.md).
+
 ## Separate analysis from selected native code generation
 
 - Split whole-source AST analysis from explicit bytecode outputs with identical

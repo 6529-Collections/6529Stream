@@ -59,11 +59,20 @@ single-use; timeout, interruption, compiler error or evidence mismatch refuses
 acceptance. The native process is killed and reaped on exceptional exit.
 
 Verification checks all source IDs, selected ASTs, requested output fields and
-immutable-reference ranges. Every immutable ID must resolve in the bytecode
-pass's own AST, even when the analysis output contains the missing declaration.
+immutable-reference ranges. Every source-declared immutable ID must resolve in
+the bytecode pass's own AST, even when the analysis output contains the missing declaration.
 Analysis ASTs are never spliced into native output. Bytecode selections must emit
 both creation/runtime objects, their link references and runtime immutable
 references; the abbreviated compound selectors above include those fields.
+
+The compiler also emits `library_deploy_address` for some library runtimes. This
+is a generated self-address guard, not an AST variable. The verifier records it
+separately, only for the exact selected library's same-native AST and a zero-filled
+32-byte runtime site in a decoded `ADDRESS`/`PUSH32`/`EQ` instruction sequence.
+Unknown identifiers, ordinary contracts and creation-code references still fail.
+Pinned Solidity [Common.cpp](https://github.com/argotorg/solidity/blob/7dd6d404815651b2341ecae220709a88aaed4038/libsolidity/codegen/ir/Common.cpp)
+names this field; [IRGenerator.cpp](https://github.com/argotorg/solidity/blob/7dd6d404815651b2341ecae220709a88aaed4038/libsolidity/codegen/ir/IRGenerator.cpp#L956)
+assigns the deployed library's address and checks it in the runtime.
 
 ## Forge forwarding and canonical preparation
 
@@ -115,10 +124,54 @@ unchanged. This tool does not establish that a selected output inventory include
 every product needed by a particular campaign; retain its existing inventory and
 all original assertions.
 
+## Admit a completed legacy capture without recompiling
+
+An early version of this tool rejected the generated library self-address field
+after both native passes completed. The explicit recovery path accepts only that
+exact legacy tool hash and error, with both original passes complete at integer
+exit code zero. It rechecks every retained file hash, input, output, source ID,
+AST and immutable reference under the repaired verifier. Other failures remain
+ineligible. The original directory, `FAILED` record and raw outputs stay unchanged.
+
+Write a new receipt outside the original capture:
+
+```text
+python -B -m tools.build.scoped_standard_json admit --capture out/original-capture --receipt out/readmission.json
+python -B -m tools.build.scoped_standard_json verify --capture out/original-capture --admission out/readmission.json
+```
+
+The receipt binds the original record and files, the current verifier bytes and
+the fresh verification report. Ordinary verification still refuses the original
+failed capture without this explicit receipt. Admission establishes native
+evidence only; it does not establish artifact or runtime acceptance.
+
+If the original Forge process received no compiler output, a one-use compiler
+launcher can return the retained native stdout without invoking the compiler:
+
+```text
+python -B /path/to/tools/build/scoped_standard_json.py replay --capture /path/to/original-capture --admission /path/to/readmission.json --receipt /path/to/new-replay.json -- COMPILER_ARGUMENTS
+```
+
+Keep the same project paths, source bytes, Forge command and settings. Replay
+requires the exact original compiler arguments and JSON-type-exact Forge request,
+and writes an external receipt before forwarding untouched stdout/stderr. Version
+probes use the retained version bytes. A standard-JSON replay receipt is single-use,
+including when its output stream fails. Preserve the original Forge failure log;
+retain fresh replay process evidence, then authenticate the resulting cache and
+artifacts before any runtime test.
+
+Pass `--compiler-admission BUILD_ID=/path/to/readmission.json` alongside the
+matching `--compiler-capture` during canonical preparation. The native exporter
+also accepts `--compiler-admission /path/to/readmission.json`. Both revalidate the
+receipt, and reports preserve its hash and the original failed record identity.
+Exact native library exports retain the generated reference. The graph projection
+format still requires AST-declared immutables and explicitly refuses such library
+products; this repair does not change the Solidity graph consumer.
+
 ## Validation and limits
 
 ```text
-python -B -m unittest tools.build.test_scoped_standard_json tools.build.test_prepare_current_graph tools.build.test_native_artifact_storage tools.development.test_current_acceptance
+python -B -m unittest tools.build.test_scoped_standard_json tools.build.test_scoped_library_address tools.build.test_prepare_current_graph tools.build.test_native_artifact_storage tools.development.test_current_acceptance
 ```
 
 Synthetic tests exercise refusal and process cleanup. A separate bounded native

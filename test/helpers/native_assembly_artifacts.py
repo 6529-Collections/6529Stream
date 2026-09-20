@@ -25,7 +25,10 @@ def object_hex(value: str) -> str:
 
 
 def project(build_info: Path, artifact_root: Path, destination: Path,
-            products: dict[str, str], current_native_exports: bool = False, *, compiler_capture: Path | None = None) -> dict:
+            products: dict[str, str], current_native_exports: bool = False, *, compiler_capture: Path | None = None,
+            compiler_admission: Path | None = None) -> dict:
+    if compiler_admission is not None and compiler_capture is None:
+        raise ValueError('Compiler admission requires its matching compiler capture')
     raw_build = build_info.read_bytes()
     build = json.loads(raw_build)
     assert build["solcVersion"] == "0.8.19", "original native compiler"
@@ -34,7 +37,7 @@ def project(build_info: Path, artifact_root: Path, destination: Path,
         import sys
         sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
         from tools.build.scoped_standard_json import bind_build_capture
-        build, _, capture_evidence = bind_build_capture(build, compiler_capture)
+        build, _, capture_evidence = bind_build_capture(build, compiler_capture, admission=compiler_admission)
     compiler_input, output = build["input"], build["output"]
     context = sha(canonical(compiler_input))
     declarations: dict[int, dict] = {}
@@ -119,6 +122,7 @@ def project(build_info: Path, artifact_root: Path, destination: Path,
                         assert not occupied.intersection(span), "overlapping link range"
                         occupied.update(span)
             for ident, sites in refs.items():
+                assert ident != 'library_deploy_address', 'Graph projections require AST-declared immutables; use exact native exports for compiler library self-address references'
                 assert int(ident) in declarations and sites, "unresolved immutable declaration"
                 for site in sites:
                     assert site["length"] == 32 and 0 <= site["start"] <= length - 32
@@ -153,9 +157,12 @@ def main() -> None:
     parser.add_argument("--destination", type=Path, required=True)
     parser.add_argument("--products", type=Path, required=True)
     parser.add_argument("--current-native-exports", action="store_true")
+    parser.add_argument("--compiler-capture", type=Path)
+    parser.add_argument("--compiler-admission", type=Path)
     args = parser.parse_args()
     products = json.loads(args.products.read_bytes())
-    report = project(args.build_info, args.artifact_root, args.destination, products, args.current_native_exports)
+    report = project(args.build_info, args.artifact_root, args.destination, products, args.current_native_exports,
+                     compiler_capture=args.compiler_capture, compiler_admission=args.compiler_admission)
     print(json.dumps({"products": len(report["products"]),
                       "productionRuntimes": len(report["productionRuntimeSizes"]),
                       "compilationHash": report["compilerInputSha256"]}))

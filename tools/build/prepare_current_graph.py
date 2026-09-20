@@ -137,7 +137,12 @@ def retain_exports(exports: Path, artifact_root: Path, build_id: str) -> Path:
 def prepare(project: Path, products_path: Path, *, out: Path | None = None,
             cache_dir: Path | None = None, campaign: bool = False,
             selected_hosts: tuple[tuple[str, str], ...] | None = None,
-            compiler_captures: dict[str, Path] | None = None) -> dict:
+            compiler_captures: dict[str, Path] | None = None,
+            compiler_admissions: dict[str, Path] | None = None) -> dict:
+    captures = compiler_captures or {}
+    admissions = compiler_admissions or {}
+    if set(admissions) - set(captures):
+        raise ValueError('Every compiler admission requires its matching compiler capture')
     project = project.resolve()
     out = (project / (out or 'out/current')).resolve()
     cache_dir = (project / (cache_dir or 'cache/current')).resolve()
@@ -170,7 +175,6 @@ def prepare(project: Path, products_path: Path, *, out: Path | None = None,
         products = json.loads(products_path.read_bytes())
         if not products or any(not source.startswith('smart-contracts/') for source in products.values()):
             raise ValueError('Graph product inventory must name production sources')
-        captures = compiler_captures or {}
         if set(captures) - set(coordinates.values()):
             raise ValueError('Compiler capture does not match a selected native build')
         contexts = {}; transports = set()
@@ -183,14 +187,15 @@ def prepare(project: Path, products_path: Path, *, out: Path | None = None,
                 raise ValueError('Build-info identity differs from its selected cache entry')
             analysis = None; capture_evidence = None
             if ident in captures:
-                build, analysis, capture_evidence = bind_build_capture(build, captures[ident])
+                build, analysis, capture_evidence = bind_build_capture(build, captures[ident], admission=admissions.get(ident))
             helpers = {name: source for name, source in helper.items() if coordinates[name] == ident}
             inventory = products if ident == build_id else {}
             roots = set(helpers.values()) | set(inventory.values())
             transports.update(validate_sources(project, build, source_roots=roots, analysis=analysis))
             contexts[ident] = {'path': path, 'raw': raw, 'build': build, 'helpers': helpers,
                                'products': inventory, 'roots': roots, 'analysis': analysis,
-                               'compilerCapture': captures.get(ident), 'captureEvidence': capture_evidence}
+                               'compilerCapture': captures.get(ident), 'compilerAdmission': admissions.get(ident),
+                               'captureEvidence': capture_evidence}
         with tempfile.TemporaryDirectory(prefix='prepare-', dir=artifact_root) as temporary:
             temp = Path(temporary)
             for ident, context in contexts.items():
@@ -204,6 +209,8 @@ def prepare(project: Path, products_path: Path, *, out: Path | None = None,
                            '--output', str(exports)]
                 if context['compilerCapture'] is not None:
                     command += ['--compiler-capture', str(context['compilerCapture'])]
+                if context['compilerAdmission'] is not None:
+                    command += ['--compiler-admission', str(context['compilerAdmission'])]
                 subprocess.run(command, check=True)
                 context['retained'] = retain_exports(exports, artifact_root, ident)
             spec = importlib.util.spec_from_file_location(
@@ -211,14 +218,15 @@ def prepare(project: Path, products_path: Path, *, out: Path | None = None,
             module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
             owner = contexts[build_id]; projected = temp / 'compiled'
             report = module.project(owner['path'], owner['retained'], projected, products, True,
-                                    compiler_capture=owner['compilerCapture'])
+                                    compiler_capture=owner['compilerCapture'], compiler_admission=owner['compilerAdmission'])
             if cache_path.read_bytes() != cache_raw:
                 raise ValueError('Compiler cache changed during graph preparation')
             for context in contexts.values():
                 if context['path'].read_bytes() != context['raw']:
                     raise ValueError('Compiler output changed during graph preparation')
                 if context['compilerCapture'] is not None:
-                    _, _, evidence = bind_build_capture(json.loads(context['raw']), context['compilerCapture'])
+                    _, _, evidence = bind_build_capture(json.loads(context['raw']), context['compilerCapture'],
+                                                        admission=context['compilerAdmission'])
                     if evidence != context['captureEvidence']:
                         raise ValueError('Compiler capture changed during preparation')
                 validate_sources(project, context['build'], source_roots=context['roots'], analysis=context['analysis'])
@@ -262,18 +270,21 @@ def main() -> int:
                         help="Exact test/path.t.sol:ContractName to authenticate (repeatable)")
     parser.add_argument("--compiler-capture", action="append", default=[], metavar="BUILD_ID=PATH",
                         help="Verified split native capture for an actual selected Forge build (repeatable)")
+    parser.add_argument("--compiler-admission", action="append", default=[], metavar="BUILD_ID=PATH",
+                        help="Explicit terminal-capture readmission receipt for a matching capture (repeatable)")
     args = parser.parse_args()
     try:
-        captures = {}
-        for value in args.compiler_capture:
-            ident, separator, folder = value.partition("=")
-            if not separator or not ident or not folder or ident in captures:
-                raise ValueError("Expected unique BUILD_ID=PATH compiler captures")
-            captures[ident] = Path(folder).resolve()
+        captures = {}; admissions = {}
+        for values, mapping in ((args.compiler_capture, captures), (args.compiler_admission, admissions)):
+            for value in values:
+                ident, separator, folder = value.partition("=")
+                if not separator or not ident or not folder or ident in mapping:
+                    raise ValueError("Expected unique BUILD_ID=PATH compiler captures/admissions")
+                mapping[ident] = Path(folder).resolve()
         print(json.dumps(prepare(args.project, args.products, out=args.out,
                                  cache_dir=args.cache_path, campaign=args.campaign,
                                  selected_hosts=tuple(args.host) if args.host else None,
-                                 compiler_captures=captures), indent=2))
+                                 compiler_captures=captures, compiler_admissions=admissions), indent=2))
         return 0
     except (AssertionError, KeyError, OSError, ValueError, subprocess.CalledProcessError) as exc:
         print(f"Graph preparation failed: {exc}", file=sys.stderr)

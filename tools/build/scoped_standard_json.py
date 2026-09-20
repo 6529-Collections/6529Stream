@@ -19,6 +19,7 @@ import time
 
 VERSION = "0.8.19+commit.7dd6d404"
 ANALYSIS_SELECTION = {"*": {"": ["ast"]}}
+LEGACY_SELECTOR_TOOL = "3f650af99ecd951fed44b25fb39790f1af7de2e0620d4e68e3ff9a6e19a69d43"
 
 
 def canonical(value: object) -> bytes:
@@ -95,6 +96,15 @@ def walk(value):
             yield from walk(child)
 
 
+def instruction_boundary(code: str, target: int) -> bool:
+    """Decode only to a claimed opcode; linked PUSH immediates need no decoding."""
+    offset = 0
+    while offset < target:
+        opcode = int(code[offset * 2:(offset + 1) * 2], 16)
+        offset += 1 + (opcode - 0x5f if 0x60 <= opcode <= 0x7f else 0)
+    return offset == target
+
+
 def verify_requested_fields(contract: dict, fields: list[str], coordinate: str) -> None:
     for field in fields:
         value = contract
@@ -148,6 +158,7 @@ def verify_pair(analysis_input: dict, analysis_output: dict,
             ident = contract["id"]
             require(ident not in definitions, "Duplicate contract AST ID")
             definitions[ident] = {"source": source, "name": contract["name"],
+                                  "kind": contract.get("contractKind"),
                                   "abstract": contract.get("abstract", False),
                                   "dependencies": contract.get("contractDependencies", [])}
             if source in selected:
@@ -160,7 +171,8 @@ def verify_pair(analysis_input: dict, analysis_output: dict,
                     ident = str(node["id"])
                     require(ident not in declarations, "Duplicate immutable AST ID")
                     declarations[ident] = {"source": source, "variable": node["name"]}
-    joins = []
+    joins = []; library_joins = []
+    kinds = {(v["source"], v["name"]): v["kind"] for v in definitions.values()}
     for source, name in sorted(actual_contracts):
         contract = codegen_output["contracts"][source][name]
         verify_requested_fields(contract, selected[source][name], source + ":" + name)
@@ -168,8 +180,13 @@ def verify_pair(analysis_input: dict, analysis_output: dict,
         for field in ("bytecode", "deployedBytecode"):
             artifact = evm.get(field, {})
             for ident, sites in artifact.get("immutableReferences", {}).items():
-                require(ident in declarations,
-                        f"Missing same-native immutable declaration {ident} for {source}:{name}; explicitly select its source")
+                library_address = ident == "library_deploy_address"
+                if library_address:
+                    require(field == "deployedBytecode" and kinds[(source, name)] == "library",
+                            "Compiler library address requires same-native library runtime AST")
+                else:
+                    require(ident in declarations,
+                            f"Missing same-native immutable declaration {ident} for {source}:{name}; explicitly select its source")
                 require(bool(sites), "Empty immutable reference sites")
                 code = artifact["object"].removeprefix("0x")
                 for site in sites:
@@ -177,8 +194,22 @@ def verify_pair(analysis_input: dict, analysis_output: dict,
                     require(type(length) is int and length == 32 and type(start) is int and 0 <= start <= len(code) // 2 - length,
                             "Invalid immutable reference range")
                     require(code[start * 2:(start + length) * 2] == "0" * 64, "Immutable placeholder is not zero")
-                joins.append({"source": source, "contract": name, "field": field, "id": ident,
-                              "declaration": declarations[ident], "sites": copy.deepcopy(sites)})
+                    if library_address:
+                        # IRGenerator deployCode assigns address(); the runtime
+                        # compares loadimmutable(library_deploy_address) to ADDRESS.
+                        require(start >= 1 and instruction_boundary(code, start - 1)
+                                and code[(start - 1) * 2:start * 2] == "7f"
+                                and ((start >= 2 and instruction_boundary(code, start - 2)
+                                      and code[(start - 2) * 2:(start - 1) * 2] == "30"
+                                      and code[(start + 32) * 2:(start + 33) * 2] == "14")
+                                     or code[(start + 32) * 2:(start + 34) * 2] == "3014"),
+                                "Compiler library address comparison differs")
+                if library_address:
+                    library_joins.append({"source": source, "contract": name, "field": field, "id": ident,
+                                          "value": "deployed library address", "sites": copy.deepcopy(sites)})
+                else:
+                    joins.append({"source": source, "contract": name, "field": field, "id": ident,
+                                  "declaration": declarations[ident], "sites": copy.deepcopy(sites)})
     closure = set(); pending = list(scheduled)
     while pending:
         ident = pending.pop()
@@ -187,10 +218,13 @@ def verify_pair(analysis_input: dict, analysis_output: dict,
         require(ident in definitions, "Missing code-generation dependency AST ID")
         closure.add(ident); pending.extend(definitions[ident]["dependencies"])
     coordinates = lambda ids: sorted(definitions[i]["source"] + ":" + definitions[i]["name"] for i in ids)
-    return {"sourceCount": len(sources), "selectedContracts": len(actual_contracts),
+    result = {"sourceCount": len(sources), "selectedContracts": len(actual_contracts),
             "nativeAstSources": sorted(selected), "immutableJoins": joins,
             "scheduledDefinitions": coordinates(scheduled), "dependencyClosure": coordinates(closure),
             "qualification": "Selector/AST/declaration verification only. Siblings and embedded dependencies still generate code; no deployment, runtime acceptance or speed claim."}
+    if library_joins:
+        result["librarySelfAddressJoins"] = library_joins
+    return result
 
 
 def capture_pair(request_raw: bytes, selection: dict, compiler: Path, compiler_sha256: str,
@@ -259,19 +293,24 @@ def capture_pair(request_raw: bytes, selection: dict, compiler: Path, compiler_s
     return record
 
 
-def read_capture(folder: Path) -> tuple[dict, dict, dict]:
-    """Recheck a completed capture; return separate analysis/codegen contexts and report."""
+def _read_capture(folder: Path, *, allow_library_revalidation: bool = False) -> tuple[dict, dict, dict, dict]:
     record = json.loads((folder / "record.json").read_bytes())
-    require(record.get("schema") == 1 and record.get("status") == "VERIFIED", "Capture is not verified")
+    legacy_failure = (record.get("status") == "FAILED" and record.get("toolSha256") == LEGACY_SELECTOR_TOOL
+                      and re.fullmatch(r"Missing same-native immutable declaration library_deploy_address for .+; explicitly select its source",
+                                       record.get("error", "")) is not None)
+    require(type(record.get("schema")) is int and record["schema"] == 1 and (record.get("status") == "VERIFIED"
+            or (allow_library_revalidation and legacy_failure)), "Capture is not verified")
     actual = {p.name: sha(p.read_bytes()) for p in sorted(folder.iterdir()) if p.is_file() and p.name != "record.json"}
     require(actual == record["files"], "Capture files changed")
     required = {"requested-input.json", "selection.json", "version.stdout", "version.stderr", "verification.json"}
+    if legacy_failure:
+        required.remove("verification.json")
     required |= {f"{n}-{f}" for n in ("analysis", "codegen") for f in ("input.json", "output.json", "stderr.log")}
     require(set(actual) == required, "Incomplete capture files")
     require(VERSION.encode() in (folder / "version.stdout").read_bytes(), "Pinned compiler version missing")
     require(set(record["passes"]) == {"analysis", "codegen"}, "Incomplete native passes")
     for step in record["passes"].values():
-        require(step.get("status") == "COMPLETE" and step.get("exitCode") == 0
+        require(step.get("status") == "COMPLETE" and type(step.get("exitCode")) is int and step["exitCode"] == 0
                 and step.get("compilerSha256") == record["compilerSha256"]
                 and step.get("command") == [record["compiler"], *record["arguments"]], "Native process evidence differs")
     contexts = [{"solcVersion": "0.8.19", "input": json.loads((folder / (n + "-input.json")).read_bytes()),
@@ -281,7 +320,43 @@ def read_capture(folder: Path) -> tuple[dict, dict, dict]:
     require(same_json(tuple(c["input"] for c in contexts), expected), "Captured request transformation differs")
     analysis, codegen = contexts
     report = verify_pair(analysis["input"], analysis["output"], codegen["input"], codegen["output"])
-    require(same_json(report, json.loads((folder / "verification.json").read_bytes())), "Capture verification differs")
+    if not legacy_failure:
+        require(same_json(report, json.loads((folder / "verification.json").read_bytes())), "Capture verification differs")
+    else:
+        require(bool(report.get("librarySelfAddressJoins")), "Known compiler library field was not verified")
+    return analysis, codegen, record, report
+
+
+def admission_value(folder: Path, record: dict, report: dict) -> dict:
+    return {"schema": 1, "status": "VERIFIED_TERMINAL_NATIVE", "capture": str(folder.resolve()),
+            "originalCaptureRecordSha256": sha((folder / "record.json").read_bytes()),
+            "originalCaptureStatus": record["status"], "originalError": record.get("error"),
+            "originalCaptureFiles": record["files"], "verifierSha256": sha(Path(__file__).read_bytes()),
+            "verification": report,
+            "qualification": "Readmission of unchanged completed native outputs after the specific legacy library-self-address verifier failure. No compiler rerun, artifact rewrite or runtime acceptance."}
+
+
+def admit_completed_capture(folder: Path, receipt: Path) -> dict:
+    """Explicitly admit only the known terminal verifier failure; preserve its record."""
+    _, _, record, report = _read_capture(folder, allow_library_revalidation=True)
+    require(record["status"] == "FAILED", "Readmission requires the known failed legacy verifier")
+    require(not receipt.resolve().is_relative_to(folder.resolve()), "Admission receipt must be outside original capture")
+    value = admission_value(folder, record, report)
+    with receipt.open("xb") as stream:
+        stream.write(canonical(value))
+    return value
+
+
+def read_capture(folder: Path, *, admission: Path | None = None) -> tuple[dict, dict, dict]:
+    """Recheck capture and optional explicit readmission; never rewrite prior evidence."""
+    analysis, codegen, record, report = _read_capture(folder, allow_library_revalidation=admission is not None)
+    if record["status"] == "FAILED":
+        value = json.loads(admission.read_bytes())
+        require(same_json(value, admission_value(folder, record, report)), "Readmission receipt differs")
+        record = {**record, "readmission": {"path": str(admission.resolve()), "sha256": sha(admission.read_bytes()),
+                                           "status": value["status"], "verifierSha256": value["verifierSha256"]}}
+    elif admission is not None:
+        raise ValueError("Readmission is not needed for an originally verified capture")
     return analysis, codegen, record
 
 
@@ -350,14 +425,14 @@ def forge_storage_transport(native: dict, serialized: dict) -> list[str]:
     return ["empty storage layout types: null serialized as empty object"]
 
 
-def bind_build_capture(build: dict, folder: Path) -> tuple[dict, dict, dict]:
+def bind_build_capture(build: dict, folder: Path, *, admission: Path | None = None) -> tuple[dict, dict, dict]:
     """Bind a Forge envelope to actual native requests without rewriting build-info.
 
     Forge records the request it sent to a forwarding compiler. Retain that
     envelope, but derive compiler-input identities from the actual bytecode pass.
     The two native outputs remain separate, including their AST inventories.
     """
-    analysis, native, record = read_capture(folder)
+    analysis, native, record = read_capture(folder, admission=admission)
     requested = json.loads((folder / "requested-input.json").read_bytes())
     require(build.get("solcVersion") == "0.8.19", "Build compiler version differs")
     envelope = build["input"]
@@ -374,7 +449,40 @@ def bind_build_capture(build: dict, folder: Path) -> tuple[dict, dict, dict]:
                 "analysisInputSha256": sha(canonical(analysis["input"])),
                 "compilerSha256": record["compilerSha256"], "forgeEnvelopeFields": {k: envelope[k] for k in sorted(extra)},
                 "forgeOutputTransports": transports}
+    if "readmission" in record:
+        evidence["readmission"] = record["readmission"]
     return context, analysis, evidence
+
+
+def replay_capture(folder: Path, admission: Path, receipt: Path, arguments: list[str]) -> int:
+    """One-use authenticated stdout replay for Forge; no native compiler invocation."""
+    _, _, record = read_capture(folder, admission=admission)
+    if arguments == ["--version"]:
+        sys.stdout.buffer.write((folder / "version.stdout").read_bytes())
+        sys.stderr.buffer.write((folder / "version.stderr").read_bytes())
+        return 0
+    require(arguments == record["arguments"], "Replay compiler arguments differ")
+    raw = sys.stdin.buffer.read()
+    require(same_json(json.loads(raw), json.loads((folder / "requested-input.json").read_bytes())),
+            "Replay requested input differs")
+    require(not receipt.resolve().is_relative_to(folder.resolve()), "Replay receipt must be outside original capture")
+    value = {"status": "STARTED", "mode": "retained-native-output-replay", "nativeInvocations": 0,
+             "captureRecordSha256": sha((folder / "record.json").read_bytes()),
+             "admissionSha256": sha(admission.read_bytes()), "requestedInputSha256": sha(raw),
+             "nativeOutputSha256": sha((folder / "codegen-output.json").read_bytes()),
+             "arguments": arguments, "toolSha256": sha(Path(__file__).read_bytes())}
+    with receipt.open("xb") as stream:
+        stream.write(canonical(value))
+    try:
+        sys.stdout.buffer.write((folder / "codegen-output.json").read_bytes()); sys.stdout.buffer.flush()
+        sys.stderr.buffer.write((folder / "codegen-stderr.log").read_bytes()); sys.stderr.buffer.flush()
+        value["status"] = "COMPLETE"
+    except BaseException as exc:
+        value.update(status="FAILED", error=str(exc))
+        raise
+    finally:
+        receipt.write_bytes(canonical(value))
+    return 0
 
 
 def forward(manifest_path: Path, arguments: list[str]) -> int:
@@ -417,19 +525,36 @@ def main() -> int:
     run.add_argument("--timeout", type=float, required=True, help="Bound in seconds for each native pass")
     verify = commands.add_parser("verify")
     verify.add_argument("--capture", type=Path, required=True)
+    verify.add_argument("--admission", type=Path)
+    admit = commands.add_parser("admit")
+    admit.add_argument("--capture", type=Path, required=True)
+    admit.add_argument("--receipt", type=Path, required=True)
     shim = commands.add_parser("forward")
     shim.add_argument("--manifest", type=Path, required=True)
     shim.add_argument("arguments", nargs=argparse.REMAINDER)
+    replay = commands.add_parser("replay")
+    replay.add_argument("--capture", type=Path, required=True)
+    replay.add_argument("--admission", type=Path, required=True)
+    replay.add_argument("--receipt", type=Path, required=True)
+    replay.add_argument("arguments", nargs=argparse.REMAINDER)
     args = parser.parse_args()
     if args.command == "capture":
         record = capture_pair(args.input.read_bytes(), json.loads(args.selection.read_bytes()), args.solc,
                               args.compiler_sha256, args.output, timeout=args.timeout)
     elif args.command == "verify":
-        _, _, record = read_capture(args.capture)
-    else:
+        _, _, record = read_capture(args.capture, admission=args.admission)
+    elif args.command == "admit":
+        value = admit_completed_capture(args.capture, args.receipt)
+        print(json.dumps({"status": value["status"], "originalCaptureStatus": value["originalCaptureStatus"]}))
+        return 0
+    elif args.command == "forward":
         arguments = args.arguments[1:] if args.arguments[:1] == ["--"] else args.arguments
         return forward(args.manifest, arguments)
-    print(json.dumps({"status": record["status"], "passes": record["passes"]}, indent=2))
+    else:
+        arguments = args.arguments[1:] if args.arguments[:1] == ["--"] else args.arguments
+        return replay_capture(args.capture, args.admission, args.receipt, arguments)
+    print(json.dumps({"status": record["status"], "readmission": record.get("readmission"),
+                      "passes": record["passes"]}, indent=2))
     return 0
 
 
