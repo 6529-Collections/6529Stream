@@ -4,7 +4,8 @@ This developing profile lets a replacement Coordinator preserve the configured
 collection policies of its predecessor. The two additive contracts are
 [`IStreamEntropyPolicyContinuity`](../../smart-contracts/interfaces/stream/entropy/IStreamEntropyPolicyContinuity.sol)
 and [`IStreamEntropyOriginRelay`](../../smart-contracts/interfaces/stream/entropy/IStreamEntropyOriginRelay.sol).
-Combined runtime, deployment-size and current-stack acceptance remain pending.
+The focused 210-test suite passes and all 38 compiled entropy products fit their
+deployment-size limits. Complete current-stack acceptance remains pending.
 This is a new-deployment profile, with no upgrade or migration of an existing
 Coordinator's storage.
 
@@ -111,6 +112,15 @@ Current implementation values/floors are provisional pending measured release
 evidence: AUTH 100,000 (class 2), INSTANT relay 750,000 (class 2), delivery 500,000
 (class 1). They use the existing delayed monotone at-most-2x raise mechanism.
 
+A measured cold 32-step recovery export fails at the default 100,000 AUTH cap.
+The focused import test raises the candidate cap through 200,000 to 400,000 and
+then imports, seals and activates the same session. Its successful 5,696-byte
+export consumes 249,442 caller gas; the failed attempt leaves the session and
+next index unchanged. This is evidence that the default cap does not cover the
+maximum recovery export, not a release gas-floor calibration. Each participating
+host needs its own suitable cap; the full Core/Artist/origin route remains to be
+measured.
+
 A provider's callback budget need not fit the whole second-host delivery.
 Capture first and a separate retry preserve output when the nested delivery
 cannot be attempted. Operators must distinguish `rawReceived`, `delivered` and
@@ -128,11 +138,25 @@ changing their caller is rejected. Fee-only edits preserve the original origin.
 
 ## Verification scope
 
-Focused tests separately exercise inventory completeness, original policy and
-recovery preimages, governed import workers, relay execution, and actual
-Coordinator succession. The compact direct-read encoders have differential
-native tests against standard `abi.encode`, including maximum recovery arrays
-and randomized fields. Typed Core, Artist, module eligibility, governance and
-upstream-provider fixtures are explicit boundaries; these tests do not prove
-the complete Core/Artist/Safe deployment graph. Source-specific size and native
-results must accompany the final integration handoff.
+The focused native run covers 210 tests across 15 suites at production source
+`393faf78529b1b911db408b26829339371268e29`, with a subsequent test-only relay
+fixture correction. All 210 pass, including inventory completeness, original
+policy and recovery preimages, governed import, original-provider retry, actual
+Coordinator succession, and the production INSTANT, ARRNG and VRF adapters.
+The compact direct-read encoders are compared with standard `abi.encode`,
+including maximum recovery arrays and two 256-input fuzz properties. Retained
+request, fee, recovery and incident cases use pinned upstream Safe 1.4.1
+bytecode where required.
+
+The exact-source capture uses Solidity 0.8.19, viaIR, optimizer 200, Paris and no
+CBOR. All 38 compiled entropy products fit the 24,576-byte runtime and 49,152-byte
+creation limits: Coordinator is 24,282/30,146 bytes and its execution worker is
+13,736/13,770. All 221 original Coordinator ABI entries and 22 ordinary storage
+entries match the earlier INSTANT profile. The INSTANT runtime checker passes
+against the genuine Foundry artifact, cache and build-info dependency set.
+
+Typed Core, Artist, module eligibility, governance and upstream-provider
+fixtures remain explicit boundaries. These results do not prove the complete
+Core/Artist/Safe deployment graph, release gas floors, full CI or deployment
+readiness. The integrator retains the source captures, complete test inventory,
+fixture hashes, artifact provenance and the original failed harness run.

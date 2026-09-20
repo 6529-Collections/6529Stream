@@ -372,8 +372,21 @@ contract RelayHostHarness is ReentrancyGuard {
         response = next;
     }
 
-    function fulfillRelayedEntropy(bytes32 key, bytes32 id, bytes32 raw)
-        external
+    function fulfillRelayedEntropy(bytes32 key, bytes32 id, bytes32 raw) external returns (uint8) {
+        uint8 outcome = _fulfillRelayedEntropy(key, id, raw);
+        // Inject malformed ABI only after the guarded body has restored its lock.
+        // A raw return inside nonReentrant would poison every subsequent retry.
+        if (response == 2) {
+            assembly ("memory-safe") {
+                mstore(0, 0)
+                return(0, 31)
+            }
+        }
+        return outcome;
+    }
+
+    function _fulfillRelayedEntropy(bytes32 key, bytes32 id, bytes32 raw)
+        private
         nonReentrant
         returns (uint8)
     {
@@ -384,12 +397,7 @@ contract RelayHostHarness is ReentrancyGuard {
             "route authentication"
         );
         if (response == 1) revert("external delivery fault");
-        if (response == 2) {
-            assembly ("memory-safe") {
-                mstore(0, 0)
-                return(0, 31)
-            }
-        }
+        if (response == 2) return 0;
         if (response == 3) assembly ("memory-safe") { invalid() }
         if (response == 8) return 1;
         if (response >= 4) return response - 2;
@@ -582,10 +590,14 @@ contract StreamEntropyOriginRelayTest {
         bytes32 id = _send();
         successor.setResponse(2);
         provider.deliver(bytes32(uint256(77)));
-        require(origin.result(id).rawReceived && !origin.result(id).delivered, "malformed retained");
+        require(
+            origin.result(id).rawReceived && !origin.result(id).delivered
+                && origin.result(id).lastOutcome == 4 && successor.deliveries() == 0,
+            "malformed retained"
+        );
         successor.setResponse(3);
         origin.retry(id);
-        require(!origin.result(id).delivered, "OOG retained");
+        require(!origin.result(id).delivered && origin.result(id).lastOutcome == 4, "OOG retained");
         for (uint8 i = 4; i <= 8; ++i) {
             successor.setResponse(i);
             origin.retry(id);
@@ -593,11 +605,16 @@ contract StreamEntropyOriginRelayTest {
                 !origin.result(id).delivered && !origin.result(id).terminalStale,
                 "nonzero retryable"
             );
+            require(
+                origin.result(id).lastOutcome == (i == 8 ? 1 : i - 2),
+                "exact nonzero response reached"
+            );
         }
         successor.setResponse(0);
         origin.retry(id);
         require(
-            origin.result(id).delivered && successor.acceptedRaw() == bytes32(uint256(77)),
+            origin.result(id).delivered && successor.acceptedRaw() == bytes32(uint256(77))
+                && successor.deliveries() == 1 && provider.requests() == 1,
             "original raw retry"
         );
     }
