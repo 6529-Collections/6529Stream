@@ -22,6 +22,17 @@ the release policy in `docs/release-policy.md`.
   Add exact-signature underfunding/retry and proof regressions; full-current
   execution remains separate from the source batch.
 
+## Scoped full-policy output prerequisite
+
+- Add distinct TOKEN/RELEASE/SEASON STATIC output checkpoint and preserved
+  manifest profiles bound to the actual scoped full-policy factory, complete
+  original coordinator policies and current canonical scope membership.
+- Keep terminal zero-seed output separate from genuinely finalized random
+  output. Require exact rendered bytes, ordered rows and current archive coverage.
+- Preserve original COLLECTION and scoped V1 profiles. Complete scoped root,
+  snapshot/reference/inventory and finality assembly remain separate acceptance
+  work; the new source requires native validation.
+
 ## Current burn policy acceptance recipes
 
 - Add seven actual-current Burn cases with independently created source and
