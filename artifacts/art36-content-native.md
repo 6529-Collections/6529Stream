@@ -74,13 +74,81 @@ errors in84.812 seconds, retaining input SHA256
 `5df3ef41838920569db7983518537c06b1134eff359b0daa35117cd96721ba8e`
 and output SHA256
 `b55ec483aae29d987ac93e5e06b3ff8419458523a2a2a48bef828a9ffd9dad39`.
-This confirms test-host compilation only; the focused35 runtime retry remains
-pending at this source checkpoint.
+That selected capture confirms test-host compilation only. The complete focused
+retry result is recorded below.
 
 Independent capture review verifies all233 Solidity files byte-for-byte against
 the source Git blobs, exact import-closure membership, the sole configuration
 change and the runner's exact20/15 suite/case checks. Captured inputs and native
 artifacts must remain unchanged through execution.
+
+## Frozen retry capture
+
+The retry source is `35745fbc641b9d13704d300714ba4d644cd57fdb`, tree
+`f4921148f9bf2f137839dec7fd3efe0ca7ba497e`, which adds the test-only repair and
+this evidence note to the original source. The immutable retry is retained as
+`content-native2`; the failed `content-native1` capture is preserved separately.
+
+Independent input review verifies that all 233 captured Solidity files match
+this retry commit exactly and that the import closure has no missing or extra
+sources. Only the approved economics fixture differs from the first capture.
+The selected 20 hydration and 15 fact cases are unchanged. Compiler settings
+and original fixture limits are unchanged; runtime configuration differs only
+in the fresh failure-directory paths. The runner's only change accepts an
+explicit expected commit argument while retaining the exact-HEAD and clean
+tracked-tree checks, anchored suite selection, expected test inventories and
+post-execution source/artifact integrity checks.
+
+Retry capture SHA256:
+`3ff5b2620e4e24bf34ca99ee9aa35a4c483fe3f4e9d445d52d03ba18f0c4c8f7`.
+Runtime configuration SHA256:
+`b82d905cfefa0450e6174eac4a8a0ecf8f56d62482260b1ecbea2fbe2fd9dd27`.
+Runner SHA256:
+`6b7828667872bbc32bdb7a21c7184e4aad33d4bff23ef3e3747f1c18b5cc5674`.
+
+## Runtime result
+
+The frozen retry completed in 1,108.906 seconds with `SCOPED_PASSED`: exactly
+20 ContentConsentHydration cases and 15 ContentConsentFacts cases passed, with
+zero failures, zero skips and test exit code zero. Original codec import/write,
+map/head parity, replay, malformed input and rollback cases execute alongside
+the cross-owner fact cases. The selected test-host runtime limits remain those
+of the original current profile; the result is component execution evidence.
+
+All 174 nonempty production artifacts are retained. Three products in this
+older source exceed the runtime limit:
+
+| Product | Runtime bytes | Bare creation bytes |
+| --- | ---: | ---: |
+| RecoveredAttestationFacts | 33,371 | 33,405 |
+| RecoveredAttestationHydration | 34,120 | 34,157 |
+| RecoveredDelegationConsentFacts | 40,744 | 40,778 |
+
+The later `58d83123` Combined/Attestation-facts capacity repair has separate
+selected native evidence and is outside this runtime capture. It does not
+repair the AttestationHydration product. The integrator has been notified of
+that remaining size observation. This run does not establish deployment fit
+for its full closure, and a four-byte internal library shell is not evidence
+that its inlined validator is independently deployable.
+
+Independent output review verifies the exact ABI, compile-list and executed
+case sets (20 + 15), with all 35 reporting Success/Unit and no unexpected host,
+case, failure reason or counterexample. All 343 native JSON artifact hashes and
+234 captured file hashes remain unchanged. The complete 174-product inventory
+and all three size overruns recompute exactly. Of those products, 76 are
+four-byte library shells with no ABI functions; the actual content FactRows,
+hydration, read and validation runtimes retain their separately measured sizes.
+Build-info independently matches the same 233 source bytes. All 339 compiled
+contract ABIs, creation/runtime bytecode and link references match the native
+artifacts. Compiler and Forge version logs are retained. Build-info SHA256:
+`b3c8244dc64d7c61ab8c701d3ccd6a473f4f8f274e829787d286109096c7c5aa`.
+
+Result SHA256:
+`be4d597e315a8316184b086c1d8f14091a3d8fb6da61857523b1f7a6ea59cf3d`.
+Test output SHA256:
+`e3c5549bfe6607d87fddf93688d50c1e6d765cc9da8a60fdd34526ff4ee1b6bf`.
+Production inventory SHA256:
+`30894faebde78c9f3a95989ddf734a7c7c9be056dfd1ecbbd0c1519348972bf4`.
 
 ## Evidence limits
 
