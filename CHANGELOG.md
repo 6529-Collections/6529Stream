@@ -218,6 +218,9 @@ the release policy in `docs/release-policy.md`.
   Preserve original host history and fulfillment; actual-current Safe cutover
   recipes are authored and await coordinated runtime verification.
 
+- Add Artist recovery adjudication V2 callers with canonical evidence publication,
+  complete guardian selection and current-notice governance receipt verification.
+
 - Add a separate LOW_SECURITY INSTANT entropy client with original policy and
   delayed request workflows, retained provenance and direct explicit-state reads.
 

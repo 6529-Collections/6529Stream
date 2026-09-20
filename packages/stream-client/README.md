@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Artist recovery adjudication](docs/current-artist-recovery-adjudication.md)
+  adds V2 publication, complete guardian selection and original operation-35
+  governance with current living-notice evidence.
+
 - [LOW_SECURITY INSTANT entropy](docs/current-entropy-instant.md) adds the
   separate delayed request profile and exact direct sixteen-word state read.
 
