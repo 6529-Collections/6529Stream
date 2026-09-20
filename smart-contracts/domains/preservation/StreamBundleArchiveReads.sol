@@ -14,6 +14,7 @@ import {
     StreamFinalityArtifactTypes as F
 } from "../../interfaces/stream/preservation/StreamFinalityArtifactTypes.sol";
 import { StreamPreservationInventoryIO as IO } from "./StreamPreservationInventoryIO.sol";
+import { StreamInventoryAbiCorrespondence } from "./StreamInventoryAbiCorrespondence.sol";
 import "../../interfaces/stream/preservation/IStreamExternalArtifactCoverage.sol";
 import "../../interfaces/stream/preservation/IStreamExternalArtifactCurrentPair.sol";
 import "../../interfaces/stream/preservation/IStreamExternalArtifactEnvironment.sol";
@@ -496,6 +497,7 @@ library StreamBundleArchiveReads {
         if (
             item.kind != T.Kind.EXTERNAL_OBJECT && item.kind != T.Kind.ONCHAIN_OBJECT
                 && canon != RAW && canon != JCS
+                && !StreamInventoryAbiCorrespondence.supported(item)
         ) {
             revert T.UnsupportedInventoryCorrespondence(item.algorithm, item.canonicalizationId);
         }

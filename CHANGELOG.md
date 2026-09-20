@@ -7,6 +7,16 @@
   rules. Common reads identify the new leaf schema; add dispatch/read regression
   coverage and an integration guide. Combined runtime acceptance remains pending.
 
+## Exact compiler-ABI inventory archive correspondence
+
+- Admit the closed native Snapshot, Reference, metric and preservation payload
+  tuples with their original schema and canonicalization identifiers. Preserve
+  source authentication, byte checks, original archive evidence and liveness.
+- Retain the separate original significant-properties reference obligation;
+  add mutation and actual-producer regression cases. See the
+  [correspondence guide](docs/integrations/canonical-archive-correspondence.md)
+  for profile boundaries and remaining integrated acceptance.
+
 ## Canonical metadata subjects for published scopes
 
 - Keep Metadata deployable by extracting only typed subject writes; preserve the
