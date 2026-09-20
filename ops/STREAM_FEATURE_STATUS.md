@@ -16,51 +16,51 @@ different milestones.
 
 ## Latest integration checkpoint: 20 September
 
-Source checkpoint `c093a9d6` includes the independently reviewed Museum producers,
-permanent Core floor binding, metric transport and Artist deployment carriers.
-ABI90 checks 2,514 sources at the floor overlay now committed as `ff372f80`;
-the subsequent carrier batch passes ABI92: 2,520 sources, zero errors, 24.140 seconds. This is
-source compatibility, not combined-system runtime acceptance. Root client
-checks pass **1,233/1,233** in122.899 seconds, including generation, build and
-strict types. Museum selected conservation/packetV3 plus compatibility pass
-**100/100** in10.926 seconds; positive capture fixtures remain synthetic.
+Latest source checkpoint: `e558addd`. ABI94 checks all 2,557 sources with zero
+errors in 24.609 seconds. This proves source/type compatibility; runtime results
+below apply to their own recorded sources. Original RC1 is unchanged.
 
-Complete entropy import/relay (`44edac4e`/`dffb8daa`) retains210 scoped native
-passes. Actual Core/Executor/Registry/Manifest/Coordinator and2-of-3Safe cutover
-now passes **16/16** at recorded source18c42131, integrated test correction
-`65cf7db5`:9 new plus7 inherited cases. Activation/tail failures roll back the
-whole batch and allow identical signed retries. All76 captured production
-products fit. That foundation capture predates Museum Core anchors and excludes
-actual Artist/paid mint/render; those joins and real cold gas floors remain.
-
-V3 recovery clients (`68fb843a`) have their own frozen898669e5 profile. Artist
-host repair (`7901f3b1`) fits its selected hosts. Compiler-authenticated creation
-carriers (`fffb5477`) now fit both old deployment wrappers at693bytes and Factory
-at3,775 runtime/31,224 actual init; original child code and CREATE issuer/nonces
-are preserved. Eight focused native cases are running separately. Recovered
-authority hydration and broader original record combinations remain in progress.
-
-V2 output/root fixture corrections (`cb01be62`) establish28 distinct passing
-cases across the retained runs; the20m outer fixture is explicitly **not** a
-release gas-budget acceptance. V2 snapshot/reference/provider integration is
-building. Metric transport (`ca95d161`) passes17 focused cases/two256-input fuzz
-properties, but isolated20.63m/25.06m write/read costs still exceed target budgets.
-The actual publication graph remains7PASS/2FAIL. A compact same-call transport
-repair is being built. Router factoring has removed sixfold internal serving
-specialization in IR; its actual size and70-case regression results are pending.
-
-Native tier declaration/condition catalog (`2758868f`) and permanent floor Core
-binding (`ff372f80`, [ADR0053](../docs/adr/0053-durable-museum-anchors.md)) are
-source-integrated. The producer's149-product capture fits;51 authored cases are
-being rerun after test-only harness corrections (`c093a9d6`). The sixth visible
-delivery task owns genuine floor/master/reference producers; Museum owns the
-canonical catalog consumer. First-sale enforcement and full packet conformance
-remain incomplete. Held personhood and earlier denied artifacts stay unapplied.
+- Actual governance-foundation entropy cutover passes 16/16 on `18c42131`,
+  including a 2-of-3 Safe and atomic signed retry. Actual Artist/paid-mint
+  successor cases are source-integrated (`cfcedb8e`); their seven runtime cases
+  await the fitting full graph. Production recovery AUTH measurement
+  (`02d4fc0e`) passes one focused case: 258,900/263,001 forwarded gas thresholds,
+  independent 100k/200k failure and governed 400k success. These storage-cooled
+  typed-boundary measurements do not change the original default or release floor.
+- Artist creation carriers (`fffb5477`) fit both wrappers at 693 bytes and the
+  Factory at 3,775 runtime/31,224 actual init, preserving exact child bytes and
+  CREATE semantics. Eight focused native cases are running on frozen `ee91a1e9`.
+- Router factoring (`9b016f1a`, guide `c0547385`) passes 70 focused regressions
+  on `28f46de8`, including five 256-input fuzz properties. It removes 11,551
+  runtime bytes but remains 2,178 bytes above the deployment limit in that
+  capture. Further joined-source factoring is active; actual full-graph tests
+  remain pending. V2 snapshots/reference (`4730cf01`) are source-integrated;
+  their 22-case native retry corrects an oversized test schema chunk only.
+- Metric transport (`ca95d161`) passes 17 focused tests with two 256-input
+  properties, but isolated write/read costs remain 20.63m/25.06m. The actual
+  graph remains 7PASS/2FAIL. The compact transport repair fits eight selected
+  products and is in its focused native campaign; no raised-cap acceptance.
+- Native conservation tier/catalog (`2758868f`, test correction `c093a9d6`)
+  passes 51/51 on the original `f7a05e07` production capture; all 149 captured
+  products fit. That evidence excludes later Core floor binding `ff372f80`.
+  Core floor binding's 14 tests (`734775e8`) and master/waiver/SaleRights' 33
+  tests (`c1c169d5`) are in one separate native campaign. Their independent
+  source/oracle reviews are clear. Binding alone does not enforce sale floors.
+- Offchain conservation/packetV3 (`a288d58a`) passes 100 root cases; canonical
+  condition capture (`569be86d`) passes 36; durable native tier/default capture
+  (`e558addd`) passes 38 in 10.460 seconds. These overlapping cohorts must not
+  be summed. Positive fixtures are synthetic, and full packet assembly remains.
+- V3 recovery clients (`68fb843a`) pass 1,233 root checks including generation,
+  build and strict types. Their frozen profile remains separate from later
+  capacity changes and actual Safe runtime. Entropy-succession clients continue.
+- Native floor/settlement and genuine prospective reference producers continue.
+  Per-purchase preparation is an optional optimization: the original purchase
+  must remain possible in one transaction using the same freshly validated
+  evidence. This is a build requirement, not a waiver of whole-operation gas
+  targets. Held personhood and earlier denied artifacts remain unapplied.
 
 Complete current-stack/Safe, stateful/fuzz/gas/CI acceptance, source freeze and
-matching testnet demonstration remain required. Canonical condition capture/replay
-(`569be86d`) is also source-integrated; its 36-case root check passes separately,
-with synthetic positives and item 15 still partial. Original RC1 is unchanged.
+matching testnet demonstration remain required. Expanded v1 is incomplete.
 
 ## How to read this document
 
@@ -94,14 +94,14 @@ document records delivery status without narrowing those requirements.
 
 | Item | Snapshot / state |
 | --- | --- |
-| Current integration source | `e4ccdba45139d25fd97470cfa9e18c76ba7cdc36`; see the [20 September batch](#latest-integration-checkpoint-20-september) for bounded evidence and remaining joins |
+| Current integration source | `e558addd5ce1aee15d7ac327482b3822289d3dc7`; see the [20 September batch](#latest-integration-checkpoint-20-september) for bounded evidence and remaining joins |
 | Active delivery PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744); expanded v1 is not merged to main |
 | Deployed supported RC1 | `569bf87f1fa808787d324f6e1582924b5ccf1d40`; its Sepolia evidence does not cover the newer branch |
 | Integrated Artist handoff | `49f22c34dac90d444560e88de1d0354ce9cf5525`: designated dormancy followed by executed rotations; ART23 |
 | Further integrated Artist handoff | `9ea144c85768050ec910cc8534af13bcac82e20d`, received during assembly: closed-origin dormancy/rotation extension on the preceding handoff; ART24 |
 | Integrated entropy client handoff | `642d017d9d0cd8ee9b6b813abbdbe10a4c6b1265`; client.entropy-authority |
 | Integrated OwnerRecords capture handoff | `57ac8d041c9adc479f1061fafec748c8330ac974`; MUSEUM-36 |
-| Latest broad cheap compilation evidence | 2,458-source ABI/type/storage pass at `e4ccdba4` in23.375 seconds (ABI81). Historical ABI52 and additive mode-2 ABI56 remain explicitly client-pinned; neither establishes whole-system runtime acceptance. |
+| Latest broad cheap compilation evidence | 2,557-source ABI/type/storage pass at `e558addd` in 24.609 seconds (ABI94). Historical ABI52 and additive mode-2 ABI56 remain explicitly client-pinned; neither establishes whole-system runtime acceptance. |
 | Completed broader native batch | Frozen `ee0f01599b638ae8437ac794e43d83fe1a2be9f5`: 28 suites /1,056 sources,167 passed /39 failed; all 647 production products fit. See [native4 failures and assignments](#cohort-native4). Later source is excluded. |
 | Latest focused native evidence | Separate captures: entropy 10, Royalty 11, mint 101, actual-Core 29, final burn 49 and later burn-credit 31 distinct cases pass. Repaired native-price 76 passes at 766c5dfd with independent source/artifact attestation; STATIC output manifest 9 passes in a separate capture. Root clients 398 and a museum authority/profile cohort of 131 pass. Other museum cohorts overlap. No complete-system pass is inferred. |
 

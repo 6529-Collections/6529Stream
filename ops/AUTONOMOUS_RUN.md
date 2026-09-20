@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `c093a9d6`: Museum/native anchors, metric transport, V3 clients and Artist creation carriers integrated. Root clients1,233 and Museum100 pass; entropy foundation16 passes on18c42131. ABI92: 2,520 sources, zero errors. |
+| Source checkpoint | `e558addd`: Router/V2 reference, master/waiver/SaleRights, Core floor tests, production AUTH measurement and native-tier capture integrated. ABI94: 2,557 sources/zero errors. Scoped runtime evidence remains source-specific. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,55 +29,42 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 20 September
 
-Latest intake is `c093a9d6`. Root clients pass1,233/1,233 with generation/build/
-strict types; Museum selected conservation/packetV3 plus compatibility pass100.
-Actual foundation entropy cutover16/16 is recorded at18c42131 and its test
-correction is integrated65cf7db5; whole-batch Safe rollback/retry passes. Earlier
-producer210 evidence remains separate. ABI90 is source/type-only at floorff372f80;
-ABI92 passes the latest carrier intake: 2,520 sources, zero errors. No full-v1 completion claim follows.
+Latest intake is `e558addd`; ABI94 passes all 2,557 sources in 24.609 seconds.
+Root clients remain 1,233 passing checks. Native Museum tier/catalog passes 51
+on its original source; 47 master/Core-floor cases are running separately.
+Router 70 passes on its recorded capture but remains 2,178 bytes oversized.
+Native-tier offchain capture passes 38 root cases; positive fixtures are synthetic.
 
-Current ownership supersedes older historical next-batch statements below:
+Current ownership supersedes historical next-batch statements below:
 
-- A: creation carriers ee91→fffb5477 are integrated; all selected products fit,
-  original child bytes and Factory CREATE preserved. Run one frozen eight-case
-  deployment campaign while completing corrected inert personhood proposal.
-  Identity/Coordinator/Owner hosts belong to Burn; held proof stays unapplied.
-- B: V2 output/root correction bf0696→cb01be62 establishes28 distinct passes;
- 20m outer fixture is not capacity acceptance. Build V2 snapshot/reference and
- complete COLLECTION inventory adapter using real existing source primitives.
- C owns the same combined provider and its V2 dispatch.
-- C: metric a73→ca95d161 passes17 focused cases but remains over gas targets;
- actual native14 stays7/9. Build compact fresh currentness/proof transport, scoped
- provider and genuine prospective pre-sale reference profile. No held cache/cap
- increase or known-failing actual retry.
-- Mint: actual-foundation entropy16 passes with exact source/artifact verification.
- Build actual Artist-consented EXPLICIT cutover/request tests and measure a
- narrow real Coordinator cold export/import/origin-admission path. Earlier249442
- caller gas came from a typed32-recovery-step fixture, not production minimum.
-- Burn: implement recovered-authority profile10, true per-era chronology and
- seven-owner atomic import with actual continuations. First coherent singleton
- accepted-generation1 PRIMARY_ONLY subset does not complete broader ART34–37.
-- Museum: selected conservation/packetV3 integrateda288d58a, root100 passes.
- Canonical condition capture/replay20e8→569be86d passes36 root cases. Build
-  native tier/default provenance, then one coherent additive packet shape with
-  floor receipts. Retain all19 acquisition gaps and no invented latest fallback.
-- Clients: V3 rewind integrated68fb843a, root1,233 passes. Build separate exact
- entropy-succession client profile from joined7901f3b1/ABI89, retaining distinct
- actual-foundation18c runtime and plan/producer source evidence.
-- Conservation/native Museum: visible task01a0be37-2432-7a63-8820-fc42f159eb1d.
- Tier/catalogf7→2758868f source-integrated;51 cases rerun after two test-only
- corrections d35→c093a9d6. Build actual floor/master/waiver and revenue projection
- joins; root floorCoreff372f80 is ready and separate tests are being authored.
- C owns prospective reference; Museum owns offchain consumers. Personhood held.
-- Testing: Router old-codec factoring preserves canonical behavior; sixfold
- serving specialization reduced to one in optimizedIR by internal memory flags.
- One original-profile size capture is running, then cached70-case regressions
- if fitting. Compose with B's new V2 entries before refreezing actual terminal10,
- INSTANT8 and Safe9 current-graph acceptance. No protected STATIC delegation.
+- A: finish the single frozen creation-carrier eight-case run and corrected
+  inert personhood proposal. Identity/Coordinator/Owner hosts remain Burn-owned.
+- B: finish the exact V2 snapshot/reference test-only chunk retry; continue the
+  complete V2 COLLECTION inventory adapter. Source is integrated `4730cf01`.
+- C: finish compact metric native acceptance; build scoped finality and the
+  genuine prospective reference host with the agreed acyclic Floor/source join.
+- Mint: production AUTH measurement is integrated `02d4fc0e`; independently
+  review optional preparation and actual conservation/commerce compatibility.
+  Actual Artist entropy seven-case source is integrated `cfcedb8e`, runtime pending.
+- Burn: finish coherent recovered-authority profile10, original chronology and
+  seven-owner atomic import, with actual continuation/Safe test source.
+- Museum: native tier/default capture is integrated `e558addd`; continue one
+  coherent additive native conservation packet shape when the real floor is
+  frozen. Preserve all 19 acquisition requirements and source qualifications.
+- Clients: complete exact entropy-succession client/workflow profile from
+  joined `7901f3b1`/ABI89. Actual-foundation runtime `18c42131` stays separate.
+- Conservation/native task `01a0be37-2432-7a63-8820-fc42f159eb1d`: finish the
+  single 47-case run, optional-preparation floor and actual settlement joins.
+  Master/waiver/SaleRights source is integrated `c1c169d5`; Core floor tests
+  `734775e8`. C owns prospective reference; Museum owns offchain consumers.
+- Testing: continue joined Router internal read/copy factoring without changing
+  external behavior or applying held artifacts. Then refreeze actual terminal10,
+  INSTANT8 and Safe9 on the fitting current graph. No duplicate native compiler.
 
-Root owns technical decisions, shared interfaces, integration and candidate
-closure. No new funding or onchain action is needed. Source integration,
-focused tests, operational capacity and full release acceptance remain distinct.
+Root owns shared interfaces, architecture, integration and final closure.
+Preparation must remain optional for a normal one-transaction purchase; gas
+acceptance remains open. No new funding or onchain action is needed. Source
+integration, focused runtime, capacity and full release acceptance stay distinct.
 
 
 - Root owns architecture, integration and delivery. ABI70 covers all 2,329

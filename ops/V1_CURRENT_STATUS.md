@@ -18,46 +18,48 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 20 September integrated batch
 
-Latest source checkpoint: `c093a9d6`. ABI90 checked2,514 sources at the floor
-overlay now committed `ff372f80`; ABI92 checks the carrier intake at c093a9d6: 2,520 sources, zero errors, 24.140 seconds.
-Original RC1 remains unchanged. Source, scoped runtime and combined release
-acceptance are separate.
+Latest source checkpoint: `e558addd`. ABI94 checks all 2,557 sources with zero
+errors in 24.609 seconds. This proves source/type compatibility; runtime results
+below apply to their own recorded sources. Original RC1 is unchanged.
 
-- Entropy actual-foundation cutover now passes16/16 at source18c42131:
- 9 new and7 inherited cases using actual Core/Executor/Registry/Manifest/
- Coordinator and a pinned2-of-3Safe. Test correction is integrated65cf7db5.
- All76 captured production products fit; whole-batch activation/tail rollback
- and identical signed retries pass. The earlier producer210 cases retain typed
- surrounding boundaries. Neither capture proves the later Museum Core changes
- or actual Artist/paid-mint/render joins; those and cold gas calibration continue.
-- Artist creation carriers (`fffb5477`) replace two oversized deployment wrappers
- while retaining exact compiler child bytes and original Factory CREATE semantics.
- Both wrappers are693bytes; Factory3,775 runtime/31,224 actual init; all selected
- products fit. Independent source/eight-oracle review passes; focused native is
- running. The prior host repair7901f3b1 and broader recovery runtime remain distinct.
-- V2 output/root test corrections (`cb01be62`) establish28 distinct passing cases
- across retained native3/4/5. The20m outer fixture funds the original16m nested
- render budget and is not a release capacity verdict. V2 snapshot/reference and
- complete provider/inventory integration remain building.
-- Metric same-call input reuse (`ca95d161`) passes17 focused tests with two256-run
- fuzz properties and six fitting products. Measured isolated write/read costs
- remain20.63m/25.06m; actual graph7PASS/2FAIL is unchanged. A compact transport
- repair targets duplicate encoding without weakening source checks or caps.
-- Museum selected conservation/packetV3 (`a288d58a`) passes100 root new/compatibility
- tests in10.926s. Native tier/catalog (`2758868f`) is independently reviewed;
- its149-product capture fits. The51-case suite is being rerun after test-only
- harness corrections (`c093a9d6`). Positive offchain fixtures remain synthetic.
-- Permanent Core floor anchor (`ff372f80`, [ADR0053](../docs/adr/0053-durable-museum-anchors.md))
- preserves original sale-floor receipts across Metadata/recorder replacement.
- Source/ABI review passes; exact native producer, settlement joins and floor
- runtime tests are building. Binding alone does not enforce the sale floor.
-- Canonical condition source capture/replay (`569be86d`) passes36 root
-  source/wrapper/compatibility cases. Complete retained hosts and exact original
-  receipt order determine the latest record; unsupported newest evidence stays
-  unresolved. Synthetic positives and partial item15 are explicit.
-- V3 recovery clients (`68fb843a`) bring the root package to1,233 passing tests
- in122.899s including generation/build/strict types. The frozen898669 profile
- remains separate from later capacity changes and actual Safe execution.
+- Actual governance-foundation entropy cutover passes 16/16 on `18c42131`,
+  including a 2-of-3 Safe and atomic signed retry. Actual Artist/paid-mint
+  successor cases are source-integrated (`cfcedb8e`); their seven runtime cases
+  await the fitting full graph. Production recovery AUTH measurement
+  (`02d4fc0e`) passes one focused case: 258,900/263,001 forwarded gas thresholds,
+  independent 100k/200k failure and governed 400k success. These storage-cooled
+  typed-boundary measurements do not change the original default or release floor.
+- Artist creation carriers (`fffb5477`) fit both wrappers at 693 bytes and the
+  Factory at 3,775 runtime/31,224 actual init, preserving exact child bytes and
+  CREATE semantics. Eight focused native cases are running on frozen `ee91a1e9`.
+- Router factoring (`9b016f1a`, guide `c0547385`) passes 70 focused regressions
+  on `28f46de8`, including five 256-input fuzz properties. It removes 11,551
+  runtime bytes but remains 2,178 bytes above the deployment limit in that
+  capture. Further joined-source factoring is active; actual full-graph tests
+  remain pending. V2 snapshots/reference (`4730cf01`) are source-integrated;
+  their 22-case native retry corrects an oversized test schema chunk only.
+- Metric transport (`ca95d161`) passes 17 focused tests with two 256-input
+  properties, but isolated write/read costs remain 20.63m/25.06m. The actual
+  graph remains 7PASS/2FAIL. The compact transport repair fits eight selected
+  products and is in its focused native campaign; no raised-cap acceptance.
+- Native conservation tier/catalog (`2758868f`, test correction `c093a9d6`)
+  passes 51/51 on the original `f7a05e07` production capture; all 149 captured
+  products fit. That evidence excludes later Core floor binding `ff372f80`.
+  Core floor binding's 14 tests (`734775e8`) and master/waiver/SaleRights' 33
+  tests (`c1c169d5`) are in one separate native campaign. Their independent
+  source/oracle reviews are clear. Binding alone does not enforce sale floors.
+- Offchain conservation/packetV3 (`a288d58a`) passes 100 root cases; canonical
+  condition capture (`569be86d`) passes 36; durable native tier/default capture
+  (`e558addd`) passes 38 in 10.460 seconds. These overlapping cohorts must not
+  be summed. Positive fixtures are synthetic, and full packet assembly remains.
+- V3 recovery clients (`68fb843a`) pass 1,233 root checks including generation,
+  build and strict types. Their frozen profile remains separate from later
+  capacity changes and actual Safe runtime. Entropy-succession clients continue.
+- Native floor/settlement and genuine prospective reference producers continue.
+  Per-purchase preparation is an optional optimization: the original purchase
+  must remain possible in one transaction using the same freshly validated
+  evidence. This is a build requirement, not a waiver of whole-operation gas
+  targets. Held personhood and earlier denied artifacts remain unapplied.
 
 - LOW_SECURITY INSTANT entropy and direct original-policy reads (`4010ec2a`)
   pass 47 focused native cases on the producer's recorded source. Sale handling
