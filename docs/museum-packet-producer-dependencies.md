@@ -9,6 +9,15 @@ These dependencies remain required implementation, not waivable qualifications.
 
 ## Later source and consumer implementations
 
+The [original RIGHTS correspondence](museum-conservation-rights.md) separately
+replays either floor family with a frozen public RIGHTS capture. It matches
+saved collection hashes to original Metadata records, payloads and pre-sale
+selection history, while flagging a superseded selected head. The historical
+conservation provider's private constructor configuration remains unsupplied;
+the original-finality selector binding does not establish that separate binding.
+Current RIGHTS capture eligibility also limits historical availability. Full
+documentary closure and complete packet export remain required.
+
 The [typed DIRECT capture](museum-direct-conservation-source.md) follows original
 adapter receipts and shared floor evidence at source
 `8bb6dfe2957542f641b0d558e1cfd48e1b39ae98`. It discovers both known receipt

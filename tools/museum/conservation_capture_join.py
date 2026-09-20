@@ -113,10 +113,19 @@ def reconcile(inputs):
 
 def _reconcile(inputs):
     a, calls, hashes, pins, input_size, row_count = _inputs(inputs)
+    counts = _observations(a, calls, pins)
+    return {"profile": PROFILE, "profileHash": PROFILE_HASH, "version": "1", "sourceState": a,
+        "coreRuntimeHash": pins[a["core"]], "inputs": hashes,
+        "counts": {"inputBytes": str(input_size), "rowOccurrences": str(row_count), **counts},
+        "claims": dict(CLAIMS), "qualification": QUALIFICATION}
+
+
+def _observations(a, calls, pins):
+    """Reconcile already parsed, bounded source observations without projecting anchors."""
     end, stamp = uint(a["blockNumber"]), uint(a["timestamp"], 64)
     outcomes, headers, heights, receipts, queries = {}, {}, {}, {}, {}
     header_observations = set(); input_queries = {}
-    for name in NAMES:
+    for name in calls:
         input_queries[name] = {}
         for row in calls[name]:
             rpc._row(row)
@@ -261,11 +270,8 @@ def _reconcile(inputs):
             for left, right in ((lower, middle), (middle + 1, upper)):
                 child = dumps(["eth_getLogs", [{**f, "fromBlock": hex(left), "toBlock": hex(right)}]])
                 require(child in own, "conservation join missing exact split child")
-    return {"profile": PROFILE, "profileHash": PROFILE_HASH, "version": "1", "sourceState": a,
-        "coreRuntimeHash": pins[a["core"]], "inputs": hashes,
-        "counts": {"inputBytes": str(input_size), "rowOccurrences": str(row_count), "uniqueRpcOutcomes": str(len(outcomes)),
+    return {"uniqueRpcOutcomes": str(len(outcomes)),
             "headers": str(len(headers)), "receipts": str(len(receipts)), "receiptLogs": str(len(logs)),
             "transactionPlacements": str(len(transactions)), "queries": str(len(queries)),
             "queryCandidateLogChecks": str(match_checks),
-            **{k + "Queries": str(v) for k, v in query_counts.items()}},
-        "claims": dict(CLAIMS), "qualification": QUALIFICATION}
+            **{k + "Queries": str(v) for k, v in query_counts.items()}}

@@ -96,6 +96,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add offline correspondence between frozen universal or DIRECT first-sale
+  RIGHTS commitments and original public RIGHTS records, receipts and selected
+  history. Preserve both captures, flag superseded selections and keep historical
+  conservation-provider binding and complete packet evidence unresolved.
+
 - Add separate typed DIRECT conservation capture and offline replay, joining
   original adapter paid receipts to shared first-sale and release evidence.
   Retain both known sale families in ledger discovery and reject unsupported

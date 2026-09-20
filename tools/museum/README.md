@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Original conservation RIGHTS correspondence](../../docs/museum-conservation-rights.md)
+joins a saved first-sale commitment to original selected collection records,
+receipts and payloads. Current and historical selections stay separate, and
+superseded records are flagged. Historical provider configuration remains required.
+
 [Typed DIRECT conservation capture](../../docs/museum-direct-conservation-source.md)
 retains original fixed-price or auction paid receipts, adapter events and shared
 first-sale/release evidence. It keeps DIRECT identities separate from universal
