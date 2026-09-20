@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import "../helpers/StreamCurrentStackFixture.sol";
-import "../helpers/OfficialSafeFixture.sol";
+import "../helpers/CurrentCommerceConservationFixture.sol";
 import "../../smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol";
 import {
     StreamPrimarySaleSettlement
@@ -10,7 +9,7 @@ import "../../smart-contracts/interfaces/stream/artist/IStreamArtistDelegatedCon
 
 /// @notice Real current Core/Manager/Ledger/Artist/Registry/governance/recorder/native fixed sale, with separate threshold Safes.
 /// @dev Only the inherited external entropy provider is substituted. Native acceptance and cold capacity are separate evidence.
-contract StreamCurrentArtistDelegatedConsentTest is StreamCurrentStackFixture, OfficialSafeFixture {
+contract StreamCurrentArtistDelegatedConsentTest is CurrentCommerceConservationFixture {
     bytes32 private constant DELEGATED_PHASE = keccak256("ART42 delegated native phase");
     uint256 private constant PRICE = 1_000_000;
     OfficialSafe private principalSafe;
@@ -32,7 +31,19 @@ contract StreamCurrentArtistDelegatedConsentTest is StreamCurrentStackFixture, O
         delegateSafe = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 4241);
         buyerSafe = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 4242);
         _deployCurrentStack(address(principalSafe), vm.addr(PLATFORM_KEY));
+        OfficialSafe governor = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 4243);
+        _installGovernorSafe(governor, keys);
+        _enableWaivedCommerceFloor();
         vm.deal(address(buyerSafe), 1 ether);
+    }
+
+    function _additionalOperatingPolicies()
+        internal
+        view
+        override
+        returns (GovernanceActionPolicyEntry[] memory)
+    {
+        return _commerceFloorPolicies(super._additionalOperatingPolicies());
     }
 
     function _artistProof(bytes32 digest) internal override returns (bytes memory) {
@@ -265,6 +276,11 @@ contract StreamCurrentArtistDelegatedConsentTest is StreamCurrentStackFixture, O
     function _assertPaid(bytes memory saved, uint256 oldBalance) private {
         (bool ok, bytes memory result) = address(buyerSafe).call(saved);
         require(ok && abi.decode(result, (bool)), "original signed buyer Safe CALL");
+        bytes32 execution = nativeSale.executionIdByNonce(saleId, 1);
+        require(execution != 0, "original completed sale execution");
+        _assertWaivedCommerceReceipt(
+            address(recorder), recorder.settlementKey(address(nativeSale), execution), 0
+        );
         require(
             core.ownerOf(1) == address(buyerSafe) && core.collectionMintedEver(1) == 1,
             "actual current NFT acquired"
@@ -330,6 +346,7 @@ contract StreamCurrentArtistDelegatedConsentTest is StreamCurrentStackFixture, O
                 && !nativeSale.authorizationUsed(address(principalSafe), e.authorization.nonce),
             "grant and sale replay unchanged"
         );
+        require(commerceFloor.firstSale(1).receiptHash == 0, "refusal records no first sale");
         _recordSale();
         _assertPaid(saved, balance);
     }

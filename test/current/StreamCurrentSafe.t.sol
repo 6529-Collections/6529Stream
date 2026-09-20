@@ -19,8 +19,14 @@ contract StreamCurrentSafeTest is StreamCurrentStackFixture, OfficialSafeFixture
         SafeComponents memory components = deploySafeComponents("1.4.1");
         artistSafe = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 1);
         buyerSafe = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 2);
-        _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
         vm.deal(address(buyerSafe), 10 ether);
+    }
+
+    /// @dev Elect genesis economics before this scenario's only actual graph is constructed.
+    function deploySafeScenario(bool templateGenesis) external {
+        require(msg.sender == address(this), "fixture caller");
+        _templateGenesis = templateGenesis;
+        _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
     }
 
     function _artistProof(bytes32 digest) internal override returns (bytes memory) {
@@ -28,6 +34,7 @@ contract StreamCurrentSafeTest is StreamCurrentStackFixture, OfficialSafeFixture
     }
 
     function testSafeArtistBuyerCustodyApprovalTransferAndRevenueRelease() public {
+        this.deploySafeScenario(false);
         _buyRevealTransferAndClaim();
     }
 
@@ -47,8 +54,7 @@ contract StreamCurrentSafeTest is StreamCurrentStackFixture, OfficialSafeFixture
     }
 
     function testSafeArtistTemplateConsentAndPaidMintEscrowFlushAndClaim() public {
-        _templateGenesis = true;
-        _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
+        this.deploySafeScenario(true);
         require(_genesisTemplate != 0, "actual prebinding template");
         artists.requireMintConsent(1, PHASE, manager.phasePolicyHash(1, PHASE));
         (, profile, wallet) = sale.primaryPolicy(1);
@@ -143,6 +149,7 @@ contract StreamCurrentSafeTest is StreamCurrentStackFixture, OfficialSafeFixture
     }
 
     function testSafeMaterializesActualArtistTemplateAndPayoutChangesPreserveOldRights() public {
+        this.deploySafeScenario(false);
         bytes32 templateId = _createArtistTemplate();
         (bytes32 entriesHash, bytes32 metadataHash, uint32 artistShare) =
             primaryResolver.primaryTemplateEconomicsFacts(templateId);
@@ -416,6 +423,7 @@ contract StreamCurrentSafeTest is StreamCurrentStackFixture, OfficialSafeFixture
     }
 
     function testSafeArtistEconomicsGovernedReplacementAndDefensiveFreezeKeepMintEligible() public {
+        this.deploySafeScenario(false);
         IStreamSplitWallet.SplitEntry[] memory entries = new IStreamSplitWallet.SplitEntry[](2);
         entries[0] = IStreamSplitWallet.SplitEntry(artist, 900_000, keccak256("artist"));
         entries[1] = IStreamSplitWallet.SplitEntry(PROTOCOL, 100_000, keccak256("protocol"));
@@ -537,6 +545,7 @@ contract StreamCurrentSafeTest is StreamCurrentStackFixture, OfficialSafeFixture
     }
 
     function testSafeGovernorSchedulesAndExecutesActualFactoryGasRaise() public {
+        this.deploySafeScenario(false);
         (address previous, bytes32 previousHash, uint64 revision) = executor.governanceRootState();
         bytes memory data = abi.encodeCall(
             executor.rotateGovernanceRoot, (address(buyerSafe), address(buyerSafe).codehash)

@@ -83,6 +83,14 @@ royalty-snapshot auctions use their existing Safe governor. Original exact
 payment, escrow failure/retry, Artist consent and immutable royalty evidence
 assertions remain in these nine recipes.
 
+Artist delegated-consent native sales also opt in before buyer signatures. A
+separate threshold Safe performs the delayed floor binding and narrow Metadata
+grant, preserving the principal, delegate and buyer Safe nonces. Exhausted,
+revoked and expired grants retain their already-recorded policy/sale consents;
+the missing-sale-consent case retries the identical signed buyer transaction.
+Successful purchases assert the original payment-before-mint token-zero floor
+receipt. Native execution of these four recipes remains pending.
+
 ## Evidence and limits
 
 The Terminal/INSTANT source passed a 1,315-source ABI/type check before
