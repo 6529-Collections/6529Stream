@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import { StreamArtistRecoveryRewindPreparation } from "./StreamArtistRecoveryRewindPreparation.sol";
 import {
     StreamArtistRecoveryRewindActionReads as Reads
 } from "./StreamArtistRecoveryRewindActionReads.sol";
@@ -85,135 +84,100 @@ import {
 } from "../../interfaces/stream/artist/IStreamArtistDormancy.sol";
 import { GovernanceCall } from "../../interfaces/stream/governance/StreamGovernanceTypes.sol";
 
-/// @notice Fixed Coordinator V3 recipes: one plan, both snapshots, one original35 and one Archive append.
-library StreamArtistRecoveryRewindOperations {
-    struct Evidence {
-        bytes32 manifestHash;
-        W.ResolutionManifestV3 manifest;
-        W.AppealDocumentV3 appeal;
-        Appeal.Authority appealAuthority;
-        W.CrossOwnerFactsV3 facts;
-    }
+import { StreamArtistRecoveryRewindOperations } from "./StreamArtistRecoveryRewindOperations.sol";
 
-    function context(
-        T.SuiteConfiguration memory suite,
-        R.Request memory p,
-        T.Authorization memory a,
-        bytes32 manifestHash
-    ) public view returns (R.Context memory) {
-        W.EnvironmentV3 memory e = _environment(suite);
-        W.CrossOwnerFactsV3 memory facts = _facts(e, manifestHash);
-        return Owner(e.identityOwner).identityRecoveryContextV3(p, a, manifestHash, facts);
-    }
-
+/// @notice Original V3 preparation recipe, executed in the fixed Coordinator context.
+library StreamArtistRecoveryRewindPreparation {
     function prepare(D.CoordinatorContext memory x, bytes calldata data) public returns (bytes32) {
-        return StreamArtistRecoveryRewindPreparation.prepare(x, data);
-    }
-
-    /// @notice Decodes the original typed Coordinator call inside this fixed worker.
-    /// @dev The host retains its original external signature, caller gate and operation lock.
-    function recoverEncoded(D.CoordinatorContext memory x, bytes calldata originalCall)
-        public
-        returns (bytes32)
-    {
         (
             address actor,
+            bytes32 actionId,
+            GovernanceCall[] memory calls,
             R.Request memory p,
             T.Authorization memory acceptance,
             bytes32 manifestHash
-        ) = abi.decode(originalCall[4:], (address, R.Request, T.Authorization, bytes32));
-        return recover(x, actor, p, acceptance, manifestHash);
+        ) = abi.decode(
+            data[4:], (address, bytes32, GovernanceCall[], R.Request, T.Authorization, bytes32)
+        );
+        return _prepare(x, actor, actionId, calls, p, acceptance, manifestHash);
     }
 
-    function recover(
+    function _prepare(
         D.CoordinatorContext memory x,
         address actor,
+        bytes32 actionId,
+        GovernanceCall[] memory calls,
         R.Request memory p,
         T.Authorization memory acceptance,
         bytes32 manifestHash
-    ) public returns (bytes32 record) {
+    ) private returns (bytes32 association) {
         W.EnvironmentV3 memory env = _environment(x.suite);
         T.Snapshot[7] memory before_ = _snapshots(x.suite);
         Owner owner = Owner(env.identityOwner);
-        _requireNotVetoed(env.identityOwner, owner, p.artistId, manifestHash);
         W.CrossOwnerFactsV3 memory facts = _facts(env, manifestHash);
         R.Context memory c = owner.identityRecoveryContextV3(p, acceptance, manifestHash, facts);
         bytes32 role = _role(owner, p, acceptance, manifestHash, facts);
-        Evidence memory evidence = _evidence(x, env, p, manifestHash, role, facts);
-        address authority =
-            IStreamArtistIdentityContestOwner(env.identityOwner).artistWindowAuthority();
-        Contest.GovernanceWitness memory governance = role == Appeal.APPEAL
-            ? StreamArtistGuardianAppealGovernance.read(x, authority, actor, p.reasonHash, c)
-            : StreamArtistIdentityRecoveryGovernance.read(x, authority, actor, p.reasonHash, c);
-        StreamArtistRecoveryActionOperations.requireExecution(
-            env.identityOwner, p.artistId, governance.actionId
-        );
-        W.EvidenceStateV3 memory state =
-            _state(owner, p.artistId, governance.actionId, evidence, role);
-        (A.Association memory prepared,,,) = IStreamArtistRecoveryActionOwner(env.identityOwner)
-            .identityRecoveryActionState(p.artistId, governance.actionId);
-        if (prepared.associationHash != state.associationHash) revert T.InvalidRecord();
-        T.SignerApproval memory proof = _verify(x, actor, p, acceptance, c.incumbent);
-        bytes memory noticeBefore = _notice(env.identityOwner, p.expectedCauseHash);
-        record = owner.recoverIdentityV3(
-            T.ActionContext(35, actor, before_[2]),
+        StreamArtistRecoveryRewindOperations.Evidence memory evidence =
+            _evidence(x, env, p, manifestHash, role, facts);
+        IStreamArtistRecoveryActionOwner actionOwner =
+            IStreamArtistRecoveryActionOwner(env.identityOwner);
+        (address executor, bytes32 pin) = actionOwner.recoveryExecutorBinding();
+        A.Witness memory witness = Reads.prepare(
+            A.Environment(x.suite.registry, executor, pin, x.suite.roleRegistry),
+            actionId,
+            calls,
             p,
             acceptance,
-            proof,
-            governance,
+            c,
+            role == Appeal.APPEAL,
+            manifestHash
+        );
+        (A.Association memory previous,,,) = actionOwner.identityRecoveryActionState(p.artistId, 0);
+        bool terminal = previous.associationHash == 0 || Reads.terminal(previous.action);
+        association = owner.prepareIdentityRecoveryActionV3(
+            T.ActionContext(A.PREPARE_OPERATION, actor, before_[2]),
+            p,
+            acceptance,
+            witness,
+            previous.associationHash,
+            terminal,
             manifestHash,
             facts
         );
-        IStreamArtistIdentityRecoveryOwner original =
-            IStreamArtistIdentityRecoveryOwner(env.identityOwner);
-        R.Record memory item = original.identityRecoveryRecord(record);
-        if (item.recordHash != record || original.latestIdentityRecovery(p.artistId) != record) {
+        (A.Association memory saved, A.Veto memory veto, bytes32 executed,) =
+            actionOwner.identityRecoveryActionState(p.artistId, actionId);
+        W.EvidenceStateV3 memory state = _state(owner, p.artistId, actionId, evidence, role);
+        if (
+            association == 0 || saved.associationHash != association || veto.vetoer != address(0)
+                || executed != 0 || saved.action.actionId != actionId
+                || state.associationHash != association
+        ) {
             revert T.InvalidRecord();
         }
-        bytes32[] memory excluded =
-            Policy.exclusions(evidence.manifest, W.RecordKind.PAYOUT_DESIGNATION);
-        bytes32 payoutMutation;
-        if (excluded.length != 0) {
-            W.PayoutApplyV3 memory plan = W.PayoutApplyV3(
-                p.artistId,
-                manifestHash,
-                governance.actionId,
-                state.associationHash,
-                keccak256(abi.encode(c)),
-                record,
-                facts.selection.commitment,
-                facts.payout,
-                facts.payoutInventory,
-                facts.selection.payout,
-                excluded
-            );
-            payoutMutation = Payout(env.payoutOwner)
-                .applyRecoveryRewindV3(T.ActionContext(35, actor, before_[5]), plan);
-            if (payoutMutation == 0) revert T.InvalidRecord();
-        } else if (
-            keccak256(abi.encode(IStreamArtistOwner(env.payoutOwner).ownerStateSnapshotV2()))
-                != keccak256(abi.encode(before_[5]))
+        Worker worker = EvidenceReads.worker(env);
+        bytes32 seal = worker.sealPreparationV3(manifestHash, actionId, association);
+        W.PreparationSealV3 memory preparation = worker.preparationSealV3(facts.selection.sourceKey);
+        if (
+            seal == 0 || seal != preparation.commitment
+                || preparation.associationHash != association
         ) {
-            revert T.StaleOwnerSnapshot(keccak256("domain:payout_lifecycle"));
+            revert W.InvalidRecoveryRewindPreparation(actionId);
         }
         _archive(
             x,
             actor,
-            35,
-            record,
+            A.PREPARE_OPERATION,
+            association,
             before_,
             abi.encode(
-                keccak256("6529STREAM_ARTIST_RECOVERY_REWIND_EXECUTION_EVIDENCE_V3"),
+                keccak256("6529STREAM_ARTIST_RECOVERY_REWIND_PREPARATION_EVIDENCE_V3"),
                 p,
                 acceptance,
-                proof,
-                governance,
                 c,
-                item,
+                saved,
                 state,
                 evidence,
-                payoutMutation,
-                noticeBefore,
+                preparation,
                 _notice(env.identityOwner, p.expectedCauseHash)
             )
         );
@@ -277,7 +241,7 @@ library StreamArtistRecoveryRewindOperations {
         Owner owner,
         bytes32 artistId,
         bytes32 actionId,
-        Evidence memory e,
+        StreamArtistRecoveryRewindOperations.Evidence memory e,
         bytes32 role
     ) private view returns (W.EvidenceStateV3 memory s) {
         s = owner.identityRecoveryEvidenceStateV3(artistId, actionId);
@@ -300,7 +264,7 @@ library StreamArtistRecoveryRewindOperations {
         bytes32 hash,
         bytes32 role,
         W.CrossOwnerFactsV3 memory facts
-    ) private view returns (Evidence memory e) {
+    ) private view returns (StreamArtistRecoveryRewindOperations.Evidence memory e) {
         e.manifestHash = hash;
         e.facts = facts;
         IStreamArtistRecoveryRewindEvidence publisher = EvidenceReads.publisher(env);
@@ -328,55 +292,6 @@ library StreamArtistRecoveryRewindOperations {
                 x.suite.roleRegistry
             );
         }
-    }
-
-    function _requireNotVetoed(
-        address identity,
-        Owner owner,
-        bytes32 artistId,
-        bytes32 manifestHash
-    ) private view {
-        (A.Association memory a, A.Veto memory v, bytes32 executed,) = IStreamArtistRecoveryActionOwner(
-                identity
-            ).identityRecoveryActionState(artistId, 0);
-        if (a.associationHash == 0 || v.vetoer == address(0) || executed != 0) return;
-        W.EvidenceStateV3 memory s =
-            owner.identityRecoveryEvidenceStateV3(artistId, a.action.actionId);
-        if (s.manifestHash == manifestHash && s.associationHash == a.associationHash) {
-            revert A.RecoveryActionVetoed(a.action.actionId);
-        }
-    }
-
-    function _verify(
-        D.CoordinatorContext memory x,
-        address actor,
-        R.Request memory p,
-        T.Authorization memory a,
-        address incumbent
-    ) private view returns (T.SignerApproval memory) {
-        if (a.signature.length > 4096) {
-            revert T.BoundExceeded(a.signature.length, 4096);
-        }
-        if (block.timestamp > a.time) revert T.ExpiredAuthorization(a.time);
-        bytes32 digest = StreamArtistRotationHashes.acceptanceDigest(
-            StreamArtistHashes.Environment(
-                block.chainid, x.suite.registry, x.suite.core, x.suite.mintManager
-            ),
-            Rotation.Rotation(p.artistId, incumbent, p.newAddress, p.reasonHash, bytes32(0)),
-            a
-        );
-        bool direct = actor == p.newAddress && a.signature.length == 0;
-        if (!direct) {
-            (uint256 cap,, uint8 failure, uint64 revision) = IStreamGasParameterHost(
-                    x.suite.registry
-                ).gasParameterInfo(keccak256("6529STREAM_GGP_ARTIST_ERC1271_VERIFY_GAS"));
-            if (
-                revision == 0 || failure != 2
-                    || !StreamArtistRegistryValidatorBase(x.suite.validator)
-                        .validateSignerProof(p.newAddress, digest, a.signature, cap)
-            ) revert T.InvalidSignature();
-        }
-        return T.SignerApproval(p.newAddress, digest, direct);
     }
 
     function _notice(address identity, bytes32 causeHash) private view returns (bytes memory) {

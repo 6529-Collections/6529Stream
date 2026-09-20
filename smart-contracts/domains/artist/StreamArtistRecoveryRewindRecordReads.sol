@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistRecoveryRewindPayoutReads } from "./StreamArtistRecoveryRewindPayoutReads.sol";
 
 import {
     StreamArtistRecoveryRewindTypes as W
@@ -149,7 +150,7 @@ library StreamArtistRecoveryRewindRecordReads {
         } else if (kind == W.RecordKind.IDENTITY_REVISION) {
             f = _revision(e, artistId, row.recordHash, originalContinuation);
         } else if (kind == W.RecordKind.PAYOUT_DESIGNATION) {
-            f = _payout(e, artistId, row.recordHash);
+            f = StreamArtistRecoveryRewindPayoutReads.payout(e, artistId, row.recordHash);
         } else if (kind == W.RecordKind.STEWARD_SANCTION_GRANT) {
             f = _grant(e, artistId, row.recordHash);
         } else {
@@ -358,76 +359,6 @@ library StreamArtistRecoveryRewindRecordReads {
             keccak256(abi.encode(f.selected.admissionProof, n, chainProof, f.authorityClass));
     }
 
-    function _payout(W.EnvironmentV3 memory e, bytes32 artistId, bytes32 hash)
-        private
-        view
-        returns (Facts memory f)
-    {
-        (W.PayoutOriginalV3 memory r, bytes32 evidenceHash) = _payoutOriginal(e, hash);
-        T.PayoutDesignation memory stored =
-            IStreamArtistPayoutOwner(e.payoutOwner).designationRecord(hash);
-        if (
-            r.recordHash != hash || stored.artistId != artistId || r.signer == address(0)
-                || r.terms.payoutAccount == address(0) || r.signedAt == 0
-                || r.signedAt > block.timestamp || (r.authorityClass != 1 && r.authorityClass != 3)
-                || keccak256(abi.encode(stored)) != keccak256(abi.encode(r.terms))
-                || H.payoutRecordForAuthority(
-                        A.hashes(e), r.terms, r.signer, r.authorityClass, r.nonce, r.signedAt
-                    ) != hash
-        ) revert W.InvalidRecoveryRewindRecord(hash);
-        T.ReplayCell memory n = A.nonce(
-            e,
-            artistId,
-            r.nonce,
-            H.payoutDigest(A.hashes(e), r.terms, T.Authorization(r.nonce, r.signedAt, new bytes(0)))
-        );
-        if (r.terms.previousDesignationRecordHash != 0) {
-            T.PayoutDesignation memory previous = IStreamArtistPayoutOwner(e.payoutOwner)
-                .designationRecord(r.terms.previousDesignationRecordHash);
-            if (
-                previous.artistId != artistId || previous.payoutAccount == address(0)
-                    || previous.payoutAccount == r.terms.payoutAccount
-            ) revert W.InvalidRecoveryRewindRecord(hash);
-        }
-        f.selected.originalDataHash = keccak256(abi.encode(stored, r, evidenceHash));
-        f.selected.nonce = r.nonce;
-        f.association = IStreamArtistPayoutTransitionOwner(e.payoutOwner)
-            .payoutDesignationProvisionalAssociation(hash);
-        f.admissionRevision = n.touchedRevision;
-        f.authorityClass = r.authorityClass;
-        f.previousRecordHash = r.terms.previousDesignationRecordHash;
-        f.account = r.terms.payoutAccount;
-        f.abandonmentHash =
-            IStreamArtistPayoutResolutionOwner(e.payoutOwner).payoutAbandonment(hash);
-        _association(e, artistId, r.signer, f);
-        bytes32 abandonedProof;
-        if (f.abandonmentHash != 0) {
-            (D.Record memory d, T.ReplayCell memory cell) = A.dismissal(e, f.abandonmentHash);
-            D.Closure memory c = IStreamArtistIdentityDismissalOwner(e.identityOwner)
-                .identityTransitionClosure(artistId, f.association.transitionRecordHash);
-            if (
-                d.terms.artistId != artistId || !c.abandoned
-                    || c.dismissalRecordHash != f.abandonmentHash
-                    || f.association.transitionRecordHash == 0
-                    || c.windowEndsAt != f.association.windowEndsAt
-                    || cell.touchedRevision <= n.touchedRevision
-            ) revert W.InvalidRecoveryRewindRecord(hash);
-            abandonedProof = keccak256(abi.encode(d, cell, c));
-        }
-        f.selected.admissionProof =
-            keccak256(abi.encode(f.selected.admissionProof, n, evidenceHash, abandonedProof));
-        bytes32 continuationProof = C.payout(e, r, n);
-        if (continuationProof != 0) {
-            f.selected.admissionProof = keccak256(
-                abi.encode(
-                    keccak256("6529STREAM_ARTIST_RECOVERY_PAYOUT_RECORD_ADMISSION_V3"),
-                    f.selected.admissionProof,
-                    continuationProof
-                )
-            );
-        }
-    }
-
     function _association(
         W.EnvironmentV3 memory e,
         bytes32 artistId,
@@ -519,32 +450,6 @@ library StreamArtistRecoveryRewindRecordReads {
                 .dormancyTransitionStanding(v.transitionRecordHash);
         }
         revert W.InvalidRecoveryRewindRecord(v.transitionRecordHash);
-    }
-
-    function _payoutOriginal(W.EnvironmentV3 memory e, bytes32 hash)
-        private
-        view
-        returns (W.PayoutOriginalV3 memory r, bytes32 evidenceHash)
-    {
-        (address target, bytes32 pin) =
-            IStreamArtistIdentityRecoveryOwnerV3(e.identityOwner).recoveryRewindEvidenceBinding();
-        if (target.code.length == 0 || pin == 0 || target.codehash != pin) {
-            revert W.RecoveryRewindDependencyChanged(target);
-        }
-        IStreamArtistRecoveryRewindEvidence p = IStreamArtistRecoveryRewindEvidence(target);
-        if (
-            p.owner() != e.identityOwner || p.payoutOwner() != e.payoutOwner
-                || p.artistRegistry() != e.registry || p.deploymentChainId() != e.chainId
-                || p.coordinator() != e.coordinator || p.archive() != e.archive
-                || p.core() != e.core || p.mintManager() != e.manager
-        ) revert W.RecoveryRewindDependencyChanged(target);
-        bytes32 identityPin;
-        bytes32 payoutPin;
-        (r, evidenceHash, identityPin, payoutPin) = p.payoutOriginalV3(hash);
-        if (
-            identityPin != e.identityCodeHash || payoutPin != e.payoutCodeHash || evidenceHash == 0
-                || evidenceHash != W.payoutOriginalHash(e, r) || r.recordHash != hash
-        ) revert W.InvalidRecoveryPayoutOriginal(hash);
     }
 
     function _sameRevision(bytes32 hash, T.ReplayCell memory a, T.ReplayCell memory b)
