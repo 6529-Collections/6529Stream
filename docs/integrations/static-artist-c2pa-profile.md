@@ -36,11 +36,15 @@ and the semantics of every source must be independently verified; constructor
 acceptance of a role is not that verification. The original attribution closure
 must remain in the inventory when C2PA edges are added.
 
-This profile does not permit finalized output to follow live report, credential
-or identity heads. A freeze-safe C2PA successor and its finality binding are
-mandatory before admitting the optional paired renderer path. Frozen Artist
-source `3f1a0680` lacks that guarantee. No STATIC admission, byte-exact finality,
-native execution or deployment-size acceptance is established by this addendum.
+Live adverse provenance remains mandatory under MRR-ATTRIBUTION rules 3/5/6,
+AA-DISPLAY rule 7 and CMC-C2PA rules 10/11. This profile does not freeze those
+annotations. Preserve original full-output hashes as historical checkpoints:
+changed live annotation bytes make those checkpoints stale. Separating stable
+artwork bytes from live annotations would require an explicit separate profile.
+Frozen Artist source `3f1a0680` also needs the pending conflict-history successor
+before the optional paired path can claim complete ART38 behavior. No STATIC
+admission, byte-exact finality, native execution or deployment-size acceptance
+is established by this addendum.
 
 The focused registry tests use synthetic targets and analysis documents to test
 labels, pinned target identity, read bounds and admission gates. They do not
