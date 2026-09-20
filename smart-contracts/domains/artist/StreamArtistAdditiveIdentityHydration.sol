@@ -4,6 +4,7 @@ import "./StreamArtistDelegationIdentityHydration.sol";
 import "./StreamArtistMultipleIdentityHydration.sol";
 import "./StreamArtistHistoryState.sol";
 import "./StreamArtistHydrationGuards.sol";
+import "./StreamArtistMultipleDelegationIdentityHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistDelegationAuthorityHydration.sol";
 
 /// @notice Fixed transport for the two additive original-living profiles only.
@@ -46,6 +47,12 @@ library StreamArtistAdditiveIdentityHydration {
     ) public {
         (, AH.Query memory q, AH.OwnerData memory data,) =
             abi.decode(encoded, (T.ActionContext, AH.Query, AH.OwnerData, bytes32));
+        if (StreamArtistDelegationHydrationCodec.tagged(data.typedState, MD.IDENTITY)) {
+            StreamArtistMultipleDelegationIdentityHydration.importEncoded(
+                identity, grants, revisions, estate, dormancy, findings, encoded
+            );
+            return;
+        }
         if (StreamArtistDelegationHydrationCodec.tagged(data.typedState, DH.IDENTITY)) {
             StreamArtistDelegationIdentityHydration.importEncoded(
                 identity, grants, revisions, estate, dormancy, findings, encoded

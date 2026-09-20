@@ -165,3 +165,17 @@ Present grant liveness is never substituted for historical consent authority;
 fresh writes still use original current guards and the successor signature domain.
 See the [delegation profile guide](../guides/artist-delegation-authority-hydration.md)
 for the tagged owner codec, finite scope and remaining combinations.
+
+## Combined multiplicity and delegation
+
+The existing `hydrateMultipleArtistAuthority(MH.Request)` selects the explicit
+`6529STREAM_ARTIST_MULTIPLE_LIVING_DELEGATION_V1` profile when the authenticated
+source contains operation 25/26/27, operation 16, or a mode-2 binding. Its old
+supported histories keep the original multiplicity profile and bytes. Complete
+global journal partition, registration allocator, per-Artist principal/delegate
+nonce trees and every replay cell are prerequisites; a subject projection alone
+is never completeness. Global grant uses reconcile across all collections while
+original historical grant associations remain immutable. Compact typed owner
+envelopes retain the original all-owner guards, commit and Archive sequence and
+finite carrier bound, without new host selectors. See the
+[combined profile guide](../guides/artist-multiple-delegation-hydration.md).

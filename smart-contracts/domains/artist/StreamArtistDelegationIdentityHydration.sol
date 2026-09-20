@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistIdentityHydration.sol";
+import "./StreamArtistMultipleIdentityHydration.sol";
 import "./StreamArtistIdentityRevisionState.sol";
 import "./StreamArtistDelegationHydrationCodec.sol";
 import {
@@ -37,8 +38,9 @@ library StreamArtistDelegationIdentityHydration {
         AH.Query memory q
     ) public view returns (bytes memory) {
         DH.Identity memory b;
-        b.baseline =
-            StreamArtistIdentityHydration.exportState(identity, estate, dormancy, findings, q);
+        b.baseline = StreamArtistMultipleIdentityHydration.exportState(
+            identity, estate, dormancy, findings, q
+        );
         b.epoch = estate.delegationEpoch[q.artistId];
         if (b.epoch != 0 || revisions.pendingRecord[q.artistId] != 0) {
             revert T.UnsupportedProfile();
@@ -49,6 +51,7 @@ library StreamArtistDelegationIdentityHydration {
         uint256 grantCount;
         for (uint256 i; i < count; ++i) {
             H.Receipt memory r = IStreamArtistNativeReceipts(address(this)).artistNativeReceiptAt(i);
+            if (r.artistId != q.artistId) continue;
             if (r.operation == 25) ++revisionCount;
             if (r.operation == 26) ++grantCount;
         }
@@ -59,6 +62,7 @@ library StreamArtistDelegationIdentityHydration {
         bytes32 latest;
         for (uint256 i; i < count; ++i) {
             H.Receipt memory r = IStreamArtistNativeReceipts(address(this)).artistNativeReceiptAt(i);
+            if (r.artistId != q.artistId) continue;
             if (r.operation == 25) {
                 R.ProvisionalAssociation memory a = revisions.associations[r.recordHash];
                 R.ProvisionalAssociation memory empty;
@@ -87,13 +91,13 @@ library StreamArtistDelegationIdentityHydration {
         uint256 lanes;
         for (uint256 i; i < n; ++i) {
             CP.NonceIndex memory index = CP(address(this)).authorityNonceIndexAt(i);
-            if (index.kind == 2) ++lanes;
+            if (index.kind == 2 && _belongs(b.grants, q.artistId, index.key)) ++lanes;
         }
         b.delegateNonces = new DH.NonceLane[](lanes);
         lanes = 0;
         for (uint256 i; i < n; ++i) {
             CP.NonceIndex memory index = CP(address(this)).authorityNonceIndexAt(i);
-            if (index.kind != 2) continue;
+            if (index.kind != 2 || !_belongs(b.grants, q.artistId, index.key)) continue;
             if (index.prefixCount == 0 || index.prefixCount > 256) revert T.UnsupportedProfile();
             DH.NonceLane memory lane;
             lane.key = index.key;
@@ -106,6 +110,26 @@ library StreamArtistDelegationIdentityHydration {
             b.delegateNonces[lanes++] = lane;
         }
         return abi.encode(DH.IDENTITY, b);
+    }
+
+    function _belongs(DH.Grant[] memory rows, bytes32 artistId, bytes32 key)
+        private
+        pure
+        returns (bool)
+    {
+        for (uint256 i; i < rows.length; ++i) {
+            if (
+                key
+                    == keccak256(
+                        abi.encode(
+                            keccak256("6529STREAM_ARTIST_DELEGATE_NONCE_LANE_V1"),
+                            artistId,
+                            rows[i].item.grant.delegate
+                        )
+                    )
+            ) return true;
+        }
+        return false;
     }
 
     function importEncoded(
@@ -122,6 +146,17 @@ library StreamArtistDelegationIdentityHydration {
         DH.Identity memory b = StreamArtistDelegationHydrationCodec.identity(data.typedState);
         data.typedState = b.baseline;
         StreamArtistIdentityHydration.importState(identity, estate, dormancy, findings, q, data);
+        importAdditional(identity, grants, revisions, estate, q, b);
+    }
+
+    function importAdditional(
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistDelegationState.State storage grants,
+        StreamArtistIdentityRevisionState.State storage revisions,
+        StreamArtistEstateState.State storage estate,
+        AH.Query memory q,
+        DH.Identity memory b
+    ) internal {
         if (
             b.epoch != 0 || estate.delegationEpoch[q.artistId] != 0
                 || revisions.latestRecord[q.artistId] != 0

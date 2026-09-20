@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistMultipleDelegationCollectionHydration.sol";
 import "./StreamArtistMultipleCollectionHydration.sol";
 import "./StreamArtistDelegationCollectionHydration.sol";
 
@@ -560,6 +561,13 @@ contract StreamArtistConsentFinalityLifecycle is
     }
 
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
+        if (StreamArtistDelegationHydrationCodec.tagged(p.typedState, MD.CONSENT)) {
+            if (p.nonces.length != 0) revert T.InvalidRecord();
+            StreamArtistMultipleDelegationCollectionHydration.consents(
+                _policies, _recordDelegation, _saleRecords, _latestSaleConsents, p.typedState
+            );
+            return;
+        }
         if (StreamArtistDelegationHydrationCodec.tagged(p.typedState, DH.CONSENT)) {
             if (p.nonces.length != 0) revert T.InvalidRecord();
             StreamArtistDelegationCollectionHydration.importConsent(

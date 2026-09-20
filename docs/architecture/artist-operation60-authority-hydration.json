@@ -47,6 +47,20 @@
   "validationState": "source/type and authored actual two-registry/Safe/Archive scenarios; native behavior, sizes and current-stack acceptance pending",
   "additionalProfiles": [
     {
+      "profile": "6529STREAM_ARTIST_MULTIPLE_LIVING_DELEGATION_V1",
+      "write": "hydrateMultipleArtistAuthority",
+      "coordinator": "coordinateHydrateMultipleArtistAuthority",
+      "typedInterface": "smart-contracts/interfaces/stream/artist/IStreamArtistMultipleAuthorityHydration.sol",
+      "codec": "smart-contracts/interfaces/stream/artist/StreamArtistMultipleDelegationHydrationTypes.sol",
+      "request": "unchanged StreamArtistMultipleHydrationTypes.Request",
+      "selection": "admitted original source journal25/26/27, Consent16 or binding mode2; otherwise original multiplicity profile and bytes",
+      "originalOperations": [1, 2, 14, 16, 25, 26, 27, 54],
+      "source": "complete global journal/allocator partition, every subject lane, seven owner headers, per-Artist principal/delegate nonce trees and every replay cell; original living generation1 PRIMARY_ONLY modes1/2",
+      "consumer": "exact historic grant associations and all-collection use totals, original successor guards and atomic all-owner Archive import",
+      "exclusions": ["corrected/pending/collaborator bindings", "advanced authority and nonzero epoch", "other consumed delegation capabilities", "profile combinations, previous imports and larger carriers"],
+      "validation": "fourteen authored actual-owner/Safe/Archive cases; ABI and selected product sizes separate from native/current-graph/capacity acceptance"
+    },
+    {
       "profile": "6529STREAM_ARTIST_LIVING_DELEGATION_HYDRATION_V1",
       "write": "hydrateArtistAuthorityWithDelegations",
       "coordinator": "coordinateHydrateArtistAuthorityWithDelegations",

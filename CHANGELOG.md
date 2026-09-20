@@ -3,6 +3,14 @@
 All notable release-impacting changes are recorded here. The project follows
 the release policy in `docs/release-policy.md`.
 
+## Artist combined multiplicity and delegation hydration
+
+- Extend the existing multiple-Artist operation-60 capability with complete
+  original living delegation histories, all-collection grant accounting and
+  compact canonical owner states. Prior supported profile bytes stay unchanged.
+- Add actual-owner/Safe completeness, historical consent, fresh-write, finite
+  carrier and atomic rollback recipes; native/current-stack acceptance is pending.
+
 ## Artist original living delegation hydration
 
 - Add a distinct complete operation-60 profile for original living delegation,

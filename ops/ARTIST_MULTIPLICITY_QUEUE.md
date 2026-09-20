@@ -40,3 +40,22 @@ Next required combinations remain multiple identities with delegations,
 corrected bindings, other delegated record capabilities, advanced authority
 histories, profile composition and larger evidence carriers. Existing held
 collaborator/global-freeze/codec proposals stay inert and outside this batch.
+
+## Combined multiplicity/delegation successor
+
+Base `0bf8a970`, branch `codex/artist-multiple-delegation-hydration`. Reuses the
+existing multiple capability/Request and selects a compact explicit profile
+from admitted actual source histories. Global receipt/allocator partition and
+all-collection grant-use reconciliation precede every owner write. No Registry
+or Coordinator host selector, original Owner check, held artifact or shared
+fixture changes. Fourteen actual-owner/Safe cases are authored; native pending.
+Final ABI14 is clean across 893 sources. The final formatted size4 capture
+measures 20 products: all 19 new/changed or paired products fit, while unchanged
+Attribution remains 30,518. Identity 24,555, Coordinator 24,072 and Registry
+24,564 retain their original sizes. Compatibility retains all 190 prior ABI
+entries across ten changed existing products and their storage layouts; all
+eight old multiple helper bodies and the original identity import body match.
+The original Owner and four authority/facade hosts are unchanged. Independent
+review and native/current-graph acceptance remain separate; handoff is source-only.
+Later required work remains corrected/pending bindings, other record families
+and authority histories, previous imports and larger evidence carriers.

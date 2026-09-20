@@ -5,7 +5,9 @@ takes the unchanged `StreamArtistAuthorityHydrationTypes.Request` and selects
 `6529STREAM_ARTIST_LIVING_DELEGATION_HYDRATION_V1`. It is an additive permissionless
 operation-60 profile with the original seven-owner mask `0x7f`, one completion
 per owner and one atomic Archive append. No new signed domain or Artist write
-authority is introduced. The baseline and multiplicity selectors stay strict.
+authority is introduced. The baseline selector stays strict. The multiple
+selector now has a distinct combined source profile; its original supported
+histories retain their original profile bytes.
 
 ## Complete supported source
 
@@ -90,7 +92,8 @@ are separate evidence; authored tests are not runtime passes.
 ## Remaining required combinations
 
 This first ART35 slice does not complete migration. Multiple Artists/collections
-with delegation, corrected/pending bindings, revisions made before the original
+with delegation now have a [separate combined profile](artist-multiple-delegation-hydration.md)
+under the existing multiple request. Corrected/pending bindings, revisions made before the original
 binding, collaborator policies, other delegated capabilities and their records,
 nonzero epochs, guardian/rotation/recovery/estate/dormancy authority histories,
 timing changes, payout/economics/readiness/publication/finding combinations,

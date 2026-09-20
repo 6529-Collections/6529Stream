@@ -73,14 +73,14 @@ library StreamArtistDelegationCollectionHydration {
         if (count > 128) revert T.UnsupportedProfile();
         uint256 n;
         for (uint256 i; i < count; ++i) {
-            if (IStreamArtistNativeReceipts(address(this)).artistNativeReceiptAt(i).operation == 16)
-            ++n;
+            H.Receipt memory r = IStreamArtistNativeReceipts(address(this)).artistNativeReceiptAt(i);
+            if (r.operation == 16 && r.collectionId == q.collectionId) ++n;
         }
         b.sales = new DH.Sale[](n);
         n = 0;
         for (uint256 i; i < count; ++i) {
             H.Receipt memory r = IStreamArtistNativeReceipts(address(this)).artistNativeReceiptAt(i);
-            if (r.operation != 16) continue;
+            if (r.operation != 16 || r.collectionId != q.collectionId) continue;
             Sale.Record memory item = records[r.recordHash];
             bytes32 lookup = StreamArtistSaleHashes.lookup(
                 item.terms.collectionId, item.terms.saleId, item.terms.saleConfigHash

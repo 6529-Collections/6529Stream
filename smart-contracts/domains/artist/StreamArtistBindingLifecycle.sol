@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistMultipleDelegationCollectionHydration.sol";
 import "./StreamArtistMultipleCollectionHydration.sol";
 import "./StreamArtistDelegationCollectionHydration.sol";
 import "./StreamArtistCurrentAuthorityFacts.sol";
@@ -355,6 +356,13 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
     }
 
     function _hydrateAuthority(AH.Query calldata q, AH.OwnerData calldata p) internal override {
+        if (StreamArtistDelegationHydrationCodec.tagged(p.typedState, MD.BINDING)) {
+            if (p.nonces.length != 0) revert T.InvalidRecord();
+            StreamArtistMultipleDelegationCollectionHydration.bindings(
+                _bindings, _history, _terms, p.typedState
+            );
+            return;
+        }
         if (StreamArtistDelegationHydrationCodec.tagged(p.typedState, DH.BINDING)) {
             if (p.nonces.length != 0) revert T.InvalidRecord();
             StreamArtistDelegationCollectionHydration.importBinding(

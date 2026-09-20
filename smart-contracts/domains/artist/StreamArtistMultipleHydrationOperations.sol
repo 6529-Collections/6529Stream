@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 import "./StreamArtistHydrationCommit.sol";
 import "./StreamArtistMultipleHydrationCodec.sol";
+import "./StreamArtistMultipleDelegationSelection.sol";
 import {
     StreamArtistMultipleHydrationTypes as MH
 } from "../../interfaces/stream/artist/IStreamArtistMultipleAuthorityHydration.sol";
@@ -47,6 +48,11 @@ library StreamArtistMultipleHydrationOperations {
         T.SuiteConfiguration memory source =
             IStreamArtistAuthorityHydrationCoordinator(coordinator).authorityHydrationSuite();
         StreamArtistHydrationSourceGuards._suite(x.suite, source, prior, coordinator);
+        if (StreamArtistMultipleDelegationSelection.required(source)) {
+            return StreamArtistMultipleDelegationSelection.hydrate(
+                x, actor, p, source, prior, coordinator
+            );
+        }
         StreamArtistHydrationPrepared.Bundle memory h;
         h.profile = MH.PROFILE;
         h.prior = prior;
@@ -91,7 +97,7 @@ library StreamArtistMultipleHydrationOperations {
         emit MultipleArtistAuthorityHydrated(prior, value, p.artistIds, ids);
     }
 
-    function _selectors(MH.Request memory p) private pure {
+    function _selectors(MH.Request memory p) internal pure {
         if (
             p.bindingIndex != 0 || p.artistIds.length == 0 || p.artistIds.length > 128
                 || p.collections.length == 0 || p.collections.length > 128
@@ -364,7 +370,7 @@ library StreamArtistMultipleHydrationOperations {
         address coordinator,
         uint256 i,
         MH.Request memory p
-    ) private view returns (AH.OwnerData memory d) {
+    ) internal view returns (AH.OwnerData memory d) {
         CP.Checkpoint memory h = p.expectedSource[i];
         d.origins = p.replayOrigins[i];
         if (d.origins.length != h.replayCount) revert T.InvalidRecord();
@@ -395,14 +401,14 @@ library StreamArtistMultipleHydrationOperations {
         }
     }
 
-    function _artist(bytes32[] memory ids, bytes32 id) private pure returns (uint256) {
+    function _artist(bytes32[] memory ids, bytes32 id) internal pure returns (uint256) {
         for (uint256 i; i < ids.length; ++i) {
             if (ids[i] == id) return i;
         }
         revert T.InvalidRecord();
     }
 
-    function _collection(MH.Collection[] memory rows, uint256 id) private pure returns (uint256) {
+    function _collection(MH.Collection[] memory rows, uint256 id) internal pure returns (uint256) {
         for (uint256 i; i < rows.length; ++i) {
             if (rows[i].collectionId == id) return i;
         }

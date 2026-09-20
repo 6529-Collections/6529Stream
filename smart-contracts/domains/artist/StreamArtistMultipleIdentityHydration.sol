@@ -91,7 +91,7 @@ library StreamArtistMultipleIdentityHydration {
         AH.Query memory q,
         AH.Identity memory p,
         AH.NonceWord[] memory nonces
-    ) private {
+    ) internal {
         AH.OwnerData memory data;
         data.nonces = nonces;
         s.identities[q.artistId] = p.item;

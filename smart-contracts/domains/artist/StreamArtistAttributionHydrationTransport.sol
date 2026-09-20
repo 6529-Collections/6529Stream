@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistMultipleDelegationCollectionHydration.sol";
 import "./StreamArtistMultipleCollectionHydration.sol";
 import "./StreamArtistAttestationHydration.sol";
 import "./StreamArtistPublicationHydration.sol";
@@ -13,6 +14,11 @@ library StreamArtistAttributionHydrationTransport {
     ) public {
         (, AH.Query memory q, AH.OwnerData memory p,) =
             abi.decode(data[4:], (T.ActionContext, AH.Query, AH.OwnerData, bytes32));
+        if (StreamArtistDelegationHydrationCodec.tagged(p.typedState, MD.ATTRIBUTION)) {
+            if (p.nonces.length != 0) revert T.InvalidRecord();
+            StreamArtistMultipleDelegationCollectionHydration.attributions(s, p.typedState);
+            return;
+        }
         if (StreamArtistMultipleHydrationCodec.isState(p.typedState)) {
             if (p.nonces.length != 0) revert T.InvalidRecord();
             StreamArtistMultipleCollectionHydration.attributions(s, p.typedState);
