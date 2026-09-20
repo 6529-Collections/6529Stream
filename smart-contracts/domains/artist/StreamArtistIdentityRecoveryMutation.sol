@@ -88,7 +88,18 @@ library StreamArtistIdentityRecoveryMutation {
             i.governance.roleRevision
         );
         bytes32 guardian = _requirePrepared(s, rotations, i, c);
-        return _recover(s, identity, rotations, estate, replay, i, c, guardian, false);
+        return _recover(
+            s,
+            identity,
+            rotations,
+            estate,
+            replay,
+            i,
+            c,
+            guardian,
+            false,
+            i.request.supersededRecordHashes
+        );
     }
 
     /// @dev The fixed V2 admission library has authenticated its manifest, role, exact prepared
@@ -104,7 +115,38 @@ library StreamArtistIdentityRecoveryMutation {
         bytes32 guardian
     ) public returns (StreamArtistIdentityState.Mutation memory m) {
         _governance(i, c);
-        return _recover(s, identity, rotations, estate, replay, i, c, guardian, true);
+        return _recover(
+            s,
+            identity,
+            rotations,
+            estate,
+            replay,
+            i,
+            c,
+            guardian,
+            true,
+            i.request.supersededRecordHashes
+        );
+    }
+
+    /// @dev Fixed V3 admission proves the complete typed partition. The permanent record
+    /// still hashes the caller's full original array; only the guardian local effect uses
+    /// its exact classified subset. Other semantic owners apply their own validated portions.
+    function recoverRewound(
+        RecoveryState.State storage s,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        StreamArtistEstateState.State storage estate,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        RecoveryState.Input memory i,
+        Recovery.Context memory c,
+        bytes32 guardian,
+        bytes32[] memory guardianExclusions
+    ) public returns (StreamArtistIdentityState.Mutation memory) {
+        _governance(i, c);
+        return _recover(
+            s, identity, rotations, estate, replay, i, c, guardian, true, guardianExclusions
+        );
     }
 
     function _governance(RecoveryState.Input memory i, Recovery.Context memory c) private view {
@@ -129,7 +171,8 @@ library StreamArtistIdentityRecoveryMutation {
         RecoveryState.Input memory i,
         Recovery.Context memory c,
         bytes32 guardian,
-        bool adjudicated
+        bool adjudicated,
+        bytes32[] memory guardianExclusions
     ) private returns (StreamArtistIdentityState.Mutation memory m) {
         uint64 now_ = uint64(block.timestamp);
         uint64 postEnds = now_ + c.postContestSeconds;
@@ -260,7 +303,7 @@ library StreamArtistIdentityRecoveryMutation {
                         s.actions[i.governance.actionId].associationHash,
                         item.recordHash,
                         item.contextHash,
-                        i.request.supersededRecordHashes
+                        guardianExclusions
                     )
                 )
             );

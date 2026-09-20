@@ -171,9 +171,10 @@ content or completing an external selection does not opt a V1 request into V2.
 The [original staging-family guide](artist-recovery-staging-family.md) describes
 those earlier selector paths.
 
-Class4/steward-to-living recovery, non-guardian record rewinds and broader
-hydration remain separate required domains. Their absence here does not amend
-the authority specification.
+The separate [typed V3 rewind API](artist-recovery-rewinds-v3.md) adds the six
+non-guardian record families through explicit new selectors and evidence.
+Class4/steward-to-living recovery and broader hydration remain separate required
+domains. Their absence here does not amend the authority specification.
 
 ## Authored validation
 

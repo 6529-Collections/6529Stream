@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistRecoveryRewindContinuationMutation
+} from "./StreamArtistRecoveryRewindContinuationMutation.sol";
 import "./StreamArtistEntropyUnavailabilityState.sol";
 import {
     StreamArtistEntropyUnavailabilityTypes as EU,
@@ -423,9 +426,16 @@ contract StreamArtistIdentityEstateExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32) {
         _check(c, 51);
-        StreamArtistIdentityState.Mutation memory m = StreamArtistEstateEntryMutation.revokeStanding(
-            _resolutions, _rotations, _identity, _replay, _ownerContext(), msg.data[4:]
-        );
+        StreamArtistIdentityState.Mutation memory m =
+            StreamArtistRecoveryRewindContinuationMutation.revokeEncoded(
+                _recoveryRewinds,
+                _resolutions,
+                _rotations,
+                _identity,
+                _replay,
+                _ownerContext(),
+                msg.data[4:]
+            );
         _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
         _native(c.operationId, m.record, p.artistId, 0);

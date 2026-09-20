@@ -19,6 +19,7 @@ import "./StreamArtistDelegationState.sol";
 import "./StreamArtistIdentityState.sol";
 import { StreamArtistIdentityRecoveryState } from "./StreamArtistIdentityRecoveryState.sol";
 import { StreamArtistRecoveryAdjudicationState } from "./StreamArtistRecoveryAdjudicationState.sol";
+import { StreamArtistRecoveryRewindState } from "./StreamArtistRecoveryRewindState.sol";
 import "./StreamArtistBindingOperations.sol";
 import "./StreamArtistCollaboratorIdentityState.sol";
 import "./StreamArtistAuthorizationState.sol";
@@ -60,6 +61,8 @@ abstract contract StreamArtistIdentityData {
     StreamArtistStewardCapabilityState.State internal _stewardCapabilityGrants;
     // Explicit V2 evidence/action coordinates; every prior owner/child field retains its slot.
     StreamArtistRecoveryAdjudicationState.State internal _recoveryAdjudication;
+    // V3 typed rewinds append independent roots after the original V2 sidecar.
+    StreamArtistRecoveryRewindState.State internal _recoveryRewinds;
 
     function _noteLiving(
         StreamArtistIdentityState.OwnerContext memory o,

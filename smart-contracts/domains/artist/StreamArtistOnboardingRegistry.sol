@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "../../interfaces/stream/artist/IStreamArtistMultipleRecordsHydration.sol";
+
+import {
+    StreamArtistRecoveryRewindTypes as RewindTypes
+} from "../../interfaces/stream/artist/StreamArtistRecoveryRewindTypes.sol";
 import "../../interfaces/stream/artist/IStreamArtistMultipleAuthorityHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistDisputeWithdrawal.sol";
 import { StreamArtistRegistryAuxiliaryEncoding } from "./StreamArtistRegistryAuxiliaryEncoding.sol";
@@ -573,6 +577,40 @@ contract StreamArtistOnboardingRegistry is
         Succ.PublicDocument calldata document
     ) external view returns (bytes memory) {
         _forwardRegistryRead();
+    }
+
+    function registerIdentityRecoveryActionV3(
+        bytes32 actionId,
+        GovernanceCall[] calldata calls,
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function recoverArtistIdentityV3(
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function identityRecoveryContextV3(
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external view returns (IdentityRecovery.Context memory) {
+        _forwardFinalityRead();
+    }
+
+    function identityRecoveryEvidenceStateV3(bytes32 artistId, bytes32 actionId)
+        external
+        view
+        returns (RewindTypes.EvidenceStateV3 memory)
+    {
+        _forwardFinalityRead();
     }
 
     function registerIdentityRecoveryActionV2(

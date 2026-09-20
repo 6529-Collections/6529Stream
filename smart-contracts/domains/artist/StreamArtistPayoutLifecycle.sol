@@ -2,6 +2,19 @@
 pragma solidity ^0.8.19;
 import "./StreamArtistPayoutHydration.sol";
 import "./StreamArtistAuthorityCheckpoint.sol";
+import {
+    StreamArtistPayoutRecoveryState as RewindState
+} from "./StreamArtistPayoutRecoveryState.sol";
+import { StreamArtistPayoutRecovery as Rewind } from "./StreamArtistPayoutRecovery.sol";
+import {
+    StreamArtistRecoveryRewindEnvironment as RewindEnvironment
+} from "./StreamArtistRecoveryRewindEnvironment.sol";
+import {
+    StreamArtistRecoveryRewindTypes as RewindTypes
+} from "../../interfaces/stream/artist/StreamArtistRecoveryRewindTypes.sol";
+import {
+    IStreamArtistSuiteReads
+} from "../../interfaces/stream/artist/IStreamArtistSuiteReads.sol";
 
 import "./StreamArtistOwner.sol";
 import "./StreamArtistCurrentAuthorityFacts.sol";
@@ -19,6 +32,16 @@ contract StreamArtistPayoutLifecycle is StreamArtistOwner {
     mapping(bytes32 => T.Payout) private _pending;
     mapping(bytes32 => R.ProvisionalAssociation) private _associations;
     mapping(bytes32 => bytes32) private _abandonedUnder;
+    RewindState.State private _recoveryRewind;
+    event ArtistPayoutRecoveryRewindApplied(
+        uint16 schemaVersion,
+        bytes32 indexed artistId,
+        bytes32 indexed recoveryRecordHash,
+        bytes32 indexed actionId,
+        bytes32 planCommitment,
+        bytes32 continuationHash,
+        bytes32 mutationCommitment
+    );
     event ArtistPayoutProvisionalChildAbandoned(
         uint16 schemaVersion,
         bytes32 indexed artistId,
@@ -29,6 +52,59 @@ contract StreamArtistPayoutLifecycle is StreamArtistOwner {
 
     function payoutAbandonment(bytes32 recordHash) external view returns (bytes32) {
         return _abandonedUnder[recordHash];
+    }
+
+    function payoutRewindInventoryV3(bytes32 artistId)
+        external
+        view
+        returns (RewindTypes.PayoutInventoryV3 memory)
+    {
+        return Rewind.inventory(_recoveryRewind, _payouts, _pending, artistId);
+    }
+
+    function payoutRecoveryRecordStatusV3(bytes32 recordHash)
+        external
+        view
+        returns (RewindTypes.StatusV3 memory)
+    {
+        return _recoveryRewind.statuses[recordHash];
+    }
+
+    function payoutDesignationRecoveryContinuationV3(bytes32 recordHash)
+        external
+        view
+        returns (bytes32)
+    {
+        return _recoveryRewind.recordContinuations[recordHash];
+    }
+
+    function payoutRecoveryContinuationV3(bytes32 continuationHash)
+        external
+        view
+        returns (RewindTypes.PayoutContinuationV3 memory)
+    {
+        return _recoveryRewind.continuations[continuationHash];
+    }
+
+    function applyRecoveryRewindV3(
+        T.ActionContext calldata c,
+        RewindTypes.PayoutApplyV3 calldata plan
+    ) external returns (bytes32 mutationCommitment) {
+        _check(c, 35);
+        Rewind.Mutation memory mutation = Rewind.applyRewind(
+            _recoveryRewind, _payouts, _pending, _records, _replay, _rewindEnvironment(), c, plan
+        );
+        _commit(c, mutation.action, mutation.state, mutation.replay, bytes32(0));
+        emit ArtistPayoutRecoveryRewindApplied(
+            3,
+            plan.artistId,
+            plan.recoveryRecordHash,
+            plan.actionId,
+            plan.planCommitment,
+            _recoveryRewind.continuationHeads[plan.artistId],
+            mutation.commitment
+        );
+        return mutation.commitment;
     }
     event ArtistPayoutDesignationRecorded(
         uint16 schemaVersion,
@@ -236,6 +312,7 @@ contract StreamArtistPayoutLifecycle is StreamArtistOwner {
         );
         _replay[key] = T.ReplayCell(record, _revision + 1, 3, 1);
         StreamArtistAuthorityCheckpoint.noteReplay(key, _replay[key]);
+        bytes32 recoveryAdmission = _noteRecoveryAdmission(p, record);
         _commit(
             c,
             modern
@@ -255,25 +332,37 @@ contract StreamArtistPayoutLifecycle is StreamArtistOwner {
                 : keccak256(
                     abi.encode(p, signer, nonce, signedAt, currentTransition, candidateTransition)
                 ),
-            modern
-                ? keccak256(
-                    abi.encode(
-                        p.artistId,
-                        _payouts[p.artistId],
-                        _pending[p.artistId],
-                        association,
-                        record,
-                        abandonedChild,
-                        dismissal,
-                        current.recordHash
+            _withRecoveryAdmission(
+                keccak256("6529STREAM_ARTIST_PAYOUT_ADMISSION_STATE_V3"),
+                modern
+                    ? keccak256(
+                        abi.encode(
+                            p.artistId,
+                            _payouts[p.artistId],
+                            _pending[p.artistId],
+                            association,
+                            record,
+                            abandonedChild,
+                            dismissal,
+                            current.recordHash
+                        )
                     )
-                )
-                : keccak256(
-                    abi.encode(
-                        p.artistId, _payouts[p.artistId], _pending[p.artistId], association, record
-                    )
-                ),
-            keccak256(abi.encode(key, current.recordHash, record)),
+                    : keccak256(
+                        abi.encode(
+                            p.artistId,
+                            _payouts[p.artistId],
+                            _pending[p.artistId],
+                            association,
+                            record
+                        )
+                    ),
+                recoveryAdmission
+            ),
+            _withRecoveryAdmission(
+                keccak256("6529STREAM_ARTIST_PAYOUT_ADMISSION_REPLAY_V3"),
+                keccak256(abi.encode(key, current.recordHash, record)),
+                recoveryAdmission
+            ),
             record
         );
         _native(c.operationId, record, p.artistId, 0);
@@ -351,16 +440,53 @@ contract StreamArtistPayoutLifecycle is StreamArtistOwner {
         _records[record] = p;
         _replay[key] = T.ReplayCell(record, _revision + 1, 3, 1);
         StreamArtistAuthorityCheckpoint.noteReplay(key, _replay[key]);
+        bytes32 recoveryAdmission = _noteRecoveryAdmission(p, record);
         _commit(
             c,
             keccak256(abi.encode(p, signer, nonce, signedAt)),
-            keccak256(abi.encode(p.artistId, p.payoutAccount, record)),
-            keccak256(abi.encode(key, prior, record)),
+            _withRecoveryAdmission(
+                keccak256("6529STREAM_ARTIST_PAYOUT_ADMISSION_STATE_V3"),
+                keccak256(abi.encode(p.artistId, p.payoutAccount, record)),
+                recoveryAdmission
+            ),
+            _withRecoveryAdmission(
+                keccak256("6529STREAM_ARTIST_PAYOUT_ADMISSION_REPLAY_V3"),
+                keccak256(abi.encode(key, prior, record)),
+                recoveryAdmission
+            ),
             record
         );
         _native(c.operationId, record, p.artistId, 0);
         emit ArtistPayoutDesignationRecorded(
             1, p.artistId, p.payoutAccount, signer, prior, 1, nonce, signedAt, record
+        );
+    }
+
+    function _noteRecoveryAdmission(T.PayoutDesignation calldata p, bytes32 record)
+        private
+        returns (bytes32)
+    {
+        if (_recoveryRewind.continuationHeads[p.artistId] == bytes32(0)) return bytes32(0);
+        return Rewind.noteAdmission(
+            _recoveryRewind, _replay, _rewindEnvironment(), _revision, p, record
+        );
+    }
+
+    function _withRecoveryAdmission(bytes32 tag, bytes32 original, bytes32 admission)
+        private
+        pure
+        returns (bytes32)
+    {
+        return admission == bytes32(0)
+            ? original
+            : keccak256(abi.encode(tag, uint16(3), original, admission));
+    }
+
+    function _rewindEnvironment() private view returns (RewindTypes.EnvironmentV3 memory) {
+        T.SuiteConfiguration memory suite =
+            IStreamArtistSuiteReads(operationCoordinator).suiteConfiguration();
+        return RewindEnvironment.fromFixed(
+            suite.owners[2], artistRegistry, operationCoordinator, archiveV2, core, mintManager
         );
     }
 

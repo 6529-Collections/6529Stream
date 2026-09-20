@@ -74,6 +74,14 @@ the release policy in `docs/release-policy.md`.
   DISABLED/NOT_REQUIRED token registration, preserving the legacy ASYNC profile.
   Nonrandom consumer integrations and INSTANT support remain separate work;
   current-stack runtime acceptance is pending.
+
+- Add explicit Artist recovery V3 for typed guardian, succession, directive,
+  document, payout, steward-sanction and standing rewinds. Complete journal
+  selection, exact preparation seals and atomic Identity/Payout writes preserve
+  original records and spent replay, with new continuation scopes for fresh
+  writes. Class3 capability history remains authenticated through later
+  recoveries; native/current-stack, size and capacity validation remain pending.
+
 - Extend Artist recovery V2 to current living notice compromises, retaining
   original notice and dismissal history. Accepted recovery cancels an open
   notice through the original activity writer; Archive evidence and later

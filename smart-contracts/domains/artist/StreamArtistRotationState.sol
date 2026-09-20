@@ -700,6 +700,36 @@ library StreamArtistRotationState {
         T.Authorization memory a,
         T.SignerApproval memory proof
     ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        return _revokeStanding(s, identity, replay, o, c, p, a, proof, bytes32(0));
+    }
+
+    /// @dev The owner authenticates the exact stored recovery continuation for this retirement.
+    function revokeStandingWithRecovery(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        R.StandingRevocation memory p,
+        T.Authorization memory a,
+        T.SignerApproval memory proof,
+        bytes32 recoveryContinuation
+    ) public returns (StreamArtistIdentityState.Mutation memory) {
+        if (recoveryContinuation == 0) revert T.InvalidRecord();
+        return _revokeStanding(s, identity, replay, o, c, p, a, proof, recoveryContinuation);
+    }
+
+    function _revokeStanding(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        R.StandingRevocation memory p,
+        T.Authorization memory a,
+        T.SignerApproval memory proof,
+        bytes32 recoveryContinuation
+    ) private returns (StreamArtistIdentityState.Mutation memory m) {
         if (block.timestamp > a.time) revert T.ExpiredAuthorization(a.time);
         bytes32 retirement = s.retirement[p.artistId][p.revokedAddress];
         R.TransitionState memory transition = transitionState(s, retirement);
@@ -737,8 +767,14 @@ library StreamArtistRotationState {
         bytes32 key = _consume(
             replay,
             o,
-            keccak256("identity_authority.replay.standing_revocation_key"),
-            keccak256(abi.encode(p.artistId, p.revokedAddress, retirement)),
+            recoveryContinuation == 0
+                ? keccak256("identity_authority.replay.standing_revocation_key")
+                : keccak256("identity_authority.replay.standing_revocation_recovery_continuation"),
+            recoveryContinuation == 0
+                ? keccak256(abi.encode(p.artistId, p.revokedAddress, retirement))
+                : keccak256(
+                    abi.encode(p.artistId, p.revokedAddress, retirement, recoveryContinuation)
+                ),
             record
         );
         R.StandingRecord memory item =

@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamArtistIdentityRecoveryOwnerV3
+} from "../../interfaces/stream/artist/IStreamArtistIdentityRecoveryV3.sol";
+import {
+    StreamArtistRecoveryRewindTypes as RewindTypes
+} from "../../interfaces/stream/artist/StreamArtistRecoveryRewindTypes.sol";
+import { StreamArtistRecoveryRewindOperations } from "./StreamArtistRecoveryRewindOperations.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyArtistUnavailability.sol";
 import {
     StreamArtistEntropyUnavailabilityTypes as EU,
@@ -331,6 +338,24 @@ contract StreamArtistRegistryFinalityReadExtension {
         returns (bytes32)
     {
         return StreamArtistContentHashes.freezeDigest(_environment(), p, a);
+    }
+
+    function identityRecoveryContextV3(
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external view onlyHost returns (IdentityRecovery.Context memory) {
+        return StreamArtistRecoveryRewindOperations.context(_contentSuite(), p, a, manifestHash);
+    }
+
+    function identityRecoveryEvidenceStateV3(bytes32 artistId, bytes32 actionId)
+        external
+        view
+        onlyHost
+        returns (RewindTypes.EvidenceStateV3 memory)
+    {
+        return IStreamArtistIdentityRecoveryOwnerV3(_contentSuite().owners[2])
+            .identityRecoveryEvidenceStateV3(artistId, actionId);
     }
 
     function identityRecoveryContextV2(

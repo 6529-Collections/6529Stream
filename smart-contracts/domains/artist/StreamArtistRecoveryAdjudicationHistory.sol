@@ -29,6 +29,12 @@ import {
     StreamArtistRecoveryStagingHistory as Stages
 } from "./StreamArtistRecoveryStagingHistory.sol";
 import { StreamArtistSuccessionHashes } from "./StreamArtistSuccessionHashes.sol";
+import {
+    StreamArtistRecoveryRewindCapabilityReads as RewindCapabilities
+} from "./StreamArtistRecoveryRewindCapabilityReads.sol";
+import {
+    IStreamArtistIdentityRecoveryOwnerV3
+} from "../../interfaces/stream/artist/IStreamArtistIdentityRecoveryV3.sol";
 import { IStreamArtistOwner } from "../../interfaces/stream/artist/IStreamArtistOwner.sol";
 import {
     IStreamArtistRotationReads
@@ -253,6 +259,12 @@ library StreamArtistRecoveryAdjudicationHistory {
         uint32 originalCapabilities = f.capabilities.effectiveCapabilities;
         f.capabilities =
             IStreamArtistEstateOwner(address(this)).currentAuthorityCapabilities(artistId);
+        bytes32 capabilityProof;
+        if (current.facts.authorityClass == 3) {
+            capabilityProof = RewindCapabilities.proof(
+                e, artistId, f.origin, originalCapabilities, f.capabilities, ancestry.members
+            );
+        }
         if (
             f.capabilities.authorityAddress != current.facts.incumbent
                 || f.capabilities.authorityClass != current.facts.authorityClass
@@ -260,7 +272,6 @@ library StreamArtistRecoveryAdjudicationHistory {
                 || (current.facts.authorityClass == 3
                         ? f.origin.transitionRecordHash == 0
                         || f.capabilities.activationRecordHash != f.origin.transitionRecordHash
-                        || f.capabilities.effectiveCapabilities != originalCapabilities
                         : f.origin.transitionRecordHash != 0
                         || f.capabilities.activationRecordHash != 0)
         ) {
@@ -303,6 +314,15 @@ library StreamArtistRecoveryAdjudicationHistory {
                 f.closures
             )
         );
+        if (capabilityProof != 0) {
+            f.historyProof = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_RECOVERY_CAPABILITY_ADJUDICATION_HISTORY_V3"),
+                    f.historyProof,
+                    capabilityProof
+                )
+            );
+        }
     }
 
     function _estate(
@@ -467,14 +487,17 @@ library StreamArtistRecoveryAdjudicationHistory {
     ) private view returns (uint32 caps, bytes32 proof) {
         IStreamArtistSuccessionReads owner = IStreamArtistSuccessionReads(address(this));
         Succ.DesignationRecord memory d = owner.successorDesignationRecord(designation);
+        bool restored = IStreamArtistIdentityRecoveryOwnerV3(address(this))
+            .latestRecoveryCapabilityContinuationV3(v.artistId) != 0;
         if (
             d.recordHash != designation || d.terms.artistId != v.artistId || d.authorityClass != 1
                 || d.terms.successor != v.newAddress || d.terms.directiveHash != paired
                 || d.signer == address(0) || d.signedAt > before
                 || (v.previousTransitionRecordHash == 0 && d.signer != v.oldAddress)
                 || !Rotations.eligible(rotations, v.artistId, d.provisional)
-                || owner.operativeSuccessorRecord(v.artistId) != designation
-                || owner.operativeEstateDirective(v.artistId) != forbidden
+                || (!restored
+                    && (owner.operativeSuccessorRecord(v.artistId) != designation
+                        || owner.operativeEstateDirective(v.artistId) != forbidden))
                 || StreamArtistSuccessionHashes.designationRecord(
                         e, d.terms, T.Authorization(d.nonce, d.signedAt, bytes(""))
                     ) != designation

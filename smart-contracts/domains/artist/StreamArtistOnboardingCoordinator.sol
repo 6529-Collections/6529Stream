@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "../../interfaces/stream/artist/IStreamArtistMultipleRecordsHydration.sol";
+
+import { StreamArtistRecoveryRewindOperations } from "./StreamArtistRecoveryRewindOperations.sol";
 import "../../interfaces/stream/artist/IStreamArtistMultipleAuthorityHydration.sol";
 import "./StreamArtistDelegatedConsentOperations.sol";
 import "../../interfaces/stream/artist/IStreamArtistDelegatedConsent.sol";
@@ -555,6 +557,28 @@ contract StreamArtistOnboardingCoordinator is
         T.Authorization calldata a
     ) external operation returns (bytes32) {
         return StreamArtistSaleOperations.record(_economicContext(), actor, p, a);
+    }
+
+    function coordinateRegisterIdentityRecoveryActionV3(
+        address actor,
+        bytes32 actionId,
+        GovernanceCall[] calldata calls,
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external operation returns (bytes32) {
+        return StreamArtistRecoveryRewindOperations.prepare(_economicContext(), msg.data);
+    }
+
+    function coordinateRecoverArtistIdentityV3(
+        address actor,
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external operation returns (bytes32) {
+        return StreamArtistRecoveryRewindOperations.recover(
+            _economicContext(), actor, p, a, manifestHash
+        );
     }
 
     function coordinateRegisterIdentityRecoveryActionV2(

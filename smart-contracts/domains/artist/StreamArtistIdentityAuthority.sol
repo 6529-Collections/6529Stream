@@ -1,5 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    StreamArtistRecoveryRewindTypes as RewindTypes
+} from "../../interfaces/stream/artist/StreamArtistRecoveryRewindTypes.sol";
+import { StreamArtistRecoveryRewindReads } from "./StreamArtistRecoveryRewindReads.sol";
+import { StreamArtistRecoveryRewindInventory } from "./StreamArtistRecoveryRewindInventory.sol";
+import {
+    StreamArtistRecoveryRewindCapabilityReads
+} from "./StreamArtistRecoveryRewindCapabilityReads.sol";
+import { StreamArtistIdentityRewindExtension } from "./StreamArtistIdentityRewindExtension.sol";
+import { StreamArtistRewindExtensionDeployment } from "./StreamArtistRewindExtensionDeployment.sol";
+
 import "./StreamArtistAdditiveIdentityHydration.sol";
 import {
     StreamArtistStaticIdentityProjection as StaticIdentity
@@ -146,6 +157,7 @@ contract StreamArtistIdentityAuthority is
     address public immutable identityEstateExtension;
     address public immutable identityRecoveryExtension;
     address public immutable identityAdjudicationExtension;
+    address public immutable identityRewindExtension;
 
     function authorityNonceWordAt(uint8 kind, bytes32 key, uint256 index)
         external
@@ -328,6 +340,11 @@ contract StreamArtistIdentityAuthority is
         view
         returns (Estate.AuthorityCapabilities memory)
     {
+        if (_recoveryRewinds.capabilityHead[artistId] != 0) {
+            return StreamArtistRecoveryRewindCapabilityReads.current(
+                _recoveryRewinds, _identity, _estate, _dormancy, artistId
+            );
+        }
         _forwardIdentityRead();
     }
 
@@ -506,6 +523,9 @@ contract StreamArtistIdentityAuthority is
         bytes32 reasonHash,
         bool scheduled
     ) external {
+        if (_recoveryRewinds.actions[actionId].manifestHash != 0) {
+            _forwardRewindWriter();
+        }
         if (_recoveryAdjudication.actions[actionId].manifestHash != 0) {
             _forwardAdjudicationWriter();
         }
@@ -527,6 +547,181 @@ contract StreamArtistIdentityAuthority is
         T.Authorization calldata a
     ) external view returns (IdentityRecovery.Context memory) {
         _forwardIdentityRead();
+    }
+
+    function recoveryRewindEvidenceBinding() external view returns (address, bytes32) {
+        return StreamArtistIdentityRewindExtension(identityRewindExtension)
+            .recoveryRewindEvidenceBinding();
+    }
+
+    function recoveryRewindSelectionBinding() external view returns (address, bytes32) {
+        return StreamArtistIdentityRewindExtension(identityRewindExtension)
+            .recoveryRewindSelectionBinding();
+    }
+
+    function recoveryRewindInventoryV3(bytes32 artistId)
+        external
+        view
+        returns (RewindTypes.IdentityInventoryV3 memory)
+    {
+        return StreamArtistRecoveryRewindInventory.inventory(
+            _recoveryRewinds, _rotations, _identityRevisions, _succession, _stewardGrants, artistId
+        );
+    }
+
+    function recoveryRecordStatusV3(RewindTypes.RecordKind kind, bytes32 recordHash)
+        external
+        view
+        returns (RewindTypes.StatusV3 memory)
+    {
+        return StreamArtistRecoveryRewindInventory.status(
+            _recoveryRewinds, _identityRecovery, kind, recordHash
+        );
+    }
+
+    function recoveryStandingScopeV3(bytes32 artistId, address priorAddress)
+        external
+        view
+        returns (bytes32, bytes32, bytes32, bytes32)
+    {
+        return StreamArtistRecoveryRewindInventory.standing(
+            _recoveryRewinds, _rotations, _resolutions, artistId, priorAddress
+        );
+    }
+
+    function recoveryRewindBasisV3(bytes32 manifestHash)
+        external
+        view
+        returns (RewindTypes.IdentityBasisV3 memory)
+    {
+        _forwardRewindRead();
+    }
+
+    function identityRecoveryEvidenceStateV3(bytes32 artistId, bytes32 actionId)
+        external
+        view
+        returns (RewindTypes.EvidenceStateV3 memory)
+    {
+        _forwardRewindRead();
+    }
+
+    function identityRecoveryContextV3(
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash,
+        RewindTypes.CrossOwnerFactsV3 calldata facts
+    ) external view returns (IdentityRecovery.Context memory) {
+        _forwardRewindRead();
+    }
+
+    function guardianRecoveryAuthorityRoleV3(
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash,
+        RewindTypes.CrossOwnerFactsV3 calldata facts
+    ) external view returns (bytes32) {
+        _forwardRewindRead();
+    }
+
+    function prepareIdentityRecoveryActionV3(
+        T.ActionContext calldata c,
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        RecoveryAction.Witness calldata witness,
+        bytes32 previousAssociation,
+        bool previousTerminal,
+        bytes32 manifestHash,
+        RewindTypes.CrossOwnerFactsV3 calldata facts
+    ) external returns (bytes32) {
+        _forwardRewindWriter();
+    }
+
+    function recoverIdentityV3(
+        T.ActionContext calldata c,
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof,
+        Contest.GovernanceWitness calldata governance,
+        bytes32 manifestHash,
+        RewindTypes.CrossOwnerFactsV3 calldata facts
+    ) external returns (bytes32) {
+        _forwardRewindWriter();
+    }
+
+    function latestRecoveryCapabilityContinuationV3(bytes32 artistId)
+        external
+        view
+        returns (bytes32)
+    {
+        return _recoveryRewinds.capabilityHead[artistId];
+    }
+
+    function recoveryCapabilityContinuationV3(bytes32 record)
+        external
+        view
+        returns (RewindTypes.CapabilityContinuationV3 memory)
+    {
+        return _recoveryRewinds.capabilityContinuations[record];
+    }
+
+    function identityRevisionRecoveryContinuationV3(bytes32 record)
+        external
+        view
+        returns (bytes32)
+    {
+        return _recoveryRewinds.revisionRecordContinuations[record];
+    }
+
+    function recoveryRevisionContinuationV3(bytes32 hash)
+        external
+        view
+        returns (RewindTypes.RevisionContinuationV3 memory)
+    {
+        return _recoveryRewinds.revisionContinuations[hash];
+    }
+
+    function standingRevocationRecoveryContinuationV3(bytes32 record)
+        external
+        view
+        returns (bytes32)
+    {
+        return _recoveryRewinds.standingRecordContinuations[record];
+    }
+
+    function recoveryStandingContinuationV3(bytes32 hash)
+        external
+        view
+        returns (RewindTypes.StandingContinuationV3 memory)
+    {
+        return _recoveryRewinds.standingContinuations[hash];
+    }
+
+    function _forwardRewindRead() private view {
+        _returnResolution(
+            StreamArtistRecoveryRewindReads.read(
+                _identityRecovery,
+                _recoveryRewinds,
+                _identity,
+                _rotations,
+                _resolutions,
+                _estate,
+                _dormancy,
+                _ownerContext(),
+                msg.data
+            )
+        );
+    }
+
+    function _forwardRewindWriter() private {
+        address target = identityRewindExtension;
+        assembly ("memory-safe") {
+            let pointer := mload(0x40)
+            calldatacopy(pointer, 0, calldatasize())
+            let success := delegatecall(gas(), target, pointer, calldatasize(), 0, 0)
+            returndatacopy(pointer, 0, returndatasize())
+            if iszero(success) { revert(pointer, returndatasize()) }
+            return(pointer, returndatasize())
+        }
     }
 
     function recoveryEvidenceBinding() external view returns (address, bytes32) {
@@ -972,6 +1167,9 @@ contract StreamArtistIdentityAuthority is
         identityEstateExtension = extensions_[1];
         identityRecoveryExtension = extensions_[2];
         identityAdjudicationExtension = StreamArtistAdjudicationExtensionDeployment.deploy(
+            address(this), registry_, coordinator_, archive_, core_, manager_
+        );
+        identityRewindExtension = StreamArtistRewindExtensionDeployment.deploy(
             address(this), registry_, coordinator_, archive_, core_, manager_
         );
     }

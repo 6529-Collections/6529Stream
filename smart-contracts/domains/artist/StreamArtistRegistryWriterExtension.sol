@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "../../interfaces/stream/artist/IStreamArtistMultipleRecordsHydration.sol";
+
+import {
+    IStreamArtistIdentityRecoveryCoordinatorV3
+} from "../../interfaces/stream/artist/IStreamArtistIdentityRecoveryV3.sol";
 import "../../interfaces/stream/artist/IStreamArtistMultipleAuthorityHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistDelegationAuthorityHydration.sol";
 import "../../interfaces/stream/artist/IStreamArtistDelegatedConsent.sol";
@@ -224,6 +228,28 @@ contract StreamArtistRegistryWriterExtension {
     {
         return IStreamArtistSaleCoordinator(operationCoordinator)
             .coordinateRecordSaleConsent(msg.sender, p, a);
+    }
+
+    function registerIdentityRecoveryActionV3(
+        bytes32 actionId,
+        GovernanceCall[] calldata calls,
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external onlyHost returns (bytes32) {
+        return IStreamArtistIdentityRecoveryCoordinatorV3(operationCoordinator)
+            .coordinateRegisterIdentityRecoveryActionV3(
+                msg.sender, actionId, calls, p, a, manifestHash
+            );
+    }
+
+    function recoverArtistIdentityV3(
+        IdentityRecovery.Request calldata p,
+        T.Authorization calldata a,
+        bytes32 manifestHash
+    ) external onlyHost returns (bytes32) {
+        return IStreamArtistIdentityRecoveryCoordinatorV3(operationCoordinator)
+            .coordinateRecoverArtistIdentityV3(msg.sender, p, a, manifestHash);
     }
 
     function registerIdentityRecoveryActionV2(

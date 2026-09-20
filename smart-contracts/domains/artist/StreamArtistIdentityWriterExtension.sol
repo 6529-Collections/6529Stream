@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistIdentityWriterTransport.sol";
+import {
+    StreamArtistRecoveryRewindContinuationMutation
+} from "./StreamArtistRecoveryRewindContinuationMutation.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionRepudiation.sol";
 import {
     StreamArtistRepudiationTypes as RP
@@ -173,6 +176,10 @@ contract StreamArtistIdentityWriterExtension is
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32) {
         _check(c, 36);
+        // A fresh original designation cannot reactivate a permanently superseded directive.
+        if (_recoveryRewinds.statuses[p.directiveHash].recoveryRecordHash != 0) {
+            revert Succ.InvalidDirective();
+        }
         StreamArtistIdentityState.Mutation memory m =
             StreamArtistIdentityWriterTransport.designateEncoded(
                 _succession, _identity, _rotations, _resolutions, _replay, _ownerContext(), msg.data
@@ -219,7 +226,8 @@ contract StreamArtistIdentityWriterExtension is
     ) external onlyHost returns (bytes32) {
         _check(c, 25);
         StreamArtistIdentityState.Mutation memory m =
-            StreamArtistIdentityWriterTransport.reviseEncoded(
+            StreamArtistRecoveryRewindContinuationMutation.reviseEncoded(
+                _recoveryRewinds,
                 _identityRevisions,
                 _identity,
                 _rotations,

@@ -6,6 +6,9 @@ import { StreamArtistPayloadStore } from "./StreamArtistPayloadStore.sol";
 import "./StreamArtistIdentityState.sol";
 import "./StreamArtistRotationState.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityRevision.sol";
+import {
+    StreamArtistRecoveryRewindTypes as RewindTypes
+} from "../../interfaces/stream/artist/StreamArtistRecoveryRewindTypes.sol";
 
 /// @notice Linked operation-25 mechanics over the sole Identity owner's storage.
 library StreamArtistIdentityRevisionState {
@@ -105,7 +108,20 @@ library StreamArtistIdentityRevisionState {
         Dismissal.Closure memory empty;
         Dismissal.RevisionContinuation memory none;
         return _revise(
-            s, identity, rotations, replay, o, c, p, a, proof, document, displayName, empty, none
+            s,
+            identity,
+            rotations,
+            replay,
+            o,
+            c,
+            p,
+            a,
+            proof,
+            document,
+            displayName,
+            empty,
+            none,
+            bytes32(0)
         );
     }
 
@@ -137,7 +153,55 @@ library StreamArtistIdentityRevisionState {
             document,
             displayName,
             closure,
-            continuation
+            continuation,
+            bytes32(0)
+        );
+    }
+
+    /// @dev The fixed owner supplies a stored recovery continuation. A later original
+    /// dismissal continuation has already been selected by its exact admission revision.
+    function reviseWithRecoveryResolution(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        StreamArtistIdentityRevisionTypes.Revision memory p,
+        T.Authorization memory a,
+        T.SignerApproval memory proof,
+        bytes memory document,
+        string memory displayName,
+        Dismissal.Closure memory closure,
+        Dismissal.RevisionContinuation memory continuation,
+        RewindTypes.RevisionContinuationV3 memory recovery
+    ) public returns (StreamArtistIdentityState.Mutation memory) {
+        bytes32 selected;
+        if (recovery.continuationHash != 0) {
+            if (
+                recovery.artistId != p.artistId || recovery.recoveryRecordHash == 0
+                    || recovery.ownerRevision == 0 || recovery.ownerRevision > o.revision
+            ) revert T.InvalidRecord();
+            if (
+                recovery.stableRevisionRecordHash == _selected(s, rotations, p.artistId)
+                    && recovery.stableDocumentHash == p.previousRecordHash
+            ) selected = recovery.continuationHash;
+        }
+        return _revise(
+            s,
+            identity,
+            rotations,
+            replay,
+            o,
+            c,
+            p,
+            a,
+            proof,
+            document,
+            displayName,
+            closure,
+            continuation,
+            selected
         );
     }
 
@@ -154,7 +218,8 @@ library StreamArtistIdentityRevisionState {
         bytes memory document,
         string memory displayName,
         Dismissal.Closure memory closure,
-        Dismissal.RevisionContinuation memory continuation
+        Dismissal.RevisionContinuation memory continuation,
+        bytes32 recoveryContinuation
     ) private returns (StreamArtistIdentityState.Mutation memory m) {
         if (
             p.previousRecordHash != operative(s, identity, rotations, p.artistId)
@@ -197,22 +262,28 @@ library StreamArtistIdentityRevisionState {
         if (continuation.continuationHash != bytes32(0) && continuation.artistId != p.artistId) {
             revert T.InvalidRecord();
         }
-        bool continuing = continuation.continuationHash != bytes32(0)
+        bool continuing = recoveryContinuation == 0 && continuation.continuationHash != bytes32(0)
             && continuation.stableRevisionRecordHash == previousRevision
             && continuation.stableDocumentHash == p.previousRecordHash;
-        bytes32 chainSurface = continuing
-            ? keccak256("identity_authority.replay.identity_revision_continuation")
-            : keccak256("identity_authority.replay.identity_revision_chain");
-        bytes32 chainScope = continuing
+        bytes32 chainSurface = recoveryContinuation != 0
+            ? keccak256("identity_authority.replay.identity_revision_recovery_continuation")
+            : continuing
+                ? keccak256("identity_authority.replay.identity_revision_continuation")
+                : keccak256("identity_authority.replay.identity_revision_chain");
+        bytes32 chainScope = recoveryContinuation != 0
             ? keccak256(
-                abi.encode(
-                    p.artistId,
-                    previousRevision,
-                    p.previousRecordHash,
-                    continuation.continuationHash
-                )
+                abi.encode(p.artistId, previousRevision, p.previousRecordHash, recoveryContinuation)
             )
-            : keccak256(abi.encode(p.artistId, previousRevision, p.previousRecordHash));
+            : continuing
+                ? keccak256(
+                    abi.encode(
+                        p.artistId,
+                        previousRevision,
+                        p.previousRecordHash,
+                        continuation.continuationHash
+                    )
+                )
+                : keccak256(abi.encode(p.artistId, previousRevision, p.previousRecordHash));
         bytes32 chainKey = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2"),
@@ -248,7 +319,7 @@ library StreamArtistIdentityRevisionState {
                 p.revisedRecordHash,
                 previousRevision,
                 proof.signer,
-                1,
+                identity.identities[p.artistId].authorityClass,
                 a.nonce,
                 a.time,
                 p.identityRecordURI,
@@ -302,6 +373,15 @@ library StreamArtistIdentityRevisionState {
             closure.dismissalRecordHash != bytes32(0) || continuation.continuationHash != bytes32(0)
         ) {
             m.state = keccak256(abi.encode(m.state, closure, continuation, continuing));
+        }
+        if (recoveryContinuation != 0) {
+            m.state = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_REVISION_RECOVERY_CONTINUATION_WRITE_V3"),
+                    m.state,
+                    recoveryContinuation
+                )
+            );
         }
     }
 
