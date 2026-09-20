@@ -36,6 +36,9 @@ import {
 import {
     StreamArtistRecoveredHydrationEvidence as Evidence
 } from "./StreamArtistRecoveredHydrationEvidence.sol";
+import {
+    StreamArtistRecoveredHydrationCommitEncoding as Encoding
+} from "./StreamArtistRecoveredHydrationCommitEncoding.sol";
 
 /// @notice Atomic seven-owner recovered authority import and lossless paged operation60 evidence.
 /// @dev Only called after the fixed profile collector has authenticated every typed bundle.
@@ -69,16 +72,20 @@ library StreamArtistRecoveredHydrationCommit {
             revert T.InvalidBinding();
         }
         Admission.Certificate memory c = prepared.admission;
-        value = keccak256(
-            abi.encode(
-                RH.PROFILE,
-                RH.VERSION,
-                block.chainid,
-                destination.registry,
-                address(this),
+        bytes memory profileBytes;
+        Evidence.Descriptor memory descriptor;
+        bytes memory carrier;
+        bytes memory probe;
+        (value, profileBytes, descriptor, carrier, probe) = Encoding.prepare(
+            block.chainid,
+            destination.registry,
+            address(this),
+            configurationHash,
+            actor,
+            request,
+            Encoding.Inputs(
                 c.prior,
                 c.sourceCoordinator,
-                request,
                 c.artists,
                 c.collections,
                 prepared.query,
@@ -87,24 +94,6 @@ library StreamArtistRecoveredHydrationCommit {
                 prepared.externalGuards,
                 c.before_
             )
-        );
-        bytes memory profileBytes = abi.encode(
-            RH.PROFILE,
-            RH.VERSION,
-            c.prior,
-            c.sourceCoordinator,
-            request,
-            c.artists,
-            c.collections,
-            prepared.query,
-            prepared.data,
-            prepared.timing,
-            prepared.externalGuards
-        );
-        Evidence.Descriptor memory descriptor = Evidence.describe(profileBytes);
-        bytes memory carrier = abi.encode(RH.PROFILE, descriptor);
-        bytes memory probe = abi.encode(
-            uint16(1), configurationHash, uint16(60), actor, value, c.before_, c.before_, carrier
         );
         IStreamArtistArchiveV2 archive = IStreamArtistArchiveV2(destination.archive);
         if (probe.length > archive.artistArchiveMaxEvidenceBytesV2()) {
@@ -159,19 +148,16 @@ library StreamArtistRecoveredHydrationCommit {
         if (keccak256(abi.encode(appended)) != keccak256(abi.encode(descriptor))) {
             revert RH.InvalidRecoveredHydrationProvenance();
         }
-        bytes32 id = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_ARTIST_ONBOARDING_OPERATION_EVIDENCE_V1"),
-                block.chainid,
-                destination.registry,
-                address(this),
-                uint16(60),
-                actor,
-                value
-            )
-        );
-        bytes memory evidence = abi.encode(
-            uint16(1), configurationHash, uint16(60), actor, value, c.before_, after_, carrier
+        (bytes32 id, bytes memory evidence) = Encoding.evidence(
+            block.chainid,
+            destination.registry,
+            address(this),
+            configurationHash,
+            actor,
+            value,
+            c.before_,
+            after_,
+            carrier
         );
         (bytes32 hash,, bool added) = archive.appendArtistEvidenceV2(id, 1, evidence);
         if (!added || hash != keccak256(evidence)) revert T.InvalidRecord();

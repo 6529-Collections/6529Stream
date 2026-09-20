@@ -10,6 +10,11 @@ import {
     StreamArtistRecoveredHydrationTypes as Recovered
 } from "../../interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
 import "../../interfaces/stream/artist/IStreamArtistMultipleRecordsHydration.sol";
+import {
+    StreamArtistRegistryMultipleRecordsWriter
+} from "./StreamArtistRegistryMultipleRecordsWriter.sol";
+import { StreamArtistRegistryRecoveredWriter } from "./StreamArtistRegistryRecoveredWriter.sol";
+import { StreamArtistRegistryIdentityWriter } from "./StreamArtistRegistryIdentityWriter.sol";
 
 import {
     IStreamArtistIdentityRecoveryCoordinatorV3
@@ -334,8 +339,9 @@ contract StreamArtistRegistryWriterExtension {
         bytes calldata document,
         string calldata displayName
     ) external onlyHost returns (bytes32) {
-        return IStreamArtistIdentityRevisionCoordinator(operationCoordinator)
-            .coordinateRecordIdentityRevision(msg.sender, p, a, document, displayName);
+        return StreamArtistRegistryIdentityWriter.recordRevision(
+            operationCoordinator, msg.sender, msg.data[4:]
+        );
     }
 
     function recordSuccessorDesignation(Succ.Designation calldata p, T.Authorization calldata a)
@@ -520,8 +526,9 @@ contract StreamArtistRegistryWriterExtension {
         bytes calldata document,
         string calldata displayName
     ) external onlyHost returns (bytes32, bytes32) {
-        return IStreamArtistOnboardingCoordinator(operationCoordinator)
-            .coordinateProposeArtistBinding(msg.sender, collectionId, p, document, displayName);
+        return StreamArtistRegistryIdentityWriter.proposeBinding(
+            operationCoordinator, msg.sender, msg.data[4:]
+        );
     }
 
     function acceptArtistBinding(uint256 collectionId, T.Authorization calldata a)
@@ -758,23 +765,26 @@ contract StreamArtistRegistryWriterExtension {
         onlyHost
         returns (bytes32)
     {
-        return IStreamArtistRecoveredHydrationCoordinator(operationCoordinator)
-            .coordinateHydrateRecoveredArtistAuthority(msg.sender, p);
+        return StreamArtistRegistryRecoveredWriter.hydrate(
+            operationCoordinator, msg.sender, msg.data[4:]
+        );
     }
 
     function hydrateRecoveredArtistAuthorityWithConsents(
         Recovered.Request calldata p,
         T.RoyaltyFreeze[] calldata royaltyFreezes
     ) external onlyHost returns (bytes32) {
-        return IStreamArtistRecoveredConsentHydrationCoordinator(operationCoordinator)
-            .coordinateHydrateRecoveredArtistAuthorityWithConsents(msg.sender, p, royaltyFreezes);
+        return StreamArtistRegistryRecoveredWriter.hydrateWithConsents(
+                operationCoordinator, msg.sender, msg.data[4:]
+            );
     }
 
     function hydrateMultipleArtistAuthorityWithRecords(
         StreamArtistMultipleRecordsTypes.Request calldata p
     ) external onlyHost returns (bytes32) {
-        return IStreamArtistMultipleRecordsHydrationCoordinator(operationCoordinator)
-            .coordinateHydrateMultipleArtistAuthorityWithRecords(msg.sender, p);
+        return StreamArtistRegistryMultipleRecordsWriter.hydrate(
+            operationCoordinator, msg.sender, msg.data[4:]
+        );
     }
 
     function hydrateMultipleArtistAuthority(StreamArtistMultipleHydrationTypes.Request calldata p)
@@ -782,8 +792,9 @@ contract StreamArtistRegistryWriterExtension {
         onlyHost
         returns (bytes32)
     {
-        return IStreamArtistMultipleHydrationCoordinator(operationCoordinator)
-            .coordinateHydrateMultipleArtistAuthority(msg.sender, p);
+        return StreamArtistRegistryMultipleRecordsWriter.hydrateAuthority(
+            operationCoordinator, msg.sender, msg.data[4:]
+        );
     }
 
     function hydrateArtistAuthorityWithDelegations(AH.Request calldata p)
