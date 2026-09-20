@@ -19,14 +19,37 @@ import {
 import {
     IStreamArtistPrimaryTemplateConsentFacts
 } from "../../smart-contracts/interfaces/stream/artist/IStreamArtistPrimaryTemplateConsentFacts.sol";
+import {
+    StreamPreparedNativeSettlementHash
+} from "../../smart-contracts/domains/revenue/StreamPreparedNativeSettlementHash.sol";
+import {
+    StreamPrimarySettlementHash
+} from "../../smart-contracts/domains/revenue/StreamPrimarySettlementHash.sol";
+import {
+    StreamPreparedNativeSettlementTypes
+} from "../../smart-contracts/interfaces/stream/revenue/StreamPreparedNativeSettlementTypes.sol";
+import {
+    StreamPrimarySettlementTypes
+} from "../../smart-contracts/interfaces/stream/revenue/StreamPrimarySettlementTypes.sol";
+import {
+    StreamNativeSettlementTypes
+} from "../../smart-contracts/interfaces/stream/revenue/StreamNativeSettlementTypes.sol";
 
 interface CurrentCommerceCallVm {
     function expectCall(address target, uint256 value, bytes calldata data, uint64 count) external;
+    function mockCallRevert(
+        address target,
+        uint256 value,
+        bytes calldata data,
+        bytes calldata reason
+    ) external;
+    function clearMockedCalls() external;
 }
 
 /// @notice Artist consent, delayed governance, Safe auction payment and withdrawals on one current graph.
-/// @dev Only the external entropy service is a double. These aggregate workflows do not
-/// establish individual cold transaction capacity or acceptance of other rights profiles.
+/// @dev The external entropy service is a double. The PROFILE regression also explicitly
+/// injects a wallet deposit failure. These aggregate workflows do not establish individual
+/// cold transaction capacity or acceptance of other rights profiles.
 contract StreamCurrentConsentedNativeCommerceTest is
     StreamCurrentStackFixture,
     OfficialSafeFixture
@@ -40,6 +63,12 @@ contract StreamCurrentConsentedNativeCommerceTest is
     OfficialSafe private payerSafe;
     uint256[] private keys;
     StreamSaleTemplate.Selection private selected;
+
+    struct ProfileExpectation {
+        StreamPreparedNativeSettlementTypes.Facts facts;
+        StreamPrimarySettlementTypes.PrimarySettlementResult result;
+        bytes32 saleKey;
+    }
 
     function setUp() public {
         keys.push(0x5AFE01);
@@ -272,6 +301,340 @@ contract StreamCurrentConsentedNativeCommerceTest is
             "identical signed Safe transaction succeeds after actual governed repair"
         );
         _assertSettlementAndWithdraw(id);
+    }
+
+    /// @dev All authority and payment contracts are real. Only the exact native wallet deposit
+    /// is fault-injected: PROFILE requires an already-deployed wallet whose receive cannot pause.
+    /// The same deposit fault remains active across genuine escrow producer denial and repair.
+    function testActualProfileEscrowDenialAfterInjectedDepositFailureRollsBackAndExactSafeRetryPays()
+        public
+    {
+        bytes32 id = this.createProfileCommerceAuction();
+        _bid(id);
+        ProfileExpectation memory expected = _profileExpectation(id);
+        (, uint64 settlementDeadline,,) = house.auctionDeadlines(id);
+        bytes32 originalAuction = keccak256(abi.encode(house.auction(id)));
+        bytes32 originalPrepared = keccak256(abi.encode(core.preparedMint(1)));
+        bytes32 originalActive = keccak256(abi.encode(manager.activePreparedNativeMint()));
+        uint256 payerBalance = address(payerSafe).balance;
+        uint256 nonce = payerSafe.nonce();
+        bytes memory settleData = abi.encodeCall(house.settle, (id));
+        bytes32 digest = payerSafe.getTransactionHash(
+            address(house), 0, settleData, 0, 0, 0, 0, address(0), address(0), nonce
+        );
+        bytes memory exact = abi.encodeCall(
+            payerSafe.execTransaction,
+            (
+                address(house),
+                0,
+                settleData,
+                uint8(0),
+                0,
+                0,
+                0,
+                address(0),
+                payable(address(0)),
+                safeThresholdSignature(keys, digest)
+            )
+        );
+        this.setRecorderAdmission(false);
+        CurrentCommerceCallVm fault = CurrentCommerceCallVm(address(vm));
+        fault.mockCallRevert(
+            wallet,
+            PRICE,
+            bytes(""),
+            abi.encodeWithSignature("Error(string)", "injected deposit failure")
+        );
+        fault.expectCall(wallet, PRICE, bytes(""), 2);
+        fault.expectCall(
+            address(revenueEscrow),
+            PRICE,
+            abi.encodeCall(
+                revenueEscrow.creditNative, (PRIMARY_REVENUE_CLASS, profile, wallet, false)
+            ),
+            2
+        );
+        (bool ok, bytes memory failed) = address(payerSafe).call(exact);
+        require(
+            !ok && keccak256(failed) == keccak256(abi.encodeWithSignature("Error(string)", "GS013"))
+                && payerSafe.nonce() == nonce && address(payerSafe).balance == payerBalance,
+            "actual payment denial restores complete signed Safe transaction"
+        );
+        require(
+            core.totalSupply() == 0 && core.collectionMintedEver(1) == 0
+                && core.lastAllocatedTokenId() == 0 && core.collectionNextSerial(1) == 1
+                && core.pendingPreparedMintTokenId() == 0 && manager.nextOperationNonce() == 0
+                && keccak256(abi.encode(core.preparedMint(1))) == originalPrepared
+                && keccak256(abi.encode(manager.activePreparedNativeMint())) == originalActive,
+            "exact Core prepared record and Manager active facts roll back"
+        );
+        require(
+            !manager.isAuthorizationUsed(expected.facts.intentHash)
+                && !manager.isOperationRootUsed(expected.facts.operationRoot)
+                && !ledger.isManagerAuthorizationUsed(address(manager), expected.facts.intentHash)
+                && !ledger.isManagerOperationRootUsed(
+                    address(manager), expected.facts.operationRoot
+                ) && !recorder.preparedNativeSaleConsumed(expected.saleKey)
+                && !recorder.settlementConsumed(expected.result.settlementKey)
+                && recorder.preparedNativeFactsHash(expected.result.settlementKey) == 0
+                && recorder.settlementResult(expected.result.settlementKey).candidateCommitment
+                    == 0,
+            "exact original authorization root sale and receipt remain unused"
+        );
+        require(
+            keccak256(abi.encode(house.auction(id))) == originalAuction
+                && house.totalBuyerLiabilities() == PRICE + 100
+                && address(house).balance == PRICE + 100 && wallet.balance == 0
+                && address(recorder).balance == 0 && recorder.totalOfficialSettled(address(0)) == 0
+                && revenueEscrow.totalOwed(address(0)) == 0 && address(revenueEscrow).balance == 0
+                && entropy.revealFeeEscrow(1) == 0,
+            "original winner liability survives with no payment or reveal fee residue"
+        );
+        this.setRecorderAdmission(true);
+        // Creation consent was consumed at registration; the signed Safe envelope has no deadline.
+        require(
+            block.timestamp < settlementDeadline,
+            "both real governance delays fit the original settlement window"
+        );
+        (ok, failed) = address(payerSafe).call(exact);
+        require(
+            ok && abi.decode(failed, (bool)) && payerSafe.nonce() == nonce + 1
+                && address(payerSafe).balance == payerBalance,
+            "byte-identical signed Safe retry spends only the original winning deposit"
+        );
+        fault.clearMockedCalls();
+        IStreamNativeEnglishAuction.Auction memory settled = house.auction(id);
+        require(
+            settled.status == 3 && settled.tokenId == 1
+                && settled.settlementKey == expected.result.settlementKey
+                && core.ownerOf(1) == address(payerSafe) && core.totalSupply() == 1
+                && core.collectionMintedEver(1) == 1 && core.lastAllocatedTokenId() == 1
+                && core.collectionNextSerial(1) == 2 && core.pendingPreparedMintTokenId() == 0
+                && manager.nextOperationNonce() == 1
+                && keccak256(abi.encode(core.preparedMint(1))) == originalPrepared
+                && keccak256(abi.encode(manager.activePreparedNativeMint())) == originalActive,
+            "one real PROFILE prepared mint completes to the original Safe and clears its active state"
+        );
+        require(
+            manager.isAuthorizationUsed(expected.facts.intentHash)
+                && manager.isOperationRootUsed(expected.facts.operationRoot)
+                && ledger.isManagerAuthorizationUsed(address(manager), expected.facts.intentHash)
+                && ledger.isManagerOperationRootUsed(address(manager), expected.facts.operationRoot)
+                && recorder.preparedNativeSaleConsumed(expected.saleKey)
+                && recorder.settlementConsumed(expected.result.settlementKey)
+                && recorder.preparedNativeFactsHash(expected.result.settlementKey)
+                    == StreamPreparedNativeSettlementHash.factsHash(expected.facts)
+                && recorder.preparedNativeRightsFactsHash(expected.result.settlementKey) == 0
+                && keccak256(abi.encode(recorder.settlementResult(expected.result.settlementKey)))
+                    == keccak256(abi.encode(expected.result)),
+            "exact PROFILE facts all receipt fields and original Ledger replay keys join"
+        );
+        require(
+            recorder.totalOfficialSettled(address(0)) == PRICE
+                && revenueEscrow.escrowOwed(PRIMARY_REVENUE_CLASS, profile, wallet, address(0))
+                    == PRICE && revenueEscrow.totalOwed(address(0)) == PRICE
+                && address(revenueEscrow).balance == PRICE && wallet.balance == 0
+                && address(recorder).balance == 0 && entropy.revealFeeEscrow(1) == 100
+                && house.totalBuyerLiabilities() == 0 && address(house).balance == 0
+                && house.refundableBalance(settled.saleId, address(payerSafe)) == 0,
+            "one original PROFILE payment is escrowed and only the separate reveal fee is forwarded"
+        );
+        require(
+            executeSafe(
+                payerSafe,
+                keys,
+                address(revenueEscrow),
+                0,
+                abi.encodeCall(
+                    revenueEscrow.flushEscrow, (PRIMARY_REVENUE_CLASS, profile, wallet, address(0))
+                ),
+                0
+            ),
+            "real Safe flushes the original PROFILE wallet after deposit fault is removed"
+        );
+        require(
+            wallet.balance == PRICE && revenueEscrow.totalOwed(address(0)) == 0,
+            "real wallet funded once"
+        );
+        bytes32 receipt = keccak256(abi.encode(recorder.settlementResult(settled.settlementKey)));
+        require(
+            executeSafe(payerSafe, keys, address(house), 0, settleData, 0),
+            "terminal settlement is idempotent"
+        );
+        require(
+            core.totalSupply() == 1 && manager.nextOperationNonce() == 1 && wallet.balance == PRICE
+                && recorder.totalOfficialSettled(address(0)) == PRICE
+                && entropy.revealFeeEscrow(1) == 100
+                && keccak256(abi.encode(recorder.settlementResult(settled.settlementKey)))
+                    == receipt,
+            "terminal replay cannot mint or pay again or rewrite the original receipt"
+        );
+    }
+
+    function createProfileCommerceAuction() external returns (bytes32) {
+        uint64 observed = uint64(block.timestamp);
+        IStreamNativeEnglishAuction.Configuration memory c;
+        c.collectionId = 1;
+        c.phaseId = COMMERCE_PHASE;
+        c.mintAtSettlement = true;
+        c.artworkCommitment = keccak256(TOKEN_DATA);
+        c.mintCommitment = keccak256("actual PROFILE prepared mint");
+        c.poster = address(this);
+        c.reservePrice = PRICE;
+        c.minIncrementBps = 500;
+        c.clock = StreamEnglishAuctionClock.Configuration(
+            observed, observed + 3600, 0, 600, 600, 3600, false, false
+        );
+        c.primaryPolicyMode = 1;
+        c.settlementWindow = 7 days;
+        c.mintPolicyHash = manager.phasePolicyHash(1, COMMERCE_PHASE);
+        c.expectedPrimaryPolicyHash = _nativePrimaryPolicyHash();
+        IStreamNativeEnglishAuction.CreationAuthorization memory a =
+            IStreamNativeEnglishAuction.CreationAuthorization(
+                house.auctionConfigurationHash(c),
+                address(artistSafe),
+                keccak256("actual PROFILE creation"),
+                observed + 1 days
+            );
+        bytes32 digest = house.creationAuthorizationDigest(a);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(PLATFORM_KEY, digest);
+        return
+            house.registerAuction(c, TOKEN_DATA, a, abi.encodePacked(r, s, v), _artistProof(digest));
+    }
+
+    function _profileExpectation(bytes32 id) private returns (ProfileExpectation memory e) {
+        IStreamNativeEnglishAuction.Auction memory a = house.auction(id);
+        StreamPreparedNativeSettlementTypes.Intent memory i;
+        i.collectionId = 1;
+        i.phaseId = COMMERCE_PHASE;
+        i.saleId = a.saleId;
+        i.saleNonce = a.saleNonce;
+        i.executor = address(payerSafe);
+        i.payer = address(payerSafe);
+        i.poster = address(this);
+        i.beneficiary = address(payerSafe);
+        i.amount = PRICE;
+        i.primaryPolicyMode = 1;
+        i.originalPrimaryPolicyHash = a.config.expectedPrimaryPolicyHash;
+        i.executionNonce = a.winner.bidIndex;
+        i.authorityMode = 2;
+        i.saleAuthorizationDigest = a.winner.authorizationDigest;
+        i.saleExecutionHash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_NATIVE_ENGLISH_AUCTION_EXECUTION_V1"),
+                block.chainid,
+                address(house),
+                a.configHash,
+                a.creationDigest,
+                a.saleId,
+                a.winner
+            )
+        );
+        i.contentSelectionHash = keccak256(TOKEN_DATA);
+        i.mintCommitment = a.config.mintCommitment;
+        i.boundMintPolicyHash = a.config.mintPolicyHash;
+        bytes32 authorization =
+            StreamPreparedNativeSettlementHash.intentHash(address(house), address(recorder), i);
+        IStreamMintManager.MintBatch memory b;
+        b.collectionId = 1;
+        b.phaseId = COMMERCE_PHASE;
+        b.payer = address(payerSafe);
+        b.initialRecipients = new address[](1);
+        b.initialRecipients[0] = address(house);
+        b.beneficiaries = new address[](1);
+        b.beneficiaries[0] = address(payerSafe);
+        b.tokenData = new bytes[](1);
+        b.tokenData[0] = TOKEN_DATA;
+        b.mintCommitments = new bytes32[](1);
+        b.mintCommitments[0] = i.mintCommitment;
+        b.expectedPolicyHash = i.boundMintPolicyHash;
+        b.authorizationId = authorization;
+        b.contextHash = StreamPreparedNativeSettlementHash.mintContext(
+            address(manager), address(house), authorization
+        );
+        // Read-only prediction under the real admitted executor; execution still enters through the Safe and house.
+        vm.prank(address(house));
+        (bytes32 root, bytes32[] memory operations) =
+            manager.previewPreparedNativeMintOperation(b, "");
+        e.facts = StreamPreparedNativeSettlementTypes.Facts(
+            address(house),
+            address(manager),
+            address(recorder),
+            address(recorder).codehash,
+            1,
+            COMMERCE_PHASE,
+            authorization,
+            root,
+            operations[0],
+            1,
+            1,
+            address(payerSafe),
+            address(house),
+            address(payerSafe),
+            keccak256(TOKEN_DATA),
+            i.mintCommitment,
+            manager.phasePolicyHash(1, COMMERCE_PHASE),
+            i.boundMintPolicyHash
+        );
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c;
+        c.saleAdapter = address(house);
+        c.executor = address(payerSafe);
+        c.sale = StreamPrimarySettlementTypes.PrimarySale(
+            a.saleId,
+            PRIMARY_REVENUE_CLASS,
+            1,
+            1,
+            1,
+            a.saleNonce,
+            address(payerSafe),
+            address(this),
+            address(payerSafe),
+            PRICE,
+            i.originalPrimaryPolicyHash
+        );
+        StreamNativeSettlementTypes.SaleLifecycleBinding memory lifecycle =
+            house.preparedNativeSaleLifecycle(a.saleId);
+        c.lifecycleBinding.saleCreatedAt = lifecycle.saleCreatedAt;
+        c.lifecycleBinding.saleAdapterRegistryRevision = lifecycle.saleAdapterRegistryRevision;
+        c.executionBinding = StreamPrimarySettlementTypes.SaleExecutionBinding(
+            StreamPreparedNativeSettlementHash.executionId(e.facts, i),
+            i.executionNonce,
+            2,
+            i.saleAuthorizationDigest
+        );
+        c.orchestrationOrder = 2;
+        c.mintManager = address(manager);
+        c.operationIdentityCommitment = root;
+        c.operationId = operations[0];
+        c.currentPolicyHash = e.facts.currentPolicyHash;
+        c.boundPolicyHash = e.facts.boundPolicyHash;
+        c.rights = StreamPrimarySettlementTypes.PrimaryRights(
+            profile,
+            wallet,
+            0,
+            primaryResolver.resolvePrimaryAssignment(1, 0, PRIMARY_REVENUE_CLASS).assignmentHash,
+            factory.profileEntriesHash(profile)
+        );
+        c.saleExecutionHash = i.saleExecutionHash;
+        e.saleKey = StreamPreparedNativeSettlementHash.saleKey(
+            address(recorder), address(house), a.saleId, a.saleNonce
+        );
+        e.result = StreamPrimarySettlementTypes.PrimarySettlementResult(
+            StreamPreparedNativeSettlementHash.candidateCommitment(e.facts, i, c),
+            StreamPrimarySettlementHash.settlementKey(
+                address(recorder), address(house), c.executionBinding.executionId
+            ),
+            profile,
+            wallet,
+            address(0),
+            PRICE,
+            address(payerSafe),
+            c.executionBinding.executionId,
+            true,
+            root,
+            e.facts.currentPolicyHash,
+            e.facts.boundPolicyHash
+        );
     }
 
     function createArtistTemplate() external returns (bytes32 templateId) {

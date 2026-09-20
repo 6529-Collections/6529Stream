@@ -57,6 +57,7 @@ contract StreamCurrentMintFallbackIncidentTest is StreamMintFallbackFixture {
                 abi.encode(core, ledger, IERC165(address(registry)))
             )
         );
+        _assertDeployableProductionInstance(address(rescue));
         ledger.setLedgerWriter(address(rescue), true);
         rescue.transferOwnership(address(executor));
         rescueGate = new CurrentContinuityEntitlementGate(

@@ -51,13 +51,14 @@ abstract contract StreamMintFallbackFixture is StreamCurrentSafeGovernanceFixtur
         );
     }
 
-    function _deployReserveManager() internal virtual returns (StreamMintManager) {
-        return StreamMintManager(
+    function _deployReserveManager() internal virtual returns (StreamMintManager deployed) {
+        deployed = StreamMintManager(
             _artistArtifactCreate(
                 "smart-contracts/domains/mint/StreamMintManagerFallback.sol:StreamMintManagerFallback",
                 abi.encode(core, ledger, IERC165(address(registry)))
             )
         );
+        _assertDeployableProductionInstance(address(deployed));
     }
 
     function _additionalOperatingPolicies()
@@ -998,6 +999,7 @@ abstract contract StreamMintFallbackFixture is StreamCurrentSafeGovernanceFixtur
             deploySafeComponents("1.4.1"), safeOwnerAddresses(signingKeys), 2, 651
         );
         _deployCurrentStack(vm.addr(ARTIST_KEY), vm.addr(PLATFORM_KEY));
+        _assertPlannedEntropyProfile();
         originalArtistManager = address(manager);
         _installGovernorSafe(continuitySafe, signingKeys);
         _paidMint();
@@ -1053,6 +1055,29 @@ abstract contract StreamMintFallbackFixture is StreamCurrentSafeGovernanceFixtur
             "event-derived actual operation"
         );
         snapshotBlock = uint64(block.number);
+    }
+
+    /// @dev Read the actual Core value separately from its floor. Candidate calibration remains
+    /// owned by the shared launch plan; this fixture neither substitutes the floor nor raises gas.
+    function _assertPlannedEntropyProfile() internal view {
+        bytes32 parameter = 0x51125071e3dfb233a2711689d4cc377bbda429f1356ebc09a58d763548541e17;
+        StreamCore.GasParameterGenesisConfig[] memory planned =
+            StreamCurrentStackPlan.gasParameters();
+        (uint256 value, uint256 floor, uint8 failureClass, uint64 revision) =
+            core.gasParameterInfo(parameter);
+        bool found;
+        for (uint256 i; i < planned.length; ++i) {
+            if (planned[i].parameterId != parameter) continue;
+            require(!found, "unique planned entropy parameter");
+            found = true;
+            require(
+                value == planned[i].genesisValue && floor == planned[i].floor
+                    && failureClass == planned[i].failureClass && failureClass == 2
+                    && revision == 1,
+                "actual entropy allowance and floor match the candidate plan"
+            );
+        }
+        require(found, "planned entropy parameter exists");
     }
 
     function _storedRecordFactsHash(
