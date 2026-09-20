@@ -16,47 +16,51 @@ different milestones.
 
 ## Latest integration checkpoint: 20 September
 
-At source `7901f3b1`, all 2,501 Solidity sources pass ABI/type/storage checks
-(ABI89, 23.953 seconds). This is source compatibility, not combined-system
-runtime acceptance. Root client generation/build/types and all1,177 tests pass.
-Museum packetV2 passes53 root compatibility cases; public RIGHTS/ownership56
-and public mint/RC1 recipe39 retain separate overlapping evidence.
+Source checkpoint `c093a9d6` includes the independently reviewed Museum producers,
+permanent Core floor binding, metric transport and Artist deployment carriers.
+ABI90 checks 2,514 sources at the floor overlay now committed as `ff372f80`;
+the subsequent carrier batch passes ABI92: 2,520 sources, zero errors, 24.140 seconds. This is
+source compatibility, not combined-system runtime acceptance. Root client
+checks pass **1,233/1,233** in122.899 seconds, including generation, build and
+strict types. Museum selected conservation/packetV3 plus compatibility pass
+**100/100** in10.926 seconds; positive capture fixtures remain synthetic.
 
-Complete entropy policy import/original-provider relay (`44edac4e`, fixture
-`dffb8daa`) passes210 scoped native cases across15 suites; all38 captured entropy
-products fit. The original Core import gate passes8 typed cases. Actual
-Core/Executor/manifest/Safe cutover tests (`bc2bc792`) are integrated: their first
-run passes7 inherited cases but all9 new cases fail a shared registration-plan
-fixture, now being corrected. Full Artist/mint/render joins and gas floors remain.
-INSTANT/commerce/terminal-consumer47/28/28 cohorts retain their earlier boundaries.
+Complete entropy import/relay (`44edac4e`/`dffb8daa`) retains210 scoped native
+passes. Actual Core/Executor/Registry/Manifest/Coordinator and2-of-3Safe cutover
+now passes **16/16** at recorded source18c42131, integrated test correction
+`65cf7db5`:9 new plus7 inherited cases. Activation/tail failures roll back the
+whole batch and allow identical signed retries. All76 captured production
+products fit. That foundation capture predates Museum Core anchors and excludes
+actual Artist/paid mint/render; those joins and real cold gas floors remain.
 
-V3 Artist rewinds (`e4ccdba4`) include55 authored cases. Worker and host factoring
-(`afbf6726`, `7901f3b1`) brings the recorded selected Identity/Coordinator/Registry
-to23,829/24,516/24,223 bytes with original ABI/layout preserved. Two old deployment
-wrappers remain oversized. Recovered-authority hydration is building; native and
-cold-call validation remain pending. The Router is still oversized; source
-factoring and canonical-input regressions continue independently.
+V3 recovery clients (`68fb843a`) have their own frozen898669e5 profile. Artist
+host repair (`7901f3b1`) fits its selected hosts. Compiler-authenticated creation
+carriers (`fffb5477`) now fit both old deployment wrappers at693bytes and Factory
+at3,775 runtime/31,224 actual init; original child code and CREATE issuer/nonces
+are preserved. Eight focused native cases are running separately. Recovered
+authority hydration and broader original record combinations remain in progress.
 
-V2 output checkpoints/manifests/canonical roots (`a5a7b4c4`) are independently
-reviewed and source-integrated. The producer's first28-case run has26 passes;
-fixture corrections are being rerun with explicit non-release gas limits.
-The full snapshot/reference/finality flow remains in progress. Reference
-publication now fits the original transaction cap, but complete supplement
-currentness/read flow still needs acceptance; its split workers now fit in a
-separate size capture and focused runtime tests are running.
+V2 output/root fixture corrections (`cb01be62`) establish28 distinct passing
+cases across the retained runs; the20m outer fixture is explicitly **not** a
+release gas-budget acceptance. V2 snapshot/reference/provider integration is
+building. Metric transport (`ca95d161`) passes17 focused cases/two256-input fuzz
+properties, but isolated20.63m/25.06m write/read costs still exceed target budgets.
+The actual publication graph remains7PASS/2FAIL. A compact same-call transport
+repair is being built. Router factoring has removed sixfold internal serving
+specialization in IR; its actual size and70-case regression results are pending.
 
-Durable Core conservation-tier and canonical condition-source anchors
-(`758572df`, [ADR0053](../docs/adr/0053-durable-museum-anchors.md)) are source-built
-and reviewed. A sixth visible delivery task owns the missing native tier/floor,
-master/reference and canonical condition producers; Museum owns capture/replay.
-Anchor runtime/size acceptance and actual sale enforcement are still pending.
-The [current status](V1_CURRENT_STATUS.md) records detailed evidence boundaries.
+Native tier declaration/condition catalog (`2758868f`) and permanent floor Core
+binding (`ff372f80`, [ADR0053](../docs/adr/0053-durable-museum-anchors.md)) are
+source-integrated. The producer's149-product capture fits;51 authored cases are
+being rerun after test-only harness corrections (`c093a9d6`). The sixth visible
+delivery task owns genuine floor/master/reference producers; Museum owns the
+canonical catalog consumer. First-sale enforcement and full packet conformance
+remain incomplete. Held personhood and earlier denied artifacts stay unapplied.
 
-Remaining builds include recovered-authority/advanced hydration, V2 and scoped
-finality, Museum native producers/packet joins and V3 clients. The personhood
-proof and earlier held patches remain unapplied. Complete current-stack/Safe,
-stateful/fuzz/gas/CI acceptance, source freeze and matching testnet demonstration
-remain required. No combined completion percentage is inferred.
+Complete current-stack/Safe, stateful/fuzz/gas/CI acceptance, source freeze and
+matching testnet demonstration remain required. Canonical condition capture/replay
+(`569be86d`) is also source-integrated; its 36-case root check passes separately,
+with synthetic positives and item 15 still partial. Original RC1 is unchanged.
 
 ## How to read this document
 
@@ -249,7 +253,7 @@ These 164 rows are capabilities and delivery checks of different sizes. Row coun
 | [ART36](#art36-evidence) Migration of sanctions, sale/freeze/recovery approval and mixed finding histories | Not started | Not tested | Not integrated | Complete other original record families and host dependencies, including artwork-finality findings or mixed finality/entropy findings, changed timing-action histories. **Remaining:** Current complete inventory admits only original1/2/14/15/17/18/23(entropy)/24/52/54 rows. It does not silently discard unsupported receipts or copy external one-use guards. |
 | [ART37](#art37-evidence) Repeated successor migration and larger complete hydration capacity | Not started | Not tested | Not integrated | Source that itself contains imported predecessor state, multiple history generations, complete lazy/bulk or chunked authority hydration beyond current finite envelope. **Remaining:** Current target must have no earlier hydration/native records; explicit128-receipt/512-cell/256-prefix and inline Archive bounds apply. No partial activation to evade limits. |
 | [ART38](#art38-evidence) C2PA credential/key-history authorship reconciliation | Built; bounded profile | Partly tested | Not integrated | Original op24 credential history and typed reconciliation (`142a3cdb`) retain unresolved standing conflicts (`22095475`) until the exact covered original op46 disposition. Root47 related offline passes; scoped worker native13 plus256 fuzz inputs pass on retained sources. Current composition/read plans are source-integrated (`a86febaa`). Museum Standing V2 (`3f0967f`) passes 27 consumer cases and preserves original historical acknowledgement guards. **Remaining:** Authenticated history capture, actual Artist/Renderer/current-graph execution, complete STATIC admission and existing Artist host size repair. Live provenance can stale original full-output hashes; their semantics are unchanged. |
-| [ART39](#art39-evidence) Complete Artist signing/recomputation client and measured ceremony rehearsal | In progress | Partly tested | Partial | Original principal and identity/delegation callers, delegated14/16 (`b99b3781`) and mint-grace workflow (`9ac63a11`) and delegated economics15/royalty-freeze20 (`6b71507e`) are source-integrated. Mode-2 grace (`e5ec5fae`) and original delegated attestation24 (`122d2288`) add exact ABI56 support. The current full client package passes1,133 cases, generation/build/strict types, with source-specific fixture checks recorded above. Collection-policy/INSTANT clients are integrated with separate source fixtures; current op35 adjudication/notice clients are building. **Remaining:** Other original operation families and measured actual Safe ceremonies; simulated RPC is not native execution. |
+| [ART39](#art39-evidence) Complete Artist signing/recomputation client and measured ceremony rehearsal | In progress | Partly tested | Partial | Original principal and identity/delegation callers, delegated14/16 (`b99b3781`) and mint-grace workflow (`9ac63a11`) and delegated economics15/royalty-freeze20 (`6b71507e`) are source-integrated. Mode-2 grace (`e5ec5fae`) and original delegated attestation24 (`122d2288`) add exact ABI56 support. The current full client package passes1,233 cases, generation/build/strict types, with source-specific fixture checks recorded above. Collection-policy/INSTANT clients are integrated with separate source fixtures; op35 V2 adjudication/notice (`3113e16c`) and V3 rewind (`68fb843a`) clients are integrated with separate frozen profiles. **Remaining:** Other original operation families and measured actual Safe ceremonies; simulated RPC is not native execution. |
 | [ART40](#art40-evidence) Full Artist current-graph conformance, limits and operational acceptance | In progress | Partly tested | Partial | Earlier native4 completed 167 passed /39 failed on its frozen source. Fixture and harness repairs are now integrated, with 21 Python harness checks passing. **Remaining:** Rerun affected native cases on the selected combined source after capacity repair; cold gas, full fuzz/stateful limits and actual-governance/testnet acceptance. |
 | [ART41](#art41-evidence) Multi-party collaborator approval policies | In progress | Not tested | Not integrated | Immutable policy creation/read changes exist only in isolated incomplete builder work. Automatic approval review rejected the co-signed producer/transport/gate mutation; the exact 21-path inert patch is source-reviewed and its specific owner question is pending. Eight authored tests remain uncompiled. Integrated BindingLifecycle still admits only PRIMARY_ONLY with zero threshold and no overrides. **Remaining:** Complete atomic policy consumption across affected consent/authority families and real multi-party Safe/quorum tests. |
 | [ART42](#art42-evidence) Delegated mint-policy and sale-consent mode | Built | Tests written | Not integrated | Mode2 admission and delegated policy/sale-consent producers are source-integrated (`6d333842`), with original op14/16 domains/records, capability masks and durable exact consents. Independent source review and combined ABI pass; 16 Artist and four paid current-Safe cases are authored. **Remaining:** Native joins, complete clients and sizing, including the Estate deployment helper at24,765 bytes. |
@@ -267,7 +271,7 @@ These 164 rows are capabilities and delivery checks of different sizes. Row coun
 | [entropy.funding](#entropyfunding-evidence) Reveal fees, quotations, sponsors and pull refunds | Built | Partly tested | Partial | Coordinator-hosted reveal-fee escrow and provider quote validation with native sale funding; dedicated focused suite included in the 100-case entropy capture. **Remaining:** Latest fee/callback/escrow conservation acceptance. ERC20 executor allowance is separately absent. |
 | [entropy.incidents](#entropyincidents-evidence) Timeouts, service-level findings and precommitted fresh recovery | Built | Tested* | Partial | Frozen incident/recovery policies, epochs and collection/token fresh recovery. Recorded focused run passes 100 cases across ten suites, including eight 256-input properties. **Remaining:** Complete latest actual Artist/governance/upstream-provider transaction composition. |
 | [entropy.artist-join](#entropyartist-join-evidence) Real Artist consent and unavailability findings in reveal recovery | Built | Partly tested | Partial | Actual Artist/Safe/Archive tests and operation23 finding source exist. Canonical role-registry/role grant and test-name fixes are integrated 5104173c/2c39c316. **Remaining:** Execute the repaired recovery/unavailability joins, then complete actual mint/Executor/provider composition and finding hydration acceptance. |
-| [entropy.fallback-continuity](#entropyfallback-continuity-evidence) Coordinator replacement, retained old reads and distinct safe-mode fallback | In progress | Partly tested | Not integrated | Frozen V2 successor permission, covered pending-request admission, original host provenance and configured ordinary backup helper are source-integratedcf57de5e with independent review. Eleven continuity and ten prior subject-identity cases pass on recorded sources. Actual-Core launch500000 registration/receiver rollback and low-budget atomic rejection pass 3/3 at6fb0d7c3. **Remaining:** Core complete-policy gate (`4b6e05ea`) passes8 typed boundary cases/two256-input fuzz properties; actual complete legacy/explicit policy import and ultimate-origin provider relay are being built; original frozen policy domains and future mints must survive pointer replacement. Calibrate the new candidate immutable floor from measured cold cost per EC-REGGAS, execute current/Safe cutover and complete genesis activation. The120000-floor success oracle failed on both original and new sources and was corrected. |
+| [entropy.fallback-continuity](#entropyfallback-continuity-evidence) Coordinator replacement, retained old reads and distinct safe-mode fallback | In progress | Partly tested | Partial | Frozen V2 successor permission, covered pending-request admission, original host provenance and configured ordinary backup helper are source-integratedcf57de5e with independent review. Eleven continuity and ten prior subject-identity cases pass on recorded sources. Actual-Core launch500000 registration/receiver rollback and low-budget atomic rejection pass 3/3 at6fb0d7c3. Complete policy import/original-provider relay (`44edac4e`/`dffb8daa`) passes210 scoped cases; actual Core/Executor/Manifest/Coordinator and2-of-3Safe LEGACY cutover (`65cf7db5` test correction) passes16 cases on producer18c42131, including whole-batch rollback/retry. **Remaining:** Actual Artist-consented EXPLICIT/paid-mint/full-render joins, final source cold gas floors and complete genesis activation. Existing32-step export measurements use a typed fixture and do not establish production Coordinator gas. |
 
 ### Metadata and records
 
@@ -287,10 +291,10 @@ These 164 rows are capabilities and delivery checks of different sizes. Row coun
 | [MUSEUM-11](#museum-11-evidence) Typed RIGHTS interpretation, selection and museum source | Built | Tested* | Integrated* | Exact full RIGHTS JSON, class/family/subject/registered-definition selection and immutable historical receipt capture; separate six-use-class PREMIS/semantic rights output keeps independent links distinct from grants. **Remaining:** Full initialized Artist/Metadata-to-museum positive capture and all later-current selection cases remain separate. Test-fixture legal statements never prove real legal ownership/permission. |
 | [MUSEUM-12](#museum-12-evidence) Steward designation and recovery response/notice records | Built | Partly tested | Partial | Typed steward/response schemas and original owner notice/action consumers exist, including bounded incremental endpoint publication and original 72-hour clock. Publisher delivery claims remain claims. Source-preserving semantic/notice evidence and closed offline dossier adapters62dc2990 pass93 affected root tests with independent source review. **Remaining:** Positive actual capture, full dossier composition and complete operational delivery evidence; do not conflate protocol publication with receipt by an institution. |
 | [MUSEUM-13](#museum-13-evidence) Remaining named owner/institutional record semantic adapters | In progress | Partly tested | Not integrated | Source-bound ACCESSION/TITLE_BINDING, DEACCESSION and first-claim REDEMPTION_CLAIM adapters, retained institutional instruments and bounded exact Transfer receipt capture/replay are integrated. Root 22-case institutional/Transfer cohort passes. **Remaining:** Actual current token records, authenticated institutional/title evidence and full conformance. Synthetic Transfer controls do not establish legal title, physical custody or a receipt-trie proof. |
-| [MUSEUM-14](#museum-14-evidence) Full condition report and conservation-treatment mapping | In progress | Partly tested | Partial | Typed condition/conservation, original owner/frozen independent-source admission, outbound/return comparison and exact-source offline dossier replay package are integrated, including 64cac28f. Five package cases pass within the root 19-case package/authoring cohort. **Remaining:** Actual examination-time/fixity/render/recovery joins and positive current independent capture; opaque historic same-name schemas remain unsupported. |
+| [MUSEUM-14](#museum-14-evidence) Full condition report and conservation-treatment mapping | In progress | Partly tested | Partial | Typed condition/conservation, original owner/frozen independent-source admission, outbound/return comparison and exact-source offline dossier replay package are integrated, including 64cac28f. Five package cases pass within the root 19-case package/authoring cohort. Native canonical append-only source catalog (`2758868f`) is source-integrated; canonical current/source replay (`569be86d`) passes 36 root source/wrapper/compatibility cases. All matching original lanes remain complete; positive fixtures are synthetic and examination joins remain required. **Remaining:** Actual examination-time/fixity/render/recovery joins and positive current independent capture; opaque historic same-name schemas remain unsupported. |
 | [MUSEUM-15](#museum-15-evidence) Native reference render and render-critical archival inventory | Built | Tested* | Partial | Finite actual original native onchain COLLECTION plus STATIC/BYTE_EXACT reference publication, executable archive/environment/captures, source inventory and dual-family coverage. Exact raw payload versus artifact/list commitments stay distinct. **Remaining:** PERCEPTUAL_TOLERANCE and CURATED_EQUIVALENCE finality acceptance evidence, supported script/environment closure, noncollection families and additional actual correspondence methods remain; all-program/all-size gas and institutional acceptance absent. DYNAMIC renderer implementation is a later excluded extension. |
 | [MUSEUM-16](#museum-16-evidence) Script/media manifests, large bundles and full snapshot export | Built | Partly tested | Partial | Typed current manifests, logical32x24576 script chunks, bounded SSTORE2 append/finalize/full-read and frozen source reconstruction; explicit chunked snapshot embedded JSON and offline export preserve original inline domains. **Remaining:** Full actual upper-bound executable/frozen-route joined acceptance and additional renderer/dependency profiles remain; compact references never count as complete executable export. |
-| [MUSEUM-17](#museum-17-evidence) Complete object dossier, acquisition packet and canonical citation adapter | In progress | Partly tested | Partial | Versioned source-bound packages and typed derivatives retain original records and citations. Scoped collection dossier a0d71d2 now joins actual selected records, required media bytes and offline BagIt/OCFL replay, with 44 new/legacy tests passing. Source-driven examination gathering and native citation qualifiers (`79339af6`) add47 root passes, exact original-byte extraction and a19-item missing-evidence index. Full token dossier and canonical acquisition packet remain incomplete. Explicit-version repository export/import (`bee91ae5`) adds eleven root passes with full-history semantic replay and atomic exact-byte restore. Current default citation (`84c69bc3`) has ten isolated codec passes and separate current admission recipes. Mint/entropy composition (`1216379d`) adds41 root passes; selected RIGHTS item7 (`5975396a`) adds31. Public RIGHTS/ownership (`b5ec1031`) and mint/entropy/RC1 recipe (`7d20df15`) have56/39 root passes in overlapping cohorts. Acquisition/accession/native ownership join (`f541a56e`) adds38 root passes, with explicit synthetic provenance. New packetV2 typed native-owner authority is building; old schema compatibility is not invented. The actual RC1 capture attempt failed on pruned historical logs. **Remaining:** Successful actual public-chain captures, complete packet source/attestation/identity/provenance/finality items and their dossier relationships; externally supplied descriptors do not establish completeness. |
+| [MUSEUM-17](#museum-17-evidence) Complete object dossier, acquisition packet and canonical citation adapter | In progress | Partly tested | Partial | Versioned source-bound packages and typed derivatives retain original records and citations. Scoped collection dossier a0d71d2 now joins actual selected records, required media bytes and offline BagIt/OCFL replay, with 44 new/legacy tests passing. Source-driven examination gathering and native citation qualifiers (`79339af6`) add47 root passes, exact original-byte extraction and a19-item missing-evidence index. Full token dossier and canonical acquisition packet remain incomplete. Explicit-version repository export/import (`bee91ae5`) adds eleven root passes with full-history semantic replay and atomic exact-byte restore. Current default citation (`84c69bc3`) has ten isolated codec passes and separate current admission recipes. Mint/entropy composition (`1216379d`) adds41 root passes; selected RIGHTS item7 (`5975396a`) adds31. Public RIGHTS/ownership (`b5ec1031`) and mint/entropy/RC1 recipe (`7d20df15`) have56/39 root passes in overlapping cohorts. Acquisition/accession/native ownership join (`f541a56e`) adds38 root passes, with explicit synthetic provenance. PacketV2 (`4012efce`) passes53 root cases. Selected conservation capture and additive packetV3 (`a288d58a`) pass100 root new/compatibility cases, retaining all19 gaps and original schema bytes; this is synthetic/offline evidence. The actual RC1 capture attempt failed on pruned historical logs. **Remaining:** Successful actual public-chain captures, complete packet source/attestation/identity/provenance/finality items and their dossier relationships; externally supplied descriptors do not establish completeness. |
 
 ### Artwork finality and permanence
 

@@ -18,35 +18,47 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 20 September integrated batch
 
-Latest Solidity source checkpoint: `7901f3b1`. All 2,501 sources pass the combined
-ABI/type/storage check in 23.953 seconds (ABI89). This is source compatibility,
-not whole-system runtime acceptance. Original RC1 remains unchanged.
+Latest source checkpoint: `c093a9d6`. ABI90 checked2,514 sources at the floor
+overlay now committed `ff372f80`; ABI92 checks the carrier intake at c093a9d6: 2,520 sources, zero errors, 24.140 seconds.
+Original RC1 remains unchanged. Source, scoped runtime and combined release
+acceptance are separate.
 
-- Complete entropy policy succession (`44edac4e`, fixture correction `dffb8daa`)
-  is integrated. The recorded producer source passes210 native cases across15
-  suites, including actual Coordinator/provider and pinned Safe cases; all38
-  captured entropy products fit. Core/Artist/module/governance boundaries remain
-  typed in that210-case capture. The new exact catalog/import/cutover planner (`3fab88e1`) is source-reviewed;
-  actual Core/Executor/manifest/Safe cutover tests are being authored.
-- Artist host capacity repair (`7901f3b1`) fits Identity23,829, Coordinator24,516
-  and Registry24,223 in the exact producer capture, preserving715 prior ABI entries
-  and selected recursive layouts. The two old deployment-wrapper overruns remain;
-  runtime and cold-call acceptance are pending.
-- V2 output checkpoint/manifest/canonical-root source (`a5a7b4c4`) is integrated
-  after independent production review. Initial native evidence26/28 retains two
-  fixture failures; corrected fixtures run separately. Full V2 flow/capacity is open.
-- Core Museum anchors (`758572df`, [ADR0053](../docs/adr/0053-durable-museum-anchors.md))
-  retain declarations across metadata replacement and bind one canonical append-only
-  condition catalog. Source review/type checks pass; actual producer and native
-  acceptance are assigned to the new conservation lane.
-- Core replacement now requires exact complete-policy import readiness in addition
-  to pending-request coverage (`4b6e05ea`, [ADR0052](../docs/adr/0052-entropy-policy-succession.md)).
-  Eight focused cases and two256-input fuzz properties pass; all16 captured
-  production products fit, including Core19,630/23,068 runtime/init bytes.
-  Exact source/runtime/pointer-revision/inventory binding, malformed responses
-  and empty inventory are covered by typed boundaries. Real successor import,
-  activation and governed cutover are source-built. Their first actual-foundation
-  runtime has7 inherited passes and9 shared-setup failures; fixture repair is underway.
+- Entropy actual-foundation cutover now passes16/16 at source18c42131:
+ 9 new and7 inherited cases using actual Core/Executor/Registry/Manifest/
+ Coordinator and a pinned2-of-3Safe. Test correction is integrated65cf7db5.
+ All76 captured production products fit; whole-batch activation/tail rollback
+ and identical signed retries pass. The earlier producer210 cases retain typed
+ surrounding boundaries. Neither capture proves the later Museum Core changes
+ or actual Artist/paid-mint/render joins; those and cold gas calibration continue.
+- Artist creation carriers (`fffb5477`) replace two oversized deployment wrappers
+ while retaining exact compiler child bytes and original Factory CREATE semantics.
+ Both wrappers are693bytes; Factory3,775 runtime/31,224 actual init; all selected
+ products fit. Independent source/eight-oracle review passes; focused native is
+ running. The prior host repair7901f3b1 and broader recovery runtime remain distinct.
+- V2 output/root test corrections (`cb01be62`) establish28 distinct passing cases
+ across retained native3/4/5. The20m outer fixture funds the original16m nested
+ render budget and is not a release capacity verdict. V2 snapshot/reference and
+ complete provider/inventory integration remain building.
+- Metric same-call input reuse (`ca95d161`) passes17 focused tests with two256-run
+ fuzz properties and six fitting products. Measured isolated write/read costs
+ remain20.63m/25.06m; actual graph7PASS/2FAIL is unchanged. A compact transport
+ repair targets duplicate encoding without weakening source checks or caps.
+- Museum selected conservation/packetV3 (`a288d58a`) passes100 root new/compatibility
+ tests in10.926s. Native tier/catalog (`2758868f`) is independently reviewed;
+ its149-product capture fits. The51-case suite is being rerun after test-only
+ harness corrections (`c093a9d6`). Positive offchain fixtures remain synthetic.
+- Permanent Core floor anchor (`ff372f80`, [ADR0053](../docs/adr/0053-durable-museum-anchors.md))
+ preserves original sale-floor receipts across Metadata/recorder replacement.
+ Source/ABI review passes; exact native producer, settlement joins and floor
+ runtime tests are building. Binding alone does not enforce the sale floor.
+- Canonical condition source capture/replay (`569be86d`) passes36 root
+  source/wrapper/compatibility cases. Complete retained hosts and exact original
+  receipt order determine the latest record; unsupported newest evidence stays
+  unresolved. Synthetic positives and partial item15 are explicit.
+- V3 recovery clients (`68fb843a`) bring the root package to1,233 passing tests
+ in122.899s including generation/build/strict types. The frozen898669 profile
+ remains separate from later capacity changes and actual Safe execution.
+
 - LOW_SECURITY INSTANT entropy and direct original-policy reads (`4010ec2a`)
   pass 47 focused native cases on the producer's recorded source. Sale handling
   (`128c8378`) passes 28 focused cases and two 256-input fuzz properties; all
@@ -71,8 +83,8 @@ not whole-system runtime acceptance. Original RC1 remains unchanged.
   EstateDeployment24,720, IdentityExtensionDeployment25,939, RewindOperations26,222
   and RewindRecordReads25,098. The two deployment wrappers were already oversized
   before V3. Worker factoring (`afbf6726`) brings the latter two to22,731/20,239;
-  all four affected workers fit in that exact capture. Host repair and joined
-  runtime acceptance remain pending. Recovered-authority hydration is building.
+  all four affected workers fit in that exact capture. Host repair7901f3b1 is integrated; joined
+  runtime acceptance remains pending. Recovered-authority hydration is building.
 - Complete original living-record hydration (`75ad082d`), adjudication V2
   (`5310fc7b`) and current living-notice recovery (`055f2396`) are source-integrated.
   Their respective 20, 44 and ten authored cases await runtime acceptance.
