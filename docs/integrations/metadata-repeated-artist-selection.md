@@ -149,3 +149,28 @@ cap premise. Exact old/new evidence showed both inner calls use remaining gas
 inside the same outer cap; renewed review allowed the exact two-file patch.
 The original denial, packet, transport normalization and successful application
 record remain retained. The unrelated proposed two-frame partition stays inert.
+
+
+## Cold fixture fidelity correction
+
+The retained successor cost case now shares the actual Owner read fixture above.
+Its former mutable boundary stored fields that are immutable in production and
+charged for an extra mock-only enabled flag. Those mocks remain in every other
+successor test for corruption and refusal controls; only the named-cold cost
+case uses the actual Owner/Guards/State and immutable Coordinator recipe.
+Original assertions, the 400,000 callback, the single 150,000 dependency frame
+and all prior cooling remain; the actual Guards library is also explicitly cold.
+
+The frozen 172-source follow-up changes no production source. The focused retry
+passes, and the same cached retained cohort passes all 46 cases, including both
+256-input fuzz oracles. The corrected case matches the separate real-Owner
+measurement: 324,595 callback gas and 147,146 dependency-frame gas. All 82 concrete
+production products in this unchanged native closure still fit. The original
+conservative failure is preserved, as is an initial test-name filter that selected
+no cases before the corrected cached retry. Neither is counted as a passing run.
+
+The shared helper preserves the original classes and CREATE prediction/body;
+this remains an Owner read-cost recipe with typed Coordinator, Core, history
+admission and Archive boundaries. It does not execute complete operation 55–60,
+deploy concrete Identity, or establish full current-stack acceptance. The narrow
+2,854-gas dependency headroom still requires measurement on any new composition.

@@ -16,6 +16,17 @@ the release policy in `docs/release-policy.md`.
   The new carrier is 22,005 runtime bytes with its original ABI/storage retained;
   runtime acceptance remains pending.
 
+## Metadata cold fixture fidelity
+
+- Share the actual Owner/Guards/State and immutable Coordinator read recipe in the
+  retained cold-cost case; preserve every budget, assertion and earlier cooling
+  step, and add explicit cooling for the actual Guards library. Mutable negative
+  fixtures and all production bytes remain unchanged.
+- Record all 46 retained cases passing, including two 256-input fuzz oracles.
+  The corrected cold case uses 324,595/400,000 callback gas and 147,146/150,000
+  dependency gas. Preserve the old mock-cost failure; full current-stack and
+  complete operation-60 acceptance remain separate.
+
 ## Single-frame Artist certificate read reuse
 
 - Inline the unchanged imported-origin certificate view body in its fixed read

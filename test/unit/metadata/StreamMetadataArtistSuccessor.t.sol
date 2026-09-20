@@ -2,6 +2,10 @@
 pragma solidity ^0.8.19;
 
 import "./StreamCollectionMetadataV1.t.sol";
+import { StreamArtistHydrationGuards as ActualMetadataOwnerGuards }
+    from "../../../smart-contracts/domains/artist/StreamArtistHydrationGuards.sol";
+import { MetadataRealReadOwner, MetadataImmutableReadCoordinator, MetadataRealOwnerReadDeployment }
+    from "../../helpers/MetadataRealOwnerReadFixture.sol";
 import {
     StreamArtistRecoveredHydrationTypes as RH
 } from "../../../smart-contracts/interfaces/stream/artist/StreamArtistRecoveredHydrationTypes.sol";
@@ -557,8 +561,47 @@ contract StreamMetadataArtistSuccessorTest is CollectionMetadataV1Fixture {
         metadata.requireArtistRecordCandidate(p);
     }
 
+    /// @dev Cost recipe uses actual immutable Owner bindings and actual import/read workers.
+    /// The separate mutable boundaries above remain only for adversarial lineage controls.
+    /// Coordinator/Core/history/source admission/Archive are still explicit typed boundaries.
+    function _canonicalRepeatedCandidate() private returns (P.Publication memory p) {
+        T.SuiteConfiguration memory s;
+        s.registry = address(artist);
+        s.core = address(core);
+        s.archive = address(new MetadataRouterForSuccessorBoundary(address(core)));
+        s.metadata = address(new MetadataRouterForSuccessorBoundary(address(core)));
+        s.mintManager = address(new MetadataRouterForSuccessorBoundary(address(core)));
+        s.roleRegistry = address(executor);
+        s.primaryResolver = address(new MetadataRouterForSuccessorBoundary(address(core)));
+        s.royaltyResolver = address(new MetadataRouterForSuccessorBoundary(address(core)));
+        s.primaryRevenueClass = keccak256("PRIMARY");
+        s.validator = address(schemas);
+        MetadataImmutableReadCoordinator source;
+        (originalSuite, source) = MetadataRealOwnerReadDeployment.deploy(address(vm), s);
+        priorCoordinator = MetadataHydrationCoordinatorBoundary(address(source));
+        MetadataSuccessorArtistBoundary(address(artist)).configure(address(source), address(0));
+        immediatePrior = new MetadataSuccessorArtistBoundary(address(core));
+        next = new MetadataSuccessorArtistBoundary(address(core));
+        s.registry = address(next);
+        s.archive = address(new MetadataRouterForSuccessorBoundary(address(core)));
+        MetadataImmutableReadCoordinator destination;
+        (nextSuite, destination) = MetadataRealOwnerReadDeployment.deploy(address(vm), s);
+        nextCoordinator = MetadataHydrationCoordinatorBoundary(address(destination));
+        next.configure(address(destination), address(immediatePrior));
+        immediatePrior.seal(address(next), true);
+        MetadataSuccessorArtistBoundary(address(artist)).seal(address(immediatePrior), true);
+        destination.installFixturePrefix(_origin(), COMPLETION, 255, 255);
+        core.setPointer(keccak256("METADATA_ROUTER"), nextSuite.metadata);
+        core.setPointer(keccak256("ARTIST_REGISTRY"), address(next));
+        core.setPointer(keccak256("MODULE_REGISTRY"),
+            address(new MetadataPublicationModulesBoundary(address(metadata))));
+        bytes memory payload = bytes("same original Metadata across repeated import");
+        store.publishChunk(payload);
+        (, p) = _terms(address(0xa11ce), payload);
+    }
+
     function testRepeatedCandidateWorkerRetainsColdGenesis400kBudget() public {
-        P.Publication memory p = _repeatedCandidate();
+        P.Publication memory p = _canonicalRepeatedCandidate();
         MetadataPublicationBudgetProbe probe = new MetadataPublicationBudgetProbe();
         (address payloadPointer,) =
             store.chunk(keccak256(bytes("same original Metadata across repeated import")));
@@ -574,6 +617,7 @@ contract StreamMetadataArtistSuccessorTest is CollectionMetadataV1Fixture {
         safeVm.cool(address(StreamMetadataRecoveredArtistSelection));
         safeVm.cool(address(ImportedReads));
         safeVm.cool(address(ImportedState));
+        safeVm.cool(address(ActualMetadataOwnerGuards));
         safeVm.cool(address(StreamMetadataArtistConfiguration));
         safeVm.cool(address(StreamRecordDocumentReads));
         safeVm.cool(address(StreamMetadataPublicationEncoding));
