@@ -35,7 +35,11 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   auction/purchase cases are now integrated (`5eeee268`) with actual Artist,
   governance and distinct Safes; the external entropy provider remains a service
   double. Native runtime is pending. Actual-Artist native/ERC20 primary offers
-  remain the next coverage batch.
+  are now source-integrated as `770ccea5`: three native and four ERC20
+  cases preserve separate Artist/seller/buyer/executor Safe authority,
+  original spending intent and exact retry after late failure. All four
+  previously missing entrypoint families now have actual-Artist recipes;
+  these cases still await coordinated native execution.
   A later source review corrects the PROFILE test call-count oracle to include
   its final escrow flush; production is unchanged and native remains pending.
 - Core incident abort preserves consumed token IDs and collection serials.
@@ -97,7 +101,13 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   The corrected publication retry remains pending.
 - Six genuine missing genesis products are composed in `a960a5b1`, with five
   actual-current/Safe tests authored. Remaining role composition includes the
-  final role assembly and activation. The narrow
+  activation. Full 37-role construction is now source-integrated as
+  `24d3c0f1`, with genuine commerce products, locked clone singleton,
+  separate mint/entropy backups and 25 required direct support entries.
+  Six candidate cases and nine record-product cases are authored. The
+  inventory proves construction bindings; complete delayed activation,
+  transitive dependency closure, gas and native acceptance remain open.
+  The narrow
   legacy-admin adapter is integrated as `0125573d`: seven current/Safe cases
   are authored; selected adapter size is 5,448 runtime/5,981 creation bytes.
   The new full-byte preservation producer is integrated as `09fd273d`: nine
@@ -111,7 +121,8 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   not lift the separate native Artist statement bound.
   Record-product composition (`6292287b`) joins the genuine preservation and
   general hosts to the original Artist/Metadata/Store/Executor, with eight
-  current/Safe cases authored. Full 37-role activation remains outstanding.
+  current/Safe cases authored; the full candidate batch adds a ninth
+  genuine Safe/general-record 24,576-byte case. Activation is outstanding.
 - General attestations, native Artist evidence and typed identity notarization
   are integrated as `9677f5bf`. Root passes 86 affected checks (63 functional
   and 23 documentation); fixture semantics and offline reconstruction do not
@@ -128,13 +139,20 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
   recorded. This is separate from the preceding 15-case
   capture. Native Artist statements and typed notarizations retain separate
   8,192-byte bounds; complete current-graph and gas acceptance remain open.
+- Artist recovery after one or more executed rotations is source-integrated
+  as `7a274c04`, including recovery from a previously closed estate origin.
+  It preserves original records and uses the actual append-only vesting
+  history and unchanged authority epoch to authenticate the rotation chain.
+  Twenty-seven focused cases are authored; independent source review and
+  ABI checks pass, while native execution and changed-product sizes remain
+  pending. Dormancy-origin supersession is the next active recovery batch.
 - Original STATIC renderer/companion/registry composition is integrated as
   `8d1672ac`, independently source-reviewed. Six current/Safe cases are authored;
   fixture analysis and partial direct read rosters are explicitly synthetic.
   Complete transitive analysis, goldens and joined runtime remain required.
 
-The latest complete-source ABI/type/storage pass at `18be311b` covers 2,172
-sources in 22.875 seconds with no errors. It does not generate bytecode or
+The latest complete-source ABI/type/storage pass at `770ccea5` covers 2,185
+sources in 19.578 seconds with no errors. It does not generate bytecode or
 prove whole-system execution. Earlier paid-burn acceptance remains 39 distinct
 scoped cases, owner-notice adapters 93 affected root cases, and the populated
 Museum recipe 150 affected cases. Those counts overlap or use different
