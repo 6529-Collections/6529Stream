@@ -292,15 +292,23 @@ contract StreamMediaMasterSelectionTest is ConservationSelectionFixture {
         require(executeSafe(account, keys, address(metadata), 0,
             abi.encodeCall(metadata.recordCollectionRecordWithPayload, (uint256(1), r, payload)), 0), "Safe original publication");
         uint256 nonce = account.nonce();
+        bytes memory selection =
+            abi.encodeCall(masters.adoptMaster, (uint256(1), h, uint64(0), r, w));
+        bytes memory signatures = safeThresholdSignature(keys, account.getTransactionHash(
+            address(masters), 0, selection, 0, 0, 0, 0, address(0), address(0), nonce
+        ));
         archive.fail(true);
+        // Sign before the expectation: executeSafe reads nonce/hash before its execution call.
         vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
-        executeSafe(account, keys, address(masters), 0,
-            abi.encodeCall(masters.adoptMaster, (uint256(1), h, uint64(0), r, w)), 0);
+        account.execTransaction(
+            address(masters), 0, selection, 0, 0, 0, 0, address(0), payable(address(0)), signatures
+        );
         require(account.nonce() == nonce && masters.currentMaster(1, subject, 1).revision == 0,
             "Safe transaction nonce and selection rolled back");
         archive.fail(false);
-        require(executeSafe(account, keys, address(masters), 0,
-            abi.encodeCall(masters.adoptMaster, (uint256(1), h, uint64(0), r, w)), 0), "Safe exact retry");
+        require(account.execTransaction(
+            address(masters), 0, selection, 0, 0, 0, 0, address(0), payable(address(0)), signatures
+        ), "Safe exact retry");
         require(masters.currentMaster(1, subject, 1).original.recorder == address(account)
             && masters.currentMaster(1, subject, 1).original.authorizationClass == 6,
             "original Safe archivist authority retained");

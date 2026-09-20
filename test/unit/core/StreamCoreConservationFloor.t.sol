@@ -27,7 +27,19 @@ contract CoreFloorCandidateBoundary {
     }
 
     function supportsInterface(bytes4 id) external view returns (bool) {
-        return backing.supportsInterface(type(IStreamConditionSources).interfaceId)
+        (bool ok, bytes memory output) = address(backing)
+            .staticcall(
+                abi.encodeCall(
+                    IERC165.supportsInterface, (type(IStreamConditionSources).interfaceId)
+                )
+            );
+        if (!ok) assembly ("memory-safe") { revert(add(output, 32), mload(output)) }
+        // Preserve malformed replies for Core's exact-size check. A typed bool call would
+        // accept an overlong backing reply and silently re-encode it as canonical 32 bytes.
+        if (output.length != 32) {
+            assembly ("memory-safe") { return(add(output, 32), mload(output)) }
+        }
+        return abi.decode(output, (bool))
             && (id == type(IStreamConservationFloor).interfaceId || id == 0x01ffc9a7);
     }
 
