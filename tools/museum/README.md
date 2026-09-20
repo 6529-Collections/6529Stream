@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Public-chain RIGHTS and ownership capture](../../docs/museum-public-history-capture.md)
+uses bounded fixed-filter history queries at public block heights, exact native
+joins and offline reconstruction. Provider log completeness remains explicitly
+trusted; original strict genesis-walk profiles remain unchanged.
+
 [Source-driven dossier gathering and V2 citations](../../docs/museum-dossier-gather.md)
 replay the actual token fixture plus native source captures, extract original
 record bytes and citation manifests, and export a 19-item acquisition examination.

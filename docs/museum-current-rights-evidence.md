@@ -10,6 +10,11 @@ Its RPC source still requires external admission. Synthetic tests do not prove
 actual chain execution, legal rights, institutional acceptance or completion of
 the other acquisition requirements.
 
+For public block heights beyond this original genesis-walk profile's limit,
+use the separate [public-history RIGHTS capture](museum-public-history-capture.md).
+It preserves native selection semantics and adds explicit provider log-completeness
+trust, a distinct transcript/profile and standalone item-7 fragment output.
+
 ## Native source and absence
 
 `CurrentRightsSource` starts at the pinned Core's installed Metadata Router.
