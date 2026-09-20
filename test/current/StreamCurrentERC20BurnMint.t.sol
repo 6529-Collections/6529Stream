@@ -450,6 +450,9 @@ contract StreamCurrentERC20BurnMintTest is NativeCuratedSaleFixture, OfficialPer
     function testNonzeroNativeFeeRejectsBeforePullOrBurnAndSameCandidateRetries() public {
         E.Execution memory e = _open(payer, payer, payer);
         S.ERC20SettlementCandidate memory c = burnSale.previewExecution(e);
+        // Only the healthy retry may reach the first payer-to-payment token pull.
+        CurrentERC20BurnEventVm(address(vm)).expectCall(address(token), 0,
+            abi.encodeCall(token.transferFrom, (payer, address(payment), uint256(1000))), 1);
         entropy.configure(7, 1, false, false);
         vm.expectRevert();
         burnSale.previewExecution(e);
@@ -457,7 +460,7 @@ contract StreamCurrentERC20BurnMintTest is NativeCuratedSaleFixture, OfficialPer
         vm.prank(payer);
         payment.settleERC20PrimarySaleByPayer(c, abi.encode(e));
         _assertUnused(e, c, 0);
-        require(token.transferCalls() == 0, "fee rejection precedes token pull");
+        require(token.transferCalls() == 0, "fee refusal rolls token state back");
         entropy.configure(0, 1, false, false);
         vm.prank(payer);
         _assertExecuted(e, c, payment.settleERC20PrimarySaleByPayer(c, abi.encode(e)));

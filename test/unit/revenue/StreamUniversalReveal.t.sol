@@ -107,7 +107,25 @@ contract StreamUniversalRevealTest is UniversalSettlementTestBase {
         (bytes32 id, address account) = sale.refundAccountAt(0);
         require(sale.refundAccountCount() == 1 && id == saleId && account == address(executor), "retained inventory");
         (ok,) = address(executor).call(exact);
-        require(!ok && recorder.totalOfficialSettled(address(token)) == 1000, "same Safe/payment cannot replay");
+        require(!ok && recorder.totalOfficialSettled(address(token)) == 1000, "obsolete Safe envelope cannot replay");
+        // Fund the executor and sign the same inner payment at its current Safe nonce.
+        // The direct boundary probe identifies the target error hidden by the Safe's GS013.
+        vm.deal(address(executor), 175);
+        vm.prank(address(executor));
+        (ok, proof) = address(payment).call{value: 175}(inner);
+        require(!ok && keccak256(proof) == keccak256(abi.encodeWithSelector(
+            StreamERC20PrimarySettlementAdapter.PaymentIntentNonceUsed.selector,
+            address(tokenPayer), intent.nonce)), "original payment intent nonce rejects replay");
+        exact = _safeCall(executor, executorKeys, address(payment), 175, inner);
+        uint256 currentNonce = executor.nonce();
+        (ok, proof) = address(executor).call(exact);
+        require(!ok && keccak256(proof) == keccak256(abi.encodeWithSignature("Error(string)", "GS013"))
+            && executor.nonce() == currentNonce && tokenPayer.nonce() == 1
+            && address(executor).balance == 175 && address(payment).balance == 0
+            && address(sale).balance == 0 && sale.refundLiability() == 0
+            && entropy.revealFeeEscrow(1) == 100 && entropy.requests() == 1
+            && token.balanceOf(wallet) == 1000 && recorder.totalOfficialSettled(address(token)) == 1000,
+            "fresh funded Safe envelope reaches refused payment without repeating token or native effects");
     }
 
     function testLiveFeeDriftRejectsBeforeTokenPullThenSameCallRetries() public {

@@ -200,14 +200,18 @@ contract StreamUniversalPermitsTest is UniversalSettlementTestBase {
         StreamPrimarySettlementTypes.Permit2TransferAuthorization memory p2 =
             _permit2Authorization(PAYER_KEY, 1);
         vm.prank(payer);
-        (ok,) = address(payment)
+        bytes memory reason;
+        (ok, reason) = address(payment)
             .call(
                 abi.encodeCall(
                     IStreamERC20PrimarySettlementAdapter.settleERC20PrimarySaleWithPermit2,
                     (c, p2, abi.encode(e))
                 )
             );
-        require(!ok && token.balanceOf(payer) == 10_000, "immutable third-party runtime pin");
+        require(!ok && keccak256(reason) == keccak256(abi.encodeWithSelector(
+            StreamERC20PrimarySettlementAdapter.PermitCapabilityUnavailable.selector, address(token)))
+            && token.balanceOf(payer) == 10_000 && sale.executionIdByNonce(saleId, 1) == 0,
+            "exact pre-callback capability refusal for immutable third-party runtime pin");
     }
 
     function testEIP2612NativeFundingFailureRestoresPermitAndIdenticalRetry() public {

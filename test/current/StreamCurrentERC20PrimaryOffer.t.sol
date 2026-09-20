@@ -400,6 +400,9 @@ contract StreamCurrentERC20PrimaryOfferTest is NativeCuratedSaleFixture, Officia
         Primary.ERC20SettlementCandidate memory c = offers.previewExecution(q);
         Primary.PaymentIntent memory intent = _intent(p, 5);
         bytes memory proof = _curatedSignature(PAYER_KEY, payment.paymentIntentDigest(intent));
+        // Only the healthy retry may reach the first payer-to-payment token pull.
+        CurrentERC20OfferEventVm(address(vm)).expectCall(address(token), 0,
+            abi.encodeCall(token.transferFrom, (payer, address(payment), uint256(1000))), 1);
         entropy.configure(7, 1, false, false);
         vm.expectRevert();
         offers.previewExecution(q);
@@ -407,7 +410,7 @@ contract StreamCurrentERC20PrimaryOfferTest is NativeCuratedSaleFixture, Officia
         vm.prank(payer);
         payment.settleERC20PrimarySaleWithIntent(c, intent, proof, abi.encode(q));
         _assertUnused(p, q, c, intent.nonce);
-        require(token.transferCalls() == 0, "fee incompatibility fails before token effects");
+        require(token.transferCalls() == 0, "fee refusal rolls token state back");
         entropy.configure(0, 0, false, true);
         bytes memory failure = abi.encodeWithSignature("Error(string)", "provider rejected");
         CurrentERC20OfferEventVm(address(vm)).expectEmit(true, true, false, true, address(offers));
