@@ -82,6 +82,13 @@ That HTTP header leaves all transcript and profile definitions unchanged.
 Pruned-history failures still abort. Use an admitted provider retaining the full
 required range; the recipe does not substitute empty pages or a later start block.
 
+A bounded follow-up inspection of the configured endpoint variable and credential
+target names, credential index, and 13 related audit/readback/configuration files
+found no alternative Sepolia RPC configuration. The inspected capture and funding
+scripts also use the same public endpoint. The failed query was not retried and
+no guessed provider, wallet operation or transaction was used. An admitted RPC
+retaining the required history is still needed for an actual RC1 capture.
+
 ## Why RC1 cannot use the current entropy reader
 
 The original coordinator is

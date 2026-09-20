@@ -218,6 +218,10 @@ def verify_package(directory, expected_manifest_hash):
     if path.stat().st_size > MAX_MANIFEST:
         raise MuseumError("multiformat manifest bound exceeded")
     value = loads(path.read_bytes(), maximum=MAX_MANIFEST, canonical=True)
+    if isinstance(value, dict) and value.get("mode") == "acquisition_accession_history":
+        from .acquisition_accession import verify
+        from .bagit import read_tree
+        return verify(read_tree(directory), expected_manifest_hash)
     if isinstance(value, dict) and value.get("mode") == "public_mint_entropy_capture":
         from .public_mint_entropy_capture import verify
         from .bagit import read_tree

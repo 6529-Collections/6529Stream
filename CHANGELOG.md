@@ -271,6 +271,12 @@ the release policy in `docs/release-policy.md`.
 - Add pinned, bounded burn-program discovery and source/target closure warnings;
   clarify Safe CALL capability versus EIP-2612 and Permit2 signature support.
 
+- Add an acquisition ACCESSION/instrument and native token-history join with
+  historical owner reconciliation, exact same-block publication order, retained
+  instrument bytes and offline reconstruction. Add a separate public owner
+  catalogue profile while preserving original profiles, unsupported statements,
+  missing evidence and the canonical packet's unresolved owner-authority shape.
+
 - Add public mint/entropy capture with two source-derived history stages,
   cross-stage receipt/header reconciliation and exact offline leaf replay.
   Preserve active versus observed request attempts and original profiles.

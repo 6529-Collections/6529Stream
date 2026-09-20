@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Acquisition ACCESSION and title history](../../docs/museum-acquisition-accession.md)
+gathers all native owner lanes, joins an explicitly selected original ACCESSION
+to exact Core transfer chronology, and retains supplied instrument bytes for
+offline replay. Historical owner authority and remaining packet gaps stay explicit.
+
 [Public mint/entropy capture](../../docs/museum-public-mint-entropy.md) joins
 source-derived token and request-control histories, preserving active attempts
 separately from observed request counts. A concrete
