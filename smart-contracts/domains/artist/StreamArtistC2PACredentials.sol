@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { StreamArtistPersonhoodSummary } from "./StreamArtistPersonhoodSummary.sol";
 import {
     StreamArtistC2PATypes as C2PA,
     IStreamArtistC2PAReads
@@ -71,6 +72,7 @@ library StreamArtistC2PACredentials {
         if (terms.subjectKind != 10) return;
         Store storage s = state();
         if (isPersonhood(terms.schemaId)) {
+            StreamArtistPersonhoodSummary.note(origin, artistId, bindingHash, terms, record, statement, emitEvent);
             s.personhood[keccak256(abi.encode(terms.collectionId, artistId))] = record.recordHash;
             return;
         }

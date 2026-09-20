@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import { IStreamArtistPersonhoodEvidence, StreamArtistPersonhoodTypes as Personhood } from "../../interfaces/stream/artist/IStreamArtistPersonhoodEvidence.sol";
 import "../../interfaces/stream/artist/IStreamArtistC2PA.sol";
 import { StreamArtistProfilePayoutReads } from "./StreamArtistProfilePayoutReads.sol";
 import "./StreamArtistPlatformReads.sol";
@@ -495,6 +496,13 @@ contract StreamArtistOnboardingReads {
                     && personhood.schemaId != keccak256("6529STREAM_ARTIST_PERSONHOOD_EVIDENCE_V1"))
         ) {
             revert T.MissingMintPrerequisite(keccak256("personhood-attestation"));
+        }
+        if (personhood.schemaId == keccak256("6529STREAM_ARTIST_PERSONHOOD_EVIDENCE_V1")) {
+            (bytes32 selected, Personhood.Status status) = IStreamArtistPersonhoodEvidence(_suite.owners[4])
+                .personhoodEvidenceStatus(collectionId, b.artistId);
+            if (selected != personhood.recordHash || status != Personhood.Status.RESOLVED) {
+                revert T.MissingMintPrerequisite(keccak256("personhood-evidence"));
+            }
         }
     }
 

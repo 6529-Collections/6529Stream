@@ -3,6 +3,15 @@
 All notable release-impacting changes are recorded here. The project follows
 the release policy in `docs/release-policy.md`.
 
+## Artist personhood documentary references
+
+- Link the original signed Artist personhood head to its exact General identity
+  notarization, with immutable proof summaries, explicit currentness and full audit
+  reads. Preserve original signatures, records, waivers and import domains.
+- Require the selected resolved evidence in the prospective Artist mint floor;
+  retain authenticated summaries through the existing complete operation-60 import.
+  ABI/storage checks pass; behavioral, gas and deployment acceptance remain pending.
+
 ## Artist extension creation carriers
 
 - Replace the two oversized embedded-creation wrappers with authenticated,

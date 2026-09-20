@@ -5,6 +5,9 @@ import {
 } from "./StreamArtistRecoveredCollectionHydration.sol";
 import { StreamArtistRecoveredHydrationCodec } from "./StreamArtistRecoveredHydrationCodec.sol";
 import "./StreamArtistC2PACredentials.sol";
+import { StreamArtistPersonhoodReads } from "./StreamArtistPersonhoodReads.sol";
+import { StreamArtistPersonhoodSummary } from "./StreamArtistPersonhoodSummary.sol";
+import { StreamArtistPersonhoodTypes as Personhood } from "../../interfaces/stream/artist/IStreamArtistPersonhoodEvidence.sol";
 import "./StreamArtistDisputeWithdrawalState.sol";
 import {
     StreamArtistAttributionPlatformTransport as PlatformTransport
@@ -80,6 +83,39 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
     StreamArtistAttributionClaimState.Store private _attributionClaims;
     mapping(uint256 => bytes32) private _latestDisplayClaim;
     mapping(bytes32 => Attest.Association) private _attestationAssociations;
+
+    function personhoodEvidence(uint256 collectionId, bytes32 artistId)
+        external view returns (Personhood.Selection memory) {
+        return StreamArtistPersonhoodReads.read(_attestationStore(), collectionId, artistId);
+    }
+
+    function personhoodEvidenceStatus(uint256 collectionId, bytes32 artistId)
+        external view returns (bytes32, Personhood.Status) {
+        Personhood.Selection memory selection = StreamArtistPersonhoodReads.read(_attestationStore(), collectionId, artistId);
+        return (selection.nativeRecord.recordHash, selection.status);
+    }
+
+    function personhoodProofSummary(bytes32 nativeRecordHash)
+        external view returns (Personhood.Summary memory) {
+        return StreamArtistPersonhoodSummary.get(nativeRecordHash);
+    }
+
+    function personhoodProofSummaryHash(bytes32 nativeRecordHash) external view returns (bytes32) {
+        return StreamArtistPersonhoodSummary.hashOf(nativeRecordHash);
+    }
+
+    function auditPersonhoodEvidence(bytes32 nativeRecordHash)
+        external view returns (bytes32, Personhood.NotarizationFacts memory) {
+        return StreamArtistPersonhoodSummary.audit(nativeRecordHash);
+    }
+
+    function personhoodResolution(uint256 collectionId, bytes32 artistId,
+        T.AttestationRecord calldata record, bool checkEvidence)
+        external view returns (bool, Personhood.NotarizationFacts memory) {
+        if (msg.sender != address(this)) revert T.Unauthorized(msg.sender);
+        return StreamArtistPersonhoodReads.resolve(_environment(), operationCoordinator,
+            collectionId, artistId, record, checkEvidence);
+    }
 
     function c2paCredentialHead(bytes32 artistId) external view returns (C2PA.Head memory) {
         return StreamArtistC2PACredentials.head(artistId);
