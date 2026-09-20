@@ -78,7 +78,7 @@ interface PreservationRootVm {
 }
 
 /// @dev Fixed worker test host, NOT the Router deployment. Compiler-owned original state roots,
-/// original authorization/evolution worker and original V2 codecs are executed here. Artist op17
+/// original authorization/evolution worker and shared publication codec are executed here. Artist op17
 /// signature production and complete output/snapshot validation are explicit fixture boundaries.
 contract PreservationRootWorkerHost {
     address public immutable core;
@@ -104,24 +104,24 @@ contract PreservationRootWorkerHost {
         view
         returns (bytes32)
     {
-        (Root.Record memory r,) =
-            PreservationRoot.prepare(roots, Roots.Context(core, artist), p, publisher);
-        return ScopedState.familyCurrent(core, p.collectionId, r.stateHash);
+        return OldCodec.preview(
+            roots,
+            scoped,
+            _layout(),
+            _context(),
+            abi.encodeCall(
+                Preservation.previewPreservationPolicyContentRootPublication, (p, publisher)
+            )
+        );
     }
 
     function publishCollection(Root.Publication memory p) external returns (bytes32 hash) {
-        (Root.Record memory r, Preservation.Binding memory b) =
-            PreservationRoot.prepare(roots, Roots.Context(core, artist), p, msg.sender);
-        (bytes32 consent, bytes32 ratification) = Content.authorize(
+        return OldCodec.publish(
+            roots,
+            scoped,
             _layout(),
             _context(),
-            p.collectionId,
-            keccak256("CONTENT_ROOT"),
-            ScopedState.familyCurrent(core, p.collectionId, r.stateHash)
-        );
-        hash = PreservationRoot.publish(roots, Roots.Context(core, artist), p, r, b, consent);
-        Content.recordApplication(
-            _layout(), _context(), p.collectionId, keccak256("CONTENT_ROOT"), consent, ratification
+            abi.encodeCall(Preservation.publishVerifiedPreservationPolicyContentRoot, (p))
         );
     }
 
@@ -138,11 +138,28 @@ contract PreservationRootWorkerHost {
         view
         returns (bytes32)
     {
-        return PreservationScoped.preview(scoped, _layout(), _context(), p, publisher);
+        return OldCodec.preview(
+            roots,
+            scoped,
+            _layout(),
+            _context(),
+            abi.encodeCall(
+                ScopedPreservation.previewScopedPreservationPolicyContentRootPublication,
+                (p, publisher)
+            )
+        );
     }
 
     function publishScoped(Scoped.Publication memory p) external returns (bytes32) {
-        return PreservationScoped.publish(scoped, _layout(), _context(), p);
+        return OldCodec.publish(
+            roots,
+            scoped,
+            _layout(),
+            _context(),
+            abi.encodeCall(
+                ScopedPreservation.publishScopedPreservationPolicyContentRootPublication, (p)
+            )
+        );
     }
 
     function collectionContentRootHead(uint256 cid) external view returns (bytes32) {
@@ -154,7 +171,12 @@ contract PreservationRootWorkerHost {
     }
 
     function binding(bytes32 key) external view returns (Preservation.Binding memory) {
-        return PreservationRoot.readBinding(key);
+        return abi.decode(
+            OldCodec.read(
+                roots, abi.encodeCall(Preservation.preservationPolicyContentRootBinding, (key))
+            ),
+            (Preservation.Binding)
+        );
     }
 
     function oldBinding(bytes32 key) external view returns (PV.Binding memory) {
@@ -162,7 +184,13 @@ contract PreservationRootWorkerHost {
     }
 
     function scopedBinding(bytes32 key) external view returns (ScopedPreservation.Binding memory) {
-        return PreservationScoped.readBinding(key);
+        return abi.decode(
+            OldCodec.read(
+                roots,
+                abi.encodeCall(ScopedPreservation.scopedPreservationPolicyContentRootBinding, (key))
+            ),
+            (ScopedPreservation.Binding)
+        );
     }
 
     function scopedContentRootAggregate(uint256 cid)

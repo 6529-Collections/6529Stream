@@ -1,5 +1,12 @@
 # Changelog
 
+## Preservation root facade integration
+
+- Expose separate COLLECTION and scoped preservation root interfaces through
+  the Router and preserve original CONTENT_ROOT consent, history and aggregate
+  rules. Common reads identify the new leaf schema; add dispatch/read regression
+  coverage and an integration guide. Combined runtime acceptance remains pending.
+
 ## Canonical metadata subjects for published scopes
 
 - Keep Metadata deployable by extracting only typed subject writes; preserve the

@@ -71,6 +71,12 @@ import "./StreamMetadataTokenReads.sol";
 import "./StreamMetadataImageURI.sol";
 import "./StreamMetadataContentRoot.sol";
 import {
+    IStreamPreservationPolicyContentRootPublicationV1 as PreservationRootInterface
+} from "../../interfaces/stream/metadata/IStreamPreservationPolicyContentRootPublicationV1.sol";
+import {
+    IStreamScopedPreservationPolicyContentRootPublicationV1 as ScopedPreservationRootInterface
+} from "../../interfaces/stream/metadata/IStreamScopedPreservationPolicyContentRootPublicationV1.sol";
+import {
     IStreamPolicyContentRootPublicationV2 as PolicyRootInterface
 } from "../../interfaces/stream/metadata/IStreamPolicyContentRootPublicationV2.sol";
 import {
@@ -365,6 +371,8 @@ contract StreamMetadataRouter is
             || id == type(IStreamContentRootPublication).interfaceId
             || id == type(PolicyRootInterface).interfaceId || id == type(ScopedRoot).interfaceId
             || id == type(ScopedPolicyRootInterface).interfaceId
+            || id == type(PreservationRootInterface).interfaceId
+            || id == type(ScopedPreservationRootInterface).interfaceId
             || id == type(IStreamMetadataServingFacts).interfaceId
             || id == type(IStreamArtistContentFacts).interfaceId
             || id == type(IStreamArtistContentMutationFacts).interfaceId
@@ -886,6 +894,34 @@ contract StreamMetadataRouter is
         _rootRead();
     }
 
+    function previewPreservationPolicyContentRootPublication(
+        Publication calldata publication,
+        address publisher
+    ) external view returns (bytes32) {
+        _requireContentCollection(publication.collectionId);
+        return StreamMetadataRouterRootCodec.preview(
+            _contentRoots, _scopedContentRoots, _contentLayout(), _contentContext(), msg.data
+        );
+    }
+
+    function publishVerifiedPreservationPolicyContentRoot(Publication calldata publication)
+        external
+        returns (bytes32 recordHash)
+    {
+        _requireContentCollection(publication.collectionId);
+        return StreamMetadataRouterRootCodec.publish(
+            _contentRoots, _scopedContentRoots, _contentLayout(), _contentContext(), msg.data
+        );
+    }
+
+    function preservationPolicyContentRootBinding(bytes32 recordHash)
+        external
+        view
+        returns (PreservationRootInterface.Binding calldata)
+    {
+        _rootRead();
+    }
+
     function previewViewAdoption(ViewTypes.Input calldata, address)
         external
         view
@@ -1003,6 +1039,33 @@ contract StreamMetadataRouter is
         external
         view
         returns (ScopedPolicyRootInterface.Binding calldata)
+    {
+        _rootRead();
+    }
+
+    function previewScopedPreservationPolicyContentRootPublication(
+        ScopedRoot.Publication calldata publication,
+        address publisher
+    ) external view returns (bytes32) {
+        _requireContentCollection(publication.scope.collectionId);
+        return StreamMetadataRouterRootCodec.preview(
+            _contentRoots, _scopedContentRoots, _contentLayout(), _contentContext(), msg.data
+        );
+    }
+
+    function publishScopedPreservationPolicyContentRootPublication(
+        ScopedRoot.Publication calldata publication
+    ) external returns (bytes32 recordHash) {
+        _requireContentCollection(publication.scope.collectionId);
+        return StreamMetadataRouterRootCodec.publish(
+            _contentRoots, _scopedContentRoots, _contentLayout(), _contentContext(), msg.data
+        );
+    }
+
+    function scopedPreservationPolicyContentRootBinding(bytes32 recordHash)
+        external
+        view
+        returns (ScopedPreservationRootInterface.Binding calldata)
     {
         _rootRead();
     }

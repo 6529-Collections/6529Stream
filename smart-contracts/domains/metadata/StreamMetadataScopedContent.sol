@@ -21,6 +21,16 @@ import {
     StreamScopedPolicyOutputSchemasV2 as PolicyOutputSchemas
 } from "../finality/StreamScopedPolicyOutputSchemasV2.sol";
 
+import {
+    StreamMetadataScopedPreservationPolicyContentStateV1 as PreservationState
+} from "./StreamMetadataScopedPreservationPolicyContentStateV1.sol";
+import {
+    StreamScopedPreservationPolicyContentRootSchemasV1 as PreservationSchemas
+} from "../finality/StreamScopedPreservationPolicyContentRootSchemasV1.sol";
+import {
+    StreamPreservationPolicyOutputSchemasV1 as PreservationOutput
+} from "../finality/StreamPreservationPolicyOutputSchemasV1.sol";
+
 /// @notice Fixed original-Router scoped write transport. Uses the original consent and
 /// ratification maps; the only new authority state is the compiler-owned scoped aggregate.
 library StreamMetadataScopedContent {
@@ -80,9 +90,11 @@ library StreamMetadataScopedContent {
             bytes32 hash = state.heads[State.subject(core, scope)];
             R.Record memory record = state.records[hash];
             bytes32 profile = _policyProfile(state, hash, scope);
-            bytes32 schema = profile == PolicyRootSchemas.PROFILE
-                ? PolicyOutputSchemas.LEAF_SCHEMA
-                : StreamContentRootSchemas.LEAF_SCHEMA;
+            bytes32 schema = profile == PreservationSchemas.PROFILE
+                ? PreservationOutput.LEAF_SCHEMA
+                : profile == PolicyRootSchemas.PROFILE
+                    ? PolicyOutputSchemas.LEAF_SCHEMA
+                    : StreamContentRootSchemas.LEAF_SCHEMA;
             return abi.encode(
                 record.contentRoot, record.leafCount, record.leafCount == 0 ? bytes32(0) : schema
             );
@@ -96,6 +108,15 @@ library StreamMetadataScopedContent {
         StreamFinalityScope memory scope
     ) private view returns (bytes32 profile) {
         profile = PolicyState.state().bindings[hash].profileId;
+        bytes32 preservation = PreservationState.state().bindings[hash].profileId;
+        if (preservation != 0) {
+            if (
+                preservation != PreservationSchemas.PROFILE || profile != 0
+                    || keccak256(abi.encode(state.records[hash].publication.scope))
+                        != keccak256(abi.encode(scope))
+            ) revert R.InvalidScopedContentRoot();
+            return preservation;
+        }
         if (profile == 0) return profile;
         if (
             profile != PolicyRootSchemas.PROFILE

@@ -28,6 +28,16 @@ import {
     StreamPolicyOutputSchemasV2 as PolicyOutputSchemas
 } from "../finality/StreamPolicyOutputSchemasV2.sol";
 
+import {
+    StreamPreservationPolicyContentRootStateV1 as PreservationState
+} from "./StreamPreservationPolicyContentRootStateV1.sol";
+import {
+    StreamPreservationPolicyContentRootSchemasV1 as PreservationSchemas
+} from "../finality/StreamPreservationPolicyContentRootSchemasV1.sol";
+import {
+    StreamPreservationPolicyOutputSchemasV1 as PreservationOutput
+} from "../finality/StreamPreservationPolicyOutputSchemasV1.sol";
+
 /// @notice Authoritative root state in Router storage, using its fixed library and artist consent.
 library StreamMetadataContentRoot {
     struct State {
@@ -197,7 +207,20 @@ library StreamMetadataContentRoot {
         returns (bytes32, uint64, bytes32)
     {
         if (subject != _subject(core, collectionId)) return (0, 0, 0);
-        R.Record storage r = state.records[state.heads[collectionId]];
+        bytes32 head = state.heads[collectionId];
+        R.Record storage r = state.records[head];
+        bytes32 preservation = PreservationState.state().bindings[head].profileId;
+        if (preservation != 0) {
+            if (
+                preservation != PreservationSchemas.PROFILE
+                    || PolicyRootState.state().bindings[head].profileId != 0
+            ) revert R.InvalidContentRootPublication();
+            return (
+                r.contentRoot,
+                r.leafCount,
+                r.leafCount == 0 ? bytes32(0) : PreservationOutput.LEAF_SCHEMA
+            );
+        }
         return (
             r.contentRoot,
             r.leafCount,
