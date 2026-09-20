@@ -4,12 +4,14 @@ pragma solidity ^0.8.19;
 import "../../interfaces/stream/metadata/IStreamConservationFloor.sol";
 import "../../interfaces/stream/metadata/IStreamConservationFloorProvider.sol";
 import "../../interfaces/stream/metadata/IStreamConservationFloorPreparation.sol";
+import "../../interfaces/stream/metadata/IStreamDirectPrimaryConservationFloor.sol";
 import "../../interfaces/stream/core/IStreamCoreConservationTier.sol";
 import "../parameters/StreamGasParameterHost.sol";
 import "./StreamMetadataGovernance.sol";
 import "./StreamConservationTiers.sol";
 import "./StreamConservationFloorReads.sol";
 import "./StreamConservationFloorSupplemental.sol";
+import "./StreamConservationDirectReads.sol";
 
 /// @notice Permanent owner of successful first-sale and release-floor receipts.
 /// @dev The current native source graph is admitted by exact delayed governance, never selected by
@@ -17,7 +19,8 @@ import "./StreamConservationFloorSupplemental.sol";
 contract StreamConservationFloor is
     StreamGasParameterHost,
     IStreamConservationFloor,
-    IStreamConservationFloorPreparation
+    IStreamConservationFloorPreparation,
+    IStreamDirectPrimaryConservationFloor
 {
     address public immutable override core;
     bytes32 public immutable override coreCodeHash;
@@ -30,6 +33,8 @@ contract StreamConservationFloor is
     bytes32 private constant SOURCE_DOMAIN = keccak256("6529STREAM_CONSERVATION_FLOOR_SOURCES_V1");
     bytes32 private constant WAIVED = keccak256("CONSERVATION_WAIVED");
     bytes32 private constant FULL = keccak256("MUSEUM_GRADE");
+    uint8 private constant UNIVERSAL = 1;
+    uint8 private constant DIRECT = 2;
 
     StreamConservationFloorTypes.Source[] private _sources;
     bytes32[] private _heads;
@@ -64,6 +69,14 @@ contract StreamConservationFloor is
     struct SaleLink {
         bytes32 preparation;
         uint64 recordedAt;
+        uint8 family;
+    }
+
+    struct DirectPreparation {
+        bool exists;
+        StreamDirectPrimaryConservationTypes.Receipt seed;
+        bytes32 collectionEvidence;
+        bytes32 releaseEvidence;
     }
     mapping(bytes32 => CollectionPreparation) private _collectionPreparations;
     mapping(bytes32 => ReleasePreparation) private _releasePreparations;
@@ -72,6 +85,7 @@ contract StreamConservationFloor is
     mapping(uint256 => bytes32) private _first;
     mapping(bytes32 => bytes32) private _release;
     bool private _entered;
+    mapping(bytes32 => DirectPreparation) private _directPreparations;
 
     constructor(
         address core_,
@@ -107,6 +121,7 @@ contract StreamConservationFloor is
     function supportsInterface(bytes4 id) external pure override returns (bool) {
         return id == type(IStreamConservationFloor).interfaceId
             || id == type(IStreamConservationFloorPreparation).interfaceId
+            || id == type(IStreamDirectPrimaryConservationFloor).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId || id == 0x01ffc9a7;
     }
 
@@ -203,6 +218,15 @@ contract StreamConservationFloor is
         return _settlementReceipt(key);
     }
 
+    function directPrimarySaleFloorReceipt(bytes32 key)
+        external
+        view
+        override
+        returns (StreamDirectPrimaryConservationTypes.Receipt memory)
+    {
+        return _directReceipt(key);
+    }
+
     function primarySalePrepared(bytes32 key) external view override returns (bool) {
         return _salePreparations[key].exists;
     }
@@ -220,7 +244,7 @@ contract StreamConservationFloor is
             x, recorder, candidate, expectedResult, false
         );
         (CollectionPreparation memory collection_, ReleasePreparation memory release_) =
-            _evidence(candidate, _tier(candidate.sale.collectionId), false);
+            _universalEvidence(candidate, _tier(candidate.sale.collectionId), false);
         bytes32 collectionKey = keccak256(abi.encode(collection_));
         bytes32 releaseKey = release_.exists ? keccak256(abi.encode(release_)) : bytes32(0);
         SalePreparation memory p =
@@ -242,7 +266,7 @@ contract StreamConservationFloor is
             revert ConservationFloorInvalidEvidence();
         }
         (CollectionPreparation memory collection_, ReleasePreparation memory release_) =
-            _evidence(candidate, _tier(candidate.sale.collectionId), true);
+            _universalEvidence(candidate, _tier(candidate.sale.collectionId), true);
         SalePreparation memory p = _salePreparation(
             msg.sender,
             candidate,
@@ -255,25 +279,94 @@ contract StreamConservationFloor is
         // Current source head and complete first/new-release facts determine the exact key;
         // an older preparation neither authorizes a sale nor substitutes its old evidence.
         bytes32 key = _persistPreparation(p, collection_, release_);
-        _saleLinks[result.settlementKey] = SaleLink(key, uint64(block.timestamp));
-        uint256 cid = candidate.sale.collectionId;
+        _linkSale(result.settlementKey, key, UNIVERSAL, candidate.sale.collectionId, release_);
+        StreamConservationFloorTypes.SettlementReceipt memory s =
+            _settlementReceipt(result.settlementKey);
+        emit ConservationSettlementRecorded(s.settlementKey, s.receiptHash, s, 1);
+        return s.receiptHash;
+    }
+
+    function recordDirectPrimarySale(bytes32 authorizationId)
+        external
+        override
+        guarded
+        returns (bytes32 receiptHash)
+    {
+        (
+            StreamDirectPrimarySaleTypes.Bindings memory bindings,
+            StreamDirectPrimarySaleTypes.Receipt memory sale,
+            bytes32 directKey,
+            bytes32 originalHash
+        ) = StreamConservationDirectReads.requireReceipt(_context(), msg.sender, authorizationId);
+        if (_saleLinks[directKey].preparation != 0) {
+            revert ConservationFloorAlreadyRecorded(directKey);
+        }
+        if (block.timestamp == 0 || block.timestamp > type(uint64).max) {
+            revert ConservationFloorInvalidEvidence();
+        }
+        bytes32 tier = _tier(sale.collectionId);
+        (CollectionPreparation memory collection_, ReleasePreparation memory release_) = _evidence(
+            StreamConservationFloorTypes.SaleContext(
+                sale.collectionId,
+                sale.tokenId,
+                msg.sender,
+                authorizationId,
+                sale.operationRoot,
+                sale.operationId,
+                sale.boundMintPolicyHash
+            ),
+            tier
+        );
+        DirectPreparation memory p;
+        p.exists = true;
+        p.collectionEvidence = keccak256(abi.encode(collection_));
+        p.releaseEvidence = release_.exists ? keccak256(abi.encode(release_)) : bytes32(0);
+        p.seed.adapter = msg.sender;
+        p.seed.adapterCodeHash = msg.sender.codehash;
+        p.seed.directKey = directKey;
+        p.seed.authorizationId = authorizationId;
+        p.seed.originalReceiptHash = originalHash;
+        p.seed.bindings = bindings;
+        p.seed.sale = sale;
+        p.seed.effectiveTier = tier;
+        bytes32 preparation = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_CONSERVATION_DIRECT_PREPARED_V1"),
+                deploymentChainId,
+                core,
+                address(this),
+                p
+            )
+        );
+        _persistEvidence(p.collectionEvidence, p.releaseEvidence, collection_, release_);
+        _directPreparations[preparation] = p;
+        _linkSale(directKey, preparation, DIRECT, sale.collectionId, release_);
+        StreamDirectPrimaryConservationTypes.Receipt memory r = _directReceipt(directKey);
+        emit ConservationDirectPrimarySaleRecorded(directKey, r.receiptHash, r, 1);
+        return r.receiptHash;
+    }
+
+    function _linkSale(
+        bytes32 saleKey,
+        bytes32 preparation,
+        uint8 family,
+        uint256 cid,
+        ReleasePreparation memory release_
+    ) private {
+        _saleLinks[saleKey] = SaleLink(preparation, uint64(block.timestamp), family);
         if (_first[cid] == 0) {
-            _first[cid] = result.settlementKey;
+            _first[cid] = saleKey;
             StreamConservationFloorTypes.FirstSaleReceipt memory f = _firstReceipt(cid);
             emit ConservationFirstSaleRecorded(cid, f.receiptHash, f, 1);
         }
         if (release_.exists && _release[release_.releaseKey] == 0) {
-            _release[release_.releaseKey] = result.settlementKey;
+            _release[release_.releaseKey] = saleKey;
             StreamConservationFloorTypes.ReleaseFloorReceipt memory releaseReceipt =
                 _releaseReceipt(release_.releaseKey);
             emit ConservationReleaseFloorRecorded(
                 release_.releaseKey, releaseReceipt.receiptHash, releaseReceipt, 1
             );
         }
-        StreamConservationFloorTypes.SettlementReceipt memory s =
-            _settlementReceipt(result.settlementKey);
-        emit ConservationSettlementRecorded(s.settlementKey, s.receiptHash, s, 1);
-        return s.receiptHash;
     }
 
     function requireSupplemental(
@@ -335,19 +428,28 @@ contract StreamConservationFloor is
     ) private returns (bytes32 key) {
         key = _preparationHash(p);
         if (_salePreparations[key].exists) return key;
-        if (!_collectionPreparations[p.collectionEvidence].exists) {
-            _collectionPreparations[p.collectionEvidence] = collection_;
-        }
-        if (release_.exists && !_releasePreparations[p.releaseEvidence].exists) {
-            _releasePreparations[p.releaseEvidence] = release_;
-        }
+        _persistEvidence(p.collectionEvidence, p.releaseEvidence, collection_, release_);
         _salePreparations[key] = p;
         emit ConservationPrimarySalePrepared(
             key, p.seed.recorder, p.seed.settlementKey, p.collectionEvidence, p.releaseEvidence, 1
         );
     }
 
-    function _evidence(
+    function _persistEvidence(
+        bytes32 collectionKey,
+        bytes32 releaseKey,
+        CollectionPreparation memory collection_,
+        ReleasePreparation memory release_
+    ) private {
+        if (!_collectionPreparations[collectionKey].exists) {
+            _collectionPreparations[collectionKey] = collection_;
+        }
+        if (release_.exists && !_releasePreparations[releaseKey].exists) {
+            _releasePreparations[releaseKey] = release_;
+        }
+    }
+
+    function _universalEvidence(
         StreamPrimarySettlementTypes.ERC20SettlementCandidate calldata c,
         bytes32 tier,
         bool paid
@@ -356,12 +458,40 @@ contract StreamConservationFloor is
         view
         returns (CollectionPreparation memory collection_, ReleasePreparation memory release_)
     {
-        uint256 cid = c.sale.collectionId;
+        StreamConservationFloorTypes.SaleContext memory
+            sale = StreamConservationFloorTypes.SaleContext(
+            c.sale.collectionId,
+            c.sale.tokenId,
+            c.saleAdapter,
+            c.sale.settlementId,
+            c.operationIdentityCommitment,
+            c.operationId,
+            c.boundPolicyHash
+        );
+        if (
+            tier != WAIVED && !paid && c.orchestrationOrder == 2 && c.sale.tokenId != 0
+                && StreamConservationFloorReads.word(
+                        core,
+                        abi.encodeCall(IStreamCoreIdentity.tokenLifecycle, (c.sale.tokenId)),
+                        _gasParameterValue(READ_GAS)
+                    ) == 0
+        ) {
+            // Only optional prospective preparation uses collection scope before allocation.
+            // The exact original candidate remains seed-bound and paid entry uses its real token.
+            sale.tokenId = 0;
+        }
+        return _evidence(sale, tier);
+    }
+
+    function _evidence(StreamConservationFloorTypes.SaleContext memory sale, bytes32 tier)
+        private
+        view
+        returns (CollectionPreparation memory collection_, ReleasePreparation memory release_)
+    {
+        uint256 cid = sale.collectionId;
         bytes32 firstKey = _first[cid];
         if (firstKey != 0) {
-            collection_ = _collectionPreparations[
-                _salePreparations[_saleLinks[firstKey].preparation].collectionEvidence
-            ];
+            collection_ = _collectionPreparations[_collectionEvidenceFor(firstKey)];
             if (collection_.tier != tier) revert ConservationFloorInvalidEvidence();
         } else {
             collection_.exists = true;
@@ -377,39 +507,15 @@ contract StreamConservationFloor is
             collection_.sourceId = sourceId;
             collection_.facts = _collection(source, cid, tier);
         }
-        release_ = _releaseEvidence(sourceId, source, c, tier, paid);
+        release_ = _releaseEvidence(sourceId, source, sale, tier);
     }
 
     function _releaseEvidence(
         uint64 sourceId,
         StreamConservationFloorTypes.Source memory source,
-        StreamPrimarySettlementTypes.ERC20SettlementCandidate calldata c,
-        bytes32 tier,
-        bool paid
+        StreamConservationFloorTypes.SaleContext memory sale,
+        bytes32 tier
     ) private view returns (ReleasePreparation memory p) {
-        StreamConservationFloorTypes.SaleContext memory sale =
-            StreamConservationFloorTypes.SaleContext(
-                c.sale.collectionId,
-                c.sale.tokenId,
-                c.saleAdapter,
-                c.sale.settlementId,
-                c.operationIdentityCommitment,
-                c.operationId,
-                c.boundPolicyHash
-            );
-        if (
-            !paid && c.orchestrationOrder == 2 && c.sale.tokenId != 0
-                && StreamConservationFloorReads.word(
-                        core,
-                        abi.encodeCall(IStreamCoreIdentity.tokenLifecycle, (c.sale.tokenId)),
-                        _gasParameterValue(READ_GAS)
-                    ) == 0
-        ) {
-            // Prospective collection evidence does not invent an allocated token. The original
-            // predicted token remains seed-bound; paid entry passes its real identity. A token
-            // profile returning different evidence cannot match this preparation.
-            sale.tokenId = 0;
-        }
         bytes memory raw = _producer(
             source, abi.encodeCall(IStreamConservationFloorProvider.saleRelease, (sale)), 192
         );
@@ -438,9 +544,7 @@ contract StreamConservationFloor is
         if (previous != 0) {
             // Current sale-to-release mapping was just re-proved. Historical successful
             // evidence for identical semantic content remains the immutable denominator.
-            p = _releasePreparations[
-                _salePreparations[_saleLinks[previous].preparation].releaseEvidence
-            ];
+            p = _releasePreparations[_releaseEvidenceFor(previous)];
             if (p.tier != tier || p.collectionId != sale.collectionId) {
                 revert ConservationFloorInvalidEvidence();
             }
@@ -478,11 +582,10 @@ contract StreamConservationFloor is
         bytes32 key = _first[cid];
         if (key == 0) return f;
         SaleLink memory link = _saleLinks[key];
-        SalePreparation storage sale = _salePreparations[link.preparation];
-        CollectionPreparation storage p = _collectionPreparations[sale.collectionEvidence];
+        CollectionPreparation storage p = _collectionPreparations[_collectionEvidenceFor(key)];
         f.collectionId = p.collectionId;
         f.effectiveTier = p.tier;
-        f.recorder = sale.seed.recorder;
+        f.recorder = _originFor(key);
         f.settlementKey = key;
         f.recordedAt = link.recordedAt;
         f.sourceId = p.sourceId;
@@ -507,12 +610,11 @@ contract StreamConservationFloor is
         bytes32 key = _release[semanticKey];
         if (key == 0) return r;
         SaleLink memory link = _saleLinks[key];
-        SalePreparation storage sale = _salePreparations[link.preparation];
-        ReleasePreparation storage p = _releasePreparations[sale.releaseEvidence];
+        ReleasePreparation storage p = _releasePreparations[_releaseEvidenceFor(key)];
         r.releaseKey = p.releaseKey;
         r.collectionId = p.collectionId;
         r.effectiveTier = p.tier;
-        r.recorder = sale.seed.recorder;
+        r.recorder = _originFor(key);
         r.settlementKey = key;
         r.recordedAt = link.recordedAt;
         r.sourceId = p.sourceId;
@@ -536,7 +638,7 @@ contract StreamConservationFloor is
         returns (StreamConservationFloorTypes.SettlementReceipt memory s)
     {
         SaleLink memory link = _saleLinks[key];
-        if (link.preparation == 0) return s;
+        if (link.preparation == 0 || link.family != UNIVERSAL) return s;
         SalePreparation storage p = _salePreparations[link.preparation];
         s = p.seed;
         s.recordedAt = link.recordedAt;
@@ -554,6 +656,55 @@ contract StreamConservationFloor is
                 s
             )
         );
+    }
+
+    function _directReceipt(bytes32 key)
+        private
+        view
+        returns (StreamDirectPrimaryConservationTypes.Receipt memory r)
+    {
+        SaleLink memory link = _saleLinks[key];
+        if (link.preparation == 0 || link.family != DIRECT) return r;
+        DirectPreparation storage p = _directPreparations[link.preparation];
+        r = p.seed;
+        r.recordedAt = link.recordedAt;
+        r.firstSaleReceiptHash = _firstReceipt(r.sale.collectionId).receiptHash;
+        if (p.releaseEvidence != 0) {
+            r.releaseReceiptHash =
+            _releaseReceipt(_releasePreparations[p.releaseEvidence].releaseKey).receiptHash;
+        }
+        r.receiptHash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_CONSERVATION_DIRECT_RECEIPT_V1"),
+                deploymentChainId,
+                core,
+                address(this),
+                r
+            )
+        );
+    }
+
+    function _collectionEvidenceFor(bytes32 key) private view returns (bytes32) {
+        SaleLink memory link = _saleLinks[key];
+        if (link.family == UNIVERSAL) {
+            return _salePreparations[link.preparation].collectionEvidence;
+        }
+        if (link.family == DIRECT) return _directPreparations[link.preparation].collectionEvidence;
+        revert ConservationFloorInvalidEvidence();
+    }
+
+    function _releaseEvidenceFor(bytes32 key) private view returns (bytes32) {
+        SaleLink memory link = _saleLinks[key];
+        if (link.family == UNIVERSAL) return _salePreparations[link.preparation].releaseEvidence;
+        if (link.family == DIRECT) return _directPreparations[link.preparation].releaseEvidence;
+        revert ConservationFloorInvalidEvidence();
+    }
+
+    function _originFor(bytes32 key) private view returns (address) {
+        SaleLink memory link = _saleLinks[key];
+        if (link.family == UNIVERSAL) return _salePreparations[link.preparation].seed.recorder;
+        if (link.family == DIRECT) return _directPreparations[link.preparation].seed.adapter;
+        revert ConservationFloorInvalidEvidence();
     }
 
     function _collection(

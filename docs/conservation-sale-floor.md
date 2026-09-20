@@ -81,6 +81,38 @@ complete this provider's collection floor while that original verification is
 unavailable. Platform collection facts do not invent an artist identity, and
 platform media archives require their own genuine producer.
 
+## Original direct sale receipts
+
+The additive `IStreamDirectPrimaryConservationFloor` capability accepts
+`recordDirectPrimarySale(authorizationId)` from an admitted original direct
+adapter. It reads the adapter's complete typed paid receipt and deployment
+bindings, including the original authorization digest, mint operation, payment
+and registry history. It does not construct a universal settlement candidate.
+The adapter must store that receipt only after its original funding and mint or
+custody-transfer checks succeed; a failed floor call reverts those effects.
+
+Immediate products require active admission. A deprecated English auction may
+settle only when its original creation timestamp and registry revision both
+precede deprecation. Unknown and revoked adapters cannot record payment. The
+floor independently checks the pinned Manager's used operation root and Core's
+completed token and collection. The original code-pinned adapter validates the
+mint-returned token and operation vector; Core has no token-to-operation receipt
+getter that could replace that check.
+
+`directPrimarySaleFloorReceipt(directKey)` returns the locally retained full
+receipt, original adapter receipt hash, bindings, tier and first/release receipt
+hashes. `ConservationDirectPrimarySaleRecorded` carries the same tuple. Its hash
+uses `6529STREAM_CONSERVATION_DIRECT_RECEIPT_V1`, chain ID, Core, floor address
+and the tuple with `receiptHash` zero. The original adapter key and receipt use
+the separate domains in `StreamDirectPrimarySaleHash`.
+
+First-sale and release receipts may refer to either an official recorder or a
+direct adapter in their existing `recorder` field. Their original hash recipes
+and immutable evidence remain unchanged. Consumers must use the corresponding
+typed history getter: `settlementReceipt(directKey)` returns an empty universal
+tuple, and a direct receipt cannot authorize universal supplemental settlement.
+Historical direct reads never depend on the old adapter or provider.
+
 ## Supplemental accounting and rollback
 
 Native supplemental settlement uses a separate read-only floor join. It must
@@ -95,12 +127,14 @@ storing their authenticated result. A floor failure reverts the same transaction
 including funding, accounting, consumption markers and any receipt links. The
 floor therefore cannot leave a paid receipt after a later transaction failure.
 
-This join covers the official recorder paths. The separately documented original
+The official recorder join and typed direct consumer are separate surfaces. The
+original
 `StreamFixedPriceSaleAdapter`, `StreamERC20FixedPriceSaleAdapter` and
-`StreamEnglishAuctionHouse` paid paths still require their additive authenticated
-direct-sale join. Their existence prevents a claim that every supported primary
-purchase is covered by this batch. An auction's paid settlement is the relevant
-boundary, not its earlier custody mint, bids or refunds.
+`StreamEnglishAuctionHouse` adapter changes and their actual floor integration
+tests are tracked separately. The consumer alone does not demonstrate coverage
+of every supported purchase. An auction enters the floor at successful paid
+settlement; custody creation, bids, refunds and no-bid closure create no paid
+receipt. A genuinely free native fixed-price purchase also creates none.
 
 ## Validation scope
 
