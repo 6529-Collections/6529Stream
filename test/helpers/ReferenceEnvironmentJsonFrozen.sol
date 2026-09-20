@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/preservation/StreamReferenceRenderTypes.sol";
-import "./StreamRecordJson.sol";
-import "./StreamSnapshotManifestJson.sol";
+import "../../smart-contracts/interfaces/stream/preservation/StreamReferenceRenderTypes.sol";
+import "../../smart-contracts/domains/records/StreamRecordJson.sol";
+import "../../smart-contracts/domains/records/StreamSnapshotManifestJson.sol";
 
 /// @notice Complete original declared engine/toolchain inventory and native OS requirements.
 /// @dev Full package/file correspondence is an attributed curator statement independently checked
 ///      by the offline package validator; this serializer does not execute ZIP bytes or an engine.
-library StreamReferenceEnvironmentJson {
+library ReferenceEnvironmentJsonFrozen {
     uint256 private constant MAX = 524288;
 
     function manifest(StreamReferenceRenderTypes.Environment memory e)
@@ -114,132 +114,39 @@ library StreamReferenceEnvironmentJson {
         pure
         returns (string memory out)
     {
-        // Absolute paths retain the original UTF-8/JSON quoting routine and its errors.
-        // Relative paths are already restricted to a literal JSON-safe ASCII alphabet.
-        bytes[] memory quoted = new bytes[](relative ? 0 : rows.length);
+        bytes[] memory encoded = new bytes[](rows.length);
         uint256 length = 2;
         for (uint256 i; i < rows.length; ++i) {
             if (
                 rows[i].sha256Digest == 0
                     || (i != 0 && !_less(bytes(rows[i - 1].path), bytes(rows[i].path)))
             ) revert StreamReferenceRenderTypes.InvalidReferenceRender();
-            uint256 pathLength;
-            if (relative) {
-                _relative(bytes(rows[i].path));
-                pathLength = bytes(rows[i].path).length + 2;
-            } else {
-                quoted[i] = bytes(q(rows[i].path, 2048));
-                pathLength = quoted[i].length;
-            }
-            length += 107 + _digits(rows[i].byteSize) + pathLength + (i == 0 ? 0 : 1);
-            // Preserve the original prefix bound, including its final-bracket convention.
+            if (relative) _relative(bytes(rows[i].path));
+            encoded[i] = bytes(
+                string.concat(
+                    '{"byteSize":',
+                    u(rows[i].byteSize),
+                    ',"path":',
+                    relative ? string.concat('"', rows[i].path, '"') : q(rows[i].path, 2048),
+                    ',"sha256Digest":',
+                    h(rows[i].sha256Digest),
+                    "}"
+                )
+            );
+            length += encoded[i].length + (i == 0 ? 0 : 1);
+            // Preserve the original prefix bound before appending its final closing bracket.
             if (length - 1 > MAX) revert StreamReferenceRenderTypes.InvalidReferenceRender();
         }
         bytes memory output = new bytes(length);
         output[0] = "[";
         uint256 cursor = 1;
-        for (uint256 i; i < rows.length; ++i) {
+        for (uint256 i; i < encoded.length; ++i) {
             if (i != 0) output[cursor++] = ",";
-            cursor = _rowPrefix(output, cursor, rows[i].byteSize);
-            if (relative) {
-                output[cursor++] = '"';
-                _copy(output, cursor, bytes(rows[i].path));
-                cursor += bytes(rows[i].path).length;
-                output[cursor++] = '"';
-            } else {
-                _copy(output, cursor, quoted[i]);
-                cursor += quoted[i].length;
-            }
-            cursor = _rowDigest(output, cursor, rows[i].sha256Digest);
+            _copy(output, cursor, encoded[i]);
+            cursor += encoded[i].length;
         }
         output[cursor] = "]";
         return string(output);
-    }
-
-    function _digits(uint256 value) private pure returns (uint256 digits) {
-        assembly ("memory-safe") {
-            digits := 1
-            for { } iszero(lt(value, 10)) { } {
-                value := div(value, 10)
-                digits := add(digits, 1)
-            }
-        }
-    }
-
-    /// @dev Writes into the one exact-size output; every row has a further 87-byte suffix.
-    function _rowPrefix(bytes memory output, uint256 cursor, uint256 value)
-        private
-        pure
-        returns (uint256 next)
-    {
-        uint256 digits = _digits(value);
-        assembly ("memory-safe") {
-            let target := add(add(output, 32), cursor)
-            mstore(target, '{"byteSize":"')
-            target := add(target, 13)
-            let end := add(target, digits)
-            for { let at := end } gt(at, target) { } {
-                at := sub(at, 1)
-                mstore8(at, add(48, mod(value, 10)))
-                value := div(value, 10)
-            }
-            mstore(end, "\",\"path\":")
-            next := add(cursor, add(22, digits))
-        }
-    }
-
-    function _rowDigest(bytes memory output, uint256 cursor, bytes32 value)
-        private
-        pure
-        returns (uint256 next)
-    {
-        assembly ("memory-safe") {
-            let target := add(add(output, 32), cursor)
-            mstore(target, ',"sha256Digest":"0x')
-            target := add(target, 19)
-            // Spread sixteen bytes into pairs, then translate their nibbles in parallel.
-            function hexWord(v) -> encoded {
-                v := and(
-                    or(v, shl(64, v)),
-                    0x0000000000000000ffffffffffffffff0000000000000000ffffffffffffffff
-                )
-                v := and(
-                    or(v, shl(32, v)),
-                    0x00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff
-                )
-                v := and(
-                    or(v, shl(16, v)),
-                    0x0000ffff0000ffff0000ffff0000ffff0000ffff0000ffff0000ffff0000ffff
-                )
-                v := and(
-                    or(v, shl(8, v)),
-                    0x00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff
-                )
-                let nibble := 0x0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f
-                v := and(or(v, shl(4, v)), nibble)
-                let letters :=
-                    shr(
-                        4,
-                        and(
-                            add(
-                                v,
-                                0x0606060606060606060606060606060606060606060606060606060606060606
-                            ),
-                            0x1010101010101010101010101010101010101010101010101010101010101010
-                        )
-                    )
-                encoded := add(
-                    add(v, 0x3030303030303030303030303030303030303030303030303030303030303030),
-                    mul(letters, 39)
-                )
-            }
-            mstore(target, hexWord(shr(128, value)))
-            mstore(add(target, 32), hexWord(and(value, 0xffffffffffffffffffffffffffffffff)))
-            let end := add(target, 64)
-            mstore8(end, 0x22)
-            mstore8(add(end, 1), 0x7d)
-            next := add(cursor, 85)
-        }
     }
 
     /// @dev Each aligned source word is read once; the final padded word emits only real bytes.
@@ -334,9 +241,14 @@ library StreamReferenceEnvironmentJson {
             valid := 1
             for { let i := 0 } lt(i, length) { i := add(i, 1) } {
                 let c := byte(and(i, 31), mload(add(data, and(i, not(31)))))
-                // Same printable ASCII interval and exact forbidden characters as the
-                // original eight equality checks: backslash, colon, <, >, quote, |, ?, *.
-                if or(gt(sub(c, 0x20), 0x5e), and(shr(c, 0x1000000010000000d400040400000000), 1)) {
+                if or(lt(c, 0x20), iszero(lt(c, 0x7f))) {
+                    valid := 0
+                    break
+                }
+                if or(
+                    or(or(eq(c, 0x5c), eq(c, 0x3a)), or(eq(c, 0x3c), eq(c, 0x3e))),
+                    or(or(eq(c, 0x22), eq(c, 0x7c)), or(eq(c, 0x3f), eq(c, 0x2a)))
+                ) {
                     valid := 0
                     break
                 }
