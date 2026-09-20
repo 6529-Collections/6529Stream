@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `701263db`: counter reads, delegated authority hydration, aborted-pending recovery, scoped references and recovery stateful recipes are source-integrated. Exact runtime scope and remaining work are in [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch). |
+| Source checkpoint | `822b0dc7`: combined Artist delegation hydration, recovery staging families and current STATIC test recipes are source-integrated; Museum gathering and hydration/burn clients follow at `3879d3e1`. Exact runtime scope and remaining work are in [current batch](V1_CURRENT_STATUS.md#20-september-integrated-batch). |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,8 +29,8 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active continuation: 20 September
 
-- Root owns architecture, integration and delivery. ABI68 covers all 2,312
-  sources at `701263db`; clients retain explicit historical ABI52 and mode-2 ABI56.
+- Root owns architecture, integration and delivery. ABI70 covers all 2,329
+  sources at `822b0dc7`; clients retain explicit historical ABI52 and mode-2 ABI56.
   Source integration remains separate from native acceptance.
 - Artist delivered C2PA credentials/standing conflicts (`142a3cdb`, `22095475`)
   and independently reviewed the genuine composition/recovery joins. It also
@@ -38,7 +38,10 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
   Original-living delegation is now integrated (`48754d47`, ten reviewed
   cases). Its exact source repairs the new Identity/Coordinator overruns:
   all eighteen selected products fit; joined size/native acceptance remains.
-  Complete combined multiplicity/delegation is the next active build.
+  Combined multiplicity/delegation is integrated (`588341d2`), independently
+  reviewed across production and fourteen authored cases. Advanced original
+  living records hydration is the next build; existing held Attribution size
+  and joined runtime/capacity remain open.
   Held collaborator and global-freeze artifacts remain separate.
 - Revenue independently reviews exact source, client and size handoffs. Existing
   Estate/Artist size blockers remain. Seven inactive clean worktrees are removed
@@ -53,7 +56,11 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
   retry closed five passes/four failures: final adoption still runs out of gas.
   Fixed immutable carrier binding is now integrated (`be359669`), passes twenty
   focused cases/three 256-input fuzz properties and fits four affected products.
-  The exact original actual-publisher graph is running as native11.
+  The exact actual-publisher native11 closed five passes/four failures.
+  Carrier verification completes; host tail gas still fails. A focused
+  already-decoded record-preimage repair passes five cases plus256 fuzz inputs
+  in its isolated control. It is integrated as `822b0dc7`, with unchanged
+  host ABI/storage; one original-graph native12 retry is authorized.
   Scoped BYTE_EXACT (`a8a17f94`) is integrated;
   complete scoped inventory/provider is the next finality batch.
   Current Router size/full-graph acceptance remain open.
@@ -76,8 +83,11 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
   Complete repeated-living history (`22e90a3b`,18 cases authored) is integrated;
   current-cause recovery from an aborted pending rotation (`d5e3fbcb`, seven
   cases) is now integrated. First-recovery/class-3/current-veto and cancelled
-  Estate predecessor joins are one active batch. Class4 and advanced hydration
-  remain separate; native execution is pending.
+  Estate joins are integrated as `6544ff47` plus complete-history oracle fix
+  `1647c5c0`; all eighteen cases are independently reviewed, native pending.
+  Burn completed ERC-20 finality-warning clients (`3879d3e1`) and next owns
+  generalized C1/C2 guardian evidence selection under root's explicit earliest
+  contested vesting/NONE/provisional decisions. Class4 remains separate.
 - Museum delivered the complete catalog, historical C2PA reader and direct
   retained-file PREMIS (`a69c377e`,root53 tests). Its new official-authority
   snapshot is integrated (`e290dc4a`,37 root tests and profile/example checks),
@@ -87,8 +97,10 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
   new root cases passing and independent source/oracle review clear. The next
   Owner EXHIBITION source/projection/package/export flow is now integrated
   (`5d832333`), with nineteen new root passes and independent source review.
-  Canonical citation V2, source-driven token dossier/acquisition gathering and
-  default renderer citation are being implemented with explicit ownership.
+  Canonical citation V2 and source-driven examination gathering are integrated
+  (`79339af6`), with 47 new root passes. Museum next owns original mint/entropy
+  evidence extraction and composition. B separately implements default renderer
+  citation with genuine current-profile admission and preserved historical bytes.
   Current-chain authentication remains distinct from supplied-byte agreement.
 - Clients delivered delegated Artist consent (`b99b3781`) and grace workflow
   (`9ac63a11`), economics15/royalty-freeze20 (`6b71507e`) and mode-2 grace
@@ -97,7 +109,9 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
   with exact ABI57 checks. Phase-freeze workflows (`00fec435`) now pass all
   910 root package tests and the exact ABI59 fixture check. Original counter
   read clients (`1f47d711`) now pass all945 root tests and exactABI65 checks.
-  Three stable operation60 hydration client profiles are the next build.
+  Three stable operation60 profiles are integrated (`ad74286b`); combined with
+  ERC-20 burn warnings the root package passes991 cases and the exact ABI67
+  hydration fixture check. Combined multiple-Artist delegation callers follow.
   Simulated Safe plans do not prove actual Safe execution.
 - Testing delivered full37 construction/activation and genuine C2PA composition
   (`2aed78f5`, `a86febaa`); Registry13 scoped native cases pass. It now fills
@@ -106,8 +120,10 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
   reviewed and integrated; recovery/auction actions (`1cf4a74e`, nine new
   cases) are also integrated. Campaign execution remains pending. The next
   NativeOffer economics action/fuzz campaign is also source-integrated
-  (`6187c0e0`, nine reviewed cases, native pending). Missing current full37/STATIC
-  composed recipes are being identified for the next test-only batch.
+  (`6187c0e0`, nine reviewed cases, native pending). Five actual STATIC/Safe
+  lifecycle recipes are now integrated (`2d7b4f25`), source/oracle review clear
+  and native pending. Actual current C2PA credential/verifier/conflict/op46
+  composition is the next test-only batch.
   Canonical Museum admission (`29cd8b2d`) adds11
   source-reviewed Safe cases, native pending. Complete STATIC
   admission, actual full37 launch and joined Safe/fuzz acceptance remain.

@@ -29,6 +29,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Include dedicated ERC-20 burn programs in collection freeze/finality warnings,
+  with immutable gate/carrier bindings and source/target impact checks.
+
 - Add original-consent scoped CONTENT_ROOT publication and full-v1 activation
   plans; current tests are authored and coordinated execution remains pending.
 - Name finite Artist/C2PA renderer source roles, preserving target/read bounds,

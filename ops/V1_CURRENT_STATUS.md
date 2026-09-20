@@ -18,9 +18,39 @@ implementation. The exact unapplied patch is prepared and an artifact-specific a
 
 ## 20 September integrated batch
 
-Latest Solidity source checkpoint: `701263db`. All 2,312 sources pass the combined
-ABI/type/storage check in 21.484 seconds. This does not generate bytecode or
+Latest Solidity source checkpoint: `822b0dc7`. All 2,329 sources pass the combined
+ABI/type/storage check in 21.875 seconds. This does not generate bytecode or
 establish complete-system acceptance. Original RC1 remains unchanged.
+
+- Combined multiple-Artist delegation hydration (`588341d2`) is integrated.
+  Independent production and all fourteen test-oracle reviews are clear. Root
+  verifies all 24 changed-file pins and 876 selected-size inputs; the separate
+  893-source ABI capture is independently matched. Nineteen affected/paired
+  products fit; unchanged Attribution remains over limit. Native execution and
+  joined deployment capacity are pending.
+- Recovery staging families (`6544ff47`) and their complete-history test
+  correction (`1647c5c0`) cover first/repeated living and class-3 recovery,
+  original veto/compromise causes and cancelled Estate requests. Production
+  and all eighteen oracles are independently reviewed. Original transition and
+  first-closure history survives the authored rollback/retry cases; native
+  execution remains pending. General evidence-selected guardian cutoffs,
+  current notice recovery and non-guardian rewinds remain separate build work.
+- Current STATIC token lifecycle (`2d7b4f25`) adds five independently reviewed
+  actual Safe mint/reveal, configuration, burned-history and delivery rollback
+  recipes. Synthetic analysis/goldens, provider doubles and fixture-only gas
+  settings remain explicit; these tests have not run natively.
+- Source-driven Museum examination export (`79339af6`) passes all 47 new root
+  tests in 2.947 seconds. Native finality/snapshot/recovery citation readers,
+  original-record extraction and exact offline reconstruction retain permanent
+  token identity. The 19-item evidence index keeps missing fields visible;
+  new reader positives are synthetic, and complete acquisition packets remain
+  unavailable. Original V1 citation/schema bytes are unchanged.
+- Three original operation-60 client profiles (`ad74286b`) and dedicated
+  ERC-20 burn-finality warnings (`3879d3e1`) pass the combined 991-case root
+  package in 38.141 seconds, including generation/build/strict types and the
+  exact ABI67 hydration fixture check. Original Safe CALL receipt checks and
+  gate/carrier bindings are covered by simulated RPC tests; actual Safe and
+  current-contract execution remain separate.
 
 - Delegated policy/sale clients (`b99b3781`) and mint-grace governance callers
   (`9ac63a11`), followed by delegated economics15/royalty-freeze20 callers
@@ -55,7 +85,7 @@ establish complete-system acceptance. Original RC1 remains unchanged.
   Complete repeated-living histories (`22e90a3b`,18 cases) are also integrated;
   current-cause aborted-pending recovery (`d5e3fbcb`, seven further reviewed
   cases) is now integrated. First-recovery, class-3 and cancelled-Estate joins
-  are the next coherent batch; native acceptance remains pending.
+  are now integrated as `6544ff47`/`1647c5c0`; native acceptance remains pending.
 - Direct retained-file PREMIS projection (`a69c377e`) passes 53 root cases and
   its exact profile check. Missing or mismatched files cannot produce a positive
   subset. Supplied bytes and current local measurements do not invent historical
@@ -86,8 +116,14 @@ establish complete-system acceptance. Original RC1 remains unchanged.
   verifies all 55 sources, 62 artifacts and 588 source hashes. The same minimal
   host uses 7,070,296 gas for binding versus 11,281,902 for the retained copying
   control, including intrinsic gas. All four affected products fit; publisher
-  runtime is 22,688 bytes. Actual publisher native11 is running with the exact
-  four-source repair and original cases/caps; full publication capacity is open.
+  runtime is 22,688 bytes. Actual publisher native11 finished five passes/four
+  failures. Both complete carrier verifications now return, but final host
+  completion still runs out of gas. All nineteen affected products fit; root
+  checks all eight retained evidence pins. The original record-preimage reuse repair
+  is integrated (`822b0dc7`), independently reviewed and passes five focused
+  cases plus256 fuzz inputs. Both affected products fit. The isolated hash
+  step measures 628,474 versus3,561,201 gas; this is not final transaction gas.
+  A single actual-publisher native12 retry is authorized on the same graph/caps.
 - Museum Standing V2 (`3f0967f`) consumes original unresolved conflict history
   and historical acknowledgement guards without altering V1. Root passes 27
   consumer cases plus 17 documentation cases; both profiles and all seven source
@@ -126,8 +162,8 @@ establish complete-system acceptance. Original RC1 remains unchanged.
   its exact source: all 18 selected products fit, including Identity 24,555,
   Coordinator 24,072 and Registry 24,564 bytes. Ten more actual-owner/Safe cases
   are authored and reviewed; native and joined-source size checks remain.
-  Complete combined multiplicity/delegation and advanced profiles remain in
-  progress; older held Artist blockers are unchanged.
+  Combined multiplicity/delegation is now integrated as `588341d2`; advanced
+  record profiles remain in progress. Older held Artist blockers are unchanged.
 - Current Allowlist/Delegate gates and Merkle counter accounting (`f1acffbe`)
   add fourteen reviewed actual-contract/Safe recipes. Eight independently
   reviewed stateful campaign cases (`f8f78e99`) now add independent accounting,
