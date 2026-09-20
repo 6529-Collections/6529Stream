@@ -4,9 +4,12 @@
 
 This batch implements the original optional Freeze Policy on base
 `0d7b781b76b58e460be9d40df55c85ce81f1f628`. It is source-reviewed implementation
-with matched ABI/storage and selected bytecode evidence. Native execution of the
-new cases, broad current-stack tests, fuzz/invariants, gas acceptance, CI and
-release artifacts remain pending the coordinator's combined run. It does not
+with matched ABI/storage and selected bytecode evidence. The focused native
+cohort passes all 17 Ledger-freeze and six configuration cases on immutable
+commit `8f2e91577733a18eeedbc47ea91325eb3e79b4e0`. The 11 actual-current freeze
+and three new current continuity cases, broad current-stack tests,
+fuzz/invariants, gas acceptance, CI and release artifacts remain pending the
+coordinator's combined run. It does not
 claim production readiness or an audited protocol.
 
 The Manager and fallback retain every prior public ABI entry and all 19 storage
@@ -104,6 +107,18 @@ All captures are retained under the ignored local directory
   output `7c16778f5558aa7b6cc134dce55dcb956021282b14d6aabda8ab6da7c4f04de8`.
 - `mint-phase-freeze-compatibility-1`: all original 183 Manager, 185 fallback and
   88 Ledger ABI entries retained; unchanged recursive storage prefix/layout.
+- `mint-phase-freeze-units-native-8f2e9157-1`: 159 exact committed sources,
+  all 23 focused cases pass, exit zero in 283.585 seconds, with no source
+  mismatches or captured oversized production products. Native JSON SHA-256
+  `29d806aa09b36f83f62918d08b4e2adebed637823f6785b92f8929c81d5f94cc`;
+  the separate log is empty. Solidity 0.8.19, IR/200, Paris and original metadata
+  settings are retained. The original test-only 2,000,000-byte code limit,
+  10,000,000,000 gas and 1 GiB memory envelope are unchanged; production runtime
+  and init sizes are checked separately against 24,576 and 49,152 bytes.
+  A copy of the prior valid mode-2 output/cache is reused through ordinary
+  Foundry dependency invalidation, with exact snapshot and cache provenance in
+  `capture.json`. The typed royalty cases do not establish actual-current
+  snapshot-royalty successor acceptance.
 - `mint-phase-freeze-size-final-1`: 153 exact sources, ten selected products,
   Solidity 0.8.19, via IR, optimizer 200, Paris, no CBOR/hash metadata; 42.907
   seconds, no compiler errors or oversized products. Input SHA-256
