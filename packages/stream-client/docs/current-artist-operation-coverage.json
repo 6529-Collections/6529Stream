@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "sourceCommit": "44af244ed576cc4b26632b800fe70a068d577940",
-  "clientAuditCommit": "718e257abe609467d12c9fe6be3ecbaadbfa412e",
-  "scope": "Original operations 1-60 plus existing operation 61. Method variants are separate caller requirements; operation membership is not a claim of implemented workflow coverage. Additive delegated policy/sale methods retain IDs14/16. C2PA callers remain pending.",
+  "clientAuditCommit": "0d931d9b59e92c9780bc3d30a146f9cd59c417d5",
+  "scope": "Original operations 1-60 plus existing operation 61. Method variants are separate caller requirements; operation membership is not a claim of implemented workflow coverage. Delegated policy/sale methods retain IDs14/16; economics and royalty freeze retain IDs15/20. C2PA callers remain pending.",
   "signingHost": "StreamArtistOnboardingRegistry",
   "signingDomain": {
     "name": "6529StreamArtistRegistry",
@@ -152,7 +152,17 @@
         "recordDelegatedProspectiveEconomicsConsent"
       ],
       "coverage": "partial-existing",
-      "existingModules": "current-artist; current-artist-ceremony; current-revenue"
+      "existingModules": "current-artist; current-artist-ceremony; current-revenue; current-artist-operation; current-artist-workflow",
+      "implementedMethods": [
+        "recordDelegatedEconomicsConsent",
+        "recordDelegatedProspectiveEconomicsConsent"
+      ],
+      "pendingMethods": [
+        "recordEconomicsConsent",
+        "recordProspectiveEconomicsConsent",
+        "recordProspectiveTemplateEconomicsConsent",
+        "recordProspectiveTemplateFreezeConsent"
+      ]
     },
     {
       "id": 16,
@@ -199,9 +209,11 @@
         "authorizeArtistRoyaltyFreeze",
         "authorizeDelegatedRoyaltyFreeze"
       ],
-      "coverage": "principal-implemented",
+      "coverage": "methods-implemented",
       "implementedPrincipalMethod": "authorizeArtistRoyaltyFreeze",
-      "pendingMethods": [
+      "pendingMethods": [],
+      "implementedMethods": [
+        "authorizeArtistRoyaltyFreeze",
         "authorizeDelegatedRoyaltyFreeze"
       ]
     },

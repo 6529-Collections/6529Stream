@@ -8,9 +8,12 @@ ratification payloads remain in their original client modules.
 | --- | --- | --- |
 | 3 | `refuseArtistBinding` | Refuse an exact pending generation and binding hash. |
 | 14 | `recordDelegatedPolicyConsent` | Record exact policy consent using a scoped delegation. |
+| 15 | `recordDelegatedEconomicsConsent` | Consent to an exact installed economic assignment. |
+| 15 | `recordDelegatedProspectiveEconomicsConsent` | Consent to a proposed fixed assignment or clearing. |
 | 16 | `recordSaleConsent` | Record approval of an exact current sale configuration. |
 | 16 | `recordDelegatedSaleConsent` | Record exact sale consent using a scoped delegation. |
 | 20 | `authorizeArtistRoyaltyFreeze` | Authorize the specified royalty assignment freeze. |
+| 20 | `authorizeDelegatedRoyaltyFreeze` | Authorize that freeze using a scoped delegation. |
 | 21 | `authorizeArtistContentFreeze` | Authorize specified metadata locks at an exact state. |
 | 25 | `recordIdentityRevision` | Extend the operative document with exact document bytes. |
 | 26 | `grantArtistDelegation` | Grant the original scoped capabilities and use/window limits. |
@@ -18,8 +21,7 @@ ratification payloads remain in their original client modules.
 | 54 | `revokeArtistAuthorization` | Revoke one unused digest or nonzero nonce. |
 
 Operations 20 and 21 record authorization. The corresponding resolver or metadata
-operation must still perform the freeze. The delegated royalty-freeze selector
-is a separate pending caller requirement.
+operation must still perform the freeze.
 
 The [coverage register](current-artist-operation-coverage.json) tracks every
 original operation 1–60, the existing operation 61 dispute withdrawal, current
@@ -38,7 +40,8 @@ original write calldata and read-only digest call. Its exact request contains
 `message` and `details`. The kind names are `bindingRefusal`, `saleConsent`,
 `royaltyFreeze`, `contentFreeze`, `authorizationRevocation`, `identityRevision`,
 `delegationGrant`, `delegationRevocation`, `delegatedPolicyConsent` and
-`delegatedSaleConsent`.
+`delegatedSaleConsent`, `delegatedEconomicsConsent`,
+`delegatedProspectiveEconomicsConsent` and `delegatedRoyaltyFreeze`.
 
 The signing domain is `6529StreamArtistRegistry`, version `1`, with the actual
 chain and `StreamArtistOnboardingRegistry` facade address. Coordinator, owner,
@@ -47,8 +50,9 @@ extension and configuration-directory addresses are not signing hosts.
 Every integer is a bigint. Refusal, consent, freezes and both revocation schemas
 use a deadline; their records use the transaction block timestamp. Refusal's `details.reasonURI` is reviewed
 calldata outside the signed schema, limited to 2,048 UTF-8 bytes. Identity revision
-details are described below; delegated consent details contain the nonzero
-`grant` record hash, and the other details objects are empty. This client accepts Unicode URI text; it does not represent
+details are described below. Delegated actions retain the nonzero `grant` record
+hash; economics adds its collection and prospective candidate as described below.
+The other details objects are empty. This client accepts Unicode URI text; it does not represent
 arbitrary non-UTF-8 Solidity string bytes. Content-freeze lock classes retain their supplied order and
 must be 1–16 strictly increasing, nonzero bytes32 values. Their signed commitment
 hashes packed words; the record preimage retains the original dynamic array.
@@ -133,6 +137,52 @@ adapter as `from`. Sale readback also reconstructs the original stored record
 hash and checks its authority class and grant association. Neither result rechecks the grant's lifetime. Refresh the
 relevant ordinary prerequisites before a later mint or sale.
 
+## Delegated economics and royalty freeze
+
+Both economics variants reuse `CurrentArtistEconomicsConsent` and the original
+`economicsConsentDigest`. Their message contains Core, resolver, revenue class,
+scope, scope ID, assignment hash, nonce and deadline. The collection ID is in
+`details.collectionId`, outside the signature. Both retain `details.grant`.
+Prospective consent also retains `details.candidate` with `profileHash`,
+`policyHash`, uint16 `royaltyBps` and `frozen`. The candidate, payout and binding
+are outside the original signature; the exact-call review and contract checks
+must admit them. Candidate `frozen` is preserved, `policyHash` must be zero, and
+`royaltyBps` is bounded to 1,000. The chosen resolver checks its exact profile and
+royalty combination.
+
+These routes admit the original consent modes 1 and 2. Economics requires grant
+capability `4`; royalty freeze requires `32`. They use the same persistent
+Artist/delegate nonce lane and consume one grant use. The current principal
+authority must still have class 1. Economics follows ordinary identity admission;
+freeze also admits the original defensive identity status 4.
+
+For these three routes, supply `deployment.reads`, an independently reviewed code
+pin for the Coordinator's immutable `reads()` host. Capture verifies that binding
+and calls the original Reads composition. Current economics retains its exact
+installed assignment and payout evidence, including supported primary-template
+and snapshot-royalty paths. Prospective economics retains the exact preview fact
+and previous assignment hash. A legitimate clear uses zero `assignmentHash` with
+an all-zero, unfrozen candidate; it does not create a new assignment. The original
+Reads host checks payout shares and collaborator designations through the chosen
+resolver's own split factory. Consent alone never installs an assignment or
+changes payout rights.
+
+Delegated royalty freeze reuses `CurrentArtistRoyaltyFreeze` and its original
+digest getter. It requires the selected live royalty resolver, the current
+collection assignment and an unfrozen collection configuration. Snapshot royalty
+mode is not a freeze target.
+
+Economic receipt verification joins the class-2 record, original
+`ArtistEconomicsConsentRecorded`, `ArtistEconomicsConsentAssociated` and
+`ArtistRecordDelegation` events, the binding-specific getter and the original
+nested Archive payload. The record preimage itself omits collection ID; its
+association binds the full terms, Artist, generation and binding hash. A later
+binding continuation can have a new record while `economicsRecord(terms)` retains
+the first record. Historical payout designation evidence does not require today's
+operative payout to remain unchanged. Freeze joins its original authorization,
+`ArtistRecordDelegation` event and historical freeze record. Neither family uses
+the additive policy/sale `ArtistConsentDelegationRecorded` event.
+
 ## Authority and execution
 
 `captureCurrentArtistOperation(provider, deployment, request, { blockTag })`
@@ -143,7 +193,8 @@ resolver and validator. The caller supplies independently reviewed code hashes.
 
 Capture checks the chain, runtime hashes, component bindings, current Registry,
 authority, operation capability, binding, operation timing, original digest and replay
-lane. Direct execution uses the current nonce hint. Signed execution can use
+lane. Economic routes also retain the original payout and assignment evidence.
+Direct execution uses the current nonce hint. Signed execution can use
 another unused nonce. Revocation reads the target separately from the nonce
 authorizing the revocation. Captures are immutable and reconstructed before
 asynchronous work.
@@ -196,8 +247,8 @@ validation. Protocol-only owner/Coordinator methods are not user-call targets.
 
 The fixture uses the retained `parallel-feature-batch52-20260920` ABI capture at
 commit `44af244ed576cc4b26632b800fe70a068d577940`. All 2,212 literal input sources
-were verified byte-for-byte against that commit. It retains 316 production
-closure hashes, selected original ABI entries and seventeen original source
+were verified byte-for-byte against that commit. It retains 322 production
+closure hashes, selected original ABI entries and twenty-three original source
 texts for independent preimage tests. Verify without compiling Solidity:
 
 ```sh

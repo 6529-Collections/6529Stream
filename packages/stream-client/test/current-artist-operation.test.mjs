@@ -160,7 +160,7 @@ test('requests and reconstructed actions reject extra fields, forged derived val
     { ...plan, fabricatedState: 'authorized' },
   ];
   for (const changed of mutations) assert.throws(() => normalizeCurrentArtistAction(changed));
-  assert.throws(() => prepareCurrentArtistAction(request('saleConsent', { kind: 'delegatedRoyaltyFreeze' })), /Unknown/);
+  assert.throws(() => prepareCurrentArtistAction(request('saleConsent', { kind: 'unsupportedArtistOperation' })), /Unknown/);
   assert.throws(() => prepareCurrentArtistAction(request('saleConsent', { message: { ...messages.saleConsent, artistId } })), /unexpected/);
   assert.throws(() => prepareCurrentArtistAction(request('saleConsent', { details: { nonce } })), /unexpected/);
   const hidden = request('saleConsent'); Object.defineProperty(hidden.message, 'hidden', { value: 1 });
@@ -468,4 +468,160 @@ test('delegated requests reject missing grants, extra authorities, lossy widths 
   }
   for (const key of ['phaseId','policyHash']) assert.throws(() => currentArtistOperationTypedData('delegatedPolicyConsent', chainId, registry, { ...delegatedMessages.delegatedPolicyConsent, [key]: ZeroHash }), /nonzero/);
   assert.throws(() => currentArtistOperationTypedData('delegatedPolicyConsent', chainId, registry, { ...delegatedMessages.delegatedPolicyConsent, mintManager: ZeroAddress }), /nonzero/);
+});
+
+const economicsMessage = { core, resolver: a(701), revenueClass: id('PRIMARY_SALE'), scope: 1n,
+  scopeId: collectionId, assignmentHash: h(702), nonce, deadline };
+const fixedCandidate = { profileHash: h(703), policyHash: ZeroHash, royaltyBps: 0n, frozen: false };
+const economicMessages = {
+  delegatedEconomicsConsent: economicsMessage,
+  delegatedProspectiveEconomicsConsent: economicsMessage,
+  delegatedRoyaltyFreeze: messages.royaltyFreeze,
+};
+function economicRequest(kind, changes = {}) {
+  return { kind, chainId, registry, caller, signer: a(704), artistId, mode: 'signature', signature: '0x5678',
+    message: structuredClone(economicMessages[kind]),
+    details: kind === 'delegatedRoyaltyFreeze' ? { grant: h(705) }
+      : { collectionId, grant: h(705), ...(kind === 'delegatedProspectiveEconomicsConsent' ? { candidate: { ...fixedCandidate } } : {}) },
+    ...changes };
+}
+
+test('delegated current and prospective economics preserve the same original digest and facade domain', () => {
+  const m = economicsMessage;
+  const expected = typed(body('StreamArtistEconomicsConsent(address core,address resolver,bytes32 revenueClass,uint8 scope,uint256 scopeId,bytes32 assignmentHash,uint256 nonce,uint64 deadline)',
+    ['address','address','bytes32','uint8','uint256','bytes32','uint256','uint64'],
+    [core,m.resolver,m.revenueClass,1n,collectionId,m.assignmentHash,nonce,deadline]));
+  for (const kind of ['delegatedEconomicsConsent','delegatedProspectiveEconomicsConsent']) {
+    const payload = currentArtistOperationTypedData(kind, chainId, registry, m);
+    assert.equal(payload.digest, expected);
+    assert.deepEqual(payload, currentArtistTypedData('artistEconomicsConsent', chainId, registry, m));
+    assert.notEqual(payload.digest, currentArtistOperationTypedData(kind, chainId + 1n, registry, m).digest);
+    assert.notEqual(payload.digest, currentArtistOperationTypedData(kind, chainId, a(704), m).digest);
+    for (const key of ['collectionId','grant','candidate','payoutDesignationHash','artistId','delegate']) {
+      assert.throws(() => currentArtistOperationTypedData(kind, chainId, registry, { ...m, [key]: h(706) }), /unexpected fields/);
+    }
+  }
+  assert.deepEqual(currentArtistOperationTypedData('delegatedRoyaltyFreeze', chainId, registry, messages.royaltyFreeze),
+    currentArtistOperationTypedData('royaltyFreeze', chainId, registry, messages.royaltyFreeze));
+});
+
+test('three delegated economic transports match compiled argument order and original digest getter calls', () => {
+  const local = new Interface(CURRENT_ARTIST_OPERATION_ABI), m = economicsMessage, r = messages.royaltyFreeze;
+  const terms = [collectionId,m.resolver,m.revenueClass,1n,collectionId,m.assignmentHash];
+  const rows = [
+    ['delegatedEconomicsConsent',15n,'recordDelegatedEconomicsConsent','economicsConsentDigest',terms,[], '0x23a38d6d'],
+    ['delegatedProspectiveEconomicsConsent',15n,'recordDelegatedProspectiveEconomicsConsent','economicsConsentDigest',terms,[fixedCandidate], '0x09eed2fe'],
+    ['delegatedRoyaltyFreeze',20n,'authorizeDelegatedRoyaltyFreeze','royaltyFreezeDigest',[r.resolver,collectionId,r.revenueClass,r.expectedAssignmentHash],[], '0x04005067'],
+  ];
+  for (const [kind,operationId,method,getter,terms,candidate,selector] of rows) {
+    const plan = prepareCurrentArtistAction(economicRequest(kind));
+    assert.equal(plan.operationId, operationId); assert.equal(plan.method, method); assert.equal(plan.digestMethod, getter);
+    assert.equal(local.getFunction(method).selector, selector);
+    assert.deepEqual(plan.call, { to: registry, value: 0n, data: compiled.encodeFunctionData(method, [terms,...candidate,h(705),[nonce,deadline,'0x5678']]) });
+    assert.deepEqual(plan.digestCall, { to: registry, value: 0n, data: compiled.encodeFunctionData(getter, [terms,[nonce,deadline,'0x']]) });
+    for (const name of [method,getter]) assert.equal(local.getFunction(name).format('minimal'), compiled.getFunction(name).format('minimal'));
+  }
+  for (const getter of ['economicsConsentDigest','royaltyFreezeDigest']) {
+    assert.equal(CURRENT_ARTIST_OPERATION_ABI.filter(item => item.startsWith(`function ${getter}(`)).length, 1);
+  }
+});
+
+test('economics collection, grant and candidate remain separate from signed fields and each other', () => {
+  const input = economicRequest('delegatedProspectiveEconomicsConsent', { message: { ...economicsMessage, scope: 2n, scopeId: (1n << 255n) + 3n } });
+  const original = prepareCurrentArtistAction(input);
+  const otherCollection = prepareCurrentArtistAction({ ...input, details: { ...input.details, collectionId: collectionId + 1n } });
+  assert.equal(original.payload.digest, otherCollection.payload.digest);
+  assert.notEqual(original.call.data, otherCollection.call.data);
+  assert.notEqual(original.digestCall.data, otherCollection.digestCall.data); // The getter's original tuple still contains collectionId.
+  for (const details of [{ ...input.details, grant: h(706) }, { ...input.details, candidate: { ...fixedCandidate, profileHash: h(707), frozen: true } }]) {
+    const other = prepareCurrentArtistAction({ ...input, details });
+    assert.equal(original.payload.digest, other.payload.digest);
+    assert.equal(original.digestCall.data, other.digestCall.data);
+    assert.notEqual(original.call.data, other.call.data);
+  }
+  assert.throws(() => prepareCurrentArtistAction(economicRequest('delegatedEconomicsConsent', { details: { collectionId: collectionId + 1n, grant: h(705) } })), /collection context/);
+  const currentDefault = prepareCurrentArtistAction(economicRequest('delegatedEconomicsConsent', { message: { ...economicsMessage, scope: 0n, scopeId: 0n } }));
+  assert.equal(currentDefault.payload.message.scopeId, 0n);
+  assert.throws(() => prepareCurrentArtistAction(economicRequest('delegatedProspectiveEconomicsConsent', { message: { ...economicsMessage, scope: 0n, scopeId: 0n } })), /collection or token scope/);
+  for (const changes of [{ scope: 0n, scopeId: 1n }, { scope: 1n, scopeId: 0n }, { scope: 2n, scopeId: 0n }, { scope: 3n }, { scope: 256n }, { scope: 1 }]) {
+    assert.throws(() => currentArtistOperationTypedData('delegatedEconomicsConsent', chainId, registry, { ...economicsMessage, ...changes }));
+  }
+});
+
+test('only prospective clearing accepts a zero assignment with the exact original zero candidate', () => {
+  const candidate = { profileHash: ZeroHash, policyHash: ZeroHash, royaltyBps: 0n, frozen: false };
+  const input = economicRequest('delegatedProspectiveEconomicsConsent', { message: { ...economicsMessage, assignmentHash: ZeroHash }, details: { collectionId, grant: h(705), candidate } });
+  const plan = prepareCurrentArtistAction(input);
+  assert.equal(plan.payload.message.assignmentHash, ZeroHash);
+  assert.equal(compiled.decodeFunctionData(plan.method, plan.call.data)[0].assignmentHash, ZeroHash);
+  assert.equal(compiled.decodeFunctionData(plan.method, plan.call.data)[1].profileHash, ZeroHash);
+  assert.throws(() => prepareCurrentArtistAction({ ...input, kind: 'delegatedEconomicsConsent', details: { collectionId, grant: h(705) } }), /nonzero/);
+  for (const change of [{ profileHash: h(703) }, { policyHash: h(704) }, { profileHash: h(703), royaltyBps: 1n }, { frozen: true }]) {
+    assert.throws(() => prepareCurrentArtistAction({ ...input, details: { ...input.details, candidate: { ...candidate, ...change } } }));
+  }
+  const configuredZeroRoyalty = prepareCurrentArtistAction({ ...input, message: { ...input.message, revenueClass: id('ROYALTY_ERC2981'), assignmentHash: h(708) } });
+  assert.notEqual(configuredZeroRoyalty.payload.digest, plan.payload.digest);
+  assert.equal(configuredZeroRoyalty.request.details.candidate.profileHash, ZeroHash);
+  // This is a candidate packet: only the pinned original resolver preview proves its clear/current assignment relationship.
+});
+
+test('fixed economics candidate validates original widths and bounds without guessing the resolver role', () => {
+  const make = candidate => prepareCurrentArtistAction(economicRequest('delegatedProspectiveEconomicsConsent', {
+    details: { collectionId, grant: h(705), candidate },
+  }));
+  make({ ...fixedCandidate, frozen: true });
+  make({ ...fixedCandidate, royaltyBps: 1000n });
+  make({ ...fixedCandidate, profileHash: ZeroHash });
+  for (const changes of [{ policyHash: h(703) }, { royaltyBps: 1001n }, { royaltyBps: 1n << 16n }, { royaltyBps: -1n },
+    { royaltyBps: 1 }, { profileHash: ZeroHash, royaltyBps: 1n }, { profileHash: '0x' }, { frozen: 0 }, { templateId: h(703) }]) {
+    assert.throws(() => make({ ...fixedCandidate, ...changes }));
+  }
+  assert.throws(() => make({ profileHash: h(703), policyHash: ZeroHash, royaltyBps: 0n }), /unexpected fields/);
+  for (const kind of ['delegatedEconomicsConsent','delegatedProspectiveEconomicsConsent']) {
+    for (const value of [0n,1,-1n,1n << 256n]) assert.throws(() => prepareCurrentArtistAction(economicRequest(kind, {
+      message: { ...economicsMessage, scope: 2n, scopeId: 1n },
+      details: { ...economicRequest(kind).details, collectionId: value },
+    })));
+  }
+  assert.throws(() => prepareCurrentArtistAction(economicRequest('delegatedRoyaltyFreeze', { message: { ...messages.royaltyFreeze, revenueClass: id('PRIMARY_SALE') } })), /ROYALTY_ERC2981/);
+});
+
+test('economic delegated transports preserve actual delegate direct calls and empty contract-wallet relays', () => {
+  for (const kind of Object.keys(economicMessages)) {
+    const direct = prepareCurrentArtistAction(economicRequest(kind, { caller: a(704), mode: 'direct', signature: '0x' }));
+    const authorization = compiled.decodeFunctionData(direct.method, direct.call.data)[kind === 'delegatedProspectiveEconomicsConsent' ? 3 : 2];
+    assert.equal(authorization.signature, '0x'); assert.equal(authorization.time, deadline);
+    const relay = prepareCurrentArtistAction(economicRequest(kind, { signature: '0x' }));
+    assert.equal(relay.request.mode, 'signature'); assert.notEqual(relay.request.caller, relay.request.signer);
+    assert.equal(direct.payload.digest, relay.payload.digest);
+    assert.throws(() => prepareCurrentArtistAction(economicRequest(kind, { mode: 'direct', signature: '0x' })), /predicate/);
+    assert.throws(() => prepareCurrentArtistAction(economicRequest(kind, { caller: a(704), signature: '0x' })), /predicate/);
+    const maximum = prepareCurrentArtistAction(economicRequest(kind, { signature: `0x${'12'.repeat(4096)}` }));
+    assert.equal(maximum.request.signature.length, 8194);
+    assert.throws(() => prepareCurrentArtistAction(economicRequest(kind, { signature: `0x${'12'.repeat(4097)}` })), /4096/);
+  }
+});
+
+test('economic requests freeze nested candidates and reconstruct every unsigned supplement', () => {
+  for (const kind of Object.keys(economicMessages)) {
+    const input = economicRequest(kind), plan = prepareCurrentArtistAction(input);
+    assert.deepEqual(normalizeCurrentArtistAction(plan), plan);
+    input.message.nonce = 0n; input.details.grant = h(799);
+    assert.equal(plan.request.message.nonce, nonce); assert.equal(plan.request.details.grant, h(705));
+    assert.throws(() => { plan.request.details.grant = h(799); }, TypeError);
+    for (const details of [{}, { ...plan.request.details, grant: ZeroHash }, { ...plan.request.details, grant: h(705), authorityClass: 2n }]) {
+      assert.throws(() => prepareCurrentArtistAction({ ...plan.request, details }));
+    }
+    assert.throws(() => normalizeCurrentArtistAction({ ...plan, call: { ...plan.call, data: plan.digestCall.data } }), /reconstruction/);
+    assert.throws(() => normalizeCurrentArtistAction({ ...plan, request: { ...plan.request, details: { ...plan.request.details, grant: h(799) } } }), /reconstruction/);
+  }
+  const input = economicRequest('delegatedProspectiveEconomicsConsent'), plan = prepareCurrentArtistAction(input);
+  input.details.candidate.profileHash = h(799); input.details.candidate.frozen = true;
+  assert.deepEqual(plan.request.details.candidate, fixedCandidate);
+  assert.throws(() => { plan.request.details.candidate.frozen = true; }, TypeError);
+  const detached = structuredClone(plan), normalized = normalizeCurrentArtistAction(detached);
+  detached.request.details.candidate.profileHash = h(799);
+  assert.deepEqual(normalized.request.details.candidate, fixedCandidate);
+  assert.throws(() => normalizeCurrentArtistAction(detached), /reconstruction/);
+  assert.throws(() => prepareCurrentArtistAction(economicRequest('delegatedEconomicsConsent', { details: { collectionId, grant: h(705), candidate: fixedCandidate } })), /unexpected fields/);
 });

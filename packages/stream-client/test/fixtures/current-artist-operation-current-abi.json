@@ -32,6 +32,7 @@
     "smart-contracts/domains/artist/StreamArtistCollaboratorHashes.sol": "f2e73611a6421212024a24d682ce2a5e623001786e62fc17745be4b0815f191a",
     "smart-contracts/domains/artist/StreamArtistCollaboratorLifecycle.sol": "9118d09da6ab234da48754148c1ea560ff2af6f62cab49b12e696547f943cf62",
     "smart-contracts/domains/artist/StreamArtistConsentFinalityLifecycle.sol": "bf01e720b9d34d3ac05c310d07a1ce8fcd67c62eff9ecb178f4d71f3afeeafd6",
+    "smart-contracts/domains/artist/StreamArtistConsentReadEncoding.sol": "0ee49b6920162bde311fc32eef408f3348ae90d08b19d464aae40e1bf908e304",
     "smart-contracts/domains/artist/StreamArtistConsentState.sol": "aa91392c7210ff74856bde13a15748b583347d6f988bfc5aa4b65daea62363de",
     "smart-contracts/domains/artist/StreamArtistConsentTransport.sol": "24e6281289c7afe3de505c256adbdda550a2313990354aa4e452ed4a1ebdebb8",
     "smart-contracts/domains/artist/StreamArtistContentHashes.sol": "77b726a2333277752e6e3c93b0e2c415a75839e3783ff9afd6f0d54fff36c79c",
@@ -41,6 +42,7 @@
     "smart-contracts/domains/artist/StreamArtistCoordinatorRecoveryRead.sol": "36d1da5f5187b467ffb43c95082586f07dc0ba4a693659cf09a9cf985297bf12",
     "smart-contracts/domains/artist/StreamArtistCoordinatorSanctionRead.sol": "e8d197e6abec6ef46e1f166fac385bc0bba4b83a8d30aeb5d5eef847649e8c70",
     "smart-contracts/domains/artist/StreamArtistCurrentAuthorityFacts.sol": "bbc444a3148216090fe79748f731a7036e7b51334367a9362414db4d2ac9d6b7",
+    "smart-contracts/domains/artist/StreamArtistDefaultTemplateReads.sol": "25efa0581304cbbd15e1ce87655fffc2225c2f1622df0377cfc10337a06b6113",
     "smart-contracts/domains/artist/StreamArtistDelegatedConsentOperations.sol": "de0bc92c574c09860b88b3b596f0f675a50ef93e576d03b9a64fcc4c0d3556d4",
     "smart-contracts/domains/artist/StreamArtistDelegatedMutation.sol": "3f77d6bf057bbd10473ad3e5905e404d91ed9c43c972cc5291251d4a373b9bb6",
     "smart-contracts/domains/artist/StreamArtistDelegationState.sol": "55c37fd6f892fdf767de7d90ebe00280ebcb98de56ec58458a2d0d60760f4897",
@@ -52,6 +54,7 @@
     "smart-contracts/domains/artist/StreamArtistDormancyVestingReads.sol": "d99ec440f27df7b51f9ec69f98ad4292debdc4d09c773fc963c9f8eb18dd99b0",
     "smart-contracts/domains/artist/StreamArtistDynamicTemplateReads.sol": "7446e318dfde0ebecb79bd400807dc713a0d88496a6a9dc649d94ca261cafe06",
     "smart-contracts/domains/artist/StreamArtistEconomicOperations.sol": "702d5d044d56f33687bef6a0825bebffe6d96476899956f595564f7987169420",
+    "smart-contracts/domains/artist/StreamArtistEconomicsAssociation.sol": "f2bfc2bfe17a3496920940ca7bdf991f026bc0bf8477285a935b86c6676c9fc8",
     "smart-contracts/domains/artist/StreamArtistEconomicsHashes.sol": "d1d8c6c658d964d5d4b10b2dd70ca06f51ef20970e05bc09af579434f67032bd",
     "smart-contracts/domains/artist/StreamArtistEntropyFindingHydration.sol": "43d6d586b81b837fa69380834c91e4b0c3ab20c4174a2a719376ee5cf1d24d47",
     "smart-contracts/domains/artist/StreamArtistEntropyFindingHydrationOperations.sol": "37c0bc1aae5587dd73302442517f84ff6e310954458abf12aba37f995a2ac4d8",
@@ -113,6 +116,7 @@
     "smart-contracts/domains/artist/StreamArtistOwnerHydration.sol": "14de76a7d19011947e7bd2ea3d2cfdf7631fadb5fb2d6645ae79176ad2e9af47",
     "smart-contracts/domains/artist/StreamArtistPayloadStore.sol": "e73a3c6fd0cde6a46863456430381c5565523a50fc22c12236955f6ea4f9ff5a",
     "smart-contracts/domains/artist/StreamArtistPayloadSync.sol": "3f210dc1bf1ca36de28a998de999be576e99aea67c333c02fa25affedb7a7787",
+    "smart-contracts/domains/artist/StreamArtistPayoutLifecycle.sol": "19d565bba5f84e2ddde3ca1da07531a8504b0a9d65523a5ddcc418ec0c973d77",
     "smart-contracts/domains/artist/StreamArtistPlatformState.sol": "3ac58b166e760f6648c57954d5a0630bca8c274a5156c822834e116b27736500",
     "smart-contracts/domains/artist/StreamArtistProfilePayoutReads.sol": "3c4e940672de1fe2e8242e0f37e1ebbad8625fed4ae14b26d23964f6968ac859",
     "smart-contracts/domains/artist/StreamArtistPublicationHydration.sol": "8fb24eadf3b881e73b3b569268220b5bf8d0a2695d9872bff55d0445233d408f",
@@ -160,6 +164,7 @@
     "smart-contracts/domains/artist/StreamArtistSaleHashes.sol": "e511b78e55c06706e132bf58e4d7c7f850aef8425fd703877299b4e32e3f17f5",
     "smart-contracts/domains/artist/StreamArtistSaleOperations.sol": "b2d2ce3f21247fef23ac64cda1d8d8e645c7671fdb28cf94d6873fc83da93ad0",
     "smart-contracts/domains/artist/StreamArtistSanctionCandidate.sol": "a385f1e8fc3c6c8567473f1587261bde7a1fe3c22b6c5b919ad473e706933d67",
+    "smart-contracts/domains/artist/StreamArtistScopedTemplateReads.sol": "f1124eccffd214f099cd3d4a56caf109b6bd85dfb84a72ff7effb2d30e87fbec",
     "smart-contracts/domains/artist/StreamArtistStaticCalls.sol": "cf3a70d58eeb7fa231918585e0c9cb7f6ddc39697c3583234c16ee3981da364c",
     "smart-contracts/domains/artist/StreamArtistStaticDisplay.sol": "b720650219ffcd8b5b65b69a59aab001b85b4456ea621362e2f40194bd4fc9b5",
     "smart-contracts/domains/artist/StreamArtistStaticIdentityProjection.sol": "d1dd7a2041a5c29ae4e59e4596fb965d3c1d4768d33157aa8852eea70e06e86b",
@@ -168,6 +173,7 @@
     "smart-contracts/domains/artist/StreamArtistSuccessionHashes.sol": "afec32d691d473e98fc2deaa4cd44b0fa65436893f9376634e326057388533c9",
     "smart-contracts/domains/artist/StreamArtistSuccessionOperations.sol": "143b36b7fbc00c1747b54eee1460b75f47ad1bdb6c09e190b9c244d305e7b426",
     "smart-contracts/domains/artist/StreamArtistSuccessionState.sol": "26bbca344b7f5d4dc83f4d5fd6d96fa55db1787f6e9fdd6f89c9b583f36f5fcf",
+    "smart-contracts/domains/artist/StreamArtistTemplateEconomicsReads.sol": "7f885855d6102007ddf52e2b9b7855af2e18688b1610a9cc8ae9279dcaf2f3d6",
     "smart-contracts/domains/artist/StreamArtistTemplateMutationReads.sol": "3a7a6c726c158beccf82bb8b0d7e56e9e2ee0abede5122d4f632a1c5b21a765c",
     "smart-contracts/domains/artist/StreamArtistTimingState.sol": "7d58301a7db3feb21b8ca796a73f46ff2c21f5536f41392cd6bd2fce177fe92b",
     "smart-contracts/domains/artist/StreamArtistUnavailabilityState.sol": "59979a9d12dbd8c42a40dc197d2bc8e853ca50a2afa88f1a6a8f727c8a7db680",
@@ -343,7 +349,13 @@
     "smart-contracts/domains/artist/StreamArtistConsentTransport.sol": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.19;\nimport \"./StreamArtistConsentState.sol\";\nimport \"./StreamArtistContentHashes.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistContentOwner.sol\";\n\n/// @notice Fixed decoding of original Consent writer calls after their host authority checks.\n/// @dev No ledger, signature or receipt policy is introduced; fixed state workers remain authoritative.\nlibrary StreamArtistConsentTransport {\n    function saleEncoded(\n        mapping(bytes32 => Sale.Record) storage records,\n        mapping(bytes32 => bytes32) storage latest,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        StreamArtistConsentState.Context memory o,\n        bytes calldata encoded,\n        uint8 principalClass\n    ) public returns (StreamArtistConsentState.Mutation memory) {\n        (, T.Binding memory b, Sale.Consent memory p, address signer, uint256 nonce) =\n            abi.decode(encoded[4:], (T.ActionContext, T.Binding, Sale.Consent, address, uint256));\n        return StreamArtistConsentState.saleConsentForAuthority(\n            records, latest, replay, o, b, p, signer, principalClass, nonce\n        );\n    }\n\n    event ArtistConsentDelegationRecorded(\n        uint16 schemaVersion,\n        bytes32 indexed recordHash,\n        bytes32 indexed delegationRecordHash,\n        bytes32 indexed artistId,\n        uint16 operationId\n    );\n\n    function noteDelegation(\n        mapping(bytes32 => bytes32) storage delegations,\n        StreamArtistConsentState.Mutation memory m,\n        bytes32 grant,\n        bytes32 artistId,\n        uint16 operation\n    ) public returns (StreamArtistConsentState.Mutation memory) {\n        if (grant == 0 || delegations[m.record] != 0) revert T.InvalidRecord();\n        delegations[m.record] = grant;\n        m.action = keccak256(abi.encode(m.action, grant));\n        m.state = keccak256(abi.encode(m.state, grant));\n        emit ArtistConsentDelegationRecorded(1, m.record, grant, artistId, operation);\n        return m;\n    }\n\n    function policyEncoded(\n        mapping(bytes32 => bytes32) storage records,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        StreamArtistConsentState.Context memory o,\n        bytes calldata encoded,\n        uint8 principalClass\n    ) public returns (StreamArtistConsentState.Mutation memory) {\n        (, T.Binding memory b, T.PolicyConsent memory p, address signer, uint256 nonce) =\n            abi.decode(encoded[4:], (T.ActionContext, T.Binding, T.PolicyConsent, address, uint256));\n        return StreamArtistConsentState.policyForAuthority(\n            records, replay, o, b, p, signer, principalClass, nonce\n        );\n    }\n\n    function economicsEncoded(\n        mapping(bytes32 => bytes32) storage records,\n        mapping(bytes32 => bytes32) storage delegations,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        mapping(bytes32 => EconomicsEvidence.Association) storage associations,\n        mapping(bytes32 => bytes32) storage associatedRecords,\n        StreamArtistConsentState.Context memory o,\n        bytes calldata encoded,\n        uint8 principalClass,\n        bytes32 grant\n    ) public returns (StreamArtistConsentState.Mutation memory) {\n        (\n            ,\n            T.Binding memory b,\n            T.EconomicsConsent memory p,\n            T.Payout memory designation,\n            address signer,\n            uint256 nonce\n        ) = abi.decode(\n            encoded[4:],\n            (T.ActionContext, T.Binding, T.EconomicsConsent, T.Payout, address, uint256)\n        );\n        return StreamArtistConsentState.economicsAssociatedForAuthority(\n            records,\n            delegations,\n            replay,\n            associations,\n            associatedRecords,\n            o,\n            b,\n            p,\n            designation,\n            signer,\n            principalClass,\n            nonce,\n            grant\n        );\n    }\n\n    function ratificationEncoded(\n        mapping(uint256 => T.RatificationRecord) storage records,\n        mapping(bytes32 => T.RatificationRecord) storage history,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        StreamArtistConsentState.Context memory o,\n        bytes calldata encoded,\n        uint8 principalClass\n    ) public returns (StreamArtistConsentState.Mutation memory) {\n        (, T.Binding memory b, T.Ratification memory p, address signer, uint256 nonce) =\n            abi.decode(encoded[4:], (T.ActionContext, T.Binding, T.Ratification, address, uint256));\n        return StreamArtistConsentState.ratificationForAuthority(\n            records, history, replay, o, b, p, signer, principalClass, nonce\n        );\n    }\n\n    event ArtistContentConsentRecorded(\n        uint16 schemaVersion,\n        uint256 indexed collectionId,\n        bytes32 indexed familyId,\n        address indexed signer,\n        bytes32 newStateHash,\n        uint8 authorityClass,\n        uint256 nonce,\n        uint64 signedAt,\n        bytes32 consentRecordHash\n    );\n    event ArtistContentRecordContext(\n        uint16 schemaVersion, bytes32 indexed recordHash, address metadataContract, bytes32 artistId\n    );\n\n    function contentConsentEncoded(\n        mapping(bytes32 => IStreamArtistContentRecordsOwner.ConsentRecord) storage records,\n        mapping(bytes32 => bytes32) storage latest,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        StreamArtistConsentState.Context memory o,\n        bytes calldata encoded,\n        uint8 authorityClass\n    ) public returns (StreamArtistConsentState.Mutation memory m) {\n        (, T.Binding memory b, Content.Consent memory p, address signer, uint256 nonce) =\n            abi.decode(encoded[4:], (T.ActionContext, T.Binding, Content.Consent, address, uint256));\n        m.record = StreamArtistContentHashes.consentRecord(\n            o.environment, p, b.artistId, signer, authorityClass, nonce, o.observedAt\n        );\n        bytes32 scope = keccak256(abi.encode(p, b.generation));\n        bytes32 key = keccak256(\n            abi.encode(\n                keccak256(\"6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2\"),\n                o.environment.chainId,\n                o.environment.registry,\n                o.coordinator,\n                o.archive,\n                address(this),\n                o.domain,\n                keccak256(\"consent_finality.replay.content_consent_key\"),\n                keccak256(abi.encode(scope, m.record))\n            )\n        );\n        if (replay[key].status != 0) revert T.Replay(key);\n        replay[key] = T.ReplayCell(m.record, o.revision + 1, 1, 2);\n        StreamArtistAuthorityCheckpoint.noteReplay(key, replay[key]);\n        IStreamArtistContentRecordsOwner.ConsentRecord memory item =\n            IStreamArtistContentRecordsOwner.ConsentRecord(\n                m.record, b.artistId, b.generation, p, authorityClass\n            );\n        records[m.record] = item;\n        latest[scope] = m.record;\n        m.action = keccak256(abi.encode(b, p, signer, nonce));\n        m.state = keccak256(abi.encode(scope, item));\n        m.replay = keccak256(abi.encode(key, m.record));\n    }\n\n    /// @dev Called only after the host's original commit and native receipt append.\n    function emitContentConsentEncoded(\n        bytes calldata encoded,\n        bytes32 record,\n        uint8 authorityClass,\n        uint64 observedAt\n    ) public {\n        (, T.Binding memory b, Content.Consent memory p, address signer, uint256 nonce) = abi.decode(\n            encoded[4:], (T.ActionContext, T.Binding, Content.Consent, address, uint256)\n        );\n        emit ArtistContentConsentRecorded(\n            1,\n            p.collectionId,\n            p.familyId,\n            signer,\n            p.newStateHash,\n            authorityClass,\n            nonce,\n            observedAt,\n            record\n        );\n        emit ArtistContentRecordContext(1, record, p.metadataContract, b.artistId);\n    }\n\n    event ArtistContentFreezeAuthorized(\n        uint16 schemaVersion,\n        uint256 indexed collectionId,\n        address indexed signer,\n        bytes32[] lockClasses,\n        bytes32 expectedStateHash,\n        uint8 authorityClass,\n        uint256 nonce,\n        uint64 signedAt,\n        bytes32 freezeRecordHash\n    );\n\n    function contentFreezeEncoded(\n        mapping(bytes32 => Content.FreezeRecord) storage records,\n        mapping(bytes32 => bytes32) storage latest,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        StreamArtistConsentState.Context memory o,\n        bytes calldata encoded,\n        uint8 authorityClass\n    ) public returns (StreamArtistConsentState.Mutation memory m) {\n        (, T.Binding memory b, Content.Freeze memory p, address signer, uint256 nonce) =\n            abi.decode(encoded[4:], (T.ActionContext, T.Binding, Content.Freeze, address, uint256));\n        m.record = StreamArtistContentHashes.freezeRecord(\n            o.environment, p, b.artistId, signer, authorityClass, nonce, o.observedAt\n        );\n        bytes32 key = keccak256(\n            abi.encode(\n                keccak256(\"6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2\"),\n                o.environment.chainId,\n                o.environment.registry,\n                o.coordinator,\n                o.archive,\n                address(this),\n                o.domain,\n                keccak256(\"consent_finality.replay.freeze_key\"),\n                keccak256(abi.encode(keccak256(\"CONTENT\"), p.collectionId, b.generation, m.record))\n            )\n        );\n        if (replay[key].status != 0) revert T.Replay(key);\n        replay[key] = T.ReplayCell(m.record, o.revision + 1, 1, 2);\n        StreamArtistAuthorityCheckpoint.noteReplay(key, replay[key]);\n        Content.FreezeRecord memory item = Content.FreezeRecord(\n            m.record,\n            b.artistId,\n            b.generation,\n            p.metadataContract,\n            p.lockClasses,\n            p.expectedStateHash,\n            authorityClass\n        );\n        records[m.record] = item;\n        for (uint256 i; i < p.lockClasses.length; ++i) {\n            latest[\n                keccak256(\n                    abi.encode(p.collectionId, b.generation, p.metadataContract, p.lockClasses[i])\n                )\n            ] = m.record;\n        }\n        m.action = keccak256(abi.encode(b, p, signer, nonce));\n        m.state = keccak256(abi.encode(p.collectionId, item));\n        m.replay = keccak256(abi.encode(key, m.record));\n    }\n\n    /// @dev Called only after the host's original commit and native receipt append.\n    function emitContentFreezeEncoded(\n        bytes calldata encoded,\n        bytes32 record,\n        uint8 authorityClass,\n        uint64 observedAt\n    ) public {\n        (, T.Binding memory b, Content.Freeze memory p, address signer, uint256 nonce) = abi.decode(\n            encoded[4:], (T.ActionContext, T.Binding, Content.Freeze, address, uint256)\n        );\n        emit ArtistContentFreezeAuthorized(\n            1,\n            p.collectionId,\n            signer,\n            p.lockClasses,\n            p.expectedStateHash,\n            authorityClass,\n            nonce,\n            observedAt,\n            record\n        );\n        emit ArtistContentRecordContext(1, record, p.metadataContract, b.artistId);\n    }\n}\n",
     "smart-contracts/domains/artist/StreamArtistConsentState.sol": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.19;\nimport \"./StreamArtistAuthorityCheckpoint.sol\";\nimport \"./StreamArtistEconomicsAssociation.sol\";\nimport {\n    IStreamArtistEconomicsEvidence as EconomicsEvidence\n} from \"../../interfaces/stream/artist/IStreamArtistEconomicsEvidence.sol\";\n\nimport \"./StreamArtistEconomicsHashes.sol\";\nimport \"./StreamArtistSaleHashes.sol\";\n\n/// @notice Linked typed Consent mechanics; the owner retains its guard and single semantic commit.\n/// @dev Mapping references are the owner's existing slots. No new owner or external authorization path.\nlibrary StreamArtistConsentState {\n    struct Context {\n        StreamArtistHashes.Environment environment;\n        address coordinator;\n        address archive;\n        bytes32 domain;\n        uint64 revision;\n        uint64 observedAt;\n    }\n\n    struct Mutation {\n        bytes32 record;\n        bytes32 action;\n        bytes32 state;\n        bytes32 replay;\n    }\n\n    event ArtistSaleConsentRecorded(\n        uint16 schemaVersion,\n        uint256 indexed collectionId,\n        bytes32 indexed saleConfigHash,\n        address indexed signer,\n        bytes32 saleId,\n        uint8 authorityClass,\n        uint256 nonce,\n        uint64 signedAt,\n        bytes32 consentRecordHash\n    );\n\n    function saleConsent(\n        mapping(bytes32 => Sale.Record) storage records,\n        mapping(bytes32 => bytes32) storage latest,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        Context memory o,\n        T.Binding memory b,\n        Sale.Consent memory p,\n        address signer,\n        uint256 nonce\n    ) public returns (Mutation memory m) {\n        return saleConsentForAuthority(records, latest, replay, o, b, p, signer, 1, nonce);\n    }\n\n    function saleConsentForAuthority(\n        mapping(bytes32 => Sale.Record) storage records,\n        mapping(bytes32 => bytes32) storage latest,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        Context memory o,\n        T.Binding memory b,\n        Sale.Consent memory p,\n        address signer,\n        uint8 principalClass,\n        uint256 nonce\n    ) public returns (Mutation memory m) {\n        if (\n            p.collectionId == 0 || p.saleAdapter == address(0) || p.saleId == bytes32(0)\n                || p.saleConfigHash == bytes32(0)\n        ) revert T.InvalidRecord();\n        m.record = StreamArtistSaleHashes.record(\n            o.environment, p, b.artistId, signer, principalClass, nonce, o.observedAt\n        );\n        bytes32 scope = keccak256(abi.encode(p, b.generation, b.bindingHash));\n        bytes32 key = _consume(\n            replay, o, keccak256(\"consent_finality.replay.sale_consent_key\"), scope, m.record\n        );\n        if (records[m.record].recordHash != bytes32(0)) revert T.InvalidRecord();\n        Sale.Record memory item = Sale.Record(\n            m.record,\n            p,\n            b.artistId,\n            signer,\n            principalClass,\n            nonce,\n            o.observedAt,\n            b.generation,\n            b.bindingHash\n        );\n        bytes32 lookup = StreamArtistSaleHashes.lookup(p.collectionId, p.saleId, p.saleConfigHash);\n        records[m.record] = item;\n        latest[lookup] = m.record;\n        m.action = keccak256(abi.encode(b, p, signer, nonce));\n        m.state = keccak256(abi.encode(scope, lookup, item));\n        m.replay = keccak256(abi.encode(key, m.record));\n        emit ArtistSaleConsentRecorded(\n            1,\n            p.collectionId,\n            p.saleConfigHash,\n            signer,\n            p.saleId,\n            principalClass,\n            nonce,\n            o.observedAt,\n            m.record\n        );\n    }\n\n    event ArtistPolicyConsentRecorded(\n        uint16 schemaVersion,\n        uint256 indexed collectionId,\n        bytes32 indexed policyHash,\n        address indexed signer,\n        bytes32 phaseId,\n        uint8 authorityClass,\n        uint256 nonce,\n        uint64 signedAt,\n        bytes32 consentRecordHash\n    );\n    event ArtistEconomicsConsentRecorded(\n        uint16 schemaVersion,\n        uint256 indexed collectionId,\n        bytes32 indexed assignmentHash,\n        address indexed signer,\n        bytes32 revenueClass,\n        uint8 scope,\n        uint256 scopeId,\n        bytes32 payoutDesignationRecordHash,\n        uint8 authorityClass,\n        uint256 nonce,\n        uint64 signedAt,\n        bytes32 consentRecordHash\n    );\n    event ArtistRecordDelegation(\n        uint16 schemaVersion,\n        bytes32 indexed recordHash,\n        bytes32 indexed delegationRecordHash,\n        bytes32 indexed artistId,\n        address resolver,\n        bytes32 revenueClass,\n        uint8 authorityClass\n    );\n    event ArtistContentRatificationRecorded(\n        uint16 schemaVersion,\n        uint256 indexed collectionId,\n        bytes32 indexed contentStateHash,\n        address indexed signer,\n        uint8 authorityClass,\n        uint256 nonce,\n        uint64 signedAt,\n        bytes32 ratificationRecordHash\n    );\n\n    function policy(\n        mapping(bytes32 => bytes32) storage records,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        Context memory o,\n        T.Binding memory b,\n        T.PolicyConsent memory p,\n        address signer,\n        uint256 nonce\n    ) public returns (Mutation memory m) {\n        return policyForAuthority(records, replay, o, b, p, signer, 1, nonce);\n    }\n\n    function policyForAuthority(\n        mapping(bytes32 => bytes32) storage records,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        Context memory o,\n        T.Binding memory b,\n        T.PolicyConsent memory p,\n        address signer,\n        uint8 principalClass,\n        uint256 nonce\n    ) public returns (Mutation memory m) {\n        if (p.phaseId == bytes32(0) || p.policyHash == bytes32(0)) {\n            revert T.InvalidRecord();\n        }\n        m.record = StreamArtistHashes.policyRecordForAuthority(\n            o.environment, p, b.artistId, signer, principalClass, nonce, o.observedAt\n        );\n        bytes32 scope = keccak256(abi.encode(p.collectionId, p.phaseId, p.policyHash));\n        bytes32 key = _consume(\n            replay, o, keccak256(\"consent_finality.replay.policy_consent_key\"), scope, m.record\n        );\n        records[scope] = m.record;\n        m.action = keccak256(abi.encode(b, p, signer, nonce));\n        m.state = keccak256(abi.encode(scope, m.record));\n        m.replay = keccak256(abi.encode(key, m.record));\n        emit ArtistPolicyConsentRecorded(\n            1,\n            p.collectionId,\n            p.policyHash,\n            signer,\n            p.phaseId,\n            principalClass,\n            nonce,\n            o.observedAt,\n            m.record\n        );\n    }\n\n    function economics(\n        mapping(bytes32 => bytes32) storage records,\n        mapping(bytes32 => bytes32) storage delegations,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        Context memory o,\n        T.Binding memory b,\n        T.EconomicsConsent memory p,\n        T.Payout memory designation,\n        address signer,\n        uint256 nonce,\n        bytes32 grant\n    ) public returns (Mutation memory m) {\n        return economicsForAuthority(\n            records, delegations, replay, o, b, p, designation, signer, 1, nonce, grant\n        );\n    }\n\n    event ArtistEconomicsConsentAssociated(\n        uint16 schemaVersion,\n        bytes32 indexed recordHash,\n        bytes32 indexed artistId,\n        bytes32 indexed bindingHash,\n        uint64 bindingGeneration,\n        bytes32 payloadHash,\n        bytes32 originalRecord\n    );\n\n    function economicsAssociatedForAuthority(\n        mapping(bytes32 => bytes32) storage records,\n        mapping(bytes32 => bytes32) storage delegations,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        mapping(bytes32 => EconomicsEvidence.Association) storage associations,\n        mapping(bytes32 => bytes32) storage associatedRecords,\n        Context memory o,\n        T.Binding memory b,\n        T.EconomicsConsent memory p,\n        T.Payout memory designation,\n        address signer,\n        uint8 principalClass,\n        uint256 nonce,\n        bytes32 grant\n    ) public returns (Mutation memory m) {\n        if (b.artistId == bytes32(0) || b.generation == 0 || b.bindingHash == bytes32(0)) {\n            revert T.InvalidRecord();\n        }\n        bytes32 payloadHash = keccak256(abi.encode(p));\n        bytes32 original = records[payloadHash];\n        bool firstAssociation = original == bytes32(0);\n        if (!firstAssociation) {\n            EconomicsEvidence.Association memory prior = associations[original];\n            if (\n                prior.originalRecord != original || prior.payloadHash != payloadHash\n                    || prior.artistId == bytes32(0) || prior.bindingGeneration == 0\n                    || prior.bindingHash == bytes32(0)\n            ) revert T.InvalidRecord();\n            firstAssociation = prior.artistId == b.artistId\n                && prior.bindingGeneration == b.generation && prior.bindingHash == b.bindingHash;\n            if (!firstAssociation && b.generation <= prior.bindingGeneration) {\n                revert T.InvalidRecord();\n            }\n        }\n        m = _economics(\n            records,\n            delegations,\n            replay,\n            o,\n            b,\n            p,\n            designation,\n            signer,\n            principalClass,\n            nonce,\n            grant,\n            firstAssociation\n                ? payloadHash\n                : StreamArtistEconomicsAssociation.continuation(original, p, b),\n            firstAssociation\n        );\n        if (original == bytes32(0)) original = m.record;\n        EconomicsEvidence.Association memory association = EconomicsEvidence.Association(\n            b.artistId, b.generation, b.bindingHash, payloadHash, original\n        );\n        bytes32 key =\n            StreamArtistEconomicsAssociation.key(p, b.artistId, b.generation, b.bindingHash);\n        associations[m.record] = association;\n        associatedRecords[key] = m.record;\n        m.state = keccak256(abi.encode(m.state, key, association));\n        emit ArtistEconomicsConsentAssociated(\n            1, m.record, b.artistId, b.bindingHash, b.generation, payloadHash, original\n        );\n    }\n\n    function economicsForAuthority(\n        mapping(bytes32 => bytes32) storage records,\n        mapping(bytes32 => bytes32) storage delegations,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        Context memory o,\n        T.Binding memory b,\n        T.EconomicsConsent memory p,\n        T.Payout memory designation,\n        address signer,\n        uint8 principalClass,\n        uint256 nonce,\n        bytes32 grant\n    ) public returns (Mutation memory m) {\n        return _economics(\n            records,\n            delegations,\n            replay,\n            o,\n            b,\n            p,\n            designation,\n            signer,\n            principalClass,\n            nonce,\n            grant,\n            keccak256(abi.encode(p)),\n            true\n        );\n    }\n\n    function _economics(\n        mapping(bytes32 => bytes32) storage records,\n        mapping(bytes32 => bytes32) storage delegations,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        Context memory o,\n        T.Binding memory b,\n        T.EconomicsConsent memory p,\n        T.Payout memory designation,\n        address signer,\n        uint8 principalClass,\n        uint256 nonce,\n        bytes32 grant,\n        bytes32 replayScope,\n        bool firstRecord\n    ) private returns (Mutation memory m) {\n        if (\n            designation.account == address(0) || designation.recordHash == bytes32(0)\n                || p.resolver == address(0) || p.collectionId == 0 || p.revenueClass == bytes32(0)\n                || p.scope > 2\n                || (p.scope == 0 && (p.scopeId != 0 || p.assignmentHash == bytes32(0)))\n                || (p.scope == 1 && p.scopeId != p.collectionId) || (p.scope == 2 && p.scopeId == 0)\n        ) {\n            revert T.InvalidRecord();\n        }\n        uint8 authorityClass = grant == bytes32(0) ? principalClass : 2;\n        m.record = StreamArtistEconomicsHashes.economicsRecordForAuthority(\n            o.environment,\n            p,\n            designation.recordHash,\n            b.artistId,\n            signer,\n            authorityClass,\n            nonce,\n            o.observedAt\n        );\n        bytes32 scope = keccak256(abi.encode(p));\n        bytes32 key = _consume(\n            replay, o, keccak256(\"consent_finality.replay.consent_key\"), replayScope, m.record\n        );\n        if (firstRecord) records[scope] = m.record;\n        if (grant != bytes32(0)) delegations[m.record] = grant;\n        m.action = grant == bytes32(0)\n            ? keccak256(abi.encode(b, p, designation, signer, nonce))\n            : keccak256(abi.encode(b, p, designation, signer, nonce, grant));\n        m.state = grant == bytes32(0)\n            ? keccak256(abi.encode(scope, m.record))\n            : keccak256(abi.encode(scope, m.record, grant));\n        m.replay = keccak256(abi.encode(key, m.record));\n        emit ArtistEconomicsConsentRecorded(\n            1,\n            p.collectionId,\n            p.assignmentHash,\n            signer,\n            p.revenueClass,\n            p.scope,\n            p.scopeId,\n            designation.recordHash,\n            authorityClass,\n            nonce,\n            o.observedAt,\n            m.record\n        );\n        if (grant != bytes32(0)) {\n            emit ArtistRecordDelegation(\n                1, m.record, grant, b.artistId, p.resolver, p.revenueClass, 2\n            );\n        }\n    }\n\n    function ratification(\n        mapping(uint256 => T.RatificationRecord) storage current,\n        mapping(bytes32 => T.RatificationRecord) storage records,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        Context memory o,\n        T.Binding memory b,\n        T.Ratification memory p,\n        address signer,\n        uint256 nonce\n    ) public returns (Mutation memory m) {\n        return ratificationForAuthority(current, records, replay, o, b, p, signer, 1, nonce);\n    }\n\n    function ratificationForAuthority(\n        mapping(uint256 => T.RatificationRecord) storage current,\n        mapping(\n            bytes32 => T.RatificationRecord\n        ) storage records,\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        Context memory o,\n        T.Binding memory b,\n        T.Ratification memory p,\n        address signer,\n        uint8 principalClass,\n        uint256 nonce\n    ) public returns (Mutation memory m) {\n        if (p.metadataContract == address(0) || p.contentStateHash == bytes32(0)) {\n            revert T.InvalidRecord();\n        }\n        T.RatificationRecord storage prior = current[p.collectionId];\n        if (\n            prior.contentStateHash == p.contentStateHash\n                && prior.metadataContract == p.metadataContract\n        ) {\n            revert T.InvalidRecord();\n        }\n        m.record = StreamArtistHashes.ratificationRecordForAuthority(\n            o.environment, p, b.artistId, signer, principalClass, nonce, o.observedAt\n        );\n        bytes32 key = _consume(\n            replay,\n            o,\n            keccak256(\"consent_finality.replay.ratification_key\"),\n            keccak256(abi.encode(p.collectionId, m.record)),\n            m.record\n        );\n        T.RatificationRecord memory item =\n            T.RatificationRecord(m.record, p.contentStateHash, p.metadataContract);\n        current[p.collectionId] = item;\n        records[m.record] = item;\n        m.action = keccak256(abi.encode(b, p, signer, nonce));\n        m.state = keccak256(abi.encode(p.collectionId, item));\n        m.replay = keccak256(abi.encode(key, m.record));\n        emit ArtistContentRatificationRecorded(\n            1,\n            p.collectionId,\n            p.contentStateHash,\n            signer,\n            principalClass,\n            nonce,\n            o.observedAt,\n            m.record\n        );\n    }\n\n    function _consume(\n        mapping(bytes32 => T.ReplayCell) storage replay,\n        Context memory o,\n        bytes32 surface,\n        bytes32 scope,\n        bytes32 record\n    ) private returns (bytes32 key) {\n        key = keccak256(\n            abi.encode(\n                keccak256(\"6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2\"),\n                o.environment.chainId,\n                o.environment.registry,\n                o.coordinator,\n                o.archive,\n                address(this),\n                o.domain,\n                surface,\n                scope\n            )\n        );\n        if (replay[key].status != 0) revert T.Replay(key);\n        replay[key] = T.ReplayCell(record, o.revision + 1, 1, 2);\n        StreamArtistAuthorityCheckpoint.noteReplay(key, replay[key]);\n    }\n}\n",
     "smart-contracts/domains/artist/StreamArtistSaleOperations.sol": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.19;\nimport \"../../interfaces/stream/artist/IStreamArtistDelegatedConsentOwner.sol\";\nimport \"./StreamArtistAttributionPolicy.sol\";\n\nimport \"./StreamArtistContentOperations.sol\";\nimport \"./StreamArtistSaleHashes.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistSaleOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistSaleFacts.sol\";\nimport \"../../interfaces/stream/modules/IStreamModule.sol\";\nimport \"../../interfaces/stream/modules/IStreamModuleRegistry.sol\";\nimport \"../../vendor/openzeppelin/IERC165.sol\";\n\n/// @notice Typed sale consent over registered immutable adapter facts and actual artist owners.\n/// @dev Caller-sensitive validation receives the original adapter from the facade explicitly.\nlibrary StreamArtistSaleOperations {\n    bytes32 private constant _READ_GAS = keccak256(\"6529STREAM_GGP_ARTIST_SALE_FACTS_READ_GAS\");\n\n    function record(\n        StreamArtistDelegationTypes.CoordinatorContext memory x,\n        address actor,\n        Sale.Consent memory p,\n        T.Authorization memory a\n    ) public returns (bytes32 result) {\n        T.Snapshot[7] memory prior = _snapshots(x.suite);\n        T.Binding memory b = _binding(x.suite, p.collectionId, true);\n        R.AuthorityFact memory authority =\n            StreamArtistCurrentAuthorityFacts.read(x.suite.owners[2], b.artistId, false);\n        bytes memory facts = _adapter(x.suite, p);\n        bytes32 digest = StreamArtistSaleHashes.digest(_environment(x.suite), p, a);\n        bool direct = actor == authority.authorityAddress && a.signature.length == 0;\n        if (actor == address(0)) revert T.InvalidSignature();\n        if (!direct) {\n            (uint256 cap,, uint8 failure, uint64 revision) = IStreamGasParameterHost(\n                    x.suite.registry\n                ).gasParameterInfo(keccak256(\"6529STREAM_GGP_ARTIST_ERC1271_VERIFY_GAS\"));\n            if (\n                revision == 0 || failure != 2\n                    || !StreamArtistRegistryValidatorBase(x.suite.validator)\n                        .validateSignerProof(authority.authorityAddress, digest, a.signature, cap)\n            ) {\n                revert T.InvalidSignature();\n            }\n        }\n        T.SignerApproval memory proof = T.SignerApproval(authority.authorityAddress, digest, direct);\n        result = IStreamArtistSaleIdentityOwner(x.suite.owners[2])\n            .consumeSaleConsent(T.ActionContext(16, actor, prior[2]), b, p, a, proof);\n        bytes32 actual = IStreamArtistSaleConsentOwner(x.suite.owners[6])\n            .recordSaleConsent(\n                T.ActionContext(16, actor, prior[6]), b, p, proof.signer, a.nonce, authority\n            );\n        if (actual != result) revert T.InvalidRecord();\n        bytes32 id = keccak256(\n            abi.encode(\n                keccak256(\"6529STREAM_ARTIST_ONBOARDING_OPERATION_EVIDENCE_V1\"),\n                block.chainid,\n                x.suite.registry,\n                address(this),\n                uint16(16),\n                actor,\n                result\n            )\n        );\n        bytes memory evidence = abi.encode(\n            uint16(1),\n            x.configurationHash,\n            uint16(16),\n            actor,\n            result,\n            prior,\n            _snapshots(x.suite),\n            abi.encode(b, p, a, proof, authority, facts)\n        );\n        (bytes32 hash,, bool appended) =\n            IStreamArtistArchiveV2(x.suite.archive).appendArtistEvidenceV2(id, 1, evidence);\n        if (!appended || hash != keccak256(evidence)) revert T.InvalidRecord();\n    }\n\n    function delegatedBinding(T.SuiteConfiguration memory suite, uint256 collectionId)\n        public\n        view\n        returns (T.Binding memory b)\n    {\n        b = _binding(suite, collectionId, true);\n        if (b.consentMode != 2) revert T.UnsupportedProfile();\n    }\n\n    function saleFacts(T.SuiteConfiguration memory suite, Sale.Consent memory p)\n        public\n        view\n        returns (bytes memory)\n    {\n        return _adapter(suite, p);\n    }\n\n    function scope(T.SuiteConfiguration memory suite, uint256 collectionId)\n        public\n        view\n        returns (uint8)\n    {\n        return _binding(suite, collectionId, false).saleConsentScope;\n    }\n\n    /// @notice Historical/latest evidence only; current applicability is checked by requireConsent.\n    function isConsented(\n        T.SuiteConfiguration memory suite,\n        uint256 collectionId,\n        bytes32 saleId,\n        bytes32 config\n    ) public view returns (bool, bytes32) {\n        bytes32 hash = IStreamArtistSaleConsentOwner(suite.owners[6])\n            .saleConsentAt(collectionId, saleId, config);\n        return (hash != bytes32(0), hash);\n    }\n\n    function requireConsent(\n        T.SuiteConfiguration memory suite,\n        address adapter,\n        uint256 collectionId,\n        bytes32 saleId,\n        bytes32 config\n    ) public view {\n        T.Binding memory b = _binding(suite, collectionId, false);\n        if (b.saleConsentScope == 0) return;\n        b = _binding(suite, collectionId, true);\n        Sale.Consent memory p = Sale.Consent(collectionId, adapter, saleId, config);\n        IStreamArtistSaleConsentOwner owner = IStreamArtistSaleConsentOwner(suite.owners[6]);\n        Sale.Record memory item =\n            owner.saleConsentRecord(owner.saleConsentAt(collectionId, saleId, config));\n        if (\n            item.recordHash == bytes32(0) || item.artistId != b.artistId\n                || (item.authorityClass != 1\n                    && item.authorityClass != 3\n                    && !(item.authorityClass == 2\n                        && b.consentMode == 2\n                        && IStreamArtistDelegatedConsentOwner(suite.owners[6])\n                                .recordDelegation(item.recordHash) != 0))\n                || item.bindingGeneration != b.generation || item.bindingHash != b.bindingHash\n                || keccak256(abi.encode(item.terms)) != keccak256(abi.encode(p))\n        ) {\n            revert Sale.SaleConsentUnavailable(collectionId, saleId, config);\n        }\n        _adapter(suite, p);\n    }\n\n    /// @notice Exact independent attribution and authority states, never inferred from missing acceptance.\n    function attributionStateEncoded(T.SuiteConfiguration memory suite, uint256 collectionId)\n        public\n        view\n        returns (bytes memory)\n    {\n        (uint8 state, uint64 generation, bytes32 artistId, uint8 status, bytes32 hash) =\n            attributionState(suite, collectionId);\n        return abi.encode(state, generation, artistId, status, hash);\n    }\n\n    function attributionState(T.SuiteConfiguration memory suite, uint256 collectionId)\n        public\n        view\n        returns (\n            uint8 state,\n            uint64 generation,\n            bytes32 artistId,\n            uint8 authorityStatus,\n            bytes32 bindingHash\n        )\n    {\n        _selected(suite.core, keccak256(\"ARTIST_REGISTRY\"), suite.registry, _cap(suite));\n        _chain(suite);\n        T.Binding memory b = IStreamArtistBindingOwner(suite.owners[0]).binding(collectionId);\n        (state, generation) =\n            IStreamArtistAttributionOwner(suite.owners[4]).attributionState(collectionId);\n        if (generation != b.generation) revert T.InvalidAttribution(collectionId);\n        artistId = b.artistId;\n        bindingHash = b.bindingHash;\n        if (artistId != bytes32(0)) {\n            (,, authorityStatus,) =\n                IStreamArtistIdentityOwner(suite.owners[2]).authorityState(artistId);\n        }\n    }\n\n    function _binding(T.SuiteConfiguration memory suite, uint256 collectionId, bool accepted)\n        private\n        view\n        returns (T.Binding memory b)\n    {\n        _chain(suite);\n        _selected(suite.core, keccak256(\"ARTIST_REGISTRY\"), suite.registry, _cap(suite));\n        b = IStreamArtistBindingOwner(suite.owners[0]).binding(collectionId);\n        if (collectionId == 0 || b.bindingHash == bytes32(0) || b.saleConsentScope > 1) {\n            revert T.InvalidAttribution(collectionId);\n        }\n        if (!accepted) return b;\n        (uint8 state, uint64 generation) =\n            IStreamArtistAttributionOwner(suite.owners[4]).attributionState(collectionId);\n        (address authority, uint8 class_, uint8 status,) =\n            IStreamArtistIdentityOwner(suite.owners[2]).authorityState(b.artistId);\n        if (\n            !b.accepted || !StreamArtistAttributionPolicy.acceptedOrSanctioned(state)\n                || generation != b.generation\n                || !StreamArtistAuthorityPolicy.ordinary(class_, status, false)\n                || authority == address(0) || (b.consentMode != 1 && b.consentMode != 2)\n        ) revert T.InvalidAttribution(collectionId);\n        C.BindingTerms memory terms = IStreamArtistCollaboratorBindingOwner(suite.owners[0])\n            .bindingTerms(collectionId, generation);\n        if (terms.mode != 0 || terms.threshold != 0 || terms.count > 32) {\n            revert T.UnsupportedProfile();\n        }\n        if (\n            IStreamArtistCollaboratorRecordsOwner(suite.owners[1]).acceptedCount(b.bindingHash)\n                != terms.count\n        ) {\n            revert T.InvalidAttribution(collectionId);\n        }\n    }\n\n    function _adapter(T.SuiteConfiguration memory suite, Sale.Consent memory p)\n        private\n        view\n        returns (bytes memory evidence)\n    {\n        address adapter = p.saleAdapter;\n        if (adapter.code.length == 0 || p.saleId == bytes32(0) || p.saleConfigHash == bytes32(0)) {\n            revert Sale.InvalidSaleAdapter(adapter);\n        }\n        uint256 cap = _cap(suite);\n        address registry = _selected(suite.core, keccak256(\"MODULE_REGISTRY\"), address(0), cap);\n        bytes32 kind = abi.decode(\n            _read(\n                adapter, abi.encodeWithSelector(IStreamModule.streamModuleType.selector), 32, cap\n            ),\n            (bytes32)\n        );\n        bytes4 interfaceId = abi.decode(\n            _read(\n                adapter,\n                abi.encodeWithSelector(IStreamModule.streamModuleInterfaceId.selector),\n                32,\n                cap\n            ),\n            (bytes4)\n        );\n        if (\n            kind == bytes32(0) || interfaceId == bytes4(0) || interfaceId == bytes4(0xffffffff)\n                || !abi.decode(\n                    _read(\n                        registry,\n                        abi.encodeCall(\n                            IStreamModuleRegistry.isModuleEligible, (adapter, kind, interfaceId)\n                        ),\n                        32,\n                        cap\n                    ),\n                    (bool)\n                )\n                || !abi.decode(\n                    _read(\n                        adapter,\n                        abi.encodeCall(\n                            IERC165.supportsInterface, (type(IStreamArtistSaleFacts).interfaceId)\n                        ),\n                        32,\n                        cap\n                    ),\n                    (bool)\n                )\n                || abi.decode(_read(adapter, abi.encodeWithSignature(\"core()\"), 32, cap), (address))\n                    != suite.core\n        ) {\n            revert Sale.InvalidSaleAdapter(adapter);\n        }\n        (uint256 collectionId, bytes32 config) = abi.decode(\n            _read(\n                adapter,\n                abi.encodeCall(IStreamArtistSaleFacts.saleConsentFacts, (p.saleId)),\n                64,\n                cap\n            ),\n            (uint256, bytes32)\n        );\n        if (collectionId != p.collectionId || config != p.saleConfigHash) {\n            revert Sale.InvalidSaleAdapter(adapter);\n        }\n        return abi.encode(\n            registry, registry.codehash, adapter.codehash, kind, interfaceId, collectionId, config\n        );\n    }\n\n    function _cap(T.SuiteConfiguration memory suite) private view returns (uint256 cap) {\n        uint8 failure;\n        uint64 revision;\n        (cap,, failure, revision) =\n            IStreamGasParameterHost(suite.registry).gasParameterInfo(_READ_GAS);\n        if (cap == 0 || failure != 2 || revision == 0) revert T.InvalidBinding();\n    }\n\n    function _selected(address core, bytes32 kind, address expected, uint256 cap)\n        private\n        view\n        returns (address target)\n    {\n        bytes memory data = _read(\n            core, abi.encodeCall(IStreamCorePointers.getSatellitePointer, (kind)), 320, cap\n        );\n        bytes32 word;\n        bytes32 hash;\n        assembly (\"memory-safe\") {\n            word := mload(add(data, 32))\n            hash := mload(add(data, 64))\n        }\n        target = address(uint160(uint256(word)));\n        if (\n            uint256(word) >> 160 != 0 || target.code.length == 0 || hash != target.codehash\n                || (expected != address(0) && expected != target)\n        ) revert T.ComponentChanged(target);\n    }\n\n    /// @dev Allocate only the expected fixed result; neither return nor revert data is copied unboundedly.\n    function _read(address target, bytes memory callData, uint256 length, uint256 cap)\n        private\n        view\n        returns (bytes memory result)\n    {\n        uint256 available = gasleft();\n        // Includes a cold account access, fixed buffer and instructions before STATICCALL.\n        if (cap > (type(uint256).max - 10_000) / 64 * 63) {\n            revert Sale.SaleFactsParentGas(available, cap);\n        }\n        uint256 required = cap + cap / 63 + 10_000;\n        if (available < required) revert Sale.SaleFactsParentGas(available, required);\n        result = new bytes(length);\n        bool ok;\n        uint256 size;\n        assembly (\"memory-safe\") {\n            ok := staticcall(\n                cap,\n                target,\n                add(callData, 32),\n                mload(callData),\n                add(result, 32),\n                length\n            )\n            size := returndatasize()\n        }\n        if (!ok || size != length) revert Sale.SaleFactsReadFailed(target, bytes4(callData));\n    }\n\n    function _chain(T.SuiteConfiguration memory suite) private view {\n        if (block.chainid != IStreamArtistOwner(suite.owners[2]).deploymentChainId()) {\n            revert T.InvalidBinding();\n        }\n    }\n\n    function _environment(T.SuiteConfiguration memory suite)\n        private\n        view\n        returns (StreamArtistHashes.Environment memory)\n    {\n        return StreamArtistHashes.Environment(\n            block.chainid, suite.registry, suite.core, suite.mintManager\n        );\n    }\n\n    function _snapshots(T.SuiteConfiguration memory suite)\n        private\n        view\n        returns (T.Snapshot[7] memory result)\n    {\n        for (uint256 i; i < 7; ++i) {\n            if ((0x57 & (1 << i)) != 0) {\n                result[i] = IStreamArtistOwner(suite.owners[i]).ownerStateSnapshotV2();\n            }\n        }\n    }\n}\n",
-    "smart-contracts/domains/artist/StreamArtistOnboardingReads.sol": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.19;\nimport { StreamArtistProfilePayoutReads } from \"./StreamArtistProfilePayoutReads.sol\";\nimport \"./StreamArtistPlatformReads.sol\";\nimport \"./StreamArtistAttributionPolicy.sol\";\nimport \"./StreamArtistHashes.sol\";\nimport \"./StreamArtistAuthorityPolicy.sol\";\nimport \"./StreamArtistTemplateEconomicsReads.sol\";\nimport { StreamArtistTemplateMutationReads } from \"./StreamArtistTemplateMutationReads.sol\";\n\nimport \"../../interfaces/stream/artist/IStreamArtistBindingOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistCollaboratorBindingOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistCollaboratorRecordsOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistIdentityOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistIdentityRevision.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistAcceptanceOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistAttributionOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistPayoutOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistPayoutTransitionOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistRotationOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistConsentOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistEconomicsEvidence.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistContentFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistContentMutationFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistRoyaltyFacts.sol\";\nimport { StreamArtistRoyaltyModeReads } from \"./StreamArtistRoyaltyModeReads.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistRoyaltyScopeFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistPrimaryFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistPrimaryScopeFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistPrimaryTemplateFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistPrimaryTemplateConsentFacts.sol\";\nimport \"../../vendor/openzeppelin/IERC165.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistRoyaltyPreview.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistAttribution.sol\";\nimport \"../../interfaces/stream/core/IStreamCorePointers.sol\";\nimport \"../../interfaces/stream/revenue/IStreamRevenueResolver.sol\";\nimport \"../../interfaces/stream/revenue/IStreamRoyaltyResolver.sol\";\nimport \"../../interfaces/stream/revenue/IStreamSplitFactory.sol\";\nimport {\n    StreamArtistOnboardingTypes as T\n} from \"../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol\";\n\n/// @notice Stateless composition of authoritative artist records with the live selected modules.\n/// @dev Owns no semantic records or readiness state. Each floor is recomputed from actual records.\ncontract StreamArtistOnboardingReads {\n    T.SuiteConfiguration private _suite;\n    uint256 private immutable _chainId;\n\n    constructor(T.SuiteConfiguration memory suite) {\n        _suite = suite;\n        _chainId = block.chainid;\n    }\n\n    function acceptedBinding(uint256 collectionId) public view returns (T.Binding memory b) {\n        return _acceptedBinding(collectionId, false);\n    }\n\n    function defensiveBinding(uint256 collectionId) public view returns (T.Binding memory b) {\n        return _acceptedBinding(collectionId, true);\n    }\n\n    function _acceptedBinding(uint256 collectionId, bool defensive)\n        private\n        view\n        returns (T.Binding memory b)\n    {\n        b = IStreamArtistBindingOwner(_suite.owners[0]).binding(collectionId);\n        (uint8 state, uint64 generation) =\n            IStreamArtistAttributionOwner(_suite.owners[4]).attributionState(collectionId);\n        (address authority, uint8 authorityClass, uint8 identityStatus,) =\n            IStreamArtistIdentityOwner(_suite.owners[2]).authorityState(b.artistId);\n        if (\n            !b.accepted\n                || (!StreamArtistAttributionPolicy.acceptedOrSanctioned(state)\n                    && !(defensive && state == 4)) || generation != b.generation\n                || !StreamArtistAuthorityPolicy.ordinary(authorityClass, identityStatus, defensive)\n                || authority == address(0)\n        ) {\n            revert T.InvalidAttribution(collectionId);\n        }\n    }\n\n    /// @notice Canonical payout selection composes Payout records with actual Identity transition facts.\n    function artistPayoutAccount(bytes32 artistId) public view returns (address, bytes32) {\n        return StreamArtistProfilePayoutReads.artistPayoutAccount(_suite, artistId);\n    }\n\n    function collectionArtistBeneficiary(uint256 collectionId)\n        external\n        view\n        returns (bytes32 artistId, address payoutAccount, bytes32 designationRecordHash)\n    {\n        _requireSelected(keccak256(\"ARTIST_REGISTRY\"), _suite.registry);\n        T.Binding memory b = acceptedBinding(collectionId);\n        artistId = b.artistId;\n        (payoutAccount, designationRecordHash) = artistPayoutAccount(artistId);\n        if (payoutAccount == address(0) || designationRecordHash == bytes32(0)) {\n            revert T.InvalidRecord();\n        }\n    }\n\n    function collaboratorAt(uint256 collectionId, uint64 generation, uint256 index)\n        public\n        view\n        returns (C.Row memory)\n    {\n        return\n            StreamArtistProfilePayoutReads.collaboratorAt(_suite, collectionId, generation, index);\n    }\n\n    function collaboratorPayoutAccount(bytes32 artistId, address account)\n        public\n        view\n        returns (address, bytes32)\n    {\n        return StreamArtistProfilePayoutReads.collaboratorPayoutAccount(_suite, artistId, account);\n    }\n\n    function consentMode(uint256 collectionId) external view returns (uint8) {\n        T.Binding memory b = IStreamArtistBindingOwner(_suite.owners[0]).binding(collectionId);\n        PW.Admission memory platform = StreamArtistPlatformReads.admission(_suite, collectionId);\n        if (platform.declarationHash != 0 && !platform.corrected) return 3;\n        return b.accepted ? b.consentMode : 0;\n    }\n\n    function acceptedArtist(uint256 collectionId) external view returns (address) {\n        T.Binding memory b = IStreamArtistBindingOwner(_suite.owners[0]).binding(collectionId);\n        (uint8 state,) =\n            IStreamArtistAttributionOwner(_suite.owners[4]).attributionState(collectionId);\n        if (!b.accepted || !StreamArtistAttributionPolicy.acceptedOrSanctioned(state)) {\n            return address(0);\n        }\n        (address authority,,,) =\n            IStreamArtistIdentityOwner(_suite.owners[2]).authorityState(b.artistId);\n        return authority;\n    }\n\n    /// @notice Acceptance hash/time describe the primary's recorded acceptance, even before set completion.\n    /// @dev identityHash is the binding's ratified document version, never the current identity tip.\n    ///      The artist field remains zero until all required rows complete; timestamps are not readiness flags.\n    function attribution(uint256 collectionId)\n        external\n        view\n        returns (IStreamCollectionArtistRegistry.Attribution memory result)\n    {\n        T.Binding memory b = IStreamArtistBindingOwner(_suite.owners[0]).binding(collectionId);\n        (address authority,,,) =\n            IStreamArtistIdentityOwner(_suite.owners[2]).authorityState(b.artistId);\n        IStreamArtistAcceptanceOwner acceptance = IStreamArtistAcceptanceOwner(_suite.owners[3]);\n        result = IStreamCollectionArtistRegistry.Attribution(\n            b.artistAddress,\n            b.accepted ? authority : address(0),\n            b.identityRecordHash,\n            b.bindingHash,\n            acceptance.acceptanceRecord(b.bindingHash),\n            b.generation,\n            acceptance.acceptedAt(b.bindingHash)\n        );\n    }\n\n    function isPolicyConsented(uint256 collectionId, bytes32 phaseId, bytes32 policyHash)\n        external\n        view\n        returns (bool, bytes32)\n    {\n        PW.Admission memory platform = StreamArtistPlatformReads.admission(_suite, collectionId);\n        if (platform.declarationHash != 0 && !platform.corrected) {\n            StreamArtistPlatformReads.mintAllowed(platform, collectionId);\n            return (phaseId != 0 && policyHash != 0, platform.declarationHash);\n        }\n        bytes32 record = IStreamArtistConsentOwner(_suite.owners[6])\n            .policyRecord(collectionId, phaseId, policyHash);\n        return (record != bytes32(0), record);\n    }\n\n    function currentContent(uint256 collectionId)\n        public\n        view\n        returns (address target, bytes32 state)\n    {\n        _requireSelected(keccak256(\"METADATA_ROUTER\"), _suite.metadata);\n        (target, state) =\n            IStreamArtistContentFacts(_suite.metadata).currentArtistContentState(collectionId);\n        if (target != _suite.metadata || state == bytes32(0)) revert T.InvalidRecord();\n    }\n\n    function currentAssignments(uint256 collectionId)\n        public\n        view\n        returns (T.AssignmentFact memory primary, T.AssignmentFact memory royalty)\n    {\n        IStreamRevenueResolver.ResolvedPrimaryAssignment memory p = IStreamRevenueResolver(\n                _suite.primaryResolver\n            ).resolvePrimaryAssignment(collectionId, 0, _suite.primaryRevenueClass);\n        if (\n            !p.exists\n                || !((p.scope == 1 && p.scopeId == collectionId)\n                    || (p.scope == 0 && p.scopeId == 0))\n                || !((p.assignmentType == 1 && p.profileId != bytes32(0))\n                    || (p.assignmentType == 2\n                        && p.profileId == bytes32(0)\n                        && p.templateId != bytes32(0)\n                        && p.policyHash == bytes32(0)\n                        && _suite.primaryRevenueClass == keccak256(\"PRIMARY_SALE\")))\n        ) {\n            revert T.UnsupportedProfile();\n        }\n        primary = T.AssignmentFact(\n            _suite.primaryResolver, _suite.primaryRevenueClass, p.scope, p.scopeId, p.assignmentHash\n        );\n        (royalty,) = _rawSelectedCollectionRoyalty(collectionId);\n        if (royalty.assignmentHash == bytes32(0)) revert T.InvalidRecord();\n    }\n\n    /// @notice Reads royalty independently of primary or mint floors for defensive artist rights.\n    function currentRoyaltyAssignment(uint256 collectionId)\n        public\n        view\n        returns (T.AssignmentFact memory royalty)\n    {\n        _requireSelected(keccak256(\"ROYALTY_RESOLVER\"), _suite.royaltyResolver);\n        StreamArtistRoyaltyModeReads.requireLive(_suite.core, _suite.royaltyResolver, collectionId);\n        royalty = IStreamArtistRoyaltyFacts(_suite.royaltyResolver)\n            .currentArtistRoyaltyAssignment(collectionId);\n        if (\n            royalty.resolver != _suite.royaltyResolver\n                || royalty.revenueClass != keccak256(\"ROYALTY_ERC2981\") || royalty.scope != 1\n                || royalty.scopeId != collectionId || royalty.assignmentHash == bytes32(0)\n        ) revert T.InvalidRecord();\n    }\n\n    /// @notice Checks the exact immutable provider's real prospective profile against current payout rights.\n    function requireProspectiveEconomics(\n        T.EconomicsConsent calldata p,\n        T.FixedEconomicsCandidate calldata candidate,\n        address payout\n    ) external view returns (T.AssignmentFact memory fact) {\n        (fact,) = _requireProspectiveEconomics(p, candidate, payout);\n    }\n\n    function requireProspectiveEconomicsWithEvidence(\n        T.EconomicsConsent calldata p,\n        T.FixedEconomicsCandidate calldata candidate,\n        address payout\n    ) external view returns (T.AssignmentFact memory fact, bytes32 previousHash) {\n        return _requireProspectiveEconomics(p, candidate, payout);\n    }\n\n    /// @notice Validates an exact installed-template freeze proposal without prior result consent.\n    function requireProspectiveTemplateFreezeEconomics(\n        T.EconomicsConsent calldata p,\n        address payout\n    ) external view returns (bytes memory) {\n        address resolver = _suite.primaryResolver;\n        if (\n            p.resolver != resolver || p.revenueClass != _suite.primaryRevenueClass\n                || p.revenueClass != keccak256(\"PRIMARY_SALE\")\n                || !_templateConsentCapability(resolver)\n        ) revert T.UnsupportedProfile();\n        T.Binding memory b = acceptedBinding(p.collectionId);\n        IStreamRevenueResolver.ResolvedPrimaryAssignment memory current = IStreamArtistPrimaryScopeFacts(\n                resolver\n            ).primaryEconomicsFacts(p.collectionId, p.scope, p.scopeId);\n        _requireTemplatePayout(p.collectionId, b, payout, current.templateId);\n        return StreamArtistTemplateMutationReads.freeze(p, current);\n    }\n\n    /// @notice Validates a set-only template proposal without resolving the current assignment.\n    /// @dev The prospective path cannot require the consent it is about to record.\n    function requireProspectiveTemplateEconomics(\n        T.EconomicsConsent calldata p,\n        bytes32 templateId,\n        address payout\n    ) external view returns (bytes memory) {\n        address resolver = _suite.primaryResolver;\n        if (\n            p.resolver != resolver || p.revenueClass != keccak256(\"PRIMARY_SALE\")\n                || p.revenueClass != _suite.primaryRevenueClass\n                || !((p.scope == 1 && p.scopeId == p.collectionId)\n                    || (p.scope == 2 && p.scopeId != 0)\n                    || (p.scope == 0 && p.scopeId == 0)) || p.assignmentHash == bytes32(0)\n                || templateId == bytes32(0) || !_templateConsentCapability(resolver)\n        ) revert T.UnsupportedProfile();\n        T.Binding memory b = acceptedBinding(p.collectionId);\n        _requireTemplatePayout(p.collectionId, b, payout, templateId);\n        return StreamArtistTemplateEconomicsReads.prospective(p, templateId);\n    }\n\n    function _requireProspectiveEconomics(\n        T.EconomicsConsent memory p,\n        T.FixedEconomicsCandidate memory candidate,\n        address payout\n    ) private view returns (T.AssignmentFact memory fact, bytes32 previousHash) {\n        if (\n            (p.resolver == _suite.primaryResolver || p.resolver == _suite.royaltyResolver)\n                && p.assignmentHash == bytes32(0)\n        ) {\n            if (\n                p.revenueClass\n                        != (p.resolver == _suite.primaryResolver\n                                ? _suite.primaryRevenueClass\n                                : keccak256(\"ROYALTY_ERC2981\"))\n                    || candidate.profileHash != bytes32(0) || candidate.policyHash != bytes32(0)\n                    || candidate.royaltyBps != 0 || candidate.frozen\n            ) revert T.UnsupportedProfile();\n            if (p.resolver == _suite.primaryResolver) {\n                (fact, previousHash) = IStreamArtistPrimaryScopeFacts(p.resolver)\n                    .previewArtistPrimaryClear(p.collectionId, p.scope, p.scopeId);\n            } else {\n                _requireSelected(keccak256(\"ROYALTY_RESOLVER\"), p.resolver);\n                StreamArtistRoyaltyModeReads.requireLive(_suite.core, p.resolver, p.collectionId);\n                (fact, previousHash) = IStreamArtistRoyaltyScopeFacts(p.resolver)\n                    .previewArtistRoyaltyClear(p.collectionId, p.scope, p.scopeId);\n            }\n            if (\n                fact.resolver != p.resolver || fact.revenueClass != p.revenueClass\n                    || fact.scope != p.scope || fact.scopeId != p.scopeId\n                    || fact.assignmentHash != bytes32(0) || previousHash == bytes32(0)\n            ) {\n                revert T.InvalidRecord();\n            }\n            _requireCollaboratorDesignations(p.collectionId, payout);\n            return (fact, previousHash);\n        }\n        if (\n            candidate.policyHash != bytes32(0) || (p.scope != 1 && p.scope != 2)\n                || (p.scope == 1 && p.scopeId != p.collectionId)\n        ) revert T.UnsupportedProfile();\n        if (p.resolver == _suite.primaryResolver) {\n            if (\n                candidate.profileHash == bytes32(0) || candidate.royaltyBps != 0\n                    || p.revenueClass != _suite.primaryRevenueClass\n            ) {\n                revert T.UnsupportedProfile();\n            }\n            fact = IStreamArtistPrimaryScopeFacts(p.resolver)\n                .previewArtistPrimaryAssignmentForScope(\n                    p.collectionId,\n                    p.scope,\n                    p.scopeId,\n                    candidate.profileHash,\n                    candidate.policyHash,\n                    candidate.frozen\n                );\n        } else if (p.resolver == _suite.royaltyResolver) {\n            _requireSelected(keccak256(\"ROYALTY_RESOLVER\"), p.resolver);\n            if (p.revenueClass != keccak256(\"ROYALTY_ERC2981\")) {\n                revert T.UnsupportedProfile();\n            }\n            fact = StreamArtistRoyaltyModeReads.prospective(_suite.core, p, candidate);\n        } else {\n            revert T.UnsupportedProfile();\n        }\n        if (\n            fact.resolver != p.resolver || fact.revenueClass != p.revenueClass\n                || fact.scope != p.scope || fact.scopeId != p.scopeId\n                || fact.assignmentHash == bytes32(0) || fact.assignmentHash != p.assignmentHash\n        ) {\n            revert T.InvalidRecord();\n        }\n        if (p.resolver == _suite.royaltyResolver && candidate.profileHash == bytes32(0)) {\n            _requireCollaboratorDesignations(p.collectionId, payout);\n            return (fact, previousHash);\n        }\n        // Both admitted resolvers expose the same splitFactory() ABI. Read this\n        // resolver's actual factory, never substitute the primary factory for royalty.\n        _requireProfilePayout(\n            p.collectionId,\n            p.resolver,\n            IStreamRevenueResolver(p.resolver).splitFactory(),\n            candidate.profileHash,\n            payout\n        );\n    }\n\n    function _requireCollaboratorDesignations(uint256 collectionId, address payout) private view {\n        if (payout == address(0)) revert T.MissingMintPrerequisite(keccak256(\"payout\"));\n        T.Binding memory b = acceptedBinding(collectionId);\n        uint32 count =\n            IStreamArtistCollaboratorBindingOwner(_suite.owners[0])\n        .bindingTerms(collectionId, b.generation)\n        .count;\n        for (uint256 i; i < count; ++i) {\n            C.Row memory row = collaboratorAt(collectionId, b.generation, i);\n            if (!row.accepted) revert T.InvalidAttribution(collectionId);\n            if (row.shareLabelId == bytes32(0)) continue;\n            (address account, bytes32 designation) =\n                collaboratorPayoutAccount(row.collaboratorArtistId, row.account);\n            if (account == address(0) || designation == bytes32(0)) {\n                revert T.MissingMintPrerequisite(keccak256(\"collaborator_payout\"));\n            }\n        }\n    }\n\n    function requireRoyaltyFreezeProposal(T.RoyaltyFreeze calldata p) external view {\n        T.AssignmentFact memory fact = currentRoyaltyAssignment(p.collectionId);\n        if (\n            p.resolver != fact.resolver || p.revenueClass != fact.revenueClass\n                || p.expectedAssignmentHash != fact.assignmentHash\n                || IStreamRoyaltyResolver(p.resolver).collectionRoyalty(p.collectionId).frozen\n        ) {\n            revert T.InvalidRecord();\n        }\n    }\n\n    function isRoyaltyFreezeAuthorized(uint256 collectionId, bytes32 expectedAssignmentHash)\n        external\n        view\n        returns (bool)\n    {\n        if (block.chainid != _chainId) revert T.InvalidBinding();\n        _requireSelected(keccak256(\"ARTIST_REGISTRY\"), _suite.registry);\n        _requireSelected(keccak256(\"ROYALTY_RESOLVER\"), _suite.royaltyResolver);\n        if (StreamArtistRoyaltyModeReads.isSnapshot(\n                _suite.core, _suite.royaltyResolver, collectionId\n            )) return false;\n        T.Binding memory b = defensiveBinding(collectionId);\n        T.RoyaltyFreeze memory p = T.RoyaltyFreeze(\n            _suite.royaltyResolver,\n            collectionId,\n            keccak256(\"ROYALTY_ERC2981\"),\n            expectedAssignmentHash\n        );\n        T.RoyaltyFreezeRecord memory r = IStreamArtistConsentOwner(_suite.owners[6])\n            .royaltyFreezeRecord(p, b.artistId, b.generation);\n        return r.recordHash != bytes32(0) && r.artistId == b.artistId\n            && r.bindingGeneration == b.generation;\n    }\n\n    function requireMintConsent(uint256 collectionId, bytes32 phaseId, bytes32 policyHash)\n        external\n        view\n    {\n        if (block.chainid != _chainId) revert T.InvalidBinding();\n        bool registryFrozen = _requireSelected(keccak256(\"ARTIST_REGISTRY\"), _suite.registry);\n        PW.Admission memory platform = StreamArtistPlatformReads.admission(_suite, collectionId);\n        if (platform.declarationHash != 0 && !platform.corrected) {\n            StreamArtistPlatformReads.mintAllowed(platform, collectionId);\n            if (phaseId == 0 || policyHash == 0) revert PW.InvalidPlatformWorks(collectionId);\n            return;\n        }\n        T.Binding memory b = acceptedBinding(collectionId);\n        if (b.registryImmutabilityElection == 1 && !registryFrozen) {\n            revert T.MissingMintPrerequisite(keccak256(\"registry-freeze\"));\n        }\n        IStreamArtistConsentOwner consents = IStreamArtistConsentOwner(_suite.owners[6]);\n        if (consents.policyRecord(collectionId, phaseId, policyHash) == bytes32(0)) {\n            revert T.MissingMintPrerequisite(keccak256(\"policy\"));\n        }\n        (address payout, bytes32 designation) = artistPayoutAccount(b.artistId);\n        if (payout == address(0) || designation == bytes32(0)) {\n            revert T.MissingMintPrerequisite(keccak256(\"payout\"));\n        }\n        (T.AssignmentFact memory primary, T.AssignmentFact memory royalty) =\n            currentAssignments(collectionId);\n        _requireEconomics(b, collectionId, primary);\n        _requireEconomics(b, collectionId, royalty);\n        (address metadata, bytes32 content) = currentContent(collectionId);\n        T.RatificationRecord memory r = consents.firstReleaseRatification(collectionId);\n        bool validContent = r.recordHash != bytes32(0) && r.metadataContract == metadata;\n        if (validContent && r.contentStateHash != content) {\n            (bytes32 ratification, bytes32 resultingContent) =\n                IStreamArtistContentMutationFacts(metadata).artistContentEvolution(collectionId);\n            validContent = ratification == r.recordHash && resultingContent == content;\n        }\n        if (!validContent) {\n            revert T.MissingMintPrerequisite(keccak256(\"content-ratification\"));\n        }\n        IStreamArtistAttributionOwner attribution_ = IStreamArtistAttributionOwner(_suite.owners[4]);\n        T.AttestationRecord memory deployment =\n            attribution_.attestation(collectionId, 9, bytes32(uint256(uint160(_suite.core))));\n        bytes32 expected = StreamArtistHashes.deploymentFacts(\n            StreamArtistHashes.Environment(\n                _chainId, _suite.registry, _suite.core, _suite.mintManager\n            ),\n            collectionId,\n            b\n        );\n        if (\n            deployment.recordHash == bytes32(0) || deployment.generation != b.generation\n                || deployment.subjectStateHash != expected\n                || deployment.schemaId != keccak256(\"6529STREAM_ARTIST_DEPLOYMENT_ATTESTATION_V1\")\n        ) {\n            revert T.MissingMintPrerequisite(keccak256(\"deployment-attestation\"));\n        }\n        T.AttestationRecord memory personhood =\n            attribution_.attestation(collectionId, 10, b.artistId);\n        if (\n            personhood.recordHash == bytes32(0) || personhood.generation != b.generation\n                || personhood.subjectStateHash\n                    != IStreamArtistIdentityRevisionReads(_suite.owners[2])\n                        .operativeIdentityRecord(b.artistId)\n                || (personhood.schemaId != keccak256(\"6529STREAM_ARTIST_PERSONHOOD_WAIVER_V1\")\n                    && personhood.schemaId != keccak256(\"6529STREAM_ARTIST_PERSONHOOD_EVIDENCE_V1\"))\n        ) {\n            revert T.MissingMintPrerequisite(keccak256(\"personhood-attestation\"));\n        }\n    }\n\n    function requireEconomicsConsent(T.EconomicsConsent calldata p) external view {\n        T.Binding memory b = acceptedBinding(p.collectionId);\n        if (_economicsForBinding(p, b) == bytes32(0)) {\n            revert T.MissingMintPrerequisite(keccak256(\"economics\"));\n        }\n    }\n\n    /// @notice Validates current economics and returns supplemental immutable template evidence, if applicable.\n    /// @dev This is a read over an already-installed assignment, never a prospective template authorization.\n    function requireCurrentArtistEconomics(uint256 collectionId, address resolver, address payout)\n        external\n        view\n        returns (bytes memory)\n    {\n        if (resolver != _suite.primaryResolver) {\n            requireStaticArtistPayout(collectionId, resolver, payout);\n            return \"\";\n        }\n        IStreamRevenueResolver.ResolvedPrimaryAssignment memory current =\n            _rawSelectedCollectionPrimary(collectionId);\n        return _requireCurrentPrimary(collectionId, current, payout);\n    }\n\n    /// @notice Exact-key facts for recording, without invoking the resolver's consent-consuming resolution.\n    function requireCurrentEconomics(T.EconomicsConsent calldata p, address payout)\n        external\n        view\n        returns (bytes memory)\n    {\n        if (p.resolver == _suite.primaryResolver) {\n            if (p.revenueClass != _suite.primaryRevenueClass || p.assignmentHash == bytes32(0)) {\n                revert T.InvalidRecord();\n            }\n            IStreamRevenueResolver.ResolvedPrimaryAssignment memory current = IStreamArtistPrimaryScopeFacts(\n                    p.resolver\n                ).primaryEconomicsFacts(p.collectionId, p.scope, p.scopeId);\n            if (\n                !current.exists || current.scope != p.scope || current.scopeId != p.scopeId\n                    || current.assignmentHash != p.assignmentHash\n            ) revert T.InvalidRecord();\n            if (current.assignmentType == 2 && current.scope == 0) {\n                T.Binding memory binding_ = acceptedBinding(p.collectionId);\n                _requireTemplatePayout(p.collectionId, binding_, payout, current.templateId);\n                return StreamArtistDefaultTemplateReads.currentForRecording(p, current);\n            }\n            return _requireCurrentPrimary(p.collectionId, current, payout);\n        }\n        if (p.resolver != _suite.royaltyResolver || p.revenueClass != keccak256(\"ROYALTY_ERC2981\"))\n        {\n            revert T.InvalidRecord();\n        }\n        (T.AssignmentFact memory expected, IStreamRoyaltyResolver.RoyaltyConfig memory config) =\n            _royaltyFacts(p.collectionId, p.scope, p.scopeId);\n        if (\n            p.resolver != expected.resolver || p.revenueClass != expected.revenueClass\n                || p.scope != expected.scope || p.scopeId != expected.scopeId\n                || p.assignmentHash == bytes32(0) || p.assignmentHash != expected.assignmentHash\n        ) revert T.InvalidRecord();\n        return _requireCurrentRoyalty(p.collectionId, expected, config, payout);\n    }\n\n    function _royaltyFacts(uint256 collectionId, uint8 scope, uint256 scopeId)\n        private\n        view\n        returns (T.AssignmentFact memory fact, IStreamRoyaltyResolver.RoyaltyConfig memory config)\n    {\n        _requireSelected(keccak256(\"ROYALTY_RESOLVER\"), _suite.royaltyResolver);\n        return StreamArtistRoyaltyModeReads.current(\n            _suite.core, _suite.royaltyResolver, collectionId, scope, scopeId\n        );\n    }\n\n    function _rawSelectedCollectionRoyalty(uint256 collectionId)\n        private\n        view\n        returns (T.AssignmentFact memory fact, IStreamRoyaltyResolver.RoyaltyConfig memory config)\n    {\n        (fact, config) = _royaltyFacts(collectionId, 1, collectionId);\n        if (!config.configured) (fact, config) = _royaltyFacts(collectionId, 0, 0);\n    }\n\n    function _requireCurrentRoyalty(\n        uint256 collectionId,\n        T.AssignmentFact memory fact,\n        IStreamRoyaltyResolver.RoyaltyConfig memory config,\n        address payout\n    ) private view returns (bytes memory) {\n        if (!config.configured || fact.assignmentHash == bytes32(0)) {\n            revert T.InvalidRecord();\n        }\n        bytes memory evidence =\n            StreamArtistRoyaltyModeReads.rebuild(_suite.core, collectionId, fact, config);\n        if (config.profileId == bytes32(0)) {\n            if (config.wallet != address(0) || config.royaltyBps != 0) revert T.InvalidRecord();\n            _requireCollaboratorDesignations(collectionId, payout);\n        } else {\n            address factory = IStreamRevenueResolver(_suite.royaltyResolver).splitFactory();\n            if (IStreamSplitFactory(factory).walletFor(config.profileId) != config.wallet) {\n                revert T.InvalidRecord();\n            }\n            _requireProfilePayout(\n                collectionId, _suite.royaltyResolver, factory, config.profileId, payout\n            );\n        }\n        return evidence;\n    }\n\n    function _rawSelectedCollectionPrimary(uint256 collectionId)\n        private\n        view\n        returns (IStreamRevenueResolver.ResolvedPrimaryAssignment memory current)\n    {\n        IStreamArtistPrimaryScopeFacts provider =\n            IStreamArtistPrimaryScopeFacts(_suite.primaryResolver);\n        current = provider.primaryEconomicsFacts(collectionId, 1, collectionId);\n        if (!current.exists) current = provider.primaryEconomicsFacts(collectionId, 0, 0);\n    }\n\n    function _requireCurrentPrimary(\n        uint256 collectionId,\n        IStreamRevenueResolver.ResolvedPrimaryAssignment memory current,\n        address payout\n    ) private view returns (bytes memory) {\n        address resolver = _suite.primaryResolver;\n        if (current.assignmentType != 2) {\n            if (\n                !current.exists || current.assignmentType != 1 || current.profileId == bytes32(0)\n                    || current.policyHash != bytes32(0)\n            ) revert T.UnsupportedProfile();\n            T.AssignmentFact memory fact = IStreamArtistPrimaryScopeFacts(resolver)\n                .previewArtistPrimaryAssignmentForScope(\n                    collectionId,\n                    current.scope,\n                    current.scopeId,\n                    current.profileId,\n                    current.policyHash,\n                    current.frozen\n                );\n            if (\n                fact.resolver != resolver || fact.revenueClass != _suite.primaryRevenueClass\n                    || fact.scope != current.scope || fact.scopeId != current.scopeId\n                    || fact.assignmentHash != current.assignmentHash\n            ) revert T.InvalidRecord();\n            _requireProfilePayout(\n                collectionId,\n                resolver,\n                IStreamRevenueResolver(resolver).splitFactory(),\n                current.profileId,\n                payout\n            );\n            return \"\";\n        }\n        if (\n            !current.exists\n                || !((current.scope == 1 && current.scopeId == collectionId)\n                    || (current.scope == 2 && current.scopeId != 0)\n                    || (current.scope == 0 && current.scopeId == 0))\n                || current.profileId != bytes32(0) || current.templateId == bytes32(0)\n                || current.policyHash != bytes32(0)\n                || _suite.primaryRevenueClass != keccak256(\"PRIMARY_SALE\")\n        ) revert T.UnsupportedProfile();\n        T.Binding memory binding_ = acceptedBinding(collectionId);\n        _requireTemplatePayout(collectionId, binding_, payout, current.templateId);\n        return StreamArtistTemplateEconomicsReads.current(\n            collectionId, resolver, _suite.primaryRevenueClass, _suite.owners[6], binding_, current\n        );\n    }\n\n    function _templateConsentCapability(address resolver) private view returns (bool) {\n        return IERC165(resolver)\n            .supportsInterface(type(IStreamArtistPrimaryTemplateConsentFacts).interfaceId);\n    }\n\n    function _requireTemplatePayout(\n        uint256 collectionId,\n        T.Binding memory binding_,\n        address payout,\n        bytes32 templateId\n    ) private view {\n        (address operative, bytes32 designation) = artistPayoutAccount(binding_.artistId);\n        if (payout == address(0) || payout != operative || designation == bytes32(0)) {\n            revert T.MissingMintPrerequisite(keccak256(\"payout\"));\n        }\n        if (StreamArtistDynamicTemplateReads.isDynamic(_suite.primaryResolver, templateId)) {\n            _requireCollaboratorDesignations(collectionId, payout);\n            return;\n        }\n        uint32 count =\n            IStreamArtistCollaboratorBindingOwner(_suite.owners[0])\n        .bindingTerms(collectionId, binding_.generation)\n        .count;\n        for (uint256 i; i < count; ++i) {\n            C.Row memory row = collaboratorAt(collectionId, binding_.generation, i);\n            if (!row.accepted) revert T.InvalidAttribution(collectionId);\n            // This capability represents only the primary artist dynamically.\n            if (row.shareLabelId != bytes32(0)) revert T.UnsupportedProfile();\n        }\n    }\n\n    /// @notice Verifies that actual static profile artist entries pay the operative designation.\n    /// @dev Uses raw collection/default selection to avoid consent recursion. Dynamic templates\n    ///      require their separate accepted materialization path and are rejected here.\n    function requireStaticArtistPayout(uint256 collectionId, address resolver, address payout)\n        public\n        view\n    {\n        bytes32 profileId;\n        address factory;\n        if (resolver == _suite.primaryResolver) {\n            IStreamRevenueResolver.ResolvedPrimaryAssignment memory p =\n                _rawSelectedCollectionPrimary(collectionId);\n            if (!p.exists || p.assignmentType != 1) {\n                revert T.UnsupportedProfile();\n            }\n            profileId = p.profileId;\n            factory = IStreamRevenueResolver(resolver).splitFactory();\n        } else if (resolver == _suite.royaltyResolver) {\n            (T.AssignmentFact memory fact, IStreamRoyaltyResolver.RoyaltyConfig memory config) =\n                _rawSelectedCollectionRoyalty(collectionId);\n            _requireCurrentRoyalty(collectionId, fact, config, payout);\n            return;\n        } else {\n            revert T.UnsupportedProfile();\n        }\n        _requireProfilePayout(collectionId, resolver, factory, profileId, payout);\n    }\n\n    function _requireProfilePayout(\n        uint256 collectionId,\n        address resolver,\n        address factory,\n        bytes32 profileId,\n        address payout\n    ) private view {\n        StreamArtistProfilePayoutReads._requireProfilePayout(\n            _suite, collectionId, resolver, factory, profileId, payout\n        );\n    }\n\n    function _requireEconomics(T.Binding memory b, uint256 collectionId, T.AssignmentFact memory a)\n        private\n        view\n    {\n        T.EconomicsConsent memory p = T.EconomicsConsent(\n            collectionId, a.resolver, a.revenueClass, a.scope, a.scopeId, a.assignmentHash\n        );\n        if (_economicsForBinding(p, b) == bytes32(0)) {\n            revert T.MissingMintPrerequisite(a.revenueClass);\n        }\n    }\n\n    function _economicsForBinding(T.EconomicsConsent memory p, T.Binding memory b)\n        private\n        view\n        returns (bytes32)\n    {\n        return IStreamArtistEconomicsEvidence(_suite.owners[6])\n            .economicsRecordForBinding(p, b.artistId, b.generation, b.bindingHash);\n    }\n\n    function _requireSelected(bytes32 kind, address expected) private view returns (bool frozen) {\n        (address target, bytes32 hash, bool frozen_,,,,,,,) =\n            IStreamCorePointers(_suite.core).getSatellitePointer(kind);\n        if (target != expected || hash != target.codehash || target.code.length == 0) {\n            revert T.ComponentChanged(target);\n        }\n        return frozen_;\n    }\n}\n"
+    "smart-contracts/domains/artist/StreamArtistOnboardingReads.sol": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.19;\nimport { StreamArtistProfilePayoutReads } from \"./StreamArtistProfilePayoutReads.sol\";\nimport \"./StreamArtistPlatformReads.sol\";\nimport \"./StreamArtistAttributionPolicy.sol\";\nimport \"./StreamArtistHashes.sol\";\nimport \"./StreamArtistAuthorityPolicy.sol\";\nimport \"./StreamArtistTemplateEconomicsReads.sol\";\nimport { StreamArtistTemplateMutationReads } from \"./StreamArtistTemplateMutationReads.sol\";\n\nimport \"../../interfaces/stream/artist/IStreamArtistBindingOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistCollaboratorBindingOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistCollaboratorRecordsOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistIdentityOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistIdentityRevision.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistAcceptanceOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistAttributionOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistPayoutOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistPayoutTransitionOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistRotationOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistConsentOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistEconomicsEvidence.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistContentFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistContentMutationFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistRoyaltyFacts.sol\";\nimport { StreamArtistRoyaltyModeReads } from \"./StreamArtistRoyaltyModeReads.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistRoyaltyScopeFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistPrimaryFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistPrimaryScopeFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistPrimaryTemplateFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistPrimaryTemplateConsentFacts.sol\";\nimport \"../../vendor/openzeppelin/IERC165.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistRoyaltyPreview.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistAttribution.sol\";\nimport \"../../interfaces/stream/core/IStreamCorePointers.sol\";\nimport \"../../interfaces/stream/revenue/IStreamRevenueResolver.sol\";\nimport \"../../interfaces/stream/revenue/IStreamRoyaltyResolver.sol\";\nimport \"../../interfaces/stream/revenue/IStreamSplitFactory.sol\";\nimport {\n    StreamArtistOnboardingTypes as T\n} from \"../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol\";\n\n/// @notice Stateless composition of authoritative artist records with the live selected modules.\n/// @dev Owns no semantic records or readiness state. Each floor is recomputed from actual records.\ncontract StreamArtistOnboardingReads {\n    T.SuiteConfiguration private _suite;\n    uint256 private immutable _chainId;\n\n    constructor(T.SuiteConfiguration memory suite) {\n        _suite = suite;\n        _chainId = block.chainid;\n    }\n\n    function acceptedBinding(uint256 collectionId) public view returns (T.Binding memory b) {\n        return _acceptedBinding(collectionId, false);\n    }\n\n    function defensiveBinding(uint256 collectionId) public view returns (T.Binding memory b) {\n        return _acceptedBinding(collectionId, true);\n    }\n\n    function _acceptedBinding(uint256 collectionId, bool defensive)\n        private\n        view\n        returns (T.Binding memory b)\n    {\n        b = IStreamArtistBindingOwner(_suite.owners[0]).binding(collectionId);\n        (uint8 state, uint64 generation) =\n            IStreamArtistAttributionOwner(_suite.owners[4]).attributionState(collectionId);\n        (address authority, uint8 authorityClass, uint8 identityStatus,) =\n            IStreamArtistIdentityOwner(_suite.owners[2]).authorityState(b.artistId);\n        if (\n            !b.accepted\n                || (!StreamArtistAttributionPolicy.acceptedOrSanctioned(state)\n                    && !(defensive && state == 4)) || generation != b.generation\n                || !StreamArtistAuthorityPolicy.ordinary(authorityClass, identityStatus, defensive)\n                || authority == address(0)\n        ) {\n            revert T.InvalidAttribution(collectionId);\n        }\n    }\n\n    /// @notice Canonical payout selection composes Payout records with actual Identity transition facts.\n    function artistPayoutAccount(bytes32 artistId) public view returns (address, bytes32) {\n        return StreamArtistProfilePayoutReads.artistPayoutAccount(_suite, artistId);\n    }\n\n    function collectionArtistBeneficiary(uint256 collectionId)\n        external\n        view\n        returns (bytes32 artistId, address payoutAccount, bytes32 designationRecordHash)\n    {\n        _requireSelected(keccak256(\"ARTIST_REGISTRY\"), _suite.registry);\n        T.Binding memory b = acceptedBinding(collectionId);\n        artistId = b.artistId;\n        (payoutAccount, designationRecordHash) = artistPayoutAccount(artistId);\n        if (payoutAccount == address(0) || designationRecordHash == bytes32(0)) {\n            revert T.InvalidRecord();\n        }\n    }\n\n    function collaboratorAt(uint256 collectionId, uint64 generation, uint256 index)\n        public\n        view\n        returns (C.Row memory)\n    {\n        return\n            StreamArtistProfilePayoutReads.collaboratorAt(_suite, collectionId, generation, index);\n    }\n\n    function collaboratorPayoutAccount(bytes32 artistId, address account)\n        public\n        view\n        returns (address, bytes32)\n    {\n        return StreamArtistProfilePayoutReads.collaboratorPayoutAccount(_suite, artistId, account);\n    }\n\n    function consentMode(uint256 collectionId) external view returns (uint8) {\n        T.Binding memory b = IStreamArtistBindingOwner(_suite.owners[0]).binding(collectionId);\n        PW.Admission memory platform = StreamArtistPlatformReads.admission(_suite, collectionId);\n        if (platform.declarationHash != 0 && !platform.corrected) return 3;\n        return b.accepted ? b.consentMode : 0;\n    }\n\n    function acceptedArtist(uint256 collectionId) external view returns (address) {\n        T.Binding memory b = IStreamArtistBindingOwner(_suite.owners[0]).binding(collectionId);\n        (uint8 state,) =\n            IStreamArtistAttributionOwner(_suite.owners[4]).attributionState(collectionId);\n        if (!b.accepted || !StreamArtistAttributionPolicy.acceptedOrSanctioned(state)) {\n            return address(0);\n        }\n        (address authority,,,) =\n            IStreamArtistIdentityOwner(_suite.owners[2]).authorityState(b.artistId);\n        return authority;\n    }\n\n    /// @notice Acceptance hash/time describe the primary's recorded acceptance, even before set completion.\n    /// @dev identityHash is the binding's ratified document version, never the current identity tip.\n    ///      The artist field remains zero until all required rows complete; timestamps are not readiness flags.\n    function attribution(uint256 collectionId)\n        external\n        view\n        returns (IStreamCollectionArtistRegistry.Attribution memory result)\n    {\n        T.Binding memory b = IStreamArtistBindingOwner(_suite.owners[0]).binding(collectionId);\n        (address authority,,,) =\n            IStreamArtistIdentityOwner(_suite.owners[2]).authorityState(b.artistId);\n        IStreamArtistAcceptanceOwner acceptance = IStreamArtistAcceptanceOwner(_suite.owners[3]);\n        result = IStreamCollectionArtistRegistry.Attribution(\n            b.artistAddress,\n            b.accepted ? authority : address(0),\n            b.identityRecordHash,\n            b.bindingHash,\n            acceptance.acceptanceRecord(b.bindingHash),\n            b.generation,\n            acceptance.acceptedAt(b.bindingHash)\n        );\n    }\n\n    function isPolicyConsented(uint256 collectionId, bytes32 phaseId, bytes32 policyHash)\n        external\n        view\n        returns (bool, bytes32)\n    {\n        PW.Admission memory platform = StreamArtistPlatformReads.admission(_suite, collectionId);\n        if (platform.declarationHash != 0 && !platform.corrected) {\n            StreamArtistPlatformReads.mintAllowed(platform, collectionId);\n            return (phaseId != 0 && policyHash != 0, platform.declarationHash);\n        }\n        bytes32 record = IStreamArtistConsentOwner(_suite.owners[6])\n            .policyRecord(collectionId, phaseId, policyHash);\n        return (record != bytes32(0), record);\n    }\n\n    function currentContent(uint256 collectionId)\n        public\n        view\n        returns (address target, bytes32 state)\n    {\n        _requireSelected(keccak256(\"METADATA_ROUTER\"), _suite.metadata);\n        (target, state) =\n            IStreamArtistContentFacts(_suite.metadata).currentArtistContentState(collectionId);\n        if (target != _suite.metadata || state == bytes32(0)) revert T.InvalidRecord();\n    }\n\n    function currentAssignments(uint256 collectionId)\n        public\n        view\n        returns (T.AssignmentFact memory primary, T.AssignmentFact memory royalty)\n    {\n        IStreamRevenueResolver.ResolvedPrimaryAssignment memory p = IStreamRevenueResolver(\n                _suite.primaryResolver\n            ).resolvePrimaryAssignment(collectionId, 0, _suite.primaryRevenueClass);\n        if (\n            !p.exists\n                || !((p.scope == 1 && p.scopeId == collectionId)\n                    || (p.scope == 0 && p.scopeId == 0))\n                || !((p.assignmentType == 1 && p.profileId != bytes32(0))\n                    || (p.assignmentType == 2\n                        && p.profileId == bytes32(0)\n                        && p.templateId != bytes32(0)\n                        && p.policyHash == bytes32(0)\n                        && _suite.primaryRevenueClass == keccak256(\"PRIMARY_SALE\")))\n        ) {\n            revert T.UnsupportedProfile();\n        }\n        primary = T.AssignmentFact(\n            _suite.primaryResolver, _suite.primaryRevenueClass, p.scope, p.scopeId, p.assignmentHash\n        );\n        (royalty,) = _rawSelectedCollectionRoyalty(collectionId);\n        if (royalty.assignmentHash == bytes32(0)) revert T.InvalidRecord();\n    }\n\n    /// @notice Reads royalty independently of primary or mint floors for defensive artist rights.\n    function currentRoyaltyAssignment(uint256 collectionId)\n        public\n        view\n        returns (T.AssignmentFact memory royalty)\n    {\n        _requireSelected(keccak256(\"ROYALTY_RESOLVER\"), _suite.royaltyResolver);\n        StreamArtistRoyaltyModeReads.requireLive(_suite.core, _suite.royaltyResolver, collectionId);\n        royalty = IStreamArtistRoyaltyFacts(_suite.royaltyResolver)\n            .currentArtistRoyaltyAssignment(collectionId);\n        if (\n            royalty.resolver != _suite.royaltyResolver\n                || royalty.revenueClass != keccak256(\"ROYALTY_ERC2981\") || royalty.scope != 1\n                || royalty.scopeId != collectionId || royalty.assignmentHash == bytes32(0)\n        ) revert T.InvalidRecord();\n    }\n\n    /// @notice Checks the exact immutable provider's real prospective profile against current payout rights.\n    function requireProspectiveEconomics(\n        T.EconomicsConsent calldata p,\n        T.FixedEconomicsCandidate calldata candidate,\n        address payout\n    ) external view returns (T.AssignmentFact memory fact) {\n        (fact,) = _requireProspectiveEconomics(p, candidate, payout);\n    }\n\n    function requireProspectiveEconomicsWithEvidence(\n        T.EconomicsConsent calldata p,\n        T.FixedEconomicsCandidate calldata candidate,\n        address payout\n    ) external view returns (T.AssignmentFact memory fact, bytes32 previousHash) {\n        return _requireProspectiveEconomics(p, candidate, payout);\n    }\n\n    /// @notice Validates an exact installed-template freeze proposal without prior result consent.\n    function requireProspectiveTemplateFreezeEconomics(\n        T.EconomicsConsent calldata p,\n        address payout\n    ) external view returns (bytes memory) {\n        address resolver = _suite.primaryResolver;\n        if (\n            p.resolver != resolver || p.revenueClass != _suite.primaryRevenueClass\n                || p.revenueClass != keccak256(\"PRIMARY_SALE\")\n                || !_templateConsentCapability(resolver)\n        ) revert T.UnsupportedProfile();\n        T.Binding memory b = acceptedBinding(p.collectionId);\n        IStreamRevenueResolver.ResolvedPrimaryAssignment memory current = IStreamArtistPrimaryScopeFacts(\n                resolver\n            ).primaryEconomicsFacts(p.collectionId, p.scope, p.scopeId);\n        _requireTemplatePayout(p.collectionId, b, payout, current.templateId);\n        return StreamArtistTemplateMutationReads.freeze(p, current);\n    }\n\n    /// @notice Validates a set-only template proposal without resolving the current assignment.\n    /// @dev The prospective path cannot require the consent it is about to record.\n    function requireProspectiveTemplateEconomics(\n        T.EconomicsConsent calldata p,\n        bytes32 templateId,\n        address payout\n    ) external view returns (bytes memory) {\n        address resolver = _suite.primaryResolver;\n        if (\n            p.resolver != resolver || p.revenueClass != keccak256(\"PRIMARY_SALE\")\n                || p.revenueClass != _suite.primaryRevenueClass\n                || !((p.scope == 1 && p.scopeId == p.collectionId)\n                    || (p.scope == 2 && p.scopeId != 0)\n                    || (p.scope == 0 && p.scopeId == 0)) || p.assignmentHash == bytes32(0)\n                || templateId == bytes32(0) || !_templateConsentCapability(resolver)\n        ) revert T.UnsupportedProfile();\n        T.Binding memory b = acceptedBinding(p.collectionId);\n        _requireTemplatePayout(p.collectionId, b, payout, templateId);\n        return StreamArtistTemplateEconomicsReads.prospective(p, templateId);\n    }\n\n    function _requireProspectiveEconomics(\n        T.EconomicsConsent memory p,\n        T.FixedEconomicsCandidate memory candidate,\n        address payout\n    ) private view returns (T.AssignmentFact memory fact, bytes32 previousHash) {\n        if (\n            (p.resolver == _suite.primaryResolver || p.resolver == _suite.royaltyResolver)\n                && p.assignmentHash == bytes32(0)\n        ) {\n            if (\n                p.revenueClass\n                        != (p.resolver == _suite.primaryResolver\n                                ? _suite.primaryRevenueClass\n                                : keccak256(\"ROYALTY_ERC2981\"))\n                    || candidate.profileHash != bytes32(0) || candidate.policyHash != bytes32(0)\n                    || candidate.royaltyBps != 0 || candidate.frozen\n            ) revert T.UnsupportedProfile();\n            if (p.resolver == _suite.primaryResolver) {\n                (fact, previousHash) = IStreamArtistPrimaryScopeFacts(p.resolver)\n                    .previewArtistPrimaryClear(p.collectionId, p.scope, p.scopeId);\n            } else {\n                _requireSelected(keccak256(\"ROYALTY_RESOLVER\"), p.resolver);\n                StreamArtistRoyaltyModeReads.requireLive(_suite.core, p.resolver, p.collectionId);\n                (fact, previousHash) = IStreamArtistRoyaltyScopeFacts(p.resolver)\n                    .previewArtistRoyaltyClear(p.collectionId, p.scope, p.scopeId);\n            }\n            if (\n                fact.resolver != p.resolver || fact.revenueClass != p.revenueClass\n                    || fact.scope != p.scope || fact.scopeId != p.scopeId\n                    || fact.assignmentHash != bytes32(0) || previousHash == bytes32(0)\n            ) {\n                revert T.InvalidRecord();\n            }\n            _requireCollaboratorDesignations(p.collectionId, payout);\n            return (fact, previousHash);\n        }\n        if (\n            candidate.policyHash != bytes32(0) || (p.scope != 1 && p.scope != 2)\n                || (p.scope == 1 && p.scopeId != p.collectionId)\n        ) revert T.UnsupportedProfile();\n        if (p.resolver == _suite.primaryResolver) {\n            if (\n                candidate.profileHash == bytes32(0) || candidate.royaltyBps != 0\n                    || p.revenueClass != _suite.primaryRevenueClass\n            ) {\n                revert T.UnsupportedProfile();\n            }\n            fact = IStreamArtistPrimaryScopeFacts(p.resolver)\n                .previewArtistPrimaryAssignmentForScope(\n                    p.collectionId,\n                    p.scope,\n                    p.scopeId,\n                    candidate.profileHash,\n                    candidate.policyHash,\n                    candidate.frozen\n                );\n        } else if (p.resolver == _suite.royaltyResolver) {\n            _requireSelected(keccak256(\"ROYALTY_RESOLVER\"), p.resolver);\n            if (p.revenueClass != keccak256(\"ROYALTY_ERC2981\")) {\n                revert T.UnsupportedProfile();\n            }\n            fact = StreamArtistRoyaltyModeReads.prospective(_suite.core, p, candidate);\n        } else {\n            revert T.UnsupportedProfile();\n        }\n        if (\n            fact.resolver != p.resolver || fact.revenueClass != p.revenueClass\n                || fact.scope != p.scope || fact.scopeId != p.scopeId\n                || fact.assignmentHash == bytes32(0) || fact.assignmentHash != p.assignmentHash\n        ) {\n            revert T.InvalidRecord();\n        }\n        if (p.resolver == _suite.royaltyResolver && candidate.profileHash == bytes32(0)) {\n            _requireCollaboratorDesignations(p.collectionId, payout);\n            return (fact, previousHash);\n        }\n        // Both admitted resolvers expose the same splitFactory() ABI. Read this\n        // resolver's actual factory, never substitute the primary factory for royalty.\n        _requireProfilePayout(\n            p.collectionId,\n            p.resolver,\n            IStreamRevenueResolver(p.resolver).splitFactory(),\n            candidate.profileHash,\n            payout\n        );\n    }\n\n    function _requireCollaboratorDesignations(uint256 collectionId, address payout) private view {\n        if (payout == address(0)) revert T.MissingMintPrerequisite(keccak256(\"payout\"));\n        T.Binding memory b = acceptedBinding(collectionId);\n        uint32 count =\n            IStreamArtistCollaboratorBindingOwner(_suite.owners[0])\n        .bindingTerms(collectionId, b.generation)\n        .count;\n        for (uint256 i; i < count; ++i) {\n            C.Row memory row = collaboratorAt(collectionId, b.generation, i);\n            if (!row.accepted) revert T.InvalidAttribution(collectionId);\n            if (row.shareLabelId == bytes32(0)) continue;\n            (address account, bytes32 designation) =\n                collaboratorPayoutAccount(row.collaboratorArtistId, row.account);\n            if (account == address(0) || designation == bytes32(0)) {\n                revert T.MissingMintPrerequisite(keccak256(\"collaborator_payout\"));\n            }\n        }\n    }\n\n    function requireRoyaltyFreezeProposal(T.RoyaltyFreeze calldata p) external view {\n        T.AssignmentFact memory fact = currentRoyaltyAssignment(p.collectionId);\n        if (\n            p.resolver != fact.resolver || p.revenueClass != fact.revenueClass\n                || p.expectedAssignmentHash != fact.assignmentHash\n                || IStreamRoyaltyResolver(p.resolver).collectionRoyalty(p.collectionId).frozen\n        ) {\n            revert T.InvalidRecord();\n        }\n    }\n\n    function isRoyaltyFreezeAuthorized(uint256 collectionId, bytes32 expectedAssignmentHash)\n        external\n        view\n        returns (bool)\n    {\n        if (block.chainid != _chainId) revert T.InvalidBinding();\n        _requireSelected(keccak256(\"ARTIST_REGISTRY\"), _suite.registry);\n        _requireSelected(keccak256(\"ROYALTY_RESOLVER\"), _suite.royaltyResolver);\n        if (StreamArtistRoyaltyModeReads.isSnapshot(\n                _suite.core, _suite.royaltyResolver, collectionId\n            )) return false;\n        T.Binding memory b = defensiveBinding(collectionId);\n        T.RoyaltyFreeze memory p = T.RoyaltyFreeze(\n            _suite.royaltyResolver,\n            collectionId,\n            keccak256(\"ROYALTY_ERC2981\"),\n            expectedAssignmentHash\n        );\n        T.RoyaltyFreezeRecord memory r = IStreamArtistConsentOwner(_suite.owners[6])\n            .royaltyFreezeRecord(p, b.artistId, b.generation);\n        return r.recordHash != bytes32(0) && r.artistId == b.artistId\n            && r.bindingGeneration == b.generation;\n    }\n\n    function requireMintConsent(uint256 collectionId, bytes32 phaseId, bytes32 policyHash)\n        external\n        view\n    {\n        if (block.chainid != _chainId) revert T.InvalidBinding();\n        bool registryFrozen = _requireSelected(keccak256(\"ARTIST_REGISTRY\"), _suite.registry);\n        PW.Admission memory platform = StreamArtistPlatformReads.admission(_suite, collectionId);\n        if (platform.declarationHash != 0 && !platform.corrected) {\n            StreamArtistPlatformReads.mintAllowed(platform, collectionId);\n            if (phaseId == 0 || policyHash == 0) revert PW.InvalidPlatformWorks(collectionId);\n            return;\n        }\n        T.Binding memory b = acceptedBinding(collectionId);\n        if (b.registryImmutabilityElection == 1 && !registryFrozen) {\n            revert T.MissingMintPrerequisite(keccak256(\"registry-freeze\"));\n        }\n        IStreamArtistConsentOwner consents = IStreamArtistConsentOwner(_suite.owners[6]);\n        if (consents.policyRecord(collectionId, phaseId, policyHash) == bytes32(0)) {\n            revert T.MissingMintPrerequisite(keccak256(\"policy\"));\n        }\n        (address payout, bytes32 designation) = artistPayoutAccount(b.artistId);\n        if (payout == address(0) || designation == bytes32(0)) {\n            revert T.MissingMintPrerequisite(keccak256(\"payout\"));\n        }\n        (T.AssignmentFact memory primary, T.AssignmentFact memory royalty) =\n            currentAssignments(collectionId);\n        _requireEconomics(b, collectionId, primary);\n        _requireEconomics(b, collectionId, royalty);\n        (address metadata, bytes32 content) = currentContent(collectionId);\n        T.RatificationRecord memory r = consents.firstReleaseRatification(collectionId);\n        bool validContent = r.recordHash != bytes32(0) && r.metadataContract == metadata;\n        if (validContent && r.contentStateHash != content) {\n            (bytes32 ratification, bytes32 resultingContent) =\n                IStreamArtistContentMutationFacts(metadata).artistContentEvolution(collectionId);\n            validContent = ratification == r.recordHash && resultingContent == content;\n        }\n        if (!validContent) {\n            revert T.MissingMintPrerequisite(keccak256(\"content-ratification\"));\n        }\n        IStreamArtistAttributionOwner attribution_ = IStreamArtistAttributionOwner(_suite.owners[4]);\n        T.AttestationRecord memory deployment =\n            attribution_.attestation(collectionId, 9, bytes32(uint256(uint160(_suite.core))));\n        bytes32 expected = StreamArtistHashes.deploymentFacts(\n            StreamArtistHashes.Environment(\n                _chainId, _suite.registry, _suite.core, _suite.mintManager\n            ),\n            collectionId,\n            b\n        );\n        if (\n            deployment.recordHash == bytes32(0) || deployment.generation != b.generation\n                || deployment.subjectStateHash != expected\n                || deployment.schemaId != keccak256(\"6529STREAM_ARTIST_DEPLOYMENT_ATTESTATION_V1\")\n        ) {\n            revert T.MissingMintPrerequisite(keccak256(\"deployment-attestation\"));\n        }\n        T.AttestationRecord memory personhood =\n            attribution_.attestation(collectionId, 10, b.artistId);\n        if (\n            personhood.recordHash == bytes32(0) || personhood.generation != b.generation\n                || personhood.subjectStateHash\n                    != IStreamArtistIdentityRevisionReads(_suite.owners[2])\n                        .operativeIdentityRecord(b.artistId)\n                || (personhood.schemaId != keccak256(\"6529STREAM_ARTIST_PERSONHOOD_WAIVER_V1\")\n                    && personhood.schemaId != keccak256(\"6529STREAM_ARTIST_PERSONHOOD_EVIDENCE_V1\"))\n        ) {\n            revert T.MissingMintPrerequisite(keccak256(\"personhood-attestation\"));\n        }\n    }\n\n    function requireEconomicsConsent(T.EconomicsConsent calldata p) external view {\n        T.Binding memory b = acceptedBinding(p.collectionId);\n        if (_economicsForBinding(p, b) == bytes32(0)) {\n            revert T.MissingMintPrerequisite(keccak256(\"economics\"));\n        }\n    }\n\n    /// @notice Validates current economics and returns supplemental immutable template evidence, if applicable.\n    /// @dev This is a read over an already-installed assignment, never a prospective template authorization.\n    function requireCurrentArtistEconomics(uint256 collectionId, address resolver, address payout)\n        external\n        view\n        returns (bytes memory)\n    {\n        if (resolver != _suite.primaryResolver) {\n            requireStaticArtistPayout(collectionId, resolver, payout);\n            return \"\";\n        }\n        IStreamRevenueResolver.ResolvedPrimaryAssignment memory current =\n            _rawSelectedCollectionPrimary(collectionId);\n        return _requireCurrentPrimary(collectionId, current, payout);\n    }\n\n    /// @notice Exact-key facts for recording, without invoking the resolver's consent-consuming resolution.\n    function requireCurrentEconomics(T.EconomicsConsent calldata p, address payout)\n        external\n        view\n        returns (bytes memory)\n    {\n        if (p.resolver == _suite.primaryResolver) {\n            if (p.revenueClass != _suite.primaryRevenueClass || p.assignmentHash == bytes32(0)) {\n                revert T.InvalidRecord();\n            }\n            IStreamRevenueResolver.ResolvedPrimaryAssignment memory current = IStreamArtistPrimaryScopeFacts(\n                    p.resolver\n                ).primaryEconomicsFacts(p.collectionId, p.scope, p.scopeId);\n            if (\n                !current.exists || current.scope != p.scope || current.scopeId != p.scopeId\n                    || current.assignmentHash != p.assignmentHash\n            ) revert T.InvalidRecord();\n            if (current.assignmentType == 2 && current.scope == 0) {\n                T.Binding memory binding_ = acceptedBinding(p.collectionId);\n                _requireTemplatePayout(p.collectionId, binding_, payout, current.templateId);\n                return StreamArtistDefaultTemplateReads.currentForRecording(p, current);\n            }\n            return _requireCurrentPrimary(p.collectionId, current, payout);\n        }\n        if (p.resolver != _suite.royaltyResolver || p.revenueClass != keccak256(\"ROYALTY_ERC2981\"))\n        {\n            revert T.InvalidRecord();\n        }\n        (T.AssignmentFact memory expected, IStreamRoyaltyResolver.RoyaltyConfig memory config) =\n            _royaltyFacts(p.collectionId, p.scope, p.scopeId);\n        if (\n            p.resolver != expected.resolver || p.revenueClass != expected.revenueClass\n                || p.scope != expected.scope || p.scopeId != expected.scopeId\n                || p.assignmentHash == bytes32(0) || p.assignmentHash != expected.assignmentHash\n        ) revert T.InvalidRecord();\n        return _requireCurrentRoyalty(p.collectionId, expected, config, payout);\n    }\n\n    function _royaltyFacts(uint256 collectionId, uint8 scope, uint256 scopeId)\n        private\n        view\n        returns (T.AssignmentFact memory fact, IStreamRoyaltyResolver.RoyaltyConfig memory config)\n    {\n        _requireSelected(keccak256(\"ROYALTY_RESOLVER\"), _suite.royaltyResolver);\n        return StreamArtistRoyaltyModeReads.current(\n            _suite.core, _suite.royaltyResolver, collectionId, scope, scopeId\n        );\n    }\n\n    function _rawSelectedCollectionRoyalty(uint256 collectionId)\n        private\n        view\n        returns (T.AssignmentFact memory fact, IStreamRoyaltyResolver.RoyaltyConfig memory config)\n    {\n        (fact, config) = _royaltyFacts(collectionId, 1, collectionId);\n        if (!config.configured) (fact, config) = _royaltyFacts(collectionId, 0, 0);\n    }\n\n    function _requireCurrentRoyalty(\n        uint256 collectionId,\n        T.AssignmentFact memory fact,\n        IStreamRoyaltyResolver.RoyaltyConfig memory config,\n        address payout\n    ) private view returns (bytes memory) {\n        if (!config.configured || fact.assignmentHash == bytes32(0)) {\n            revert T.InvalidRecord();\n        }\n        bytes memory evidence =\n            StreamArtistRoyaltyModeReads.rebuild(_suite.core, collectionId, fact, config);\n        if (config.profileId == bytes32(0)) {\n            if (config.wallet != address(0) || config.royaltyBps != 0) revert T.InvalidRecord();\n            _requireCollaboratorDesignations(collectionId, payout);\n        } else {\n            address factory = IStreamRevenueResolver(_suite.royaltyResolver).splitFactory();\n            if (IStreamSplitFactory(factory).walletFor(config.profileId) != config.wallet) {\n                revert T.InvalidRecord();\n            }\n            _requireProfilePayout(\n                collectionId, _suite.royaltyResolver, factory, config.profileId, payout\n            );\n        }\n        return evidence;\n    }\n\n    function _rawSelectedCollectionPrimary(uint256 collectionId)\n        private\n        view\n        returns (IStreamRevenueResolver.ResolvedPrimaryAssignment memory current)\n    {\n        IStreamArtistPrimaryScopeFacts provider =\n            IStreamArtistPrimaryScopeFacts(_suite.primaryResolver);\n        current = provider.primaryEconomicsFacts(collectionId, 1, collectionId);\n        if (!current.exists) current = provider.primaryEconomicsFacts(collectionId, 0, 0);\n    }\n\n    function _requireCurrentPrimary(\n        uint256 collectionId,\n        IStreamRevenueResolver.ResolvedPrimaryAssignment memory current,\n        address payout\n    ) private view returns (bytes memory) {\n        address resolver = _suite.primaryResolver;\n        if (current.assignmentType != 2) {\n            if (\n                !current.exists || current.assignmentType != 1 || current.profileId == bytes32(0)\n                    || current.policyHash != bytes32(0)\n            ) revert T.UnsupportedProfile();\n            T.AssignmentFact memory fact = IStreamArtistPrimaryScopeFacts(resolver)\n                .previewArtistPrimaryAssignmentForScope(\n                    collectionId,\n                    current.scope,\n                    current.scopeId,\n                    current.profileId,\n                    current.policyHash,\n                    current.frozen\n                );\n            if (\n                fact.resolver != resolver || fact.revenueClass != _suite.primaryRevenueClass\n                    || fact.scope != current.scope || fact.scopeId != current.scopeId\n                    || fact.assignmentHash != current.assignmentHash\n            ) revert T.InvalidRecord();\n            _requireProfilePayout(\n                collectionId,\n                resolver,\n                IStreamRevenueResolver(resolver).splitFactory(),\n                current.profileId,\n                payout\n            );\n            return \"\";\n        }\n        if (\n            !current.exists\n                || !((current.scope == 1 && current.scopeId == collectionId)\n                    || (current.scope == 2 && current.scopeId != 0)\n                    || (current.scope == 0 && current.scopeId == 0))\n                || current.profileId != bytes32(0) || current.templateId == bytes32(0)\n                || current.policyHash != bytes32(0)\n                || _suite.primaryRevenueClass != keccak256(\"PRIMARY_SALE\")\n        ) revert T.UnsupportedProfile();\n        T.Binding memory binding_ = acceptedBinding(collectionId);\n        _requireTemplatePayout(collectionId, binding_, payout, current.templateId);\n        return StreamArtistTemplateEconomicsReads.current(\n            collectionId, resolver, _suite.primaryRevenueClass, _suite.owners[6], binding_, current\n        );\n    }\n\n    function _templateConsentCapability(address resolver) private view returns (bool) {\n        return IERC165(resolver)\n            .supportsInterface(type(IStreamArtistPrimaryTemplateConsentFacts).interfaceId);\n    }\n\n    function _requireTemplatePayout(\n        uint256 collectionId,\n        T.Binding memory binding_,\n        address payout,\n        bytes32 templateId\n    ) private view {\n        (address operative, bytes32 designation) = artistPayoutAccount(binding_.artistId);\n        if (payout == address(0) || payout != operative || designation == bytes32(0)) {\n            revert T.MissingMintPrerequisite(keccak256(\"payout\"));\n        }\n        if (StreamArtistDynamicTemplateReads.isDynamic(_suite.primaryResolver, templateId)) {\n            _requireCollaboratorDesignations(collectionId, payout);\n            return;\n        }\n        uint32 count =\n            IStreamArtistCollaboratorBindingOwner(_suite.owners[0])\n        .bindingTerms(collectionId, binding_.generation)\n        .count;\n        for (uint256 i; i < count; ++i) {\n            C.Row memory row = collaboratorAt(collectionId, binding_.generation, i);\n            if (!row.accepted) revert T.InvalidAttribution(collectionId);\n            // This capability represents only the primary artist dynamically.\n            if (row.shareLabelId != bytes32(0)) revert T.UnsupportedProfile();\n        }\n    }\n\n    /// @notice Verifies that actual static profile artist entries pay the operative designation.\n    /// @dev Uses raw collection/default selection to avoid consent recursion. Dynamic templates\n    ///      require their separate accepted materialization path and are rejected here.\n    function requireStaticArtistPayout(uint256 collectionId, address resolver, address payout)\n        public\n        view\n    {\n        bytes32 profileId;\n        address factory;\n        if (resolver == _suite.primaryResolver) {\n            IStreamRevenueResolver.ResolvedPrimaryAssignment memory p =\n                _rawSelectedCollectionPrimary(collectionId);\n            if (!p.exists || p.assignmentType != 1) {\n                revert T.UnsupportedProfile();\n            }\n            profileId = p.profileId;\n            factory = IStreamRevenueResolver(resolver).splitFactory();\n        } else if (resolver == _suite.royaltyResolver) {\n            (T.AssignmentFact memory fact, IStreamRoyaltyResolver.RoyaltyConfig memory config) =\n                _rawSelectedCollectionRoyalty(collectionId);\n            _requireCurrentRoyalty(collectionId, fact, config, payout);\n            return;\n        } else {\n            revert T.UnsupportedProfile();\n        }\n        _requireProfilePayout(collectionId, resolver, factory, profileId, payout);\n    }\n\n    function _requireProfilePayout(\n        uint256 collectionId,\n        address resolver,\n        address factory,\n        bytes32 profileId,\n        address payout\n    ) private view {\n        StreamArtistProfilePayoutReads._requireProfilePayout(\n            _suite, collectionId, resolver, factory, profileId, payout\n        );\n    }\n\n    function _requireEconomics(T.Binding memory b, uint256 collectionId, T.AssignmentFact memory a)\n        private\n        view\n    {\n        T.EconomicsConsent memory p = T.EconomicsConsent(\n            collectionId, a.resolver, a.revenueClass, a.scope, a.scopeId, a.assignmentHash\n        );\n        if (_economicsForBinding(p, b) == bytes32(0)) {\n            revert T.MissingMintPrerequisite(a.revenueClass);\n        }\n    }\n\n    function _economicsForBinding(T.EconomicsConsent memory p, T.Binding memory b)\n        private\n        view\n        returns (bytes32)\n    {\n        return IStreamArtistEconomicsEvidence(_suite.owners[6])\n            .economicsRecordForBinding(p, b.artistId, b.generation, b.bindingHash);\n    }\n\n    function _requireSelected(bytes32 kind, address expected) private view returns (bool frozen) {\n        (address target, bytes32 hash, bool frozen_,,,,,,,) =\n            IStreamCorePointers(_suite.core).getSatellitePointer(kind);\n        if (target != expected || hash != target.codehash || target.code.length == 0) {\n            revert T.ComponentChanged(target);\n        }\n        return frozen_;\n    }\n}\n",
+    "smart-contracts/domains/artist/StreamArtistEconomicsAssociation.sol": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.19;\n\nimport {\n    StreamArtistOnboardingTypes as T\n} from \"../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol\";\n\n/// @notice Additive economics binding scopes; original consent_key(payload) is never rewritten.\nlibrary StreamArtistEconomicsAssociation {\n    function key(\n        T.EconomicsConsent memory p,\n        bytes32 artistId,\n        uint64 generation,\n        bytes32 bindingHash\n    ) internal pure returns (bytes32) {\n        return keccak256(\n            abi.encode(\n                keccak256(\"6529STREAM_ARTIST_ECONOMICS_BINDING_ASSOCIATION_V1\"),\n                p,\n                artistId,\n                generation,\n                bindingHash\n            )\n        );\n    }\n\n    function continuation(bytes32 original, T.EconomicsConsent memory p, T.Binding memory b)\n        internal\n        pure\n        returns (bytes32)\n    {\n        return keccak256(\n            abi.encode(\n                keccak256(\"6529STREAM_ARTIST_ECONOMICS_BINDING_CONTINUATION_V1\"),\n                original,\n                p,\n                b.artistId,\n                b.generation,\n                b.bindingHash\n            )\n        );\n    }\n}\n",
+    "smart-contracts/domains/artist/StreamArtistConsentReadEncoding.sol": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.19;\n\nimport \"../../interfaces/stream/artist/IStreamArtistContentOwner.sol\";\nimport {\n    StreamArtistSaleTypes as Sale\n} from \"../../interfaces/stream/artist/StreamArtistSaleTypes.sol\";\nimport \"./StreamArtistEconomicsAssociation.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistEconomicsEvidence.sol\";\n\n/// @notice Exact historical record encodings for the existing Consent owner getters.\n/// @dev Storage lookup keys and returned tuples are unchanged; this performs no operative selection.\nlibrary StreamArtistConsentReadEncoding {\n    function economicsForBinding(\n        mapping(bytes32 => bytes32) storage associated,\n        mapping(bytes32 => IStreamArtistEconomicsEvidence.Association) storage associations,\n        mapping(bytes32 => bytes32) storage original,\n        T.EconomicsConsent calldata p,\n        bytes32 artistId,\n        uint64 generation,\n        bytes32 bindingHash\n    ) public view returns (bytes32 record) {\n        record = associated[\n            StreamArtistEconomicsAssociation.key(p, artistId, generation, bindingHash)\n        ];\n        if (record == 0) return record;\n        IStreamArtistEconomicsEvidence.Association memory a = associations[record];\n        if (\n            a.artistId != artistId || a.bindingGeneration != generation\n                || a.bindingHash != bindingHash || a.payloadHash != keccak256(abi.encode(p))\n                || a.originalRecord == 0 || original[a.payloadHash] != a.originalRecord\n        ) revert T.InvalidRecord();\n    }\n\n    function association(\n        mapping(bytes32 => IStreamArtistEconomicsEvidence.Association) storage records,\n        bytes32 hash\n    ) public view returns (bytes memory) {\n        return abi.encode(records[hash]);\n    }\n\n    function firstRatification(\n        mapping(uint256 => T.RatificationRecord) storage records,\n        uint256 collectionId\n    ) public view returns (bytes memory) {\n        return abi.encode(records[collectionId]);\n    }\n\n    function ratification(mapping(bytes32 => T.RatificationRecord) storage records, bytes32 hash)\n        public\n        view\n        returns (bytes memory)\n    {\n        return abi.encode(records[hash]);\n    }\n\n    function sale(mapping(bytes32 => Sale.Record) storage records, bytes32 hash)\n        public\n        view\n        returns (bytes memory)\n    {\n        return abi.encode(records[hash]);\n    }\n\n    function content(\n        mapping(bytes32 => IStreamArtistContentRecordsOwner.ConsentRecord) storage records,\n        bytes32 hash\n    ) public view returns (bytes memory) {\n        return abi.encode(records[hash]);\n    }\n\n    function contentAt(\n        mapping(bytes32 => IStreamArtistContentRecordsOwner.ConsentRecord) storage records,\n        mapping(bytes32 => bytes32) storage latest,\n        Content.Consent calldata terms,\n        uint64 generation\n    ) public view returns (bytes memory) {\n        return abi.encode(records[latest[keccak256(abi.encode(terms, generation))]]);\n    }\n\n    function freeze(mapping(bytes32 => Content.FreezeRecord) storage records, bytes32 hash)\n        public\n        view\n        returns (bytes memory)\n    {\n        return abi.encode(records[hash]);\n    }\n\n    function freezeAt(\n        mapping(bytes32 => Content.FreezeRecord) storage records,\n        mapping(bytes32 => bytes32) storage latest,\n        uint256 collectionId,\n        uint64 generation,\n        address metadata,\n        bytes32 lockClass\n    ) public view returns (bytes memory) {\n        return abi.encode(\n            records[latest[keccak256(abi.encode(collectionId, generation, metadata, lockClass))]]\n        );\n    }\n}\n",
+    "smart-contracts/domains/artist/StreamArtistProfilePayoutReads.sol": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.19;\nimport \"./StreamArtistPlatformReads.sol\";\nimport \"./StreamArtistAttributionPolicy.sol\";\nimport \"./StreamArtistHashes.sol\";\nimport \"./StreamArtistAuthorityPolicy.sol\";\nimport \"./StreamArtistTemplateEconomicsReads.sol\";\n\nimport \"../../interfaces/stream/artist/IStreamArtistBindingOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistCollaboratorBindingOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistCollaboratorRecordsOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistIdentityOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistIdentityRevision.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistAcceptanceOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistAttributionOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistPayoutOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistPayoutTransitionOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistRotationOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistConsentOwner.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistEconomicsEvidence.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistContentFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistContentMutationFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistRoyaltyFacts.sol\";\nimport { StreamArtistRoyaltyModeReads } from \"./StreamArtistRoyaltyModeReads.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistRoyaltyScopeFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistPrimaryFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistPrimaryScopeFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistPrimaryTemplateFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistPrimaryTemplateConsentFacts.sol\";\nimport \"../../vendor/openzeppelin/IERC165.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistRoyaltyPreview.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistAttribution.sol\";\nimport \"../../interfaces/stream/core/IStreamCorePointers.sol\";\nimport \"../../interfaces/stream/revenue/IStreamRevenueResolver.sol\";\nimport \"../../interfaces/stream/revenue/IStreamRoyaltyResolver.sol\";\nimport \"../../interfaces/stream/revenue/IStreamSplitFactory.sol\";\nimport {\n    StreamArtistOnboardingTypes as T\n} from \"../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol\";\n\n/// @notice Fixed original payout/profile validation over the constructor-bound suite.\nlibrary StreamArtistProfilePayoutReads {\n    function artistPayoutAccount(T.SuiteConfiguration memory _suite, bytes32 artistId)\n        public\n        view\n        returns (address, bytes32)\n    {\n        (\n            T.Payout memory stable,\n            T.Payout memory candidate,\n            R.ProvisionalAssociation memory association\n        ) = IStreamArtistPayoutTransitionOwner(_suite.owners[5]).payoutCandidates(artistId);\n        if (\n            candidate.recordHash != bytes32(0)\n                && IStreamArtistRotationOwner(_suite.owners[2])\n                    .provisionalRecordEligible(artistId, association)\n        ) {\n            return (candidate.account, candidate.recordHash);\n        }\n        return (stable.account, stable.recordHash);\n    }\n\n    function collaboratorAt(\n        T.SuiteConfiguration memory _suite,\n        uint256 collectionId,\n        uint64 generation,\n        uint256 index\n    ) public view returns (C.Row memory) {\n        T.Binding memory b = IStreamArtistBindingOwner(_suite.owners[0])\n            .bindingAt(collectionId, generation);\n        T.CollaboratorRecord memory p = IStreamArtistCollaboratorBindingOwner(_suite.owners[0])\n            .collaboratorTerm(collectionId, generation, index);\n        C.Join memory j = IStreamArtistCollaboratorRecordsOwner(_suite.owners[1])\n            .acceptedRow(b.bindingHash, p.account, p.role, p.shareLabelId);\n        return C.Row(\n            p.account,\n            p.role,\n            p.shareLabelId,\n            j.artistId,\n            j.acceptanceRecordHash,\n            j.artistId != bytes32(0)\n        );\n    }\n\n    function collaboratorPayoutAccount(\n        T.SuiteConfiguration memory _suite,\n        bytes32 artistId,\n        address account\n    ) public view returns (address, bytes32) {\n        if (!IStreamArtistCollaboratorRecordsOwner(_suite.owners[1])\n                .identityLinked(artistId, account)) return (address(0), bytes32(0));\n        return artistPayoutAccount(_suite, artistId);\n    }\n\n    function _requireProfilePayout(\n        T.SuiteConfiguration memory _suite,\n        uint256 collectionId,\n        address resolver,\n        address factory,\n        bytes32 profileId,\n        address payout\n    ) public view {\n        if (payout == address(0)) {\n            revert T.MissingMintPrerequisite(keccak256(\"payout\"));\n        }\n        IStreamSplitFactory splits = IStreamSplitFactory(factory);\n        uint256 count = splits.profileEntryCount(profileId);\n        if (count == 0 || count > 64 || !splits.splitWalletExists(profileId)) {\n            revert T.InvalidRecord();\n        }\n        uint256 artistShare;\n        for (uint256 i; i < count; ++i) {\n            (address account, uint32 share, bytes32 label) = splits.profileEntry(profileId, i);\n            if (label == keccak256(\"artist\")) {\n                if (account != payout) revert T.InvalidRecord();\n                artistShare += share;\n            }\n        }\n        if (artistShare == 0 || (resolver == _suite.primaryResolver && artistShare < 500_000)) {\n            revert T.InvalidRecord();\n        }\n        T.Binding memory b = IStreamArtistBindingOwner(_suite.owners[0]).binding(collectionId);\n        uint32 required =\n            IStreamArtistCollaboratorBindingOwner(_suite.owners[0])\n        .bindingTerms(collectionId, b.generation)\n        .count;\n        for (uint256 i; i < required; ++i) {\n            C.Row memory row = collaboratorAt(_suite, collectionId, b.generation, i);\n            if (!row.accepted) revert T.InvalidAttribution(collectionId);\n            if (row.shareLabelId == bytes32(0)) continue;\n            (address collaboratorPayout, bytes32 designation) =\n                collaboratorPayoutAccount(_suite, row.collaboratorArtistId, row.account);\n            if (collaboratorPayout == address(0) || designation == bytes32(0)) {\n                revert T.MissingMintPrerequisite(keccak256(\"collaborator_payout\"));\n            }\n            uint256 collaboratorShare;\n            for (uint256 j; j < count; ++j) {\n                (address account, uint32 share, bytes32 label) = splits.profileEntry(profileId, j);\n                if (label == row.shareLabelId) {\n                    if (account != collaboratorPayout) revert T.InvalidRecord();\n                    collaboratorShare += share;\n                }\n            }\n            if (collaboratorShare == 0) revert T.InvalidRecord();\n        }\n    }\n}\n",
+    "smart-contracts/domains/artist/StreamArtistRoyaltyModeReads.sol": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.19;\n\nimport {\n    StreamArtistOnboardingTypes as T\n} from \"../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol\";\nimport {\n    IStreamArtistSnapshotRoyaltyFacts\n} from \"../../interfaces/stream/artist/IStreamArtistSnapshotRoyaltyFacts.sol\";\nimport {\n    IStreamArtistRoyaltyScopeFacts\n} from \"../../interfaces/stream/artist/IStreamArtistRoyaltyScopeFacts.sol\";\nimport { IStreamRoyaltyResolver } from \"../../interfaces/stream/revenue/IStreamRoyaltyResolver.sol\";\nimport { IERC165 } from \"../../vendor/openzeppelin/IERC165.sol\";\n\n/// @notice Fixed linked dispatch between original live and elected collection snapshot economics.\n/// @dev The Artist host first authenticates the selected immutable suite resolver. Every\n///      provider read retains that host's caller through DELEGATECALL. Snapshot facts do\n///      not consume prior consent; operative admission uses the original binding lookup.\nlibrary StreamArtistRoyaltyModeReads {\n    function isSnapshot(address core, address resolver, uint256 collectionId)\n        public\n        view\n        returns (bool)\n    {\n        return _election(core, resolver, collectionId) != bytes32(0);\n    }\n\n    function requireLive(address core, address resolver, uint256 collectionId) public view {\n        if (_election(core, resolver, collectionId) != bytes32(0)) revert T.UnsupportedProfile();\n    }\n\n    function prospective(\n        address core,\n        T.EconomicsConsent memory p,\n        T.FixedEconomicsCandidate memory candidate\n    ) public view returns (T.AssignmentFact memory fact) {\n        bytes32 election = _election(core, p.resolver, p.collectionId);\n        if (election != bytes32(0)) {\n            _snapshotShape(\n                p.collectionId,\n                p.scope,\n                p.scopeId,\n                candidate.profileHash,\n                candidate.royaltyBps,\n                candidate.frozen\n            );\n        }\n        fact = _preview(\n            p.resolver,\n            p.collectionId,\n            p.scope,\n            p.scopeId,\n            candidate.profileHash,\n            candidate.royaltyBps,\n            candidate.frozen\n        );\n        if (election != bytes32(0)) {\n            T.AssignmentFact memory snapshot = IStreamArtistSnapshotRoyaltyFacts(p.resolver)\n                .previewArtistSnapshotRoyaltyAssignment(\n                    p.collectionId, candidate.profileHash, candidate.royaltyBps, candidate.frozen\n                );\n            _requireSnapshot(core, p.collectionId, election, fact, snapshot);\n            fact = snapshot;\n        }\n    }\n\n    function current(\n        address core,\n        address resolver,\n        uint256 collectionId,\n        uint8 scope,\n        uint256 scopeId\n    )\n        public\n        view\n        returns (T.AssignmentFact memory fact, IStreamRoyaltyResolver.RoyaltyConfig memory config)\n    {\n        bytes32 election = _election(core, resolver, collectionId);\n        if (election != bytes32(0) && (scope != 1 || scopeId != collectionId)) {\n            revert T.UnsupportedProfile();\n        }\n        if (election != bytes32(0)) {\n            (fact, config) = _currentSnapshotRaw(resolver, collectionId);\n            T.AssignmentFact memory snapshot = IStreamArtistSnapshotRoyaltyFacts(resolver)\n                .currentArtistSnapshotRoyaltyAssignment(collectionId);\n            _requireSnapshot(core, collectionId, election, fact, snapshot);\n            return (snapshot, config);\n        }\n        (fact, config) = IStreamArtistRoyaltyScopeFacts(resolver)\n            .royaltyEconomicsFacts(collectionId, scope, scopeId);\n        if (\n            fact.resolver != resolver || fact.revenueClass != keccak256(\"ROYALTY_ERC2981\")\n                || fact.scope != scope || fact.scopeId != scopeId\n                || (config.configured == (fact.assignmentHash == bytes32(0)))\n        ) revert T.InvalidRecord();\n    }\n\n    function rebuild(\n        address core,\n        uint256 collectionId,\n        T.AssignmentFact memory fact,\n        IStreamRoyaltyResolver.RoyaltyConfig memory config\n    ) public view returns (bytes memory) {\n        bytes32 election = _election(core, fact.resolver, collectionId);\n        if (election != bytes32(0)) {\n            (\n                T.AssignmentFact memory selected,\n                IStreamRoyaltyResolver.RoyaltyConfig memory currentConfig\n            ) = _currentSnapshotRaw(fact.resolver, collectionId);\n            if (keccak256(abi.encode(currentConfig)) != keccak256(abi.encode(config))) {\n                revert T.InvalidRecord();\n            }\n            _requireSnapshot(core, collectionId, election, selected, fact);\n            return abi.encode(\n                keccak256(\"6529STREAM_CURRENT_SNAPSHOT_ROYALTY_ECONOMICS_EVIDENCE_V1\"),\n                election,\n                selected,\n                fact,\n                config\n            );\n        }\n        T.AssignmentFact memory raw = _preview(\n            fact.resolver,\n            collectionId,\n            fact.scope,\n            fact.scopeId,\n            config.profileId,\n            config.royaltyBps,\n            config.frozen\n        );\n        if (keccak256(abi.encode(raw)) != keccak256(abi.encode(fact))) revert T.InvalidRecord();\n        return\n            abi.encode(keccak256(\"6529STREAM_CURRENT_ROYALTY_ECONOMICS_EVIDENCE_V1\"), fact, config);\n    }\n\n    /// @dev Return only snapshot elections. Explicit mode-one elections remain live.\n    function _election(address core, address resolver, uint256 collectionId)\n        private\n        view\n        returns (bytes32)\n    {\n        if (!IERC165(resolver)\n                .supportsInterface(type(IStreamArtistSnapshotRoyaltyFacts).interfaceId)) {\n            return bytes32(0);\n        }\n        (uint8 mode, bytes32 election) =\n            IStreamArtistSnapshotRoyaltyFacts(resolver).collectionRoyaltyMode(collectionId);\n        if (mode != 1 && mode != 2) revert T.InvalidRecord();\n        if (mode == 1 && election == bytes32(0)) return bytes32(0);\n        if (\n            election\n                != keccak256(\n                    abi.encode(\n                        keccak256(\"6529STREAM_ROYALTY_MODE_ELECTION_V1\"),\n                        block.chainid,\n                        resolver,\n                        core,\n                        collectionId,\n                        mode\n                    )\n                )\n        ) revert T.InvalidRecord();\n        return mode == 2 ? election : bytes32(0);\n    }\n\n    function _preview(\n        address resolver,\n        uint256 collectionId,\n        uint8 scope,\n        uint256 scopeId,\n        bytes32 profile,\n        uint16 bps,\n        bool frozen\n    ) private view returns (T.AssignmentFact memory) {\n        return IStreamArtistRoyaltyScopeFacts(resolver)\n            .previewArtistRoyaltyAssignmentForScope(\n                collectionId, scope, scopeId, profile, bps, frozen\n            );\n    }\n\n    function _currentSnapshotRaw(address resolver, uint256 collectionId)\n        private\n        view\n        returns (T.AssignmentFact memory raw, IStreamRoyaltyResolver.RoyaltyConfig memory config)\n    {\n        (raw, config) = IStreamArtistRoyaltyScopeFacts(resolver)\n            .royaltyEconomicsFacts(collectionId, 1, collectionId);\n        _requireRawKey(resolver, 1, collectionId, raw, config);\n        if (!config.configured) {\n            (raw, config) =\n                IStreamArtistRoyaltyScopeFacts(resolver).royaltyEconomicsFacts(collectionId, 0, 0);\n            _requireRawKey(resolver, 0, 0, raw, config);\n        }\n        if (\n            !config.configured || (config.profileId == bytes32(0)) != (config.royaltyBps == 0)\n                || (config.wallet == address(0)) != (config.profileId == bytes32(0))\n                || config.royaltyBps > 1_000 || (raw.scope == 1 && config.frozen)\n        ) revert T.InvalidRecord();\n        T.AssignmentFact memory rebuilt = _preview(\n            resolver,\n            collectionId,\n            raw.scope,\n            raw.scopeId,\n            config.profileId,\n            config.royaltyBps,\n            config.frozen\n        );\n        if (keccak256(abi.encode(raw)) != keccak256(abi.encode(rebuilt))) {\n            revert T.InvalidRecord();\n        }\n    }\n\n    function _requireRawKey(\n        address resolver,\n        uint8 scope,\n        uint256 scopeId,\n        T.AssignmentFact memory raw,\n        IStreamRoyaltyResolver.RoyaltyConfig memory config\n    ) private pure {\n        if (\n            raw.resolver != resolver || raw.revenueClass != keccak256(\"ROYALTY_ERC2981\")\n                || raw.scope != scope || raw.scopeId != scopeId\n                || (config.configured == (raw.assignmentHash == bytes32(0)))\n        ) revert T.InvalidRecord();\n    }\n\n    function _snapshotShape(\n        uint256 collectionId,\n        uint8 scope,\n        uint256 scopeId,\n        bytes32 profile,\n        uint16 bps,\n        bool frozen\n    ) private pure {\n        if (\n            scope != 1 || scopeId != collectionId || (profile == bytes32(0)) != (bps == 0)\n                || bps > 1_000 || frozen\n        ) {\n            revert T.UnsupportedProfile();\n        }\n    }\n\n    function _requireSnapshot(\n        address core,\n        uint256 collectionId,\n        bytes32 election,\n        T.AssignmentFact memory raw,\n        T.AssignmentFact memory snapshot\n    ) private view {\n        if (\n            raw.resolver == address(0) || raw.revenueClass != keccak256(\"ROYALTY_ERC2981\")\n                || !((raw.scope == 1 && raw.scopeId == collectionId)\n                    || (raw.scope == 0 && raw.scopeId == 0)) || raw.assignmentHash == bytes32(0)\n                || snapshot.resolver != raw.resolver || snapshot.revenueClass != raw.revenueClass\n                || snapshot.scope != 1 || snapshot.scopeId != collectionId\n                || snapshot.assignmentHash\n                    != keccak256(\n                        abi.encode(\n                            keccak256(\"6529STREAM_SNAPSHOT_ROYALTY_ASSIGNMENT_V1\"),\n                            block.chainid,\n                            raw.resolver,\n                            core,\n                            collectionId,\n                            election,\n                            raw.assignmentHash\n                        )\n                    )\n        ) revert T.InvalidRecord();\n    }\n}\n",
+    "smart-contracts/domains/artist/StreamArtistTemplateEconomicsReads.sol": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.19;\nimport { StreamArtistDefaultTemplateReads } from \"./StreamArtistDefaultTemplateReads.sol\";\nimport { StreamArtistScopedTemplateReads } from \"./StreamArtistScopedTemplateReads.sol\";\nimport { StreamArtistDynamicTemplateReads } from \"./StreamArtistDynamicTemplateReads.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistPrimaryTemplateFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistPrimaryTemplateConsentFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistEconomicsEvidence.sol\";\nimport \"../../interfaces/stream/revenue/IStreamRevenueResolver.sol\";\nimport \"../../vendor/openzeppelin/IERC165.sol\";\nimport {\n    StreamArtistOnboardingTypes as T\n} from \"../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol\";\n\n/// @notice Fixed linked template facts and evidence reads for the Artist read host.\n/// @dev The host first checks its suite, accepted binding and operative payout.\n///      Delegatecall preserves that host as the caller of every original provider read.\nlibrary StreamArtistTemplateEconomicsReads {\n    function prospective(T.EconomicsConsent memory p, bytes32 templateId)\n        public\n        view\n        returns (bytes memory)\n    {\n        if (p.scope == 0) return StreamArtistDefaultTemplateReads.prospective(p, templateId);\n        if (p.scope == 2) return StreamArtistScopedTemplateReads.prospective(p, templateId);\n        if (StreamArtistDynamicTemplateReads.isDynamic(p.resolver, templateId)) {\n            return StreamArtistDynamicTemplateReads.prospective(p, templateId);\n        }\n        address resolver = p.resolver;\n        IStreamArtistPrimaryTemplateConsentFacts provider =\n            IStreamArtistPrimaryTemplateConsentFacts(resolver);\n        (bytes32 entriesHash, bytes32 metadataURIHash, uint32 share) =\n            provider.primaryTemplateConsentFacts(templateId);\n        T.AssignmentFact memory fact = provider.previewArtistPrimaryTemplateConsentAssignment(\n            p.collectionId, templateId, bytes32(0), false\n        );\n        if (\n            entriesHash == bytes32(0) || share == 0 || share > 1_000_000\n                || fact.resolver != p.resolver || fact.revenueClass != p.revenueClass\n                || fact.scope != p.scope || fact.scopeId != p.scopeId\n                || fact.assignmentHash != p.assignmentHash\n        ) revert T.InvalidRecord();\n        return abi.encode(\n            keccak256(\"6529STREAM_PROSPECTIVE_PRIMARY_TEMPLATE_ECONOMICS_EVIDENCE_V1\"),\n            templateId,\n            entriesHash,\n            metadataURIHash,\n            share,\n            fact\n        );\n    }\n\n    function current(\n        uint256 collectionId,\n        address resolver,\n        bytes32 primaryRevenueClass,\n        address consentOwner,\n        T.Binding memory binding_,\n        IStreamRevenueResolver.ResolvedPrimaryAssignment memory current\n    ) public view returns (bytes memory) {\n        if (current.scope == 0) {\n            return StreamArtistDefaultTemplateReads.current(\n                collectionId, resolver, primaryRevenueClass, consentOwner, binding_, current\n            );\n        }\n        if (current.scope == 2) {\n            return StreamArtistScopedTemplateReads.current(\n                collectionId, resolver, primaryRevenueClass, consentOwner, binding_, current\n            );\n        }\n        if (StreamArtistDynamicTemplateReads.isDynamic(resolver, current.templateId)) {\n            return StreamArtistDynamicTemplateReads.current(\n                collectionId, resolver, primaryRevenueClass, consentOwner, binding_, current\n            );\n        }\n        bytes32 entriesHash;\n        bytes32 metadataURIHash;\n        uint32 artistShare;\n        T.AssignmentFact memory preview;\n        if (_templateConsentCapability(resolver)) {\n            IStreamArtistPrimaryTemplateConsentFacts provider =\n                IStreamArtistPrimaryTemplateConsentFacts(resolver);\n            (entriesHash, metadataURIHash, artistShare) =\n                provider.primaryTemplateConsentFacts(current.templateId);\n            preview = provider.previewArtistPrimaryTemplateConsentAssignment(\n                collectionId, current.templateId, current.policyHash, current.frozen\n            );\n            if (artistShare < 500_000) {\n                T.EconomicsConsent memory consent = T.EconomicsConsent(\n                    collectionId,\n                    resolver,\n                    primaryRevenueClass,\n                    1,\n                    collectionId,\n                    current.assignmentHash\n                );\n                if (\n                    IStreamArtistEconomicsEvidence(consentOwner)\n                            .economicsRecordForBinding(\n                                consent,\n                                binding_.artistId,\n                                binding_.generation,\n                                binding_.bindingHash\n                            ) == bytes32(0)\n                ) {\n                    revert T.MissingMintPrerequisite(keccak256(\"economics\"));\n                }\n            }\n        } else {\n            IStreamArtistPrimaryTemplateFacts provider = IStreamArtistPrimaryTemplateFacts(resolver);\n            (entriesHash, metadataURIHash, artistShare) =\n                provider.primaryTemplateEconomicsFacts(current.templateId);\n            preview = provider.previewArtistPrimaryTemplateAssignment(\n                collectionId, current.templateId, current.policyHash, current.frozen\n            );\n            if (artistShare < 500_000) revert T.InvalidRecord();\n        }\n        if (\n            entriesHash == bytes32(0) || artistShare == 0 || artistShare > 1_000_000\n                || preview.resolver != resolver || preview.revenueClass != primaryRevenueClass\n                || preview.scope != 1 || preview.scopeId != collectionId\n                || preview.assignmentHash != current.assignmentHash\n        ) revert T.InvalidRecord();\n        return abi.encode(\n            keccak256(\"6529STREAM_CURRENT_PRIMARY_TEMPLATE_ECONOMICS_EVIDENCE_V1\"),\n            current.templateId,\n            entriesHash,\n            metadataURIHash,\n            artistShare\n        );\n    }\n\n    function _templateConsentCapability(address resolver) private view returns (bool) {\n        return IERC165(resolver)\n            .supportsInterface(type(IStreamArtistPrimaryTemplateConsentFacts).interfaceId);\n    }\n}\n",
+    "smart-contracts/domains/artist/StreamArtistDefaultTemplateReads.sol": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.19;\nimport { StreamArtistDynamicTemplateReads } from \"./StreamArtistDynamicTemplateReads.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistDefaultPrimaryTemplateFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistPrimaryTemplateConsentFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistDynamicPrimaryTemplateFacts.sol\";\nimport \"../../interfaces/stream/artist/IStreamArtistEconomicsEvidence.sol\";\nimport \"../../interfaces/stream/revenue/IStreamRevenueResolver.sol\";\nimport \"../../vendor/openzeppelin/IERC165.sol\";\nimport {\n    StreamArtistOnboardingTypes as T\n} from \"../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol\";\n\n/// @notice Explicit default TEMPLATE evidence under the original exact-scope op15 signature.\nlibrary StreamArtistDefaultTemplateReads {\n    function prospective(T.EconomicsConsent memory p, bytes32 templateId)\n        public\n        view\n        returns (bytes memory)\n    {\n        return _facts(\n            p, templateId, false, keccak256(\"6529STREAM_PROSPECTIVE_DEFAULT_TEMPLATE_EVIDENCE_V1\")\n        );\n    }\n\n    function current(\n        uint256 collectionId,\n        address resolver,\n        bytes32 revenueClass,\n        address consentOwner,\n        T.Binding memory binding_,\n        IStreamRevenueResolver.ResolvedPrimaryAssignment memory selected\n    ) public view returns (bytes memory) {\n        T.EconomicsConsent memory p = T.EconomicsConsent(\n            collectionId,\n            resolver,\n            revenueClass,\n            selected.scope,\n            selected.scopeId,\n            selected.assignmentHash\n        );\n        bytes memory evidence = _facts(\n            p,\n            selected.templateId,\n            selected.frozen,\n            keccak256(\"6529STREAM_CURRENT_DEFAULT_TEMPLATE_EVIDENCE_V1\")\n        );\n        if (\n            IStreamArtistEconomicsEvidence(consentOwner)\n                    .economicsRecordForBinding(\n                        p, binding_.artistId, binding_.generation, binding_.bindingHash\n                    ) == 0\n        ) revert T.MissingMintPrerequisite(keccak256(\"economics\"));\n        return evidence;\n    }\n\n    function currentForRecording(\n        T.EconomicsConsent memory p,\n        IStreamRevenueResolver.ResolvedPrimaryAssignment memory selected\n    ) public view returns (bytes memory) {\n        if (\n            !selected.exists || selected.scope != 0 || selected.scopeId != 0\n                || selected.assignmentType != 2 || selected.profileId != 0\n                || selected.templateId == 0 || selected.policyHash != 0\n                || selected.assignmentHash != p.assignmentHash\n        ) revert T.InvalidRecord();\n        return _facts(\n            p,\n            selected.templateId,\n            selected.frozen,\n            keccak256(\"6529STREAM_CURRENT_DEFAULT_TEMPLATE_EVIDENCE_V1\")\n        );\n    }\n\n    function _facts(T.EconomicsConsent memory p, bytes32 templateId, bool frozen, bytes32 domain)\n        private\n        view\n        returns (bytes memory)\n    {\n        if (\n            p.scope != 0 || p.scopeId != 0 || p.collectionId == 0 || p.assignmentHash == 0\n                || p.revenueClass != keccak256(\"PRIMARY_SALE\")\n                || !IERC165(p.resolver)\n                    .supportsInterface(type(IStreamArtistDefaultPrimaryTemplateFacts).interfaceId)\n        ) revert T.UnsupportedProfile();\n        bool dynamic_ = StreamArtistDynamicTemplateReads.isDynamic(p.resolver, templateId);\n        bytes32 entries;\n        bytes32 metadata;\n        uint32 share;\n        bytes32 beneficiaries;\n        if (dynamic_) {\n            (entries, metadata, share, beneficiaries) = IStreamArtistDynamicPrimaryTemplateFacts(\n                    p.resolver\n                ).dynamicPrimaryTemplateFacts(p.collectionId, templateId);\n            if (beneficiaries == 0) revert T.InvalidRecord();\n        } else {\n            (entries, metadata, share) = IStreamArtistPrimaryTemplateConsentFacts(p.resolver)\n                .primaryTemplateConsentFacts(templateId);\n        }\n        T.AssignmentFact memory fact = IStreamArtistDefaultPrimaryTemplateFacts(p.resolver)\n            .previewArtistDefaultPrimaryTemplateAssignment(p.collectionId, templateId, 0, frozen);\n        if (\n            entries == 0 || share == 0 || share > 1_000_000 || fact.resolver != p.resolver\n                || fact.revenueClass != p.revenueClass || fact.scope != p.scope\n                || fact.scopeId != p.scopeId || fact.assignmentHash != p.assignmentHash\n        ) revert T.InvalidRecord();\n        return\n            abi.encode(domain, templateId, dynamic_, entries, metadata, share, beneficiaries, fact);\n    }\n}\n"
   },
   "selections": {
     "registry": {
@@ -395,7 +407,13 @@
         "policyConsentDigest",
         "isPolicyConsented",
         "requireMintConsent",
-        "requireSaleConsent"
+        "requireSaleConsent",
+        "recordDelegatedEconomicsConsent",
+        "recordDelegatedProspectiveEconomicsConsent",
+        "authorizeDelegatedRoyaltyFreeze",
+        "economicsConsentDigest",
+        "artistPayoutAccount",
+        "requireEconomicsConsent"
       ]
     },
     "coordinator": {
@@ -404,7 +422,20 @@
       "methods": [
         "suiteConfiguration",
         "deploymentChainId",
-        "configurationHash"
+        "configurationHash",
+        "reads"
+      ]
+    },
+    "reads": {
+      "source": "smart-contracts/domains/artist/StreamArtistOnboardingReads.sol",
+      "contract": "StreamArtistOnboardingReads",
+      "methods": [
+        "acceptedBinding",
+        "defensiveBinding",
+        "artistPayoutAccount",
+        "requireCurrentEconomics",
+        "requireProspectiveEconomicsWithEvidence",
+        "requireRoyaltyFreezeProposal"
       ]
     },
     "owner": {
@@ -476,6 +507,13 @@
         "acceptedCount"
       ]
     },
+    "payout": {
+      "source": "smart-contracts/domains/artist/StreamArtistPayoutLifecycle.sol",
+      "contract": "StreamArtistPayoutLifecycle",
+      "methods": [
+        "designationRecord"
+      ]
+    },
     "consent": {
       "source": "smart-contracts/domains/artist/StreamArtistConsentFinalityLifecycle.sol",
       "contract": "StreamArtistConsentFinalityLifecycle",
@@ -486,14 +524,20 @@
         "contentFreezeRecord",
         "contentFreezeAt",
         "policyRecord",
-        "recordDelegation"
+        "recordDelegation",
+        "economicsRecord",
+        "economicsRecordForBinding",
+        "economicsRecordAssociation"
       ],
       "events": [
         "ArtistSaleConsentRecorded",
         "ArtistRoyaltyFreezeAuthorized",
         "ArtistContentFreezeAuthorized",
         "ArtistContentRecordContext",
-        "ArtistPolicyConsentRecorded"
+        "ArtistPolicyConsentRecorded",
+        "ArtistEconomicsConsentRecorded",
+        "ArtistEconomicsConsentAssociated",
+        "ArtistRecordDelegation"
       ]
     },
     "consentTransport": {
@@ -2394,6 +2438,30 @@
         "type": "function"
       },
       {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "artistId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "artistPayoutAccount",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
         "inputs": [],
         "name": "artistRegistryCutover",
         "outputs": [
@@ -2590,6 +2658,74 @@
           }
         ],
         "name": "authorizeArtistRoyaltyFreeze",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "expectedAssignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.RoyaltyFreeze",
+            "name": "p",
+            "type": "tuple"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "grant",
+            "type": "bytes32"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "time",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes",
+                "name": "signature",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.Authorization",
+            "name": "a",
+            "type": "tuple"
+          }
+        ],
+        "name": "authorizeDelegatedRoyaltyFreeze",
         "outputs": [
           {
             "internalType": "bytes32",
@@ -3212,6 +3348,79 @@
       {
         "inputs": [
           {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.EconomicsConsent",
+            "name": "p",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "time",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes",
+                "name": "signature",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.Authorization",
+            "name": "a",
+            "type": "tuple"
+          }
+        ],
+        "name": "economicsConsentDigest",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
             "internalType": "bytes32",
             "name": "record",
             "type": "bytes32"
@@ -3814,6 +4023,84 @@
                 "type": "uint256"
               },
               {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.EconomicsConsent",
+            "name": "p",
+            "type": "tuple"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "grant",
+            "type": "bytes32"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "time",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes",
+                "name": "signature",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.Authorization",
+            "name": "a",
+            "type": "tuple"
+          }
+        ],
+        "name": "recordDelegatedEconomicsConsent",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
                 "internalType": "bytes32",
                 "name": "phaseId",
                 "type": "bytes32"
@@ -3857,6 +4144,111 @@
           }
         ],
         "name": "recordDelegatedPolicyConsent",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.EconomicsConsent",
+            "name": "p",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "profileHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "policyHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint16",
+                "name": "royaltyBps",
+                "type": "uint16"
+              },
+              {
+                "internalType": "bool",
+                "name": "frozen",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.FixedEconomicsCandidate",
+            "name": "candidate",
+            "type": "tuple"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "grant",
+            "type": "bytes32"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "nonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "time",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes",
+                "name": "signature",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.Authorization",
+            "name": "a",
+            "type": "tuple"
+          }
+        ],
+        "name": "recordDelegatedProspectiveEconomicsConsent",
         "outputs": [
           {
             "internalType": "bytes32",
@@ -4156,6 +4548,39 @@
           }
         ],
         "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "revenueClass",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "assignmentHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "requireEconomicsConsent",
+        "outputs": [],
+        "stateMutability": "view",
         "type": "function"
       },
       {
@@ -4569,6 +4994,19 @@
       },
       {
         "inputs": [],
+        "name": "reads",
+        "outputs": [
+          {
+            "internalType": "contract StreamArtistOnboardingReads",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
         "name": "suiteConfiguration",
         "outputs": [
           {
@@ -4634,6 +5072,380 @@
             "type": "tuple"
           }
         ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    "reads": [
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "acceptedBinding",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "artistId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "artistAddress",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "identityRecordHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "bindingHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint64",
+                "name": "generation",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint8",
+                "name": "consentMode",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint8",
+                "name": "saleConsentScope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint8",
+                "name": "registryImmutabilityElection",
+                "type": "uint8"
+              },
+              {
+                "internalType": "address",
+                "name": "proposer",
+                "type": "address"
+              },
+              {
+                "internalType": "bool",
+                "name": "accepted",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.Binding",
+            "name": "b",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "artistId",
+            "type": "bytes32"
+          }
+        ],
+        "name": "artistPayoutAccount",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "defensiveBinding",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "artistId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "artistAddress",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "identityRecordHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "bindingHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint64",
+                "name": "generation",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint8",
+                "name": "consentMode",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint8",
+                "name": "saleConsentScope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint8",
+                "name": "registryImmutabilityElection",
+                "type": "uint8"
+              },
+              {
+                "internalType": "address",
+                "name": "proposer",
+                "type": "address"
+              },
+              {
+                "internalType": "bool",
+                "name": "accepted",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.Binding",
+            "name": "b",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.EconomicsConsent",
+            "name": "p",
+            "type": "tuple"
+          },
+          {
+            "internalType": "address",
+            "name": "payout",
+            "type": "address"
+          }
+        ],
+        "name": "requireCurrentEconomics",
+        "outputs": [
+          {
+            "internalType": "bytes",
+            "name": "",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.EconomicsConsent",
+            "name": "p",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "profileHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "policyHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint16",
+                "name": "royaltyBps",
+                "type": "uint16"
+              },
+              {
+                "internalType": "bool",
+                "name": "frozen",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.FixedEconomicsCandidate",
+            "name": "candidate",
+            "type": "tuple"
+          },
+          {
+            "internalType": "address",
+            "name": "payout",
+            "type": "address"
+          }
+        ],
+        "name": "requireProspectiveEconomicsWithEvidence",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.AssignmentFact",
+            "name": "fact",
+            "type": "tuple"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "previousHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "expectedAssignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.RoyaltyFreeze",
+            "name": "p",
+            "type": "tuple"
+          }
+        ],
+        "name": "requireRoyaltyFreezeProposal",
+        "outputs": [],
         "stateMutability": "view",
         "type": "function"
       }
@@ -5984,6 +6796,44 @@
         "type": "function"
       }
     ],
+    "payout": [
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "record",
+            "type": "bytes32"
+          }
+        ],
+        "name": "designationRecord",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "artistId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "payoutAccount",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "previousDesignationRecordHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.PayoutDesignation",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
     "consent": [
       {
         "anonymous": false,
@@ -6088,6 +6938,134 @@
           },
           {
             "indexed": true,
+            "internalType": "bytes32",
+            "name": "recordHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "artistId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "bindingHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint64",
+            "name": "bindingGeneration",
+            "type": "uint64"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "payloadHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "originalRecord",
+            "type": "bytes32"
+          }
+        ],
+        "name": "ArtistEconomicsConsentAssociated",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "assignmentHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "signer",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "revenueClass",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint8",
+            "name": "scope",
+            "type": "uint8"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "scopeId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "payoutDesignationRecordHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint8",
+            "name": "authorityClass",
+            "type": "uint8"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "nonce",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint64",
+            "name": "signedAt",
+            "type": "uint64"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "consentRecordHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "ArtistEconomicsConsentRecorded",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
             "internalType": "uint256",
             "name": "collectionId",
             "type": "uint256"
@@ -6136,6 +7114,55 @@
           }
         ],
         "name": "ArtistPolicyConsentRecorded",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "recordHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "delegationRecordHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "artistId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "resolver",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "revenueClass",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint8",
+            "name": "authorityClass",
+            "type": "uint8"
+          }
+        ],
+        "name": "ArtistRecordDelegation",
         "type": "event"
       },
       {
@@ -6376,6 +7403,169 @@
             "internalType": "struct StreamArtistContentTypes.FreezeRecord",
             "name": "",
             "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.EconomicsConsent",
+            "name": "p",
+            "type": "tuple"
+          }
+        ],
+        "name": "economicsRecord",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "recordHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "economicsRecordAssociation",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "artistId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint64",
+                "name": "bindingGeneration",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "bindingHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "payloadHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "originalRecord",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamArtistEconomicsEvidence.Association",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "resolver",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "revenueClass",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "scope",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "scopeId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "assignmentHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamArtistOnboardingTypes.EconomicsConsent",
+            "name": "p",
+            "type": "tuple"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "artistId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint64",
+            "name": "generation",
+            "type": "uint64"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "bindingHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "economicsRecordForBinding",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "record",
+            "type": "bytes32"
           }
         ],
         "stateMutability": "view",

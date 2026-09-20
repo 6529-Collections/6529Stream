@@ -340,7 +340,7 @@ contract profiles and outstanding larger-script work.
 - [Mint executor policy grace](docs/current-mint-policy-grace.md) preserves original
   policy hashes, predecessor deadlines and delayed governance calls.
 - [Current Artist operation callers](docs/current-artist-operation.md) add eight
-  principal calls and delegated policy/sale consent with pinned authority,
+  principal calls and delegated policy, sale, economics and royalty-freeze calls with pinned authority,
   replay, simulation and receipt review;
   the [coverage register](docs/current-artist-operation-coverage.json) tracks all 61 operations and variants.
 - [Complete reference environment preparation](docs/current-reference-environment.md)

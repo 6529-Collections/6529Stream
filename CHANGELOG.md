@@ -84,6 +84,9 @@ the release policy in `docs/release-policy.md`.
   continuity admission and a configured ordinary backup deployment/plan helper.
   Preserve original host history and fulfillment; actual-current Safe cutover
   recipes are authored and await coordinated runtime verification.
+- Add delegated Artist economics and royalty-freeze callers with original
+  signatures, binding-specific records and payout evidence.
+
 - Add Mint executor policy-grace callers with exact policy preimages, bounded
   predecessor continuity and original delayed governance review.
 

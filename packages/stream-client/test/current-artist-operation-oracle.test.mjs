@@ -56,8 +56,8 @@ test("Artist operation fixture retains exact ABI52 provenance and original sourc
   assert.equal(fixture.sourceCount, 2212);
   assert.equal(fixture.inputSha256, "94d4a931f6f2f1849e9d91506e6ac9c39d10982cc61d06c7fc2f4b35c17f0fde");
   assert.equal(fixture.outputSha256, "d299875f9ae1f03e1361dfba0795b908b4d0b45a480fe4e47deab5f78c173905");
-  assert.equal(Object.keys(fixture.sourceHashes).length, 316);
-  assert.equal(Object.keys(fixture.sourceTexts).length, 17);
+  assert.equal(Object.keys(fixture.sourceHashes).length, 322);
+  assert.equal(Object.keys(fixture.sourceTexts).length, 23);
   for (const [path, literal] of Object.entries(fixture.sourceTexts)) {
     assert.equal(createHash("sha256").update(literal).digest("hex"), fixture.sourceHashes[path]);
   }
@@ -285,4 +285,109 @@ test("delegation receipt event and policy reads retain their exact original comp
   assert.match(source, /abi\.encode\(b, p, a, proof, grant, prior, facts\)/);
   assert.match(source, /policyDigest\(_environment\(x\), p, a\)/);
   assert.match(source, /StreamArtistSaleHashes\.digest\(_environment\(x\), p, a\)/);
+});
+
+const economicsDeclaration = "StreamArtistEconomicsConsent(address core,address resolver,bytes32 revenueClass,uint8 scope,uint256 scopeId,bytes32 assignmentHash,uint256 nonce,uint64 deadline)";
+const economicsSample = { core, resolver: address(31), revenueClass: id("PRIMARY_SALE"), scope: 2n,
+  scopeId: (1n << 230n) + 39n, assignmentHash: id("prospective assignment"), nonce, deadline };
+const economicsOriginals = {
+  delegatedEconomicsConsent: [15n, "recordDelegatedEconomicsConsent", "economicsConsentDigest", "0x23a38d6d"],
+  delegatedProspectiveEconomicsConsent: [15n, "recordDelegatedProspectiveEconomicsConsent", "economicsConsentDigest", "0x09eed2fe"],
+  delegatedRoyaltyFreeze: [20n, "authorizeDelegatedRoyaltyFreeze", "royaltyFreezeDigest", "0x04005067"],
+};
+function economicsRequest(kind) {
+  return { kind, chainId, registry, caller: address(40), signer: address(51), artistId, mode: "signature", signature: "0x",
+    message: kind === "delegatedRoyaltyFreeze" ? samples.royaltyFreeze : economicsSample,
+    details: { grant: id("economic grant"), ...(kind === "delegatedRoyaltyFreeze" ? {} : { collectionId }),
+      ...(kind === "delegatedProspectiveEconomicsConsent" ? {
+        candidate: { profileHash: id("profile"), policyHash: ZeroHash, royaltyBps: 0n, frozen: true },
+      } : {}) } };
+}
+function economicsTerms(input) {
+  const m = input.message;
+  return input.kind === "delegatedRoyaltyFreeze"
+    ? [m.resolver, m.collectionId, m.revenueClass, m.expectedAssignmentHash]
+    : [input.details.collectionId, m.resolver, m.revenueClass, m.scope, m.scopeId, m.assignmentHash];
+}
+
+test("delegated economic and freeze calls retain original signatures, selectors and compiled tuple positions", () => {
+  assert.ok(fixture.sourceTexts["smart-contracts/domains/artist/StreamArtistHashes.sol"].includes(`"${economicsDeclaration}"`));
+  const local = new Interface(CURRENT_ARTIST_OPERATION_ABI);
+  for (const [kind, [operationId, method, digestMethod, selector]] of Object.entries(economicsOriginals)) {
+    const input = economicsRequest(kind), p = prepareCurrentArtistAction(input), terms = economicsTerms(input);
+    const args = [terms];
+    if (kind === "delegatedProspectiveEconomicsConsent") args.push(input.details.candidate);
+    args.push(input.details.grant, [nonce, deadline, input.signature]);
+    assert.equal(p.operationId, operationId); assert.equal(p.method, method); assert.equal(p.digestMethod, digestMethod);
+    assert.equal(abi.registry.getFunction(method).selector, selector);
+    assert.equal(local.getFunction(method).format("sighash"), abi.registry.getFunction(method).format("sighash"));
+    assert.equal(p.payload.digest, originalDigest(kind === "delegatedRoyaltyFreeze" ? originals.royaltyFreeze[1] : economicsDeclaration, input.message));
+    assert.deepEqual(p.call, { to: registry, value: 0n, data: abi.registry.encodeFunctionData(method, args) });
+    assert.deepEqual(p.digestCall, { to: registry, value: 0n,
+      data: abi.registry.encodeFunctionData(digestMethod, [terms, [nonce, deadline, "0x"]]) });
+    assert.equal(p.request.mode, "signature"); assert.equal(p.request.signature, "0x");
+  }
+});
+
+test("economics collection, candidate and grant stay outside signing while retaining exact reviewed calldata", () => {
+  for (const kind of ["delegatedEconomicsConsent", "delegatedProspectiveEconomicsConsent"]) {
+    const input = economicsRequest(kind), p = prepareCurrentArtistAction(input);
+    for (const details of [{ ...input.details, collectionId: collectionId + 1n }, { ...input.details, grant: id("replacement economic grant") },
+      ...(kind === "delegatedProspectiveEconomicsConsent" ? [{ ...input.details, candidate: { ...input.details.candidate, frozen: false } }] : [])]) {
+      const changed = prepareCurrentArtistAction({ ...input, details });
+      assert.equal(changed.payload.digest, p.payload.digest); assert.notEqual(changed.call.data, p.call.data);
+    }
+    for (const absent of ["collectionId", "grant", "candidate", "artistId", "payoutAccount", "bindingHash"]) {
+      assert.equal(Object.hasOwn(p.payload.message, absent), false);
+    }
+    assert.equal(prepareCurrentArtistAction({ ...input, artistId: id("other locator") }).call.data, p.call.data);
+  }
+});
+
+test("prospective economics preserves the legitimate zero assignment clear and exact uint16 candidate", () => {
+  const input = economicsRequest("delegatedProspectiveEconomicsConsent");
+  const clear = { ...input, message: { ...input.message, assignmentHash: ZeroHash }, details: { ...input.details,
+    candidate: { profileHash: ZeroHash, policyHash: ZeroHash, royaltyBps: 0n, frozen: false } } };
+  const p = prepareCurrentArtistAction(clear);
+  assert.equal(p.payload.digest, originalDigest(economicsDeclaration, clear.message));
+  const [terms, candidate] = abi.registry.decodeFunctionData("recordDelegatedProspectiveEconomicsConsent", p.call.data);
+  assert.equal(terms.assignmentHash, ZeroHash); assert.equal(candidate.profileHash, ZeroHash);
+  assert.equal(candidate.policyHash, ZeroHash); assert.equal(candidate.royaltyBps, 0n); assert.equal(candidate.frozen, false);
+  const original = abi.registry.getFunction("recordDelegatedProspectiveEconomicsConsent");
+  assert.equal(original.inputs[1].components[2].type, "uint16");
+  assert.equal(original.inputs[1].components[3].type, "bool");
+  assert.throws(() => prepareCurrentArtistAction({ ...input, details: { ...input.details,
+    candidate: { ...input.details.candidate, royaltyBps: 1n << 16n } } }), /uint|range|bounds|16|royalty/i);
+});
+
+test("economic history joins original binding association, delegation event and nested Archive evidence", () => {
+  assert.deepEqual(abi.consent.getEvent("ArtistRecordDelegation").inputs.map(row => [row.type, row.indexed]), [
+    ["uint16", false], ["bytes32", true], ["bytes32", true], ["bytes32", true],
+    ["address", false], ["bytes32", false], ["uint8", false],
+  ]);
+  const association = abi.consent.getFunction("economicsRecordAssociation").outputs[0];
+  assert.deepEqual(association.components.map(row => [row.name, row.type]), [
+    ["artistId", "bytes32"], ["bindingGeneration", "uint64"], ["bindingHash", "bytes32"], ["payloadHash", "bytes32"], ["originalRecord", "bytes32"],
+  ]);
+  assert.equal(abi.consent.getFunction("economicsRecordForBinding").inputs[0].components[0].name, "collectionId");
+  assert.deepEqual(abi.payout.getFunction("designationRecord").outputs[0].components.map(row => row.type), ["bytes32", "address", "bytes32"]);
+  const source = fixture.sourceTexts["smart-contracts/domains/artist/StreamArtistEconomicOperations.sol"];
+  assert.match(source, /abi\.encode\(b, p, payout, a, proof, candidateEvidence, association\)/);
+  assert.match(source, /if \(delegation != bytes32\(0\)\) payload = abi\.encode\(payload, delegation, prior\)/);
+  assert.match(source, /abi\.encode\(candidate, actual, previousHash\)/);
+  const states = fixture.sourceTexts["smart-contracts/domains/artist/StreamArtistConsentState.sol"];
+  assert.match(states, /if \(firstRecord\) records\[scope\] = m\.record/);
+  assert.match(states, /StreamArtistEconomicsAssociation\.continuation\(original, p, b\)/);
+});
+
+test("current economics relies on the original pinned Reads composition including template and snapshot behavior", () => {
+  assert.equal(abi.coordinator.getFunction("reads").outputs[0].type, "address");
+  assert.equal(abi.reads.getFunction("requireCurrentEconomics").outputs[0].type, "bytes");
+  assert.equal(abi.reads.getFunction("requireProspectiveEconomicsWithEvidence").outputs[0].components.length, 5);
+  assert.equal(abi.reads.getFunction("requireRoyaltyFreezeProposal").outputs.length, 0);
+  const reads = fixture.sourceTexts["smart-contracts/domains/artist/StreamArtistOnboardingReads.sol"];
+  assert.match(reads, /StreamArtistDefaultTemplateReads\.currentForRecording/);
+  assert.match(reads, /StreamArtistRoyaltyModeReads\.current/);
+  assert.match(reads, /StreamArtistRoyaltyModeReads\.requireLive/);
+  assert.match(reads, /Both admitted resolvers expose the same splitFactory\(\) ABI/);
 });

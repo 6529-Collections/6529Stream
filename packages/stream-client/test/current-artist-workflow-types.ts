@@ -28,8 +28,8 @@ void captured; void simulated; void plan; void inspected; void required; void no
 
 // @ts-expect-error captures require a concrete numeric block
 captureCurrentArtistOperation(provider, deployment, request, { blockTag: "latest" });
-// @ts-expect-error protocol-only and delegated operations are outside this family
-captureCurrentArtistOperation(provider, deployment, { ...request, kind: "delegatedRoyaltyFreeze" }, { blockTag: 100 });
+// @ts-expect-error delegated attestation is outside this family
+captureCurrentArtistOperation(provider, deployment, { ...request, kind: "delegatedAttestation" }, { blockTag: 100 });
 // @ts-expect-error transaction execution is a direct call or ordinary Safe CALL
 inspectCurrentArtistReceipt(provider, capture, { transactionHash: hash, execution: "delegatecall" });
 // @ts-expect-error no broadcast method or signer enters a read helper
@@ -86,3 +86,15 @@ recorded.delegationRecordHash = hash;
 // @ts-expect-error policy existence does not promise full mint admission
 const mintReady: "mint-admission-verified" = recorded.applicability;
 void mintReady;
+
+const reads: Address | undefined = capture.deployment.reads?.address;
+const payoutAccount: Address | undefined = capture.economics?.payout.account;
+const candidateEvidence: Hex | undefined = receipt.economics?.candidateEvidence;
+const originalEconomics: Hex | undefined = receipt.economics?.association.originalRecord;
+void reads; void payoutAccount; void candidateEvidence; void originalEconomics;
+// @ts-expect-error pinned Reads is immutable
+capture.deployment.reads!.codeHash = hash;
+// @ts-expect-error retained economics inputs are immutable
+capture.economics!.payout.account = address;
+// @ts-expect-error actual receipt association is immutable
+receipt.economics!.association.bindingGeneration = 99n;

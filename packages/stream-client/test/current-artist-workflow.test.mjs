@@ -15,6 +15,9 @@ const pin = n => ({
 const d = {
   chainId: 31337n, registry: pin(8), coordinator: pin(20), components: Array.from({ length: 16 }, (_, n) => pin(n + 1))
 };
+const economicsDeployment = { ...d, reads: pin(30) };
+const payout = { account: A(150), recordHash: id('payout-designation') };
+const economicKinds = ['delegatedEconomicsConsent', 'delegatedProspectiveEconomicsConsent', 'delegatedRoyaltyFreeze'];
 const artist = id('artist');
 const signer = A(100);
 const cfg = id('configuration');
@@ -27,6 +30,9 @@ function request(kind, change = {}) {
   };
   const document = '0x7b22617274697374223a226e6577227d';
   const messages = {
+    delegatedEconomicsConsent: { core: A(10), resolver: A(14), revenueClass: id('primary'), scope: 1n, scopeId: 7n, assignmentHash: id('assignment'), nonce: 1n, deadline: 9999n },
+    delegatedProspectiveEconomicsConsent: { core: A(10), resolver: A(14), revenueClass: id('primary'), scope: 1n, scopeId: 7n, assignmentHash: id('assignment'), nonce: 1n, deadline: 9999n },
+    delegatedRoyaltyFreeze: { ...base, resolver: A(15), revenueClass: id('ROYALTY_ERC2981'), expectedAssignmentHash: id('assignment') },
     delegatedPolicyConsent: { ...base, mintManager: A(11), phaseId: id('phase'), policyHash: id('policy') },
     delegatedSaleConsent: { ...base, saleAdapter: A(90), saleId: id('sale'), saleConfigHash: id('config') },
     identityRevision: {
@@ -53,19 +59,36 @@ function request(kind, change = {}) {
   return {
     kind, chainId: d.chainId, registry: d.registry.address, caller: signer, signer, artistId: artist, mode: 'direct', signature: '0x', message: messages[kind], details: kind === 'bindingRefusal' ? { reasonURI: 'ipfs://reviewed-but-not-signed' } : kind === 'identityRevision' ? {
       identityRecordURI: 'ipfs://unsigned-revision-uri', document, displayName: 'Updated Artist'
-    } : kind.startsWith("delegated") ? { grant: grantHash(creationGrant({ kind, artistId: artist, signer })) } : {}, ...change
+    } : kind.startsWith("delegated") ? {
+      grant: grantHash(creationGrant({ kind, artistId: artist, signer })),
+      ...(kind.includes('Economics') ? { collectionId: 7n } : {}),
+      ...(kind === 'delegatedProspectiveEconomicsConsent' ? { candidate: { profileHash: id('profile'), policyHash: ZeroHash, royaltyBps: 0n, frozen: false } } : {})
+    } : {}, ...change
   };
 }
 function binding(q) {
   return [q.artistId, A(101), id('identity'), id('binding'), 2n, isDelegated(q) ? 2n : 1n, 1n, 0n, A(102), q.kind !== 'bindingRefusal'];
 }
 function isDelegated(q) {
-  return q.kind === 'delegatedPolicyConsent' || q.kind === 'delegatedSaleConsent';
+  return q.kind === 'delegatedPolicyConsent' || q.kind === 'delegatedSaleConsent' || economicKinds.includes(q.kind);
+}
+function isEconomics(q) {
+  return q.kind === 'delegatedEconomicsConsent' || q.kind === 'delegatedProspectiveEconomicsConsent';
+}
+function prospectiveFact(q) {
+  const m = q.message;
+  return [m.resolver, m.revenueClass, m.scope, m.scopeId, m.assignmentHash];
+}
+function candidateEvidence(q) {
+  if (q.kind !== 'delegatedProspectiveEconomicsConsent') return '0x';
+  const outputs = abi.getFunction('requireProspectiveEconomicsWithEvidence').outputs;
+  return coder.encode([abi.getFunction('requireProspectiveEconomicsWithEvidence').inputs[1], ...outputs],
+    [q.details.candidate, prospectiveFact(q), q.message.assignmentHash === ZeroHash ? id('previous-assignment') : ZeroHash]);
 }
 function creationGrant(q) {
   return {
     grant: { artistId: q.artistId, delegate: q.signer, collectionId: 7n,
-      capabilities: q.kind === 'delegatedPolicyConsent' ? 2n : 1024n,
+      capabilities: q.kind === 'delegatedPolicyConsent' ? 2n : q.kind === 'delegatedSaleConsent' ? 1024n : q.kind === 'delegatedRoyaltyFreeze' ? 32n : 4n,
       notBefore: 1000n, expiresAt: 2000n, maxUses: 5n, constraintsHash: id('uninterpreted-constraints') },
     grantor: A(201), nonce: 6n, uses: 1n, revoked: false, revocationRecordHash: ZeroHash
   };
@@ -119,7 +142,7 @@ function provider(q, opt = {}) {
           return result;
         }
       }
-      return target === A(20) ? code(20) : d.components.some(x => x.address === target) ? code(Number(BigInt(target))) : '0xef0100' + A(200).slice(2);
+      return [A(20), A(30)].includes(target) || d.components.some(x => x.address === target) ? code(Number(BigInt(target))) : '0xef0100' + A(200).slice(2);
     }, async call(tx) {
       calls.push(tx);
       const desc = abi.parseTransaction({ data: tx.data });
@@ -135,6 +158,15 @@ function provider(q, opt = {}) {
       }
       let value;
       switch (name) {
+        case 'reads': value = [A(30)]; break;
+        case 'acceptedBinding':
+        case 'defensiveBinding': value = [binding(q)]; break;
+        case 'artistPayoutAccount': value = [payout.account, payout.recordHash]; break;
+        case 'requireCurrentEconomics': value = ['0x']; break;
+        case 'requireProspectiveEconomicsWithEvidence':
+          value = [prospectiveFact(q), q.message.assignmentHash === ZeroHash ? id('previous-assignment') : ZeroHash];
+          break;
+        case 'requireRoyaltyFreezeProposal': value = []; break;
         case 'suiteConfiguration':
           value = [[A(8), A(9), Array.from({ length: 7 }, (_, i) => A(i + 1)), A(10), A(11), A(12), A(13), A(14), A(15), id('primary'), A(16)]];
           break;
@@ -163,7 +195,9 @@ function provider(q, opt = {}) {
           value = [cfg];
           break;
         case 'getSatellitePointer':
-          value = [A(8), pin(8).codeHash, false, id('ARTIST_REGISTRY'), '0x12345678', A(80), 1, id('manifest'), id('deployment'), 1];
+          value = args[0] === id('ROYALTY_RESOLVER')
+            ? [A(15), pin(15).codeHash, false, id('ROYALTY_RESOLVER'), '0x12345678', A(80), 1, id('manifest'), id('deployment'), 1]
+            : [A(8), pin(8).codeHash, false, id('ARTIST_REGISTRY'), '0x12345678', A(80), 1, id('manifest'), id('deployment'), 1];
           break;
         case 'artistRegistryCutover':
           value = [false, ZeroAddress, 0];
@@ -220,7 +254,7 @@ function provider(q, opt = {}) {
         else {
           if (name === action.method) {
             value = [record({
-                action, authority: { authorityClass: opt.authorityClass ?? 1n }
+                action, authority: { authorityClass: opt.authorityClass ?? 1n }, economics: { payout }
               }, BigInt(1000 + tag))];
           }
           else {
@@ -236,7 +270,7 @@ const B = abi.getFunction('binding').outputs[0];
 const S = '(bytes32 domainId,uint64 revision,bytes32 stateRoot,bytes32 recordChainTip)';
 const F = '(bytes32 artistId,address authorityAddress,uint8 authorityClass,uint8 status)';
 const P = '(address signer,bytes32 digest,bool direct)';
-function record(c, time) {
+function record(c, time, executedPayout = c.economics?.payout ?? payout) {
   const q = c.action.request;
   const m = q.message;
   const core = A(10);
@@ -248,6 +282,13 @@ function record(c, time) {
     return grantHash({
       grant, nonce: n
     });
+  }
+  if (isEconomics(q)) {
+    return keccak256(coder.encode(
+      ['bytes32', 'uint256', 'address', 'address', 'bytes32', 'uint8', 'uint256', 'bytes32', 'bytes32', 'bytes32', 'address', 'uint8', 'uint256', 'uint64'],
+      [id('6529STREAM_ARTIST_ECONOMICS_CONSENT_RECORD_V1'), ...common, m.resolver, m.revenueClass,
+        m.scope, m.scopeId, m.assignmentHash, executedPayout.recordHash, q.artistId, q.signer, 2, n, time]
+    ));
   }
   const maps = {
     delegatedPolicyConsent: [['bytes32','uint256','address','address','uint256','bytes32','bytes32','bytes32','address','uint8','uint256','uint64'],
@@ -269,19 +310,21 @@ function record(c, time) {
     contentFreeze: [['bytes32', 'uint256', 'address', 'address', 'address', 'uint256', 'bytes32[]', 'bytes32', 'bytes32', 'address', 'uint8', 'uint256', 'uint64'], [id('6529STREAM_ARTIST_CONTENT_FREEZE_RECORD_V1'), ...common, m.metadataContract, core, m.collectionId, m.lockClasses, m.expectedStateHash, artist, q.signer, cl, n, time]],
     authorizationRevocation: [['bytes32', 'uint256', 'address', 'bytes32', 'bytes32', 'uint256', 'uint256', 'uint64'], [id('6529STREAM_ARTIST_AUTH_REVOCATION_RECORD_V1'), ...common, artist, m.revokedDigest, m.revokedNonce, n, time]]
   };
-  return keccak256(coder.encode(...maps[q.kind]));
+  return keccak256(coder.encode(...maps[q.kind === 'delegatedRoyaltyFreeze' ? 'royaltyFreeze' : q.kind]));
 }
-function mined(c, { safe = false, indexed = false, mutateArchive, afterRead } = {}) {
+function mined(c, { safe = false, indexed = false, mutateArchive, afterRead, executedPayout = c.economics?.payout ?? payout, executedCandidateEvidence = c.economics?.candidateEvidence, originalRecord } = {}) {
   const q = c.action.request;
   const m = q.message;
   const tag = 11;
   const time = 1011n;
   const cl = isDelegated(q) ? 2n : c.authority.authorityClass;
-  const rh = record(c, time);
+  const rh = record(c, time, executedPayout);
   const fn = abi.getFunction(c.action.method);
   const decodedCall = abi.decodeFunctionData(fn, c.action.call.data);
   const t = decodedCall[0];
-  const auth = decodedCall[isDelegated(q) ? 2 : 1];
+  const authIndex = q.kind === 'delegatedProspectiveEconomicsConsent' ? 3 : isDelegated(q) ? 2 : 1;
+  const auth = decodedCall[authIndex];
+  const economicsAssociation = isEconomics(q) ? [q.artistId, 2n, id('binding'), keccak256(coder.encode([fn.inputs[0]], [t])), originalRecord ?? rh] : null;
   let types = q.kind === 'authorizationRevocation' ? [fn.inputs[0], fn.inputs[1], P] : [B, fn.inputs[0], fn.inputs[1], P];
   let values = q.kind === 'authorizationRevocation' ? [t, auth, [q.signer, c.action.payload.digest, q.mode === 'direct']] : [binding(q), t, auth, [q.signer, c.action.payload.digest, q.mode === 'direct']];
   const effectiveTime = q.kind === 'identityRevision' ? (m.signedAt === 0n ? time : m.signedAt) : time;
@@ -303,7 +346,17 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead } = 
       }
     }
   }
-  if (isDelegated(q)) {
+  if (economicKinds.includes(q.kind)) {
+    const innerTypes = isEconomics(q)
+      ? [B, fn.inputs[0], '(address account,bytes32 recordHash)', fn.inputs[authIndex], P, 'bytes', abi.getFunction('economicsRecordAssociation').outputs[0]]
+      : [B, fn.inputs[0], fn.inputs[authIndex], P];
+    const innerValues = isEconomics(q)
+      ? [binding(q), t, executedPayout, auth, proof, executedCandidateEvidence, economicsAssociation]
+      : [binding(q), t, auth, proof];
+    types = ['bytes', 'bytes32', abi.getFunction('delegationRecord').outputs[0]];
+    values = [coder.encode(innerTypes, innerValues), q.details.grant, c.delegation];
+  }
+  else if (isDelegated(q)) {
     types = [B,fn.inputs[0],fn.inputs[2],P,'bytes32',abi.getFunction('delegationRecord').outputs[0],'bytes'];
     const facts = q.kind === 'delegatedPolicyConsent' ? '0x'
       : coder.encode(['address','bytes32','bytes32','bytes32','bytes4','uint256','bytes32'],
@@ -319,7 +372,7 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead } = 
     values.push(coder.encode(['address', 'bytes32', 'bytes32', 'bytes32', 'bytes4', 'uint256', 'bytes32'], [A(80), id('registrycode'), id('adaptercode'), id('kind'), '0x12345678', m.collectionId, m.saleConfigHash]));
   }
   const identityOnly = ['authorizationRevocation', 'identityRevision', 'delegationGrant', 'delegationRevocation'].includes(q.kind);
-  const mask = identityOnly ? 4 : q.kind === 'bindingRefusal' ? 21 : 87;
+  const mask = identityOnly ? 4 : q.kind === 'bindingRefusal' ? 21 : isEconomics(q) ? 119 : 87;
   const writeMask = identityOnly ? 4 : q.kind === 'bindingRefusal' ? 21 : 68;
   const snap = after => domains.map((domain, i) => {
     const written = Boolean(after && (writeMask & (1 << i)));
@@ -350,6 +403,14 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead } = 
     case 'delegatedPolicyConsent':
       specs.push([A(7),'ArtistPolicyConsentRecorded',[1,m.collectionId,m.policyHash,q.signer,m.phaseId,2,m.nonce,time,rh]]);
       break;
+    case 'delegatedEconomicsConsent':
+    case 'delegatedProspectiveEconomicsConsent':
+      specs.push([A(7), 'ArtistEconomicsConsentRecorded', [1, t.collectionId, t.assignmentHash, q.signer,
+        t.revenueClass, t.scope, t.scopeId, executedPayout.recordHash, 2, m.nonce, time, rh]],
+      [A(7), 'ArtistRecordDelegation', [1, rh, q.details.grant, q.artistId, t.resolver, t.revenueClass, 2]],
+      [A(7), 'ArtistEconomicsConsentAssociated', [1, rh, q.artistId, id('binding'), 2, economicsAssociation[3], economicsAssociation[4]]]);
+      break;
+    case 'delegatedRoyaltyFreeze':
     case 'royaltyFreeze':
       specs.push([A(7), 'ArtistRoyaltyFreezeAuthorized', [1, m.collectionId, m.expectedAssignmentHash, q.signer, cl, m.nonce, time, rh]]);
       break;
@@ -358,7 +419,10 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead } = 
       break;
     case 'authorizationRevocation': specs.push([A(3), 'ArtistAuthorizationRevoked', [1, artist, m.revokedDigest, m.revokedNonce, m.nonce, time, rh]]);
   }
-  if (isDelegated(q)) {
+  if (q.kind === 'delegatedRoyaltyFreeze') {
+    specs.push([A(7), 'ArtistRecordDelegation', [1, rh, q.details.grant, q.artistId, t.resolver, t.revenueClass, 2]]);
+  }
+  else if (isDelegated(q) && !isEconomics(q)) {
     specs.push([A(7),'ArtistConsentDelegationRecorded',[1,rh,q.details.grant,q.artistId,c.action.operationId]]);
   }
   specs.push([A(9), 'ArtistArchiveEvidenceAppendedV2', [eid, 1, keccak256(raw), A(201), (raw.length - 2) / 2]]);
@@ -381,6 +445,8 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead } = 
   const rpc = provider(q, {
     authorityClass: c.authority.authorityClass, read(name, args, call) {
       if (call.blockTag !== tag) {
+        if (name === 'requireCurrentEconomics' && c.economics) return [c.economics.candidateEvidence];
+        if (name === 'artistPayoutAccount' && c.economics) return [c.economics.payout.account, c.economics.payout.recordHash];
         if (name === 'delegationRecord' && c.delegation) {
           return [c.delegation];
         }
@@ -400,6 +466,11 @@ function mined(c, { safe = false, indexed = false, mutateArchive, afterRead } = 
         return replacement;
       }
       switch (name) {
+        case 'designationRecord': return [[q.artistId, executedPayout.account, ZeroHash]];
+        case 'economicsRecord': return [originalRecord ?? rh];
+        case 'economicsRecordForBinding': return [rh];
+        case 'economicsRecordAssociation':
+          return [args[0] === rh ? economicsAssociation : [id('earlier-artist'), 1n, id('earlier-binding'), economicsAssociation[3], originalRecord]];
         case 'identityRevisionRecord':
           return [[rh, q.artistId, m.previousRecordHash, m.revisedRecordHash, ZeroHash, q.signer, 1, m.nonce, effectiveTime, q.details.identityRecordURI, q.details.displayName]];
         case 'identityDocumentBytes':
@@ -1373,4 +1444,247 @@ test('recorded sale format supports principal classes with zero association; cla
     await assert.rejects(flow.inspectCurrentArtistRecordedConsent(recordedProvider(malformed), d,
       recordedRequest(malformed), { blockTag: 3000 }), /delegation differ/);
   }
+});
+
+test('delegated economics and freeze capture pinned Reads evidence and simulate the exact actual caller', async () => {
+  for (const kind of economicKinds) {
+    const q = request(kind);
+    const rpc = provider(q);
+    const c = await flow.captureCurrentArtistOperation(rpc, economicsDeployment, q, { blockTag: 10 });
+    assert.equal(c.action.operationId, kind === 'delegatedRoyaltyFreeze' ? 20n : 15n);
+    assert.equal(c.authority.address, A(200));
+    assert.notEqual(c.delegation.grantor, c.authority.address);
+    assert.equal(c.delegation.grant.capabilities, kind === 'delegatedRoyaltyFreeze' ? 32n : 4n);
+    assert.equal(c.economics?.payout.recordHash ?? null, isEconomics(q) ? payout.recordHash : null);
+    assert.equal(c.economics?.candidateEvidence, isEconomics(q) ? candidateEvidence(q) : undefined);
+    const result = await flow.simulateCurrentArtistCall(rpc, c, { blockTag: 10 });
+    assert.equal(result.recordHash, record(c, 1010n));
+    assert.equal(rpc.calls.at(-1).from, q.caller);
+    assert.equal(rpc.calls.at(-1).blockTag, 10);
+    assert(Object.isFrozen(c.deployment.reads));
+    if (c.economics) assert(Object.isFrozen(c.economics.payout));
+    if (kind === 'delegatedRoyaltyFreeze') {
+      assert(!rpc.calls.some(tx => abi.parseTransaction(tx).name === 'artistPayoutAccount'));
+    }
+  }
+});
+
+test('Reads runtime, Coordinator binding, selected royalty resolver and exact canonical returns fail closed', async () => {
+  const q = request('delegatedRoyaltyFreeze');
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(q), d, q, { blockTag: 10 }), /Reads runtime pin/);
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(q, { read: n => n === 'reads' ? [A(31)] : undefined }), economicsDeployment, q, { blockTag: 10 }), /Reads binding/);
+  const delegatedCode = '0xef0100' + A(31).slice(2);
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(q, { code: a => a === A(30) ? delegatedCode : undefined }), {
+    ...economicsDeployment, reads: { address: A(30), codeHash: keccak256(delegatedCode) }
+  }, q, { blockTag: 10 }), /runtime/);
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(q, { read: (n, args) => n === 'getSatellitePointer' && args[0] === id('ROYALTY_RESOLVER')
+    ? [A(31), pin(31).codeHash, false, id('ROYALTY_RESOLVER'), '0x12345678', A(80), 1, id('manifest'), id('deployment'), 1] : undefined
+  }), economicsDeployment, q, { blockTag: 10 }), /not selected/);
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(q, { read: n => n === 'requireRoyaltyFreezeProposal' ? { raw: ZeroHash } : undefined }), economicsDeployment, q, { blockTag: 10 }), /Noncanonical/);
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(q, { read: n => n === 'defensiveBinding' ? [[...binding(q).slice(0, 3), id('different-binding'), ...binding(q).slice(4)]] : undefined }), economicsDeployment, q, { blockTag: 10 }), /Reads binding/);
+  const wrongResolver = request('delegatedEconomicsConsent');
+  wrongResolver.message.resolver = A(90);
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(wrongResolver), economicsDeployment, wrongResolver, { blockTag: 10 }), /resolver differs/);
+});
+
+test('new delegated routes admit modes1or2, freeze grant32 and defensive status4 without widening economics authority', async () => {
+  for (const kind of economicKinds) {
+    const q = request(kind);
+    for (const mode of [1n, 2n]) {
+      const b = binding(q); b[5] = mode;
+      const rpc = provider(q, { read: n => ['binding', 'acceptedBinding', 'defensiveBinding'].includes(n) ? [b] : undefined });
+      await flow.captureCurrentArtistOperation(rpc, economicsDeployment, q, { blockTag: 10 });
+    }
+    for (const mode of [0n, 3n]) {
+      const b = binding(q); b[5] = mode;
+      await assert.rejects(flow.captureCurrentArtistOperation(provider(q, { read: n => n === 'binding' ? [b] : undefined }), economicsDeployment, q, { blockTag: 10 }), /mode 1 or 2/);
+    }
+    const contested = provider(q, { read: n => n === 'authorityState' ? [A(200), 1n, 4n, id('identity')] : n === 'attributionState' ? [4n, 2n] : undefined });
+    if (kind === 'delegatedRoyaltyFreeze') {
+      await flow.captureCurrentArtistOperation(contested, economicsDeployment, q, { blockTag: 10 });
+    } else {
+      await assert.rejects(flow.captureCurrentArtistOperation(contested, economicsDeployment, q, { blockTag: 10 }), /eligible/);
+    }
+  }
+  const q = request('delegatedRoyaltyFreeze');
+  const wrongGrant = creationGrant(q); wrongGrant.grant.capabilities = 16n;
+  q.details.grant = grantHash(wrongGrant);
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(q, { read: n => n === 'delegationRecord' ? [wrongGrant] : undefined }), economicsDeployment, q, { blockTag: 10 }), /capability/);
+});
+
+test('current economics retains opaque provider evidence while exact write simulation remains authoritative', async () => {
+  for (const [resolver, revenueClass, scope, evidence] of [
+    [A(14), id('primary'), 0n, '0x'],
+    [A(14), id('primary'), 1n, coder.encode(['bytes32', 'bytes'], [id('template-test-evidence'), '0x1234'])],
+    [A(15), id('ROYALTY_ERC2981'), 1n, coder.encode(['bytes32', 'bytes'], [id('snapshot-test-evidence'), '0x5678'])]
+  ]) {
+    const q = request('delegatedEconomicsConsent');
+    Object.assign(q.message, { resolver, revenueClass, scope, scopeId: scope === 0n ? 0n : 7n });
+    const rpc = provider(q, { read: n => n === 'requireCurrentEconomics' ? [evidence] : undefined });
+    const c = await flow.captureCurrentArtistOperation(rpc, economicsDeployment, q, { blockTag: 10 });
+    assert.equal(c.economics.candidateEvidence, evidence);
+    assert.equal(c.simulationRequired, true);
+    const rejected = provider(q, { read: n => {
+      if (n === 'requireCurrentEconomics') return [evidence];
+      if (n === c.action.method) throw Error('Original producer rejects replay/admission');
+    } });
+    await assert.rejects(flow.simulateCurrentArtistCall(rejected, c, { blockTag: 10 }), /producer rejects/);
+  }
+});
+
+test('prospective clear preserves zero assignment and exact candidate/fact/previousHash evidence', async () => {
+  const q = request('delegatedProspectiveEconomicsConsent');
+  const c = await flow.captureCurrentArtistOperation(provider(q), economicsDeployment, q, { blockTag: 10 });
+  assert.equal(c.economics.candidateEvidence, candidateEvidence(q));
+  await assert.rejects(flow.captureCurrentArtistOperation(provider(q, { read: n => n === 'requireProspectiveEconomicsWithEvidence' ? [prospectiveFact(q), id('impossible-previous')] : undefined }), economicsDeployment, q, { blockTag: 10 }), /Prospective economics evidence/);
+  q.message.assignmentHash = ZeroHash;
+  q.details.candidate = { profileHash: ZeroHash, policyHash: ZeroHash, royaltyBps: 0n, frozen: false };
+  const cleared = await flow.captureCurrentArtistOperation(provider(q), economicsDeployment, q, { blockTag: 10 });
+  await flow.simulateCurrentArtistCall(provider(q), cleared, { blockTag: 10 });
+  const r = mined(cleared);
+  const out = await flow.inspectCurrentArtistReceipt(r.rpc, cleared, { transactionHash: r.txHash, execution: 'direct' });
+  assert.equal(out.economics.candidateEvidence, candidateEvidence(q));
+  for (const returned of [[prospectiveFact(q), ZeroHash], [[A(90), ...prospectiveFact(q).slice(1)], id('old')]]) {
+    await assert.rejects(flow.captureCurrentArtistOperation(provider(q, { read: n => n === 'requireProspectiveEconomicsWithEvidence' ? returned : undefined }), economicsDeployment, q, { blockTag: 10 }), /Prospective economics evidence/);
+  }
+});
+
+test('economics admission snapshots inputs before awaits and rejects payout/evidence drift during refresh', async () => {
+  const q = request('delegatedProspectiveEconomicsConsent');
+  const mutable = structuredClone(q);
+  const pins = structuredClone(economicsDeployment);
+  const c = await flow.captureCurrentArtistOperation(provider(q, { mutate: () => {
+    mutable.details.candidate.profileHash = id('changed');
+    pins.reads.address = A(99);
+  } }), pins, mutable, { blockTag: 10 });
+  assert.equal(c.action.request.details.candidate.profileHash, q.details.candidate.profileHash);
+  assert.equal(c.deployment.reads.address, A(30));
+  const drift = provider(q, { read: (n, args, tx) => n === 'artistPayoutAccount' && tx.blockTag === 11 ? [A(151), id('new-payout')] : undefined });
+  await assert.rejects(flow.simulateCurrentArtistCall(drift, c, { blockTag: 11 }), /Economics admission facts changed/);
+  const forged = structuredClone(c); forged.economics.payout.recordHash = id('forged');
+  assert.throws(() => flow.createCurrentArtistSafePlan([forged], 'forged'), /facts changed/);
+  const current = request('delegatedEconomicsConsent');
+  for (const result of [[ZeroAddress, payout.recordHash], [payout.account, ZeroHash]]) {
+    await assert.rejects(flow.captureCurrentArtistOperation(provider(current, { read: n => n === 'artistPayoutAccount' ? result : undefined }), economicsDeployment, current, { blockTag: 10 }), /Zero address|bytes32/);
+  }
+});
+
+test('all three economics/freeze routes join direct and both Safe event layouts with nested original Archive', async () => {
+  for (const kind of economicKinds) {
+    const q = request(kind);
+    const c = await flow.captureCurrentArtistOperation(provider(q), economicsDeployment, q, { blockTag: 10 });
+    for (const options of [{}, { safe: true }, { safe: true, indexed: true }]) {
+      const r = mined(c, options);
+      const result = await flow.inspectCurrentArtistReceipt(r.rpc, c, { transactionHash: r.txHash, execution: options.safe ? 'safe' : 'direct' });
+      assert.equal(result.recordHash, r.rh);
+      assert.equal(result.observedDelegated.nonceUsed, true);
+      assert(result.events.some(e => e.event === 'ArtistRecordDelegation'));
+      assert(!result.events.some(e => e.event === 'ArtistConsentDelegationRecorded'));
+      if (isEconomics(q)) assert.equal(result.economics.association.originalRecord, r.rh);
+      else assert.equal(result.economics, null);
+    }
+  }
+});
+
+test('economics receipts use actual historical payout and permit later current state and grant changes', async () => {
+  const q = request('delegatedEconomicsConsent');
+  const c = await flow.captureCurrentArtistOperation(provider(q), economicsDeployment, q, { blockTag: 10 });
+  const actualPayout = { account: A(152), recordHash: id('executed-payout') };
+  const actualEvidence = coder.encode(['bytes32', 'bytes'], [id('actual-provider-evidence'), '0xaabb']);
+  const r = mined(c, { executedPayout: actualPayout, executedCandidateEvidence: actualEvidence, afterRead: n => {
+    if (['artistPayoutAccount', 'requireCurrentEconomics', 'delegationState', 'delegationEpochState'].includes(n)) throw Error('Current readiness must not run at receipt');
+    if (n === 'delegationRecord') return [{ ...c.delegation, uses: 5n, revoked: true, revocationRecordHash: id('later-revocation') }];
+    if (n === 'artistAuthorizationState') return [[true, false, true, true, 900n]];
+  } });
+  const result = await flow.inspectCurrentArtistReceipt(r.rpc, c, { transactionHash: r.txHash, execution: 'direct' });
+  assert.deepEqual(result.economics.payout, actualPayout);
+  assert.equal(result.economics.candidateEvidence, actualEvidence);
+  assert.notEqual(result.recordHash, record(c, 1011n));
+  assert(Object.isFrozen(result.economics.association));
+});
+
+test('economics continuations retain the first raw record and join the new binding association', async () => {
+  const q = request('delegatedEconomicsConsent');
+  const c = await flow.captureCurrentArtistOperation(provider(q), economicsDeployment, q, { blockTag: 10 });
+  const first = id('first-economics-record');
+  const r = mined(c, { originalRecord: first });
+  const result = await flow.inspectCurrentArtistReceipt(r.rpc, c, { transactionHash: r.txHash, execution: 'direct' });
+  assert.equal(result.economics.association.originalRecord, first);
+  assert.notEqual(result.recordHash, first);
+  for (const read of [
+    n => n === 'economicsRecord' ? [id('other-original')] : undefined,
+    n => n === 'economicsRecordForBinding' ? [first] : undefined,
+    (n, args) => n === 'economicsRecordAssociation' && args[0] === first
+      ? [[artist, 2n, id('prior-binding'), result.economics.association.payloadHash, first]] : undefined
+  ]) {
+    const bad = mined(c, { originalRecord: first, afterRead: read });
+    await assert.rejects(flow.inspectCurrentArtistReceipt(bad.rpc, c, { transactionHash: bad.txHash, execution: 'direct' }), /association differs/);
+  }
+});
+
+function mutateNestedArchive(envelope, q, change) {
+  const outerTypes = ['bytes', 'bytes32', abi.getFunction('delegationRecord').outputs[0]];
+  const outer = Array.from(coder.decode(outerTypes, envelope[7]));
+  const fn = abi.getFunction(pure.prepareCurrentArtistAction(q).method);
+  const authIndex = q.kind === 'delegatedProspectiveEconomicsConsent' ? 3 : 2;
+  const innerTypes = isEconomics(q)
+    ? [B, fn.inputs[0], '(address account,bytes32 recordHash)', fn.inputs[authIndex], P, 'bytes', abi.getFunction('economicsRecordAssociation').outputs[0]]
+    : [B, fn.inputs[0], fn.inputs[authIndex], P];
+  const inner = Array.from(coder.decode(innerTypes, outer[0]));
+  change(inner, outer);
+  outer[0] = coder.encode(innerTypes, inner);
+  envelope[7] = coder.encode(outerTypes, outer);
+}
+
+test('nested economics Archive rejects swapped payout, association, candidate, prior grant, and read-only owner mutations', async () => {
+  const q = request('delegatedProspectiveEconomicsConsent');
+  const c = await flow.captureCurrentArtistOperation(provider(q), economicsDeployment, q, { blockTag: 10 });
+  const modifications = [
+    e => mutateNestedArchive(e, q, inner => { inner[2] = [A(153), payout.recordHash]; }),
+    e => mutateNestedArchive(e, q, inner => { const assoc = Array.from(inner[6]); assoc[1] = 9n; inner[6] = assoc; }),
+    e => mutateNestedArchive(e, q, inner => {
+      const types = [abi.getFunction('requireProspectiveEconomicsWithEvidence').inputs[1], ...abi.getFunction('requireProspectiveEconomicsWithEvidence').outputs];
+      inner[5] = coder.encode(types, [q.details.candidate, prospectiveFact(q), id('nonclear-previous')]);
+    }),
+    e => mutateNestedArchive(e, q, (inner, outer) => { outer[1] = id('wrong-grant'); }),
+    e => { e[6][5][1] = 2n; }
+  ];
+  for (const mutateArchive of modifications) {
+    const r = mined(c, { mutateArchive });
+    await assert.rejects(flow.inspectCurrentArtistReceipt(r.rpc, c, { transactionHash: r.txHash, execution: 'direct' }), /payout designation|Archive request|Prospective economics|read-only owner/);
+  }
+  const badDesignation = mined(c, { afterRead: n => n === 'designationRecord' ? [[id('wrong-artist'), payout.account, ZeroHash]] : undefined });
+  await assert.rejects(flow.inspectCurrentArtistReceipt(badDesignation.rpc, c, { transactionHash: badDesignation.txHash, execution: 'direct' }), /payout designation/);
+});
+
+test('economics and freeze Safe plans retain delegate lanes and reject grant revocation before use', async () => {
+  for (const kind of economicKinds) {
+    const q = request(kind);
+    const c = await flow.captureCurrentArtistOperation(provider(q), economicsDeployment, q, { blockTag: 10 });
+    const revoke = request('delegationRevocation', { signer: c.delegation.grantor, caller: c.delegation.grantor });
+    revoke.message.delegate = q.signer;
+    revoke.message.delegationRecordHash = q.details.grant;
+    const revocation = await flow.captureCurrentArtistOperation(provider(revoke, { read: n => n === 'delegationRecord' ? [c.delegation] : undefined }), d, revoke, { blockTag: 10 });
+    const plan = flow.createCurrentArtistSafePlan([c, revocation], 'Use then revoke');
+    assert(plan.steps.every(s => s.transaction.operation === 0 && s.transaction.value === '0'));
+    assert.throws(() => flow.createCurrentArtistSafePlan([revocation, c], 'Revoke then use'), /follows its grant revocation/);
+    assert.throws(() => flow.createCurrentArtistSafePlan([c, c], 'Duplicate'), /Duplicate Artist authorization nonce/);
+  }
+});
+
+test('economics receipts reject wrong delegation transport and source/Safe event order', async () => {
+  const q = request('delegatedEconomicsConsent');
+  const c = await flow.captureCurrentArtistOperation(provider(q), economicsDeployment, q, { blockTag: 10 });
+  let r = mined(c, { safe: true });
+  const delegationLog = r.receipt.logs[1];
+  Object.assign(delegationLog, abi.encodeEventLog(abi.getEvent('ArtistConsentDelegationRecorded'), [1, r.rh, q.details.grant, q.artistId, 15]));
+  await assert.rejects(flow.inspectCurrentArtistReceipt(r.rpc, c, { transactionHash: r.txHash, execution: 'safe' }), /Expected one ArtistRecordDelegation/);
+  r = mined(c, { safe: true });
+  [r.receipt.logs[0], r.receipt.logs[1]] = [r.receipt.logs[1], r.receipt.logs[0]];
+  r.receipt.logs.forEach((l, index) => { l.index = index; });
+  await assert.rejects(flow.inspectCurrentArtistReceipt(r.rpc, c, { transactionHash: r.txHash, execution: 'safe' }), /event order/);
+  r = mined(c, { safe: true });
+  r.receipt.logs.unshift(r.receipt.logs.pop());
+  r.receipt.logs.forEach((l, index) => { l.index = index; });
+  await assert.rejects(flow.inspectCurrentArtistReceipt(r.rpc, c, { transactionHash: r.txHash, execution: 'safe' }), /Safe success must follow/);
 });

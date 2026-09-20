@@ -23,9 +23,15 @@ const selections = {
     "operativeEstateDirective", "estateDirectiveRecord", "activeAuthorityWindow",
     "recordDelegatedPolicyConsent", "recordDelegatedSaleConsent", "policyConsentDigest",
     "isPolicyConsented", "requireMintConsent", "requireSaleConsent",
+    "recordDelegatedEconomicsConsent", "recordDelegatedProspectiveEconomicsConsent", "authorizeDelegatedRoyaltyFreeze",
+    "economicsConsentDigest", "artistPayoutAccount", "requireEconomicsConsent",
   ] },
   coordinator: { source: base + "StreamArtistOnboardingCoordinator.sol", contract: "StreamArtistOnboardingCoordinator",
-    methods: ["suiteConfiguration", "deploymentChainId", "configurationHash"] },
+    methods: ["suiteConfiguration", "deploymentChainId", "configurationHash", "reads"] },
+  reads: { source: base + "StreamArtistOnboardingReads.sol", contract: "StreamArtistOnboardingReads", methods: [
+    "acceptedBinding", "defensiveBinding", "artistPayoutAccount", "requireCurrentEconomics",
+    "requireProspectiveEconomicsWithEvidence", "requireRoyaltyFreezeProposal",
+  ] },
   owner: { source: base + "StreamArtistOwner.sol", contract: "StreamArtistOwner", methods: sharedOwner },
   identity: { source: base + "StreamArtistIdentityAuthority.sol", contract: "StreamArtistIdentityAuthority",
     methods: ["authorityState", "artistAuthorizationState", "currentAuthorityCapabilities", "delegationEpochState", "signatureBundle", "replayCell",
@@ -36,9 +42,12 @@ const selections = {
   attribution: { source: base + "StreamArtistAttributionLifecycle.sol", contract: "StreamArtistAttributionLifecycle",
     methods: ["attributionState"], events: ["ArtistAttributionStateChanged", "ArtistBindingTerminationContext"] },
   collaborator: { source: base + "StreamArtistCollaboratorLifecycle.sol", contract: "StreamArtistCollaboratorLifecycle", methods: ["acceptedCount"] },
+  payout: { source: base + "StreamArtistPayoutLifecycle.sol", contract: "StreamArtistPayoutLifecycle", methods: ["designationRecord"] },
   consent: { source: base + "StreamArtistConsentFinalityLifecycle.sol", contract: "StreamArtistConsentFinalityLifecycle",
-    methods: ["saleConsentRecord", "saleConsentAt", "royaltyFreezeRecord", "contentFreezeRecord", "contentFreezeAt", "policyRecord", "recordDelegation"],
-    events: ["ArtistSaleConsentRecorded", "ArtistRoyaltyFreezeAuthorized", "ArtistContentFreezeAuthorized", "ArtistContentRecordContext", "ArtistPolicyConsentRecorded"] },
+    methods: ["saleConsentRecord", "saleConsentAt", "royaltyFreezeRecord", "contentFreezeRecord", "contentFreezeAt", "policyRecord", "recordDelegation",
+      "economicsRecord", "economicsRecordForBinding", "economicsRecordAssociation"],
+    events: ["ArtistSaleConsentRecorded", "ArtistRoyaltyFreezeAuthorized", "ArtistContentFreezeAuthorized", "ArtistContentRecordContext", "ArtistPolicyConsentRecorded",
+      "ArtistEconomicsConsentRecorded", "ArtistEconomicsConsentAssociated", "ArtistRecordDelegation"] },
   consentTransport: { source: base + "StreamArtistConsentTransport.sol", contract: "StreamArtistConsentTransport",
     methods: [], events: ["ArtistConsentDelegationRecorded"] },
   delegatedConsent: { source: "smart-contracts/interfaces/stream/artist/IStreamArtistDelegatedConsent.sol", contract: "IStreamArtistDelegatedConsent",
@@ -53,7 +62,9 @@ const oracleSources = ["StreamArtistHashes.sol", "StreamArtistBindingOperations.
   "StreamArtistIdentityRevisionState.sol", "StreamArtistDelegationState.sol", "StreamArtistIdentityState.sol",
   "StreamArtistIdentityOperations.sol", "StreamArtistEconomicOperations.sol", "StreamArtistDelegatedConsentOperations.sol",
   "StreamArtistDelegatedMutation.sol", "StreamArtistConsentTransport.sol", "StreamArtistConsentState.sol",
-  "StreamArtistSaleOperations.sol", "StreamArtistOnboardingReads.sol"].map(name => base + name);
+  "StreamArtistSaleOperations.sol", "StreamArtistOnboardingReads.sol", "StreamArtistEconomicsAssociation.sol",
+  "StreamArtistConsentReadEncoding.sol", "StreamArtistProfilePayoutReads.sol", "StreamArtistRoyaltyModeReads.sol",
+  "StreamArtistTemplateEconomicsReads.sol", "StreamArtistDefaultTemplateReads.sol"].map(name => base + name);
 
 export function artistOperationFixture(inputBytes, outputBytes) {
   if (sha(inputBytes) !== INPUT_SHA || sha(outputBytes) !== OUTPUT_SHA) throw Error("Expected exact frozen Artist ABI52 compiler capture");

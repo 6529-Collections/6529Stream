@@ -13,6 +13,8 @@ export interface CurrentArtistDeployment {
   readonly registry: CurrentArtistCodePin;
   readonly coordinator: CurrentArtistCodePin;
   readonly components: readonly CurrentArtistCodePin[];
+  /** Required for delegated economics and royalty-freeze admission through the original Reads helper. */
+  readonly reads?: CurrentArtistCodePin;
 }
 type Action = ReturnType<typeof prepareCurrentArtistAction>;
 export interface CurrentArtistAuthority {
@@ -72,6 +74,18 @@ export interface CurrentArtistDelegatedObservation {
   readonly epochCurrent: bigint;
   readonly usesRemaining: bigint;
 }
+export interface CurrentArtistEconomicsObservation {
+  readonly payout: { readonly account: Address; readonly recordHash: Hex };
+  /** Original helper evidence; its format depends on the selected economics provider. */
+  readonly candidateEvidence: Hex;
+}
+export interface CurrentArtistEconomicsAssociation {
+  readonly artistId: Hex;
+  readonly bindingGeneration: bigint;
+  readonly bindingHash: Hex;
+  readonly payloadHash: Hex;
+  readonly originalRecord: Hex;
+}
 export interface CurrentArtistCapture {
   readonly deployment: CurrentArtistDeployment;
   readonly action: Action;
@@ -89,6 +103,7 @@ export interface CurrentArtistCapture {
   } | null;
   readonly delegation: CurrentArtistDelegationRecord | null;
   readonly delegated: CurrentArtistDelegatedObservation | null;
+  readonly economics: CurrentArtistEconomicsObservation | null;
   /** Authority/replay observation only; exact write simulation performs operation-specific admission. */
   readonly simulationRequired: true;
   readonly captureHash: Hex;
@@ -111,6 +126,8 @@ export interface CurrentArtistReceipt {
   readonly observedReplay: CurrentArtistReplay;
   readonly observedDelegated: { readonly nonceUsed: boolean; readonly nextUnusedNonce: bigint } | null;
   readonly effectiveDigest: Hex;
+  /** Actual archived economics facts at execution, independently of later operative payout changes. */
+  readonly economics: (CurrentArtistEconomicsObservation & { readonly association: CurrentArtistEconomicsAssociation }) | null;
 }
 type Reader = Pick<Provider, "getNetwork" | "getBlock" | "getCode" | "call">;
 type ReceiptReader = Reader & Pick<Provider, "getTransaction" | "getTransactionReceipt">;
@@ -123,6 +140,11 @@ const F = "(bytes32 artistId,address authorityAddress,uint8 authorityClass,uint8
 const R = "(bool digestObserved,bool digestRevoked,bool nonceConsumed,bool nonceRevoked,uint256 nextUnusedNonce)";
 const G = "(bytes32 artistId,address delegate,uint256 collectionId,uint32 capabilities,uint64 notBefore,uint64 expiresAt,uint64 maxUses,bytes32 constraintsHash)";
 const D = `(${G} grant,address grantor,uint256 nonce,uint256 uses,bool revoked,bytes32 revocationRecordHash)`;
+const E = "(uint256 collectionId,address resolver,bytes32 revenueClass,uint8 scope,uint256 scopeId,bytes32 assignmentHash)";
+const C = "(bytes32 profileHash,bytes32 policyHash,uint16 royaltyBps,bool frozen)";
+const AF = "(address resolver,bytes32 revenueClass,uint8 scope,uint256 scopeId,bytes32 assignmentHash)";
+const PAYOUT = "(address account,bytes32 recordHash)";
+const EA = "(bytes32 artistId,uint64 bindingGeneration,bytes32 bindingHash,bytes32 payloadHash,bytes32 originalRecord)";
 const terms = {
   bindingRefusal: "(uint256 collectionId,uint64 generation,bytes32 bindingHash,bytes32 reasonHash,string reasonURI)",
   saleConsent: "(uint256 collectionId,address saleAdapter,bytes32 saleId,bytes32 saleConfigHash)",
@@ -132,10 +154,27 @@ const terms = {
   identityRevision: "(bytes32 artistId,bytes32 previousRecordHash,bytes32 revisedRecordHash,string identityRecordURI)",
   delegatedPolicyConsent: "(uint256 collectionId,bytes32 phaseId,bytes32 policyHash)",
   delegatedSaleConsent: "(uint256 collectionId,address saleAdapter,bytes32 saleId,bytes32 saleConfigHash)",
+  delegatedEconomicsConsent: E,
+  delegatedProspectiveEconomicsConsent: E,
+  delegatedRoyaltyFreeze: "(address resolver,uint256 collectionId,bytes32 revenueClass,bytes32 expectedAssignmentHash)",
   delegationGrant: G,
   delegationRevocation: "(bytes32 artistId,address delegate,bytes32 delegationRecordHash,bytes32 reasonHash)"
 } as const;
 const abi = new Interface([...CURRENT_ARTIST_OPERATION_ABI,
+  "function reads() view returns(address)",
+  `function acceptedBinding(uint256) view returns(${B})`,
+  `function defensiveBinding(uint256) view returns(${B})`,
+  "function artistPayoutAccount(bytes32) view returns(address,bytes32)",
+  `function requireCurrentEconomics(${E},address) view returns(bytes)`,
+  `function requireProspectiveEconomicsWithEvidence(${E},${C},address) view returns(${AF} fact,bytes32 previousHash)`,
+  `function requireRoyaltyFreezeProposal(${terms.royaltyFreeze}) view`,
+  "function designationRecord(bytes32) view returns((bytes32 artistId,address payoutAccount,bytes32 previousDesignationRecordHash))",
+  `function economicsRecord(${E}) view returns(bytes32)`,
+  `function economicsRecordForBinding(${E},bytes32,uint64,bytes32) view returns(bytes32)`,
+  `function economicsRecordAssociation(bytes32) view returns(${EA})`,
+  "event ArtistEconomicsConsentRecorded(uint16 schemaVersion,uint256 indexed collectionId,bytes32 indexed assignmentHash,address indexed signer,bytes32 revenueClass,uint8 scope,uint256 scopeId,bytes32 payoutDesignationRecordHash,uint8 authorityClass,uint256 nonce,uint64 signedAt,bytes32 consentRecordHash)",
+  "event ArtistEconomicsConsentAssociated(uint16 schemaVersion,bytes32 indexed recordHash,bytes32 indexed artistId,bytes32 indexed bindingHash,uint64 bindingGeneration,bytes32 payloadHash,bytes32 originalRecord)",
+  "event ArtistRecordDelegation(uint16 schemaVersion,bytes32 indexed recordHash,bytes32 indexed delegationRecordHash,bytes32 indexed artistId,address resolver,bytes32 revenueClass,uint8 authorityClass)",
   "function policyRecord(uint256,bytes32,bytes32) view returns(bytes32)",
   "function recordDelegation(bytes32) view returns(bytes32)",
   "function saleConsentAt(uint256,bytes32,bytes32) view returns(bytes32)",
@@ -269,12 +308,13 @@ function pin(p: CurrentArtistCodePin): CurrentArtistCodePin {
   };
 }
 function deployment(v: CurrentArtistDeployment): CurrentArtistDeployment {
-  keys(v, ["chainId", "registry", "coordinator", "components"]);
+  keys(v, ["chainId", "registry", "coordinator", "components", ...(v.reads === undefined ? [] : ["reads"])]);
   if (!Array.isArray(v.components) || v.components.length !== 16) {
     throw Error("Expected exactly16 component pins");
   }
   const d = {
-    chainId: uint(v.chainId), registry: pin(v.registry), coordinator: pin(v.coordinator), components: v.components.map(pin)
+    chainId: uint(v.chainId), registry: pin(v.registry), coordinator: pin(v.coordinator), components: v.components.map(pin),
+    ...(v.reads === undefined ? {} : { reads: pin(v.reads) })
   };
   if (d.chainId === 0n || !same(d.components[7]!.address, d.registry.address) || !same(d.components[7]!.codeHash, d.registry.codeHash) || new Set([d.coordinator.address, ...d.components.map(p => p.address)]).size !== 17) {
     throw Error("Invalid exact Artist deployment pins");
@@ -313,7 +353,7 @@ async function context(p: Reader, d: CurrentArtistDeployment, tag: number, curre
     throw Error("RPC chain mismatch");
   }
   const h = await header(p, tag);
-  await Promise.all([d.coordinator, ...d.components].map(async (x) => {
+  await Promise.all([d.coordinator, ...d.components, ...(d.reads ? [d.reads] : [])].map(async (x) => {
     const code = bytes(await p.getCode(x.address, tag), 65536);
     if (code === "0x" || (code.length === 48 && code.startsWith("0xef0100")) || !same(keccak256(code), x.codeHash)) {
       throw Error("Pinned Artist runtime differs");
@@ -322,6 +362,9 @@ async function context(p: Reader, d: CurrentArtistDeployment, tag: number, curre
   const [suite] = await read(p, d.coordinator.address, "suiteConfiguration", [], tag);
   const ordered = [...suite.owners, suite.registry, suite.archive, suite.core, suite.mintManager, suite.roleRegistry, suite.metadata, suite.primaryResolver, suite.royaltyResolver, suite.validator];
   equal(ordered.map(address), d.components.map(p => p.address), "Suite component pins differ");
+  if (d.reads && !same((await read(p, d.coordinator.address, "reads", [], tag))[0], d.reads.address)) {
+    throw Error("Coordinator Reads binding differs");
+  }
   if ((await read(p, d.coordinator.address, "deploymentChainId", [], tag))[0] !== d.chainId) {
     throw Error("Coordinator chain differs");
   }
@@ -373,7 +416,7 @@ function captureHash(v: unknown): Hex {
   return keccak256(new TextEncoder().encode(stable(v))) as Hex;
 }
 function saved(v: CurrentArtistCapture): CurrentArtistCapture {
-  keys(v, ["deployment", "action", "blockNumber", "blockHash", "timestamp", "configurationHash", "authority", "binding", "replay", "revocationTarget", "timing", "revision", "delegation", "delegated", "simulationRequired", "captureHash"]);
+  keys(v, ["deployment", "action", "blockNumber", "blockHash", "timestamp", "configurationHash", "authority", "binding", "replay", "revocationTarget", "timing", "revision", "delegation", "delegated", "economics", "simulationRequired", "captureHash"]);
   const d = deployment(v.deployment);
   const a = normalizeCurrentArtistAction(v.action);
   const c = copy(v);
@@ -387,6 +430,27 @@ function saved(v: CurrentArtistCapture): CurrentArtistCapture {
 }
 function delegatedConsent(q: CurrentArtistOperationRequest): q is Extract<CurrentArtistOperationRequest, { kind: "delegatedPolicyConsent" | "delegatedSaleConsent" }> {
   return q.kind === "delegatedPolicyConsent" || q.kind === "delegatedSaleConsent";
+}
+function economicsOperation(q: CurrentArtistOperationRequest): q is Extract<CurrentArtistOperationRequest, { kind: "delegatedEconomicsConsent" | "delegatedProspectiveEconomicsConsent" }> {
+  return q.kind === "delegatedEconomicsConsent" || q.kind === "delegatedProspectiveEconomicsConsent";
+}
+function economicsOrFreeze(q: CurrentArtistOperationRequest): q is Extract<CurrentArtistOperationRequest, { kind: "delegatedEconomicsConsent" | "delegatedProspectiveEconomicsConsent" | "delegatedRoyaltyFreeze" }> {
+  return economicsOperation(q) || q.kind === "delegatedRoyaltyFreeze";
+}
+function delegatedOperation(q: CurrentArtistOperationRequest): q is Extract<CurrentArtistOperationRequest, { kind: "delegatedPolicyConsent" | "delegatedSaleConsent" | "delegatedEconomicsConsent" | "delegatedProspectiveEconomicsConsent" | "delegatedRoyaltyFreeze" }> {
+  return delegatedConsent(q) || economicsOrFreeze(q);
+}
+function collectionId(q: CurrentArtistOperationRequest): bigint | undefined {
+  return economicsOperation(q) ? q.details.collectionId : "collectionId" in q.message ? q.message.collectionId : undefined;
+}
+function prospectiveEvidence(q: Extract<CurrentArtistOperationRequest, { kind: "delegatedProspectiveEconomicsConsent" }>, t: any, raw: Hex): Hex {
+  const [candidate, fact, previousHash] = decode([C, AF, "bytes32"], raw);
+  if (!same(coder.encode([C], [candidate]), coder.encode([C], [q.details.candidate]))
+    || !same(coder.encode([AF], [fact]), coder.encode([AF], [[t.resolver, t.revenueClass, t.scope, t.scopeId, t.assignmentHash]]))
+    || (t.assignmentHash === ZeroHash ? previousHash === ZeroHash : previousHash !== ZeroHash)) {
+    throw Error("Prospective economics evidence differs");
+  }
+  return raw;
 }
 function delegatedDenyKey(d: CurrentArtistDeployment, artistId: Hex, delegate: Address, digest: Hex): Hex {
   const lane = keccak256(coder.encode(["bytes32", "bytes32", "address"],
@@ -479,8 +543,12 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
   const q = action.request;
   const tag = number(options.blockTag);
   const m = q.message as any;
+  const cid = collectionId(q);
   if (q.chainId !== d.chainId || !same(q.registry, d.registry.address)) {
     throw Error("Action deployment differs");
+  }
+  if (economicsOrFreeze(q) && !d.reads) {
+    throw Error("Delegated economics/freeze requires the Coordinator Reads runtime pin");
   }
   const h = await context(p, d, tag, true);
   if (m.mintManager !== undefined && !same(m.mintManager, d.components[10]!.address)) {
@@ -491,15 +559,15 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
   }
   const observedTiming = timing(action, h.timestamp);
   let b: CurrentArtistBinding | null = null;
-  if (["bindingRefusal", "saleConsent", "royaltyFreeze", "contentFreeze", "delegatedPolicyConsent", "delegatedSaleConsent"].includes(q.kind) || (q.kind === "delegationGrant" && m.collectionId !== 0n)) {
-    if ((await read(p, d.components[9]!.address, "collectionExists", [m.collectionId], tag))[0] !== true) {
+  if (["bindingRefusal", "saleConsent", "royaltyFreeze", "contentFreeze", "delegatedPolicyConsent", "delegatedSaleConsent"].includes(q.kind) || economicsOrFreeze(q) || (q.kind === "delegationGrant" && m.collectionId !== 0n)) {
+    if ((await read(p, d.components[9]!.address, "collectionExists", [cid], tag))[0] !== true) {
       throw Error("Unknown collection");
     }
-    b = binding((await read(p, d.components[0]!.address, "binding", [m.collectionId], tag))[0]);
+    b = binding((await read(p, d.components[0]!.address, "binding", [cid], tag))[0]);
     if (!same(b.artistId, q.artistId) || b.bindingHash === ZeroHash) {
       throw Error("Binding/replay identity differs");
     }
-    const [state, generation] = await read(p, d.components[4]!.address, "attributionState", [m.collectionId], tag);
+    const [state, generation] = await read(p, d.components[4]!.address, "attributionState", [cid], tag);
     if (generation !== b.generation) {
       throw Error("Binding generation differs");
     }
@@ -510,7 +578,7 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
       }
     }
     else {
-      if (!b.accepted || !([2n, 3n].includes(state) || ["royaltyFreeze", "contentFreeze"].includes(q.kind) && state === 4n)) {
+      if (!b.accepted || !([2n, 3n].includes(state) || ["royaltyFreeze", "contentFreeze", "delegatedRoyaltyFreeze"].includes(q.kind) && state === 4n)) {
         throw Error("Binding is not eligible");
       }
     }
@@ -520,11 +588,48 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
     if (delegatedConsent(q) && b.consentMode !== 2n) {
       throw Error("Delegated consent requires mode 2");
     }
+    if (economicsOrFreeze(q)) {
+      if (![1n, 2n].includes(b.consentMode)) {
+        throw Error("Delegated economics/freeze requires mode 1 or 2");
+      }
+      const name = q.kind === "delegatedRoyaltyFreeze" ? "defensiveBinding" : "acceptedBinding";
+      equal(binding((await read(p, d.reads!.address, name, [cid], tag))[0]), b, "Reads binding differs");
+    }
     if (q.kind === "saleConsent" || q.kind === "contentFreeze" || q.kind === "delegatedSaleConsent") {
       const [t] = await read(p, d.components[0]!.address, "bindingTerms", [m.collectionId, b.generation], tag);
       if (![1n, 2n].includes(b.consentMode) || t.mode !== 0n || t.threshold !== 0n || t.count > 32n || (await read(p, d.components[1]!.address, "acceptedCount", [b.bindingHash], tag))[0] !== t.count) {
         throw Error("Collaborator/consent profile is not ready");
       }
+    }
+  }
+  let economics: CurrentArtistEconomicsObservation | null = null;
+  if (economicsOrFreeze(q)) {
+    const [t] = abi.decodeFunctionData(action.method, action.call.data);
+    if (!same(t.resolver, d.components[13]!.address) && !same(t.resolver, d.components[14]!.address)) {
+      throw Error("Signed economics resolver differs from Coordinator suite");
+    }
+    if (same(t.resolver, d.components[14]!.address)) {
+      const pointer = await read(p, d.components[9]!.address, "getSatellitePointer", [id("ROYALTY_RESOLVER")], tag);
+      if (!same(pointer[0], d.components[14]!.address) || !same(pointer[1], d.components[14]!.codeHash)) {
+        throw Error("Royalty resolver is not selected");
+      }
+    }
+    if (q.kind === "delegatedRoyaltyFreeze") {
+      if (!same(t.resolver, d.components[14]!.address)) {
+        throw Error("Royalty freeze requires the suite royalty resolver");
+      }
+      await read(p, d.reads!.address, "requireRoyaltyFreezeProposal", [t], tag);
+    } else {
+      const [account, recordHash] = await read(p, d.reads!.address, "artistPayoutAccount", [q.artistId], tag);
+      const payout = { account: address(account), recordHash: hash(recordHash) };
+      let candidateEvidence: Hex;
+      if (q.kind === "delegatedEconomicsConsent") {
+        candidateEvidence = bytes((await read(p, d.reads!.address, "requireCurrentEconomics", [t, payout.account], tag))[0]);
+      } else {
+        const [fact, previousHash] = await read(p, d.reads!.address, "requireProspectiveEconomicsWithEvidence", [t, q.details.candidate, payout.account], tag);
+        candidateEvidence = prospectiveEvidence(q, t, coder.encode([C, AF, "bytes32"], [q.details.candidate, fact, previousHash]) as Hex);
+      }
+      economics = { payout, candidateEvidence };
     }
   }
   const raw = await read(p, d.components[2]!.address, "authorityState", [q.artistId], tag);
@@ -549,12 +654,12 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
       throw Error("Stored delegation grantor or target differs");
     }
   }
-  if (delegatedConsent(q)) {
+  if (delegatedOperation(q)) {
     delegation = delegationRecord((await read(p, d.components[2]!.address, "delegationRecord", [q.details.grant], tag))[0]);
     validateDelegation(d, delegation, q.details.grant);
-    const capability = q.kind === "delegatedPolicyConsent" ? 2n : 1024n;
+    const capability = q.kind === "delegatedPolicyConsent" ? 2n : q.kind === "delegatedSaleConsent" ? 1024n : q.kind === "delegatedRoyaltyFreeze" ? 32n : 4n;
     if (!same(delegation.grant.artistId, q.artistId) || !same(delegation.grant.delegate, q.signer)
-      || (delegation.grant.collectionId !== 0n && delegation.grant.collectionId !== q.message.collectionId)
+      || (delegation.grant.collectionId !== 0n && delegation.grant.collectionId !== collectionId(q))
       || (delegation.grant.capabilities & capability) !== capability || !liveDelegation(delegation, h.timestamp)) {
       throw Error("Delegation scope, capability or live window unavailable");
     }
@@ -572,9 +677,9 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
     }
     delegated = { ...replay, epochRecorded: recorded, epochCurrent: current, usesRemaining: remaining };
   }
-  const expectedSigner = delegatedConsent(q) ? delegation!.grant.delegate : delegation?.grantor ?? authority.address;
+  const expectedSigner = delegatedOperation(q) ? delegation!.grant.delegate : delegation?.grantor ?? authority.address;
   if (!same(expectedSigner, q.signer) || !ordinary(authority, [20, 21, 27, 54].includes(Number(action.operationId)))
-    || ((q.kind === "delegationGrant" || delegatedConsent(q)) && authority.authorityClass !== 1n)) {
+    || ((q.kind === "delegationGrant" || delegatedOperation(q)) && authority.authorityClass !== 1n)) {
     throw Error("Current Artist authority differs");
   }
   if (authority.authorityClass !== 1n) {
@@ -599,10 +704,10 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
     }
   }
   const state = await replayRead(p, d, q.artistId, observedTiming.effectiveDigest, m.nonce, tag);
-  if (state.digestRevoked || (!delegatedConsent(q) && (state.nonceConsumed || state.nonceRevoked))) {
+  if (state.digestRevoked || (!delegatedOperation(q) && (state.nonceConsumed || state.nonceRevoked))) {
     throw Error("Artist authorization consumed/revoked");
   }
-  if (!delegatedConsent(q) && q.mode === "direct" && m.nonce !== state.nextUnusedNonce) {
+  if (!delegatedOperation(q) && q.mode === "direct" && m.nonce !== state.nextUnusedNonce) {
     throw Error("Direct nonce differs from current hint");
   }
   if (q.mode === "signature") {
@@ -620,7 +725,7 @@ export async function captureCurrentArtistOperation(p: Reader, input: CurrentArt
   }
   await unchanged(p, h);
   const body = {
-    deployment: d, action, ...h, authority, binding: b, replay: state, revocationTarget, timing: observedTiming, revision, delegation, delegated, simulationRequired: true as const
+    deployment: d, action, ...h, authority, binding: b, replay: state, revocationTarget, timing: observedTiming, revision, delegation, delegated, economics, simulationRequired: true as const
   };
   return freeze({
     ...body, captureHash: captureHash(body)
@@ -647,6 +752,7 @@ export async function simulateCurrentArtistCall(p: Reader, input: CurrentArtistC
   equal(fresh.revision, c.revision, "Identity revision state changed; capture again");
   equal(fresh.delegation, c.delegation, "Delegation state changed; capture again");
   equal(fresh.delegated, c.delegated, "Delegate replay or epoch changed; capture again");
+  equal(fresh.economics, c.economics, "Economics admission facts changed; capture again");
   const raw = await p.call({
     ...c.action.call, from: c.action.request.caller, blockTag: tag
   });
@@ -679,7 +785,7 @@ export function createCurrentArtistSafePlan(captures: readonly CurrentArtistCapt
   const delegationRevocations = new Set<string>();
   const lane = (c: CurrentArtistCapture) => c.action.request.registry.toLowerCase() + ":" + c.action.request.artistId.toLowerCase();
   for (const c of items) {
-    const nonceLane = delegatedConsent(c.action.request) ? lane(c) + ":delegate:" + c.action.request.signer.toLowerCase() : lane(c);
+    const nonceLane = delegatedOperation(c.action.request) ? lane(c) + ":delegate:" + c.action.request.signer.toLowerCase() : lane(c);
     const nonceKey = nonceLane + ":nonce:" + c.action.request.message.nonce.toString();
     if (authorizations.has(nonceKey)) {
       throw Error("Duplicate Artist authorization nonce in Safe plan");
@@ -693,7 +799,7 @@ export function createCurrentArtistSafePlan(captures: readonly CurrentArtistCapt
   }
   for (const c of items) {
     const q = c.action.request;
-    if (delegatedConsent(q) && delegationRevocations.has(q.registry.toLowerCase() + ":" + q.details.grant.toLowerCase())) {
+    if (delegatedOperation(q) && delegationRevocations.has(q.registry.toLowerCase() + ":" + q.details.grant.toLowerCase())) {
       throw Error("Delegated consent follows its grant revocation in Safe plan");
     }
     if (q.kind === "delegationRevocation") {
@@ -718,7 +824,7 @@ export function createCurrentArtistSafePlan(captures: readonly CurrentArtistCapt
     safe: c.action.request.caller, intent: `Artist operation ${c.action.operationId}: ${c.action.method}`, call: c.action.call, abi: abi.fragments
   })));
 }
-function originalRecord(c: CurrentArtistCapture, time: bigint): Hex {
+function originalRecord(c: CurrentArtistCapture, time: bigint, payoutHash?: Hex): Hex {
   const q = c.action.request;
   const m = q.message as any;
   const [t] = abi.decodeFunctionData(c.action.method, c.action.call.data);
@@ -727,7 +833,7 @@ function originalRecord(c: CurrentArtistCapture, time: bigint): Hex {
   const core = c.deployment.components[9]!.address;
   const artist = q.artistId;
   const signer = q.signer;
-  const cl = delegatedConsent(q) ? 2n : c.authority.authorityClass;
+  const cl = delegatedOperation(q) ? 2n : c.authority.authorityClass;
   const n = m.nonce;
   const common = [chain, host];
   let types: string[];
@@ -747,6 +853,13 @@ function originalRecord(c: CurrentArtistCapture, time: bigint): Hex {
       values = [id("6529STREAM_ARTIST_POLICY_CONSENT_RECORD_V1"), chain, host, c.deployment.components[10]!.address,
         t.collectionId, t.phaseId, t.policyHash, artist, signer, cl, n, time];
       break;
+    case "delegatedEconomicsConsent":
+    case "delegatedProspectiveEconomicsConsent":
+      types = ["bytes32", "uint256", "address", "address", "bytes32", "uint8", "uint256", "bytes32", "bytes32", "bytes32", "address", "uint8", "uint256", "uint64"];
+      values = [id("6529STREAM_ARTIST_ECONOMICS_CONSENT_RECORD_V1"), ...common, t.resolver, t.revenueClass,
+        t.scope, t.scopeId, t.assignmentHash, payoutHash ?? c.economics!.payout.recordHash, artist, signer, cl, n, time];
+      break;
+    case "delegatedRoyaltyFreeze":
     case "royaltyFreeze":
       types = ["bytes32", "uint256", "address", "address", "uint256", "bytes32", "bytes32", "bytes32", "address", "uint8", "uint256", "uint64"];
       values = [id("6529STREAM_ARTIST_ROYALTY_FREEZE_RECORD_V1"), ...common, t.resolver, t.collectionId, t.revenueClass, t.expectedAssignmentHash, artist, signer, cl, n, time];
@@ -814,7 +927,7 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
   const m = q.message as any;
   const decodedCall = abi.decodeFunctionData(a.method, a.call.data);
   const t = decodedCall[0];
-  const auth = decodedCall[delegatedConsent(q) ? 2 : 1];
+  const auth = decodedCall[q.kind === "delegatedProspectiveEconomicsConsent" ? 3 : delegatedOperation(q) ? 2 : 1];
   equal(await captureCurrentArtistOperation(p, d, q, { blockTag: c.blockNumber }), c, "Historical capture differs");
   const [tx, r] = await Promise.all([p.getTransaction(transactionHash), p.getTransactionReceipt(transactionHash)]);
   if (!tx || !r || !same(tx.hash, transactionHash) || !same(r.hash, transactionHash) || r.status !== 1 || tx.chainId !== d.chainId || tx.blockNumber === null || r.blockNumber !== tx.blockNumber || !same(tx.blockHash, r.blockHash) || !same(tx.from, r.from) || !same(tx.to, r.to) || tx.value !== 0n || r.blockNumber <= c.blockNumber) {
@@ -842,7 +955,6 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
   if (!same(h.blockHash, blockHash) || !same(h.configurationHash, c.configurationHash)) {
     throw Error("Receipt block/configuration differs");
   }
-  const recordHash = originalRecord(c, h.timestamp);
   if (!Array.isArray(r.logs) || r.logs.length > 512) {
     throw Error("Receipt log bound exceeded");
   }
@@ -857,6 +969,17 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
     };
   });
   const refs: CurrentArtistEventReference[] = [];
+  let payoutHash: Hex | undefined;
+  if (economicsOperation(q)) {
+    const fragment = abi.getEvent("ArtistEconomicsConsentRecorded")!;
+    const hits = logs.filter(l => same(l.address, d.components[6]!.address) && same(l.topics[0], fragment.topicHash));
+    if (hits.length !== 1) {
+      throw Error("Expected one ArtistEconomicsConsentRecorded");
+    }
+    const v = abi.decodeEventLog(fragment, hits[0]!.data, hits[0]!.topics);
+    payoutHash = hash(v.payoutDesignationRecordHash);
+  }
+  const recordHash = originalRecord(c, h.timestamp, payoutHash);
   const event = (target: Address, name: string, expected: readonly unknown[], iface = abi) => {
     const f = iface.getEvent(name)!;
     const hits = logs.filter(l => same(l.address, target) && same(l.topics[0], f.topicHash));
@@ -875,12 +998,14 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
     });
     return l.index;
   };
-  const cl = delegatedConsent(q) ? 2n : c.authority.authorityClass;
+  const cl = delegatedOperation(q) ? 2n : c.authority.authorityClass;
   const n = m.nonce;
   const at = h.timestamp;
   const owner = d.components[6]!.address;
   const identityOwner = d.components[2]!.address;
   let revokedReadback: CurrentArtistDelegationRecord | null = null;
+  let economicsAssociation: CurrentArtistEconomicsAssociation | null = null;
+  let economics: CurrentArtistReceipt["economics"] = null;
   switch (q.kind) {
     case "identityRevision": {
       const first = event(identityOwner, "ArtistIdentityRevisionRecorded", [1, q.artistId, q.signer,
@@ -966,6 +1091,42 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
       }
       break;
     }
+    case "delegatedEconomicsConsent":
+    case "delegatedProspectiveEconomicsConsent": {
+      const primary = event(owner, "ArtistEconomicsConsentRecorded", [1, t.collectionId, t.assignmentHash,
+        q.signer, t.revenueClass, t.scope, t.scopeId, payoutHash, 2, n, at, recordHash]);
+      const grantEvent = event(owner, "ArtistRecordDelegation", [1, recordHash, q.details.grant,
+        q.artistId, t.resolver, t.revenueClass, 2]);
+      const [association] = await read(p, owner, "economicsRecordAssociation", [recordHash], tag);
+      const original = hash(association.originalRecord);
+      const payloadHash = keccak256(coder.encode([E], [t])) as Hex;
+      const expected = [q.artistId, c.binding!.generation, c.binding!.bindingHash, payloadHash, original];
+      if (!same(coder.encode([EA], [association]), coder.encode([EA], [expected]))
+        || !same((await read(p, owner, "economicsRecordForBinding", [t, q.artistId, c.binding!.generation, c.binding!.bindingHash], tag))[0], recordHash)
+        || !same((await read(p, owner, "economicsRecord", [t], tag))[0], original)) {
+        throw Error("Historical economics binding association differs");
+      }
+      if (!same(original, recordHash)) {
+        const [first] = await read(p, owner, "economicsRecordAssociation", [original], tag);
+        if (!same(first.originalRecord, original) || !same(first.payloadHash, payloadHash)
+          || first.artistId === ZeroHash || first.bindingHash === ZeroHash || first.bindingGeneration === 0n
+          || first.bindingGeneration >= c.binding!.generation) {
+          throw Error("Original economics continuation association differs");
+        }
+      }
+      const associated = event(owner, "ArtistEconomicsConsentAssociated", [1, recordHash, q.artistId,
+        c.binding!.bindingHash, c.binding!.generation, payloadHash, original]);
+      if (primary >= grantEvent || grantEvent >= associated
+        || !same((await read(p, owner, "recordDelegation", [recordHash], tag))[0], q.details.grant)) {
+        throw Error("Economics delegation event order/association differs");
+      }
+      economicsAssociation = {
+        artistId: q.artistId, bindingGeneration: c.binding!.generation, bindingHash: c.binding!.bindingHash,
+        payloadHash, originalRecord: original
+      };
+      break;
+    }
+    case "delegatedRoyaltyFreeze":
     case "royaltyFreeze": {
       event(owner, "ArtistRoyaltyFreezeAuthorized", [1, t.collectionId, t.expectedAssignmentHash, q.signer, cl, n, at, recordHash]);
       const [v] = await read(p, owner, "royaltyFreezeRecord", [t, q.artistId, c.binding!.generation], tag);
@@ -996,6 +1157,14 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
       throw Error("Consent delegation association differs");
     }
   }
+  if (q.kind === "delegatedRoyaltyFreeze") {
+    const previous = refs[refs.length - 1]!.logIndex;
+    const association = event(owner, "ArtistRecordDelegation", [1, recordHash, q.details.grant,
+      q.artistId, t.resolver, t.revenueClass, 2]);
+    if (association <= previous || !same((await read(p, owner, "recordDelegation", [recordHash], tag))[0], q.details.grant)) {
+      throw Error("Royalty freeze delegation association differs");
+    }
+  }
   const evidenceId = keccak256(coder.encode(["bytes32", "uint256", "address", "address", "uint16", "address", "bytes32"], [id("6529STREAM_ARTIST_ONBOARDING_OPERATION_EVIDENCE_V1"), d.chainId, d.registry.address, d.coordinator.address, a.operationId, q.caller, recordHash])) as Hex;
   const archive = d.components[8]!.address;
   const metadata = await read(p, archive, "artistEvidenceMetadataV2", [evidenceId, 1], tag);
@@ -1013,7 +1182,7 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
     throw Error("Archive operation envelope differs");
   }
   const identityOnly = ["identityRevision", "delegationGrant", "delegationRevocation", "authorizationRevocation"].includes(q.kind);
-  const mask = identityOnly ? 4 : q.kind === "bindingRefusal" ? 21 : 87;
+  const mask = identityOnly ? 4 : q.kind === "bindingRefusal" ? 21 : economicsOperation(q) ? 119 : 87;
   const writeMask = identityOnly ? 4 : q.kind === "bindingRefusal" ? 21 : 68;
   for (let i = 0; i < 7; i++) {
     const before = v[5][i];
@@ -1043,10 +1212,12 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
   const authority = [q.artistId, q.signer, cl, c.authority.status];
   let payloadTypes: string[];
   let payloadValues: unknown[];
-  if (delegatedConsent(q)) {
-    payloadTypes = [B, terms[q.kind], A, P, "bytes32", D, "bytes"];
-    const decoded = decode(payloadTypes, v[7]);
-    const prior = delegationRecord(decoded[5]);
+  let priorGrant: CurrentArtistDelegationRecord | null = null;
+  if (delegatedOperation(q)) {
+    const decoded = economicsOrFreeze(q)
+      ? decode(["bytes", "bytes32", D], v[7])
+      : decode([B, terms[q.kind], A, P, "bytes32", D, "bytes"], v[7]);
+    const prior = delegationRecord(decoded[economicsOrFreeze(q) ? 2 : 5]);
     validateDelegation(d, prior, q.details.grant);
     if (!liveDelegation(prior, h.timestamp) || prior.uses < c.delegation!.uses
       || !same(prior.grantor, c.delegation!.grantor) || prior.nonce !== c.delegation!.nonce
@@ -1059,6 +1230,35 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
       || !same(coder.encode([G], [after.grant]), coder.encode([G], [prior.grant]))) {
       throw Error("Delegation consumption readback differs");
     }
+    priorGrant = prior;
+  }
+  if (economicsOrFreeze(q)) {
+    payloadTypes = ["bytes", "bytes32", D];
+    const [inner] = decode(payloadTypes, v[7]);
+    let expectedInner: Hex;
+    if (economicsOperation(q)) {
+      const decoded = decode([B, E, PAYOUT, A, P, "bytes", EA], inner);
+      const payout = { account: address(decoded[2].account), recordHash: hash(decoded[2].recordHash) };
+      const [designation] = await read(p, d.components[5]!.address, "designationRecord", [payout.recordHash], tag);
+      if (!same(payout.recordHash, payoutHash) || !same(designation.artistId, q.artistId)
+        || !same(designation.payoutAccount, payout.account)) {
+        throw Error("Historical economics payout designation differs");
+      }
+      let candidateEvidence = bytes(decoded[5]);
+      if (q.kind === "delegatedProspectiveEconomicsConsent") {
+        candidateEvidence = prospectiveEvidence(q, t, candidateEvidence);
+      }
+      economics = { payout, candidateEvidence, association: economicsAssociation! };
+      expectedInner = coder.encode([B, E, PAYOUT, A, P, "bytes", EA],
+        [bindingArray(c.binding!), t, payout, auth, proof, candidateEvidence, economicsAssociation!]) as Hex;
+    } else {
+      expectedInner = coder.encode([B, terms.royaltyFreeze, A, P], [bindingArray(c.binding!), t, auth, proof]) as Hex;
+    }
+    payloadValues = [expectedInner, q.details.grant, priorGrant];
+  }
+  else if (delegatedConsent(q)) {
+    payloadTypes = [B, terms[q.kind], A, P, "bytes32", D, "bytes"];
+    const decoded = decode(payloadTypes, v[7]);
     if (q.kind === "delegatedPolicyConsent") {
       if (decoded[6] !== "0x") {
         throw Error("Policy consent facts must be empty");
@@ -1066,7 +1266,7 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
     } else {
       saleFacts(decoded[6], t);
     }
-    payloadValues = [bindingArray(c.binding!), t, auth, proof, q.details.grant, prior, decoded[6]];
+    payloadValues = [bindingArray(c.binding!), t, auth, proof, q.details.grant, priorGrant, decoded[6]];
   }
   else if (q.kind === "identityRevision") {
     payloadTypes = [terms.identityRevision, A, "bytes", "string", P, A];
@@ -1112,7 +1312,7 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
   }
   const observedReplay = await replayRead(p, d, q.artistId, executedTiming.effectiveDigest, m.nonce, tag);
   let observedDelegated: CurrentArtistReceipt["observedDelegated"] = null;
-  if (delegatedConsent(q)) {
+  if (delegatedOperation(q)) {
     const state = await delegatedReplay(p, d, q, executedTiming.effectiveDigest, tag);
     if (!state.nonceUsed || state.digestRevoked) {
       throw Error("Executed delegate authorization not consumed");
@@ -1120,7 +1320,7 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
     observedDelegated = { nonceUsed: state.nonceUsed, nextUnusedNonce: state.nextUnusedNonce };
   }
   if (!observedReplay.digestObserved || observedReplay.digestRevoked
-    || (!delegatedConsent(q) && (!observedReplay.nonceConsumed || observedReplay.nonceRevoked))) {
+    || (!delegatedOperation(q) && (!observedReplay.nonceConsumed || observedReplay.nonceRevoked))) {
     throw Error("Executed Artist authorization not consumed");
   }
   if (q.kind === "authorizationRevocation") {
@@ -1146,7 +1346,7 @@ export async function inspectCurrentArtistReceipt(p: ReceiptReader, input: Curre
   }
   await unchanged(p, h);
   return freeze({
-    capture: c, transactionHash, blockNumber: tag, blockHash, recordHash, evidenceId, events: refs.sort((a, b) => a.logIndex - b.logIndex), observedReplay, observedDelegated, effectiveDigest: executedTiming.effectiveDigest
+    capture: c, transactionHash, blockNumber: tag, blockHash, recordHash, evidenceId, events: refs.sort((a, b) => a.logIndex - b.logIndex), observedReplay, observedDelegated, effectiveDigest: executedTiming.effectiveDigest, economics
   });
 }
 

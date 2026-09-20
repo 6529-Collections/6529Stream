@@ -3,7 +3,9 @@ import { currentArtistOperationTypedData, normalizeCurrentArtistAction, normaliz
   prepareCurrentArtistAction, type CurrentArtistOperationRequest, type CurrentArtistContentFreeze,
   type CurrentArtistSaleConsent, type PreparedCurrentArtistAction, type CurrentArtistIdentityRevision,
   type CurrentArtistDelegationGrant, type CurrentArtistDelegationRevocation,
-  type CurrentArtistDelegatedPolicyConsent, type CurrentArtistDelegatedSaleConsent } from "../src/current-artist-operation.js";
+  type CurrentArtistDelegatedPolicyConsent, type CurrentArtistDelegatedSaleConsent,
+  type CurrentArtistDelegatedEconomicsConsent, type CurrentArtistDelegatedRoyaltyFreeze,
+  type CurrentArtistFixedEconomicsCandidate } from "../src/current-artist-operation.js";
 
 declare const address: Address;
 declare const hash: Hex;
@@ -35,8 +37,8 @@ prepareCurrentArtistAction({ ...request, details: { reasonURI: "" } });
 prepareCurrentArtistAction({ ...request, mode: "relayed" });
 // @ts-expect-error one opaque byte string, not signature-kind objects
 prepareCurrentArtistAction({ ...request, signature: { kind: "erc1271", value: "0x" } });
-// @ts-expect-error original principal variants are explicit; delegated variants are separate
-prepareCurrentArtistAction({ ...request, kind: "delegatedRoyaltyFreeze" });
+// @ts-expect-error unimplemented operation variants are not guessed from their schema name
+prepareCurrentArtistAction({ ...request, kind: "unsupportedArtistOperation" });
 // @ts-expect-error call-bound caller is required
 prepareCurrentArtistAction({ kind: "contentFreeze", chainId: 1n, registry: address, signer: address, artistId: hash, mode: "direct", signature: "0x", message: content, details: {} });
 // @ts-expect-error normalized nested arrays are immutable
@@ -107,3 +109,42 @@ currentArtistOperationTypedData("delegatedSaleConsent", 1n, address, { ...delega
 prepareCurrentArtistAction({ ...delegatedPolicyRequest, details: { grant: hash, capabilities: 2n } });
 // @ts-expect-error the reviewed grant selection is immutable
 policyPlan.request.details.grant = hash;
+
+declare const delegatedEconomics: CurrentArtistDelegatedEconomicsConsent;
+declare const delegatedFreeze: CurrentArtistDelegatedRoyaltyFreeze;
+const candidate: CurrentArtistFixedEconomicsCandidate = { profileHash: hash, policyHash: hash, royaltyBps: 0n, frozen: false };
+const economicsRequest: CurrentArtistOperationRequest<"delegatedEconomicsConsent"> = {
+  ...request, kind: "delegatedEconomicsConsent", message: delegatedEconomics, details: { collectionId: 1n, grant: hash },
+};
+const prospectiveRequest: CurrentArtistOperationRequest<"delegatedProspectiveEconomicsConsent"> = {
+  ...request, kind: "delegatedProspectiveEconomicsConsent", message: delegatedEconomics,
+  details: { collectionId: 1n, grant: hash, candidate },
+};
+const economicsPlan = prepareCurrentArtistAction(economicsRequest);
+const prospectivePlan = prepareCurrentArtistAction(prospectiveRequest);
+const fixed: CurrentArtistFixedEconomicsCandidate = prospectivePlan.request.details.candidate;
+const royaltyBps: bigint = prospectivePlan.request.details.candidate.royaltyBps;
+const scopeId: bigint = economicsPlan.payload.message.scopeId;
+prepareCurrentArtistAction({ ...request, kind: "delegatedRoyaltyFreeze", message: delegatedFreeze, details: { grant: hash } });
+currentArtistOperationTypedData("delegatedProspectiveEconomicsConsent", 1n, address, delegatedEconomics);
+void fixed; void royaltyBps; void scopeId;
+// @ts-expect-error collection context is not a field in the original signed economics schema
+currentArtistOperationTypedData("delegatedEconomicsConsent", 1n, address, { ...delegatedEconomics, collectionId: 1n });
+// @ts-expect-error the original fixed candidate is supplemental rather than EIP-712 input
+currentArtistOperationTypedData("delegatedProspectiveEconomicsConsent", 1n, address, { ...delegatedEconomics, candidate });
+// @ts-expect-error current assignment consent has no prospective candidate tuple
+prepareCurrentArtistAction({ ...economicsRequest, details: { ...economicsRequest.details, candidate } });
+// @ts-expect-error prospective fixed consent requires its candidate for exact calldata reconstruction
+prepareCurrentArtistAction({ ...prospectiveRequest, details: { collectionId: 1n, grant: hash } });
+// @ts-expect-error supplemental collection coordinates are uint256 bigints
+prepareCurrentArtistAction({ ...economicsRequest, details: { collectionId: 1, grant: hash } });
+// @ts-expect-error candidate royalty basis points retain the original uint16 bigint representation
+prepareCurrentArtistAction({ ...prospectiveRequest, details: { ...prospectiveRequest.details, candidate: { ...candidate, royaltyBps: 10 } } });
+// @ts-expect-error no delegated prospective template transport is synthesized
+prepareCurrentArtistAction({ ...prospectiveRequest, details: { ...prospectiveRequest.details, candidate: { ...candidate, templateId: hash } } });
+// @ts-expect-error royalty freeze's collection is signed and cannot be duplicated in details
+prepareCurrentArtistAction({ ...request, kind: "delegatedRoyaltyFreeze", message: delegatedFreeze, details: { grant: hash, collectionId: 1n } });
+// @ts-expect-error nested prepared candidate inputs are immutable
+prospectivePlan.request.details.candidate.frozen = true;
+// @ts-expect-error the reviewed supplemental collection cannot change after preparation
+economicsPlan.request.details.collectionId = 2n;
