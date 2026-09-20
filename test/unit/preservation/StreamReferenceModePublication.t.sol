@@ -18,16 +18,16 @@ import {
     StreamRenderCriticalSourceTypes as Critical
 } from "../../../smart-contracts/interfaces/stream/preservation/StreamRenderCriticalSourceTypes.sol";
 import {
-    StreamPreservationInventoryTypes as Inventory
+    StreamPreservationInventoryTypes as PreservationInventory
 } from "../../../smart-contracts/interfaces/stream/preservation/StreamPreservationInventoryTypes.sol";
 
 contract ReferenceModeInventoryProbe {
     function items(Critical.Dependencies memory d, Critical.Context memory c)
         external
         view
-        returns (Inventory.Item[] memory)
+        returns (PreservationInventory.Item[] memory)
     {
-        (, Inventory.Item[] memory rows) = StreamReferenceModeInventory.stage(d, c, 2);
+        (, PreservationInventory.Item[] memory rows) = StreamReferenceModeInventory.stage(d, c, 2);
         return rows;
     }
 }
