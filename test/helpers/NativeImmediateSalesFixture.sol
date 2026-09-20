@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import { NativeEnglishAuctionFixture } from "./NativeEnglishAuctionFixture.sol";
-import { NativeAuctionArtist } from "./NativeEnglishAuctionMocks.sol";
+import { NativeAuctionArtist, NativeAuctionEntropy } from "./NativeEnglishAuctionMocks.sol";
 import { OfficialSafe } from "./OfficialSafeFixture.sol";
 import {
     StreamNativeImmediateSales
@@ -242,17 +242,14 @@ abstract contract NativeImmediateSalesFixture is NativeEnglishAuctionFixture {
         return new ImmediateSalesArtistBoundary(address(core), address(manager));
     }
 
+    function _deployAuctionEntropy() internal override returns (NativeAuctionEntropy) {
+        immediateEntropy = new ImmediateSalesEntropyBoundary(address(core));
+        return NativeAuctionEntropy(address(immediateEntropy));
+    }
+
     function setUp() public virtual override {
         super.setUp();
         _installMetadataAndFloor();
-        immediateEntropy = new ImmediateSalesEntropyBoundary(address(core));
-        _register(
-            address(immediateEntropy),
-            keccak256("ENTROPY_COORDINATOR"),
-            type(IStreamEntropyCoordinator).interfaceId,
-            MANIFEST
-        );
-        _pointer(keccak256("ENTROPY_COORDINATOR"), address(immediateEntropy));
         StreamNativeImmediateSales.DeploymentConfig memory d;
         d.manager = manager;
         d.recorder = recorder;

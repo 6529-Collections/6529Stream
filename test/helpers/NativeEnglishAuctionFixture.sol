@@ -125,7 +125,7 @@ abstract contract NativeEnglishAuctionFixture is
             MANIFEST
         );
         _pointer(keccak256("ARTIST_REGISTRY"), address(artists));
-        entropy = new NativeAuctionEntropy(address(core));
+        entropy = _deployAuctionEntropy();
         _register(
             address(entropy),
             keccak256("ENTROPY_COORDINATOR"),
@@ -282,6 +282,10 @@ abstract contract NativeEnglishAuctionFixture is
     /// @dev Override only the explicitly typed Artist semantic boundary.
     function _deployAuctionArtist() internal virtual returns (NativeAuctionArtist) {
         return new NativeAuctionArtist(address(core), address(manager));
+    }
+
+    function _deployAuctionEntropy() internal virtual returns (NativeAuctionEntropy) {
+        return new NativeAuctionEntropy(address(core));
     }
 
     /// @dev Optional independently tested declaration profile; default fixture remains self-only.
