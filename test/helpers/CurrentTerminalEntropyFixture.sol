@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "./StreamCurrentSafeGovernanceFixture.sol";
+import "./CurrentCommerceConservationFixture.sol";
 import "../../smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol";
 import "../../smart-contracts/domains/mint/StreamOperatorDistribution.sol";
 import "../../smart-contracts/domains/mint/StreamImmediateSaleEntropyPolicy.sol";
@@ -81,7 +81,7 @@ contract CurrentTerminalEntropyReceiver is IERC721Receiver {
 
 /// @notice Genuine current Artist/Executor/entropy and paid mint/distribution with original Safes.
 /// @dev Only the inherited external entropy provider and explicit receiver behavior are test boundaries.
-abstract contract CurrentTerminalEntropyFixture is StreamCurrentSafeGovernanceFixture {
+abstract contract CurrentTerminalEntropyFixture is CurrentCommerceConservationFixture {
     bytes32 internal constant TERMINAL_PHASE = keccak256("current terminal native phase");
     bytes32 internal constant DISTRIBUTION_PHASE = keccak256("current terminal distribution");
     bytes32 internal constant SUPPLY = keccak256("terminal distribution supply");
@@ -224,6 +224,7 @@ abstract contract CurrentTerminalEntropyFixture is StreamCurrentSafeGovernanceFi
             0,
             0
         );
+        rows = _commerceFloorPolicies(rows);
     }
 
     function terminalTime() external view returns (uint64) {
@@ -780,6 +781,14 @@ abstract contract CurrentTerminalEntropyFixture is StreamCurrentSafeGovernanceFi
         StreamNativeSettlementTypes.NativeSettlementCandidate memory c,
         IStreamNativeFixedPriceSaleAdapter.SaleExecutionData memory e
     ) private view {
+        bytes32 settlementKey =
+            recorder.settlementKey(address(nativeSale), c.executionBinding.executionId);
+        require(
+            !recorder.settlementConsumed(settlementKey)
+                && recorder.settlementResult(settlementKey).amount == 0,
+            "failed sale rolls back recorder receipt"
+        );
+        _assertNoCommerceFloorReceipt(settlementKey);
         bytes32 authorization = keccak256(
             abi.encode(
                 keccak256("6529STREAM_MINT_TICKET_AUTHORIZATION_V1"),
@@ -815,7 +824,79 @@ abstract contract CurrentTerminalEntropyFixture is StreamCurrentSafeGovernanceFi
         );
     }
 
+    /// @dev One exact signed payload crosses the genuine floor's two refusal boundaries.
+    function _floorRefusalsThenExactPaidRetry() internal {
+        _prepareCommerceFloor();
+        IStreamNativeFixedPriceSaleAdapter.SaleExecutionData memory e =
+            _execution(address(terminalPayer));
+        StreamNativeSettlementTypes.NativeSettlementCandidate memory c =
+            nativeSale.previewExecution(e);
+        bytes32 key = recorder.settlementKey(address(nativeSale), c.executionBinding.executionId);
+        bytes memory data = abi.encodeCall(nativeSale.purchase, (e));
+        bytes memory payload =
+            _safePayload(terminalPayer, address(nativeSale), PRICE + EXCESS, data);
+        uint256 nonce = terminalPayer.nonce();
+        _exactFloorFailure(
+            data,
+            abi.encodeWithSelector(StreamPrimarySaleFloorCall.SaleFloorBindingUnavailable.selector)
+        );
+        _safeRejected(terminalPayer, payload);
+        _unmintedNative(c, e);
+        require(
+            !recorder.settlementConsumed(key) && recorder.settlementResult(key).amount == 0,
+            "unbound payment receipt rollback"
+        );
+        _assertNoCommerceFloorReceipt(key);
+        _bindCommerceFloor();
+        _exactFloorFailure(
+            data,
+            abi.encodeWithSelector(
+                StreamPrimarySaleFloorCall.SaleFloorCallFailed.selector,
+                address(commerceFloor),
+                IStreamConservationFloor.ConservationFloorSourceUnavailable.selector
+            )
+        );
+        _safeRejected(terminalPayer, payload);
+        _unmintedNative(c, e);
+        require(
+            core.declaredConservationTier(1) == 0 && !recorder.settlementConsumed(key)
+                && recorder.settlementResult(key).amount == 0,
+            "undeclared floor preserves payment and declaration"
+        );
+        _assertNoCommerceFloorReceipt(key);
+        _declareWaivedCommerce();
+        _exactSafe(terminalPayer, payload);
+        require(
+            terminalPayer.nonce() == nonce + 1 && core.ownerOf(1) == address(terminalPayer)
+                && core.collectionMintedEver(1) == 1 && recorder.settlementConsumed(key)
+                && recorder.totalOfficialSettled(address(0)) == PRICE && wallet.balance == PRICE
+                && nativeSale.refundLiability() == EXCESS && address(nativeSale).balance == EXCESS
+                && address(terminalPayer).balance == 1 ether - PRICE - EXCESS
+                && nativeSale.executionStatus(c.executionBinding.executionId) == 2
+                && manager.isOperationRootUsed(c.operationIdentityCommitment),
+            "exact original signed paid retry after explicit declaration"
+        );
+        _assertWaivedCommerceReceipt(address(recorder), key);
+        bytes32 receipt =
+            keccak256(abi.encode(commerceFloor.settlementReceipt(key), commerceFloor.firstSale(1)));
+        _safeRejected(
+            terminalPayer, _safePayload(terminalPayer, address(nativeSale), PRICE + EXCESS, data)
+        );
+        require(
+            keccak256(abi.encode(commerceFloor.settlementReceipt(key), commerceFloor.firstSale(1)))
+                == receipt,
+            "replay preserves original floor receipts"
+        );
+    }
+
+    function _exactFloorFailure(bytes memory data, bytes memory expected) private {
+        vm.prank(address(terminalPayer));
+        (bool ok, bytes memory reason) = address(nativeSale).call{ value: PRICE + EXCESS }(data);
+        require(!ok && keccak256(reason) == keccak256(expected), "exact production floor refusal");
+    }
+
     function _paid(bool disabled, bool callback) internal returns (uint256 token) {
+        _enableWaivedCommerceFloor();
         address recipient = address(terminalPayer);
         CurrentTerminalEntropyReceiver receiver;
         if (callback) {
@@ -878,6 +959,7 @@ abstract contract CurrentTerminalEntropyFixture is StreamCurrentSafeGovernanceFi
         bytes32 key = recorder.settlementKey(address(nativeSale), c.executionBinding.executionId);
         StreamPrimarySettlementTypes.PrimarySettlementResult memory settled =
             recorder.settlementResult(key);
+        _assertWaivedCommerceReceipt(address(recorder), key);
         require(
             recorder.settlementConsumed(key) && settled.amount == PRICE && settled.wallet == wallet
                 && settled.operationIdentityCommitment == c.operationIdentityCommitment
@@ -1312,6 +1394,7 @@ abstract contract CurrentTerminalEntropyFixture is StreamCurrentSafeGovernanceFi
     }
 
     function _legacyRequiredControl() internal {
+        _enableWaivedCommerceFloor();
         Policy.PolicyRecord memory original = policy.collectionEntropyPolicy(1);
         require(
             !original.explicitPolicy && original.mode == Policy.Mode.ASYNC
@@ -1330,6 +1413,10 @@ abstract contract CurrentTerminalEntropyFixture is StreamCurrentSafeGovernanceFi
         );
         Vm.Log[] memory logs = vm.getRecordedLogs();
         (,,,,, bytes32 key, uint256 request, uint16 attempt) = entropy.tokenEntropy(1);
+        bytes32 executionId = nativeSale.executionIdByNonce(saleId, 1);
+        _assertWaivedCommerceReceipt(
+            address(recorder), recorder.settlementKey(address(nativeSale), executionId)
+        );
         require(
             core.ownerOf(1) == address(terminalPayer)
                 && core.coordinatorAtMint(1) == address(entropy)

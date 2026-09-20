@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../helpers/CurrentInstantEntropyFixture.sol";
 
-/// @notice Eight bounded actual-current INSTANT recipes; compilation and execution remain pending.
+/// @notice Nine actual-current INSTANT/floor recipes; joined runtime remains pending.
 contract StreamCurrentInstantEntropyTest is CurrentInstantEntropyFixture {
     function testActualInstantPolicyConsentConfigureSeparateFreezeAndGovernanceReplay() public {
         _constructInstant();
@@ -58,5 +58,11 @@ contract StreamCurrentInstantEntropyTest is CurrentInstantEntropyFixture {
         _constructInstant();
         _configureInstant(true, true, false);
         _paid(true, true, false);
+    }
+
+    function testActualFloorUnboundUndeclaredRefusalsAndExactSafePaidRetry() public {
+        _constructInstant();
+        _configureInstant(true, true, false);
+        _floorRefusalsThenExactPaidRetry();
     }
 }

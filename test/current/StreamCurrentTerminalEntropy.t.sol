@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../helpers/CurrentTerminalEntropyFixture.sol";
 
-/// @notice Ten bounded actual-current terminal-entropy recipes; joined runtime remains pending.
+/// @notice Eleven actual-current terminal/floor recipes; joined runtime remains pending.
 contract StreamCurrentTerminalEntropyTest is CurrentTerminalEntropyFixture {
     function testDisabledActualArtistConsentGovernanceConfigureAndSeparateFreeze() public {
         _constructTerminal();
@@ -60,5 +60,11 @@ contract StreamCurrentTerminalEntropyTest is CurrentTerminalEntropyFixture {
     function testOriginalRequiredAsyncPaidMintStillRequestsAndFinalizes() public {
         _constructTerminal();
         _legacyRequiredControl();
+    }
+
+    function testActualFloorUnboundUndeclaredRefusalsAndExactSafePaidRetry() public {
+        _constructTerminal();
+        _configureTerminal(true, false);
+        _floorRefusalsThenExactPaidRetry();
     }
 }
