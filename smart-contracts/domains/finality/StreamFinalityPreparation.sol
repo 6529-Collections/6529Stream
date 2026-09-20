@@ -15,6 +15,9 @@ import "../../interfaces/stream/finality/IStreamFinalityEvidenceDiscoveryBinding
 import "../../interfaces/stream/finality/IStreamCoreFinalityEvidenceBinding.sol";
 import "../../interfaces/stream/core/IStreamCorePointers.sol";
 import "./StreamFinalityHashes.sol";
+import {
+    StreamFinalityScopedMetadataReads as ScopedMetadata
+} from "./StreamFinalityScopedMetadataReads.sol";
 import "./StreamFinalityRouteReads.sol";
 import "./StreamFinalityPreparedScopeReads.sol";
 import "../../interfaces/stream/finality/IStreamFinalityMetadataReads.sol";
@@ -160,7 +163,7 @@ library StreamFinalityPreparation {
         if (metadataMode > StreamFinalityDomains.METADATA_MODE_HYBRID) {
             revert FinalityMetadataModeInvalid(metadataMode);
         }
-        _requireSnapshotManifestForScriptWorks(deps, scope.collectionId, metadataMode);
+        _requireSnapshotManifestForScriptWorks(deps, scope, metadataMode);
         {
             uint256 leafCount;
             bool exactLeafCount;
@@ -249,7 +252,7 @@ library StreamFinalityPreparation {
         if (metadataMode > StreamFinalityDomains.METADATA_MODE_HYBRID) {
             revert FinalityMetadataModeInvalid(metadataMode);
         }
-        _requireSnapshotManifestForScriptWorks(deps, scope.collectionId, metadataMode);
+        _requireSnapshotManifestForScriptWorks(deps, scope, metadataMode);
         (ctx.coreFactsHash, ctx.expectedLeafCount, ctx.exactLeafCount) =
             _verifyCoreGatesAndFacts(deps, scope);
         _verifyContentRoot(deps, scope, ctx.expectedLeafCount, ctx.exactLeafCount);
@@ -638,18 +641,26 @@ library StreamFinalityPreparation {
         bool exactLeafCount
     ) private view {
         bytes32 scopeSubject = _contentRootSubject(deps, scope);
-        (bytes32 contentRoot, uint64 leafCount,) = abi.decode(
-            _requiredRead(
-                deps,
-                address(deps.metadataReads),
-                abi.encodeCall(
-                    IStreamFinalityMetadataReads.tokenContentRoot,
-                    (scope.collectionId, scopeSubject)
+        bytes32 contentRoot;
+        uint64 leafCount;
+        if (scope.scopeType == StreamFinalityScopeType.COLLECTION) {
+            (contentRoot, leafCount,) = abi.decode(
+                _requiredRead(
+                    deps,
+                    address(deps.metadataReads),
+                    abi.encodeCall(
+                        IStreamFinalityMetadataReads.tokenContentRoot,
+                        (scope.collectionId, scopeSubject)
+                    ),
+                    96
                 ),
-                96
-            ),
-            (bytes32, uint64, bytes32)
-        );
+                (bytes32, uint64, bytes32)
+            );
+        } else {
+            (contentRoot, leafCount,) = ScopedMetadata.contentRoot(
+                address(deps.metadataReads), deps._providerCodeHash, scope, deps.readGas
+            );
+        }
         if (contentRoot == bytes32(0)) {
             revert FinalityContentRootMissing(scopeSubject);
         }
@@ -677,13 +688,23 @@ library StreamFinalityPreparation {
 
     function _requireSnapshotManifestForScriptWorks(
         Dependencies memory deps,
-        uint256 collectionId,
+        StreamFinalityScope memory scope,
         uint8 metadataMode
     ) private view {
         if (
             metadataMode != StreamFinalityDomains.METADATA_MODE_ONCHAIN
                 && metadataMode != StreamFinalityDomains.METADATA_MODE_HYBRID
         ) {
+            return;
+        }
+        if (scope.scopeType != StreamFinalityScopeType.COLLECTION) {
+            if (
+                ScopedMetadata.snapshot(
+                        address(deps.metadataReads), deps._providerCodeHash, scope, deps.readGas
+                    ) == 0
+            ) {
+                revert FinalitySnapshotManifestMissing(scope.collectionId, metadataMode);
+            }
             return;
         }
         if (
@@ -693,14 +714,14 @@ library StreamFinalityPreparation {
                         address(deps.metadataReads),
                         abi.encodeCall(
                             IStreamFinalityMetadataReads.latestCollectionSnapshotHash,
-                            (collectionId)
+                            (scope.collectionId)
                         ),
                         32
                     ),
                     (bytes32)
                 ) == bytes32(0)
         ) {
-            revert FinalitySnapshotManifestMissing(collectionId, metadataMode);
+            revert FinalitySnapshotManifestMissing(scope.collectionId, metadataMode);
         }
     }
 

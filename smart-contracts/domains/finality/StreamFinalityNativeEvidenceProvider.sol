@@ -56,7 +56,7 @@ contract StreamFinalityNativeEvidenceProvider is StreamFinalityRouterEvidencePro
             StreamFinalityRouterEvidence.moduleIdentity(c.targets[1], c.readGas);
     }
 
-    function supportsInterface(bytes4 id) public pure override returns (bool) {
+    function supportsInterface(bytes4 id) public pure virtual override returns (bool) {
         return super.supportsInterface(id)
             || id == type(IStreamFinalityEvidenceProvider).interfaceId
             || id == type(IStreamFinalityMetadataReads).interfaceId
@@ -112,6 +112,7 @@ contract StreamFinalityNativeEvidenceProvider is StreamFinalityRouterEvidencePro
     function finalityComponentFacts(bytes32 family, StreamFinalityScope calldata scope)
         public
         view
+        virtual
         override
         returns (StreamFinalityHostComponentFacts memory f)
     {
@@ -160,7 +161,7 @@ contract StreamFinalityNativeEvidenceProvider is StreamFinalityRouterEvidencePro
         );
     }
 
-    function latestCollectionSnapshotHash(uint256 cid) external view returns (bytes32) {
+    function latestCollectionSnapshotHash(uint256 cid) public view virtual returns (bytes32) {
         _pins();
         _snapshotPin();
         StreamSnapshotTypes.Receipt memory r = abi.decode(
@@ -189,8 +190,9 @@ contract StreamFinalityNativeEvidenceProvider is StreamFinalityRouterEvidencePro
     }
 
     function inputManifestBytes(StreamFinalityScope calldata scope)
-        external
+        public
         view
+        virtual
         returns (bytes memory)
     {
         StreamFinalityNativeProviderReads.Config memory c = _native;
@@ -205,8 +207,9 @@ contract StreamFinalityNativeEvidenceProvider is StreamFinalityRouterEvidencePro
     }
 
     function requireFinalityScopeInputs(StreamFinalityScope calldata scope, bytes32 manifestHash)
-        external
+        public
         view
+        virtual
         returns (StreamFinalityScopeInputs memory, bytes32, bytes32)
     {
         StreamFinalityNativeProviderReads.Config memory c = _native;
@@ -218,8 +221,9 @@ contract StreamFinalityNativeEvidenceProvider is StreamFinalityRouterEvidencePro
 
     /// @notice Original ordered capture bytes for the artist's review of this exact current manifest.
     function requireSanctionReviewFacts(StreamFinalityScope calldata scope, bytes32 manifestHash)
-        external
+        public
         view
+        virtual
         returns (IStreamFinalitySanctionReview.ReviewFacts memory)
     {
         StreamFinalityNativeProviderReads.Config memory c = _native;
@@ -238,7 +242,7 @@ contract StreamFinalityNativeEvidenceProvider is StreamFinalityRouterEvidencePro
         StreamFinalityScope calldata scope,
         bytes32 manifestHash,
         StreamFinalityComponentExpectation[] calldata components
-    ) external view returns (StreamFinalityScopeInputs memory, bytes32, bytes32) {
+    ) public view virtual returns (StreamFinalityScopeInputs memory, bytes32, bytes32) {
         StreamFinalityNativeProviderReads.Config memory c = _native;
         _requirePreparedCandidate(c, scope, components);
         return _admit(
@@ -255,8 +259,9 @@ contract StreamFinalityNativeEvidenceProvider is StreamFinalityRouterEvidencePro
         bytes32 manifestHash,
         StreamFinalityComponentExpectation[] calldata components
     )
-        external
+        public
         view
+        virtual
         returns (
             StreamFinalityScopeInputs memory inputs,
             bytes32 schema,

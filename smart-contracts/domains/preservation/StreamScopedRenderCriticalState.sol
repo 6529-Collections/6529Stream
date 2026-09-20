@@ -32,6 +32,9 @@ library StreamScopedRenderCriticalState {
         mapping(bytes32 => uint64) definitionCursor;
         mapping(bytes32 => DocumentPin[]) documents;
         mapping(bytes32 => Scoped.Evidence) completed;
+        mapping(bytes32 => Scoped.TokenProgress) tokenProgress;
+        mapping(bytes32 => DocumentPin[]) selectedDocuments;
+        mapping(bytes32 => mapping(bytes32 => bytes32)) selectedDocumentFacts;
     }
     event ScopedInventorySegmentRecorded(
         uint16 schemaVersion,

@@ -2,6 +2,9 @@
 pragma solidity ^0.8.19;
 
 import "../../vendor/openzeppelin/IERC165.sol";
+import {
+    StreamFinalityScopedMetadataReads as ScopedMetadata
+} from "./StreamFinalityScopedMetadataReads.sol";
 import "../../interfaces/stream/finality/IStreamCoreFinalityAdapter.sol";
 import "../../interfaces/stream/finality/IStreamCoreFinalitySource.sol";
 import "../../interfaces/stream/finality/IStreamFinalityMetadataReads.sol";
@@ -131,8 +134,19 @@ contract StreamCoreFinalityAdapter is
             return facts;
         }
 
-        (bool published, bytes32 manifestHash) = IStreamFinalityMetadataReads(evidenceProvider)
-            .scopeManifest(scope.collectionId, scope.scopeId);
+        // The caller's existing read envelope bounds this fixed source call; keep local
+        // gas reserve without introducing an unrelated configurable policy or fallback.
+        (bool published, bytes32 manifestHash) = ScopedMetadata.manifest(
+            evidenceProvider,
+            _providerCodeHash,
+            StreamFinalityScope(
+                StreamFinalityScopeType(scope.scopeType),
+                scope.collectionId,
+                scope.tokenId,
+                scope.scopeId
+            ),
+            gasleft()
+        );
         if (published && manifestHash != bytes32(0)) {
             facts.scopeExists = true;
             facts.scopeManifestHash = manifestHash;

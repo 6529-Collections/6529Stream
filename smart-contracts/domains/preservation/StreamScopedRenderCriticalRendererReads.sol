@@ -95,11 +95,9 @@ library StreamScopedRenderCriticalRendererReads {
             );
         }
         if (index == 7) {
-            return
-                (
-                    Items.runtime(keccak256("RENDERER_ENCODING_RUNTIME"), o.encoding, key, token),
-                    count
-                );
+            return (
+                Items.runtime(keccak256("RENDERER_ENCODING_RUNTIME"), o.encoding, key, token), count
+            );
         }
         if (index < 13) {
             bytes32[5] memory ids = [

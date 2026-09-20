@@ -23,9 +23,21 @@ library StreamScopedRenderCriticalTypes {
         uint64 referenceCount;
     }
 
+    /// @dev A token advances only after all five fixed source families finish.
+    struct TokenProgress {
+        uint8 phase;
+        uint64 row;
+        uint64 count;
+    }
+
     struct Evidence {
         StreamFinalityScope scope;
         Inventory.Evidence inventory;
+    }
+
+    struct BundleEvidence {
+        StreamFinalityScope scope;
+        Inventory.BundleEvidence coverage;
     }
 
     struct Context {

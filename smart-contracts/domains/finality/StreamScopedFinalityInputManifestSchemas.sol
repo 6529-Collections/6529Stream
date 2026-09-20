@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+
+/// @notice Exact interpretation documents for independent input-manifest ABI bytes.
+/// @dev These definitions are registered under RAW_BYTES; this is not a JCS payload profile.
+library StreamScopedFinalityInputManifestSchemas {
+    bytes32 internal constant SCHEMA_ID = keccak256("6529STREAM_SCOPED_FINALITY_INPUT_MANIFEST_V1");
+    bytes32 internal constant CANON_ID =
+        keccak256("6529STREAM_SCOPED_FINALITY_INPUT_MANIFEST_ABI_V1");
+    error UnknownManifestDefinition(bytes32 id);
+
+    function document(bytes32 id) public pure returns (bytes memory) {
+        if (id == SCHEMA_ID) {
+            return bytes(
+                '{"name":"6529STREAM_SCOPED_FINALITY_INPUT_MANIFEST_V1","version":1,"format":"Solidity ABI","profile":"native STATIC ONCHAIN artist-bound TOKEN/RELEASE/SEASON","statement":"StreamScopedFinalityInputManifestTypes.Statement","fields":["StreamFinalityScope scope","bytes32 coreFactsHash","bytes32 contentRoot","uint64 leafCount","bytes32 contentRootSchemaId","bytes32 snapshotManifestHash","bytes32 referenceRenderManifestHash","StreamFinalityScopeInputs inputs","StreamFinalityComponentExpectation[] nonSanctionComponents","uint8 entropyPolicy","uint8 postFreezePolicy","uint8 sanctionPolicy"],"inputOrder":["rootRecordHash","snapshotRecordHash","referenceRenderRecordHash","intentRecordHash","intentWaiverRecordHash","interviewEvidenceHash","rightsStatementRecordHash","workDescriptionRecordHash","renderCriticalEvidenceHash","bundleCoverageHash"],"components":"Exactly the nine required independent families in ascending family order; all seven original expectation fields retained","policies":{"entropyPolicy":1,"postFreezePolicy":1,"sanctionPolicy":1},"policyMeaning":"All members have terminal entropy; no artwork-byte mutation exceptions; actual artist sanction and its archival proof are separate execution requirements","originalEvidence":"Distinct scoped Router root, scoped snapshot and scoped reference records resolve complete source/membership/selection/output commitments; samples never substitute for membership; original renderer/context/native policies/runtime environment and archive receipt identities retained","excluded":"Own content hash, finality record, sanction record and signature; no mutable fixity head is substituted into original evidence","authority":"Only the fixed provider rederives and validates current facts; encoding or byte publication grants no authority or readiness"}'
+            );
+        }
+        if (id == CANON_ID) {
+            return bytes(
+                '{"name":"6529STREAM_SCOPED_FINALITY_INPUT_MANIFEST_ABI_V1","version":1,"encoding":"abi.encode(bytes32 schemaId,bytes32 canonicalizationId,uint256 chainId,address core,address metadataHost,address finalityRegistry,StreamScopedFinalityInputManifestTypes.Statement statement)","schemaId":"keccak256(6529STREAM_SCOPED_FINALITY_INPUT_MANIFEST_V1)","canonicalizationId":"keccak256(6529STREAM_SCOPED_FINALITY_INPUT_MANIFEST_ABI_V1)","scope":"TOKEN=1: nonzero collectionId/tokenId and zero scopeId; RELEASE=2 or SEASON=3: nonzero collectionId/scopeId and zero tokenId; no COLLECTION or VIEW","scopeTuple":["uint8 scopeType","uint256 collectionId","uint256 tokenId","bytes32 scopeId"],"inputTuple":["bytes32 rootRecordHash","bytes32 snapshotRecordHash","bytes32 referenceRenderRecordHash","bytes32 intentRecordHash","bytes32 intentWaiverRecordHash","bytes32 interviewEvidenceHash","bytes32 rightsStatementRecordHash","bytes32 workDescriptionRecordHash","bytes32 renderCriticalEvidenceHash","bytes32 bundleCoverageHash"],"componentTuple":["bytes32 componentType","address component","bytes4 interfaceId","bytes32 codeHash","bytes32 moduleVersion","bytes32 manifestHash","bytes32 dataHash"],"expandedEnvelope":"(bytes32,bytes32,uint256,address,address,address,((uint8,uint256,uint256,bytes32),bytes32,bytes32,uint64,bytes32,bytes32,bytes32,(bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32),(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[],uint8,uint8,uint8))","componentCount":9,"componentWords":7,"words":"Solidity 0.8.19 canonical ABI; uint64/uint8 and addresses zero extended, bytes4 right padded","arrays":"Exact fixed family order, no duplicate or omitted family","trailingBytes":"Forbidden","alternateOffsets":"Forbidden","maximumBytes":8192,"hash":"Keccak-256 of all exact bytes","scopeInputCommitment":"Existing 6529STREAM_FINALITY_SCOPE_INPUTS_V1 domain with chainId, actual Core, actual generic metadataHost, scope and ten inputs; never provider address","retention":"The actual schema Store and original Registry staging must both retain identical complete bytes under this content hash"}'
+            );
+        }
+        revert UnknownManifestDefinition(id);
+    }
+}

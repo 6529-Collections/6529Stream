@@ -35,5 +35,17 @@ library StreamScopedRenderCriticalDefinitionStages {
                 : Documents.currentFactsHash(state.dependencies, documentId);
             if (actual != pin.factsHash) revert T.InventorySourceChanged();
         }
+        // Renderer/citation documents were derived from the admitted immutable versions,
+        // not a caller list. Repeated IDs share one exact facts pin; history stays readable.
+        for (uint256 i; i < state.selectedDocuments[id].length; ++i) {
+            State.DocumentPin storage pin = state.selectedDocuments[id][i];
+            bytes32 actual = full
+                ? Documents.item(state.dependencies, pin.id, 0).provenanceHash
+                : Documents.currentFactsHash(state.dependencies, pin.id);
+            if (actual != pin.factsHash || state.selectedDocumentFacts[id][pin.id] != pin.factsHash)
+            {
+                revert T.InventorySourceChanged();
+            }
+        }
     }
 }
