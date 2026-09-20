@@ -1,7 +1,7 @@
 # Recovery after designated dormancy
 
-This additive reader admits the first elected recovery of a designated class-3
-successor installed by original operation 43. It uses the existing operation 35
+These readers admit first and repeated elected recovery of a designated class-3
+successor installed by original operation 43. They use the existing operation 35
 payload, new-address Safe acceptance, staged TERMINAL_FREEZE action registration,
 guardian veto and atomic Archive. The historical 1–57 operations, dismissal 58 and
 later steward-grant 59 retain their own recipes and signing domains.
@@ -31,8 +31,9 @@ compromise. The original unclosed profile has no prior recovery, intervening rot
 cause or resolution. The additive closed profile below authenticates admitted
 kind-1 dismissals. The standing-history profile below additionally admits
 closed, unexecuted rotation attempts. The executed-rotation and guardian
-supersession profiles below extend those histories. Prior operation35 and
-steward-origin authority histories remain separate unfinished work.
+supersession profiles below extend those histories. A later section covers
+repeated recovery after the first dormancy recovery. Living operation35 before
+the original43 and steward-origin authority remain separate unfinished work.
 
 ## Guardians, authority and execution
 
@@ -273,12 +274,43 @@ retained veto, election completeness, evidence and role drift, original receipt
 preimages and Archive retry. These authored scenarios await coordinated native
 execution, linked-product size, gas/capacity and current-graph acceptance.
 
-ART27 remains incomplete after this batch. Two confirmed history families are
-queued separately: designated43 followed by recovery35 and a later recovery;
-and living recovery35 followed by designated43 and elected recovery. Their
-capability-origin, epoch and prior-record proofs must be implemented explicitly.
-Held steward-to-living/class4 and expanded hydration work remain outside this
-profile.
+### Repeated recovery with the original dormancy origin
+
+An admitted designated43 recovery can now be followed by a fresh compromise and
+another elected recovery, directly or after one or more executed rotations:
+`43 -> 35 -> [32*] -> 33 -> 35`. Current capabilities continue to name the actual
+original43 and retain its original plan mask. Neither recovery nor rotation
+substitutes an estate activation or rewrites the original designated address.
+
+The additional proof reads the fixed Identity owner's canonical original notice,
+completion, transition and operation43 vesting. It checks the original designated
+class3 plan, completed notice, captured guardian prefix and capability origin.
+The original43 epoch must be strictly lower than the latest admitted35 epoch;
+the latter must still equal the current delegation epoch. Original vesting owner
+revisions must also be ordered. Equal timestamps are allowed when the actual
+owner revisions establish the order. Further successful recoveries therefore
+remain possible without assuming the current epoch is always original43 plus one.
+
+The existing repeat-recovery proof authenticates the latest35 record, its typed
+receipts, the complete later rotation history, current cause and any independent
+closures admitted by that profile. An immediate closed35 still requires its
+existing kind-1 closure proof; a standing-closed35 is covered when a later
+executed32 supplies the rotation continuation. It does not replay the first
+recovery's historical governance against today's principal or epoch. The existing
+current35/32 cutoff, complete guardian
+election, APPEAL/ARBITER classification and retained lifetime veto still apply.
+Only the newly admitted dormancy-repeat context adds the original-dormancy proof;
+existing living and estate repeat-context bytes are unchanged. The original
+operation35 record, acceptance, mutation, replay and receipt producers remain in
+use, including one epoch increment and atomic Archive rollback.
+
+`StreamArtistDormancyRepeatedRecoveryActual.t.sol` authors actual Artist, Safe and
+Archive scenarios for this history. Source review and ABI/type checks do not
+establish runtime acceptance, linked product size or transaction capacity.
+
+ART27 remains incomplete: living recovery35 followed by designated43 and elected
+recovery still needs separate origin, epoch and prior-record admission. Held
+steward-to-living/class4 and expanded hydration remain outside these profiles.
 
 ## Validation
 
@@ -318,6 +350,12 @@ For the closed profile use the same command with
 
 For standing history use
 `--match-path test/unit/artist/StreamArtistDormancyStandingHistoryActual.t.sol`.
+
+For first-dormancy supersession use
+`--match-path test/unit/artist/StreamArtistDormancyGuardianSupersessionActual.t.sol --match-test '^testArt27'`.
+For subsequent recoveries with the original dormancy origin use
+`--match-path test/unit/artist/StreamArtistDormancyRepeatedRecoveryActual.t.sol --match-test '^testRepeatedDormancy'`.
+These authored ART27 cohorts still await native execution.
 
 Include all reached fixture JSON data in frozen captures. The aggregate fixture's
 large gas/code limits do not establish deployable size or transaction capacity.

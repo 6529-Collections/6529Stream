@@ -1802,3 +1802,29 @@ and a designated appointment after a prior living recovery, still require their
 own origin/epoch/history admission. Class4/steward-to-living and expanded
 hydration remain excluded. Source/type validation does not establish native,
 linked-product size, current-graph or transaction-capacity acceptance.
+
+### Repeated recovery retaining a designated-dormancy origin
+
+The next ART27 increment admits `43 -> 35 -> [32*] -> 33 -> 35` using the
+existing repeated-recovery path. The class3 origin check now distinguishes an
+original designated dormancy from an estate activation. With no estate
+activation, it authenticates the fixed owner's canonical completed notice,
+original43 terminal and transition, original vesting and captured guardian
+prefix. Current capabilities must retain that exact original43 and plan mask.
+
+Original43's epoch and vesting revision must precede the latest admitted35;
+latest35's epoch must still equal the current epoch. These are strict epoch and
+revision comparisons, not an assumption that only one recovery has occurred.
+The existing authenticated latest35 proof and unchanged epoch constrain the
+entire subsequent rotation suffix. Original records remain immutable; current
+causes, closures and guardian adjudication retain their existing separate proofs.
+
+Only this newly admitted dormancy-repeat context binds the additional origin
+proof. Living and estate repeat-context bytes and all operation35 record,
+acceptance, mutation, replay and typed-receipt producers are unchanged. No
+storage, owner API, election or cutoff change is required. Actual-contract source
+scenarios are in the [caller guide](../guides/artist-dormancy-recovery.md); native,
+size, capacity and complete current-graph acceptance remain pending.
+
+The reverse family, living35 followed by designated43 and elected recovery,
+remains separate. This increment does not admit class4 or expanded hydration.

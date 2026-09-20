@@ -29,6 +29,9 @@ import {
     StreamArtistRecoveryRotationContinuation as Rotated
 } from "./StreamArtistRecoveryRotationContinuation.sol";
 import {
+    StreamArtistRecoveryDormancyOrigin as DormancyOrigin
+} from "./StreamArtistRecoveryDormancyOrigin.sol";
+import {
     IStreamArtistIdentityRecoveryOwner
 } from "../../interfaces/stream/artist/IStreamArtistIdentityRecovery.sol";
 import {
@@ -201,13 +204,20 @@ library StreamArtistRecoveryContinuation {
             capabilities.authorityAddress != principal.authorityAddress
                 || capabilities.authorityClass != principal.authorityClass
                 || capabilities.status != 4
-                || (principal.authorityClass == 3
-                    && (capabilities.activationRecordHash == 0
-                        || capabilities.activationRecordHash
-                            != estate.authorityActivation[p.artistId]
-                        || estate.phases[capabilities.activationRecordHash] != 2))
         ) {
             revert I.UnsupportedIdentityRecoveryProfile(p.artistId);
+        }
+        bytes32 dormancyOrigin;
+        if (principal.authorityClass == 3) {
+            if (estate.authorityActivation[p.artistId] == 0) {
+                dormancyOrigin = DormancyOrigin.requireOrigin(s, o.environment, prior, capabilities);
+            } else if (
+                capabilities.activationRecordHash == 0
+                    || capabilities.activationRecordHash != estate.authorityActivation[p.artistId]
+                    || estate.phases[capabilities.activationRecordHash] != 2
+            ) {
+                revert I.UnsupportedIdentityRecoveryProfile(p.artistId);
+            }
         }
         R.GuardianRecord memory g =
             guardian(s, rotations, o.environment, p.artistId, principal.authorityClass);
@@ -277,6 +287,15 @@ library StreamArtistRecoveryContinuation {
                     keccak256("6529STREAM_ARTIST_ROTATED_REPEAT_RECOVERY_STATE_V1"),
                     c.oldValueHash,
                     rotationProof
+                )
+            );
+        }
+        if (dormancyOrigin != 0) {
+            c.oldValueHash = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_DORMANCY_REPEAT_RECOVERY_STATE_V1"),
+                    c.oldValueHash,
+                    dormancyOrigin
                 )
             );
         }
