@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/metadata/IStreamGeneralAttestations.sol";
+import "../../interfaces/stream/metadata/IStreamGeneralAttestationPayloadChunks.sol";
 import "../../interfaces/standards/IERC5267.sol";
 import "../../vendor/openzeppelin/ReentrancyGuard.sol";
 import "../modules/StreamModuleBase.sol";
@@ -13,6 +14,7 @@ import "./StreamGeneralAttestationSignatures.sol";
 import "./StreamGeneralAttestationJSON.sol";
 import "./StreamGeneralAttestationReads.sol";
 import "./StreamGeneralArtistEvidence.sol";
+import "./StreamGeneralAttestationPayloads.sol";
 import { StreamIndependentReads } from "./StreamIndependentReads.sol";
 
 /// @notice Signed general claims and separately attributed configured-operator assertions.
@@ -23,6 +25,7 @@ contract StreamGeneralAttestations is
     StreamGasParameterHost,
     ReentrancyGuard,
     IStreamGeneralAttestations,
+    IStreamGeneralAttestationPayloadChunks,
     IERC5267
 {
     struct Configuration {
@@ -65,7 +68,9 @@ contract StreamGeneralAttestations is
     bytes32 public immutable metadataAuthorityCodeHash;
     bytes32 public immutable artistRegistryCodeHash;
     bytes32 public immutable artistAttributionCodeHash;
-    uint256 public constant MAX_RECORD_PAYLOAD_BYTES = 8192;
+    uint256 public constant MAX_RECORD_PAYLOAD_BYTES = 24576;
+    uint256 public constant MAX_NOTARIZATION_PAYLOAD_BYTES = 8192;
+    uint256 public constant MAX_ARTIST_STATEMENT_BYTES = 8192;
     uint256 public constant MAX_SIGNATURE_BYTES = 4096;
     uint256 public constant MAX_SIGNATURE_BUNDLE_BYTES = 8192;
     uint256 public constant METADATA_ERC1271_VERIFY_GAS_FLOOR = 90000;
@@ -85,10 +90,11 @@ contract StreamGeneralAttestations is
     mapping(uint256 => mapping(bytes32 => bytes32)) private _chains;
     mapping(uint256 => Pointer[]) private _pointers;
     mapping(uint256 => mapping(bytes32 => bool)) private _pointerSeen;
+    mapping(bytes32 => StreamGeneralAttestationPayloads.Carrier) private _payloadCarriers;
 
     constructor(Configuration memory c)
         StreamModuleBase(
-            keccak256("6529stream.general-attestations.v1"),
+            keccak256("6529stream.general-attestations.v2"),
             address(0),
             c.deploymentManifestHash,
             c.manifestURI,
@@ -182,7 +188,7 @@ contract StreamGeneralAttestations is
     }
 
     function streamModuleVersion() public pure override returns (bytes32) {
-        return keccak256("6529stream.general-attestations.v1");
+        return keccak256("6529stream.general-attestations.v2");
     }
 
     function streamModuleInterfaceId() public pure override returns (bytes4) {
@@ -196,6 +202,7 @@ contract StreamGeneralAttestations is
         returns (bool)
     {
         return id == type(IStreamGeneralAttestations).interfaceId
+            || id == type(IStreamGeneralAttestationPayloadChunks).interfaceId
             || id == type(IERC5267).interfaceId || id == type(IStreamGasParameterHost).interfaceId
             || super.supportsInterface(id);
     }
@@ -281,6 +288,7 @@ contract StreamGeneralAttestations is
                 || r.schemaId != StreamGeneralAttestationDefinitions.SCHEMA_ID
                 || r.canonicalizationId != StreamWorkRecordDefinitions.CANON_ID
                 || r.artistAuthorizationRecordHash != 0
+                || r.payload.length > MAX_NOTARIZATION_PAYLOAD_BYTES
                 || keccak256(r.payload) != keccak256(StreamGeneralAttestationJSON.notarization(n))
         ) revert InvalidGeneralAttestation();
         _subject(s, r);
@@ -315,6 +323,7 @@ contract StreamGeneralAttestations is
             r.attestationType != keccak256("ARTIST_STATEMENT")
                 || r.artistAuthorizationRecordHash == 0
                 || r.schemaId == StreamGeneralAttestationDefinitions.SCHEMA_ID
+                || r.payload.length > MAX_ARTIST_STATEMENT_BYTES
         ) revert InvalidGeneralAttestation();
         Receipt memory receipt = _signed(r, signature);
         (bytes memory evidence, bytes32 artistId, uint8 authorityClass_) =
@@ -537,7 +546,22 @@ contract StreamGeneralAttestations is
         stored.receipt = receipt;
         stored.subject = subject;
         stored.nativeArtistEvidence = evidence;
-        stored.payloadPointer = _publish(r.collectionId, FAMILY, r.payload);
+        if (r.payload.length <= 8192) {
+            stored.payloadPointer = _publish(r.collectionId, FAMILY, r.payload);
+        } else {
+            StreamGeneralAttestationReads.code(chunkStore, chunkStoreCodeHash);
+            StreamGeneralAttestationPayloads.Carrier storage carrier = _payloadCarriers[hash];
+            stored.payloadPointer =
+                StreamGeneralAttestationPayloads.retain(carrier, chunkStore, r.payload);
+            for (uint256 i; i < carrier.manifest.pointers.length; ++i) {
+                _indexPointer(
+                    r.collectionId,
+                    FAMILY,
+                    carrier.manifest.chunkHashes[i],
+                    carrier.manifest.pointers[i]
+                );
+            }
+        }
         if (bundle.length != 0) {
             stored.signaturePointer = _publish(r.collectionId, BUNDLE_FAMILY, bundle);
         }
@@ -571,6 +595,12 @@ contract StreamGeneralAttestations is
             hash != keccak256(payload)
                 || pointer.codehash != keccak256(bytes.concat(hex"00", payload))
         ) revert InvalidGeneralAttestation();
+        _indexPointer(collectionId, family, hash, pointer);
+    }
+
+    function _indexPointer(uint256 collectionId, bytes32 family, bytes32 hash, address pointer)
+        private
+    {
         bytes32 key = keccak256(abi.encode(family, hash));
         if (!_pointerSeen[collectionId][key]) {
             _pointerSeen[collectionId][key] = true;
@@ -625,7 +655,36 @@ contract StreamGeneralAttestations is
         returns (address pointer, bytes memory payload)
     {
         Stored storage s = _known(hash);
-        return (s.payloadPointer, _payload(s.payloadPointer, s.value.statementHash));
+        return (
+            s.payloadPointer,
+            StreamGeneralAttestationPayloads.read(
+                _payloadCarriers[hash], s.payloadPointer, s.value.statementHash
+            )
+        );
+    }
+
+    function recordPayloadInfo(bytes32 hash)
+        external
+        view
+        override
+        returns (bytes32 contentHash, uint32 byteLength, uint32 chunkCount)
+    {
+        Stored storage s = _known(hash);
+        return StreamGeneralAttestationPayloads.info(
+            _payloadCarriers[hash], s.payloadPointer, s.value.statementHash
+        );
+    }
+
+    function recordPayloadChunkAt(bytes32 hash, uint256 index)
+        external
+        view
+        override
+        returns (bytes32 chunkHash, address pointer, uint32 length)
+    {
+        Stored storage s = _known(hash);
+        return StreamGeneralAttestationPayloads.chunkAt(
+            _payloadCarriers[hash], s.payloadPointer, s.value.statementHash, index
+        );
     }
 
     function recordSignatureBundle(bytes32 hash)

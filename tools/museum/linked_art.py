@@ -232,10 +232,14 @@ class PinnedLinkedArt:
         except KeyError as exc:
             raise MuseumError("derived schema unavailable") from exc
 
-    def validate_and_expand(self, raw: bytes) -> Expansion:
+    def validate_and_expand(self, raw: bytes, *, maximum=24576) -> Expansion:
         # This first derived-document profile has no float/unsafe-integer adapter.
         # Existing source numeric bytes are retained separately and never converted here.
-        document = loads(raw)
+        # Explicit larger derived carriers may include JSON escaping and resource metadata.
+        # Existing callers retain the original bound; schema/context policy is unchanged.
+        if type(maximum) is not int or not 1 <= maximum <= 262144:
+            raise MuseumError("derived document byte allowance outside bound")
+        document = loads(raw, maximum=maximum)
         if not isinstance(document, dict) or document.get("@context") != self._context_uri:
             raise MuseumError("document must use the exact pinned context URI")
         _contexts(document)

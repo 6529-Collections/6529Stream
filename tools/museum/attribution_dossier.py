@@ -16,6 +16,31 @@ from .preservation_graph import CONTEXT, VALIDATION_HASH, validator
 
 PROFILE = "STREAM_MUSEUM_NATIVE_ATTRIBUTION_DOSSIER_V1"
 RULE = "urn:6529stream:museum:native-attribution:v1:"
+# A V2 payload may expand sixfold when control bytes become JSON escape sequences.
+MAX_GENERAL_V2_RESOURCE = 6 * 24576 + 8192
+
+
+def _general_profiles():
+    from .general_attestation_source import GeneralAttestationSource, PROFILE as V1, PROFILE_BYTES as V1_BYTES
+    from .general_attestation_source_v2 import GeneralAttestationSourceV2, PROFILE as V2, PROFILE_BYTES as V2_BYTES
+    return ((V1, GeneralAttestationSource, V1_BYTES), (V2, GeneralAttestationSourceV2, V2_BYTES))
+
+
+def _general_source(anchor_raw, transport, *, provenance):
+    """Choose an explicit retained profile before any producer reads; never fall back."""
+    anchor = loads(anchor_raw, maximum=524288, canonical=True)
+    require(type(anchor) is dict, "general attribution anchor profile missing")
+    for name, kind, _ in _general_profiles():
+        if anchor.get("profile") == name:
+            return kind(anchor_raw, transport, provenance=provenance)
+    require(False, "general attribution anchor profile unsupported")
+
+
+def _general_profile_bytes(source):
+    for _, kind, raw in _general_profiles():
+        if type(source) is kind:
+            return raw
+    require(False, "concrete general attribution source required")
 
 
 def render(artist, semantic=None, selection=None, *, general=None, model_root=DEFAULT_MODEL_ROOT):
@@ -78,7 +103,9 @@ def render(artist, semantic=None, selection=None, *, general=None, model_root=DE
         raw = dumps(resource); stem = "general-" + row["recordHash"][2:]
         path = "graph/resources/" + stem + ".json"
         require(path not in files, "general attribution duplicate graph identity")
-        files[path], files["graph/expanded/" + stem + ".json"] = raw, model.validate_and_expand(raw).expanded_bytes
+        from .general_attestation_source_v2 import PROFILE as GENERAL_V2
+        maximum = MAX_GENERAL_V2_RESOURCE if general["profile"] == GENERAL_V2 else 24576
+        files[path], files["graph/expanded/" + stem + ".json"] = raw, model.validate_and_expand(raw, maximum=maximum).expanded_bytes
         index.append({"source": source, "id": identifier, "path": path, "status": "original_statement",
             "authority": authority, "interpretation": row["interpretation"]})
         provenance.extend({"entity": identifier, "path": pointer, "value": value, "source": source,
@@ -106,8 +133,8 @@ def build_files(artist_source, *, semantic=None, general=None, selection_raw=Non
         "artist/profile.json": ARTIST_PROFILE_BYTES})
     general_value = None
     if general is not None:
-        from .general_attestation_source import GeneralAttestationSource, PROFILE_BYTES as GENERAL_PROFILE_BYTES
-        require(type(general) is GeneralAttestationSource and general.provenance == artist_source.provenance,
+        general_profile = _general_profile_bytes(general)
+        require(general.provenance == artist_source.provenance,
             "concrete general attribution source with matching provenance required")
         general_value = loads(general.snapshot(), maximum=MAX_TRANSCRIPT, canonical=True)
         require(general_value["sourceState"] == artist["sourceState"]
@@ -116,7 +143,7 @@ def build_files(artist_source, *, semantic=None, general=None, selection_raw=Non
             and general.a["stateRoot"] == artist_source.metadata_catalog.a["stateRoot"],
             "general attribution joined source identity/state differs")
         files.update(_source_files(general, "sources/general"))
-        files["sources/general/profile.json"] = GENERAL_PROFILE_BYTES
+        files["sources/general/profile.json"] = general_profile
     semantic_value = selected = None
     require((selection_raw is None) == (selection_hash is None), "native attribution selection external pin required")
     if semantic is not None:
@@ -198,10 +225,11 @@ def verify_files(files, manifest_hash, *, model_root=DEFAULT_MODEL_ROOT):
         require(semantic.snapshot() == files["semantics/snapshot.json"], "native attribution semantic replay differs")
     general = None
     if flags["general"]:
-        from .general_attestation_source import GeneralAttestationSource
         raw = files["sources/general/transcript.json"]
-        general = GeneralAttestationSource(files["sources/general/anchor.json"], ReplayTransport(raw, keccak256(raw)),
+        general = _general_source(files["sources/general/anchor.json"], ReplayTransport(raw, keccak256(raw)),
             provenance=manifest["provenance"])
+        require(files["sources/general/profile.json"] == _general_profile_bytes(general),
+            "native attribution general profile bytes differ")
         require(general.snapshot() == files["sources/general/snapshot.json"], "native attribution general replay differs")
     rebuilt = build_files(artist, semantic=semantic, general=general,
         selection_raw=files["semantics/selection.json"] if flags["selection"] else None,
@@ -236,8 +264,7 @@ def main():
     catalogue = _input_source(plan["metadata"], MetadataCatalogSource)
     general = None
     if plan["general"] is not None:
-        from .general_attestation_source import GeneralAttestationSource
-        general = _input_source(plan["general"], GeneralAttestationSource)
+        general = _input_source(plan["general"], _general_source)
     endpoint = os.environ.get(args.rpc_env); require(bool(endpoint), "native attribution RPC environment missing")
     artist = ArtistAttestationSource(catalogue, RpcTransport(endpoint))
     semantic = NativeAttributionSemanticSource(artist, RpcTransport(endpoint)) if plan["semantics"] else None

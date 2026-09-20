@@ -72,6 +72,23 @@ class ActualOfflineLinkedArt(unittest.TestCase):
                 self.profile.validate_and_expand(dumps(mutation))
         self.profile.validate_and_expand(dumps(original))
 
+    def test_explicit_derived_byte_allowance_keeps_default_and_schema_policy(self):
+        original = digital() | {"_label": "x" * 24576}
+        raw = dumps(original)
+        with self.assertRaisesRegex(MuseumError, "JSON byte limit"):
+            self.profile.validate_and_expand(raw)
+        with patch("socket.socket", side_effect=AssertionError("network forbidden")):
+            result = self.profile.validate_and_expand(raw, maximum=32768)
+        self.assertEqual(result.source_bytes, raw)
+        self.assertEqual(result.policy_hash, keccak256(self.policy_bytes))
+        for maximum in (0, True, "32768", 262145):
+            with self.subTest(maximum=maximum), self.assertRaisesRegex(MuseumError, "allowance outside bound"):
+                self.profile.validate_and_expand(raw, maximum=maximum)
+        for changed in (original | {"misspelled_relation": "lost"},
+                        original | {"@context": "https://foreign.invalid/context"}):
+            with self.subTest(changed=changed), self.assertRaises(MuseumError):
+                self.profile.validate_and_expand(dumps(changed), maximum=32768)
+
     def test_schema_context_and_policy_hashes_are_independent_pins(self):
         original = loads(self.policy_bytes)
         with self.assertRaises(MuseumError):

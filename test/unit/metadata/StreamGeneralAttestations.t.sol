@@ -25,6 +25,29 @@ import {
 import {
     StreamGeneralAttestationSignatures
 } from "../../../smart-contracts/domains/metadata/StreamGeneralAttestationSignatures.sol";
+import {
+    StreamGeneralAttestationPayloads
+} from "../../../smart-contracts/domains/metadata/StreamGeneralAttestationPayloads.sol";
+import {
+    IStreamGeneralAttestationPayloadChunks
+} from "../../../smart-contracts/interfaces/stream/metadata/IStreamGeneralAttestationPayloadChunks.sol";
+
+/// @dev Deliberate storage corruption is available only in this carrier test harness.
+contract GeneralPayloadCarrierHarness {
+    StreamGeneralAttestationPayloads.Carrier private carrier;
+
+    function retain(address store, bytes calldata payload) external returns (address) {
+        return StreamGeneralAttestationPayloads.retain(carrier, store, payload);
+    }
+
+    function corruptMode() external {
+        carrier.chunked = false;
+    }
+
+    function read(address pointer, bytes32 hash) external view returns (bytes memory) {
+        return StreamGeneralAttestationPayloads.read(carrier, pointer, hash);
+    }
+}
 
 contract GeneralSignatureGasHarness {
     function verify(address signer, bytes32 digest, bytes calldata signature, uint256 cap)
@@ -668,16 +691,16 @@ contract StreamGeneralAttestationsTest is IndependentAttestationTestBase {
             IStreamCollectionAttestations.Subject memory subject,
             IStreamGeneralAttestations.Request memory r
         ) = _generalRequest(42);
-        r.payload = new bytes(8193);
+        r.payload = new bytes(24577);
         bytes memory signature = _sign(general.attestationDigest(r));
         vm.expectRevert();
         general.recordSignedAttestation(subject, r, signature);
         require(!general.isAttesterNonceUsed(signer, 42), "oversize nonce intact");
-        r.payload = new bytes(8192);
+        r.payload = new bytes(24576);
         signature = _sign(general.attestationDigest(r));
         bytes32 hash = general.recordSignedAttestation(subject, r, signature);
         (, bytes memory payload) = general.recordPayload(hash);
-        require(payload.length == 8192, "exact payload limit");
+        require(payload.length == 24576, "exact generic payload limit");
         vm.prank(signer);
         general.revokeAttesterNonce(43);
         r.nonce = 43;
@@ -784,6 +807,286 @@ contract StreamGeneralAttestationsTest is IndependentAttestationTestBase {
                 revision
             )
         );
+    }
+
+    function testCapacityVersionInterfacesAndUnchangedSigningDomain() public {
+        require(general.supportsInterface(0xb4afac56), "original interface retained");
+        require(
+            type(IStreamGeneralAttestationPayloadChunks).interfaceId == bytes4(0xc637353c)
+                && general.supportsInterface(0xc637353c),
+            "additive chunk interface"
+        );
+        require(
+            general.streamModuleVersion() == keccak256("6529stream.general-attestations.v2")
+                && general.MAX_RECORD_PAYLOAD_BYTES() == 24576
+                && general.MAX_NOTARIZATION_PAYLOAD_BYTES() == 8192
+                && general.MAX_ARTIST_STATEMENT_BYTES() == 8192
+                && general.MAX_SIGNATURE_BYTES() == 4096
+                && general.MAX_SIGNATURE_BUNDLE_BYTES() == 8192,
+            "separate capacity and evidence limits"
+        );
+        (, string memory name, string memory version, uint256 chain, address verifying,,) =
+            general.eip712Domain();
+        require(
+            keccak256(bytes(name)) == keccak256("6529StreamGeneralAttestations")
+                && keccak256(bytes(version)) == keccak256("1") && chain == block.chainid
+                && verifying == address(general),
+            "original signing domain"
+        );
+    }
+
+    function _capacityPayload(uint256 length, uint8 seed) private pure returns (bytes memory payload) {
+        payload = new bytes(length);
+        for (uint256 i; i < length; ++i) payload[i] = bytes1(uint8(seed + i / 8192));
+    }
+
+    function _assertPayloadChunks(bytes32 hash, bytes memory expected) private view {
+        (address first, bytes memory full) = general.recordPayload(hash);
+        require(full.length == expected.length && keccak256(full) == keccak256(expected), "all payload bytes");
+        (bytes32 contentHash, uint32 length, uint32 count) = general.recordPayloadInfo(hash);
+        require(
+            contentHash == keccak256(expected) && length == expected.length
+                && count == (expected.length + 8191) / 8192,
+            "full payload descriptor"
+        );
+        for (uint256 i; i < count; ++i) {
+            (bytes32 chunkHash, address pointer, uint32 chunkLength) = general.recordPayloadChunkAt(hash, i);
+            uint256 offset = i * 8192;
+            uint256 size = expected.length - offset;
+            if (size > 8192) size = 8192;
+            bytes32 expectedChunk;
+            assembly ("memory-safe") { expectedChunk := keccak256(add(add(expected, 32), offset), size) }
+            (address storedPointer, uint32 storedLength) = store.chunk(expectedChunk);
+            require(
+                chunkHash == expectedChunk && chunkLength == size && storedLength == size
+                    && pointer == storedPointer && pointer.code.length == size + 1
+                    && (i != 0 || pointer == first),
+                "real ordered Store chunk"
+            );
+            bool inventoried;
+            for (uint256 j; j < general.payloadPointerCount(1); ++j) {
+                (address p, bytes32 family, bytes32 h) = general.payloadPointerAt(1, j);
+                if (
+                    p == pointer && h == chunkHash
+                        && family == keccak256("6529STREAM_RECORD_FAMILY_GENERAL_ATTESTATION_V1")
+                ) inventoried = true;
+            }
+            require(inventoried, "every actual chunk appears in host inventory");
+        }
+    }
+
+    function testPayloadCapacityBoundariesAndOriginalRecordChainPreimages() public {
+        uint256[7] memory lengths = [uint256(1), 8191, 8192, 8193, 16384, 16385, 24576];
+        bytes32 previous;
+        bytes32 previousChain;
+        for (uint256 i; i < lengths.length; ++i) {
+            (IStreamCollectionAttestations.Subject memory s, IStreamGeneralAttestations.Request memory r) =
+                _generalRequest(100 + i);
+            r.payload = _capacityPayload(lengths[i], uint8(10 + i * 3));
+            r.supersedes = previous;
+            bytes32 hash = general.recordSignedAttestation(s, r, _sign(general.attestationDigest(r)));
+            _assertPayloadChunks(hash, r.payload);
+            (IStreamGeneralAttestations.Attestation memory value, IStreamGeneralAttestations.Receipt memory receipt) =
+                general.attestation(hash);
+            require(receipt.recordIndex == i && value.supersedes == previous, "one record per payload");
+            bytes32 chain = keccak256(abi.encode(
+                keccak256("6529STREAM_GENERAL_ATTESTATION_CHAIN_V1"), uint256(1), r.attestationType,
+                previousChain, hash, uint64(i)
+            ));
+            require(receipt.recordChainHash == chain, "original chain preimage");
+            receipt.recordIndex = 0;
+            receipt.recordChainHash = 0;
+            require(hash == keccak256(abi.encode(
+                keccak256("6529STREAM_GENERAL_ATTESTATION_RECORD_V1"), block.chainid,
+                address(general), value, receipt
+            )), "original record preimage");
+            previous = hash;
+            previousChain = chain;
+        }
+        (bytes32 finalChain, uint64 count) = general.recordChainHash(1, keccak256("INSTITUTIONAL_VERIFICATION"));
+        require(count == lengths.length && finalChain == previousChain, "one history row per record");
+        vm.expectRevert();
+        general.recordPayloadChunkAt(previous, 3);
+        vm.expectRevert();
+        general.recordPayloadInfo(bytes32(uint256(123)));
+    }
+
+    function testRepeatedChunkPositionsAndDeduplicatedActualPointerInventory() public {
+        (IStreamCollectionAttestations.Subject memory s, IStreamGeneralAttestations.Request memory r) = _generalRequest(200);
+        r.payload = new bytes(24576);
+        r.attestationType = keccak256("ESTATE_VERIFICATION");
+        bytes32 hash = general.recordSignedAttestation(s, r, _sign(general.attestationDigest(r)));
+        _assertPayloadChunks(hash, r.payload);
+        (bytes32 a, address p,) = general.recordPayloadChunkAt(hash, 0);
+        for (uint256 i = 1; i < 3; ++i) {
+            (bytes32 b, address q,) = general.recordPayloadChunkAt(hash, i);
+            require(a == b && p == q, "repeated positions retained");
+        }
+        require(general.payloadPointerCount(1) == 2, "one real payload chunk plus bundle");
+        (address indexedPointer, bytes32 family, bytes32 indexedHash) = general.payloadPointerAt(1, 0);
+        require(
+            indexedPointer == p && indexedHash == a && indexedHash != keccak256(r.payload)
+                && family == keccak256("6529STREAM_RECORD_FAMILY_GENERAL_ATTESTATION_V1"),
+            "inventory describes actual bytes at pointer"
+        );
+        metadata.set(1, address(this), true);
+        r.attestationType = keccak256("CURATORIAL_STATEMENT");
+        r.nonce = 201;
+        bytes32 operatorHash = general.recordOperatorAttestation(s, r);
+        _assertPayloadChunks(operatorHash, r.payload);
+        require(general.payloadPointerCount(1) == 2, "cross-record payload chunk dedupe");
+        (, IStreamGeneralAttestations.Receipt memory receipt) = general.attestation(operatorHash);
+        require(
+            receipt.recorder == address(this)
+                && receipt.verificationClass == IStreamGeneralAttestations.VerificationClass.OPERATOR_ASSERTED,
+            "large operator assertion keeps admission semantics"
+        );
+    }
+
+    function testLargeThenSmallSupersessionAndEmptyPayloadRejection() public {
+        (IStreamCollectionAttestations.Subject memory s, IStreamGeneralAttestations.Request memory r) = _generalRequest(210);
+        r.payload = _capacityPayload(8193, 51);
+        bytes32 first = general.recordSignedAttestation(s, r, _sign(general.attestationDigest(r)));
+        r.nonce = 211;
+        r.supersedes = first;
+        r.payload = "";
+        bytes memory signature = _sign(general.attestationDigest(r));
+        vm.expectRevert(abi.encodeWithSelector(IStreamGeneralAttestations.InvalidGeneralAttestation.selector));
+        general.recordSignedAttestation(s, r, signature);
+        require(!general.isAttesterNonceUsed(signer, 211), "empty payload leaves nonce");
+        r.payload = hex"aabbcc";
+        bytes32 second = general.recordSignedAttestation(s, r, _sign(general.attestationDigest(r)));
+        _assertPayloadChunks(second, r.payload);
+        (, uint32 length, uint32 count) = general.recordPayloadInfo(second);
+        require(length == 3 && count == 1, "small successor keeps single chunk");
+        require(general.latestAttestationHashFor(1, r.attestationType, r.subjectId, signer) == second, "signer head");
+        _assertPayloadChunks(first, _capacityPayload(8193, 51));
+        vm.expectRevert();
+        general.recordPayloadChunkAt(second, 1);
+    }
+
+    function testLaterChunkTamperingFailsAllPayloadReadSurfaces() public {
+        (IStreamCollectionAttestations.Subject memory s, IStreamGeneralAttestations.Request memory r) = _generalRequest(220);
+        r.payload = _capacityPayload(16385, 61);
+        bytes32 hash = general.recordSignedAttestation(s, r, _sign(general.attestationDigest(r)));
+        (, address later,) = general.recordPayloadChunkAt(hash, 2);
+        bytes memory original = later.code;
+        for (uint256 mode; mode < 3; ++mode) {
+            bytes memory altered = abi.encodePacked(original);
+            if (mode == 0) altered = hex"00";
+            if (mode == 1) altered[0] = hex"01";
+            if (mode == 2) altered[1] = hex"ff";
+            vm.etch(later, altered);
+            vm.expectRevert();
+            general.recordPayload(hash);
+            vm.expectRevert();
+            general.recordPayloadInfo(hash);
+            vm.expectRevert();
+            general.recordPayloadChunkAt(hash, 0);
+            vm.etch(later, original);
+        }
+        _assertPayloadChunks(hash, r.payload);
+    }
+
+    function testHistoricalLargeReadsDoNotDependOnLiveStoreOrSchema() public {
+        (IStreamCollectionAttestations.Subject memory s, IStreamGeneralAttestations.Request memory r) = _generalRequest(230);
+        r.payload = _capacityPayload(24576, 71);
+        bytes32 hash = general.recordSignedAttestation(s, r, _sign(general.attestationDigest(r)));
+        (address first, bytes memory beforeChange) = general.recordPayload(hash);
+        vm.etch(address(store), hex"00");
+        vm.etch(address(schemas), hex"00");
+        (address afterPointer, bytes memory afterChange) = general.recordPayload(hash);
+        require(first == afterPointer && keccak256(beforeChange) == keccak256(afterChange), "historical complete bytes");
+        (bytes32 contentHash, uint32 length, uint32 count) = general.recordPayloadInfo(hash);
+        require(contentHash == keccak256(r.payload) && length == 24576 && count == 3, "historical manifest");
+        (, address last, uint32 lastLength) = general.recordPayloadChunkAt(hash, 2);
+        require(last != address(0) && lastLength == 8192, "historical final chunk");
+        (, bytes memory bundle) = general.recordSignatureBundle(hash);
+        require(bundle.length != 0 && bundle.length <= 8192, "historical signature bundle");
+    }
+
+    function testCorruptExistingLaterChunkRollsBackNewChunkAndEntireRecord() public {
+        (IStreamCollectionAttestations.Subject memory s, IStreamGeneralAttestations.Request memory r) = _generalRequest(240);
+        bytes memory first = _capacityPayload(8192, 81);
+        r.payload = bytes.concat(first, hex"52");
+        (, address later) = store.publishChunk(hex"52");
+        bytes memory original = later.code;
+        vm.etch(later, hex"0053");
+        bytes memory signature = _sign(general.attestationDigest(r));
+        vm.expectRevert(abi.encodeWithSelector(StreamGeneralAttestationPayloads.InvalidGeneralPayloadCarrier.selector));
+        general.recordSignedAttestation(s, r, signature);
+        (address rolledBackPointer, uint32 rolledBackLength) = store.chunk(keccak256(first));
+        require(rolledBackPointer == address(0) && rolledBackLength == 0, "earlier publication rolled back");
+        (bytes32 chain, uint64 count) = general.recordChainHash(1, r.attestationType);
+        require(
+            !general.isAttesterNonceUsed(signer, 240) && general.payloadPointerCount(1) == 0
+                && chain == 0 && count == 0
+                && general.latestAttestationHashFor(1, r.attestationType, r.subjectId, signer) == 0,
+            "failed write leaves all authority and inventory state intact"
+        );
+        vm.etch(later, original);
+        bytes32 hash = general.recordSignedAttestation(s, r, signature);
+        _assertPayloadChunks(hash, r.payload);
+    }
+
+    function testMalformedManifestCannotFallBackToFirstChunk() public {
+        GeneralPayloadCarrierHarness harness = new GeneralPayloadCarrierHarness();
+        bytes memory payload = _capacityPayload(8193, 91);
+        address first = harness.retain(address(store), payload);
+        require(keccak256(harness.read(first, keccak256(payload))) == keccak256(payload), "intact carrier");
+        harness.corruptMode();
+        bytes32 firstHash = keccak256(_capacityPayload(8192, 91));
+        vm.expectRevert(abi.encodeWithSelector(StreamGeneralAttestationPayloads.InvalidGeneralPayloadCarrier.selector));
+        harness.read(first, firstHash);
+        vm.expectRevert(abi.encodeWithSelector(StreamGeneralAttestationPayloads.InvalidGeneralPayloadCarrier.selector));
+        harness.retain(address(store), payload);
+    }
+
+    function testNativeArtistPayloadBoundRemains8192WithValidHistoricalProof() public {
+        for (uint256 i; i < 2; ++i) {
+            (, IStreamGeneralAttestations.Request memory r) = _generalRequest(250 + i);
+            r.payload = _capacityPayload(8192 + i, 101);
+            r.attestationType = keccak256("ARTIST_STATEMENT");
+            r.subjectId = keccak256(abi.encode("bounded original native subject", i));
+            StreamArtistOnboardingTypes.Attestation memory original = StreamArtistOnboardingTypes.Attestation(
+                1, 10, r.subjectId, keccak256("native state"), r.schemaId, keccak256(r.payload), r.statementURI
+            );
+            r.artistAuthorizationRecordHash = artist.seed(original, signer, 2, 77 + i, 800, r.payload);
+            IStreamGeneralAttestations.ArtistWitness memory witness = IStreamGeneralAttestations.ArtistWitness(10, 77 + i, i);
+            bytes memory signature = _sign(general.attestationDigest(r));
+            if (i == 0) {
+                bytes32 hash = general.recordArtistStatement(r, witness, signature);
+                _assertPayloadChunks(hash, r.payload);
+            } else {
+                vm.expectRevert(abi.encodeWithSelector(IStreamGeneralAttestations.InvalidGeneralAttestation.selector));
+                general.recordArtistStatement(r, witness, signature);
+                require(!general.isAttesterNonceUsed(signer, r.nonce), "native limit leaves nonce");
+            }
+        }
+    }
+
+    function testTypedNotarizationAndSignatureLimitsRemainSeparate() public {
+        IStreamGeneralAttestations.Notarization memory n = _notarization();
+        bytes memory uri = _capacityPayload(2048, 120);
+        uri[0] = "i"; uri[1] = "p"; uri[2] = "f"; uri[3] = "s"; uri[4] = ":"; uri[5] = "/"; uri[6] = "/";
+        n.legalPersonRef.uri = string(uri);
+        n.instrumentRef.uri = string(uri);
+        n.officiatingAuthorityIdentityRef.uri = string(uri);
+        n.verifyingInstitutionIdentityRef.uri = string(uri);
+        vm.expectRevert();
+        general.notarizationPayload(n);
+        (IStreamCollectionAttestations.Subject memory s, IStreamGeneralAttestations.Request memory r) = _generalRequest(260);
+        IndependentSignatureBoundary wallet = new IndependentSignatureBoundary();
+        r.attester = address(wallet);
+        r.payload = _capacityPayload(24576, 111);
+        wallet.set(general.attestationDigest(r), 0);
+        vm.expectRevert();
+        general.recordSignedAttestation(s, r, new bytes(4097));
+        require(!general.isAttesterNonceUsed(address(wallet), r.nonce), "signature limit leaves nonce");
+        bytes32 hash = general.recordSignedAttestation(s, r, new bytes(4096));
+        (, bytes memory bundle) = general.recordSignatureBundle(hash);
+        require(bundle.length <= 8192, "full payload keeps bounded original bundle");
+        _assertPayloadChunks(hash, r.payload);
     }
 
     function testSignatureParentGasBranchBeforeERC1271Attempt() public {

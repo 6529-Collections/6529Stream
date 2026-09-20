@@ -174,6 +174,8 @@ interface IStreamGeneralAttestations is IERC165 {
         external
         view
         returns (IStreamCollectionAttestations.Subject memory);
+    /// @notice Returns the complete canonical payload; pointer is its FIRST chunk pointer.
+    /// @dev Use IStreamGeneralAttestationPayloadChunks for ordered large-payload descriptors.
     function recordPayload(bytes32 recordHash)
         external
         view

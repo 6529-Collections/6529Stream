@@ -203,6 +203,110 @@ class AttributionDossierTests(unittest.TestCase):
         with self.assertRaisesRegex(MuseumError, "cross-source RPC result differs"):
             dossier.build_files(fixture.overlay(), general=general.reader())
 
+    def test_original_v1_general_package_commitment_and_explicit_profile_dispatch(self):
+        from .general_attestation_source import GeneralAttestationSource, PROFILE_BYTES
+        from .test_general_attestation_source import Fixture as GeneralFixture
+        fixture = GeneralFixture(artist_context=Fixture())
+        files = dossier.build_files(fixture.artist_overlay(), general=fixture.reader())
+        # Captured before adding V2 dispatch: preserves every V1 package byte.
+        self.assertEqual(keccak256(files["manifest.json"]),
+            "0xe36121d5c5721b9c08c7a247a0ec26ffdfcf8c70ab6fd9bc93ca9a8aa947a2e5")
+        self.assertEqual(files["sources/general/profile.json"], PROFILE_BYTES)
+        with patch("socket.socket", side_effect=AssertionError("network forbidden")):
+            dossier.verify_files(files, keccak256(files["manifest.json"]))
+            with tempfile.TemporaryDirectory() as directory:
+                plan = {"provenance": "synthetic_fixture"}
+                for name in ("anchor", "transcript", "snapshot"):
+                    raw = files["sources/general/" + name + ".json"]
+                    path = Path(directory) / (name + ".json")
+                    path.write_bytes(raw)
+                    plan[name + "Path"], plan[name + "Hash"] = str(path), keccak256(raw)
+                source = dossier._input_source(plan, dossier._general_source)
+                self.assertIs(type(source), GeneralAttestationSource)
+                self.assertEqual(source.snapshot(), files["sources/general/snapshot.json"])
+
+        changed = dict(files)
+        anchor = loads(changed["sources/general/anchor.json"])
+        anchor["profile"] = "STREAM_MUSEUM_GENERAL_ATTESTATION_SOURCE_V99"
+        changed["sources/general/anchor.json"] = dumps(anchor)
+        with self.assertRaisesRegex(MuseumError, "profile unsupported"):
+            dossier.verify_files(changed, rehash(changed))
+
+    def test_v2_maximum_payload_join_retains_all_chunks_and_replays_offline(self):
+        from . import general_attestation_source as v1
+        from .general_attestation_source_v2 import GeneralAttestationSourceV2, PROFILE_BYTES
+        from .test_general_attestation_source_v2 import Fixture as GeneralFixture
+        from .test_native_attribution_source import Fixture as SemanticFixture
+        fixture = SemanticFixture(rotated=True, disputed=True)
+        general_fixture = GeneralFixture(generic_payload_bytes=24576, artist_context=fixture)
+        fixture.responses = general_fixture.responses
+        semantic, general = fixture.semantic(), general_fixture.reader()
+        files = dossier.build_files(semantic.artist, semantic=semantic, general=general)
+        with patch("socket.socket", side_effect=AssertionError("network forbidden")):
+            report = dossier.verify_files(files, keccak256(files["manifest.json"]))
+            with tempfile.TemporaryDirectory() as directory:
+                plan = {"provenance": "synthetic_fixture"}
+                for name in ("anchor", "transcript", "snapshot"):
+                    raw = files["sources/general/" + name + ".json"]
+                    path = Path(directory) / (name + ".json")
+                    path.write_bytes(raw)
+                    plan[name + "Path"], plan[name + "Hash"] = str(path), keccak256(raw)
+                source = dossier._input_source(plan, dossier._general_source)
+                self.assertIs(type(source), GeneralAttestationSourceV2)
+                self.assertEqual(source.snapshot(), general.snapshot())
+        self.assertEqual(report["generalAttestationCount"], "4")
+        self.assertEqual(files["sources/general/profile.json"], PROFILE_BYTES)
+        original = loads(files["dossier.json"])["generalAttestationEvidence"]["original"]
+        row = next(item for item in original["records"] if item["value"][3] == v1.CURATORIAL)
+        self.assertEqual(row["payloadInfo"]["byteLength"], "24576")
+        self.assertEqual(row["payloadInfo"]["chunkCount"], "3")
+        self.assertEqual(row["payloadInfo"]["firstChunkPointer"], row["payloadChunks"][0]["pointer"])
+        self.assertNotEqual(row["payloadInfo"]["contentHash"], row["payloadChunks"][0]["chunkHash"])
+        resources = loads(files["graph/index.json"])["resources"]
+        resource = next(item for item in resources if item["source"].get("recordHash") == row["recordHash"])
+        self.assertEqual(loads(files[resource["path"]])["content"].encode(), bytes.fromhex(row["payloadHex"][2:]))
+        coverage = loads(files["graph/source-coverage.json"])
+        self.assertEqual({item["sourcePath"]: item["value"] for item in coverage
+            if item["source"] == resource["source"]}, dict(dossier.leaves(row)))
+        self.assertFalse(report["claims"]["actualChainAcceptance"])
+
+        changed = dict(files)
+        changed["sources/general/profile.json"] = v1.PROFILE_BYTES
+        with self.assertRaisesRegex(MuseumError, "profile bytes differ"):
+            dossier.verify_files(changed, rehash(changed))
+        changed = dict(files)
+        value = loads(changed["sources/general/snapshot.json"])
+        record = next(item for item in value["records"] if item["value"][3] == v1.CURATORIAL)
+        record["payloadChunks"].reverse()
+        changed["sources/general/snapshot.json"] = dumps(value)
+        with self.assertRaisesRegex(MuseumError, "general replay differs"):
+            dossier.verify_files(changed, rehash(changed))
+        changed = dict(files)
+        anchor = loads(changed["sources/general/anchor.json"])
+        anchor["profile"] = v1.PROFILE
+        changed["sources/general/anchor.json"] = dumps(anchor)
+        with self.assertRaises(MuseumError):
+            dossier.verify_files(changed, rehash(changed))
+
+    def test_v2_worst_case_json_escaping_preserves_complete_original(self):
+        from . import general_attestation_source as v1
+        from .test_general_attestation_source_v2 import Fixture as GeneralFixture
+        fixture = GeneralFixture(generic_payload_bytes=None, artist_context=Fixture())
+        original = bytes(24576)
+        fixture._replace_payload(2, original)
+        fixture.install_v2_state()
+        files = dossier.build_files(fixture.artist_overlay(), general=fixture.reader())
+        with patch("socket.socket", side_effect=AssertionError("network forbidden")):
+            dossier.verify_files(files, keccak256(files["manifest.json"]))
+        snapshot = loads(files["sources/general/snapshot.json"])
+        row = next(item for item in snapshot["records"] if item["value"][3] == v1.CURATORIAL)
+        resource = next(item for item in loads(files["graph/index.json"])["resources"]
+            if item["source"].get("recordHash") == row["recordHash"])
+        raw = files[resource["path"]]
+        self.assertGreater(len(raw), 6 * len(original))
+        self.assertLessEqual(len(raw), dossier.MAX_GENERAL_V2_RESOURCE)
+        self.assertEqual(loads(raw)["content"].encode(), original)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -15,8 +15,11 @@ The constructor `Configuration` takes `core`, `schemas`, `metadata`,
 Deploy from the exact retained compiler export and its library links.
 
 The module type is `keccak256("GENERAL_ATTESTATIONS")`; its version is
-`keccak256("6529stream.general-attestations.v1")`. Discover its dedicated
-`IStreamGeneralAttestations` interface through ERC-165. Do not route its calls to
+`keccak256("6529stream.general-attestations.v2")`. Discover its dedicated
+`IStreamGeneralAttestations` and additive
+`IStreamGeneralAttestationPayloadChunks` interfaces through ERC-165. The original
+general interface, signed request and EIP-712 domain version remain unchanged.
+Do not route its calls to
 the older independent host. Coordinated genesis registration and genuine capture
 must retain the actual address, constructor values, linked products, compiler
 settings and runtime hashes.
@@ -78,8 +81,12 @@ uint64 deadline
 Every field is committed. Nonces are consumed per authenticated recorder; signed
 records use the attester as recorder. Operator records use the actual caller.
 `revokeAttesterNonce` revokes the caller's nonce. Deadlines are checked at write.
-Payloads are complete state-backed bytes up to 8,192 bytes; signature bytes are
-bounded to 4,096 and their domain/typed-word envelope to 8,192. Failed late writes
+Generic institutional, estate and curatorial payloads are complete state-backed
+bytes up to 24,576 bytes. Typed identity notarizations and native Artist statements
+retain their separate 8,192-byte bounds. The native Artist bound remains an open
+capacity dependency on the original Artist producer; this companion does not
+establish 24,576-byte conformance for that route. Signature bytes are bounded to
+4,096 and their domain/typed-word envelope to 8,192. Failed late writes
 revert the nonce, record, head and pointer changes atomically.
 
 Generic signed, operator and typed-notarization requests use the existing
@@ -133,6 +140,22 @@ recorder lane. Replacements leave original records, payloads, signatures and
 Artist proof readable. `recordChainHash` and `recordHashAt` enumerate every type's
 history; `payloadPointerCount/At` enumerate deduplicated payload and signature
 carriers. Full state-backed bytes, not event-only attestations, remain available.
+
+`recordPayload(recordHash)` returns the complete payload for every accepted
+record. Its pointer is the single carrier for payloads through 8,192 bytes and
+the **first chunk only** for larger payloads. The first chunk's bytecode alone
+does not commit to the full larger payload. `Attestation.statementHash` continues
+to commit to the complete bytes in the unchanged record and signature preimages.
+
+`recordPayloadInfo(recordHash)` returns the complete content hash, byte length
+and chunk count. `recordPayloadChunkAt(recordHash, index)` returns each ordered
+chunk hash, pointer and length. Chunks contain 8,192 bytes except the final chunk;
+at most three chunks carry one generic payload. Repeated chunks retain every
+ordered position even when the collection pointer inventory deduplicates their
+`(family, chunkHash)` entries. That inventory contains real chunk hashes, never a
+first pointer mislabeled with a larger payload's full hash. Retaining or preparing
+bytes does not confer attestation authority. Historical reads reconstruct the
+accepted immutable carriers without consulting current authority or schema status.
 
 The [Museum attribution adapter](../museum-native-attribution.md) checks the
 original receipt and complete lane/pointer history offline. Historical acceptance

@@ -91,6 +91,26 @@ identity document from the pinned native registry, together with separate curren
 identity/status and operative-document observations. Later rotation or dispute
 cannot replace the document named by the original signed receipt.
 
+`GeneralAttestationSourceV2` selects the explicit
+`STREAM_MUSEUM_GENERAL_ATTESTATION_SOURCE_V2` anchor profile and version-2 native
+producer. It retains the full payload getter's bytes and checks them against the
+complete ordered chunk descriptors, immutable chunk code and full content hash.
+The getter's pointer denotes the first chunk; it is not a single-carrier proof
+of a larger payload. Every repeated chunk position remains in the record while
+the global pointer inventory contains deduplicated real chunk hashes.
+
+Generic institutional, estate and curatorial statements may contain up to
+24,576 bytes. Typed identity notarizations and native Artist statements retain
+their separate 8,192-byte bounds; native Artist capacity remains pending its
+original producer extension. Signature and bundle limits are unchanged. V1 source
+and profile bytes remain frozen for existing 8,192-byte producers and packages.
+Version selection is explicit, with no failed-read fallback. Existing transcript,
+snapshot and package aggregate limits still apply; per-record capacity does not
+promise that every maximum-sized catalogue fits one package.
+V2 derived textual resources allow up to 155,648 JSON bytes to accommodate the
+24,576-byte original, worst-case JSON escaping and resource metadata. The pinned
+schema/context validation policy and the validator's default limit are unchanged.
+
 ## Package and replay
 
 Python composition:
@@ -105,7 +125,10 @@ result = write(artist, new_output_directory, semantic=semantic,
 `write` is in `tools.museum.attribution_dossier`. Semantic interpretation, selection
 and the general source are optional; their absence is explicit in the package.
 Selection requires semantic interpretation. A general source is a concrete
-`GeneralAttestationSource`, not a caller-written summary.
+`GeneralAttestationSource` or `GeneralAttestationSourceV2`, not a caller-written
+summary. The anchor selects one supported profile; its exact profile bytes are
+retained and committed by the package manifest. Existing V1 package output and
+offline replay remain unchanged.
 
 The package retains source anchors, snapshots, transcripts, all original identities
 and statements, interpretation documents, selection, coverage and provenance.
