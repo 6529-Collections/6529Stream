@@ -165,7 +165,8 @@ revision+1; non-native preparations and executions do not become native receipts
 The [recovered-authority guide](../guides/artist-recovered-authority-hydration.md)
 defines the source certificate, repeated-import chronology and remaining scope.
 The implementation is under development: the seven concrete owners advertise
-feature mask 127 for the first graph, economics and delegation compositions below.
+feature mask 255 for the first graph, economics, delegation and attestation
+compositions below.
 Positive execution scenarios are authored, and ABI-only checks establish no
 runtime, Safe, capacity or release acceptance. Existing profiles remain strict.
 
@@ -188,8 +189,22 @@ signing domains and from Consent's native clock. Historical policy/economics
 associations use the authenticated fixed-source model where preimages are not
 retained. Fresh class-1 eligibility, epoch invalidation, replacement and signature
 rules remain unchanged; retained class-3 history grants no new delegation powers.
-Recovered attestation/personhood/C2PA, corrected generations, multiplicity and
-collaborators remain required composition work.
+Corrected generations, multiplicity and collaborators remain required
+composition work.
+
+The recovered attestation composition adds bit 128 for complete original
+operation-24 history on the same binding. Ordered terms and nonce witnesses
+reproduce every record under its ultimate original Registry domain and retained
+class; original Identity admission points authenticate principal/delegate nonce
+and digest guards. Delegated24 uses join the existing complete grant totals.
+The fixed owner4 transport preserves all statements, associations, publications,
+latest subject maps, original personhood summaries and the independent C2PA and
+personhood heads. Existing summary/C2PA writers replay their documentary import
+path, never current signature authorization. Registration identity remains
+separate from each evidence record's saved operative identity, and current reads
+continue to assess live identity/notarization/dependency truth. Metadata's current
+one-successor selection limit remains a separate consumer composition gap.
+Source/type evidence and authored cases do not establish runtime acceptance.
 
 ## Original living delegation profile
 

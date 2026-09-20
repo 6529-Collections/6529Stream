@@ -142,7 +142,7 @@ contract StreamArtistRecoveredEstateAuthorityActualTest is
     }
     AH.Origin[][7] private ehCandidates;
     bytes32 private ehGuardian;
-    bytes32 private ehRecovery;
+    bytes32 internal ehRecovery;
     bytes32 private ehOriginalAction;
 
     bytes32 private ehEstate;
@@ -324,7 +324,7 @@ contract StreamArtistRecoveredEstateAuthorityActualTest is
         );
     }
 
-    function _ehBaseline(uint32 capabilities) private {
+    function _ehBaseline(uint32 capabilities) internal {
         _ehCandidate(
             0, "binding_lifecycle.replay.proposal_key", keccak256(abi.encode(uint256(1), uint64(1)))
         );
@@ -659,11 +659,11 @@ contract StreamArtistRecoveredEstateAuthorityActualTest is
         return executeSafe(rotationSafe, rotationKeys, target, 0, data, 0);
     }
 
-    function _ehCandidate(uint8 owner, string memory surface, bytes32 scope) private {
+    function _ehCandidate(uint8 owner, string memory surface, bytes32 scope) internal {
         ehCandidates[owner].push(AH.Origin(keccak256(bytes(surface)), scope));
     }
 
-    function _ehAuthorization(bytes32 digest, uint256 nonce) private {
+    function _ehAuthorization(bytes32 digest, uint256 nonce) internal {
         _ehCandidate(
             2,
             "identity_authority.replay.authorization_consumed_digest",
@@ -674,7 +674,7 @@ contract StreamArtistRecoveredEstateAuthorityActualTest is
         );
     }
 
-    function _ehRequest() private view returns (RH.Request memory p) {
+    function _ehRequest() internal view returns (RH.Request memory p) {
         (, p.expectedSourceImportCommitment,) =
             RecoveredOwner(suite.owners[2]).recoveredHydrationImportedPrefix();
         p.records.authority.artistIds = new bytes32[](1);
@@ -718,7 +718,7 @@ contract StreamArtistRecoveredEstateAuthorityActualTest is
     }
 
     function _ehImported(Successor memory next, Commit.Prepared memory prepared, bytes32 value)
-        private
+        internal
         view
     {
         require(value != 0, "actual operation60 commitment");
@@ -995,7 +995,7 @@ contract StreamArtistRecoveredEstateAuthorityActualTest is
         );
     }
 
-    function _ehCutover() private returns (Successor memory next) {
+    function _ehCutover() internal returns (Successor memory next) {
         next = _ehNext();
         HT.Leaf[] memory rows = _ehLeaves(History(address(ingress)));
         (bytes32 root,) = _ehProof(address(ingress), rows, 0);
@@ -1106,7 +1106,7 @@ contract StreamArtistRecoveredEstateAuthorityActualTest is
         History(address(next.registry)).verifyImportedLaneTip(0, rows[rows.length - 1], proof);
     }
 
-    function _ehAdopt(Successor memory next) private {
+    function _ehAdopt(Successor memory next) internal {
         ingress = next.registry;
         coordinator = next.coordinator;
         archive = next.archive;

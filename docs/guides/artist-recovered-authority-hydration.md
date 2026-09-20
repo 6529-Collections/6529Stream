@@ -8,7 +8,7 @@ entry point. Its seven-owner masks remain `0x7f`. Existing hydration selectors
 keep their existing profiles and exclusions.
 
 This is a source implementation with ABI-only checks. The seven concrete owners
-advertise feature mask 127 for these graphs; the base owner stays disabled. The positive
+advertise feature mask 255 for these graphs; the base owner stays disabled. The positive
 import scenarios are authored but have not run. Safe execution, current-stack
 integration, bytecode size, gas, invariants and release acceptance remain pending.
 
@@ -18,6 +18,8 @@ and complete direct operation-14 policy history. An explicit economics extension
 also carries complete direct operation-15 history for that same binding.
 The delegation extension carries all original grant versions and revocations with
 complete direct/delegated operations 14/15/16, and admits consent modes 1 and 2.
+The attestation extension adds complete original operation-24 history, including
+personhood summaries, C2PA credentials and publication evidence, for that graph.
 Complete Identity and Payout histories are transported together. Class 4,
 multiple Artists or collections,
 collaborator graphs, corrected generations and broader collection histories
@@ -33,6 +35,7 @@ typed source restrictions.
 | 16 | More than one retained import era |
 | 32 | Complete economics history, selected by actual native operation 15; delegated records also require bit 64 |
 | 64 | Retained grants, consent mode 2 or native sale-consent operation 16; complete mixed consent history |
+| 128 | Complete original operation-24 attestation history, including personhood and C2PA derived state |
 
 Every source and destination owner must support the combined required mask.
 Pending requests, compromised status and unused preparations are included in
@@ -44,10 +47,14 @@ authority capability mask, including a zero mask, remains unchanged.
 
 `Request.records.authority` supplies the complete Artist and collection
 selectors, expected source checkpoints and logical replay-key preimages. Without
-economics history, `records.witnesses` must remain empty. A source with
-operation-15 records requires exactly one witness for the selected collection,
-containing all economics terms in original operation-15 order and no attestations.
-Missing, extra, duplicate or reordered terms reject. Empty wrappers also reject.
+economics or attestation history, `records.witnesses` must remain empty. A source
+with operation-15 or operation-24 records requires exactly one witness for the
+selected collection. It contains every economics term in original operation-15
+order and every attestation's terms and nonce in original operation-24 order.
+Either array is empty only when its original record family is absent. The actual
+complete journals select the required families; callers cannot omit one family
+to choose a smaller profile. Missing, extra, duplicate or reordered terms reject.
+Empty wrappers also reject.
 The request also names every expected source capability, the exact prior import
 commitment, and a nonzero expected semantic inventory.
 
@@ -153,7 +160,8 @@ Revocation records retain their original native occurrence and one-way replay
 cell; missing reason/time preimages are not invented. Delegate nonce lanes use
 the original tagged nonce domain, which differs from the current-grant lookup
 key. Every consumed delegate nonce bit must correspond to a recorded grant use,
-and every use must be accounted for by the selected collection's consent history.
+and every use must be accounted for by the selected collection's complete consent
+and delegated attestation history.
 Unsupported delegated record families cannot be silently omitted.
 
 The Coordinator joins grant scope and capability with each original consent.
@@ -172,6 +180,54 @@ invalidates older grants. An old-epoch grant can also reserve the same delegate
 slot until it is genuinely revoked, expired or exhausted; hydration does not
 change the original replacement rule. New signatures use the current Registry
 domain. The old no-delegation/no-sale/mode-1 paths retain their existing encoding.
+
+## Attestation, personhood and C2PA composition
+
+Actual original operation-24 history selects bit 128 on every source and
+destination owner. The fixed source provides the full ordered Attribution
+journal, retained records, statement bytes, classes, historical associations,
+publication evidence and latest subject pointers. Each record's terms, nonce,
+signer, class and signed time reproduce its hash under its ultimate original
+Registry domain. Saved classes 1, 2 and 3 remain historical facts. The importer
+does not substitute today's principal, operative identity or grant liveness.
+Other Attribution operations and corrected generations remain separate profiles.
+
+Identity's original nonce admission and consumed digest authenticate each
+attestation. Direct attestations also retain their original attestation-key
+guard; delegated attestations use the tagged delegate lane and recorded grant.
+Their uses join the complete 14/15/16 totals. Grant creation, revocation and
+replacement are ordered against the original Identity admission point. A signed
+time can legitimately precede submission and is not a replacement grant-liveness
+clock. Two delegate lanes can share a digest whose first observation precedes
+the later admission. No owner-4 replay cells are invented.
+
+Every original personhood waiver/evidence record has a corresponding retained
+row. Canonical evidence carries the exact original immutable proof summary and
+hash. Waivers and opaque historical statements preserve their empty summaries.
+The original Registry is derived from the authenticated native occurrence.
+Import invokes the existing summary path against that ultimate source, then
+checks the copied summary, hash and origin against the collected record. It does
+not replace old evidence with a newer report or rerun its old ERC1271 signature.
+
+The original C2PA note rebuilds credential records and heads in complete journal
+order, retaining every previous-record link, Artist-wide revision and original
+Registry. The final personhood pointer is checked independently of credentials,
+including a history with personhood and no C2PA rows. C2PA records do not erase
+the separate personhood head. All derived state is imported in the existing
+seven-owner transaction after its original provenance and payload guards.
+
+Historical kind-10 evidence binds the operative identity at its original
+admission. The Binding's original registration identity is a different field.
+A later identity revision can make retained personhood evidence stale without
+rewriting it. Current reads continue to check the current operative identity,
+notarization head and live dependency pins. Kind-9 deployment facts use their
+unchanged original predicate; Registry cutover alone does not make them stale.
+
+Publication kinds 7/8 retain their full original Metadata evidence. Metadata's
+consumed-authorization map remains on its original host. The current Metadata
+selection bridge supports one immediate Artist successor only: preserving old
+publication evidence through A→B→C does not establish that C can consume it.
+That consumer extension remains separate from this historical transport.
 
 ## Atomicity and transport bounds
 
@@ -192,6 +248,8 @@ The economics extension admits at most 128 complete operation-15 records and
 128 direct policy selectors for the selected collection.
 The mixed consent extension separately admits at most 128 policies, 128 economics
 records and 128 sale records within the same complete transport bounds.
+The attestation extension admits at most 128 complete operation-24 records;
+personhood rows are the exact filtered subset, not an independently chosen list.
 
 ## Validation boundary
 
@@ -238,6 +296,34 @@ typed coordinator do not establish original signer authorization or seven-owner
 execution. Separate controls require feature64 on every owner and for mode-2
 binding import.
 Core and governance fixtures remain explicitly typed unit boundaries.
+
+Six recovered attestation cases use actual owners, Registry, Coordinator,
+Archive, Safe, notarization and personhood/C2PA producers. They cover mature
+operation-35 recovery followed by fresh operation 24, complete original records,
+stale notarization and operative-identity changes, A→B→C with fresh successor
+records, shared delegated digests and retained grant use, malformed witnesses,
+and exact late Archive rollback with identical Safe retry. A new successor-side
+Metadata/Reconciliation fixture covers imported credential currentness and fresh
+withdrawal; it does not establish reuse of old Metadata through two successors.
+Its Core, router, governance and verifier observation are explicit unit boundaries.
+Three additional class-3 cases cover retained attestation/waiver heads, fresh
+successor attestations and spent principal nonces. Their zero-capability negative
+uses the existing no-attestation import path before checking the original fresh
+attestation rejection; it does not establish canonical personhood under a zero
+estate capability mask.
+Fourteen pure attestation-fact cases cover exact original hashes, signature and
+nonce admissions, replay aliases, shared digest first observations, grant
+chronology and combined consent/attestation use totals. Seven synthetic witness
+selector cases and an all-owner capability case check complete witness families,
+bounds and explicit feature-128 support. These component cases do not establish
+complete original source certificates or seven-owner execution.
+Nineteen codec/derived-state cases use original Attribution writers and native
+commits under a fixed coordinator, then the genuine documentary summary/C2PA
+import paths. They cover complete retained maps and heads, malformed records,
+payload guards, occupied destination state and rollback/retry. The canonical
+summary response and second-era certificates in those controls are explicitly
+synthetic; genuine notarization and repeated seven-owner imports belong to the
+actual-flow cases above.
 
 ABI-only compilation establishes source and type compatibility. It does not
 establish that these transactions execute, fit deployment limits or meet the

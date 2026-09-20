@@ -35,6 +35,10 @@ the release policy in `docs/release-policy.md`.
 
 ## Artist recovered authority hydration
 
+- Retain complete recovered attestation history, original personhood summaries
+  and C2PA heads through ordered repeated imports. Join original direct/delegated
+  authorization guards and preserve dynamic currentness. Runtime, capacity and
+  the Metadata bridge beyond one successor remain pending.
 - Carry complete recovered delegation and mixed policy/economics/sale consent
   history through repeated imports, preserving grant versions, revocations, uses,
   epochs and tagged delegate nonce lanes. Add an explicit capability and retain

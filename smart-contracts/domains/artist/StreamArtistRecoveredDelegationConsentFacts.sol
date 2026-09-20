@@ -20,8 +20,14 @@ import {
     StreamArtistRecoveredHydrationChronology as Chronology
 } from "./StreamArtistRecoveredHydrationChronology.sol";
 import { StreamArtistDelegationState as Delegation } from "./StreamArtistDelegationState.sol";
+import {
+    StreamArtistPublicationHydrationTypes as PubH
+} from "../../interfaces/stream/artist/IStreamArtistPublicationAuthorityHydration.sol";
+import {
+    StreamArtistRecoveredAttestationFacts as Attestations
+} from "./StreamArtistRecoveredAttestationFacts.sol";
 
-/// @notice Complete original grant-use reconciliation across the two fixed semantic owners.
+/// @notice Complete original grant-use reconciliation across the fixed semantic owners.
 /// @dev The source certificate authenticates the original grant and consent maps. Policy and
 /// economics rows do not retain signer/nonce/time preimages, so their original fixed association
 /// is not reauthorized against current grant liveness. Sale rows retain the delegate nonce and
@@ -38,12 +44,34 @@ library StreamArtistRecoveredDelegationConsentFacts {
         RH.Provenance memory p,
         uint8 mode
     ) public pure {
+        _validate(identity, consent, q, p, mode, new uint256[](identity.delegations.length));
+    }
+
+    /// @notice Adds original op24 uses before the same complete grant-use equality.
+    function validate(
+        IH.Bundle memory identity,
+        Consent.Bundle memory consent,
+        AH.Query memory q,
+        RH.Provenance memory p,
+        uint8 mode,
+        PubH.Row[] memory rows
+    ) public pure {
+        _validate(identity, consent, q, p, mode, Attestations.validate(identity, rows, q, p));
+    }
+
+    function _validate(
+        IH.Bundle memory identity,
+        Consent.Bundle memory consent,
+        AH.Query memory q,
+        RH.Provenance memory p,
+        uint8 mode,
+        uint256[] memory uses
+    ) private pure {
         if (
             identity.artistId != q.artistId || consent.artistId != q.artistId
                 || consent.collectionId != q.collectionId || consent.bindingHash != q.bindingHash
                 || (mode != 1 && mode != 2)
         ) _invalid();
-        uint256[] memory uses = new uint256[](identity.delegations.length);
         for (uint256 i; i < consent.policies.length; ++i) {
             bytes32 grant = consent.policies[i].grant;
             if (grant == 0) continue;

@@ -61,6 +61,18 @@ import {
 import {
     IStreamArtistBindingOwner as Binding
 } from "../../interfaces/stream/artist/IStreamArtistBindingOwner.sol";
+import {
+    StreamArtistMultipleRecordsTypes as MR
+} from "../../interfaces/stream/artist/IStreamArtistMultipleRecordsHydration.sol";
+import {
+    StreamArtistRecoveredRecordWitnesses as Witnesses
+} from "./StreamArtistRecoveredRecordWitnesses.sol";
+import {
+    StreamArtistRecoveredAttestationHydration as Attestations
+} from "./StreamArtistRecoveredAttestationHydration.sol";
+import {
+    StreamArtistRecoveredAttestationFacts as AttestationFacts
+} from "./StreamArtistRecoveredAttestationFacts.sol";
 
 /// @notice Complete seven-owner certificate for the admitted recovered-authority graphs.
 /// @dev One recovered class1/class3 subject and one accepted generation-one binding without collaborators.
@@ -100,7 +112,9 @@ library StreamArtistRecoveredHydrationPrepared {
         // Identity retains signatures for the entire original artist lane, including secondary
         // occurrences. Collection owners read their exact typed selectors from the same query.
         prepared.query.records = c.artists[0].records;
-        T.EconomicsConsent[] memory economics = _economics(c, request);
+        MR.CollectionWitness memory witnesses =
+            Witnesses.collect(c.source, c.provenance, prepared.query, request.records.witnesses);
+        T.EconomicsConsent[] memory economics = witnesses.economics;
         IH.Bundle memory identity = Identity.collect(
             c.source.owners[2], prepared.query, RH.ownerProvenance(c.provenance, 2)
         );
@@ -119,6 +133,16 @@ library StreamArtistRecoveredHydrationPrepared {
         ) revert RH.InvalidRecoveredHydrationProvenance();
         uint256 features = requiredFeatures(identity, payout, c.provenance.eras.length);
         if (economics.length != 0) features |= RH.DIRECT_ECONOMICS;
+        Attestations.Bundle memory attestations;
+        if (witnesses.attestations.length != 0) {
+            features |= RH.ATTESTATIONS;
+            attestations = Attestations.collect(
+                c.source.owners[4],
+                prepared.query,
+                RH.ownerProvenance(c.provenance, 4),
+                witnesses.attestations
+            );
+        }
         uint8 consentMode =
             Binding(c.source.owners[0]).binding(prepared.query.collectionId).consentMode;
         bool hasDelegation = _delegation(identity, c.provenance, consentMode);
@@ -128,7 +152,22 @@ library StreamArtistRecoveredHydrationPrepared {
             delegated = Delegated.collect(
                 c.source.owners[6], prepared.query, RH.ownerProvenance(c.provenance, 6), economics
             );
-            DelegationFacts.validate(identity, delegated, prepared.query, c.provenance, consentMode);
+            if (witnesses.attestations.length == 0) {
+                DelegationFacts.validate(
+                    identity, delegated, prepared.query, c.provenance, consentMode
+                );
+            } else {
+                DelegationFacts.validate(
+                    identity,
+                    delegated,
+                    prepared.query,
+                    c.provenance,
+                    consentMode,
+                    attestations.records
+                );
+            }
+        } else if (witnesses.attestations.length != 0) {
+            AttestationFacts.validate(identity, attestations.records, prepared.query, c.provenance);
         }
         for (uint8 i; i < 7; ++i) {
             _capabilities(
@@ -146,6 +185,9 @@ library StreamArtistRecoveredHydrationPrepared {
             if (i == 2) {
                 _nonces(identity, payload.nonces);
                 payload.semanticState = Identity.encode(identity, payload.provenance);
+            } else if (i == 4 && witnesses.attestations.length != 0) {
+                payload.semanticState =
+                    Attestations.encode(attestations, prepared.query, payload.provenance);
             } else if (i == 5) {
                 // The joined validator binds original Identity35/nonce admission and retained
                 // Payout continuations; an owner-local export alone is insufficient here.
@@ -181,36 +223,6 @@ library StreamArtistRecoveredHydrationPrepared {
             if (p.journals[6][i].receipt.operation == 16) return true;
         }
         return false;
-    }
-
-    /// @dev Native history selects the extension. Witnesses supply exact retained terms,
-    /// never authority or a projection of a larger source. No live assignment is rechecked.
-    function _economics(Admission.Certificate memory c, RH.Request memory request)
-        private
-        pure
-        returns (T.EconomicsConsent[] memory terms)
-    {
-        uint256 count;
-        for (uint256 i; i < c.provenance.journals[6].length; ++i) {
-            if (c.provenance.journals[6][i].receipt.operation == 15) ++count;
-        }
-        if (count == 0) {
-            if (request.records.witnesses.length != 0) revert T.UnsupportedProfile();
-            return new T.EconomicsConsent[](0);
-        }
-        if (
-            count > 128 || request.records.witnesses.length != 1
-                || request.records.witnesses[0].collectionId != c.collections[0].collectionId
-                || request.records.witnesses[0].economics.length != count
-                || request.records.witnesses[0].attestations.length != 0
-        ) revert T.UnsupportedProfile();
-        terms = request.records.witnesses[0].economics;
-        for (uint256 i; i < terms.length; ++i) {
-            if (
-                terms[i].resolver != c.source.primaryResolver
-                    && terms[i].resolver != c.source.royaltyResolver
-            ) revert T.UnsupportedProfile();
-        }
     }
 
     /// @notice Canonical inventory identifier, independent of the caller's expected value.
