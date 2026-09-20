@@ -498,3 +498,3684 @@ the release policy in `docs/release-policy.md`.
   Preserve the complete title V5 package and reconcile twelve source captures.
   Historical Core facts remain hash-only; full batch authority and complete
   acquisition source coverage remain unresolved.
+
+- Add a native accession/title V5 export derived from original owner receipts,
+  complete captured Core transfers, supported title bindings and owner heads.
+  Reconcile eleven sources, preserve both original packages, and retain explicit
+  historical selection without claiming legal title or institutional authority.
+
+- Add native media-master and prospective-reference capture with historical
+  release joins over an unchanged V5 packet. Reconcile nine source captures,
+  preserve original manifest and publication histories, and distinguish saved
+  evidence from current archive liveness, source state and later replacements.
+  Generic preservation labels and complete packet acceptance remain qualified.
+
+- Add native attribution and sanction capture with exact offline replay and an
+  additive V5 packet join. Preserve original confirmation, latest association
+  sanction and later dispute restoration separately, reconcile seven source
+  captures, and keep unsupported generic record fields and source completeness
+  explicitly qualified.
+
+- Add acquisition packet V5 with all 19 required field groups and exact native
+  personhood authority/scope, DIRECT floor and conservation context fragments.
+  Bind source-preserving packet assemblies to current RIGHTS and captured
+  attribution fields, export validated supplied packet bytes, and report remaining
+  source coverage separately. V1–V4 and institutional acceptance remain unchanged.
+
+- Add standalone native tier/selection context and six-source DIRECT acquisition
+  composition. Join completed-mint chronology, original sale tier, saved provider
+  selection dependencies and first-sale intent/interview history. Preserve current
+  and superseded selections separately, carry earlier RIGHTS/personhood evidence,
+  and keep original captures, V4 and full-packet acceptance boundaries unchanged.
+
+- Add a standalone native DIRECT floor schema and a two-input personhood
+  assembly that replays the original floor, RIGHTS, provider and personhood
+  evidence together. Preserve native adapter receipts and distinguish saved
+  personhood commitments from current evidence. V4 remains unchanged; tier,
+  selection, complete packet integration and actual-chain acceptance remain
+  separate requirements.
+
+- Add native Artist personhood capture, offline replay and acquisition
+  correspondence with saved first-sale commitments and original provider pins.
+  Reconstruct original operation-24 and General documentary evidence, distinguish
+  waiver and proof-summary hashes, and retain same-recorder supersession,
+  imported signing domains and separate identity records. A separate native
+  fragment preserves General authority and its original subject. Earlier captures
+  stay unchanged; synthetic evidence does not establish legal personhood or a
+  complete acquisition packet.
+
+- Add an explicitly admitted native-provider configuration capture and historical
+  RIGHTS binding. Recompute the original ten target/code pins and three gas
+  configurations, retain current gas separately, and match the saved floor
+  source and RIGHTS dependencies without changing earlier capture formats or
+  implying historical execution, personhood or paid Artist acceptance.
+- Allow original Metadata selection through complete repeated recovered Artist
+  ancestry, preserving the original seven-owner completion and publication
+  consumption checks. Add six typed regression recipes; native acceptance remains.
+
+- Add offline correspondence between frozen universal or DIRECT first-sale
+  RIGHTS commitments and original public RIGHTS records, receipts and selected
+  history. Preserve both captures, flag superseded selections and keep historical
+  conservation-provider binding and complete packet evidence unresolved.
+
+- Add separate typed DIRECT conservation capture and offline replay, joining
+  original adapter paid receipts to shared first-sale and release evidence.
+  Retain both known sale families in ledger discovery and reject unsupported
+  mixed target histories without changing frozen universal capture formats.
+
+- Add a native conservation packet representation and offline composition of
+  frozen tier, selected intent/interview and universal floor captures. Reconcile
+  shared RPC observations and preserve historical tier timing, four distinct
+  selection lanes and unresolved documentary joins. Keep V1--V3 definitions and
+  original captures unchanged, with all 19 acquisition requirements visible.
+
+- Add native conservation-floor capture and offline replay with complete bounded
+  ledger discovery, retained source admissions, immutable receipt hashes and
+  original consumed settlement results/events. Preserve inline purchases and
+  optional preparation, historical replacements and candidate commitment limits;
+  keep tier/packet joins and native runtime acceptance explicitly separate.
+
+- Add durable Core conservation-tier capture and offline replay. Reconcile
+  declarations with complete allocation and completed-mint history, preserving
+  aborted and prepared identities and defaults after burns. Distinguish an
+  undeclared collection's public pre-mint zero tier from prospective LITE sale
+  enforcement; retain missing floor and packet-assembly evidence explicitly.
+
+- Add canonical condition-source capture and offline replay against the permanent
+  Core-bound catalog. Retain replacement hosts and complete original lanes;
+  select the latest owner and independent reports by receipt position, preserving
+  unsupported newest records as unresolved. Keep examination joins and complete
+  acquisition packet requirements explicit.
+
+- Add a source-bound whole-v1 Safe caller inventory and canonical Artist personhood
+  reference callers, documentary reads and original operation-24 receipt checks.
+
+- Complete original DIRECT product control callers and receipt checks, with
+  source-bound coverage of all 29 mutable selectors through direct and Safe calls.
+
+- Add original DIRECT sale and auction callers with separate payer consent,
+  typed paid receipts, immutable conservation history and Safe verification.
+
+- Add native Museum anchor, tier and media-master clients with original Artist
+  waiver evidence, permanent governance bindings and Safe receipt verification.
+
+- Add canonical entropy policy succession callers with complete inventory checks,
+  original origin routes, staged catalog admission and atomic cutover receipts.
+
+- Add Artist recovery rewind V3 callers with typed exclusions, complete dual-owner
+  selection, worker preparation seals and atomic Identity/Payout receipt checks.
+
+- Bind a permanent conservation-floor receipt ledger through an additive Core
+  interface and exact one-time delayed governance, preserving receipts across
+  Metadata/recorder replacement. Native floor enforcement remains in progress.
+
+- Add source capture and offline replay for native conservation selections,
+  original op24 intent/interview evidence, separate Artist/estate histories,
+  complete selected catalogs and intent locks. Keep tier and sale-floor inputs
+  explicitly missing. Add packet V3 support for zero optional condition captures
+  while preserving V1/V2 schemas and unsupported selected-record failures.
+
+- Add durable Core conservation-tier declarations and an exact one-time governed
+  condition-source catalog binding. Original interfaces/storage roots remain;
+  the new Metadata producer and actual sale-floor acceptance are separate work.
+
+- Require complete source-bound entropy policy import evidence at Core replacement,
+  alongside original pending-request coverage. Add canonical bounded inventory/readiness
+  checks and fault/fuzz regressions; full successor activation remains separate.
+
+- Connect explicit INSTANT and terminal entropy modes to immediate, Dutch,
+  clearing and deferred sale completion, preserving original ASYNC fees,
+  credits, request events and public sale signatures.
+
+- Support explicit terminal non-random tokens in shared immediate sale reveal
+  handling, retaining ASYNC fee accounting and original token identity. Add
+  focused rollback, malformed-evidence and fee/refund fuzz coverage.
+
+- Include dedicated ERC-20 burn programs in collection freeze/finality warnings,
+  with immutable gate/carrier bindings and source/target impact checks.
+
+
+- Add [truthful current metadata](docs/integrations/terminal-entropy-consumers.md)
+  for explicit DISABLED/NOT_REQUIRED entropy and
+  separately governed STATIC terminal rendering with a direct original-source
+  fact profile. Add complete V2 coordinator-policy/source-set and terminal
+  readiness adapters; V2 reference publication/output and full current-stack
+  acceptance remain separate required work.
+- Add the original chain/Core/global-token citation to current default metadata,
+  with separate governed STATIC profile evidence and preserved historical render
+  entries. Record-state qualifiers and full current-graph acceptance remain separate.
+- Add explicit Artist-consented collection entropy policies and terminal
+  DISABLED/NOT_REQUIRED token registration, preserving the legacy ASYNC profile.
+  Nonrandom consumer integrations and INSTANT support remain separate work;
+  current-stack runtime acceptance is pending.
+
+- Add explicit Artist recovery V3 for typed guardian, succession, directive,
+  document, payout, steward-sanction and standing rewinds. Complete journal
+  selection, exact preparation seals and atomic Identity/Payout writes preserve
+  original records and spent replay, with new continuation scopes for fresh
+  writes. Class3 capability history remains authenticated through later
+  recoveries; native/current-stack, size and capacity validation remain pending.
+
+- Extend Artist recovery V2 to current living notice compromises, retaining
+  original notice and dismissal history. Accepted recovery cancels an open
+  notice through the original activity writer; Archive evidence and later
+  recovery authenticate the exact cancellation and native receipts. Authored
+  regression cases await coordinated native/current-stack validation.
+
+- Add explicit evidence-bound Artist recovery V2 for original class1/class3
+  C1/C2 histories, earliest declared vesting cutoffs, hostile-guardian APPEAL
+  evidence and complete guardian selection, including authenticated empty results.
+  Preserve original recovery records and V1 entry points; native execution,
+  capacity and full current-stack validation remain pending.
+
+- Add original-consent scoped CONTENT_ROOT publication and full-v1 activation
+  plans; current tests are authored and coordinated execution remains pending.
+- Name finite Artist/C2PA renderer source roles, preserving target/read bounds,
+  live provenance semantics, exact analysis and golden-evidence requirements.
+- Add scoped mint counter values and remaining-unit reads, including verified
+  Merkle resolution. Proofless Merkle allowance reads require evidence instead
+  of treating the configured ceiling as an account allocation.
+
+- Add advisory mint eligibility and per-counter diagnostics at the Manager,
+  preserving explicit executor/gate context, aggregate caps and original
+  execution checks. Focused runtime and complete current-stack acceptance remain pending.
+
+- Add one-way governed mint phase freezes with canonical same-Ledger inheritance,
+  retained executor ceilings and fresh successor Artist consent. Terminal-freeze
+  veto and counter limits remain unchanged; combined native acceptance is pending.
+
+- Accept original mode-2 Artist policy consent during Manager registration and
+  executor grace rotation, retaining exact recorded evidence and current mint
+  authority checks. Delegated Safe regression recipes await native execution.
+
+- Add consent-gated mint executor policy rotations with bounded predecessor
+  grace through an additive Manager capability. Preserve current authority,
+  counters and replay; focused and actual Safe recipes await native execution.
+
+
+
+- Replace the historical Artist API subset in its implementation introduction
+  with the source-pinned operation crosswalk and explicit coverage limits.
+- Correct Artist delegation documentation to the integrated capability mask,
+  mode-2 policy/sale consent and consent-time grant checks, with current-state
+  admission and pending validation limits retained.
+- Retain complete 24,576-byte Metadata records through ordered immutable chunks,
+  preserving original small-record bytes, signatures, pointers and storage roots.
+- Compose the full-byte preservation and general attestation products with the
+  original Artist/Metadata graph and explicit current Safe test recipes.
+- Extend first living and class3 recovery across original aborted rotations
+  and cancelled estate requests, preserving their cause, replay, closure and
+  capability history. Existing context encodings remain compatible; native
+  validation and receipt-scan capacity measurements are pending.
+
+- Admit repeated living recovery when the current compromise has already
+  aborted a pending rotation, using its original cause and empty dismissal
+  closure. Guardian election keeps the executed transition cutoff; native
+  validation is pending.
+
+- Extend repeated living recovery with a complete authenticated rotation,
+  dismissal and closure history, including cancelled notices and retained
+  standing vetoes. Existing supported context encodings and authority epochs
+  remain unchanged; native validation is pending.
+
+- Preserve original cancelled-notice challenges through a later designated
+  notice and recovery, including mixed active dismissals and intervening
+  rotations. Original cancellation, restored status and first closures remain
+  independently authenticated; native acceptance is pending.
+
+- Preserve dismissed active-notice challenges through designated-dormancy
+  recovery using original notice, cause, dismissal and closure history.
+  The notice deadline and all original authority producers remain unchanged.
+
+- Admit designated dormancy after a prior living recovery, retaining original
+  recovery actions, receipts, guardian history and cause/resolution boundaries
+  through first and subsequent class-3 recoveries. Native acceptance is pending.
+
+- Admit repeated recovery after a designated-dormancy recovery and later
+  rotations while preserving the original dormancy capability origin and epoch
+  history. Native and current-graph acceptance remain pending.
+
+- Add guardian supersession to first designated-dormancy recovery using the
+  original current vesting cutoff, APPEAL/ARBITER rules and receipt commitments.
+  Broader prior-recovery histories and coordinated runtime acceptance remain pending.
+
+- Extend Artist recovery through executed rotations after an original recovery,
+  and after a dismissed original estate activation, while preserving historical
+  records, guardian standing and the original authority epoch boundaries.
+  Focused source recipes are authored; coordinated runtime acceptance is pending.
+
+- Add full-byte preservation records with original family authority, immutable
+  record history and enumerable ordered chunk retention up to24,576 bytes.
+- Compose original STATIC renderer products with explicit retained-document
+  admission and current Safe test recipes; complete analysis remains separate.
+
+- Retain C2PA standing conflicts independently of live report currentness, with
+  immutable history and exact covered original op46 acknowledgement. Optional
+  STATIC disclosure includes token and collection conflicts without changing
+  the original report ABI or full-output commitment semantics.
+
+- Add original Artist op24 C2PA credential history with independent personhood
+  heads and complete supported-profile hydration, plus exact offline report
+  reconciliation, pinned selected-verifier Metadata evidence and optional typed
+  STATIC provenance fields. Unsupported or stale evidence remains unevaluated;
+  no authorship or signing authority is granted by a report. Full current-graph
+  runtime acceptance and the existing Artist host size repair remain open.
+
+- Add a narrowly scoped current-Executor compatibility adapter and original
+  preservation/family-registry composition, with governed metadata pause/resume
+  and explicit family writers; current Safe tests await coordinated execution.
+
+- Add deterministic version4 split-wallet clones with a pinned, locked singleton
+  implementation, retaining original authorization and historical identities.
+- Add a distinct ordinary/incident mint fallback with genuine Ledger imports,
+  permanent writer retirement and exact governed prepared-mint recovery.
+- Compose six additional genuine genesis products with original dependencies
+  and current/Safe regression recipes; full37 activation remains outstanding.
+- Stage exact reference inventories in authenticated fixed-row parts and
+  reduce duplicate publication tuple decoding while preserving original bytes,
+  identities and validation order. Complete publisher gas acceptance is open.
+
+- Preserve complete collection inventory and finality/preservation membership
+  across incident-aborted serial gaps with bounded authenticated Core scans,
+  exact serial lookup and snapshot-pinned offline reference endpoint checks.
+
+- Add exact frozen entropy-successor policies, constant-time pending-request
+  continuity admission and a configured ordinary backup deployment/plan helper.
+  Preserve original host history and fulfillment; actual-current Safe cutover
+  recipes are authored and await coordinated runtime verification.
+
+- Add Artist recovery adjudication V2 callers with canonical evidence publication,
+  complete guardian selection and current-notice governance receipt verification.
+
+- Add a separate LOW_SECURITY INSTANT entropy client with original policy and
+  delayed request workflows, retained provenance and direct explicit-state reads.
+
+- Add explicit collection entropy policy clients with original Artist content
+  consent and class-1 configuration/class-2 freeze governance workflows.
+
+- Add current metadata citation admission and read clients with exact retained
+  evidence, original class-1 governance calls and Safe receipt verification.
+
+- Extend Artist authority hydration callers to the source-selected combined
+  multiple-Artist delegation profile, retaining complete per-Artist evidence.
+
+- Add original Artist authority hydration callers for baseline, multiple and
+  delegation profiles, with complete source evidence and atomic receipt checks.
+
+- Add original Mint counter accounting reads with scoped keys, proof-aware
+  allowances and pinned Manager/Ledger observations.
+
+- Add Mint phase-freeze callers with original terminal governance, canonical
+  Ledger constraints and bounded successor freeze copying.
+
+- Add reference Mode payload preparation callers preserving complete original
+  inputs, canonical bytes and distinct preview/preparation evidence.
+
+- Add delegated Artist attestation callers with original signatures, authenticated
+  subject reads, scoped finality/economics and durable record evidence.
+
+- Extend Mint policy-grace review to exact mode-2 consent with an explicit
+  reviewed Manager capability, retaining the historical mode-1/3 behavior.
+
+- Add delegated Artist economics and royalty-freeze callers with original
+  signatures, binding-specific records and payout evidence.
+
+- Add Mint executor policy-grace callers with exact policy preimages, bounded
+  predecessor continuity and original delayed governance review.
+
+- Add delegated Artist policy and sale consent callers using original signatures,
+  persistent delegate nonces and durable consent evidence after grant expiry.
+
+- Add original Artist identity revision and delegation callers, preserving dated
+  authorization, nonce-only grants and stored-grantor revocation evidence.
+
+- Add original Artist refusal, sale-consent, freeze-authorization and revocation
+  callers with pinned authority/replay review and explicit remaining operation coverage.
+
+- Add reference environment preparation clients preserving complete typed inputs,
+  canonical bytes, original inventory prerequisites and exact uploader/preparer calls.
+
+- Add current split-factory clients with per-factory clone predictions, immutable
+  profile readback, lazy deployment and original wallet-domain release payloads.
+
+- Add mint Manager fallback ceremony clients with original governance commitments,
+  retirement classification, genuine imports and atomic activation/recovery review.
+
+- Add collection token inventory recovery clients with bounded allocation scans,
+  actual-serial lookups, saved-prefix membership and exact direct/Safe CALL review.
+
+- Add staged reference file-inventory clients with exact fixed-row parts,
+  original full identities, pinned gas quotes, receipt readback and Safe plans.
+
+- Preserve consumed token IDs and collection serials when a replacement Manager
+  aborts a stranded prepared mint; ordinary transaction rollback is unchanged.
+
+- Add dedicated ERC20 paid burn-to-mint clients, original universal signing,
+  independent source approvals, four funding routes and ordinary Safe CALL plans.
+
+- Add pinned, bounded burn-program discovery and source/target closure warnings;
+  clarify Safe CALL capability versus EIP-2612 and Permit2 signature support.
+
+- Add canonical acquisition packet V2 owner-receipt references and an exact
+  source-replayed item-9 assembly. Bind historical receipts, Core ownership,
+  publication order and original signature bytes without numeric authority
+  substitution. Preserve V1 definitions and keep missing packet requirements
+  and conservation/condition producer dependencies explicit.
+
+- Add an acquisition ACCESSION/instrument and native token-history join with
+  historical owner reconciliation, exact same-block publication order, retained
+  instrument bytes and offline reconstruction. Add a separate public owner
+  catalogue profile while preserving original profiles, unsupported statements,
+  missing evidence and the canonical packet's unresolved owner-authority shape.
+
+- Add public mint/entropy capture with two source-derived history stages,
+  cross-stage receipt/header reconciliation and exact offline leaf replay.
+  Preserve active versus observed request attempts and original profiles.
+  Add a pinned read-only RC1 ownership recipe with explicit historical ABI and
+  pruned-provider limitations; identify the public RPC client by User-Agent.
+
+- Add public-chain RIGHTS and ownership capture with bounded fixed-filter log
+  queries, full returned-receipt/header checks, native state reconciliation and
+  exact offline package replay. Preserve original strict history profiles and
+  explicitly retain provider log-completeness and canonical-mapping trust.
+
+- Add complete bounded current collection/token RIGHTS selection evidence and
+  offline item-7 composition with original publication blocks and receipt
+  authority. Preserve token precedence, explicit unspecified grants, native
+  selected absence and original schema/profile bytes.
+
+- Add original paid-mint and entropy-registration extraction plus an offline
+  composer for complete bounded original-coordinator entropy/event captures.
+  Preserve earlier examinations and explicitly retain unresolved entropy when
+  coordinator reads or complete event history are unavailable.
+
+- Add source-driven token examination gathering with complete admitted native
+  record extraction, exact offline replay and a 19-item acquisition evidence
+  index. Add the V2 executed-recovery citation namespace under ADR 0051,
+  preserving V1 profiles and original definitions. Complete packet, renderer,
+  source registration and institutional acceptance remain separate.
+
+- Add an owner-published exhibition consumer with original receipt/schema
+  admission, same-block token/collection joins, attributed Linked Art resources
+  and complete offline package replay through the BagIt/OCFL workflow.
+  Preserve reported status, burned-token history and original schema meanings.
+
+- Add a complete offline Museum repository export/import workflow with explicit
+  historical-version and external hash selection, full declared semantic replay,
+  exact original bag restoration and atomic no-overwrite publication.
+  Preserve original profiles and separate recovery from current conformance.
+
+- Add complete offline PREMIS authority-field accounting across events, outcomes,
+  agent classes, rights bases and fixity algorithms. Retain original vocabulary
+  bytes and retrieval observations, with explicit unresolved/local fields and
+  prospective close matches while preserving all genesis schema definitions.
+
+- Add a V2 Museum Artist C2PA Standing consumer that retains complete supplied
+  conflict histories and checks original historical acknowledgement guards.
+  Preserve V1 bytes, independent token/collection scopes and live Display;
+  governance authentication and native runtime validation remain separate.
+
+- Add bounded offline LoC PREMIS term snapshots and prospective profile-field
+  bindings, retaining original bytes, dates, unresolved references and provenance
+  with explicit ambiguity and freshness checks.
+
+- Add a direct native Independent-catalogue PREMIS source adapter for typed
+  preservation objects and retained files. Preserve original records while
+  measuring local size/digests, retaining missing/mismatch diagnostics and
+  replaying the full offline package without inventing historical fixity events.
+
+- Add exact Museum decoding for native Artist C2PA credentials and selected
+  reconciliation reports, preserving separate personhood, history and display
+  observations. Supplied-byte and hash checks do not establish C2PA cryptography,
+  authenticated admission, freeze-safe output or full dossier conformance.
+
+- Add the complete 29-name Museum genesis source catalog, broad missing schema
+  definitions, worked examples and ordered registry chunk inputs. Preserve
+  existing definition bytes and distinguish profile/shape validation from
+  actual admission, complete exporter behavior and institutional acceptance.
+
+- Add ordered chunk retention and full-byte reads for general institutional,
+  estate and curatorial payloads through 24,576 bytes, with an explicit V2 Museum
+  reader and closed dossier dispatch preserving V1 replay. Typed notarization and
+  native Artist payloads remain bounded to 8,192 bytes; coordinated successor
+  runtime, genesis and full-capacity acceptance remain pending.
+
+- Add a separate general-attestation companion with mandatory signer verification,
+  exact curatorial grants, retained native Artist provenance and typed operative
+  identity notarizations. Add source-preserving Artist/general Museum adapters,
+  explicit SELF-review selection and closed offline dossier replay. Coordinated
+  contract execution, genesis registration and genuine capture remain pending.
+
+- Add a versioned local token-dossier recipe with registered native hosts,
+  direct-owner and governed Metadata publications, deployment-scope independent
+  records, same-block capture inputs and explicit compiler-source composition
+  checks; native execution remains pending coordinated artifact review.
+
+- Add a dedicated ERC20 paid burn-to-mint carrier and gate with independent NFT
+  burn authority, original payer authorization and atomic burn/payment/mint
+  rollback. The zero-native-reveal-fee profile has 21 passing focused gate tests and
+  eighteen passing current-contract cases, independently bound to their source.
+
+- Add atomic ERC20 primary offer clients with original Sales signatures, separate
+  payer intent, four nonpayable funding routes and complete user-entry Safe CALL plans.
+
+- Add an externally pinned read-only native dossier capture runner with a
+  six-source minimum, complete supported registered scopes and offline result
+  reconstruction; actual native graph execution remains separately required.
+
+- Add retained metric source, runtime and replay clients with staged chunk uploads,
+  writer publication, distinct receipt identities and ordinary Safe CALL plans.
+
+- Add typed native dossier joins, MetadataV1 record enumeration and a current
+  registered-host roster, preserving original assemblies and record occurrences
+  while keeping global host coverage and genuine capture acceptance unresolved.
+
+- Add atomic ERC20 primary offers with original buyer/seller authorization,
+  separate payer intents and exact paid-receipt admission before minting.
+  Support selected and unselected work under a zero-native-reveal-fee profile;
+  current-stack, Safe and permit execution acceptance remains pending.
+
+- Bind full perceptual finality to retained metric source, runtime and replay
+  evidence through an additive original-record supplement and staged byte
+  retention. Preserve historical interfaces and storage; joined publication,
+  replay and transaction-capacity acceptance remain pending.
+
+- Run repository checks independently of native CI builds and cancel superseded
+  PR checks per job, preserving draft native caches and the required combined
+  Foundry status; validate and checksum-cover the separate museum toolchain.
+
+- Add native owner and independent record catalogs with complete per-scope
+  histories and authenticated empty lanes, plus bounded Core ownership-history
+  capture and replay; genuine native acceptance and full dossier assembly
+  remain separate requirements. Repair owner capture URI inputs without
+  asserting hosted fixture availability.
+
+- Add object-dossier requirement accounting, bounded supplied components and
+  replayable partial assembly from the retained actual-token capture, plus a
+  finite native render-inventory reader with complete segment reconstruction;
+  actual inventory capture and full object-dossier conformance remain required.
+
+- Add native primary offer clients with original buyer and seller signatures,
+  executor-funded payments, buyer refunds, historical revocation and Safe CALL plans.
+
+- Add atomic native primary mint offers for unselected and selected artwork,
+  preserving original buyer/seller signatures, separate replay protection,
+  executor-funded payments and buyer-owned pull refunds.
+
+- Preserve exact reference-metric source and runtime archives, verify restored
+  execution with typed transcripts and exact environment joins, and run offline
+  preservation controls in the existing Windows/Linux CI workflow.
+
+- Add an explicitly pinned local paid-token capture with actual Safe consent,
+  token-subject media records, source-block metadata reads and offline scoped
+  dossier replay; full object-dossier acceptance remains separate.
+
+- Add curated manifest, fixed and private sale callers with original content and
+  authorization hashes, commit/reveal refunds, historical revocation and Safe CALL plans.
+
+- Add native selected-work fixed and buyer-bound private sale carriers, with
+  pause-aware commitments, original purchase/settlement identities and pull
+  refunds; keep repeated credited refunds idempotent after clock collapse.
+- Reduce STATIC field/script/UTF-8 scan gas with exact output parity and measured
+  bounded checkpoint workloads; complete deployment acceptance remains pending.
+- Add initial versioned perceptual and curated reference producers/consumers and
+  a deterministic image metric. Independent review corrections, size repairs and
+  current-contract acceptance remain in progress.
+
+- Add offline scoped semantic-evidence dossiers from authenticated museum
+  exports, with required local media bytes, original dependency closure and
+  BagIt/OCFL reconstruction; full token object-dossier acceptance stays explicit.
+
+- Add per-purchase curated native settlement and full-payload historical private
+  authorization revocation, preserving original identities and auction replay.
+  Extract six stored Manager view encodings to preserve deployment headroom.
+
+- Reduce pure STATIC JSON/HTML encoding gas while preserving exact bytes, with
+  frozen-reference differential fuzzing and large-script performance cases.
+
+- Correct the STATIC renderer's exact script-bundle return length, with actual
+  metadata/dependency regression tests and a canonical PNG test fixture.
+
+- Add refund-window same-leaf price capture with immutable charged-price/proof
+  facts, unchanged original signatures and saved-amount refunds/finalization.
+- Add versioned museum Type/declaration continuation and replayable local Safe
+  authority records, preserving original profiles and snapshot provenance.
+
+- Add native Dutch and clearing same-leaf Merkle price consumers, preserving
+  original signatures, Dutch free-sale rules and clearing rebate accounting.
+- Add canonical complete STATIC output-hash manifests with exact registered
+  interpretation and current archival coverage; full-byte retention is separate.
+
+- Add frozen ONCHAIN STATIC full-output checkpoints and require complete gas
+  budgets when validating current output, with reproduced low-gas regressions.
+
+- Add original-opener Artist dispute withdrawal as additive operation 61, with
+  canonical outcome/history records and authored Artist/Safe/Archive regressions.
+- Add free-burn maximum reveal allowances, executor-owned pull credits and
+  governed surplus recovery; extend actual Safe-governance recovery tests.
+- Add source-preserving external museum authority snapshots and reconciliation,
+  retaining original reviews, qualified uncertainty and append-only corrections.
+
+- Add native same-leaf Merkle price programs with explicit price-counter and
+  free-tier policy, retaining original sale signatures, replay and refund ownership.
+
+- Add scoped/Merkle mint accounting, concrete eligibility gates, authenticated
+  Ledger import and Core replacement admission, preserving prepared-mint abort.
+- Add protected Royalty import and Core continuity admission, Artist repudiation,
+  operator distribution and the initial versioned STATIC rendering source.
+- Add source-bound institutional and condition museum adapters and qualified
+  geography drafts; actual current-record joins remain explicit acceptance work.
+
+- Extend the current-stack stateful driver with mandatory phase-counter and
+  per-payer native conservation, persistent mint/cancellation receipts, original
+  entropy registrations and exact native receiver-failure retry. Expanded
+  campaign execution remains pending the frozen current graph.
+
+- Add actual Safe-governed mint succession import, pointer rollback and
+  accounting preservation cases, plus original-Artist successor consent,
+  imported entitlement replay, remaining caps and exact Safe retry coverage;
+  native execution remains pending.
+
+- Add official Safe all-CALL batch tests for paid mint, entropy, custody,
+  replay and cross-component rollback, including payer/beneficiary caller
+  isolation, payout redirection and receiver-handler repair with exact signed
+  retries; native execution remains pending.
+
+- Correct the Artist entropy-recovery test fixture's canonical role-registry
+  pin and add live-role revocation/regrant and registry-drift regressions.
+
+- Add reproducible selected-host current-graph acceptance captures with native
+  compiler provenance, complete suite inventories and production size checks.
+- Add native refund-window allowlist callers and bounded stored-purchase readback,
+  preserving original signatures, captured prices and proofs through finalization or refund.
+
+- Add native Dutch and clearing allowlist callers with original signatures,
+  same-leaf ceilings, explicit registration hash evidence and payer refund recovery.
+
+- Add native allowlist-price registration, original-domain signing and payable
+  purchase callers, with explicit price rules and price-bearing mint-gate proofs.
+
+- Add source-bound burn-to-mint callers with separate owner/gate approval checks,
+  original native purchase signing, explicit free reveal allowances and refund recovery.
+
+- Add ordered operator-distribution manifests, bounded slice callers and retained
+  NFT claim recovery for direct and failure-isolated delivery.
+
+- Add current ticket, delegated vault and static allowlist mint-gate input producers
+  with exact signing and replay commitments and bounded proof encodings.
+
+- Add mint counter profile and continuity callers with canonical inventory proofs,
+  bounded state and ancestry imports, and explicit source and readiness checks.
+
+- Add royalty continuity manifest producers and bounded import callers that
+  preserve original route origins, frozen configurations, snapshots and elections.
+
+- Add declared PLATFORM auction callers for families 8–13, independent signing
+  and configuration hashes, partial pinned inspections and exact Safe CALL inputs.
+
+- Add ordered Safe CALL plans, exact primary-template CLEAR/FREEZE callers with
+  independent assignment reconstruction, and eight-family Artist ceremony packets.
+- Add compact source-bound archival semantic exports, preserving exact typed
+  authority selections and immutable earlier schemas, with a separate governed
+  ARCHIVE publication route and offline reconstruction.
+
+- Add complete typed Artist authority hydration for original living, payout
+  and direct-economics histories, preserving source records and replay guards.
+- Add historical native sale-credit enumeration and pinned offline export for
+  six hosts, including locked liabilities and zeroed historical accounts.
+- Add actual Safe Metadata RIGHTS publication capture and offline museum replay.
+- Add entropy incident, fresh-recovery, original Artist content-consent and
+  executor-credit client helpers with ordinary Safe CALL examples.
+
+- Add ordered incident recovery for registered token/scope entropy, original
+  Artist content-consent evidence, atomic fee/refund handling and frozen
+  late-callback arbitration; unavailability findings remain an integration gap.
+- Add canonical Artist history lanes, successor admission and typed owner guard
+  checkpoints, retaining original operations; typed hydration profiles follow.
+- Add governed native surplus recovery across six sale hosts and actual local
+  preservation-operation capture with independently replayable museum exports.
+
+- Add frozen ordered entropy recovery policies and exact governed pre-mint
+  collection bindings, with original configuration locks and explicit finality
+  commitments; the later fresh-request implementation uses those frozen policies.
+
+- Add governed provider admission, deprecation and incident revocation with
+  original-request callback retention, current graph plans and focused lifecycle tests.
+- Add native secondary inventory, account-directed delegated claims and
+  delegate-signed offers while retaining principal payment and shared replay.
+- Add discoverable Artist authority preimages, typed dormancy/steward execution
+  records and independent event reconstruction cases.
+- Add complete chunked snapshots and offline museum BagIt/OCFL packaging with
+  exact-byte hydration and portable path validation.
+
+
+- Add role-authorized token/scope entropy incidents with immutable evidence and a
+  bounded provider-result probe; declaration alone does not enable a fresh draw.
+- Add Artist dormancy, steward grants and designated dormancy-origin recovery.
+- Add declared platform primary auctions, prepared custody PROFILE/template sales,
+  and explicit known-token platform rights activation.
+- Add complete chunk-backed scripts/libraries and burn-stable artwork checkpoints.
+
+- Add live nested Artist provenance, typed script/media manifests and governed
+  display budgets, preserving original finality routes and optional external hashes.
+- Add state-bound and delegated Artist attestations and declared platform-work
+  royalty admission; complete current-stack acceptance remains pending.
+- Extract fixed Artist and metadata workers to restore contract-size headroom
+  while preserving public interfaces and existing owner storage.
+- Add typed manifest previews, original Artist content-consent signing and
+  zero-value Safe CALL preparation to the current client.
+
+- Track pre-mint entropy provider revisions and immutable request policy inputs,
+  preserving epoch-one commitments and the existing policy lock after registration.
+- Add Artist display facts and permissionless attribution claims with original
+  authority records and append-only history; full renderer acceptance remains pending.
+
+- Support recovery after a dismissed and reopened prior-recovery interval,
+  preserving original closure, guardian and accepted recovery history.
+- Add a reproducible actual-contract/Safe museum media capture with all four
+  recorded export formats and offline reconstruction.
+
+- Add platform-work declarations, permissionless claims, governed contests and
+  corrective Artist binding, with collection-subject archival evidence and retained
+  scoped finality history. Runtime and full display/commerce integration remain pending.
+
+- Add current native fixed-price/price-program signing and Safe call preparation,
+  live reveal-policy reads, digest checks and native excess-refund calls.
+
+- Support repeated Artist recovery and guardian supersession across retained histories.
+- Add default TEMPLATE custody commerce and Artist-approved exact TEMPLATE clear/freeze.
+- Extend recorded-account museum exports through PREMIS, IIIF and LIDO, requiring
+  selected file facts and a separate declared publisher instead of inventing missing data.
+- Add native immediate-sale reveal funding, bounded post-mint attempts and Safe-owned
+  excess refunds. Native runtime, gas and final deployment integration remain pending.
+
+- Extend estate recovery across successive rotations and dismissed terminal histories.
+- Add scoped custody templates and explicit default-profile commerce with current
+  Artist consent; move large auction tuple getters into a fixed linked library.
+  Native size and full integration acceptance remain pending.
+- Package one selected public synthetic museum source as Linked Art, PREMIS, IIIF
+  and LIDO, and recorded account captures as Linked Art, with offline replay.
+- Add current custody approval signing, house digest readback, and explicit
+  activation, bid and settlement calls suitable for Safe transaction preparation.
+
+- Add source support for recovery after estate-successor rotation and token-specific
+  PROFILE custody activation/settlement; comprehensive runtime validation remains pending.
+
+- Add current Artist and collaborator signing, digest readback and Safe CALL
+  preparation for eight onboarding operations; broader runtime acceptance follows
+  the integrated feature batch.
+
+- Support dynamic poster/collaborator primary templates and standing-veto/living-estate
+  recovery history, preserving original Artist consent, guardian and payment rules.
+- Reuse the actual cached creation-library context when preparing current graph
+  tests, independently binding changed test hosts and rejecting stale imports.
+- Construct each native settlement scenario once, including required Artist consent
+  and Safe failure/repair/retry cases.
+
+- Add explicit current native auction, bid and custody signing helpers with
+  native-getter parity vectors, preserving retained RC1 domains and Safe calls.
+
+- Support artist-approved default royalty snapshots and recovery after dismissed
+  first-estate compromise, preserving original consent, veto and replay rules.
+
+- Preserve omitted compiler storage layouts in native graph fixtures and run
+  fixture-tooling regressions before expensive current-stack compilation.
+
+- Refresh the active Solidity source inventory and allow cold current-stack CI builds
+  to complete before their checked compiler outputs are reused.
+
+- Support accelerated first-estate recovery with original guardian, veto and replay rules.
+- Support artist-approved configured-zero royalty snapshots and prepared custody acquisition.
+- Allow explicit compiler-selected typed client catalogs, preserving retained RC1
+  ABIs while supporting current interface calls, overloads, unnamed tuples and Safe CALLs.
+
+- Add explicit Artist Safe consent for positive-share primary templates and
+  consume that consent through native auction settlement.
+- Add elected collection royalty snapshots to actual prepared mint paths, with
+  original Artist approval, immutable token provenance and refund admission
+  that rejects incompatible deposits before payment.
+
+- Add exact native commerce activation plans for Safe-root catalog extension,
+  delayed module/escrow admission and one-time Manager/custody binding.
+
+- Add versioned native collection-template auctions with original opening consent,
+  actual-token policy recording, escrow materialization and atomic Safe retry.
+
+- Add native auction custody acquisition and paid transfer of the original NFT,
+  with canonical house admission, terminal claims and signed Safe retry coverage.
+- Add current native recorder/auction deployment and exact module/escrow admission.
+- Complete the staged local graph rehearsal within enforced transaction gas caps.
+- Bound stored Finality evidence reads by available gas while preserving public
+  interfaces, exact evidence validation and complete-provider admission gates.
+
+- Integrate published curated-work native auctions with complete manifest and
+  exact-byte admission, original counter accounting and atomic Safe retry.
+- Split Artist host deployments into authenticated fixed children while retaining
+  original host bindings and separate real-transaction capacity validation.
+
+- Add an exact separate governed artist read-budget expansion plan, preserving
+  the original activation batch and requiring normal delayed execution.
+
+- Stage current graph deployment through resumable checkpoints with actual local
+  transaction and governance rehearsal coverage; product activation remains open.
+- Bound Finality Registry constructor admission by available gas while preserving
+  its configured runtime budget, exact dependency checks and failed-deployment retry.
+
+- Add native deferred English auctions with atomic paid mint settlement, bounded
+  clocks, pull refunds, original delegated delivery and tested Safe retry paths.
+- Complete the native preservation, Artist Safe sanction and canonical finality
+  integration rehearsal; individual transaction capacity remains separate.
+
+- Add atomic prepared native paid minting through the fixed official recorder,
+  with original-sale replay protection, complete rollback and Safe retry tests.
+- Add the native auction content-proof helper and its curated settlement integration.
+- Prepare fuzz/invariant graph inputs from each campaign's own compiler context
+  before execution, with retained preparation logs and a shared-fixture lock.
+
+- Add portable current graph fixture preparation from authenticated native compiler
+  outputs and exact NFTDelegation grant helpers for the new auction integration.
+
+- Added actual native graph, Artist record/seal and snapshot assembly tests.
+- Separated native finality component leaf budgets from outer source-read budgets,
+  with bounded adapter/provider callback regressions and matching constructor pins.
+
+- Added reviewed Safe preservation call and atomic-retry coverage.
+- Added a tested auction clock library for first-bid timing, capped extensions,
+  pause tolling, rounded increments and signed settlement deadline ceilings.
+- Specified first-bid clocks, signed deadline ceilings and deferred no-bid outcomes
+  for the new native auction under ADR 0043; implementation remains in progress.
+
+- Added an operator-owned deployment slot with deterministic CREATE coordinates,
+  atomic rollback, actual Safe retry tests and a portable local rehearsal command.
+
+- Added complete native render-critical inventories and independently refreshed
+  archival bundles, with original signed evidence and bounded Safe reference stages.
+
+- Added combined artist candidate preparation and original-image review from one
+  validated current statement, retaining legacy interfaces and permanent hashes.
+
+- Added original ordered image facts for native artist approval and a separately
+  registered multi-capture profile, preserving original signed definitions.
+- Extended the candidate consumer's bounded review decoding and adaptive gas
+  forwarding while retaining the original single-capture profile.
+
+- Restored immutable RC1 owner-continuity evidence and moved the adopted recovery
+  occurrence and owner vectors into a separately checked current extension.
+- Corrected the museum LIDO subtree LF rule for release checksum validation.
+
+- Added permanent WORK/RIGHTS selected-head seals through canonical terminal
+  governance, with guarded selector writes and historical seal receipts.
+
+- Added estate-authority recovery and authenticated successor guardian histories,
+  retaining original capabilities, veto standing and atomic Archive retries.
+- Added the developing native collection finality provider, exact source and
+  archive joins, local selected-record facts and Registry-only prepared inputs.
+- Kept finality read caps as upper bounds with exact return validation and
+  tested actual Safe public reads and protocol-only access restrictions.
+
+- Added current-head guardian restoration and restricted root-authorized appeals,
+  preserving original transition evidence, directives and retained veto rights.
+- Added native original reference-render publication, complete retained runtime
+  manifests and a fixed consumer, with exact Safe transaction-envelope tests.
+- Added optional fixed current component routes so finality preparation keeps one
+  strict live-state pass and unchanged permanent hashes, with legacy discovery support.
+
+- Added exact independent finality ABI manifests with complete portable tuple
+  definitions, fixed source bindings and matching Store/original-Registry bytes.
+- Added bounded nonempty guardian-record supersession after an adjudicated
+  original rotation while preserving pre-transition and retained-set veto rights.
+- Included contract/interface guides in the default Markdown link check and
+  corrected the named Safe discovery selector evidence.
+
+- Added fixed current finality discovery with mandatory component families,
+  unsigned artist preparation, shared producer bindings and bounded indexed reads.
+- Added native external-object proofs, complete archival coverage and current
+  liveness for original receipt pairs, with portable runtime capture tooling.
+- Retained guardian history at actual authority vesting and split estate execution
+  preparation to keep its creation helper within the EVM runtime size limit.
+- Added actual Core/Executor/Safe tests for original native entropy across
+  coordinator replacement, token burn and later collection growth.
+
+- Added native full-byte collection snapshots with original source commitments,
+  independent publisher grants, immutable history and a fixed finality consumer.
+- Extended living-artist recovery to completed ordinary rotation histories and
+  prior resolved contests while retaining discarded guardians' applicable vetoes.
+- Added immutable complete entropy source sets and token-specific frozen serving
+  across coordinator replacement, with separate current-discovery validation.
+
+- Added Identity-owned scheduled recovery preparation, action-bound guardian veto
+  and complete admitted guardian history for the initial living-artist profile.
+- Added fixed finality consumers for selected conservation records and every
+  original coordinator policy, with independent locks and source commitments.
+
+- Added the initial living-artist adjudicated recovery path, original authority
+  acceptance, atomic owner/archive continuity and contest/dismissal behavior.
+  Registered-guardian and broader historical/estate profiles remain in development.
+- Added authenticated intent/waiver selection with distinct original artist and
+  estate lineages, exact interview linkage, immutable preparation and artist head locks.
+  Finality consumption and complete archival coverage remain separate work.
+
+- Extended inherited artist recovery approval to actual published RELEASE, SEASON
+  and VIEW membership, with fresh execution validation and preserved approval history.
+
+- Added complete conservation JSON profiles, schemas, format catalogs and dated
+  language validation for artist intent, waivers and interviews. Original record
+  authority, current selection and archive coverage remain separate consumers.
+- Added complete scoped indexing of retained Core coordinators across pointer
+  replacement, with bounded atomic batches, immutable history and explicit
+  indexing-time runtime validation.
+- Added inherited recovery scope-membership authentication and exact permanent
+  identity-recovery hash encodings; complete operative recovery is tracked separately.
+
+- Added inherited TOKEN artist recovery approval using actual retained Core
+  identity, with separate historical approval and fresh execution checks.
+- Added fixed-graph finality consumption of actual selected WORK and RIGHTS
+  records, preserving original receipts and current interpretation checks.
+  Complete scope membership and the other finality inputs remain separate joins.
+- Added authenticated scope membership and original-provider Router reads, typed
+  owner recovery responses and action-bound notice windows, and bounded immutable
+  preparation for complete delivery claims. Wider recovery scopes remain in progress.
+- Reduced shared JSON escaping gas while preserving the prior returned bytes,
+  including arbitrary byte strings. Differential fuzzing and retained owner,
+  rights and work-record flows pass in both compiler modes.
+- Added the current coordinator's immutable collection-policy read and fixed
+  entropy serving evidence. Complete entropy modes, mixed-coordinator discovery
+  and whole-system finality remain separate implementation work.
+- Added a fixed evidence provider for six actual Router serving families, with
+  independent source commitments and explicit current-candidate checks against
+  live module eligibility and the saved original-Finality anchor. Complete typed
+  finality inputs, entropy and full deployment acceptance remain in progress.
+
+### Added
+
+- Export typed recorded preservation events with explicit outcomes, multiple
+  file/agent links, noncompleted source states and reproducible offline packages.
+
+- Implement canonical ordered entropy recovery-policy configuration and permanent
+  freeze, with exact governance commitments and fixed-library deployment headroom.
+  Collection binding and fresh requests remain separate implementation work.
+
+- Add original Artist authority execution-event reconstruction, recorded PREMIS
+  fixity events/reports/agents, and explicit-ABI secondary inventory and delegated
+  claim/offer client workflows.
+
+
+- Fixed release checksum parsing for the pinned upstream license's Git whitespace
+  diagnostic override while preserving its exact bytes and the existing LF policy.
+  Current deployment and test imports now name their Router dependencies explicitly;
+  full Finality/Coordinator deployment assembly remains in progress.
+- Added complete steward/recovery-response JSON profiles and atomic typed
+  owner steward designations using the original direct/relayed owner record
+  authorization, exact registered definitions and durable per-author history.
+  Typed recovery-response counting and TOKEN notice execution are now implemented.
+- Added authenticated current WORK selection with curator grants or explicit
+  adoption of an artist's predecessor-bound publication, complete typed meaning,
+  original provenance and retained history. Full provider/deployment composition
+  remains open.
+- Added current-owner dossier records with retained payloads, direct and relayed
+  Safe/EOA calls, unordered replay protection and custody history. Typed recovery
+  notices and responses extend this same authorization and history.
+- Added bounded schema facts and original collection-record receipts, preserving
+  existing interfaces and storage. Maximum supported registration and record
+  shapes now fit the existing dependency cap for these readers and record ingress.
+- Added compact governance action facts, so a long reason URI does not consume
+  the onchain budget for reading the original batch identity and execution window.
+- Added an original-record witness entrypoint for rights selection, preserving
+  existing selectors, grants and history while supporting maximum record URIs
+  under the unchanged read cap.
+- Added canonical governed recovery execution, original lineage and bounded refresh
+  plans. Actual Core/Executor/Safe composition is tested with explicit artist,
+  original Finality and owner-notice boundaries.
+- Added complete typed WORK-to-LIDO mapping with original-field accounting,
+  exact provenance and reproducible fixtures; authenticated current selection
+  and institutional ingest remain separate from this mapping profile.
+- Added explicit current rights-record selection backed by original metadata
+  receipts, exact registered definitions, existing RIGHTS-family grants and
+  immutable history. Complete provider, scope and Finality composition remain open.
+- Added the complete typed work-description JSON profile, format catalog,
+  independent canonical fixtures and pinned registered-artist identity reads.
+- Added immutable artist recovery approvals and a bounded recovery owner-evidence
+  reader. The full recovery companion and owner-notice execution remain in development.
+- Added a narrow shared artist/curator WORK_DESCRIPTION authorization path,
+  preserving the original record hash, receipt provenance and family grants.
+- Added complete supported rights JSON serialization, exact recorded-byte
+  comparison, closed schema/profile inputs and independent canonical fixtures.
+  Onchain registration, authenticated current selection and typed write
+  admission remain separate integration work.
+- Added anchored independent-record history and exact publication event order
+  for museum input. Offline replay and actual local captures retain explicit
+  trusted-RPC and fixture boundaries. Registered account-authored semantic
+  records now produce exact museum projections; institutional identity and
+  independence remain separately evidenced.
+- Added pinned LIDO correspondence for the same four-media source used by
+  Linked Art, PREMIS and IIIF, with original schema closure, exact provenance
+  and preserved previous outputs. All 202 tests and eight generators pass;
+  full recorded-input correspondence and institutional conformance remain open.
+- Added current-content evidence reads that join the exact artist-approved root
+  record, fixed deployment route, complete token checkpoint and preserved leaf
+  bytes. Full typed record interpretation and finality composition remain open.
+- Added artist-approved collection-root publication backed by verified preserved
+  manifests, exact governed interpretation bytes and publisher grants, with
+  append-only history, atomic consent/evolution and Safe calls. The complete
+  artist/provider/Finality deployment and additional scope profiles remain open.
+- Added pinned IIIF Presentation 3 correspondence for four media types, exact
+  numeric/identity handling and original-source provenance. Seven generators
+  and all 28 example outputs pass integration readback; the reviewed test union
+  contains 183 distinct cases. Complete museum conformance remains open.
+- Corrected artist Finality admission to distinguish the metadata renderer from
+  the generic record host, and reduced delegation compiler stack lifetimes
+  without changing signed commitments.
+- Added incremental verification of complete content-leaf manifests against
+  actual checkpoint fields and preserved artifact bytes, with stable archival
+  completion identity, historical reads and Safe calls. Authoritative root
+  publication and larger composed manifests remain in development.
+- Added a pinned PREMIS 3 file-object export linked to the same source assertions
+  as Linked Art, with exact datatype, size, format and fixity-field checks.
+  The reviewed museum cohort contains 149 tests; this first file profile does
+  not establish actual file fixity, authenticated-chain input or full PREMIS.
+- Added faithful museum abstract-work and nonvisual projections with shared
+  identities and exact source accounting. All 132 tests and five generators
+  pass locally; the original v1 package remains unchanged.
+- Added permissionless onchain content checkpoints with exact served JSON/HTML,
+  complete Core membership, retained leaf history and threshold Safe calls.
+  Authoritative publication, archival coverage and full finality remain separate.
+- Integrated stable artist presentation, display locks and historical metadata
+  reads. Added image-field-only canonical Base64 raster admission, preserving
+  existing URI bounds, external schemes and artist authorization.
+- Fixed vendored Base64 encoding of inputs followed by dirty memory. Padding is
+  canonical, and input/adjacent memory is restored; literal and independent
+  randomized regressions cover the repair.
+- Preserved artist owner commitments and acceptance event arguments while
+  reducing default-compiler stack pressure. Complete-build acceptance remains
+  separate from the focused compiler repair.
+- Added an independent-attestor record host with permanent author history and
+  Safe direct/relayed paths. Its reviewed 22-case suite uses actual schemas,
+  byte storage and governance, with explicit Core membership boundaries.
+- Added a permissionless collection inventory backed by actual Core serials,
+  including burns and excluding incomplete mints. Fourteen focused cases pass
+  both compiler modes with 256 fuzz inputs and threshold Safe calls.
+- Added four actual artist-registry-to-metadata-host publication checks for
+  Safe signatures, estate intent authority, rotation and atomic append rollback.
+  Full current Core/Executor composition remains separate.
+- Added exact typed metadata-publication authorization through the current artist
+  registry, preserving prior artist methods, signing domains and storage prefixes.
+  The unpruned 271-test artist cohort passes independent review.
+- Added the current full-byte metadata host, a distinct caller interface,
+  attributed history, canonical events and root-authorized family grants.
+  Twenty-three host/adapter cases pass in both compiler modes with fuzzing;
+  three independent actual-Executor cases verify the configuration boundary.
+  Actual artist publication and typed finality composition remain in development.
+- Extracted foundation/catalog planning into a stateless local helper, with
+  explicit stop/read/resume handling in both deployment entry points. Exact
+  plan/catalog tests and a real protected foundation rehearsal pass without
+  adding a deployer transaction. Full product-script compilation and execution
+  remain open after the bounded compilation diagnostic timed out.
+- Added attributed museum resource projections and reproducible offline public
+  packages. The combined suite now contains 104 tests; complete cross-format
+  mappings, authenticated onchain sources and institutional acceptance remain open.
+- Added complete archival artifact chunk coverage with stable completion
+  commitments and separate fresh-fixity validation. Twenty-six focused cases
+  and fuzzing pass independent review; actual full finality composition remains open.
+- Added canonical semantic review bodies and deterministic authority-policy
+  selection, binding reviews to exact original records without circular hashes.
+  Fifteen new tests extend the reviewed museum suite to 80; actual recorded-state
+  authentication and complete projections remain in development.
+- Added a bounded, schema-derived source inventory for museum projections,
+  retaining applicable branch evidence and exact field values. Thirteen new
+  cases extend the independently reviewed museum suite to 65 tests.
+- Added pinned offline Linked Art schema validation and JSON-LD expansion,
+  with complete local schema-reference checks, explicit interpretation repairs
+  and strict format validation. Fifty-two tests pass independent review;
+  museum tooling now has an independent Windows/Linux CI workflow.
+- Added canonical token content-tree and metadata-subject primitives, with
+  independent hash vectors and fuzzing. Added immutable host finality adapters
+  separating historical verification from current discovery; actual metadata
+  publication and full finality integration remain in development.
+- Retained the pinned CRM and Linked Art vocabulary bytes and explicit
+  interpretation policy, with seven independently reviewed hierarchy and
+  domain/range tests. Complete JSON-LD and Linked Art validation remain separate.
+- Reworked collaborator binding serialization to avoid the default compiler's
+  stack limit while preserving the exact sixteen-word preimage, ABI and
+  selectors. Independent literal vectors and 256 fuzz inputs pass against the
+  prior IR implementation and both new compiler profiles. Complete repository
+  compilation remains a separate check.
+- Added the immutable interpretation-document registry and bounded chunk store,
+  with canonical payload reconstruction, versioned identities, governed
+  retirement and retained history. Eighteen current governance/document cases
+  with 256 fuzz inputs and an additional exact-event/Safe-call test pass;
+  both production compiler profiles fit. Official schema publication and
+  complete metadata integration remain separate delivery steps.
+- Added token royalty assignments, explicit disabled royalties and clear-to-
+  inheritance semantics under ADR 0038. The reviewed 262-case artist/provider
+  corpus passes, preserving prior operations and consent history; full-current
+  composition of the new royalty paths remains pending.
+- Added the first museum offline schema and fixture foundation, with three
+  candidate schemas, eight synthetic scenarios, exact retained context bytes
+  and a prospective onchain document publication planner. Thirty-two tests
+  and both deterministic generators pass independent review. Full format
+  mappings, authenticated recorded-state exports and institutional evidence
+  remain in development.
+- Added token-level primary revenue assignments and corrected-binding consent
+  with 249 reviewed domain cases. Added full-payload mint-ticket and sale-offer
+  revocation with 49 domain cases, fuzzing and two actual Executor/Safe cases.
+  Seven combined current Safe setup/mint/reveal regressions also pass.
+- Added the version-2 staged deployment foundation and reviewed catalog
+  inventory chunking. The local deployment dry run verifies actual product
+  construction after governance initialization; complete staged product
+  activation and the full-v1 deployment inventory remain in development.
+- Added native secondary private offers and custody sales with exact typed
+  revocation, buyer binding, royalty settlement and pull credits. Forty-two
+  domain cases, fuzzing and both production compiler profiles pass independent
+  review; actual-current Core/royalty composition remains pending.
+- Added saved governance stage planning for Safe callers, with seven reviewed
+  tests covering real delays, exact action matching, catalog changes and
+  idempotent execution. Full operator activation remains in development.
+- Adopted the complete museum semantic specification under ADR 0036, including
+  CIDOC CRM/Linked Art, Getty TGN, attributed records and offline dossier exports.
+  Tightened review authority, identity, bounded documents and exact field
+  preservation; twelve conformance gates and five parallel delivery packages
+  track implementation and evidence still to be delivered.
+- Added the native clearing-sale consumer with immediate floor mints, permanent
+  buyer rebates, separate supplemental settlement and bounded refund escape.
+  The subsequent compressed-aggregate and sparse-record optimization passes
+  70 domain cases and six fuzz properties with independent review. Updated
+  current-contract composition passes the reviewed nine-case clearing/catalog/
+  archival run; collector gas exceeds the required
+  ceiling and remains a candidate gate under ADR 0033.
+- Added estate activation and successor authority with immutable archival
+  coverage dependencies. All 234 artist-domain cases pass independent review;
+  three current-contract estate/Safe cases now pass independent review. Live
+  archival quorum, commercial mint after activation and operator migration
+  remain pending.
+- Distinguished test-asset engineering rehearsals from conforming candidates
+  in ADR 0033, preserving all numerical collector-gas ceilings and failed gates.
+- Added a network-derived Arweave inclusion fixture with exact source provenance,
+  positive and rejection tests, and changed-payload fuzzing in both compiler
+  profiles. This tests native inclusion without claiming consensus or independent
+  observer authentication.
+
+- Added the public archival-coverage prerequisite with quorum-authenticated
+  Arweave checkpoints, native inclusion, independent storing-family receipts
+  and current fixity records. Twenty-nine tests, two fuzz properties and separate
+  default compiler products pass independent review. Real-network rehearsal and
+  live quorum acceptance remain pending under ADR 0031; current estate
+  composition is covered by the three cases described above.
+
+- Added native supplemental clearing settlement tied to the original paid mint,
+  with independent replay protection, current revenue rights and no second NFT.
+  Twenty-one new cases, 103 prior regressions, fuzzing and both product compiler
+  profiles pass independent review. The separate clearing-sale consumer and
+  its optimization are described above.
+
+- Added standard native Dutch sales with immutable schedules, signed maximum
+  prices, official settlement and per-sale excess credits. Thirty-three domain
+  cases and two fuzz properties pass independent review. Four current-contract
+  Safe workflows pass independent review after a test-only role correction.
+- Implemented identity-contest dismissal and terminal cohort closure under
+  operation 58, preserving history and sole Identity ownership. The 202-case
+  domain suite and twelve actual-current dismissal/refund/dispute cases pass
+  independent review. Five further current succession/cohort/standing cases now
+  pass with eight Dutch/refund regressions on the supplemental recorder after
+  a test-only nonce correction. Effective source/configuration binding remains
+  pending.
+- Added native refund-window purchases with separate buyer custody, per-sale
+  pull refunds, permissionless finalization, official settlement, retained
+  artist-authority checks and reveal-fee handling. The 63-case domain suite and
+  two fuzz properties pass independent review. Four actual-current refund cases
+  and four retained identity-dispute cases also pass independent review against
+  their captured pre-dismissal source.
+- Added signing-domain discovery for native and universal sales, including an
+  explicit getter for the native adapter's separate price-program domain.
+  Existing signed messages, interface IDs and storage remain unchanged. Four
+  focused Safe/domain tests and 256 fuzz runs pass independent review.
+- Added succession directives and successor designations with disjoint authority
+  masks, defensive successor standing and typed record/read interfaces. The
+  185-case domain suite, prior interfaces/storage and eight actual constructor
+  traces pass independent review under the artist IR profile.
+- Added actual Safe/Executor identity-dispute coverage for delayed arbitration,
+  a role grant followed by a contest in the same batch, role-loss rollback,
+  mint denial and existing NFT transfer. Four new cases and seven retained
+  entropy cases pass independent review on their pre-succession snapshot.
+- Recorded the explicit identity-contest dismissal design in ADR 0029: a new
+  operation 58 closes adjudicated provisional cohorts while preserving historical
+  records and consumed replay state. The additive inventory and hostile checker
+  fixtures are recorded separately from the implementation and its acceptance.
+- Added governed reveal timing with a permissionless Safe keeper request after
+  the effective SLO, live request-timeout raises and strict deadline boundaries.
+  Fifty-four domain tests, thirty actual-Core metadata regressions and both
+  compiler profiles pass independent review. Seven actual Executor/Safe scenarios
+  also pass against their captured source. The new constructor takes explicit timing configuration
+  and uses a new storage layout for new deployments.
+- Added exact artist sale-parameter consent across native and universal sales,
+  with explicit capability admission and REQUIRED rejection in legacy consumers.
+  Focused consent and Safe tests pass. Three actual-current REQUIRED purchase
+  scenarios pass independent review after correcting their direct artist-approval
+  nonce setup; the original partial run is retained separately.
+- Added artist identity-compromise filings by eligible guardians, prior
+  authorities and a staged arbiter, with immutable contest records and
+  provisional-cohort consequences. The 159-case domain suite passes independent
+  review; actual governance composition now passes, while dismissal/recovery remain underway.
+- Added declared collection reveal-fee policies, separate escrow and requester
+  credits, canonical operational roles and typed provider quotes. Forty-four
+  focused cases and thirty actual-Core metadata regressions pass independent
+  review. Resumable role activation has six registry regression tests; automatic
+  AT_MINT requests and complete recovery remain in progress.
+- Added the ARRNG provider adapter with pinned source authority, exact fees,
+  stored-output retry, a governed coordinator-call gas cap and contract treasury
+  withdrawals. Seventeen focused tests plus fuzzing pass with independent review;
+  twelve combined current-stack tests also pass, including Safe mint/reveal,
+  retained-output retry and governance. Deployed upstream acceptance remains open.
+- Added artist rotation, guardian contests, provisional records and governed
+  timing windows through typed libraries and fixed extensions. The 133-case
+  domain suite and constructor/size checks pass independent review; wider
+  recovery and finality remain in progress.
+- Added signed native open, zero-price and pay-what-you-want programs, preserving
+  existing sale selectors. Seventy-two focused cases plus fuzzing pass independent
+  review; actual-Core Safe free, PWYW and open-edition purchases also pass.
+  Sale consent and refund windows continue.
+- Added native fixed-price PROFILE and COLLECTION_ARTIST sales through the shared
+  official settlement recorder, with exact payment, deferred wallet escrow and
+  replay protection. Domain tests and fuzzing pass with real Safe wallets;
+  all six current-Core native/ERC-20 composition tests also pass, including
+  template escrow, Safe withdrawals and complete failed-mint rollback.
+- Added a stateless phase-setup planner and JSON encoder for exact EOA/Safe calls,
+  confirmed-state resumption, current artist nonce checks and final Manager
+  ownership handoff. Seven actual-current tests cover real Safe setup, failed
+  target calls, sparse nonce use and paid minting. Identity onboarding and the
+  complete deployment runner remain separate migration work.
+- Added operative artist identity document revisions with immutable registration
+  and binding history, exact document-hash personhood matching, and preserved
+  existing consent records. Current-stack Safe and payment composition passes.
+- Added the shared official revenue recorder, sole ERC-20 payer adapter and a
+  signed fixed-profile sale consumer, including governed EIP-2612/Permit2 paths,
+  exact settlement events, replay protection and Safe domain tests. Actual-Core
+  Safe payment, minting, claims and rollback composition passes; broader sale
+  orchestration remains in progress.
+- Bound universal sale mint authorization IDs to the complete signed digest,
+  preserving the separate commercial and execution nonce protections. Added
+  actual-current Safe payment, exact replay and late-recipient rollback scenarios.
+- Preserved resolver and public SALE_POSTER materialization regressions in their
+  own fixture while retiring the uninstalled settlement API's owner allowlist
+  and direct payer-pull tests. New graph tests cover current transfer/replay rules.
+- Added modular artist content consent, defensive freeze authorization and
+  unused-authorization revocation, preserving the earlier interfaces and owner
+  storage. Current artist/metadata composition passes the actual Safe mint flows;
+  executed-finality admission remains separate work.
+- Added metadata-host content commitments, one-use approval consumption, actual
+  evolution witnesses and defensive artist locks, with real Safe administration
+  and relayer tests. Modular artist composition passes; executed-finality integration
+  remains open.
+- Added exact Safe CALL payload conversion and receipt verification for the expected
+  Safe transaction hash, with actual upstream 1.3.0/1.4.1/1.5.0 success/failure tests.
+  Client ABI/signing documentation now explicitly identifies its retained RC1 scope.
+- Added scoped artist economics/freeze delegation and direct-call timestamp
+  handling for queued EOA and Safe payout/attestation transactions.
+- Added exact native/ERC-20 sale funding with bounded wallet delivery and escrow
+  fallback. Native sale authorization is version 2 and binds the primary policy.
+- Added auction version-2 authorization and retained proceeds commitments;
+  settlement uses the rights approved when the auction was created.
+- Added a resumable modular artist authority-activation plan and current-system
+  Safe ERC-20 payment/recipient-failure tests. Complete operator and client
+  migration remains in progress.
+- Added prospective fixed-profile artist economics approval and exact defensive
+  royalty freeze authorization, with typed resolver previews and consent before
+  governed mutations. Defensive freezing preserves royalty terms; new minting
+  still requires consent to the resulting frozen hash.
+- Added deferred split-profile registration and append-only wallet discovery.
+- Connected modular artist onboarding and exact consent records to actual current
+  native/ERC-20 minting, auctions, metadata and primary/royalty facts. Added real
+  Safe artist, buyer, custody, payout and delayed-governance integration scenarios.
+  Wider artist lifecycle and deployment/client migration remain in progress.
+- Added split-wallet release authorization, revocation and deprecated-asset exits,
+  and immutable Core/artist binding for primary revenue resolution.
+- Added stateless aggregation of native and ERC-20 split-wallet claims, including
+  atomic and continue-on-failure modes and tests across 20 actual wallets.
+- Added offline fixtures from integrity-pinned official Safe 1.3.0, 1.4.1 and
+  1.5.0 packages, real threshold-signature and execution helpers, and focused
+  wallet interoperability tests. Full workflow acceptance remains in progress.
+
+- Added independently checked Sepolia deployment and native-sale demonstration
+  evidence, public addresses and client configuration, including real Chainlink
+  fulfillment, final metadata, withdrawals and artist transfer.
+- Run release checksum and verifier suites concurrently with Solidity compilation
+  in a separate CI job with the same pinned tooling and retained logs.
+
+- Added current-stack input fuzzing and stateful conservation checks, with
+  successful-action counters, per-payer accounting, reproducible quick/extended
+  campaigns and retained failure traces. CI runs the quick campaign; an explicit
+  workflow dispatch can select the extended campaign.
+- Added governed local collection completion and a portable collector package
+  that reconstructs its retained metadata and artwork without RPC access.
+- Added a TypeScript client with retained current ABIs, typed contract calls,
+  EIP-712 payloads, receipt decoding and block-pinned selected-state snapshots.
+- Added repeatable local product scenarios covering a second artist, native and
+  ERC-20 purchases, auction bidding/refunds/settlement and state-export publication.
+  Local test-token preparation uses its own source-bound compilation without
+  modifying the retained deployment output.
+- Added credential-free Sepolia status and transaction recovery that preserves
+  the exact signed intent across interrupted runs, plus explicit entropy and
+  metadata delivery retries.
+
+- Added current-stack ERC-20 fixed-price sales with payer-bound intents,
+  canonical primary-policy commitments, exact allowance settlement and atomic
+  Core minting. Supported primary assignments use fixed collection/default profiles.
+- Added state-export publication on the actual governance Executor, live-role
+  authorization, permissionless challenges, forward supersession and historical
+  reads. Scheduling validation is linked separately to retain runtime headroom.
+- Added local transaction demonstrations with receipt-bound token/request IDs,
+  final metadata notification, split withdrawals and a fresh-transaction VRF
+  adapter callback rehearsal against an explicitly local upstream mock.
+
+- Added focused Core, mint and governance caller interfaces, shared request
+  types, and interface compatibility regressions. Added a portable developer
+  command for the supported stack and explicit unit, legacy, gas and full suites.
+- Integrated the current Core with signed native fixed-price sales, English
+  auctions, canonical mint accounting, immutable split wallets and royalty
+  resolution. Sales and auctions require the accepted collection artist and
+  platform to sign the exact transaction terms.
+- Added collection artist nomination and relayed acceptance, a current entropy
+  coordinator with a VRF v2.5 adapter, and metadata rendering from the token's
+  original coordinator. Wider artist lifecycle and payment modes remain future work.
+- Added committed one-time genesis initialization, real system discovery and
+  current-stack tests covering paid mint, auction custody/refunds, withdrawals,
+  metadata, transfer/burn, receiver rollback and delayed governance rotation.
+  Normal governance delays remain after genesis. The current Sepolia instance
+  completes the real randomness callback and native demonstration; earlier
+  prototype records retain their historical source and deployment identity.
+
+### Changed
+
+- Run frozen artist-57 packet checks in their exact accepted RC1 Git context,
+  while enforcing unchanged frozen inputs in the active checkout. Current
+  extension-design and contract checks continue against current sources.
+
+- Preserve historical mint and revenue companions in explicitly named, provenance-
+  checked RC1 fixtures so legacy regressions remain separate from evolving v1
+  contract behavior and current deployment artifacts.
+- Admit the narrow artist mint-consent capability at Core and narrow attribution
+  reads at sale adapters. Pin provider identity across committed genesis, and
+  extract mint phase configuration without changing the Manager ABI or storage.
+- Compare client commitment and receipt hashes by their hexadecimal bytes so
+  equivalent letter casing does not reject a valid purchase or auction.
+- Order resumed scenario authorizations by contract ABI fields across supported
+  PowerShell versions, and check current auction terms before wallet prompts.
+- Report local snapshot and collector-package errors clearly, and keep campaign
+  lock conflicts from creating empty output directories.
+- Build the client before Windows operator tests and avoid retaining checkout
+  credentials in the client CI job.
+- Reuse compiler caches within the pinned toolchain and profile while retaining
+  unconditional builds, tests and source validation. Mixed current build-info
+  after a fallback restore triggers one fresh build before export validation.
+- Publish writable compilation workspaces only after copying and validation
+  succeed, and reject unreachable governance-policy validation in the source gate.
+- Organized Solidity interfaces by domain, isolated legacy implementations and
+  regression tests, and grouped maintenance tools into Python packages. Rewrote
+  contributor and integration guides around the current APIs; older examples and
+  detailed maintenance instructions now have separate reference sections.
+- Preserved historical compilation, source-layout and documentation snapshots
+  while refreshing current evidence. Exported interface IDs now follow Solidity's
+  own-selector rules, including the inheritance-only Core aggregate's zero ID.
+- Build cleanup preserves broadcast receipts and deployment records. Offline
+  release verification binds package initializers and isolates cached first-party
+  modules when validating a materialized release snapshot.
+- Retry the complete pinned Foundry installer after transient attestation-service
+  failures without bypassing verification. Reconcile reviewed release-tool source
+  bindings and make the output-directory-swap regression deterministic on Windows.
+- Retain the Executor pagination ABI return names with a narrowly checked
+  warning disposition for its existing encoded-tuple forwarding implementation.
+- Validate maximum-content metadata against the configured 12 million router
+  gas budget and require the complete URI through a bounded 16 million gas
+  Core read. Refresh the full default compilation's measured gas snapshots
+  within unchanged release ceilings, and preserve exact UTF-8 release notes.
+  Rebind the non-production materialization fixture to the verified canonical
+  build and reconcile the documented NatSpec coverage count without adding
+  accepted documentation exclusions.
+- Increase native Foundry installer retries for transient download failures,
+  including attestations, while preserving pinned versions and verification.
+- Keep token and registered-scope entropy subjects distinct when requesting
+  randomness; the regression covers unchanged token inputs and both lifecycles.
+- Scope the live Slither gate to all production Solidity sources, excluding
+  expensive test and script constructor closures. Refresh exact source/capture
+  provenance and retain reviewed detector-specific dispositions without
+  suppressing findings or changing audit readiness.
+- Added current contract/interface navigation and replaced the stale autonomous
+  run log with a concise integration and delivery record.
+- Allow the sealed current-stack Executor to admit replacement satellite
+  administration through root-proposed, 48-hour-delayed append-only catalog
+  extensions. Exact target/code/value policies remain immutable per entry;
+  extensions publish the SystemManifest atomically and invalidate actions
+  scheduled under older catalog roots. Core and its authority binding are unchanged.
+- Permit optional preparation of the exact committed genesis binding before
+  atomic product initialization and sealing. Ordinary actions cannot run between
+  preparation and initialization; a failed initialization can retry the same
+  plan. Compare governance calldata in exact words to reduce validation gas.
+
+- Updated the pinned Foundry toolchain action to use its native installer on
+  Linux and Windows. CI now checks changelog coverage before tool installation
+  and compilation so missing release notes fail promptly.
+- Dispositioned the two retained `StreamSplitWallet` `incorrect-equality`
+  findings as detector-specific false positives without suppressing the detector
+  or changing production Solidity. Focused Foundry coverage proves the exact
+  zero-release sentinel, the adjacent one-wei release boundary, unchanged
+  observation handling, monotonic increases, and decreasing-observation
+  rejection. The canonical 32-row semantic inventory remains unchanged; 30
+  rows remain Open and the protocol remains pre-audit and blocked from public
+  beta and production.
+- Wired the Proposed dual owner-record continuity prerequisite into the
+  canonical Unix, Windows, Make, pull-request CI, and checksum validation
+  paths. The checksum-bound gate preserves all 37 retained semantic record
+  domains while independently proving 40 record creations in 39 owner batches,
+  seven immutable owner identities, owner-V2 commitments, ordered record-chain
+  transitions, and fixed zero/one/two record-delta envelopes. Logical receipts
+  are insertion-only, supersession preserves predecessors, ArchiveV2 remains
+  evidence-only, and opaque Coordinator words, live `block.chainid`, packed
+  hashing, implicit current-state joins, enumeration, delegatecall, upgrade,
+  and readiness promotion remain forbidden. This prerequisite does not select
+  physical owner storage or operation ABI, accept `owner_storage`,
+  `owner_snapshots`, or `replay_keys`, authorize any of the 57 operation
+  sources, or add Solidity, audit, deployment, public-beta, production, or
+  readiness credit.
+- Wired the Proposed artist record/event reconstruction correction packet into
+  the canonical Unix, Windows, Make, pull-request CI, and release-mode
+  validation paths. The checksum-bound gate mechanically enforces 37 record
+  domains, 54 normative events (39 preserved and 15 minimally corrected), 57
+  operation joins, 40 created-record mappings, 430 typed field-source
+  bindings, nine permitted immutable constants, and four independently derived
+  vectors. The checker now derives historical 21/54 and 2/54 coverage from one
+  checksum-rooted archive of two raw commit objects, four raw trees, and 38
+  deduplicated blob payloads instead of relying on machine-local Git refs or a
+  Git subprocess. That historical coverage remains compatibility evidence
+  only; shared mechanics remains 3/19, all seven owner
+  layouts, 64 replay rows, and four inner envelopes remain unresolved and
+  source-blocking, all 57 source/authorization flags remain false, and this
+  validation wiring grants no Solidity, audit, deployment, public-beta,
+  production, or readiness credit.
+- Bound the existing canonical deployment candidate-v2 planning document to
+  exactly two stable merged authorities: the post-#716 Solidity source-layout
+  manifest and the unchanged 37-entry genesis deployment profile. The checker
+  now verifies both canonical paths and SHA-256 digests, and focused hostile
+  tests reject path, hash, or status drift. The honest completeness count falls
+  from 46 to 44 while source commit, governed-parameter and record-family
+  identities, canonical build, retained evidence, linked libraries, and all
+  concrete instances remain unavailable. The candidate stays planning-only,
+  production-disabled, unbound, undeployed, pre-audit, and not readiness
+  evidence. The candidate checker and focused tests are now checksum-covered,
+  and every canonical deployment-plan gate runs the 19-test suite, confirms
+  the ordinary 37/0/0/44 result, and requires strict completion to exit 1.
+- Connected checker-complete canonical deployment candidate v2 documents to
+  the existing non-production plan materializer and executor without adding a
+  parallel plan or receipt schema. Materializer generator 4 binds the
+  cycle-free candidate SHA-256/Keccak-256 identity, projects linked libraries
+  before instances, and carries every candidate expected address into the
+  plan. Executor generator 2 derives the same ordered CREATE addresses from
+  the selected sender and uncontended starting nonce before Forge or broadcast
+  construction, then rechecks that nonce before submission. Retained evidence
+  binds the projected identity and may not embed the raw candidate-artifact
+  SHA-256, avoiding a candidate/evidence hash cycle. The legacy v1 Anvil
+  fixture remains unchanged. The committed v2 planning document still has 37
+  profile rows, zero linked libraries, zero instances, and 46 completeness
+  blockers; production execution remains explicitly disabled, and this slice
+  adds no concrete candidate, deployment, audit, public-beta, or production
+  readiness credit.
+- Added the Proposed global artist semantic-domain ownership architecture
+  packet. The strict matrix binds all 57 frozen rows and all 18 columns, 37
+  record domains, 54 events, normalized replay surfaces, effective
+  implementation stops, dependencies, and future source requirements. Seven
+  isolated owners include a dedicated acceptance owner so operations 2 and 7
+  cannot split `ACCEPTANCE_RECORD_DOMAIN`. A typed immutable stateless
+  `StreamArtistOperationCoordinator` snapshots exact revisions/commitments and
+  executes 57 enumerated atomic recipes; no owner reads or writes another
+  owner, payout snapshots before consent/finality for operation 15, and EVM
+  revert supplies all-or-nothing rollback. Registry remains a slim typed
+  directory, ArchiveV2 is append-only evidence only, and both are
+  non-authoritative. The schema and source freeze are independently
+  hash-pinned, and hostile tests cover coupled schema/matrix tampering and
+  composite recipe regressions. Five immutable typed external providers bind
+  role, Core, Governance V2, Finality, and import-continuity snapshots to exact
+  future manifest address/runtime-codehash/interface/marker/schema/binding
+  pins; candidate values remain null, the synthetic manifest fixture is not
+  credited, and missing interface reconciliations remain hard implementation
+  stops. The affected recipes also bind the three named platform roles through
+  exact `StreamRoleRegistry` role/revision snapshots of the authenticated
+  original caller. Identity remains the sole record-family and
+  artist signature/GGP semantic owner while #669's exact absent-source
+  non-authoritative `StreamArtistRegistryValidatorBase._validateSignerProof`
+  `address(<signer>).staticcall{gas: context.erc1271GasCap}` boundary remains
+  reserved. The ADR stays
+  Proposed; this slice adds no Solidity, inventory row, catalog/profile,
+  release tail, deployment evidence, audit credit, or readiness claim.
+- Published the Proposed artist semantic-domain ownership packet into the
+  deterministic local validation and release-evidence closure. The checker,
+  hostile tests, ADR, strict matrix, and schema are exact checksum roots; the
+  checker-read frozen operation source and four existing immutable-provider
+  interfaces are exact roots as well; the offline verifier replays the checker
+  from checksum-bound snapshot bytes;
+  manifest independently validates and binds the matrix and schema; and the
+  release-tool call policy covers the checker and focused tests. This
+  review remediation converts unreadable provider interfaces and unknown typed
+  record/event/replay write IDs into stable `MatrixError` failures, makes every
+  hostile rejection assertion discriminate its intended validation path,
+  isolates staticcall-syntax tampering from operation-tag drift, and derives
+  the success-banner counts from the validated matrix inventory. This
+  publication changes no Solidity, deployment or candidate value, maturity,
+  audit credit, external governance, or readiness claim.
+- Implemented the first Proposed artist-successor source slice as
+  `StreamArtistArchiveV2` plus `IStreamArtistArchiveV2`. The contract is an
+  append-only, caller-versioned evidence store in the former PayloadStore
+  deployment position: it accepts writes only from one immutable operation
+  Coordinator, stores immutable SSTORE2 payloads under exact nonzero
+  `(evidenceId, version)` keys, makes identical retries idempotent, rejects
+  conflicts, and exposes exact-key evidence reads. Archive records and events
+  are evidence only and never authorize operations, own current or replay
+  state, decide lifecycle transitions, or provide a latest pointer. The
+  interface id is `0x2dc66e2e`; the implementation has no delegatecall,
+  generic router, mutable upgrade, or rebind surface. This source and its
+  release artifacts remain Proposed, pre-audit, candidate-unbound and
+  undeployed; the Registry/directory and seven semantic-owner modules remain
+  absent, and this change grants no audit, deployment or readiness credit. The
+  exact non-production Anvil deployment-plan fixture is refreshed only to the
+  current canonical build receipt, target catalog and config so required build
+  gates remain reproducible; it still materializes only its historical
+  `DependencyRegistry` fixture and is not candidate, deployment or readiness
+  evidence. Existing local/fork ceremony and randomizer-operation evidence
+  fixtures refresh only their deterministic ABI-checksum references; this does
+  not recapture, promote, or add ceremony, deployment, candidate, or readiness
+  evidence.
+- Implemented the next Proposed artist-successor source slice as the slim
+  immutable `StreamArtistRegistryV2` directory plus
+  `IStreamArtistRegistryV2`. Its constructor freezes typed address,
+  runtime-codehash, interface, marker, schema, recipe-set, and binding
+  commitments for the Coordinator, ArchiveV2, seven semantic owners, and five
+  external providers without calling absent dependencies. The read-only
+  interface id is `0x56c1a7f2`; there is no semantic truth, operation routing,
+  authorization, replay or lifecycle decision, generic calldata/selector path,
+  delegatecall, proxy, upgrade, or rebind surface. The implementation and
+  release artifacts remain Proposed, pre-audit, candidate-unbound and
+  undeployed under the explicit `unbound_singleton` scope. All 57 operation
+  recipes remain implementation-unauthorized, the Coordinator and seven owner
+  modules remain absent, and historical deployment manifests, address books,
+  candidates, profiles, blocker status, and readiness evidence gain no Registry
+  instance or credit. A fresh Slither `0.11.5` capture bound to the immutable
+  semantic commit retains the exact 32 open first-party High/Medium rows; the
+  unfiltered inventory adds only three Low and two Informational diagnostics
+  from the new source/test closure and grants no audit or readiness credit.
+- Added the isolated issue #656A canonical deployment candidate-v2 planning
+  scaffold: a strict schema, an intentionally incomplete 37-row profile, and a
+  fail-closed structural checker with hostile fixtures. The ordinary checker
+  authenticates the zero-instance planning document, while
+  `--require-complete` rejects its 46 explicit blockers until source, profile,
+  dependency, canonical-build, concrete-instance, library, and retained
+  evidence identities are available. This slice is not wired into shared
+  deployment execution or release gates and does not authorize deployment,
+  freeze a candidate, or advance audit, public-beta, or production readiness.
+- Added the generic non-production issue #677A canonical-initcode executor
+  foundation. The checked Python runner re-materializes an exact isolated-build
+  plan, compiles a production-import-free raw-initcode broadcaster in dedicated
+  output/cache/broadcast directories, and fail-closes on plan, network, signer,
+  nonce, strict JSON-RPC, transaction, canonical-block, portable-path, or
+  deployed-runtime drift. Live Sepolia pins an all-public normalized DNS set and
+  requires it unchanged before each executor request and Forge invocation,
+  without claiming actual-peer verification; JSON-RPC IDs require exact
+  non-boolean safe integers and success envelopes allow no mixed or extra
+  members. A separate repository-local chain/sender lock serializes different
+  plans using the same signer, while latest/pending nonce checks fail closed on
+  external interleaving. Successful external journals are terminal, and
+  nominally preflight journals are retry-safe only when their complete identity
+  and empty pre-broadcast state remain coherent. An executor-owned ephemeral
+  retry becomes safe only after its Anvil process is proved stopped. Production
+  mode remains unavailable pending the issue #656 candidate and retained
+  evidence binding; this does not authorize deployment or promote readiness.
+- Reorganized all 120 Solidity sources from the former flat directory into a
+  reviewed domain-first hierarchy, preserving contract behavior while updating
+  imports, source-bound deployment/release evidence, baselines, and operator
+  documentation. The exact old-to-new map is retained in
+  `smart-contracts/source-layout.json`; a fail-closed checker now rejects
+  unreviewed placement, stale flat paths, unresolved relative imports, and
+  interface/concrete compatibility-boundary violations. This mechanical
+  migration does not change ABI, storage layout, events, errors, deployment,
+  audit, or readiness status.
+- Hardened the canonical release builder's cross-process evidence authority:
+  authoritative Windows runs now use run-scoped Forge and Solc leases, reject
+  overlapping consumers and stale terminals, remain importable for the pinned
+  Linux CI parity lane, and exercise the complete 121-test builder suite on
+  Windows. The native job pins the final setup-python Windows 3.12 build
+  (`3.12.10`) while Linux CI and release mode retain `3.12.13`; the fail-closed
+  inventory verifies those per-platform pins, and the common hashed lock now
+  includes Web3's exact Windows-only `pywin32==312` closure. Historical R4
+  journals now use
+  distinct event and terminal schemas, shadowed R4 validators have explicit
+  names, and failed evidence flushes remove temporary residue without masking
+  the primary diagnostic. The native builder test routes merged Python output
+  through `cmd.exe` so Windows PowerShell 5.1 cannot promote unittest stderr to
+  a terminating `NativeCommandError`, while preserving the Python exit code.
+  The scoped Windows wiring policy test remains
+  checksum-covered by both the generator and the independent offline-verifier
+  root-set pin. Refreshed the exact non-production
+  deployment-fixture receipt pin and deterministic release tail; no contract,
+  live deployment, audit, or readiness status changed.
+- Hardened issue #690's source implementation and future candidate evidence.
+  Non-reserved record locks now require the admitted record family's authority,
+  independent-attestation record types cannot be permanently locked or written
+  through the mutable metadata host, and their append-only Preservation path
+  remains available through metadata pauses and Core freeze. Preservation
+  record hashes and latest pointers are recorder-scoped: the convenience
+  derive/latest reads use `msg.sender`, while explicit-recorder reads require a
+  nonzero recorder, so two authorized writers cannot collide or overwrite each
+  other's latest pointer. Undeclared record types fail before consuming
+  metadata record capacity. The immutable source commit changes the published
+  ABI: `IStreamRecordFamilyRegistry` adds configuration-authority reads and a
+  two-step propose/accept/cancel lifecycle (`0x679dcd40`), while
+  `IStreamPreservationRecords` adds explicit-recorder derive/latest reads and
+  the zero-recorder error (`0xa30cfc7c`); `IStreamCollectionMetadata` remains
+  `0x2c2422f4` because its added host/lock errors do not change ERC-165. The
+  candidate grant-map schema and checker now bind the exact source catalog,
+  numeric authorization classes and modes, live-provider codehash/revision
+  rows, family IDs, per-record-type class masks and lock policy, active family
+  grants, both hosts' exact shared registry address, and the two real host
+  implementations. The registry stores a current configuration authority,
+  initialized once from the `StreamAdmins` owner, plus a separate pending
+  authority used by that two-step lifecycle; the catalog no longer describes
+  the mutable `StreamAdmins` owner as the continuing authority. Candidate
+  evidence must bind both values at the same finalized observation in the
+  classifier, grant map, and both host-support rows. The current value must be
+  nonzero, while a nonzero pending value requires an explicit reviewed
+  disposition. Lifecycle evidence also binds the exact proposed, accepted,
+  and cancelled address transitions with their emitted configuration
+  revisions and hashes, the registry address, and the same finalized
+  chain/block observation. The terminal accepted/cancellation authority must
+  equal the observed current authority, and a reviewed commitment-linkage
+  reference binds the terminal revision/hash to an observation at or after
+  that state. A chain- and registry-domain-separated configuration
+  commitment advances on every admission, provider, and family-grant mutation;
+  retained maps bind its revision, hash, record-type count, chain, and finalized
+  observation block, so later configuration changes require regeneration and
+  review. Candidate/profile binding, the production admission/provider/grant
+  set, deployed runtime evidence, lifecycle exercise, and retained
+  candidate-bound independent review remain unavailable; `RISK-GOV-002` and
+  both release-mode stops remain unchanged. The canonical release target
+  configuration now publishes `IStreamRecordFamilyAuthorityProvider` and
+  `IStreamRecordFamilyRegistry`, and explicitly pins the Solidity interface IDs
+  for the Registry, Collection Metadata, and Preservation interfaces so
+  inherited ERC-165 selectors cannot distort the generated catalog. The
+  expanded interface surface adds 24 explicit NatSpec-baseline exclusions
+  (912 total), retaining that documentation debt rather than implying it is
+  complete. A fresh
+  pinned Slither `0.11.5` capture at the rebased source commit retains the exact
+  32 Open first-party production High/Medium fingerprints (2 High, 30 Medium);
+  four additional Medium rows are test-only. Baseline parity is inventory
+  consistency, not finding acceptance, audit completion, or readiness. Review
+  remediation also canonicalizes pending-authority review timestamps, converts
+  missing/reordered source anchors into typed fail-closed checker errors, and
+  documents explicit-recorder dossier and stewardship reads. Template hostile
+  coverage now also proves the lifecycle source-commit observation remains
+  absent until retained evidence exists; these changes do not alter Solidity,
+  candidate evidence availability, risk disposition, or readiness.
+- Closed the local Core headroom obligation under issue #654 by deriving
+  `RISK-SIZE-001` from the cycle-free canonical ABI measurement and requiring
+  exact parity with the final `StreamCore` bytecode-proof row and the
+  non-waivable 2,000-byte production floor. Missing, malformed, inconsistent,
+  stale-bound, or sub-threshold proof evidence now fails closed; live
+  normative/tooling mirrors point to the proof instead of owning mutable size
+  strings, and the exact `check_contract_size_budget.py` command is bound in
+  both release checksum indexes. The permanent target's local size result does not
+  implement or accept the concrete #670 satellites: ADR 0021's revenue
+  architecture is Accepted but source-blocked, while ADR 0022's artist
+  architecture remains Proposed. It does not advance the pre-audit maturity,
+  candidate, audit, deployment, or retained-live-evidence gates.
+- Implemented the locked permanent `StreamCore` target with authenticated
+  metadata-router, system-manifest, entropy-coordinator, artist-registry, and
+  revenue-resolver pointer rows; linked bounded external reads; manager-only
+  prepared mint completion; exact EIP-150/full-stipend entropy admission;
+  shared royalty/metadata parent-gas protection; and restricted ERC-4906
+  emitters. The production-profile via-IR target measures 18,997 runtime bytes,
+  5,579 bytes below EIP-170 and 3,579 bytes inside the non-waivable 2,000-byte
+  deployment margin. That is a 5,131-byte reduction from the 24,128-byte
+  transitional Core and restores the stricter 22,184-byte objective. The two
+  #670 concrete artist/revenue interface rows and exact candidate-instance
+  bindings under #656/#684 remain unresolved, so this is pre-audit source
+  completion rather than a deployment or readiness claim. The refreshed
+  permanent-source Slither inventory has 32 Open first-party High/Medium rows
+  (2 High and 30 Medium); no row is accepted or suppressed. ABI validation now
+  keeps the current 53-function/18-event implementation baseline separate from
+  an immutable 87-function/14-event pre-cutover snapshot, so compatibility and
+  retirement-closure checks prove their distinct intended histories. The
+  aggregate size/warning wrapper also retains the exact test-only legacy Core
+  warning surface without treating its 11-byte EIP-170 overage as production;
+  any other overage or compiler error remains fail-closed, while isolated
+  release artifacts remain the production size authority.
+- Raised the aggregate Foundry CI timeout from 60 to 90 minutes after the
+  exact permanent-Core lane reached its final deployment rehearsal at the old
+  limit. The rehearsal parity checker now rejects insufficient timeout
+  headroom instead of relying on a presence-only workflow assertion.
+- Completed issue #671's shared
+  `ROYALTY_RETURN_GAS_BUFFER` safety component: an overflow-safe EIP-150
+  admission helper, authenticated permanent-Core three-row implementation,
+  bounded 65,536-byte metadata ABI return, actual `tokenURI()` and
+  `contractURI()` threshold tests, hostile full-budget/malformed/oversized and
+  independent raise-chain tests, and six-scenario checksum-bound via-IR
+  evidence. The
+  governed inventory records the measurement-derived 1,460,000 planning floor
+  and 2,910,000 planning genesis value without adding a 23rd GGP. The artifact
+  binds the 18,997-byte permanent Core while #656/#670/#684 keep candidate,
+  fixed-stipend, cadence, rehearsal, and review readiness fail-closed.
+- Completed issue #672's as-built permanent-Core post-entropy boundary: Core
+  encodes coordinator calldata before admission, reserves the EIP-150 ceiling,
+  3,300-gas cold-call cost, and measured 162,000-gas EOA completion tail,
+  forwards the exact governed stipend, and now executes the real Core at the
+  just-below, exact, and just-above admission boundary. The evidence checker
+  fails closed if any of those three cases disappears. Core runtime is
+  unchanged by this acceptance closure. Nonempty returndata and coordinator
+  failure still roll back all mint state and events; contract-receiver callback
+  gas remains caller supplied and candidate-instance binding remains incomplete.
+- Reconciled issue #669's reserved artist-authority external-call taxonomy
+  with the controlling successor-architecture taxonomy decision: only the
+  future `smart-contracts/domains/artist/StreamArtistRegistryValidatorBase.sol`
+  validation adapter's exact `_validateSignerProof` call option using the
+  registry-authenticated `context.erc1271GasCap` may use the
+  `artist-authority` lane. ADR 0022 and its interface packet remain Proposed
+  and do not authorize implementation. The source and inventory row remain
+  absent; a future successor source slice may add them only after architecture
+  and packet acceptance. Exact host, floor, measurement, reserve, raise-chain,
+  and candidate evidence remain blocked by #684. The artist reservation
+  recognizes `staticcall` only for the explicit built-in address conversion
+  form `address(<signer-expression>).staticcall` with the exact
+  `gas: context.erc1271GasCap` option. Explicit-cast `call` and `delegatecall`
+  variants are distinct, while uncast members and typed interface methods remain
+  `external-call`. The historical `StreamMintGateValidator._callGate` source
+  and inventory row therefore remain exact without a compatibility rebind.
+- Implemented accepted ADR 0018's pre-genesis atomic operation-identity
+  cutover: the manager derives and reserves one batch root plus one operation
+  ID per token before ledger consumption; the ledger owns manager-scoped root,
+  authorization, nullifier, phase, and current/bound-policy validation; and
+  Core retains only current prepared-pair operation-ID equality. The exact
+  typed primary-settlement callback and execution-ID-bound repeated-sale key
+  remain ADR 0019 / #694 blockers. The complete Core headroom/finality seam is
+  now closed under #654 by the permanent target and proof-derived release gate.
+  The refreshed exact Slither inventory introduces no
+  new first-party High/Medium finding and removes two prior
+  `uninitialized-local` rows after explicit initialization and narrow analyzer
+  annotations, leaving 28 Open rows at that checkpoint. The later
+  permanent-Core capture above supersedes that historical count with the
+  current canonical 32 Open rows. Generated as-built and release surfaces are
+  refreshed without promoting protocol maturity or readiness.
+- Clarified ADR 0017's resolution of issue #673: launch v1 removes the royalty
+  probe-record model and every related authorization path, and the
+  overflow-safe 64/63 Core precheck remains safe for either ordering of monotonic
+  `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` raises.
+  Separate measurement references must describe the same candidate and
+  complete proposed tuple; actual candidate-bound measurements remain blocked
+  on issues #684 and #656, so maturity and release readiness are unchanged.
+- Rebound the issue #690 record-family source catalog and checker to the exact
+  accessible #722 squash commit
+  `f5c7164f37399ef758dbed2bb2e67fb73ee4fe75` after the reviewed PR-only source
+  commit became unreachable from `main`. Candidate-source replay again verifies
+  the unchanged interface, registry, metadata, preservation, and rehearsal
+  binding set; candidate-bound deployment and live evidence remain unavailable,
+  both release modes remain fail-closed, and readiness is unchanged.
+- Added a fail-closed field-policy matrix for issue #669's `artist-authority`
+  call lane. Its initial `StreamArtistRegistry._verifySignature` Yul
+  reservation is superseded by the controlling successor-architecture
+  validator-row taxonomy described above; ADR 0022 and its interface packet
+  remain Proposed and do not authorize implementation. The matrix covers
+  path, site, kind, operation, expression, count, path class, lane, issue,
+  disposition, missing rows, and
+  duplicate calls/rows. Literal declarations cannot use the reserved lane,
+  while the exact Yul `gas()` exemption and generic unexpected-call rejection
+  remain unchanged. This issue #669 checker-support slice adds neither the
+  artist registry source nor its inventory row and does not claim GGP
+  provenance, candidate binding, ERC-1271 gas-safety evidence, maturity, or
+  release readiness.
+- Centralized recursive JSON no-secret scanning for public-beta evidence,
+  non-local release evidence, drop-authorization signing evidence, and signer
+  custody readiness. The shared scanner preserves checker-specific exception
+  types, reports nested JSON paths, and applies the strict union of the migrated
+  secret-key and assignment-looking value patterns. Direct helper tests,
+  release-tool call-policy coverage, the offline verifier, and canonical
+  checksums now bind the shared policy. This tooling-only change does not add
+  retained non-local evidence or change public-beta or production readiness;
+  issue #609 tracks the work.
+- Implemented the source layer of record-family authorization under issue
+  #690. `StreamCollectionMetadata` now embeds the
+  `StreamRecordFamilyRegistry` implementation, preserving the accepted genesis
+  role count while providing append-only exact record-type
+  admission, fourteen pinned family IDs, eight typed authority classes,
+  family-specific grants, live signer providers with codehash revalidation,
+  provider rotation/revocation, and fail-closed unknown-type handling.
+  `StreamCollectionMetadata` and `StreamPreservationRecords` bind the registry
+  immutably, persist and emit the actual authorization class, reject
+  whole-selector authority for ordinary record writes, and make snapshots
+  declare a strict exact record-type set whose full authority intersection is
+  revalidated. Snapshot payloads must themselves use the `SNAPSHOT` family.
+  A schema-validated source catalog pins the semantic source commit and
+  digests, interfaces, family/class map, hosts, and focused adversarial tests;
+  the pre-remediation planning inventory remains retained as a historical
+  fail-open baseline. Exact candidate/profile binding, the production
+  admission set, live provider/grant configuration, deployed codehashes,
+  non-local lifecycle evidence, and independent review are still unavailable.
+  `RISK-GOV-002` therefore remains `open_blocker`; public-beta and production
+  release modes remain fail closed, and protocol maturity/readiness are
+  unchanged.
+- Accepted the pre-genesis semantic interface for issue #670's immutable
+  revenue-resolver and artist-registry validation adapters. The decision pins
+  the 57 artist operation families and semantic selectors, 28 unambiguous
+  EIP-712 typehashes, exact signer/dynamic-input bounds, the registry-owned
+  ERC-1271 gas-parameter ABI, private dependency IDs `38` and `39`, and
+  machine-readable mechanical, operation-matrix, and security gate artifacts.
+  This is an architecture and semantic freeze only: three
+  finality-dependent artist operations, executable golden vectors, empirical
+  EIP-150 reserves, final runtime/initcode margins, complete 57-write source,
+  deployment bindings, audit, and release approval remain blocking. Protocol
+  maturity and readiness are unchanged.
+- Accepted ADR 0021's immutable revenue-resolver validation-adapter
+  architecture for pre-genesis implementation. Source work remains blocked
+  until the complete normative interface appendix and freeze commit are
+  independently approved; acceptance changes no contract, ABI, profile,
+  deployment, maturity, or readiness state.
+- Added proposed ADR 0022 for issue #670's size-feasible artist-registry
+  architecture: one registered, state-owning `StreamArtistRegistry` plus one
+  immutable, stateless, implementation-private validation adapter. The
+  proposal preserves the Permanent artist interfaces and Core ABI, forbids
+  advertised zero stubs and multiple state owners, and pins exact-code,
+  canonical-transcript, bounded-dynamic-input, gas-governance, deployment, and
+  dual-size requirements. Release-manifest and checksum source policies now
+  bind the ADR directly, expanding the canonical projection to 254 roots and
+  421 files. The ADR remains Proposed, authorizes no implementation, and
+  changes no contract, profile, maturity, or readiness state.
+- Added proposed ADR 0021 for issue #670's size-feasible royalty-resolver
+  architecture: one registered, state-owning `StreamRevenueResolver` plus one
+  immutable, stateless, implementation-private validation adapter. The
+  proposal preserves the permanent Core ABI and royalty-resolver pointer,
+  prohibits proxy, delegatecall, mutable-implementation, and second-authority
+  shapes, and pins exact-code, canonical-transcript, available-gas, private
+  dependency, sizing, deployment, and historical-evidence requirements. The
+  ADR remains Proposed, authorizes no implementation, changes no contract or
+  deployment profile, and does not advance maturity or release readiness.
+- Added proposed ADR 0020 for issue #667's executor-only, append-only artwork
+  finality recovery architecture. The proposal assigns pending-action
+  lifecycle ownership to Governance V2, uses a dedicated Core discovery
+  pointer and recovery-aware metadata-router serving path, and pins route
+  lineage, artist-consent, owner-notice, permanent-verification, and indexer
+  migration requirements for later implementation. Current LTA/LCM recovery
+  semantics remain authoritative: the ADR freezes no ABI, changes no contract,
+  and does not advance maturity or release readiness.
+- Added proposed ADR 0019 for issue #664's payer-bound ERC-20 settlement
+  orchestration. The provisional boundary separates contract `20` payer
+  authorization/funding from sale-adapter authority and contract `9`
+  revenue/escrow accounting, pins two typed paid-mint orders with atomic
+  rollback, and imports ADR 0018's exact operation-root policy identity:
+  configured and ungated paths accept the current or one valid immediate
+  predecessor as the bound identity while current consent, modules, gates,
+  counters, caps, and increments remain authoritative. Settlement preview,
+  execution, replay, results, and event evidence carry the operation root plus
+  current/bound identities without treating predecessor policy as live
+  economics or consent. The exact manager-owned single-step preview selector,
+  adapter-as-caller semantics, configured-gate equality, ungated
+  zero/NONE/empty-nullifier normalization, preview-before-effect order, and
+  full root/operation-ID-vector comparison are pinned for later implementation.
+  The ADR remains Proposed, freezes no ABI, changes no contract, and does not
+  advance maturity or release readiness.
+- Bound Governance V2 to an immutable, checksum-covered closed-world action
+  catalog keyed by exact action class, target, and selector, with target runtime
+  and reviewed profile hashes plus zero, exact, or bounded native-value
+  semantics. Scheduling now compares the immutable catalog against its
+  separately stored manifest commitment and validates each selected entry's
+  bound hash without work proportional to the full catalog; execution checks
+  the scheduled catalog snapshot and revalidates each selected entry, exact
+  target code, call type, and value bounds;
+  unknown tuples, unregistered modules, generic proxy/multicall/fallback/
+  delegatecall routes, and unreviewed native transfers fail closed. Added
+  hostile target, target-drift, typed-value, refund, reentrancy, and mixed-value
+  atomic rollback tests; bootstrap/catalog monitoring events; machine schema,
+  policy checker, release-manifest/checksum integration, and monitoring/docs
+  updates for issue #685. The committed candidate binding remains explicitly
+  unavailable until issue #656 supplies exact addresses and code hashes, so
+  `RISK-GOV-003` remains High and open pending deployment, non-local rehearsal,
+  monitoring, and independent review; this is not a readiness claim.
+- Centralized recursive JSON no-secret scanning for public-beta evidence,
+  non-local release evidence, drop-authorization signing evidence, and signer
+  custody readiness. The shared scanner preserves checker-specific exception
+  types, reports nested JSON paths, and applies the strict union of the migrated
+  secret-key and assignment-looking value patterns. Direct helper tests,
+  release-tool call-policy coverage, the offline verifier, and canonical
+  checksums now bind the shared policy. This tooling-only change does not add
+  retained non-local evidence or change public-beta or production readiness;
+  issue #609 tracks the work.
+- Added the zero-`StreamCore`-delta planning and measurement slice for issue
+  #672. A dedicated production-profile via-IR target fixture measures the
+  first-mint, all-zero-to-nonzero EOA-recipient post-entropy completion tail at
+  128,886 gas and derives a 162,000-gas parent reserve using a 25% margin
+  rounded up to the next 1,000 gas. Pure below/at/above planning-predicate
+  boundaries, a separate high-parent-gas full-stipend path, coordinator and
+  receiver rollback, and the unbounded contract-receiver callback budget are
+  covered by focused Solidity and hostile evidence tests. The predicate is not
+  an exact as-built threshold: #654 must account for ABI setup, memory
+  expansion, low-level `CALL` costs, and intervening source work and prove
+  exact stipend forwarding at the candidate-instance boundary. The checksum-bound
+  artifact, snapshot, generator/checker/tests, aggregate gates, and offline
+  verifier remain planning-only: current `StreamCore` stays at the transitional
+  24,152-byte runtime, and #654 must implement and remeasure the actual seam
+  while delivering the complete target at or below 22,576 bytes (objective
+  22,184). No production-readiness or #684 measurement claim is made.
+- Added the first fail-closed planning slice for record-family authorization
+  under issue #690. A schema-validated inventory now pins the five as-built
+  collection-metadata and preservation mutation selectors, eight authorization
+  classes, fourteen family groups, and eight known fail-open behaviors; a
+  separate retained-evidence schema, strict grant-map schema, and template
+  require candidate, classifier, grant-map, snapshot-intersection, lifecycle,
+  phase, runtime, and independent review bindings without treating template
+  fields as evidence. The checker,
+  hostile tests, release manifest, candidate lockfile, checksum trust set,
+  offline verifier, aggregate gates, and both release-mode phases fail closed
+  around the package. The current whole-selector/global-admin grants remain
+  nonconformant and cannot be used for public beta or production;
+  `RISK-GOV-002` remains `open_blocker`. This slice changes no contract,
+  authorization enforcement, maturity, or readiness claim, and issue #690
+  remains open.
+- Added proposed ADR 0018 and checked target-spec semantics for mint operation
+  identity: the proposal defines one manager-scoped ledger operation root and
+  one unique operation ID per token; nonpayable asset-agnostic manager ABI,
+  a manager-owned caller-sensitive single-step preview, typed request/result
+  commitments, signer-bound token content, current-versus-grace-bound policy
+  identity, exact ledger/manager event ownership, schema-first royalty snapshot
+  events, nonce reservation, and rollback requirements are checker-pinned. The
+  proposed ledger call now receives explicit collection/phase identity, loads
+  current policy from that registered manager tuple, and permits zero-counter
+  phases without inferring scope. Canonical checksum generation and offline
+  verification independently bind the reviewed 20-file release-tool runtime
+  closure plus eight focused tests, reject broad/substituted coverage and
+  alternate importer escapes, and reserve custom subsets for explicit
+  noncanonical outputs.
+  Exact typed primary-settlement integration
+  and repeat-sale replay remain ADR 0019 / #694 blockers. This is a spec-first
+  pre-genesis proposal for
+  [issue #688](https://github.com/6529-Collections/6529Stream/issues/688);
+  current Solidity and generated as-built ABI/event catalogs remain unchanged
+  and #688 is not closed. Protocol maturity and production readiness are
+  unchanged.
+- Corrected five external-evidence risk rows to derive their tracker provenance
+  from the canonical open evidence-issue registry, and hash-bound that registry
+  into the generated risk register. This does not change evidence status,
+  maturity, or release readiness; issue #689 tracks the correction.
+- Added the schema-validated 25-row governed-parameter launch inventory, structural
+  checker, and focused mutation tests for the exact 22 GGP/3 GTP policy. The
+  inventory makes multi-host coverage explicit across all four sale adapters
+  and the primary plus selected fallback callback providers, and pins
+  `ROYALTY_RETURN_GAS_BUFFER` as the shared Core parent-completion buffer for
+  `royaltyInfo()`, `tokenURI()`, and `contractURI()` with worst-path
+  floor/evidence requirements. Ordinary checks accept the artifact's honest
+  `not_available` candidate bindings; production release mode invokes
+  `--require-complete` and fails closed until exact host instances, values,
+  floors, exhaustive guarded-consumer inventories, reviewed sizing/cadence
+  evidence, and fixed-stipend compatibility exist. The artifact, schema,
+  checker, and tests are checksum-covered and the
+  release manifest/candidate lockfile record the inventory directly. Issue
+  #684 and `RISK-GOV-004` remain open. A self-reported `complete` candidate is
+  rejected until #656 supplies the structured production-candidate model and
+  reconciliation checker. Self-reported complete measurement/cadence or
+  fixed-stipend evidence is likewise rejected until #684 adds the
+  candidate-instance-bound measurement, reproduction, and reachable-raise-chain
+  model; this is not a production-readiness claim. The
+  shared-buffer text is the specification-only part of #671: implementation,
+  threshold and reachable-raise-chain tests, candidate-bound measurement, and
+  exact-target rehearsal are still required, so #671 remains open.
+- Removed the immutable 30,000-gas ERC-165 probe ceiling from governed
+  `StreamModuleRegistry` registration. The registry now forwards available gas
+  into a bounded read, accepts only successful exact 32-byte canonical `true`
+  returndata, and fails closed on revert, short, oversized, false, or
+  noncanonical results. Added repricing and malformed-returndata Solidity
+  regressions plus a deterministic all-`smart-contracts/` call-gas inventory
+  gate that also rejects implicit fixed-gas `.transfer(...)` and `.send(...)`
+  calls, parses a strict duplicate-free inventory, and pins the sole
+  probe-under-test exception to its normative architecture authority. This
+  slice does not change `StreamCore`. It is only the first control-plane
+  remediation for
+  [issue #669](https://github.com/6529-Collections/6529Stream/issues/669):
+  eleven finality, minting, and revenue call sites and eleven literal
+  declarations remain explicitly open in the checked inventory rather than
+  accepted as risk. Protocol maturity and production readiness are unchanged.
+- Hardened canonical release builds so configured targets, retained build-info
+  compiler inputs, and artifact metadata fail closed if any resolved source is
+  under `test/` or `script/`; added focused regressions for both restricted
+  roots; made the runtime-size and Core bytecode-spend checker CLIs retain the
+  validated canonical receipt and hash the exact artifact bytes they consume;
+  extended that receipt-bound single-read/hash/decode model through the release,
+  source-verification, protocol-surface, and ABI consumers; made the canonical
+  producer derive config, Foundry-config, artifact, and retained compiler-input
+  receipt hashes from the exact snapshots it validates and writes; bound
+  source-verification checkout reads to the receipt's compiler/metadata source
+  hashes and carried each source snapshot forward without reopening it;
+  required one canonical-path, Windows-alias-safe manifest-wide source identity
+  across production and interface metadata/compiler records; bound every
+  size/Core artifact import read to that
+  identity with missing and non-file replacements rejected; made release JSON
+  generation hash one serialization, atomically install those exact bytes, and
+  verify installed bytes before success; and
+  consistently labeled the aggregate all-source size/warning build as
+  diagnostic rather than production evidence. Canonical retention now validates
+  the exact Forge worktree path
+  carriers and projects only those fields to stable `.` / `lib` values before
+  hashing. It also normalizes only Forge's platform packaging timestamp while
+  retaining the exact semantic version, commit, build profile, and identity
+  self-hash, so otherwise identical Windows and POSIX builds produce
+  byte-identical compiler inputs and receipt hashes without weakening source,
+  compiler, toolchain, or artifact binding. This addresses
+  [issue #675](https://github.com/6529-Collections/6529Stream/issues/675)
+  without changing `foundry.toml`, Solidity bytecode, ABI, via-IR test
+  compilation, or release maturity.
+- Made release bytecode generation reproducible under Solidity 0.8.19 by
+  compiling each configured production source and its import closure in an
+  isolated via-IR Forge invocation, retaining a deterministic build receipt,
+  and using staged replacement with rollback on caught failures to restore the
+  configured named artifacts plus retained compiler inputs and receipt to
+  dedicated ignored `out-release/` before release, ABI, size, and
+  explorer-verification generators run. The aggregate all-source size build
+  remains a diagnostic warning input, not the release-bytecode authority. This
+  closes the local release/verification evidence gap tracked by
+  [issue #674](https://github.com/6529-Collections/6529Stream/issues/674), but
+  does not make Forge deployment scripts or broadcasts consume that canonical
+  initcode; [issue #677](https://github.com/6529-Collections/6529Stream/issues/677)
+  remains a production blocker. Protocol maturity is unchanged.
+- Made generated fork deployment, ceremony, and randomizer command provenance
+  quote-exact across Windows and POSIX shells. The non-local evidence generator
+  can now read a canonical retained Markdown `Command` field instead of
+  transporting shell-sensitive text through native argv, and the checker
+  rejects missing, ambiguous, malformed, or quote-drifted replay commands
+  without changing release readiness.
+- Replaced the transitional Governance V1 executor boundary with the atomic
+  Governance V2 schema: seven-field per-call transition commitments, derived
+  batch scope/old/new hashes, six-return target context, exact SSTORE2 calldata
+  publication, active action classes `0..5`, target-scoped terminal-freeze veto
+  indexing, manifest-tail composition, and an executor-first one-way
+  system-manifest bootstrap bind/seal ceremony. Pre-genesis class ID `6` is
+  retired, forbidden, and permanently reserved from reuse.
+  ModuleRegistry, RoleRegistry, and governed gas/time hosts now recheck the
+  executing action ID, class, scope, old state, new state, and revision; V1
+  action-ID calldata and domains are rejected. Bootstrap and
+  live-registry reads forward EIP-150-clamped available gas with bounded
+  returndata and canonical decoding instead of compiled-in call caps. Added
+  focused malformed-return, high-gas, raise-only parameter, role-history,
+  bootstrap-envelope, and holder-rehearsal coverage. Additional hardening
+  rejects cancellation after expiry; classifies Executor configuration from
+  exact canonical calldata and direction; forbids self-targeted mutable
+  classifier configuration; bounds governed-call failure returndata while
+  ignoring successful returndata; caps and reserves terminal-freeze discovery
+  capacity with schedule-time root classification; commits the exact terminal
+  guardian registry, role histories, holder ordering, and holder code hashes;
+  emits replay-complete per-scope membership mutations; and attributes every
+  governed RoleRegistry mutation to its exact action ID. Executor and
+  RoleRegistry control-plane actions bind the scheduling root revision, and
+  non-root proposer actions bind the proposer's configuration revision, so
+  address ABA cannot revive stale queues; a registered canceller also cannot
+  cancel its own delayed removal unless it is the root or action proposer.
+  The bounded assembly call prevents governed-call returndata bombs, but it also
+  removes the Executor's proposal-selected native-value authority from
+  Slither's `arbitrary-send-eth` view; `RISK-GOV-003` therefore preserves that
+  authority as a separate High open blocker pending a closed-world
+  target/selector/value policy and deployment evidence. Deployment-input
+  generators, that action-policy catalog, target-side cutover hooks, and
+  candidate artifacts remain separate follow-up release-evidence slices. PR
+  #683 completed this slice's named Governance V2/ModuleRegistry transition
+  scope and closed #665; issue #685 now owns the remaining closed-world
+  target/selector/native-value boundary. This does not clear the static-analysis
+  blocker in #658 and is not a production-readiness claim.
+- Refreshed the canonical unfiltered Slither 0.11.5 capture at source commit
+  `93527f72ec7911f2e473053bccb5cd07c8cb311e` on
+  `2026-07-27T03:45:25Z`. The exact first-party production High/Medium
+  inventory is now 30 Open rows (3 High, 27 Medium; one confirmed gap, five
+  design-review rows, and 24 pending dispositions). All 30 retained semantic
+  fingerprints are unchanged and no new production row appeared. The seven
+  additional Medium rows are test-only governance action-policy findings. The
+  prior refresh's three retired `StreamCadenceProbe` equality rows record
+  source retirement under ADR 0017, not finding acceptance. Bounded assembly
+  still hides the Executor's proposal-selected native-value call from
+  `arbitrary-send-eth`, so mandatory High open blocker `RISK-GOV-003` preserves
+  that authority under issues #656 and #658. The full 3,096-row capture,
+  normalized scope counts, provenance hashes, deterministic reviewer mirror,
+  release-mode blocker, and generated risk/release evidence are checked
+  together. This refresh is not an audit or readiness claim.
+- Cut `StreamArtworkFinalityRegistry` and `StreamArtworkFinalityPreview` over
+  from the retired aggregate/facade Core-read seam to separately bound actual
+  Core, collection metadata, and `StreamCoreFinalityAdapter` dependencies. The
+  registry now validates dependency code, the adapter's exact ERC-165 support,
+  immutable bindings, canonical probe values, and exact 9-word/13-word
+  aggregate returns through fixed-size buffers; hashes the actual Core rather
+  than the adapter; requires exact discovery count, hash, and ordered component
+  enumeration; bounds strict, preview, and diagnostic reads without copying
+  attacker-sized returndata; rejects unknown metadata-mode, collection-status,
+  and supply-mode values; enforces the actual Core's collection burn-block and
+  freeze gates; compares aggregate supply as `uint256`; and removes the
+  controller/facade gate and
+  `facadeBindingSatisfied` preview field. Focused adapter, registry, preview,
+  component-floor, ABI, domain-golden, malformed-dependency, impostor-binding,
+  raw-scope, large-supply, discovery, and gate-parity tests cover the cutover.
+  This is a zero-Core-delta change: `StreamCore` source, ABI, and runtime
+  bytecode remain unchanged. It does not clear production deployment because
+  the current Core, metadata, discovery, and sanction implementations remain
+  incomplete for the target production path.
+- Closed two governance-v2 target ambiguities before implementation: the
+  six-return `currentAction()` is now explicitly the complete target-readable
+  context while ordered call index/selector validation remains at the
+  executor's descriptor/`callsHash` boundary, and module registration now pins
+  a separately named 2,048-byte, nonempty, strict-UTF-8 module-manifest URI
+  policy alongside the existing registry-manifest URI bound.
+- Pinned Linux CI and release mode to CPython `3.12.13`, replaced floating pip
+  upgrades and live transitive resolution with one binary-only SHA-256 lock,
+  added fail-closed workflow/lock policy tests, documented lock refresh and the
+  separate Playwright browser-runtime boundary, and checksum-bound the complete
+  Python toolchain provenance without changing release maturity.
+- Aligned seven ADR 0010 citations in the collection-metadata and
+  metadata-router specifications with the D-prefixed decision-id format and
+  refreshed the hash-bound release evidence; this is documentation-only and
+  does not change deployed protocol behavior.
+- Hardened release mode so expired, future, or inverted risk-acceptance windows
+  fail; external-audit evidence and all production evidence are non-waivable;
+  local release targets run the aggregate check; and the manual workflow fails
+  unless invoked from the protected default branch before running the full
+  repository gate. Production release mode also validates the checksum-covered
+  `StreamCore` build measurement against the normative 2,000-byte EIP-170
+  deployment headroom requirement, keeping issue #654 fail-closed while the
+  current 424-byte margin is recovered. Reconciled current roadmap and
+  non-normative architecture notes to the artifact-backed 24,152-byte runtime
+  and confirmed that the measured build already uses plain non-enumerable
+  ERC-721, so recovery must come from real compression, extraction, or
+  authorized relocation rather than assumed enumerable-removal savings. The
+  readiness surfaces now expose the canonical profile while keeping the
+  separate issue #656 genesis inventory limitation fail-closed because
+  instance-aware deployment reconciliation remains incomplete.
+- Rebuilt `StreamCore` token identity onto the specification's sequential
+  model: one monotone global token ID counter starting at 1 replaces the
+  reserved-range allocator, per-token `(collectionId, collectionSerial)`
+  identity records are written at allocation and retained across burns,
+  `TokenCollectionRegistered` (leading `uint16 schemaVersion`) is emitted at
+  every authoritative identity write before dependent effects, burn is
+  reshaped to `burn(uint256)` with the `StreamTokenBurned` event and the
+  `collectionBurnsBlockedAtBlock` height read, the Permanent identity and
+  enumeration reads land (`tokenLifecycle`, `lastAllocatedTokenId`,
+  `lastAllocatedCollectionId`, storage-backed `tokenCollectionIdentity`),
+  transfer/approval conditioning overrides are removed so ERC-721 transfers
+  stay unconditioned, the vendored `ERC721Enumerable` pair is deleted, and
+  every `10^10` range derivation is purged from Core, the minter read path,
+  and the metadata renderer (`TokenOutsideCollectionRange` is renamed to
+  `TokenIdentityUnknown`).
+
+### Added
+
+- Added the first non-production issue #677 canonical deployment-plan
+  materializer. It validates the issue #674 isolated build receipt and exact
+  artifact hashes, derives constructor ABI encoding plus creation/runtime
+  library and immutable ranges, and emits ordered full initcode and expected
+  runtime hashes from a pinned Anvil-only `DependencyRegistry` fixture. It
+  carries the exact validated receipt, release-config, Foundry-config, and
+  artifact byte snapshots through plan construction without reopening those
+  files, strictly decodes the carried receipt, config, and every artifact JSON
+  before target selection, and reuses parsed artifact snapshots across repeated
+  instances. The underlying canonical validator now applies the same
+  duplicate-free, non-floating-point I-JSON policy to config, receipt, all
+  artifacts, retained compiler inputs, and string-form metadata without
+  rereading them, so post-validation filesystem replacement cannot alter the
+  resulting plan. Focused regressions cover exact read counts, post-validation
+  mutation, forged snapshot sets, and ambiguous selected or unselected inputs.
+  It enforces the full 49,152-byte
+  EIP-3860 initcode limit,
+  directly pins its `eth-abi` encoder, uses a directly pinned `jsonschema`
+  engine for actual Draft 2020-12 candidate/plan validation, and applies one
+  runtime/schema portable path policy that rejects Windows-invalid controls,
+  characters, device names, dot aliases, and trailing dot/space aliases. It
+  checksum-binds the implementation/tests and runs the unit plus real-fixture
+  materialize/reparse-check sequence after canonical builds in the Make, Bash,
+  PowerShell, and Linux CI gates. The tool refuses production/readiness flags,
+  writes only ephemeral `tmp/` output, and does not add a broadcaster, a strict
+  issue #656 instance-aware candidate, or any release-readiness evidence;
+  issues #656 and #677 remain open and protocol maturity is unchanged.
+- Added the immutable, read-only `StreamCoreFinalityAdapter` with its exact
+  four-function ERC-165 ABI and fixed Core/collection-metadata bindings. It
+  composes collection facts from granular target-Core reads, derives checked
+  burned supply as minted minus live supply, carries aggregate supply values as
+  `uint256` with no `createdAt`, and resolves canonical TOKEN scopes from
+  retained Core identity/lifecycle state and RELEASE/SEASON/VIEW scopes from
+  metadata manifests while returning semantic negatives for malformed or
+  unknown scope shapes.
+- Closed the finality-recovery refresh executability gap without spending Core
+  bytecode: recovery schedules require a nonzero manifest content hash;
+  artwork-changing execution snapshots the global token high-water mark and
+  creates a stored monotonic plan; exact permissionless collection/scoped
+  continuations emit one existing Core batch refresh of at most 5,000 IDs per
+  transaction with rollback on failure; collection/release/season/view plans
+  use a safe global-ID superset, token plans use one ID, superseded and complete
+  plans reject, and progress is reconstructible through exact reads/events.
+  New recoveries carry an incomplete predecessor invalidation into a fresh
+  snapshot plan even when their own artwork-change flag is false. A global
+  active-incomplete count and exact same-batch zero-count assertion prevent a
+  finality-registry pointer replacement from stranding old-registry plans;
+  monitoring/keepers drain them before cutover. Post-snapshot mints already
+  resolve through the recovered route. The Core ABI is unchanged.
+- Added the checksum-covered, normative
+  `stream-core-permanent-interface.json` target for issue #654. It locks the
+  complete Permanent `StreamCore` function/event surface (58 active functions
+  and 19 active events), excludes the five facade-readiness functions and three
+  events deferred by ADR 0016, omits the redundant `MetadataRouterUpdated`
+  alias in favor of `CoreSatellitePointerUpdated`, includes the native
+  `StreamMetadataRefresh` event, moves the system-manifest five-function/event
+  surface to its Permanent satellite, and maps every active entry into a closed
+  bytecode-budget group whose only sizing authority is the complete linked
+  via-IR runtime measurement. It records explicit pre-genesis dispositions for
+  all 60 current functions and 6 current events that do not survive unchanged,
+  and is validated independently of Foundry output with
+  `check_abi_compatibility.py --target-only`. Custom errors, constructor, and
+  Medium/Replaceable surfaces remain separately cataloged; fallback and receive
+  are fail-closed `required_absent` categories enforced against implementation
+  ABI output. The pre-ADR-0017 v1 canonical genesis target at this stage
+  contained 60 derived entries:
+  `StreamSystemManifest` is Permanent deployment entry 36,
+  `StreamCoreFinalityAdapter` is immutable Permanent entry 37, the 22
+  per-parameter GGP probes occupy entries 38-59, and the shared cadence probe is
+  entry 60. Checker goldens pin both satellites' module/interface identities
+  and immutable bindings, including the manifest's frozen Core pointer and
+  append-only history and the adapter's Core-native-only finality boundary,
+  without claiming a deployed candidate exists. A separate reviewed lock now
+  pins the exact ordered `(signature, mutability, returns)` shape of all 58
+  active functions and `(signature, indexed, anonymous, schema_version)` shape
+  of all 19 active events, with every event explicitly non-anonymous and every
+  protocol event fixed to schema version `1`, to
+  fixed SHA-256 digest
+  `2513151416a7fc01753226120b415de67ba4f1e5ebf79e6e7ae8a1a3e8aefdc4`,
+  so count-preserving status substitution, dummy replacement, shape drift, or
+  reordering fails. A second reviewer-pinned canonical-JSON digest,
+  `18992066d0c6b22c27d37112b13e6b7d3d7efe5d8e46b4ded9fa25d6d0652f55`,
+  covers every top-level target semantic plus all ordered active and retired
+  rows. Baseline reconciliation is bidirectional: every current Core
+  function/event has exactly one active or retired disposition, and every
+  retirement matches a current-baseline shape. Target, config, baseline,
+  genesis-profile, and candidate JSON now reject invalid UTF-8, duplicate keys,
+  non-finite/floating values, and unsafe integers. The complete canonical
+  profile rows for Core, governance, `StreamSystemManifest`, and
+  `StreamCoreFinalityAdapter` pin all reviewed fields. Candidate reconciliation
+  requires the exact implementation/interface/marker sets for the three
+  safety-critical non-governance entries, including rejecting an extra
+  `IERC721Enumerable` Core advertisement, while governance remains composite
+  and pins its exact three normative homes. The governance profile entry now
+  proves its genesis `STATE_EXPORT_PUBLISHER` role through
+  `IStreamStateExportPublisher`, the exact `latestStateExport()` selector, and
+  all three publication/challenge/supersession event topics. Its complete
+  machine lock also pins the read's
+  five ordered return types, all three event indexed masks, and non-anonymous
+  emission to fixed digest
+  `535217fe4e980b1c72bc1a24f0352a7704928a3cd25f4197bdff0604d7645ea7`;
+  candidate proof validation recomputes that digest over type-strict canonical
+  JSON, so integer `0`/`1` values cannot masquerade as booleans, and matching
+  interface/marker strings cannot replace the separate structured proof. The
+  proof is governance-exclusive: every matched non-governance candidate rejects
+  a non-null publisher proof. The StreamCore genesis entry also pins the exact
+  advertised `IERC165`, `IERC721`, `IERC721Metadata`, `IERC4906`, `IERC2981`,
+  and `IERC7572` interface tuple. The
+  system-manifest vector records the publisher surface
+  explicitly, and its `STATE_EXPORT_PUBLISHER` pointer plus the governance
+  registry record now carry the real one-function publisher interface ID
+  `0x77faad4f`, rather than the synthetic composite `0xa5971448`. A separately
+  implemented fixed-golden JCS/Keccak/ABI oracle prevents the generator and
+  primary checker from self-confirming the same codec or formula defect.
+- Added a canonical normalized Slither baseline and fail-closed drift gate for
+  first-party production High/Medium findings. The initial 38 rows (4 High and
+  34 Medium) were all explicitly Open: one confirmed gap, six design-review
+  rows, and 31 pending dispositions, with no suppressions, acceptances, or
+  false-positive claims. Fast default checks validate provenance, counts,
+  classifications, and Markdown parity; a dedicated pinned CI job reruns
+  Slither and fails on exact semantic-set drift. The generated risk register now
+  treats the baseline as a high-severity release blocker under issue #658, and
+  both public-beta and production release-mode decisions fail closed while any
+  first-party production High/Medium row remains Open. Release-mode Make targets
+  and the protected-branch workflow also rerun the live exact Slither comparison
+  before evaluating the strict decision.
+- Added the pre-ADR-0017 v1 machine-readable Genesis Deployment Profile and a
+  structural checker plus catalog-level diagnostics. That superseded profile
+  derives its exhaustive count from contiguous entries, pins every contract
+  role and GGP/GTP probe, keeps legacy aliases unapproved by default, distinguishes the
+  SplitWallet implementation from on-demand clones, and records the required
+  fallback roles. The v1 `contracts.json` catalog can report missing, extra,
+  duplicate, ambiguous, wrong-scope, wrong-interface, and wrong-marker mapping
+  gaps, but it can never clear production mode because it cannot prove
+  deployment-instance identity, fallback-address distinctness, or governed
+  parameter host bindings. Production remains fail-closed until a checked,
+  instance-aware candidate reconciles deployment manifests, address books,
+  source-verification inputs, the on-chain system-manifest payload, retained
+  rehearsal/live evidence, and the release candidate lockfile. This is a
+  permanently production-blocking foundation for issue #656, not completion of
+  that issue.
+- Added the ADR 0017 raise-only Governed Gas Parameter and Governed Time
+  Parameter machinery: reusable `StreamGasParameterHost` and
+  `StreamTimeParameterHost` bases with concrete storage-backed stores,
+  immutable deployment-time inventories and floors, deterministic parameter
+  IDs, monotonic revisions, exact Governance V2 scope/old/new commitments, and
+  strict delayed authority-only raises bounded to at most `2x` per action, with
+  same-parameter duplicate-action rejection and real-executor atomic rollback.
+  Marker and `currentAction()` reads forward available gas, accept only exact
+  canonical returndata, and reject EIP-7702 delegated authorities. Probe,
+  emergency, lower, permissionless conditional mutation, and rebind surfaces
+  are absent. This supersedes the earlier 60-entry probe-bearing target: the
+  canonical genesis profile now has 37 entries, while governance action-class
+  ID `6` remains reserved as `retired_pre_genesis`, forbidden, and never
+  reusable. The probe-removing profile grammar is explicitly versioned as
+  `6529stream.genesis-deployment-profile.v2` with a versioned schema resource;
+  pre-genesis v1 profile artifacts are intentionally unsupported rather than
+  silently accepted under a narrowed v1 grammar. Its governance row requires
+  the narrow `IStreamGovernedParameterAuthority` marker/context interface.
+  Schema-v2 registration/update events and focused adversarial
+  suites cover malformed/high-gas authority reads, stale context, ABA/revision
+  drift, over-bound raises, immutable zero-authority stores, and retired
+  selector absence. Only the generic store hosts are implemented in this slice;
+  exact production host, value, floor, sizing/cadence evidence, and
+  fixed-stipend bindings for all 25 logical parameters remain blocked under
+  issue #684; generated `RISK-GOV-004` and strict production release mode fail
+  closed until they are complete. The ABI baseline deliberately first-publishes the post-ADR-0017
+  `IStreamGasParameterHost`, `IStreamGovernanceExecutor`,
+  `IStreamGovernedParameterAuthority`, and `IStreamTimeParameterHost` surfaces;
+  it intentionally does not preserve the superseded pre-genesis probe, lower,
+  emergency, rebind, or action-class-6 drafts as published compatibility
+  commitments.
+- Added the staged-governance machinery and canonical module registry:
+  `StreamGovernanceExecutor` implements the ADR 0004 [GOV-ACTION-ID] and
+  [GOV-BATCH] canonical action identity (golden-tested
+  `STREAM_GOVERNANCE_ACTION_V1`/`STREAM_GOVERNANCE_CALLS_V1` typehashes,
+  byte-identical single-call wrappers, atomic payable batches with exact
+  per-call value sums and surplus rejection, onchain SSTORE2 calldata
+  preimage publication), the [GOV-WINDOWS] delay and window floors (48h
+  delayed, 72h terminal-freeze veto with `terminalFreezeVetoGuardian`/
+  `vetoTerminalFreeze`, 14d funds recovery, 30d successor declaration, 7d
+  open-to-execute floor), and the scheduled-action transition table with
+  cancellation, veto, and expiry materialization; `StreamRoleRegistry`
+  pins the [GOV-ROLES] `ROLE_*` vocabulary as keccak-of-own-name
+  constants with root/operational grant classes, registry-resolved
+  `emergencyRecipient()`, pause/unpause disjointness, and role-redundancy
+  views; `StreamModuleRegistry` + `IStreamModuleRegistry` implement the
+  canonical [LTA-REGISTRY] record shape with append-only
+  `moduleCount()`/`moduleAt()` enumeration, the
+  `registrationChainHash()` record-chain lane under
+  `STREAM_MODULE_REGISTRATION_RECORD_V1`, `INCIDENT_REVOKED` status
+  vocabulary, zero-means-unbounded `moduleGasLimit`, and lifecycle
+  changes gated through governed action classes; plus the canonical
+  eight-function `IStreamModule` [LTA-MODULE-ID] identity surface with a
+  `StreamModuleBase` adoption base and a minimal `SSTORE2` helper, all
+  covered by golden typehash, lifecycle, batch-semantics, window-floor,
+  role-resolution, and registry append-only/chain-hash test suites.
+- Added the `StreamArtworkFinalityRegistry` satellite with all five finality
+  scopes at genesis (COLLECTION, TOKEN, RELEASE, SEASON, VIEW per ADR 0009
+  decision 6): onchain finality-record-hash recomputation over the pinned
+  `STREAM_FINALITY_V1`/`STREAM_SCOPED_FINALITY_V1` preimages; sorted-unique
+  component manifests verified against live
+  `finalityState`/`finalityStateForScope` reads; the mandatory
+  component-type floor enforced onchain per collection metadata mode
+  ([LTA-FINALITY] requirement 1 â€” COLLECTION_METADATA, METADATA_ROUTER,
+  RENDERER, RENDER_CONTEXT, MEDIA_MANIFEST, ENTROPY_COORDINATOR for every
+  mode, plus SCRIPT_SOURCE, DEPENDENCY_SOURCE, REFERENCE_RENDER for
+  ONCHAIN/hybrid script works) independent of the optional discovery module,
+  which layers an exact-match superset gate on top when bound; the
+  artist-sanction and platform-works exactly-one component rule with onchain
+  `SANCTION_SUBJECT_DOMAIN` subject-hash computation; the CLOSED-plus-burn-block
+  collection gate; token content-root and leaf-count verification; the
+  ONCHAIN/hybrid assembled-snapshot-manifest gate ([CMC-FINALITY-INPUTS]
+  rule 3); the `EXTERNAL_FACADE` identity binding carried as a submitted
+  `IDENTITY_FACADE_BINDING` finality component (entering `componentsHash` and
+  the permanent `finalityRecordHash`, re-surfaceable through
+  `verifyFinality`/`frozenRouteForScope`) with the `CORE_NATIVE` no-component
+  rule; registry-stored canonical manifest bytes behind `manifestPointer`;
+  never-revert bounded diagnostics (`verifyFinality`/`verifyFinalityRange`
+  under the genesis `FINALITY_COMPONENT_READ_GAS` budget); the [LTA-FREEZE]
+  freeze-mode vocabulary with a single staged TERMINAL_FREEZE path (72-hour
+  veto floor, an independent guardian re-resolved at veto and execution time,
+  7-day open-to-execute floor); a bound `StreamArtworkFinalityPreview`
+  periphery exposing every execution comparison plus the computed sanction
+  subject hash; narrow `IStreamFinality*` consumer seams for the Core,
+  metadata, artist-registry, and governance surfaces built in parallel; and
+  golden tests recomputing every pinned finality domain constant from its
+  spec preimage.
+- Resolved OQ-X8 through ADR 0015 by protocol-owner ratification: the
+  on-chain collection-metadata reads plus `properties.stream.collection`
+  token JSON are the normative marketplace collection-identity signal, a
+  two-named-signed-commitments gate precedes public sale, and the
+  per-collection ERC-721 facade line is specified as a dormant extension
+  profile (`docs/stream-collection-facade-profile.md`) with its
+  facade-readiness genesis surfaces (per-collection identity mode,
+  one-way pre-first-mint transfer-controller registry, controlled
+  mutation path, event-doctrine carve-out, finality identity binding)
+  carved into the protocol v1 spec, umbrella doctrine, metadata specs,
+  artist consent surface, and conformance-matrix gates, closing the
+  open-question register.
+- Added the launch v1 target architecture spec and hardened the payment,
+  royalty, mint, metadata, and entropy specs for Core-native ERC-2981,
+  event-sourced reconstruction, and long-lived module boundaries.
+- Expanded the launch v1 outside-Core scope to require approved-standard ERC-20
+  primary settlement, museum-grade C2PA/IIIF/PREMIS-style preservation surfaces,
+  richer preservation satellites, and an explicit ARRNG/Pyth fallback versus
+  VRF-only entropy decision.
+- Added the first outside-Core split factory and split wallet skeleton with
+  deterministic fixed-profile wallet deployment, immutable entry validation,
+  native ETH pull-release accounting, and release-artifact surface coverage.
+- Added the launch asset policy registry and approved-standard ERC-20 split
+  wallet release/sync surface, with deployment manifest coverage, strict
+  default-deny asset policy, exact ERC-20 transfer invariants, canonical
+  registry status validation, high-water freeze documentation, and fail-closed
+  tests for unsupported token behavior.
+- Added outside-Core primary revenue resolver and primary-sale settlement
+  satellites, covering deterministic assignment hashes, dynamic `SALE_POSTER`
+  primary templates, verified split-wallet native ETH deposits,
+  approved-standard ERC-20 primary settlement, replay protection, policy drift
+  events, deployment rehearsal wiring, and adversarial settlement tests.
+- Added the Core mint-manager hook surface, including a validated
+  `mintManager` pointer, manager-only mint and prepared-mint calls, canonical
+  `tokenCollectionIdentity` reads, prepared operation binding, and focused
+  rollback/callback coverage for the launch mint-manager migration, with
+  mint-manager replacement left available as the Core recovery path for a
+  stranded prepared mint. This uses accepted Core bytecode-spend exception
+  `CORE-SPEND-2026-06-24-001` for the measured `StreamCore` runtime of
+  24,150 bytes, a +1,966-byte delta over the 22,184-byte approved baseline, and
+  426 bytes of EIP-170 margin, which is above the 384-byte release floor but
+  below the 512-byte warning threshold.
+- Added the `StreamMintLedger` static counter accounting foundation, with
+  deployed-contract ledger writers, registered phase policy hashes,
+  launch-safe static counter policies, cap-checked counter consumption,
+  authorization replay protection, and focused ledger tests, without adding
+  Core bytecode or routing existing sale/drop/auction flows through the mint
+  manager yet.
+- Added the `StreamMintManager` phase policy and prepared-mint execution
+  surface, with launch-static counter policy registration, executor allowlists,
+  phase pause/window guards, bounded ledger consumption construction,
+  stale-policy and authorization replay protection, Core prepare/complete
+  execution, deployment rehearsal wiring, release-artifact coverage, and focused
+  rollback/reentrancy tests while keeping gates, resolver counters, callable
+  nullifiers, and existing Drops/Auctions routing as follow-up slices.
+- Added launch v1 `StreamCollectionMetadata` and `StreamPreservationRecords`
+  satellites, with schema-bound collection metadata records, immutable
+  snapshot publication, PREMIS/C2PA/IIIF/fixity-ready preservation records,
+  tagged hash references, post-freeze append-only preservation behavior,
+  deployment rehearsal wiring, release-artifact coverage, and focused
+  event-reconstruction/admin/freeze tests while keeping attestations and view
+  references as follow-up satellites.
+- Added the launch v1 mint gate and module registry foundation, with
+  `IStreamMintGate`, `IStreamMintModuleRegistry`,
+  `StreamMintModuleRegistry`, optional phase gate pins in `StreamMintManager`,
+  gate-derived authorization and authorizer accounting, mint-time registry
+  revalidation, deployment rehearsal wiring, release-artifact coverage, and
+  focused fail-closed tests while keeping concrete ticket/Merkle/TDH gates and
+  callable nullifiers as follow-up slices.
+- Added drop-authorization ZK nullifier binding helpers and docs, using
+  `salt = uint256(nullifierHash)` so ERC-1271 verifier contracts can stay
+  read-only while `StreamDrops` consumes the derived drop ID as the replay
+  guard.
+- Added proposed pre-launch revenue split and royalty resolver specs covering
+  arbitrary labeled split profiles, primary-sale templates, pull-based split
+  wallets, native/ERC-20 release accounting, scoped assignment freezes, and
+  Core-native resolver-backed ERC-2981 as the launch target.
+- Added a root `AGENTS.md` operating guide for automated coding agents,
+  covering task startup, scope discipline, validation choices, PR/bot workflow,
+  and security boundaries, with markdown-link checker coverage for the new
+  guide.
+- Added a production-readiness execution packet for the remote-main release
+  candidate, recording the frozen commit, local gates that passed, local
+  toolchain blockers, and the remaining public-beta and production evidence
+  rows without changing readiness claims.
+- Added release-manifest and checksum coverage for the production-readiness
+  execution packet so the packet participates in the release integrity chain.
+- Centralized symlink-safe release evidence retained-path validation across
+  non-local release evidence, release-signature evidence, marketplace/indexer
+  evidence, live deployment-manifest evidence, live metadata-browser evidence,
+  and production broadcast retention evidence so symlinked leaf files and
+  symlinked intermediate directories fail before hashing or artifact
+  validation.
+- Hardened the testnet deployment rehearsal retained-artifact checker to reject
+  symlinked retained transcript, broadcast, manifest, address-book, and
+  gas/invariant files before future reviewed Sepolia evidence can pass.
+- Added burned pending arRNG composition regressions proving paid fixed-price
+  and settled auction drops can be burned before fulfillment while preserving
+  payment/proceeds accounting, request bindings, burned-token audit randomness,
+  freeze eligibility, and frozen manifest stability.
+- Added fixed-price and auction arRNG request-ID collision composition
+  regressions proving a reused provider request ID fails with
+  `RandomnessRequestAlreadyExists` while preserving drop authorization state,
+  mint/drop counts, payment or auction accounting, pending request accounting,
+  and the first token's fulfillable request binding.
+- Added auction/drop/arRNG composition regressions proving randomness-request
+  pauses roll back signed auction-drop execution without consuming
+  authorizations, pending arRNG requests block randomizer migration without
+  auction drift, and auction settlement before fulfillment preserves custody,
+  credits, total owed values, and token/request binding.
+- Extended auction/drop/arRNG composition regressions to cover post-execution
+  signer lifecycle controls, proving signer-epoch invalidation, signer
+  rotation, consumed-drop cancellation attempts, replay attempts, and
+  drop-execution pauses cannot disturb existing auction custody, bid
+  accounting, pending request bindings, settlement, or later arRNG fulfillment.
+- Added fixed-price/drop/arRNG composition regressions proving randomness-request
+  pauses roll back paid fixed-price drop execution without consuming
+  authorizations or crediting payments, post-execution signer lifecycle controls
+  cannot disturb fixed-price credits or pending request bindings, and
+  poster/protocol credit withdrawals before arRNG fulfillment do not break later
+  fulfillment.
+- Added auction terminal/drop/arRNG composition regressions proving no-bid
+  settlement, contract-poster pending no-bid claims, pre-bid auction
+  cancellation, cancelled signed auction authorizations, and invalid terminal
+  operations preserve auction custody, claimant state, zero-accounting
+  boundaries, pending request bindings, and later arRNG fulfillment.
+- Extended the autonomous run-state consistency checker to reject stale detailed
+  execution-backlog `Status:` paragraphs that still claim active work after the
+  corresponding issue or PR has closed.
+- Strengthened the offline release artifact verifier to reject unchecksummed
+  regular files and symlinks under `release-artifacts/latest`, while preserving
+  the self-referential checksum bundle exceptions for `SHA256SUMS` and
+  `release-checksums.json`.
+- Hardened the offline release artifact verifier to reject symlinked
+  checksum-covered inputs, symlinked release directories, and release
+  directories outside the checkout before accepting matching hashes.
+- Added a deployment rehearsal gate parity checker that locks the aggregate
+  suite and standalone deployment, auction, and emergency rehearsal commands
+  across Make, Bash, PowerShell, and CI before the scripts execute.
+- Added an aggregate local deployment rehearsal suite that runs the deployment,
+  auction ceremony, and emergency redeployment rehearsals through one
+  release-gate script while preserving the individual scripts for targeted
+  debugging, retained evidence capture, and automated standalone-entrypoint
+  coverage.
+- Added a no-secret Sepolia evidence preflight checker that validates committed
+  deployment/evidence prerequisites and optionally checks only operator
+  environment variable presence, never values, before future public-beta
+  evidence runs for issues #217, #221, and #222.
+- Added a retained exact-linked live release-evidence issue audit after the
+  live deployment manifest checker merge, syncing issue #227 to the dedicated
+  retained-artifact body, proving it remains open, and refreshing archive,
+  release-manifest, and checksum coverage while keeping production release
+  blocked on real reviewed live evidence.
+- Added portable command-provenance normalization and checker coverage for
+  retained live-audit reports so release evidence does not embed
+  operator-specific absolute Windows paths.
+- Extended ABI compatibility checks and the committed baseline to cover
+  published interface ABIs from `release-artifacts/contracts.json` in addition
+  to production contracts, failing removed or changed interface entries while
+  continuing to report additive entries as compatible.
+- Documented ABI compatibility diagnostics so `subject` is the canonical
+  production contract or published interface identifier while `contract`
+  remains a deprecated compatibility alias for existing consumers.
+- Added a no-network autonomous run-state consistency checker so stale active
+  PR, issue, or branch markers in `ops/AUTONOMOUS_RUN.md` and
+  `ops/EXECUTION_BACKLOG.md` fail local and CI gates.
+- Strengthened release artifact verification so nested release manifest,
+  bytecode proof, and release-candidate lockfile file records must be covered
+  by `SHA256SUMS` with matching hashes, and expanded the checksum bundle to
+  include release-manifest source docs referenced by those records.
+- Added an exact linked-issue mode to the release-evidence issue snapshot
+  exporter so retained live audit reports fetch the committed tracker issue
+  map directly instead of relying on paginated `gh issue list` results, then
+  retained and archived a fresh no-secret live audit report after PR #560 while
+  keeping public beta blocked on the remaining missing evidence rows.
+- Added reviewed fork/testnet marketplace and indexer evidence for
+  `fork_testnet_marketplace_indexer_evidence`, retaining a supplemental
+  reviewed artifact, equivalent collector/indexer tooling transcript,
+  non-local evidence envelope, and release artifact updates under the shared
+  public-beta evidence manifest while keeping public beta blocked on the
+  remaining missing evidence rows.
+- Added reviewed fork metadata browser evidence for
+  `fork_testnet_metadata_browser_evidence`, retaining the mainnet-fork browser
+  summary, generated `tokenURI`, redacted execution transcript, non-local
+  evidence envelope, and release artifact updates under the shared public-beta
+  evidence manifest while keeping public beta blocked on the remaining missing
+  evidence rows.
+- Added an authenticated live release-evidence issue sync gate that fetches the
+  exact linked GitHub tracker issues, checks live body drift and premature
+  closure against committed release artifacts, and tolerates Windows UTF-8 BOM
+  snapshots while keeping the default CI gate network-free.
+- Added a fork/testnet metadata-browser evidence draft generator that converts
+  retained browser capture outputs into a checker-compatible pending-review
+  evidence bundle, with no-secret validation, deployed-contract assertion, and
+  local/CI/Windows gate coverage while keeping issue #218 blocked until real
+  reviewed fork/testnet evidence is linked.
+- Added retained-output flags to the local metadata browser rehearsal checker
+  so operators can export deterministic browser summary JSON, generated
+  `tokenURI`, and redacted transcript artifacts before future fork/testnet
+  metadata browser evidence review.
+- Added reviewed fork randomizer operations evidence for
+  `fork_testnet_randomizer_operations_evidence`, retaining the mainnet-fork
+  deployment broadcast, fork deployment manifest, fork address book, redacted
+  provider export, fork transaction bundle, post-state request views, and local
+  lifecycle/adversarial/retry/payment/pause/emergency test proof under the
+  shared public-beta evidence manifest while keeping public beta blocked on the
+  remaining missing evidence rows.
+- Added reviewed fork ceremony evidence for `fork_testnet_ceremony_evidence`,
+  retaining the mainnet-fork deployment broadcast, fork deployment manifest,
+  fork address book, Safe/admin placeholder export, post-state views, and local
+  mint/auction/emergency dry-run ceremony evidence under the shared public-beta
+  evidence manifest while keeping public beta blocked on the remaining missing
+  evidence rows.
+- Added a checked public-beta verified-addresses retained-artifact template
+  and offline checker for future `verified_deployed_addresses` and
+  `explorer_verification_status` evidence, covering Sepolia address-book,
+  deployment-manifest, explorer verification, bytecode proof, retained file
+  path and optional declared `sha256:` validation, no-secret redaction,
+  local/CI/Windows gate wiring, release-packet mapping, and checksum coverage
+  while keeping issues #221 and #222 open until real reviewed public-beta
+  address evidence is retained.
+- Added a checked production release-signing retained-artifact template and
+  offline checker for future `production_signatures` and `signed_git_tag`
+  evidence, covering checksum bundle references, detached signature evidence,
+  signed-tag verification, signer fingerprint/custody/rotation notes, retained
+  file path and optional declared `sha256:` validation, no-secret redaction,
+  local/CI/Windows gate wiring, release-packet mapping, and checksum coverage
+  while keeping issues #223 and #224 open until real reviewed release ceremony
+  evidence is retained.
+- Added a checked live deployment-manifest retained-artifact template and
+  offline checker for future `live_deployment_manifest` evidence, covering
+  production chain ID, deployment version, finalized contract addresses,
+  bytecode hashes, constructor arguments, address-book agreement,
+  repo-relative retained files, optional declared `sha256:` validation,
+  no-secret redaction, local/CI/Windows gate wiring, release-packet mapping,
+  and checksum coverage while keeping issue #227 open until real reviewed live
+  manifest evidence is retained.
+- Added stronger production verified-addresses retained-artifact validation so
+  future pending or reviewed production address-book and live explorer
+  verification evidence must reference existing repo-relative retained UTF-8
+  files, avoid symlinked evidence, remain no-secret, preserve address-book,
+  deployment-manifest, explorer, and bytecode proof agreement, and match
+  optional declared `sha256:` hashes before issues #225 or #230 can be
+  considered for closure.
+- Added stronger live randomizer operations retained-artifact validation so
+  future pending or reviewed mainnet provider operations evidence must
+  reference existing repo-relative retained UTF-8 files, avoid symlinked
+  evidence, remain no-secret, and match optional declared `sha256:` hashes
+  before issue #229 can be considered for closure.
+- Added stronger live ceremony retained-artifact validation so future pending
+  or reviewed mainnet ceremony evidence must reference existing repo-relative
+  retained UTF-8 files, avoid symlinked evidence, remain no-secret, and match
+  optional declared `sha256:` hashes before issue #228 can be considered for
+  closure.
+- Added stronger live metadata browser retained-artifact validation so future
+  pending or reviewed mainnet evidence must reference existing repo-relative
+  retained files, remain no-secret, and match optional declared `sha256:`
+  hashes before issue #473 can be considered for closure.
+- Added stronger testnet deployment rehearsal retained-artifact validation so
+  future pending or reviewed Sepolia evidence must reference existing
+  repo-relative retained files, remain no-secret, and match optional declared
+  `sha256:` hashes before issue #217 can be considered for closure.
+- Added a checked fork/testnet randomizer operations retained-artifact template
+  and offline checker for future
+  `fork_testnet_randomizer_operations_evidence`, covering fork/testnet
+  environment and chain IDs, provider configuration, funding, reserve,
+  request-health, lifecycle controls, retained-file and optional declared
+  `sha256:` validation, no-secret redaction, local, Windows, and CI gate
+  wiring, release-packet mapping, and checksum coverage while preserving the
+  blocked public-beta baseline until reviewed evidence is retained.
+- Added a checked fork/testnet ceremony retained-artifact template and offline
+  checker for future `fork_testnet_ceremony_evidence`, covering fork/testnet
+  environment and chain IDs, deployer/admin Safe or multisig/signer/emergency
+  participants, ownership and role ceremonies, metadata/freeze, auction,
+  emergency controls, dry-run and monitoring handoff evidence, no-secret
+  redaction, local, Windows, and CI gate wiring, release-packet mapping, and
+  checksum coverage while preserving the blocked public-beta baseline until
+  reviewed evidence is retained.
+- Added fork deployment rehearsal retained-artifact reference validation so
+  reviewed and pending fork rehearsal evidence now proves retained files stay
+  inside the repository, exist on disk, remain no-secret, and match declared
+  `sha256:` hashes; refreshed the reviewed fork broadcast, deployment manifest,
+  address-book, public-beta evidence, release packet, manifest, lockfile, and
+  checksum hashes that the stricter checker surfaced as stale.
+- Added a checked fork/testnet metadata-browser retained-artifact template and
+  offline checker for future `fork_testnet_metadata_browser_evidence`, covering
+  fork/testnet environment and chain IDs, deployed-contract metadata fetches,
+  retained browser summary JSON, sandbox outcomes, no-secret redaction, local,
+  Windows, and CI gate wiring, release-packet mapping, and checksum coverage
+  while preserving the blocked public-beta baseline until reviewed evidence is
+  retained.
+- Added manifest-aware marketplace/indexer evidence validation so complete
+  public-beta or production marketplace/indexer rows must reference reviewed
+  non-local envelopes whose retained Markdown artifacts pass the detailed
+  coverage, hash, environment, and no-secret checks while templates remain
+  reusable preparation material.
+- Added `ADV-013` randomizer request-binding parity tests covering VRF and
+  arRNG wrong-collection pending-state preservation, plus nested stale-mark and
+  retry reentry during the external core write without production bytecode
+  changes.
+- Added `ADV-014` bounded randomizer/admin stateful invariant tests covering
+  arRNG reserve funding, request-cost changes, unique token requests,
+  fulfillment, stale marking, failed post-processing, retry success/failure,
+  provider/epoch replacement attempts, randomness-request pauses, token-binding
+  drift, and emergency-withdrawal reserve views without production bytecode
+  changes.
+- Added `StreamAuctions.minimumNextBid(tokenId)` and
+  `retrieveNoBidAuctionClaimant(tokenId)` read views for auction integrations,
+  with focused bid-threshold, fail-closed, custody-alias, invariant, docs, and
+  release-artifact coverage.
+- Added a checked `AUD-003` external audit finding workflow covering
+  public-safe intake, severity/status triage, audited scope, remediation PRs,
+  required tests, retest, accepted-risk decisions, closure gates, release
+  evidence handoff, no-secret redaction, and local/CI/Windows gate wiring.
+- Added a generated release-candidate lockfile that ties the release manifest,
+  bytecode release proof, public-beta evidence, risk register, release notes,
+  blocker reports, release evidence issue outputs, release-signature evidence,
+  and non-release commit/tag/signature status into a checksum-covered local
+  baseline, with focused tests and local/CI/Windows gate wiring.
+- Added a checked `GOV-008` bad metadata/dependency drill retained-artifact
+  template, source-aware checker, and regression tests covering metadata
+  schema/state, token URI snapshots, URI/UTF-8/raw-attributes and browser
+  sandbox evidence, dependency key/version/content hash, freeze manifest,
+  repin boundaries, ERC-4906/cache invalidation, marketplace/indexer handoff,
+  recovery decisions, review, redaction, and local/CI/Windows gate wiring.
+- Added a checked `GOV-007` failed-randomness drill retained-artifact template,
+  source-aware checker, and regression tests covering request identity, provider
+  type, provider epoch, pending/stale/failed/final lifecycle state, invalid
+  callback handling, retry or stale marking, metadata state, provider migration
+  boundaries, monitoring handoff, review, redaction, and local/CI/Windows gate
+  wiring.
+- Added a checked `GOV-006` stuck-auction drill retained-artifact template,
+  source-aware checker, and regression tests covering auction identity, stuck
+  condition, custody, pause/unpause, terminal settlement or cancellation,
+  bidder/proceeds credits, withdrawal availability, emergency-surplus boundary,
+  monitoring handoff, review, redaction, and local/CI/Windows gate wiring.
+- Added a checked `GOV-005` signer-compromise drill retained-artifact template,
+  source-aware checker, and regression tests covering drop-execution pause,
+  signer rotation or revocation, epoch invalidation, per-drop cancellation,
+  stale/cancelled/wrong-domain payload rejection, recovered fixed-price and
+  auction payloads, monitoring handoff, review, redaction, and
+  local/CI/Windows gate wiring.
+- Added a checked `GOV-010` operator dashboard query model covering
+  environment/release, admin, signer, fixed-price, auction, randomizer,
+  payment/credit, metadata/dependency, release blocker, and incident drill
+  panels, with query inputs, source artifacts, freshness, severity,
+  no-secret telemetry, local/CI/Windows gate wiring, release-readiness and
+  integration navigation, release-manifest coverage, and release-checksum
+  coverage.
+- Added a checked `GOV-009` protocol monitoring specification covering admin,
+  signer, auction, randomness, credits, metadata/dependency, release evidence,
+  alert severity, dashboard queries, incident handoff, local/CI/Windows gate
+  wiring, release-readiness/integration navigation, release-manifest coverage,
+  and release-checksum coverage.
+- Added a checked Markdown link gate covering local files, heading anchors,
+  duplicate GitHub-style anchors, line anchors, local/CI/Windows wiring, and
+  release-manifest/checksum coverage.
+- Added a checked pull request template release-impact checklist covering
+  roadmap linkage, validation evidence, generated-artifact impact,
+  breaking-change approval references, and release-manifest/checksum coverage.
+- Added checked GitHub issue templates for integration reports, public-safe
+  audit finding intake, and release evidence requests, with no-secret and
+  pre-audit maturity language, local/CI/Windows gate wiring, and
+  release-manifest/checksum coverage.
+- Added a checked first-30-minutes contributor guide covering fresh checkout
+  setup, Foundry/Python/Windows prerequisites, `forge` not being on `PATH`,
+  canonical local gates, docs-only and Solidity/test validation paths, known
+  warning noise, generated artifact drift, no-secret maturity boundaries,
+  local/CI/Windows gate wiring, and release-manifest/checksum coverage.
+- Added checked INT-016 integration conformance fixtures for frontend, mobile,
+  Electron, indexer, operator UI, and signing-service teams, covering artifact
+  loading, fail-closed chain config, EIP-712 domain expectations, event topic
+  dispatch, normalized log identity, read-after-event queues, duplicate log
+  idempotency, unknown emitter/topic rejection, confirmation depth, reorg
+  rollback, no-secret redaction diagnostics, local/CI/Windows gate wiring, and
+  release-manifest/checksum coverage.
+- Added checked INT-015 TypeScript event decoding and indexer ingestion
+  snippets covering event topic catalog loading, `topic0` dispatch, normalized
+  log identity, ABI/topic drift checks, idempotent ingestion, confirmation
+  depth, reorg rollback, read-after-event queues, no-secret diagnostics,
+  local/CI/Windows gate wiring, and release-manifest/checksum coverage for
+  frontend and indexer teams.
+- Added checked INT-014 TypeScript EIP-712 payload construction snippets
+  covering domain construction, `DropAuthorization` message shape, drop ID
+  derivation, token data hashing, sale-mode validation, EOA/ERC-1271/Safe
+  boundaries, submission preflight, no-secret logging, local/CI/Windows gate
+  wiring, and release-manifest/checksum coverage for frontend and signing
+  service teams.
+- Added checked INT-013 TypeScript artifact loading and chain config snippets
+  covering release manifest loading, address book loading, deployment manifest
+  cross-checks, release manifest hash validation, ABI checksum awareness,
+  no-secret public environment parsing, and fail-closed wrong-chain guards for
+  frontend teams.
+- Added a checked withdrawal and credit UX integration flow spec covering
+  fixed-price, auction, curator reward, surplus, mobile, Electron, and
+  indexer handling with source-aware checker coverage for contract credit
+  surfaces.
+- Added a checked curator rewards integration flow spec covering reward root
+  publication, domain-separated Merkle leaf encoding, direct and delegated
+  claims, pull-payment curator credits, withdrawal/failure UX, events,
+  indexer reconstruction, and release artifact coverage for frontend teams.
+- Added a checked root README maturity/navigation gate that keeps the public
+  repo front door aligned with current pre-audit status, role-specific docs
+  paths, local/Windows validation commands, release-readiness blockers, and
+  release-manifest/checksum coverage.
+- Added live solc warning baseline enforcement for the warning-disposition gate:
+  aggregate size/warning diagnostic output is retained in local/CI logs and
+  checked against the reviewed warning rows so new or resolved compiler
+  warnings require an explicit code or disposition update, and removed or
+  relocated accepted warnings require a reviewed baseline refresh.
+- Added a checked incident drill retained-artifact template and validation gate
+  for mint pause, bid pause, settlement pause, withdrawal policy, failed
+  randomness, stuck auction, bad metadata/dependency, bad Merkle root, and
+  signer compromise drills without claiming completed fork, testnet, or live
+  drill evidence.
+- Added a checked `StreamCore` bytecode-spend policy gate that pins the current
+  22,184-byte approved production runtime baseline, fails unreviewed Core
+  runtime increases even when the EIP-170 floor still passes, records rejected
+  no-gain/negative-gain headroom experiments, and wires focused tests into
+  local, CI, Windows, release-manifest, and checksum paths.
+- Added a no-secret live randomizer operations retained-artifact template and
+  checker for future `live_randomizer_operations_evidence`, with provider
+  configuration, provider funding, reserve, request health, lifecycle control,
+  monitoring, retained-artifact, reviewer, redaction, local/CI/Windows gate,
+  packet-index, release-manifest, and checksum coverage while preserving the
+  blocked production-release baseline until reviewed live randomizer operations
+  evidence is retained.
+- Added a no-secret live ceremony retained-artifact template and checker for
+  future `live_ceremony_evidence`, with governance participant, ownership/role,
+  signer, metadata/freeze, auction, emergency-control, dry-run, monitoring,
+  retained-artifact, reviewer, redaction, local/CI/Windows gate, packet-index,
+  release-manifest, and checksum coverage while preserving the blocked
+  production-release baseline until reviewed live ceremony evidence is
+  retained.
+- Added a no-secret post-audit remediation retained-artifact template and
+  checker for future `post_audit_remediation` evidence, with finding-by-finding
+  remediation, retest, accepted-risk, release-note, reviewer-signoff, local/CI/
+  Windows gate, packet-index command, release-manifest, and checksum coverage
+  while preserving the blocked production-release baseline until reviewed
+  post-audit remediation evidence is retained.
+- Added `live_metadata_browser_evidence` as a production-release evidence row
+  with a no-secret retained-artifact template, offline checker, focused tests,
+  local/CI/Windows gate wiring, release-evidence tracker issue #473, and packet
+  index/checksum coverage while preserving the blocked production-release
+  baseline until reviewed live metadata browser evidence is retained.
+- Added a no-secret production verified-addresses retained-artifact template
+  and checker for future `production_address_books` and
+  `live_explorer_verification` evidence, with address-book/deployment-manifest
+  agreement checks, verified explorer row validation, focused tests,
+  local/CI/Windows gate wiring, release-readiness/tooling docs, packet-index
+  command coverage, and checksum coverage while preserving the blocked
+  production-release baseline until reviewed live address evidence is retained.
+- Added a no-secret production broadcast retention retained-artifact template
+  and checker for future `production_broadcast_retention` evidence, with
+  focused tests, local/CI/Windows gate wiring, release-readiness/tooling docs,
+  and checksum coverage while preserving the blocked production-release
+  baseline until reviewed live broadcast artifacts are retained.
+- Added an opt-in release-mode evidence gate with
+  `scripts/check_release_mode.py`, focused tests, manual Makefile targets, a
+  workflow-dispatch GitHub Actions profile, release-readiness/tooling docs, and
+  checksum coverage. Default CI validates the checker and the structurally
+  blocked evidence baseline; release-mode checks intentionally fail until
+  public-beta or production-release evidence rows are complete or explicitly
+  accepted as risk.
+- Added a deterministic dependency provenance attestation bundle generated from
+  the dependency artifact manifest, with descriptor/source hash revalidation,
+  no-secret checks, validation commands, local/CI/Windows gate wiring, release
+  manifest/checksum coverage, and explicit local-baseline limitations for
+  non-live dependency evidence.
+- Added deterministic release notes generation from changelog and committed
+  release evidence, with JSON/Markdown outputs, tests, local/CI/Windows gate
+  wiring, release-manifest/checksum coverage, and explicit no-overclaim
+  readiness boundaries for the pre-audit local baseline.
+- Added `scripts/verify_release_artifacts.py`, an offline third-party verifier
+  for the committed release bundle, with focused tests, local/CI/Windows gate
+  wiring, checksum coverage for the verifier script, and documentation of what
+  the check proves versus live deployment/readiness evidence it does not prove.
+- Added `IStreamCompatibility` and release-tracked compatibility views on the
+  `StreamContractMetadata` adapter for frontend/indexer protocol checks:
+  protocol name, protocol version, metadata schema version, release tag/hash,
+  and adapter-or-core interface probing, with focused tests, integration docs,
+  release-manifest/checksum coverage, and regenerated deployment/release
+  artifacts while preserving `StreamCore` bytecode size.
+- Added a checked NatSpec coverage gate for the release-relevant protocol
+  surface with `scripts/check_natspec_coverage.py`,
+  `release-artifacts/baselines/v0.1.0/natspec-coverage.json`,
+  `docs/natspec-coverage.md`, local/CI/Windows gate wiring, release-manifest
+  and checksum coverage, and explicit baseline debt for undocumented
+  functions, public variable getters, events, and custom errors.
+- Added a generated custom-error catalog with
+  `release-artifacts/latest/custom-error-catalog.json`,
+  `docs/custom-errors.md`, generator/test wiring, local/CI/Windows gates,
+  release-manifest and checksum coverage, and auditor/integrator traceability
+  for release-relevant custom errors without changing Solidity behavior.
+- Added `StreamMetadataCrossInvariants.t.sol`, a focused ADV-007 suite covering
+  frozen dependency pins under registry version/deprecation churn, rejected
+  late randomness writes against frozen live metadata, and post-freeze burned
+  pending-token callback audit behavior without moving frozen manifests.
+- Added `StreamRandomizerAdversarial.t.sol`, a focused ADV-006 suite covering
+  VRF and arRNG duplicate callback reentry during core post-processing plus
+  stale-provider fulfillment attempts that must preserve pending request state
+  until explicit stale marking.
+- Added `StreamCustomErrorNegative.t.sol`, a mutation-style negative suite that
+  pins representative release-tracked custom-error selectors and argument
+  encodings across admin, minter, dependency, metadata, contract-metadata, and
+  randomizer lifecycle failure paths.
+- Added gas envelope coverage for high-risk user flows: expanded the local
+  Foundry gas snapshot to fixed-price withdrawal, near-end outbid, bidder
+  refund withdrawal, no-bid settlement, auction proceeds withdrawal, and curator
+  credit withdrawal; added `gas-envelopes.json` plus checker/test wiring across
+  local gates, CI, release manifest, and checksum coverage.
+- Added `StreamMEVTiming.t.sol`, a focused MEV/timing adversarial suite
+  covering third-party signed-payload submission semantics, paid-drop payer
+  binding, inclusive deadline behavior, strict post-end auction bid rejection,
+  exact-end bid extension, near-end outbid credits, and custody/accounting
+  preservation on failed timing attempts.
+- Added `StreamSafeERC1271ForkSmoke.t.sol`, a no-RPC Safe-shaped ERC-1271
+  smoke suite covering approved-hash threshold validation, fixed-price and
+  auction drops, wrong-chain rejection, and wrong-verifying-contract rejection.
+- Added `StreamEventReconstructability.t.sol`, an indexer-style log
+  reconstruction suite that proves representative fixed-price, auction, minter
+  bridge, and admin-reference flows can be rebuilt from emitted logs plus the
+  documented read-after-event calls.
+- Added additive `StreamMinter` event coverage for indexers and frontend read
+  models: collection phase updates, fixed-price batch mint ranges, auction
+  mint custody/end-time bridges, minter-side auction end-time edits, and
+  minter contract-reference updates, with focused event tests and integration
+  docs/checker coverage.
+- Added a generated protocol surface report with
+  `docs/protocol-surface.md`,
+  `release-artifacts/latest/protocol-surface-report.json`, a
+  generator/test pair, local/CI/Windows gate wiring, release-manifest and
+  checksum coverage, and explicit boundaries that the report is deterministic
+  review evidence rather than protocol correctness or production-readiness
+  proof.
+- Added a third `StreamCore` headroom recovery slice that moves tokenURI and
+  metadata-state dispatch helpers into the linked `StreamMetadataRenderer`
+  library while preserving exact off-chain/on-chain metadata output behavior;
+  that slice measured `StreamCore` at 22,184 runtime
+  bytes with 2,392 bytes of EIP-170 headroom, with the gas snapshot refreshed
+  for a -12 gas auction-settlement delta, a -2,569 gas final on-chain
+  `tokenURI` delta, and a +32 gas fixed-price mint delta.
+- Added a second `StreamCore` headroom recovery slice that moves
+  field-specific metadata validation profiles into the linked
+  `StreamMetadataRenderer` library while preserving public Core size constants,
+  custom-error selectors, and metadata output behavior; the production via-IR
+  size gate now measures `StreamCore` at 22,390 runtime bytes with 2,186 bytes
+  of EIP-170 headroom, with the gas snapshot refreshed for a +45 gas
+  dependency-script read delta, a -24 gas final on-chain `tokenURI` delta, and
+  a +38 gas fixed-price mint delta.
+- Added a `StreamCore` headroom recovery slice that moves collection and
+  dependency script assembly into the linked `StreamMetadataRenderer` library
+  while preserving the `retrieveGenerativeScript` Core surface; the production
+  via-IR size gate now measures `StreamCore` at 23,159 runtime bytes with
+  1,417 bytes of EIP-170 headroom, with the gas snapshot refreshed for the
+  small dependency-script read decrease and final metadata/mint read-path
+  increases.
+- Added ONE-007 warning-disposition coverage with
+  `docs/warning-dispositions.md`, a checker/test pair, local/CI/Windows gate
+  wiring, release-manifest and risk-register coverage, first-party NatSpec
+  header cleanup, and explicit accepted dispositions for solc unused-parameter,
+  pure/view, documentation, linter, vendored, test-only, ABI-compatibility, and
+  `StreamCore` size-tradeoff warning rows.
+- Added ONE-006 satellite-extension architecture policy coverage with checked
+  architecture-doc size-budget requirements, release-policy/status hooks, and
+  explicit rules for measured `StreamCore` bytecode deltas, size-budget
+  exceptions, and satellite/read-adapter/library/release-artifact defaults for
+  future 1/1 product surfaces, plus required link-target existence checks and
+  bytecode-release-proof size-evidence matching for the architecture and
+  threat-model evidence docs.
+- Added ONE-005 marketplace/indexer retained evidence coverage with
+  `docs/integrations/marketplace-indexer-evidence.md`, fork/testnet and live
+  retained-artifact templates, public-beta and production evidence rows,
+  release-packet/backlog/body-sync/manifest/checksum coverage, local/CI checker
+  wiring, and explicit boundaries that template files are not completion
+  evidence and no public-beta or production-readiness claim depends on
+  marketplaces honoring royalties.
+- Added ONE-004 collector-verifiable permanence package support with
+  `docs/permanence-packages.md`, a checked JSON schema, no-secret retained
+  artifact template, generated
+  `release-artifacts/latest/one-of-one-permanence-manifest.json`, local/CI
+  checker and generator wiring, integration/release-readiness documentation,
+  release-manifest/checksum coverage, and explicit boundaries that permanence
+  package evidence is not final collector proof, marketplace proof, royalty
+  enforcement, ownership proof beyond chain state, or production release
+  approval until reviewed non-local or final-drop evidence exists.
+- Added ONE-003 royalty policy coverage with `docs/royalty-policy.md`, a
+  checker/test pair, local/CI gate wiring, integration/release-readiness
+  navigation, release-manifest/checksum coverage, and explicit ERC-2981
+  disclosure boundaries that state royalty information is not payment
+  enforcement and no production-readiness claim depends on marketplaces
+  honoring royalties.
+- Added ONE-002 1/1 provenance manifest support with
+  `docs/provenance-manifests.md`, a checked JSON schema, no-secret retained
+  artifact template, generated
+  `release-artifacts/latest/one-of-one-provenance-manifest.json`, local/CI
+  checker and generator wiring, integration/release-readiness documentation,
+  release-manifest/checksum coverage, and explicit boundaries that provenance
+  evidence is not token metadata finality, marketplace proof, royalty
+  enforcement, or ownership proof beyond chain state.
+- Added ONE-001 contract-level metadata support with a release-tracked
+  `StreamContractMetadata` adapter, `IERC7572`/`IStreamContractMetadata`
+  interfaces, `contractURI()`/`contractURIHash()` views,
+  `ContractURIUpdated` event catalog coverage, metadata-pause enforcement,
+  deployment rehearsal wiring, generated manifest/address-book/source
+  verification artifacts, and integration docs that preserve the current
+  marketplace-evidence boundary.
+- Added INT-010 operator admin UI specification with
+  `docs/integrations/operator-admin-ui.md`, a checker/test pair, local/CI gate
+  wiring, integration/release-readiness navigation, release-manifest coverage,
+  and no-production-readiness boundaries so operator UI implementers can trace
+  Safe/multisig ceremony, role grants, signer lifecycle, pause domains,
+  metadata freeze, dependency, randomizer, emergency, monitoring, and
+  no-secret evidence flows without treating local evidence as public beta or
+  production proof.
+- Added INT-009 Electron security and wallet integration guide with
+  `docs/integrations/electron-security-wallets.md`, a checker/test pair,
+  local/CI gate wiring, release-readiness navigation, release-manifest
+  coverage, and no-Electron-app/no-production-readiness boundaries so desktop
+  implementers can trace main/renderer/preload responsibilities,
+  BrowserWindow hardening, context isolation, IPC allowlists, wallet-provider
+  boundaries, metadata animation sandboxing, local cache/secrets policy,
+  signed-update and code-signing expectations, telemetry, and no-secret support
+  constraints without treating local evidence as public beta or production
+  proof.
+- Added INT-008 mobile and WalletConnect integration guide with
+  `docs/integrations/mobile-walletconnect.md`, a checker/test pair, local/CI
+  gate wiring, release-readiness navigation, release-manifest coverage, and
+  no-mobile-SDK/no-production-readiness boundaries so mobile browser, native
+  shell, and WalletConnect implementers can trace session lifecycle, foreground
+  wallet handoff, deep links, account/chain changes, typed-data and transaction
+  guards, offline/background recovery, metadata/indexer refresh, telemetry, and
+  no-secret support expectations without treating local evidence as public beta
+  or production proof.
+- Added INT-007 React/Next frontend reference architecture with
+  `docs/integrations/frontend-reference-architecture.md`,
+  `docs/integrations/examples/react-viem.md`, a checker/test pair, local/CI
+  gate wiring, release-readiness navigation, release-manifest coverage, and
+  no-SDK/no-production-readiness boundaries so 6529.io-style frontend teams can
+  trace artifact import, chain config, contract-client layering, query/cache,
+  transaction, wallet/signature, metadata, indexer, environment, telemetry, and
+  testing expectations without hardcoded addresses or browser secrets.
+- Added INT-006 metadata rendering, cache, animation sandbox, and marketplace
+  integration guide with `docs/integrations/metadata-rendering.md`, a
+  checker/test pair, local/CI gate wiring, release-readiness navigation, and
+  release-manifest coverage so frontend, mobile, Electron, marketplace, cache,
+  analytics, and indexer teams can trace metadata states, tokenURI behavior,
+  ERC-4906 cache invalidation, animation sandbox boundaries, cache keys,
+  refresh triggers, marketplace evidence gaps, and public-beta evidence
+  boundaries without production-readiness or live-marketplace overclaims.
+- Added INT-005 event and indexer reconstruction spec with
+  `docs/integrations/events-and-indexing.md`, a checker/test pair, local/CI gate
+  wiring, release-readiness navigation, and release-manifest coverage so
+  frontend, mobile, Electron, operator UI, backend signing-service,
+  marketplace, analytics, and indexer teams can trace source artifacts, indexed
+  entities, event-to-state updates, read-after-event calls,
+  confirmation/reorg policy, full-rescan recovery, and known event/read gaps
+  without production-readiness or live-indexer overclaims.
+- Added INT-004 wallet, EIP-712, ERC-1271, and Safe signing guide with
+  `docs/integrations/wallets-and-signatures.md`, a checker/test pair,
+  local/CI gate wiring, release-readiness navigation, and release-manifest
+  coverage so React, mobile, Electron, operator UI, indexer, and backend
+  signing-service teams can trace domain fields, replay controls, EOA and
+  contract-signer behavior, Safe/WalletConnect caveats, failure states, and
+  no-secret custody boundaries without production-readiness overclaims.
+- Added INT-003 auction frontend and indexer flow spec with
+  `docs/integrations/auction-flows.md`, a checker/test pair, local/CI gate
+  wiring, release-readiness navigation, and release-manifest coverage so
+  frontend and indexer teams can trace auction submission, bidding, settlement,
+  no-bid claims, cancellation, credits, withdrawals, pause domains, events, and
+  known event/read gaps without production-readiness overclaims.
+- Added INT-002 fixed-price mint and drop authorization flow spec with
+  `docs/integrations/contract-flows.md`, a checker/test pair, local/CI gate
+  wiring, release-readiness navigation, and release-manifest coverage so
+  frontend and backend signing service teams can trace preflight reads,
+  EIP-712/ERC-1271 payload handling, transaction submission, events, credits,
+  withdrawals, and failure states without production-readiness overclaims.
+- Added INT-001 integrations entrypoint with `docs/integrations/README.md`, a
+  checker/test pair, local/CI gate wiring, release-readiness navigation, and
+  release-manifest coverage so frontend, mobile, Electron, indexer, operator
+  UI, and backend signing service teams can find canonical integration
+  artifacts without weakening the pre-production readiness boundary.
+- Added AUD-002 generated risk register support with
+  `release-artifacts/latest/risk-register.json`, a retained schema, generator,
+  checker, focused tests, local/CI gate wiring, audit-package and
+  release-readiness links, release-manifest coverage, and checksum coverage so
+  launch blockers, planned mitigations, and accepted local-baseline risks stay
+  machine-checkable.
+- Refreshed the AUD-001 external audit package with a current protocol
+  snapshot, explicit local-versus-external evidence gaps, bytecode-to-release
+  proof and signed release tag references, release-artifact traceability, and
+  an audit submission checklist enforced by the audit package checker.
+- Added REL-003 bytecode-to-release proof generation with a checked
+  `release-artifacts/latest/bytecode-release-proof.json` tying committed
+  deployment manifests, address books, runtime bytecode hashes, source
+  verification inputs, and the current release manifest together while keeping
+  production live-bytecode proof explicitly blocked until reviewed evidence
+  exists.
+- Added REL-002 signed release tag verification with a default non-release
+  local/CI gate, strict release-mode checks for matching signed Git tags,
+  signer fingerprints, current checksum bundles, and post-bundle
+  release-signature evidence, plus release docs that prevent detached checksum
+  signatures from self-invalidating the `SHA256SUMS` bundle they verify. The
+  strict verifier now also requires an explicit good-signature marker, a
+  mandatory signer fingerprint matched as a bounded token, and a tighter
+  Git-safe release tag name.
+- Added on-chain artist approval hashes for finalized collection state and
+  refreshed release/deployment artifact catalogs.
+- Added EIP-712 artist approval signatures with compact EIP-2098 support and
+  refreshed release/deployment artifact catalogs.
+- Changed artist approval validity so stored approvals become stale when the
+  finalized collection-state digest changes, while retaining the original
+  approval text/signature as provenance.
+- Added ERC-1271 contract-wallet artist approval support with strict
+  `isValidSignature(bytes32,bytes)` magic-value validation.
+- Documented artist approval provenance semantics for direct, EIP-712, and
+  ERC-1271 approvals, including stale state-bound approval handling.
+- Hardened artist approval digests to bind approval hashes to the freeze
+  manifest, supply settings, final-supply delay, core address, and chain ID.
+- Added a reusable ADV-001 protocol state-machine smoke harness with
+  deterministic cross-contract coverage for fixed-price minting, auction
+  outbid/settlement, known credit withdrawals, pause/signer/cancel controls,
+  randomness-finalized metadata, metadata mutation, collection freeze, and
+  owed-balance/surplus assertions without production contract changes.
+- Added ADV-002 deterministic protocol state-machine adversarial tests for
+  cancelled, expired, stale-signer, and replayed drop authorizations,
+  fixed-price withdrawal rollback to rejecting receivers, auction
+  pre-settlement ordering, settlement idempotence, late bids, and failed
+  auction withdrawal rollback without production contract changes.
+- Added ADV-003 signer compromise and revocation coverage with a deterministic
+  pause/rotation/epoch/cancellation recovery drill plus bounded fuzz over
+  fixed-price and auction signed payload invalidation paths.
+- Added ADV-004 pause and settlement matrix coverage for auction bid pauses,
+  with-bid and no-bid settlement pauses, failed fixed-price, bidder-credit, and
+  proceeds withdrawals, user withdrawal liveness, forced-surplus
+  emergency-withdrawal boundaries, and duplicate-settlement rejection without
+  production contract changes.
+- Added ADV-005 payment and forced-ETH invariant coverage for failed
+  fixed-price, auction bidder/proceeds, and curator withdrawals, auction curator
+  proceeds withdrawals in generated sequences, randomizer forced-reserve
+  accounting, and explicit randomizer balance/reserve equality without
+  production contract changes.
+- Expanded the reviewer-supplied 1/1 product-excellence roadmap into
+  issue-ready backlog entries and strategic release requirements for
+  contract-level metadata, provenance manifests, royalty policy, collector
+  permanence packages, marketplace/indexer evidence, satellite-extension
+  architecture, and release-grade warning disposition.
+- Recorded the clean-main reviewer rebaseline in the roadmap and execution
+  backlog, including reviewer-confirmed fixed protocol surfaces, remaining
+  production-trust and 1/1 product gaps, benchmark inputs, and PR #373
+  verification metadata.
+- Added a no-secret deployment admin ceremony evidence schema, template,
+  retained-artifact checklist, checker, tests, local/CI gate wiring, release
+  manifest coverage, checksum coverage, and deployment/readiness/runbook docs
+  for issue #362 while keeping reviewed fork/testnet/live admin ceremony
+  evidence missing until real ceremony artifacts are retained.
+- Added a no-secret Sepolia deployment rehearsal config template, a
+  `runSepolia()` Foundry script entrypoint, deployment/runbook documentation,
+  and template regression coverage for issue #360 while keeping
+  `testnet_deployment_rehearsal` missing until real reviewed Sepolia evidence
+  is retained.
+- Added a dedicated testnet deployment rehearsal retained-artifact template and
+  checker for issue #217, wiring it into local/CI evidence gates and generated
+  release evidence trackers while keeping `testnet_deployment_rehearsal`
+  missing until real reviewed Sepolia evidence is retained. Added
+  `ops/EXECUTION_BACKLOG.md` as the PR-sized 10/10 implementation map for the
+  combined roadmap, external assessment, and integration-readiness work, now
+  including reviewer-supplied 1/1 product-excellence items for contract-level
+  metadata, collector provenance, royalty philosophy, permanence packaging,
+  marketplace/indexer evidence, Core size discipline, and warning burn-down.
+- Added a dedicated external audit report retained-artifact template and
+  checker for issue #215, wiring it into local/CI evidence gates and generated
+  release evidence trackers while keeping `external_audit_report` missing until
+  a real reviewed audit report is retained.
+- Accepted reviewed mainnet-fork deployment rehearsal evidence for issue #216,
+  moving `fork_deployment_rehearsal` to `complete`, dropping #216 from the
+  active evidence tracker backlog/link/body-sync set, and preserving blocked
+  public-beta readiness on the remaining missing evidence rows.
+- Added a retained no-secret live audit report and snapshot bundle after
+  syncing issue #216 from `missing` to the committed `pending`
+  fork-deployment-rehearsal body, with refreshed live-audit archive, release
+  manifest, and checksum evidence while preserving blocked public-beta
+  readiness.
+- Added pending-review mainnet-fork deployment rehearsal evidence for issue
+  #216, including a sanitized Foundry broadcast, generated fork deployment
+  manifest, generated fork address book, non-local evidence envelope, and
+  refreshed public-beta evidence artifacts while keeping public-beta readiness
+  blocked until review is accepted.
+- Added fork-mainnet broadcast-derived manifest and address-book drift checks
+  to the local and CI deployment-manifest gates.
+- Added broadcast manifest generator support for explicitly ignored linked
+  library/helper deployments and Foundry unlocked-broadcast receipt-hash drift
+  fallback when the receipt order and deployed address still prove the same
+  deployment.
+- Added a fork deployment rehearsal retained-artifact Markdown shape and
+  checker so issue #216 evidence can be structurally validated without changing
+  public-beta readiness claims.
+- Added Windows check-wrapper native exit-code enforcement and a focused policy
+  test so `scripts/check.ps1` fails fast when `forge` or Python checks return
+  non-zero under Windows PowerShell 5.1.
+- Added an executable PowerShell runtime harness for the Windows checked native
+  wrapper so zero-exit and non-zero-exit native command behavior are both
+  validated without running the full local gate.
+- Added a lightweight Windows PowerShell CI job for the checked native-command
+  wrapper harness so Windows-specific native exit handling is covered without
+  running the full Foundry gate on Windows, plus a focused policy test for the
+  workflow wiring.
+- Added fork-specific release evidence tracker routing so issue #216 points to
+  the canonical fork deployment rehearsal retained-artifact template and
+  checker commands instead of the generic public-beta placeholder.
+- Added a retained live audit report and snapshot bundle after the fork issue
+  #216 body sync, with refreshed live-audit archive, release manifest, and
+  checksum evidence while preserving blocked public-beta readiness.
+- Added a scoped Solidity formatting gate that requires formatted first-party
+  files while tracking the current vendored/provenance formatting exemption
+  policy.
+- Added curator reward Merkle root epochs and domain-separated reward leaves
+  that bind proofs to the leaf domain, chain ID, pool address, collection ID,
+  claimant, amount, and root epoch.
+- Added release change approval policy and a local/CI changelog gate for
+  release-impacting contract, deployment, artifact, and release-workflow
+  changes.
+- Added deterministic release evidence tracker label checks with an optional
+  live GitHub issue snapshot audit mode for label drift.
+- Added the applied release evidence tracker label taxonomy for live tracker
+  issues: `evidence` plus `public-beta` or `production-release` phase labels.
+- Added a release evidence issue snapshot exporter so live label, body, and
+  closure audits can write UTF-8 JSON without shell redirection.
+- Added a release evidence issue snapshot audit orchestrator so operators can
+  export and check live label, body, and closure issue snapshots with one
+  no-secret command while CI stays network-free.
+- Added a retained no-secret release evidence live audit report bundle mode for
+  the issue snapshot orchestrator, including deterministic JSON/Markdown report
+  output, snapshot digests, command provenance, and blocked-readiness warnings.
+- Added a release evidence live audit report schema, checked no-secret template,
+  and offline checker for retained report bundles.
+- Added a release evidence live audit Markdown parity checker and checked
+  no-secret Markdown template for retained report bundles.
+- Added a deterministic release evidence live audit report archive index for
+  retained JSON/Markdown report bundles, with no-secret validation and
+  local/CI drift checks.
+- Added the live audit report archive retention workflow, including the
+  canonical retained-bundle directory, naming convention, no-secret rule,
+  validation command sequence, and readiness-claim boundary.
+- Added a deterministic retained live audit dry-run report bundle under the
+  canonical archive directory, with regenerated archive, release manifest, and
+  checksum evidence.
+- Added snapshot freshness/currentness guards for retained live audit reports
+  so historical issue-label, issue-body, and issue-closure snapshots cannot be
+  presented as current without explicit blocked-readiness markers.
+- Added deterministic release evidence tracker body checks with optional
+  live GitHub issue snapshot audit mode and body-file remediation output for
+  body drift.
+- Added deterministic release evidence tracker closure/readiness checks with
+  optional live GitHub issue snapshot audit mode so tracker issues cannot close
+  before committed evidence is complete or explicitly risk-accepted.
+- Added a non-local release evidence metadata generator that computes retained
+  artifact digests, validates generated evidence envelopes, and supports
+  `--check` drift detection without changing release readiness claims.
+- Added a deterministic machine-readable release manifest that ties release
+  artifacts, ABI compatibility, deployment manifests, address books, governance
+  docs, and release-ceremony status together under `release-artifacts/latest/`.
+- Added deterministic source-verification input generation under
+  `release-artifacts/latest/`, including source hashes, compiler settings,
+  constructor ABI, bytecode/linking status, and verification command templates.
+- Added deterministic Foundry broadcast manifest-input ingestion from sanitized
+  broadcast JSON, with generated broadcast-derived deployment manifest and
+  address-book artifacts covered by release manifest and checksum gates.
+- Added contract-enforced metadata byte limits for collection display fields,
+  collection scripts, token data, token images, token attributes, generated
+  `tokenURI` output, dependency scripts, and dependency provenance strings.
+- Added metadata golden-fixture safety checks for JSON/data-URI decoding,
+  current URI scheme policy, and generated animation HTML script-boundary
+  validation in local and CI gates.
+- Added renderer URI policy helpers and production token image URI validation
+  for required metadata image inputs.
+- Added production collection base URI and external library URL validation,
+  keeping those fields optional while rejecting unsafe non-empty URI values.
+- Added focused `StreamCore` custom-error regressions covering function-admin
+  authorization, artist signatures, metadata array lengths, and final-supply
+  timing.
+- Added deterministic dependency artifact descriptors and
+  `release-artifacts/latest/dependency-artifact-manifest.json`, with local/CI
+  drift checks for packaged dependency source files.
+- Added metadata fixture regressions proving invalid UTF-8 JSON/HTML data URI
+  payloads and non-semantic attribute entries fail the committed fixture gate.
+- Added production raw-attribute schema enforcement so token attributes must be
+  empty or comma-separated objects with `trait_type` and `value` string fields.
+- Added a strict UTF-8 scanner and production dependency registry enforcement
+  for dependency script chunks and provenance, with focused invalid-sequence and
+  size-before-UTF-8 tests.
+- Added production `StreamCore` UTF-8 enforcement for collection metadata
+  fields, collection script chunks, token data, token image URIs, and token raw
+  attributes, with valid multibyte acceptance, invalid-sequence, field-specific
+  selector, direct-update-path, and size-before-UTF-8 tests.
+- Added Playwright-backed metadata browser sandbox checks for the committed
+  final on-chain animation fixture, with deterministic dependency stubbing,
+  unexpected-network rejection, bootstrap assertions, and parent-frame
+  isolation proof in local and CI gates.
+- Added a local deployment-rehearsal metadata browser sandbox gate that deploys
+  the stack, mints through EIP-712 drop authorization, finalizes generated
+  metadata inputs, and executes the resulting on-chain animation in Chromium.
+- Added a local auction ceremony rehearsal gate that deploys the stack, signs
+  and mints an auction drop, proves auction custody, bids, settles, withdraws
+  poster/protocol/curator proceeds, and checks zero owed funds.
+- Added a local emergency redeployment rehearsal gate that deploys impacted and
+  replacement stacks with distinct deployment versions, manifests, EIP-712 drop
+  domains, and contract addresses, then proves replacement fixed-price mint
+  smoke evidence after Safe-rooted admin ceremonies.
+- Added a deployment ceremony evidence schema, local Anvil evidence bundle, and
+  local/CI checker so admin, signer, metadata-browser, auction, emergency
+  redeployment, artifact, verification, and redaction evidence has a
+  deterministic no-secret release format.
+- Added a committed local gas snapshot baseline for fixed-price mint, auction
+  bid, auction settlement, curator reward claim, final on-chain `tokenURI`, and
+  dependency/script reads, with local/CI drift checks.
+- Added a bounded supply/replay/freeze invariant baseline covering fixed-price
+  drop mints, cancellations, replay attempts, burns, metadata updates,
+  freeze-manifest stability, and post-freeze mutation rejection.
+- Added a bounded auction-consistency invariant baseline covering auction-drop
+  registration, escrow custody, first bids, outbids, cancellation, settlement,
+  invalid-operation preservation, withdrawals, and auction-local owed/reserve
+  surplus coherence.
+- Added focused randomizer reserve lifecycle tests covering arRNG request-cost
+  spending, multiple pending requests, fulfillment, stale marking, failed
+  post-processing, retry, forced ETH, and emergency-withdrawal boundaries.
+- Added a randomizer operations evidence schema, local Anvil evidence bundle,
+  and local/CI checker covering provider configuration, funding status,
+  lifecycle controls, reserve policy, retained artifacts, and redaction rules.
+- Added no-secret drop authorization signing examples, deterministic EIP-712
+  and ERC-1271 fixtures, local/CI fixture validation, and release
+  manifest/checksum coverage for the signing evidence.
+- Added a no-secret drop authorization payload generator, fixed-price and
+  auction input/output examples, local/CI generator validation, and docs wiring
+  for unsigned EIP-712 payload evidence.
+- Added a no-secret drop authorization signing evidence schema, checked
+  template, retained-artifact hash validation, local/CI checker, and release
+  manifest/checksum coverage.
+- Added a no-secret signer custody readiness evidence schema, checked
+  template, retained-artifact hash validation, local/CI checker, and release
+  manifest/checksum coverage for production signer readiness evidence without
+  committing private keys, HSM credentials, signer-service secrets, or live
+  unreleased payloads.
+- Added a release signature evidence schema, local placeholder bundle, and
+  local/CI checker covering detached checksum signatures, signed Git tags,
+  signer identity, retained verification artifacts, and no-secret redaction
+  rules.
+- Added an external audit package index and local/CI checker so current
+  maturity, scope, ADRs, invariants, static-analysis disposition, local
+  deployment/release evidence, known blockers, accepted local-baseline
+  dispositions, and security reporting remain linked for auditors.
+- Added architecture and threat-model docs plus a local/CI checker so current
+  system components, trust boundaries, value/custody flows, threat categories,
+  residual risks, and evidence links remain complete before audit packaging.
+- Added a release-readiness dashboard and local/CI checker so Gate G local
+  evidence, public-beta blockers, production release blockers, required
+  evidence links, and release-readiness commands remain visible before release
+  manifest and checksum generation.
+- Added a public-beta evidence status manifest, schema, and local/CI checker so
+  fork/testnet/live, external audit, signature, signed tag, address,
+  broadcast-retention, explorer-verification, and post-audit blockers stay
+  machine-checkable before any public-beta or production release claim.
+- Added a generated public-beta blocker report under
+  `release-artifacts/latest/public-beta-blockers.md`, with local/CI drift
+  checks and release manifest/checksum coverage for the current incomplete
+  evidence rows without changing readiness claims.
+- Added a generated production-release blocker report under
+  `release-artifacts/latest/production-release-blockers.md`, with local/CI drift
+  checks, per-requirement production template links, and release
+  manifest/checksum coverage without changing readiness claims.
+- Added a generated release evidence packet index under
+  `release-artifacts/latest/`, with JSON/Markdown outputs, local/CI drift
+  checks, blocker-row/template/retained-artifact/validation-command mappings,
+  and release manifest/checksum coverage without changing readiness claims.
+- Added a generated release evidence issue backlog under
+  `release-artifacts/latest/`, with JSON/Markdown outputs, local/CI drift
+  checks, issue-ready titles, labels, bodies, completion gates, validation
+  commands, and release manifest/checksum coverage without auto-creating issues
+  or changing readiness claims.
+- Added a committed release evidence issue-link map under
+  `release-artifacts/latest/`, with local/CI checks tying every generated
+  backlog entry to a GitHub tracker issue without treating tracker closure as
+  retained evidence.
+- Added generated release evidence issue body-sync artifacts under
+  `release-artifacts/latest/`, with exact no-secret GitHub issue body payloads,
+  a Markdown review view, local/CI drift checks, and release manifest/checksum
+  coverage without automatically updating GitHub or changing readiness claims.
+- Added a non-local release evidence intake runbook so fork/testnet/live,
+  audit, explorer, gas, invariant, checksum-signature, and signed-tag evidence
+  has required retained fields, no-secret redaction rules, reviewer
+  expectations, and public-beta requirement mapping before status rows are
+  marked complete.
+- Added a non-local release evidence metadata schema, checked template,
+  retained placeholder artifact, checker, and local/CI gate so future reviewed
+  non-local evidence can be machine-validated before release manifest and
+  checksum generation.
+- Added checked per-requirement public-beta evidence templates under
+  `release-artifacts/evidence/public-beta-templates/`, with checker coverage
+  proving every public-beta requirement has a template while readiness remains
+  blocked until reviewed non-local evidence exists.
+- Added checked per-requirement production-release evidence templates under
+  `release-artifacts/evidence/production-release-templates/`, with checker
+  coverage proving every production-release requirement has a template while
+  readiness remains blocked until reviewed non-local evidence exists.
+- Added a protocol incident-response runbook and local/CI checker covering
+  stuck auctions, failed or stale randomness, bad Merkle roots, bad metadata or
+  dependency configuration, signer compromise, and release artifact/evidence
+  mistakes before release manifest and checksum generation.
+- Added a production dependency operations runbook covering dependency version
+  proposal, review, source packaging, registry registration, unfrozen
+  collection repinning, deprecation, rollback by corrective version, frozen
+  collection protection, and source-retention evidence.
+- Added lifecycle-aware stale and failed randomness metadata states for minted
+  tokens whose hash is still unset, with off-chain URI fixtures, schema-v1
+  on-chain JSON fixtures, token state view coverage, fallback-to-pending
+  coverage, and final-hash override coverage.
+- Added focused randomizer migration regressions proving unsupported lifecycle
+  providers do not block migration while lifecycle-aware providers with failed
+  pending-request probes still block replacement.
+- Pinned release-artifact, JavaScript, and Python text files to LF line endings
+  so dependency artifact source hashes stay deterministic across Windows and
+  Linux checkouts.
+
+### Changed
+
+- Pinned Solidity metadata off in `foundry.toml` (`bytecode_hash = "none"`,
+  `cbor_metadata = false`) so contract creation and runtime bytecode is
+  deterministic and self-contained, with no embedded IPFS metadata-hash
+  pointer to off-chain metadata. This removes the incidental metadata churn
+  whereby adding an unrelated source file perturbed the embedded metadata of
+  unrelated curated contracts and staled their release-artifact checksums.
+  All release artifacts (release-artifact catalog, protocol surface, custom
+  error catalog, source-verification inputs, deployment and broadcast
+  manifests, address books, dependency and provenance attestations, risk
+  register, release notes, one-of-one permanence/provenance manifests,
+  release manifest, bytecode release proof, release-candidate lockfile, and
+  release checksums) were regenerated from a clean production `--via-ir`
+  build, and the offline deployment rehearsal suite was re-run to confirm the
+  contracts still deploy in-memory under the new build settings. This is a
+  deployment-semantics change aligned with the project's on-chain permanence
+  doctrine: verified bytecode no longer depends on any off-chain metadata
+  artifact.
+- Applied the nine-lens round-5 resolutions through accepted
+  `docs/adr/0014-world-class-pass-round-5.md`: preservation now attaches
+  fully to the sale (ENDOWED archive receipt at or before first sale;
+  sale-follows lanes for reference renders and execution environments;
+  still-image masters for museum-grade), a pinned storage-family taxonomy
+  gains a family-extinction migration rule, artist attribution hardens
+  (staged revocation with guardian veto, old-key veto expiry, onchain
+  succession import verification, platform-works repair path, artist name
+  in attribution JSON, first-release content ratification), governance
+  closes the tail (standing handover latency proofs, guardian-module
+  holder discipline, superseded P0 direct-execution risk, treasury and
+  entropy-admin roles), sales pin zero-value overrides, fair-allocation
+  raffles, seller-action disclosure, anti-snipe exhaustion states, and a
+  pattern-coverage matrix, revenue pins the revocation typehashes and the
+  ERC-20 single-step realization, GGP classification closes the
+  purchase-path ratchet loophole and gains permissionless re-lower, and
+  the museum floor defaults to declared tiers with owner
+  notice-and-objection standing in recovery. The autonomous iteration
+  loop closes at five rounds (instrument ceiling 9.0/lens) pending
+  protocol-owner decisions on OQ-X8 and the merge bar.
+- Applied the nine-lens round-4 resolutions through accepted
+  `docs/adr/0013-world-class-pass-round-4.md`: typed artist payout
+  resolution (`artistPayoutAccount` reads with artist-signed designation
+  records) fixes the mechanically unimplementable `COLLECTION_ARTIST`
+  template source; the module registry gains state enumeration and a
+  registration record-chain lane and the system-manifest payload joins the
+  onchain-bytes class; the ENDOWED archival slot requires cryptoeconomic
+  storage; heirless-artist steward authority, guardian-veto survival,
+  permissionless attribution claims, a pinned identity-document schema,
+  and entropy-consent scope land in the artist spec; governance gains
+  batch payable semantics, a completed role vocabulary with the emergency
+  recipient as a role reference, onchain scheduled-calldata publication,
+  and the 72-hour terminal-freeze floor everywhere; the sales layer pins
+  reveal-fee escrow, Dutch price floors, external burn-to-mint, airdrop
+  failure isolation, EIP-7702-safe claim paths, and waivable auction
+  floors; the museum conservation floor moves to before-first-sale for
+  museum-grade collections with preservation masters, capture semantics
+  for time-based works, and an institutional-validation gate; and the
+  open-questions register restates OQ-X8's lifecycle gate decidably.
+- Applied the nine-lens round-3 resolutions through accepted
+  `docs/adr/0012-world-class-pass-round-3.md`: GGP probe contracts become
+  Permanent-class genesis inventory with a zero-signer museum drill, and
+  permissionless conditional raises are restricted to read-survival
+  parameters (killing the fail-closed DoS ratchet); entropy block-count
+  windows become Governed Time Parameters; preservation follows the sale
+  (sold tokens in open offchain collections require endowed dual-family
+  receipts and fixity within a pinned window of each sale); every onchain
+  payload family gains state-readable pointer discovery and exports gain
+  their own archival mandate; ERC721Enumerable is removed from Core
+  (periphery enumeration lens specified; totalSupply retained); artist
+  estate flows gain third-party contest paths, identity-document revisions,
+  sanction authority classes, platform-works sale stops, and
+  successor-registry history import; the sales layer adds airdrop, raffle,
+  consignment/custody-grant, cross-sale content uniqueness, and editions
+  posture with revocation typehashes pinned; claimRefund semantics, escrow
+  conservation invariants, and PaymentIntent domain binding are pinned;
+  the museum dossier adds the ownership-provenance chain, a tombstone
+  cataloguing schema, packaging mappings, and rights floors; ADR 0004 gains
+  ROLE_PAUSE_GUARDIAN, the definitive two-tier enforcement statement, and
+  material-action executability rehearsals; a baseline-record header now
+  quarantines all fourteen legacy operational documents from the
+  specification set; and the deployment chain posture (Ethereum mainnet L1)
+  plus a vulnerability-disclosure obligation are stated normatively.
+- Applied the nine-lens round-2 resolutions through accepted
+  `docs/adr/0011-world-class-pass-round-2.md`: onchain bytes now means
+  contract storage or SSTORE2 (event data demoted to discovery pointers);
+  offchain-mode collections bind per-token content hashes at mint/sale time;
+  execution environments are archived as runnable artifacts with pinned
+  per-work re-render acceptance modes; archival receipts require a
+  cryptographically verifiable class and one pay-once endowed family;
+  Governed Gas Parameter raises are 2x-bounded with named probe contracts
+  and permissionless pre-approved conditional raises for lost governance;
+  escrow-holding sale modes bind drift envelopes so buyer funds can never
+  strand (Dutch purchases pay max-price with pull-credit excess; phase
+  pause moves out of the policy hash via the V2 phase-config preimage);
+  artist identity gains rotation contest windows, guardian sets,
+  platform-independent estate activation, pre-finality content veto, and
+  post-finality recovery signatures; sale-scoped randomness, reveal-owner
+  SLOs, SaleKind vocabulary growth, zero-price/PWYW/custody-inventory
+  kinds, and deposit-bonded sealed bids join the sales spec; nonces are
+  per-signer everywhere; museum registrar/conservation/rights schemas are
+  pinned with a PREMIS mapping and an operator-independent attestor lane;
+  mirrors now carry every governance and GGP domain; and 51 further
+  minor-tier refinements land across the set.
+  `scripts/check_mint_manager_domain_constants.py` additionally enforces the
+  revenue-layer `6529STREAM_` domain-namespace rule across the home table
+  and its protocol v1 mirror.
+- Hardened the full specification set through accepted
+  `docs/adr/0010-world-class-spec-pass.md`, resolving all 112 findings of a
+  nine-lens independent review (permanence, artist provenance, Safe/TDH
+  operability, minting coverage, best-in-world comparison, good patterns,
+  anti-patterns, meta-consistency, museum practice): added
+  `docs/stream-artist-authority.md` (two-sided artist identity, artist
+  sanction as a finality component, mint-path consent modes, estate and
+  succession, artist economics rights) and `docs/stream-sales-and-auctions.md`
+  (sale adapter conformance, English/Dutch auctions with anti-snipe and
+  increments, burn-to-mint, Merkle allowlists, refund windows, delegated
+  minting); replaced every immutable gas cap with Governed Gas Parameters
+  (immutable floors, staged raise/lower, health probes â€” minting can never
+  brick and marketplace reads can never permanently zero under gas
+  repricing); extended finality with per-token content roots for all
+  metadata modes, reference-render capture, renderer-determinism gates, and
+  dual-family archival proof; extended state exports to the artwork/metadata
+  layer with record-chain accumulators; added the museum object dossier
+  (pinned token subject IDs, owner-writable accession/condition/exhibition/
+  deaccession records, a mandated fixity program, artist-intent records,
+  C2PA media binding, IIIF profile, citation profile); defined the canonical
+  governance action-ID preimage with atomic batch execution and
+  multisig-sized window floors in ADR 0004; adopted single-sourcing with
+  normative homes, precedence, and requirement anchors in the spec policy;
+  pinned 175 new hash-domain and EIP-712 typehash constants; closed the
+  reviewed anti-patterns (PaymentIntent binding for ERC-20 pulls,
+  authorizerKind replacing address(0) conventions, manager-scoped
+  nullifiers, VRF callback try/catch persistence, fee-quote-bound entropy
+  payments); and opened `OQ-X8` (marketplace collection identity signal
+  under sequential token IDs) as the single owner-reserved question.
+  Corrected the ADR 0009/register decision count from 24 to 25.
+- Resolved all 24 open questions raised by the specification permanence
+  reframe through accepted `docs/adr/0009-protocol-v1-open-question-resolutions.md`
+  and accepted ADR 0008 (amended by ADR 0009 decisions 8 and 9): sequential
+  global token IDs with stored collection serials, the 2,000-byte Core
+  headroom rule as the governing size gate, dual genesis entropy providers
+  (VRF plus reviewed ARRNG/Pyth fallback; VRF-only nonconformant), the full
+  five-scope genesis finality registry, one canonical `stream`-prefixed
+  module identity surface, mandatory Core `contractURI()` and
+  Core-originated ERC-4906 refresh emitters, `maxRoyaltyBps = 1000`,
+  frozen-bit-only assignment-hash binding, deployment-wide global freeze
+  blocking new revenue classes, `COLLECTION_SCOPE_PHASE_ID = 0` cross-phase
+  counter derivation, `fulfillEntropy` outcome codes for stale-result
+  handling, and the metadata/collection-metadata decisions recorded in the
+  ADR. Removed every inline `OQ-*` marker and moved the register to
+  Resolved.
+- Reframed the Stream specification set from launch-phase language onto
+  permanence classes for permanent 6529-network infrastructure: added
+  `docs/spec-policy.md` (Permanent/Replaceable/Operational taxonomy,
+  Draft/Review/Final lifecycle, ADR-gated amendments) and
+  `docs/spec-open-questions.md` (tracked `OQ-*` decisions), retitled the
+  launch v1 target architecture to the Stream protocol v1 specification and
+  the launch conformance matrix to the deployment conformance matrix, swept
+  launch/pre-launch/future-module wording from the umbrella, revenue, mint,
+  metadata, collection metadata, and entropy specs, canonicalized the
+  `royaltyReceiverAndBps` (`0x54f77a09`) resolver selector across the matrix
+  and umbrella spec, and marked genuinely open decisions with inline `OQ-*`
+  markers instead of deferral hedges. Spec file names are unchanged;
+  normative requirements are unchanged except where hedges became tracked
+  open questions.
+- Recovered 392 bytes of measured `StreamCore` runtime headroom with
+  behavior-preserving storage caching and invariant-bounded unchecked counter
+  arithmetic; that release step measured production via-IR runtime at 21,831
+  bytes with 2,745 bytes of EIP-170 margin under the then-current 22,184-byte
+  approved ceiling. Later Core mint-manager hook work supersedes the current
+  runtime measurement and approved exception ceiling in the Unreleased section.
+  Added explicit mint/burn/final-supply counter regressions and a checked
+  negative-delta convention for accepted headroom-recovery records.
+
+### Fixed
+
+- Hardened discovery-bound artwork-finality diagnostics after finalization:
+  `finalityStillMatches`, `verifyFinality`, and `verifyArtworkScopeFinality` now
+  compare the live discovery count and route hash with the stored component set,
+  returning `false` while preserving the stored record and component hashes when
+  discovery drifts, loses its code, reverts, exhausts its bounded gas, or returns
+  malformed or oversized data. Discovery reads use the existing 30,000-gas
+  finality read budget, retain parent-frame gas for fail-closed completion, and
+  use an exact-word return buffer so hostile returndata cannot turn the full
+  diagnostic into an unbounded copy; collection and scoped regressions cover the
+  new behavior without changing paginated component-range semantics.
+- Aligned `StreamArtworkFinalityPreview` finality preview with execution by
+  mirroring the `[LTA-FREEZE]` rule 4 live veto-guardian gate in
+  `_stagedFreezeReady`: the preview now re-resolves the terminal-freeze veto
+  guardian through the registry governance authority and reports a staged freeze
+  as not-ready (`stagedFreezeReady`/`wouldExecute` false) when the guardian was
+  cleared after scheduling, matching the `FinalityFreezeGuardianUnset` revert in
+  `StreamArtworkFinalityRegistry._requireExecutableFreeze` so
+  `previewFinality(...).wouldExecute` can no longer report an unexecutable freeze
+  as ready. The view-only edit shifted the IR-optimized `StreamCore` runtime to
+  24,152 bytes with 424 bytes of EIP-170 headroom via the whole-program
+  optimizer, and the release-artifact, deployment, and evidence pin chain plus
+  the `StreamCore` size figures in the architecture, status, known-blockers,
+  release-policy, tooling, and target-architecture docs were regenerated to match.
+- Hardened the Windows checked-native helper so successful commands that write
+  accepted warning output to stderr still pass based on exit code, with runtime
+  harness coverage for stderr-on-success behavior, and taught the Solidity
+  formatting checker to ignore CRLF-only diffs for formatting-required files
+  while preserving the documented vendored exemption set.
+- Corrected reviewed fork metadata browser evidence so non-local retained
+  `tokenURI` metadata self-describes the fork/testnet rehearsal, and hardened
+  Forge broadcast return parsing to validate decoded field shapes and skip
+  malformed `returns` records before retaining evidence.
+- Reconciled stale autonomous backlog status rows for previously merged
+  integration, 1/1 product-readiness, contract-size, and randomizer test work,
+  and refreshed the dependent risk-register and release-artifact hashes.
+- Retired provider and integration files from the prior Solidity formatting
+  exception baseline, so arRNG, VRF, delegation, and randomizer integration
+  interfaces are now enforced by `make fmt-check`.
+- Retired first-party interface files from the prior Solidity formatting
+  exception baseline, so `INextGenCore2.sol`, `IStreamDrops.sol`, and
+  `IStreamMinter.sol` are now enforced by `make fmt-check`.
+- Converted the remaining Solidity formatter baseline from generic baseline
+  language into an explicit 17-file vendored/provenance exemption policy.
+- Clarified production-release evidence tracker completion gates so
+  `public-beta-evidence.json` is described as the shared release evidence
+  status manifest rather than a public-beta-only completion target.
+- Persisted collection base URI values during full collection metadata updates
+  and hardened admin, minter, and randomizer marker probes so invalid targets
+  revert with typed custom errors.
+- Rejected initial zero collection supply with a typed supply error instead of
+  arithmetic panic, and rejected dependency registry swaps to non-contract
+  addresses with `InvalidDependencyRegistryContract()`.
+- Recovered `StreamCore` runtime bytecode headroom by replacing selected legacy
+  string reverts with typed custom errors and tightening repeated
+  `setCollectionData` storage access, bringing the production IR-optimized
+  runtime to 24,128 bytes with 448 bytes of EIP-170 headroom.
+- Rejected `setFinalSupply` for collections with missing collection data using
+  `CollectionDataMissing(collectionId)` before final supply math can underflow.
+- Recovered enough `StreamCore` bytecode for Core UTF-8 production enforcement
+  by moving reusable metadata guards into the linked renderer library and
+  replacing inherited `_requireMinted` string reverts with `TokenNotMinted()`;
+  after lifecycle-aware stale/failed metadata state display, the production
+  IR-optimized runtime remains deployable at 24,348 bytes with 228 bytes of
+  EIP-170 headroom and is tracked as below the 384-byte release floor.
+- Recovered the documented `StreamCore` minimum release floor by moving freeze
+  metadata hash helpers into the linked renderer library, inlining final-token
+  metadata checks, reusing known collection IDs in token-name rendering, caching
+  generative-script storage lookups, and replacing the old-randomizer lifecycle
+  probe with equivalent low-level staticcalls that preserve pending-probe
+  revert data. The production IR-optimized runtime is now 24,139 bytes with 437
+  bytes of EIP-170 headroom.
+- Recovered additional `StreamCore` runtime bytecode headroom by replacing the
+  unused inherited ERC-2981 default-royalty machinery with equivalent fixed
+  `royaltyInfo` logic and explicit ERC-2981 interface support. The production
+  IR-optimized runtime is now 24,047 bytes with 529 bytes of EIP-170 headroom.
+- Recovered another 386 bytes of `StreamCore` runtime bytecode headroom by
+  moving off-chain token URI formatting, token-name formatting, and randomizer
+  lifecycle probe helpers into the linked `StreamMetadataRenderer` library
+  while preserving metadata state and migration behavior. The PR #421
+  production IR-optimized runtime measured 23,661 bytes with 915 bytes of
+  EIP-170 headroom before later mainline additions; the current release proof
+  records the rebased `StreamCore` runtime as 23,781 bytes with 795 bytes of
+  EIP-170 headroom.
+- Hardened the runtime size-budget checker so it validates compiler metadata,
+  optimizer settings, EVM version, compilation target, and current source
+  Keccak hashes before trusting Foundry artifacts, with focused regression
+  tests for stale and wrong-profile artifacts.
+
+### Release Impact
+
+- Gate G now requires release-impacting PRs to update this `Unreleased` section
+  before merge.
+- Gate G now checks `release-artifacts/latest/release-manifest.json` before the
+  signable checksum bundle. The checksum bundle covers the release manifest, so
+  the manifest records checksum-bundle digests as self-referentially unavailable
+  rather than embedding a hash cycle.
+- Gate G now checks `release-artifacts/latest/source-verification-inputs.json`
+  before the release manifest so retained verification inputs are covered by
+  both the top-level manifest and the signable checksum bundle.
+- Gate E/G now checks sanitized broadcast-derived deployment evidence before
+  deployment manifests, address books, release manifests, and checksums are
+  considered current.
+- Gate D/G release artifacts now include the ABI and bytecode deltas from the
+  metadata size-limit custom errors and public limit constants.
+- Gate D now runs metadata fixture safety checks in `make check`, CI, and the
+  platform check wrappers.
+- Gate D/G release artifacts now include the ABI and bytecode deltas from the
+  metadata URI policy helper functions and `UnsafeMetadataURI()` custom error.
+- Gate D/G release artifacts now include the ABI and bytecode deltas from
+  collection URI production enforcement and custom errors replacing legacy
+  `StreamCore` revert strings on metadata, mint, randomizer, and wiring paths.
+- Gate D/G release artifacts now include the ABI, bytecode, and custom-error
+  deltas from dependency registry UTF-8 enforcement and the shared renderer
+  UTF-8 scanner.
+- Gate D/G release artifacts now include the ABI and bytecode deltas from the
+  `StreamMetadataRenderer.supportsContractMarker` helper used to keep marker
+  probe hardening deployable under EIP-170.
+- Gate D/G release artifacts now include the ABI and bytecode deltas from
+  explicit initial zero-supply rejection and dependency registry target
+  validation.
+- Gate D/G release artifacts now include the ABI and bytecode deltas from
+  moving collection-script and token-metadata freeze hash helpers into
+  `StreamMetadataRenderer`.
+- Gate D/G release artifacts now include dependency artifact manifest coverage
+  and checksum coverage for dependency descriptors/source files under
+  `release-artifacts/dependencies/`.
+- Gate D/G release artifacts now include the bytecode delta from production
+  raw-attribute schema enforcement in `StreamMetadataRenderer`.
+- Gate D/G release artifacts now include the ABI and bytecode deltas from
+  replacing inherited ERC-2981 default-royalty machinery with equivalent fixed
+  royalty logic, plus generated creation/runtime bytecode size fields and
+  bytecode-release-proof size assertions.
+- Gate D/G now enforces the `StreamCore` runtime size budget from
+  `release-artifacts/contracts.json` in local checks, CI, and the Windows
+  wrapper.
+- Gate D/G release artifacts now include the ABI and bytecode deltas from
+  `StreamCore` size-recovery custom errors:
+  `ArtistSignatureUnauthorized()`, `FunctionAdminUnauthorized()`,
+  `InvalidTokenMetadataInput()`, and `FinalSupplyTimeNotPassed()`.
+- Detached checksum signatures, signed release tags, production address books,
+  and verified live deployment addresses remain future release-ceremony work.
+- Gate F release evidence now includes `docs/audit-package.md` as a
+  release-manifest governance document before the checksum bundle is refreshed.
+
+## v0.1.0 - Initial Local Baseline
+
+### Added
+
+- Established the first local release-artifact baseline, including ABI
+  checksums, bytecode checksums, interface IDs, event topic catalog, ABI
+  compatibility baseline, local deployment manifest, local address book, and
+  signable checksum bundle.
