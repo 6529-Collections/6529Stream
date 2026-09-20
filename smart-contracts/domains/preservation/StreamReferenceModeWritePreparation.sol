@@ -54,12 +54,12 @@ library StreamReferenceModeWritePreparation {
         p.expectedSourcesHash = result.sourcesHash;
         receipt.sourcesHash = result.sourcesHash;
         result.evidence = abi.encode(evidence);
-        bytes memory encoded = abi.encode(p);
-        if (encoded.length > 524288) revert M.InvalidModeEvidence();
+        bytes memory frame = recordFrame(d, p, receipt);
+        (bytes32 publicationHash, uint32 publicationBytes) = framePublication(frame);
         result.selected = Payload.selectForWrite(
             preparedPayloads,
-            keccak256(encoded),
-            uint32(encoded.length),
+            publicationHash,
+            publicationBytes,
             receipt,
             source,
             evidence,
@@ -70,7 +70,7 @@ library StreamReferenceModeWritePreparation {
                 p, receipt, source, evidence, result.mode, _environment(inventories, p.environment)
             );
         }
-        result.recordHash = completedEncodedRecordHash(d, encoded, receipt, result);
+        result.recordHash = completedFrameRecordHash(frame, receipt, result);
     }
 
     /// @dev Literal original record preimage over this frame's already authenticated full p.
@@ -169,6 +169,85 @@ library StreamReferenceModeWritePreparation {
                 mstore(dest, mload(src))
             }
         }
+    }
+
+    /// @dev One owned compiler allocation of the literal original record preimage.
+    /// No caller supplies a frame. All live admission still precedes this construction.
+    function recordFrame(R.Dependencies memory d, R.Publication memory p, R.Receipt memory receipt)
+        internal
+        view
+        returns (bytes memory)
+    {
+        return abi.encode(
+            keccak256("6529STREAM_REFERENCE_MODE_RECORD_V1"),
+            d.chainId,
+            address(this),
+            d.targets[0],
+            d.targets[1],
+            p,
+            receipt
+        );
+    }
+
+    /// @dev Frame data[800] is Receipt.canonicalizationHash, immediately before the
+    /// Publication tail at832. Save/32/hash/restore forms the exact abi.encode(p)
+    /// interval without another allocation. No call, allocation or slice escapes while
+    /// the word differs. All accesses remain within the compiler-owned bytes buffer.
+    function framePublication(bytes memory frame)
+        internal
+        pure
+        returns (bytes32 hash, uint32 size)
+    {
+        size = _framePublicationBytes(frame);
+        assembly ("memory-safe") {
+            let at := add(frame, 832)
+            let saved := mload(at)
+            mstore(at, 32)
+            hash := keccak256(at, size)
+            mstore(at, saved)
+        }
+    }
+
+    /// @dev Only the four original final receipt fields change. The complete Publication
+    /// tail and the other sixteen receipt words retain their literal original encoding.
+    /// The actual host still performs its same receipt assignments and all mutations.
+    function completedFrameRecordHash(
+        bytes memory frame,
+        R.Receipt memory receipt,
+        Prepared memory result
+    ) internal view returns (bytes32 hash) {
+        _framePublicationBytes(frame);
+        receipt.sourcesHash = result.sourcesHash;
+        receipt.payloadHash = result.selected.payloadId == 0
+            ? keccak256(result.canonical)
+            : result.selected.payloadHash;
+        receipt.payloadBytes = result.selected.payloadId == 0
+            ? uint32(result.canonical.length)
+            : result.selected.payloadBytes;
+        receipt.recordedAt = uint64(block.timestamp);
+        bytes32 payloadHash = receipt.payloadHash;
+        uint32 payloadBytes = receipt.payloadBytes;
+        bytes32 sourcesHash = receipt.sourcesHash;
+        uint64 recordedAt = receipt.recordedAt;
+        assembly ("memory-safe") {
+            mstore(add(frame, 416), payloadHash)
+            mstore(add(frame, 448), and(payloadBytes, 0xffffffff))
+            mstore(add(frame, 480), sourcesHash)
+            mstore(add(frame, 704), and(recordedAt, 0xffffffffffffffff))
+            hash := keccak256(add(frame, 32), mload(frame))
+        }
+    }
+
+    /// @dev Copy-envelope checks only. Nested validity is guaranteed by recordFrame's
+    /// own compiler encoding of the already validated Publication, not arbitrary bytes.
+    function _framePublicationBytes(bytes memory frame) private pure returns (uint32 size) {
+        if (frame.length < 1216 || frame.length > 525088 || frame.length % 32 != 0) {
+            revert M.InvalidModeEvidence();
+        }
+        uint256 offset;
+        assembly ("memory-safe") { offset := mload(add(frame, 192)) }
+        if (offset != 832) revert M.InvalidModeEvidence();
+        size = uint32(frame.length - 800);
     }
 
     function _environment(

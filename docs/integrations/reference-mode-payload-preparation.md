@@ -355,3 +355,46 @@ unchanged. Selected sizes fit: writer 19,212 runtime / 19,244 creation bytes,
 publisher unchanged at 22,449 / 26,823. All 98 publisher ABI entries and 17
 recursive storage rows remain exact. No native13, current-head/full37,
 complete cold-read-set, live RPC or deployability acceptance is claimed here.
+
+## One compiler-owned frame for both commitments
+
+The next correction creates the original complete record frame once, using the
+literal original `abi.encode(domain, chain, host, Core, Metadata, p, receipt)`.
+Its Publication offset remains 832 bytes. For a standalone Publication of N
+bytes, this frame contains N + 800 data bytes. A no-call assembly block saves
+the receipt's last word at data offset 800, temporarily writes the standalone
+outer offset 32, hashes exactly N bytes from there, then restores that word.
+The frame never escapes during this temporary mutation. Only the writer's own
+compiler encoding is used; this is not a validator for caller-provided nested
+ABI data. Alignment, the original 524,288-byte Publication limit and the fixed
+outer offset remain checked.
+
+After the unchanged source and payload selection, the writer patches only the
+same four completed receipt fields: payload hash, uint32 payload length, source
+hash and uint64 recorded time. Their frame offsets are 384, 416, 448 and 672.
+The other sixteen receipt words and the complete Publication tail are unchanged.
+The original host assignments, live checks, retention choices, mutation order,
+storage layout, events and gas caps are unchanged. StateReads and the prior
+compatibility codecs remain byte-exact.
+
+For native12's 254,464-byte Publication, the new frame removes 255,360 nominal
+allocated bytes and the separate complete-preimage copy relative to the previous
+tail-reuse sequence. The frozen focused run passed 21 tests, including three
+256-input fuzz cases. Literal original encodings and old codecs agree across
+empty/nonempty dynamic rows, both retention branches, all twenty receipt words,
+domain changes, the original upper bound, malformed outer envelopes, aliases,
+canaries and repeated restoration. All 119 frozen sources, one fixture, 125
+current artifacts and 2,216 metadata source-hash comparisons matched exactly.
+The 133-source ABI bridge preserves all 98 publisher entries and 17 recursive
+storage rows.
+
+On the retained 1,048-package/102-platform corpus, separate fresh frames measured
+the complete encoding and two-commitment sequence at 2,244,908 gas before and
+1,069,091 after: 1,175,817 gas saved. This includes both encoding sequences in
+each comparison, unlike the preceding isolated hash measurement. It remains an
+execution-only worker comparison, not a full publication transaction or a
+prediction that the remaining host writes fit. Selected sizes fit: writer
+19,106 runtime / 19,138 creation bytes; unchanged publisher 22,449 / 26,823.
+Native12's five passes and four complete-flow failures remain retained. No
+native13 or actual publication, Safe retry, supplement, lock or inventory
+acceptance is claimed by this focused result.
