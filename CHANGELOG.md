@@ -60,6 +60,17 @@ the release policy in `docs/release-policy.md`.
   Add exact-signature underfunding/retry and proof regressions; full-current
   execution remains separate from the source batch.
 
+## Scoped full-policy preservation and deployment recipe
+
+- Add distinct scoped-policy reference, ordered render-critical inventory and
+  archive bundle producers, including the original root consent, complete frozen
+  policies, terminal admission and exact recorded output interpretation.
+- Add a constructor-fixed publication factory with seven genuine per-plan
+  children and bounded, resumable creation. It can precede scoped publications;
+  no mutable host routing or supplied implementation is accepted.
+- Retain original COLLECTION and scoped V1 profiles. Provider/discovery assembly,
+  native execution, deployment size and transaction gas remain separate work.
+
 ## Scoped full-policy snapshot and root publication
 
 - Add a distinct root-free TOKEN/RELEASE/SEASON snapshot that binds the actual
