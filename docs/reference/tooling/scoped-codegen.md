@@ -110,10 +110,14 @@ python -B -m tools.build.prepare_current_graph --project /path/to/project --host
 
 Repeat `--compiler-capture` for separately captured selected compiler contexts.
 Unknown IDs, stale sources, changed captures or unbound outputs fail. The adapter
-recognizes and records only the observed empty-field serialization in pinned
-Foundry 1.7.1: added empty AST children/AST objects and documentation objects,
-omitted empty immutable-reference maps and storage layouts, and null-to-empty
-storage-layout type maps in physical artifacts. Source IDs, nonempty AST content,
+recognizes and records the observed serialization in pinned Foundry 1.7.1:
+added empty AST children/AST objects and documentation objects, omitted empty
+immutable-reference maps, method-identifier maps and storage layouts, and
+null-to-empty storage-layout type maps in physical artifacts. It also accepts
+top-level ABI entry permutations with exact entry contents and duplicate counts;
+parameter/output order, nested arrays and JSON types remain exact. Native and
+serialized ABI hashes record each permutation without changing either artifact.
+Source IDs, nonempty AST content,
 layouts, bytecode, links, immutable ranges and all other fields remain exact.
 
 Full analysis supports transitive import/source checks only. Native exports and
@@ -171,7 +175,7 @@ products; this repair does not change the Solidity graph consumer.
 ## Validation and limits
 
 ```text
-python -B -m unittest tools.build.test_scoped_standard_json tools.build.test_scoped_library_address tools.build.test_prepare_current_graph tools.build.test_native_artifact_storage tools.development.test_current_acceptance
+python -B -m unittest tools.build.test_scoped_standard_json tools.build.test_scoped_library_address tools.build.test_forge_abi_transport tools.build.test_prepare_current_graph tools.build.test_native_artifact_storage tools.development.test_current_acceptance
 ```
 
 Synthetic tests exercise refusal and process cleanup. A separate bounded native

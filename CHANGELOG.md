@@ -49,6 +49,12 @@
   [correspondence guide](docs/integrations/canonical-archive-correspondence.md)
   for profile boundaries and remaining integrated acceptance.
 
+## Bind native ABI entries through Forge serialization
+
+- Record exact top-level ABI entry permutations and omitted empty selector maps
+  in Forge build-info. Preserve native output, duplicate entries and all nested
+  parameter ordering; authenticate physical exports using the same checks.
+
 ## Preserve completed native captures with generated library references
 
 - Verify Solidity's generated library self-address field separately from

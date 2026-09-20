@@ -27,7 +27,7 @@ capture_evidence=None
 if a.compiler_capture:
     import sys
     sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
-    from tools.build.scoped_standard_json import bind_build_capture, forge_ast_transport, forge_storage_transport
+    from tools.build.scoped_standard_json import bind_build_capture, forge_ast_transport, forge_storage_transport, forge_abi_transport
     current,_,capture_evidence=bind_build_capture(current,a.compiler_capture,admission=a.compiler_admission)
 products=json.loads((a.products or a.project/'projection-products.json').read_bytes())
 helpers={'StreamNativeAssemblyCreation':'test/helpers/StreamNativeAssemblyCreation.sol', 'StreamNativeFinalityAssemblyTest':'test/current/StreamNativeFinalityAssembly.t.sol'}
@@ -57,12 +57,15 @@ for name,source in sorted(products.items()):
             'literalSourceHashes':{k:sha(v['content'].encode()) for k,v in build['input']['sources'].items()}}
     old=prior_builds[ident];native_old=old['output']['contracts'][source][name]
     assert set(physical)==({'abi','bytecode','deployedBytecode','methodIdentifiers','rawMetadata','metadata','ast','id'} | ({'storageLayout'} if 'storageLayout' in native_old else set()))
-    assert physical['abi']==native_old['abi']
+    physical_transports=[]
+    if a.compiler_capture and ident==a.build_id:
+        physical_transports.extend(forge_abi_transport(native_old['abi'],physical['abi']))
+    else:
+        assert physical['abi']==native_old['abi']
     assert json.loads(physical['rawMetadata'])==json.loads(native_old['metadata'])
     assert physical['metadata']['settings']['compilationTarget']=={source:name}
     assert physical['methodIdentifiers']==native_old['evm']['methodIdentifiers']
     # Non-emission is not evidence of an empty storage layout.
-    physical_transports=[]
     if 'storageLayout' in native_old:
         if a.compiler_capture and ident==a.build_id:
             physical_transports.extend(forge_storage_transport(native_old['storageLayout'],physical['storageLayout']))
@@ -82,7 +85,11 @@ for name,source in sorted(products.items()):
     native=current['output']['contracts'][source][name]
     if name in helpers:
         assert json.loads(physical['rawMetadata'])==json.loads(native['metadata'])
-        assert physical['abi']==native['abi'] and physical['methodIdentifiers']==native['evm']['methodIdentifiers']
+        if a.compiler_capture and ident==a.build_id:
+            forge_abi_transport(native['abi'],physical['abi'])
+        else:
+            assert physical['abi']==native['abi']
+        assert physical['methodIdentifiers']==native['evm']['methodIdentifiers']
         for field in ['bytecode','deployedBytecode']:
             assert code(physical[field]['object'])==code(native['evm'][field]['object']), (name,field,'current literal helper code')
             assert physical[field]['linkReferences']==native['evm'][field]['linkReferences'], (name,field,'current literal helper links')

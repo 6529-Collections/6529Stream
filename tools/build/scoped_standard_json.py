@@ -384,6 +384,15 @@ def forge_ast_transport(native: dict, serialized: dict, prefix: str = "ast") -> 
     return changes
 
 
+def forge_abi_transport(native: list, serialized: list) -> list[str]:
+    """Accept only a top-level ABI permutation, including exact duplicate counts."""
+    require(isinstance(native, list) and isinstance(serialized, list), "Forge ABI must be an array")
+    if same_json(native, serialized):
+        return []
+    require(sorted(map(canonical, native)) == sorted(map(canonical, serialized)), "Forge ABI entries differ")
+    return ["ABI top-level entry order: native " + sha(canonical(native)) + " serialized " + sha(canonical(serialized))]
+
+
 def forge_output_transport(native: dict, serialized: dict) -> list[str]:
     """Check the narrow empty-field serialization observed in pinned Foundry 1.7.1."""
     expected = copy.deepcopy(native); changes = []
@@ -402,6 +411,12 @@ def forge_output_transport(native: dict, serialized: dict) -> list[str]:
         for name, contract in contracts.items():
             actual = serialized["contracts"][source][name]; target = expected["contracts"][source][name]
             label = source + ":" + name
+            if "abi" in contract:
+                changes.extend(label + ": " + change for change in forge_abi_transport(contract["abi"], actual.get("abi")))
+                target["abi"] = actual["abi"]
+            if contract.get("evm", {}).get("methodIdentifiers") == {} and "methodIdentifiers" not in actual.get("evm", {}):
+                del target["evm"]["methodIdentifiers"]
+                changes.append(label + ": omitted empty method identifiers")
             for field in ("devdoc", "userdoc"):
                 if field not in contract and actual.get(field) == {}:
                     target[field] = {}; changes.append(label + ": added empty " + field)
