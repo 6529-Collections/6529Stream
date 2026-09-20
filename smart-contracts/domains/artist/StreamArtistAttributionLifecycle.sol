@@ -166,7 +166,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         return (a.state, a.generation);
     }
 
-    function staticPlatformWorksState(uint256 id) external view returns (PW.State memory) {
+    function staticPlatformWorksState(uint256 id) external view returns (PW.State calldata) {
         PW.State storage p = _platform.collections[id];
         // Exact twenty fixed ABI words from the original typed State root.
         assembly ("memory-safe") {

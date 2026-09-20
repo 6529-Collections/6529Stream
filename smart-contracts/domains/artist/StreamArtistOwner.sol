@@ -289,18 +289,8 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
     }
 
     function _replayKey(bytes32 surface, bytes32 scope) internal view returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                keccak256("6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2"),
-                deploymentChainId,
-                artistRegistry,
-                operationCoordinator,
-                archiveV2,
-                address(this),
-                domainId,
-                surface,
-                scope
-            )
+        return StreamArtistOwnerCommit.replayKey(
+            _commitEnvironment(), address(this), surface, scope
         );
     }
 

@@ -19,6 +19,27 @@ library StreamArtistOwnerCommit {
         bytes32 domain;
     }
 
+    /// @notice Pure original nine-word replay-key preimage; no replay storage or mutation.
+    function replayKey(Environment memory e, address owner, bytes32 surface, bytes32 scope)
+        public
+        pure
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2"),
+                e.chainId,
+                e.registry,
+                e.coordinator,
+                e.archive,
+                owner,
+                e.domain,
+                surface,
+                scope
+            )
+        );
+    }
+
     struct Preimage {
         bytes32 tag;
         uint256 chainId;
