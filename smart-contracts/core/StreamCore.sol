@@ -698,6 +698,20 @@ contract StreamCore is ERC721, IStreamCore {
                     previous.target, previous.codeHash, newTarget
                 )
         ) revert InvalidSatellitePointer(pointerType, newTarget);
+        if (
+            pointerType == _POINTER_ENTROPY_COORDINATOR && previous.target != address(0)
+                && newTarget != previous.target
+                && !StreamCoreExternalReads.entropySuccessorAdmitted(
+                    previous.target,
+                    previous.codeHash,
+                    newTarget,
+                    plan.candidate.codeHash,
+                    _gasParameters[_GGP_ENTROPY_REGISTRATION_GAS_LIMIT].value,
+                    _ENTROPY_PARENT_GAS_RESERVE + _ENTROPY_CALL_UPFRONT_GAS
+                )
+        ) {
+            revert InvalidSatellitePointer(pointerType, newTarget);
+        }
         plan.candidate.revision = _nextRevision(previous.revision);
         if (plan.preRevisionCandidateHash == plan.oldValueHash) {
             revert SatellitePointerNoOp(pointerType);

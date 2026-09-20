@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamEntropyCoordinatorContinuity as V
+} from "../../interfaces/stream/entropy/IStreamEntropyCoordinatorContinuity.sol";
 import { StreamEntropyFreshRecovery } from "./StreamEntropyFreshRecovery.sol";
-import { IStreamEntropyFreshRecovery } from "../../interfaces/stream/entropy/IStreamEntropyFreshRecovery.sol";
+import {
+    IStreamEntropyFreshRecovery
+} from "../../interfaces/stream/entropy/IStreamEntropyFreshRecovery.sol";
 import "./StreamEntropyCoordinator.sol";
 import "../../interfaces/stream/core/IStreamCore.sol";
 import { StreamEntropyCollectionRecovery } from "./StreamEntropyCollectionRecovery.sol";
@@ -82,6 +87,17 @@ library StreamEntropyAuxiliaryReads {
         if (selector == IStreamEntropyIncidents.entropyIncident.selector) {
             return
                 abi.encode(StreamEntropyIncidentEvidence.incident(abi.decode(data[4:], (bytes32))));
+        }
+        if (selector == V.coordinatorReplacementTerms.selector) {
+            (address successor, bytes32 hash, bytes32 policy) =
+                StreamEntropyRecoveryPolicies.replacement(abi.decode(data[4:], (bytes32)));
+            return abi.encode(successor, hash, policy);
+        }
+        if (selector == V.freshRecoveryPolicyV2Transition.selector) {
+            (bytes32 id, bytes32 hash) = abi.decode(data[4:], (bytes32, bytes32));
+            (bytes32 scope, bytes32 oldHash, bytes32 newHash) =
+                StreamEntropyRecoveryPolicies.transitionV2(id, hash);
+            return abi.encode(scope, oldHash, newHash);
         }
         if (selector == R.freshRecoveryPolicy.selector) {
             (R.FreshRecoveryPolicy memory policy, bytes32 hash, uint64 revision, bytes32 actionId) =

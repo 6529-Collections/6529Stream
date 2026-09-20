@@ -5,6 +5,11 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add exact frozen entropy-successor policies, constant-time pending-request
+  continuity admission and a configured ordinary backup deployment/plan helper.
+  Preserve original host history and fulfillment; actual-current Safe cutover
+  recipes are authored and await coordinated runtime verification.
+
 - Add staged reference file-inventory clients with exact fixed-row parts,
   original full identities, pinned gas quotes, receipt readback and Safe plans.
 

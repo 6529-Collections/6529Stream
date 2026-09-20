@@ -27,6 +27,20 @@ contract EntropySubjectCoreFixture {
         view
         returns (address, bytes32, bool, bytes32, bytes4, address, uint8, bytes32, bytes32, uint64)
     {
+        if (kind == keccak256("ENTROPY_COORDINATOR")) {
+            return (
+                address(_coordinator),
+                address(_coordinator).codehash,
+                false,
+                kind,
+                type(IStreamEntropyCoordinator).interfaceId,
+                _moduleRegistry,
+                1,
+                bytes32(0),
+                bytes32(0),
+                1
+            );
+        }
         require(kind == keccak256("MODULE_REGISTRY"), "only module registry");
         return (
             _moduleRegistry,
@@ -182,8 +196,8 @@ contract StreamEntropySubjectIdentityTest is CharacterizationTestBase, EntropyTi
         (bool oldReadWorks,) =
             address(entropy).staticcall(abi.encodeCall(entropy.tokenSeed, (TOKEN_ID)));
         require(!oldReadWorks, "control must reach disabled delegated reader");
-        (bool success, bytes memory raw) = address(entropy)
-            .staticcall(abi.encodeCall(entropy.staticTokenRenderFacts, (TOKEN_ID)));
+        (bool success, bytes memory raw) =
+            address(entropy).staticcall(abi.encodeCall(entropy.staticTokenRenderFacts, (TOKEN_ID)));
         require(success && raw.length == 96, "direct STATIC source remains available");
         (uint8 status, bytes32 seed, address originalProvider) =
             abi.decode(raw, (uint8, bytes32, address));

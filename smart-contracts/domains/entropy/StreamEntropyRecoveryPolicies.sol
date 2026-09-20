@@ -6,6 +6,10 @@ import {
 import {
     IStreamGovernedParameterAuthority as A
 } from "../../interfaces/stream/parameters/IStreamGovernedParameterAuthority.sol";
+import {
+    IStreamEntropyCoordinatorContinuity as V
+} from "../../interfaces/stream/entropy/IStreamEntropyCoordinatorContinuity.sol";
+import { IStreamCore } from "../../interfaces/stream/core/IStreamCore.sol";
 import { StreamEntropyProviderLifecycle } from "./StreamEntropyProviderLifecycle.sol";
 
 /// @notice Fixed policy worker; data and replay protection live in the calling coordinator.
@@ -27,11 +31,24 @@ library StreamEntropyRecoveryPolicies {
         bytes32 lastActionId;
     }
 
+    struct Replacement {
+        address successor;
+        bytes32 codeHash;
+    }
+
     struct Store {
         mapping(bytes32 => Entry) entries;
         mapping(bytes32 => mapping(bytes32 => bool)) consumed;
         bytes32 authorityCodeHash;
+        mapping(bytes32 => Replacement) replacements;
     }
+    event FreshRecoveryCoordinatorReplacement(
+        uint16 schemaVersion,
+        bytes32 indexed policyId,
+        bytes32 indexed policyHash,
+        address indexed successor,
+        bytes32 successorCodeHash
+    );
     event FreshRecoveryPolicyConfigured(
         uint16 schemaVersion,
         bytes32 indexed policyId,
@@ -77,6 +94,22 @@ library StreamEntropyRecoveryPolicies {
         view
         returns (bytes32 scope, bytes32 oldHash, bytes32 newHash)
     {
+        return _transition(id, proposedHash, freezing, R.configureFreshRecoveryPolicy.selector);
+    }
+
+    function transitionV2(bytes32 id, bytes32 proposedHash)
+        public
+        view
+        returns (bytes32 scope, bytes32 oldHash, bytes32 newHash)
+    {
+        return _transition(id, proposedHash, false, V.configureFreshRecoveryPolicyV2.selector);
+    }
+
+    function _transition(bytes32 id, bytes32 proposedHash, bool freezing, bytes4 configureSelector)
+        private
+        view
+        returns (bytes32 scope, bytes32 oldHash, bytes32 newHash)
+    {
         Entry storage e = store().entries[id];
         if (e.policy.frozen) revert R.FreshRecoveryPolicyIsFrozen(id);
         if (
@@ -91,9 +124,7 @@ library StreamEntropyRecoveryPolicies {
                 block.chainid,
                 address(this),
                 id,
-                freezing
-                    ? R.freezeFreshRecoveryPolicy.selector
-                    : R.configureFreshRecoveryPolicy.selector
+                freezing ? R.freezeFreshRecoveryPolicy.selector : configureSelector
             )
         );
         oldHash = keccak256(
@@ -121,7 +152,60 @@ library StreamEntropyRecoveryPolicies {
         );
     }
 
+    function configureV2Call(address authority, IStreamCore core, bytes calldata data) public {
+        (
+            bytes32 id,
+            uint16 attempts,
+            bytes32 role,
+            bytes32 reason,
+            bytes32 manifest,
+            R.FreshRecoveryStep[] memory steps,
+            address successor,
+            bytes32 codeHash
+        ) = abi.decode(
+            data,
+            (bytes32, uint16, bytes32, bytes32, bytes32, R.FreshRecoveryStep[], address, bytes32)
+        );
+        if (
+            successor == address(this) || successor.code.length == 0
+                || successor.codehash != codeHash
+                || address(StreamEntropyContinuityTarget(successor).core()) != address(core)
+                || StreamEntropyContinuityTarget(successor).authority() != authority
+        ) revert V.InvalidEntropyContinuity();
+        _configure(
+            authority,
+            id,
+            R.FreshRecoveryPolicy(true, false, attempts, role, reason, manifest, steps),
+            Replacement(successor, codeHash),
+            address(core)
+        );
+    }
+
+    function replacement(bytes32 id) public view returns (address, bytes32, bytes32) {
+        Replacement storage target = store().replacements[id];
+        return (target.successor, target.codeHash, store().entries[id].policyHash);
+    }
+
+    /// @dev A request can only count coverage from its already-frozen bound complete policy.
+    function replacementKey(bytes32 id, bytes32 policyHash) public view returns (bytes32) {
+        Store storage s = store();
+        if (id == 0 || s.replacements[id].successor == address(0)) return bytes32(0);
+        Entry storage e = s.entries[id];
+        if (!e.policy.frozen || e.policyHash != policyHash) revert V.InvalidEntropyContinuity();
+        return keccak256(abi.encode(s.replacements[id].successor, s.replacements[id].codeHash));
+    }
+
     function configure(address authority, bytes32 id, R.FreshRecoveryPolicy memory p) public {
+        _configure(authority, id, p, Replacement(address(0), bytes32(0)), address(0));
+    }
+
+    function _configure(
+        address authority,
+        bytes32 id,
+        R.FreshRecoveryPolicy memory p,
+        Replacement memory replacement_,
+        address core
+    ) private {
         if (
             p.maxFreshRecoveryAttempts == 0 || p.steps.length < p.maxFreshRecoveryAttempts
                 || p.steps.length > MAX_STEPS || p.incidentDeclarerRole != DECLARER
@@ -149,7 +233,29 @@ library StreamEntropyRecoveryPolicies {
                 keccak256(abi.encode(STEPS, p.steps))
             )
         );
-        bytes32 actionId = _authorize(authority, id, hash, false);
+        bytes32 actionId;
+        if (replacement_.successor == address(0)) {
+            actionId = _authorize(authority, id, hash, false);
+        } else {
+            hash = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ENTROPY_FRESH_RECOVERY_POLICY_V2"),
+                    block.chainid,
+                    address(this),
+                    core,
+                    id,
+                    hash,
+                    replacement_.successor,
+                    replacement_.codeHash
+                )
+            );
+            (bytes32 scope, bytes32 oldHash, bytes32 newHash) = transitionV2(id, hash);
+            actionId = requireAction(authority, scope, oldHash, newHash);
+            Store storage s = store();
+            if (s.consumed[id][actionId]) revert R.FreshRecoveryPolicyReplay(id, actionId);
+            s.consumed[id][actionId] = true;
+        }
+        store().replacements[id] = replacement_;
         Entry storage e = store().entries[id];
         // Flags are host-owned; a caller cannot supply a pre-frozen policy.
         p.exists = true;
@@ -163,6 +269,11 @@ library StreamEntropyRecoveryPolicies {
         );
         emit FreshRecoveryPolicyDefinition(1, id, hash, p.reasonSchemaHash, p.steps);
         emit FreshRecoveryPolicyAction(1, id, actionId, e.revision);
+        if (replacement_.successor != address(0)) {
+            emit FreshRecoveryCoordinatorReplacement(
+                2, id, hash, replacement_.successor, replacement_.codeHash
+            );
+        }
     }
 
     function freeze(address authority, bytes32 id) public {
@@ -223,4 +334,9 @@ library StreamEntropyRecoveryPolicies {
         }
         actionId = currentId;
     }
+}
+
+interface StreamEntropyContinuityTarget {
+    function core() external view returns (IStreamCore);
+    function authority() external view returns (address);
 }

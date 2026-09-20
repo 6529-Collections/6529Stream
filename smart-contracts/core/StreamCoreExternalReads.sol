@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamEntropyCoordinatorContinuity
+} from "../interfaces/stream/entropy/IStreamEntropyCoordinatorContinuity.sol";
 import "../interfaces/stream/artist/IStreamArtistHistory.sol";
 
 import "../vendor/openzeppelin/IERC165.sol";
@@ -246,6 +249,52 @@ library StreamCoreExternalReads {
             revision: 0
         });
         return (StreamCoreValidationStatus.VALID, candidate);
+    }
+
+    /// @notice Uses the live entropy registration GGP for exact lifecycle continuity reads.
+    /// @dev No collection scan, ignored failure, or implicit pending-request migration.
+    function entropySuccessorAdmitted(
+        address previous,
+        bytes32 oldCodeHash,
+        address successor,
+        bytes32 nextCodeHash,
+        uint256 cap,
+        uint256 completionBuffer
+    ) public view returns (bool) {
+        if (!_codeIsLive(previous, oldCodeHash) || !_codeIsLive(successor, nextCodeHash)) return false;
+        (bool ok, uint256 word) =
+            _entropyWord(previous, abi.encodeWithSignature("core()"), cap, completionBuffer);
+        if (!ok || word != uint256(uint160(address(this)))) return false;
+        (ok, word) =
+            _entropyWord(successor, abi.encodeWithSignature("core()"), cap, completionBuffer);
+        if (!ok || word != uint256(uint160(address(this)))) return false;
+        (ok, word) = _entropyWord(
+            previous,
+            abi.encodeCall(
+                IStreamEntropyCoordinatorContinuity.uncoveredPendingRequestCount,
+                (successor, nextCodeHash)
+            ),
+            cap,
+            completionBuffer
+        );
+        return ok && word == 0;
+    }
+
+    function _entropyWord(address target, bytes memory data, uint256 cap, uint256 buffer)
+        private
+        view
+        returns (bool ok, uint256 word)
+    {
+        if (!StreamCoreReadBuffer.hasSufficientParentGas(gasleft(), cap, buffer)) {
+            return (false, 0);
+        }
+        uint256 size;
+        assembly ("memory-safe") {
+            ok := staticcall(cap, target, add(data, 32), mload(data), 0, 32)
+            size := returndatasize()
+            word := mload(0)
+        }
+        return (ok && size == 32, word);
     }
 
     function preparePointerUpdate(

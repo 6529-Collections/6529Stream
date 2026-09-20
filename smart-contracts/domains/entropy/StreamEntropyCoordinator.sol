@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamEntropyCoordinatorContinuity as EntropyContinuityCapability
+} from "../../interfaces/stream/entropy/IStreamEntropyCoordinatorContinuity.sol";
+import { StreamEntropyContinuity } from "./StreamEntropyContinuity.sol";
+import { StreamEntropyScopeRegistration } from "./StreamEntropyScopeRegistration.sol";
 import { StreamEntropyTerminalAdmission } from "./StreamEntropyTerminalAdmission.sol";
 import { StreamEntropySubjectReads } from "./StreamEntropySubjectReads.sol";
 import {
@@ -301,8 +306,46 @@ contract StreamEntropyCoordinator is
             || id == type(EntropyU).interfaceId
             || id == type(IStreamEntropyCollectionRecovery).interfaceId
             || id == type(IStreamEntropyRecoveryPolicies).interfaceId
+            || id == type(EntropyContinuityCapability).interfaceId
             || id == type(IStreamEntropyProviderLifecycle).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId || super.supportsInterface(id);
+    }
+
+    function configureFreshRecoveryPolicyV2(
+        bytes32,
+        uint16,
+        bytes32,
+        bytes32,
+        bytes32,
+        FreshRecoveryStep[] calldata,
+        address,
+        bytes32
+    ) external {
+        StreamEntropyRecoveryPolicies.configureV2Call(authority, core, msg.data[4:]);
+    }
+
+    function freshRecoveryPolicyV2Transition(bytes32, bytes32)
+        external
+        view
+        returns (bytes32, bytes32, bytes32)
+    {
+        _auxiliaryRead();
+    }
+
+    function coordinatorReplacementTerms(bytes32)
+        external
+        view
+        returns (address, bytes32, bytes32)
+    {
+        _auxiliaryRead();
+    }
+
+    function uncoveredPendingRequestCount(address successor, bytes32 codeHash)
+        external
+        view
+        returns (uint256)
+    {
+        return StreamEntropyContinuity.uncovered(pendingRequestCount, successor, codeHash);
     }
 
     function configureFreshRecoveryPolicy(
@@ -432,39 +475,17 @@ contract StreamEntropyCoordinator is
         uint256 revealFeePerTokenWei
     ) external override {
         _requireEntropyAdmin();
-        if (
-            !core.collectionExists(collectionId)
-                || collectionEntropyConfig[collectionId].provider == address(0)
-        ) {
-            revert InvalidCollection(collectionId);
-        }
-        if (
-            collectionEntropyConfig[collectionId].locked
-                || core.collectionFreezeStatus(collectionId)
-        ) {
-            revert PolicyLocked(collectionId);
-        }
-        if (requestMode > 1 || revealOwnerRole != _REVEAL_OWNER || requestSLOBlocks == 0) {
-            revert InvalidRevealPolicy(collectionId);
-        }
-        _validateRevealFee(collectionId, revealFeePerTokenWei);
-        _revealPolicies[collectionId] = IStreamRevealFeeEscrow.CollectionRevealPolicy(
-            true, requestMode, revealOwnerRole, requestSLOBlocks, revealFeePerTokenWei
-        );
-        emit RevealPolicyConfigured(
-            1, collectionId, requestMode, revealOwnerRole, requestSLOBlocks, revealFeePerTokenWei
+        StreamEntropyCollectionConfiguration.configureReveal(
+            core, collectionEntropyConfig, _revealPolicies, msg.data[4:]
         );
     }
 
     /// @notice Retunes funding for future mints without changing frozen reveal promises or escrow.
     function updateRevealFeePerToken(uint256 collectionId, uint256 next) external override {
         _requireEntropyAdmin();
-        IStreamRevealFeeEscrow.CollectionRevealPolicy storage policy = _revealPolicies[collectionId];
-        if (!policy.declared) revert RevealPolicyUndeclared(collectionId);
-        _validateRevealFee(collectionId, next);
-        uint256 previous = policy.revealFeePerTokenWei;
-        policy.revealFeePerTokenWei = next;
-        emit RevealFeePerTokenUpdated(1, collectionId, previous, next);
+        StreamEntropyCollectionConfiguration.updateFee(
+            collectionEntropyConfig, _revealPolicies, collectionId, next
+        );
     }
 
     /// @notice Permissionless funding does not query or request the provider, including during outages.
@@ -499,10 +520,6 @@ contract StreamEntropyCoordinator is
         (bool success,) = treasury.call{ value: amount }("");
         if (!success) revert CreditTransferFailed();
         emit RevealFeeEscrowWithdrawn(1, collectionId, treasury, amount);
-    }
-
-    function _validateRevealFee(uint256 collectionId, uint256 fee) private view {
-        StreamEntropyCoordinatorReads.validateRevealFee(collectionEntropyConfig[collectionId], fee);
     }
 
     function _requireEntropyAdmin() private view {
@@ -612,23 +629,15 @@ contract StreamEntropyCoordinator is
         address recipient,
         bytes32 mintCommitment
     ) external override {
-        if (msg.sender != address(core)) revert Unauthorized(msg.sender);
-        (bool exists, uint256 actualCollection,, bool burned) =
-            core.tokenCollectionIdentity(tokenId);
-        if (
-            !exists || burned || actualCollection != collectionId || recipient == address(0)
-                || core.coordinatorAtMint(tokenId) != address(this)
-        ) revert InvalidToken(tokenId);
-        bytes32 key = _tokenKey(tokenId);
-        if (_subjects[key].status != StreamEntropyStatus.NONE) revert InvalidSubject(key);
-        _lockPolicy(collectionId);
-        _subjects[key].collectionId = collectionId;
-        _subjects[key].inputsHash = mintCommitment;
-        _subjects[key].status = StreamEntropyStatus.REGISTERED;
-        if (block.number > type(uint64).max) revert EntropyBlockNumberOverflow();
-        registeredAtBlock[tokenId] = uint64(block.number);
-        ++nonterminalTokenCount[collectionId];
-        emit EntropyRegistered(collectionId, tokenId, mintCommitment);
+        StreamEntropyScopeRegistration.token(
+            core,
+            _subjects,
+            collectionEntropyConfig,
+            _revealPolicies,
+            registeredAtBlock,
+            nonterminalTokenCount,
+            msg.data[4:]
+        );
     }
 
     /// @inheritdoc IStreamEntropyTiming
@@ -684,29 +693,18 @@ contract StreamEntropyCoordinator is
         override
         returns (bytes32 scopeId)
     {
-        if (msg.sender != authority && !requesters[msg.sender]) {
-            revert Unauthorized(msg.sender);
-        }
-        if (scopeKind > 2 || scopeRef == 0 || !core.collectionExists(collectionId)) {
-            revert InvalidCollection(collectionId);
-        }
-        scopeId = keccak256(
-            abi.encode(
-                SCOPE_DOMAIN,
-                block.chainid,
-                address(this),
-                address(core),
-                collectionId,
-                scopeKind,
-                scopeRef
-            )
+        return StreamEntropyScopeRegistration.register(
+            core,
+            authority,
+            requesters,
+            _subjects,
+            _registeredScopes,
+            collectionEntropyConfig,
+            _revealPolicies,
+            collectionId,
+            scopeKind,
+            scopeRef
         );
-        if (_subjects[scopeId].status != StreamEntropyStatus.NONE) revert InvalidSubject(scopeId);
-        _lockPolicy(collectionId);
-        _registeredScopes[scopeId] = true;
-        _subjects[scopeId].collectionId = collectionId;
-        _subjects[scopeId].status = StreamEntropyStatus.REGISTERED;
-        emit EntropyScopeRegistered(collectionId, scopeId, scopeKind, scopeRef);
     }
 
     function requestScopeEntropy(bytes32 scopeId, bytes32 scopeInputsHash)
@@ -723,13 +721,6 @@ contract StreamEntropyCoordinator is
         if (!_registeredScopes[scopeId] || scopeInputsHash == 0) revert InvalidSubject(scopeId);
         _subjects[scopeId].inputsHash = scopeInputsHash;
         return _request(scopeId, 0, scopeId);
-    }
-
-    function _lockPolicy(uint256 collectionId) private {
-        CollectionConfig storage config = collectionEntropyConfig[collectionId];
-        if (config.provider == address(0)) revert InvalidCollection(collectionId);
-        if (!_revealPolicies[collectionId].declared) revert RevealPolicyUndeclared(collectionId);
-        config.locked = true;
     }
 
     function _request(bytes32 subjectKey, uint256 tokenId, bytes32 scopeId)
@@ -764,6 +755,7 @@ contract StreamEntropyCoordinator is
             Request(subjectKey, tokenId, scopeId, provider, uint64(block.number), 0, 0);
         _requestPolicies[requestKey] = p.policy;
         ++pendingRequestCount;
+        StreamEntropyContinuity.admit(subject.collectionId, requestKey);
         providerRequestId =
             IStreamEntropyProvider(provider).requestEntropy{ value: p.fee }(requestKey, p.context);
         if (providerRequestKeys[provider][providerRequestId] != 0) {
@@ -898,10 +890,12 @@ contract StreamEntropyCoordinator is
     {
         Request storage request = requests[requestKey];
         Subject storage subject = _subjects[request.subjectKey];
+        bytes32 activeRequestKey = subject.requestKey;
         outcome = StreamEntropyFulfillment.finalize(
             core, request, subject, _requestPolicies[requestKey], requestKey, rawRandomness
         );
         if (outcome != 0) return _reject(requestKey, outcome);
+        StreamEntropyContinuity.close(activeRequestKey);
         --pendingRequestCount;
         if (request.tokenId != 0) --nonterminalTokenCount[subject.collectionId];
         emit EntropyFinalized(
@@ -1039,6 +1033,7 @@ contract StreamEntropyCoordinator is
         private
     {
         subject.status = status;
+        StreamEntropyContinuity.close(requestKey);
         --pendingRequestCount;
         emit EntropyRequestTerminal(requestKey, status);
         uint256 tokenId = requests[requestKey].tokenId;

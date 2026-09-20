@@ -79,4 +79,80 @@ library StreamEntropyCollectionConfiguration {
         );
         emit CollectionEntropyEpochConfigured(1, collectionId, provider, epoch, configHash);
     }
+
+    event RevealPolicyConfigured(
+        uint16 schemaVersion,
+        uint256 indexed collectionId,
+        uint8 requestMode,
+        bytes32 revealOwnerRole,
+        uint64 requestSLOBlocks,
+        uint256 revealFeePerTokenWei
+    );
+    event RevealFeePerTokenUpdated(
+        uint16 schemaVersion, uint256 indexed collectionId, uint256 oldFee, uint256 newFee
+    );
+
+    function configureReveal(
+        IStreamCore core,
+        mapping(
+            uint256 => StreamEntropyCoordinator.CollectionConfig
+        ) storage collectionEntropyConfig,
+        mapping(
+            uint256 => IStreamRevealFeeEscrow.CollectionRevealPolicy
+        ) storage _revealPolicies,
+        bytes calldata data
+    ) public {
+        (
+            uint256 collectionId,
+            uint8 requestMode,
+            bytes32 revealOwnerRole,
+            uint64 requestSLOBlocks,
+            uint256 revealFeePerTokenWei
+        ) = abi.decode(data, (uint256, uint8, bytes32, uint64, uint256));
+        if (
+            !core.collectionExists(collectionId)
+                || collectionEntropyConfig[collectionId].provider == address(0)
+        ) {
+            revert StreamEntropyCoordinator.InvalidCollection(collectionId);
+        }
+        if (
+            collectionEntropyConfig[collectionId].locked
+                || core.collectionFreezeStatus(collectionId)
+        ) {
+            revert StreamEntropyCoordinator.PolicyLocked(collectionId);
+        }
+        if (
+            requestMode > 1 || revealOwnerRole != keccak256("ROLE_ENTROPY_REVEAL_OWNER")
+                || requestSLOBlocks == 0
+        ) {
+            revert StreamEntropyCoordinator.InvalidRevealPolicy(collectionId);
+        }
+        StreamEntropyCoordinatorReads.validateRevealFee(
+            collectionEntropyConfig[collectionId], revealFeePerTokenWei
+        );
+        _revealPolicies[collectionId] = IStreamRevealFeeEscrow.CollectionRevealPolicy(
+            true, requestMode, revealOwnerRole, requestSLOBlocks, revealFeePerTokenWei
+        );
+        emit RevealPolicyConfigured(
+            1, collectionId, requestMode, revealOwnerRole, requestSLOBlocks, revealFeePerTokenWei
+        );
+    }
+
+    function updateFee(
+        mapping(
+            uint256 => StreamEntropyCoordinator.CollectionConfig
+        ) storage collectionEntropyConfig,
+        mapping(
+            uint256 => IStreamRevealFeeEscrow.CollectionRevealPolicy
+        ) storage _revealPolicies,
+        uint256 collectionId,
+        uint256 next
+    ) public {
+        IStreamRevealFeeEscrow.CollectionRevealPolicy storage policy = _revealPolicies[collectionId];
+        if (!policy.declared) revert StreamEntropyCoordinator.RevealPolicyUndeclared(collectionId);
+        StreamEntropyCoordinatorReads.validateRevealFee(collectionEntropyConfig[collectionId], next);
+        uint256 previous = policy.revealFeePerTokenWei;
+        policy.revealFeePerTokenWei = next;
+        emit RevealFeePerTokenUpdated(1, collectionId, previous, next);
+    }
 }
