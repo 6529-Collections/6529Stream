@@ -1,0 +1,1037 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "2e0fca1aef41a023d76a9717651a699bbd7db155",
+  "sourceTree": "919ec79e1558a5c0b521474e7958ceee49fd26be",
+  "sourceCount": 2098,
+  "compilerVersion": "0.8.19",
+  "inputSha256": "832fd66f1a77a6b5e031d01559b45dd6cafc2a2864e5de0c060e5e31844cea5c",
+  "outputSha256": "f56bfe433b6361ff42ad5d2c054a9f89ce2f622b4152eab9f2cb36ac96e1947e",
+  "reviewedSourceEquivalence": "The ten selected source files are byte-identical at integration 5ae32cdff9a3498316581467d2c585966473ed0a.",
+  "qualification": "Exact read/event ABI and selected source evidence only; no current-stack execution, gas, Safe runtime, deployment or release acceptance.",
+  "sources": {
+    "smart-contracts/core/StreamCore.sol": "490bf780d048455bbbc8a9b55ccb5efd601439bc2403e3e73e09035d9cfd1c43",
+    "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol": "8c9038d1a6b1900778c1944e4dbfcc07bd24ae73ac5666348f9b8520d80b5d8e",
+    "smart-contracts/domains/mint/StreamBurnMintGate.sol": "6a443ae3b4b5e667e21a94549c53342dde7240633c03a0fcadd765fa838e226f",
+    "smart-contracts/domains/mint/StreamBurnRedemption.sol": "34b9ab083cad715965dbaa9d259e74be6c0fdf61e647eede12cf5f7c9eb9c90d",
+    "smart-contracts/interfaces/stream/core/IStreamCoreBurn.sol": "734a1a81b208ae7d944b44b15409a56d90ce7f7ad10ac9e7c19c8c2321430366",
+    "smart-contracts/interfaces/stream/core/IStreamCoreCollectionView.sol": "8a5ce0c442d2f9b29b81bf53696da483cc44f61e2af1b7f78f902f43df685046",
+    "smart-contracts/interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol": "826bfcf8ee17490294ff2e90067281544e92ab5a2ca08c13bffaf65639538677",
+    "smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol": "caeda7b29efd6ee23db0aabd754c0cc1d20eb95428e6f42e7366a9dd7a4cbc7f",
+    "smart-contracts/interfaces/stream/mint/IStreamBurnMintGate.sol": "0bedcfe7e2456905b4b3544f50b81ac6c128d66becd5ad85eefd8d6e6fabc2b3",
+    "smart-contracts/interfaces/stream/mint/IStreamBurnRedemption.sol": "f1d0e2b7f602b4336a0440873b0161eb06682ff20ef4b866ded747495c210aa7"
+  },
+  "selections": {
+    "gate": {
+      "source": "smart-contracts/domains/mint/StreamBurnMintGate.sol",
+      "contract": "StreamBurnMintGate",
+      "functions": [
+        "core",
+        "moduleRegistry",
+        "coreCodeHash",
+        "registryCodeHash",
+        "program",
+        "allowedSourceCollections"
+      ],
+      "events": [
+        "BurnMintProgramConfigured"
+      ]
+    },
+    "redemption": {
+      "source": "smart-contracts/domains/mint/StreamBurnRedemption.sol",
+      "contract": "StreamBurnRedemption",
+      "functions": [
+        "core",
+        "moduleRegistry",
+        "coreCodeHash",
+        "registryCodeHash",
+        "program"
+      ],
+      "events": [
+        "SaleConfigured",
+        "RedemptionTermsRecorded"
+      ]
+    },
+    "core": {
+      "source": "smart-contracts/core/StreamCore.sol",
+      "contract": "StreamCore",
+      "functions": [
+        "collectionExists",
+        "collectionSupplyMode",
+        "collectionStatus",
+        "collectionHasMaxSupply",
+        "collectionMaxSupply",
+        "collectionMintedEver",
+        "collectionFreezeStatus",
+        "collectionBurnsBlocked",
+        "collectionBurnsBlockedAtBlock",
+        "getSatellitePointer"
+      ],
+      "events": []
+    },
+    "finality": {
+      "source": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
+      "contract": "StreamArtworkFinalityRegistry",
+      "functions": [
+        "core",
+        "collectionFinalityRecord",
+        "artworkScopeFinalityRecord",
+        "artworkFreezeMode"
+      ],
+      "events": []
+    }
+  },
+  "abis": {
+    "gate": [
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "targetCollectionId",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "manager",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "phaseId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "configHash",
+            "type": "bytes32"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "manager",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "targetCollectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "phaseId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint256[]",
+                "name": "sourceCollectionIds",
+                "type": "uint256[]"
+              },
+              {
+                "internalType": "uint8",
+                "name": "sourcesPerMint",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint64",
+                "name": "startsAt",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "endsAt",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bool",
+                "name": "prepared",
+                "type": "bool"
+              },
+              {
+                "internalType": "address",
+                "name": "nativeSaleAdapter",
+                "type": "address"
+              }
+            ],
+            "indexed": false,
+            "internalType": "struct IStreamBurnMintGate.ProgramConfig",
+            "name": "config",
+            "type": "tuple"
+          }
+        ],
+        "name": "BurnMintProgramConfigured",
+        "type": "event"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "targetCollectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "allowedSourceCollections",
+        "outputs": [
+          {
+            "internalType": "uint256[]",
+            "name": "",
+            "type": "uint256[]"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "core",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "coreCodeHash",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "moduleRegistry",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "targetCollectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "program",
+        "outputs": [
+          {
+            "components": [
+              {
+                "components": [
+                  {
+                    "internalType": "address",
+                    "name": "manager",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "targetCollectionId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "phaseId",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "uint256[]",
+                    "name": "sourceCollectionIds",
+                    "type": "uint256[]"
+                  },
+                  {
+                    "internalType": "uint8",
+                    "name": "sourcesPerMint",
+                    "type": "uint8"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "startsAt",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "endsAt",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "prepared",
+                    "type": "bool"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "nativeSaleAdapter",
+                    "type": "address"
+                  }
+                ],
+                "internalType": "struct IStreamBurnMintGate.ProgramConfig",
+                "name": "config",
+                "type": "tuple"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "configHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "managerCodeHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "nativeSaleCodeHash",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IStreamBurnMintGate.Program",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "registryCodeHash",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    "redemption": [
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "saleId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "termsHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint64",
+            "name": "startTime",
+            "type": "uint64"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint64",
+            "name": "endTime",
+            "type": "uint64"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "saleNonce",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "operator",
+            "type": "address"
+          }
+        ],
+        "name": "RedemptionTermsRecorded",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint16",
+            "name": "schemaVersion",
+            "type": "uint16"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "saleId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "phaseId",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint8",
+            "name": "saleKind",
+            "type": "uint8"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "asset",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "saleConfigHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "expectedPrimaryPolicyHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint8",
+            "name": "primaryPolicyMode",
+            "type": "uint8"
+          }
+        ],
+        "name": "SaleConfigured",
+        "type": "event"
+      },
+      {
+        "inputs": [],
+        "name": "core",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "coreCodeHash",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "moduleRegistry",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "id",
+            "type": "bytes32"
+          }
+        ],
+        "name": "program",
+        "outputs": [
+          {
+            "components": [
+              {
+                "components": [
+                  {
+                    "internalType": "uint256",
+                    "name": "collectionId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "startTime",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "uint64",
+                    "name": "endTime",
+                    "type": "uint64"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "termsHash",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct IStreamBurnRedemption.ProgramConfig",
+                "name": "config",
+                "type": "tuple"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "saleConfigHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "saleNonce",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint64",
+                "name": "createdAt",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "registryRevision",
+                "type": "uint64"
+              },
+              {
+                "internalType": "bool",
+                "name": "cancelled",
+                "type": "bool"
+              }
+            ],
+            "internalType": "struct IStreamBurnRedemption.Program",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "registryCodeHash",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    "core": [
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionBurnsBlocked",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionBurnsBlockedAtBlock",
+        "outputs": [
+          {
+            "internalType": "uint64",
+            "name": "",
+            "type": "uint64"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionExists",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionFreezeStatus",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionHasMaxSupply",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionMaxSupply",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionMintedEver",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionStatus",
+        "outputs": [
+          {
+            "internalType": "uint8",
+            "name": "",
+            "type": "uint8"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionSupplyMode",
+        "outputs": [
+          {
+            "internalType": "uint8",
+            "name": "",
+            "type": "uint8"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "pointerType",
+            "type": "bytes32"
+          }
+        ],
+        "name": "getSatellitePointer",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "target",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "codeHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bool",
+            "name": "frozen",
+            "type": "bool"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "moduleType",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes4",
+            "name": "interfaceId",
+            "type": "bytes4"
+          },
+          {
+            "internalType": "address",
+            "name": "registry",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "registryStatus",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "moduleManifestHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "deploymentManifestHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint64",
+            "name": "revision",
+            "type": "uint64"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    "finality": [
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "enum StreamFinalityScopeType",
+                "name": "scopeType",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "scopeId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamFinalityScope",
+            "name": "scope",
+            "type": "tuple"
+          }
+        ],
+        "name": "artworkFreezeMode",
+        "outputs": [
+          {
+            "internalType": "enum StreamArtworkFreezeMode",
+            "name": "",
+            "type": "uint8"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "enum StreamFinalityScopeType",
+                "name": "scopeType",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "collectionId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "scopeId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct StreamFinalityScope",
+            "name": "scope",
+            "type": "tuple"
+          }
+        ],
+        "name": "artworkScopeFinalityRecord",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bool",
+                "name": "finalized",
+                "type": "bool"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "enum StreamFinalityScopeType",
+                    "name": "scopeType",
+                    "type": "uint8"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "collectionId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "scopeId",
+                    "type": "bytes32"
+                  }
+                ],
+                "internalType": "struct StreamFinalityScope",
+                "name": "scope",
+                "type": "tuple"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "finalityRecordHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "manifestContentHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "manifestURIHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "componentsHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "finalityManifestURI",
+                "type": "string"
+              },
+              {
+                "internalType": "address",
+                "name": "manifestPointer",
+                "type": "address"
+              },
+              {
+                "internalType": "uint64",
+                "name": "finalizedAt",
+                "type": "uint64"
+              }
+            ],
+            "internalType": "struct StreamScopedFinalityRecord",
+            "name": "out",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionId",
+            "type": "uint256"
+          }
+        ],
+        "name": "collectionFinalityRecord",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "bool",
+                "name": "finalized",
+                "type": "bool"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "finalityRecordHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "manifestContentHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "manifestURIHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "string",
+                "name": "finalityManifestURI",
+                "type": "string"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "componentsHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "address",
+                "name": "manifestPointer",
+                "type": "address"
+              },
+              {
+                "internalType": "uint64",
+                "name": "finalizedAt",
+                "type": "uint64"
+              }
+            ],
+            "internalType": "struct StreamCollectionFinalityRecord",
+            "name": "",
+            "type": "tuple"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "core",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ]
+  }
+}

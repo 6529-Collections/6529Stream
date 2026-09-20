@@ -5,6 +5,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add pinned, bounded burn-program discovery and source/target closure warnings;
+  clarify Safe CALL capability versus EIP-2612 and Permit2 signature support.
+
 - Add a versioned local token-dossier recipe with registered native hosts,
   direct-owner and governed Metadata publications, deployment-scope independent
   records, same-block capture inputs and explicit compiler-source composition

@@ -5,6 +5,10 @@ burn-to-mint paths. It does not approve ERC-721 transfers, burn a token, sign a
 native sale authorization, send a transaction, or establish production or Safe
 runtime readiness. Burn-to-redeem is a separate product.
 
+Before a collection burn block, freeze or collection finality action, use the
+[burn program warning join](current-burn-finality.md) to identify affected source
+and target programs within an explicit deployment and history range.
+
 The checked ABI fixture is bound to source commit
 `9310d6e9865db8ffe83fb53c78801ff4151158e3`, its source tree, and the exact
 999-source compiler input, output, and source-binding capture. It establishes

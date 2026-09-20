@@ -64,9 +64,12 @@ the original Core/registry code hashes, and the complete registered module
 record are checked on operational calls.
 
 Core remains the authority for source burn blocks and collection freeze. A
-burn-blocked or frozen token cannot be redeemed. The complete operator workflow
-still needs to join registered programs to pre-freeze/finality warnings; this
-contract does not silently alter Core's burn rules.
+burn-blocked or frozen token cannot be redeemed. The read-only
+[operator warning client](../../packages/stream-client/docs/current-burn-finality.md)
+joins retained programs to source and target collections within explicit
+deployment and block ranges before burn blocks, freeze or collection finality.
+Its report does not establish governance authority or execution readiness;
+this contract does not silently alter Core's burn rules.
 
 ## Verification boundary
 

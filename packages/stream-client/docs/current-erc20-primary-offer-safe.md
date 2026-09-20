@@ -10,8 +10,9 @@ approval from a successful target simulation.
 
 Contract 20 is the sole token puller. A buyer Safe approves that payment adapter
 and executes `settleERC20PrimarySaleByPayer` itself, or supplies its separate
-ERC-1271 PaymentIntent to a live delegated executor. The carrier receives no
-standing token approval. The buyer remains the initial and final recipient.
+ERC-1271 PaymentIntent to a live delegated executor while maintaining
+sufficient token allowance to contract 20. The carrier receives no standing
+token approval. The buyer remains the initial and final recipient.
 
 Only the payer calling contract 20 directly receives its caller exemption.
 An offer signer, relayer or carrier cannot inherit that exemption. EIP-2612 and
@@ -19,12 +20,34 @@ Permit2 routes also require the buyer/payer as their actual caller. WithIntent
 checks the buyer's own signature even when the executor is also the buyer.
 An offer-signing delegation never grants token-spending authority.
 
+A Safe's ability to CALL a payment entry does not establish that the token
+accepts a permit signed by that Safe. The EIP-2612 route forwards the token's
+`permit(owner, spender, amount, deadline, v, r, s)` call; it does not translate
+an ERC-1271 signature into a token permit. The retained token implementation
+uses `ecrecover`, and the retained Safe test explicitly rejects that permit
+route. Do not assume EIP-2612 support implies Safe signature support. Use
+approval plus `ByPayer`, or an ERC-1271 PaymentIntent with sufficient allowance,
+unless the exact token's permit behavior for the Safe has separate evidence.
+
+The pinned Permit2 implementation has its own ERC-1271 verification path. A
+retained universal-settlement test covers Safe 1.4.1 with a threshold signature
+over the Safe-wrapped Permit2 digest, a prior token approval to Permit2 and a
+sufficient governed whole-call gas budget. The test rejects raw owner
+signatures that omit the Safe message wrapping.
+The offer-specific Permit2 test uses an EOA payer; it does not establish a
+joined Safe-plus-offer Permit2 execution. Check the pinned implementation,
+asset permit policy, Safe signature encoding, allowance and gas budget before
+using that route for a Safe.
+
 The [signing guide](current-erc20-primary-offer-signing.md) keeps the original
 Sales domain at the carrier separate from the original PaymentIntent domain at
 contract 20. Preserve all fields and the independent buyer TICKET, seller digest
 and payer-nonce replay identities. This atomic profile has no purchase ID.
 
 ## Complete user-call inventory
+
+This inventory describes target entries and caller requirements. Inclusion
+does not establish Safe compatibility with a token's permit signature scheme.
 
 | Target | Calls | Actual authority |
 | --- | --- | --- |
@@ -35,7 +58,9 @@ and payer-nonce replay identities. This atomic profile has no purchase ID.
 | Carrier | `raiseGasParameter` | Current governed gas authority. |
 | Carrier | `transferOwnership`, `renounceOwnership` | Current owner; these change future owner authority. |
 | Carrier | `revokeAuthorization` | Historical admitted seller, directly or through the original signed revocation. |
-| Contract 20 | `settleERC20PrimarySaleByPayer`, `settleERC20PrimarySaleWithEIP2612Permit`, `settleERC20PrimarySaleWithPermit2` | Actual buyer/payer. |
+| Contract 20 | `settleERC20PrimarySaleByPayer` | Actual buyer/payer with sufficient token allowance to contract 20. |
+| Contract 20 | `settleERC20PrimarySaleWithEIP2612Permit` | Actual buyer/payer and a valid token permit; Safe CALL capability alone is insufficient. |
+| Contract 20 | `settleERC20PrimarySaleWithPermit2` | Actual buyer/payer, token approval to pinned Permit2 and its valid permit signature; Safe use has the evidence limits above. |
 | Contract 20 | `settleERC20PrimarySaleWithIntent` | Buyer-signed intent; a nonpayer executor must additionally be a live buyer delegate. |
 | Contract 20 | `revokePaymentIntent`, `revokePaymentIntentWithSignature` | Direct payer or original signed payer revocation. |
 | Manager | `voidMintOffer` | Direct buyer or original signed MintTicketRevocation. |
