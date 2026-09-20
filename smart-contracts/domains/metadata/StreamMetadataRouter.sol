@@ -676,7 +676,12 @@ contract StreamMetadataRouter is
 
     function _collectionRead() private view {
         bytes memory result = StreamMetadataRouterCollectionReads.read(
-            _contentLayout(), _artistPresentation, _contentContext(), msg.data
+            _contentLayout(),
+            _artistPresentation,
+            _contentContext(),
+            address(StreamMetadataTokenRenderer),
+            address(StreamMetadataBundleRenderer),
+            msg.data
         );
         assembly ("memory-safe") { return(add(result, 32), mload(result)) }
     }

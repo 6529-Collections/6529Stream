@@ -10,7 +10,6 @@ import { IStreamCore } from "../../interfaces/stream/core/IStreamCore.sol";
 import { StreamMetadataRouterContent as Content } from "./StreamMetadataRouterContent.sol";
 import { StreamMetadataStaticState as ConfigState } from "./StreamMetadataStaticState.sol";
 import { StreamMetadataBundleRenderer as Bundle } from "./StreamMetadataBundleRenderer.sol";
-import { StreamMetadataTokenRenderer as TokenRenderer } from "./StreamMetadataTokenRenderer.sol";
 import {
     IStreamScriptBundles as Bundles
 } from "../../interfaces/stream/metadata/IStreamScriptBundles.sol";
@@ -54,6 +53,8 @@ library StreamMetadataRouterCollectionReads {
         Content.Layout memory layout,
         mapping(uint256 => IStreamMetadataServingFacts.ArtistPresentation) storage presentations,
         Content.Context memory context,
+        address tokenRenderer,
+        address bundleRenderer,
         bytes calldata input
     ) public view returns (bytes memory) {
         bytes4 selector = bytes4(input[:4]);
@@ -65,7 +66,11 @@ library StreamMetadataRouterCollectionReads {
             return abi.encode(presentations[collectionId]);
         }
         if (selector == IStreamMetadataServingFacts.collectionServingFacts.selector) {
-            return abi.encode(_completeFacts(layout, presentations, context, collectionId));
+            return abi.encode(
+                _completeFacts(
+                    layout, presentations, context, collectionId, tokenRenderer, bundleRenderer
+                )
+            );
         }
         if (selector == IStreamMetadataServingFacts.collectionServingSource.selector) {
             IStreamMetadataServingFacts.ServingSource memory result =
@@ -91,7 +96,9 @@ library StreamMetadataRouterCollectionReads {
         Content.Layout memory layout,
         mapping(uint256 => IStreamMetadataServingFacts.ArtistPresentation) storage presentations,
         Content.Context memory context,
-        uint256 collectionId
+        uint256 collectionId,
+        address tokenRenderer,
+        address bundleRenderer
     ) private view returns (IStreamMetadataServingFacts.ServingFacts memory result) {
         result = facts(
             _collections(layout),
@@ -100,7 +107,7 @@ library StreamMetadataRouterCollectionReads {
             _displayLocks(layout),
             IStreamCore(context.core),
             collectionId,
-            address(TokenRenderer)
+            tokenRenderer
         );
         Bundles.Selection memory selected = _scriptBundle(layout, collectionId);
         if (selected.bundleId != 0) {
@@ -109,7 +116,7 @@ library StreamMetadataRouterCollectionReads {
             result.mode = keccak256("ONCHAIN");
             result.scriptHash = f.payloadHash;
             result.scriptBytes = f.totalBytes;
-            result.renderer = address(Bundle);
+            result.renderer = bundleRenderer;
             result.rendererCodeHash = result.renderer.codehash;
             result.dependenciesLocked = result.scriptLocked;
         }
