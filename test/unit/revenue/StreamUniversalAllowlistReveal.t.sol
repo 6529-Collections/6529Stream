@@ -27,9 +27,10 @@ contract StreamUniversalAllowlistRevealTest is UniversalAllowlistPriceFixture {
         (IStreamUniversalFixedPriceSaleAdapter.SaleExecutionData memory e,
          StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c) =
             _priceExecution(payer, payer, payer, n);
+        bytes memory data = StreamUniversalAllowlistPrice.encode(e,c.sale.amount,proofData);
         vm.prank(payer);
         StreamPrimarySettlementTypes.PrimarySettlementResult memory r =
-            payment.settleERC20PrimarySaleByPayer{value: value}(c, StreamUniversalAllowlistPrice.encode(e,c.sale.amount,proofData));
+            payment.settleERC20PrimarySaleByPayer{value: value}(c, data);
         require(r.amount == 375 && r.asset == address(token) && r.executor == payer, "token receipt units");
         return r.settlementKey;
     }
@@ -172,10 +173,11 @@ contract StreamUniversalAllowlistRevealTest is UniversalAllowlistPriceFixture {
             _priceExecution(payer, payer, payer, 1);
         token.configure(address(payment), 1);
         vm.deal(address(payment), 125);
+        bytes memory data = StreamUniversalAllowlistPrice.encode(e,c.sale.amount,proofData);
         vm.expectRevert(abi.encodeWithSelector(
             IStreamImmediateSaleReveal.SaleRevealFeeBelowRequired.selector, uint256(125), uint256(126)));
         vm.prank(address(payment));
-        priceSale.executeERC20PreRevenueSingleStep{value: 125}(c, StreamUniversalAllowlistPrice.encode(e,c.sale.amount,proofData));
+        priceSale.executeERC20PreRevenueSingleStep{value: 125}(c, data);
         require(priceSale.executionIdByNonce(saleId, 1) == 0 && priceSale.refundLiability() == 0
             && token.balanceOf(payer) == 10000, "preflight before priceSale replay or funding");
     }
@@ -369,7 +371,7 @@ contract StreamUniversalAllowlistRevealTest is UniversalAllowlistPriceFixture {
         require(priceSale.refundAccountCount()==1 && priceSale.refundLiability()==50 && priceSale.refundableBalance(saleId,payer)==50,"one inventory row per sale and executor");
         PriceReentrantRefundReceiver recipient=new PriceReentrantRefundReceiver(priceSale,saleId);
         vm.prank(payer); priceSale.claimRefund(saleId,address(recipient));
-        require(recipient.attempted() && !recipient.succeeded() && keccak256(recipient.reason())==keccak256(abi.encodeWithSignature("Error(string)","ReentrancyGuard: reentrant call")),"original guard blocks nested claim");
+        require(recipient.attempted() && !recipient.succeeded() && keccak256(recipient.reason())==keccak256(abi.encodeWithSelector(ReentrancyGuard.ReentrancyGuardReentrantCall.selector)),"original guard blocks nested claim");
         require(address(recipient).balance==50 && priceSale.refundLiability()==0 && priceSale.refundableBalance(saleId,payer)==0 && priceSale.refundAccountCount()==1,"single claim preserves retained enumeration");
     }
 

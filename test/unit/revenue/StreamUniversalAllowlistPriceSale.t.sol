@@ -188,7 +188,7 @@ contract StreamUniversalAllowlistPriceSaleTest is UniversalAllowlistPriceFixture
         token.setCallback(address(priceSale),abi.encodeCall(priceSale.cancelSale,(saleId)));
         priceSale.transferOwnership(address(token));
         _pay(_e(payer,payer,payer,1));
-        require(!token.callbackSuccess() && token.callbackResultHash()==keccak256(abi.encodeWithSignature("Error(string)","ReentrancyGuard: reentrant call")),"host guard survives callback");
+        require(!token.callbackSuccess() && token.callbackResultHash()==keccak256(abi.encodeWithSelector(ReentrancyGuard.ReentrancyGuardReentrantCall.selector)),"host guard survives callback");
         require(!priceSale.saleRecord(saleId).cancelled && token.balanceOf(wallet)==375,"outer execution completes once");
     }
     function testLatePriceChangeRollsBackPaymentAndIdenticalBytesRetry() public {

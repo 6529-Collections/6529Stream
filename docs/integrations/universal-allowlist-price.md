@@ -2,8 +2,8 @@
 
 This additive ADR0019 carrier was applied after renewed review of the exact v8
 packet on 20 September 2026 (approval tool165646). Earlier denied proposals and
-review evidence remain preserved. The 42 tests are authored and typechecked;
-runtime, current-stack and launch acceptance remain pending. Existing
+review evidence remain preserved. The 42 tests are authored and typechecked; the bounded unit run and its
+limits are recorded below. Current-stack and launch acceptance remain pending. Existing
 Universal and Payment contracts are unchanged.
 
 `StreamUniversalAllowlistPriceSale` uses the existing one-token, order-1,
@@ -63,14 +63,25 @@ The current recipe uses actual Core/Artist/Manager/Ledger/Safe and its inherited
 WAIVED conservation setup; external entropy and ERC20 are explicit fixtures.
 Those seven current recipes retain zero-native execution; native fees and refunds
 are covered by the separate authored unit-boundary cases. Inherited fixture gas
-settings do not establish production cap acceptance. All 42 remain unexecuted.
+settings do not establish production cap acceptance. The seven current recipes
+remain unexecuted.
 The selected five-product capture passes Solidity 0.8.19 via-IR, 200 runs, Paris
 with no CBOR metadata: this carrier is 22,005 runtime / 27,506 creation bytes.
 Its original 121 ABI entries and recursive storage layout are unchanged. The
 two admission calls use the already accepted fixed SaleExecution worker; its
-original checks and caller context are retained. Actual deployment, linked
-artifact execution and runtime acceptance remain pending. The unit run awaits
-the shared genuine conservation-floor fixture correction.
+original checks and caller context are retained. The isolated 302-source unit graph includes the reviewed genuine conservation
+floor fixture correction. Its 102 artifacts (100 concrete production products)
+pass exact source/compiler/link/metadata verification and the original production
+code limits before tests. The second frozen run passed 34 of 35 unit cases. Its
+sole remaining failure was an obsolete string-error assertion: the unchanged
+recipient callback correctly reverted with `ReentrancyGuardReentrantCall()`.
+The assertion now names that exact original custom error, preserving the outer
+refund accounting checks. Earlier corrections evaluate the same public-library
+encoding before one-shot Foundry prank/revert expectations and use the same
+custom error for the token callback. All production bytes are unchanged.
+A final single changed-test cached run remains pending; the original failed
+captures are retained. No current-stack or launch acceptance follows from this
+bounded fixture evidence.
 
 This profile does not implement the separate `6529Stream Sales` signing family,
 public unsigned sales, Dutch/PWYW/clearing programs, multi-token/prepared batches,
