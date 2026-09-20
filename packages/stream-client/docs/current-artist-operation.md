@@ -25,13 +25,18 @@ ratification payloads remain in their original client modules.
 Operations 20 and 21 record authorization. The corresponding resolver or metadata
 operation must still perform the freeze.
 
-The [coverage register](current-artist-operation-coverage.json) tracks every
-original operation 1–60, the existing operation 61 dispute withdrawal, current
+The frozen [coverage register](current-artist-operation-coverage.json) tracks every
+original operation 1–60, the existing operation 61 dispute withdrawal, source-pinned
 method variants, and three additional public configuration/checkpoint methods.
 An operation ID is not a claim that all its variants have client workflows.
 Operation 36 is historically named `designateSuccessor`; its actual facade method
 is `recordSuccessorDesignation`. Delegated policy and sale consent retain the
 original operation IDs 14 and 16. C2PA callers remain pending.
+
+The additive [authority hydration callers](current-artist-authority-hydration.md)
+cover operation 60's approved baseline, multiple and single-delegation profiles.
+Their newer compiler fixture preserves the coverage register's earlier source
+snapshot and does not imply support for every hydration combination.
 
 ## Payload and caller review
 

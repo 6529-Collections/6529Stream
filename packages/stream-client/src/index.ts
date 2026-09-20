@@ -63,3 +63,5 @@ export * from "./current-erc20-primary-offer.js";
 export * from "./current-erc20-burn-mint-signing.js";
 export * from "./current-erc20-burn-mint.js";
 export * from "./current-entropy-authority.js";
+export * from "./current-artist-authority-hydration.js";
+export * from "./current-artist-authority-hydration-workflow.js";
