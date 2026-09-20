@@ -756,6 +756,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add original scoped-policy reference preparation and publication clients,
+  preserving exact environment bytes and external archive coverage semantics.
+
 - Add scoped-policy Router root adoption and original Artist content-consent
   clients with exact family, replay and historical aggregate commitments.
 

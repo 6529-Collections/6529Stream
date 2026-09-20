@@ -100,6 +100,11 @@ the same original source profile for Artist operation-17 consent and Router
 root adoption. The signed collection-wide family, historical aggregate and
 actual consent consumption remain distinct commitments.
 
+The [scoped full-policy reference client](current-scoped-policy-reference-v2.md)
+continues the original ABI129 profile with environment and file-inventory
+preparation plus reference publication. It preserves the distinction between
+fresh external coverage, the original current receipt pair and immutable history.
+
 This retained inventory still records gaps for governance/control families,
 clone claims and escrow, original records/read surfaces, Core/mint controls, and broader
 Artist variants. It is an implementation queue and review register, not a

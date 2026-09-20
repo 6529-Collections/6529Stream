@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Scoped full-policy reference publication](docs/current-scoped-policy-reference-v2.md)
+  covers original environment and inventory preparation plus reference
+  publication under ABI129, with distinct fresh/current archive coverage.
+
 - [Scoped full-policy root adoption](docs/current-scoped-policy-root-v2.md)
   covers original Router roots and exact Artist operation-17 consent under
   ABI129, with collection-wide family and historical aggregate commitments.
