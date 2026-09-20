@@ -1,5 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import {
+    IStreamCurrentAuthorityPreservationPolicyPublicationFactoryV1 as CurrentFactory
+} from "../../interfaces/stream/finality/IStreamCurrentAuthorityPreservationPolicyPublicationFactoryV1.sol";
+import {
+    StreamCurrentAuthorityPreservationPolicyPublicationTypesV1 as Current
+} from "../../interfaces/stream/finality/StreamCurrentAuthorityPreservationPolicyPublicationTypesV1.sol";
+import {
+    StreamArtistArchiveOriginTypes as O
+} from "../../interfaces/stream/preservation/StreamArtistArchiveOriginTypes.sol";
+import {
+    StreamCurrentAuthorityInventoryTypes as D
+} from "../../interfaces/stream/preservation/StreamCurrentAuthorityInventoryTypes.sol";
 
 import {
     IStreamPreservationPolicyPublicationGraphBindingV1 as Binding
@@ -56,15 +68,18 @@ library StreamMetadataPreservationPolicyPublicationGraphReadsV1 {
         _pin(b.factory, b.factoryCodeHash);
         if (
             _word(
-                        b.factory,
-                        abi.encodeCall(IERC165.supportsInterface, (type(Factory).interfaceId)),
-                        c.readGas
-                    ) != bytes32(uint256(1))
-                || _word(
-                        b.factory,
-                        abi.encodeCall(Factory.preservationPolicyPublicationFactoryProfile, ()),
-                        c.readGas
-                    ) != Graph.PROFILE
+                    b.factory,
+                    abi.encodeCall(IERC165.supportsInterface, (type(Factory).interfaceId)),
+                    c.readGas
+                ) != bytes32(uint256(1))
+        ) revert PreservationPolicyPublicationGraphUnavailable(b.factory);
+        bytes32 profile = _word(
+            b.factory,
+            abi.encodeCall(Factory.preservationPolicyPublicationFactoryProfile, ()),
+            c.readGas
+        );
+        if (
+            (profile != Graph.PROFILE && profile != Current.FACTORY_PROFILE)
                 || _word(b.factory, abi.encodeCall(Factory.recipeHash, ()), c.readGas)
                     != b.recipeHash
                 || _word(
@@ -79,9 +94,10 @@ library StreamMetadataPreservationPolicyPublicationGraphReadsV1 {
 
         raw = Reads.dynamicRead(b.factory, abi.encodeCall(Factory.recipe, ()), 24576, c.readGas);
         Graph.Recipe memory r = abi.decode(raw, (Graph.Recipe));
+        (bytes32 expectedRecipeHash, bytes32 graphDomain) =
+            _recipeIdentity(b.factory, profile, r, c.readGas);
         if (
-            keccak256(raw) != keccak256(abi.encode(r))
-                || b.recipeHash != keccak256(abi.encode(Graph.PROFILE, block.chainid, r))
+            keccak256(raw) != keccak256(abi.encode(r)) || b.recipeHash != expectedRecipeHash
                 || r.inventory.chainId != block.chainid || r.inventory.targets[0] != c.core
                 || r.inventory.targets[1] != c.metadata || r.inventory.targets[2] != c.schemas
                 || r.inventory.targets[4] != c.router || r.factorySourceGas < 50000
@@ -104,7 +120,7 @@ library StreamMetadataPreservationPolicyPublicationGraphReadsV1 {
                 || g.graphId
                     != keccak256(
                         abi.encode(
-                            keccak256("6529STREAM_PRESERVATION_POLICY_PUBLICATION_GRAPH_V1"),
+                            graphDomain,
                             block.chainid,
                             b.factory,
                             b.recipeHash,
@@ -137,6 +153,47 @@ library StreamMetadataPreservationPolicyPublicationGraphReadsV1 {
             _pin(g.children[i], g.codeHashes[i]);
         }
         return (g.children[2], g.codeHashes[2]);
+    }
+
+    /// @dev Supplemental selectors are shared with SCOPED factories. Both the base
+    /// COLLECTION capability above and this exact closed profile are required.
+    function _recipeIdentity(
+        address factory,
+        bytes32 profile,
+        Graph.Recipe memory recipe_,
+        uint256 cap
+    ) private view returns (bytes32 recipeHash_, bytes32 graphDomain) {
+        if (profile == Graph.PROFILE) {
+            return (
+                keccak256(abi.encode(Graph.PROFILE, block.chainid, recipe_)),
+                keccak256("6529STREAM_PRESERVATION_POLICY_PUBLICATION_GRAPH_V1")
+            );
+        }
+        if (
+            profile != Current.FACTORY_PROFILE
+                || _word(
+                        factory,
+                        abi.encodeCall(
+                            IERC165.supportsInterface, (type(CurrentFactory).interfaceId)
+                        ),
+                        cap
+                    ) != bytes32(uint256(1))
+        ) revert PreservationPolicyPublicationGraphUnavailable(factory);
+        bytes memory originBytes =
+            Reads.read(factory, abi.encodeCall(CurrentFactory.originDependencies, ()), 128, cap);
+        bytes memory authorityBytes =
+            Reads.read(factory, abi.encodeCall(CurrentFactory.authorityDependencies, ()), 96, cap);
+        O.Dependencies memory origin = abi.decode(originBytes, (O.Dependencies));
+        D.Dependencies memory authority = abi.decode(authorityBytes, (D.Dependencies));
+        if (
+            keccak256(originBytes) != keccak256(abi.encode(origin))
+                || keccak256(authorityBytes) != keccak256(abi.encode(authority))
+        ) {
+            revert PreservationPolicyPublicationGraphUnavailable(factory);
+        }
+        // The genuine factory's requireCurrentGraph below still authenticates all
+        // operative resolver/origin capabilities and exact current children.
+        return (Current.recipeHash(block.chainid, recipe_, origin, authority), Current.GRAPH_DOMAIN);
     }
 
     function _word(address target, bytes memory input, uint256 gasLimit)

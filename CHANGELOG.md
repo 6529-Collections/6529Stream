@@ -1,4 +1,11 @@
 # Changelog
+## Current-authority COLLECTION publication reader
+
+- Join the distinct authority-bound preservation factory to the ordinary
+  COLLECTION root route. Preserve the standard recipe while checking the new
+  capability, canonical dependency tuples and separate graph domain. Add eight
+  dispatch and corruption regressions; native ceremony acceptance remains open.
+
 ## Governed VIEW route-read budget
 
 - Add an explicitly governed VIEW budget shared by adoption, current-source

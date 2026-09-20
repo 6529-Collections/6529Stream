@@ -30,9 +30,19 @@ Children zero through four are the existing preservation readiness, checkpoint,
 output, snapshot and reference deployments. Children five and six are the new
 current-authority inventory and coverage hosts. Creation is bounded and
 append-only. Every current graph read rechecks the exact child runtimes,
-constructor hashes and entropy source plan. The Router's collection publication
-reader also needs the separately integrated exact authority-factory admission
-path; the ordinary factory hash is not interchangeable with the new hash.
+constructor hashes and entropy source plan. The Router's COLLECTION publication
+reader accepts the two explicitly named standard and current-authority factory
+profiles. It first requires the base COLLECTION factory capability; the new
+profile additionally requires the authority-factory capability and canonical
+original-archive and resolver dependency tuples. Their values enter the recipe
+hash and distinct graph domain. A SCOPED factory or an unknown profile cannot
+enter this route even if it advertises the same supplemental selectors.
+
+The reader retains every source-plan, seven-child runtime and current-graph
+check before returning the output child. The original standard branch keeps
+its original hash and performs no new authority-dependency reads. Eight added
+regressions cover dispatch, missing capabilities, dependency corruption and
+noncanonical replies; they are ABI-checked, with native execution pending.
 
 These first five children retain the existing producer profile checks. The
 separate current-Artist preservation producer uses a distinct producer marker;
