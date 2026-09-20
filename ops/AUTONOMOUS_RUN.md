@@ -21,7 +21,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | `45836680`: canonical claim/PWYW, VIEW adoption, transport/export, writer capacity, Museum V5 and revenue clients integrated. ABI116: 2,984 sources / zero errors. Clients1,588 and Museum31 pass; metric native17 eight pass / one fail. Every runtime result retains its recorded source boundary. |
+| Source checkpoint | `5d1756eb`: full Import, pending-generation attestation, scoped factory, current Safe/Burn recipes and museum attribution integrated. ABI117:3,000 sources / zero errors, exact committed-source bridge. Clients1,588 and Museum31 pass; metric native17 eight pass / one fail. Every runtime result retains its recorded source boundary. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -58,8 +58,8 @@ gas failure. Builders continue coherent features while frozen tests run.
   and three actual-current ERC20 Safe cases integrated. Build eight bounded
   current revenue/Safe claim cases, separating official and passive receipts.
 - Prepared task `01a0bf2e-f3d6-7203-8d51-c530eda626c7`: transport/export and
-  continuations integrated; complete original Identity Import split and actual
-  record rollback evidence. A owns the generation/attestation join.
+  continuations integrated; original Identity Import split is integrated with six real-record rollback
+  passes. Prepare the exact actual-Artist operation60 construction/source plan. A owns the generation/attestation join.
 
 Root clients1,588 and Museum V5 31 pass on their recorded source. Metric native17
 is eight pass/one transaction-gas failure. Full actual current/Safe/stateful,

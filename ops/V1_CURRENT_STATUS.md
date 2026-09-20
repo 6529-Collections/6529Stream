@@ -18,9 +18,22 @@ Other held proposals remain separate.
 
 ## 20 September integrated batch
 
-Latest integrated source: `45836680`. ABI116 checks all 2,984 Solidity
-sources, method identifiers and storage layouts with zero errors in 30.719
-seconds. Source integration is not combined runtime acceptance.
+Latest integrated source: `5d1756eb`. ABI117 checks all 3,000 Solidity
+sources, method identifiers and storage layouts with zero errors in 31.125
+seconds. Exact committed-source readback has zero mismatches. Source integration
+is not combined runtime acceptance.
+
+The next joined additions are complete as source: original Identity Import
+(`e1fa284c`, nine selected products fit, six real-storage component cases pass),
+pending generations plus original op24 attestation history (`c686a29f`, eight
+selected products fit, ten new cases authored), and the genuine scoped full-policy
+entropy factory (`5ad8163c`, twelve cases authored). The factory is a prerequisite,
+not a complete finality provider. Actual-current Burn policy seven and Safe
+revenue claims eight are integrated (`0b2c1d6f`, `4cb8fef4`); execution is pending.
+The corrected actual-current Immediate/Claim recorder admission is `3c78cc5a`.
+Museum attribution/sanction joins (`b2f1459c`) pass all 51 focused root tests.
+The compact metric proof optimization (`5d1756eb`) is source-reviewed; its
+original 25 plus nine independent parity cases are compiling.
 
 - Canonical signed/public fixed and open sales, ZERO_PRICE_CLAIM and PWYW are
   source-integrated (`b4d07ed0`, `65dc2b2b`). The original Sales-v1 signature
@@ -28,7 +41,9 @@ seconds. Source integration is not combined runtime acceptance.
   verifier passes 11 native cases and 256 fuzz inputs. The native-sales cohort
   passes 20 revocation/recorder cases; 25 purchase cases stopped in setup on an
   unsupported fixture URI. Corrected URI fixtures (`3eb4078a`, `b6457e38`) are
-  integrated and a frozen retry is running. Eight actual-current claim/Safe
+  integrated. The frozen retry then found a second setup issue: its typed entropy
+  replacement triggers real Core continuity checks. A genesis-only fixture
+  binding repair is being built; the 25 purchase bodies remain unexecuted. Eight actual-current claim/Safe
   cases are integrated (`45836680`), with execution pending. Standard Dutch
   carriers remain an active build.
 - Proven native Dutch/clearing leaf ceilings now replace the signed price
@@ -39,8 +54,9 @@ seconds. Source integration is not combined runtime acceptance.
 - ERC20 reveal allowance passes its frozen 93-case campaign at `5df9808e`,
   independently checked against all 553 sources and recorded production sizes.
   The separate price campaign reached 26 passes and nine failures caused by
-  test call ordering, an error expectation and missing pinned Safe artifacts;
-  the reviewed fixture corrections are running. Three additional actual-current
+  test call ordering, error expectations and missing pinned Safe artifacts. The
+  corrected successor passes 34 of 35; its remaining obsolete refund-error
+  expectation is corrected in `307ed239` and a frozen retry is running. Three additional actual-current
   two-Safe/ASYNC_REQUIRED/Permit2 rollback cases are source-integrated
   (`316f1050`, `4cf9c6ed`), with combined execution pending.
 - Artist preparation, record/delegation, complete source decoding and pending
@@ -51,8 +67,9 @@ seconds. Source integration is not combined runtime acceptance.
   seven selected products, preserving original interfaces and write order;
   its 25 cases are authored. Identity transport/export/continuations
   (`e2713593`) fit 22 selected products; nonce/encoding components pass 13
-  cases. Full Import and generation-plus-attestation composition are active
-  builds. These component results do not prove complete migration execution.
+  cases. Full Import and generation-plus-attestation composition are now source
+  integrated as recorded above; broader direct content/consent combinations
+  remain an active build. These component results do not prove complete migration execution.
 - Canonical VIEW adoption, STATIC routing and rendering are source-integrated
   (`b256a3c1`). Its 21 scoped cases and two 256-input fuzz properties pass;
   Router and fixed read facade fit. Full VIEW output/finality and actual
@@ -61,8 +78,8 @@ seconds. Source integration is not combined runtime acceptance.
 - Actual-current redemption adds 12 reviewed source cases (`452d0f17`).
   Recipient Merkle distribution is integrated (`a2d38f50`) with 18 additional
   cases alongside the earlier 27. Its bounded native attempt timed out before
-  execution; no pass is claimed. Current burn-policy rollback cases are being
-  built separately.
+  execution; no pass is claimed. Seven current burn-policy rollback cases are now source-integrated
+  as recorded above.
 - Developer clients add 17 wallet/ClaimRouter/Escrow/governance calls
   (`4fa32ae1`). Root's frozen combined package passes all 1,588 tests, zero
   failures/skips, generation, build and strict types. The generated Safe
@@ -73,8 +90,8 @@ seconds. Source integration is not combined runtime acceptance.
   integrated (`bb38b542`); root passes 31 cases. All 19 requirements remain.
   Requirements 2/7/19 have source-derived joins; 5/6/10/13 are partial and the
   rest remain supplied-only. Complete authoritative source export and
-  institutional conformance are not claimed. Attribution/sanction and later
-  historical master/archive joins continue.
+  institutional conformance are not claimed. Attribution/sanction joins now pass the separate 51-case source/capture
+  campaign. Historical master/archive joins continue.
 - The actual metric-publication native17 capture now passes eight of nine
   original cases, including full admission/consumer/class-two lock and
   identical Safe retry. Final transaction binding still exceeds the original
