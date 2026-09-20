@@ -202,6 +202,24 @@ contract StreamArtistRecoveryStagingFamilyActualTest is
         if (sfExecution == 0) _sfEmptyClosure(0);
     }
 
+    function _sfCloseExecution() private returns (bytes32 closureHash) {
+        require(sfExecution != 0, "actual execution to close");
+        _sfMature();
+        _sfCompromise(sfExecution);
+        bytes32 dismissal = _sfDismiss();
+        R.TransitionState memory t = ingress.artistTransitionState(sfExecution);
+        Dismissal.Closure memory closed = ingress.identityTransitionClosure(artistId, sfExecution);
+        require(
+            t.phase == 2 && t.executedAt != 0 && t.contestedAt >= t.postWindowEndsAt
+                && closed.artistId == artistId && closed.transitionRecordHash == sfExecution
+                && closed.dismissalRecordHash == dismissal && dismissal != 0
+                && closed.windowEndsAt == t.postWindowEndsAt && closed.contestedAt == t.contestedAt
+                && !closed.abandoned,
+            "actual late33 dismissal creates the retained mature execution closure"
+        );
+        return keccak256(abi.encode(closed));
+    }
+
     function _sfCapture(bool veto, bytes32 subject) private returns (bytes32 pending) {
         _sfMature();
         ArtistAppealUnitRoles(suite.roleRegistry).setArbiter(address(artist), true);
@@ -514,14 +532,22 @@ contract StreamArtistRecoveryStagingFamilyActualTest is
     function _sfHistory() private view returns (bytes32 value) {
         if (sfOrigin != 0) {
             value = keccak256(
-                abi.encode(sfOrigin, _snapshot(sfOrigin), ingress.artistTransitionState(sfOrigin))
+                abi.encode(
+                    sfOrigin,
+                    _snapshot(sfOrigin),
+                    ingress.artistTransitionState(sfOrigin),
+                    ingress.identityTransitionClosure(artistId, sfOrigin)
+                )
             );
         }
         for (uint256 i; i < sfRotations.length; ++i) {
             bytes32 r = sfRotations[i];
             value = keccak256(
                 abi.encode(
-                    value, ingress.rotationRecord(r), ingress.identityTransitionClosure(artistId, r)
+                    value,
+                    ingress.rotationRecord(r),
+                    ingress.artistTransitionState(r),
+                    ingress.identityTransitionClosure(artistId, r)
                 )
             );
         }
@@ -534,6 +560,8 @@ contract StreamArtistRecoveryStagingFamilyActualTest is
                     value,
                     ingress.identityRecoveryRecord(r),
                     _snapshot(r),
+                    ingress.artistTransitionState(r),
+                    ingress.identityTransitionClosure(artistId, r),
                     primary,
                     occurrence,
                     secondary
@@ -828,13 +856,24 @@ contract StreamArtistRecoveryStagingFamilyActualTest is
 
     function testStagingFamilyFirst40RotationC2() public {
         _sfSetup(2, 4095);
+        bytes32 closed = _sfCloseExecution();
         _sfRotate();
         _sfRecover(_sfCapture(true, 0), false, true, false);
+        require(
+            keccak256(abi.encode(ingress.identityTransitionClosure(artistId, sfOrigin))) == closed,
+            "original40 closure retains its first dismissal"
+        );
     }
 
     function testStagingFamilyRepeated40C1AndLaterRegisteredNativeRows() public {
         _sfSetup(3, 4095);
+        bytes32 prior = sfExecution;
+        bytes32 closed = _sfCloseExecution();
         _sfRecover(_sfCapture(false, 0), false, true, true);
+        require(
+            keccak256(abi.encode(ingress.identityTransitionClosure(artistId, prior))) == closed,
+            "original35 closure retains its first dismissal"
+        );
     }
 
     function testStagingFamilyRepeated40ZeroCapabilitiesRotationC2() public {
@@ -850,8 +889,13 @@ contract StreamArtistRecoveryStagingFamilyActualTest is
 
     function testStagingFamilyFirst43RotationC2() public {
         _sfSetup(4, 0);
+        bytes32 closed = _sfCloseExecution();
         _sfRotate();
         _sfRecover(_sfCapture(true, 0), false, true, false);
+        require(
+            keccak256(abi.encode(ingress.identityTransitionClosure(artistId, sfOrigin))) == closed,
+            "original43 closure retains its first dismissal"
+        );
     }
 
     function testStagingFamilyRepeated43C1() public {
