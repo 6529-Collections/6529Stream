@@ -65,6 +65,10 @@ establish complete-system acceptance. Original RC1 remains unchanged.
   real Store/workers with named cooling; the actual publication/Safe/lock retry
   is running on its exact predecessor graph. Full latest-stack capacity remains
   open, and the original failed captures are preserved.
+- Museum Standing V2 (`3f0967f`) consumes original unresolved conflict history
+  and historical acknowledgement guards without altering V1. Root passes 27
+  consumer cases plus 17 documentation cases; both profiles and all seven source
+  pins match. Supplied-byte checks do not authenticate governance or chain history.
 - Seven inactive worktrees were removed after exact cleanliness and process
   checks. Every named branch and commit was retained. Active tasks, evidence,
   dirty worktrees and the Museum runtime were preserved; no tasks were archived.
@@ -268,7 +272,8 @@ credential/report/selection bytes with independent personhood and historical
 Display observations. Its 13 focused tests pass; the combined 28-case catalog
 and C2PA cohort passes after a test-only source assertion follows the already
 extracted Metadata pointer-index worker. Original ART38 and standing conflicts
-are now source-integrated; the additive Museum Standing consumer remains pending.
+are now source-integrated; the additive Museum Standing consumer (`3f0967f`)
+passes its scoped checks. Authenticated current/history capture remains pending.
 
 The latest combined-source ABI/type/storage pass at `9beafd1a` covers 2,248
 sources in 20.359 seconds with no errors, including the new C2PA and recovery

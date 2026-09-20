@@ -56,7 +56,9 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 - Museum delivered the complete catalog, historical C2PA reader and direct
   retained-file PREMIS (`a69c377e`,root53 tests). Its new official-authority
   snapshot is integrated (`e290dc4a`,37 root tests and profile/example checks),
-  followed by the additive frozen Standing consumer now being built.
+  followed by Standing V2 (`3f0967f`,27 consumer plus17 docs tests). Its next
+  independent Museum requirement batch is being selected; current-chain historical
+  authentication remains distinct from supplied-byte agreement.
 - Clients delivered delegated Artist consent (`b99b3781`) and grace workflow
   (`9ac63a11`), then economics15/royalty-freeze20 (`6b71507e`): root797 tests
   plus exact ABI52 check pass. Remaining work includes original attestation24,
