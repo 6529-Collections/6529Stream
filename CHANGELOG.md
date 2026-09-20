@@ -115,6 +115,11 @@ the release policy in `docs/release-policy.md`.
 
 - Fit the joined Artist Payout owner by factoring six original structured reads
   into a fixed typed encoder, preserving its ABI, storage and mutation bodies.
+- Add an explicitly admitted native-provider configuration capture and historical
+  RIGHTS binding. Recompute the original ten target/code pins and three gas
+  configurations, retain current gas separately, and match the saved floor
+  source and RIGHTS dependencies without changing earlier capture formats or
+  implying historical execution, personhood or paid Artist acceptance.
 
 - Add offline correspondence between frozen universal or DIRECT first-sale
   RIGHTS commitments and original public RIGHTS records, receipts and selected

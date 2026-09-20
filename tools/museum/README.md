@@ -1,5 +1,10 @@
 # Museum offline tooling
 
+[Original provider configuration](../../docs/museum-conservation-provider-source.md)
+captures the new getter's complete constructor preimage and separates original
+gas from governed values. Its additive binding joins the saved floor provider
+and RIGHTS dependency pins while preserving the earlier assembly unchanged.
+
 [Original conservation RIGHTS correspondence](../../docs/museum-conservation-rights.md)
 joins a saved first-sale commitment to original selected collection records,
 receipts and payloads. Current and historical selections stay separate, and

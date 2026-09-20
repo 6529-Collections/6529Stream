@@ -9,6 +9,15 @@ These dependencies remain required implementation, not waivable qualifications.
 
 ## Later source and consumer implementations
 
+The [original provider configuration profile](museum-conservation-provider-source.md)
+uses the additive getter at source `36c871f44636837bdc5504e6aaeafe54e14dcb98`.
+Explicit runtime admission and the saved configuration hash bind the complete
+constructor preimage. A separate assembly matches the saved floor provider and
+RIGHTS targets 0--4, preserving the prior RIGHTS assembly and original/current
+gas distinction. This is immutable configuration correspondence, not historical
+provider execution or paid Artist acceptance. The frozen 8bb profile still lacks
+the getter and retains its original limitation.
+
 The [original RIGHTS correspondence](museum-conservation-rights.md) separately
 replays either floor family with a frozen public RIGHTS capture. It matches
 saved collection hashes to original Metadata records, payloads and pre-sale
