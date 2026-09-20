@@ -59,8 +59,20 @@ contract StreamCurrentConservationFloorSettlementTest is NativeCustodyAuctionFix
                 "CONSERVATION_FLOOR_PRODUCER_GAS", 1000000, 1000000, 2
             ),
             IStreamGasParameterHost.GasParameterConfig(
-                "CONSERVATION_FLOOR_CALL_GAS", 6000000, 6000000, 2
+                // Fresh WAIVED-fixture tuple; not a reduction of an existing governed cap.
+                "CONSERVATION_FLOOR_CALL_GAS",
+                2000000,
+                2000000,
+                2
             )
+        );
+        (uint256 callGas, uint256 callFloor, uint8 failureClass,) =
+            floor.gasParameterInfo(floor.CALL_GAS());
+        uint256 callbackGas = manager.gasParameter(manager.GGP_PREPARED_NATIVE_CALLBACK_GAS_LIMIT());
+        require(
+            callGas == 2000000 && callFloor == 2000000 && failureClass == 2
+                && callbackGas == 4000000 && callGas + callGas / 63 + 100000 + 3300 < callbackGas,
+            "fresh WAIVED floor reservation fits the unchanged callback configuration"
         );
         (bytes32 s, bytes32 o, bytes32 n) = core.conservationFloorTransition(address(floor));
         _context(s, o, n, 1);
