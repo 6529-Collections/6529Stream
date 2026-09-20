@@ -72,6 +72,10 @@ The [canonical native sales client](current-canonical-native-sales.md) separatel
 retains ABI113 for fixed/open and free/PWYW purchases, excess refunds and original
 Manager revocation. It preserves the earlier native-adapter signing profiles.
 
+The [recipient Merkle distribution client](current-distribution-merkle.md)
+separately retains ABI117 for published recipient allowances and original
+distribution/claim CALLs. Earlier STATIC program hashes and evidence are preserved.
+
 This retained inventory still records gaps for governance/control families,
 clone claims and escrow, original records/read surfaces, Core/mint controls, and broader
 Artist variants. It is an implementation queue and review register, not a

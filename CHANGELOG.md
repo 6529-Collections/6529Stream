@@ -378,6 +378,9 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+- Add source-qualified recipient Merkle distribution callers with published-list
+  commitments, ordered allowance proofs and original direct/Safe NFT claims.
+
 - Add source-qualified canonical native fixed/open purchases and free/PWYW claims,
   with original Sales-v1 signing, native refunds and historical Manager revocation.
 

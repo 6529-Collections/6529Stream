@@ -337,6 +337,10 @@ contract profiles and outstanding larger-script work.
 
 ## Current caller extensions
 
+- [Published recipient distribution allowances](docs/current-distribution-merkle.md)
+  adds Manager-selected Merkle configuration, ordered recipient proofs and
+  original distribution/claim workflows while preserving the STATIC profile.
+
 - [Canonical native purchases and claims](docs/current-canonical-native-sales.md)
   covers original Sales-v1 fixed/open and free/PWYW purchases, native excess
   refunds and historical Manager revocation through direct and Safe calls.

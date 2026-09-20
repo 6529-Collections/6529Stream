@@ -40,6 +40,8 @@ export * from "./current-mint-phase-freeze-workflow.js";
 export * from "./current-mint-counter-reads.js";
 export * from "./current-mint-counter-reads-workflow.js";
 export * from "./current-distribution.js";
+export * from "./current-distribution-merkle.js";
+export * from "./current-distribution-merkle-workflow.js";
 export * from "./current-burn-mint.js";
 export * from "./current-burn-finality.js";
 export * from "./current-native-allowlist-price.js";
