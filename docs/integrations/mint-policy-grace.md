@@ -102,3 +102,11 @@ The separate [mode-2 batch](../../ops/MINT_MODE2_CONSENT_ACCEPTANCE.md) adds act
 delegated registration/grace, stale-policy rejection and durable-consent retry
 cases. Native test execution, gas measurements and complete candidate acceptance
 remain pending the coordinator's matched-source run.
+
+
+## Frozen phases
+
+A [one-way phase freeze](mint-phase-freeze.md) preserves existing grace. Its
+executor set can only shrink: removals retain the same consent and grace checks,
+no-ops cannot extend grace, and a removed executor cannot be re-added. Freeze
+continuity is enforced by the original Ledger across supported replacements.

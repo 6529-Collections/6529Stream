@@ -6,6 +6,7 @@ import "./StreamMintArtistConsent.sol";
 import "./StreamMintGateValidator.sol";
 import "./StreamMintOperationIdentity.sol";
 import "./StreamMintCounterPolicy.sol";
+import "./StreamMintPhaseFreezeControl.sol";
 
 /// @notice Linked configuration and bookkeeping for Manager-owned phase state.
 /// @dev Delegatecalls retain Manager storage, msg.sender and event emitter. Public
@@ -24,6 +25,16 @@ library StreamMintPhaseState {
         uint32 maxBatchQuantity;
         uint16 maxCounters;
     }
+
+    struct ConfigurationArguments {
+        uint256 collectionId;
+        bytes32 phaseId;
+        IStreamMintManager.MintPhaseConfig config;
+        IStreamMintManager.MintGateConfig gateConfig;
+        bytes32[] counterIds;
+        IStreamMintManager.MintCounterConfig[] counterConfigs;
+    }
+
     uint16 private constant SCHEMA_VERSION = 1;
 
     /// @notice Adds/removes one executor, returning false for an unchanged authorization.
@@ -118,24 +129,28 @@ library StreamMintPhaseState {
         bytes32[] storage storedIds,
         mapping(bytes32 => IStreamMintManager.MintCounterConfig) storage storedCounters,
         address[] storage executors,
+        mapping(address => bool) storage authorized,
+        mapping(address => uint256) storage indexPlusOne,
         mapping(bytes32 => bytes32) storage policyHashes,
-        IStreamMintManager.MintPhaseConfig calldata config,
-        IStreamMintManager.MintGateConfig calldata gateConfig,
-        bytes32[] calldata counterIds,
-        IStreamMintManager.MintCounterConfig[] calldata counterConfigs,
+        bytes calldata arguments,
         ConfigurationContext memory context
     ) external returns (bytes32 policyHash) {
         uint256 collectionId = context.policy.collectionId;
         bytes32 phaseId = context.policy.phaseId;
+        // The original configurePhase ABI is decoded by a fixed linked worker. Storage
+        // references and dependencies still originate exclusively at the guarded host.
+        (,, IStreamMintManager.MintPhaseConfig memory config) =
+            abi.decode(arguments, (uint256, bytes32, IStreamMintManager.MintPhaseConfig));
         _requirePhaseConfig(collectionId, phaseId, config, context.maxBatchQuantity);
-        if (counterIds.length == 0 || counterIds.length != counterConfigs.length) {
-            revert IStreamMintManager.MintArrayLengthMismatch();
+        _requireArgumentBounds(arguments, context.maxCounters);
+        ConfigurationArguments memory args =
+            abi.decode(bytes.concat(bytes32(uint256(32)), arguments), (ConfigurationArguments));
+        if (args.collectionId != collectionId || args.phaseId != phaseId) {
+            revert IStreamMintManager.InvalidMintPhase(collectionId, phaseId);
         }
-        if (counterIds.length > context.maxCounters) {
-            revert IStreamMintManager.MintCounterCountLimitExceeded(
-                counterIds.length, context.maxCounters
-            );
-        }
+        IStreamMintManager.MintGateConfig memory gateConfig = args.gateConfig;
+        bytes32[] memory counterIds = args.counterIds;
+        IStreamMintManager.MintCounterConfig[] memory counterConfigs = args.counterConfigs;
 
         bytes32[] memory ids = _copyCounterIds(counterIds);
         IStreamMintLedger.LedgerCounterPolicy[] memory ledgerPolicies =
@@ -158,6 +173,9 @@ library StreamMintPhaseState {
         phaseState.exists = true;
         phaseState.config = config;
 
+        StreamMintPhaseFreezeControl.inheritExecutors(
+            authorized, executors, indexPlusOne, context.policy.ledger, collectionId, phaseId
+        );
         policyHash = StreamMintOperationIdentity.computePolicyHash(
             config, validatedGateConfig, ids, counterConfigs, executors, context.policy
         );
@@ -182,7 +200,34 @@ library StreamMintPhaseState {
         _emitGateConfigured(collectionId, phaseId, validatedGateConfig, policyHash);
     }
 
-    function _copyCounterIds(bytes32[] calldata counterIds)
+    /// @dev Inspect original ABI array heads before allocating either dynamic array.
+    function _requireArgumentBounds(bytes calldata arguments, uint16 maximum) private pure {
+        // collection/phase + six phase words + six gate words + two array offsets.
+        if (arguments.length < 512) revert IStreamMintManager.MintArrayLengthMismatch();
+        uint256 idsOffset;
+        uint256 configsOffset;
+        assembly ("memory-safe") {
+            idsOffset := calldataload(add(arguments.offset, 448))
+            configsOffset := calldataload(add(arguments.offset, 480))
+        }
+        if (idsOffset > arguments.length - 32 || configsOffset > arguments.length - 32) {
+            revert IStreamMintManager.MintArrayLengthMismatch();
+        }
+        uint256 count;
+        uint256 configCount;
+        assembly ("memory-safe") {
+            count := calldataload(add(arguments.offset, idsOffset))
+            configCount := calldataload(add(arguments.offset, configsOffset))
+        }
+        if (count == 0 || count != configCount) {
+            revert IStreamMintManager.MintArrayLengthMismatch();
+        }
+        if (count > maximum) {
+            revert IStreamMintManager.MintCounterCountLimitExceeded(count, maximum);
+        }
+    }
+
+    function _copyCounterIds(bytes32[] memory counterIds)
         private
         pure
         returns (bytes32[] memory ids)
@@ -211,7 +256,7 @@ library StreamMintPhaseState {
     function _requirePhaseConfig(
         uint256 collectionId,
         bytes32 phaseId,
-        IStreamMintManager.MintPhaseConfig calldata config,
+        IStreamMintManager.MintPhaseConfig memory config,
         uint32 maximum
     ) private pure {
         if (config.endTime != 0 && config.startTime != 0 && config.endTime < config.startTime) {
@@ -222,10 +267,7 @@ library StreamMintPhaseState {
         }
     }
 
-    function _requireNoDuplicateCounterId(bytes32[] calldata counterIds, uint256 index)
-        private
-        pure
-    {
+    function _requireNoDuplicateCounterId(bytes32[] memory counterIds, uint256 index) private pure {
         bytes32 counterId = counterIds[index];
         if (counterId == bytes32(0)) {
             revert IStreamMintManager.InvalidMintCounter(counterId);
@@ -239,7 +281,7 @@ library StreamMintPhaseState {
 
     function _requireStaticCounterConfig(
         bytes32 counterId,
-        IStreamMintManager.MintCounterConfig calldata config
+        IStreamMintManager.MintCounterConfig memory config
     ) private pure {
         if (
             !config.enabled || config.keyMode == IStreamMintManager.CounterKeyMode.UNKNOWN
@@ -265,7 +307,7 @@ library StreamMintPhaseState {
         uint256 collectionId,
         bytes32 phaseId,
         bytes32 counterId,
-        IStreamMintManager.MintCounterConfig calldata config,
+        IStreamMintManager.MintCounterConfig memory config,
         bytes32 policyHash
     ) private {
         emit MintCounterConfigured(
@@ -285,7 +327,7 @@ library StreamMintPhaseState {
     function _emitPhaseConfigured(
         uint256 collectionId,
         bytes32 phaseId,
-        IStreamMintManager.MintPhaseConfig calldata config,
+        IStreamMintManager.MintPhaseConfig memory config,
         bytes32 policyHash
     ) private {
         emit MintPhaseConfigured(
@@ -324,7 +366,7 @@ library StreamMintPhaseState {
         bytes32[] storage existing,
         mapping(bytes32 => IStreamMintManager.MintCounterConfig) storage stored,
         bytes32[] memory ids,
-        IStreamMintManager.MintCounterConfig[] calldata configs
+        IStreamMintManager.MintCounterConfig[] memory configs
     ) private {
         for (uint256 i; i < existing.length; ++i) {
             delete stored[existing[i]];

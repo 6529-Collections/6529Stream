@@ -8,6 +8,7 @@ import "../../vendor/openzeppelin/Ownable.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 import "./StreamMintCounterPolicy.sol";
 import "./StreamMintImport.sol";
+import "./StreamMintPhaseFreezeState.sol";
 
 /// @notice Durable outside-Core accounting ledger for launch mint counters.
 contract StreamMintLedger is
@@ -16,6 +17,7 @@ contract StreamMintLedger is
     IStreamMintCounterPolicy,
     IStreamMintLedgerImport,
     IStreamMintLedgerContinuity,
+    IStreamMintLedgerPhaseFreeze,
     Ownable,
     ERC165
 {
@@ -60,6 +62,76 @@ contract StreamMintLedger is
     mapping(address => mapping(address => mapping(address => bool))) private _mintAncestorKnown;
     mapping(bytes32 => uint256) private _importAncestorCount;
     mapping(bytes32 => uint256) private _importAncestorCursor;
+    // Appended canonical phase-freeze restrictions and bounded inheritance progress.
+    StreamMintPhaseFreezeState.State private _phaseFreezes;
+
+    function freezePhase(uint256 collectionId, bytes32 phaseId, bytes32 policyHash)
+        external
+        override
+    {
+        _requireLedgerWriter();
+        _requirePhasePolicy(msg.sender, collectionId, phaseId, policyHash);
+        bytes32 root = _successorImportRoot[msg.sender];
+        if (root != 0 && !_imports[root].complete) revert MintImportNotReady(msg.sender);
+        if (registeredPhasePolicyHash[msg.sender][collectionId][phaseId] != policyHash) {
+            revert MintPhaseFreezePolicyMismatch(msg.sender, collectionId, phaseId);
+        }
+        StreamMintPhaseFreezeState.freeze(
+            _phaseFreezes, msg.sender, collectionId, phaseId, policyHash
+        );
+    }
+
+    function phaseFreeze(address manager, uint256 collectionId, bytes32 phaseId)
+        external
+        view
+        override
+        returns (PhaseFreeze memory)
+    {
+        return _phaseFreezes.phases[manager][collectionId][phaseId].fact;
+    }
+
+    function frozenPhaseCount(address manager) external view override returns (uint256) {
+        return _phaseFreezes.inventory[manager].length;
+    }
+
+    function frozenPhaseAt(address manager, uint256 index)
+        external
+        view
+        override
+        returns (uint256 collectionId, bytes32 phaseId)
+    {
+        StreamMintPhaseFreezeState.Identity storage identity =
+            _phaseFreezes.inventory[manager][index];
+        return (identity.collectionId, identity.phaseId);
+    }
+
+    function mintImportFreezeProgress(bytes32 root)
+        external
+        view
+        override
+        returns (uint256 imported, uint256 required)
+    {
+        StreamMintPhaseFreezeState.Progress storage progress = _phaseFreezes.imports[root];
+        return (progress.imported, progress.required);
+    }
+
+    function frozenPhaseExecutors(address manager, uint256 collectionId, bytes32 phaseId)
+        external
+        view
+        override
+        returns (address[] memory)
+    {
+        return _phaseFreezes.phases[manager][collectionId][phaseId].executors;
+    }
+
+    function importPhaseFreezes(bytes32 root, uint256 maxCount) external override {
+        ImportCommitment storage c = _imports[root];
+        if (
+            c.successorManager == address(0) || c.complete
+                || ledgerWriterRetiredAt[c.successorManager] != 0 || maxCount == 0 || maxCount > 32
+        ) revert MintImportInvalid();
+        StreamMintPhaseFreezeState.copyImport(_phaseFreezes, root, c, maxCount);
+    }
 
     function registerCounterDefinition(Definition calldata definition)
         external
@@ -134,6 +206,7 @@ contract StreamMintLedger is
             || interfaceId == type(IStreamMintCounterPolicy).interfaceId
             || interfaceId == type(IStreamMintLedgerImport).interfaceId
             || interfaceId == type(IStreamMintLedgerContinuity).interfaceId
+            || interfaceId == type(IStreamMintLedgerPhaseFreeze).interfaceId
             || super.supportsInterface(interfaceId);
     }
 
@@ -201,6 +274,9 @@ contract StreamMintLedger is
             false
         );
         bytes32 actionId = StreamMintImport.authenticateCommit(owner(), c, importRoot);
+        StreamMintPhaseFreezeState.captureImport(
+            _phaseFreezes, importRoot, predecessorLedger, predecessorManager
+        );
         _imports[importRoot] = c;
         _successorImportRoot[successorManager] = importRoot;
         _importDefinitionCount[importRoot] =
@@ -444,6 +520,7 @@ contract StreamMintLedger is
                 || c.importedNullifiers != nullifierLeaves
                 || _importDefinitionCursor[root] != _importDefinitionCount[root]
                 || _importAncestorCursor[root] != _importAncestorCount[root]
+                || _phaseFreezes.imports[root].imported != _phaseFreezes.imports[root].required
         ) revert MintImportInvalid();
         bytes32 descriptor = StreamMintImport.descriptorLeaf(c, counterLeaves, nullifierLeaves);
         if (!StreamMintCounterPolicy.verify(root, descriptor, descriptorProof)) {
@@ -542,6 +619,11 @@ contract StreamMintLedger is
                 counterIds,
                 counterPolicies,
                 i
+            );
+        }
+        if (_phaseFreezes.phases[manager][collectionId][phaseId].fact.configurationHash != 0) {
+            StreamMintPhaseFreezeState.validateRegistration(
+                _phaseFreezes, manager, collectionId, phaseId, policyHash, counterIds
             );
         }
     }

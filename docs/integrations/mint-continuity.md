@@ -30,12 +30,15 @@ and [upgrade/redeployment ADR](../adr/0007-upgrade-redeployment.md).
    A successor already pinned to a conflicting interpretation cannot complete;
    use a fresh successor. Also call `importMintAncestors(root, maxCount)` until
    ancestry copying is complete; each call copies at most 32 historical pairs.
+   For the additive [phase-freeze capability](mint-phase-freeze.md), also finish
+   `importPhaseFreezes(root, maxCount)`. Every frozen phase must remain on its
+   original Ledger and is copied even if the successor has not configured it.
 6. The successor Manager owner calls `importMintState(abi.encode(batch))` in
    batches of at most 32 total counter and nullifier leaves. A Safe owner uses an
    ordinary Safe CALL. Each leaf is single use. Counter values merge by maximum.
 7. Call `completeCounterImport(root, counterCount, nullifierCount, descriptorProof)`.
-   Exact leaf counts, complete profile copying and complete ancestry copying are
-   required. While an import is pending the Ledger rejects ordinary successor consumption.
+   Exact leaf counts, complete profile copying, complete ancestry copying and
+   complete inherited freeze copying are required. While an import is pending the Ledger rejects ordinary successor consumption.
 8. Core enforces replacement continuity before its original class-3 pointer
    transition. It reads each Manager's exact Core and immutable Ledger binding,
    verifies the predecessor's pinned runtime and the successor Ledger's normal
@@ -49,6 +52,9 @@ and [upgrade/redeployment ADR](../adr/0007-upgrade-redeployment.md).
    With a retained Artist suite, successor phase registration requires the
    completed successor to be Core's currently selected Manager and Ledger.
    Policy hashes can be previewed and Artist consent recorded before cutover.
+   An inherited frozen phase's first configuration uses the Ledger's remaining
+   executor ceiling in that preview; actual configuration seeds those inherited
+   executors before the fresh policy/consent check. It cannot add new rights.
 
 The Artist suite retains its original Manager and signing domains. The new
 consumer authenticates complete lineage from that original Manager/Ledger pair;

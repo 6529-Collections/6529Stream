@@ -17,6 +17,10 @@ the release policy in `docs/release-policy.md`.
   plans; current tests are authored and coordinated execution remains pending.
 - Name finite Artist/C2PA renderer source roles, preserving target/read bounds,
   live provenance semantics, exact analysis and golden-evidence requirements.
+- Add one-way governed mint phase freezes with canonical same-Ledger inheritance,
+  retained executor ceilings and fresh successor Artist consent. Terminal-freeze
+  veto and counter limits remain unchanged; combined native acceptance is pending.
+
 - Accept original mode-2 Artist policy consent during Manager registration and
   executor grace rotation, retaining exact recorded evidence and current mint
   authority checks. Delegated Safe regression recipes await native execution.

@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 import "./StreamMintOperationIdentity.sol";
 import "./StreamMintPhaseState.sol";
 import "./StreamMintManagerAccounting.sol";
+import "../../interfaces/stream/mint/IStreamMintRoyaltyPolicy.sol";
 import "../../interfaces/stream/mint/StreamPreparedNativeContentTypes.sol";
 import "../../interfaces/stream/revenue/StreamPreparedNativeSettlementTypes.sol";
 import "../../interfaces/stream/revenue/StreamPreparedNativeRightsTypes.sol";
@@ -60,6 +61,15 @@ library StreamMintManagerViews {
 
     function gateEncoded(IStreamMintManager.MintGateConfig storage config)
         external view returns (bytes memory) { return abi.encode(config); }
+
+    function executorsEncoded(address[] storage executors)
+        external view returns (bytes memory) { return abi.encode(executors); }
+
+    function counterIdsEncoded(bytes32[] storage ids)
+        external view returns (bytes memory) { return abi.encode(ids); }
+
+    function royaltyEncoded(IStreamMintRoyaltyPolicy.Policy storage policy)
+        external view returns (bytes memory) { return abi.encode(policy); }
 
     struct PhasePreview {
         uint256 collectionId;

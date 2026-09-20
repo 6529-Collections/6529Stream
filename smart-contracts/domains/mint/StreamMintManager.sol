@@ -29,6 +29,7 @@ import "../../interfaces/stream/mint/IStreamMintSaleAuthorizationRevocation.sol"
 import "./StreamMintManagerTranscript.sol";
 import "./StreamMintManagerExecution.sol";
 import "./StreamMintManagerPolicy.sol";
+import "./StreamMintPhaseFreezeControl.sol";
 import "./StreamMintManagerViews.sol";
 import "./StreamMintImport.sol";
 import { StreamMintRoyaltyPolicy } from "./StreamMintRoyaltyPolicy.sol";
@@ -52,6 +53,7 @@ contract StreamMintManager is
     IStreamMintRoyaltyPolicy,
     IStreamMintManagerImport,
     IStreamMintPolicyGrace,
+    IStreamMintPhaseFreeze,
     Ownable,
     ReentrancyGuard,
     ERC165,
@@ -220,6 +222,7 @@ contract StreamMintManager is
             || interfaceId == type(IStreamMintRoyaltyPolicy).interfaceId
             || interfaceId == type(IStreamMintManagerImport).interfaceId
             || interfaceId == type(IStreamMintPolicyGrace).interfaceId
+            || interfaceId == type(IStreamMintPhaseFreeze).interfaceId
             || super.supportsInterface(interfaceId);
     }
 
@@ -313,11 +316,10 @@ contract StreamMintManager is
             _phaseCounterIds[collectionId][phaseId],
             _counterConfigs[collectionId][phaseId],
             _phaseExecutors[collectionId][phaseId],
+            phaseExecutor[collectionId][phaseId],
+            _phaseExecutorIndex[collectionId][phaseId],
             phasePolicyHash[collectionId],
-            config,
-            gateConfig,
-            counterIds,
-            counterConfigs,
+            msg.data[4:],
             StreamMintPhaseState.ConfigurationContext(
                 _policyContext(collectionId, phaseId),
                 address(core),
@@ -376,6 +378,36 @@ contract StreamMintManager is
         );
     }
 
+    function freezePhase(uint256 collectionId, bytes32 phaseId)
+        external override onlyOwner nonReentrant
+    {
+        _requireConfiguredPhase(collectionId, phaseId);
+        StreamMintPhaseFreezeControl.freeze(collectionId, phaseId);
+    }
+
+    function phaseFrozen(uint256 collectionId, bytes32 phaseId)
+        external view override returns (bool)
+    {
+        return StreamMintPhaseFreezeControl.frozen(
+            address(mintLedger), address(this), collectionId, phaseId
+        );
+    }
+
+    function phaseExecutors(uint256 collectionId, bytes32 phaseId)
+        external view override returns (address[] memory)
+    {
+        bytes memory encoded = StreamMintManagerViews.executorsEncoded(
+            _phaseExecutors[collectionId][phaseId]
+        );
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
+    }
+
+    function phaseFreezeTransitionHashes(uint256 collectionId, bytes32 phaseId)
+        external view override returns (bytes32 scope, bytes32 oldHash, bytes32 newHash)
+    {
+        return StreamMintPhaseFreezeControl.transition(address(this), collectionId, phaseId);
+    }
+
     /// @notice Pauses or unpauses a configured phase.
     function setPhasePaused(uint256 collectionId, bytes32 phaseId, bool paused)
         external
@@ -385,12 +417,9 @@ contract StreamMintManager is
     {
         StreamMintPhaseState.PhaseState storage phaseState =
             _requireConfiguredPhase(collectionId, phaseId);
-        if (phaseState.config.paused == paused) {
-            return;
-        }
-        phaseState.config.paused = paused;
-        bytes32 policyHash = phasePolicyHash[collectionId][phaseId];
-        emit MintPhasePausedEvent(collectionId, phaseId, paused, policyHash, msg.sender);
+        StreamMintManagerPolicy.pause(
+            phaseState, collectionId, phaseId, paused, phasePolicyHash[collectionId][phaseId]
+        );
     }
 
     /// @notice Executes the immediate Core manager path atomically.
@@ -763,7 +792,10 @@ contract StreamMintManager is
         override
         returns (bytes32[] memory)
     {
-        return _phaseCounterIds[collectionId][phaseId];
+        bytes memory encoded = StreamMintManagerViews.counterIdsEncoded(
+            _phaseCounterIds[collectionId][phaseId]
+        );
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     /// @notice Returns one manager-side counter config.
@@ -1003,7 +1035,10 @@ contract StreamMintManager is
         override
         returns (IStreamMintRoyaltyPolicy.Policy memory)
     {
-        return _phaseRoyalties[collectionId][phaseId];
+        bytes memory encoded = StreamMintManagerViews.royaltyEncoded(
+            _phaseRoyalties[collectionId][phaseId]
+        );
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function phaseRoyaltyConfigHash(

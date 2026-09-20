@@ -4,6 +4,8 @@ pragma solidity ^0.8.19;
 import "../helpers/StreamCurrentSafeGovernanceFixture.sol";
 import "../../smart-contracts/interfaces/stream/mint/IStreamMintBatchGate.sol";
 import "../../smart-contracts/interfaces/stream/mint/IStreamMintLedgerImport.sol";
+import "../../script/current/StreamMintPhaseFreezePlan.sol";
+import "../../smart-contracts/interfaces/stream/artist/IStreamArtistIdentityContest.sol";
 
 /// @dev The only eligibility substitute: a lifetime entitlement independent of Manager/Ledger.
 /// Authorization still binds the actual caller, Manager, Ledger and every batch field.
@@ -129,6 +131,7 @@ contract StreamCurrentMintContinuityTest is StreamCurrentSafeGovernanceFixture {
     bytes32 private constant GATE_MANIFEST = keccak256("explicit test entitlement boundary");
 
     bool private replaceLedger;
+    bool private freezeForTest;
     StreamMintLedger private nextLedger;
     StreamMintManager private successor;
     StreamMintManager private wrongSuccessor;
@@ -718,6 +721,30 @@ contract StreamCurrentMintContinuityTest is StreamCurrentSafeGovernanceFixture {
         vm.expectRevert();
         nextLedger.completeCounterImport(tree[0], 3, 1, _proof(4));
         nextLedger.importCounterDefinitions(tree[0], 32);
+        if (freezeForTest) {
+            (uint256 imported, uint256 required) = nextLedger.mintImportFreezeProgress(tree[0]);
+            require(imported == 0 && required == 2, "all retired freezes captured");
+            nextLedger.importPhaseFreezes(tree[0], 1);
+            (imported, required) = nextLedger.mintImportFreezeProgress(tree[0]);
+            require(imported == 1 && required == 2, "bounded partial freeze copy");
+            vm.expectRevert();
+            nextLedger.completeCounterImport(tree[0], 3, 1, _proof(4));
+            nextLedger.importPhaseFreezes(tree[0], 32);
+            nextLedger.importPhaseFreezes(tree[0], 32);
+            (imported, required) = nextLedger.mintImportFreezeProgress(tree[0]);
+            require(
+                imported == 2 && required == 2 && successor.phaseFrozen(1, CONTINUITY_PHASE)
+                    && successor.phaseFrozen(1, PHASE)
+                    && nextLedger.frozenPhaseCount(address(successor)) == 2,
+                "repeated copy cannot omit or duplicate inherited freezes"
+            );
+            (bool exists,) = successor.phase(1, CONTINUITY_PHASE);
+            require(
+                !exists && successor.phasePolicyHash(1, CONTINUITY_PHASE) == 0
+                    && successor.phaseExecutors(1, CONTINUITY_PHASE).length == 0,
+                "freeze constraints inherited before actual configuration"
+            );
+        }
         require(
             !nextLedger.isMintSuccessorReady(address(ledger), address(manager), address(successor)),
             "unsealed import not ready"
@@ -843,6 +870,7 @@ contract StreamCurrentMintContinuityTest is StreamCurrentSafeGovernanceFixture {
 
     function _exerciseCutover(bool newLedger) private {
         _setup(newLedger);
+        if (freezeForTest) _freezeSource();
         _copy();
         bytes32 before_ = _baseline();
         StreamCorePointerState memory oldManager =
@@ -1166,7 +1194,10 @@ contract StreamCurrentMintContinuityTest is StreamCurrentSafeGovernanceFixture {
         (bool originalAccepted, bytes32 originalEvidence) =
             artists.isPolicyConsented(1, CONTINUITY_PHASE, originalPolicy);
         require(originalAccepted && originalEvidence != 0, "predecessor policy remains consented");
-        address[] memory enabled = new address[](0);
+        bool inheritedFreeze = successor.phaseFrozen(1, CONTINUITY_PHASE);
+        address[] memory enabled = inheritedFreeze
+            ? nextLedger.frozenPhaseExecutors(address(successor), 1, CONTINUITY_PHASE)
+            : new address[](0);
         bytes32 newPolicy = successor.previewPhasePolicyHash(
             1, CONTINUITY_PHASE, config, gateConfig, ids, configs, enabled
         );
@@ -1198,6 +1229,15 @@ contract StreamCurrentMintContinuityTest is StreamCurrentSafeGovernanceFixture {
                     == 0,
             "missing fresh consent rolls back phase and Ledger registration"
         );
+        if (inheritedFreeze) {
+            require(
+                successor.phaseExecutors(1, CONTINUITY_PHASE).length == 0
+                    && !successor.phaseExecutor(1, CONTINUITY_PHASE, address(continuitySafe))
+                    && nextLedger.frozenPhaseExecutors(address(successor), 1, CONTINUITY_PHASE)
+                    .length == 1,
+                "missing consent rolls back inherited executor bootstrap, retaining canonical ceiling"
+            );
+        }
         _recordSuccessorConsent(newPolicy);
         _executeAsGovernor(action, data);
         enabled = new address[](1);
@@ -1205,11 +1245,29 @@ contract StreamCurrentMintContinuityTest is StreamCurrentSafeGovernanceFixture {
         bytes32 executablePolicy = successor.previewPhasePolicyHash(
             1, CONTINUITY_PHASE, config, gateConfig, ids, configs, enabled
         );
-        require(
-            executablePolicy != newPolicy && executablePolicy != originalPolicy,
-            "executor admission requires its own exact policy"
-        );
-        _recordSuccessorConsent(executablePolicy);
+        if (inheritedFreeze) {
+            require(
+                executablePolicy == newPolicy && executablePolicy != originalPolicy
+                    && successor.phaseExecutor(1, CONTINUITY_PHASE, address(continuitySafe)),
+                "fresh consent binds inherited executor rights at first configuration"
+            );
+            IStreamMintLedgerPhaseFreeze.PhaseFreeze memory original =
+                ledger.phaseFreeze(address(manager), 1, CONTINUITY_PHASE);
+            IStreamMintLedgerPhaseFreeze.PhaseFreeze memory inherited =
+                nextLedger.phaseFreeze(address(successor), 1, CONTINUITY_PHASE);
+            require(
+                original.policyHash == inherited.policyHash
+                    && original.configurationHash == inherited.configurationHash,
+                "original freeze provenance and immutable terms retained"
+            );
+        } else {
+            require(
+                executablePolicy != newPolicy && executablePolicy != originalPolicy,
+                "executor admission requires its own exact policy"
+            );
+            _recordSuccessorConsent(executablePolicy);
+        }
+        // Frozen true/true is an allowed no-op; original unconfigured rights are consented above.
         _ordinary(
             address(successor),
             abi.encodeCall(
@@ -1369,5 +1427,90 @@ contract StreamCurrentMintContinuityTest is StreamCurrentSafeGovernanceFixture {
 
     function testNewLedgerActualArtistConsentSuccessorMintReplayAndSafeRetry() public {
         _exerciseSuccessorMint(true);
+    }
+
+    function _freezeSource() private {
+        IStreamMintPhaseFreeze source = IStreamMintPhaseFreeze(address(manager));
+        GenesisBatch memory classification = StreamMintPhaseFreezePlan.classifier(executor, source);
+        _runBatch(classification.actionClass, classification.calls, classification.callDatas);
+        bytes32[2] memory phases = [CONTINUITY_PHASE, PHASE];
+        for (uint256 i; i < phases.length; ++i) {
+            GenesisBatch memory batch = StreamMintPhaseFreezePlan.freeze(source, 1, phases[i]);
+            _runBatch(batch.actionClass, batch.calls, batch.callDatas);
+        }
+        require(ledger.frozenPhaseCount(address(manager)) == 2, "two canonical source freezes");
+    }
+
+    function testFrozenSameLedgerActualSuccessorRequiresAllConstraintsFreshConsentAndSafeRetry()
+        public
+    {
+        freezeForTest = true;
+        _exerciseSuccessorMint(false);
+        require(
+            successor.phaseFrozen(1, CONTINUITY_PHASE)
+                && successor.phaseExecutors(1, CONTINUITY_PHASE).length == 1,
+            "minting retains one-way inherited freeze"
+        );
+    }
+
+    function testFrozenPhaseRefusesDifferentLedgerBeforeImportOrPointerChange() public {
+        _setup(true);
+        _freezeSource();
+        _retire();
+        _buildTree();
+        GovernanceActionRequest memory request = _commitRequest();
+        bytes32 action = _scheduleAsGovernor(request);
+        vm.warp(request.notBefore);
+        bytes32 before_ = _baseline();
+        uint256 nonce = continuitySafe.nonce();
+        vm.expectRevert();
+        _executeAsGovernor(action, request.callData);
+        require(
+            _baseline() == before_ && continuitySafe.nonce() == nonce
+                && executor.governanceAction(action).status == GovernanceActionStatus.SCHEDULED
+                && nextLedger.mintImportCommitment(tree[0]).successorManager == address(0)
+                && StreamCurrentStackPlan.readPointer(core, MANAGER_POINTER).target
+                    == address(manager)
+                && StreamCurrentStackPlan.readPointer(core, LEDGER_POINTER).target
+                    == address(ledger),
+            "cross-Ledger freeze bypass rejected atomically at original import commitment"
+        );
+    }
+
+    function testFrozenSuccessorStillRequiresCurrentArtistAfterActualCutover() public {
+        freezeForTest = true;
+        _exerciseCutover(false);
+        _configureSuccessorWithFreshConsent();
+        _setRole(keccak256("ROLE_ATTRIBUTION_ARBITER"), address(continuitySafe), true);
+        IStreamArtistIdentityContest contests = IStreamArtistIdentityContest(address(artists));
+        bytes32 evidence = keccak256("frozen successor incumbent compromise");
+        (bytes32 scope, bytes32 oldHash, bytes32 newHash) = contests.identityContestGovernanceContext(
+            fixtureArtistId, 0, evidence, GOVERNANCE_REASON
+        );
+        _govern(
+            _governanceRequest(
+                1,
+                address(artists),
+                abi.encodeCall(
+                    contests.contestArtistIdentity,
+                    (fixtureArtistId, bytes32(0), evidence, GOVERNANCE_REASON)
+                ),
+                scope,
+                oldHash,
+                newHash
+            )
+        );
+        bytes32 claim = keccak256("frozen successor stopped Artist claim");
+        (IStreamMintManager.MintBatch memory batch, bytes memory data) =
+            _mintRequest(successor, claim, keccak256("stopped Artist nonce"));
+        bytes32 before_ = _baseline();
+        uint256 nonce = continuitySafe.nonce();
+        (bool ok,) = address(continuitySafe).call(_signedSuccessorCall(batch, data));
+        require(
+            !ok && successor.phaseFrozen(1, CONTINUITY_PHASE),
+            "inherited freeze cannot replace live Artist consent"
+        );
+        _assertSuccessorFailure(batch, before_, nonce, claim);
+        _assertImported();
     }
 }

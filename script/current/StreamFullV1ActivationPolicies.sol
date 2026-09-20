@@ -57,12 +57,15 @@ library StreamFullV1ActivationPolicies {
         work[n++] = _row(x, 1, address(backup), backup.importMintState.selector);
         work[n++] =
             _row(x, 3, address(backup), x.products.continuity.manager.recoverPreparedMint.selector);
+        work[n++] = _row(x, 2, address(backup), backup.freezePhase.selector);
+        work[n++] = _row(x, 2, address(x.foundation.manager), x.foundation.manager.freezePhase.selector);
         StreamMintLedger ledger = x.foundation.ledger;
         work[n++] = _row(x, 1, address(ledger), ledger.setLedgerWriter.selector);
         work[n++] = _row(x, 0, address(ledger), ledger.retireLedgerWriter.selector);
         work[n++] = _row(x, 1, address(ledger), ledger.commitCounterImportRoot.selector);
         work[n++] = _row(x, 1, address(ledger), ledger.importCounterDefinitions.selector);
         work[n++] = _row(x, 1, address(ledger), ledger.importMintAncestors.selector);
+        work[n++] = _row(x, 1, address(ledger), ledger.importPhaseFreezes.selector);
         work[n++] = _row(x, 1, address(ledger), ledger.completeCounterImport.selector);
         work[n++] = _row(
             x, 1, address(x.foundation.executor), x.foundation.executor.setTighteningCall.selector

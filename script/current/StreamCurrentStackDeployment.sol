@@ -766,7 +766,7 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
     }
 
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {
-        rows = new GovernanceActionPolicyEntry[](localDevelopment ? 85 : 86);
+        rows = new GovernanceActionPolicyEntry[](localDevelopment ? 87 : 88);
         rows[0] = _operatingPolicy(address(manager), manager.configurePhase.selector);
         rows[1] = _operatingPolicy(address(manager), manager.setPhaseExecutor.selector);
         rows[2] = _operatingPolicy(address(manager), manager.setPhasePaused.selector);
@@ -905,6 +905,8 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
         rows[i++] = _operatingPolicy(address(router), router.raiseGasParameter.selector);
         // Bounded predecessor grace remains an exact delayed-loosening CALL.
         rows[i++] = _operatingPolicy(address(manager), manager.setPhaseExecutorWithGrace.selector);
+        rows[i++] = _operatingPolicy(2, address(manager), manager.freezePhase.selector);
+        rows[i++] = _operatingPolicy(1, address(ledger), ledger.importPhaseFreezes.selector);
         // Metadata/entropy configuration selectors come from the configuration prototypes.
         assert(i == rows.length);
     }

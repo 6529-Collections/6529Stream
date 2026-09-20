@@ -45,6 +45,27 @@ library StreamMintManagerPolicy {
         address admin
     );
 
+    event MintPhasePausedEvent(
+        uint256 indexed collectionId,
+        bytes32 indexed phaseId,
+        bool paused,
+        bytes32 policyHash,
+        address admin
+    );
+
+    /// @dev The guarded facade admits an existing phase; no policy hash or grace changes here.
+    function pause(
+        StreamMintPhaseState.PhaseState storage phase,
+        uint256 collectionId,
+        bytes32 phaseId,
+        bool paused,
+        bytes32 policyHash
+    ) external {
+        if (phase.config.paused == paused) return;
+        phase.config.paused = paused;
+        emit MintPhasePausedEvent(collectionId, phaseId, paused, policyHash, msg.sender);
+    }
+
     /// @notice Applies one original executor mutation and consented policy refresh atomically.
     /// @dev All storage references and the maximum originate at the guarded Manager entrypoint.
     function updateExecutor(
@@ -58,6 +79,22 @@ library StreamMintManagerPolicy {
         mapping(bytes32 => bytes32) storage policyHashes,
         ExecutorUpdate memory update
     ) external {
+        if (update.executor == address(0)) {
+            revert IStreamMintManager.InvalidMintExecutor(update.executor);
+        }
+        if (
+            update.allowed && !authorized[update.executor]
+                && StreamMintPhaseFreezeControl.frozen(
+                    update.context.policy.ledger,
+                    address(this),
+                    update.context.policy.collectionId,
+                    update.context.policy.phaseId
+                )
+        ) {
+            revert IStreamMintPhaseFreeze.MintPhaseFrozenExecutor(
+                update.context.policy.collectionId, update.context.policy.phaseId, update.executor
+            );
+        }
         if (!StreamMintPhaseState.setExecutor(
                 authorized,
                 executors,
