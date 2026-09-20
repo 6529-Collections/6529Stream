@@ -56,7 +56,9 @@ eligible, supersede the report, verify rejection, refresh operation 24, and retr
 the identical commercial bytes. The first sale's historical summary is permanent.
 
 A new media manifest with no master fails at the late Floor call after the
-original payment/mint path. Tests require that call to occur, check the exact EOA
+original payment/mint path. Each unique failed/successful authorization pair must
+make exactly two Floor calls; the original adapter makes one per execution, so
+the successful retry alone cannot satisfy the expectation. Tests check the exact EOA
 wrapped failure, and compare payer balances, wallet proceeds, liabilities, Core
 allocation and lifecycle, Manager replay, Ledger counters, entropy and every old
 receipt. A failed Safe transaction may consume its outer Safe nonce; inner
@@ -125,6 +127,8 @@ reservation or workload failure must remain visible, and no further allowance
 increase is implied. The ordinary transaction and collector targets remain open.
 Each actual EOA buy and outer Safe execution is separately capped at 16,777,216
 minus 21,000 base gas and the literal outer calldata's 4/16 gas-per-byte cost.
+The positive-value EOA CALL requests 2,300 gas less to account for its added value
+stipend; the zero-value outer Safe CALL needs no stipend adjustment.
 This bounded execution retains the original transaction envelope; warmed
 preflight reads still prevent treating it as complete cold collector acceptance.
 

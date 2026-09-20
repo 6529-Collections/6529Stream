@@ -14,7 +14,7 @@ import {
 } from "../../smart-contracts/interfaces/stream/metadata/StreamConservationFloorTypes.sol";
 
 interface DocumentaryCallVm {
-    function expectCall(address target, bytes calldata data) external;
+    function expectCall(address target, bytes calldata data, uint64 count) external;
 }
 
 /// @notice Documentary sale model using the actual current graph and original native buy API.
@@ -434,7 +434,7 @@ abstract contract CurrentDocumentaryConservationFixture is CurrentDocumentaryArt
             documentarySafeDebit += DOCUMENTARY_PRICE;
             require(documentaryBuyerSafe.nonce() == beforeSafe + 1, "one successful Safe nonce");
         } else {
-            uint256 cap = _documentaryTransactionExecutionGas(b.data);
+            uint256 cap = _documentaryCallGas(b.data, DOCUMENTARY_PRICE);
             vm.prank(BUYER);
             (bool ok, bytes memory returned) =
                 address(sale).call{ value: DOCUMENTARY_PRICE, gas: cap }(b.data);
@@ -588,13 +588,6 @@ abstract contract CurrentDocumentaryConservationFixture is CurrentDocumentaryArt
     function _expectDocumentaryFailure(DocumentaryBuy memory b, bool late) private {
         bytes32 before = _documentaryMutableStateHash();
         uint256 beforeSafe = documentaryBuyerSafe.nonce();
-        if (late) {
-            DocumentaryCallVm(address(vm))
-                .expectCall(
-                    address(documentaryFloor),
-                    abi.encodeCall(documentaryFloor.recordDirectPrimarySale, (b.id))
-                );
-        }
         if (b.authorization.payer == address(documentaryBuyerSafe)) {
             require(
                 !_boundedDocumentarySafeBuy(b.data, true),
@@ -616,7 +609,7 @@ abstract contract CurrentDocumentaryConservationFixture is CurrentDocumentaryArt
                     address(artists),
                     IStreamArtistMintConsent.requireMintConsent.selector
                 );
-            uint256 cap = _documentaryTransactionExecutionGas(b.data);
+            uint256 cap = _documentaryCallGas(b.data, DOCUMENTARY_PRICE);
             vm.prank(BUYER);
             (bool ok, bytes memory reason) =
                 address(sale).call{ value: DOCUMENTARY_PRICE, gas: cap }(b.data);
@@ -692,6 +685,15 @@ abstract contract CurrentDocumentaryConservationFixture is CurrentDocumentaryArt
         return DOCUMENTARY_TRANSACTION_GAS - intrinsic;
     }
 
+    /// @dev A positive-value CALL adds a stipend after the requested gas. Subtract it so the
+    /// callee's complete allowance stays inside the original transaction execution envelope.
+    function _documentaryCallGas(bytes memory data, uint256 value) private pure returns (uint256) {
+        uint256 execution = _documentaryTransactionExecutionGas(data);
+        uint256 stipend = value == 0 ? 0 : 2_300;
+        require(execution >= stipend, "bounded documentary value stipend");
+        return execution - stipend;
+    }
+
     function _boundedDocumentarySafeBuy(bytes memory data, bool failureProbe)
         private
         returns (bool)
@@ -724,7 +726,7 @@ abstract contract CurrentDocumentaryConservationFixture is CurrentDocumentaryArt
                 safeThresholdSignature(documentaryBuyerKeys, digest)
             )
         );
-        uint256 cap = _documentaryTransactionExecutionGas(outer);
+        uint256 cap = _documentaryCallGas(outer, 0);
         (bool ok, bytes memory result) = address(documentaryBuyerSafe).call{ gas: cap }(outer);
         if (!ok) assembly ("memory-safe") { revert(add(result, 32), mload(result)) }
         require(result.length == 32, "canonical actual Safe transaction result");
@@ -910,6 +912,15 @@ abstract contract CurrentDocumentaryConservationFixture is CurrentDocumentaryArt
             documentaryFloor.releaseFloorReceipt(key).receiptHash == 0,
             "new unproved semantic release"
         );
+        // The original adapter makes exactly one Floor call per execution. This authorization
+        // is unique to this failed/successful pair: its retry alone cannot satisfy two calls.
+        // Exact-count expectations are verified at the root return, including reverted calls.
+        DocumentaryCallVm(address(vm))
+            .expectCall(
+                address(documentaryFloor),
+                abi.encodeCall(documentaryFloor.recordDirectPrimarySale, (b.id)),
+                2
+            );
         _expectDocumentaryBuyFailure(b);
         _completeDocumentaryMaster();
         documentaryPurchaseRelease[b.id] = key;
