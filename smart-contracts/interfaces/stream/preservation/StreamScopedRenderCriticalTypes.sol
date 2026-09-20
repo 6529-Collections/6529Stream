@@ -1,0 +1,49 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+import {
+    StreamPreservationInventoryTypes as Inventory
+} from "./StreamPreservationInventoryTypes.sol";
+import { StreamFinalityScope } from "../finality/StreamArtworkFinalityTypes.sol";
+import { StreamScopedSnapshotTypes as Snapshot } from "../metadata/StreamScopedSnapshotTypes.sol";
+import { StreamScopedReferenceTypes as Reference } from "./StreamScopedReferenceTypes.sol";
+import { StreamFinalityDescriptionEvidence } from "../finality/StreamFinalityDescriptionTypes.sol";
+import {
+    IStreamConservationRecordSelection
+} from "../metadata/IStreamConservationRecordSelection.sol";
+
+/// @notice Separate full-scope context for the scoped native inventory profile.
+/// @dev No COLLECTION receipt/root can fill a scoped receipt field. Samples are not membership.
+library StreamScopedRenderCriticalTypes {
+    struct Plan {
+        StreamFinalityScope scope;
+        Inventory.Plan progress;
+        uint64 nativeCursor;
+        uint64 nativeCount;
+        uint64 referenceCursor;
+        uint64 referenceCount;
+    }
+
+    struct Evidence {
+        StreamFinalityScope scope;
+        Inventory.Evidence inventory;
+    }
+
+    struct Context {
+        StreamFinalityScope scope;
+        bytes32 subject;
+        bytes32 artistId;
+        Snapshot.Receipt snapshot;
+        Reference.Receipt referenceRender;
+        StreamFinalityDescriptionEvidence descriptions;
+        IStreamConservationRecordSelection.Selection conservation;
+        bytes32 interviewEvidenceHash;
+        bytes32 nativeHash;
+        bytes32 rootRecordHash;
+        bytes32 tokenInventoryHash;
+        bytes32 checkpointHash;
+        bytes32 outputManifestRecord;
+        bytes32 selectionId;
+        bytes32 selectionHash;
+        uint64 tokenCount;
+    }
+}
